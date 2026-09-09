@@ -19,12 +19,18 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../chat/utils/aluno_picker_list.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -32,6 +38,7 @@ import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
 
 part 'automacoes_screen_logs.part.dart';
+part 'automacoes_screen_list.part.dart';
 
 final _repo = Provider(
   (ref) => AutomacaoRepository(ref.read(apiClientProvider)),
@@ -52,6 +59,10 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   List<AutomacaoTemplate> _templates = const [];
   PlanoFeatures? _planoFromHome;
   var _loading = true;
+  var _carregandoMais = false;
+  var _hasMore = false;
+  var _page = 0;
+  var _totalFluxos = 0;
   String? _error;
   DateTime? _fetchedAt;
   var _query = '';
@@ -60,6 +71,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   @override
   void initState() {
     super.initState();
+    prefetchAlunosHome(ref);
     _load();
   }
 
@@ -74,15 +86,19 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
   void _onQueryChanged(String value) {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      setState(() => _query = value);
+      final next = value.trim();
+      if (!mounted || next == _query) return;
+      _query = next;
+      _load();
     });
   }
 
   void _clearQuery() {
     _searchDebounce?.cancel();
     _searchCtrl.clear();
-    setState(() => _query = '');
+    if (_query.isEmpty) return;
+    _query = '';
+    _load();
   }
 
   void _leave() {
@@ -92,30 +108,12 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
   List<AutomacaoTemplate> get _visibleTemplates {
     if (_chip == AutomacaoChip.ativos) return const [];
-    return _templates
-        .where(
-          (t) => automacaoMatchesQuery(
-            nome: t.nome,
-            descricao: t.descricao,
-            triggerTipo: t.triggerTipo,
-            query: _query,
-          ),
-        )
-        .toList();
+    return _templates;
   }
 
   List<AutomacaoFluxo> get _visibleFluxos {
     if (_chip == AutomacaoChip.templates) return const [];
-    return _fluxos
-        .where(
-          (f) => automacaoMatchesQuery(
-            nome: f.nome,
-            descricao: f.descricao,
-            triggerTipo: f.triggerTipo,
-            query: _query,
-          ),
-        )
-        .toList();
+    return _fluxos;
   }
 
   Future<void> _load() async {
@@ -124,12 +122,15 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       _error = null;
     });
     try {
-      final home = await ref.read(_repo).getHome();
+      final home = await ref.read(_repo).getHome(q: _query);
       if (!mounted) return;
       setState(() {
         _fluxos = home.fluxos;
         _templates = home.templates;
         _planoFromHome = home.planoFeatures;
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalFluxos = home.totalFluxos;
         _fetchedAt = DateTime.now();
         _loading = false;
       });
@@ -139,6 +140,31 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
         _loading = false;
         _error = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasMore) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final home = await ref
+          .read(_repo)
+          .getHome(page: _page + 1, q: _query);
+      if (!mounted) return;
+      final seen = _fluxos.map((f) => f.id).toSet();
+      setState(() {
+        _fluxos = [
+          ..._fluxos,
+          ...home.fluxos.where((f) => seen.add(f.id)),
+        ];
+        _page = home.page;
+        _hasMore = home.hasNext;
+        _totalFluxos = home.totalFluxos;
+        _carregandoMais = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _carregandoMais = false);
     }
   }
 
@@ -168,12 +194,13 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
 
   Future<void> _openLogs(AutomacaoFluxo fluxo) async {
     try {
-      final logs = await ref.read(_repo).logs(fluxo.id);
+      final pagina = await ref.read(_repo).logs(fluxo.id);
       if (!mounted) return;
       await _showAutomacaoLogsSheet(
         context: context,
         fluxo: fluxo,
-        logs: logs,
+        logs: pagina.content,
+        onIniciar: () => _iniciarParaAluno(fluxo),
       );
     } catch (e) {
       if (!mounted) return;
@@ -219,8 +246,10 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
               title: 'Automações',
               subtitle: FxHubFreshness.joinCount(
                 automacaoCountLabel(
-                  templates: templates.length,
-                  fluxos: fluxos.length,
+                  templates: _chip == AutomacaoChip.ativos
+                      ? 0
+                      : templates.length,
+                  fluxos: _chip == AutomacaoChip.templates ? 0 : _totalFluxos,
                 ),
                 FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
@@ -240,6 +269,10 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                       FxHelpTip(
                         'Histórico',
                         'Toque em um fluxo ativo para ver as execuções.',
+                      ),
+                      FxHelpTip(
+                        'Iniciar',
+                        'No histórico, escolha um aluno para disparar agora.',
                       ),
                     ],
                   ),
@@ -341,119 +374,6 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildList(
-    List<AutomacaoTemplate> templates,
-    List<AutomacaoFluxo> fluxos,
-  ) {
-    final primary = Theme.of(context).colorScheme.primary;
-    if (templates.isEmpty && fluxos.isEmpty) {
-      final filtered =
-          _query.trim().isNotEmpty || _chip != AutomacaoChip.todos;
-      return RefreshIndicator(
-        color: primary,
-        onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: filtered ? 'search' : 'zap',
-              title: filtered
-                  ? 'Nenhuma automação encontrada'
-                  : 'Nenhuma automação ainda',
-              subtitle: filtered
-                  ? 'Ajuste a busca ou o filtro.'
-                  : 'Templates aparecem aqui para você ativar o primeiro fluxo.',
-              action: filtered
-                  ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearQuery)
-                  : null,
-            ),
-          ],
-        ),
-      );
-    }
-
-    final rows = <Object>[
-      if (templates.isNotEmpty) ...['Templates', ...templates],
-      if (fluxos.isNotEmpty) ...['Fluxos ativos', ...fluxos],
-    ];
-
-    return RefreshIndicator(
-      color: primary,
-      onRefresh: _load,
-      child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s2,
-          FxSettingsLayout.pageInset,
-          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        itemCount: rows.length,
-        itemBuilder: (context, i) {
-          final row = rows[i];
-          if (row is String) {
-            return Padding(
-              padding: EdgeInsets.only(
-                top: i == 0 ? 0 : TokensStrip.s3,
-                bottom: TokensStrip.s2,
-              ),
-              child: Text(
-                row,
-                style: FocuxHubTypography.cardTitle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            );
-          }
-          if (row is AutomacaoTemplate) {
-            return FxSatelliteListTile(
-              title: row.nome,
-              titleCase: false,
-              subtitle: Text(
-                row.descricao.trim().isEmpty
-                    ? automacaoTriggerLabel(row.triggerTipo)
-                    : row.descricao,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              leading: Icon(Icons.bolt_outlined, color: primary),
-              trailing: Text(
-                'Ativar',
-                style: FocuxHubTypography.bodyMuted(
-                  color: primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              onTap: () => _ativar(row),
-            );
-          }
-          final fluxo = row as AutomacaoFluxo;
-          return FxSatelliteListTile(
-            title: fluxo.nome,
-            titleCase: false,
-            subtitle: Text(automacaoTriggerLabel(fluxo.triggerTipo)),
-            leading: Icon(
-              fluxo.ativo
-                  ? Icons.play_circle_rounded
-                  : Icons.pause_circle_rounded,
-              color: primary,
-            ),
-            trailing: Text(
-              automacaoFluxoStatusLabel(ativo: fluxo.ativo),
-              style: FocuxHubTypography.bodyMuted(
-                color: fxScreenMute(context),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            onTap: () => _openLogs(fluxo),
-          );
-        },
       ),
     );
   }

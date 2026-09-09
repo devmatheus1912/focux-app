@@ -1,5 +1,25 @@
 import '../../../core/utils/fx_utils.dart';
 
+enum LeadPublicoChip { todos, novos, convertidos }
+
+String leadPublicoChipLabel(LeadPublicoChip chip) => switch (chip) {
+  LeadPublicoChip.todos => 'Todos',
+  LeadPublicoChip.novos => 'Novos',
+  LeadPublicoChip.convertidos => 'Convertidos',
+};
+
+bool? leadPublicoConvertidoParam(LeadPublicoChip chip) => switch (chip) {
+  LeadPublicoChip.todos => null,
+  LeadPublicoChip.novos => false,
+  LeadPublicoChip.convertidos => true,
+};
+
+String leadPublicoCountLabel(int count) {
+  if (count <= 0) return 'Nenhum lead';
+  if (count == 1) return '1 lead';
+  return '$count leads';
+}
+
 String leadPublicoNome(String? nome) {
   final value = nome?.trim();
   if (value == null || value.isEmpty) return 'Lead';
@@ -31,11 +51,4 @@ String leadPublicoFxIcon(bool convertido) =>
 bool leadPublicoPodeCriarAluno(String? email) {
   final mail = email?.trim();
   return mail != null && mail.isNotEmpty;
-}
-
-String leadPublicoHubSubtitle(String? freshness) {
-  const base = 'Contatos captados pela sua página';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
 }

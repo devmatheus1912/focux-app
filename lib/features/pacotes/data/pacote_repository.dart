@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../../core/money/fx_money.dart';
 
 class Pacote {
@@ -53,20 +54,32 @@ class PacotesHomePerfil {
 class PacotesHomeBundle {
   final List<Pacote> pacotes;
   final PacotesHomePerfil? perfil;
+  final int page;
+  final bool hasNext;
+  final int total;
 
-  const PacotesHomeBundle({required this.pacotes, this.perfil});
+  const PacotesHomeBundle({
+    required this.pacotes,
+    this.perfil,
+    this.page = 0,
+    this.hasNext = false,
+    this.total = 0,
+  });
 
   factory PacotesHomeBundle.fromJson(Map<String, dynamic> j) {
     final perfilJson = j['perfil'];
+    final raw = (j['content'] as List?) ?? const [];
+    final pacotes =
+        raw.map((e) => Pacote.fromJson(e as Map<String, dynamic>)).toList();
     return PacotesHomeBundle(
-      pacotes:
-          ((j['pacotes'] as List?) ?? const [])
-              .map((e) => Pacote.fromJson(e as Map<String, dynamic>))
-              .toList(),
+      pacotes: pacotes,
       perfil:
           perfilJson is Map<String, dynamic>
               ? PacotesHomePerfil.fromJson(perfilJson)
               : null,
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      hasNext: j['hasNext'] == true,
+      total: (j['total'] as num?)?.toInt() ?? pacotes.length,
     );
   }
 }
@@ -75,16 +88,49 @@ class PacoteRepository {
   final Dio _dio;
   PacoteRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<Pacote>> listar() async {
-    final r = await _dio.get('/api/pacotes');
-    return (r.data as List<dynamic>)
-        .map((e) => Pacote.fromJson(e as Map<String, dynamic>))
-        .toList();
+  static const pageSize = 20;
+
+  Future<Pagina<Pacote>> listar({
+    int page = 0,
+    String q = '',
+    bool? destaque,
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/pacotes',
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+        if (destaque != null) 'destaque': destaque,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw const FormatException('GET /api/pacotes devolve Pagina, não lista crua.');
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Pacote.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   /// BFF tipado — first paint da tela Planos (lista + slug da vitrine).
-  Future<PacotesHomeBundle> getHome() async {
-    final r = await _dio.get('/api/pacotes/home');
+  Future<PacotesHomeBundle> getHome({
+    int page = 0,
+    String q = '',
+    bool? destaque,
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/pacotes/home',
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+        if (destaque != null) 'destaque': destaque,
+      },
+    );
     return PacotesHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 

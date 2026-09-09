@@ -13,6 +13,7 @@ void main() {
 
   test('gatilho e status em PT-BR', () {
     expect(automacaoTriggerLabel('NOVO_ALUNO'), 'Novo aluno');
+    expect(automacaoTriggerLabel('ALUNO_CRIADO'), 'Novo aluno');
     expect(automacaoTriggerLabel('checkin'), 'Check-in');
     expect(automacaoTriggerLabel(''), 'Gatilho');
     expect(automacaoLogStatusLabel('ATIVO'), 'Em andamento');

@@ -31,6 +31,7 @@ void main() {
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, contains('/perfil/ferramentas'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('TabBar')));

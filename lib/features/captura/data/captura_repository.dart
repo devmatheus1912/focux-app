@@ -39,20 +39,32 @@ class CapturaRepository {
   final Dio _dio;
   CapturaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<SubmissaoCaptura>> meus() async {
-    final r = await _dio.get('/api/captura');
+  Future<Pagina<SubmissaoCaptura>> meus({
+    int page = 0,
+    String q = '',
+    bool? convertido,
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/captura',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+        if (convertido != null) 'convertido': convertido,
+      },
+    );
     final data = r.data;
     if (data is! Map) {
       throw FormatException(
         'GET /api/captura devolve Pagina, não lista crua.',
       );
     }
-    final pagina = Pagina.fromJson(
+    return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (item) =>
           SubmissaoCaptura.fromJson(Map<String, dynamic>.from(item as Map)),
     );
-    return pagina.content;
   }
 
   Future<void> marcarConvertido(int id) async {

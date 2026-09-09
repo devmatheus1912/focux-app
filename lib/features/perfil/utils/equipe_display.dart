@@ -1,9 +1,22 @@
-String equipeHubSubtitle(String? freshness) {
-  const base = 'Assistentes e permissões';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+enum EquipeChip { todos, convites, ativos }
+
+String equipeChipLabel(EquipeChip chip) => switch (chip) {
+  EquipeChip.todos => 'Todos',
+  EquipeChip.convites => 'Convites',
+  EquipeChip.ativos => 'Ativos',
+};
+
+String equipeCountLabel(int count) {
+  if (count <= 0) return 'Nenhum membro';
+  if (count == 1) return '1 membro';
+  return '$count membros';
 }
+
+String? equipeStatusParam(EquipeChip chip) => switch (chip) {
+  EquipeChip.todos => null,
+  EquipeChip.convites => 'CONVIDADO',
+  EquipeChip.ativos => 'ATIVO',
+};
 
 String equipeRoleLabel(String? role) {
   switch ((role ?? '').trim().toUpperCase()) {

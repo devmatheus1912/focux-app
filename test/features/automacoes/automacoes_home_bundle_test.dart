@@ -56,5 +56,28 @@ void main() {
     });
     expect(log.status, 'ATIVO');
     expect(log.passoAtual, 2);
+    expect(log.iniciadoEm, isNull);
+  });
+
+  test('AutomacaoLog lê iniciadoEm', () {
+    final log = AutomacaoLog.fromJson({
+      'status': 'ATIVO',
+      'passoAtual': 0,
+      'iniciadoEm': '2026-09-08T12:00:00',
+    });
+    expect(log.iniciadoEm, '2026-09-08T12:00:00');
+  });
+
+  test('AutomacoesHomeBundle lê page e hasNext', () {
+    final bundle = AutomacoesHomeBundle.fromJson({
+      'fluxos': [],
+      'templates': [],
+      'page': 1,
+      'hasNext': true,
+      'totalFluxos': 40,
+    });
+    expect(bundle.page, 1);
+    expect(bundle.hasNext, isTrue);
+    expect(bundle.totalFluxos, 40);
   });
 }

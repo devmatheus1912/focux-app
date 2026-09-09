@@ -5,7 +5,7 @@ import 'package:focux_app/features/pacotes/data/pacote_repository.dart';
 void main() {
   test('PacotesHomeBundle parses pacotes + perfil slug', () {
     final bundle = PacotesHomeBundle.fromJson({
-      'pacotes': [
+      'content': [
         {
           'id': 1,
           'titulo': 'Musculação',
@@ -25,10 +25,12 @@ void main() {
     expect(bundle.pacotes.first.valor, FxMoney.parse(150));
     expect(bundle.perfil?.slug, 'ana-silva');
     expect(bundle.perfil?.nome, 'Ana Silva');
+    expect(bundle.hasNext, isFalse);
+    expect(bundle.total, 1);
   });
 
   test('PacotesHomeBundle tolerates missing perfil', () {
-    final bundle = PacotesHomeBundle.fromJson({'pacotes': []});
+    final bundle = PacotesHomeBundle.fromJson({'content': []});
     expect(bundle.pacotes, isEmpty);
     expect(bundle.perfil, isNull);
   });

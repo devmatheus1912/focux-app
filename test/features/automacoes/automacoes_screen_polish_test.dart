@@ -26,6 +26,10 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('logs('));
+    expect(screen, contains('iniciarFluxo'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('alunosHomeProvider'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FloatingActionButton')));

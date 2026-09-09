@@ -387,7 +387,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: _ferramentas,
   ),
-  '/perfil/equipe': FocuxSurfaceSpec(type: _s4, logicalParent: _perfil),
+  '/perfil/equipe': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _perfil,
+  ),
   '/pacotes': FocuxSurfaceSpec(
     type: _s4,
     hasInput: true,
@@ -397,7 +401,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     type: _s4,
     logicalParent: _home,
   ),
-  '/leads-publicos': FocuxSurfaceSpec(type: _s4, logicalParent: '/leads'),
+  '/leads-publicos': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: '/leads',
+  ),
   '/perfil/landing-editor': FocuxSurfaceSpec(
     type: _s5,
     hasInput: true,
@@ -429,7 +437,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     redirectTo: '/migracao-magica',
   ),
   '/promo-enterprise': FocuxSurfaceSpec(type: _s6, logicalParent: '/planos'),
-  '/ranking': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/ranking': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/coach': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/notificacoes': FocuxSurfaceSpec(
     type: _s4,
