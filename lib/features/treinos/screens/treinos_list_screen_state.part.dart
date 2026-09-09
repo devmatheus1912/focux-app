@@ -83,8 +83,14 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
         ProductEvents.treinosSearchUsed,
         props: {..._analyticsScope, 'has_query': _query.trim().isNotEmpty},
       );
-      if (widget.alunoId != null) return;
       final next = value.trim();
+      if (widget.alunoId != null) {
+        final current = ref.read(treinosDoAlunoQueryProvider(widget.alunoId!));
+        if (current.q == next) return;
+        ref.read(treinosDoAlunoQueryProvider(widget.alunoId!).notifier).state =
+            TreinosAlunoQuery(q: next);
+        return;
+      }
       final current = ref.read(treinosHomeQueryProvider);
       if (current.q == next) return;
       ref.read(treinosHomeQueryProvider.notifier).state =
@@ -114,7 +120,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
           .read(treinoRepositoryProvider)
           .atribuirAluno(treino.id, selected);
       invalidateTreinosCaches(ref);
-      ref.invalidate(treinosDoAlunoProvider(selected));
+      invalidateTreinosDoAluno(ref, selected);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
       AnalyticsService.instance.track(
@@ -163,7 +169,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
           .read(treinoRepositoryProvider)
           .clonarParaAluno(treino.id, selected);
       invalidateTreinosCaches(ref);
-      ref.invalidate(treinosDoAlunoProvider(selected));
+      invalidateTreinosDoAluno(ref, selected);
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
@@ -252,7 +258,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       if (widget.alunoId == null) {
         invalidateTreinosCaches(ref);
       } else {
-        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
+        invalidateTreinosDoAluno(ref, widget.alunoId!);
       }
       if (!mounted) return;
       FeedbackHelper.showSuccess(
@@ -280,34 +286,52 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   @override
   Widget build(BuildContext context) {
     final fromLibrary = widget.alunoId == null;
-    final treinosSource =
+    final alunoPageAsync =
         fromLibrary
-            ? treinosProvider
-            : treinosDoAlunoProvider(widget.alunoId!);
-    final treinosAsync = ref.watch(treinosSource);
+            ? null
+            : ref.watch(treinosDoAlunoPageProvider(widget.alunoId!));
+    final treinosAsync =
+        fromLibrary
+            ? ref.watch(treinosProvider)
+            : alunoPageAsync!.whenData((page) => page.treinos);
     final homeBundle =
         fromLibrary ? ref.watch(treinosHomeProvider).valueOrNull : null;
     final tail =
-        fromLibrary ? ref.watch(treinosHomeTailProvider) : const TreinosHomeTailState();
+        fromLibrary
+            ? ref.watch(treinosHomeTailProvider)
+            : ref.watch(treinosDoAlunoTailProvider(widget.alunoId!));
     final uiHints = homeBundle?.uiHints;
-    ref.listen<AsyncValue<List<Treino>>>(treinosSource, (_, next) {
-      if (!next.isLoading && next.hasValue) {
-        setState(() => _fetchedAt = DateTime.now());
-      }
-    });
     if (fromLibrary) {
+      ref.listen<AsyncValue<List<Treino>>>(treinosProvider, (_, next) {
+        if (!next.isLoading && next.hasValue) {
+          setState(() => _fetchedAt = DateTime.now());
+        }
+      });
       ref.listen<AsyncValue<TreinosHomeBundle>>(treinosHomeProvider, (_, next) {
         next.whenData((home) {
           ref.read(treinosHomeTailProvider.notifier).reset(hasNext: home.hasNext);
         });
       });
+    } else {
+      ref.listen<AsyncValue<TreinosAlunoPage>>(
+        treinosDoAlunoPageProvider(widget.alunoId!),
+        (_, next) {
+          if (!next.isLoading && next.hasValue) {
+            setState(() => _fetchedAt = DateTime.now());
+          }
+          next.whenData((page) {
+            ref
+                .read(treinosDoAlunoTailProvider(widget.alunoId!).notifier)
+                .reset(hasNext: page.hasNext);
+          });
+        },
+      );
     }
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final pageTreinos = treinosAsync.valueOrNull ?? const <Treino>[];
-    final loadedTreinos =
-        fromLibrary ? [...pageTreinos, ...tail.treinos] : pageTreinos;
+    final loadedTreinos = [...pageTreinos, ...tail.treinos];
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final fromAluno = widget.alunoId != null;
     final title =
@@ -327,7 +351,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       if (widget.alunoId == null) {
         invalidateTreinosCaches(ref);
       } else {
-        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
+        invalidateTreinosDoAluno(ref, widget.alunoId!);
       }
     }
 
@@ -382,7 +406,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                               ? (homeBundle?.totalElements ??
                                   homeBundle?.resumo.totalPlanos ??
                                   loadedTreinos.length)
-                              : loadedTreinos.length,
+                              : (alunoPageAsync?.valueOrNull?.totalElements ??
+                                  loadedTreinos.length),
                       freshness: freshnessLabel,
                     ),
             showBack: fromAluno,
@@ -495,14 +520,31 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                       onRefresh: refresh,
                       child: NotificationListener<ScrollNotification>(
                         onNotification: (n) {
-                          if (!fromLibrary) return false;
                           if (n.metrics.extentAfter < 480 &&
                               tail.hasNext &&
                               !tail.loading) {
-                            ref.read(treinosHomeTailProvider.notifier).loadMore(
-                              query: ref.read(treinosHomeQueryProvider),
-                              repo: ref.read(treinoRepositoryProvider),
-                            );
+                            if (fromLibrary) {
+                              ref.read(treinosHomeTailProvider.notifier).loadMore(
+                                query: ref.read(treinosHomeQueryProvider),
+                                repo: ref.read(treinoRepositoryProvider),
+                              );
+                            } else {
+                              ref
+                                  .read(
+                                    treinosDoAlunoTailProvider(
+                                      widget.alunoId!,
+                                    ).notifier,
+                                  )
+                                  .loadMoreAluno(
+                                    alunoId: widget.alunoId!,
+                                    query: ref.read(
+                                      treinosDoAlunoQueryProvider(
+                                        widget.alunoId!,
+                                      ),
+                                    ),
+                                    repo: ref.read(treinoRepositoryProvider),
+                                  );
+                            }
                           }
                           return false;
                         },
@@ -643,7 +685,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   icon: 'search',
                                   title: 'Nada encontrado',
                                   subtitle:
-                                      'Ajuste a busca para encontrar outro treino da biblioteca.',
+                                      widget.alunoId == null
+                                          ? 'Ajuste a busca para encontrar outro treino da biblioteca.'
+                                          : 'Ajuste a busca para encontrar outro treino do aluno.',
                                   action: FxEmptyAction(
                                     label: 'Limpar busca',
                                     onTap: _clearQuery,
@@ -661,7 +705,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                 sliver: SliverList.separated(
                                   itemCount:
                                       filteredTreinos.length +
-                                      (fromLibrary && tail.hasNext ? 1 : 0),
+                                      (tail.hasNext ? 1 : 0),
                                   separatorBuilder:
                                       (_, __) => SizedBox(
                                         height: TreinosLayout.listItemGap,

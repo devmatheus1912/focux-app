@@ -527,12 +527,13 @@ class ExercicioRepository {
       all.addAll(
         list.map((e) => Exercicio.fromJson(e as Map<String, dynamic>)),
       );
+      page += 1;
+      if (data is Map<String, dynamic> && data['hasNext'] == false) break;
+      if (list.length < pageSize) break;
       final totalPages =
           data is Map<String, dynamic>
               ? (data['totalPages'] as num?)?.toInt()
               : null;
-      page += 1;
-      if (list.length < pageSize) break;
       if (totalPages != null && page >= totalPages) break;
     }
 
@@ -602,7 +603,7 @@ class ExercicioRepository {
         .toList();
     return ExercicioPage(
       content: list,
-      meta: ExercicioPageMeta.fromSpringPage(data),
+      meta: ExercicioPageMeta.fromJson(data),
     );
   }
 

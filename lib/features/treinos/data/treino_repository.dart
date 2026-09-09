@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../utils/treinos_list_labels.dart';
 
@@ -217,6 +218,18 @@ class TreinosHomeBundle {
   }
 }
 
+class TreinosAlunoPage {
+  const TreinosAlunoPage({
+    required this.treinos,
+    required this.hasNext,
+    this.totalElements,
+  });
+
+  final List<Treino> treinos;
+  final bool hasNext;
+  final int? totalElements;
+}
+
 class TreinoPickerUiHints {
   final String searchPlaceholder;
   final String createCtaLabel;
@@ -395,11 +408,35 @@ class TreinoRepository {
     await _dio.post('/api/treinos/$treinoId/alunos/$alunoId');
   }
 
-  Future<List<Treino>> listarTreinosDoAluno(int alunoId) async {
-    final response = await _dio.get('/api/alunos/$alunoId/treinos');
-    return (response.data as List<dynamic>)
-        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<TreinosAlunoPage> listarTreinosDoAlunoPagina(
+    int alunoId, {
+    int page = 0,
+    int size = 40,
+    String q = '',
+  }) async {
+    final response = await _dio.get(
+      '/api/alunos/$alunoId/treinos',
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (q.trim().isNotEmpty) 'q': q.trim(),
+      },
+    );
+    final data = response.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/alunos/$alunoId/treinos devolve Pagina, não lista crua.',
+      );
+    }
+    final pagina = Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Treino.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+    return TreinosAlunoPage(
+      treinos: pagina.content,
+      hasNext: pagina.hasNext,
+      totalElements: pagina.totalElements,
+    );
   }
 
   Future<void> salvarComoTemplate(int id) async {

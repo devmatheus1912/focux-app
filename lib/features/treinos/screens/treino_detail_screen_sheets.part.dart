@@ -63,7 +63,7 @@ Future<void> _dispatchTreinoDetailAction({
         );
         ref.invalidate(treinoProvider(treinoId));
         invalidateTreinosCaches(ref);
-        ref.invalidate(treinosDoAlunoProvider(selected));
+        invalidateTreinosDoAluno(ref, selected);
         if (context.mounted) {
           FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
         }
@@ -90,7 +90,7 @@ Future<void> _dispatchTreinoDetailAction({
           props: {'source': 'detail', 'id': treinoId},
         );
         invalidateTreinosCaches(ref);
-        ref.invalidate(treinosDoAlunoProvider(selected));
+        invalidateTreinosDoAluno(ref, selected);
         if (context.mounted) {
           FeedbackHelper.showSuccess(
             context,

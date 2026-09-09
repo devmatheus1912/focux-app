@@ -85,7 +85,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
         await ref
             .read(treinoRepositoryProvider)
             .atribuirAluno(treino.id, widget.alunoId!);
-        ref.invalidate(treinosDoAlunoProvider(widget.alunoId!));
+        invalidateTreinosDoAluno(ref, widget.alunoId!);
       }
       invalidateTreinosCaches(ref);
       ref.invalidate(treinoProvider(treino.id));

@@ -13,7 +13,9 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, contains('IconButton'));
+    expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, contains('FxLiquidPrimaryButton'));

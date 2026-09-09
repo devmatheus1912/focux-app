@@ -10,6 +10,14 @@ class TreinosHomeQuery {
   static const pageSize = 40;
 }
 
+class TreinosAlunoQuery {
+  const TreinosAlunoQuery({this.q = ''});
+
+  final String q;
+
+  static const pageSize = 40;
+}
+
 class TreinosHomeTailState {
   const TreinosHomeTailState({
     this.nextPage = 1,
@@ -69,6 +77,31 @@ class TreinosHomeTailNotifier extends StateNotifier<TreinosHomeTailState> {
       rethrow;
     }
   }
+
+  Future<void> loadMoreAluno({
+    required int alunoId,
+    required TreinosAlunoQuery query,
+    required TreinoRepository repo,
+  }) async {
+    if (state.loading || !state.hasNext) return;
+    state = state.copyWith(loading: true);
+    try {
+      final chunk = await repo.listarTreinosDoAlunoPagina(
+        alunoId,
+        page: state.nextPage,
+        size: TreinosAlunoQuery.pageSize,
+        q: query.q,
+      );
+      state = TreinosHomeTailState(
+        nextPage: state.nextPage + 1,
+        treinos: [...state.treinos, ...chunk.treinos],
+        hasNext: chunk.hasNext,
+      );
+    } catch (_) {
+      state = state.copyWith(loading: false);
+      rethrow;
+    }
+  }
 }
 
 final treinoRepositoryProvider = Provider<TreinoRepository>(
@@ -98,12 +131,29 @@ final treinosProvider = FutureProvider<List<Treino>>((ref) async {
   return (await ref.watch(treinosHomeProvider.future)).treinos;
 });
 
-final treinosDoAlunoProvider = FutureProvider.family<List<Treino>, int>((
-  ref,
-  alunoId,
-) async {
-  return ref.watch(treinoRepositoryProvider).listarTreinosDoAluno(alunoId);
+final treinosDoAlunoQueryProvider = StateProvider.family<TreinosAlunoQuery, int>(
+  (ref, alunoId) => const TreinosAlunoQuery(),
+);
+
+final treinosDoAlunoTailProvider = StateNotifierProvider.family<
+  TreinosHomeTailNotifier,
+  TreinosHomeTailState,
+  int
+>((ref, alunoId) {
+  ref.watch(treinosDoAlunoQueryProvider(alunoId));
+  return TreinosHomeTailNotifier();
 });
+
+final treinosDoAlunoPageProvider =
+    FutureProvider.family<TreinosAlunoPage, int>((ref, alunoId) async {
+      final query = ref.watch(treinosDoAlunoQueryProvider(alunoId));
+      return ref.watch(treinoRepositoryProvider).listarTreinosDoAlunoPagina(
+        alunoId,
+        q: query.q,
+        page: 0,
+        size: TreinosAlunoQuery.pageSize,
+      );
+    });
 
 final treinoProvider = FutureProvider.family<Treino, int>((ref, id) async {
   return ref.watch(treinoRepositoryProvider).buscar(id);
@@ -118,4 +168,9 @@ final treinoPickerHomeProvider =
 void invalidateTreinosCaches(WidgetRef ref) {
   ref.read(treinosHomeTailProvider.notifier).clear();
   ref.invalidate(treinosHomeProvider);
+}
+
+void invalidateTreinosDoAluno(WidgetRef ref, int alunoId) {
+  ref.read(treinosDoAlunoTailProvider(alunoId).notifier).clear();
+  ref.invalidate(treinosDoAlunoPageProvider(alunoId));
 }

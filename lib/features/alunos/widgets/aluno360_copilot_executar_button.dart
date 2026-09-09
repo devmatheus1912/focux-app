@@ -42,7 +42,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
     ref.invalidate(aluno360Provider(widget.alunoId));
     ref.invalidate(alunoProvider(widget.alunoId));
     if (backendTipo == 'REDUZIR_CARGA') {
-      ref.invalidate(treinosDoAlunoProvider(widget.alunoId));
+      invalidateTreinosDoAluno(ref, widget.alunoId);
     }
   }
 
