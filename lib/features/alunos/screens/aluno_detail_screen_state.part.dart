@@ -388,6 +388,10 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                             .valueOrNull
                                             ?.aderenciaSemanal
                                             .diasMaps,
+                                    aderenciaBundle:
+                                        operacaoAsync
+                                            .valueOrNull
+                                            ?.aderenciaSemanal,
                                     recoveryAsync: recoveryAsync,
                                     autonomiaResumoAsync:
                                         resolvedAutonomiaResumoAsync,

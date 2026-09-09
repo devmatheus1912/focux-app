@@ -20,6 +20,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../utils/treino_ficha_status.dart';
 
 part 'meus_treinos_screen_state.part.dart';
 part 'meus_treinos_screen_widgets.part.dart';
@@ -33,6 +34,7 @@ class MeusTreinosScreen extends ConsumerStatefulWidget {
 
 class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   DateTime? _fetchedAt;
+  int? _startingTreinoId;
 
   @override
   Widget build(BuildContext context) {
@@ -153,11 +155,29 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                             (context, index) => _TrainingPlanCard(
                               treino: treinos[index],
                               isDark: isDark,
-                              onStart:
-                                  () => context.push(
-                                    '/checkin/executar',
-                                    extra: treinos[index].treinoId,
-                                  ),
+                              starting:
+                                  _startingTreinoId ==
+                                  treinos[index].treinoId,
+                              onStart: () {
+                                final treino = treinos[index];
+                                if (_startingTreinoId != null) return;
+                                setState(
+                                  () => _startingTreinoId = treino.treinoId,
+                                );
+                                context.push(
+                                  '/checkin/executar',
+                                  extra: treino.treinoId,
+                                );
+                                Future<void>.delayed(
+                                  const Duration(milliseconds: 600),
+                                  () {
+                                    if (!mounted) return;
+                                    if (_startingTreinoId == treino.treinoId) {
+                                      setState(() => _startingTreinoId = null);
+                                    }
+                                  },
+                                );
+                              },
                             ),
                       ),
                     ),

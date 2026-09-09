@@ -51,10 +51,9 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
               child: _AdherenceWeekCell(
                 point: points[i],
                 activeColor: activeColor,
-                missColor: missColor,
+                idleColor: idleColor,
                 todayRingColor: todayRingColor,
                 labelColor: labelColor,
-                emptyWeek: emptyWeek,
                 cellHeight: _cellHeight,
               ),
             ),
@@ -69,19 +68,17 @@ class _AdherenceWeekCell extends StatelessWidget {
   const _AdherenceWeekCell({
     required this.point,
     required this.activeColor,
-    required this.missColor,
+    required this.idleColor,
     required this.todayRingColor,
     required this.labelColor,
-    required this.emptyWeek,
     required this.cellHeight,
   });
 
   final AderenciaWeekPoint point;
   final Color activeColor;
-  final Color missColor;
+  final Color idleColor;
   final Color todayRingColor;
   final Color labelColor;
-  final bool emptyWeek;
   final double cellHeight;
 
   @override
@@ -99,13 +96,13 @@ class _AdherenceWeekCell extends StatelessWidget {
     final fill =
         hasActivity
             ? activeColor.withValues(alpha: 0.18)
-            : missColor.withValues(alpha: emptyWeek ? 0.08 : 0.06);
+            : idleColor;
     final borderColor =
         isToday
             ? todayRingColor
             : hasActivity
             ? activeColor.withValues(alpha: 0.42)
-            : missColor.withValues(alpha: 0.28);
+            : idleColor;
     final numberColor =
         isToday
             ? todayRingColor
@@ -143,14 +140,7 @@ class _AdherenceWeekCell extends StatelessWidget {
                   if (hasActivity)
                     Icon(Icons.check_rounded, size: 13, color: activeColor)
                   else
-                    Container(
-                      width: 5,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: missColor.withValues(alpha: 0.45),
-                      ),
-                    ),
+                    const SizedBox(height: 13),
                   const SizedBox(height: 3),
                   Text(
                     dayLabel,

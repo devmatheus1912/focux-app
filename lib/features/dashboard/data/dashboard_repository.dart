@@ -318,6 +318,7 @@ class AlunoDashboardHomeBundle {
   final int streakAtual;
   final double volumeSemanaKg;
   final double volumeMesKg;
+  final List<RecordePessoal> recordes;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -335,6 +336,7 @@ class AlunoDashboardHomeBundle {
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
     this.volumeMesKg = 0,
+    this.recordes = const [],
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -355,7 +357,15 @@ class AlunoDashboardHomeBundle {
         (raw as List? ?? const [])
             .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
             .toList();
+    List<RecordePessoal> parseRecordes(dynamic raw) =>
+        (raw as List? ?? const [])
+            .map((e) => RecordePessoal.fromJson(e as Map<String, dynamic>))
+            .toList();
     final recoveryRaw = json['recovery'];
+    final evolucaoHome = json['evolucaoHome'];
+    final recordesRaw =
+        json['recordes'] ??
+        (evolucaoHome is Map ? evolucaoHome['recordes'] : null);
 
     return AlunoDashboardHomeBundle(
       aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
@@ -382,6 +392,7 @@ class AlunoDashboardHomeBundle {
       streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
       volumeSemanaKg: (json['volumeSemanaKg'] as num?)?.toDouble() ?? 0,
       volumeMesKg: (json['volumeMesKg'] as num?)?.toDouble() ?? 0,
+      recordes: parseRecordes(recordesRaw),
     );
   }
 }

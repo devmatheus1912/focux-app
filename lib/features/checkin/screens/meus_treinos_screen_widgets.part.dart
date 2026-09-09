@@ -161,12 +161,14 @@ class _TrainingHero extends StatelessWidget {
 class _TrainingPlanCard extends StatelessWidget {
   final ExecucaoTreino treino;
   final bool isDark;
+  final bool starting;
   final VoidCallback onStart;
 
   const _TrainingPlanCard({
     required this.treino,
     required this.isDark,
     required this.onStart,
+    this.starting = false,
   });
 
   @override
@@ -178,22 +180,26 @@ class _TrainingPlanCard extends StatelessWidget {
     final done = treino.exercicios.where((e) => e.concluido).length;
     final progress =
         treino.exercicios.isEmpty ? 0.0 : done / treino.exercicios.length;
-    final hasExercises = treino.exercicios.isNotEmpty;
+    final aguardando = isTreinoAguardandoLiberacao(treino);
+    final hasExercises = !aguardando && treino.exercicios.isNotEmpty;
     final mediaCount =
         treino.exercicios.where((e) => e.gifUrl?.isNotEmpty == true).length;
-    final status = treino.status.toUpperCase();
-    final concluido = status == 'CONCLUIDO';
+    final status = normalizeTreinoStatus(treino.status);
+    final concluido = status == treinoStatusConcluido;
+    final canStart = isTreinoDisponivelParaIniciar(treino) || concluido;
     void handleAction() {
-      if (hasExercises || concluido) {
-        onStart();
+      if (starting) return;
+      if (aguardando) {
+        _showTrainingPendingSheet(
+          context: context,
+          treinoNome: treino.treinoNome,
+          isDark: isDark,
+        );
         return;
       }
-
-      _showTrainingPendingSheet(
-        context: context,
-        treinoNome: treino.treinoNome,
-        isDark: isDark,
-      );
+      if (canStart) {
+        onStart();
+      }
     }
 
     return InkWell(
@@ -298,7 +304,7 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 10),
-            if (!hasExercises && !concluido) ...[
+            if (aguardando) ...[
               Text(
                 'Treino reservado. A ficha abre assim que o personal liberar os exercícios.',
                 style: TextStyle(
@@ -340,7 +346,9 @@ class _TrainingPlanCard extends StatelessWidget {
                         concluido
                             ? Icons.replay_rounded
                             : Icons.play_arrow_rounded,
-                    onPressed: handleAction,
+                    onPressed: starting ? null : handleAction,
+                    loading: starting,
+                    loadingLabel: 'Abrindo…',
                     expand: false,
                   ),
                 ],
