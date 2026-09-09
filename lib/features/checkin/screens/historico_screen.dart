@@ -15,7 +15,9 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -36,6 +38,7 @@ class HistoricoCheckinScreen extends ConsumerStatefulWidget {
 class _HistoricoCheckinScreenState
     extends ConsumerState<HistoricoCheckinScreen> {
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
   final _items = <ExecucaoTreino>[];
   var _loading = true;
   var _loadingMore = false;
@@ -57,6 +60,7 @@ class _HistoricoCheckinScreenState
   void dispose() {
     _searchDebounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -109,7 +113,15 @@ class _HistoricoCheckinScreenState
     }
   }
 
-  void _abrirTreinos() => context.push('/checkin/treinos');
+  void _abrirTreinos() {
+    FxKeyboardDismissScope.dismiss();
+    context.push('/checkin/treinos');
+  }
+
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/checkin/treinos');
+  }
 
   void _abrirItem(ExecucaoTreino entry) {
     final id = entry.id;
@@ -125,9 +137,20 @@ class _HistoricoCheckinScreenState
     final visible = _items;
     final count = visible.length;
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Histórico de Treinos',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          _leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Histórico de Treinos',
@@ -135,7 +158,27 @@ class _HistoricoCheckinScreenState
             historicoCountLabel(count),
             FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
-          onBack: () => safePopOrGo(context, '/checkin/treinos'),
+          onBack: _leave,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o histórico',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Histórico',
+                subtitle: 'Treinos que o aluno já fechou.',
+                tips: const [
+                  FxHelpTip(
+                    'Busca',
+                    'Filtra pelo nome. Os chips separam feitos e pendentes.',
+                  ),
+                  FxHelpTip(
+                    'Detalhe',
+                    'Toque na linha abre o check-in daquele treino.',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -155,9 +198,9 @@ class _HistoricoCheckinScreenState
                 ),
                 child: TextField(
                   controller: _searchCtrl,
+                  focusNode: _searchFocus,
                   onChanged: _onQueryChanged,
-                  onTapOutside:
-                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
                     isDense: true,
@@ -252,6 +295,7 @@ class _HistoricoCheckinScreenState
               ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -37,6 +40,8 @@ class AlertasScreen extends ConsumerStatefulWidget {
 class _AlertasScreenState extends ConsumerState<AlertasScreen> {
   final _openedAt = DateTime.now();
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _searchDebounce;
   List<AlertaRisco> _alertas = [];
   AlertasConfiguracao? _config;
   var _page = 0;
@@ -58,8 +63,29 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() => _query = value);
+    });
+  }
+
+  void _clearQuery() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/dashboard/personal');
   }
 
   Future<void> _load() async {
@@ -279,9 +305,20 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
       );
     }
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Alertas',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          _leave();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
@@ -293,7 +330,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                     totalRiscos: _totalRiscos,
                     freshness: freshness,
                   ),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: _leave,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar os alertas',
@@ -350,7 +387,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                         ),
                         child: TextField(
                           controller: _searchController,
-                          onChanged: (value) => setState(() => _query = value),
+                          focusNode: _searchFocus,
+                          onChanged: _onQueryChanged,
+                          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
                             isDense: true,
@@ -370,10 +409,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                     ? null
                                     : IconButton(
                                       tooltip: 'Limpar busca',
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        setState(() => _query = '');
-                                      },
+                                      onPressed: _clearQuery,
                                       icon: Icon(
                                         Icons.close_rounded,
                                         color: mute,
@@ -410,10 +446,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                             'Ajuste a busca para achar outro aluno em risco.',
                                         action: FxEmptyAction(
                                           label: 'Limpar busca',
-                                          onTap: () {
-                                            _searchController.clear();
-                                            setState(() => _query = '');
-                                          },
+                                          onTap: _clearQuery,
                                         ),
                                       ),
                                     ),
@@ -458,11 +491,14 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                     keyboardDismissBehavior:
                                         ScrollViewKeyboardDismissBehavior
                                             .onDrag,
-                                    padding: const EdgeInsets.fromLTRB(
+                                    padding: EdgeInsets.fromLTRB(
                                       TokensStrip.s4,
                                       TokensStrip.s2,
                                       TokensStrip.s4,
-                                      TokensStrip.s6,
+                                      TokensStrip.s6 +
+                                          MediaQuery.viewInsetsOf(
+                                            context,
+                                          ).bottom,
                                     ),
                                     itemCount:
                                         rows.length +
@@ -558,6 +594,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                     ),
                   ],
                 ),
+      ),
       ),
     );
   }

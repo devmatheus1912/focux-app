@@ -37,5 +37,8 @@ void main() {
     expect(screen, isNot(contains('saudaveis')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('Future.wait')));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('viewInsetsOf'));
   });
 }

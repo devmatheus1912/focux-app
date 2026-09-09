@@ -28,5 +28,8 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains("icon: 'plus'")));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
   });
 }
