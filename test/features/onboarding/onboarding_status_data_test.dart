@@ -12,11 +12,9 @@ void main() {
         primeiroAlunoAdicionado: true,
         primeiroTreinoCriado: true,
         pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: false,
         pacoteCriado: false,
         habitoConfigurado: false,
         linkBioConfigurado: true,
-        progressoPercentual: 71,
       );
 
       expect(data.etapasFeitas(), 5);
@@ -31,11 +29,9 @@ void main() {
         primeiroAlunoAdicionado: true,
         primeiroTreinoCriado: true,
         pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: false,
         pacoteCriado: true,
         habitoConfigurado: true,
         linkBioConfigurado: false,
-        progressoPercentual: 86,
       );
 
       expect(data.etapasTotal(includeLinkBio: false), 6);
@@ -49,11 +45,9 @@ void main() {
         primeiroAlunoAdicionado: true,
         primeiroTreinoCriado: true,
         pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: true,
         pacoteCriado: true,
         habitoConfigurado: true,
         linkBioConfigurado: true,
-        progressoPercentual: 100,
       );
 
       expect(data.progressoExibido(), 100);
@@ -66,16 +60,22 @@ void main() {
         'primeiroAlunoAdicionado': false,
         'primeiroTreinoCriado': false,
         'pagamentoConfigurado': false,
-        'primeiroPagamentoRecebido': false,
         'pacoteCriado': true,
         'habitoConfigurado': false,
         'linkBioConfigurado': true,
-        'progressoPercentual': 43,
       });
 
       expect(data.pacoteCriado, isTrue);
       expect(data.linkBioConfigurado, isTrue);
       expect(data.progressoExibido(), 43);
+    });
+
+    test('fromJson mapeia primeiroPagamentoRecebido legado em pagamento', () {
+      final data = OnboardingStatusData.fromJson({
+        'primeiroPagamentoRecebido': true,
+      });
+
+      expect(data.pagamentoConfigurado, isTrue);
     });
   });
 
@@ -106,11 +106,9 @@ void main() {
         primeiroAlunoAdicionado: false,
         primeiroTreinoCriado: false,
         pagamentoConfigurado: false,
-        primeiroPagamentoRecebido: false,
         pacoteCriado: false,
         habitoConfigurado: false,
         linkBioConfigurado: false,
-        progressoPercentual: 0,
       );
       expect(nextSetupStep(data)?.id, 'primeiro-aluno');
     });
@@ -121,33 +119,12 @@ void main() {
         primeiroAlunoAdicionado: true,
         primeiroTreinoCriado: true,
         pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: false,
         pacoteCriado: false,
         habitoConfigurado: false,
         linkBioConfigurado: true,
-        progressoPercentual: 71,
       );
 
       expect(nextSetupStep(data)?.id, 'pacote');
-    });
-
-    test('pendingSetupSteps lista só os pendentes', () {
-      final data = OnboardingStatusData(
-        perfilCompleto: true,
-        primeiroAlunoAdicionado: true,
-        primeiroTreinoCriado: true,
-        pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: false,
-        pacoteCriado: false,
-        habitoConfigurado: false,
-        linkBioConfigurado: true,
-        progressoPercentual: 71,
-      );
-
-      expect(pendingSetupSteps(data).map((s) => s.id), [
-        'pacote',
-        'habito',
-      ]);
     });
 
     test('link-bio some sem landingCompleta', () {
@@ -156,11 +133,9 @@ void main() {
         primeiroAlunoAdicionado: true,
         primeiroTreinoCriado: true,
         pagamentoConfigurado: true,
-        primeiroPagamentoRecebido: false,
         pacoteCriado: true,
         habitoConfigurado: true,
         linkBioConfigurado: false,
-        progressoPercentual: 86,
       );
       expect(nextSetupStep(data, landingCompleta: false), isNull);
       expect(nextSetupStep(data, landingCompleta: true)?.id, 'link-bio');
@@ -237,6 +212,46 @@ void main() {
 
       final ent = normalizeOnboardingWizard(raw, landingCompleta: true);
       expect(ent.steps.map((s) => s.id), contains('link-bio'));
+    });
+
+    test('descarta passos órfãos do BFF fora do catálogo', () {
+      final raw = OnboardingWizard(
+        steps: [
+          OnboardingStep(
+            id: 'cor-da-marca',
+            title: 'Cor da marca',
+            description: 'Escolha a paleta.',
+            icon: 'palette',
+            completed: false,
+            actionRoute: '/setup/identidade',
+            estimatedMinutes: 2,
+          ),
+          OnboardingStep(
+            id: 'primeiro-aluno',
+            title: 'Cadastre seu primeiro aluno',
+            description: 'Cadastre ou importe.',
+            icon: 'person_add',
+            completed: false,
+            actionRoute: '/alunos/novo',
+            estimatedMinutes: 2,
+          ),
+        ],
+        completedCount: 0,
+        totalCount: 2,
+        progressPercent: 0,
+        nextActionLabel: 'Cor da marca',
+        nextActionRoute: '/setup/identidade',
+        wizardCompleto: false,
+        allStepsDone: false,
+      );
+
+      final normalized = normalizeOnboardingWizard(
+        raw,
+        landingCompleta: false,
+      );
+      expect(normalized.steps.map((s) => s.id), isNot(contains('cor-da-marca')));
+      expect(normalized.steps.first.id, 'primeiro-aluno');
+      expect(normalized.nextActionRoute, '/alunos/novo');
     });
   });
 }
