@@ -3,22 +3,18 @@ class OnboardingStatusData {
   final bool primeiroAlunoAdicionado;
   final bool primeiroTreinoCriado;
   final bool pagamentoConfigurado;
-  final bool primeiroPagamentoRecebido;
   final bool pacoteCriado;
   final bool habitoConfigurado;
   final bool linkBioConfigurado;
-  final int progressoPercentual;
 
   OnboardingStatusData({
     required this.perfilCompleto,
     required this.primeiroAlunoAdicionado,
     required this.primeiroTreinoCriado,
     required this.pagamentoConfigurado,
-    required this.primeiroPagamentoRecebido,
     required this.pacoteCriado,
     required this.habitoConfigurado,
     required this.linkBioConfigurado,
-    required this.progressoPercentual,
   });
 
   /// Ordem canônica: aluno → treino → perfil → PIX → pacote → hábito → link.
@@ -57,16 +53,14 @@ class OnboardingStatusData {
       primeiroAlunoAdicionado:
           json['primeiroAlunoAdicionado'] as bool? ?? false,
       primeiroTreinoCriado: json['primeiroTreinoCriado'] as bool? ?? false,
+      // `primeiroPagamentoRecebido` era o campo antigo; só fallback de parse.
       pagamentoConfigurado:
           json['pagamentoConfigurado'] as bool? ??
           json['primeiroPagamentoRecebido'] as bool? ??
           false,
-      primeiroPagamentoRecebido:
-          json['primeiroPagamentoRecebido'] as bool? ?? false,
       pacoteCriado: json['pacoteCriado'] as bool? ?? false,
       habitoConfigurado: json['habitoConfigurado'] as bool? ?? false,
       linkBioConfigurado: json['linkBioConfigurado'] as bool? ?? false,
-      progressoPercentual: json['progressoPercentual'] as int? ?? 0,
     );
   }
 }
