@@ -13,6 +13,8 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -31,6 +33,9 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
   List<GalleryItem> _fotos = [];
   var _loading = true;
   var _uploading = false;
+  var _loadingMore = false;
+  var _hasNext = false;
+  var _page = 0;
   String? _erro;
   DateTime? _fetchedAt;
 
@@ -46,10 +51,14 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
       _erro = null;
     });
     try {
-      final items = await GaleriaRepository(ref.read(apiClientProvider)).listar();
+      final pagina = await GaleriaRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina();
       if (!mounted) return;
       setState(() {
-        _fotos = items;
+        _fotos = pagina.content;
+        _hasNext = pagina.hasNext;
+        _page = pagina.page ?? 0;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -94,6 +103,36 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
     }
   }
 
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/dashboard/personal');
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasNext) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await GaleriaRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina(page: _page + 1);
+      if (!mounted) return;
+      final seen = _fotos.map((f) => f.id).toSet();
+      setState(() {
+        _fotos = [
+          ..._fotos,
+          ...pagina.content.where((f) => seen.add(f.id)),
+        ];
+        _hasNext = pagina.hasNext;
+        _page = pagina.page ?? (_page + 1);
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   Future<void> _delete(int id) async {
     final ok = await showFxConfirmSheet(
       context,
@@ -117,9 +156,16 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final canAdd = !_uploading && _fotos.length < galeriaMaxFotos;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Galeria',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Galeria',
@@ -127,7 +173,23 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
             galeriaCountLabel(_fotos.length),
             FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: _leave,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar a galeria',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Galeria',
+                subtitle: 'Fotos do perfil público. No máximo $galeriaMaxFotos.',
+                tips: const [
+                  FxHelpTip(
+                    'Adicionar',
+                    'O botão no rodapé envia a foto. Toque no X remove.',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [
@@ -191,8 +253,33 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
                                         crossAxisSpacing: TokensStrip.s2,
                                         mainAxisSpacing: TokensStrip.s2,
                                       ),
-                                  itemCount: _fotos.length,
+                                  itemCount:
+                                      _fotos.length + (_hasNext ? 1 : 0),
                                   itemBuilder: (_, i) {
+                                    if (i >= _fotos.length) {
+                                      return Material(
+                                        color: chrome.cardFill,
+                                        borderRadius: BorderRadius.circular(
+                                          TokensStrip.rCard,
+                                        ),
+                                        child: InkWell(
+                                          onTap: _loadingMore
+                                              ? null
+                                              : _carregarMais,
+                                          borderRadius: BorderRadius.circular(
+                                            TokensStrip.rCard,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              _loadingMore
+                                                  ? 'Carregando…'
+                                                  : 'Mais',
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
                                     final f = _fotos[i];
                                     final onSurface =
                                         Theme.of(context).colorScheme.onSurface;
@@ -253,6 +340,7 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

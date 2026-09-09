@@ -22,5 +22,9 @@ void main() {
     expect(screen, isNot(contains('focux_unsigned')));
     expect(screen, isNot(contains('api.cloudinary.com')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('listarPagina'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
   });
 }

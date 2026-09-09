@@ -28,5 +28,14 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, isNot(contains('context.pop()')));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
   });
 }
