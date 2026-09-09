@@ -34,6 +34,98 @@ class OperacaoStickyAction {
 
 enum OperacaoDominantMetricKind { risco, aderencia, prontidao }
 
+/// Cards do grid Status operacional — destino decidido no app (BE sem deep link).
+enum OperacaoStatusCardKind {
+  focoDoDia,
+  prontidao,
+  aderencia,
+  ultimoTreino,
+  risco,
+  checkins7d,
+}
+
+enum OperacaoStatusCardDestination {
+  chat,
+  engajamento,
+  treinos,
+  noop,
+}
+
+/// Resolve destino do card. Não usar treinos como default para Foco/Risco/Aderência.
+OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
+  required OperacaoStatusCardKind kind,
+  required bool contactPriority,
+  ProximaAcaoResumo? proximaAcao,
+}) {
+  switch (kind) {
+    case OperacaoStatusCardKind.focoDoDia:
+      return _focoDoDiaDestination(
+        contactPriority: contactPriority,
+        proximaAcao: proximaAcao,
+      );
+    case OperacaoStatusCardKind.risco:
+      return contactPriority
+          ? OperacaoStatusCardDestination.chat
+          : OperacaoStatusCardDestination.engajamento;
+    case OperacaoStatusCardKind.aderencia:
+      return OperacaoStatusCardDestination.engajamento;
+    case OperacaoStatusCardKind.prontidao:
+      // Sem deep link de treino; detalhe wearable fica na própria aba.
+      return OperacaoStatusCardDestination.noop;
+    case OperacaoStatusCardKind.ultimoTreino:
+    case OperacaoStatusCardKind.checkins7d:
+      return OperacaoStatusCardDestination.treinos;
+  }
+}
+
+OperacaoStatusCardDestination _focoDoDiaDestination({
+  required bool contactPriority,
+  ProximaAcaoResumo? proximaAcao,
+}) {
+  if (contactPriority) return OperacaoStatusCardDestination.chat;
+
+  final tipo = proximaAcao?.tipoAcao?.toUpperCase().trim() ?? '';
+  final acao = proximaAcao?.acao.trim() ?? '';
+  final lower = acao.toLowerCase();
+
+  if (tipo == 'CONTATO' ||
+      tipo == 'RECUPERACAO' ||
+      tipo == 'WEARABLE' ||
+      acaoSugereChat(acao)) {
+    return OperacaoStatusCardDestination.chat;
+  }
+  if (tipo == 'ADERENCIA' ||
+      lower.contains('aderên') ||
+      lower.contains('aderenc') ||
+      lower.contains('churn') ||
+      lower.contains('inativ') ||
+      lower.contains('sumiu') ||
+      lower.contains('sumiço')) {
+    return OperacaoStatusCardDestination.engajamento;
+  }
+  if (tipo == 'TREINO' ||
+      tipo == 'CHECKIN' ||
+      lower.contains('treino') ||
+      lower.contains('check-in') ||
+      lower.contains('checkin')) {
+    return OperacaoStatusCardDestination.treinos;
+  }
+  if (tipo == 'MEDIDA' ||
+      lower.contains('medida') ||
+      lower.contains('corporal') ||
+      lower.contains('mapa')) {
+    // Evolução fica no sticky; no grid de status, engajamento cobre o contexto.
+    return OperacaoStatusCardDestination.engajamento;
+  }
+  if (tipo == 'FINANCEIRO' ||
+      lower.contains('financeir') ||
+      lower.contains('mensalidade')) {
+    return OperacaoStatusCardDestination.engajamento;
+  }
+  // Default: permanecer no 360 / não empurrar treinos.
+  return OperacaoStatusCardDestination.noop;
+}
+
 /// Primary operational metric shown above the secondary grid.
 class OperacaoDominantMetric {
   const OperacaoDominantMetric({

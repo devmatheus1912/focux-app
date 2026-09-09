@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,8 +40,50 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
   final List<Map<String, dynamic>>? aderenciaSemanal;
   final AderenciaSemanalBundle? aderenciaBundle;
 
-  void _openTreinos(BuildContext context) {
-    context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+  void _openDestination(
+    BuildContext context, {
+    required OperacaoStatusCardDestination dest,
+    required Aluno360OperacaoSnapshot? operacao,
+  }) {
+    if (dest == OperacaoStatusCardDestination.noop) return;
+
+    HapticFeedback.selectionClick();
+    switch (dest) {
+      case OperacaoStatusCardDestination.chat:
+        _openChat(context, operacao: operacao);
+      case OperacaoStatusCardDestination.engajamento:
+        context.push('/alunos/$alunoId/engajamento', extra: aluno.nome);
+      case OperacaoStatusCardDestination.treinos:
+        context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+      case OperacaoStatusCardDestination.noop:
+        return;
+    }
+  }
+
+  void _openChat(
+    BuildContext context, {
+    required Aluno360OperacaoSnapshot? operacao,
+  }) {
+    final draft =
+        operacao?.effectiveProxima?.mensagemSugerida?.trim() ??
+        operacao?.outreachMessage.trim() ??
+        '';
+    if (draft.isNotEmpty) {
+      showAlunoOutreachMessageSheet(
+        context,
+        alunoId: alunoId,
+        alunoNome: aluno.nome,
+        message: draft,
+        title: 'Mensagem sugerida',
+        subtitle: 'Copiloto · revise antes de enviar.',
+        icon: Icons.auto_awesome_rounded,
+      );
+      return;
+    }
+    context.push(
+      '/alunos/$alunoId/chat',
+      extra: alunoChatRouteExtra(nome: aluno.nome),
+    );
   }
 
   @override
@@ -120,27 +163,50 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       required String hint,
       required Color color,
       required bool alert,
+      required OperacaoStatusCardKind kind,
       IconData? icon,
     }) {
+      final dest = resolveOperacaoStatusCardDestination(
+        kind: kind,
+        contactPriority: operacao?.contactPriority ?? false,
+        proximaAcao: operacao?.effectiveProxima,
+      );
+      final tile = OperationalMetricTile(
+        label: label,
+        value: value,
+        hint: hint,
+        color: color,
+        isDark: isDark,
+        leadingIcon: icon,
+        emphasis:
+            alert
+                ? OperationalMetricEmphasis.alert
+                : OperationalMetricEmphasis.normal,
+      );
       return Padding(
         padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-        child: InkWell(
-          onTap: () => _openTreinos(context),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: label,
-            value: value,
-            hint: hint,
-            color: color,
-            isDark: isDark,
-            leadingIcon: icon,
-            emphasis:
-                alert
-                    ? OperationalMetricEmphasis.alert
-                    : OperationalMetricEmphasis.normal,
-          ),
-        ),
+        child:
+            dest == OperacaoStatusCardDestination.noop
+                ? tile
+                : InkWell(
+                  onTap:
+                      () => _openDestination(
+                        context,
+                        dest: dest,
+                        operacao: operacao,
+                      ),
+                  borderRadius: BorderRadius.circular(12),
+                  child: tile,
+                ),
       );
+    }
+
+    OperacaoStatusCardKind dominantKind() {
+      return switch (dominant.kind) {
+        OperacaoDominantMetricKind.risco => OperacaoStatusCardKind.focoDoDia,
+        OperacaoDominantMetricKind.aderencia => OperacaoStatusCardKind.aderencia,
+        OperacaoDominantMetricKind.prontidao => OperacaoStatusCardKind.prontidao,
+      };
     }
 
     final metrics = <Widget>[
@@ -151,6 +217,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: dominant.hint,
           color: _dominantAccent(dominant, aderenciaColor, riscoColor, primary),
           alert: dominant.kind == OperacaoDominantMetricKind.risco,
+          kind: dominantKind(),
           icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
         ),
       if (heroShowsRisco) ...[
@@ -163,6 +230,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
+          kind: OperacaoStatusCardKind.aderencia,
           icon: Icons.percent_rounded,
         ),
         metric(
@@ -171,6 +239,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: semTreinoSubtitle,
           color: semTreinoAccent,
           alert: (dias ?? 0) >= diasLimite,
+          kind: OperacaoStatusCardKind.ultimoTreino,
           icon: Icons.pause_circle_outline_rounded,
         ),
       ] else ...[
@@ -181,6 +250,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: 'Índice operacional',
           color: primary,
           alert: false,
+          kind: OperacaoStatusCardKind.prontidao,
           icon: Icons.speed_rounded,
         ),
         metric(
@@ -192,6 +262,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
+          kind: OperacaoStatusCardKind.aderencia,
           icon: Icons.percent_rounded,
         ),
         metric(
@@ -200,6 +271,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: semTreinoSubtitle,
           color: semTreinoAccent,
           alert: (dias ?? 0) >= diasLimite,
+          kind: OperacaoStatusCardKind.ultimoTreino,
           icon: Icons.pause_circle_outline_rounded,
         ),
         metric(
@@ -208,6 +280,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint: aluno.emRisco ? 'Em risco' : 'Estável',
           color: riscoColor,
           alert: aluno.emRisco,
+          kind: OperacaoStatusCardKind.risco,
           icon: riscoMetricIcon(aluno.riscoNivel),
         ),
       ],
@@ -217,6 +290,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         hint: adherenceEmpty?.message ?? week.caption,
         color: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
         alert: !week.hasAnyCheckin && week.points.isNotEmpty,
+        kind: OperacaoStatusCardKind.checkins7d,
         icon: Icons.calendar_view_week_rounded,
       ),
     ];
