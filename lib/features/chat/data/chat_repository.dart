@@ -403,10 +403,15 @@ class ChatRepository {
     return r.data as Map<String, dynamic>;
   }
 
-  /// List archived conversations
-  Future<List<ChatInboxItem>> inboxArchived() async {
-    final r = await _dio.get('/api/chat/inbox/archived');
-    return _paginaContent(
+  Future<Pagina<ChatInboxItem>> inboxArchivedPage({
+    int page = 0,
+    int size = 50,
+  }) async {
+    final r = await _dio.get(
+      '/api/chat/inbox/archived',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return _pagina(
       r.data,
       'GET /api/chat/inbox/archived',
       ChatInboxItem.fromJson,
@@ -437,17 +442,22 @@ class ChatRepository {
     );
   }
 
-  /// Inbox with unread-only filter
-  Future<List<ChatInboxItem>> inboxUnread() async {
-    final r = await _dio.get('/api/chat/inbox/unread');
-    return _paginaContent(
+  Future<Pagina<ChatInboxItem>> inboxUnreadPage({
+    int page = 0,
+    int size = 50,
+  }) async {
+    final r = await _dio.get(
+      '/api/chat/inbox/unread',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return _pagina(
       r.data,
       'GET /api/chat/inbox/unread',
       ChatInboxItem.fromJson,
     );
   }
 
-  List<T> _paginaContent<T>(
+  Pagina<T> _pagina<T>(
     dynamic data,
     String endpoint,
     T Function(Map<String, dynamic>) parse,
@@ -458,7 +468,7 @@ class ChatRepository {
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (item) => parse(Map<String, dynamic>.from(item as Map)),
-    ).content;
+    );
   }
 
   String _clientMessageId() {
@@ -475,6 +485,10 @@ class ChatInboxHomeBundle {
   final int inboxTotal;
   final int inboxPage;
   final int inboxSize;
+  final bool unreadHasMore;
+  final int unreadTotal;
+  final bool archivedHasMore;
+  final int archivedTotal;
 
   ChatInboxHomeBundle({
     required this.inbox,
@@ -484,6 +498,10 @@ class ChatInboxHomeBundle {
     this.inboxTotal = 0,
     this.inboxPage = 0,
     this.inboxSize = 50,
+    this.unreadHasMore = false,
+    this.unreadTotal = 0,
+    this.archivedHasMore = false,
+    this.archivedTotal = 0,
   });
 
   factory ChatInboxHomeBundle.fromJson(Map<String, dynamic> j) {
@@ -492,14 +510,20 @@ class ChatInboxHomeBundle {
             .map((e) => ChatInboxItem.fromJson(e as Map<String, dynamic>))
             .toList();
     final inbox = parse('inbox');
+    final unread = parse('unread');
+    final archived = parse('archived');
     return ChatInboxHomeBundle(
       inbox: inbox,
-      unread: parse('unread'),
-      archived: parse('archived'),
+      unread: unread,
+      archived: archived,
       inboxHasMore: j['inboxHasMore'] as bool? ?? false,
       inboxTotal: (j['inboxTotal'] as num?)?.toInt() ?? inbox.length,
       inboxPage: (j['inboxPage'] as num?)?.toInt() ?? 0,
       inboxSize: (j['inboxSize'] as num?)?.toInt() ?? 50,
+      unreadHasMore: j['unreadHasMore'] as bool? ?? false,
+      unreadTotal: (j['unreadTotal'] as num?)?.toInt() ?? unread.length,
+      archivedHasMore: j['archivedHasMore'] as bool? ?? false,
+      archivedTotal: (j['archivedTotal'] as num?)?.toInt() ?? archived.length,
     );
   }
 }

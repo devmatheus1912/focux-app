@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 import '../../../core/money/fx_money.dart';
 
 class RecorrenciaAssinatura {
@@ -37,11 +38,34 @@ class RecorrenciaRepository {
   final Dio _dio;
   RecorrenciaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<RecorrenciaAssinatura>> listar() async {
-    final r = await _dio.get('/api/recorrencia');
-    return (r.data as List)
-        .map((e) => RecorrenciaAssinatura.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<RecorrenciaAssinatura>> listarPagina({
+    int page = 0,
+    int size = 20,
+    String? q,
+    String? status,
+  }) async {
+    final query = q?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/recorrencia',
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (query.isNotEmpty) 'q': query,
+        if (status != null && status.isNotEmpty) 'status': status,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw const FormatException(
+        'GET /api/recorrencia devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => RecorrenciaAssinatura.fromJson(
+        Map<String, dynamic>.from(item as Map),
+      ),
+    );
   }
 
   Future<RecorrenciaAssinatura> criar({

@@ -6,16 +6,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -126,6 +129,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
         return;
       }
       if (!mounted) return;
+      FxKeyboardDismissScope.dismiss();
       context.push(normalized);
       return;
     }
@@ -162,100 +166,119 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
   Widget build(BuildContext context) {
     final resultAsync = ref.watch(buscaResultadoProvider);
     final filter = ref.watch(buscaFilterProvider);
+    final query = ref.watch(buscaQueryProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final hasQuery = _ctrl.text.isNotEmpty;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final result = resultAsync.valueOrNull;
+    final countLabel = query.trim().length < buscaMinQueryLength
+        ? 'Busca'
+        : buscaCountLabel(result?.totalCount ?? 0);
 
     return fxScreenA11yScope(
       label: 'Busca global',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Busca',
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como buscar',
-              onTap: _showHelp,
-            ),
-            if (hasQuery)
-              Padding(
-                padding: const EdgeInsets.only(right: TokensStrip.s3),
-                child: Center(
-                  child: Semantics(
-                    button: true,
-                    label: 'Limpar busca',
-                    child: ShellHeaderIconButton(
-                      icon: 'x',
-                      tooltip: 'Limpar busca',
-                      onTap: _clearQuery,
+      child: PopScope(
+        canPop: !keyboardOpen && !_focus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _focus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, '/dashboard/personal');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Busca',
+            subtitle: FxHubFreshness.joinCount(countLabel, null),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/personal');
+            },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como buscar',
+                onTap: _showHelp,
+              ),
+            ],
+          ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(buscaResultadoProvider);
+              await ref.read(buscaResultadoProvider.future);
+            },
+            child: FxContentWidthLimiter(
+              child: ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+                ),
+                children: [
+                  TextField(
+                    controller: _ctrl,
+                    focusNode: _focus,
+                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                    decoration: InputDecoration(
+                      hintText: buscaHint(),
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: hasQuery
+                          ? IconButton(
+                              tooltip: 'Limpar busca',
+                              onPressed: _clearQuery,
+                              icon: const Icon(Icons.close_rounded),
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: chrome.cardFill,
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: chrome.line),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(buscaResultadoProvider);
-            await ref.read(buscaResultadoProvider.future);
-          },
-          child: FxContentWidthLimiter(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s3,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s6,
-              ),
-              children: [
-                TextField(
-                  controller: _ctrl,
-                  focusNode: _focus,
-                  decoration: InputDecoration(
-                    hintText: buscaHint(),
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    filled: true,
-                    fillColor: chrome.cardFill,
-                    border: FxInputDeco.outlineBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: chrome.line),
-                    ),
+                  const SizedBox(height: TokensStrip.s3),
+                  Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      for (final tipo in BuscaTipo.values)
+                        FxToggleChip(
+                          label: tipo.label,
+                          selected: tipo == filter,
+                          isDark: chrome.isDark,
+                          onTap: () =>
+                              ref.read(buscaFilterProvider.notifier).state =
+                                  tipo,
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: TokensStrip.s3),
-                Wrap(
-                  spacing: TokensStrip.s2,
-                  runSpacing: TokensStrip.s2,
-                  children: [
-                    for (final tipo in BuscaTipo.values)
-                      FxToggleChip(
-                        label: tipo.label,
-                        selected: tipo == filter,
-                        isDark: chrome.isDark,
-                        onTap: () =>
-                            ref.read(buscaFilterProvider.notifier).state = tipo,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: TokensStrip.s4),
-                resultAsync.when(
-                  loading: () => const SkeletonList(count: 6),
-                  error:
-                      (e, _) => FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: friendlyError(e),
-                        onRetry: () => ref.invalidate(buscaResultadoProvider),
-                      ),
-                  data:
-                      (result) => BuscaGlobalResults(
-                        query: ref.watch(buscaQueryProvider),
-                        filter: filter,
-                        result: result ?? const BuscaGlobalResult.empty(),
-                        onOpen: _abrirItem,
-                      ),
-                ),
-              ],
+                  const SizedBox(height: TokensStrip.s4),
+                  resultAsync.when(
+                    loading: () => const SkeletonList(count: 6),
+                    error:
+                        (e, _) => FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: friendlyError(e),
+                          onRetry: () => ref.invalidate(buscaResultadoProvider),
+                        ),
+                    data:
+                        (result) => BuscaGlobalResults(
+                          query: query,
+                          filter: filter,
+                          result: result ?? const BuscaGlobalResult.empty(),
+                          onOpen: _abrirItem,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

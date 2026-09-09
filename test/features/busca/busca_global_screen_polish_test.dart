@@ -15,10 +15,15 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('FxSettingsLayout'));
-    expect(screen, contains('ShellHeaderIconButton'));
-    expect(screen, contains("icon: 'x'"));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxHelpSheet'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('Limpar busca'));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('AlunoInsetFormField')));
     expect(screen, isNot(contains('FilterChip')));
@@ -29,6 +34,8 @@ void main() {
     expect(screen, isNot(contains('Map<String, dynamic>')));
     expect(screen, isNot(contains('Icons.clear')));
     expect(screen, isNot(contains('Icons.person')));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('context.pop()')));
   });
 
   test('busca global fold segue pele do Perfil', () {

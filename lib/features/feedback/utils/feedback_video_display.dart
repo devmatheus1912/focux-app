@@ -45,17 +45,3 @@ bool feedbackVideoMatchesQuery({
   if (q.isEmpty) return true;
   return comentario.toLowerCase().contains(q);
 }
-
-String feedbackVideoHubSubtitle({
-  String? alunoNome,
-  String? freshness,
-  int? count,
-}) {
-  final parts = <String>[
-    if (count != null) feedbackVideoCountLabel(count)
-    else 'Análises técnicas de execução',
-    if ((alunoNome ?? '').trim().isNotEmpty) alunoNome!.trim(),
-    if ((freshness ?? '').trim().isNotEmpty) freshness!.trim(),
-  ];
-  return parts.join(' · ');
-}

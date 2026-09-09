@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/money/fx_money.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -18,17 +20,25 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../alunos/data/aluno_repository.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../chat/utils/aluno_picker_list.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
+
+part 'recorrencia_screen_form.part.dart';
 
 class RecorrenciaScreen extends ConsumerStatefulWidget {
   const RecorrenciaScreen({super.key});
@@ -38,138 +48,91 @@ class RecorrenciaScreen extends ConsumerStatefulWidget {
 }
 
 class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _debounce;
+  var _query = '';
+  var _filtro = RecorrenciaHubFiltro.todos;
   List<RecorrenciaAssinatura> _items = [];
-  bool _loading = true;
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loading = true;
+  var _loadingMore = false;
   String? _erro;
   DateTime? _fetchedAt;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _load(reset: true);
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _erro = null;
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      final next = value.trim();
+      if (next == _query) return;
+      _query = next;
+      _load(reset: true);
     });
-    try {
-      final items =
-          await RecorrenciaRepository(ref.read(apiClientProvider)).listar();
-      if (mounted) {
-        setState(() {
-          _items = items;
-          _loading = false;
-          _fetchedAt = DateTime.now();
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _erro = friendlyError(e);
-        });
-      }
-    }
   }
 
-  Future<void> _criar() async {
-    HapticFeedback.selectionClick();
-    final alunos = await AlunoRepository(ref.read(apiClientProvider)).listar();
-    if (alunos.isEmpty) {
-      if (!mounted) return;
-      FeedbackHelper.showWarn(context, 'Cadastre um aluno primeiro.');
-      return;
+  Future<void> _load({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+        _page = 0;
+        _items = [];
+        _hasMore = false;
+      });
+    } else {
+      if (_loadingMore || !_hasMore) return;
+      setState(() => _loadingMore = true);
     }
-    var alunoId = alunos.first.id;
-    var alunoNome = alunos.first.nome;
-    final valorCtrl = TextEditingController(text: '199');
-    var created = false;
-
     try {
+      final pagina = await RecorrenciaRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina(
+        page: reset ? 0 : _page + 1,
+        q: _query,
+        status: recorrenciaHubFiltroStatus(_filtro),
+      );
       if (!mounted) return;
-      final ok = await showFxFormSheet(
-        context,
-        title: 'Nova recorrência',
-        icon: Icons.repeat_rounded,
-        confirmLabel: 'Criar',
-        child: StatefulBuilder(
-          builder:
-              (ctx, setDialogState) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FxInsetPickerRow(
-                    icon: Icons.person_outline,
-                    label: 'Aluno',
-                    value: recorrenciaAlunoLabel(alunoNome),
-                    onTap: () async {
-                      final picked = await showFxInsetPickerSheet<int>(
-                        ctx,
-                        title: 'Aluno',
-                        selected: alunoId,
-                        items: [
-                          for (final a in alunos)
-                            FxInsetPickerSheetItem(
-                              value: a.id,
-                              label: recorrenciaAlunoLabel(a.nome),
-                            ),
-                        ],
-                      );
-                      if (picked == null) return;
-                      Aluno? match;
-                      for (final a in alunos) {
-                        if (a.id == picked) {
-                          match = a;
-                          break;
-                        }
-                      }
-                      final aluno = match;
-                      if (aluno == null) return;
-                      setDialogState(() {
-                        alunoId = aluno.id;
-                        alunoNome = aluno.nome;
-                      });
-                    },
-                  ),
-                  AlunoInsetFormField(
-                    controller: valorCtrl,
-                    label: 'Valor mensal (R\$)',
-                    icon: Icons.payments_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    showDivider: false,
-                  ),
-                ],
-              ),
-        ),
-      );
-      if (ok != true) return;
-
-      final r = await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
-        alunoId: alunoId,
-        valor: FxMoney.fromInput(
-          valorCtrl.text.trim().isEmpty ? '199' : valorCtrl.text,
-        ),
-      );
-      final link = r.initPoint?.trim();
-      if (link != null && link.isNotEmpty) {
-        await copySensitiveToClipboard(link);
-        if (!mounted) return;
-        FeedbackHelper.showSuccess(
-          context,
-          'Link de assinatura copiado — envie ao aluno.',
-        );
-      }
-      created = true;
+      setState(() {
+        if (reset) {
+          _items = pagina.content;
+          _fetchedAt = DateTime.now();
+        } else {
+          final seen = _items.map((i) => i.id).toSet();
+          _items = [
+            ..._items,
+            ...pagina.content.where((i) => seen.add(i.id)),
+          ];
+        }
+        _page = pagina.page ?? (reset ? 0 : _page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _items.length;
+        _loading = false;
+        _loadingMore = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      valorCtrl.dispose();
+      setState(() {
+        _erro = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
     }
-    if (created) await _load();
   }
 
   Future<void> _abrirCheckout(String initPoint) async {
@@ -184,37 +147,111 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Recorrência MP',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Recorrência MP',
-          subtitle: recorrenciaHubSubtitle(freshnessLabel),
-          onBack: () => context.pop(),
-          actions: [
-            ShellHeaderIconButton(
-              icon: 'plus',
-              tooltip: 'Nova recorrência',
-              onTap: _criar,
+      child: PopScope(
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, '/financeiro');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Recorrência MP',
+            subtitle: FxHubFreshness.joinCount(
+              recorrenciaCountLabel(_loading ? 0 : _total),
+              _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
-          ],
-        ),
-        body:
-            _loading
-                ? const Padding(
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/financeiro');
+            },
+          ),
+          body: _loading
+              ? const Padding(
                   padding: EdgeInsets.all(FxSettingsLayout.pageInset),
                   child: SkeletonList(count: 5),
                 )
-                : _erro != null
-                ? FxErrorState(
+              : _erro != null
+              ? FxErrorState(
                   chromeOnDark: chrome.isDark,
                   primary: primary,
                   message: _erro!,
-                  onRetry: _load,
+                  onRetry: () => _load(reset: true),
                 )
-                : FxContentWidthLimiter(child: _buildBody()),
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        8,
+                        FxSettingsLayout.pageInset,
+                        8,
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        focusNode: _searchFocus,
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onQueryChanged,
+                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                        decoration: FxInputDeco.build(context, 'Buscar aluno'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        0,
+                        FxSettingsLayout.pageInset,
+                        8,
+                      ),
+                      child: Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
+                        children: [
+                          for (final filtro in RecorrenciaHubFiltro.values)
+                            FxToggleChip(
+                              label: recorrenciaHubFiltroLabel(filtro),
+                              selected: _filtro == filtro,
+                              isDark: chrome.isDark,
+                              onTap: () {
+                                if (_filtro == filtro) return;
+                                setState(() => _filtro = filtro);
+                                _load(reset: true);
+                              },
+                            ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: FxContentWidthLimiter(child: _buildBody()),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s3 +
+                              MediaQuery.viewInsetsOf(context).bottom,
+                        ),
+                        child: FxLiquidPrimaryButton(
+                          label: 'Nova recorrência',
+                          onPressed: _criar,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }
@@ -222,40 +259,57 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
   Widget _buildBody() {
     final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
-      onRefresh: _load,
+      onRefresh: () => _load(reset: true),
       child: _items.isEmpty
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 8,
                 FxSettingsLayout.pageInset,
-                32,
+                32 + MediaQuery.viewInsetsOf(context).bottom,
               ),
               children: [
                 FxEmptyState(
-                  icon: 'coin',
-                  title: 'Nenhuma assinatura ainda',
-                  subtitle:
-                      'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.',
-                  action: FxEmptyAction(label: 'Nova recorrência', onTap: _criar),
+                  icon: _query.isEmpty && _filtro == RecorrenciaHubFiltro.todos
+                      ? 'coin'
+                      : 'search',
+                  title: _query.isEmpty && _filtro == RecorrenciaHubFiltro.todos
+                      ? 'Nenhuma assinatura ainda'
+                      : 'Nenhuma assinatura encontrada',
+                  subtitle: _query.isEmpty &&
+                          _filtro == RecorrenciaHubFiltro.todos
+                      ? 'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.'
+                      : 'Ajuste a busca ou o filtro para ver outras assinaturas.',
+                  action: FxEmptyAction(
+                    label: 'Nova recorrência',
+                    onTap: _criar,
+                  ),
                 ),
               ],
             )
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 TokensStrip.s3,
                 FxSettingsLayout.pageInset,
-                TokensStrip.s6,
+                TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
               ),
-              itemCount: _items.length + 1,
+              itemCount: _items.length + 1 + (_hasMore ? 1 : 0),
               itemBuilder: (context, i) {
                 if (i == 0) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: TokensStrip.s3),
                     child: DashboardSectionHeader(title: 'Assinaturas'),
+                  );
+                }
+                if (_hasMore && i == _items.length + 1) {
+                  return FxSatelliteListTile(
+                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                    onTap: _loadingMore ? null : () => _load(reset: false),
                   );
                 }
                 final item = _items[i - 1];
@@ -271,9 +325,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                   trailing: Text(
                     recorrenciaValorLabel(item.valor),
                     style: FocuxHubTypography.bodyMuted(
-                      color: danger
-                          ? EagleTokens.bad
-                          : fxScreenMute(context),
+                      color: danger ? EagleTokens.bad : fxScreenMute(context),
                       fontWeight: FontWeight.w700,
                     ),
                   ),

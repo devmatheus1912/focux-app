@@ -15,9 +15,14 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('alunosHomeProvider'));
+    expect(screen, contains('listarPickerPagina'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
@@ -33,7 +38,11 @@ void main() {
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('_NovoFeedbackDialog')));
     expect(screen, isNot(contains('Exercício #')));
+    expect(screen, isNot(contains('Aluno (ID interno)')));
+    expect(screen, isNot(contains('ID do exercício')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('context.pop()')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }
