@@ -415,14 +415,25 @@ class ChatRepository {
 
   /// Global search across all conversations
   Future<List<ChatMsg>> globalSearch(String query) async {
+    return (await globalSearchPage(query)).content;
+  }
+
+  Future<Pagina<ChatMsg>> globalSearchPage(
+    String query, {
+    int page = 0,
+  }) async {
     final r = await _dio.get(
       '/api/chat/inbox/search',
-      queryParameters: {'q': query},
+      queryParameters: {'q': query.trim(), 'page': page},
     );
-    return _paginaContent(
-      r.data,
-      'GET /api/chat/inbox/search',
-      ChatMsg.fromJson,
+    if (r.data is! Map) {
+      throw const FormatException(
+        'GET /api/chat/inbox/search devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(r.data as Map),
+      (item) => ChatMsg.fromJson(Map<String, dynamic>.from(item as Map)),
     );
   }
 

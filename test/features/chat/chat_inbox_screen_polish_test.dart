@@ -40,9 +40,10 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('hubCount:'));
     expect(screen, contains('Nova mensagem'));
-    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('PopScope'));
     expect(screen, contains('IndexedStack'));
-    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('FloatingActionButton')));

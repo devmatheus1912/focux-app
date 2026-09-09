@@ -114,7 +114,7 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
       title: 'Tipo de post',
       selected: _tipoSelecionado,
       items: [
-        for (final t in feedTipoValues)
+        for (final t in feedTipoValues.where((t) => t != 'ENQUETE'))
           FxInsetPickerSheetItem(value: t, label: feedTipoLabel(t)),
       ],
     );

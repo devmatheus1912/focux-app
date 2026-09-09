@@ -26,6 +26,10 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('canCompose: false'));
     expect(screen, contains('listarPersonalPagina'));
     expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('label: feedPublicarTileLabel')));

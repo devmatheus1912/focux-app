@@ -114,28 +114,84 @@ class _ImagePlaceholder extends StatelessWidget {
 
 class _VideoAttachmentTile extends StatelessWidget {
   final Color primary;
+  final String? url;
 
-  const _VideoAttachmentTile({required this.primary});
+  const _VideoAttachmentTile({required this.primary, this.url});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 130,
-      width: double.infinity,
-      decoration: BoxDecoration(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: url == null || url!.isEmpty
+            ? null
+            : () => showFxHomeSheet<void>(
+              context,
+              builder: (_) => _FeedVideoPreview(url: url!, primary: primary),
+            ),
         borderRadius: BorderRadius.circular(8),
-        gradient: LinearGradient(
-          colors: [BrandPalette.deep(primary), primary.withValues(alpha: 0.74)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        child: Ink(
+          height: 130,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: LinearGradient(
+              colors: [
+                BrandPalette.deep(primary),
+                primary.withValues(alpha: 0.74),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: const Center(
+            child: Icon(
+              Icons.play_circle_fill_rounded,
+              color: Colors.white,
+              size: 44,
+            ),
+          ),
         ),
       ),
-      child: const Center(
-        child: Icon(
-          Icons.play_circle_fill_rounded,
-          color: Colors.white,
-          size: 44,
-        ),
+    );
+  }
+}
+
+class _FeedVideoPreview extends StatelessWidget {
+  const _FeedVideoPreview({required this.url, required this.primary});
+
+  final String url;
+  final Color primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FxHomeSheetHandle(isDark: Theme.of(context).brightness == Brightness.dark),
+          const SizedBox(height: 12),
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: ColoredBox(
+                color: BrandPalette.deep(primary),
+                child: Center(
+                  child: TextButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri.parse(url),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.play_arrow_rounded),
+                    label: const Text('Abrir vídeo'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -187,7 +243,7 @@ class _FeedPostCard extends StatelessWidget {
   final Color primary;
   final int curtidas;
   final int comentarios;
-  final VoidCallback onCurtir;
+  final VoidCallback? onCurtir;
   final VoidCallback onComentar;
   final VoidCallback onFixar;
   final VoidCallback onExcluir;
@@ -293,7 +349,7 @@ class _FeedPostCard extends StatelessWidget {
               if (mUrl != null && mUrl.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 post.tipoPost == 'VIDEO'
-                    ? _VideoAttachmentTile(primary: primary)
+                    ? _VideoAttachmentTile(primary: primary, url: mUrl)
                     : ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
@@ -317,15 +373,24 @@ class _FeedPostCard extends StatelessWidget {
                 runSpacing: 4,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  TextButton.icon(
-                    onPressed: onCurtir,
-                    icon: const Icon(Icons.thumb_up_alt_outlined, size: 18),
-                    label: Text('$curtidas Curtir'),
-                  ),
+                  if (onCurtir != null)
+                    TextButton.icon(
+                      onPressed: onCurtir,
+                      icon: const Icon(Icons.thumb_up_alt_outlined, size: 18),
+                      label: Text('$curtidas Curtir'),
+                    )
+                  else
+                    Text(
+                      '$curtidas curtidas',
+                      style: FocuxHubTypography.bodyMuted(
+                        color: ShellChrome.of(context).mute,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   TextButton.icon(
                     onPressed: onComentar,
                     icon: const Icon(Icons.comment_outlined, size: 18),
-                    label: Text('$comentarios Comentar'),
+                    label: Text('$comentarios comentários'),
                   ),
                 ],
               ),
