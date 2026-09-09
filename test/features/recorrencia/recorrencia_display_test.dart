@@ -92,11 +92,18 @@ void main() {
     expect(recorrenciaProximaHint('2026-10-01'), 'Cobrança automática');
   });
 
-  test('recorrenciaHubSubtitle junta freshness', () {
-    expect(recorrenciaHubSubtitle(null), 'Assinaturas Mercado Pago');
+  test('recorrenciaCountLabel e filtro', () {
+    expect(recorrenciaCountLabel(0), 'Nenhuma assinatura');
+    expect(recorrenciaCountLabel(1), '1 assinatura');
+    expect(recorrenciaCountLabel(3), '3 assinaturas');
     expect(
-      recorrenciaHubSubtitle('há 1 min'),
-      'Assinaturas Mercado Pago · há 1 min',
+      recorrenciaHubFiltroLabel(RecorrenciaHubFiltro.pendente),
+      'Pendentes',
     );
+    expect(
+      recorrenciaHubFiltroStatus(RecorrenciaHubFiltro.ativa),
+      'ATIVA',
+    );
+    expect(recorrenciaHubFiltroStatus(RecorrenciaHubFiltro.todos), isNull);
   });
 }

@@ -20,15 +20,21 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/exercicios/providers/exercicios_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../../chat/utils/aluno_picker_list.dart';
 import '../data/feedback_video_repository.dart';
 import '../utils/feedback_video_display.dart';
+
+part 'feedback_video_screen_form.part.dart';
 
 enum _FeedbackVideoAcao { abrir, deletar }
 
@@ -45,6 +51,7 @@ class FeedbackVideoScreen extends ConsumerStatefulWidget {
 
 class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
   final _feedbacks = <FeedbackVideo>[];
   var _loading = true;
   var _loadingMore = false;
@@ -56,6 +63,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   var _query = '';
   Timer? _searchDebounce;
 
+  String get _parentRoute => widget.alunoId == null
+      ? '/dashboard/personal'
+      : '/alunos/${widget.alunoId}';
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +77,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -178,95 +190,6 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     }
   }
 
-  Future<void> _novoFeedback() async {
-    HapticFeedback.selectionClick();
-    final alunoIdCtrl = TextEditingController(
-      text: widget.alunoId?.toString() ?? '',
-    );
-    final exercicioIdCtrl = TextEditingController();
-    final videoUrlCtrl = TextEditingController();
-    final comentarioCtrl = TextEditingController();
-    var created = false;
-
-    try {
-      if (!mounted) return;
-      final ok = await showFxFormSheet(
-        context,
-        title: 'Novo feedback de vídeo',
-        subtitle:
-            widget.alunoNome != null && widget.alunoNome!.trim().isNotEmpty
-                ? 'Para ${satelliteFirstName(widget.alunoNome)}'
-                : 'URL, exercício e comentário técnico.',
-        icon: Icons.videocam_outlined,
-        confirmLabel: 'Salvar',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.alunoId == null)
-              AlunoInsetFormField(
-                controller: alunoIdCtrl,
-                label: 'Aluno (ID interno)',
-                icon: Icons.person_outline,
-                hint: 'Somente se não veio do perfil',
-                keyboardType: TextInputType.number,
-              ),
-            AlunoInsetFormField(
-              controller: exercicioIdCtrl,
-              label: 'Exercício',
-              icon: Icons.fitness_center_outlined,
-              hint: 'ID do exercício no app',
-              keyboardType: TextInputType.number,
-            ),
-            AlunoInsetFormField(
-              controller: videoUrlCtrl,
-              label: 'URL do vídeo',
-              icon: Icons.link_outlined,
-              hint: 'Cloudinary, YouTube…',
-            ),
-            AlunoInsetFormField(
-              controller: comentarioCtrl,
-              label: 'Comentário técnico',
-              icon: Icons.notes_outlined,
-              maxLines: 3,
-              showDivider: false,
-            ),
-          ],
-        ),
-      );
-      if (ok != true) return;
-      final alunoId = widget.alunoId ?? int.tryParse(alunoIdCtrl.text);
-      final exercicioId = int.tryParse(exercicioIdCtrl.text);
-      final video = videoUrlCtrl.text.trim();
-      final com = comentarioCtrl.text.trim();
-      if (alunoId == null ||
-          exercicioId == null ||
-          video.isEmpty ||
-          com.isEmpty) {
-        if (mounted) {
-          FeedbackHelper.showError(context, 'Preencha todos os campos');
-        }
-        return;
-      }
-      await FeedbackVideoRepository(ref.read(apiClientProvider)).registrar(
-        alunoId: alunoId,
-        exercicioId: exercicioId,
-        videoUrl: video,
-        comentario: com,
-      );
-      created = true;
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      alunoIdCtrl.dispose();
-      exercicioIdCtrl.dispose();
-      videoUrlCtrl.dispose();
-      comentarioCtrl.dispose();
-    }
-    if (created) await _load(reset: true);
-  }
-
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -274,112 +197,127 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final mute = chrome.mute;
     final visible = _feedbacks;
     final count = _total;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Feedback de vídeo',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title:
-              widget.alunoNome != null
-                  ? 'Feedbacks — ${widget.alunoNome}'
-                  : 'Feedbacks de vídeo',
-          subtitle: feedbackVideoHubSubtitle(
-            alunoNome: widget.alunoNome,
-            freshness: FxHubFreshness.fromFetchedAt(_fetchedAt),
-            count: count,
+      child: PopScope(
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, _parentRoute);
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title:
+                widget.alunoNome != null
+                    ? 'Feedbacks — ${widget.alunoNome}'
+                    : 'Feedbacks de vídeo',
+            subtitle: FxHubFreshness.joinCount(
+              feedbackVideoCountLabel(_loading ? 0 : count),
+              _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
+            ),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, _parentRoute);
+            },
           ),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                TokensStrip.s2,
-                TokensStrip.s4,
-                TokensStrip.s2,
-              ),
-              child: DecoratedBox(
-                decoration: fxStripCardDecoration(
-                  context,
-                  accent: primary,
-                  radius: TokensStrip.rCard,
-                  glowStrength: 0.03,
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  TokensStrip.s2,
+                  TokensStrip.s4,
+                  TokensStrip.s2,
                 ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: _onQueryChanged,
-                  onTapOutside:
-                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: 'Buscar comentário',
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                    suffixIcon:
-                        _query.trim().isEmpty
-                            ? null
-                            : IconButton(
-                              tooltip: 'Limpar busca',
-                              onPressed: () {
-                                _searchDebounce?.cancel();
-                                _searchCtrl.clear();
-                                setState(() => _query = '');
-                                _load(reset: true);
-                              },
-                              icon: Icon(
-                                Icons.close_rounded,
-                                color: mute,
-                                size: 18,
+                child: DecoratedBox(
+                  decoration: fxStripCardDecoration(
+                    context,
+                    accent: primary,
+                    radius: TokensStrip.rCard,
+                    glowStrength: 0.03,
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    focusNode: _searchFocus,
+                    onChanged: _onQueryChanged,
+                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Buscar comentário',
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: primary,
+                        size: 20,
+                      ),
+                      suffixIcon:
+                          _query.trim().isEmpty
+                              ? null
+                              : IconButton(
+                                tooltip: 'Limpar busca',
+                                onPressed: () {
+                                  _searchDebounce?.cancel();
+                                  _searchCtrl.clear();
+                                  setState(() => _query = '');
+                                  _load(reset: true);
+                                },
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: mute,
+                                  size: 18,
+                                ),
                               ),
-                            ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child:
-                  _loading
-                      ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 4),
-                      )
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: chrome.isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: () => _load(reset: true),
-                        title: 'Não conseguimos carregar os feedbacks',
-                      )
-                      : FxContentWidthLimiter(child: _buildBody(visible)),
-            ),
-            if (!_loading && _erro == null)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Novo feedback',
-                    onPressed: _novoFeedback,
+              Expanded(
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 4),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: () => _load(reset: true),
+                          title: 'Não conseguimos carregar os feedbacks',
+                        )
+                        : FxContentWidthLimiter(child: _buildBody(visible)),
+              ),
+              if (!_loading && _erro == null)
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Novo feedback',
+                      onPressed: _novoFeedback,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -395,6 +333,9 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
           children: [
             if (filtered)
               FxEmptyState(
@@ -437,11 +378,11 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
           TokensStrip.s3,
           FxSettingsLayout.pageInset,
-          TokensStrip.s6,
+          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         itemCount: visible.length + (showMore ? 1 : 0),
         itemBuilder: (context, i) {

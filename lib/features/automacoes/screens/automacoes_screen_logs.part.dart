@@ -55,14 +55,69 @@ extension on _AutomacoesScreenState {
 Future<void> _showAutomacaoLogsSheet({
   required BuildContext context,
   required AutomacaoFluxo fluxo,
-  required List<AutomacaoLog> logs,
+  required Pagina<AutomacaoLog> initial,
+  required Future<Pagina<AutomacaoLog>> Function(int page) onLoadMore,
   required Future<void> Function() onIniciar,
 }) {
-  final chrome = ShellChrome.of(context);
-  final primary = Theme.of(context).colorScheme.primary;
   return showFxHomeSheet<void>(
     context,
-    builder: (sheetContext) => FxHomeSheetSurface(
+    builder: (sheetContext) => _AutomacaoLogsSheet(
+      fluxo: fluxo,
+      initial: initial,
+      onLoadMore: onLoadMore,
+      onIniciar: onIniciar,
+    ),
+  );
+}
+
+class _AutomacaoLogsSheet extends StatefulWidget {
+  const _AutomacaoLogsSheet({
+    required this.fluxo,
+    required this.initial,
+    required this.onLoadMore,
+    required this.onIniciar,
+  });
+
+  final AutomacaoFluxo fluxo;
+  final Pagina<AutomacaoLog> initial;
+  final Future<Pagina<AutomacaoLog>> Function(int page) onLoadMore;
+  final Future<void> Function() onIniciar;
+
+  @override
+  State<_AutomacaoLogsSheet> createState() => _AutomacaoLogsSheetState();
+}
+
+class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
+  late List<AutomacaoLog> _logs = List.of(widget.initial.content);
+  late var _hasNext = widget.initial.hasNext;
+  late var _page = widget.initial.page ?? 0;
+  var _loadingMore = false;
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasNext) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = await widget.onLoadMore(_page + 1);
+      if (!mounted) return;
+      setState(() {
+        _logs = [..._logs, ...next.content];
+        _hasNext = next.hasNext;
+        _page = next.page ?? _page + 1;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final logs = _logs;
+    return FxHomeSheetSurface(
       isDark: chrome.isDark,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -76,8 +131,8 @@ Future<void> _showAutomacaoLogsSheet({
               color: primary,
               size: 18,
             ),
-            title: fluxo.nome,
-            subtitle: automacaoTriggerLabel(fluxo.triggerTipo),
+            title: widget.fluxo.nome,
+            subtitle: automacaoTriggerLabel(widget.fluxo.triggerTipo),
           ),
           SizedBox(
             height: 280,
@@ -95,8 +150,14 @@ Future<void> _showAutomacaoLogsSheet({
                       FxSettingsLayout.pageInset,
                       TokensStrip.s3,
                     ),
-                    itemCount: logs.length,
+                    itemCount: logs.length + (_hasNext ? 1 : 0),
                     itemBuilder: (context, i) {
+                      if (i >= logs.length) {
+                        return FxSatelliteListTile(
+                          title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                          onTap: _loadingMore ? null : _carregarMais,
+                        );
+                      }
                       final log = logs[i];
                       return FxSatelliteListTile(
                         title: automacaoLogStatusLabel(log.status),
@@ -119,11 +180,11 @@ Future<void> _showAutomacaoLogsSheet({
             ),
             child: FxLiquidPrimaryButton(
               label: automacaoIniciarLabel(),
-              onPressed: onIniciar,
+              onPressed: widget.onIniciar,
             ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }

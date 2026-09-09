@@ -16,8 +16,14 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   bool _viewTracked = false;
   bool _ttvTracked = false;
   final _extraInbox = <ChatInboxItem>[];
+  final _extraUnread = <ChatInboxItem>[];
+  final _extraArchived = <ChatInboxItem>[];
   var _inboxHasMore = false;
+  var _unreadHasMore = false;
+  var _archivedHasMore = false;
   var _loadingMoreInbox = false;
+  var _loadingMoreUnread = false;
+  var _loadingMoreArchived = false;
 
   bool get _isSearching => _query.isNotEmpty;
 
@@ -211,8 +217,14 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         setState(() {
           _fetchedAt = DateTime.now();
           _extraInbox.clear();
+          _extraUnread.clear();
+          _extraArchived.clear();
           _inboxHasMore = home.inboxHasMore;
+          _unreadHasMore = home.unreadHasMore;
+          _archivedHasMore = home.archivedHasMore;
           _loadingMoreInbox = false;
+          _loadingMoreUnread = false;
+          _loadingMoreArchived = false;
         });
       }
     });
@@ -248,9 +260,13 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
             ((ref.watch(chatInboxProvider).valueOrNull?.length ?? 0) +
                 _extraInbox.length),
       ChatInboxHubView.naoLidas =>
-        ref.watch(chatInboxUnreadProvider).valueOrNull?.length ?? 0,
+        home?.unreadTotal ??
+            ((ref.watch(chatInboxUnreadProvider).valueOrNull?.length ?? 0) +
+                _extraUnread.length),
       ChatInboxHubView.arquivadas =>
-        ref.watch(chatInboxArchivedProvider).valueOrNull?.length ?? 0,
+        home?.archivedTotal ??
+            ((ref.watch(chatInboxArchivedProvider).valueOrNull?.length ?? 0) +
+                _extraArchived.length),
     };
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
@@ -387,12 +403,17 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           onToggleSelection: _toggleSelection,
         ),
         _InboxTabPane(
-          async: ref.watch(chatInboxUnreadProvider),
+          async: ref.watch(chatInboxUnreadProvider).whenData(
+            (items) => [...items, ..._extraUnread],
+          ),
           isDark: isDark,
           primary: primary,
           view: ChatInboxHubView.naoLidas,
           selectionActive: _selectionActive,
           selectedAlunoIds: _selectedAlunoIds,
+          showLoadMore: _unreadHasMore,
+          loadingMore: _loadingMoreUnread,
+          onLoadMore: _loadMoreUnread,
           onRetry: () => invalidateChatInboxCaches(ref),
           onRefresh: _refreshInbox,
           onNovaConversa: _showAlunoPicker,
@@ -401,12 +422,17 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           onToggleSelection: _toggleSelection,
         ),
         _InboxTabPane(
-          async: ref.watch(chatInboxArchivedProvider),
+          async: ref.watch(chatInboxArchivedProvider).whenData(
+            (items) => [...items, ..._extraArchived],
+          ),
           isDark: isDark,
           primary: primary,
           view: ChatInboxHubView.arquivadas,
           selectionActive: _selectionActive,
           selectedAlunoIds: _selectedAlunoIds,
+          showLoadMore: _archivedHasMore,
+          loadingMore: _loadingMoreArchived,
+          onLoadMore: _loadMoreArchived,
           onRetry: () => invalidateChatInboxCaches(ref),
           onRefresh: _refreshInbox,
           onNovaConversa: _showAlunoPicker,
@@ -468,7 +494,9 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       ...?home?.inbox,
       ..._extraInbox,
       ...?home?.unread,
+      ..._extraUnread,
       ...?home?.archived,
+      ..._extraArchived,
     ]) {
       if (item.alunoId == alunoId) return item.alunoNome;
     }
@@ -500,35 +528,5 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   Future<void> _refreshInbox() async {
     AnalyticsService.instance.track(ProductEvents.chatInboxRefreshed);
     invalidateChatInboxCaches(ref);
-  }
-
-  Future<void> _loadMoreInbox() async {
-    if (_loadingMoreInbox || !_inboxHasMore) return;
-    final home = ref.read(chatInboxHomeProvider).valueOrNull;
-    if (home == null || home.inboxSize <= 0) return;
-    setState(() => _loadingMoreInbox = true);
-    try {
-      final loaded = home.inbox.length + _extraInbox.length;
-      final nextPage = loaded ~/ home.inboxSize;
-      final page = await ChatRepository(
-        ref.read(apiClientProvider),
-      ).inboxPage(page: nextPage, size: home.inboxSize);
-      final seen = <int>{
-        ...home.inbox.map((item) => item.alunoId),
-        ..._extraInbox.map((item) => item.alunoId),
-      };
-      if (!mounted) return;
-      setState(() {
-        _extraInbox.addAll(
-          page.items.where((item) => seen.add(item.alunoId)),
-        );
-        _inboxHasMore = page.hasMore;
-        _loadingMoreInbox = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _loadingMoreInbox = false);
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
   }
 }

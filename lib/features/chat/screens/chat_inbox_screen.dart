@@ -40,6 +40,7 @@ import '../utils/chat_inbox_display.dart';
 import '../utils/aluno_picker_list.dart';
 
 part 'chat_inbox_screen_state.part.dart';
+part 'chat_inbox_screen_paging.part.dart';
 part 'chat_inbox_screen_widgets.part.dart';
 
 final chatInboxHomeProvider = FutureProvider<ChatInboxHomeBundle>((ref) async {

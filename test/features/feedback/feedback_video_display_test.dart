@@ -20,24 +20,9 @@ void main() {
     expect(feedbackVideoDanger(null), isFalse);
   });
 
-  test('feedbackVideoHubSubtitle junta freshness', () {
-    expect(
-      feedbackVideoHubSubtitle(),
-      'Análises técnicas de execução',
-    );
-    expect(
-      feedbackVideoHubSubtitle(freshness: 'há 1 min'),
-      'Análises técnicas de execução · há 1 min',
-    );
-    expect(
-      feedbackVideoHubSubtitle(alunoNome: 'Ana', freshness: 'há 1 min'),
-      'Análises técnicas de execução · Ana · há 1 min',
-    );
-    expect(
-      feedbackVideoHubSubtitle(count: 2, freshness: 'há 1 min'),
-      '2 feedbacks · há 1 min',
-    );
+  test('feedbackVideoCountLabel e query', () {
     expect(feedbackVideoCountLabel(1), '1 feedback');
+    expect(feedbackVideoCountLabel(2), '2 feedbacks');
     expect(
       feedbackVideoMatchesQuery(comentario: 'Joelhada alta', query: 'joel'),
       isTrue,

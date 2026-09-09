@@ -34,9 +34,17 @@ void main() {
       'inboxTotal': 80,
       'inboxPage': 0,
       'inboxSize': 50,
+      'unreadHasMore': true,
+      'unreadTotal': 12,
+      'archivedHasMore': false,
+      'archivedTotal': 3,
     });
     expect(bundle.inboxHasMore, isTrue);
     expect(bundle.inboxTotal, 80);
     expect(bundle.inboxSize, 50);
+    expect(bundle.unreadHasMore, isTrue);
+    expect(bundle.unreadTotal, 12);
+    expect(bundle.archivedHasMore, isFalse);
+    expect(bundle.archivedTotal, 3);
   });
 }

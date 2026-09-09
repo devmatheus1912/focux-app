@@ -15,8 +15,17 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('alunosHomeProvider'));
     expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('listarPagina'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
@@ -25,8 +34,12 @@ void main() {
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('context.pop()')));
     expect(screen, isNot(contains('Clipboard.setData')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
     expect(screen, isNot(contains('Aluno #')));
+    expect(screen, isNot(contains('Color(')));
   });
 }

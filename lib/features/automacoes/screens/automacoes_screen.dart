@@ -34,6 +34,7 @@ import '../../chat/utils/aluno_picker_list.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../../core/api/pagina.dart';
 import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
 
@@ -199,7 +200,8 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
       await _showAutomacaoLogsSheet(
         context: context,
         fluxo: fluxo,
-        logs: pagina.content,
+        initial: pagina,
+        onLoadMore: (page) => ref.read(_repo).logs(fluxo.id, page: page),
         onIniciar: () => _iniciarParaAluno(fluxo),
       );
     } catch (e) {

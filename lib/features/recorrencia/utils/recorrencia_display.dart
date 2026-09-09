@@ -60,12 +60,29 @@ bool recorrenciaTemLinkCheckout(String status, String? initPoint) {
   return recorrenciaPendente(status) && link != null && link.isNotEmpty;
 }
 
-String recorrenciaHubSubtitle(String? freshness) {
-  const base = 'Assinaturas Mercado Pago';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+String recorrenciaCountLabel(int count) {
+  if (count <= 0) return 'Nenhuma assinatura';
+  if (count == 1) return '1 assinatura';
+  return '$count assinaturas';
 }
+
+enum RecorrenciaHubFiltro { todos, pendente, ativa, pausada, cancelada }
+
+String recorrenciaHubFiltroLabel(RecorrenciaHubFiltro filtro) => switch (filtro) {
+  RecorrenciaHubFiltro.todos => 'Todas',
+  RecorrenciaHubFiltro.pendente => 'Pendentes',
+  RecorrenciaHubFiltro.ativa => 'Ativas',
+  RecorrenciaHubFiltro.pausada => 'Pausadas',
+  RecorrenciaHubFiltro.cancelada => 'Canceladas',
+};
+
+String? recorrenciaHubFiltroStatus(RecorrenciaHubFiltro filtro) => switch (filtro) {
+  RecorrenciaHubFiltro.todos => null,
+  RecorrenciaHubFiltro.pendente => 'PENDENTE',
+  RecorrenciaHubFiltro.ativa => 'ATIVA',
+  RecorrenciaHubFiltro.pausada => 'PAUSADA',
+  RecorrenciaHubFiltro.cancelada => 'CANCELADA',
+};
 
 String recorrenciaAlunoHubSubtitle() => 'Cobrança mensal';
 

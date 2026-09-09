@@ -176,6 +176,7 @@ void main() {
       'lib/features/chat/screens/chat_inbox_screen.dart',
     ).readAsStringSync();
     expect(screen, contains("part 'chat_inbox_screen_state.part.dart'"));
+    expect(screen, contains("part 'chat_inbox_screen_paging.part.dart'"));
     expect(screen, contains("part 'chat_inbox_screen_widgets.part.dart'"));
   });
 
