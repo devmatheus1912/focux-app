@@ -61,6 +61,7 @@ void main() {
     );
     expect(repo, contains('Pagina.fromJson'));
     expect(repo, contains('listarPersonalPagina'));
+    expect(repo, contains('listarAlunoPagina'));
     expect(repo, contains("'q': query"));
     expect(repo, contains("'/api/feed'"));
     expect(repo, contains("'/api/feed/aluno'"));

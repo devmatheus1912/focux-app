@@ -48,6 +48,22 @@ void main() {
     expect(habitoCountLabel(0), 'Nenhum hábito');
     expect(habitoCountLabel(1), '1 hábito');
     expect(habitoCountLabel(3), '3 hábitos');
+    expect(
+      habitoAlunoSubtitle(
+        descricao: 'Água',
+        feitosNaSemana: 3,
+        metaSemanal: 7,
+      ),
+      'Água · 3/7 na semana',
+    );
+    expect(
+      habitoMatchesQuery(titulo: 'Beber água', query: 'beber'),
+      isTrue,
+    );
+    expect(
+      habitoMatchesQuery(titulo: 'Sono', descricao: '8h', query: 'cardio'),
+      isFalse,
+    );
     expect(habitoComoCalculamos, contains('checks'));
     expect(habitoComplianceEmptyTitle(''), 'Sem dados ainda');
     expect(habitoComplianceEmptyTitle('ana'), 'Nenhum aluno encontrado');

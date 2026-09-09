@@ -43,8 +43,11 @@ part 'chat_inbox_screen_state.part.dart';
 part 'chat_inbox_screen_paging.part.dart';
 part 'chat_inbox_screen_widgets.part.dart';
 
+final chatInboxQueryProvider = StateProvider<String>((ref) => '');
+
 final chatInboxHomeProvider = FutureProvider<ChatInboxHomeBundle>((ref) async {
-  return ChatRepository(ref.read(apiClientProvider)).inboxHome();
+  final q = ref.watch(chatInboxQueryProvider);
+  return ChatRepository(ref.read(apiClientProvider)).inboxHome(q: q);
 });
 
 final chatInboxProvider = FutureProvider<List<ChatInboxItem>>((ref) async {

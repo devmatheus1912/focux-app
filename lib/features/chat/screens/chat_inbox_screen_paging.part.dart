@@ -11,7 +11,11 @@ extension on _ChatInboxScreenState {
       final nextPage = loaded ~/ home.inboxSize;
       final page = await ChatRepository(
         ref.read(apiClientProvider),
-      ).inboxPage(page: nextPage, size: home.inboxSize);
+      ).inboxPage(
+        page: nextPage,
+        size: home.inboxSize,
+        q: ref.read(chatInboxQueryProvider),
+      );
       final seen = <int>{
         ...home.inbox.map((item) => item.alunoId),
         ..._extraInbox.map((item) => item.alunoId),
@@ -41,7 +45,11 @@ extension on _ChatInboxScreenState {
       final nextPage = loaded ~/ home.inboxSize;
       final page = await ChatRepository(
         ref.read(apiClientProvider),
-      ).inboxUnreadPage(page: nextPage, size: home.inboxSize);
+      ).inboxUnreadPage(
+        page: nextPage,
+        size: home.inboxSize,
+        q: ref.read(chatInboxQueryProvider),
+      );
       final seen = <int>{
         ...home.unread.map((item) => item.alunoId),
         ..._extraUnread.map((item) => item.alunoId),
@@ -71,7 +79,11 @@ extension on _ChatInboxScreenState {
       final nextPage = loaded ~/ home.inboxSize;
       final page = await ChatRepository(
         ref.read(apiClientProvider),
-      ).inboxArchivedPage(page: nextPage, size: home.inboxSize);
+      ).inboxArchivedPage(
+        page: nextPage,
+        size: home.inboxSize,
+        q: ref.read(chatInboxQueryProvider),
+      );
       final seen = <int>{
         ...home.archived.map((item) => item.alunoId),
         ..._extraArchived.map((item) => item.alunoId),

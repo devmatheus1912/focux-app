@@ -13,6 +13,13 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('habitoAlunoDetailPath'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, isNot(contains('context.pop()')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

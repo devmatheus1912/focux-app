@@ -216,17 +216,27 @@ class ChatRepository {
     return (await inboxPage()).items;
   }
 
-  Future<ChatInboxPage> inboxPage({int page = 0, int size = 50}) async {
+  Future<ChatInboxPage> inboxPage({
+    int page = 0,
+    int size = 50,
+    String q = '',
+  }) async {
     final r = await _dio.get(
       '/api/chat/inbox',
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: _inboxQuery(page: page, size: size, q: q),
     );
     return ChatInboxPage.fromJson(r.data as Map<String, dynamic>);
   }
 
   /// BFF tipado — first paint da inbox (inbox + unread + archived).
-  Future<ChatInboxHomeBundle> inboxHome() async {
-    final r = await _dio.get('/api/chat/inbox/home');
+  Future<ChatInboxHomeBundle> inboxHome({String q = ''}) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/chat/inbox/home',
+      queryParameters: {
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return ChatInboxHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -406,10 +416,11 @@ class ChatRepository {
   Future<Pagina<ChatInboxItem>> inboxArchivedPage({
     int page = 0,
     int size = 50,
+    String q = '',
   }) async {
     final r = await _dio.get(
       '/api/chat/inbox/archived',
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: _inboxQuery(page: page, size: size, q: q),
     );
     return _pagina(
       r.data,
@@ -445,16 +456,30 @@ class ChatRepository {
   Future<Pagina<ChatInboxItem>> inboxUnreadPage({
     int page = 0,
     int size = 50,
+    String q = '',
   }) async {
     final r = await _dio.get(
       '/api/chat/inbox/unread',
-      queryParameters: {'page': page, 'size': size},
+      queryParameters: _inboxQuery(page: page, size: size, q: q),
     );
     return _pagina(
       r.data,
       'GET /api/chat/inbox/unread',
       ChatInboxItem.fromJson,
     );
+  }
+
+  Map<String, dynamic> _inboxQuery({
+    required int page,
+    required int size,
+    String q = '',
+  }) {
+    final query = q.trim();
+    return {
+      'page': page,
+      'size': size,
+      if (query.isNotEmpty) 'q': query,
+    };
   }
 
   Pagina<T> _pagina<T>(

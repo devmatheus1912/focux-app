@@ -34,7 +34,8 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('chatInboxViewed'));
-    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('inboxHome(q:'));
+    expect(screen, contains('chatInboxQueryProvider'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));

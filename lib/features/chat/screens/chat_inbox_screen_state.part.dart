@@ -32,6 +32,10 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
     _searchDebounce?.cancel();
     _searchCtrl.dispose();
     _searchFocus.dispose();
+    if (ref.exists(chatInboxQueryProvider) &&
+        ref.read(chatInboxQueryProvider).isNotEmpty) {
+      ref.read(chatInboxQueryProvider.notifier).state = '';
+    }
     super.dispose();
   }
 
@@ -48,6 +52,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         _searchPage = 0;
         _selectedAlunoIds.clear();
       });
+      ref.read(chatInboxQueryProvider.notifier).state = next;
       if (next.isEmpty) return;
       _performSearch(reset: true);
     });
@@ -445,19 +450,25 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   }
 
   Widget _buildSearchBody(bool isDark, Color ink, Color mute) {
-    if (_searchLoading && _searchResults.isEmpty) {
+    final home = ref.watch(chatInboxHomeProvider);
+    final conversations = home.valueOrNull?.inbox ?? const <ChatInboxItem>[];
+    final waiting =
+        (_searchLoading && _searchResults.isEmpty) ||
+        (home.isLoading && conversations.isEmpty && _searchResults.isEmpty);
+    if (waiting) {
       return const Padding(
         padding: EdgeInsets.all(FxSettingsLayout.pageInset),
         child: SkeletonList(count: 5),
       );
     }
-    if (_searchResults.isEmpty) {
+    if (conversations.isEmpty && _searchResults.isEmpty) {
       return const FxEmptyState(
         icon: 'search',
         title: 'Nenhum resultado encontrado',
-        subtitle: 'Tente outro termo ou revise a grafia.',
+        subtitle: 'Tente o nome do aluno ou um trecho da mensagem.',
       );
     }
+    final extra = _searchHasMore ? 1 : 0;
     return ListView.builder(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(
@@ -466,9 +477,18 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         FxSettingsLayout.pageInset,
         TokensStrip.s6,
       ),
-      itemCount: _searchResults.length + (_searchHasMore ? 1 : 0),
+      itemCount: conversations.length + _searchResults.length + extra,
       itemBuilder: (context, i) {
-        if (i >= _searchResults.length) {
+        if (i < conversations.length) {
+          final item = conversations[i];
+          return _InboxTile(
+            item: item,
+            isDark: isDark,
+            onTap: () => _openThread(item.alunoId, extra: item.alunoNome),
+          );
+        }
+        final msgIndex = i - conversations.length;
+        if (msgIndex >= _searchResults.length) {
           return FxSatelliteListTile(
             title: _searchLoading ? 'Carregando…' : 'Carregar mais',
             onTap: _searchLoading
@@ -477,8 +497,8 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
           );
         }
         return _SearchResultTile(
-          msg: _searchResults[i],
-          alunoNome: _alunoNomeFor(_searchResults[i].alunoId),
+          msg: _searchResults[msgIndex],
+          alunoNome: _alunoNomeFor(_searchResults[msgIndex].alunoId),
           isDark: isDark,
           ink: ink,
           mute: mute,

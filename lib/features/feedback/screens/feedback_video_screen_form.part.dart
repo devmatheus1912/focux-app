@@ -46,30 +46,13 @@ extension on _FeedbackVideoScreenState {
     late final int selectedExercicioId;
     var exercicioNome = 'Exercício';
     try {
-      final picker = await ref
-          .read(exercicioRepositoryProvider)
-          .listarPickerPagina(size: 30);
-      if (!mounted) return;
-      if (picker.content.isEmpty) {
-        FeedbackHelper.showError(context, 'Cadastre um exercício primeiro.');
-        return;
-      }
-      final pickedEx = await showFxInsetPickerSheet<int>(
+      final pickedEx = await showFxHomeSheet<_FeedbackExercicioPick>(
         context,
-        title: 'Exercício',
-        items: [
-          for (final e in picker.content)
-            FxInsetPickerSheetItem(value: e.id, label: e.nome),
-        ],
+        builder: (ctx) => const _FeedbackExercicioPickerSheet(),
       );
       if (pickedEx == null || !mounted) return;
-      selectedExercicioId = pickedEx;
-      for (final e in picker.content) {
-        if (e.id == pickedEx) {
-          exercicioNome = e.nome;
-          break;
-        }
-      }
+      selectedExercicioId = pickedEx.id;
+      exercicioNome = pickedEx.nome;
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -134,5 +117,185 @@ extension on _FeedbackVideoScreenState {
       comentarioCtrl.dispose();
     }
     if (created) await _load(reset: true);
+  }
+}
+
+typedef _FeedbackExercicioPick = ({int id, String nome});
+
+class _FeedbackExercicioPickerSheet extends ConsumerStatefulWidget {
+  const _FeedbackExercicioPickerSheet();
+
+  @override
+  ConsumerState<_FeedbackExercicioPickerSheet> createState() =>
+      _FeedbackExercicioPickerSheetState();
+}
+
+class _FeedbackExercicioPickerSheetState
+    extends ConsumerState<_FeedbackExercicioPickerSheet> {
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  var _query = '';
+  var _page = 0;
+  var _hasNext = false;
+  var _loading = true;
+  var _loadingMore = false;
+  String? _error;
+  final _items = <({int id, String nome})>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch(reset: true);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 320), () {
+      final next = value.trim();
+      if (next == _query) return;
+      _query = next;
+      _fetch(reset: true);
+    });
+  }
+
+  Future<void> _fetch({required bool reset}) async {
+    if (reset) {
+      setState(() {
+        _loading = true;
+        _error = null;
+        _page = 0;
+        _items.clear();
+      });
+    } else {
+      if (_loadingMore || !_hasNext) return;
+      setState(() => _loadingMore = true);
+    }
+    try {
+      final page = await ref.read(exercicioRepositoryProvider).listarPickerPagina(
+        busca: _query,
+        page: reset ? 0 : _page,
+        size: 30,
+      );
+      if (!mounted) return;
+      setState(() {
+        _items.addAll(
+          page.content.map((e) => (id: e.id, nome: e.nome)),
+        );
+        _hasNext = page.meta.hasNext;
+        _page = page.meta.page + 1;
+        _loading = false;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = friendlyError(e);
+        _loading = false;
+        _loadingMore = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      expand: true,
+      maxHeight:
+          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.expandHeightFactor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: 'Exercício',
+            subtitle: 'Busque pelo nome ou carregue mais.',
+            leading: Icon(Icons.fitness_center_outlined, color: primary, size: 20),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+            ),
+            child: TextField(
+              controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              onChanged: _onQueryChanged,
+              onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+              decoration: InputDecoration(
+                hintText: 'Buscar exercício',
+                prefixIcon: const Icon(Icons.search_rounded),
+                border: FxInputDeco.outlineBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 6),
+                  )
+                : _error != null
+                ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _error!,
+                    onRetry: () => _fetch(reset: true),
+                  )
+                : _items.isEmpty
+                ? FxEmptyState(
+                    icon: 'search',
+                    title: _query.isEmpty
+                        ? 'Cadastre um exercício primeiro'
+                        : 'Nenhum exercício encontrado',
+                    subtitle: _query.isEmpty
+                        ? 'O catálogo aparece aqui para o feedback de vídeo.'
+                        : 'Tente outro nome ou carregue o catálogo sem busca.',
+                  )
+                : ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      0,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s6,
+                    ),
+                    itemCount: _items.length + (_hasNext ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index >= _items.length) {
+                        return FxSatelliteListTile(
+                          title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                          onTap: _loadingMore ? null : () => _fetch(reset: false),
+                        );
+                      }
+                      final item = _items[index];
+                      return FxSatelliteListTile(
+                        title: item.nome,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          Navigator.of(context).pop(item);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 }
