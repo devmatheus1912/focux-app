@@ -87,6 +87,16 @@ class _GrupoAulasPersonalScreenState
     _load();
   }
 
+  void _clearFilters() {
+    _searchDebounce?.cancel();
+    _searchCtrl.clear();
+    setState(() {
+      _query = '';
+      _chip = GrupoAulaChip.todas;
+    });
+    _load();
+  }
+
   void _leave() {
     FxKeyboardDismissScope.dismiss();
     safePopOrGo(context, '/dashboard/personal');
@@ -101,7 +111,7 @@ class _GrupoAulasPersonalScreenState
       final pagina =
           await GrupoAulaRepository(
             ref.read(apiClientProvider),
-          ).listarPersonalPagina(q: _query);
+          ).listarPersonalPagina(q: _query, chip: _chip);
       if (mounted) {
         setState(() {
           _aulas = pagina.content;
@@ -128,7 +138,7 @@ class _GrupoAulasPersonalScreenState
     try {
       final pagina = await GrupoAulaRepository(
         ref.read(apiClientProvider),
-      ).listarPersonalPagina(page: _page + 1, q: _query);
+      ).listarPersonalPagina(page: _page + 1, q: _query, chip: _chip);
       if (!mounted) return;
       final seen = _aulas.map((a) => a.id).toSet();
       setState(() {
@@ -324,20 +334,7 @@ class _GrupoAulasPersonalScreenState
     if (created) await _load();
   }
 
-  List<GrupoAula> get _visible => _aulas
-      .where(
-        (aula) => grupoAulaMatches(
-          titulo: aula.titulo,
-          localAula: aula.localAula,
-          lotada: grupoAulaLotada(
-            inscritos: aula.inscritos,
-            capacidadeMax: aula.capacidadeMax,
-          ),
-          query: _query,
-          chip: _chip,
-        ),
-      )
-      .toList();
+  List<GrupoAula> get _visible => _aulas;
 
   void _openAula(GrupoAula aula) {
     final chrome = ShellChrome.of(context);
@@ -507,7 +504,11 @@ class _GrupoAulasPersonalScreenState
                         label: grupoAulaChipLabel(chip),
                         selected: _chip == chip,
                         isDark: chrome.isDark,
-                        onTap: () => setState(() => _chip = chip),
+                        onTap: () {
+                          if (_chip == chip) return;
+                          setState(() => _chip = chip);
+                          _load();
+                        },
                       ),
                   ],
                 ),
@@ -573,7 +574,7 @@ class _GrupoAulasPersonalScreenState
                   : 'Crie uma aula em grupo para abrir vagas aos seus alunos.',
               action: FxEmptyAction(
                 label: filtered ? 'Limpar filtros' : 'Nova aula',
-                onTap: filtered ? _clearQuery : _criar,
+                onTap: filtered ? _clearFilters : _criar,
               ),
             ),
           ],

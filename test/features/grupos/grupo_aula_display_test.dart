@@ -65,6 +65,9 @@ void main() {
       ),
       isFalse,
     );
+    expect(grupoAulaChipQuery(GrupoAulaChip.todas), isNull);
+    expect(grupoAulaChipQuery(GrupoAulaChip.abertas), 'ABERTAS');
+    expect(grupoAulaChipQuery(GrupoAulaChip.lotadas), 'LOTADAS');
   });
 
   test('grupoAulaHubSubtitle junta freshness', () {

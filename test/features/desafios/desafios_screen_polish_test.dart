@@ -30,6 +30,8 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
+    expect(screen, contains('listarPagina'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('onTap: () {}')));
     expect(screen, contains('FeatureGate'));

@@ -35,6 +35,8 @@ import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
 
+part 'desafios_screen_form.part.dart';
+
 final _repo = Provider((ref) => DesafioRepository(ref.read(apiClientProvider)));
 
 class DesafiosScreen extends ConsumerStatefulWidget {
@@ -51,6 +53,10 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   List<Desafio> _desafios = [];
   var _filtro = DesafioTipoFiltro.todos;
   var _query = '';
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loadingMore = false;
   var _loading = true;
   String? _error;
   DateTime? _fetchedAt;
@@ -71,23 +77,22 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
 
   void _onQueryChanged(String value) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () {
+    _debounce = Timer(const Duration(milliseconds: 280), () {
       if (!mounted) return;
       setState(() => _query = value.trim());
+      _load();
     });
   }
 
-  List<Desafio> get _visiveis => _desafios
-      .where((d) => desafioMatchesFiltro(d.tipo, _filtro))
-      .where(
-        (d) => desafioMatchesQuery(
-          titulo: d.titulo,
-          descricao: d.descricao,
-          tipo: d.tipo,
-          query: _query,
-        ),
-      )
-      .toList();
+  void _clearFilters() {
+    _debounce?.cancel();
+    _searchCtrl.clear();
+    setState(() {
+      _query = '';
+      _filtro = DesafioTipoFiltro.todos;
+    });
+    _load();
+  }
 
   Future<void> _load() async {
     setState(() {
@@ -95,10 +100,16 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
       _error = null;
     });
     try {
-      final lista = await ref.read(_repo).listar();
+      final pagina = await ref.read(_repo).listarPagina(
+        q: _query,
+        tipo: desafioFiltroTipo(_filtro),
+      );
       if (!mounted) return;
       setState(() {
-        _desafios = lista;
+        _desafios = pagina.content;
+        _page = pagina.page ?? 0;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? pagina.content.length;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -111,126 +122,32 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     }
   }
 
-  Future<void> _criar() async {
-    final tituloCtrl = TextEditingController();
-    final descricaoCtrl = TextEditingController();
-    var tipo = desafioTipos.first.value;
-    var dias = 30;
-    var metaPontos = 100;
-    var created = false;
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
     try {
-      final ok = await showFxFormSheet(
-        context,
-        title: 'Novo desafio',
-        subtitle: 'Prazo, tipo e meta entram no ranking.',
-        icon: Icons.flag_outlined,
-        confirmLabel: 'Criar',
-        child: StatefulBuilder(
-          builder: (ctx, setDialogState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AlunoInsetFormField(
-                controller: tituloCtrl,
-                label: 'Título',
-                icon: Icons.title_outlined,
-              ),
-              AlunoInsetFormField(
-                controller: descricaoCtrl,
-                label: 'Descrição (opcional)',
-                icon: Icons.notes_outlined,
-                maxLines: 2,
-              ),
-              FxInsetPickerRow(
-                icon: Icons.category_outlined,
-                label: 'Tipo',
-                value: desafioTipoLabel(tipo),
-                onTap: () async {
-                  final picked = await showFxInsetPickerSheet<String>(
-                    ctx,
-                    title: 'Tipo',
-                    selected: tipo,
-                    items: [
-                      for (final item in desafioTipos)
-                        FxInsetPickerSheetItem(
-                          value: item.value,
-                          label: item.label,
-                        ),
-                    ],
-                  );
-                  if (picked == null) return;
-                  setDialogState(() => tipo = picked);
-                },
-              ),
-              FxInsetPickerRow(
-                icon: Icons.event_outlined,
-                label: 'Prazo',
-                value: desafioDuracaoLabel(dias),
-                onTap: () async {
-                  final picked = await showFxInsetPickerSheet<int>(
-                    ctx,
-                    title: 'Prazo',
-                    selected: dias,
-                    items: [
-                      for (final d in desafioDuracoes)
-                        FxInsetPickerSheetItem(
-                          value: d,
-                          label: desafioDuracaoLabel(d),
-                        ),
-                    ],
-                  );
-                  if (picked == null) return;
-                  setDialogState(() => dias = picked);
-                },
-              ),
-              FxInsetPickerRow(
-                icon: Icons.emoji_events_outlined,
-                label: 'Meta',
-                value: desafioMetaLabel(metaPontos),
-                showDivider: false,
-                onTap: () async {
-                  final picked = await showFxInsetPickerSheet<int>(
-                    ctx,
-                    title: 'Meta',
-                    selected: metaPontos,
-                    items: const [
-                      FxInsetPickerSheetItem(value: 50, label: '50 pts'),
-                      FxInsetPickerSheetItem(value: 100, label: '100 pts'),
-                      FxInsetPickerSheetItem(value: 200, label: '200 pts'),
-                    ],
-                  );
-                  if (picked == null) return;
-                  setDialogState(() => metaPontos = picked);
-                },
-              ),
-            ],
-          ),
-        ),
+      final pagina = await ref.read(_repo).listarPagina(
+        page: _page + 1,
+        q: _query,
+        tipo: desafioFiltroTipo(_filtro),
       );
-      if (ok != true || tituloCtrl.text.trim().isEmpty) return;
-      final hoje = DateTime.now();
-      await ref.read(_repo).criar(
-        titulo: tituloCtrl.text.trim(),
-        descricao: descricaoCtrl.text.trim().isEmpty
-            ? null
-            : descricaoCtrl.text.trim(),
-        tipo: tipo,
-        metaPontos: metaPontos,
-        inicio: hoje,
-        fim: hoje.add(Duration(days: dias)),
-      );
-      AnalyticsService.instance.track(
-        ProductEvents.desafioCreated,
-        props: {'feature': 'desafios', 'tipo': tipo},
-      );
-      created = true;
-      if (mounted) FeedbackHelper.showSuccess(context, 'Desafio criado');
+      if (!mounted) return;
+      final seen = _desafios.map((d) => d.id).toSet();
+      setState(() {
+        _desafios = [
+          ..._desafios,
+          ...pagina.content.where((d) => seen.add(d.id)),
+        ];
+        _page = pagina.page ?? (_page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _desafios.length;
+        _loadingMore = false;
+      });
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      tituloCtrl.dispose();
-      descricaoCtrl.dispose();
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
-    if (created) await _load();
   }
 
   void _abrirDetalhe(Desafio d) {
@@ -244,7 +161,6 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final visiveis = _loading ? const <Desafio>[] : _visiveis;
 
     return fxScreenA11yScope(
       label: 'Desafios',
@@ -264,7 +180,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
           appBar: FxShellAppBar(
             title: 'Desafios',
             subtitle: FxHubFreshness.joinCount(
-              desafioCountLabel(_loading ? 0 : visiveis.length),
+              desafioCountLabel(_loading ? 0 : _total),
               _loading ? null : freshnessLabel,
             ),
             onBack: () {
@@ -334,7 +250,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
   }
 
   Widget _buildBody() {
-    final visiveis = _visiveis;
+    final searching = _query.isNotEmpty || _filtro != DesafioTipoFiltro.todos;
     return RefreshIndicator(
       onRefresh: _load,
       child: Column(
@@ -376,11 +292,13 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                         label: desafioFiltroLabel(filtro),
                         selected: _filtro == filtro,
                         isDark: Theme.of(context).brightness == Brightness.dark,
-                        onTap: () => setState(() {
-                          _filtro = _filtro == filtro
+                        onTap: () {
+                          final next = _filtro == filtro
                               ? DesafioTipoFiltro.todos
                               : filtro;
-                        }),
+                          setState(() => _filtro = next);
+                          _load();
+                        },
                       ),
                   ],
                 ),
@@ -397,22 +315,22 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                 FxSettingsLayout.pageInset,
                 32,
               ),
-              itemCount: visiveis.isEmpty ? 1 : visiveis.length + 2,
+              itemCount: _desafios.isEmpty
+                  ? 1
+                  : _desafios.length + 2 + (_hasMore ? 1 : 0),
               itemBuilder: (context, index) {
-                if (visiveis.isEmpty) {
+                if (_desafios.isEmpty) {
                   return FxEmptyState(
-                    icon: 'spark',
-                    title: _desafios.isEmpty
-                        ? 'Nenhum desafio'
-                        : 'Nada neste filtro',
-                    subtitle: _desafios.isEmpty
-                        ? 'Crie o primeiro desafio com prazo e meta.'
-                        : _query.isEmpty
-                            ? 'Troque o tipo ou crie outro desafio.'
-                            : 'Ajuste a busca ou o tipo para ver outros.',
+                    icon: searching ? 'search' : 'spark',
+                    title: searching
+                        ? 'Nada neste filtro'
+                        : 'Nenhum desafio',
+                    subtitle: searching
+                        ? 'Ajuste a busca ou o tipo para ver outros.'
+                        : 'Crie o primeiro desafio com prazo e meta.',
                     action: FxEmptyAction(
-                      label: 'Criar desafio',
-                      onTap: _criar,
+                      label: searching ? 'Limpar filtros' : 'Criar desafio',
+                      onTap: searching ? _clearFilters : _criar,
                     ),
                   );
                 }
@@ -434,7 +352,13 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                     ),
                   );
                 }
-                final desafio = visiveis[index - 2];
+                if (_hasMore && index == _desafios.length + 2) {
+                  return FxSatelliteListTile(
+                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                    onTap: _loadingMore ? null : _carregarMais,
+                  );
+                }
+                final desafio = _desafios[index - 2];
                 return FxSatelliteListTile(
                   title: desafio.titulo,
                   subtitle: Text(

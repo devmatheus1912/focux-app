@@ -39,5 +39,7 @@ void main() {
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, contains('listarPersonalPagina'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('chip: _chip'));
+    expect(screen, contains('_clearFilters'));
   });
 }

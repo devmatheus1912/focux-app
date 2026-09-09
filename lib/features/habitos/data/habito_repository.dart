@@ -258,13 +258,6 @@ class HabitoRepository {
     return Habito.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<ComplianceItem>> compliance() async {
-    final r = await _dio.get('/api/habitos/compliance');
-    return (r.data as List<dynamic>)
-        .map((e) => ComplianceItem.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   Future<Pagina<Habito>> meusHabitosPagina({
     int page = 0,
     String q = '',
