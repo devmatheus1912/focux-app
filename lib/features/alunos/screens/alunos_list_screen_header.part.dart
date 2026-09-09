@@ -2,17 +2,11 @@ part of 'alunos_list_screen.dart';
 
 extension AlunosListScreenHeader on _AlunosListScreenState {
   Widget _buildAlunosListHeader({
-    required int totalCount,
     required int contatoCount,
     required int ativosCount,
     required int inadCount,
     required int riscoCount,
     required int novosCount,
-    required String? headerOps,
-    required bool showHeaderBack,
-    required bool headerBackFromDashboard,
-    required String? freshnessLabel,
-    required ShellPalette chrome,
     required bool isDark,
     required Color primary,
     required Color ink,
@@ -22,185 +16,6 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header (Alunos + Botão Adicionar)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              TokensStrip.s3,
-              TokensStrip.s4,
-              TokensStrip.s2,
-            ),
-            child: DecoratedBox(
-              decoration: fxStripCardDecoration(
-                context,
-                accent: primary,
-                radius: TokensStrip.rCard,
-                glowStrength: _modoSelecao ? 0.02 : 0.04,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 11, 10, 11),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (showHeaderBack) ...[
-                      Semantics(
-                        button: true,
-                        label:
-                            headerBackFromDashboard
-                                ? 'Voltar para Hoje'
-                                : 'Limpar filtro',
-                        child: InkWell(
-                          onTap: _handleHeaderBack,
-                          borderRadius: BorderRadius.circular(
-                            AlunosLayout.headerChromeSize / 2,
-                          ),
-                          child: Container(
-                            width: AlunosLayout.headerChromeSize,
-                            height: AlunosLayout.headerChromeSize,
-                            decoration: chrome.headerAction(
-                              radius: AlunosLayout.headerChromeSize / 2,
-                            ),
-                            child: Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 16,
-                              color: ink,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AlunosLayout.headerChromeGap),
-                    ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (headerOps != null && headerOps.isNotEmpty) ...[
-                            Text(
-                              headerOps,
-                              style: FocuxHubTypography.eyebrow(
-                                context,
-                                color:
-                                    _modoSelecao
-                                        ? BrandPalette.sectionAction(
-                                          primary,
-                                          dark: isDark,
-                                        )
-                                        : mute,
-                                fontWeight:
-                                    _modoSelecao
-                                        ? FontWeight.w700
-                                        : FontWeight.w600,
-                                letterSpacing: _modoSelecao ? 0.08 : 0.04,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                          ],
-                          Text(
-                            context.alunosL10n.alunosTitle,
-                            style: FocuxHubTypography.pageTitle(
-                              context,
-                              color: ink,
-                            ).copyWith(
-                              fontWeight: FontWeight.w800,
-                              height: 1.12,
-                            ),
-                          ),
-                          if (freshnessLabel != null) ...[
-                            const SizedBox(height: 3),
-                            Semantics(
-                              liveRegion: true,
-                              child: Text(
-                                freshnessLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: mute,
-                                  fontWeight: FontWeight.w600,
-                                ).copyWith(fontSize: 11),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    if (_modoSelecao) ...[
-                      InkWell(
-                        onTap: _toggleModoSelecao,
-                        borderRadius: BorderRadius.circular(
-                          AlunosLayout.headerChromeSize / 2,
-                        ),
-                        child: Container(
-                          width: AlunosLayout.headerChromeSize,
-                          height: AlunosLayout.headerChromeSize,
-                          decoration: chrome.headerAction(
-                            radius: AlunosLayout.headerChromeSize / 2,
-                          ),
-                          child: Icon(Icons.close, size: 20, color: ink),
-                        ),
-                      ),
-                    ] else ...[
-                      FxHelpIconButton(
-                        tooltip: AlunosMicrocopy.helpA11y,
-                        onTap: _openHelp,
-                      ),
-                      const SizedBox(width: AlunosLayout.headerChromeGap),
-                      Semantics(
-                        button: true,
-                        label: AlunosMicrocopy.selectA11y,
-                        child: InkWell(
-                          onTap: _toggleModoSelecao,
-                          borderRadius: BorderRadius.circular(
-                            AlunosLayout.headerChromeSize / 2,
-                          ),
-                          child: Container(
-                            width: AlunosLayout.headerChromeSize,
-                            height: AlunosLayout.headerChromeSize,
-                            decoration: chrome.headerAction(
-                              radius: AlunosLayout.headerChromeSize / 2,
-                            ),
-                            child: Icon(
-                              Icons.checklist_rounded,
-                              size: 20,
-                              color: ink,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AlunosLayout.headerChromeGap),
-                      Semantics(
-                        button: true,
-                        label: AlunosMicrocopy.addA11y,
-                        child: Material(
-                          color: primary,
-                          elevation: isDark ? 3 : 1,
-                          shadowColor: primary.withValues(
-                            alpha: isDark ? 0.35 : 0.18,
-                          ),
-                          shape: const CircleBorder(),
-                          child: InkWell(
-                            onTap: _adicionarAluno,
-                            customBorder: const CircleBorder(),
-                            child: SizedBox(
-                              width: AlunosLayout.headerChromeSize,
-                              height: AlunosLayout.headerChromeSize,
-                              child: const Icon(
-                                Icons.add_rounded,
-                                size: 22,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           if (!_modoSelecao) ...[
             Padding(
               padding: AlunosLayout.searchBarOuterPadding,
@@ -369,13 +184,6 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                   child: Row(
                     children: [
                       _alunosFilterChip(
-                        filtro: AlunoFiltro.todos,
-                        label: context.alunosL10n.alunosFilterAll,
-                        count: totalCount,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
                         filtro: AlunoFiltro.contatoHoje,
                         label: context.alunosL10n.alunosFilterContactToday,
                         count: contatoCount,
@@ -436,7 +244,10 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
         count: count,
         isSelected: _filtro == filtro,
         isDark: isDark,
-        onTap: () => _setFiltro(filtro),
+        onTap:
+            () => _setFiltro(
+              _filtro == filtro ? AlunoFiltro.todos : filtro,
+            ),
       ),
     );
   }

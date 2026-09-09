@@ -429,51 +429,76 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       });
     });
 
-    if (_displayHome != null) {
-      return fxScreenA11yScope(
-        label: AlunosMicrocopy.screenA11y,
-        child: PopScope(
-          canPop: !_hasActiveFilter,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
-            if (_hasActiveFilter) _handleHeaderBack();
-          },
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: FxContentWidthLimiter(
-              child: _buildAlunosHomeData(
-                _displayHome!,
-                listRefreshing: _listRefreshing || homeAsync.isLoading,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
+    final home = _displayHome ?? homeAsync.valueOrNull;
+    final count = home?.stats.total ?? 0;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final clearFilter = _hasActiveFilter && !_modoSelecao;
 
     return fxScreenA11yScope(
       label: AlunosMicrocopy.screenA11y,
       child: PopScope(
-        canPop: !_hasActiveFilter,
+        canPop: !keyboardOpen && !_hasActiveFilter && !_modoSelecao,
         onPopInvokedWithResult: (didPop, result) {
           if (didPop) return;
+          if (keyboardOpen || _searchFocusNode.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          if (_modoSelecao) {
+            _toggleModoSelecao();
+            return;
+          }
           if (_hasActiveFilter) _handleHeaderBack();
         },
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: homeAsync.when(
-            loading: () => const AlunosLoadingScaffold(),
-            error:
-                (e, _) => AlunosErrorScaffold(
-                  error: e,
-                  onRetry: () => invalidateAlunosCaches(ref),
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: context.alunosL10n.alunosTitle,
+            subtitle:
+                _modoSelecao
+                    ? _selectionSummary()
+                    : FxHubFreshness.joinCount(
+                      alunosListCountLabel(count),
+                      freshness,
+                    ),
+            showBack: clearFilter,
+            onBack:
+                clearFilter
+                    ? () {
+                      FxKeyboardDismissScope.dismiss();
+                      _handleHeaderBack();
+                    }
+                    : null,
+            actions: [
+              FxHelpIconButton(
+                tooltip: AlunosMicrocopy.helpA11y,
+                onTap: _openHelp,
+              ),
+              IconButton(
+                tooltip: AlunosMicrocopy.selectA11y,
+                onPressed: _toggleModoSelecao,
+                icon: Icon(
+                  _modoSelecao ? Icons.close_rounded : Icons.checklist_rounded,
                 ),
-            data: (home) {
-              return FxContentWidthLimiter(
-                child: _buildAlunosHomeData(home),
-              );
-            },
+              ),
+            ],
           ),
+          body:
+              _displayHome != null
+                  ? _buildAlunosHomeData(
+                    _displayHome!,
+                    listRefreshing: _listRefreshing || homeAsync.isLoading,
+                  )
+                  : homeAsync.when(
+                    loading: () => const AlunosLoadingScaffold(),
+                    error:
+                        (e, _) => AlunosErrorScaffold(
+                          error: e,
+                          onRetry: () => invalidateAlunosCaches(ref),
+                        ),
+                    data: _buildAlunosHomeData,
+                  ),
         ),
       ),
     );

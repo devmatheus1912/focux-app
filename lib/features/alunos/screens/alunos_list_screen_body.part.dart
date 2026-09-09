@@ -15,10 +15,6 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                 ...ref.watch(alunosHomeTailProvider).alunos,
               ];
               final stats = home.stats;
-              final freshnessLabel = FxHubFreshness.joinCount(
-                alunosListCountLabel(stats.total),
-                FxHubFreshness.fromFetchedAt(_fetchedAt),
-              );
               final diasLimite = home.alertasConfig.diasSemTreino;
               final filtrados = alunos;
               final ativosCount = stats.totalAtivos;
@@ -39,10 +35,6 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                 totalCount: stats.total,
                 contatoBannerVisible: showTriageBanner,
               );
-              final headerOps =
-                  _modoSelecao ? _selectionSummary() : null;
-              final showHeaderBack = !_modoSelecao && _hasActiveFilter;
-              final headerBackFromDashboard = _hasDeepLinkFiltro(context);
               final triageContextActive =
                   _filtro == AlunoFiltro.contatoHoje ||
                   (_filtro == AlunoFiltro.todos &&
@@ -54,23 +46,15 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final listBottomGap = AlunosLayout.listBottomGap(context);
               final tail = ref.watch(alunosHomeTailProvider);
 
-              return SafeArea(
-                bottom: false,
-                child: Column(
+              return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildAlunosListHeader(
-                      totalCount: stats.total,
                       contatoCount: contatoCount,
                       ativosCount: ativosCount,
                       inadCount: inadCount,
                       riscoCount: riscoCount,
                       novosCount: novosCount,
-                      headerOps: headerOps,
-                      showHeaderBack: showHeaderBack,
-                      headerBackFromDashboard: headerBackFromDashboard,
-                      freshnessLabel: freshnessLabel,
-                      chrome: chrome,
                       isDark: isDark,
                       primary: primary,
                       ink: ink,
@@ -193,26 +177,23 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                       );
                                     }
                                     final a = filtrados[i];
-                                    return FxStaggerItem(
-                                      index: i,
-                                      child: AlunoListCard(
-                                        aluno: a,
-                                        modoSelecao: _modoSelecao,
-                                        isSelected: _selecionados.contains(
-                                          a.id,
-                                        ),
-                                        onToggle:
-                                            () => _toggleSelecionado(a.id),
-                                        onLongPress:
-                                            _modoSelecao
-                                                ? null
-                                                : _toggleModoSelecao,
-                                        activeFiltro: _filtro,
-                                        triageContextActive:
-                                            triageContextActive,
-                                        diasSemTreinoLimite: diasLimite,
-                                        compact: _listaCompacta,
+                                    return AlunoListCard(
+                                      aluno: a,
+                                      modoSelecao: _modoSelecao,
+                                      isSelected: _selecionados.contains(
+                                        a.id,
                                       ),
+                                      onToggle:
+                                          () => _toggleSelecionado(a.id),
+                                      onLongPress:
+                                          _modoSelecao
+                                              ? null
+                                              : _toggleModoSelecao,
+                                      activeFiltro: _filtro,
+                                      triageContextActive:
+                                          triageContextActive,
+                                      diasSemTreinoLimite: diasLimite,
+                                      compact: _listaCompacta,
                                     );
                                   },
                                 ),
@@ -293,8 +274,24 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               )
                               : const SizedBox.shrink(),
                     ),
+                    if (!_modoSelecao && !listRefreshing)
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                            TokensStrip.s4,
+                            TokensStrip.s3 +
+                                MediaQuery.viewInsetsOf(context).bottom,
+                          ),
+                          child: FxLiquidPrimaryButton(
+                            label: 'Novo aluno',
+                            onPressed: _adicionarAluno,
+                          ),
+                        ),
+                      ),
                   ],
-                ),
               );
   }
 }
