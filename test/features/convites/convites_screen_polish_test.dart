@@ -27,6 +27,9 @@ void main() {
     expect(screen, contains('conviteCountLabel'));
     expect(screen, contains('conviteGeradoLabel'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('Clipboard.setData')));
     expect(screen, isNot(contains('_HeroCard')));
   });

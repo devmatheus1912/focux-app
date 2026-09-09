@@ -13,9 +13,11 @@ import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -127,6 +129,17 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
 
   Future<void> _gerar() async {
     if (_generating) return;
+    if (_convite != null) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Gerar novo link?',
+        message: 'O link atual deixa de valer na hora.',
+        icon: Icons.link_off_outlined,
+        confirmLabel: 'Gerar novo',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
     HapticFeedback.mediumImpact();
     setState(() {
       _generating = true;
@@ -191,7 +204,13 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
 
     return fxScreenA11yScope(
       label: 'Convidar aluno',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: MediaQuery.viewInsetsOf(context).bottom == 0,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Convidar aluno',
@@ -199,7 +218,10 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
             conviteCountLabel(ativo: ativo),
             FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
           actions: [
             FxHelpIconButton(
               tooltip: 'Como convidar',
@@ -231,7 +253,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                   child: RefreshIndicator(
                     color: primary,
                     onRefresh: _load,
-                    child: ListView(
+                    child: ListView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
@@ -241,63 +263,70 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                         FxSettingsLayout.pageInset,
                         TokensStrip.s4,
                       ),
-                      children: [
-                        if (!ativo)
-                          SizedBox(
-                            height: 280,
-                            child:                             FxEmptyState(
-                              icon: 'users',
-                              title: 'Nenhum convite ativo',
-                              subtitle:
-                                  'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
-                              action: FxEmptyAction(
-                                label: 'Gerar link',
-                                onTap: _gerar,
-                              ),
-                            ),
-                          )
-                        else ...[
-                          OperationalMetricTile(
-                            label: 'Link vigente',
-                            value: conviteRemainingLabel(
-                              _convite!.expiraEm,
-                              DateTime.now(),
-                            ),
-                            hint: 'Um uso. Some da área de transferência em 1 min.',
-                            color: primary,
-                            isDark: isDark,
-                          ),
-                          const SizedBox(height: TokensStrip.s4),
-                          Wrap(
-                            spacing: TokensStrip.s2,
-                            runSpacing: TokensStrip.s2,
-                            children: [
-                              DashboardHomeActionChip(
-                                label: 'Copiar',
-                                accent: primary,
+                      itemCount: 1,
+                      itemBuilder: (context, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (!ativo)
+                              SizedBox(
+                                height: 280,
+                                child: FxEmptyState(
+                                  icon: 'users',
+                                  title: 'Nenhum convite ativo',
+                                  subtitle:
+                                      'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
+                                  action: FxEmptyAction(
+                                    label: 'Gerar link',
+                                    onTap: _gerar,
+                                  ),
+                                ),
+                              )
+                            else ...[
+                              OperationalMetricTile(
+                                label: 'Link vigente',
+                                value: conviteRemainingLabel(
+                                  _convite!.expiraEm,
+                                  DateTime.now(),
+                                ),
+                                hint:
+                                    'Um uso. Some da área de transferência em 1 min.',
+                                color: primary,
                                 isDark: isDark,
-                                onPressed: _copiar,
                               ),
-                              DashboardHomeActionChip(
-                                label: 'WhatsApp',
-                                accent: primary,
-                                isDark: isDark,
-                                onPressed: _compartilharWhatsApp,
+                              const SizedBox(height: TokensStrip.s4),
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: 'Copiar',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: _copiar,
+                                  ),
+                                  DashboardHomeActionChip(
+                                    label: 'WhatsApp',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: _compartilharWhatsApp,
+                                  ),
+                                ],
                               ),
                             ],
-                          ),
-                        ],
-                        if (_error != null) ...[
-                          const SizedBox(height: TokensStrip.s4),
-                          FxErrorState(
-                            chromeOnDark: isDark,
-                            primary: primary,
-                            title: 'Não gerou',
-                            message: _error!,
-                            onRetry: _gerar,
-                          ),
-                        ],
-                      ],
+                            if (_error != null) ...[
+                              const SizedBox(height: TokensStrip.s4),
+                              FxErrorState(
+                                chromeOnDark: isDark,
+                                primary: primary,
+                                title: 'Não gerou',
+                                message: _error!,
+                                onRetry: _gerar,
+                              ),
+                            ],
+                          ],
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -321,6 +350,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                 ),
               ],
             ),
+      ),
       ),
     );
   }

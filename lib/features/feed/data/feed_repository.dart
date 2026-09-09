@@ -178,8 +178,22 @@ class FeedRepository {
     return FeedComentario.fromJson(r.data);
   }
 
-  Future<List<FeedComentario>> listarComentarios(int postId) async {
-    final r = await _client.dio.get('/api/feed/$postId/comentarios');
-    return (r.data as List).map((e) => FeedComentario.fromJson(e)).toList();
+  Future<Pagina<FeedComentario>> listarComentarios(
+    int postId, {
+    String? cursor,
+  }) async {
+    final r = await _client.dio.get(
+      '/api/feed/$postId/comentarios',
+      queryParameters: {if (cursor != null && cursor.isNotEmpty) 'cursor': cursor},
+    );
+    if (r.data is! Map) {
+      throw const FormatException(
+        'GET /api/feed/{id}/comentarios devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(r.data as Map),
+      (item) => FeedComentario.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 }

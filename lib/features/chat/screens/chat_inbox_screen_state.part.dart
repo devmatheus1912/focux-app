@@ -3,8 +3,13 @@ part of 'chat_inbox_screen.dart';
 class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   ChatInboxHubView _view = ChatInboxHubView.todas;
   final TextEditingController _searchCtrl = TextEditingController();
-  bool _isSearching = false;
-  List<ChatMsg>? _searchResults;
+  final FocusNode _searchFocus = FocusNode();
+  Timer? _searchDebounce;
+  List<ChatMsg> _searchResults = const [];
+  var _query = '';
+  var _searchHasMore = false;
+  var _searchPage = 0;
+  var _searchLoading = false;
   final Set<int> _selectedAlunoIds = <int>{};
   DateTime? _fetchedAt;
   final DateTime _openedAt = DateTime.now();
@@ -14,56 +19,54 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   var _inboxHasMore = false;
   var _loadingMoreInbox = false;
 
+  bool get _isSearching => _query.isNotEmpty;
+
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
-  Future<void> _abrirVista() async {
-    HapticFeedback.selectionClick();
-    final picked = await showFxInsetPickerSheet<ChatInboxHubView>(
-      context,
-      title: 'Ver',
-      selected: _view,
-      items: [
-        for (final v in ChatInboxHubView.values)
-          FxInsetPickerSheetItem(
-            value: v,
-            label: chatInboxHubViewLabel(v),
-          ),
-      ],
-    );
-    if (!mounted || picked == null || picked == _view) return;
-    setState(() => _view = picked);
-  }
-
-  Future<void> _performSearch(String query) async {
-    if (query.trim().isEmpty) {
-      setState(() => _searchResults = null);
-      return;
-    }
-    try {
-      final results = await ChatRepository(
-        ref.read(apiClientProvider),
-      ).globalSearch(query.trim());
-      if (mounted) setState(() => _searchResults = results);
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-  }
-
-  void _toggleSearch() {
-    setState(() {
-      _isSearching = !_isSearching;
-      _selectedAlunoIds.clear();
-      if (!_isSearching) {
-        _searchCtrl.clear();
-        _searchResults = null;
-      }
+  void _onQueryChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      final next = value.trim();
+      if (next == _query) return;
+      setState(() {
+        _query = next;
+        _searchResults = const [];
+        _searchHasMore = false;
+        _searchPage = 0;
+        _selectedAlunoIds.clear();
+      });
+      if (next.isEmpty) return;
+      _performSearch(reset: true);
     });
+  }
+
+  Future<void> _performSearch({required bool reset}) async {
+    if (_query.isEmpty) return;
+    if (_searchLoading) return;
+    setState(() => _searchLoading = true);
+    try {
+      final page = await ChatRepository(
+        ref.read(apiClientProvider),
+      ).globalSearchPage(_query, page: reset ? 0 : _searchPage + 1);
+      if (!mounted) return;
+      setState(() {
+        _searchResults = reset ? page.content : [..._searchResults, ...page.content];
+        _searchHasMore = page.hasNext;
+        _searchPage = page.page ?? (reset ? 0 : _searchPage + 1);
+        _searchLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _searchLoading = false);
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   bool get _selectionActive => _selectedAlunoIds.isNotEmpty;
@@ -167,12 +170,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         ],
       );
     }
-    if (_isSearching) {
-      return FxShellAppBar(
-        title: 'Buscar',
-        onBack: _toggleSearch,
-      );
-    }
     return FxShellAppBar(
       title: 'Mensagens',
       subtitle: chatInboxHubSubtitle(
@@ -180,7 +177,10 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         count: hubCount,
         freshness: freshnessLabel,
       ),
-      onBack: () => safePopOrGo(context, '/dashboard/personal'),
+      onBack: () {
+        FxKeyboardDismissScope.dismiss();
+        safePopOrGo(context, '/dashboard/personal');
+      },
       actions: [
         FxHelpIconButton(
           tooltip: 'Como usar as mensagens',
@@ -190,17 +190,6 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
             );
             showChatInboxHelpSheet(context);
           },
-        ),
-        const SizedBox(width: FxHelpChrome.gap),
-        ShellHeaderIconButton(
-          icon: 'search',
-          tooltip: 'Buscar conversas',
-          onTap: _toggleSearch,
-        ),
-        ShellHeaderIconButton(
-          icon: 'chat',
-          tooltip: 'Trocar visão',
-          onTap: _abrirVista,
         ),
       ],
     );
@@ -252,19 +241,36 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       });
     }
 
+    final home = ref.watch(chatInboxHomeProvider).valueOrNull;
     final hubCount = switch (_view) {
       ChatInboxHubView.todas =>
-        (ref.watch(chatInboxProvider).valueOrNull?.length ?? 0) +
-            _extraInbox.length,
+        home?.inboxTotal ??
+            ((ref.watch(chatInboxProvider).valueOrNull?.length ?? 0) +
+                _extraInbox.length),
       ChatInboxHubView.naoLidas =>
         ref.watch(chatInboxUnreadProvider).valueOrNull?.length ?? 0,
       ChatInboxHubView.arquivadas =>
         ref.watch(chatInboxArchivedProvider).valueOrNull?.length ?? 0,
     };
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Mensagens',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen && !_selectionActive && !_searchFocus.hasFocus,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          if (_selectionActive) {
+            _clearSelection();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/personal');
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: _buildAppBar(
           ink: ink,
@@ -274,6 +280,58 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         ),
         body: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                8,
+                FxSettingsLayout.pageInset,
+                8,
+              ),
+              child: TextField(
+                controller: _searchCtrl,
+                focusNode: _searchFocus,
+                textInputAction: TextInputAction.search,
+                onChanged: _onQueryChanged,
+                onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                style: TextStyle(color: ink, fontSize: 16),
+                decoration: InputDecoration(
+                  hintText: 'Buscar conversas',
+                  hintStyle: TextStyle(color: mute),
+                  prefixIcon: Icon(Icons.search_rounded, color: mute),
+                  filled: true,
+                  fillColor: chrome.cardFill,
+                  border: FxInputDeco.outlineBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: chrome.line),
+                  ),
+                ),
+              ),
+            ),
+            if (!_isSearching)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  0,
+                  FxSettingsLayout.pageInset,
+                  8,
+                ),
+                child: Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    for (final view in ChatInboxHubView.values)
+                      FxToggleChip(
+                        label: chatInboxHubViewLabel(view),
+                        selected: _view == view,
+                        isDark: isDark,
+                        onTap: () {
+                          if (_view == view) return;
+                          setState(() => _view = view);
+                        },
+                      ),
+                  ],
+                ),
+              ),
             Expanded(
               child:
                   _isSearching
@@ -300,6 +358,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -360,50 +419,13 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   }
 
   Widget _buildSearchBody(bool isDark, Color ink, Color mute) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            FxSettingsLayout.pageInset,
-            8,
-            FxSettingsLayout.pageInset,
-            8,
-          ),
-          child: TextField(
-            controller: _searchCtrl,
-            autofocus: true,
-            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-            style: TextStyle(color: ink, fontSize: 16),
-            decoration: InputDecoration(
-              hintText: 'Buscar em todas as conversas…',
-              hintStyle: TextStyle(color: mute),
-              prefixIcon: Icon(Icons.search_rounded, color: mute),
-              filled: true,
-              fillColor: ShellChrome.of(context).cardFill,
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: ShellChrome.of(context).line),
-              ),
-            ),
-            onChanged: _performSearch,
-          ),
-        ),
-        Expanded(
-          child:
-              _searchResults != null
-                  ? _buildSearchResults(isDark, ink, mute)
-                  : const FxEmptyState(
-                    icon: 'search',
-                    title: 'Buscar conversas',
-                    subtitle: 'Digite um termo para procurar nas mensagens.',
-                  ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchResults(bool isDark, Color ink, Color mute) {
-    if (_searchResults!.isEmpty) {
+    if (_searchLoading && _searchResults.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+        child: SkeletonList(count: 5),
+      );
+    }
+    if (_searchResults.isEmpty) {
       return const FxEmptyState(
         icon: 'search',
         title: 'Nenhum resultado encontrado',
@@ -418,14 +440,39 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         FxSettingsLayout.pageInset,
         TokensStrip.s6,
       ),
-      itemCount: _searchResults!.length,
-      itemBuilder: (context, i) => _SearchResultTile(
-        msg: _searchResults![i],
-        isDark: isDark,
-        ink: ink,
-        mute: mute,
-      ),
+      itemCount: _searchResults.length + (_searchHasMore ? 1 : 0),
+      itemBuilder: (context, i) {
+        if (i >= _searchResults.length) {
+          return FxSatelliteListTile(
+            title: _searchLoading ? 'Carregando…' : 'Carregar mais',
+            onTap: _searchLoading
+                ? null
+                : () => _performSearch(reset: false),
+          );
+        }
+        return _SearchResultTile(
+          msg: _searchResults[i],
+          alunoNome: _alunoNomeFor(_searchResults[i].alunoId),
+          isDark: isDark,
+          ink: ink,
+          mute: mute,
+        );
+      },
     );
+  }
+
+  String? _alunoNomeFor(int? alunoId) {
+    if (alunoId == null) return null;
+    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    for (final item in [
+      ...?home?.inbox,
+      ..._extraInbox,
+      ...?home?.unread,
+      ...?home?.archived,
+    ]) {
+      if (item.alunoId == alunoId) return item.alunoNome;
+    }
+    return null;
   }
 
   void _openThread(int alunoId, {Object? extra}) {

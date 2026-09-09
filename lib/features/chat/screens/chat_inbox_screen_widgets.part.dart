@@ -164,11 +164,13 @@ class _AlunoContactTile extends StatelessWidget {
 
 class _SearchResultTile extends StatelessWidget {
   final ChatMsg msg;
+  final String? alunoNome;
   final bool isDark;
   final Color ink;
   final Color mute;
   const _SearchResultTile({
     required this.msg,
+    this.alunoNome,
     required this.isDark,
     required this.ink,
     required this.mute,
@@ -178,8 +180,12 @@ class _SearchResultTile extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(isDark || !isDark);
     assert(ink.a >= 0 && mute.a >= 0);
+    final who = alunoNome?.trim();
+    final title = (who != null && who.isNotEmpty)
+        ? who
+        : (msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno');
     return FxSatelliteListTile(
-      title: msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno',
+      title: title,
       subtitle: Text(msg.conteudo),
       trailing: Text(
         fxTimeAgo(msg.enviadoEm),

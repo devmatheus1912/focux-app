@@ -16,6 +16,7 @@ class FeedCommentsSheet extends StatefulWidget {
   final ValueChanged<int> onComentou;
   final int? currentAlunoId;
   final String? currentAlunoFotoUrl;
+  final bool canCompose;
 
   const FeedCommentsSheet({
     super.key,
@@ -24,6 +25,7 @@ class FeedCommentsSheet extends StatefulWidget {
     required this.onComentou,
     this.currentAlunoId,
     this.currentAlunoFotoUrl,
+    this.canCompose = true,
   });
 
   @override
@@ -35,6 +37,9 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
   List<FeedComentario> _comentarios = [];
   bool _loading = true;
   bool _sending = false;
+  bool _loadingMore = false;
+  bool _hasNext = false;
+  String? _nextCursor;
 
   @override
   void initState() {
@@ -48,17 +53,28 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
     super.dispose();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool more = false}) async {
+    if (more && (_loadingMore || !_hasNext)) return;
+    if (more) setState(() => _loadingMore = true);
     try {
-      final lista = await widget.repo.listarComentarios(widget.postId);
+      final pagina = await widget.repo.listarComentarios(
+        widget.postId,
+        cursor: more ? _nextCursor : null,
+      );
       if (!mounted) return;
       setState(() {
-        _comentarios = lista;
+        _comentarios = more ? [..._comentarios, ...pagina.content] : pagina.content;
+        _hasNext = pagina.hasNext;
+        _nextCursor = pagina.nextCursor;
         _loading = false;
+        _loadingMore = false;
       });
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _loading = false;
+          _loadingMore = false;
+        });
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
@@ -119,11 +135,27 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                       child: FxLoading.sectionShimmer(context, height: 200),
                     )
                     : _comentarios.isEmpty
-                    ? const Center(child: Text('Seja o primeiro a comentar!'))
+                    ? Center(
+                      child: Text(
+                        widget.canCompose
+                            ? 'Seja o primeiro a comentar!'
+                            : 'Nenhum comentário ainda',
+                      ),
+                    )
                     : ListView.builder(
                       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                      itemCount: _comentarios.length,
+                      itemCount: _comentarios.length + (_hasNext ? 1 : 0),
                       itemBuilder: (ctx, i) {
+                        if (i >= _comentarios.length) {
+                          return TextButton(
+                            onPressed: _loadingMore
+                                ? null
+                                : () => _load(more: true),
+                            child: Text(
+                              _loadingMore ? 'Carregando…' : 'Carregar mais',
+                            ),
+                          );
+                        }
                         final c = _comentarios[i];
                         final useCurrentAlunoFallback =
                             widget.currentAlunoId != null &&
@@ -194,9 +226,15 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                       },
                     ),
           ),
-          Divider(height: 1, color: line),
+          if (widget.canCompose) Divider(height: 1, color: line),
+          if (widget.canCompose)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              10,
+              16,
+              12 + MediaQuery.viewInsetsOf(context).bottom,
+            ),
             child: Row(
               children: [
                 Expanded(

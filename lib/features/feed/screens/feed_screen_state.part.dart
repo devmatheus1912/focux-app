@@ -123,21 +123,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
   }
 
-  Future<void> _curtir(int postId) async {
-    try {
-      final novoTotal = await FeedRepository(
-        ref.read(apiClientProvider),
-      ).toggleCurtida(postId);
-      if (mounted) {
-        setState(() => _curtidasLocais[postId] = novoTotal);
-      }
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-  }
-
   void _abrirComentarios(int postId) {
     showFxHomeSheet<void>(
       context,
@@ -145,6 +130,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           (ctx) => FeedCommentsSheet(
             postId: postId,
             repo: FeedRepository(ref.read(apiClientProvider)),
+            canCompose: false,
             onComentou:
                 (novoTotal) =>
                     setState(() => _comentariosLocais[postId] = novoTotal),
@@ -251,7 +237,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             primary: primary,
             curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
-            onCurtir: () => _curtir(p.id),
+            onCurtir: null,
             onComentar: () => _abrirComentarios(p.id),
             onFixar: () => _toggleFixar(p.id),
             onExcluir: () => _confirmarExclusao(p.id),
@@ -269,14 +255,47 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final visible = _posts;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Feed',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Feed',
-          subtitle: feedHubSubtitle(freshnessLabel, count: _posts.length),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          subtitle: FxHubFreshness.joinCount(
+            feedCountLabel(_posts.length),
+            freshnessLabel,
+          ),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o feed',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Feed',
+                subtitle: 'Publicações que os alunos veem no app deles.',
+                tips: const [
+                  FxHelpTip(
+                    'Publicar',
+                    'O criar no rodapé abre texto, imagem ou vídeo.',
+                  ),
+                  FxHelpTip(
+                    'Comentários',
+                    'Você lê o que os alunos escreveram. Curtir e comentar é no app deles.',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body:
             _loading
@@ -367,6 +386,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       ),
                   ],
                 ),
+      ),
       ),
     );
   }
