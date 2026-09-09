@@ -29,6 +29,8 @@ void main() {
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('listar('));
+    expect(screen, contains('page:'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('onTap: () {}')));
