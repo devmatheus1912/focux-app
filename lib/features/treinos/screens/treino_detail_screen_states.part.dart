@@ -22,6 +22,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   late final TextEditingController _repCtrl;
   late final TextEditingController _descansoCtrl;
   late final TextEditingController _cargaCtrl;
+  late final TextEditingController _rpeAlvoCtrl;
   late final TextEditingController _obsCtrl;
   late final TextEditingController _supersetCtrl;
   late String _tipoSerie;
@@ -44,6 +45,9 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
               ? item.cargaKg!.toString()
               : '',
     );
+    _rpeAlvoCtrl = TextEditingController(
+      text: item.rpeAlvo != null ? '${item.rpeAlvo}' : '',
+    );
     _obsCtrl = TextEditingController(text: item.observacoes ?? '');
     _supersetCtrl = TextEditingController(text: '${item.grupoSuperset ?? 1}');
     _tipoSerie = item.tipoSerie;
@@ -60,6 +64,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     _repCtrl.dispose();
     _descansoCtrl.dispose();
     _cargaCtrl.dispose();
+    _rpeAlvoCtrl.dispose();
     _obsCtrl.dispose();
     _supersetCtrl.dispose();
     super.dispose();
@@ -103,6 +108,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         repeticoes: _repCtrl.text.trim(),
         descansoSegundos: descansoSegundos,
         cargaKg: double.tryParse(_cargaCtrl.text.replaceAll(',', '.')),
+        rpeAlvo: int.tryParse(_rpeAlvoCtrl.text.trim()),
         observacoes: _obsCtrl.text,
         tipoSerie: _tipoSerie,
         grupoSuperset:
@@ -146,6 +152,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       repCtrl: _repCtrl,
       descansoCtrl: _descansoCtrl,
       cargaCtrl: _cargaCtrl,
+      rpeAlvoCtrl: _rpeAlvoCtrl,
       observacoesCtrl: _obsCtrl,
       grupoSupersetCtrl: _supersetCtrl,
       onPresetSelected: _applyPreset,

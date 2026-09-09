@@ -29,7 +29,7 @@ void main() {
     expect(alunoActivationQuestion(allDone: false), 'Próximo passo');
   });
 
-  test('perfil conta campos preenchidos', () {
+  test('perfil conta campos preenchidos sem exigir foto', () {
     expect(
       alunoActivationProfileCompletion(
         telefone: '11999999999',
@@ -39,7 +39,7 @@ void main() {
         peso: '80',
         altura: '1.80',
         dataNascimento: '1995-01-01',
-        fotoUrl: 'https://cdn/foto.jpg',
+        fotoUrl: null,
       ),
       100,
     );

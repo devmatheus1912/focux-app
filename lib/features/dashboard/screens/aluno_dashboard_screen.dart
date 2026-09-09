@@ -43,6 +43,7 @@ import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../data/aluno_autonomy_plan.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_home_display.dart';
+import '../utils/aluno_volume_format.dart';
 import 'progresso_semanal_widget.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
@@ -176,6 +177,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       AlunoRecoveryCard(
                         isDark: isDark,
                         snapshot: home.recovery,
+                        hasWearableHistory: home.hasWearableHistory,
                       ),
                       const SizedBox(height: 12),
                       CoachProativoCard(

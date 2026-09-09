@@ -7,6 +7,7 @@ class AddExercisePrescriptionInput {
     required this.repeticoes,
     required this.descansoSegundos,
     this.cargaKg,
+    this.rpeAlvo,
     this.observacoes,
     required this.tipoSerie,
     this.grupoSuperset,
@@ -16,6 +17,7 @@ class AddExercisePrescriptionInput {
   final String repeticoes;
   final int descansoSegundos;
   final double? cargaKg;
+  final int? rpeAlvo;
   final String? observacoes;
   final String tipoSerie;
   final int? grupoSuperset;
@@ -27,6 +29,7 @@ class AddExercisePrescriptionInput {
   required String repeticoesText,
   required String descansoText,
   required String cargaText,
+  String rpeAlvoText = '',
   required String observacoesText,
   required String tipoSerie,
   required String grupoSupersetText,
@@ -74,6 +77,15 @@ class AddExercisePrescriptionInput {
     }
   }
 
+  final rpeRaw = rpeAlvoText.trim();
+  int? rpeAlvo;
+  if (rpeRaw.isNotEmpty) {
+    rpeAlvo = int.tryParse(rpeRaw);
+    if (rpeAlvo == null || rpeAlvo < 1 || rpeAlvo > 10) {
+      return (error: 'RPE alvo deve ser um número de 1 a 10.', values: null);
+    }
+  }
+
   final observacoes = observacoesText.trim();
 
   return (
@@ -83,6 +95,7 @@ class AddExercisePrescriptionInput {
       repeticoes: reps,
       descansoSegundos: descanso,
       cargaKg: cargaKg,
+      rpeAlvo: rpeAlvo,
       observacoes: observacoes.isEmpty ? null : observacoes,
       tipoSerie: tipoSerie,
       grupoSuperset: grupoSuperset,

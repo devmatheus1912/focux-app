@@ -172,6 +172,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
             initialRepeticoes: serie?.repeticoes ?? ee.repeticoes,
             initialFeedback: serie?.feedback ?? ee.feedback,
             initialRpe: serie?.rpe ?? ee.rpe,
+            rpeAlvo: ee.rpeAlvo,
             initialDor: serie?.dor ?? ee.dor,
           ),
     );
