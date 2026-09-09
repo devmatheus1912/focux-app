@@ -86,11 +86,30 @@ class DesafioRepository {
   final Dio _dio;
   DesafioRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<Desafio>> listar() async {
-    final r = await _dio.get('/api/desafios');
-    return (r.data as List)
-        .map((e) => Desafio.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<Desafio>> listarPagina({
+    int page = 0,
+    String q = '',
+    String? tipo,
+  }) async {
+    final query = q.trim();
+    final tipoKey = tipo?.trim() ?? '';
+    final r = await _dio.get(
+      '/api/desafios',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+        if (tipoKey.isNotEmpty) 'tipo': tipoKey,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('GET /api/desafios devolve Pagina, não lista crua.');
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => Desafio.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<Pagina<Desafio>> meusPagina({

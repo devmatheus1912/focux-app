@@ -120,6 +120,12 @@ String grupoAulaChipLabel(GrupoAulaChip chip) => switch (chip) {
   GrupoAulaChip.lotadas => 'Lotadas',
 };
 
+String? grupoAulaChipQuery(GrupoAulaChip chip) => switch (chip) {
+  GrupoAulaChip.todas => null,
+  GrupoAulaChip.abertas => 'ABERTAS',
+  GrupoAulaChip.lotadas => 'LOTADAS',
+};
+
 bool grupoAulaMatches({
   required String titulo,
   required String? localAula,

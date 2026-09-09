@@ -111,4 +111,18 @@ void main() {
     expect(match!.spec.type, FocuxSurfaceType.s6);
     expect(FocuxSurfaces.resolveParent(match), '/login');
   });
+
+  test('chat aluno é thread S1; equipamentos do aluno são S5', () {
+    final chat = FocuxSurfaces.resolve('/chat/aluno');
+    expect(chat!.spec.type, FocuxSurfaceType.s1);
+    expect(FocuxSurfaces.resolveParent(chat), '/dashboard/aluno');
+
+    final equipamentos = FocuxSurfaces.resolve('/alunos/9/equipamentos');
+    expect(equipamentos!.spec.type, FocuxSurfaceType.s5);
+    expect(FocuxSurfaces.resolveParent(equipamentos), '/alunos/9');
+
+    final fotos = FocuxSurfaces.resolve('/alunos/9/fotos');
+    expect(fotos!.spec.type, FocuxSurfaceType.s4);
+    expect(FocuxSurfaces.resolveParent(fotos), '/alunos/9');
+  });
 }

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
+import '../utils/grupo_aula_display.dart';
 
 class GrupoAula {
   final int id;
@@ -47,14 +48,17 @@ class GrupoAulaRepository {
   Future<Pagina<GrupoAula>> listarPersonalPagina({
     int page = 0,
     String q = '',
+    GrupoAulaChip chip = GrupoAulaChip.todas,
   }) async {
     final query = q.trim();
+    final chipKey = grupoAulaChipQuery(chip);
     final r = await _dio.get(
       '/api/grupo-aulas',
       queryParameters: {
         'page': page,
         'size': 20,
         if (query.isNotEmpty) 'q': query,
+        if (chipKey != null) 'chip': chipKey,
       },
     );
     final data = r.data;

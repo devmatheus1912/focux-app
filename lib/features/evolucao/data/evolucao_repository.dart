@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class MedidaCorporal {
   final int id;
@@ -203,4 +204,53 @@ class EvolucaoRepository {
   Future<void> compartilharEvolucao(int alunoId) async {
     await _dio.post('/api/alunos/$alunoId/evolucao/compartilhar');
   }
+
+  Future<Pagina<FotoEvolucao>> listarFotosPagina(
+    int alunoId, {
+    int page = 0,
+  }) async {
+    final r = await _dio.get(
+      '/api/alunos/$alunoId/fotos',
+      queryParameters: {'page': page, 'size': 20},
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/alunos/$alunoId/fotos devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => FotoEvolucao.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
+  }
+
+  Future<void> adicionarFoto(
+    int alunoId, {
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    final fd = FormData.fromMap({
+      'foto': MultipartFile.fromBytes(bytes, filename: filename),
+    });
+    await _dio.post('/api/alunos/$alunoId/fotos', data: fd);
+  }
+}
+
+class FotoEvolucao {
+  final int id;
+  final String url;
+  final String data;
+
+  const FotoEvolucao({
+    required this.id,
+    required this.url,
+    required this.data,
+  });
+
+  factory FotoEvolucao.fromJson(Map<String, dynamic> j) => FotoEvolucao(
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    url: j['url'] as String? ?? j['fotoUrl'] as String? ?? '',
+    data: j['data'] as String? ?? j['createdAt'] as String? ?? '',
+  );
 }
