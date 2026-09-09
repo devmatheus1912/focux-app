@@ -36,5 +36,8 @@ void main() {
     expect(screen, isNot(contains('_AderenciaRingPainter')));
     expect(screen, isNot(contains('showDateRangePicker')));
     expect(screen, contains('relatorioAlunoPeriodoOpcoes'));
+    expect(screen, contains('relatorioAlunoPeriodoMetricValue'));
+    expect(screen, contains('relatorioAlunoResumoCaption'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
   });
 }

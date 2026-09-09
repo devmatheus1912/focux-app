@@ -138,6 +138,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Evolução',
+          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
             FxHelpIconButton(
@@ -149,10 +150,27 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         body: Column(
           children: [
             Expanded(
-              child: FxContentWidthLimiter(
+              child: homeAsync.when(
+                loading:
+                    () => const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 4),
+                    ),
+                error:
+                    (e, _) => FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: primary,
+                      message: friendlyError(e),
+                      onRetry:
+                          () => ref.invalidate(
+                            evolucaoHomeProvider(widget.alunoId),
+                          ),
+                      title: 'Não conseguimos carregar a evolução',
+                    ),
+                data:
+                    (_) => FxContentWidthLimiter(
                 child: Column(
                   children: [
-                    if (homeAsync.hasValue)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
                           FxSettingsLayout.pageInset,
@@ -164,24 +182,33 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                           children: [
                             FxHubHeader(
                               title: fxTitleCaseName(widget.alunoNome),
-                              freshnessLabel: FxHubFreshness.fromFetchedAt(
-                                _fetchedAt,
-                              ),
-                              subtitle: evolucaoHubSubtitle(
-                                view: _view,
-                                variacao: variacao,
-                              ),
+                              subtitle: evolucaoHubSubtitle(),
                             ),
                             const SizedBox(height: TokensStrip.s4),
                             OperationalMetricTile(
                               label: 'Peso',
                               value: evolucaoPesoAtual(medidas ?? const []),
-                              hint:
-                                  variacao == null || variacao.isEmpty
-                                      ? 'Registre duas medidas para ver a variação'
-                                      : variacao,
+                              hint: evolucaoUltimaMedidaHint(
+                                medidas ?? const [],
+                              ),
                               color: primary,
                               isDark: chrome.isDark,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            OperationalMetricTile(
+                              label: 'Variação',
+                              value: evolucaoVariacaoValue(
+                                medidas ?? const [],
+                              ),
+                              hint: evolucaoVariacaoHint(
+                                medidas ?? const [],
+                              ),
+                              color: primary,
+                              isDark: chrome.isDark,
+                              emphasis:
+                                  variacao == null || variacao.isEmpty
+                                      ? OperationalMetricEmphasis.muted
+                                      : OperationalMetricEmphasis.normal,
                             ),
                             const SizedBox(height: TokensStrip.s2),
                             OperationalMetricTile(
@@ -283,10 +310,12 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                     ),
                   ],
                 ),
+                    ),
               ),
             ),
-            SafeArea(
-              top: false,
+            if (homeAsync.hasValue)
+              SafeArea(
+                top: false,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
@@ -294,15 +323,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                     FxSettingsLayout.pageInset,
                     TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
-                child: FxLiquidPrimaryButton(
-                  label:
-                      _view == EvolucaoHubView.medidas
-                          ? 'Registrar medida'
-                          : 'Registrar recorde',
-                  onPressed: _registrar,
+                  child: FxLiquidPrimaryButton(
+                    label:
+                        _view == EvolucaoHubView.medidas
+                            ? 'Registrar medida'
+                            : 'Registrar recorde',
+                    onPressed: _registrar,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

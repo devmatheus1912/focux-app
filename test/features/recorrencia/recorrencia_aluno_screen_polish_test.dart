@@ -26,6 +26,9 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('/chat/aluno'));
     expect(screen, contains('/financeiro/aluno'));
+    expect(screen, contains("label: 'Hoje'"));
+    expect(screen, contains('recorrenciaPagamentoValue'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('FilledButton')));

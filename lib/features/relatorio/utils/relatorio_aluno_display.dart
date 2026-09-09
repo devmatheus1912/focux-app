@@ -182,10 +182,28 @@ const relatorioDetalheSecoes = [
 String relatorioAlunoHubSubtitle({
   required String alunoNome,
   required int diasAnalisados,
-  String? freshness,
 }) {
-  final dias =
-      diasAnalisados <= 0 ? alunoNome : '$alunoNome · $diasAnalisados dias';
-  if (freshness == null || freshness.isEmpty) return dias;
-  return '$dias · $freshness';
+  if (diasAnalisados <= 0) return alunoNome;
+  return '$alunoNome · $diasAnalisados dias';
 }
+
+String relatorioAlunoPeriodoMetricValue(int diasAnalisados) {
+  if (diasAnalisados <= 0) return '—';
+  if (diasAnalisados == 1) return '1 dia';
+  return '$diasAnalisados dias';
+}
+
+String relatorioAlunoPeriodoMetricHint() => 'Recorte deste relatório';
+
+String relatorioAlunoCheckinsMetricValue(int? checkIns) {
+  if (checkIns == null) return '—';
+  return '$checkIns';
+}
+
+String relatorioAlunoCheckinsMetricHint(int? checkIns) {
+  if (checkIns == null) return 'Sem recorte anterior ainda';
+  return relatorioAlunoCheckinsLabel(checkIns);
+}
+
+String relatorioAlunoResumoCaption() =>
+    'Aderência é treinos concluídos sobre o total deste recorte.';

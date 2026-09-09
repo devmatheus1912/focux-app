@@ -1,4 +1,5 @@
 import '../../../core/money/fx_money.dart';
+import '../../../core/utils/fx_utils.dart';
 
 String recorrenciaAlunoLabel(String? alunoNome) {
   final nome = alunoNome?.trim();
@@ -66,24 +67,53 @@ String recorrenciaHubSubtitle(String? freshness) {
   return '$base · $stamp';
 }
 
-String recorrenciaAlunoHubSubtitle({
-  String? proximaCobranca,
-  String? freshness,
+String recorrenciaAlunoHubSubtitle() => 'Cobrança mensal';
+
+String recorrenciaAlunoEmptySubtitle() => 'Ainda sem cobrança automática';
+
+String recorrenciaPagamentoValue({
+  required String? status,
+  String? initPoint,
 }) {
-  final prox = proximaCobranca?.trim();
-  final base =
-      (prox == null || prox.isEmpty) ? 'Cobrança mensal' : 'Próxima: $prox';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+  if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
+    return 'Autorizar';
+  }
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'ATIVA':
+      return 'Autorizado';
+    case 'PAUSADA':
+      return 'Pausado';
+    case 'CANCELADA':
+      return 'Encerrado';
+    case 'PENDENTE':
+      return 'Pendente';
+    default:
+      return '—';
+  }
 }
 
-String recorrenciaAlunoEmptySubtitle(String? freshness) {
-  const base = 'Ainda sem cobrança automática';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
+String recorrenciaPagamentoHint({
+  required String? status,
+  String? initPoint,
+}) {
+  if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
+    return 'Abre o Mercado Pago';
+  }
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'ATIVA':
+      return 'Cobrança autorizada';
+    case 'PAUSADA':
+      return 'Retome quando quiser';
+    case 'CANCELADA':
+      return 'Ciclo encerrado';
+    default:
+      return 'Sem autorização ainda';
+  }
 }
+
+String recorrenciaCicloValue() => 'Mensal';
+
+String recorrenciaCicloHint() => 'Mercado Pago';
 
 enum RecorrenciaAlunoStickyKind { autorizar, pausar, retomar, chat }
 
@@ -130,7 +160,9 @@ String recorrenciaRetomarConfirmMessage() =>
 String recorrenciaProximaValue(String? proximaCobranca) {
   final prox = proximaCobranca?.trim();
   if (prox == null || prox.isEmpty) return '—';
-  return prox;
+  final parsed = DateTime.tryParse(prox);
+  if (parsed == null) return prox;
+  return fxDateShort(parsed);
 }
 
 String recorrenciaProximaHint(String? proximaCobranca) {

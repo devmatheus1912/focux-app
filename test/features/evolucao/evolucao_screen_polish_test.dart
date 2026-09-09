@@ -41,6 +41,9 @@ void main() {
     expect(screen, contains('compartilharEvolucao'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('evolucaoVariacaoValue'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxErrorState'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));
     expect(screen, isNot(contains('TabBar')));
