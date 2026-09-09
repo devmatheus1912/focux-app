@@ -68,19 +68,36 @@ class AderenciaWeekSummary {
     required this.points,
     required this.totalCheckins,
     required this.hasAnyCheckin,
+    this.daysWithCheckin,
+    this.totalSemana,
+    this.resumo = '',
   });
 
   final List<AderenciaWeekPoint> points;
   final int totalCheckins;
   final bool hasAnyCheckin;
+  final int? daysWithCheckin;
+  final int? totalSemana;
+  final String resumo;
 
   String get caption {
+    if (resumo.trim().isNotEmpty) return resumo.trim();
     if (points.isEmpty) return 'Sem dados';
-    final daysWith = points.where((p) => p.checkins > 0).length;
+    final daysWith =
+        daysWithCheckin ?? points.where((p) => p.checkins > 0).length;
+    final denom = totalSemana ?? points.length;
     if (!hasAnyCheckin) {
-      return '0 de ${points.length} dias';
+      return '0 de $denom dias';
     }
-    return '$totalCheckins check-ins · $daysWith de ${points.length} dias';
+    return '$totalCheckins check-ins · $daysWith de $denom dias';
+  }
+
+  String get weekRatioLabel {
+    final daysWith =
+        daysWithCheckin ?? points.where((p) => p.checkins > 0).length;
+    final denom = totalSemana ?? (points.isEmpty ? 7 : points.length);
+    if (points.isEmpty && daysWithCheckin == null) return '—';
+    return '$daysWith/$denom';
   }
 }
 
@@ -258,15 +275,20 @@ OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
 }) {
   if (week.points.isEmpty || week.hasAnyCheckin) return null;
 
+  final message =
+      week.resumo.trim().isNotEmpty
+          ? week.resumo.trim()
+          : 'Nenhum check-in nos últimos 7 dias.';
+
   if (operacao?.showPrepareMessage == true) {
-    return const OperacaoAdherenceEmptyState(
-      message: 'Nenhum check-in nos últimos 7 dias.',
+    return OperacaoAdherenceEmptyState(
+      message: message,
       showCheckinCta: false,
     );
   }
 
-  return const OperacaoAdherenceEmptyState(
-    message: 'Nenhum check-in nos últimos 7 dias.',
+  return OperacaoAdherenceEmptyState(
+    message: message,
     hint: 'Peça um check-in com mensagem pronta.',
     showCheckinCta: true,
   );
@@ -275,8 +297,13 @@ OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
 /// Human-readable idle days for operational tiles.
 String formatDiasSemTreinoDisplay(int? dias) {
   if (dias == null) return '—';
-  if (dias <= 0) return 'Hoje';
+  if (dias <= 0) return 'hoje';
   return '${dias}d';
+}
+
+String formatSemTreinoOperacaoLabel(int? dias) {
+  if (dias != null && dias <= 0) return 'Último treino';
+  return 'Sem treino';
 }
 
 String semTreinoOperacaoSubtitle(int? dias) {
@@ -327,8 +354,12 @@ List<AderenciaWeekPoint> parseAderenciaSemanal(
       .map(
         (point) => AderenciaWeekPoint(
           checkins: (point['checkins'] as num?)?.toDouble() ?? 0,
-          date: point['data'] as String?,
-          dayLetter: (point['labelDia'] as String?)?.trim(),
+          date:
+              point['data'] as String? ??
+              point['dia'] as String?,
+          dayLetter:
+              (point['labelDia'] as String?)?.trim() ??
+              (point['weekday'] as String?)?.trim(),
         ),
       )
       .toList(growable: false);
@@ -357,8 +388,11 @@ List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
   });
 }
 
-AderenciaWeekSummary summarizeAderenciaWeek(List<AderenciaWeekPoint> points) {
-  if (points.isEmpty) {
+AderenciaWeekSummary summarizeAderenciaWeek(
+  List<AderenciaWeekPoint> points, {
+  AderenciaSemanalBundle? bundle,
+}) {
+  if (points.isEmpty && bundle == null) {
     return const AderenciaWeekSummary(
       points: [],
       totalCheckins: 0,
@@ -366,10 +400,17 @@ AderenciaWeekSummary summarizeAderenciaWeek(List<AderenciaWeekPoint> points) {
     );
   }
   final total = points.fold<double>(0, (sum, p) => sum + p.checkins);
+  final hasAny =
+      (bundle?.diasComCheckin ?? 0) > 0 || points.any((p) => p.checkins > 0);
   return AderenciaWeekSummary(
     points: points,
     totalCheckins: total.round(),
-    hasAnyCheckin: points.any((p) => p.checkins > 0),
+    hasAnyCheckin: hasAny,
+    daysWithCheckin: bundle?.diasComCheckin,
+    totalSemana: bundle == null
+        ? null
+        : (bundle.totalSemana > 0 ? bundle.totalSemana : 7),
+    resumo: bundle?.resumo ?? '',
   );
 }
 

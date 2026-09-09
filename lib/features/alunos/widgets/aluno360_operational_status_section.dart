@@ -29,6 +29,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     required this.isDark,
     required this.primary,
     required this.aderenciaSemanal,
+    this.aderenciaBundle,
   });
 
   final Aluno aluno;
@@ -36,6 +37,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
   final bool isDark;
   final Color primary;
   final List<Map<String, dynamic>>? aderenciaSemanal;
+  final AderenciaSemanalBundle? aderenciaBundle;
 
   void _openTreinos(BuildContext context) {
     context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
@@ -58,6 +60,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     );
     final week = summarizeAderenciaWeek(
       parseAderenciaSemanal(aderenciaSemanal),
+      bundle: aderenciaBundle,
     );
     final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
     final heroShowsRisco = operacaoHeroShowsRisco(aluno);
@@ -91,6 +94,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       compactFollowUpVisible: compactFollowUpVisible,
     );
     final dias = aluno.diasSemTreino;
+    final semTreinoLabel = formatSemTreinoOperacaoLabel(dias);
     final semTreinoDisplay = formatDiasSemTreinoDisplay(dias);
     final semTreinoSubtitle = semTreinoOperacaoSubtitle(dias);
     final semTreinoAccent =
@@ -103,12 +107,9 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             ? week.points
             : summarizeAderenciaWeek(
               padAderenciaWeekToSevenDays(const []),
+              bundle: aderenciaBundle,
             ).points;
-    final daysWithCheckin = week.points.where((p) => p.checkins > 0).length;
-    final weekValue =
-        week.points.isEmpty
-            ? '—'
-            : '$daysWithCheckin/${week.points.length}';
+    final weekValue = week.weekRatioLabel;
 
     final mute = fxScreenMute(context);
     final line = ShellChrome.of(context).line;
@@ -159,13 +160,13 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
               aluno.aderenciaPercent == null
                   ? '—'
                   : '${aluno.aderenciaPercent}%',
-          hint: 'Treinos concluídos na semana',
+          hint: 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
           icon: Icons.percent_rounded,
         ),
         metric(
-          label: 'Sem treino',
+          label: semTreinoLabel,
           value: semTreinoDisplay,
           hint: semTreinoSubtitle,
           color: semTreinoAccent,
@@ -188,13 +189,13 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
               aluno.aderenciaPercent == null
                   ? '—'
                   : '${aluno.aderenciaPercent}%',
-          hint: 'Treinos concluídos na semana',
+          hint: 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
           icon: Icons.percent_rounded,
         ),
         metric(
-          label: 'Sem treino',
+          label: semTreinoLabel,
           value: semTreinoDisplay,
           hint: semTreinoSubtitle,
           color: semTreinoAccent,

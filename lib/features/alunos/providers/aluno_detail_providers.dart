@@ -270,10 +270,42 @@ final alunoOpenIaActionsProvider =
 
 final alunoEvolucaoInteligenteProvider =
     FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
-      return AlunoRepository(
+      final raw = await AlunoRepository(
         ref.read(apiClientProvider),
       ).buscarEvolucaoInteligente(alunoId);
+      if (_hasUltimoPr(raw)) return raw;
+
+      // Preferir recordes de evolucaoHome quando o sinal inteligente ainda
+      // não trouxe último PR (ex.: PR gravado no concluir, cache antigo).
+      final cached = EvolucaoHomeClientCache.getIfFresh(alunoId);
+      final recordes = cached?.recordes;
+      if (recordes == null || recordes.isEmpty) return raw;
+      final pr = recordes.first;
+      final carga = pr.cargaKg;
+      return EvolucaoInteligente(
+        sinal: raw.sinal,
+        resumo: raw.resumo,
+        ultimoPrLabel:
+            carga == null
+                ? pr.exercicioNome
+                : '${carga == carga.roundToDouble() ? carga.toStringAsFixed(0) : carga.toStringAsFixed(1)}kg',
+        ultimoPrCargaKg: carga,
+        ultimoPrExercicio: pr.exercicioNome,
+        volumeSemanal: raw.volumeSemanal,
+        volumeMensal: raw.volumeMensal,
+        tendenciaVolumePct: raw.tendenciaVolumePct,
+        proximaAcao: raw.proximaAcao,
+        sugerirCopiloto: raw.sugerirCopiloto,
+        volumePorSemana: raw.volumePorSemana,
+      );
     });
+
+bool _hasUltimoPr(EvolucaoInteligente ev) {
+  final label = ev.ultimoPrLabel?.trim();
+  if (label != null && label.isNotEmpty) return true;
+  final carga = ev.ultimoPrCargaKg;
+  return carga != null && carga > 0;
+}
 
 final alunoAderenciaSemanalProvider =
     FutureProvider.family<List<Map<String, dynamic>>, int>((

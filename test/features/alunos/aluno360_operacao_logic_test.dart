@@ -305,7 +305,7 @@ void main() {
     });
 
     test('zero shows hoje', () {
-      expect(formatDiasSemTreinoDisplay(0), 'Hoje');
+      expect(formatDiasSemTreinoDisplay(0), 'hoje');
     });
 
     test('positive shows days suffix', () {
@@ -313,9 +313,23 @@ void main() {
     });
   });
 
+  group('formatSemTreinoOperacaoLabel', () {
+    test('zero uses ultimo treino label', () {
+      expect(formatSemTreinoOperacaoLabel(0), 'Último treino');
+    });
+
+    test('positive keeps sem treino', () {
+      expect(formatSemTreinoOperacaoLabel(3), 'Sem treino');
+    });
+  });
+
   group('semTreinoOperacaoSubtitle', () {
     test('null explains missing history', () {
       expect(semTreinoOperacaoSubtitle(null), contains('sem histórico'));
+    });
+
+    test('zero trained recently', () {
+      expect(semTreinoOperacaoSubtitle(0), 'Treinou recentemente');
     });
 
     test('positive shows idle days', () {

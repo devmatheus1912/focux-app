@@ -85,6 +85,18 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     context.push('/alunos/$alunoId/treinos-list', extra: alunoNome);
   }
 
+  static String? _ultimoPrValue(EvolucaoInteligente ev) {
+    final label = ev.ultimoPrLabel?.trim();
+    if (label != null && label.isNotEmpty) return label;
+    final carga = ev.ultimoPrCargaKg;
+    if (carga == null || carga <= 0) return null;
+    final formatted =
+        carga == carga.roundToDouble()
+            ? carga.toStringAsFixed(0)
+            : carga.toStringAsFixed(1);
+    return '${formatted}kg';
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -302,6 +314,24 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   isDark: isDark,
                                 ),
                               ),
+                              if (_ultimoPrValue(ev) != null) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                InkWell(
+                                  onTap: () => _openTreinos(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: OperationalMetricTile(
+                                    label: 'Volume Último PR',
+                                    value: _ultimoPrValue(ev)!,
+                                    hint:
+                                        ev.ultimoPrExercicio?.trim().isNotEmpty ==
+                                                true
+                                            ? ev.ultimoPrExercicio!
+                                            : 'Recorde de carga',
+                                    color: EagleTokens.good,
+                                    isDark: isDark,
+                                  ),
+                                ),
+                              ],
                               if (ev.tendenciaVolumePct != null) ...[
                                 const SizedBox(height: TokensStrip.s2),
                                 InkWell(
