@@ -7,14 +7,8 @@ String exercicioDificuldadeHint(String? dificuldade) {
   return value;
 }
 
-String exercicioHubSubtitle({
-  required String? grupo,
-  String? freshness,
-}) {
-  final parts = <String>[];
+String exercicioHubSubtitle({required String? grupo}) {
   final group = grupo?.trim();
-  if (group != null && group.isNotEmpty) parts.add(group);
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
+  if (group == null || group.isEmpty) return 'Exercício';
+  return group;
 }

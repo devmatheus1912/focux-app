@@ -93,15 +93,7 @@ String planoSucessoStickyLabel({
   return 'Remarcar revisão';
 }
 
-String planoSucessoHubSubtitle({
-  required String base,
-  String? freshness,
-}) {
-  final parts = <String>[base];
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
-}
+String planoSucessoHubSubtitle({required String base}) => base;
 
 String planoSucessoEtapasValue(int done, int total) => '$done/$total';
 

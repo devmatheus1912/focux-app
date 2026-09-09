@@ -35,6 +35,9 @@ void main() {
     expect(screen, contains('exercicioVideoMetric'));
     expect(screen, contains("label: 'Biblioteca'"));
     expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains("label: 'Modalidade'"));
+    expect(screen, contains("label: 'Dificuldade'"));
+    expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt)'));
     expect(screen, contains('PopScope'));
   });

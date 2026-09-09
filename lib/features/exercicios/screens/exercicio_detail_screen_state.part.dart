@@ -205,7 +205,6 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
             data:
                 (ex) {
                   final grupo = _grupoLabel(ex);
-                  final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
                   return Column(
                   children: [
                     Expanded(
@@ -225,39 +224,43 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               children: [
                                 FxHubHeader(
                                   title: ex.nome,
-                                  subtitle: exercicioHubSubtitle(
-                                    grupo: grupo,
-                                    freshness: freshness,
-                                  ),
+                                  subtitle: exercicioHubSubtitle(grupo: grupo),
                                 ),
                               const SizedBox(height: TokensStrip.s4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OperationalMetricTile(
-                                      label: 'Grupo',
-                                      value: grupo ?? '—',
-                                      hint: _modalidadeLabel(ex) ?? 'Cadastro',
-                                      color: primary,
-                                      isDark: isDark,
-                                    ),
-                                  ),
-                                  const SizedBox(width: TokensStrip.s2),
-                                  Expanded(
-                                    child: OperationalMetricTile(
-                                      label: 'Vídeo',
-                                      value: exercicioVideoMetric(
-                                        hasVideo:
-                                            ex.videoUrl?.isNotEmpty == true,
-                                      ),
-                                      hint: exercicioDificuldadeHint(
-                                        _dificuldadeLabel(ex),
-                                      ),
-                                      color: primary,
-                                      isDark: isDark,
-                                    ),
-                                  ),
-                                ],
+                              OperationalMetricTile(
+                                label: 'Grupo',
+                                value: grupo ?? '—',
+                                hint: 'Musculação / grupo',
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              OperationalMetricTile(
+                                label: 'Modalidade',
+                                value: _modalidadeLabel(ex) ?? '—',
+                                hint: 'Cadastro',
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              OperationalMetricTile(
+                                label: 'Vídeo',
+                                value: exercicioVideoMetric(
+                                  hasVideo: ex.videoUrl?.isNotEmpty == true,
+                                ),
+                                hint: 'Demo do exercício',
+                                color: primary,
+                                isDark: isDark,
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              OperationalMetricTile(
+                                label: 'Dificuldade',
+                                value: _dificuldadeLabel(ex) ?? '—',
+                                hint: exercicioDificuldadeHint(
+                                  _dificuldadeLabel(ex),
+                                ),
+                                color: primary,
+                                isDark: isDark,
                               ),
                               const SizedBox(height: TokensStrip.s3),
                               Wrap(
