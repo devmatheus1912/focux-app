@@ -40,6 +40,14 @@ void main() {
     expect(feedMidiaCta(tipo: 'IMAGEM', hasFile: true), 'Trocar arquivo');
   });
 
+  test('chips de lista mapeiam tipo e fixado', () {
+    expect(feedListChipLabel(FeedListChip.fixados), 'Fixados');
+    expect(feedListChipTipo(FeedListChip.imagem), 'IMAGEM');
+    expect(feedListChipTipo(FeedListChip.todos), isNull);
+    expect(feedListChipFixado(FeedListChip.fixados), isTrue);
+    expect(feedListChipFixado(FeedListChip.dica), isNull);
+  });
+
   test('publicar confirma e limita tamanho', () {
     expect(feedTituloMax, 255);
     expect(feedConteudoMax, 4000);

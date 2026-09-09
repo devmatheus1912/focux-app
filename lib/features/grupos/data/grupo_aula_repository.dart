@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/pagina.dart';
 
 class GrupoAula {
   final int id;
@@ -43,11 +44,29 @@ class GrupoAulaRepository {
   final Dio _dio;
   GrupoAulaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<GrupoAula>> listarPersonal() async {
-    final r = await _dio.get('/api/grupo-aulas');
-    return (r.data as List)
-        .map((e) => GrupoAula.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<Pagina<GrupoAula>> listarPersonalPagina({
+    int page = 0,
+    String q = '',
+  }) async {
+    final query = q.trim();
+    final r = await _dio.get(
+      '/api/grupo-aulas',
+      queryParameters: {
+        'page': page,
+        'size': 20,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/grupo-aulas devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (item) => GrupoAula.fromJson(Map<String, dynamic>.from(item as Map)),
+    );
   }
 
   Future<List<GrupoAula>> disponiveis() async {

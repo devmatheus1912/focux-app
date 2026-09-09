@@ -74,6 +74,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
       setState(() => _query = value);
+      _load();
     });
   }
 
@@ -81,6 +82,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     _searchDebounce?.cancel();
     _searchController.clear();
     setState(() => _query = '');
+    _load();
   }
 
   void _leave() {
@@ -95,7 +97,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     });
     try {
       final home =
-          await AlertasRepository(ref.read(apiClientProvider)).getHome();
+          await AlertasRepository(ref.read(apiClientProvider)).getHome(
+            q: _query,
+          );
       if (!mounted) return;
       setState(() {
         _alertas = home.riscos;
@@ -122,7 +126,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     try {
       final home = await AlertasRepository(
         ref.read(apiClientProvider),
-      ).getHome(page: _page + 1);
+      ).getHome(page: _page + 1, q: _query);
       if (!mounted) return;
       final seen = _alertas.map((a) => a.alunoId).toSet();
       setState(() {
@@ -267,18 +271,8 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final brand = Theme.of(context).colorScheme.primary;
     final mute = fxScreenMute(context);
-    final filtered =
-        _alertas
-            .where(
-              (a) => alertaMatchesQuery(
-                alunoNome: a.alunoNome,
-                motivos: a.motivos,
-                query: _query,
-              ),
-            )
-            .toList();
-    final altos = filtered.where((a) => a.score >= 2).toList();
-    final medios = filtered.where((a) => a.score == 1).toList();
+    final altos = _alertas.where((a) => a.score >= 2).toList();
+    final medios = _alertas.where((a) => a.score == 1).toList();
     final rows = <_HubRow>[
       if (_config != null) _HubRow.config(_config!),
       for (final item in altos) _HubRow.risco(item, 'alto'),
@@ -286,7 +280,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
     ];
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final emptyFiltered =
-        !_loading && _erro == null && _alertas.isNotEmpty && filtered.isEmpty;
+        !_loading && _erro == null && _query.trim().isNotEmpty && _alertas.isEmpty;
 
     Widget configTile(AlertasConfiguracao config) {
       return FxSatelliteListTile(
@@ -501,14 +495,9 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                           ).bottom,
                                     ),
                                     itemCount:
-                                        rows.length +
-                                        (_hasMore && _query.trim().isEmpty
-                                            ? 1
-                                            : 0),
+                                        rows.length + (_hasMore ? 1 : 0),
                                     itemBuilder: (context, i) {
-                                      if (_hasMore &&
-                                          _query.trim().isEmpty &&
-                                          i == rows.length) {
+                                      if (_hasMore && i == rows.length) {
                                         return FxSatelliteListTile(
                                           title:
                                               _carregandoMais

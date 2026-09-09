@@ -45,6 +45,10 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
   DateTime? _fetchedAt;
   var _query = '';
   var _chip = DepoimentoChip.todos;
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loadingMore = false;
 
   @override
   void initState() {
@@ -65,6 +69,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
       setState(() => _query = value);
+      _load();
     });
   }
 
@@ -72,6 +77,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
     _searchDebounce?.cancel();
     _searchCtrl.clear();
     setState(() => _query = '');
+    _load();
   }
 
   void _leave() {
@@ -79,18 +85,30 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
     safePopOrGo(context, '/perfil/ferramentas');
   }
 
+  bool? get _aprovadoFiltro => switch (_chip) {
+    DepoimentoChip.todos => null,
+    DepoimentoChip.pendentes => false,
+    DepoimentoChip.aprovados => true,
+  };
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final items = await DepoimentoRepository(
+      final pagina = await DepoimentoRepository(
         ref.read(apiClientProvider),
-      ).listarParaPersonal();
+      ).listarParaPersonalPagina(
+        q: _query,
+        aprovado: _aprovadoFiltro,
+      );
       if (!mounted) return;
       setState(() {
-        _items = items;
+        _items = pagina.content;
+        _page = pagina.page ?? 0;
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? pagina.content.length;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -100,6 +118,36 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
         _erro = friendlyError(e);
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await DepoimentoRepository(
+        ref.read(apiClientProvider),
+      ).listarParaPersonalPagina(
+        page: _page + 1,
+        q: _query,
+        aprovado: _aprovadoFiltro,
+      );
+      if (!mounted) return;
+      final seen = _items.map((d) => d.id).toSet();
+      setState(() {
+        _items = [
+          ..._items,
+          ...pagina.content.where((d) => seen.add(d.id)),
+        ];
+        _page = pagina.page ?? (_page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _items.length;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -127,17 +175,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
     }
   }
 
-  List<DepoimentoModel> get _visible => _items
-      .where(
-        (d) => depoimentoMatches(
-          nomeAluno: d.nomeAluno,
-          texto: d.texto,
-          aprovado: d.aprovado,
-          query: _query,
-          chip: _chip,
-        ),
-      )
-      .toList();
+  List<DepoimentoModel> get _visible => _items;
 
   void _openItem(DepoimentoModel item) {
     final chrome = ShellChrome.of(context);
@@ -221,7 +259,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
           appBar: FxShellAppBar(
             title: 'Depoimentos',
             subtitle: FxHubFreshness.joinCount(
-              depoimentoCountLabel(_items.length),
+              depoimentoCountLabel(_total),
               FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
             onBack: _leave,
@@ -312,7 +350,11 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                         label: depoimentoChipLabel(chip),
                         selected: _chip == chip,
                         isDark: chrome.isDark,
-                        onTap: () => setState(() => _chip = chip),
+                        onTap: () {
+                          if (_chip == chip) return;
+                          setState(() => _chip = chip);
+                          _load();
+                        },
                       ),
                   ],
                 ),
@@ -380,8 +422,14 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
           FxSettingsLayout.pageInset,
           TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        itemCount: visible.length,
+        itemCount: visible.length + (_hasMore ? 1 : 0),
         itemBuilder: (context, i) {
+          if (_hasMore && i == visible.length) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : _carregarMais,
+            );
+          }
           final d = visible[i];
           return FxSatelliteListTile(
             title: d.nomeAluno,

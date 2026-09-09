@@ -7,6 +7,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Timer? _searchDebounce;
   List<FeedPost> _posts = [];
   var _query = '';
+  var _chip = FeedListChip.todos;
   var _hasMore = false;
   var _loadingMore = false;
   String? _nextCursor;
@@ -42,6 +43,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     _load();
   }
 
+  void _clearFilters() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    setState(() {
+      _query = '';
+      _chip = FeedListChip.todos;
+    });
+    _load();
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -50,7 +61,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     try {
       final pagina = await FeedRepository(
         ref.read(apiClientProvider),
-      ).listarPersonalPagina(q: _query);
+      ).listarPersonalPagina(
+        q: _query,
+        tipo: feedListChipTipo(_chip),
+        fixado: feedListChipFixado(_chip),
+      );
       if (!mounted) return;
       setState(() {
         _posts = pagina.content;
@@ -79,7 +94,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     try {
       final pagina = await FeedRepository(
         ref.read(apiClientProvider),
-      ).listarPersonalPagina(cursor: _nextCursor, q: _query);
+      ).listarPersonalPagina(
+        cursor: _nextCursor,
+        q: _query,
+        tipo: feedListChipTipo(_chip),
+        fixado: feedListChipFixado(_chip),
+      );
       if (!mounted) return;
       setState(() {
         final seen = _posts.map((p) => p.id).toSet();
@@ -181,7 +201,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   Widget _buildBody(Color primary, List<FeedPost> visible) {
     if (visible.isEmpty) {
-      final searching = _query.trim().isNotEmpty;
+      final searching = _query.trim().isNotEmpty || _chip != FeedListChip.todos;
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
@@ -200,8 +220,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       ? 'Ajuste a busca para achar outra publicação.'
                       : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
               action: FxEmptyAction(
-                label: searching ? 'Limpar busca' : 'Criar publicação',
-                onTap: searching ? _clearQuery : _abrirFormulario,
+                label: searching ? 'Limpar filtros' : 'Criar publicação',
+                onTap: searching ? _clearFilters : _abrirFormulario,
               ),
             ),
           ],
@@ -360,6 +380,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                     ),
                           ),
                         ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        0,
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                      ),
+                      child: Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
+                        children: [
+                          for (final chip in FeedListChip.values)
+                            FxToggleChip(
+                              label: feedListChipLabel(chip),
+                              selected: _chip == chip,
+                              isDark: isDark,
+                              onTap: () {
+                                if (_chip == chip) return;
+                                setState(() => _chip = chip);
+                                _load();
+                              },
+                            ),
+                        ],
                       ),
                     ),
                     Expanded(

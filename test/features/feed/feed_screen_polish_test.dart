@@ -32,6 +32,8 @@ void main() {
     expect(screen, contains('canCompose: false'));
     expect(screen, contains('listarPersonalPagina'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('FeedListChip'));
+    expect(screen, contains('FxToggleChip'));
     expect(screen, isNot(contains('label: feedPublicarTileLabel')));
     expect(screen, isNot(contains('feedPublicarTileLabel()')));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));

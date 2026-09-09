@@ -85,6 +85,10 @@ class ConviteRepository {
     return Convite.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<void> revogar() async {
+    await _dio.post('/api/convites/revogar');
+  }
+
   Future<ConviteValidacao> validar(String token) async {
     final response = await _dio.get('/api/convites/validar/$token');
     return ConviteValidacao.fromJson(response.data as Map<String, dynamic>);

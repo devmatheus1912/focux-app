@@ -37,5 +37,7 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, isNot(contains('context.pop()')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
+    expect(screen, contains('listarPersonalPagina'));
+    expect(screen, contains('Carregar mais'));
   });
 }

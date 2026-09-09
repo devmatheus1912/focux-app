@@ -30,6 +30,7 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('revogar'));
     expect(screen, isNot(contains('Clipboard.setData')));
     expect(screen, isNot(contains('_HeroCard')));
   });
