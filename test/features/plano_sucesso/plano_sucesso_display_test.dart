@@ -86,11 +86,8 @@ void main() {
       'Metas e prazos do aluno',
     );
     expect(
-      planoSucessoHubSubtitle(
-        base: 'Emagrecer 8 kg',
-        freshness: 'Atualizado agora',
-      ),
-      'Emagrecer 8 kg · Atualizado agora',
+      planoSucessoHubSubtitle(base: 'Emagrecer 8 kg'),
+      'Emagrecer 8 kg',
     );
     expect(planoSucessoEtapasValue(1, 4), '1/4');
     expect(

@@ -47,14 +47,14 @@ void main() {
     );
   });
 
-  test('engajamentoHubSubtitle junta nome, período e freshness', () {
+  test('engajamentoHubSubtitle junta nome e período', () {
     expect(
       engajamentoHubSubtitle(alunoNome: 'Ana', dias: 30),
       'Ana · 30 dias',
     );
     expect(
-      engajamentoHubSubtitle(alunoNome: '  ', dias: 60, freshness: 'há 1 min'),
-      'Aluno · 60 dias · há 1 min',
+      engajamentoHubSubtitle(alunoNome: '  ', dias: 60),
+      'Aluno · 60 dias',
     );
   });
 

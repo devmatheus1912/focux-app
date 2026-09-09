@@ -280,7 +280,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                             plano: plano,
                             primary: primary,
                             isDark: chrome.isDark,
-                            freshness: freshness,
                             proximo: proximo,
                             onMarcar:
                                 (id) => _marcarMarco(provider, id),
@@ -320,7 +319,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     required PlanoSucesso? plano,
     required Color primary,
     required bool isDark,
-    required String? freshness,
     required MarcoSucesso? proximo,
     required ValueChanged<int> onMarcar,
   }) {
@@ -344,7 +342,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
             title: headerTitle,
             subtitle: planoSucessoHubSubtitle(
               base: 'Metas e prazos do aluno',
-              freshness: freshness,
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
@@ -396,7 +393,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           title: headerTitle,
           subtitle: planoSucessoHubSubtitle(
             base: plano.objetivoPrincipal,
-            freshness: freshness,
           ),
         ),
         const SizedBox(height: TokensStrip.s4),

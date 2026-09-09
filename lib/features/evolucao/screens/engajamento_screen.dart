@@ -171,7 +171,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                         onRetry: _load,
                         title: 'Não conseguimos carregar o engajamento',
                       )
-                      : FxContentWidthLimiter(child: _buildBody(freshness)),
+                      : FxContentWidthLimiter(child: _buildBody()),
             ),
             if (showSticky)
               SafeArea(
@@ -196,7 +196,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     );
   }
 
-  Widget _buildBody(String? freshness) {
+  Widget _buildBody() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final header = FxHubHeader(
@@ -204,7 +204,6 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       subtitle: engajamentoHubSubtitle(
         alunoNome: widget.alunoNome,
         dias: _dias,
-        freshness: freshness,
       ),
     );
     final metric = Padding(

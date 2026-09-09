@@ -67,13 +67,9 @@ String engajamentoEventoSubtitle({
 String engajamentoHubSubtitle({
   required String alunoNome,
   required int dias,
-  String? freshness,
 }) {
   final nome = alunoNome.trim().isEmpty ? 'Aluno' : alunoNome.trim();
-  final parts = <String>[nome, engajamentoPeriodoLabel(dias)];
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
+  return '$nome · ${engajamentoPeriodoLabel(dias)}';
 }
 
 String engajamentoEventosMetricHint(int count, int dias) {
