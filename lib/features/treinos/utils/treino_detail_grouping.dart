@@ -61,6 +61,29 @@ int treinoDetailGroupCount(List<TreinoExercicioItem> items) =>
 String treinoDetailSeriesHint(int groups) =>
     groups == 1 ? '1 grupo muscular' : '$groups grupos';
 
+String treinoDetailGroupTileHint(int groups) =>
+    groups == 0 ? 'Ainda vazio' : 'Músculos distintos';
+
+double? treinoDetailCargaTotalKg(List<TreinoExercicioItem> items) {
+  var sum = 0.0;
+  var any = false;
+  for (final item in items) {
+    final kg = item.cargaKg;
+    if (kg == null || kg <= 0) continue;
+    sum += kg;
+    any = true;
+  }
+  return any ? sum : null;
+}
+
+String treinoDetailCargaValue(List<TreinoExercicioItem> items) =>
+    formatTreinoLoadKg(treinoDetailCargaTotalKg(items));
+
+String treinoDetailCargaHint(List<TreinoExercicioItem> items) =>
+    treinoDetailCargaTotalKg(items) == null
+        ? 'Sem carga prescrita'
+        : 'Soma das prescrições';
+
 /// Contagens reais da prescrição — sem duração inventada.
 String treinoDetailMetaLine(List<TreinoExercicioItem> items) {
   if (items.isEmpty) return 'Em montagem';

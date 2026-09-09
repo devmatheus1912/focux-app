@@ -76,6 +76,25 @@ void main() {
       ),
       '4 / 10',
     );
+    expect(trilhaValorUnidade('PESO'), ' kg');
+    expect(trilhaValorUnidade('MEDIDA'), ' cm');
+    expect(trilhaValorUnidade('TREINOS'), '');
+    expect(
+      trilhaValorAtualLabel(
+        TrilhaModel(
+          id: 4,
+          alunoId: 1,
+          titulo: 'Peso',
+          metaTipo: 'PESO',
+          valorAtual: 72.5,
+          percentualConclusao: 40,
+          concluida: false,
+          marcos: const [],
+          metaValor: 70,
+        ),
+      ),
+      '72.5 / 70 kg',
+    );
   });
 
   test('trilha prazo e datas do contrato', () {

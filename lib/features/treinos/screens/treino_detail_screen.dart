@@ -203,14 +203,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
 }
 
 class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
-  late DateTime _fetchedAt;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchedAt = DateTime.now();
-  }
-
   Future<void> _refresh() async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailRefreshed,
@@ -219,9 +211,7 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
     ref.invalidate(treinoProvider(widget.treinoId));
     await ref.read(treinoProvider(widget.treinoId).future);
     if (!mounted) return;
-    final stamp = DateTime.now();
-    setState(() => _fetchedAt = stamp);
-    widget.onFetched(stamp);
+    widget.onFetched(DateTime.now());
   }
 
   @override
@@ -235,7 +225,6 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       alunoId: widget.alunoId,
       alunoNome: widget.alunoNome,
       isDark: widget.isDark,
-      freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
       onRefresh: _refresh,
       ref: ref,
     );

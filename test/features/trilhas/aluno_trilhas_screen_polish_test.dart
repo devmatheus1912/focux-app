@@ -28,6 +28,8 @@ void main() {
     expect(screen, contains("'/aluno/habitos'"));
     expect(screen, contains("'/chat/aluno'"));
     expect(screen, contains('trilhaListaPrazoValue'));
+    expect(screen, contains('trilhaValorAtualLabel'));
+    expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('concluirMarco'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('subtitle: freshness'));

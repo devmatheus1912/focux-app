@@ -250,7 +250,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
             color: primary,
             isDark: isDark,
           ),
-          const SizedBox(height: TokensStrip.s2),
+          const SizedBox(height: TokensStrip.s3),
           OperationalMetricTile(
             label: 'Progresso',
             value: trilhaListaProgressoLabel(lista),
@@ -258,7 +258,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
             color: primary,
             isDark: isDark,
           ),
-          const SizedBox(height: TokensStrip.s2),
+          const SizedBox(height: TokensStrip.s3),
           OperationalMetricTile(
             label: 'Marcos',
             value: '${trilhaMarcosPendentes(trilhas)}',
@@ -269,7 +269,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
             color: primary,
             isDark: isDark,
           ),
-          const SizedBox(height: TokensStrip.s2),
+          const SizedBox(height: TokensStrip.s3),
           OperationalMetricTile(
             label: 'Prazo',
             value: trilhaListaPrazoValue(lista),
