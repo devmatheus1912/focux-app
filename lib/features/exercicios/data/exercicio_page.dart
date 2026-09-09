@@ -1,6 +1,6 @@
 import 'exercicio_repository.dart';
 
-/// Metadados de paginação — paridade com `ExercicioPickerPageMeta` / Spring Page.
+/// Metadados de paginação — paridade com `Pagina` / picker.
 class ExercicioPageMeta {
   final int page;
   final int size;
@@ -23,15 +23,6 @@ class ExercicioPageMeta {
     totalPages: (j['totalPages'] as num?)?.toInt() ?? 0,
     hasNext: j['hasNext'] as bool? ?? false,
   );
-
-  factory ExercicioPageMeta.fromSpringPage(Map<String, dynamic> j) =>
-      ExercicioPageMeta(
-        page: (j['number'] as num?)?.toInt() ?? 0,
-        size: (j['size'] as num?)?.toInt() ?? 0,
-        totalElements: (j['totalElements'] as num?)?.toInt() ?? 0,
-        totalPages: (j['totalPages'] as num?)?.toInt() ?? 0,
-        hasNext: j['last'] == false,
-      );
 }
 
 class ExercicioPage {

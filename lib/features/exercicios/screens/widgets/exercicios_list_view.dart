@@ -46,6 +46,7 @@ class ExerciciosListView extends StatelessWidget {
 
     return ListView.builder(
       controller: controller,
+      physics: const AlwaysScrollableScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.fromLTRB(
         16,

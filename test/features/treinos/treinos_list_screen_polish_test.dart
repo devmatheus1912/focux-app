@@ -55,6 +55,9 @@ void main() {
     expect(screen, contains('_searchFocusNode'));
     expect(screen, contains('treinosHomeQueryProvider'));
     expect(screen, contains('treinosHomeTailProvider'));
+    expect(screen, contains('treinosDoAlunoQueryProvider'));
+    expect(screen, contains('treinosDoAlunoTailProvider'));
+    expect(screen, contains('treinosDoAlunoPageProvider'));
     expect(screen, isNot(contains('class _TreinosHeader')));
     expect(screen, isNot(contains('class _TreinosErrorState')));
     expect(screen, isNot(contains('class _EmptyState')));
