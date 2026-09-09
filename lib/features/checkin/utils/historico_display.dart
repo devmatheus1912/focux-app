@@ -76,13 +76,11 @@ String historicoStickyLabel(String status) =>
 String historicoDetalheSubtitle({
   required String status,
   String? iniciadoEm,
-  String? freshness,
 }) {
   final parts = <String>[
     historicoStatusLabel(status),
     if (historicoDateLabel(iniciadoEm).isNotEmpty)
       historicoDateLabel(iniciadoEm),
-    if ((freshness ?? '').trim().isNotEmpty) freshness!.trim(),
   ];
   return parts.join(' · ');
 }

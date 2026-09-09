@@ -147,15 +147,7 @@ String leadFollowUpValue(String? proximoContato) {
   }
 }
 
-String leadHubSubtitle({
-  required String? status,
-  String? freshness,
-}) {
-  final parts = <String>[leadStatusLabel(status)];
-  final stamp = freshness?.trim();
-  if (stamp != null && stamp.isNotEmpty) parts.add(stamp);
-  return parts.join(' · ');
-}
+String leadHubSubtitle({required String? status}) => leadStatusLabel(status);
 
 String leadCountLabel(int count) {
   if (count == 1) return '1 lead';

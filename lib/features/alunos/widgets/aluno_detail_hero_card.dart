@@ -20,7 +20,6 @@ class AlunoDetailHeroCard extends StatelessWidget {
     required this.primary,
     this.compactContactPriority = false,
     this.onDefineObjective,
-    this.freshnessLabel,
   });
 
   final Aluno aluno;
@@ -28,7 +27,6 @@ class AlunoDetailHeroCard extends StatelessWidget {
   final Color primary;
   final bool compactContactPriority;
   final VoidCallback? onDefineObjective;
-  final String? freshnessLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +44,6 @@ class AlunoDetailHeroCard extends StatelessWidget {
       objectiveDefined: objectiveDefined,
       objective: objective,
       contextLine: contextLine,
-      freshness: freshnessLabel,
     );
     final showStatusBadge = alunoHeroShouldShowStatusBadge(
       signal: signal,

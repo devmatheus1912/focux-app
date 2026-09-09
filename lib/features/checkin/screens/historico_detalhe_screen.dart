@@ -150,7 +150,6 @@ class _HistoricoDetalheScreenState
                   )
                   : _DetalheBody(
                     execucao: execucao,
-                    freshness: freshness,
                     secao: _secao,
                     onSecao: (value) => setState(() => _secao = value),
                     onRefresh: _carregar,
@@ -166,7 +165,6 @@ class _HistoricoDetalheScreenState
 class _DetalheBody extends StatelessWidget {
   const _DetalheBody({
     required this.execucao,
-    required this.freshness,
     required this.secao,
     required this.onSecao,
     required this.onRefresh,
@@ -175,7 +173,6 @@ class _DetalheBody extends StatelessWidget {
   });
 
   final ExecucaoTreino execucao;
-  final String? freshness;
   final String secao;
   final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
@@ -220,65 +217,45 @@ class _DetalheBody extends StatelessWidget {
                     subtitle: historicoDetalheSubtitle(
                       status: execucao.status,
                       iniciadoEm: execucao.iniciadoEm,
-                      freshness: freshness,
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OperationalMetricTile(
-                          label: 'Exercícios',
-                          value: historicoExerciciosMetric(
-                            done: done,
-                            total: total,
-                          ),
-                          hint: historicoCountLabel(total),
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                      ),
-                      const SizedBox(width: TokensStrip.s2),
-                      Expanded(
-                        child: OperationalMetricTile(
-                          label: 'Status',
-                          value: historicoStatusLabel(execucao.status),
-                          hint: historicoDateLabel(execucao.iniciadoEm).isEmpty
-                              ? 'Nesta sessão'
-                              : historicoDateLabel(execucao.iniciadoEm),
-                          color: concluido ? EagleTokens.good : EagleTokens.warn,
-                          isDark: isDark,
-                          emphasis:
-                              concluido
-                                  ? OperationalMetricEmphasis.normal
-                                  : OperationalMetricEmphasis.alert,
-                        ),
-                      ),
-                    ],
+                  OperationalMetricTile(
+                    label: 'Exercícios',
+                    value: historicoExerciciosMetric(done: done, total: total),
+                    hint: historicoCountLabel(total),
+                    color: primary,
+                    isDark: isDark,
                   ),
                   const SizedBox(height: TokensStrip.s2),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OperationalMetricTile(
-                          label: 'Duração',
-                          value: duracao ?? '—',
-                          hint: concluido ? 'Sessão fechada' : 'Em andamento',
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                      ),
-                      const SizedBox(width: TokensStrip.s2),
-                      Expanded(
-                        child: OperationalMetricTile(
-                          label: 'Recordes',
-                          value: historicoPrMetric(recordes),
-                          hint: historicoPrHint(recordes),
-                          color: primary,
-                          isDark: isDark,
-                        ),
-                      ),
-                    ],
+                  OperationalMetricTile(
+                    label: 'Status',
+                    value: historicoStatusLabel(execucao.status),
+                    hint: historicoDateLabel(execucao.iniciadoEm).isEmpty
+                        ? 'Nesta sessão'
+                        : historicoDateLabel(execucao.iniciadoEm),
+                    color: concluido ? EagleTokens.good : EagleTokens.warn,
+                    isDark: isDark,
+                    emphasis:
+                        concluido
+                            ? OperationalMetricEmphasis.normal
+                            : OperationalMetricEmphasis.alert,
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  OperationalMetricTile(
+                    label: 'Duração',
+                    value: duracao ?? '—',
+                    hint: concluido ? 'Sessão fechada' : 'Em andamento',
+                    color: primary,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  OperationalMetricTile(
+                    label: 'Recordes',
+                    value: historicoPrMetric(recordes),
+                    hint: historicoPrHint(recordes),
+                    color: primary,
+                    isDark: isDark,
                   ),
                   const SizedBox(height: TokensStrip.s3),
                   Wrap(
@@ -296,6 +273,12 @@ class _DetalheBody extends StatelessWidget {
                         accent: primary,
                         isDark: isDark,
                         onPressed: () => context.push('/checkin/treinos'),
+                      ),
+                      DashboardHomeActionChip(
+                        label: 'Hoje',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed: () => context.push('/dashboard/aluno'),
                       ),
                     ],
                   ),

@@ -422,7 +422,6 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
                   loadingInteracoes: _loadingInteracoes,
                   interacoes: _interacoes,
                   isDark: Theme.of(context).brightness == Brightness.dark,
-                  freshnessLabel: FxHubFreshness.fromFetchedAt(_fetchedAt),
                   sticky: sticky,
                   secao: _secao,
                   onSecao: (value) => setState(() => _secao = value),

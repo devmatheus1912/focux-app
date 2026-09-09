@@ -56,29 +56,15 @@ void main() {
       );
     });
 
-    test('joins freshness outside contact priority', () {
+    test('undefined objective keeps context only', () {
       expect(
         alunoHeroIdentitySubtitle(
           compactContactPriority: false,
-          objectiveDefined: true,
-          objective: 'Hipertrofia',
+          objectiveDefined: false,
+          objective: 'Sem objetivo',
           contextLine: 'Priorize contato hoje',
-          freshness: 'Atualizado agora',
         ),
-        'Hipertrofia · Priorize contato hoje · Atualizado agora',
-      );
-    });
-
-    test('contact priority omits freshness', () {
-      expect(
-        alunoHeroIdentitySubtitle(
-          compactContactPriority: true,
-          objectiveDefined: true,
-          objective: 'Hipertrofia',
-          contextLine: 'Priorize contato hoje',
-          freshness: 'Atualizado agora',
-        ),
-        'Hipertrofia',
+        'Priorize contato hoje',
       );
     });
   });
