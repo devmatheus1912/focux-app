@@ -27,11 +27,13 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';
-import '../../planos/data/plano_features_bff_cache.dart';
 import '../../dashboard/utils/dashboard_onboarding_logic.dart';
+import '../../planos/data/plano_features_bff_cache.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../utils/onboarding_wizard_display.dart';
+import '../utils/onboarding_wizard_normalize.dart';
 import '../widgets/setup_step_widgets.dart';
 
 part 'onboarding_wizard_screen_actions.part.dart';
@@ -70,7 +72,16 @@ class _OnboardingWizardScreenState
   }
 
   Future<void> _load({bool silent = false}) async {
-    final cached = OnboardingWizardClientCache.getIfFresh();
+    final landingCompleta =
+        ref.read(planoFeaturesProvider).valueOrNull?.landingCompleta ?? false;
+    final cachedRaw = OnboardingWizardClientCache.getIfFresh();
+    final cached =
+        cachedRaw == null
+            ? null
+            : normalizeOnboardingWizard(
+              cachedRaw,
+              landingCompleta: landingCompleta,
+            );
     final keepFold = silent && _wizard != null;
     if (!keepFold) {
       if (cached != null) {
@@ -88,15 +99,22 @@ class _OnboardingWizardScreenState
       }
     }
     try {
-      final w =
+      final raw =
           await OnboardingRepository(ref.read(apiClientProvider)).wizard();
       if (!mounted) return;
-      OnboardingWizardClientCache.put(w);
+      final liveLanding =
+          ref.read(planoFeaturesProvider).valueOrNull?.landingCompleta ??
+          landingCompleta;
+      final w = normalizeOnboardingWizard(
+        raw,
+        landingCompleta: liveLanding,
+      );
+      OnboardingWizardClientCache.put(raw);
       final completed = w.completedCount;
       if (completed > _previousCompleted && _previousCompleted > 0) {
         HapticFeedback.mediumImpact();
         _evictHomeCaches();
-        OnboardingWizardClientCache.put(w);
+        OnboardingWizardClientCache.put(raw);
       }
       if (w.allStepsDone && !_celebratedAllDone) {
         HapticFeedback.heavyImpact();

@@ -21,28 +21,35 @@ class OnboardingStatusData {
     required this.progressoPercentual,
   });
 
-  /// Etapas visíveis no card "Sua ativação" — espelha o backend (7 passos).
-  List<bool> get etapasConcluidas => [
-    perfilCompleto,
+  /// Ordem canônica: aluno → treino → perfil → PIX → pacote → hábito → link.
+  List<bool> etapasConcluidas({bool includeLinkBio = true}) => [
     primeiroAlunoAdicionado,
     primeiroTreinoCriado,
+    perfilCompleto,
+    pagamentoConfigurado,
     pacoteCriado,
     habitoConfigurado,
-    pagamentoConfigurado,
-    linkBioConfigurado,
+    if (includeLinkBio) linkBioConfigurado,
   ];
 
-  int get etapasTotal => etapasConcluidas.length;
+  int etapasTotal({bool includeLinkBio = true}) =>
+      etapasConcluidas(includeLinkBio: includeLinkBio).length;
 
-  int get etapasFeitas => etapasConcluidas.where((done) => done).length;
+  int etapasFeitas({bool includeLinkBio = true}) =>
+      etapasConcluidas(
+        includeLinkBio: includeLinkBio,
+      ).where((done) => done).length;
 
   /// Progresso derivado das etapas exibidas (evita % divergente da UI).
-  int get progressoExibido {
-    if (etapasTotal == 0) return 0;
-    return (etapasFeitas * 100 / etapasTotal).round();
+  int progressoExibido({bool includeLinkBio = true}) {
+    final total = etapasTotal(includeLinkBio: includeLinkBio);
+    if (total == 0) return 0;
+    return (etapasFeitas(includeLinkBio: includeLinkBio) * 100 / total).round();
   }
 
-  bool get ativacaoCompleta => etapasFeitas >= etapasTotal;
+  bool ativacaoCompleta({bool includeLinkBio = true}) =>
+      etapasFeitas(includeLinkBio: includeLinkBio) >=
+      etapasTotal(includeLinkBio: includeLinkBio);
 
   factory OnboardingStatusData.fromJson(Map<String, dynamic> json) {
     return OnboardingStatusData(
