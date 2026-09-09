@@ -24,11 +24,14 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('.registrar('));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
-    expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
-    expect(screen, contains("label: 'Aluno'"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains("label: 'Evolução'"));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('percGordura'));
+    expect(screen, contains('circCintura'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('person_add')));
     expect(screen, isNot(contains('DropdownButton')));

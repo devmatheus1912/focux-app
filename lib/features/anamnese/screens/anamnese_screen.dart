@@ -20,11 +20,11 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/anamnese_repository.dart';
@@ -50,6 +50,7 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
   bool _acting = false;
   String? _erro;
   DateTime? _fetchedAt;
+  var _secao = anamneseSecaoParq;
 
   AnamneseRepository get _repo =>
       AnamneseRepository(ref.read(apiClientProvider));
@@ -338,12 +339,46 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
                   title: anamneseStatusLabel(a.status),
                   subtitle: anamneseStatusSubtitle(a.status),
                 ),
+                const SizedBox(height: TokensStrip.s4),
+                OperationalMetricTile(
+                  label: 'Status',
+                  value: anamneseStatusLabel(a.status),
+                  hint: anamneseStatusSubtitle(a.status),
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                OperationalMetricTile(
+                  label: 'PAR-Q+',
+                  value: anamneseParqMetricValue(a),
+                  hint: anamneseParqMetricHint(a),
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                OperationalMetricTile(
+                  label: 'Alertas',
+                  value: anamneseAlertasMetricValue(a),
+                  hint: anamneseAlertasMetricHint(a),
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                OperationalMetricTile(
+                  label: 'Agenda',
+                  value: anamneseDispMetricValue(a),
+                  hint: 'Disponibilidade semanal',
+                  color: primary,
+                  isDark: isDark,
+                ),
                 _AnamneseBody(
                   anamnese: a,
                   acting: _acting,
                   isDark: isDark,
                   primary: primary,
                   alunoId: widget.alunoId,
+                  secao: _secao,
+                  onSecao: (value) => setState(() => _secao = value),
                   onSolicitar: _solicitar,
                   onRevisar: _revisar,
                 ),

@@ -7,6 +7,8 @@ class _AnamneseBody extends StatelessWidget {
     required this.isDark,
     required this.primary,
     required this.alunoId,
+    required this.secao,
+    required this.onSecao,
     required this.onSolicitar,
     required this.onRevisar,
   });
@@ -16,6 +18,8 @@ class _AnamneseBody extends StatelessWidget {
   final bool isDark;
   final Color primary;
   final int alunoId;
+  final String secao;
+  final ValueChanged<String> onSecao;
   final VoidCallback onSolicitar;
   final Future<void> Function({
     required String status,
@@ -32,8 +36,64 @@ class _AnamneseBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const SizedBox(height: TokensStrip.s4),
+        Wrap(
+          spacing: TokensStrip.s2,
+          runSpacing: TokensStrip.s2,
+          children: [
+            DashboardHomeActionChip(
+              label: 'Lista',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => safePopOrGo(context, '/alunos/$alunoId'),
+            ),
+            DashboardHomeActionChip(
+              label: 'Evolução',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/alunos/$alunoId/evolucao'),
+            ),
+            DashboardHomeActionChip(
+              label: 'Chat',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/alunos/$alunoId/chat'),
+            ),
+            if (!a.isNaoIniciada && !a.isSolicitada)
+              DashboardHomeActionChip(
+                label: 'Pedir atestado',
+                accent: primary,
+                isDark: isDark,
+                enabled: !acting,
+                onPressed:
+                    () => onRevisar(
+                      status: AnamneseStatus.precisaAtestado,
+                      title: 'Pedir atestado',
+                      subtitle:
+                          'Oriente o aluno sobre o que o atestado deve cobrir.',
+                      confirmLabel: 'Pedir atestado',
+                      pedirAtestado: true,
+                    ),
+              ),
+            if (a.isPreenchida || a.isPrecisaAtestado)
+              DashboardHomeActionChip(
+                label: 'Pedir atualização',
+                accent: primary,
+                isDark: isDark,
+                enabled: !acting,
+                onPressed:
+                    () => onRevisar(
+                      status: AnamneseStatus.solicitada,
+                      title: 'Pedir atualização',
+                      subtitle:
+                          'O aluno será notificado para atualizar a ficha.',
+                      confirmLabel: 'Pedir atualização',
+                    ),
+              ),
+          ],
+        ),
         if (a.alertas.isNotEmpty) ...[
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: TokensStrip.s3),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
@@ -68,87 +128,16 @@ class _AnamneseBody extends StatelessWidget {
             subtitle:
                 'O aluno foi notificado. Quando enviar, você revisa aqui.',
           ),
-        ] else ...[
+        ] else if (a.personalPodeRevisar) ...[
           const SizedBox(height: TokensStrip.s4),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              DashboardHomeActionChip(
-                label: 'Aluno',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId'),
-              ),
-              if (!a.isNaoIniciada && !a.isSolicitada)
-                DashboardHomeActionChip(
-                  label: 'Pedir atestado',
-                  accent: primary,
-                  isDark: isDark,
-                  enabled: !acting,
-                  onPressed:
-                      () => onRevisar(
-                        status: AnamneseStatus.precisaAtestado,
-                        title: 'Pedir atestado',
-                        subtitle:
-                            'Oriente o aluno sobre o que o atestado deve cobrir.',
-                        confirmLabel: 'Pedir atestado',
-                        pedirAtestado: true,
-                      ),
-                ),
-              if (a.isPreenchida || a.isPrecisaAtestado)
-                DashboardHomeActionChip(
-                  label: 'Pedir atualização',
-                  accent: primary,
-                  isDark: isDark,
-                  enabled: !acting,
-                  onPressed:
-                      () => onRevisar(
-                        status: AnamneseStatus.solicitada,
-                        title: 'Pedir atualização',
-                        subtitle:
-                            'O aluno será notificado para atualizar a ficha.',
-                        confirmLabel: 'Pedir atualização',
-                      ),
-                ),
-              if (!a.isNaoIniciada)
-                DashboardHomeActionChip(
-                  label: 'Solicitar de novo',
-                  accent: primary,
-                  isDark: isDark,
-                  enabled: !acting,
-                  onPressed: onSolicitar,
-                ),
-              DashboardHomeActionChip(
-                label: 'Chat',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId/chat'),
-              ),
-            ],
+          AlunoSegmentedChoice(
+            options: anamneseDetalheSecoes,
+            selected: secao,
+            isDark: isDark,
+            onSelect: onSecao,
           ),
-          if (a.personalPodeRevisar) _AnamneseFicha(anamnese: a),
-        ],
-        if (a.isNaoIniciada || (a.isSolicitada && !a.personalPodeRevisar)) ...[
-          const SizedBox(height: TokensStrip.s4),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              DashboardHomeActionChip(
-                label: 'Aluno',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId'),
-              ),
-              DashboardHomeActionChip(
-                label: 'Chat',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/alunos/$alunoId/chat'),
-              ),
-            ],
-          ),
+          const SizedBox(height: TokensStrip.s3),
+          _AnamneseFicha(anamnese: a, secao: secao),
         ],
       ],
     );
@@ -156,129 +145,71 @@ class _AnamneseBody extends StatelessWidget {
 }
 
 class _AnamneseFicha extends StatelessWidget {
-  const _AnamneseFicha({required this.anamnese});
+  const _AnamneseFicha({required this.anamnese, required this.secao});
 
   final Anamnese anamnese;
+  final String secao;
 
   @override
   Widget build(BuildContext context) {
     final a = anamnese;
+    final rows = switch (secao) {
+      anamneseSecaoSaude => [
+        ('Histórico médico', anamneseTextOrDash(a.historicoMedico)),
+        ('Cirurgias', anamneseTextOrDash(a.cirurgias)),
+        ('Dores crônicas', anamneseTextOrDash(a.doresCronicas)),
+        ('Lesões / limitações', anamneseTextOrDash(a.lesoes)),
+        ('Medicamentos', anamneseTextOrDash(a.medicamentos)),
+        ('Alergias', anamneseTextOrDash(a.alergias)),
+        ('Gestação / pós-parto', anamneseTextOrDash(a.gestacaoPosParto)),
+        ('Histórico familiar CV', anamneseTextOrDash(a.historicoFamiliarCv)),
+        ('Sintomas CV', anamneseTextOrDash(a.sintomasCv)),
+      ],
+      anamneseSecaoHabitos => [
+        ('Sono', anamneseSonoHorasLabel(a.sonoHoras)),
+        ('Qualidade do sono', anamneseTextOrDash(a.qualidadeSono)),
+        ('Nível de estresse', anamneseTextOrDash(a.nivelEstresse)),
+        ('Tabagismo', anamneseTextOrDash(a.tabagismo)),
+        ('Álcool', anamneseTextOrDash(a.alcool)),
+        ('Observações', anamneseTextOrDash(a.observacoes)),
+        ('Notas', anamneseTextOrDash(a.notasProfissional)),
+        ('Atestado', anamneseTextOrDash(a.atestadoObs)),
+      ],
+      anamneseSecaoTreino => [
+        ('Objetivo', anamneseTextOrDash(a.objetivo)),
+        ('Objetivo detalhado', anamneseTextOrDash(a.objetivoDetalhado)),
+        (
+          'Disponibilidade',
+          a.disponibilidadeSemanal == null
+              ? '—'
+              : anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
+        ),
+        ('Preferências de treino', anamneseTextOrDash(a.preferenciasTreino)),
+        ('Restrições alimentares', anamneseTextOrDash(a.restricoesAlimentares)),
+        ('Histórico de atividade', anamneseTextOrDash(a.historicoAtividade)),
+        ('Motivo de interrupções', anamneseTextOrDash(a.motivoInterrupcoes)),
+        ('Motivação atual', anamneseTextOrDash(a.motivacaoAtual)),
+        ('Algo mais', anamneseTextOrDash(a.algoMais)),
+      ],
+      _ => [
+        for (final q in anamneseParqPerguntas)
+          (q.label, anamneseBoolLabel(anamneseParqValue(a, q.key))),
+        if ((a.parqOutraRazaoDetalhe ?? '').trim().isNotEmpty)
+          ('Detalhe (outra razão)', a.parqOutraRazaoDetalhe!.trim()),
+      ],
+    };
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'PAR-Q+',
-          caption:
-              a.parqCompleto == true
-                  ? (a.parqPositivo == true
-                      ? 'Respostas positivas — atenção.'
-                      : 'Questionário completo.')
-                  : 'Questionário incompleto ou não enviado.',
-          children: [
-            for (var i = 0; i < anamneseParqPerguntas.length; i++)
-              FxSettingsTile(
-                fxIcon: 'alert-triangle',
-                label: anamneseParqPerguntas[i].label,
-                value: anamneseBoolLabel(
-                  anamneseParqValue(a, anamneseParqPerguntas[i].key),
-                ),
-                showDivider:
-                    i < anamneseParqPerguntas.length - 1 ||
-                    (a.parqOutraRazaoDetalhe ?? '').trim().isNotEmpty,
-                danger:
-                    anamneseParqValue(a, anamneseParqPerguntas[i].key) == true,
-              ),
-            if ((a.parqOutraRazaoDetalhe ?? '').trim().isNotEmpty)
-              FxSettingsTile(
-                fxIcon: 'help',
-                label: 'Detalhe (outra razão)',
-                value: a.parqOutraRazaoDetalhe!.trim(),
-                showDivider: false,
-              ),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Saúde',
-          caption: 'Preenchido pelo aluno — só leitura.',
-          children: [
-            _ro('Histórico médico', a.historicoMedico, 'article'),
-            _ro('Cirurgias', a.cirurgias, 'alert-triangle'),
-            _ro('Dores crônicas', a.doresCronicas, 'zap'),
-            _ro('Lesões / limitações', a.lesoes, 'trend'),
-            _ro('Medicamentos', a.medicamentos, 'spark'),
-            _ro('Alergias', a.alergias, 'alert-triangle'),
-            _ro('Gestação / pós-parto', a.gestacaoPosParto, 'users'),
-            _ro('Histórico familiar CV', a.historicoFamiliarCv, 'users'),
-            _ro('Sintomas CV', a.sintomasCv, 'flame', showDivider: false),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Hábitos',
-          children: [
-            FxSettingsTile(
-              fxIcon: 'moon',
-              label: 'Sono',
-              value: anamneseSonoHorasLabel(a.sonoHoras),
-            ),
-            _ro('Qualidade do sono', a.qualidadeSono, 'moon'),
-            _ro('Nível de estresse', a.nivelEstresse, 'zap'),
-            _ro('Tabagismo', a.tabagismo, 'x'),
-            _ro('Álcool', a.alcool, 'spark'),
-            _ro('Observações', a.observacoes, 'article', showDivider: false),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Treino e objetivos',
-          caption: 'Contexto de saúde — restrição alimentar não é dieta.',
-          children: [
-            _ro('Objetivo', a.objetivo, 'target'),
-            _ro('Objetivo detalhado', a.objetivoDetalhado, 'target'),
-            FxSettingsTile(
-              fxIcon: 'calendar',
-              label: 'Disponibilidade',
-              value:
-                  a.disponibilidadeSemanal == null
-                      ? '—'
-                      : anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
-            ),
-            _ro('Preferências de treino', a.preferenciasTreino, 'dumbbell'),
-            _ro('Restrições alimentares', a.restricoesAlimentares, 'spark'),
-            _ro('Histórico de atividade', a.historicoAtividade, 'trend'),
-            _ro('Motivo de interrupções', a.motivoInterrupcoes, 'x'),
-            _ro('Motivação atual', a.motivacaoAtual, 'flame'),
-            _ro('Algo mais', a.algoMais, 'message-circle', showDivider: false),
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          header: 'Notas do profissional',
-          caption: 'Só você edita na revisão.',
-          children: [
-            _ro('Notas', a.notasProfissional, 'article'),
-            _ro('Atestado', a.atestadoObs, 'circle-check', showDivider: false),
-          ],
-        ),
+        for (final row in rows)
+          FxSatelliteListTile(
+            title: row.$1,
+            titleCase: false,
+            subtitle: Text(row.$2),
+          ),
       ],
     );
   }
-}
-
-FxSettingsTile _ro(
-  String label,
-  String? value,
-  String icon, {
-  bool showDivider = true,
-}) {
-  return FxSettingsTile(
-    fxIcon: icon,
-    label: label,
-    value: anamneseTextOrDash(value),
-    showDivider: showDivider,
-  );
 }
 
 class _AlertaChip extends StatelessWidget {

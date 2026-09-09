@@ -35,6 +35,8 @@ import '../widgets/alerta_detalhe_help_sheet.dart';
 import '../widgets/alerta_detalhe_situacao.dart';
 import '../widgets/alerta_enviar_mensagem_sheet.dart';
 
+part 'alerta_detalhe_screen_nav.part.dart';
+
 class AlertaDetalheScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
@@ -333,9 +335,6 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                               title: nome,
                               subtitle: alertaHubSubtitle(
                                 statusFinanceiro: _detalhe!.statusFinanceiro,
-                                freshness: FxHubFreshness.fromFetchedAt(
-                                  _fetchedAt,
-                                ),
                               ),
                             ),
                             const SizedBox(height: TokensStrip.s4),
@@ -393,30 +392,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                       : OperationalMetricEmphasis.normal,
                             ),
                             const SizedBox(height: TokensStrip.s4),
-                            Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                DashboardHomeActionChip(
-                                  label: 'Aluno',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed: () => context.push(
-                                    '/alunos/${widget.alunoId}',
-                                    extra: nome,
-                                  ),
-                                ),
-                                DashboardHomeActionChip(
-                                  label: 'Chat',
-                                  accent: primary,
-                                  isDark: isDark,
-                                  onPressed: () => context.push(
-                                    '/alunos/${widget.alunoId}/chat',
-                                    extra: nome,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            _chips(nome: nome, primary: primary, isDark: isDark),
                             const SizedBox(height: TokensStrip.s4),
                             AlunoSegmentedChoice(
                               options: alertaDetalheSecoes,

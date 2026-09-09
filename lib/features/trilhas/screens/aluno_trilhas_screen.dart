@@ -7,6 +7,8 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -36,13 +38,67 @@ class AlunoTrilhasScreen extends ConsumerStatefulWidget {
 class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
   DateTime? _fetchedAt;
   String _filtro = trilhaFiltroAndamento;
+  final _mais = <TrilhaModel>[];
+  var _nextPage = 1;
+  var _hasMore = false;
+  var _loadingMore = false;
 
   Future<void> _refresh() async {
+    _mais.clear();
+    _nextPage = 1;
+    _hasMore = false;
     ref.invalidate(trilhasMinhasProvider);
     try {
-      await ref.read(trilhasMinhasProvider.future);
-      if (mounted) setState(() => _fetchedAt = DateTime.now());
+      final lista = await ref.read(trilhasMinhasProvider.future);
+      if (mounted) {
+        setState(() {
+          _fetchedAt = DateTime.now();
+          _hasMore = lista.hasMore;
+        });
+      }
     } catch (_) {}
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final next = await ref
+          .read(trilhasRepositoryProvider)
+          .listarMinhas(page: _nextPage);
+      if (!mounted) return;
+      setState(() {
+        _mais.addAll(next.items);
+        _nextPage += 1;
+        _hasMore = next.hasMore;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _loadingMore = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
+  Future<void> _concluirMarco(TrilhaModel trilha, MarcoModel marco) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Concluir etapa?',
+      subtitle: marco.titulo,
+      message: 'Marca esta etapa da trilha ${trilha.titulo}.',
+      confirmLabel: 'Concluir',
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref
+          .read(trilhasRepositoryProvider)
+          .concluirMarco(trilhaId: trilha.id, marcoId: marco.id);
+      if (mounted) FeedbackHelper.showSuccess(context, 'Etapa concluída.');
+      await _refresh();
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 
   void _stampFreshness() {
@@ -99,10 +155,16 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                         onRetry: _refresh,
                         title: 'Não conseguimos carregar as trilhas',
                       ),
-                  data: (trilhas) {
+                  data: (lista) {
                     _stampFreshness();
+                    final merged = lista.append(
+                      TrilhaLista(
+                        items: _mais,
+                        hasMore: _mais.isEmpty ? lista.hasMore : _hasMore,
+                      ),
+                    );
                     return FxContentWidthLimiter(
-                      child: _buildBody(trilhas, primary, chrome),
+                      child: _buildBody(merged, primary, chrome),
                     );
                   },
                 ),
@@ -131,10 +193,11 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
   }
 
   Widget _buildBody(
-    List<TrilhaModel> trilhas,
+    TrilhaLista lista,
     Color primary,
     bool isDark,
   ) {
+    final trilhas = lista.items;
     final visiveis = trilhaFiltradas(trilhas, _filtro);
     return RefreshIndicator(
       onRefresh: _refresh,
@@ -179,7 +242,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           const SizedBox(height: TokensStrip.s4),
           OperationalMetricTile(
             label: 'Ativas',
-            value: '${trilhaAtivasCount(trilhas)}',
+            value: '${trilhaListaAtivas(lista)}',
             hint:
                 trilhas.isEmpty
                     ? 'Nenhuma trilha ainda'
@@ -190,7 +253,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           const SizedBox(height: TokensStrip.s2),
           OperationalMetricTile(
             label: 'Progresso',
-            value: trilhaProgressoMedioLabel(trilhas),
+            value: trilhaListaProgressoLabel(lista),
             hint: 'Média das suas trilhas',
             color: primary,
             isDark: isDark,
@@ -209,8 +272,8 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           const SizedBox(height: TokensStrip.s2),
           OperationalMetricTile(
             label: 'Prazo',
-            value: trilhaPrazoMetricValue(trilhas),
-            hint: trilhaPrazoMetricHint(trilhas),
+            value: trilhaListaPrazoValue(lista),
+            hint: trilhaListaPrazoHint(lista),
             color: primary,
             isDark: isDark,
           ),
@@ -259,7 +322,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           else ...[
             const DashboardSectionHeader(title: 'Trilhas'),
             const SizedBox(height: TokensStrip.s3),
-            for (final trilha in visiveis)
+            for (final trilha in visiveis) ...[
               FxSatelliteListTile(
                 title: trilha.titulo,
                 titleCase: false,
@@ -272,6 +335,25 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                   color: primary,
                 ),
                 trailing: Text(trilhaValorAtualLabel(trilha)),
+              ),
+              if (trilhaProximoMarco(trilha) case final marco?)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+                  child: DashboardHomeActionChip(
+                    label: 'Concluir ${marco.titulo}',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: () => _concluirMarco(trilha, marco),
+                  ),
+                ),
+            ],
+            if (lista.hasMore)
+              DashboardHomeActionChip(
+                label: _loadingMore ? 'Carregando…' : 'Carregar mais',
+                accent: primary,
+                isDark: isDark,
+                enabled: !_loadingMore,
+                onPressed: _carregarMais,
               ),
           ],
         ],

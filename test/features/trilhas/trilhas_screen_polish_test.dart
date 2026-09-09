@@ -37,7 +37,9 @@ void main() {
     expect(screen, contains('/alunos/\$alunoId/chat'));
     expect(screen, contains('/alunos/\$alunoId/evolucao'));
     expect(screen, contains("label: 'Lista'"));
-    expect(screen, contains('trilhaPrazoMetricValue'));
+    expect(screen, contains('trilhaListaPrazoValue'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('page:'));
     expect(screen, contains('trilhaPrazoIso'));
     expect(screen, contains('subtitle: freshness'));
     expect(screen, isNot(contains('TabBar')));

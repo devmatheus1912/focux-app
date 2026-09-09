@@ -85,6 +85,42 @@ String anamneseTextOrDash(String? value) {
   return t.isEmpty ? '—' : t;
 }
 
+const anamneseSecaoParq = 'parq';
+const anamneseSecaoSaude = 'saude';
+const anamneseSecaoHabitos = 'habitos';
+const anamneseSecaoTreino = 'treino';
+
+const anamneseDetalheSecoes = [
+  (value: anamneseSecaoParq, label: 'PAR-Q+'),
+  (value: anamneseSecaoSaude, label: 'Saúde'),
+  (value: anamneseSecaoHabitos, label: 'Hábitos'),
+  (value: anamneseSecaoTreino, label: 'Treino'),
+];
+
+String anamneseParqMetricValue(Anamnese a) {
+  if (a.parqPositivo == true) return 'Atenção';
+  if (a.parqCompleto == true) return 'Ok';
+  return '—';
+}
+
+String anamneseParqMetricHint(Anamnese a) {
+  if (a.parqPositivo == true) return 'Resposta positiva no questionário';
+  if (a.parqCompleto == true) return 'Questionário completo';
+  return 'Ainda sem PAR-Q+';
+}
+
+String anamneseAlertasMetricValue(Anamnese a) => '${a.alertas.length}';
+
+String anamneseAlertasMetricHint(Anamnese a) {
+  if (a.alertas.isEmpty) return 'Nenhum alerta na ficha';
+  return 'Pontos de atenção';
+}
+
+String anamneseDispMetricValue(Anamnese a) {
+  if (a.disponibilidadeSemanal == null) return '—';
+  return anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!);
+}
+
 String anamneseSonoHorasLabel(int? horas) {
   if (horas == null) return '—';
   if (horas <= 1) return '1 hora';

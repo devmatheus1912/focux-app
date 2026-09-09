@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../financeiro/data/financeiro_repository.dart';
 
 class LandingServiceItem {
   final String titulo;
@@ -110,6 +111,7 @@ class PerfilPersonal {
   final List<LandingFaqItem> faq;
   final int? readinessPercent;
   final List<String>? readinessMissing;
+  final ResumoMensal? resumoMensal;
 
   PerfilPersonal({
     required this.id,
@@ -160,6 +162,7 @@ class PerfilPersonal {
     this.faq = const [],
     this.readinessPercent,
     this.readinessMissing,
+    this.resumoMensal,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -227,6 +230,12 @@ class PerfilPersonal {
         (json['readinessMissing'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList(),
+    resumoMensal:
+        json['resumoMensal'] is Map
+            ? ResumoMensal.fromJson(
+              Map<String, dynamic>.from(json['resumoMensal'] as Map),
+            )
+            : null,
   );
 }
 
@@ -235,8 +244,13 @@ class PerfilRepository {
 
   PerfilRepository(ApiClient client) : _dio = client.dio;
 
-  Future<PerfilPersonal> buscar() async {
-    final response = await _dio.get('/api/personal/perfil');
+  Future<PerfilPersonal> buscar({bool incluirResumoMensal = false}) async {
+    final response = await _dio.get(
+      '/api/personal/perfil',
+      queryParameters: {
+        if (incluirResumoMensal) 'incluirResumoMensal': true,
+      },
+    );
     return PerfilPersonal.fromJson(response.data as Map<String, dynamic>);
   }
 

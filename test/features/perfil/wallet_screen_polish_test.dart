@@ -42,5 +42,7 @@ void main() {
     expect(screen, contains('walletPixStatusValue'));
     expect(screen, contains('totalPrevisto.format()'));
     expect(screen, contains('if (showSticky)'));
+    expect(screen, contains('perfilWalletProvider'));
+    expect(screen, contains('resumoMensal'));
   });
 }

@@ -17,7 +17,10 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('solicitar'));
@@ -29,7 +32,9 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAnamneseHelpSheet'));
     expect(screen, contains("'Solicitar anamnese'"));
-    expect(screen, contains("label: 'Aluno'"));
+    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains("label: 'Evolução'"));
+    expect(screen, contains("'/alunos/\$alunoId/evolucao'"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('Slider(')));
