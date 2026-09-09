@@ -9,6 +9,7 @@ class SetupStepCatalogEntry {
     required this.actionRoute,
     required this.estimatedMinutes,
     required this.isDone,
+    this.requiresLandingCompleta = false,
   });
 
   final String id;
@@ -18,19 +19,15 @@ class SetupStepCatalogEntry {
   final String actionRoute;
   final int estimatedMinutes;
   final bool Function(OnboardingStatusData data) isDone;
+
+  /// Passo de marketing (link/landing) — só no checklist com capability.
+  final bool requiresLandingCompleta;
 }
 
-/// Espelha as 7 etapas do backend (`OnboardingService.getGuide`).
+/// Ordem de ativação: aluno → treino → perfil operacional → PIX → pacote →
+/// hábitos → link na bio (Enterprise). Espelha o guia canônico do produto;
+/// o BFF `/wizard` é normalizado no cliente para esta ordem.
 final setupStepCatalog = [
-  SetupStepCatalogEntry(
-    id: 'perfil',
-    title: 'Complete seu perfil',
-    description: 'Cor da marca e bio profissional.',
-    icon: 'person',
-    actionRoute: '/perfil/editar',
-    estimatedMinutes: 2,
-    isDone: (d) => d.perfilCompleto,
-  ),
   SetupStepCatalogEntry(
     id: 'primeiro-aluno',
     title: 'Cadastre seu primeiro aluno',
@@ -48,6 +45,24 @@ final setupStepCatalog = [
     actionRoute: '/treinos/novo',
     estimatedMinutes: 3,
     isDone: (d) => d.primeiroTreinoCriado,
+  ),
+  SetupStepCatalogEntry(
+    id: 'perfil',
+    title: 'Complete seu perfil',
+    description: 'Foto, bio e contato profissional.',
+    icon: 'person',
+    actionRoute: '/perfil/editar',
+    estimatedMinutes: 2,
+    isDone: (d) => d.perfilCompleto,
+  ),
+  SetupStepCatalogEntry(
+    id: 'pagamento',
+    title: 'Configure o recebimento',
+    description: 'Chave PIX para receber no app.',
+    icon: 'attach_money',
+    actionRoute: '/perfil/wallet',
+    estimatedMinutes: 1,
+    isDone: (d) => d.pagamentoConfigurado,
   ),
   SetupStepCatalogEntry(
     id: 'pacote',
@@ -68,15 +83,6 @@ final setupStepCatalog = [
     isDone: (d) => d.habitoConfigurado,
   ),
   SetupStepCatalogEntry(
-    id: 'pagamento',
-    title: 'Configure o recebimento',
-    description: 'Chave PIX para receber no app.',
-    icon: 'attach_money',
-    actionRoute: '/perfil/wallet',
-    estimatedMinutes: 1,
-    isDone: (d) => d.pagamentoConfigurado,
-  ),
-  SetupStepCatalogEntry(
     id: 'link-bio',
     title: 'Crie seu link na bio',
     description: 'Página pública para captação.',
@@ -84,16 +90,36 @@ final setupStepCatalog = [
     actionRoute: '/perfil/landing-editor',
     estimatedMinutes: 2,
     isDone: (d) => d.linkBioConfigurado,
+    requiresLandingCompleta: true,
   ),
 ];
 
-SetupStepCatalogEntry? nextSetupStep(OnboardingStatusData data) {
-  for (final step in setupStepCatalog) {
+/// Passos visíveis no plano atual (esconde link/marca sem capability).
+List<SetupStepCatalogEntry> visibleSetupSteps({
+  required bool landingCompleta,
+}) {
+  return setupStepCatalog
+      .where(
+        (step) => !step.requiresLandingCompleta || landingCompleta,
+      )
+      .toList(growable: false);
+}
+
+SetupStepCatalogEntry? nextSetupStep(
+  OnboardingStatusData data, {
+  bool landingCompleta = false,
+}) {
+  for (final step in visibleSetupSteps(landingCompleta: landingCompleta)) {
     if (!step.isDone(data)) return step;
   }
   return null;
 }
 
-List<SetupStepCatalogEntry> pendingSetupSteps(OnboardingStatusData data) {
-  return setupStepCatalog.where((step) => !step.isDone(data)).toList();
+List<SetupStepCatalogEntry> pendingSetupSteps(
+  OnboardingStatusData data, {
+  bool landingCompleta = false,
+}) {
+  return visibleSetupSteps(landingCompleta: landingCompleta)
+      .where((step) => !step.isDone(data))
+      .toList();
 }

@@ -111,9 +111,15 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 }
 
                 final onboardingFromHome = home.onboardingResumo;
+                final landingCompleta =
+                    planoFromHome?.landingCompleta ??
+                    ref.watch(planoFeaturesProvider).valueOrNull?.landingCompleta ??
+                    false;
                 final onboardingIncomplete =
                     onboardingFromHome != null &&
-                    !onboardingFromHome.ativacaoCompleta;
+                    !onboardingFromHome.ativacaoCompleta(
+                      includeLinkBio: landingCompleta,
+                    );
                 final primeiroTreinoCriado =
                     onboardingFromHome?.primeiroTreinoCriado ?? false;
                 if (_focusPreferenceLoaded &&
@@ -266,7 +272,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 alunosScore: home.commandCenter.alunosScore,
                                 homePlanoFeatures: home.planoFeatures,
                                 onboardingCompleto:
-                                    onboardingFromHome?.ativacaoCompleta ??
+                                    onboardingFromHome?.ativacaoCompleta(
+                                      includeLinkBio: landingCompleta,
+                                    ) ??
                                     false,
                                 toolsSectionKey: _toolsSectionKey,
                                 onOpenRelatorio:
