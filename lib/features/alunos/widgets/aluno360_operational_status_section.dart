@@ -17,7 +17,6 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/alertas_config_from_home.dart';
 import '../utils/aluno360_operacao_logic.dart';
-import '../utils/aluno360_copilot_outreach_logic.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
@@ -42,17 +41,14 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
   final AderenciaSemanalBundle? aderenciaBundle;
 
   void _openDestination(
-    BuildContext context,
-    WidgetRef ref, {
+    BuildContext context, {
     required OperacaoStatusCardKind kind,
     required Aluno360OperacaoSnapshot? operacao,
   }) {
     HapticFeedback.selectionClick();
-    final contactPriority = operacao?.contactPriority ?? false;
     final dest = resolveOperacaoStatusCardDestination(
       kind: kind,
-      contactPriority: contactPriority,
-      hasWearableHistory: _hasWearable(ref),
+      contactPriority: operacao?.contactPriority ?? false,
       proximaAcao: operacao?.effectiveProxima,
     );
 
@@ -63,32 +59,19 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         context.push('/alunos/$alunoId/engajamento', extra: aluno.nome);
       case OperacaoStatusCardDestination.treinos:
         context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
-      case OperacaoStatusCardDestination.recovery:
-        // Recovery insight vive na própria aba Operação — sem deep link de treino.
-        return;
       case OperacaoStatusCardDestination.noop:
         return;
     }
-  }
-
-  bool _hasWearable(WidgetRef ref) {
-    final async = ref.read(aluno360OperacaoBundleProvider(alunoId));
-    return async.maybeWhen(
-      data:
-          (bundle) =>
-              bundle.hasWearableHistory == true ||
-              alunoTemHistoricoWearable(bundle.recoverySnapshot),
-      orElse: () => false,
-    );
   }
 
   void _openChat(
     BuildContext context, {
     required Aluno360OperacaoSnapshot? operacao,
   }) {
-    final message = operacao?.outreachMessage.trim() ?? '';
     final draft =
-        operacao?.effectiveProxima?.mensagemSugerida?.trim() ?? message;
+        operacao?.effectiveProxima?.mensagemSugerida?.trim() ??
+        operacao?.outreachMessage.trim() ??
+        '';
     if (draft.isNotEmpty) {
       showAlunoOutreachMessageSheet(
         context,
@@ -193,7 +176,6 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           onTap:
               () => _openDestination(
                 context,
-                ref,
                 kind: kind,
                 operacao: operacao,
               ),

@@ -48,7 +48,6 @@ enum OperacaoStatusCardDestination {
   chat,
   engajamento,
   treinos,
-  recovery,
   noop,
 }
 
@@ -56,7 +55,6 @@ enum OperacaoStatusCardDestination {
 OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
   required OperacaoStatusCardKind kind,
   required bool contactPriority,
-  bool hasWearableHistory = false,
   ProximaAcaoResumo? proximaAcao,
 }) {
   switch (kind) {
@@ -72,9 +70,8 @@ OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
     case OperacaoStatusCardKind.aderencia:
       return OperacaoStatusCardDestination.engajamento;
     case OperacaoStatusCardKind.prontidao:
-      return hasWearableHistory
-          ? OperacaoStatusCardDestination.recovery
-          : OperacaoStatusCardDestination.noop;
+      // Sem deep link de treino; detalhe wearable fica na própria aba.
+      return OperacaoStatusCardDestination.noop;
     case OperacaoStatusCardKind.ultimoTreino:
     case OperacaoStatusCardKind.checkins7d:
       return OperacaoStatusCardDestination.treinos;

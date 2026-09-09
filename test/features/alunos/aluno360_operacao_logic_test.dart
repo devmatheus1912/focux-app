@@ -1239,12 +1239,11 @@ void main() {
       );
     });
 
-    test('Prontidão sem wearable é noop', () {
+    test('Prontidão não abre treinos', () {
       expect(
         resolveOperacaoStatusCardDestination(
           kind: OperacaoStatusCardKind.prontidao,
           contactPriority: false,
-          hasWearableHistory: false,
         ),
         OperacaoStatusCardDestination.noop,
       );
