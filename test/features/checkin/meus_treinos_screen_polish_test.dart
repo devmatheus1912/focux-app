@@ -15,6 +15,9 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('meusTreinosPagina'));
+    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('_hasMore'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

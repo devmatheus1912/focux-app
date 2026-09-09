@@ -7,18 +7,24 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   final _errosComunsCtrl = TextEditingController();
   final _contraindicacoesCtrl = TextEditingController();
 
-  Modalidade? _modalidade = Modalidade.musculacao;
-  PadraoMovimento? _padraoMovimento;
-  GrupoMuscular? _grupoMuscularPrimario;
-  Dificuldade? _dificuldade = Dificuldade.iniciante;
-  final Set<Equipamento> _equipamentos = {
+  static const _defaultEquipamentos = {
     Equipamento.halter,
     Equipamento.barra,
     Equipamento.maquina,
     Equipamento.polia,
     Equipamento.banco,
   };
-  final Set<Espaco> _espacos = {Espaco.academiaCompleta, Espaco.academiaBasica};
+  static const _defaultEspacos = {
+    Espaco.academiaCompleta,
+    Espaco.academiaBasica,
+  };
+
+  Modalidade? _modalidade = Modalidade.musculacao;
+  PadraoMovimento? _padraoMovimento;
+  GrupoMuscular? _grupoMuscularPrimario;
+  Dificuldade? _dificuldade = Dificuldade.iniciante;
+  final Set<Equipamento> _equipamentos = {..._defaultEquipamentos};
+  final Set<Espaco> _espacos = {..._defaultEspacos};
   bool _unilateral = false;
   bool _showGuidance = false;
   bool _loading = false;
@@ -26,12 +32,77 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   String? _error;
   String? _selectedSetupLabel = 'Academia';
 
+  // Baseline for edit dirty-check (filled after prefill).
+  String _baselineNome = '';
+  String _baselineDescricao = '';
+  String _baselineErros = '';
+  String _baselineContra = '';
+  Modalidade? _baselineModalidade;
+  PadraoMovimento? _baselinePadrao;
+  GrupoMuscular? _baselineGrupo;
+  Dificuldade? _baselineDificuldade;
+  Set<Equipamento> _baselineEquipamentos = {};
+  Set<Espaco> _baselineEspacos = {};
+  bool _baselineUnilateral = false;
+  bool _baselineShowGuidance = false;
+
   bool get _isEdit => widget.exercicioId != null;
+
+  bool get _dirty {
+    if (_isEdit) {
+      if (!_didPrefill) return false;
+      return _nomeCtrl.text != _baselineNome ||
+          _descricaoCtrl.text != _baselineDescricao ||
+          _errosComunsCtrl.text != _baselineErros ||
+          _contraindicacoesCtrl.text != _baselineContra ||
+          _modalidade != _baselineModalidade ||
+          _padraoMovimento != _baselinePadrao ||
+          _grupoMuscularPrimario != _baselineGrupo ||
+          _dificuldade != _baselineDificuldade ||
+          !_setEquals(_equipamentos, _baselineEquipamentos) ||
+          !_setEquals(_espacos, _baselineEspacos) ||
+          _unilateral != _baselineUnilateral ||
+          _showGuidance != _baselineShowGuidance;
+    }
+    return _nomeCtrl.text.trim().isNotEmpty ||
+        _descricaoCtrl.text.trim().isNotEmpty ||
+        _errosComunsCtrl.text.trim().isNotEmpty ||
+        _contraindicacoesCtrl.text.trim().isNotEmpty ||
+        _grupoMuscularPrimario != null ||
+        _padraoMovimento != null ||
+        _unilateral ||
+        _modalidade != Modalidade.musculacao ||
+        _dificuldade != Dificuldade.iniciante ||
+        !_setEquals(_equipamentos, _defaultEquipamentos) ||
+        !_setEquals(_espacos, _defaultEspacos) ||
+        _selectedSetupLabel != 'Academia' ||
+        _showGuidance;
+  }
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: _isEdit ? 'Descartar alterações?' : 'Descartar cadastro?',
+        message:
+            _isEdit
+                ? 'O que você alterou não será salvo.'
+                : 'O que você preencheu não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/exercicios');
+  }
 
   @override
   void initState() {
     super.initState();
     _nomeCtrl.addListener(_onFormChanged);
+    _descricaoCtrl.addListener(_onFormChanged);
+    _errosComunsCtrl.addListener(_onFormChanged);
+    _contraindicacoesCtrl.addListener(_onFormChanged);
     if (_isEdit) {
       Future.microtask(_prefillFromApi);
     }
@@ -79,6 +150,18 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         ex.descricao?.trim().isNotEmpty == true ||
         ex.errosComuns?.trim().isNotEmpty == true ||
         ex.contraindicacoes?.trim().isNotEmpty == true;
+    _baselineNome = _nomeCtrl.text;
+    _baselineDescricao = _descricaoCtrl.text;
+    _baselineErros = _errosComunsCtrl.text;
+    _baselineContra = _contraindicacoesCtrl.text;
+    _baselineModalidade = _modalidade;
+    _baselinePadrao = _padraoMovimento;
+    _baselineGrupo = _grupoMuscularPrimario;
+    _baselineDificuldade = _dificuldade;
+    _baselineEquipamentos = {..._equipamentos};
+    _baselineEspacos = {..._espacos};
+    _baselineUnilateral = _unilateral;
+    _baselineShowGuidance = _showGuidance;
   }
 
   Map<String, String> _formPayload() {
@@ -179,6 +262,9 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   @override
   void dispose() {
     _nomeCtrl.removeListener(_onFormChanged);
+    _descricaoCtrl.removeListener(_onFormChanged);
+    _errosComunsCtrl.removeListener(_onFormChanged);
+    _contraindicacoesCtrl.removeListener(_onFormChanged);
     _nomeCtrl.dispose();
     _descricaoCtrl.dispose();
     _errosComunsCtrl.dispose();
@@ -237,11 +323,23 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
 
     return fxScreenA11yScope(
       label: screenTitle,
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: screenTitle,
-          onBack: () => safePopOrGo(context, '/exercicios'),
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: _cancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Cancelar'),
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como cadastrar',
@@ -253,37 +351,28 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         bottomNavigationBar:
             loadingEdit
                 ? null
-                : SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
-                    ),
-                    child: Semantics(
-                      button: true,
-                      enabled: canSubmit,
-                      label:
-                          _loading
-                              ? (_isEdit
-                                  ? l10n.exerciseSavingSemantics
-                                  : l10n.exerciseCreatingSemantics)
-                              : canSubmit
-                              ? (_isEdit
-                                  ? l10n.exerciseSaveSemantics
-                                  : l10n.exerciseRegisterSemantics)
-                              : l10n.exerciseRegisterDisabledSemantics,
-                      child: FxLiquidPrimaryButton(
-                        label: _isEdit ? l10n.save : l10n.exerciseRegister,
-                        loading: _loading,
-                        loadingLabel:
-                            _isEdit
-                                ? l10n.exerciseSaving
-                                : l10n.exerciseCreating,
-                        onPressed: canSubmit ? _submit : null,
-                      ),
+                : FxFormStickyBar(
+                  child: Semantics(
+                    button: true,
+                    enabled: canSubmit,
+                    label:
+                        _loading
+                            ? (_isEdit
+                                ? l10n.exerciseSavingSemantics
+                                : l10n.exerciseCreatingSemantics)
+                            : canSubmit
+                            ? (_isEdit
+                                ? l10n.exerciseSaveSemantics
+                                : l10n.exerciseRegisterSemantics)
+                            : l10n.exerciseRegisterDisabledSemantics,
+                    child: FxLiquidPrimaryButton(
+                      label: _isEdit ? l10n.save : l10n.exerciseRegister,
+                      loading: _loading,
+                      loadingLabel:
+                          _isEdit
+                              ? l10n.exerciseSaving
+                              : l10n.exerciseCreating,
+                      onPressed: canSubmit ? _submit : null,
                     ),
                   ),
                 ),
@@ -293,6 +382,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                 : SafeArea(
                   bottom: false,
                   child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: const EdgeInsets.fromLTRB(
                       FxSettingsLayout.pageInset,
                       6,
@@ -485,9 +576,13 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                   ),
                 ),
       ),
+      ),
     );
   }
 }
+
+bool _setEquals<T>(Set<T> a, Set<T> b) =>
+    a.length == b.length && a.containsAll(b);
 
 String _filterSummary({required int equipamentos, required int espacos}) {
   if (equipamentos == 0 && espacos == 0) {

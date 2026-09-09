@@ -16,7 +16,9 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -51,6 +53,29 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   bool _salvando = false;
   String? _error;
 
+  bool get _dirty =>
+      _nome.text.trim() != widget.aluno.nome.trim() ||
+      _email.text.trim() != widget.aluno.email.trim() ||
+      _telefone.text.trim() != (widget.aluno.telefone ?? '').trim() ||
+      _whatsapp.text.trim() != (widget.aluno.whatsapp ?? '').trim() ||
+      _objetivo.text.trim() != (widget.aluno.objetivo ?? '').trim() ||
+      _genero != widget.aluno.genero ||
+      _tipoConsultoria != (widget.aluno.tipoConsultoria ?? 'ONLINE');
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar alterações?',
+        message: 'O que você alterou não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/alunos/${widget.aluno.id}');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -61,10 +86,24 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _objetivo = TextEditingController(text: widget.aluno.objetivo ?? '');
     _genero = widget.aluno.genero;
     _tipoConsultoria = widget.aluno.tipoConsultoria ?? 'ONLINE';
+    _nome.addListener(_onFormChanged);
+    _email.addListener(_onFormChanged);
+    _telefone.addListener(_onFormChanged);
+    _whatsapp.addListener(_onFormChanged);
+    _objetivo.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _nome.removeListener(_onFormChanged);
+    _email.removeListener(_onFormChanged);
+    _telefone.removeListener(_onFormChanged);
+    _whatsapp.removeListener(_onFormChanged);
+    _objetivo.removeListener(_onFormChanged);
     _nome.dispose();
     _email.dispose();
     _telefone.dispose();
@@ -133,12 +172,24 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Editar Aluno',
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Editar Aluno',
           subtitle: editarAlunoHubSubtitle(),
-          onBack: () => safePopOrGo(context, '/alunos/${widget.aluno.id}'),
+          leadingWidth: 92,
+          leading: TextButton(
+            onPressed: _cancel,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Cancelar'),
+          ),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como editar',
@@ -149,28 +200,19 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
-            ),
-            child: Semantics(
-              button: true,
-              enabled: !_salvando,
-              label:
-                  _salvando
-                      ? 'Salvando alterações do aluno'
-                      : 'Salvar alterações do aluno',
-              child: FxLiquidPrimaryButton(
-                label: 'Salvar',
-                loading: _salvando,
-                loadingLabel: 'Salvando…',
-                onPressed: _salvando ? null : _salvar,
-              ),
+        bottomNavigationBar: FxFormStickyBar(
+          child: Semantics(
+            button: true,
+            enabled: !_salvando,
+            label:
+                _salvando
+                    ? 'Salvando alterações do aluno'
+                    : 'Salvar alterações do aluno',
+            child: FxLiquidPrimaryButton(
+              label: 'Salvar',
+              loading: _salvando,
+              loadingLabel: 'Salvando…',
+              onPressed: _salvando ? null : _salvar,
             ),
           ),
         ),
@@ -179,6 +221,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             bottom: false,
             child: FxContentWidthLimiter(
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
                   8,
@@ -417,6 +461,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
