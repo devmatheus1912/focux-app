@@ -42,6 +42,31 @@ void main() {
     );
   });
 
+  test('grupoAulaCountLabel e filtro', () {
+    expect(grupoAulaCountLabel(0), 'Nenhuma aula');
+    expect(grupoAulaCountLabel(2), '2 aulas');
+    expect(
+      grupoAulaMatches(
+        titulo: 'Funcional',
+        localAula: 'Praia',
+        lotada: false,
+        query: 'praia',
+        chip: GrupoAulaChip.abertas,
+      ),
+      isTrue,
+    );
+    expect(
+      grupoAulaMatches(
+        titulo: 'Funcional',
+        localAula: 'Praia',
+        lotada: true,
+        query: '',
+        chip: GrupoAulaChip.abertas,
+      ),
+      isFalse,
+    );
+  });
+
   test('grupoAulaHubSubtitle junta freshness', () {
     expect(grupoAulaHubSubtitle(null), 'Turmas abertas e vagas');
     expect(

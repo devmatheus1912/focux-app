@@ -11,5 +11,14 @@ void main() {
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('/perfil/ferramentas'));
+    expect(screen, isNot(contains('FilledButton')));
+    expect(screen, isNot(contains('Color(')));
   });
 }

@@ -105,3 +105,37 @@ String grupoAulaHubSubtitle(String? freshness) {
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
 }
+
+enum GrupoAulaChip { todas, abertas, lotadas }
+
+String grupoAulaCountLabel(int count) {
+  if (count <= 0) return 'Nenhuma aula';
+  if (count == 1) return '1 aula';
+  return '$count aulas';
+}
+
+String grupoAulaChipLabel(GrupoAulaChip chip) => switch (chip) {
+  GrupoAulaChip.todas => 'Todas',
+  GrupoAulaChip.abertas => 'Abertas',
+  GrupoAulaChip.lotadas => 'Lotadas',
+};
+
+bool grupoAulaMatches({
+  required String titulo,
+  required String? localAula,
+  required bool lotada,
+  required String query,
+  required GrupoAulaChip chip,
+}) {
+  final matchesChip = switch (chip) {
+    GrupoAulaChip.todas => true,
+    GrupoAulaChip.abertas => !lotada,
+    GrupoAulaChip.lotadas => lotada,
+  };
+  if (!matchesChip) return false;
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  if (titulo.toLowerCase().contains(q)) return true;
+  final local = localAula?.toLowerCase() ?? '';
+  return local.contains(q);
+}

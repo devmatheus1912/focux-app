@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
+import '../utils/galeria_display.dart';
 
 class GalleryItem {
   final int id;
@@ -24,8 +25,13 @@ class GalleryItem {
 class GaleriaRepository {
   final Dio _dio;
   GaleriaRepository(ApiClient client) : _dio = client.dio;
-  Future<List<GalleryItem>> listar() async {
-    final r = await _dio.get('/api/personal/gallery');
+  Future<List<GalleryItem>> listar() async => (await listarPagina()).content;
+
+  Future<Pagina<GalleryItem>> listarPagina({int page = 0}) async {
+    final r = await _dio.get(
+      '/api/personal/gallery',
+        queryParameters: {'page': page, 'size': galeriaMaxFotos},
+    );
     final data = r.data;
     if (data is! Map) {
       throw FormatException(
@@ -35,7 +41,7 @@ class GaleriaRepository {
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (item) => GalleryItem.fromJson(Map<String, dynamic>.from(item as Map)),
-    ).content;
+    );
   }
 
   Future<GalleryItem> adicionar({
