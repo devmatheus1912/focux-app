@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,10 +21,12 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -33,6 +37,8 @@ import '../../subscription/models/subscription_plan.dart';
 import '../data/loja_repository.dart';
 import '../models/loja_pedido.dart';
 import '../utils/loja_hub_display.dart';
+
+part 'loja_screen_actions.part.dart';
 
 final lojaRepositoryProvider = Provider(
   (ref) => LojaRepository(ref.read(apiClientProvider)),
@@ -46,13 +52,17 @@ class LojaScreen extends ConsumerStatefulWidget {
 }
 
 class _LojaScreenState extends ConsumerState<LojaScreen> {
+  final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
+  Timer? _searchDebounce;
   LojaHubView _view = LojaHubView.vitrine;
-  List<Pacote> _pacotes = [];
-  List<LojaPedido> _pedidos = [];
+  List<Pacote> _pacotes = const [];
+  List<LojaPedido> _pedidos = const [];
   PlanoFeatures? _planoFromHome;
-  bool _loading = true;
+  var _loading = true;
   String? _error;
   DateTime? _fetchedAt;
+  var _query = '';
 
   @override
   void initState() {
@@ -60,26 +70,59 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     _load();
   }
 
-  Future<void> _abrirVista() async {
-    final picked = await showFxInsetPickerSheet<LojaHubView>(
-      context,
-      title: 'Ver',
-      selected: _view,
-      items: [
-        for (final v in LojaHubView.values)
-          FxInsetPickerSheetItem(value: v, label: lojaHubViewLabel(v)),
-      ],
-    );
-    if (!mounted || picked == null || picked == _view) return;
-    setState(() => _view = picked);
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchCtrl.dispose();
+    _searchFocus.dispose();
+    super.dispose();
   }
+
+  void _onQueryChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      setState(() => _query = value);
+    });
+  }
+
+  void _clearQuery() {
+    _searchDebounce?.cancel();
+    _searchCtrl.clear();
+    setState(() => _query = '');
+  }
+
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/perfil/ferramentas');
+  }
+
+  List<Pacote> get _visiblePacotes => _pacotes
+      .where(
+        (p) => lojaPacoteMatches(
+          titulo: p.titulo,
+          descricao: p.descricao,
+          query: _query,
+        ),
+      )
+      .toList();
+
+  List<LojaPedido> get _visiblePedidos => _pedidos
+      .where(
+        (p) => lojaPedidoMatches(
+          buyerNome: p.buyerNome,
+          buyerEmail: p.buyerEmail,
+          status: p.status,
+          query: _query,
+        ),
+      )
+      .toList();
 
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
     });
-
     try {
       final home = await ref.read(lojaRepositoryProvider).getHome();
       if (!mounted) return;
@@ -99,169 +142,14 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     }
   }
 
-  Future<void> _checkoutPacote(Pacote pacote) async {
-    final emailCtrl = TextEditingController();
-    final nomeCtrl = TextEditingController();
-    final ok = await showFxFormSheet(
-      context,
-      title: 'Checkout — ${pacote.titulo}',
-      subtitle: formatBrlCurrency(pacote.valor),
-      icon: Icons.qr_code_rounded,
-      confirmLabel: 'Gerar PIX',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AlunoInsetFormField(
-            controller: emailCtrl,
-            label: 'Email do comprador',
-            icon: Icons.mail_outline,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          AlunoInsetFormField(
-            controller: nomeCtrl,
-            label: 'Nome (opcional)',
-            icon: Icons.person_outline,
-            textCapitalization: TextCapitalization.words,
-            showDivider: false,
-          ),
-        ],
-      ),
-    );
-
-    final email = emailCtrl.text.trim();
-    final nome = nomeCtrl.text.trim();
-    emailCtrl.dispose();
-    nomeCtrl.dispose();
-    if (ok != true || email.isEmpty) return;
-
-    AnalyticsService.instance.track(
-      ProductEvents.lojaCheckoutStarted,
-      props: {'feature': 'loja', 'pacote_id': pacote.id},
-    );
-
-    try {
-      final result = await ref.read(lojaRepositoryProvider).checkout(
-        pacoteId: pacote.id,
-        buyerEmail: email,
-        buyerNome: nome.isEmpty ? null : nome,
-      );
-
-      if (!mounted) return;
-
-      final pix = result.pixCopiaECola;
-      await showFxNoticeSheet(
-        context,
-        title: 'PIX gerado',
-        icon: Icons.qr_code_rounded,
-        actionLabel: 'OK',
-        message: pix.isEmpty ? 'Pedido criado.' : pix,
-        extraActions: [
-          if (pix.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: SizedBox(
-                height: 48,
-                child: TextButton(
-                  onPressed: () async {
-                    await copySensitiveToClipboard(pix);
-                    if (!mounted) return;
-                    FeedbackHelper.showSuccess(context, 'Código copiado');
-                  },
-                  child: const Text('Copiar'),
-                ),
-              ),
-            ),
-        ],
-      );
-
-      await _load();
-      if (!mounted) return;
-      setState(() => _view = LojaHubView.pedidos);
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
-  }
-
-  Future<void> _abrirPedido(LojaPedido pedido) async {
-    final pix = lojaPedidoPix(pedido.pixCopiaECola);
-    final pendente = lojaPedidoPendente(pedido.status);
-    await showFxNoticeSheet(
-      context,
-      title: lojaPedidoLabel(
-        buyerNome: pedido.buyerNome,
-        buyerEmail: pedido.buyerEmail,
-      ),
-      icon: Icons.qr_code_rounded,
-      message: lojaPedidoSubtitle(
-        buyerNome: pedido.buyerNome,
-        buyerEmail: pedido.buyerEmail,
-        status: pedido.status,
-      ),
-      extraActions: [
-        if (pix != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: SizedBox(
-              height: 48,
-              child: TextButton(
-                onPressed: () async {
-                  await copySensitiveToClipboard(pix);
-                  if (!mounted) return;
-                  FeedbackHelper.showSuccess(context, 'Código copiado');
-                },
-                child: const Text('Copiar PIX'),
-              ),
-            ),
-          ),
-        if (pendente)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: SizedBox(
-              height: 48,
-              child: Builder(
-                builder: (sheetCtx) => TextButton(
-                  onPressed: () async {
-                    Navigator.of(sheetCtx).pop();
-                    await _confirmarPedido(pedido);
-                  },
-                  child: const Text('Marcar pago'),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _confirmarPedido(LojaPedido pedido) async {
-    final ok = await showFxConfirmSheet(
-      context,
-      title: 'Marcar este PIX como pago?',
-      subtitle: lojaPedidoLabel(
-        buyerNome: pedido.buyerNome,
-        buyerEmail: pedido.buyerEmail,
-      ),
-      message: formatBrlCurrency(pedido.valor),
-      confirmLabel: 'Marcar pago',
-    );
-    if (!ok || !mounted) return;
-    try {
-      await ref.read(lojaRepositoryProvider).confirmar(pedido.id);
-      await _load();
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Pedido marcado como pago');
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final chrome = ShellChrome.of(context);
-    final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final visibleCount = _view == LojaHubView.vitrine
+        ? _visiblePacotes.length
+        : _visiblePedidos.length;
     final planoFromHome = _planoFromHome;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -276,63 +164,195 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
         featureName: 'Loja Digital',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
         capability: 'lojaDigital',
-        child: FxShellScaffold(
-          useMesh: true,
-          constrainWidth: false,
-          appBar: FxShellAppBar(
-            title: 'Loja digital',
-            subtitle: lojaHubSubtitle(
-              view: _view,
-              freshness: freshnessLabel,
-            ),
-            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
-            actions: [
-              ShellHeaderIconButton(
-                icon: 'pix',
-                tooltip: 'Trocar visão',
-                onTap: _abrirVista,
+        child: PopScope(
+          canPop: !keyboardOpen && !_searchFocus.hasFocus,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (keyboardOpen || _searchFocus.hasFocus) {
+              FxKeyboardDismissScope.dismiss();
+              return;
+            }
+            _leave();
+          },
+          child: FxShellScaffold(
+            useMesh: true,
+            dismissKeyboard: true,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Loja digital',
+              subtitle: FxHubFreshness.joinCount(
+                lojaCountLabel(view: _view, count: visibleCount),
+                FxHubFreshness.fromFetchedAt(_fetchedAt),
               ),
-            ],
-          ),
-          body: _loading
-              ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 5),
-                )
-              : _error != null
-              ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: scheme.primary,
-                  message: _error!,
-                  onRetry: _load,
-                )
-              : FxContentWidthLimiter(
-                  child: IndexedStack(
-                    index: _view.index,
-                    children: [_buildVitrine(), _buildPedidos()],
+              onBack: _leave,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar a loja',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Loja digital',
+                    subtitle: 'Vitrine com PIX e pedidos do comprador.',
+                    tips: const [
+                      FxHelpTip(
+                        'Vitrine',
+                        'Toque no pacote para gerar um PIX.',
+                      ),
+                      FxHelpTip(
+                        'Pedidos',
+                        'Toque para copiar o código ou marcar pago.',
+                      ),
+                    ],
                   ),
                 ),
+              ],
+            ),
+            body: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: DecoratedBox(
+                    decoration: fxStripCardDecoration(
+                      context,
+                      accent: scheme.primary,
+                      radius: TokensStrip.rCard,
+                      glowStrength: 0.03,
+                    ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      focusNode: _searchFocus,
+                      onChanged: _onQueryChanged,
+                      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        hintText: _view == LojaHubView.vitrine
+                            ? 'Buscar pacote'
+                            : 'Buscar pedido',
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
+                          color: scheme.primary,
+                          size: 20,
+                        ),
+                        suffixIcon: _query.trim().isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: 'Limpar busca',
+                                onPressed: _clearQuery,
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: chrome.mute,
+                                  size: 18,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    0,
+                    TokensStrip.s4,
+                    TokensStrip.s2,
+                  ),
+                  child: Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      for (final view in LojaHubView.values)
+                        FxToggleChip(
+                          label: lojaHubViewLabel(view),
+                          selected: _view == view,
+                          isDark: chrome.isDark,
+                          onTap: () {
+                            if (_view == view) return;
+                            setState(() => _view = view);
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: _loading
+                      ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 5),
+                        )
+                      : _error != null
+                      ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: scheme.primary,
+                          message: _error!,
+                          onRetry: _load,
+                        )
+                      : FxContentWidthLimiter(
+                          child: IndexedStack(
+                            index: _view.index,
+                            children: [_buildVitrine(), _buildPedidos()],
+                          ),
+                        ),
+                ),
+                if (!_loading && _error == null)
+                  SafeArea(
+                    top: false,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s2,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3 +
+                            MediaQuery.viewInsetsOf(context).bottom,
+                      ),
+                      child: FxLiquidPrimaryButton(
+                        label: 'Ir para planos',
+                        onPressed: () => context.push('/pacotes'),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildVitrine() {
-    if (_pacotes.isEmpty) {
+    final visible = _visiblePacotes;
+    final primary = Theme.of(context).colorScheme.primary;
+    if (visible.isEmpty) {
+      final filtered = _query.trim().isNotEmpty;
       return RefreshIndicator(
+        color: primary,
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: 'spark',
-              title: 'Nenhum pacote na vitrine',
-              subtitle:
-                  'Crie planos em Planos & link de vendas para vender pela loja.',
-              action: FxEmptyAction(
-                label: 'Ir para pacotes',
-                onTap: () => context.push('/pacotes'),
-              ),
+              icon: filtered ? 'search' : 'spark',
+              title: filtered
+                  ? 'Nenhum pacote encontrado'
+                  : 'Nenhum pacote na vitrine',
+              subtitle: filtered
+                  ? 'Ajuste a busca.'
+                  : 'Crie planos em Planos & link de vendas para vender pela loja.',
+              action: filtered
+                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                  : FxEmptyAction(
+                      label: 'Ir para pacotes',
+                      onTap: () => context.push('/pacotes'),
+                    ),
             ),
           ],
         ),
@@ -340,37 +360,20 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     }
 
     return RefreshIndicator(
+      color: primary,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          32,
+          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        itemCount: _pacotes.length + 2,
+        itemCount: visible.length,
         itemBuilder: (context, index) {
-          if (index == 0) {
-            return const DashboardSectionHeader(title: 'Vitrine');
-          }
-          if (index == 1) {
-            return Padding(
-              padding: const EdgeInsets.only(
-                top: TokensStrip.s2,
-                bottom: TokensStrip.s3,
-              ),
-              child: Text(
-                'Toque no pacote para gerar um PIX.',
-                style: FocuxHubTypography.bodyMuted(
-                  color: fxScreenMute(context),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            );
-          }
-          final pacote = _pacotes[index - 2];
+          final pacote = visible[index];
           return FxSatelliteListTile(
             title: pacote.titulo,
             subtitle: Text(
@@ -394,16 +397,28 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
   }
 
   Widget _buildPedidos() {
-    if (_pedidos.isEmpty) {
+    final visible = _visiblePedidos;
+    final primary = Theme.of(context).colorScheme.primary;
+    if (visible.isEmpty) {
+      final filtered = _query.trim().isNotEmpty;
       return RefreshIndicator(
+        color: primary,
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
             FxEmptyState(
-              icon: 'article',
-              title: 'Nenhum pedido ainda',
-              subtitle: 'Gere um PIX na vitrine para ver pedidos aqui.',
+              icon: filtered ? 'search' : 'article',
+              title: filtered
+                  ? 'Nenhum pedido encontrado'
+                  : 'Nenhum pedido ainda',
+              subtitle: filtered
+                  ? 'Ajuste a busca.'
+                  : 'Gere um PIX na vitrine para ver pedidos aqui.',
+              action: filtered
+                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                  : null,
             ),
           ],
         ),
@@ -411,37 +426,20 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     }
 
     return RefreshIndicator(
+      color: primary,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          32,
+          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        itemCount: _pedidos.length + 2,
+        itemCount: visible.length,
         itemBuilder: (context, index) {
-          if (index == 0) {
-            return const DashboardSectionHeader(title: 'Pedidos');
-          }
-          if (index == 1) {
-            return Padding(
-              padding: const EdgeInsets.only(
-                top: TokensStrip.s2,
-                bottom: TokensStrip.s3,
-              ),
-              child: Text(
-                'Toque para copiar o PIX ou marcar pago.',
-                style: FocuxHubTypography.bodyMuted(
-                  color: fxScreenMute(context),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            );
-          }
-          final pedido = _pedidos[index - 2];
+          final pedido = visible[index];
           return FxSatelliteListTile(
             title: lojaPedidoLabel(
               buyerNome: pedido.buyerNome,

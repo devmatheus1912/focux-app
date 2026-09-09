@@ -5,11 +5,39 @@ String lojaHubViewLabel(LojaHubView view) => switch (view) {
   LojaHubView.pedidos => 'Pedidos',
 };
 
-String lojaHubSubtitle({required LojaHubView view, String? freshness}) {
-  final label = lojaHubViewLabel(view);
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return label;
-  return '$label · $stamp';
+String lojaCountLabel({required LojaHubView view, required int count}) {
+  if (view == LojaHubView.vitrine) {
+    if (count <= 0) return 'Nenhum pacote';
+    if (count == 1) return '1 pacote';
+    return '$count pacotes';
+  }
+  if (count <= 0) return 'Nenhum pedido';
+  if (count == 1) return '1 pedido';
+  return '$count pedidos';
+}
+
+bool lojaPacoteMatches({
+  required String titulo,
+  required String? descricao,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  if (titulo.toLowerCase().contains(q)) return true;
+  return (descricao ?? '').toLowerCase().contains(q);
+}
+
+bool lojaPedidoMatches({
+  required String? buyerNome,
+  required String buyerEmail,
+  required String status,
+  required String query,
+}) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return true;
+  if ((buyerNome ?? '').toLowerCase().contains(q)) return true;
+  if (buyerEmail.toLowerCase().contains(q)) return true;
+  return lojaPedidoStatusLabel(status).toLowerCase().contains(q);
 }
 
 String lojaPacoteSubtitle({String? descricao, required int duracaoMeses}) {

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/money/fx_money.dart';
 import 'package:focux_app/features/loja/data/loja_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
@@ -36,7 +37,7 @@ void main() {
     });
     expect(bundle.pacotes, hasLength(1));
     expect(bundle.pacotes.first.titulo, 'Musculação');
-    expect(bundle.pacotes.first.valor, 150);
+    expect(bundle.pacotes.first.valor, FxMoney.parse(150));
     expect(bundle.pedidos, hasLength(1));
     expect(bundle.pedidos.first.buyerEmail, 'ana@test.com');
     expect(bundle.pedidos.first.status, 'PENDENTE');
