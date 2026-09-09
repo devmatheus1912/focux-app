@@ -293,8 +293,15 @@ class AderenciaDia {
   });
 
   factory AderenciaDia.fromJson(Map<String, dynamic> json) => AderenciaDia(
-    data: json['data'] as String? ?? '',
-    labelDia: json['labelDia'] as String? ?? '',
+    // Contrato novo: dia/weekday · legado: data/labelDia.
+    data:
+        json['data'] as String? ??
+        json['dia'] as String? ??
+        '',
+    labelDia:
+        json['labelDia'] as String? ??
+        json['weekday'] as String? ??
+        '',
     checkins: (json['checkins'] as num?)?.toInt() ?? 0,
   );
 

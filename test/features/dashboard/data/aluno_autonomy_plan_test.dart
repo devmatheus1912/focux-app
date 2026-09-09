@@ -122,8 +122,16 @@ void main() {
         ExecucaoTreino(
           treinoId: 7,
           treinoNome: 'Treino A',
-          status: 'PENDENTE',
-          exercicios: const [],
+          status: 'DISPONIVEL',
+          exercicios: [
+            ExecucaoExercicio(
+              id: 1,
+              treinoExercicioId: 1,
+              exercicioNome: 'Supino',
+              seriesFeitas: 0,
+              concluido: false,
+            ),
+          ],
         ),
       ],
       historico: [
@@ -167,6 +175,42 @@ void main() {
     expect(home.narratives.join(' '), contains('Supino'));
   });
 
+  test('ficha aguardando liberacao nao oferece CTA de iniciar', () {
+    final home = buildAlunoHomeExperience(
+      aluno: Aluno(
+        id: 1,
+        nome: 'Aluno Espera',
+        email: 'espera@focux.test',
+        objetivo: 'Hipertrofia',
+        status: 'ATIVO',
+        fotoUrl: 'https://cdn.test/foto.jpg',
+        telefone: '11999999999',
+        whatsapp: '11999999999',
+        genero: 'M',
+        peso: 80,
+        altura: 1.8,
+        dataNascimento: '1995-01-10',
+      ),
+      medidas: [MedidaCorporal(id: 1, data: '2026-05-01', peso: 80)],
+      treinos: [
+        ExecucaoTreino(
+          treinoId: 7,
+          treinoNome: 'Treino A',
+          status: 'AGUARDANDO_LIBERACAO',
+          exercicios: const [],
+        ),
+      ],
+      historico: const [],
+      mensagens: const [],
+      now: DateTime(2026, 5, 5),
+    );
+
+    expect(home.action.mode, AlunoHomeMode.awaitingRelease);
+    expect(home.action.cta, isNot(contains('Treinar')));
+    expect(home.action.route, '/checkin/treinos');
+    expect(home.narratives.join(' '), contains('preparação'));
+  });
+
   test('home experience troca prioridade quando aluno precisa retomar', () {
     final home = buildAlunoHomeExperience(
       aluno: Aluno(
@@ -188,8 +232,16 @@ void main() {
         ExecucaoTreino(
           treinoId: 9,
           treinoNome: 'Treino Leve',
-          status: 'PENDENTE',
-          exercicios: const [],
+          status: 'DISPONIVEL',
+          exercicios: [
+            ExecucaoExercicio(
+              id: 1,
+              treinoExercicioId: 1,
+              exercicioNome: 'Agachamento',
+              seriesFeitas: 0,
+              concluido: false,
+            ),
+          ],
         ),
       ],
       historico: [

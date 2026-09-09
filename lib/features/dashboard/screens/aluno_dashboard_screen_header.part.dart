@@ -495,6 +495,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   final AsyncValue<List<ExecucaoTreino>> historicoAsync;
   final double volumeSemanaKg;
   final double volumeMesKg;
+  final List<RecordePessoal> recordes;
   final bool isDark;
 
   const _PerformanceEvolutionCard({
@@ -502,6 +503,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     required this.volumeSemanaKg,
     required this.volumeMesKg,
     required this.isDark,
+    this.recordes = const [],
   });
 
   @override
@@ -526,8 +528,15 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   .where((treino) => treino.status == 'CONCLUIDO')
                   .toList();
           final ultimaEvolucao = _ultimaEvolucao(treinosConcluidos);
+          final ultimoRecorde = recordes.isEmpty ? null : recordes.first;
           final volumeSemana = volumeSemanaKg;
           final volumeMes = volumeMesKg;
+          final ultimoPrLabel =
+              ultimaEvolucao != null
+                  ? _labelEvolucao(ultimaEvolucao.tipo)
+                  : ultimoRecorde == null
+                  ? '--'
+                  : _fmtRecorde(ultimoRecorde);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -558,9 +567,10 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          ultimaEvolucao == null
+                          ultimaEvolucao == null && ultimoRecorde == null
                               ? 'Registre as séries para o app enxergar carga, repetições e volume.'
-                              : ultimaEvolucao.mensagem,
+                              : ultimaEvolucao?.mensagem ??
+                                  '${ultimoRecorde!.exercicioNome}: ${_fmtRecorde(ultimoRecorde)}',
                           style: TextStyle(color: mute, height: 1.45),
                         ),
                       ],
@@ -574,10 +584,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   Expanded(
                     child: _MiniMetricCard(
                       label: 'Último PR',
-                      value:
-                          ultimaEvolucao == null
-                              ? '--'
-                              : _labelEvolucao(ultimaEvolucao.tipo),
+                      value: ultimoPrLabel,
                       isDark: isDark,
                     ),
                   ),
@@ -667,6 +674,16 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     if (value <= 0) return '--';
     if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}t';
     return '${value.toStringAsFixed(0)}kg';
+  }
+
+  String _fmtRecorde(RecordePessoal recorde) {
+    final carga = recorde.cargaKg;
+    if (carga == null || carga <= 0) return recorde.exercicioNome;
+    final formatted =
+        carga == carga.roundToDouble()
+            ? carga.toStringAsFixed(0)
+            : carga.toStringAsFixed(1);
+    return '${formatted}kg';
   }
 
   String _fmtValor(double value, String unidade) {

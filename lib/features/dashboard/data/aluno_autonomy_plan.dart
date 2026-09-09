@@ -1,6 +1,7 @@
 import '../../alunos/data/aluno_repository.dart';
 import '../../chat/data/chat_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
+import '../../checkin/utils/treino_ficha_status.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 
 enum AlunoTaskPriority { alta, media, baixa }
@@ -12,6 +13,7 @@ enum AlunoHomeMode {
   financialHold,
   evolution,
   noWorkout,
+  awaitingRelease,
   steady,
 }
 
@@ -212,7 +214,10 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
   final hasStudentMessage = mensagens.any(
     (item) => item.remetente.toUpperCase() == 'ALUNO',
   );
-  final hasOpenWorkout = treinos.isNotEmpty;
+  final startable = treinosProntosParaIniciar(treinos);
+  final hasOpenWorkout = startable.isNotEmpty;
+  final hasAwaitingOnly =
+      !hasOpenWorkout && treinos.any(isTreinoAguardandoLiberacao);
   final isInadimplente =
       aluno.inadimplente ||
       aluno.statusFinanceiro.toUpperCase() == 'INADIMPLENTE';
@@ -267,13 +272,25 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         title:
             hasOpenWorkout
                 ? 'Concluir treino da semana'
+                : hasAwaitingOnly
+                ? 'Aguardando liberação da ficha'
                 : 'Solicitar treino ativo',
         description:
             hasOpenWorkout
                 ? 'Treinar pelo app gera histórico de carga, aderência e feedback para o personal.'
+                : hasAwaitingOnly
+                ? 'Seu personal já reservou o treino. Os exercícios aparecem quando forem liberados.'
                 : 'Avise seu personal que você está pronto para receber um treino ativo.',
-        cta: hasOpenWorkout ? 'Treinar' : 'Chamar',
-        route: hasOpenWorkout ? '/checkin/treinos' : '/chat/aluno',
+        cta:
+            hasOpenWorkout
+                ? 'Treinar'
+                : hasAwaitingOnly
+                ? 'Ver status'
+                : 'Chamar',
+        route:
+            hasOpenWorkout || hasAwaitingOnly
+                ? '/checkin/treinos'
+                : '/chat/aluno',
         kind: AlunoTaskKind.treino,
         priority: AlunoTaskPriority.alta,
         done: hasWeeklyWorkout,
@@ -354,11 +371,13 @@ AlunoHomeAction _mainHomeAction({
     );
   }
 
+  final startable = treinosProntosParaIniciar(treinos);
+  final awaiting = treinos.where(isTreinoAguardandoLiberacao).toList();
   final lastWorkout = _latestWorkoutDate(historico);
   final inactiveDays =
       lastWorkout == null ? 99 : now.difference(lastWorkout).inDays;
-  if (inactiveDays >= 7 && treinos.isNotEmpty) {
-    final workout = treinos.first;
+  if (inactiveDays >= 7 && startable.isNotEmpty) {
+    final workout = startable.first;
     return AlunoHomeAction(
       mode: AlunoHomeMode.comeback,
       eyebrow: 'Retomada inteligente',
@@ -371,8 +390,8 @@ AlunoHomeAction _mainHomeAction({
     );
   }
 
-  if (treinos.isNotEmpty) {
-    final workout = treinos.first;
+  if (startable.isNotEmpty) {
+    final workout = startable.first;
     return AlunoHomeAction(
       mode: AlunoHomeMode.workoutReady,
       eyebrow: 'Plano de hoje',
@@ -382,6 +401,19 @@ AlunoHomeAction _mainHomeAction({
       cta: 'Treinar agora',
       route: '/checkin/executar',
       routeExtra: workout.treinoId,
+    );
+  }
+
+  if (awaiting.isNotEmpty) {
+    final workout = awaiting.first;
+    return AlunoHomeAction(
+      mode: AlunoHomeMode.awaitingRelease,
+      eyebrow: 'Em preparação',
+      title: workout.treinoNome,
+      description:
+          'Treino reservado. A ficha abre assim que o personal liberar os exercícios.',
+      cta: 'Ver status do treino',
+      route: '/checkin/treinos',
     );
   }
 
@@ -543,9 +575,13 @@ List<String> _homeNarratives({
           .where((item) => item.remetente.toUpperCase() == 'ALUNO')
           .toList()
         ..sort((a, b) => b.enviadoEm.compareTo(a.enviadoEm));
+  final startable = treinosProntosParaIniciar(treinos);
+  final awaiting = treinos.where(isTreinoAguardandoLiberacao).toList();
   return [
-    if (treinos.isNotEmpty)
-      '$firstName tem ${treinos.first.treinoNome} pronto com foco em ${lens.primaryMetric}.',
+    if (startable.isNotEmpty)
+      '$firstName tem ${startable.first.treinoNome} pronto com foco em ${lens.primaryMetric}.',
+    if (startable.isEmpty && awaiting.isNotEmpty)
+      '${awaiting.first.treinoNome} está em preparação — aguardando liberação dos exercícios.',
     if (completed7 > 0)
       'Você concluiu $completed7 treino${completed7 == 1 ? '' : 's'} nos últimos 7 dias.',
     if (lastEvolution != null) lastEvolution,

@@ -42,6 +42,7 @@ class _State extends ConsumerState<ModoPresencialScreen>
   ExecucaoTreino? _exec;
   bool _loading = true;
   String? _erro;
+  bool _startInFlight = false;
   int _currentIdx = 0;
   Timer? _timer;
   Duration _elapsed = Duration.zero;
@@ -95,6 +96,8 @@ class _State extends ConsumerState<ModoPresencialScreen>
   }
 
   Future<void> _start() async {
+    if (_startInFlight) return;
+    _startInFlight = true;
     try {
       final e = await ref
           .read(checkinRepositoryProvider)
@@ -118,6 +121,8 @@ class _State extends ConsumerState<ModoPresencialScreen>
           _erro = friendlyError(e);
         });
       }
+    } finally {
+      _startInFlight = false;
     }
   }
 

@@ -24,6 +24,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
     required this.aderenciaSemanal,
+    this.aderenciaBundle,
     required this.recoveryAsync,
     required this.autonomiaResumoAsync,
     required this.animateEntrance,
@@ -41,6 +42,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
   final List<Map<String, dynamic>>? aderenciaSemanal;
+  final AderenciaSemanalBundle? aderenciaBundle;
   final AsyncValue<RecoverySnapshot?> recoveryAsync;
   final AsyncValue<AlunoAutonomiaResumo> autonomiaResumoAsync;
   final bool animateEntrance;
@@ -81,6 +83,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
         isDark: isDark,
         primary: primary,
         aderenciaSemanal: aderenciaSemanal,
+        aderenciaBundle: aderenciaBundle,
       ),
       copilotCard: Aluno360CopilotCard(
         aluno: aluno,
