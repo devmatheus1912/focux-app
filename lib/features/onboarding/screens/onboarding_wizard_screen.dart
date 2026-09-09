@@ -34,6 +34,7 @@ import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
 import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';
+import '../utils/setup_action_navigation.dart';
 import '../widgets/setup_step_widgets.dart';
 
 part 'onboarding_wizard_screen_actions.part.dart';
@@ -188,7 +189,7 @@ class _OnboardingWizardScreenState
         ),
       );
     }
-    await context.push<dynamic>(normalizeSetupActionRoute(route));
+    await pushSetupActionRoute(context, ref, route);
     if (mounted) await _load(silent: true);
   }
 
