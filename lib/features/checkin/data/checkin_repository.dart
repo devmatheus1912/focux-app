@@ -347,11 +347,21 @@ class CheckinRepository {
 
   CheckinRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<ExecucaoTreino>> meusTreinos() async {
-    final r = await _dio.get('/api/checkin/meus-treinos');
-    return (r.data as List)
-        .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<List<ExecucaoTreino>> meusTreinos({int page = 0, int size = 100}) async {
+    final r = await _dio.get(
+      '/api/checkin/meus-treinos',
+      queryParameters: {'page': page, 'size': size},
+    );
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/checkin/meus-treinos devolve Pagina, não lista crua.',
+      );
+    }
+    return Pagina.fromJson(
+      Map<String, dynamic>.from(data),
+      (e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>),
+    ).content;
   }
 
   Future<ExecucaoTreino> iniciar(int treinoId) async {
