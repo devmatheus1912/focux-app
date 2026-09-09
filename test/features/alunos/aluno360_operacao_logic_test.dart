@@ -1180,4 +1180,105 @@ void main() {
       expect(weekdayNameFromIso('2026-06-04'), isNotEmpty);
     });
   });
+
+  group('resolveOperacaoStatusCardDestination', () {
+    test('Foco do dia com contactPriority vai para chat', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.focoDoDia,
+          contactPriority: true,
+        ),
+        OperacaoStatusCardDestination.chat,
+      );
+    });
+
+    test('Risco sem contactPriority vai para engajamento', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.risco,
+          contactPriority: false,
+        ),
+        OperacaoStatusCardDestination.engajamento,
+      );
+    });
+
+    test('Risco com contactPriority vai para chat', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.risco,
+          contactPriority: true,
+        ),
+        OperacaoStatusCardDestination.chat,
+      );
+    });
+
+    test('Aderência vai para engajamento', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.aderencia,
+          contactPriority: false,
+        ),
+        OperacaoStatusCardDestination.engajamento,
+      );
+    });
+
+    test('Último treino e check-ins vão para treinos', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.ultimoTreino,
+          contactPriority: true,
+        ),
+        OperacaoStatusCardDestination.treinos,
+      );
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.checkins7d,
+          contactPriority: true,
+        ),
+        OperacaoStatusCardDestination.treinos,
+      );
+    });
+
+    test('Prontidão sem wearable é noop', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.prontidao,
+          contactPriority: false,
+          hasWearableHistory: false,
+        ),
+        OperacaoStatusCardDestination.noop,
+      );
+    });
+
+    test('Foco do dia CONTATO → chat; TREINO → treinos', () {
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.focoDoDia,
+          contactPriority: false,
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Retomar contato',
+            motivo: '',
+            fonte: 'TEST',
+            prioridade: 'P1',
+            tipoAcao: 'CONTATO',
+          ),
+        ),
+        OperacaoStatusCardDestination.chat,
+      );
+      expect(
+        resolveOperacaoStatusCardDestination(
+          kind: OperacaoStatusCardKind.focoDoDia,
+          contactPriority: false,
+          proximaAcao: const ProximaAcaoResumo(
+            acao: 'Atribuir treino',
+            motivo: '',
+            fonte: 'TEST',
+            prioridade: 'P2',
+            tipoAcao: 'TREINO',
+          ),
+        ),
+        OperacaoStatusCardDestination.treinos,
+      );
+    });
+  });
 }
