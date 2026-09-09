@@ -42,16 +42,12 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
 
   void _openDestination(
     BuildContext context, {
-    required OperacaoStatusCardKind kind,
+    required OperacaoStatusCardDestination dest,
     required Aluno360OperacaoSnapshot? operacao,
   }) {
-    HapticFeedback.selectionClick();
-    final dest = resolveOperacaoStatusCardDestination(
-      kind: kind,
-      contactPriority: operacao?.contactPriority ?? false,
-      proximaAcao: operacao?.effectiveProxima,
-    );
+    if (dest == OperacaoStatusCardDestination.noop) return;
 
+    HapticFeedback.selectionClick();
     switch (dest) {
       case OperacaoStatusCardDestination.chat:
         _openChat(context, operacao: operacao);
@@ -170,29 +166,38 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       required OperacaoStatusCardKind kind,
       IconData? icon,
     }) {
+      final dest = resolveOperacaoStatusCardDestination(
+        kind: kind,
+        contactPriority: operacao?.contactPriority ?? false,
+        proximaAcao: operacao?.effectiveProxima,
+      );
+      final tile = OperationalMetricTile(
+        label: label,
+        value: value,
+        hint: hint,
+        color: color,
+        isDark: isDark,
+        leadingIcon: icon,
+        emphasis:
+            alert
+                ? OperationalMetricEmphasis.alert
+                : OperationalMetricEmphasis.normal,
+      );
       return Padding(
         padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-        child: InkWell(
-          onTap:
-              () => _openDestination(
-                context,
-                kind: kind,
-                operacao: operacao,
-              ),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: label,
-            value: value,
-            hint: hint,
-            color: color,
-            isDark: isDark,
-            leadingIcon: icon,
-            emphasis:
-                alert
-                    ? OperationalMetricEmphasis.alert
-                    : OperationalMetricEmphasis.normal,
-          ),
-        ),
+        child:
+            dest == OperacaoStatusCardDestination.noop
+                ? tile
+                : InkWell(
+                  onTap:
+                      () => _openDestination(
+                        context,
+                        dest: dest,
+                        operacao: operacao,
+                      ),
+                  borderRadius: BorderRadius.circular(12),
+                  child: tile,
+                ),
       );
     }
 
