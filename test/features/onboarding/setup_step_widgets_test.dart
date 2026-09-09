@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_command_center_sticky_header.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
+import 'package:focux_app/features/onboarding/utils/setup_action_navigation.dart';
 import 'package:focux_app/features/onboarding/widgets/setup_step_widgets.dart';
 
 void main() {
@@ -11,6 +12,12 @@ void main() {
       expect(normalizeSetupActionRoute('/financeiro'), '/perfil/wallet');
       expect(normalizeSetupActionRoute('/perfil'), '/perfil/editar');
       expect(normalizeSetupActionRoute('/pacotes'), '/pacotes');
+    });
+
+    test('passo perfil do setup aponta para edição com dados', () {
+      expect(isSetupPerfilEditRoute('/perfil'), isTrue);
+      expect(isSetupPerfilEditRoute('/perfil/editar'), isTrue);
+      expect(isSetupPerfilEditRoute('/perfil/wallet'), isFalse);
     });
   });
 

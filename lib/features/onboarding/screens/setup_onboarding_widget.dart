@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/widgets/dashboard_home_activation_strip.dart';
-import '../../perfil/providers/perfil_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../data/onboarding_status_data.dart';
 import '../data/setup_steps_catalog.dart';
 import '../providers/onboarding_provider.dart';
+import '../utils/setup_action_navigation.dart';
 import '../widgets/setup_step_widgets.dart';
 
 class SetupOnboardingWidget extends ConsumerWidget {
@@ -22,20 +22,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
     WidgetRef ref,
     SetupStepCatalogEntry entry,
   ) async {
-    if (entry.id == 'perfil') {
-      try {
-        final perfil = await ref.read(perfilProvider.future);
-        if (context.mounted) {
-          context.push('/perfil/editar', extra: perfil);
-        }
-      } catch (_) {
-        if (context.mounted) context.push('/perfil');
-      }
-      return;
-    }
-    if (context.mounted) {
-      context.push(entry.actionRoute);
-    }
+    await pushSetupActionRoute(context, ref, entry.actionRoute);
   }
 
   @override
