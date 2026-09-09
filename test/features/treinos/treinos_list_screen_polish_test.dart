@@ -53,6 +53,8 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('_searchFocusNode'));
+    expect(screen, contains('treinosHomeQueryProvider'));
+    expect(screen, contains('treinosHomeTailProvider'));
     expect(screen, isNot(contains('class _TreinosHeader')));
     expect(screen, isNot(contains('class _TreinosErrorState')));
     expect(screen, isNot(contains('class _EmptyState')));

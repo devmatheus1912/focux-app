@@ -30,6 +30,10 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('FxHubFreshness.joinCount'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));

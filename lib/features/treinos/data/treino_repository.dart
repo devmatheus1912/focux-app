@@ -176,11 +176,19 @@ class TreinosHomeBundle {
   final List<Treino> treinos;
   final TreinosHomeResumo resumo;
   final TreinosHomeUiHints uiHints;
+  final int page;
+  final int size;
+  final int totalElements;
+  final bool hasNext;
 
   const TreinosHomeBundle({
     required this.treinos,
     required this.resumo,
     required this.uiHints,
+    this.page = 0,
+    this.size = 40,
+    this.totalElements = 0,
+    this.hasNext = false,
   });
 
   factory TreinosHomeBundle.fromJson(Map<String, dynamic> j) {
@@ -188,16 +196,23 @@ class TreinosHomeBundle {
       (j['resumo'] as Map<String, dynamic>?) ?? const {},
     );
     final hintsRaw = j['uiHints'] as Map<String, dynamic>?;
+    final treinos =
+        ((j['treinos'] as List?) ?? const [])
+            .map((e) => Treino.fromHomeItemJson(e as Map<String, dynamic>))
+            .toList();
     return TreinosHomeBundle(
-      treinos:
-          ((j['treinos'] as List?) ?? const [])
-              .map((e) => Treino.fromHomeItemJson(e as Map<String, dynamic>))
-              .toList(),
+      treinos: treinos,
       resumo: resumo,
       uiHints:
           hintsRaw == null
               ? TreinosHomeUiHints.fallback(resumo: resumo)
               : TreinosHomeUiHints.fromJson(hintsRaw),
+      page: (j['page'] as num?)?.toInt() ?? 0,
+      size: (j['size'] as num?)?.toInt() ?? treinos.length,
+      totalElements:
+          (j['totalElements'] as num?)?.toInt() ??
+          resumo.totalPlanos,
+      hasNext: j['hasNext'] == true,
     );
   }
 }
@@ -278,8 +293,20 @@ class TreinoRepository {
   TreinoRepository(ApiClient client) : _dio = client.dio;
 
   /// BFF tipado — first paint da biblioteca (slim + resumo, sem N+1).
-  Future<TreinosHomeBundle> getHome() async {
-    final response = await _dio.get('/api/treinos/home');
+  Future<TreinosHomeBundle> getHome({
+    String? q,
+    int page = 0,
+    int size = 40,
+  }) async {
+    final query = q?.trim() ?? '';
+    final response = await _dio.get(
+      '/api/treinos/home',
+      queryParameters: {
+        'page': page,
+        'size': size,
+        if (query.isNotEmpty) 'q': query,
+      },
+    );
     return TreinosHomeBundle.fromJson(response.data as Map<String, dynamic>);
   }
 

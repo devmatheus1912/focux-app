@@ -33,5 +33,29 @@ void main() {
     expect(bundle.resumo.prontos, 1);
     expect(bundle.uiHints.libraryCaption, '1 pronto · 12 exercícios');
     expect(bundle.uiHints.createCtaLabel, 'Criar treino');
+    expect(bundle.hasNext, isFalse);
+    expect(bundle.totalElements, 1);
+  });
+
+  test('TreinosHomeBundle lê hasNext e totalElements', () {
+    final bundle = TreinosHomeBundle.fromJson({
+      'treinos': const [],
+      'resumo': {
+        'totalPlanos': 80,
+        'prontos': 70,
+        'emMontagem': 10,
+        'templates': 2,
+        'totalExercicios': 400,
+      },
+      'page': 1,
+      'size': 40,
+      'totalElements': 80,
+      'hasNext': true,
+    });
+    expect(bundle.page, 1);
+    expect(bundle.size, 40);
+    expect(bundle.totalElements, 80);
+    expect(bundle.hasNext, isTrue);
+    expect(bundle.resumo.totalPlanos, 80);
   });
 }

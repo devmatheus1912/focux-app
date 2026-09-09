@@ -19,6 +19,8 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -46,6 +48,7 @@ class HabitosPersonalScreen extends ConsumerStatefulWidget {
 
 class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   final _searchCtrl = TextEditingController();
+  final _searchFocus = FocusNode();
   Timer? _debounce;
   var _query = '';
   List<Habito> _habitos = [];
@@ -69,6 +72,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
   void dispose() {
     _debounce?.cancel();
     _searchCtrl.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
@@ -161,21 +165,33 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       });
     }
 
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return fxScreenA11yScope(
       label: 'Hábitos & Compliance',
       child: FeatureGate(
         featureName: 'Habit Coaching',
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'habitCoaching',
-        child: FxShellScaffold(
+        child: PopScope(
+          canPop: !keyboardOpen,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            FxKeyboardDismissScope.dismiss();
+          },
+          child: FxShellScaffold(
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Hábitos & Compliance',
-            subtitle: _loading
-                ? habitoHubSubtitle(freshnessLabel)
-                : '${habitoCountLabel(_habitos.length)}${freshnessLabel == null ? '' : ' · $freshnessLabel'}',
-            onBack: () => safePopOrGo(context, '/perfil/ferramentas'),
+            subtitle: FxHubFreshness.joinCount(
+              habitoCountLabel(_loading ? 0 : _habitos.length),
+              _loading ? null : freshnessLabel,
+            ),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/perfil/ferramentas');
+            },
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar os hábitos',
@@ -191,15 +207,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     ),
                     FxHelpTip(
                       'Novo',
-                      'O mais cria para todos ou para um aluno só.',
+                      'O criar no rodapé abre para todos ou para um aluno só.',
                     ),
                   ],
                 ),
-              ),
-              ShellHeaderIconButton(
-                icon: 'plus',
-                tooltip: 'Novo hábito',
-                onTap: _novoHabito,
               ),
             ],
           ),
@@ -216,7 +227,30 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                     message: _error!,
                     onRetry: _carregar,
                   )
-                  : FxContentWidthLimiter(child: _buildBody()),
+                  : Column(
+                    children: [
+                      Expanded(
+                        child: FxContentWidthLimiter(child: _buildBody()),
+                      ),
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                            TokensStrip.s4,
+                            TokensStrip.s3 +
+                                MediaQuery.viewInsetsOf(context).bottom,
+                          ),
+                          child: FxLiquidPrimaryButton(
+                            label: 'Novo hábito',
+                            onPressed: _novoHabito,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+        ),
         ),
       ),
     );
@@ -324,6 +358,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           ),
           child: TextField(
             controller: _searchCtrl,
+            focusNode: _searchFocus,
             textInputAction: TextInputAction.search,
             onChanged: _onQueryChanged,
             onSubmitted: (value) {

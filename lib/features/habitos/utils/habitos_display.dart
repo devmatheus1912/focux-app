@@ -63,13 +63,6 @@ String habitoCountLabel(int count) {
   return '$count hábitos';
 }
 
-String habitoHubSubtitle(String? freshness) {
-  const base = 'Coaching diário e aderência';
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
-}
-
 String habitoComplianceEmptyTitle(String query) =>
     query.trim().isEmpty ? 'Sem dados ainda' : 'Nenhum aluno encontrado';
 

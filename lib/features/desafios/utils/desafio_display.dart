@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
 
 const desafioTipos = <({String value, String label})>[
   (value: 'HABITOS', label: 'Hábitos'),
@@ -20,12 +21,8 @@ String desafioDuracaoLabel(int dias) {
   return '$dias dias';
 }
 
-String desafioHubSubtitle({required int count, String? freshness}) {
-  final base = desafioCountLabel(count);
-  final stamp = freshness?.trim();
-  if (stamp == null || stamp.isEmpty) return base;
-  return '$base · $stamp';
-}
+String desafioHubSubtitle({required int count, String? freshness}) =>
+    FxHubFreshness.joinCount(desafioCountLabel(count), freshness);
 
 String desafioCountLabel(int count) {
   if (count <= 0) return 'Nenhum desafio';
@@ -80,6 +77,21 @@ bool desafioMatchesFiltro(String tipo, DesafioTipoFiltro filtro) {
   return filtro == DesafioTipoFiltro.habitos
       ? key == 'HABITOS'
       : key == 'TREINOS';
+}
+
+bool desafioMatchesQuery({
+  required String titulo,
+  String? descricao,
+  required String tipo,
+  required String query,
+}) {
+  final needle = query.trim().toLowerCase();
+  if (needle.isEmpty) return true;
+  return [
+    titulo,
+    descricao,
+    desafioTipoLabel(tipo),
+  ].whereType<String>().any((value) => value.toLowerCase().contains(needle));
 }
 
 String desafioDetailPath(int id) => '/desafios/$id';
