@@ -19,7 +19,11 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../alunos/utils/aluno360_client_cache.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../data/checkin_repository.dart';
+import '../data/meus_treinos_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../widgets/checkin_exercise_widgets.dart';
@@ -42,6 +46,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   bool _loading = true;
   String? _loadError;
   bool _concluindo = false;
+  bool _iniciarInFlight = false;
   Timer? _timer;
   Duration _duration = Duration.zero;
   bool _showRestTimer = false;
@@ -86,6 +91,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   Future<void> _iniciar() async {
+    if (_loading && _execucao != null) return;
+    if (_iniciarInFlight) return;
+    _iniciarInFlight = true;
     setState(() {
       _loading = true;
       _loadError = null;
@@ -95,6 +103,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
           .read(checkinRepositoryProvider)
           .iniciar(widget.treinoId);
       if (!mounted) return;
+      // Idempotente: mesmo id em retry/double-tap — retoma a execução.
       setState(() {
         _execucao = execucao;
         _loading = false;
@@ -117,6 +126,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         _loading = false;
         _loadError = friendlyError(e);
       });
+    } finally {
+      _iniciarInFlight = false;
     }
   }
 
@@ -225,8 +236,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       final concluida = await ref
           .read(checkinRepositoryProvider)
           .concluir(_execucao!.id!);
+      MeusTreinosMemCache.clear();
+      EvolucaoHomeClientCache.clear();
+      Aluno360ClientCache.clear();
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
+      ref.invalidate(alunoDashboardHomeProvider);
       if (!mounted) return;
       final evolucoes =
           concluida.evolucoesPerformance.isNotEmpty

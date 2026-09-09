@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../checkin/data/checkin_repository.dart';
+import '../../checkin/utils/treino_ficha_status.dart';
 
 class ProgressoSemanalWidget extends StatelessWidget {
   const ProgressoSemanalWidget({
@@ -20,8 +21,8 @@ class ProgressoSemanalWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final weeklyGoal = treinos.isEmpty ? 3 : treinos.length.clamp(3, 6);
-    final completedThisWeek =
-        historico.where((t) => _isSameWeek(t.concluidoEm)).length;
+    // Dias com ≥1 CONCLUIDO — não contar N execuções do mesmo dia como N/meta.
+    final completedThisWeek = countUniqueCompletedDaysThisWeek(historico);
     final streakDays = streakAtual < 0 ? 0 : streakAtual;
     final progressValue =
         weeklyGoal == 0
@@ -161,22 +162,6 @@ class ProgressoSemanalWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  bool _isSameWeek(String? iso) {
-    if (iso == null) return false;
-    final dt = DateTime.tryParse(iso)?.toLocal();
-    if (dt == null) return false;
-    final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final normalizedWeek = DateTime(
-      startOfWeek.year,
-      startOfWeek.month,
-      startOfWeek.day,
-    );
-    final endOfWeek = normalizedWeek.add(const Duration(days: 7));
-    return dt.isAfter(normalizedWeek.subtract(const Duration(seconds: 1))) &&
-        dt.isBefore(endOfWeek);
   }
 
   bool _sameDate(String? iso, DateTime day) {
