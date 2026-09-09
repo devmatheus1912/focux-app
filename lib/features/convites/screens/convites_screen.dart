@@ -42,6 +42,7 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
   var _personalNome = '';
   var _loading = true;
   var _generating = false;
+  var _revoking = false;
   String? _error;
   DateTime? _fetchedAt;
   Timer? _countdownTimer;
@@ -168,6 +169,43 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
       });
     } finally {
       if (mounted) setState(() => _generating = false);
+    }
+  }
+
+  Future<void> _revogar() async {
+    if (_revoking || _convite == null) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Revogar link?',
+      message: 'Quem ainda não usou deixa de conseguir entrar com este convite.',
+      icon: Icons.link_off_outlined,
+      confirmLabel: 'Revogar',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    setState(() {
+      _revoking = true;
+      _error = null;
+    });
+    try {
+      await ref.read(conviteRepositoryProvider).revogar();
+      if (!mounted) return;
+      _countdownTimer?.cancel();
+      setState(() {
+        _convite = null;
+        _revoking = false;
+        _fetchedAt = DateTime.now();
+      });
+      FeedbackHelper.showSuccess(context, 'Link revogado.');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _revoking = false;
+        _error = friendlyError(
+          e,
+          fallback: 'Não revogou o convite. Tente novamente.',
+        );
+      });
     }
   }
 
@@ -340,11 +378,24 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                       TokensStrip.s3 +
                           MediaQuery.viewInsetsOf(context).bottom,
                     ),
-                    child: FxLiquidPrimaryButton(
-                      label: ativo ? 'Gerar novo link' : 'Gerar link',
-                      loading: _generating,
-                      loadingLabel: 'Gerando…',
-                      onPressed: _generating ? null : _gerar,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (ativo)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                            child: TextButton(
+                              onPressed: _revoking || _generating ? null : _revogar,
+                              child: Text(_revoking ? 'Revogando…' : 'Revogar link'),
+                            ),
+                          ),
+                        FxLiquidPrimaryButton(
+                          label: ativo ? 'Gerar novo link' : 'Gerar link',
+                          loading: _generating,
+                          loadingLabel: 'Gerando…',
+                          onPressed: _generating || _revoking ? null : _gerar,
+                        ),
+                      ],
                     ),
                   ),
                 ),

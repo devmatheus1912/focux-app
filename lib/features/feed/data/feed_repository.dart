@@ -95,6 +95,8 @@ class FeedRepository {
   Future<Pagina<FeedPost>> listarPersonalPagina({
     String? cursor,
     String? q,
+    String? tipo,
+    bool? fixado,
   }) async {
     final query = q?.trim();
     final r = await _client.dio.get(
@@ -102,6 +104,8 @@ class FeedRepository {
       queryParameters: {
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
         if (query != null && query.isNotEmpty) 'q': query,
+        if (tipo != null && tipo.isNotEmpty) 'tipo': tipo,
+        if (fixado != null) 'fixado': fixado,
       },
     );
     final data = r.data;
@@ -114,10 +118,6 @@ class FeedRepository {
       Map<String, dynamic>.from(data),
       (item) => FeedPost.fromJson(Map<String, dynamic>.from(item as Map)),
     );
-  }
-
-  Future<List<FeedPost>> listarPersonal() async {
-    return (await listarPersonalPagina()).content;
   }
 
   Future<List<FeedPost>> listarAluno({String? q}) async {

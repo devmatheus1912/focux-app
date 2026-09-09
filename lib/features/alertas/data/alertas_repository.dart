@@ -150,10 +150,15 @@ class AlertasRepository {
   static const pageSize = 20;
 
   /// BFF tipado — first paint da tela Alertas (riscos + configuração).
-  Future<AlertasHomeBundle> getHome({int page = 0}) async {
+  Future<AlertasHomeBundle> getHome({int page = 0, String q = ''}) async {
+    final query = q.trim();
     final r = await _dio.get(
       '/api/alertas/home',
-      queryParameters: {'page': page, 'size': pageSize},
+      queryParameters: {
+        'page': page,
+        'size': pageSize,
+        if (query.isNotEmpty) 'q': query,
+      },
     );
     return AlertasHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }

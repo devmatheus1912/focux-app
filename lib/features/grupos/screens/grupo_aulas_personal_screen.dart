@@ -52,6 +52,10 @@ class _GrupoAulasPersonalScreenState
   DateTime? _fetchedAt;
   var _query = '';
   var _chip = GrupoAulaChip.todas;
+  var _page = 0;
+  var _hasMore = false;
+  var _total = 0;
+  var _loadingMore = false;
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _GrupoAulasPersonalScreenState
     _searchDebounce = Timer(const Duration(milliseconds: 350), () {
       if (!mounted) return;
       setState(() => _query = value);
+      _load();
     });
   }
 
@@ -79,6 +84,7 @@ class _GrupoAulasPersonalScreenState
     _searchDebounce?.cancel();
     _searchCtrl.clear();
     setState(() => _query = '');
+    _load();
   }
 
   void _leave() {
@@ -92,13 +98,16 @@ class _GrupoAulasPersonalScreenState
       _erro = null;
     });
     try {
-      final aulas =
+      final pagina =
           await GrupoAulaRepository(
             ref.read(apiClientProvider),
-          ).listarPersonal();
+          ).listarPersonalPagina(q: _query);
       if (mounted) {
         setState(() {
-          _aulas = aulas;
+          _aulas = pagina.content;
+          _page = pagina.page ?? 0;
+          _hasMore = pagina.hasNext;
+          _total = pagina.totalElements ?? pagina.content.length;
           _loading = false;
           _fetchedAt = DateTime.now();
         });
@@ -110,6 +119,32 @@ class _GrupoAulasPersonalScreenState
           _erro = friendlyError(e);
         });
       }
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final pagina = await GrupoAulaRepository(
+        ref.read(apiClientProvider),
+      ).listarPersonalPagina(page: _page + 1, q: _query);
+      if (!mounted) return;
+      final seen = _aulas.map((a) => a.id).toSet();
+      setState(() {
+        _aulas = [
+          ..._aulas,
+          ...pagina.content.where((a) => seen.add(a.id)),
+        ];
+        _page = pagina.page ?? (_page + 1);
+        _hasMore = pagina.hasNext;
+        _total = pagina.totalElements ?? _aulas.length;
+        _loadingMore = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loadingMore = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -381,7 +416,7 @@ class _GrupoAulasPersonalScreenState
           appBar: FxShellAppBar(
             title: 'Aulas em grupo',
             subtitle: FxHubFreshness.joinCount(
-              grupoAulaCountLabel(_aulas.length),
+              grupoAulaCountLabel(_total),
               FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
             onBack: _leave,
@@ -557,12 +592,18 @@ class _GrupoAulasPersonalScreenState
           FxSettingsLayout.pageInset,
           TokensStrip.s4 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        itemCount: visible.length + 1,
+        itemCount: visible.length + 1 + (_hasMore ? 1 : 0),
         itemBuilder: (context, i) {
           if (i == 0) {
             return const Padding(
               padding: EdgeInsets.only(bottom: TokensStrip.s3),
               child: DashboardSectionHeader(title: 'Próximas aulas'),
+            );
+          }
+          if (_hasMore && i == visible.length + 1) {
+            return FxSatelliteListTile(
+              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+              onTap: _loadingMore ? null : _carregarMais,
             );
           }
           final aula = visible[i - 1];

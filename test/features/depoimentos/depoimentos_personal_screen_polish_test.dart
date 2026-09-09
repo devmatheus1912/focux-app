@@ -18,6 +18,8 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('/perfil/ferramentas'));
+    expect(screen, contains('listarParaPersonalPagina'));
+    expect(screen, contains('Carregar mais'));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('Color(')));
   });

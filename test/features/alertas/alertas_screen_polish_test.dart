@@ -20,7 +20,7 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('getHome()'));
+    expect(screen, contains('getHome('));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('/alertas/config'));
     expect(screen, contains('alertasHubViewed'));
@@ -29,7 +29,7 @@ void main() {
     expect(screen, contains('alertaEnviarMensagemCtaLabel'));
     expect(screen, contains('showAlertaEnviarMensagemSheet'));
     expect(screen, contains('Buscar aluno ou motivo'));
-    expect(screen, contains('alertaMatchesQuery'));
+    expect(screen, contains('q: _query'));
     expect(screen, contains('alertaListSubtitle'));
     expect(screen, contains('Quando dispara'));
     expect(screen, isNot(contains("fxIcon: 'message-circle'")));
