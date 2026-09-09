@@ -6,13 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -40,7 +41,24 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   bool _saving = false;
 
   @override
+  void initState() {
+    super.initState();
+    _nome.addListener(_onFormChanged);
+    _telefone.addListener(_onFormChanged);
+    _objetivo.addListener(_onFormChanged);
+    _observacoes.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _nome.removeListener(_onFormChanged);
+    _telefone.removeListener(_onFormChanged);
+    _objetivo.removeListener(_onFormChanged);
+    _observacoes.removeListener(_onFormChanged);
     _nome.dispose();
     _telefone.dispose();
     _objetivo.dispose();
@@ -78,6 +96,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   bool get _canSubmit => _nome.text.trim().isNotEmpty && !_saving;
 
   Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
     if (_dirty) {
       final ok = await showFxConfirmSheet(
         context,
@@ -157,7 +176,10 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   @override
   Widget build(BuildContext context) => fxScreenA11yScope(
     label: 'Novo Lead',
-    child: FxShellScaffold(
+    child: FxFormPopGuard(
+      dirty: _dirty,
+      onCancel: _cancel,
+      child: FxShellScaffold(
       useMesh: true,
       appBar: FxShellAppBar(
         title: 'Novo Lead',
@@ -179,33 +201,19 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            FxSettingsLayout.pageInset,
-            TokensStrip.s2,
-            FxSettingsLayout.pageInset,
-            TokensStrip.s3,
-          ),
-          child: ListenableBuilder(
-            listenable: _nome,
-            builder: (context, _) {
-              return Semantics(
-                button: true,
-                enabled: _canSubmit,
-                label:
-                    _canSubmit
-                        ? (_saving ? 'Salvando lead' : leadSalvarTooltip())
-                        : 'Salvar. Informe o nome para habilitar',
-                child: FxLiquidPrimaryButton(
-                  label: 'Salvar',
-                  loading: _saving,
-                  loadingLabel: 'Salvando…',
-                  onPressed: _canSubmit ? _salvar : null,
-                ),
-              );
-            },
+      bottomNavigationBar: FxFormStickyBar(
+        child: Semantics(
+          button: true,
+          enabled: _canSubmit,
+          label:
+              _canSubmit
+                  ? (_saving ? 'Salvando lead' : leadSalvarTooltip())
+                  : 'Salvar. Informe o nome para habilitar',
+          child: FxLiquidPrimaryButton(
+            label: 'Salvar',
+            loading: _saving,
+            loadingLabel: 'Salvando…',
+            onPressed: _canSubmit ? _salvar : null,
           ),
         ),
       ),
@@ -215,6 +223,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
           child: Form(
             key: _formKey,
             child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
                 8,
@@ -282,6 +291,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         ),
       ),
     ),
+  ),
   ),
 );
 }

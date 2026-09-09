@@ -347,7 +347,10 @@ class CheckinRepository {
 
   CheckinRepository(ApiClient client) : _dio = client.dio;
 
-  Future<List<ExecucaoTreino>> meusTreinos({int page = 0, int size = 100}) async {
+  Future<Pagina<ExecucaoTreino>> meusTreinosPagina({
+    int page = 0,
+    int size = 20,
+  }) async {
     final r = await _dio.get(
       '/api/checkin/meus-treinos',
       queryParameters: {'page': page, 'size': size},
@@ -361,7 +364,11 @@ class CheckinRepository {
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),
       (e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>),
-    ).content;
+    );
+  }
+
+  Future<List<ExecucaoTreino>> meusTreinos({int page = 0, int size = 20}) async {
+    return (await meusTreinosPagina(page: page, size: size)).content;
   }
 
   Future<ExecucaoTreino> iniciar(int treinoId) async {
