@@ -59,7 +59,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             child: const FxShellScaffold(
               useMesh: true,
               constrainWidth: false,
-              appBar: FxShellAppBar(title: 'Boas-vindas'),
+              appBar: FxShellAppBar(title: 'Boas-vindas', showBack: false),
               body: SkeletonList(count: 4),
             ),
           ),
@@ -69,7 +69,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             child: FxShellScaffold(
               useMesh: true,
               constrainWidth: false,
-              appBar: const FxShellAppBar(title: 'Boas-vindas'),
+              appBar: const FxShellAppBar(title: 'Boas-vindas', showBack: false),
               body: FxErrorState(
                 chromeOnDark: chrome.isDark,
                 primary: primary,

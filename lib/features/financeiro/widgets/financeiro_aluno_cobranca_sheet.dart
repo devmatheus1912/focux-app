@@ -22,6 +22,11 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
         financeiroMensalidadeStatusLabel(item.status),
         icon: item.status == 'ATRASADO' ? 'alert-triangle' : 'circle-check',
       ),
+      const FxHelpTip(
+        'Como pagar',
+        'Peça o PIX ou confirmação ao personal pelo chat. Pagamento direto no app ainda não está liberado para aluno.',
+        icon: 'message-circle',
+      ),
     ],
     extra: [
       FxLiquidPrimaryButton(

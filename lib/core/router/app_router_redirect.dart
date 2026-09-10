@@ -79,6 +79,8 @@ bool isAlunoOnlyLocation(String path) {
     '/aluno/desafios',
     '/aluno/trilhas',
     '/aluno/recorrencia',
+    '/aluno/grupo-aulas',
+    '/aluno/form-check',
     '/evolucao',
     '/chat/aluno',
     '/financeiro/aluno',
