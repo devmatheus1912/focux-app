@@ -1,6 +1,26 @@
 part of 'definir_senha_aluno_screen.dart';
 
 extension on _DefinirSenhaAlunoScreenState {
+  Future<void> _sairSemDefinirSenha() async {
+    if (_loading || _saindo) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: definirSenhaSairTitle(),
+      message: definirSenhaSairMessage(),
+      confirmLabel: definirSenhaSairConfirmLabel(),
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    _saindo = true;
+    try {
+      await ref.read(authProvider.notifier).logout();
+      if (!mounted) return;
+      authUnfocusAndGo(context, '/login?role=aluno');
+    } finally {
+      if (mounted) _saindo = false;
+    }
+  }
+
   Future<void> _abrirAjuda() {
     return showFxHelpSheet(
       context,

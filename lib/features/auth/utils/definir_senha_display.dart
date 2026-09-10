@@ -22,3 +22,10 @@ String definirSenhaConfirmTitle() => 'Definir esta senha?';
 
 String definirSenhaConfirmMessage() =>
     'Encerra as sessões abertas. Depois você segue para a ativação.';
+
+String definirSenhaSairTitle() => 'Sair sem definir senha?';
+
+String definirSenhaSairMessage() =>
+    'A senha provisória continua valendo. Defina uma senha pessoal antes de usar o app.';
+
+String definirSenhaSairConfirmLabel() => 'Sair';
