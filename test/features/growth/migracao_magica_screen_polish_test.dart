@@ -19,6 +19,7 @@ void main() {
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('migracaoEtapaLabel'));
     expect(screen, contains('FxWizardStickyBar'));
+    expect(screen, contains('FxWizardStepDots'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('MigracaoMagicaDraftCache'));
     expect(screen, isNot(contains('FxSettingsTile')));

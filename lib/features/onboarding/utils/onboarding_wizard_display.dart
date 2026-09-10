@@ -59,3 +59,10 @@ String wizardConfirmMessage() =>
     'O checklist some da Home. Você continua usando o app normalmente.';
 
 String wizardConfirmLabel() => 'Concluir';
+
+String wizardLeaveTitle() => 'Sair dos primeiros passos?';
+
+String wizardLeaveMessage() =>
+    'O progresso já salvo fica. Você pode voltar pelo checklist da Home.';
+
+String wizardLeaveConfirm() => 'Sair';

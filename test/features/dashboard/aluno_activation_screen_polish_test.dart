@@ -13,8 +13,11 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('FxWizardStickyBar'));
     expect(screen, contains('FxWizardPopGuard'));
+    expect(screen, contains('FxWizardStepDots'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('alunoActivationProgress'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('alunoActivationLeaveTitle'));
     expect(screen, isNot(contains('_ActivationStepCard')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

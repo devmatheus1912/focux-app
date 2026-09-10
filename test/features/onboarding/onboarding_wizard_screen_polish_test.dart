@@ -18,6 +18,8 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxWizardStickyBar'));
     expect(screen, contains('FxWizardPopGuard'));
+    expect(screen, contains('FxWizardStepDots'));
+    expect(screen, contains('wizardEtapaCurrent'));
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, contains('wizardEtapaLabel'));
     expect(screen, contains('wizardFazerDepoisLabel'));
@@ -35,8 +37,10 @@ void main() {
     expect(screen, contains('dismissForSession'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('wizardLeaveTitle'));
     expect(screen, contains('wizardStickyLabel'));
     expect(screen, contains('_pedirConcluir'));
+    expect(screen, contains('_sairSemConcluir'));
     expect(screen, isNot(contains('DashboardPrioritiesOverlay')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('SetupStepCard')));

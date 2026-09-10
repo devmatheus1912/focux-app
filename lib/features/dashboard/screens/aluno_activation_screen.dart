@@ -147,6 +147,17 @@ class AlunoActivationScreen extends ConsumerWidget {
                   TokensStrip.s5,
                 ),
                 children: [
+                  FxWizardStepDots(
+                    current: progress.allDone
+                        ? progress.totalCount
+                        : (progress.doneCount + 1).clamp(
+                          1,
+                          progress.totalCount,
+                        ),
+                    total: progress.totalCount,
+                    color: primary,
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
                   Text(
                     'Olá, ${aluno.nome.split(' ').first}',
                     style: FocuxHubTypography.pageTitle(

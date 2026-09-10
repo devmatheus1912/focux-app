@@ -9,5 +9,7 @@ void main() {
     expect(src, contains('FxFormStickyBar'));
     expect(src, contains('class FxWizardPopGuard'));
     expect(src, contains('FxFormPopGuard'));
+    expect(src, contains('class FxWizardStepDots'));
+    expect(src, contains('Semantics('));
   });
 }

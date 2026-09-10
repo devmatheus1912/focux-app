@@ -27,4 +27,10 @@ void main() {
     );
     expect(wizardTitlesCaption(prefix: 'Depois:', titles: const []), '');
   });
+
+  test('sair no meio não apaga progresso', () {
+    expect(wizardLeaveTitle(), contains('Sair'));
+    expect(wizardLeaveMessage().toLowerCase(), contains('salvo'));
+    expect(wizardLeaveConfirm(), 'Sair');
+  });
 }
