@@ -86,3 +86,21 @@ String automacaoIniciarSuccess() => 'Fluxo iniciado';
 
 String automacaoSemAlunos() =>
     'Cadastre um aluno para iniciar o fluxo.';
+
+String automacaoPausarLabel() => 'Pausar fluxo';
+
+String automacaoRetomarLabel() => 'Retomar fluxo';
+
+String automacaoPausarConfirmTitle(String nome) => 'Pausar “$nome”?';
+
+String automacaoPausarConfirmMessage() =>
+    'O gatilho para de disparar até você retomar.';
+
+String automacaoRetomarConfirmTitle(String nome) => 'Retomar “$nome”?';
+
+String automacaoRetomarConfirmMessage() =>
+    'Novos alunos que baterem o gatilho entram no fluxo de novo.';
+
+String automacaoPausarSuccess() => 'Fluxo pausado';
+
+String automacaoRetomarSuccess() => 'Fluxo retomado';

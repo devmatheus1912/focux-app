@@ -58,6 +58,7 @@ Future<void> _showAutomacaoLogsSheet({
   required Pagina<AutomacaoLog> initial,
   required Future<Pagina<AutomacaoLog>> Function(int page) onLoadMore,
   required Future<void> Function() onIniciar,
+  required Future<AutomacaoFluxo?> Function(AutomacaoFluxo fluxo) onToggleAtivo,
 }) {
   return showFxHomeSheet<void>(
     context,
@@ -66,6 +67,7 @@ Future<void> _showAutomacaoLogsSheet({
       initial: initial,
       onLoadMore: onLoadMore,
       onIniciar: onIniciar,
+      onToggleAtivo: onToggleAtivo,
     ),
   );
 }
@@ -76,12 +78,14 @@ class _AutomacaoLogsSheet extends StatefulWidget {
     required this.initial,
     required this.onLoadMore,
     required this.onIniciar,
+    required this.onToggleAtivo,
   });
 
   final AutomacaoFluxo fluxo;
   final Pagina<AutomacaoLog> initial;
   final Future<Pagina<AutomacaoLog>> Function(int page) onLoadMore;
   final Future<void> Function() onIniciar;
+  final Future<AutomacaoFluxo?> Function(AutomacaoFluxo fluxo) onToggleAtivo;
 
   @override
   State<_AutomacaoLogsSheet> createState() => _AutomacaoLogsSheetState();
@@ -91,7 +95,9 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
   late List<AutomacaoLog> _logs = List.of(widget.initial.content);
   late var _hasNext = widget.initial.hasNext;
   late var _page = widget.initial.page ?? 0;
+  late AutomacaoFluxo _fluxo = widget.fluxo;
   var _loadingMore = false;
+  var _toggling = false;
 
   Future<void> _carregarMais() async {
     if (_loadingMore || !_hasNext) return;
@@ -110,6 +116,17 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
       setState(() => _loadingMore = false);
       FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  Future<void> _toggle() async {
+    if (_toggling) return;
+    setState(() => _toggling = true);
+    final updated = await widget.onToggleAtivo(_fluxo);
+    if (!mounted) return;
+    setState(() {
+      _toggling = false;
+      if (updated != null) _fluxo = updated;
+    });
   }
 
   @override
@@ -131,8 +148,9 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
               color: primary,
               size: 18,
             ),
-            title: widget.fluxo.nome,
-            subtitle: automacaoTriggerLabel(widget.fluxo.triggerTipo),
+            title: _fluxo.nome,
+            subtitle:
+                '${automacaoTriggerLabel(_fluxo.triggerTipo)} · ${automacaoFluxoStatusLabel(ativo: _fluxo.ativo)}',
           ),
           SizedBox(
             height: 280,
@@ -176,13 +194,32 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
               FxSettingsLayout.pageInset,
               0,
               FxSettingsLayout.pageInset,
-              TokensStrip.s3,
+              TokensStrip.s2,
             ),
-            child: FxLiquidPrimaryButton(
-              label: automacaoIniciarLabel(),
-              onPressed: widget.onIniciar,
+            child: TextButton(
+              onPressed: _toggling ? null : _toggle,
+              child: Text(
+                _fluxo.ativo
+                    ? automacaoPausarLabel()
+                    : automacaoRetomarLabel(),
+              ),
             ),
           ),
+          if (_fluxo.ativo)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                0,
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+              ),
+              child: FxLiquidPrimaryButton(
+                label: automacaoIniciarLabel(),
+                onPressed: widget.onIniciar,
+              ),
+            )
+          else
+            const SizedBox(height: TokensStrip.s3),
         ],
       ),
     );
