@@ -22,6 +22,10 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains("icon: 'circle-check'")));
     expect(screen, isNot(contains('FilterChip')));

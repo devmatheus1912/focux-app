@@ -18,6 +18,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -520,108 +521,97 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final viewInsets = MediaQuery.viewInsetsOf(context);
-
     return fxScreenA11yScope(
       label: 'Landing page',
       child: FeatureGate(
         featureName: 'Landing page completa',
         capability: 'landingCompleta',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Landing page',
-            subtitle:
-                _step == 0
-                    ? 'Passo 1 · Entrevista'
-                    : _publicado
-                    ? 'No ar · revisar e republicar'
-                    : 'Passo 2 · Revisar e publicar',
-            onBack: _onBack,
-            actions: [
-              FxHelpIconButton(
-                tooltip: 'Como funciona a landing',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Landing page',
-                  subtitle: 'Página pública que captura leads.',
-                  tips: const [
-                    FxHelpTip(
-                      'Entrevista rápida',
-                      'Responda em linguagem simples. O Focux escreve a página.',
-                      icon: 'mic',
-                    ),
-                    FxHelpTip(
-                      'Gerar',
-                      'O backend monta título, método, FAQ e fechamento.',
-                      icon: 'sparkles',
-                    ),
-                    FxHelpTip(
-                      'Publicar',
-                      'Revise textos e fotos. O link fica em focuxpersonal.com/p/…',
-                      icon: 'link',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: TokensStrip.s2),
-            ],
-          ),
-          bottomNavigationBar: _loading
-              ? null
-              : AnimatedPadding(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  padding: EdgeInsets.only(bottom: viewInsets.bottom),
-                  child: SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s3,
+        child: FxFormPopGuard(
+          // Step 1 must route through _onBack (volta à entrevista), not raw pop.
+          dirty: _dirty || _step == 1,
+          onCancel: _onBack,
+          child: FxShellScaffold(
+            useMesh: true,
+            appBar: FxShellAppBar(
+              title: 'Landing page',
+              subtitle:
+                  _step == 0
+                      ? 'Passo 1 · Entrevista'
+                      : _publicado
+                      ? 'No ar · revisar e republicar'
+                      : 'Passo 2 · Revisar e publicar',
+              onBack: _onBack,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como funciona a landing',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Landing page',
+                    subtitle: 'Página pública que captura leads.',
+                    tips: const [
+                      FxHelpTip(
+                        'Entrevista rápida',
+                        'Responda em linguagem simples. O Focux escreve a página.',
+                        icon: 'mic',
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_step == 1) ...[
-                            FxLiquidSecondaryButton(
-                              label: 'Voltar à entrevista',
-                              onPressed: _busy
-                                  ? null
-                                  : () => setState(() => _step = 0),
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
-                          ],
-                          FxLiquidPrimaryButton(
-                            label:
-                                _busy
-                                    ? (_step == 0
-                                        ? 'Gerando…'
-                                        : 'Publicando…')
-                                    : (_step == 0
-                                        ? 'Gerar página'
-                                        : (_publicado
-                                            ? 'Republicar'
-                                            : 'Publicar')),
-                            loading: _busy,
-                            loadingLabel:
-                                _step == 0 ? 'Gerando…' : 'Publicando…',
-                            onPressed:
-                                _step == 0
-                                    ? (_canGenerate ? _gerar : null)
-                                    : (_canPublish ? _publicar : null),
-                          ),
-                        ],
+                      FxHelpTip(
+                        'Gerar',
+                        'O backend monta título, método, FAQ e fechamento.',
+                        icon: 'sparkles',
                       ),
-                    ),
+                      FxHelpTip(
+                        'Publicar',
+                        'Revise textos e fotos. O link fica em focuxpersonal.com/p/…',
+                        icon: 'link',
+                      ),
+                    ],
                   ),
                 ),
-          body: SafeArea(
-            bottom: false,
-            child: _buildBody(context),
+                const SizedBox(width: TokensStrip.s2),
+              ],
+            ),
+            bottomNavigationBar: _loading
+                ? null
+                : FxFormStickyBar(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_step == 1) ...[
+                          FxLiquidSecondaryButton(
+                            label: 'Voltar à entrevista',
+                            onPressed: _busy
+                                ? null
+                                : () => setState(() => _step = 0),
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                        ],
+                        FxLiquidPrimaryButton(
+                          label:
+                              _busy
+                                  ? (_step == 0
+                                      ? 'Gerando…'
+                                      : 'Publicando…')
+                                  : (_step == 0
+                                      ? 'Gerar página'
+                                      : (_publicado
+                                          ? 'Republicar'
+                                          : 'Publicar')),
+                          loading: _busy,
+                          loadingLabel:
+                              _step == 0 ? 'Gerando…' : 'Publicando…',
+                          onPressed:
+                              _step == 0
+                                  ? (_canGenerate ? _gerar : null)
+                                  : (_canPublish ? _publicar : null),
+                        ),
+                      ],
+                    ),
+                  ),
+            body: SafeArea(
+              bottom: false,
+              child: _buildBody(context),
+            ),
           ),
         ),
       ),
