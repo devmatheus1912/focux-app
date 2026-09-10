@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -11,7 +12,9 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -51,6 +54,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
   @override
   void initState() {
     super.initState();
+    _tituloCtrl.addListener(_onDraftChanged);
+    _mensagemCtrl.addListener(_onDraftChanged);
     _freshnessSub = ref.listenManual(_broadcastHistoricoProvider, (_, next) {
       if (!next.hasValue || next.isLoading || next.hasError) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -60,9 +65,34 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
     }, fireImmediately: true);
   }
 
+  void _onDraftChanged() {
+    if (mounted) setState(() {});
+  }
+
+  bool get _isDirty =>
+      _tituloCtrl.text.trim().isNotEmpty ||
+      _mensagemCtrl.text.trim().isNotEmpty ||
+      _publicoAlvo != 'TODOS';
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_isDirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar rascunho?',
+        message: 'O título e a mensagem não serão enviados.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/dashboard/personal');
+  }
+
   @override
   void dispose() {
     _freshnessSub?.close();
+    _tituloCtrl.removeListener(_onDraftChanged);
+    _mensagemCtrl.removeListener(_onDraftChanged);
     _tituloCtrl.dispose();
     _mensagemCtrl.dispose();
     super.dispose();
@@ -135,27 +165,25 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
 
     return fxScreenA11yScope(
       label: 'Broadcast',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Broadcasts',
-          subtitle: freshnessLabel ?? 'Mensagem para a base',
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como funciona o broadcast',
-              onTap: _showHelp,
-            ),
-          ],
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
-            ),
+      child: FxFormPopGuard(
+        dirty: _isDirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Broadcasts',
+            subtitle: freshnessLabel ?? 'Mensagem para a base',
+            onBack: () {
+              _cancel();
+            },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como funciona o broadcast',
+                onTap: _showHelp,
+              ),
+            ],
+          ),
+          bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: !_enviando,
@@ -168,25 +196,26 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
               ),
             ),
           ),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(_broadcastHistoricoProvider);
-              await ref.read(_broadcastHistoricoProvider.future);
-            },
-            child: FxContentWidthLimiter(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3,
-                    FxSettingsLayout.pageInset,
-                    24,
-                  ),
-                  children: [
+          body: SafeArea(
+            bottom: false,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(_broadcastHistoricoProvider);
+                await ref.read(_broadcastHistoricoProvider.future);
+              },
+              child: FxContentWidthLimiter(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                      FxSettingsLayout.pageInset,
+                      24,
+                    ),
+                    children: [
                     FxSettingsGroup(
                       header: 'Nova mensagem',
                       caption: 'Título e texto da notificação push.',
@@ -266,7 +295,8 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
           ),
         ),
       ),
-    ),
-  );
+        ),
+      ),
+    );
   }
 }

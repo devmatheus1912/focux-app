@@ -15,7 +15,8 @@ void main() {
     expect(screen, contains('landingCompleta'));
     expect(screen, contains('FeedbackHelper'));
     expect(screen, isNot(contains('showSnackBar(')));
-    expect(screen, contains('viewInsets'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('unfocus'));
     expect(screen, contains('landingStudioRepositoryProvider'));
     expect(screen, contains('Gerar página'));
@@ -31,5 +32,6 @@ void main() {
     expect(screen, isNot(contains('landing/presets')));
     expect(screen, isNot(contains('gerar-hero')));
     expect(screen, isNot(contains('offerCta')));
+    expect(screen, isNot(contains('AnimatedPadding')));
   });
 }
