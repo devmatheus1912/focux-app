@@ -187,6 +187,7 @@ extension on _RegisterScreenState {
 
       if (!mounted) return;
       if (await _maybeOpenMfa(loginResult, method: 'google')) return;
+      if (!mounted) return;
       ref.invalidate(perfilProvider);
       unawaited(
         AnalyticsService.instance.track(
@@ -232,6 +233,7 @@ extension on _RegisterScreenState {
 
       if (!mounted) return;
       if (await _maybeOpenMfa(result, method: 'apple')) return;
+      if (!mounted) return;
       ref.invalidate(perfilProvider);
       unawaited(
         AnalyticsService.instance.track(
