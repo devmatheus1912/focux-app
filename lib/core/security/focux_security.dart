@@ -73,6 +73,7 @@ abstract final class FocuxSecurity {
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/ux/friendly_error_test.dart',
     'test/core/api/tls_certificate_pinning_test.dart',
+    'test/core/auth/session_invalidator_tenant_cache_test.dart',
     '.github/workflows/security.yml',
     '.github/workflows/semgrep.yml',
   ];

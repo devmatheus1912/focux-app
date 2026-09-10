@@ -134,4 +134,10 @@ class AlunoFollowUpStore {
           (current ?? const AlunoFollowUpEntry()).copyWith(clearFollowUp: true),
     );
   }
+
+  /// Logout / troca de conta — o mapa é por id de aluno do tenant anterior.
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storageKey);
+  }
 }
