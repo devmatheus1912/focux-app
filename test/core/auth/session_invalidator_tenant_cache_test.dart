@@ -153,6 +153,9 @@ void main() {
       fonte: MigracaoFonte.texto,
     );
     await AlunoFollowUpStore.snooze(7);
+    final prefsBefore = await SharedPreferences.getInstance();
+    await prefsBefore.setBool('health_authorized', true);
+    expect(prefsBefore.getBool('health_authorized'), isTrue);
 
     expect(AlunosHomeClientCache.getIfFresh(query, now: now), isNotNull);
     expect(DashboardHomeClientCache.getIfFresh(now: now), isNotNull);
@@ -178,5 +181,7 @@ void main() {
     expect(MeusTreinosMemCache.loadIfFresh(), isNull);
     expect(await MigracaoMagicaDraftCache.load(), isNull);
     expect(await AlunoFollowUpStore.loadAll(), isEmpty);
+    final prefsAfter = await SharedPreferences.getInstance();
+    expect(prefsAfter.getBool('health_authorized'), isNull);
   });
 }
