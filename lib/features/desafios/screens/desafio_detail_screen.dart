@@ -154,6 +154,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
           },
           child: FxShellScaffold(
             useMesh: true,
+            constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Desafio',
               subtitle: freshness,
@@ -399,6 +400,15 @@ class _DesafioDetailBody extends StatelessWidget {
                       icon: 'spark',
                       title: desafioLeaderboardEmpty(),
                       subtitle: 'Quando alguém pontuar, o lugar aparece aqui.',
+                      action: forAluno
+                          ? FxEmptyAction(
+                              label: desafioStickyAlunoLabel(desafio.tipo),
+                              onTap: onAlunoSticky,
+                            )
+                          : FxEmptyAction(
+                              label: 'Atualizar',
+                              onTap: () => onRefresh(),
+                            ),
                     )
                   else
                     for (var i = 0; i < ranking.length; i++)

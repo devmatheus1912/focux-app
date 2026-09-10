@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -12,8 +14,9 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -103,14 +106,84 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
   }
 
   void _abrirTrilha(TrilhaModel trilha) {
-    showFxNoticeSheet(
+    showFxHomeSheet<void>(
       context,
-      title: trilha.titulo,
-      message:
-          '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
-      body: Text(trilhaValorAtualLabel(trilha)),
-      icon: Icons.route_rounded,
+      builder: (sheetContext) {
+        final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
+        final primary = Theme.of(sheetContext).colorScheme.primary;
+        final mute = ShellChrome.forDark(isDark).mute;
+        final marco = trilhaProximoMarco(trilha);
+        final maxHeight =
+            MediaQuery.sizeOf(sheetContext).height *
+            FxHomeSheetChrome.maxHeightFactor;
+
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight: maxHeight,
+          expand: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              const SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: isDark,
+                title: trilha.titulo,
+                leading: FxIcon(name: 'route', size: 18, color: primary),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _TrilhaSheetRow(
+                        label: 'Status',
+                        value: trilhaStatusLabel(trilha.concluida),
+                        mute: mute,
+                      ),
+                      _TrilhaSheetRow(
+                        label: 'Progresso',
+                        value: trilhaPercentLabel(trilha.percentualConclusao),
+                        mute: mute,
+                      ),
+                      _TrilhaSheetRow(
+                        label: 'Valor atual',
+                        value: trilhaValorAtualLabel(trilha),
+                        mute: mute,
+                      ),
+                      if (marco != null)
+                        _TrilhaSheetRow(
+                          label: 'Próximo marco',
+                          value: marco.titulo,
+                          mute: mute,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s4),
+              FxLiquidPrimaryButton(
+                label: 'Ir aos treinos',
+                onPressed: () {
+                  FxHomeSheetChrome.dismissAndPop(sheetContext);
+                  context.push('/checkin/treinos');
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  TrilhaModel? _trilhaComMarcoPendente(List<TrilhaModel> trilhas) {
+    for (final trilha in trilhas) {
+      if (trilhaProximoMarco(trilha) != null) return trilha;
+    }
+    return null;
   }
 
   void _stampFreshness() {
@@ -330,6 +403,49 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               ),
             )
           else ...[
+            if (trilhaMarcosPendentes(trilhas) > 0)
+              if (_trilhaComMarcoPendente(trilhas) case final focus?)
+                if (trilhaProximoMarco(focus) case final marco?) ...[
+                  FxStripCard(
+                    emphasize: true,
+                    semanticsLabel:
+                        'Próximo marco: ${marco.titulo}. ${focus.titulo}',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Próximo marco',
+                          style: FocuxHubTypography.chip(
+                            ShellChrome.forDark(isDark).mute,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          marco.titulo,
+                          style: FocuxHubTypography.sectionTitle(
+                            context,
+                            color: ShellChrome.forDark(isDark).ink,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          focus.titulo,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: ShellChrome.forDark(isDark).mute,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        DashboardHomeActionChip(
+                          label: 'Continuar',
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: () => _abrirTrilha(focus),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                ],
             const DashboardSectionHeader(title: 'Trilhas'),
             const SizedBox(height: TokensStrip.s3),
             for (final trilha in visiveis) ...[
@@ -367,6 +483,38 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                 onPressed: _carregarMais,
               ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TrilhaSheetRow extends StatelessWidget {
+  const _TrilhaSheetRow({
+    required this.label,
+    required this.value,
+    required this.mute,
+  });
+
+  final String label;
+  final String value;
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: FocuxHubTypography.chip(mute)),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: FocuxHubTypography.body(
+              color: ShellChrome.of(context).ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
         ],
       ),
     );
