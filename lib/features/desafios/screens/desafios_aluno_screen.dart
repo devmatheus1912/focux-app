@@ -225,11 +225,11 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                           TokensStrip.s4,
                           TokensStrip.s2,
                         ),
-                        child: Row(
+                        child: Wrap(
+                          spacing: TokensStrip.s2,
+                          runSpacing: TokensStrip.s2,
                           children: [
-                            for (final filtro in DesafioTipoFiltro.values) ...[
-                              if (filtro != DesafioTipoFiltro.values.first)
-                                const SizedBox(width: TokensStrip.s2),
+                            for (final filtro in DesafioTipoFiltro.values)
                               FxToggleChip(
                                 label: desafioFiltroLabel(filtro),
                                 selected: _filtro == filtro,
@@ -240,7 +240,6 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                                   _load();
                                 },
                               ),
-                            ],
                           ],
                         ),
                       ),
@@ -273,13 +272,16 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                       : 'Nenhum desafio agora',
                   subtitle: searching
                       ? 'Ajuste a busca ou o filtro para achar outra campanha.'
-                      : 'Quando seu personal abrir uma campanha, ela aparece aqui.',
+                      : 'Quando seu personal abrir uma campanha, ela aparece aqui. Dúvida? Fale no chat.',
                   action: searching
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
                           onTap: _clearFilters,
                         )
-                      : null,
+                      : FxEmptyAction(
+                          label: 'Abrir chat',
+                          onTap: () => context.push('/chat/aluno'),
+                        ),
                 ),
               ],
             )
