@@ -353,15 +353,36 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         data: (home) {
           final planosList = home.planos;
           if (planosList.isEmpty) {
-            return FxEmptyState(
-              icon: 'dollar-sign',
-              title: 'Nenhum plano disponível',
-              subtitle: 'Tente novamente em instantes.',
-              action: FxEmptyAction(
-                label: 'Tentar de novo',
-                onTap: () {
-                  ref.invalidate(paywallHomeProvider);
-                },
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FxEmptyState(
+                      icon: 'dollar-sign',
+                      title: 'Planos em sincronização',
+                      subtitle:
+                          'Não carregamos o catálogo agora. Atualize — o Pro destrava cobrança PIX, IA e landing pública.',
+                      action: FxEmptyAction(
+                        label: 'Tentar de novo',
+                        onTap: () {
+                          ref.invalidate(paywallHomeProvider);
+                        },
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => context.push('/suporte'),
+                      child: Text(
+                        'Falar com suporte',
+                        style: TextStyle(
+                          color: mute,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
