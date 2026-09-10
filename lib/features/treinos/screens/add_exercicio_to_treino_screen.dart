@@ -16,8 +16,11 @@ import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -81,6 +84,11 @@ class _AddExercicioToTreinoScreenState
   List<int> _recentIds = const [];
   ExercisePrescriptionMemory? _lastPrescription;
 
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/treinos/${widget.treinoId}');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,12 +128,9 @@ class _AddExercicioToTreinoScreenState
 
     return fxScreenA11yScope(
       label: 'Adicionar exercício',
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          safePopOrGo(context, '/treinos/${widget.treinoId}');
-        },
+      child: FxFormPopGuard(
+        dirty: false,
+        onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
@@ -134,32 +139,38 @@ class _AddExercicioToTreinoScreenState
               data: (treino) => displayWorkoutName(treino.nome),
               orElse: () => 'Montando treino',
             ),
-            onBack: () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
+            leadingWidth: 92,
+            leading: TextButton(
+              onPressed: _cancel,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Cancelar'),
+            ),
             actions: [
               FxHelpIconButton(
                 tooltip: 'Ajuda para adicionar exercícios',
                 onTap: () => showAddExercicioHelpSheet(context),
               ),
-              TextButton(
-                onPressed:
-                    () => safePopOrGo(context, '/treinos/${widget.treinoId}'),
-                child: Text(
-                  'Concluir',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: BrandPalette.sectionAction(primary, dark: isDark),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
             ],
+          ),
+          bottomNavigationBar: FxFormStickyBar(
+            child: Semantics(
+              button: true,
+              label: 'Concluir adição de exercícios',
+              child: FxLiquidPrimaryButton(
+                label: 'Concluir',
+                onPressed: _cancel,
+              ),
+            ),
           ),
           body: SafeArea(
             bottom: false,
             child: CallbackShortcuts(
               bindings: {
-                const SingleActivator(LogicalKeyboardKey.escape): () {
-                  safePopOrGo(context, '/treinos/${widget.treinoId}');
-                },
+                const SingleActivator(LogicalKeyboardKey.escape): _cancel,
               },
               child: Focus(
                 autofocus: true,

@@ -17,9 +17,12 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -79,6 +82,20 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   }
 
   bool get _canSubmit => _nomeOk && _isDirty && !_loading && !_uploadingPhoto;
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_isDirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar alterações?',
+        message: 'O que você alterou não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/perfil');
+  }
 
   @override
   void initState() {
@@ -173,7 +190,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   }
 
   Future<void> _submit() async {
-    FocusScope.of(context).unfocus();
+    FxKeyboardDismissScope.dismiss();
     if (!_canSubmit) return;
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
@@ -233,29 +250,33 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
 
     return fxScreenA11yScope(
       label: 'Editar Perfil',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Editar Perfil',
-          subtitle: 'Conta e marca comercial',
-          onBack: () => safePopOrGo(context, '/perfil'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como editar o perfil',
-              onTap: () => showEditarPerfilHelpSheet(context),
+      child: FxFormPopGuard(
+        dirty: _isDirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Editar Perfil',
+            subtitle: 'Conta e marca comercial',
+            leadingWidth: 92,
+            leading: TextButton(
+              onPressed: _cancel,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Cancelar'),
             ),
-            const SizedBox(width: TokensStrip.s2),
-          ],
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              TokensStrip.s2,
-              TokensStrip.s4,
-              TokensStrip.s3,
-            ),
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como editar o perfil',
+                onTap: () => showEditarPerfilHelpSheet(context),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+            ],
+          ),
+          bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: _canSubmit,
@@ -273,17 +294,18 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
               ),
             ),
           ),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              6,
-              TokensStrip.s4,
-              TokensStrip.s6,
-            ),
-                child: Form(
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                6,
+                TokensStrip.s4,
+                TokensStrip.s6,
+              ),
+              child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -428,7 +450,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                 ),
               ),
             ),
-      ),
-    );
+          ),
+        ),
+      );
   }
 }
