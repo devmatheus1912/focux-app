@@ -755,9 +755,10 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                   ],
                 ),
               ),
+            ),
             );
           },
-        ),
+          ),
         ),
       ),
     );
