@@ -53,48 +53,6 @@ String feedHubSubtitle(String? freshness, {int? count}) {
   return '$base · $stamp';
 }
 
-bool feedMatchesQuery({
-  required String titulo,
-  required String conteudo,
-  required String query,
-}) {
-  final q = _foldSearch(query);
-  if (q.isEmpty) return true;
-  return _foldSearch(titulo).contains(q) || _foldSearch(conteudo).contains(q);
-}
-
-String _foldSearch(String value) {
-  var out = value.trim().toLowerCase();
-  const pairs = <String, String>{
-    'á': 'a',
-    'à': 'a',
-    'â': 'a',
-    'ã': 'a',
-    'ä': 'a',
-    'é': 'e',
-    'è': 'e',
-    'ê': 'e',
-    'ë': 'e',
-    'í': 'i',
-    'ì': 'i',
-    'î': 'i',
-    'ï': 'i',
-    'ó': 'o',
-    'ò': 'o',
-    'ô': 'o',
-    'õ': 'o',
-    'ö': 'o',
-    'ú': 'u',
-    'ù': 'u',
-    'û': 'u',
-    'ü': 'u',
-    'ç': 'c',
-    'ñ': 'n',
-  };
-  pairs.forEach((from, to) => out = out.replaceAll(from, to));
-  return out;
-}
-
 String feedMidiaCta({required String tipo, required bool hasFile}) {
   if (hasFile) return 'Trocar arquivo';
   return tipo.toUpperCase() == 'VIDEO' ? 'Escolher vídeo' : 'Escolher imagem';

@@ -18,7 +18,6 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -152,11 +151,14 @@ class _HistoricoCheckinScreenState
         },
         child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Histórico de Treinos',
           subtitle: FxHubFreshness.joinCount(
-            historicoCountLabel(count),
-            FxHubFreshness.fromFetchedAt(_fetchedAt),
+            _loading
+                ? historicoCountLabel(0)
+                : '${historicoCountLabel(count)}${_hasNext ? '+' : ''}',
+            _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
           onBack: _leave,
           actions: [
@@ -277,22 +279,6 @@ class _HistoricoCheckinScreenState
                       )
                       : FxContentWidthLimiter(child: _buildList(visible)),
             ),
-            if (!_loading && _erro == null)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Ver treinos disponíveis',
-                    onPressed: _abrirTreinos,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

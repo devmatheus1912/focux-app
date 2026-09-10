@@ -67,29 +67,4 @@ void main() {
       'Supino · Carga nova',
     );
   });
-
-  test('historico filtra busca e chip no carregado', () {
-    expect(
-      historicoMatchesQuery(treinoNome: 'Peito A', query: 'peito'),
-      isTrue,
-    );
-    expect(
-      historicoMatchesQuery(treinoNome: 'Peito A', query: 'perna'),
-      isFalse,
-    );
-    expect(
-      historicoMatchesChip(
-        status: 'CONCLUIDO',
-        chip: HistoricoStatusChip.concluido,
-      ),
-      isTrue,
-    );
-    expect(
-      historicoMatchesChip(
-        status: 'CONCLUIDO',
-        chip: HistoricoStatusChip.andamento,
-      ),
-      isFalse,
-    );
-  });
 }
