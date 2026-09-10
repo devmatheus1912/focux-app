@@ -4,6 +4,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   final Map<int, int> _curtidasLocais = {};
   final Map<int, int> _comentariosLocais = {};
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
   Timer? _searchDebounce;
   List<FeedPost> _posts = [];
   var _query = '';
@@ -25,15 +26,19 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
   }
 
   void _onQueryChanged(String value) {
+    setState(() => _query = value);
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 280), () {
-      final next = value.trim();
-      if (next == _query) return;
-      _query = next;
+      if (!mounted) return;
+      final trimmed = value.trim();
+      if (trimmed != _query) {
+        setState(() => _query = trimmed);
+      }
       _load();
     });
   }
@@ -175,7 +180,10 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   : 'Seu personal ainda não publicou no feed. Volte em breve.',
               action: searching
                   ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
-                  : null,
+                  : FxEmptyAction(
+                      label: 'Abrir chat',
+                      onTap: () => context.push('/chat/aluno'),
+                    ),
             ),
           ],
         ),
@@ -226,9 +234,13 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Feed',
       child: PopScope(
-        canPop: !keyboardOpen,
+        canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
           FxKeyboardDismissScope.dismiss();
         },
         child: FxShellScaffold(
@@ -237,7 +249,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
           appBar: FxShellAppBar(
             title: 'Feed',
             subtitle: FxHubFreshness.joinCount(
-              feedCountLabel(_posts.length),
+              '${feedCountLabel(_posts.length)}${_hasMore && !_loading ? '+' : ''}',
               _loading ? null : freshnessLabel,
             ),
             onBack: () {
@@ -269,6 +281,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                       ),
                       child: TextField(
                         controller: _searchController,
+                        focusNode: _searchFocus,
                         onChanged: _onQueryChanged,
                         onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                         textInputAction: TextInputAction.search,
