@@ -212,6 +212,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
         },
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Trilhas',
             subtitle: freshness,
@@ -284,203 +285,255 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
   ) {
     final trilhas = lista.items;
     final visiveis = trilhaFiltradas(trilhas, _filtro);
+    final pagePadding = const EdgeInsets.fromLTRB(
+      FxSettingsLayout.pageInset,
+      TokensStrip.s4,
+      FxSettingsLayout.pageInset,
+      32,
+    );
+
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: ListView(
+      child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(
-          FxSettingsLayout.pageInset,
-          TokensStrip.s4,
-          FxSettingsLayout.pageInset,
-          32,
-        ),
-        children: [
-          const FxHubHeader(
-            title: 'Seu progresso',
-            subtitle: 'Metas que o personal atribuiu',
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              DashboardHomeActionChip(
-                label: 'Hábitos',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/aluno/habitos'),
-              ),
-              DashboardHomeActionChip(
-                label: 'Chat',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => context.push('/chat/aluno'),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          OperationalMetricTile(
-            label: 'Ativas',
-            value: '${trilhaListaAtivas(lista)}',
-            hint:
-                trilhas.isEmpty
-                    ? 'Nenhuma trilha ainda'
-                    : '${trilhaConcluidasCount(trilhas)} concluídas',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          OperationalMetricTile(
-            label: 'Progresso',
-            value: trilhaListaProgressoLabel(lista),
-            hint: 'Média das suas trilhas',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          OperationalMetricTile(
-            label: 'Marcos',
-            value: '${trilhaMarcosPendentes(trilhas)}',
-            hint:
-                trilhaMarcosPendentes(trilhas) == 0
-                    ? 'Nada pendente'
-                    : 'Etapas em aberto',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          OperationalMetricTile(
-            label: 'Prazo',
-            value: trilhaListaPrazoValue(lista),
-            hint: trilhaListaPrazoHint(lista),
-            color: primary,
-            isDark: isDark,
-          ),
-          if (trilhas.isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s4),
-            AlunoSegmentedChoice(
-              options: trilhaFiltroOpcoes,
-              selected: _filtro,
-              isDark: isDark,
-              onSelect: (value) => setState(() => _filtro = value),
+        slivers: [
+          SliverPadding(
+            padding: pagePadding,
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const FxHubHeader(
+                  title: 'Seu progresso',
+                  subtitle: 'Metas que o personal atribuiu',
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    DashboardHomeActionChip(
+                      label: 'Hábitos',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => context.push('/aluno/habitos'),
+                    ),
+                    DashboardHomeActionChip(
+                      label: 'Chat',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => context.push('/chat/aluno'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: TokensStrip.s4),
+                OperationalMetricTile(
+                  label: 'Ativas',
+                  value: '${trilhaListaAtivas(lista)}',
+                  hint:
+                      trilhas.isEmpty
+                          ? 'Nenhuma trilha ainda'
+                          : '${trilhaConcluidasCount(trilhas)} concluídas',
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'Progresso',
+                  value: trilhaListaProgressoLabel(lista),
+                  hint: 'Média das suas trilhas',
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'Marcos',
+                  value: '${trilhaMarcosPendentes(trilhas)}',
+                  hint:
+                      trilhaMarcosPendentes(trilhas) == 0
+                          ? 'Nada pendente'
+                          : 'Etapas em aberto',
+                  color: primary,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'Prazo',
+                  value: trilhaListaPrazoValue(lista),
+                  hint: trilhaListaPrazoHint(lista),
+                  color: primary,
+                  isDark: isDark,
+                ),
+                if (trilhas.isNotEmpty) ...[
+                  const SizedBox(height: TokensStrip.s4),
+                  AlunoSegmentedChoice(
+                    options: trilhaFiltroOpcoes,
+                    selected: _filtro,
+                    isDark: isDark,
+                    onSelect: (value) => setState(() => _filtro = value),
+                  ),
+                ],
+                const SizedBox(height: TokensStrip.s5),
+              ]),
             ),
-          ],
-          const SizedBox(height: TokensStrip.s5),
+          ),
           if (trilhas.isEmpty)
-            FxEmptyState(
-              icon: 'route',
-              title: 'Nenhuma trilha atribuída',
-              subtitle:
-                  'Quando o personal criar uma meta, o progresso aparece aqui.',
-              action: FxEmptyAction(
-                label: 'Ir aos treinos',
-                onTap: () => context.push('/checkin/treinos'),
+            SliverPadding(
+              padding: pagePadding.copyWith(top: 0),
+              sliver: SliverToBoxAdapter(
+                child: FxEmptyState(
+                  icon: 'route',
+                  title: 'Nenhuma trilha atribuída',
+                  subtitle:
+                      'Quando o personal criar uma meta, o progresso aparece aqui.',
+                  action: FxEmptyAction(
+                    label: 'Ir aos treinos',
+                    onTap: () => context.push('/checkin/treinos'),
+                  ),
+                ),
               ),
             )
           else if (visiveis.isEmpty)
-            FxEmptyState(
-              icon: 'route',
-              title:
-                  _filtro == trilhaFiltroConcluidas
-                      ? 'Nenhuma trilha concluída'
-                      : 'Nada em andamento',
-              subtitle:
-                  _filtro == trilhaFiltroConcluidas
-                      ? 'As trilhas ativas aparecem na outra seção.'
-                      : 'Tudo que existia já foi concluído.',
-              action: FxEmptyAction(
-                label:
-                    _filtro == trilhaFiltroConcluidas
-                        ? 'Ver em andamento'
-                        : 'Ver concluídas',
-                onTap:
-                    () => setState(
-                      () => _filtro =
-                          _filtro == trilhaFiltroConcluidas
-                              ? trilhaFiltroAndamento
-                              : trilhaFiltroConcluidas,
-                    ),
+            SliverPadding(
+              padding: pagePadding.copyWith(top: 0),
+              sliver: SliverToBoxAdapter(
+                child: FxEmptyState(
+                  icon: 'route',
+                  title:
+                      _filtro == trilhaFiltroConcluidas
+                          ? 'Nenhuma trilha concluída'
+                          : 'Nada em andamento',
+                  subtitle:
+                      _filtro == trilhaFiltroConcluidas
+                          ? 'As trilhas ativas aparecem na outra seção.'
+                          : 'Tudo que existia já foi concluído.',
+                  action: FxEmptyAction(
+                    label:
+                        _filtro == trilhaFiltroConcluidas
+                            ? 'Ver em andamento'
+                            : 'Ver concluídas',
+                    onTap:
+                        () => setState(
+                          () => _filtro =
+                              _filtro == trilhaFiltroConcluidas
+                                  ? trilhaFiltroAndamento
+                                  : trilhaFiltroConcluidas,
+                        ),
+                  ),
+                ),
               ),
             )
           else ...[
             if (trilhaMarcosPendentes(trilhas) > 0)
               if (_trilhaComMarcoPendente(trilhas) case final focus?)
-                if (trilhaProximoMarco(focus) case final marco?) ...[
-                  FxStripCard(
-                    emphasize: true,
-                    semanticsLabel:
-                        'Próximo marco: ${marco.titulo}. ${focus.titulo}',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Próximo marco',
-                          style: FocuxHubTypography.chip(
-                            ShellChrome.forDark(isDark).mute,
-                          ),
+                if (trilhaProximoMarco(focus) case final marco?)
+                  SliverPadding(
+                    padding: pagePadding.copyWith(top: 0),
+                    sliver: SliverToBoxAdapter(
+                      child: FxStripCard(
+                        emphasize: true,
+                        semanticsLabel:
+                            'Próximo marco: ${marco.titulo}. ${focus.titulo}',
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Próximo marco',
+                              style: FocuxHubTypography.chip(
+                                ShellChrome.forDark(isDark).mute,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              marco.titulo,
+                              style: FocuxHubTypography.sectionTitle(
+                                context,
+                                color: ShellChrome.forDark(isDark).ink,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              focus.titulo,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: ShellChrome.forDark(isDark).mute,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            DashboardHomeActionChip(
+                              label: 'Continuar',
+                              accent: primary,
+                              isDark: isDark,
+                              onPressed: () => _abrirTrilha(focus),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          marco.titulo,
-                          style: FocuxHubTypography.sectionTitle(
-                            context,
-                            color: ShellChrome.forDark(isDark).ink,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          focus.titulo,
-                          style: FocuxHubTypography.bodyMuted(
-                            color: ShellChrome.forDark(isDark).mute,
-                          ),
-                        ),
-                        const SizedBox(height: TokensStrip.s3),
-                        DashboardHomeActionChip(
-                          label: 'Continuar',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => _abrirTrilha(focus),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: TokensStrip.s4),
-                ],
-            const DashboardSectionHeader(title: 'Trilhas'),
-            const SizedBox(height: TokensStrip.s3),
-            for (final trilha in visiveis) ...[
-              FxSatelliteListTile(
-                title: trilha.titulo,
-                titleCase: false,
-                onTap: () => _abrirTrilha(trilha),
-                subtitle: Text(
-                  '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
+            SliverPadding(
+              padding: pagePadding.copyWith(top: TokensStrip.s4),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    DashboardSectionHeader(title: 'Trilhas'),
+                    SizedBox(height: TokensStrip.s3),
+                  ],
                 ),
-                leading: FxIcon(
-                  name: trilha.concluida ? 'circle-check' : 'route',
-                  size: 18,
-                  color: primary,
-                ),
-                trailing: Text(trilhaValorAtualLabel(trilha)),
               ),
-              if (trilhaProximoMarco(trilha) case final marco?)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+            ),
+            SliverPadding(
+              padding: pagePadding.copyWith(top: 0),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final trilha = visiveis[index];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FxSatelliteListTile(
+                          title: trilha.titulo,
+                          titleCase: false,
+                          onTap: () => _abrirTrilha(trilha),
+                          subtitle: Text(
+                            '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
+                          ),
+                          leading: FxIcon(
+                            name: trilha.concluida ? 'circle-check' : 'route',
+                            size: 18,
+                            color: primary,
+                          ),
+                          trailing: Text(trilhaValorAtualLabel(trilha)),
+                        ),
+                        if (trilhaProximoMarco(trilha) case final marco?)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: TokensStrip.s3,
+                            ),
+                            child: DashboardHomeActionChip(
+                              label: 'Concluir ${marco.titulo}',
+                              accent: primary,
+                              isDark: isDark,
+                              onPressed: () => _concluirMarco(trilha, marco),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                  childCount: visiveis.length,
+                ),
+              ),
+            ),
+            if (lista.hasMore)
+              SliverPadding(
+                padding: pagePadding.copyWith(top: 0),
+                sliver: SliverToBoxAdapter(
                   child: DashboardHomeActionChip(
-                    label: 'Concluir ${marco.titulo}',
+                    label: _loadingMore ? 'Carregando…' : 'Carregar mais',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => _concluirMarco(trilha, marco),
+                    enabled: !_loadingMore,
+                    onPressed: _carregarMais,
                   ),
                 ),
-            ],
-            if (lista.hasMore)
-              DashboardHomeActionChip(
-                label: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                accent: primary,
-                isDark: isDark,
-                enabled: !_loadingMore,
-                onPressed: _carregarMais,
               ),
           ],
         ],

@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -18,6 +20,7 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -146,6 +149,15 @@ class _RecorrenciaAlunoScreenState
 
   void _leave() => safePopOrGo(context, '/dashboard/aluno');
 
+  VoidCallback _stickyOnPressed(RecorrenciaAlunoStickyKind kind) {
+    return switch (kind) {
+      RecorrenciaAlunoStickyKind.autorizar => _autorizar,
+      RecorrenciaAlunoStickyKind.pausar => _pausar,
+      RecorrenciaAlunoStickyKind.retomar => _retomar,
+      RecorrenciaAlunoStickyKind.chat => () => context.push('/chat/aluno'),
+    };
+  }
+
   Widget _chips({required Color primary, required bool isDark}) {
     return Wrap(
       spacing: TokensStrip.s2,
@@ -248,6 +260,7 @@ class _RecorrenciaAlunoScreenState
         },
         child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Assinatura',
           subtitle: freshnessLabel,
@@ -328,6 +341,44 @@ class _RecorrenciaAlunoScreenState
                                   subtitle: recorrenciaAlunoHubSubtitle(),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
+                                FxStripCard(
+                                  emphasize: true,
+                                  accent: primary,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        recorrenciaStatusLabel(
+                                          assinatura.status,
+                                        ),
+                                        style: FocuxHubTypography.sectionTitle(
+                                          context,
+                                          color: ShellChrome.forDark(isDark).ink,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        recorrenciaValorLabel(assinatura.valor),
+                                        style: FocuxHubTypography.kpi(
+                                          color: ShellChrome.forDark(isDark).ink,
+                                          fontSize: FocuxHubTypography.metricLg,
+                                        ),
+                                      ),
+                                      const SizedBox(height: TokensStrip.s3),
+                                      DashboardHomeActionChip(
+                                        label: recorrenciaAlunoStickyLabel(
+                                          stickyKind,
+                                        ),
+                                        accent: primary,
+                                        isDark: isDark,
+                                        enabled: !_mutando,
+                                        onPressed: _stickyOnPressed(stickyKind),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
                                 ..._metricTiles(
                                   valor: recorrenciaValorLabel(
                                     assinatura.valor,
@@ -378,18 +429,7 @@ class _RecorrenciaAlunoScreenState
                             loading: _mutando,
                             loadingLabel: 'Salvando…',
                             onPressed:
-                                _mutando
-                                    ? null
-                                    : switch (stickyKind) {
-                                      RecorrenciaAlunoStickyKind.autorizar =>
-                                        _autorizar,
-                                      RecorrenciaAlunoStickyKind.pausar =>
-                                        _pausar,
-                                      RecorrenciaAlunoStickyKind.retomar =>
-                                        _retomar,
-                                      RecorrenciaAlunoStickyKind.chat =>
-                                        () => context.push('/chat/aluno'),
-                                    },
+                                _mutando ? null : _stickyOnPressed(stickyKind),
                           ),
                         ),
                       ),
