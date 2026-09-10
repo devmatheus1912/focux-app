@@ -6,6 +6,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../utils/checkin_execucao_display.dart';
 
 class CheckinWorkoutHeader extends StatelessWidget {
   final String treinoNome;
@@ -63,7 +64,20 @@ class CheckinWorkoutHeader extends StatelessWidget {
                 tooltip: 'Dicas deste exercício',
                 onTap: onHelp!,
               ),
-            TextButton(onPressed: onBack, child: const Text('Sair')),
+            SizedBox(
+              height: checkinExecutionControlMin,
+              child: TextButton(
+                onPressed: onBack,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(
+                    checkinExecutionControlMin,
+                    checkinExecutionControlMin,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
+                ),
+                child: const Text('Sair'),
+              ),
+            ),
           ],
         ),
       ),

@@ -45,6 +45,7 @@ void main() {
     expect(screen, contains('CheckinRestFocusView'));
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('checkinFinalizarLabel'));
+    expect(screen, contains('Trocar exercício'));
     expect(screen, contains('selectedId:'));
     expect(screen, contains('FxLoading'));
     expect(screen, isNot(contains('ListView(')));
@@ -52,6 +53,7 @@ void main() {
     expect(screen, isNot(contains('CheckinRestTimerDock')));
     expect(screen, isNot(contains('CheckinLiveCoachingCard')));
     expect(screen, isNot(contains('CheckinLiveBadge')));
+    expect(screen, isNot(contains('Ver fila')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 
@@ -70,6 +72,7 @@ void main() {
       'lib/features/checkin/widgets/checkin_header_widgets.dart',
     );
     expect(header, contains("child: const Text('Sair')"));
+    expect(header, contains('checkinExecutionControlMin'));
     expect(header, contains('FxHelpIconButton'));
     expect(header, isNot(contains('CheckinLiveBadge')));
     expect(header, isNot(contains('AO VIVO')));

@@ -503,7 +503,13 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                               TextButton(
                                 onPressed: () => _abrirFila(exercicios),
                                 child: Text(
-                                  'Ver fila · ${exercicios.length} exercícios',
+                                  'Trocar exercício',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.55),
+                                  ),
                                 ),
                               ),
                           ],
@@ -519,22 +525,28 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                       TokensStrip.s4,
                       TokensStrip.s3,
                     ),
-                    child:
-                        allDone
-                            ? SizedBox(
-                              height: checkinExecutionControlMin,
-                              child: FxLiquidPrimaryButton(
+                    child: SizedBox(
+                      height: checkinExecutionControlMin,
+                      child:
+                          allDone
+                              ? FxLiquidPrimaryButton(
                                 label: checkinFinalizarLabel(),
                                 icon: Icons.flag_rounded,
                                 onPressed: _concluindo ? null : _concluir,
                                 loading: _concluindo,
                                 loadingLabel: 'Finalizando…',
+                              )
+                              : TextButton(
+                                onPressed: _concluindo ? null : _concluir,
+                                style: TextButton.styleFrom(
+                                  minimumSize: const Size(
+                                    double.infinity,
+                                    checkinExecutionControlMin,
+                                  ),
+                                ),
+                                child: Text(checkinFinalizarLabel()),
                               ),
-                            )
-                            : TextButton(
-                              onPressed: _concluindo ? null : _concluir,
-                              child: Text(checkinFinalizarLabel()),
-                            ),
+                    ),
                   ),
                 ),
             ],

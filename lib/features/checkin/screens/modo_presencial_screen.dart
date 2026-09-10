@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -483,29 +482,13 @@ class _State extends ConsumerState<ModoPresencialScreen>
                   ),
                 ),
               ] else ...[
-                Container(
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  decoration: BoxDecoration(
-                    color: EagleTokens.good.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Column(
-                    children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: EagleTokens.good,
-                        size: 40,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Concluído',
-                        style: TextStyle(
-                          color: EagleTokens.good,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
+                Text(
+                  'Exercício concluído',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: heroTealMuted(0.70),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -516,6 +499,12 @@ class _State extends ConsumerState<ModoPresencialScreen>
                   height: checkinExecutionControlMin,
                   child: TextButton(
                     onPressed: _next,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(
+                        double.infinity,
+                        checkinExecutionControlMin,
+                      ),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

@@ -6,14 +6,18 @@ import '../theme/focux_system_chrome.dart';
 import 'cinematic_mesh_background.dart';
 import 'mesh_scope.dart';
 
-/// Routes that keep their own immersive / marketing background.
-const _immersiveRoutePrefixes = ['/treino-presencial/', '/promo-enterprise'];
+/// Routes that keep their own immersive / marketing background (no mesh wrap).
+const _immersiveRoutePrefixes = [
+  '/treino-presencial/',
+  '/checkin/executar',
+  '/promo-enterprise',
+];
 
 bool _fxRouteUsesImmersiveChrome(String path) {
   for (final prefix in _immersiveRoutePrefixes) {
-    if (path.startsWith(prefix)) return true;
+    if (path == prefix || path.startsWith(prefix)) return true;
   }
-  return path == '/promo-enterprise';
+  return false;
 }
 
 /// Wraps pushed sub-routes with cinematic mesh + system chrome.
