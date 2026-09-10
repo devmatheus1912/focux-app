@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../growth/utils/migracao_foto_limits.dart';
 import '../subscription/models/subscription_plan.dart';
 import '../subscription/utils/plano_ia_limits.dart';
@@ -253,6 +255,136 @@ class PlanEntitlements {
     );
   }
 
+  /// 3 benefícios de venda por capability — sheet/FeatureGate.
+  static List<UpgradeSalesBenefit> salesBenefits({
+    String? capability,
+    required String featureName,
+    required SubscriptionPlan plan,
+  }) {
+    final planLabel = displayPlanName(plan);
+    return switch (capability) {
+      'iaCopiloto' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.bolt_rounded,
+          label: 'Prioridade do dia sob medida',
+          detail: 'O que fazer agora com cada aluno',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.psychology_outlined,
+          label: 'Contexto operacional completo',
+          detail: 'Treinos, check-ins, risco e aderência',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.task_alt_rounded,
+          label: 'Da sugestão à ação em um toque',
+          detail: 'Tarefa, mensagem ou treino prontos',
+        ),
+      ],
+      'financeiro' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.payments_outlined,
+          label: 'Cobrança PIX no fluxo',
+          detail: 'Menos inadimplência, menos cobrança manual',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.receipt_long_outlined,
+          label: 'Mensalidades sob controle',
+          detail: 'Vencidos, a receber e histórico',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.insights_outlined,
+          label: 'Resumo financeiro claro',
+          detail: 'Saiba onde está o dinheiro da operação',
+        ),
+      ],
+      'landingCompleta' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.web_outlined,
+          label: 'Landing que vende 24h',
+          detail: 'Depoimentos, galeria, FAQ e captura',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.campaign_outlined,
+          label: 'Leads no funil',
+          detail: 'Formulário Meta e link público',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.brush_outlined,
+          label: 'Sua marca no ar',
+          detail: 'Página com a cara do seu negócio',
+        ),
+      ],
+      'leads' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.people_outline,
+          label: 'CRM sem teto do Free',
+          detail: 'Pipeline completo de prospects',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.trending_up_rounded,
+          label: 'Funil sob controle',
+          detail: 'Status, follow-up e conversão',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.notifications_active_outlined,
+          label: 'Não perde lead frio',
+          detail: 'Lembretes e próximos passos',
+        ),
+      ],
+      'lojaDigital' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.storefront_outlined,
+          label: 'Vitrine digital',
+          detail: 'Programas e pacotes no seu link',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.payments_outlined,
+          label: 'Checkout PIX',
+          detail: 'Cliente paga sem atrito',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.inventory_2_outlined,
+          label: 'Catálogo organizado',
+          detail: 'Nome, preço e o que está incluso',
+        ),
+      ],
+      'poseCoach' => const [
+        UpgradeSalesBenefit(
+          icon: Icons.accessibility_new_rounded,
+          label: 'Análise de postura ML',
+          detail: 'Feedback visual em tempo real',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.videocam_outlined,
+          label: 'Form check com evidência',
+          detail: 'Menos lesão, mais qualidade',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.school_outlined,
+          label: 'Aluno aprende mais rápido',
+          detail: 'Correção clara no treino',
+        ),
+      ],
+      _ => [
+        UpgradeSalesBenefit(
+          icon: Icons.lock_open_rounded,
+          label: 'Acesso a $featureName',
+          detail: 'Liberado no plano $planLabel',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.speed_rounded,
+          label: 'Operação mais rápida',
+          detail: 'Menos planilha, mais alunos atendidos',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.workspace_premium_rounded,
+          label: 'Upgrade em um passo',
+          detail: 'Compare planos e assine no app',
+        ),
+      ],
+    };
+  }
+
   static LockedOffer iaQuotaUpgradeOffer({
     required SubscriptionPlan currentPlan,
     SubscriptionPlan? targetPlan,
@@ -385,6 +517,19 @@ class LockedOffer {
     required this.ctaLabel,
     this.targetPlan,
   });
+}
+
+/// Benefício de venda no sheet/tela de upgrade.
+class UpgradeSalesBenefit {
+  const UpgradeSalesBenefit({
+    required this.icon,
+    required this.label,
+    required this.detail,
+  });
+
+  final IconData icon;
+  final String label;
+  final String detail;
 }
 
 /// Métricas de uso vindas de `/api/planos/me`.

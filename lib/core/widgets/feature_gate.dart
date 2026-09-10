@@ -8,12 +8,12 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
+import '../../features/subscription/widgets/fx_upgrade_sales_sheet.dart';
 import '../analytics/analytics_service.dart';
 import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
 import '../theme/design_tokens.dart';
-import '../theme/shell_chrome.dart';
-import 'fx_motion.dart';
+import '../theme/tokens_strip.dart';
 import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
 
@@ -254,7 +254,17 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
       capability: widget.capability,
       requiredPlan: widget.requiredPlan,
     );
-    final primary = Theme.of(context).colorScheme.primary;
+    final plan = offer.targetPlan ?? widget.requiredPlan;
+    final benefits = PlanEntitlements.salesBenefits(
+      capability: widget.capability,
+      featureName: widget.featureName,
+      plan: plan,
+    );
+    final priceAnchor = switch (plan) {
+      SubscriptionPlan.ENTERPRISE => 'Enterprise · marca, loja e time',
+      SubscriptionPlan.PRO => 'Pro · a partir da assinatura mensal',
+      _ => null,
+    };
 
     return FxShellScaffold(
       useMesh: true,
@@ -267,73 +277,48 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s2,
+            TokensStrip.s4,
+            TokensStrip.s3,
+          ),
           child: Column(
             children: [
-              const Spacer(),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: fxStripCardDecoration(context, accent: primary),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Icon(Icons.lock_open_rounded, size: 32, color: primary),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      offer.headline,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1.15,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      offer.body,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: ShellChrome.of(context).mute,
-                        fontSize: 14,
-                        height: 1.45,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: SingleChildScrollView(
+                  child: FxUpgradeSalesPanel(
+                    offer: offer,
+                    benefits: benefits,
+                    plan: plan,
+                    priceAnchor: priceAnchor,
+                    onCta: () {
+                      AnalyticsService.instance.track(
+                        ProductEvents.paywallCtaTapped,
+                        props: {
+                          'source': 'feature_gate',
+                          'plan_id': plan.apiName,
+                          if (widget.capability != null)
+                            'capability': widget.capability!,
+                        },
+                      );
+                      final cap = widget.capability;
+                      final capQuery =
+                          cap != null && cap.isNotEmpty
+                              ? '&capability=${Uri.encodeComponent(cap)}'
+                              : '';
+                      context.push(
+                        '/assinatura?plano=${plan.apiName}&source=feature_gate&feature=${Uri.encodeComponent(widget.featureName)}$capQuery',
+                      );
+                    },
+                    onDismiss:
+                        () => safePopOr(
+                          context,
+                          () => goToRoleHome(context, ref),
+                        ),
+                  ),
                 ),
               ),
-              const Spacer(),
-              FxLiquidPrimaryButton(
-                label: offer.ctaLabel,
-                icon: Icons.workspace_premium_rounded,
-                onPressed:
-                    offer.targetPlan == null
-                        ? null
-                        : () {
-                          final cap = widget.capability;
-                          final capQuery =
-                              cap != null && cap.isNotEmpty
-                                  ? '&capability=${Uri.encodeComponent(cap)}'
-                                  : '';
-                          context.push(
-                            '/assinatura?plano=${offer.targetPlan!.apiName}&source=feature_gate&feature=${Uri.encodeComponent(widget.featureName)}$capQuery',
-                          );
-                        },
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed:
-                    () =>
-                        safePopOr(context, () => goToRoleHome(context, ref)),
-                child: const Text('Agora não'),
-              ),
-              const SizedBox(height: 8),
             ],
           ),
         ),

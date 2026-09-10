@@ -24,8 +24,9 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
     if (sortedPlans.isEmpty) {
       return FxEmptyState(
         icon: 'dollar-sign',
-        title: 'Nenhum plano disponível',
-        subtitle: 'Tente atualizar em instantes.',
+        title: 'Planos em sincronização',
+        subtitle:
+            'Atualize em instantes — o Pro destrava cobrança PIX, IA e landing pública.',
         action: FxEmptyAction(
           label: 'Atualizar',
           onTap: () {
