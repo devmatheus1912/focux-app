@@ -7,14 +7,12 @@ import '../../../core/widgets/fx_settings_tile.dart';
 class PerfilOperacaoSection extends StatelessWidget {
   const PerfilOperacaoSection({
     super.key,
-    required this.accent,
     required this.mute,
     required this.line,
     required this.pixDone,
     required this.planoLabel,
   });
 
-  final Color accent;
   final Color mute;
   final Color line;
   final bool pixDone;
@@ -28,7 +26,6 @@ class PerfilOperacaoSection extends StatelessWidget {
           icon: Icons.workspace_premium_outlined,
           label: 'Planos e assinatura',
           value: planoLabel,
-          accent: accent,
           mute: mute,
           line: line,
           onTap: () => context.push('/assinatura'),

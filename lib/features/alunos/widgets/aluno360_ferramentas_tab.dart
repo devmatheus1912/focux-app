@@ -54,7 +54,8 @@ class Aluno360FerramentasTab extends StatelessWidget {
         context.push(evolucaoRoute, extra: aluno.nome);
       case Aluno360MeasurementField.gordura:
       case Aluno360MeasurementField.massaMagra:
-        context.push(evolucaoRoute, extra: aluno.nome);
+        // Composição corporal vive no Comparativo (% gordura / massa magra).
+        context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
     }
   }
 

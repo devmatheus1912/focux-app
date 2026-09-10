@@ -205,7 +205,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               header: 'Operação',
                               children: [
                                 PerfilOperacaoSection(
-                                  accent: accent,
                                   mute: mute,
                                   line: line,
                                   pixDone: readiness.isPixDone,

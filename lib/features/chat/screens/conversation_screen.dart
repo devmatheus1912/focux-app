@@ -194,8 +194,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _loading = false;
       });
       _dedupeInitialDraft();
-      await _markRead();
       _scrollToBottom(animated: false);
+      // Mark-read em paralelo — não atrasar o scroll (estilo WhatsApp).
+      // ignore: unawaited_futures
+      _markRead();
     } catch (e) {
       if (mounted) {
         setState(() {

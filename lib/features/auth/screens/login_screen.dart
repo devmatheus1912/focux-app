@@ -10,6 +10,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
+import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -93,6 +94,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (slug != null && slug.isNotEmpty) {
       _personalSlug = slug;
       _slugController.text = slug;
+      // ignore: unawaited_futures
+      PersonalSlugStore.save(slug);
+    } else if (_isAluno) {
+      // ignore: unawaited_futures
+      PersonalSlugStore.read().then((stored) {
+        if (!mounted || stored == null || stored.isEmpty) return;
+        if (_slugController.text.trim().isNotEmpty) return;
+        setState(() {
+          _personalSlug = stored;
+          _slugController.text = stored;
+        });
+      });
     }
   }
 

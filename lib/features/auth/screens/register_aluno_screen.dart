@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_brand_copy.dart';
+import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
@@ -94,6 +95,11 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
             personalSlug: widget.personalSlug,
           );
       if (mounted) {
+        final slug = widget.personalSlug?.trim();
+        if (slug != null && slug.isNotEmpty) {
+          await PersonalSlugStore.save(slug);
+        }
+        if (!mounted) return;
         HapticFeedback.heavyImpact();
         unawaited(
           AnalyticsService.instance.track(

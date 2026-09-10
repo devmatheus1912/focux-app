@@ -6,6 +6,8 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 
 /// Conta e segurança — grupo + sair em card separado (ChatGPT).
+///
+/// Termos/privacidade ficam em Consentimentos (aceite LGPD + leitura).
 class PerfilContaSegurancaSection extends StatelessWidget {
   const PerfilContaSegurancaSection({
     super.key,
@@ -43,33 +45,35 @@ class PerfilContaSegurancaSection extends StatelessWidget {
                 line: line,
                 onTap: onMfaTap,
               ),
-            FxSettingsTile(
-              icon: Icons.gavel_outlined,
-              label: 'Termos de uso',
-              value: '',
-              mute: mute,
-              line: line,
-              onTap: () => FocuxLegal.openTerms(),
-            ),
-            FxSettingsTile(
-              icon: Icons.shield_outlined,
-              label: 'Política de privacidade',
-              value: '',
-              mute: mute,
-              line: line,
-              showDivider: onConsentTap != null,
-              onTap: () => FocuxLegal.openPrivacy(),
-            ),
             if (onConsentTap != null)
               FxSettingsTile(
                 icon: Icons.fact_check_outlined,
                 label: 'Consentimentos',
-                value: '',
+                value: 'Termos, privacidade e aceite',
                 mute: mute,
                 line: line,
                 showDivider: false,
                 onTap: onConsentTap,
+              )
+            else ...[
+              FxSettingsTile(
+                icon: Icons.gavel_outlined,
+                label: 'Termos de uso',
+                value: '',
+                mute: mute,
+                line: line,
+                onTap: () => FocuxLegal.openTerms(),
               ),
+              FxSettingsTile(
+                icon: Icons.shield_outlined,
+                label: 'Política de privacidade',
+                value: '',
+                mute: mute,
+                line: line,
+                showDivider: false,
+                onTap: () => FocuxLegal.openPrivacy(),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: FxSettingsLayout.groupGap),
