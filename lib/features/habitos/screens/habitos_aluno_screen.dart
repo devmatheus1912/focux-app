@@ -267,10 +267,13 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                       : 'Nenhum hábito ainda',
                   subtitle: searching
                       ? 'Tente outro nome. O personal cadastra os hábitos da sua rotina.'
-                      : 'Seu personal ainda não cadastrou hábitos. Avise para começar sua jornada.',
+                      : 'Seu personal ainda não cadastrou hábitos. Avise no chat para começar.',
                   action: searching
                       ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
-                      : null,
+                      : FxEmptyAction(
+                          label: 'Abrir chat',
+                          onTap: () => context.push('/chat/aluno'),
+                        ),
                 ),
               ],
             )

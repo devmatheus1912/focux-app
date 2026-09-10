@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/api/pagina.dart';
 import '../../../core/brand/focux_microcopy.dart';
-import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
@@ -112,16 +113,14 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
         },
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Sua rotina',
             subtitle: FxHubFreshness.joinCount(
               meusTreinosCountLabel(count),
               treinosAsync.isLoading && base.isEmpty ? null : freshnessLabel,
             ),
-            onBack: () {
-              FxKeyboardDismissScope.dismiss();
-              safePopOrGo(context, '/dashboard/aluno');
-            },
+            showBack: false,
             actions: [
               IconButton(
                 onPressed: () => ref.invalidate(meusTreinosProvider),
@@ -173,6 +172,8 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                     onRefresh: () async => ref.invalidate(meusTreinosProvider),
                     child: CustomScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       slivers: [
                         const SliverToBoxAdapter(child: SizedBox(height: 8)),
                         SliverToBoxAdapter(

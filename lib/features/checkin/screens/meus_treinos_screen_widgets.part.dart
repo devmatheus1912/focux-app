@@ -40,7 +40,9 @@ class _TrainingHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final primaryDeep = BrandPalette.deep(primary);
+    final chrome = ShellChrome.forDark(isDark);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final progresso =
         totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
     final hasExercises = totalExercicios > 0;
@@ -50,108 +52,50 @@ class _TrainingHero extends StatelessWidget {
             : 'Plano em montagem';
     final subtitle =
         hasExercises
-            ? '$total no plano atual'
+            ? '$total no plano atual · $totalConcluidos/$totalExercicios exercícios'
             : '$total treino${total == 1 ? '' : 's'} no plano atual';
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primary, primaryDeep],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.18 : 0.28),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
-            spreadRadius: -16,
-          ),
-        ],
-      ),
+    return FxStripCard(
+      emphasize: true,
+      accent: primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(Icons.bolt_rounded, color: Colors.white),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      headline,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.72),
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          Text(
+            headline,
+            style: FocuxHubTypography.sectionTitle(context, color: ink).copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: FocuxHubTypography.bodyMuted(
+              color: mute,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 14),
           if (hasExercises)
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 value: progresso,
-                minHeight: 8,
-                backgroundColor: Colors.white.withValues(alpha: 0.18),
-                valueColor: const AlwaysStoppedAnimation(Colors.white),
+                minHeight: 7,
+                backgroundColor:
+                    isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
+                valueColor: AlwaysStoppedAnimation(primary),
               ),
             )
           else
-            Container(
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: 0.18,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
+            Text(
+              'A sessão já está no radar. Os exercícios aparecem quando forem liberados.',
+              style: FocuxHubTypography.bodyMuted(
+                color: mute,
+                fontWeight: FontWeight.w600,
+              ).copyWith(fontSize: 12.5, height: 1.35),
             ),
-          const SizedBox(height: 10),
-          Text(
-            hasExercises
-                ? '$totalConcluidos de $totalExercicios exercícios concluídos no ciclo aberto.'
-                : 'A sessão já está no radar. Os exercícios aparecem aqui quando forem liberados.',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.76),
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
         ],
       ),
     );
