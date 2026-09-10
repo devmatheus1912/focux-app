@@ -22,7 +22,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -117,15 +119,23 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final subtitle = iaAlunoHubSubtitle(_view);
+    Future<void> voltar() async {
+      FxKeyboardDismissScope.dismiss();
+      safePopOrGo(context, '/dashboard/aluno');
+    }
+
     return fxScreenA11yScope(
       label: 'Assistente IA',
-      child: FxShellScaffold(
+      child: FxFormPopGuard(
+        dirty: false,
+        onCancel: voltar,
+        child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Assistente IA',
           subtitle: freshness == null ? subtitle : '$subtitle · $freshness',
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+          onBack: voltar,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar o assistente',
@@ -172,6 +182,7 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
                     ],
                   ),
                 ),
+        ),
       ),
     );
   }
@@ -410,31 +421,45 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.all(TokensStrip.s4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Progressão de Carga',
-            style: FocuxHubTypography.sectionTitle(
-              context,
-              color: Theme.of(context).colorScheme.onSurface,
+          if (_resultado == null && !_loading && _erro == null)
+            FxEmptyState(
+              icon: 'spark',
+              title: 'Progressão de carga',
+              subtitle:
+                  'Gere recomendações com base no seu histórico de treinos.',
+              action: FxEmptyAction(
+                label: 'Gerar recomendações',
+                onTap: _gerarProgressao,
+              ),
+            )
+          else ...[
+            Text(
+              'Progressão de Carga',
+              style: FocuxHubTypography.sectionTitle(
+                context,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-            style: TextStyle(color: TokensStrip.textSecondary),
-          ),
-          const SizedBox(height: 8),
-          const IaSafetyDisclaimer(compact: true),
-          const SizedBox(height: 20),
-          FxLiquidPrimaryButton(
-            label: _loading ? 'Analisando...' : 'Gerar Recomendações',
-            icon: Icons.auto_awesome,
-            loading: _loading,
-            onPressed: _loading ? null : _gerarProgressao,
-          ),
+            const SizedBox(height: 8),
+            const Text(
+              'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
+              style: TextStyle(color: TokensStrip.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            const IaSafetyDisclaimer(compact: true),
+            const SizedBox(height: 20),
+            FxLiquidPrimaryButton(
+              label: _loading ? 'Analisando...' : 'Gerar Recomendações',
+              icon: Icons.auto_awesome,
+              loading: _loading,
+              onPressed: _loading ? null : _gerarProgressao,
+            ),
+          ],
           if (_loading) const IaProgressaoLoadingSkeleton(),
           if (_erro != null) ...[
             const SizedBox(height: TokensStrip.s4),

@@ -290,6 +290,15 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   };
 
   Future<void> _salvar() async {
+    FxKeyboardDismissScope.dismiss();
+    final parqPendente = _parq.values.any((v) => v == null);
+    if (parqPendente) {
+      FeedbackHelper.showError(
+        context,
+        'Responda todas as perguntas do PAR-Q+ antes de enviar.',
+      );
+      return;
+    }
     HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {

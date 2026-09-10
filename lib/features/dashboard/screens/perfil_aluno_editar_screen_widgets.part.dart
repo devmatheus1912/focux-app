@@ -1,63 +1,5 @@
 part of 'perfil_aluno_editar_screen.dart';
 
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool isDark;
-  final List<Widget> children;
-  final Widget? trailing;
-
-  const _SectionCard({
-    required this.title,
-    required this.subtitle,
-    required this.isDark,
-    required this.children,
-    this.trailing,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
-    return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      decoration: chrome.listCard(primary: primary),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: chrome.ink,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 12), trailing!],
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: chrome.mute,
-              fontSize: 12.5,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
 class _ProgressEntryCard extends StatelessWidget {
   final MedidaCorporal medida;
   final bool isDark;
@@ -215,6 +157,7 @@ class _Field extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         keyboardType: keyboardType,
+        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         decoration: FxInputDeco.build(context, label, icon: icon),
         validator:
             requiredField

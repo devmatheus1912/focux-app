@@ -12,8 +12,10 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../auth/utils/auth_layout.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_wizard_chrome.dart';
@@ -133,9 +135,11 @@ class AlunoActivationScreen extends ConsumerWidget {
                   onPressed: () async {
                     await _markSeen(aluno.id);
                     if (!context.mounted) return;
-                    context.go(
-                      progress.allDone ? '/dashboard/aluno' : step.route,
-                    );
+                    if (progress.allDone) {
+                      safePopOrGo(context, '/dashboard/aluno');
+                    } else {
+                      context.go(step.route);
+                    }
                   },
                 ),
               ),
@@ -147,6 +151,14 @@ class AlunoActivationScreen extends ConsumerWidget {
                   TokensStrip.s5,
                 ),
                 children: [
+                  Center(
+                    child: FxConversionLockup(
+                      width: authLogoWidthFor(context, withTagline: true),
+                      semanticLabel: 'Focux ALUNO',
+                      aluno: true,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
                   FxWizardStepDots(
                     current: progress.allDone
                         ? progress.totalCount

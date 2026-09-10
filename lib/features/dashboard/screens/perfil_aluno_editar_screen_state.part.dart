@@ -156,6 +156,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   }
 
   Future<void> _save({bool silent = false}) async {
+    FxKeyboardDismissScope.dismiss();
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     try {
@@ -456,14 +457,20 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
             _loadIfNeeded(aluno);
             return Form(
               key: _formKey,
-              child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
+              child: FxContentWidthLimiter(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    8,
+                    FxSettingsLayout.pageInset,
+                    24,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -555,159 +562,190 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         ],
                       ),
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    _SectionCard(
-                      title: 'Identidade e contato',
-                      subtitle: 'Dados basicos para contato e rotina do aluno.',
-                      isDark: isDark,
+                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    FxSettingsGroup(
+                      header: 'Identidade e contato',
+                      caption: 'Dados básicos para contato e rotina do aluno.',
                       children: [
-                        _Field(
+                        AlunoInsetFormField(
                           controller: _nome,
                           label: 'Nome',
                           icon: Icons.person_outline,
-                          requiredField: true,
+                          validator:
+                              (v) =>
+                                  v == null || v.trim().isEmpty
+                                      ? 'Obrigatório.'
+                                      : null,
                         ),
-                        _Field(
+                        AlunoInsetFormField(
                           controller: _email,
                           label: 'Email',
                           icon: Icons.email_outlined,
-                          requiredField: true,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) {
+                              return 'Obrigatório.';
+                            }
+                            if (!v.contains('@')) return 'E-mail inválido.';
+                            return null;
+                          },
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _Field(
-                                controller: _telefone,
-                                label: 'Telefone',
-                                icon: Icons.phone_outlined,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _Field(
-                                controller: _whatsapp,
-                                label: 'WhatsApp',
-                                icon: Icons.chat_outlined,
-                              ),
-                            ),
-                          ],
+                        AlunoInsetFormField(
+                          controller: _telefone,
+                          label: 'Telefone',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _Field(
-                                controller: _genero,
-                                label: 'Genero',
-                                icon: Icons.badge_outlined,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _Field(
-                                controller: _dataNascimento,
-                                label: 'Nascimento DD-MM-AAAA',
-                                icon: Icons.cake_outlined,
-                              ),
-                            ),
-                          ],
+                        AlunoInsetFormField(
+                          controller: _whatsapp,
+                          label: 'WhatsApp',
+                          icon: Icons.chat_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        AlunoInsetFormField(
+                          controller: _genero,
+                          label: 'Gênero',
+                          icon: Icons.badge_outlined,
+                        ),
+                        AlunoInsetFormField(
+                          controller: _dataNascimento,
+                          label: 'Nascimento DD-MM-AAAA',
+                          icon: Icons.cake_outlined,
+                          showDivider: false,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    _SectionCard(
-                      title: 'Corpo e metas',
-                      subtitle:
-                          'O que o aluno quer construir e de onde esta partindo.',
-                      isDark: isDark,
+                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    FxSettingsGroup(
+                      header: 'Corpo e metas',
+                      caption:
+                          'O que você quer construir e de onde está partindo.',
                       children: [
-                        _Field(
+                        AlunoInsetFormField(
                           controller: _objetivo,
                           label: 'Objetivo principal',
                           icon: Icons.flag_outlined,
                           maxLines: 2,
                         ),
-                        _Field(
+                        AlunoInsetFormField(
                           controller: _tipoConsultoria,
                           label: 'Tipo de consultoria',
                           icon: Icons.fitness_center,
                         ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _Field(
-                                controller: _peso,
-                                label: 'Peso kg',
-                                icon: Icons.monitor_weight_outlined,
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _Field(
-                                controller: _altura,
-                                label: 'Altura m',
-                                icon: Icons.height,
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                          ],
+                        AlunoInsetFormField(
+                          controller: _peso,
+                          label: 'Peso kg',
+                          icon: Icons.monitor_weight_outlined,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                        ),
+                        AlunoInsetFormField(
+                          controller: _altura,
+                          label: 'Altura m',
+                          icon: Icons.height,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          showDivider: false,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
-                    _SectionCard(
-                      title: 'Progresso corporal',
-                      subtitle:
-                          'Medidas, foto de evolução e histórico rápido para acompanhar resultado real.',
-                      isDark: isDark,
-                      trailing: FilledButton.tonalIcon(
-                        onPressed: _registrarMedida,
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(0, 44),
-                        ),
-                        icon: const Icon(Icons.add_chart),
-                        label: const Text('Registrar'),
+                    const SizedBox(height: FxSettingsLayout.groupGap),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: FxSettingsLayout.groupPadH,
                       ),
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (medidas.isEmpty)
-                              FxEmptyState(
-                                icon: 'chart',
-                                title: 'Histórico corporal vazio',
-                                subtitle:
-                                    'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
-                                action: FxEmptyAction(
-                                  label: 'Registrar medida',
-                                  onTap: _registrarMedida,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Progresso corporal',
+                                  style: FxSettingsLayout.sectionHeader(
+                                    color: mute,
+                                  ),
                                 ),
-                              )
-                            else ...[
-                              Text(
-                                'Últimas atualizações',
-                                style: TextStyle(
-                                  color: ink,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                                const SizedBox(
+                                  height: FxSettingsLayout.captionAfterHeader,
+                                ),
+                                Text(
+                                  'Medidas, foto de evolução e histórico rápido.',
+                                  style: FxSettingsLayout.footer(color: mute),
+                                ),
+                              ],
+                            ),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: _registrarMedida,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(0, 44),
+                            ),
+                            icon: const Icon(Icons.add_chart),
+                            label: const Text('Registrar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: FxSettingsLayout.headerToGroup),
+                    FxSettingsGroup(
+                      children: [
+                        if (medidas.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(TokensStrip.s3),
+                            child: FxEmptyState(
+                              icon: 'chart',
+                              title: 'Histórico corporal vazio',
+                              subtitle:
+                                  'Registrar a primeira medida melhora acompanhamento, ajuste de carga e conversa com o personal.',
+                              action: FxEmptyAction(
+                                label: 'Registrar medida',
+                                onTap: _registrarMedida,
+                              ),
+                            ),
+                          )
+                        else ...[
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.groupPadH,
+                              TokensStrip.s3,
+                              FxSettingsLayout.groupPadH,
+                              TokensStrip.s2,
+                            ),
+                            child: Text(
+                              'Últimas atualizações',
+                              style: TextStyle(
+                                color: ink,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          ...medidas
+                              .take(3)
+                              .map(
+                                (medida) => Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    FxSettingsLayout.groupPadH,
+                                    0,
+                                    FxSettingsLayout.groupPadH,
+                                    TokensStrip.s2,
+                                  ),
+                                  child: _ProgressEntryCard(
+                                    medida: medida,
+                                    isDark: isDark,
+                                    formatarData: _formatarDataCurta,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              ...medidas
-                                  .take(3)
-                                  .map(
-                                    (medida) => _ProgressEntryCard(
-                                      medida: medida,
-                                      isDark: isDark,
-                                      formatarData: _formatarDataCurta,
-                                    ),
-                                  ),
-                            ],
-                          ],
-                        ),
+                          const SizedBox(height: TokensStrip.s2),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: TokensStrip.s4),
+                    const SizedBox(height: FxSettingsLayout.groupGap),
                     Text(
                       'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
                       textAlign: TextAlign.center,

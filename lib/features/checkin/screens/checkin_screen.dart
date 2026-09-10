@@ -12,6 +12,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_execution_chrome.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -327,6 +328,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   Future<void> _sair() async {
+    FxKeyboardDismissScope.dismiss();
     final exercicios = _execucao?.exercicios ?? [];
     final doneSeries = exercicios.fold<int>(
       0,
