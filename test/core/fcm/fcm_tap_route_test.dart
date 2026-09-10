@@ -2,13 +2,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/fcm/fcm_tap_route.dart';
 
 void main() {
-  test('route explícita vence o type', () {
+  test('route de personal vaza e vira rota do aluno', () {
     expect(
       resolveFcmTapRoute({
         'type': 'mensalidade',
         'route': '/financeiro',
       }),
-      '/financeiro',
+      '/financeiro/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({
+        'type': 'anamnese',
+        'route': '/alunos/7/anamnese',
+        'alunoId': '7',
+      }),
+      '/aluno/anamnese',
     );
   });
 
@@ -18,24 +26,17 @@ void main() {
       '/financeiro/aluno',
     );
     expect(resolveFcmTapRoute({'type': 'dunning'}), '/financeiro/aluno');
-    expect(resolveFcmTapRoute({'type': 'treino'}), '/dashboard/aluno');
+    expect(resolveFcmTapRoute({'type': 'treino'}), '/checkin/treinos');
     expect(resolveFcmTapRoute({'type': 'chat'}), '/chat/aluno');
     expect(resolveFcmTapRoute({'type': 'anamnese'}), '/aluno/anamnese');
-    expect(
-      resolveFcmTapRoute({
-        'type': 'anamnese',
-        'route': '/alunos/7/anamnese',
-        'alunoId': '7',
-      }),
-      '/alunos/7/anamnese',
-    );
+    expect(resolveFcmTapRoute({'type': 'broadcast'}), '/dashboard/aluno');
     expect(resolveFcmTapRoute({'type': 'plan_sync'}), '/assinatura');
     expect(resolveFcmTapRoute({'type': 'retencao'}), '/retencao');
   });
 
-  test('sem type usa alunoId ou chatId', () {
-    expect(resolveFcmTapRoute({'alunoId': '12'}), '/alunos/12');
-    expect(resolveFcmTapRoute({'chatId': '9'}), '/alunos/9/chat');
+  test('sem type usa hub do aluno, não /alunos do personal', () {
+    expect(resolveFcmTapRoute({'alunoId': '12'}), '/dashboard/aluno');
+    expect(resolveFcmTapRoute({'chatId': '9'}), '/chat/aluno');
   });
 
   test('execucaoId empurra o histórico do check-in', () {
