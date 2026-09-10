@@ -73,8 +73,10 @@ OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
       // Sem deep link de treino; detalhe wearable fica na própria aba.
       return OperacaoStatusCardDestination.noop;
     case OperacaoStatusCardKind.ultimoTreino:
-    case OperacaoStatusCardKind.checkins7d:
       return OperacaoStatusCardDestination.treinos;
+    case OperacaoStatusCardKind.checkins7d:
+      // Check-ins = aderência/engajamento, não lista de treinos.
+      return OperacaoStatusCardDestination.engajamento;
   }
 }
 

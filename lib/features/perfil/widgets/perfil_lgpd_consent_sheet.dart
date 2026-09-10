@@ -8,7 +8,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lgpd_consent_repository.dart';
@@ -22,9 +21,23 @@ Future<void> showPerfilLgpdConsentSheet(
   BuildContext context, {
   List<String> tipos = lgpdConsentTiposPersonal,
 }) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   return showFxHomeSheet<void>(
     context,
-    builder: (ctx) => _PerfilLgpdConsentSheet(tipos: tipos),
+    builder: (ctx) => FxHomeSheetScaffold(
+      isDark: isDark,
+      leading: Icon(
+        Icons.privacy_tip_outlined,
+        color: Theme.of(ctx).colorScheme.primary,
+        size: 22,
+      ),
+      title: 'Consentimentos',
+      subtitle:
+          'Registra o aceite dos docs vigentes (LGPD). '
+          'Abrimos a página oficial e salvamos a versão '
+          '${FocuxLegal.consentDocumentVersion}.',
+      child: _PerfilLgpdConsentSheet(tipos: tipos),
+    ),
   );
 }
 
@@ -104,71 +117,46 @@ class _PerfilLgpdConsentSheetState
     final mute = chrome.mute;
     final ink = chrome.ink;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: FxHomeSheetChrome.paddingOf(context),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Consentimentos',
-              style: FocuxHubTypography.sectionTitle(context, color: ink),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: TokensStrip.s4),
+            child: Center(child: FxLoading()),
+          )
+        else if (_erro != null)
+          Text(
+            _erro!,
+            style: FocuxHubTypography.bodyMuted(color: mute),
+          )
+        else
+          Text(
+            lgpdConsentStatusLine(_ultimo),
+            style: FocuxHubTypography.bodyMuted(color: mute),
+          ),
+        const SizedBox(height: TokensStrip.s3),
+        for (final tipo in widget.tipos) ...[
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(
+              'Aceitar ${lgpdConsentTipoLabel(tipo).toLowerCase()}',
+              style: FocuxHubTypography.cardTitle(color: ink),
             ),
-            const SizedBox(height: TokensStrip.s2),
-            Text(
-              'Registra o aceite dos docs vigentes (LGPD). '
-              'Abrimos a página oficial e salvamos a versão '
-              '${FocuxLegal.consentDocumentVersion}.',
-              style: FocuxHubTypography.bodyMuted(color: mute),
-            ),
-            const SizedBox(height: TokensStrip.s4),
-            if (_loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: TokensStrip.s4),
-                child: Center(child: FxLoading()),
-              )
-            else if (_erro != null)
-              Text(
-                _erro!,
-                style: FocuxHubTypography.bodyMuted(color: mute),
-              )
-            else
-              Text(
-                lgpdConsentStatusLine(_ultimo),
-                style: FocuxHubTypography.bodyMuted(color: mute),
-              ),
-            const SizedBox(height: TokensStrip.s4),
-            for (final tipo in widget.tipos) ...[
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Aceitar ${lgpdConsentTipoLabel(tipo).toLowerCase()}',
-                  style: FocuxHubTypography.cardTitle(color: ink),
-                ),
-                trailing: _busyTipo == tipo
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: FxLoading(),
-                      )
-                    : Icon(Icons.chevron_right, color: mute, size: 20),
-                onTap: _busyTipo != null || _loading
-                    ? null
-                    : () => _registrar(tipo),
-              ),
-            ],
-            TextButton(
-              onPressed: () {
-                FxKeyboardDismissScope.dismiss();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Fechar'),
-            ),
-          ],
-        ),
-      ),
+            trailing: _busyTipo == tipo
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: FxLoading(),
+                  )
+                : Icon(Icons.chevron_right, color: mute, size: 20),
+            onTap: _busyTipo != null || _loading
+                ? null
+                : () => _registrar(tipo),
+          ),
+        ],
+      ],
     );
   }
 }

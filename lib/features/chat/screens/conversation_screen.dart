@@ -103,7 +103,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   bool _wsLifecycleEnded = false;
   static const _maxWsReconnectAttempts = 8;
   bool _loading = true;
-  bool _sending = false;
   bool _uploading = false;
   bool _recordingAudio = false;
   bool _composerHasText = false;
@@ -472,8 +471,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                             itemCount:
                                 _msgs.length +
-                                (_hasMoreMessages || _loadingOlder ? 1 : 0) +
-                                (_sending || _uploading ? 1 : 0),
+                                (_hasMoreMessages || _loadingOlder ? 1 : 0),
                             itemBuilder: (_, index) {
                               final hasLoader =
                                   _hasMoreMessages || _loadingOlder;
@@ -481,23 +479,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 return ConversationOlderMessagesLoader(
                                   loading: _loadingOlder,
                                   onTap: _loadOlderMessages,
-                                );
-                              }
-                              final typingIndex =
-                                  _msgs.length + (hasLoader ? 1 : 0);
-                              if ((_sending || _uploading) &&
-                                  index == typingIndex) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                  ),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: ConversationTypingIndicator(
-                                      isDark: isDark,
-                                      accentColor: primary,
-                                    ),
-                                  ),
                                 );
                               }
                               final msgIndex = hasLoader ? index - 1 : index;
@@ -572,9 +553,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     children: [
                       IconButton(
                         onPressed:
-                            (_sending || _uploading)
-                                ? null
-                                : _showAttachmentSheet,
+                            _uploading ? null : _showAttachmentSheet,
                         icon: const Icon(Icons.add_circle),
                         color: TokensStrip.textSecondary,
                       ),
@@ -659,7 +638,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         icon: const Icon(Icons.auto_awesome),
                                         color: TokensStrip.textSecondary,
                                       ),
-                                      if (_composerHasText || _sending)
+                                      if (_composerHasText)
                                         Padding(
                                           padding: const EdgeInsets.only(
                                             right: 6,
@@ -675,28 +654,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                             child: IconButton(
                                               padding: EdgeInsets.zero,
                                               onPressed:
-                                                  (_sending || _uploading)
-                                                      ? null
-                                                      : _sendText,
-                                              icon:
-                                                  _sending
-                                                      ? const SizedBox(
-                                                        width: 14,
-                                                        height: 14,
-                                                        child: FxLoading(
-                                                          strokeWidth: 2,
-                                                          color: Colors.white,
-                                                        ),
-                                                      )
-                                                      : const Icon(
-                                                        Icons.arrow_upward,
-                                                        color: Colors.white,
-                                                        size: 18,
-                                                      ),
+                                                  _uploading ? null : _sendText,
+                                              icon: const Icon(
+                                                Icons.arrow_upward,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      if (!_composerHasText && !_sending)
+                                      if (!_composerHasText)
                                         Padding(
                                           padding: const EdgeInsets.only(
                                             right: 6,
@@ -719,7 +686,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                       ? 'Enviar audio'
                                                       : 'Gravar audio',
                                               onPressed:
-                                                  (_uploading || _sending)
+                                                  _uploading
                                                       ? null
                                                       : _recordingAudio
                                                       ? () =>

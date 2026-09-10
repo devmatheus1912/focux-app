@@ -371,7 +371,6 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                 widget.alunoNome != null
                     ? '${satelliteFirstName(widget.alunoNome)} ainda não possui marcos de sucesso definidos.'
                     : 'Este aluno ainda não possui plano de sucesso.',
-            action: FxEmptyAction(label: 'Criar plano', onTap: _criarPlano),
           ),
         ],
       );

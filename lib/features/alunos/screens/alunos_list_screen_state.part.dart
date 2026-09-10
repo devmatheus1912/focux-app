@@ -15,6 +15,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   DateTime? _fetchedAt;
   AlunosHomeBundle? _displayHome;
   bool _listRefreshing = false;
+  bool _operacaoWarmScheduled = false;
   final Map<AlunoFiltro, GlobalKey> _chipKeys = {
     for (final filtro in AlunoFiltro.values) filtro: GlobalKey(),
   };

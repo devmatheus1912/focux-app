@@ -24,6 +24,26 @@ class MediaUploadService {
     return response.data['url'] as String;
   }
 
+  /// Upload direto do caminho — evita carregar vídeo inteiro em RAM.
+  Future<String> uploadFile({
+    required String path,
+    required String filename,
+    String folder = 'uploads',
+    String resourceType = 'auto',
+  }) async {
+    final form = FormData.fromMap({
+      'folder': folder,
+      'resourceType': resourceType,
+      'file': await MultipartFile.fromFile(
+        path,
+        filename: filename,
+        contentType: _contentTypeFor(filename, resourceType),
+      ),
+    });
+    final response = await _dio.post('/api/uploads', data: form);
+    return response.data['url'] as String;
+  }
+
   DioMediaType? _contentTypeFor(String filename, String resourceType) {
     final ext = filename.toLowerCase().split('.').lastOrNull ?? '';
     return switch (ext) {

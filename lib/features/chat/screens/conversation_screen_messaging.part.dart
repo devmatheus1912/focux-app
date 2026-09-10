@@ -3,7 +3,7 @@ part of 'conversation_screen.dart';
 extension ConversationScreenMessaging on _ConversationScreenState {
   Future<void> _sendText() async {
     final text = _ctrl.text.trim();
-    if (text.isEmpty || _sending || _uploading) return;
+    if (text.isEmpty || _uploading) return;
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {
@@ -11,39 +11,60 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       }
       return;
     }
+    if (!_isAlunoMode && _alunoId == null) {
+      FeedbackHelper.showError(context, 'Conversa sem aluno. Reabra o chat.');
+      return;
+    }
+
     final replyToMessageId = _replyingTo?.id;
+    final replyPreview = _replyingTo;
+    final repo = ChatRepository(ref.read(apiClientProvider));
+    final clientId = repo.newClientMessageId();
+    final optimistic = ChatMsg(
+      alunoId: _alunoId,
+      remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
+      conteudo: text,
+      enviadoEm: DateTime.now(),
+      tipoMidia: 'TEXTO',
+      clientMessageId: clientId,
+      replyToMessageId: replyToMessageId,
+      replyToConteudo: replyPreview?.conteudo,
+      replyToRemetente: replyPreview?.remetente,
+    );
+
     _ctrl.clear();
     HapticFeedback.lightImpact();
-    setState(() => _sending = true);
+    setState(() {
+      _composerHasText = false;
+      _replyingTo = null;
+      _upsertMessage(optimistic);
+    });
+    _scrollToBottom();
+
     try {
-      final repo = ChatRepository(ref.read(apiClientProvider));
       final msg =
           _isAlunoMode
               ? await repo.enviarComoAluno(
                 text,
                 replyToMessageId: replyToMessageId,
+                clientMessageId: clientId,
               )
               : await repo.enviar(
                 _alunoId!,
                 text,
                 'PERSONAL',
                 replyToMessageId: replyToMessageId,
+                clientMessageId: clientId,
               );
       _captureAlunoId(msg);
       if (!mounted) return;
-      setState(() {
-        _replyingTo = null;
-        _upsertMessage(msg);
-      });
-      _scrollToBottom();
+      setState(() => _upsertMessage(msg));
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _sending = false);
-      }
+      if (!mounted) return;
+      setState(() {
+        _msgs.removeWhere((m) => m.clientMessageId == clientId && m.id == null);
+      });
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -124,16 +145,37 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     }
   }
 
+  String _safeUploadFilename(XFile file, ConversationMediaType type) {
+    final name = file.name.trim();
+    if (name.contains('.')) return name;
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    return switch (type) {
+      ConversationMediaType.photo => 'foto_$stamp.jpg',
+      ConversationMediaType.video => 'video_$stamp.mp4',
+      ConversationMediaType.audio => 'audio_$stamp.m4a',
+    };
+  }
+
   Future<void> _pickAndSend(ConversationMediaType type) async {
+    if (_uploading) return;
+    if (!_isAlunoMode && _alunoId == null) {
+      FeedbackHelper.showError(context, 'Conversa sem aluno. Reabra o chat.');
+      return;
+    }
+
     XFile? file;
     try {
       if (type == ConversationMediaType.photo) {
         file = await _picker.pickImage(
           source: ImageSource.gallery,
-          imageQuality: 86,
+          maxWidth: 1600,
+          imageQuality: 72,
         );
       } else if (type == ConversationMediaType.video) {
-        file = await _picker.pickVideo(source: ImageSource.gallery);
+        file = await _picker.pickVideo(
+          source: ImageSource.gallery,
+          maxDuration: const Duration(seconds: 60),
+        );
       } else {
         file = await _picker.pickMedia();
       }
@@ -148,18 +190,69 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     }
     if (file == null) return;
 
+    final size = await file.length();
+    const maxChatBytes = 80 * 1024 * 1024;
+    if (size <= 0) {
+      if (mounted) {
+        FeedbackHelper.showError(context, 'Arquivo vazio.');
+      }
+      return;
+    }
+    if (size > maxChatBytes) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          type == ConversationMediaType.video
+              ? 'Vídeo acima de 80 MB. Envie um trecho mais curto.'
+              : 'Arquivo acima de 80 MB.',
+        );
+      }
+      return;
+    }
+
     final replyToMessageId = _replyingTo?.id;
-    setState(() => _uploading = true);
+    final filename = _safeUploadFilename(file, type);
+    final resourceType =
+        type == ConversationMediaType.photo
+            ? 'image'
+            : type == ConversationMediaType.video
+            ? 'video'
+            : 'auto';
+    final repo = ChatRepository(ref.read(apiClientProvider));
+    final clientId = repo.newClientMessageId();
+    final optimistic = ChatMsg(
+      alunoId: _alunoId,
+      remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
+      conteudo: _mediaLabel(type),
+      enviadoEm: DateTime.now(),
+      tipoMidia: _mediaType(type),
+      clientMessageId: clientId,
+      replyToMessageId: replyToMessageId,
+    );
+
+    setState(() {
+      _uploading = true;
+      _replyingTo = null;
+      _upsertMessage(optimistic);
+    });
+    _scrollToBottom();
+
     try {
-      final mediaUrl = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
-        bytes: await file.readAsBytes(),
-        filename: file.name,
-        folder: 'chat',
-        resourceType: type == ConversationMediaType.photo ? 'image' : 'auto',
-      );
-      final repo = ChatRepository(ref.read(apiClientProvider));
+      final uploader = MediaUploadService(ref.read(apiClientProvider));
+      final mediaUrl =
+          kIsWeb || file.path.isEmpty
+              ? await uploader.uploadBytes(
+                bytes: await file.readAsBytes(),
+                filename: filename,
+                folder: 'chat',
+                resourceType: resourceType,
+              )
+              : await uploader.uploadFile(
+                path: file.path,
+                filename: filename,
+                folder: 'chat',
+                resourceType: resourceType,
+              );
       final msg =
           _isAlunoMode
               ? await repo.enviarMidiaComoAluno(
@@ -167,6 +260,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
                 tipoMidia: _mediaType(type),
                 midiaUrl: mediaUrl,
                 replyToMessageId: replyToMessageId,
+                clientMessageId: clientId,
               )
               : await repo.enviarMidia(
                 alunoId: _alunoId!,
@@ -175,18 +269,18 @@ extension ConversationScreenMessaging on _ConversationScreenState {
                 tipoMidia: _mediaType(type),
                 midiaUrl: mediaUrl,
                 replyToMessageId: replyToMessageId,
+                clientMessageId: clientId,
               );
       _captureAlunoId(msg);
       if (!mounted) return;
-      setState(() {
-        _replyingTo = null;
-        _upsertMessage(msg);
-      });
+      setState(() => _upsertMessage(msg));
       _scrollToBottom();
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
+      if (!mounted) return;
+      setState(() {
+        _msgs.removeWhere((m) => m.clientMessageId == clientId && m.id == null);
+      });
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) {
         setState(() => _uploading = false);
@@ -195,7 +289,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
   }
 
   Future<void> _startAudioRecording() async {
-    if (_recordingAudio || _sending || _uploading) return;
+    if (_recordingAudio || _uploading) return;
     try {
       final allowed = await _audioRecorder.hasPermission();
       if (!allowed) {

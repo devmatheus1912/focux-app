@@ -17,6 +17,16 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final stats = home.stats;
               final diasLimite = home.alertasConfig.diasSemTreino;
               final filtrados = alunos;
+              if (!_operacaoWarmScheduled && filtrados.isNotEmpty) {
+                _operacaoWarmScheduled = true;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  warmAluno360OperacaoList(
+                    ref,
+                    filtrados.map((a) => a.id),
+                  );
+                });
+              }
               final ativosCount = stats.totalAtivos;
               final inadCount = stats.totalInadimplentes;
               final riscoCount = stats.totalRiscoAlto;

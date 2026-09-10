@@ -233,9 +233,8 @@ class _EmptyAlunosState extends StatelessWidget {
       action = FxEmptyAction(label: 'Limpar filtro', onTap: onClearFilter!);
     } else if (onClear != null) {
       action = FxEmptyAction(label: 'Limpar busca', onTap: onClear!);
-    } else if (onAdd != null) {
-      action = FxEmptyAction(label: 'Adicionar aluno', onTap: onAdd!);
     }
+    // Create fica só no sticky — evita dois CTAs iguais no vazio.
 
     return FxEmptyState(
       icon: icon,

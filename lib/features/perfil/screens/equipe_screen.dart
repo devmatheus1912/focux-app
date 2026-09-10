@@ -375,7 +375,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
                           label: 'Limpar filtros',
                           onTap: _clearQuery,
                         )
-                      : FxEmptyAction(label: 'Convidar', onTap: _convidar),
+                      : null,
                 ),
               ],
             )

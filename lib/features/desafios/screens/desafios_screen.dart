@@ -328,10 +328,12 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                     subtitle: searching
                         ? 'Ajuste a busca ou o tipo para ver outros.'
                         : 'Crie o primeiro desafio com prazo e meta.',
-                    action: FxEmptyAction(
-                      label: searching ? 'Limpar filtros' : 'Criar desafio',
-                      onTap: searching ? _clearFilters : _criar,
-                    ),
+                    action: searching
+                        ? FxEmptyAction(
+                          label: 'Limpar filtros',
+                          onTap: _clearFilters,
+                        )
+                        : null,
                   );
                 }
                 if (index == 0) {

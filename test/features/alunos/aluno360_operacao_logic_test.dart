@@ -1222,7 +1222,7 @@ void main() {
       );
     });
 
-    test('Último treino e check-ins vão para treinos', () {
+    test('Último treino → treinos; check-ins → engajamento', () {
       expect(
         resolveOperacaoStatusCardDestination(
           kind: OperacaoStatusCardKind.ultimoTreino,
@@ -1235,7 +1235,7 @@ void main() {
           kind: OperacaoStatusCardKind.checkins7d,
           contactPriority: true,
         ),
-        OperacaoStatusCardDestination.treinos,
+        OperacaoStatusCardDestination.engajamento,
       );
     });
 

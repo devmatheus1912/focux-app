@@ -394,7 +394,6 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                       _status == null
                           ? 'Cadastre o primeiro lead para começar a acompanhar o funil.'
                           : 'Troque o filtro ou cadastre um prospect neste estágio.',
-                  action: FxEmptyAction(label: 'Novo lead', onTap: _novoLead),
                 ),
             ],
           ),

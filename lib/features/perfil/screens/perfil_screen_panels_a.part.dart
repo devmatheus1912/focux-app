@@ -6,12 +6,14 @@ class _PerfilVitrineTiles extends StatelessWidget {
     required this.mute,
     required this.line,
     required this.onOpenEditor,
+    required this.onOpenPublicLink,
   });
 
   final String? slug;
   final Color mute;
   final Color line;
   final VoidCallback onOpenEditor;
+  final VoidCallback onOpenPublicLink;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,7 @@ class _PerfilVitrineTiles extends StatelessWidget {
             value: linkValue,
             mute: mute,
             line: line,
-            onTap: onOpenEditor,
+            onTap: onOpenPublicLink,
           ),
           FxSettingsTile(
             icon: Icons.tune_outlined,

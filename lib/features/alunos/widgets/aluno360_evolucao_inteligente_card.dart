@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
+import '../../dashboard/utils/aluno_volume_format.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
@@ -295,9 +296,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 onTap: () => _openTreinos(context),
                                 borderRadius: BorderRadius.circular(12),
                                 child: OperationalMetricTile(
-                                  label: 'Volume semanal',
-                                  value: ev.volumeSemanal.toStringAsFixed(0),
-                                  hint: 'Carga da semana',
+                                  label: 'Volume da semana',
+                                  value: formatAlunoVolumeKg(ev.volumeSemanal),
+                                  hint: 'Soma de carga × reps nos check-ins',
                                   color: primary,
                                   isDark: isDark,
                                 ),
@@ -307,9 +308,9 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 onTap: () => _openTreinos(context),
                                 borderRadius: BorderRadius.circular(12),
                                 child: OperationalMetricTile(
-                                  label: 'Volume mensal',
-                                  value: ev.volumeMensal.toStringAsFixed(0),
-                                  hint: 'Carga do mês',
+                                  label: 'Volume do mês',
+                                  value: formatAlunoVolumeKg(ev.volumeMensal),
+                                  hint: 'Mesma conta nos últimos 30 dias',
                                   color: primary,
                                   isDark: isDark,
                                 ),
@@ -421,7 +422,7 @@ class _VolumeSparklineRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Volume semanal',
+                  'Volume da semana',
                   style: Aluno360Layout.metaStyle(context).copyWith(
                     color: mute,
                     letterSpacing: 0.4,
@@ -430,7 +431,7 @@ class _VolumeSparklineRow extends StatelessWidget {
                 if (singleWeek) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Primeira semana com volume',
+                    'Primeira semana com volume (carga × reps)',
                     style: Aluno360Layout.captionStyle(context).copyWith(
                       color: mute,
                     ),
