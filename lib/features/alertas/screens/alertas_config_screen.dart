@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -84,6 +86,20 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
     );
   }
 
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar alterações?',
+        message: 'Os limiares novos não serão salvos.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/alertas');
+  }
+
   Future<void> _salvar() async {
     if (_salvando || !_dirty) return;
     setState(() => _salvando = true);
@@ -122,36 +138,31 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
 
     return fxScreenA11yScope(
       label: 'Quando dispara',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Quando dispara',
-          subtitle: 'Limiares da caixa de alertas',
-          onBack: () => safePopOrGo(context, '/alertas'),
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar os limiares',
-              onTap: () {
-                AnalyticsService.instance.track(
-                  ProductEvents.alertasConfigHelpOpened,
-                );
-                showAlertasConfigHelpSheet(context);
-              },
-            ),
-          ],
-        ),
-        bottomNavigationBar:
-            !_dirty || _loading || _erro != null
-                ? null
-                : SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
-                    ),
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Quando dispara',
+            subtitle: 'Limiares da caixa de alertas',
+            onBack: _cancel,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar os limiares',
+                onTap: () {
+                  AnalyticsService.instance.track(
+                    ProductEvents.alertasConfigHelpOpened,
+                  );
+                  showAlertasConfigHelpSheet(context);
+                },
+              ),
+            ],
+          ),
+          bottomNavigationBar:
+              !_dirty || _loading || _erro != null
+                  ? null
+                  : FxFormStickyBar(
                     child: FxLiquidPrimaryButton(
                       label: 'Salvar',
                       loading: _salvando,
@@ -159,62 +170,64 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
                       onPressed: _salvando ? null : _salvar,
                     ),
                   ),
+          body: _loading
+              ? const Padding(
+                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                child: SkeletonList(count: 6),
+              )
+              : _erro != null
+              ? FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: _erro!,
+                onRetry: _load,
+              )
+              : ListView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  8,
+                  FxSettingsLayout.pageInset,
+                  32,
                 ),
-        body: _loading
-            ? const Padding(
-              padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-              child: SkeletonList(count: 6),
-            )
-            : _erro != null
-            ? FxErrorState(
-              chromeOnDark: isDark,
-              primary: primary,
-              message: _erro!,
-              onRetry: _load,
-            )
-            : ListView(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                8,
-                FxSettingsLayout.pageInset,
-                32,
+                children: [
+                  FxSettingsGroup(
+                    header: 'Sem treino',
+                    caption:
+                        'Alerta se o último treino passou deste prazo.',
+                    children: [
+                      _LimiarSlider(
+                        label: '$_diasSemTreino dias',
+                        value: _diasSemTreino.toDouble(),
+                        min: 1,
+                        max: 90,
+                        divisions: 89,
+                        onChanged: (v) =>
+                            setState(() => _diasSemTreino = v.round()),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: FxSettingsLayout.groupGap),
+                  FxSettingsGroup(
+                    header: 'Aderência',
+                    caption:
+                        'Alerta se os check-ins concluídos dos últimos 30 dias caírem abaixo.',
+                    children: [
+                      _LimiarSlider(
+                        label: '$_aderenciaMinima%',
+                        value: _aderenciaMinima.toDouble(),
+                        min: 10,
+                        max: 100,
+                        divisions: 18,
+                        onChanged: (v) =>
+                            setState(() => _aderenciaMinima = v.round()),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              children: [
-                FxSettingsGroup(
-                  header: 'Sem treino',
-                  caption:
-                      'Alerta se o último treino passou deste prazo.',
-                  children: [
-                    _LimiarSlider(
-                      label: '$_diasSemTreino dias',
-                      value: _diasSemTreino.toDouble(),
-                      min: 1,
-                      max: 90,
-                      divisions: 89,
-                      onChanged: (v) =>
-                          setState(() => _diasSemTreino = v.round()),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: FxSettingsLayout.groupGap),
-                FxSettingsGroup(
-                  header: 'Aderência',
-                  caption:
-                      'Alerta se os check-ins concluídos dos últimos 30 dias caírem abaixo.',
-                  children: [
-                    _LimiarSlider(
-                      label: '$_aderenciaMinima%',
-                      value: _aderenciaMinima.toDouble(),
-                      min: 10,
-                      max: 100,
-                      divisions: 18,
-                      onChanged: (v) =>
-                          setState(() => _aderenciaMinima = v.round()),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+        ),
       ),
     );
   }

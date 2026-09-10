@@ -20,14 +20,16 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('viewInsetsOf'));
-    expect(screen, contains('FxKeyboardPopScope'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, isNot(contains('bottomNavigationBar')));
+    expect(screen, isNot(contains('FxKeyboardPopScope')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, isNot(contains('showDialog')));
     expect(screen, isNot(contains('FxSettingsTile')));
@@ -41,7 +43,7 @@ void main() {
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(screen, contains('walletPixStatusValue'));
     expect(screen, contains('totalPrevisto.format()'));
-    expect(screen, contains('if (showSticky)'));
+    expect(screen, contains('showSticky'));
     expect(screen, contains('perfilWalletProvider'));
     expect(screen, contains('resumoMensal'));
   });

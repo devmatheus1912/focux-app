@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -17,6 +16,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
@@ -140,6 +140,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   }
 
   Future<void> _handleBack() async {
+    FxKeyboardDismissScope.dismiss();
     if (_hasUnsavedChanges) {
       final discard = await _confirmDiscard();
       if (!discard || !mounted) return;
@@ -270,102 +271,84 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
 
     return fxScreenA11yScope(
       label: 'Carteira e PIX',
-      child: FxKeyboardPopScope(
-        child: PopScope(
-          canPop: !_hasUnsavedChanges,
-          onPopInvokedWithResult: (didPop, _) async {
-            if (didPop) return;
-            if (MediaQuery.viewInsetsOf(context).bottom > 0) return;
-            await _handleBack();
-          },
-          child: FxShellScaffold(
-            useMesh: true,
-            appBar: FxShellAppBar(
-              title: 'Carteira e PIX',
-              subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
-              onBack: _handleBack,
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar a carteira',
-                  onTap: _showHelp,
-                ),
-              ],
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: perfilAsync.when(
-                    loading: () => const SkeletonList(count: 5),
-                    error:
-                        (e, _) => FxErrorState(
-                          chromeOnDark: chrome.isDark,
-                          primary: primary,
-                          message: friendlyError(e),
-                          onRetry: () => ref.invalidate(perfilWalletProvider),
-                          title: 'Não conseguimos carregar a carteira',
-                        ),
-                    data: (perfil) {
-                      _preencherDadosAtuais(perfil);
-                      return Form(
-                        key: _formKey,
-                        child: RefreshIndicator(
-                          color: primary,
-                          onRefresh: () async {
-                            _inicializado = false;
-                            ref.invalidate(perfilWalletProvider);
-                          },
-                          child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s4,
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s4,
-                          ),
-                          children: [
-                            FxContentWidthLimiter(
-                              child: _WalletFormFields(
-                                tipoChavePix: _tipoChavePix,
-                                chavePixCtrl: _chavePixCtrl,
-                                bancoCtrl: _bancoCtrl,
-                                agenciaCtrl: _agenciaCtrl,
-                                contaCtrl: _contaCtrl,
-                                carregando: _carregando,
-                                secao: _secao,
-                                resumoMensal: perfil.resumoMensal,
-                                onSecao: (value) => setState(() => _secao = value),
-                                onSelecionarTipo: _selecionarTipoPix,
-                                onCopiarChave: _copiarChavePix,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (showSticky)
-                  SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s2,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s3 +
-                            MediaQuery.viewInsetsOf(context).bottom,
-                      ),
-                      child: FxLiquidPrimaryButton(
-                        label: walletSalvarTileLabel(),
-                        loading: _carregando,
-                        loadingLabel: 'Salvando…',
-                        onPressed: _carregando ? null : _salvar,
-                      ),
+      child: FxFormPopGuard(
+        dirty: _hasUnsavedChanges,
+        onCancel: _handleBack,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Carteira e PIX',
+            subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+            onBack: _handleBack,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar a carteira',
+                onTap: _showHelp,
+              ),
+            ],
+          ),
+          bottomNavigationBar:
+              showSticky
+                  ? FxFormStickyBar(
+                    child: FxLiquidPrimaryButton(
+                      label: walletSalvarTileLabel(),
+                      loading: _carregando,
+                      loadingLabel: 'Salvando…',
+                      onPressed: _carregando ? null : _salvar,
                     ),
+                  )
+                  : null,
+          body: perfilAsync.when(
+            loading: () => const SkeletonList(count: 5),
+            error:
+                (e, _) => FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(perfilWalletProvider),
+                  title: 'Não conseguimos carregar a carteira',
+                ),
+            data: (perfil) {
+              _preencherDadosAtuais(perfil);
+              return Form(
+                key: _formKey,
+                child: RefreshIndicator(
+                  color: primary,
+                  onRefresh: () async {
+                    _inicializado = false;
+                    ref.invalidate(perfilWalletProvider);
+                  },
+                  child: ListView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s4,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s4,
+                    ),
+                    children: [
+                      FxContentWidthLimiter(
+                        child: _WalletFormFields(
+                          tipoChavePix: _tipoChavePix,
+                          chavePixCtrl: _chavePixCtrl,
+                          bancoCtrl: _bancoCtrl,
+                          agenciaCtrl: _agenciaCtrl,
+                          contaCtrl: _contaCtrl,
+                          carregando: _carregando,
+                          secao: _secao,
+                          resumoMensal: perfil.resumoMensal,
+                          onSecao: (value) => setState(() => _secao = value),
+                          onSelecionarTipo: _selecionarTipoPix,
+                          onCopiarChave: _copiarChavePix,
+                        ),
+                      ),
+                    ],
                   ),
-              ],
-            ),
+                ),
+              );
+            },
           ),
         ),
       ),
