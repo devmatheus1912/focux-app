@@ -23,6 +23,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
@@ -44,11 +46,20 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
   bool _resolving = true;
   Object? _resolveError;
   DateTime? _fetchedAt;
+  final _generateTick = ValueNotifier<int>(0);
+  final _focusChatTick = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
     _resolverAlunoId();
+  }
+
+  @override
+  void dispose() {
+    _generateTick.dispose();
+    _focusChatTick.dispose();
+    super.dispose();
   }
 
   Future<void> _abrirVista() async {
@@ -174,11 +185,73 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
                   onRetry: _resolverAlunoId,
                 )
                 : FxContentWidthLimiter(
-                  child: IndexedStack(
-                    index: _view.index,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _ChatTab(alunoId: _alunoId),
-                      _ProgressaoTab(alunoId: _alunoId),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: FxStripCard(
+                          emphasize: true,
+                          semanticsLabel:
+                              '${iaAlunoHubViewLabel(_view)}. ${iaAlunoHubSubtitle(_view)}',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                iaAlunoHubViewLabel(_view),
+                                style: FocuxHubTypography.sectionTitle(
+                                  context,
+                                  color: chrome.ink,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                iaAlunoHubSubtitle(_view),
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.mute,
+                                ),
+                              ),
+                              const SizedBox(height: TokensStrip.s3),
+                              DashboardHomeActionChip(
+                                label:
+                                    _view == IaAlunoHubView.chat
+                                        ? 'Fazer pergunta'
+                                        : 'Gerar progressão',
+                                accent: primary,
+                                isDark: chrome.isDark,
+                                onPressed: () {
+                                  if (_view == IaAlunoHubView.chat) {
+                                    setState(() => _view = IaAlunoHubView.chat);
+                                    _focusChatTick.value++;
+                                  } else {
+                                    _generateTick.value++;
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: IndexedStack(
+                          index: _view.index,
+                          children: [
+                            _ChatTab(
+                              alunoId: _alunoId,
+                              focusChatTick: _focusChatTick,
+                            ),
+                            _ProgressaoTab(
+                              alunoId: _alunoId,
+                              generateTick: _generateTick,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -198,7 +271,8 @@ class _IaMsg {
 
 class _ChatTab extends ConsumerStatefulWidget {
   final int? alunoId;
-  const _ChatTab({this.alunoId});
+  final ValueNotifier<int> focusChatTick;
+  const _ChatTab({this.alunoId, required this.focusChatTick});
 
   @override
   ConsumerState<_ChatTab> createState() => _ChatTabState();
@@ -214,7 +288,28 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
   String? _pendingRetry;
 
   @override
+  void initState() {
+    super.initState();
+    widget.focusChatTick.addListener(_onFocusChatTick);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChatTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusChatTick != widget.focusChatTick) {
+      oldWidget.focusChatTick.removeListener(_onFocusChatTick);
+      widget.focusChatTick.addListener(_onFocusChatTick);
+    }
+  }
+
+  void _onFocusChatTick() {
+    if (!mounted) return;
+    _focus.requestFocus();
+  }
+
+  @override
   void dispose() {
+    widget.focusChatTick.removeListener(_onFocusChatTick);
     _ctrl.dispose();
     _focus.dispose();
     _scroll.dispose();
@@ -378,7 +473,8 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
 
 class _ProgressaoTab extends ConsumerStatefulWidget {
   final int? alunoId;
-  const _ProgressaoTab({this.alunoId});
+  final ValueNotifier<int> generateTick;
+  const _ProgressaoTab({this.alunoId, required this.generateTick});
 
   @override
   ConsumerState<_ProgressaoTab> createState() => _ProgressaoTabState();
@@ -388,6 +484,32 @@ class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
   bool _loading = false;
   IaProgressaoCargaResult? _resultado;
   Object? _erro;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.generateTick.addListener(_onGenerateTick);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ProgressaoTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.generateTick != widget.generateTick) {
+      oldWidget.generateTick.removeListener(_onGenerateTick);
+      widget.generateTick.addListener(_onGenerateTick);
+    }
+  }
+
+  void _onGenerateTick() {
+    if (!mounted || _loading) return;
+    _gerarProgressao();
+  }
+
+  @override
+  void dispose() {
+    widget.generateTick.removeListener(_onGenerateTick);
+    super.dispose();
+  }
 
   Future<void> _gerarProgressao() async {
     final id = widget.alunoId;

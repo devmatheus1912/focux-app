@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -18,6 +19,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
@@ -100,6 +102,7 @@ class _HistoricoDetalheScreenState
         },
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Treino',
             subtitle: freshness,
@@ -220,26 +223,53 @@ class _DetalheBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s4),
+                  FxStripCard(
+                    emphasize: true,
+                    accent: primary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status',
+                          style: FocuxHubTypography.chip(
+                            fxScreenMute(context),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          historicoStatusLabel(execucao.status),
+                          style: FocuxHubTypography.kpi(
+                            color: fxScreenInk(context),
+                            fontSize: FocuxHubTypography.metricLg,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          historicoDateLabel(execucao.iniciadoEm).isEmpty
+                              ? 'Nesta sessão'
+                              : historicoDateLabel(execucao.iniciadoEm),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: TokensStrip.s3),
+                        DashboardHomeActionChip(
+                          label: historicoStickyLabel(execucao.status),
+                          accent: primary,
+                          isDark: isDark,
+                          onPressed: onAct,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
                   OperationalMetricTile(
                     label: 'Exercícios',
                     value: historicoExerciciosMetric(done: done, total: total),
                     hint: historicoCountLabel(total),
                     color: primary,
                     isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Status',
-                    value: historicoStatusLabel(execucao.status),
-                    hint: historicoDateLabel(execucao.iniciadoEm).isEmpty
-                        ? 'Nesta sessão'
-                        : historicoDateLabel(execucao.iniciadoEm),
-                    color: concluido ? EagleTokens.good : EagleTokens.warn,
-                    isDark: isDark,
-                    emphasis:
-                        concluido
-                            ? OperationalMetricEmphasis.normal
-                            : OperationalMetricEmphasis.alert,
                   ),
                   const SizedBox(height: TokensStrip.s2),
                   OperationalMetricTile(
@@ -291,14 +321,27 @@ class _DetalheBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   if (secao == historicoSecaoRecordes)
-                    ..._recordes(prs, cargas)
+                    ..._recordes(
+                      prs,
+                      cargas,
+                      stickyLabel: historicoStickyLabel(execucao.status),
+                      onAct: onAct,
+                    )
                   else if (secao == historicoSecaoNotas)
-                    ..._notas(execucao.exercicios)
+                    ..._notas(
+                      execucao.exercicios,
+                      stickyLabel: historicoStickyLabel(execucao.status),
+                      onAct: onAct,
+                    )
                   else if (execucao.exercicios.isEmpty)
-                    const FxEmptyState(
+                    FxEmptyState(
                       icon: 'dumbbell',
                       title: 'Sem exercícios nesta execução',
                       subtitle: 'O treino ainda pode ser feito de novo.',
+                      action: FxEmptyAction(
+                        label: historicoStickyLabel(execucao.status),
+                        onTap: onAct,
+                      ),
                     )
                   else
                     for (final item in execucao.exercicios)
@@ -349,7 +392,11 @@ class _DetalheBody extends StatelessWidget {
     );
   }
 
-  List<Widget> _notas(List<ExecucaoExercicio> exercicios) {
+  List<Widget> _notas(
+    List<ExecucaoExercicio> exercicios, {
+    required String stickyLabel,
+    required VoidCallback onAct,
+  }) {
     final tiles = <Widget>[
       for (final item in exercicios)
         if (historicoNotaLine(
@@ -373,6 +420,7 @@ class _DetalheBody extends StatelessWidget {
           icon: 'article',
           title: historicoNotasEmpty(),
           subtitle: 'Observação e feedback do exercício aparecem aqui.',
+          action: FxEmptyAction(label: stickyLabel, onTap: onAct),
         ),
       ];
     }
@@ -381,14 +429,17 @@ class _DetalheBody extends StatelessWidget {
 
   List<Widget> _recordes(
     List<EvolucaoPerformance> prs,
-    List<EvolucaoCarga> cargas,
-  ) {
+    List<EvolucaoCarga> cargas, {
+    required String stickyLabel,
+    required VoidCallback onAct,
+  }) {
     if (prs.isEmpty && cargas.isEmpty) {
       return [
         FxEmptyState(
           icon: 'star',
           title: historicoRecordesEmpty(),
           subtitle: 'Quando bater carga ou volume, o recorde aparece aqui.',
+          action: FxEmptyAction(label: stickyLabel, onTap: onAct),
         ),
       ];
     }

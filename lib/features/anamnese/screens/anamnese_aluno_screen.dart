@@ -299,6 +299,13 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
       );
       return;
     }
+    if (_objetivoCtrl.text.trim().isEmpty) {
+      FeedbackHelper.showError(
+        context,
+        'Informe seu objetivo antes de enviar.',
+      );
+      return;
+    }
     HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {
