@@ -18,6 +18,8 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../perfil/utils/lgpd_consent_display.dart';
+import '../../perfil/widgets/perfil_lgpd_consent_sheet.dart';
 import '../../perfil/widgets/perfil_sticky_bar.dart';
 import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
@@ -146,8 +148,19 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
                       value: '',
                       mute: chrome.mute,
                       line: chrome.line,
-                      showDivider: false,
                       onTap: () => context.push('/aluno/perfil/editar'),
+                    ),
+                    FxSettingsTile(
+                      icon: Icons.fact_check_outlined,
+                      label: 'Consentimentos',
+                      value: '',
+                      mute: chrome.mute,
+                      line: chrome.line,
+                      showDivider: false,
+                      onTap: () => showPerfilLgpdConsentSheet(
+                        context,
+                        tipos: lgpdConsentTiposAluno,
+                      ),
                     ),
                   ],
                 ),

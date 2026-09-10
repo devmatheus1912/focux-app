@@ -18,15 +18,20 @@ final lgpdConsentRepositoryProvider = Provider<LgpdConsentRepository>(
   (ref) => LgpdConsentRepository(ref.read(apiClientProvider)),
 );
 
-Future<void> showPerfilLgpdConsentSheet(BuildContext context) {
+Future<void> showPerfilLgpdConsentSheet(
+  BuildContext context, {
+  List<String> tipos = lgpdConsentTiposPersonal,
+}) {
   return showFxHomeSheet<void>(
     context,
-    builder: (ctx) => const _PerfilLgpdConsentSheet(),
+    builder: (ctx) => _PerfilLgpdConsentSheet(tipos: tipos),
   );
 }
 
 class _PerfilLgpdConsentSheet extends ConsumerStatefulWidget {
-  const _PerfilLgpdConsentSheet();
+  const _PerfilLgpdConsentSheet({required this.tipos});
+
+  final List<String> tipos;
 
   @override
   ConsumerState<_PerfilLgpdConsentSheet> createState() =>
@@ -76,6 +81,7 @@ class _PerfilLgpdConsentSheetState
       } else if (tipo == 'PRIVACIDADE') {
         await FocuxLegal.openPrivacy();
       }
+      // SAUDE: sem URL pública — só registro do aceite.
       final saved = await ref
           .read(lgpdConsentRepositoryProvider)
           .registrar(tipo: tipo);
@@ -134,7 +140,7 @@ class _PerfilLgpdConsentSheetState
                 style: FocuxHubTypography.bodyMuted(color: mute),
               ),
             const SizedBox(height: TokensStrip.s4),
-            for (final tipo in lgpdConsentTiposPersonal) ...[
+            for (final tipo in widget.tipos) ...[
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(

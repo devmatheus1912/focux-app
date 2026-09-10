@@ -16,6 +16,9 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains("label: 'Editar cadastro'"));
     expect(screen, contains("label: 'Anamnese'"));
+    expect(screen, contains("label: 'Consentimentos'"));
+    expect(screen, contains('showPerfilLgpdConsentSheet'));
+    expect(screen, contains('lgpdConsentTiposAluno'));
     expect(screen, contains("label: 'Excluir minha conta'"));
     expect(screen, contains('/aluno/perfil/editar'));
     expect(screen, isNot(contains('onBack:')));

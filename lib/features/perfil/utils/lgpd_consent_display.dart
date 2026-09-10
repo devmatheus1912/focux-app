@@ -21,3 +21,6 @@ String lgpdConsentStatusLine(LgpdConsent? consent) {
 }
 
 const lgpdConsentTiposPersonal = ['TERMOS', 'PRIVACIDADE'];
+
+/// Aluno também aceita tratamento de dados de saúde (anamnese/hábitos).
+const lgpdConsentTiposAluno = ['TERMOS', 'PRIVACIDADE', 'SAUDE'];

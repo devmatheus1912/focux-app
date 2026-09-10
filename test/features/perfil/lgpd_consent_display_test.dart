@@ -24,4 +24,8 @@ void main() {
   test('tipos personal são termos + privacidade', () {
     expect(lgpdConsentTiposPersonal, ['TERMOS', 'PRIVACIDADE']);
   });
+
+  test('tipos aluno incluem saúde', () {
+    expect(lgpdConsentTiposAluno, ['TERMOS', 'PRIVACIDADE', 'SAUDE']);
+  });
 }
