@@ -193,6 +193,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+              FxWizardStepDots(
+                current: _isReviewing ? 2 : 1,
+                total: 2,
+                color: brand,
+              ),
+              const SizedBox(height: TokensStrip.s4),
               Text(
                 migracaoQuestionTitle(reviewing: _isReviewing),
                 style: FocuxHubTypography.sectionTitle(context, color: ink),

@@ -195,6 +195,13 @@ class _OnboardingWizardScreenState
 
   Future<void> _sairSemConcluir() async {
     HapticFeedback.selectionClick();
+    final leave = await showFxConfirmSheet(
+      context,
+      title: wizardLeaveTitle(),
+      message: wizardLeaveMessage(),
+      confirmLabel: wizardLeaveConfirm(),
+    );
+    if (!leave || !mounted) return;
     DashboardOnboardingWizardGate.dismissForSession();
     if (!mounted) return;
     context.go('/dashboard/personal');
@@ -353,6 +360,16 @@ class _OnboardingWizardScreenState
     ).copyWith(fontSize: TokensStrip.fontBodySm);
 
     return [
+      FxWizardStepDots(
+        current: wizardEtapaCurrent(
+          completedCount: wizard.completedCount,
+          totalCount: wizard.totalCount,
+          allDone: _allDone,
+        ),
+        total: wizard.totalCount <= 0 ? 1 : wizard.totalCount,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      const SizedBox(height: TokensStrip.s4),
       Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
