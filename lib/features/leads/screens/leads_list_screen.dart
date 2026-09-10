@@ -13,6 +13,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -26,6 +27,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../widgets/leads_list_help_sheet.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/models/subscription_plan.dart';
 import '../data/lead_repository.dart';
 import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
@@ -161,7 +163,11 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
 
     return fxScreenA11yScope(
       label: 'Funil de Leads',
-      child: PopScope(
+      child: FeatureGate(
+        featureName: 'Leads',
+        requiredPlan: SubscriptionPlan.PRO,
+        capability: 'leads',
+        child: PopScope(
         canPop: !keyboardOpen,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
@@ -328,6 +334,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
               ),
           ],
         ),
+      ),
       ),
       ),
     );

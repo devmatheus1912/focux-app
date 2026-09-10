@@ -21,6 +21,8 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('FeatureGate'));
+    expect(screen, contains("capability: 'leads'"));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('leadListChipStatuses'));
     expect(screen, contains('PopScope'));

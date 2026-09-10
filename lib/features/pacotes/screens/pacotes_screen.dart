@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../subscription/models/subscription_plan.dart';
 import '../data/pacote_repository.dart';
 import '../providers/pacotes_provider.dart';
 import '../utils/pacote_display.dart';
@@ -187,7 +189,11 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
     return fxScreenA11yScope(
       label: 'Planos & link de vendas',
-      child: PopScope(
+      child: FeatureGate(
+        featureName: 'Loja Digital',
+        requiredPlan: SubscriptionPlan.ENTERPRISE,
+        capability: 'lojaDigital',
+        child: PopScope(
         canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
@@ -333,6 +339,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );

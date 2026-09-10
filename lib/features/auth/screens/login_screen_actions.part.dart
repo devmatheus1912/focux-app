@@ -73,8 +73,12 @@ extension on _LoginScreenState {
             .login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
         if (await _maybeOpenMfa(result, method: 'password')) return;
+        if (!mounted) return;
         _trackLogin(success: true, method: 'password');
-        context.go(await _postPersonalLoginRedirect(context));
+        final dest = _postLoginRedirect(context, isAluno: false);
+        await _prefetchPersonalAfterLogin();
+        if (!mounted) return;
+        context.go(dest);
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -143,11 +147,15 @@ extension on _LoginScreenState {
       if (!_isAluno && await _maybeOpenMfa(result, method: 'google')) {
         return;
       }
+      if (!mounted) return;
       _trackLogin(success: true, method: 'google');
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
-        context.go(await _postPersonalLoginRedirect(context));
+        final dest = _postLoginRedirect(context, isAluno: false);
+        await _prefetchPersonalAfterLogin();
+        if (!mounted) return;
+        context.go(dest);
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -191,11 +199,15 @@ extension on _LoginScreenState {
       if (!_isAluno && await _maybeOpenMfa(result, method: 'apple')) {
         return;
       }
+      if (!mounted) return;
       _trackLogin(success: true, method: 'apple');
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
-        context.go(await _postPersonalLoginRedirect(context));
+        final dest = _postLoginRedirect(context, isAluno: false);
+        await _prefetchPersonalAfterLogin();
+        if (!mounted) return;
+        context.go(dest);
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -219,8 +231,7 @@ extension on _LoginScreenState {
     return safePostLoginPath(from, isAluno: isAluno) ?? fallback;
   }
 
-  Future<String> _postPersonalLoginRedirect(BuildContext context) async {
-    final fallback = _postLoginRedirect(context, isAluno: false);
+  Future<void> _prefetchPersonalAfterLogin() async {
     try {
       invalidateSessionUserCaches(ref);
       ref.invalidate(perfilProvider);
@@ -230,6 +241,5 @@ extension on _LoginScreenState {
     } catch (_) {
       // Prefetch best-effort — Home ainda é o destino.
     }
-    return fallback;
   }
 }
