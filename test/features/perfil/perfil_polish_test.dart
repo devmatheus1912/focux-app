@@ -34,6 +34,8 @@ void main() {
     expect(screen, contains('PerfilAppearanceSection'));
     expect(screen, contains('PerfilOperacaoSection'));
     expect(screen, contains('PerfilContaSegurancaSection'));
+    expect(screen, contains('showPerfilLgpdConsentSheet'));
+    expect(conta, contains("label: 'Consentimentos'"));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(

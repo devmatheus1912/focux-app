@@ -223,6 +223,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               showMfa: widget.showMfa,
                               onMfaTap:
                                   () => context.push('/perfil/mfa'),
+                              onConsentTap: () =>
+                                  showPerfilLgpdConsentSheet(context),
                               onLogout: () {
                                 onLogout();
                               },
