@@ -245,6 +245,7 @@ class ChatRepository {
     String conteudo,
     String remetente, {
     int? replyToMessageId,
+    String? clientMessageId,
   }) async {
     final r = await _dio.post(
       '/api/chat/enviar',
@@ -252,7 +253,7 @@ class ChatRepository {
         'alunoId': alunoId,
         'conteudo': conteudo,
         'remetente': remetente,
-        'clientMessageId': _clientMessageId(),
+        'clientMessageId': clientMessageId ?? _clientMessageId(),
         if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       },
     );
@@ -297,12 +298,13 @@ class ChatRepository {
   Future<ChatMsg> enviarComoAluno(
     String conteudo, {
     int? replyToMessageId,
+    String? clientMessageId,
   }) async {
     final r = await _dio.post(
       '/api/chat/aluno/enviar',
       data: {
         'conteudo': conteudo,
-        'clientMessageId': _clientMessageId(),
+        'clientMessageId': clientMessageId ?? _clientMessageId(),
         if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       },
     );
@@ -314,6 +316,7 @@ class ChatRepository {
     required String tipoMidia,
     required String midiaUrl,
     int? replyToMessageId,
+    String? clientMessageId,
   }) async {
     final r = await _dio.post(
       '/api/chat/aluno/enviar',
@@ -321,7 +324,7 @@ class ChatRepository {
         'conteudo': conteudo,
         'tipoMidia': tipoMidia,
         'midiaUrl': midiaUrl,
-        'clientMessageId': _clientMessageId(),
+        'clientMessageId': clientMessageId ?? _clientMessageId(),
         if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       },
     );
@@ -335,6 +338,7 @@ class ChatRepository {
     required String tipoMidia,
     required String midiaUrl,
     int? replyToMessageId,
+    String? clientMessageId,
   }) async {
     final r = await _dio.post(
       '/api/chat/enviar',
@@ -344,12 +348,15 @@ class ChatRepository {
         'remetente': remetente,
         'tipoMidia': tipoMidia,
         'midiaUrl': midiaUrl,
-        'clientMessageId': _clientMessageId(),
+        'clientMessageId': clientMessageId ?? _clientMessageId(),
         if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       },
     );
     return ChatMsg.fromJson(r.data);
   }
+
+  /// ID estável gerado no app — bate com o bubble otimista.
+  String newClientMessageId() => _clientMessageId();
 
   Future<ChatMsg> toggleReaction(int messageId, String emoji) async {
     final r = await _dio.post(

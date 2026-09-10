@@ -314,10 +314,6 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                   title: 'Nenhum convite ativo',
                                   subtitle:
                                       'Gere um link de um uso. O aluno cria a conta e troca a senha no primeiro acesso.',
-                                  action: FxEmptyAction(
-                                    label: 'Gerar link',
-                                    onTap: _gerar,
-                                  ),
                                 ),
                               )
                             else ...[

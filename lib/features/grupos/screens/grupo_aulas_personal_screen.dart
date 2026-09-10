@@ -572,10 +572,12 @@ class _GrupoAulasPersonalScreenState
               subtitle: filtered
                   ? 'Ajuste a busca ou o filtro.'
                   : 'Crie uma aula em grupo para abrir vagas aos seus alunos.',
-              action: FxEmptyAction(
-                label: filtered ? 'Limpar filtros' : 'Nova aula',
-                onTap: filtered ? _clearFilters : _criar,
-              ),
+              action: filtered
+                  ? FxEmptyAction(
+                      label: 'Limpar filtros',
+                      onTap: _clearFilters,
+                    )
+                  : null,
             ),
           ],
         ),

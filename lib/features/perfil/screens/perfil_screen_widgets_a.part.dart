@@ -10,6 +10,7 @@ class _PerfilBody extends StatefulWidget {
   final VoidCallback onEditPerfil;
   final Future<void> Function() onLogout;
   final VoidCallback onOpenLandingEditor;
+  final VoidCallback onOpenPublicLink;
 
   const _PerfilBody({
     required this.perfil,
@@ -21,6 +22,7 @@ class _PerfilBody extends StatefulWidget {
     required this.onEditPerfil,
     required this.onLogout,
     required this.onOpenLandingEditor,
+    required this.onOpenPublicLink,
   });
 
   @override
@@ -38,6 +40,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final onEditPerfil = widget.onEditPerfil;
     final onLogout = widget.onLogout;
     final onOpenLandingEditor = widget.onOpenLandingEditor;
+    final onOpenPublicLink = widget.onOpenPublicLink;
     final theme = Theme.of(context);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
@@ -181,6 +184,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                   mute: mute,
                                   line: line,
                                   onOpenEditor: onOpenLandingEditor,
+                                  onOpenPublicLink: onOpenPublicLink,
                                 ),
                               ],
                             ),

@@ -17,10 +17,12 @@ Future<void> openLandingEditorOrUpgrade(
     return;
   }
   if (!context.mounted) return;
-  await UpgradePromptSheet.showIfAllowed(
+  // Tap explícito no Perfil — sempre mostra (sem cooldown silencioso).
+  await UpgradePromptSheet.show(
     context: context,
     featureName: 'Landing page completa',
     capability: 'landingCompleta',
     requiredPlan: SubscriptionPlan.ENTERPRISE,
+    source: 'perfil_personalizar',
   );
 }

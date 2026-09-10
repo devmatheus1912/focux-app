@@ -282,10 +282,20 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                           _filtro == RecorrenciaHubFiltro.todos
                       ? 'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.'
                       : 'Ajuste a busca ou o filtro para ver outras assinaturas.',
-                  action: FxEmptyAction(
-                    label: 'Nova recorrência',
-                    onTap: _criar,
-                  ),
+                  action: _query.isEmpty &&
+                          _filtro == RecorrenciaHubFiltro.todos
+                      ? null
+                      : FxEmptyAction(
+                          label: 'Limpar filtros',
+                          onTap: () {
+                            _searchCtrl.clear();
+                            setState(() {
+                              _query = '';
+                              _filtro = RecorrenciaHubFiltro.todos;
+                            });
+                            _load(reset: true);
+                          },
+                        ),
                 ),
               ],
             )

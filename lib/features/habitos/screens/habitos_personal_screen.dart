@@ -370,7 +370,6 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           title: 'Nenhum hábito cadastrado',
           subtitle:
               'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
-          action: FxEmptyAction(label: 'Novo hábito', onTap: _novoHabito),
         )
       else ...[
         const DashboardSectionHeader(title: 'Hábitos cadastrados'),
@@ -417,8 +416,15 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           subtitle: habitoComplianceEmptySubtitle(_query),
           action:
               _query.trim().isEmpty
-                  ? FxEmptyAction(label: 'Novo hábito', onTap: _novoHabito)
-                  : null,
+                  ? null
+                  : FxEmptyAction(
+                    label: 'Limpar busca',
+                    onTap: () {
+                      _searchCtrl.clear();
+                      setState(() => _query = '');
+                      _carregar();
+                    },
+                  ),
         )
       else ...[
         const DashboardSectionHeader(title: 'Compliance da semana'),

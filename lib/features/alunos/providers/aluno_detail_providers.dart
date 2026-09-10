@@ -154,6 +154,14 @@ void prefetchAluno360SecondaryTabs(WidgetRef ref, int alunoId) {
   }();
 }
 
+/// Warm Operação dos primeiros da lista — corta delay do 360 no tap.
+void warmAluno360OperacaoList(WidgetRef ref, Iterable<int> alunoIds) {
+  for (final id in alunoIds.take(8)) {
+    // ignore: unawaited_futures
+    ref.read(aluno360OperacaoBundleProvider(id).future);
+  }
+}
+
 /// @Deprecated monolito `/360` — não usar no first paint.
 final aluno360Provider = FutureProvider.family<Aluno360, int>((
   ref,

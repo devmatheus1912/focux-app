@@ -10,6 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../data/aluno_list_preferences_store.dart';
 import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';

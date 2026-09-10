@@ -412,7 +412,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                       onTap: _clearQuery,
                     ),
                   )
-                : PacotesEmptyState(onCreate: _novoPacote);
+                : const PacotesEmptyState();
           }
           if (_hasMore && index == itemCount - 1) {
             return FxSatelliteListTile(

@@ -31,6 +31,7 @@ import '../widgets/perfil_conta_seguranca_section.dart';
 import '../widgets/perfil_lgpd_consent_sheet.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
 import '../widgets/perfil_operacao_section.dart';
+import '../widgets/perfil_public_link_sheet.dart';
 import '../widgets/perfil_sticky_bar.dart';
 import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';
@@ -215,6 +216,14 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
             onLogout: _logout,
             onOpenLandingEditor:
                 () => openLandingEditorOrUpgrade(context, ref),
+            onOpenPublicLink: () {
+              final slug = perfil.slug?.trim();
+              if (slug == null || slug.isEmpty) {
+                openLandingEditorOrUpgrade(context, ref);
+                return;
+              }
+              showPerfilPublicLinkSheet(context, slug: slug);
+            },
           );
         },
       ),

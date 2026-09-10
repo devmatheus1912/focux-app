@@ -591,7 +591,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume semana',
+                      label: 'Volume da semana',
                       value: _fmtVolume(volumeSemana),
                       isDark: isDark,
                     ),
@@ -599,7 +599,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume mês',
+                      label: 'Volume do mês',
                       value: _fmtVolume(volumeMes),
                       isDark: isDark,
                     ),

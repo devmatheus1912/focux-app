@@ -8,7 +8,6 @@ import '../theme/hero_teal.dart';
 import '../theme/shell_chrome.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_keyboard_dismiss_scope.dart';
-import 'fx_shell_scaffold.dart';
 
 /// Chrome canônico de sheet — paridade Command Priorities / ajuda da Home.
 abstract final class FxHomeSheetChrome {
@@ -24,10 +23,11 @@ abstract final class FxHomeSheetChrome {
   static const double touchTarget = 48;
   static const EdgeInsets contentPadding = EdgeInsets.fromLTRB(18, 10, 18, 18);
 
-  static double glow(bool isDark) => isDark ? 0.10 : 0.16;
+  static double glow(bool isDark) => isDark ? 0.14 : 0.16;
 
+  /// Scrim mais fechado no dark — sheet não “vaza” a tela de baixo.
   static Color barrier([bool isDark = false]) =>
-      heroScrim(isDark ? 0.34 : 0.28);
+      heroScrim(isDark ? 0.58 : 0.28);
 
   static void dismissAndPop<T extends Object?>(BuildContext context, [T? result]) {
     FxKeyboardDismissScope.dismiss();
@@ -168,6 +168,10 @@ class FxHomeSheetSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outerPad = FxHomeSheetChrome.paddingOf(context);
+    final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    // Sheet fill opaco (não glass 0.72) — dark não mistura com o fundo.
+    final fill = chrome.sheetFill;
     return Padding(
       padding: outerPad,
       child: LayoutBuilder(
@@ -187,10 +191,24 @@ class FxHomeSheetSurface extends StatelessWidget {
                 bounded && !expand ? BoxConstraints(maxHeight: limit) : null,
             clipBehavior: Clip.antiAlias,
             padding: padding,
-            decoration: fxStripCardDecoration(
-              context,
-              radius: FxHomeSheetChrome.radius,
-              glowStrength: FxHomeSheetChrome.glow(isDark),
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: BorderRadius.circular(FxHomeSheetChrome.radius),
+              border: Border.all(
+                color: primary.withValues(alpha: isDark ? 0.34 : 0.16),
+                width: 1.2,
+              ),
+              boxShadow: [
+                ...TokensStrip.elevation(
+                  isDark ? 10 : 8,
+                  dark: isDark,
+                  accent: primary,
+                ),
+                ...TokensStrip.coloredDepthGlow(
+                  primary,
+                  strength: FxHomeSheetChrome.glow(isDark),
+                ),
+              ],
             ),
             child: child,
           );

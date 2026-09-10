@@ -13,10 +13,6 @@ extension FinanceiroMensalidadesTabWidgets on _FinanceiroMensalidadesTabState {
       icon: 'dollar-sign',
       title: 'Nenhuma mensalidade',
       subtitle: 'Lance a primeira ou limpe a busca.',
-      action: FxEmptyAction(
-        label: 'Nova mensalidade',
-        onTap: _abrirFormularioNovaMensalidade,
-      ),
     );
   }
 }

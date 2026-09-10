@@ -155,6 +155,7 @@ class _EvolucaoComparativoScreenState
     final peso = TextEditingController();
     final altura = TextEditingController();
     final gordura = TextEditingController();
+    final massaMagra = TextEditingController();
     final cintura = TextEditingController();
     var saved = false;
     try {
@@ -187,6 +188,12 @@ class _EvolucaoComparativoScreenState
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
             AlunoInsetFormField(
+              controller: massaMagra,
+              label: 'Massa magra (kg)',
+              icon: Icons.fitness_center_outlined,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+            AlunoInsetFormField(
               controller: cintura,
               label: 'Cintura (cm)',
               icon: Icons.straighten_outlined,
@@ -214,6 +221,9 @@ class _EvolucaoComparativoScreenState
           if (gordura.text.trim().isNotEmpty)
             'percGordura':
                 double.tryParse(gordura.text.trim().replaceAll(',', '.')),
+          if (massaMagra.text.trim().isNotEmpty)
+            'massaMuscular':
+                double.tryParse(massaMagra.text.trim().replaceAll(',', '.')),
           if (cintura.text.trim().isNotEmpty)
             'cinturaCm':
                 double.tryParse(cintura.text.trim().replaceAll(',', '.')),
@@ -228,6 +238,7 @@ class _EvolucaoComparativoScreenState
       peso.dispose();
       altura.dispose();
       gordura.dispose();
+      massaMagra.dispose();
       cintura.dispose();
       if (mounted) setState(() => _registrando = false);
     }
@@ -373,10 +384,6 @@ class _EvolucaoComparativoScreenState
               title: 'Nenhuma avaliação para comparar',
               subtitle:
                   'Registre ao menos duas avaliações físicas para ver a evolução.',
-              action: FxEmptyAction(
-                label: evolucaoComparativoStickyRegistrar(),
-                onTap: _registrando ? () {} : _registrar,
-              ),
             ),
           ],
         ),
