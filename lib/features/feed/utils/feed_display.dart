@@ -24,13 +24,6 @@ const feedConteudoMax = 4000;
 
 String feedPublicarTileLabel() => 'Publicar';
 
-String feedPublicarConfirmTitle() => 'Publicar no feed?';
-
-String feedPublicarConfirmMessage() =>
-    'Os alunos passam a ver esta publicação no feed deles.';
-
-String feedPublicarConfirmLabel() => 'Publicar';
-
 String feedTipoLabel(String? tipo) {
   switch ((tipo ?? 'TEXTO').trim().toUpperCase()) {
     case 'IMAGEM':

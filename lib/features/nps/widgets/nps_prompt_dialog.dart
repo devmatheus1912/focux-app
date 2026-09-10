@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../data/nps_repository.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/nps_repository.dart';
 
 Future<void> showNpsPromptIfNeeded(
   BuildContext context,
@@ -20,20 +24,21 @@ Future<void> showNpsPromptIfNeeded(
     if (!deve || !context.mounted) return;
     await showFxHomeSheet<void>(
       context,
-      builder: (ctx) => _NpsDialog(repo: repo),
+      builder: (ctx) => _NpsPromptSheet(repo: repo),
     );
   } catch (_) {}
 }
 
-class _NpsDialog extends StatefulWidget {
+class _NpsPromptSheet extends StatefulWidget {
+  const _NpsPromptSheet({required this.repo});
+
   final NpsRepository repo;
-  const _NpsDialog({required this.repo});
 
   @override
-  State<_NpsDialog> createState() => _NpsDialogState();
+  State<_NpsPromptSheet> createState() => _NpsPromptSheetState();
 }
 
-class _NpsDialogState extends State<_NpsDialog> {
+class _NpsPromptSheetState extends State<_NpsPromptSheet> {
   int _score = 8;
   final _comentario = TextEditingController();
   bool _saving = false;
@@ -45,13 +50,14 @@ class _NpsDialogState extends State<_NpsDialog> {
   }
 
   Future<void> _enviar() async {
+    if (_saving) return;
     setState(() => _saving = true);
     try {
       await widget.repo.responder(
         score: _score,
         comentario: _comentario.text.trim(),
       );
-      if (mounted) Navigator.pop(context);
+      if (mounted) FxHomeSheetChrome.dismissAndPop(context);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -63,7 +69,9 @@ class _NpsDialogState extends State<_NpsDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
+
     return FxHomeSheetSurface(
       isDark: isDark,
       child: Column(
@@ -71,17 +79,18 @@ class _NpsDialogState extends State<_NpsDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
             title: 'Como está sua experiência?',
+            subtitle: 'Uma nota rápida ajuda a melhorar o Focux.',
             leading: Icon(Icons.favorite_outline, color: primary, size: 18),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Text(
             'Nota: $_score',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
           Slider(
             value: _score.toDouble(),
@@ -89,28 +98,34 @@ class _NpsDialogState extends State<_NpsDialog> {
             max: 10,
             divisions: 10,
             label: '$_score',
-            onChanged: (v) => setState(() => _score = v.round()),
+            onChanged:
+                _saving ? null : (v) => setState(() => _score = v.round()),
           ),
           TextField(
             controller: _comentario,
             maxLines: 2,
+            enabled: !_saving,
+            textInputAction: TextInputAction.done,
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             decoration: FxInputDeco.build(
               context,
               'Comentário',
               hint: 'Comentário (opcional)',
             ),
           ),
-          const SizedBox(height: 16),
-          FilledButton(
+          const SizedBox(height: TokensStrip.s4),
+          FxLiquidPrimaryButton(
+            label: 'Enviar',
+            loading: _saving,
             onPressed: _saving ? null : _enviar,
-            child:
-                _saving
-                    ? const FxLoading(size: 18, strokeWidth: 2)
-                    : const Text('Enviar'),
           ),
           TextButton(
-            onPressed: _saving ? null : () => Navigator.pop(context),
-            child: const Text('Depois'),
+            onPressed:
+                _saving ? null : () => FxHomeSheetChrome.dismissAndPop(context),
+            child: Text(
+              'Depois',
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
           ),
         ],
       ),
