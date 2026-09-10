@@ -7,7 +7,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
     showFxHomeSheet<void>(
       context,
       builder:
-          (_) => FxHomeSheetSurface(
+          (sheetContext) => FxHomeSheetSurface(
             isDark: isDark,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -19,7 +19,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                     leading: Icon(Icons.person_outline, color: primary),
                     title: const Text('Ver perfil do aluno'),
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                       context.push('/alunos/${widget.alunoId}');
                     },
                   ),
@@ -27,7 +27,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   leading: Icon(Icons.search_rounded, color: primary),
                   title: const Text('Buscar conversa'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     _showSearchSheet();
                   },
                 ),
@@ -35,7 +35,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   leading: Icon(Icons.perm_media_outlined, color: primary),
                   title: const Text('Midias da conversa'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     _showMediaGallerySheet();
                   },
                 ),
@@ -43,7 +43,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   leading: Icon(Icons.refresh, color: primary),
                   title: const Text('Atualizar conversa'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     _loadHistorico();
                   },
                 ),
@@ -51,7 +51,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   leading: Icon(Icons.emoji_emotions_outlined, color: primary),
                   title: const Text('Adicionar emoji'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     _showEmojiSheet();
                   },
                 ),

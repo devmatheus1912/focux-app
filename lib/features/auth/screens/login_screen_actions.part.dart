@@ -59,6 +59,8 @@ extension on _LoginScreenState {
               personalSlug: slug,
             );
         if (!mounted) return;
+        await PersonalSlugStore.save(slug);
+        if (!mounted) return;
         _trackLogin(success: true, method: 'password');
         final requiresChange =
             ref.read(authProvider.notifier).requiresPasswordChange;

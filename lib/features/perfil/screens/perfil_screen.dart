@@ -222,6 +222,12 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                 openLandingEditorOrUpgrade(context, ref);
                 return;
               }
+              final features = ref.read(planoFeaturesProvider).valueOrNull;
+              // Free: página pública fica 403/indisponível — vende upgrade no app.
+              if (features?.landingCompleta != true) {
+                openLandingEditorOrUpgrade(context, ref);
+                return;
+              }
               showPerfilPublicLinkSheet(context, slug: slug);
             },
           );

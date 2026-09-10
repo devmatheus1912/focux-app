@@ -11,10 +11,10 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     showFxHomeSheet<void>(
       context,
       builder:
-          (_) => FxHomeSheetSurface(
+          (sheetContext) => FxHomeSheetSurface(
             isDark: isDark,
             maxHeight:
-                MediaQuery.sizeOf(context).height *
+                MediaQuery.sizeOf(sheetContext).height *
                 FxHomeSheetChrome.maxHeightFactor,
             child: SingleChildScrollView(
               child: Column(
@@ -44,7 +44,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                             in _ConversationScreenState._quickReactions)
                           InkWell(
                             onTap: () {
-                              Navigator.pop(context);
+                              Navigator.pop(sheetContext);
                               _toggleReaction(msg, emoji);
                             },
                             borderRadius: BorderRadius.circular(16),
@@ -70,7 +70,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                       leading: Icon(Icons.reply_rounded, color: primary),
                       title: const Text('Responder'),
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pop(sheetContext);
                         _setReply(msg);
                       },
                     ),
@@ -82,7 +82,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                       ),
                       title: const Text('Copiar mensagem'),
                       onTap: () async {
-                        Navigator.pop(context);
+                        Navigator.pop(sheetContext);
                         await Clipboard.setData(
                           ClipboardData(
                             text: formatChatTextForDisplay(msg.conteudo),
@@ -99,7 +99,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                       leading: Icon(Icons.edit_outlined, color: primary),
                       title: const Text('Editar mensagem'),
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pop(sheetContext);
                         _editMessage(msg);
                       },
                     ),
@@ -112,7 +112,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                       ),
                       title: const Text('Apagar mensagem'),
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pop(sheetContext);
                         _deleteMessage(msg);
                       },
                     ),
@@ -130,7 +130,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     showFxHomeSheet<void>(
       context,
       builder:
-          (_) => FxHomeSheetSurface(
+          (sheetContext) => FxHomeSheetSurface(
             isDark: isDark,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -145,7 +145,7 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                         in _ConversationScreenState._quickReactions)
                       InkWell(
                         onTap: () {
-                          Navigator.pop(context);
+                          Navigator.pop(sheetContext);
                           final next = '${_ctrl.text}$emoji';
                           _ctrl.value = TextEditingValue(
                             text: next,
@@ -177,12 +177,12 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     );
   }
 
-  void _showAttachmentSheet() {
+  Future<void> _showAttachmentSheet() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    showFxHomeSheet<void>(
+    final choice = await showFxHomeSheet<Object>(
       context,
       builder:
-          (_) => FxHomeSheetSurface(
+          (sheetContext) => FxHomeSheetSurface(
             isDark: isDark,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -193,34 +193,41 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                   icon: Icons.photo_camera_outlined,
                   label: 'Foto da galeria',
                   isDark: isDark,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickAndSend(ConversationMediaType.photo);
-                  },
+                  onTap:
+                      () => Navigator.pop(
+                        sheetContext,
+                        ConversationMediaType.photo,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 ConversationAttachOption(
                   icon: Icons.videocam_outlined,
                   label: 'Video da galeria',
                   isDark: isDark,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickAndSend(ConversationMediaType.video);
-                  },
+                  onTap:
+                      () => Navigator.pop(
+                        sheetContext,
+                        ConversationMediaType.video,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 ConversationAttachOption(
                   icon: Icons.mic_none_outlined,
                   label: 'Gravar audio',
                   isDark: isDark,
-                  onTap: () {
-                    Navigator.pop(context);
-                    _startAudioRecording();
-                  },
+                  onTap: () => Navigator.pop(sheetContext, 'audio'),
                 ),
               ],
             ),
           ),
     );
+    if (!mounted || choice == null) return;
+    if (choice == 'audio') {
+      await _startAudioRecording();
+      return;
+    }
+    if (choice is ConversationMediaType) {
+      await _pickAndSend(choice);
+    }
   }
 }

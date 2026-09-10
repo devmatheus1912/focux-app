@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -73,8 +74,12 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
           (result.personalSlug?.trim().isNotEmpty == true)
               ? result.personalSlug!.trim()
               : widget.initialSlug?.trim();
+      if (slug != null && slug.isNotEmpty) {
+        await PersonalSlugStore.save(slug);
+      }
       final params = <String, String>{'token': token};
       if (slug != null && slug.isNotEmpty) params['p'] = slug;
+      if (!mounted) return;
       context.go(
         Uri(path: '/register/aluno', queryParameters: params).toString(),
       );
@@ -129,8 +134,23 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           TextButton(
-                            onPressed:
-                                () => context.go('/login?role=aluno'),
+                            onPressed: () async {
+                              final slug =
+                                  widget.initialSlug?.trim().isNotEmpty == true
+                                      ? widget.initialSlug!.trim()
+                                      : await PersonalSlugStore.read();
+                              if (!context.mounted) return;
+                              final params = <String, String>{'role': 'aluno'};
+                              if (slug != null && slug.isNotEmpty) {
+                                params['p'] = slug;
+                              }
+                              context.go(
+                                Uri(
+                                  path: '/login',
+                                  queryParameters: params,
+                                ).toString(),
+                              );
+                            },
                             child: const Text('Já tenho conta — Entrar'),
                           ),
                         ],
