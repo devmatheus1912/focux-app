@@ -16,6 +16,9 @@ void main() {
     expect(screen, contains('alertasConfigViewed'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, isNot(contains('Icons.calendar_month')));
   });

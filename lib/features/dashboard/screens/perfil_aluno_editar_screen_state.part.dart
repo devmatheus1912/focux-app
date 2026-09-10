@@ -17,25 +17,103 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
   bool _loaded = false;
   bool _saving = false;
   bool _uploading = false;
+  String _baseNome = '';
+  String _baseEmail = '';
+  String _baseTelefone = '';
+  String _baseWhatsapp = '';
+  String _baseObjetivo = '';
+  String _baseGenero = '';
+  String _baseTipo = '';
+  String _basePeso = '';
+  String _baseAltura = '';
+  String _baseNascimento = '';
+  String? _baseFotoUrl;
+
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
+  bool get _isDirty {
+    if (!_loaded) return false;
+    return _nome.text != _baseNome ||
+        _email.text != _baseEmail ||
+        _telefone.text != _baseTelefone ||
+        _whatsapp.text != _baseWhatsapp ||
+        _objetivo.text != _baseObjetivo ||
+        _genero.text != _baseGenero ||
+        _tipoConsultoria.text != _baseTipo ||
+        _peso.text != _basePeso ||
+        _altura.text != _baseAltura ||
+        _dataNascimento.text != _baseNascimento ||
+        _fotoUrl != _baseFotoUrl;
+  }
+
+  void _captureBaseline() {
+    _baseNome = _nome.text;
+    _baseEmail = _email.text;
+    _baseTelefone = _telefone.text;
+    _baseWhatsapp = _whatsapp.text;
+    _baseObjetivo = _objetivo.text;
+    _baseGenero = _genero.text;
+    _baseTipo = _tipoConsultoria.text;
+    _basePeso = _peso.text;
+    _baseAltura = _altura.text;
+    _baseNascimento = _dataNascimento.text;
+    _baseFotoUrl = _fotoUrl;
+  }
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_isDirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar alterações?',
+        message: 'O que você alterou não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/aluno/perfil');
+  }
 
   @override
   void dispose() {
-    _nome.dispose();
-    _email.dispose();
-    _telefone.dispose();
-    _whatsapp.dispose();
-    _objetivo.dispose();
-    _genero.dispose();
-    _tipoConsultoria.dispose();
-    _peso.dispose();
-    _altura.dispose();
-    _dataNascimento.dispose();
+    for (final c in [
+      _nome,
+      _email,
+      _telefone,
+      _whatsapp,
+      _objetivo,
+      _genero,
+      _tipoConsultoria,
+      _peso,
+      _altura,
+      _dataNascimento,
+    ]) {
+      c
+        ..removeListener(_onFieldChanged)
+        ..dispose();
+    }
     super.dispose();
   }
 
   Future<void> _loadIfNeeded(Aluno aluno) async {
     if (_loaded) return;
     _loaded = true;
+    for (final c in [
+      _nome,
+      _email,
+      _telefone,
+      _whatsapp,
+      _objetivo,
+      _genero,
+      _tipoConsultoria,
+      _peso,
+      _altura,
+      _dataNascimento,
+    ]) {
+      c.addListener(_onFieldChanged);
+    }
     _nome.text = aluno.nome;
     _email.text = aluno.email;
     _telefone.text = aluno.telefone ?? '';
@@ -47,6 +125,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     _altura.text = aluno.altura?.toString() ?? '';
     _dataNascimento.text = formatBirthDateForDisplay(aluno.dataNascimento);
     _fotoUrl = aluno.fotoUrl;
+    _captureBaseline();
     if (mounted) setState(() {});
   }
 
@@ -97,6 +176,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
       ref.invalidate(alunoPerfilHomeProvider);
       ref.invalidate(alunoMeProvider);
       ref.invalidate(alunoDashboardHomeProvider);
+      _captureBaseline();
       if (!silent && mounted) {
         FeedbackHelper.showSuccess(context, 'Perfil do aluno atualizado.');
       }
@@ -338,27 +418,25 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
 
     return fxScreenA11yScope(
       label: 'Meu perfil',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Editar cadastro',
-          subtitle: freshnessLabel,
-          onBack: () => safePopOrGo(context, '/aluno/perfil'),
-          actions: [
-            TextButton(
+      child: FxFormPopGuard(
+        dirty: _isDirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Editar cadastro',
+            subtitle: freshnessLabel,
+            onBack: _cancel,
+          ),
+          bottomNavigationBar: FxFormStickyBar(
+            child: FxLiquidPrimaryButton(
+              loading: _saving,
+              loadingLabel: 'Salvando…',
+              label: _saving ? 'Salvando…' : 'Salvar meu perfil',
               onPressed: _saving ? null : _save,
-              child:
-                  _saving
-                      ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: FxLoading(strokeWidth: 2),
-                      )
-                      : const Text('Salvar'),
             ),
-          ],
-        ),
-        body: homeAsync.when(
+          ),
+          body: homeAsync.when(
           loading:
               () => const Padding(
                 padding: EdgeInsets.all(TokensStrip.s4),
@@ -379,6 +457,8 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
             return Form(
               key: _formKey,
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 16, 16, 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -628,13 +708,6 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                       ],
                     ),
                     const SizedBox(height: TokensStrip.s4),
-                    FxLiquidPrimaryButton(
-                      loading: _saving,
-                      icon: Icons.check,
-                      label: 'Salvar meu perfil',
-                      onPressed: _saving ? null : _save,
-                    ),
-                    const SizedBox(height: 14),
                     Text(
                       'Esses dados ajudam o personal a ajustar treino, contato, segurança e aderência sem depender de conversa toda hora.',
                       textAlign: TextAlign.center,
@@ -645,6 +718,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
               ),
             );
           },
+        ),
         ),
       ),
     );
