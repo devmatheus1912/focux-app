@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -37,9 +38,31 @@ class PerfilAlunoScreen extends ConsumerWidget {
       label: 'Meu perfil',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: true,
         appBar: FxShellAppBar(
           title: 'Meu perfil',
+          showBack: false,
           subtitle: FxHubFreshness.fromFetchedAt(homeAsync.valueOrNull?.fetchedAt),
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como usar o perfil',
+              onTap: () => showFxHelpSheet(
+                context,
+                title: 'Meu perfil',
+                subtitle: 'Conta, consentimentos e anamnese.',
+                tips: const [
+                  FxHelpTip(
+                    'Cadastro',
+                    'Toque no avatar ou em Editar cadastro para atualizar dados.',
+                  ),
+                  FxHelpTip(
+                    'Completar',
+                    'A barra inferior aparece enquanto o perfil não chega a 100%.',
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         body: homeAsync.when(
           loading: () => const SkeletonList(count: 4),
@@ -145,7 +168,7 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
                     FxSettingsTile(
                       icon: Icons.badge_outlined,
                       label: 'Editar cadastro',
-                      value: '',
+                      value: '$score%',
                       mute: chrome.mute,
                       line: chrome.line,
                       onTap: () => context.push('/aluno/perfil/editar'),
@@ -153,28 +176,18 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
                     FxSettingsTile(
                       icon: Icons.fact_check_outlined,
                       label: 'Consentimentos',
-                      value: '',
+                      value: 'LGPD',
                       mute: chrome.mute,
                       line: chrome.line,
-                      showDivider: false,
                       onTap: () => showPerfilLgpdConsentSheet(
                         context,
                         tipos: lgpdConsentTiposAluno,
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              FxStaggerItem(
-                index: 2,
-                child: FxSettingsGroup(
-                  header: 'Saúde',
-                  children: [
                     FxSettingsTile(
                       icon: Icons.assignment_outlined,
                       label: 'Anamnese',
-                      value: '',
+                      value: 'Saúde',
                       mute: chrome.mute,
                       line: chrome.line,
                       showDivider: false,
@@ -185,7 +198,7 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
               ),
               const SizedBox(height: FxSettingsLayout.groupGap),
               FxStaggerItem(
-                index: 3,
+                index: 2,
                 child: FxSettingsGroup(
                   children: [
                     FxSettingsTile(

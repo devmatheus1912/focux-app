@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -99,6 +100,17 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  void _abrirTrilha(TrilhaModel trilha) {
+    showFxNoticeSheet(
+      context,
+      title: trilha.titulo,
+      message:
+          '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
+      body: Text(trilhaValorAtualLabel(trilha)),
+      icon: Icons.route_rounded,
+    );
   }
 
   void _stampFreshness() {
@@ -220,12 +232,6 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
             runSpacing: TokensStrip.s2,
             children: [
               DashboardHomeActionChip(
-                label: 'Início',
-                accent: primary,
-                isDark: isDark,
-                onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
-              ),
-              DashboardHomeActionChip(
                 label: 'Hábitos',
                 accent: primary,
                 isDark: isDark,
@@ -288,11 +294,15 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
           ],
           const SizedBox(height: TokensStrip.s5),
           if (trilhas.isEmpty)
-            const FxEmptyState(
+            FxEmptyState(
               icon: 'route',
               title: 'Nenhuma trilha atribuída',
               subtitle:
                   'Quando o personal criar uma meta, o progresso aparece aqui.',
+              action: FxEmptyAction(
+                label: 'Ir aos treinos',
+                onTap: () => context.push('/checkin/treinos'),
+              ),
             )
           else if (visiveis.isEmpty)
             FxEmptyState(
@@ -326,6 +336,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               FxSatelliteListTile(
                 title: trilha.titulo,
                 titleCase: false,
+                onTap: () => _abrirTrilha(trilha),
                 subtitle: Text(
                   '${trilhaStatusLabel(trilha.concluida)} · ${trilhaPercentLabel(trilha.percentualConclusao)}',
                 ),

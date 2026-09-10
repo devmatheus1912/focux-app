@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
@@ -137,17 +138,28 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        OperationalMetricTile(
-          label: 'Em aberto',
-          value: _abertoTotal.format(showDecimals: false),
-          hint: financeiroAlunoAtrasadasHint(_atrasadas),
-          color: _atrasadas > 0 ? EagleTokens.bad : primary,
-          isDark: isDark,
-          emphasis:
-              _atrasadas > 0
-                  ? OperationalMetricEmphasis.alert
-                  : OperationalMetricEmphasis.normal,
-        ),
+        if (_atrasadas > 0)
+          FxStripCard(
+            emphasize: true,
+            accent: EagleTokens.bad,
+            child: OperationalMetricTile(
+              label: 'Em aberto',
+              value: _abertoTotal.format(showDecimals: false),
+              hint: financeiroAlunoAtrasadasHint(_atrasadas),
+              color: EagleTokens.bad,
+              isDark: isDark,
+              emphasis: OperationalMetricEmphasis.alert,
+            ),
+          )
+        else
+          OperationalMetricTile(
+            label: 'Em aberto',
+            value: _abertoTotal.format(showDecimals: false),
+            hint: financeiroAlunoAtrasadasHint(_atrasadas),
+            color: primary,
+            isDark: isDark,
+            emphasis: OperationalMetricEmphasis.normal,
+          ),
         const SizedBox(height: TokensStrip.s2),
         OperationalMetricTile(
           label: 'Pagas',
@@ -190,12 +202,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
       spacing: TokensStrip.s2,
       runSpacing: TokensStrip.s2,
       children: [
-        DashboardHomeActionChip(
-          label: 'Início',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => safePopOrGo(context, '/dashboard/aluno'),
-        ),
         DashboardHomeActionChip(
           label: 'Assinatura',
           accent: primary,
@@ -277,11 +283,16 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         isDark: isDark,
                                       ),
                                       const SizedBox(height: TokensStrip.s4),
-                                      const FxEmptyState(
+                                      FxEmptyState(
                                         icon: 'coin',
                                         title: 'Nenhuma mensalidade',
                                         subtitle:
                                             'Quando seu personal lançar uma cobrança, ela aparece aqui.',
+                                        action: FxEmptyAction(
+                                          label: 'Abrir chat',
+                                          onTap: () =>
+                                              context.push('/chat/aluno'),
+                                        ),
                                       ),
                                     ],
                                   )
