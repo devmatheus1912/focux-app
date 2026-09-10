@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -253,10 +254,13 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                       : 'Nenhuma aula disponível',
                   subtitle: searching
                       ? 'Tente outro nome ou local.'
-                      : 'Quando seu personal abrir uma aula em grupo, ela aparece aqui.',
+                      : 'Quando seu personal abrir uma aula em grupo, ela aparece aqui. Dúvida? Fale no chat.',
                   action: searching
                       ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
-                      : null,
+                      : FxEmptyAction(
+                          label: 'Abrir chat',
+                          onTap: () => context.push('/chat/aluno'),
+                        ),
                 ),
               ],
             )

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/config/env.dart';
@@ -14,12 +15,13 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
@@ -28,8 +30,6 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_display.dart';
 import '../utils/agenda_status.dart';
-
-part 'agenda_aluno_screen_cards.part.dart';
 
 class AgendaAlunoScreen extends ConsumerStatefulWidget {
   const AgendaAlunoScreen({super.key});
@@ -174,18 +174,39 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     }
   }
 
-  Future<void> _confirmar(Agendamento ag) async {
-    try {
-      await AgendaRepository(
-        ref.read(apiClientProvider),
-      ).confirmarPresenca(ag.id);
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Presença confirmada!');
-      await _load();
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+  Future<void> _onAgTap(Agendamento ag) async {
+    final title = agendaAlunoDefaultTitle(ag.titulo);
+    final when = agendaAlunoWhenLabel(ag.inicio, ag.fim);
+    final status = agendaStatusLabel(ag.status);
+
+    if (agendaStatusNeedsConfirm(ag.status)) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Confirmar presença?',
+        message: '$title\n$when',
+        confirmLabel: 'Confirmar',
+        icon: Icons.event_available_rounded,
+      );
+      if (!ok || !mounted) return;
+      try {
+        await AgendaRepository(
+          ref.read(apiClientProvider),
+        ).confirmarPresenca(ag.id);
+        if (!mounted) return;
+        FeedbackHelper.showSuccess(context, 'Presença confirmada!');
+        await _load();
+      } catch (e) {
+        if (!mounted) return;
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+      return;
     }
+
+    await showFxNoticeSheet(
+      context,
+      title: title,
+      message: '$when\n$status',
+    );
   }
 
   @override
@@ -194,8 +215,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final searching =
-        _query.isNotEmpty || _chip != AgendaAlunoChip.todos;
+    final searching = _query.isNotEmpty || _chip != AgendaAlunoChip.todos;
 
     return fxScreenA11yScope(
       label: 'Minha Agenda',
@@ -253,8 +273,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                         focusNode: _searchFocus,
                         textInputAction: TextInputAction.search,
                         onChanged: _onQueryChanged,
-                        onTapOutside: (_) =>
-                            FxKeyboardDismissScope.dismiss(),
+                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                         decoration: InputDecoration(
                           hintText: 'Buscar sessão',
                           prefixIcon: const Icon(Icons.search_rounded),
@@ -271,11 +290,11 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                         TokensStrip.s4,
                         TokensStrip.s2,
                       ),
-                      child: Row(
+                      child: Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
                         children: [
-                          for (final chip in AgendaAlunoChip.values) ...[
-                            if (chip != AgendaAlunoChip.values.first)
-                              const SizedBox(width: TokensStrip.s2),
+                          for (final chip in AgendaAlunoChip.values)
                             FxToggleChip(
                               label: agendaAlunoChipLabel(chip),
                               selected: _chip == chip,
@@ -286,7 +305,6 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                                 _load();
                               },
                             ),
-                          ],
                         ],
                       ),
                     ),
@@ -318,13 +336,16 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                       : 'Nenhum agendamento',
                   subtitle: searching
                       ? 'Ajuste a busca ou o filtro para achar outra sessão.'
-                      : 'Quando seu personal marcar uma sessão, ela aparece aqui.',
+                      : 'Quando seu personal marcar uma sessão, ela aparece aqui. Dúvida? Fale no chat.',
                   action: searching
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
                           onTap: _clearFilters,
                         )
-                      : null,
+                      : FxEmptyAction(
+                          label: 'Abrir chat',
+                          onTap: () => context.push('/chat/aluno'),
+                        ),
                 ),
               ],
             )
@@ -345,11 +366,27 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                     onTap: _loadingMore ? null : _carregarMais,
                   );
                 }
-                return _AgCard(
-                  ag: _ags[i],
+                final ag = _ags[i];
+                final cor = agendaStatusColor(
+                  ag.status,
                   isDark: isDark,
                   primary: primary,
-                  onConfirmar: _confirmar,
+                );
+                return FxSatelliteListTile(
+                  title: agendaAlunoDefaultTitle(ag.titulo),
+                  titleCase: false,
+                  accent: cor,
+                  subtitle: Text(agendaAlunoWhenLabel(ag.inicio, ag.fim)),
+                  trailing: Text(
+                    agendaStatusNeedsConfirm(ag.status)
+                        ? 'Confirmar'
+                        : agendaStatusLabel(ag.status),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: cor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  onTap: () => _onAgTap(ag),
                 );
               },
             ),
