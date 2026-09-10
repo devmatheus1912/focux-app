@@ -126,12 +126,14 @@ bool isPersonalOnlyLocation(String path) {
     '/personal',
     '/dashboard/personal',
     '/dashboard/qualidade',
+    '/dashboard/command-center/copiloto',
     '/ia',
     '/ia/copiloto',
     '/ia/chat',
     '/ia/checkin',
     '/ia/progressao/aceitar',
     '/alunos',
+    '/kanban',
     '/treinos',
     '/agenda',
     '/agenda/novo',
@@ -140,8 +142,10 @@ bool isPersonalOnlyLocation(String path) {
     '/feed',
     '/broadcasts',
     '/leads',
+    '/leads-publicos',
     '/alertas',
     '/relatorios/global',
+    '/relatorio/business',
     '/convites',
     '/perfil',
     '/configuracoes',
@@ -149,13 +153,19 @@ bool isPersonalOnlyLocation(String path) {
     '/perfil/wallet',
     '/perfil/ferramentas',
     '/perfil/mfa',
+    '/perfil/equipe',
+    '/perfil/landing-editor',
+    '/perfil/white-label',
     '/identidade-visual',
     '/white-label',
     '/setup/identidade',
     '/planos',
     '/paywall',
     '/assinatura',
+    '/assinatura/review',
+    '/assinatura/success',
     '/migracao-magica',
+    '/migracao-focux',
     '/growth/migracao',
     '/promo-enterprise',
     '/ranking',
@@ -165,6 +175,21 @@ bool isPersonalOnlyLocation(String path) {
     '/busca',
     '/analytics',
     '/admin/rbac',
+    '/retencao',
+    '/dunning',
+    '/winback',
+    '/ofertas-upsell',
+    '/cancel-save',
+    '/automacoes',
+    '/loja',
+    '/pacotes',
+    '/recorrencia',
+    '/nps',
+    '/grupo-aulas',
+    '/onboarding/wizard',
+    '/referral',
+    '/chat/inbox',
+    '/desafios',
   };
   if (personalOnly.contains(path)) {
     return true;
@@ -177,7 +202,10 @@ bool isPersonalOnlyLocation(String path) {
       path.startsWith('/financeiro/mensalidades') ||
       path.startsWith('/alertas/') ||
       path.startsWith('/desafios/') ||
-      path.startsWith('/habitos');
+      path.startsWith('/habitos') ||
+      path.startsWith('/leads/') ||
+      path.startsWith('/ferramentas/') ||
+      path.startsWith('/treino-presencial/');
 }
 
 String? stringRouteExtra(GoRouterState state) {

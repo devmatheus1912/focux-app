@@ -27,6 +27,12 @@ void main() {
     expect(isPersonalOnlyLocation('/habitos/4'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/trilhas'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/recorrencia'), isTrue);
+    expect(isPersonalOnlyLocation('/retencao'), isTrue);
+    expect(isPersonalOnlyLocation('/dunning'), isTrue);
+    expect(isPersonalOnlyLocation('/leads-publicos'), isTrue);
+    expect(isPersonalOnlyLocation('/leads/kanban'), isTrue);
+    expect(isPersonalOnlyLocation('/winback'), isTrue);
+    expect(isPersonalOnlyLocation('/relatorio/business'), isTrue);
   });
 
   test('logged-in users leave pre-login gate', () {

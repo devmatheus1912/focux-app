@@ -2,21 +2,24 @@
 ///
 /// Usa `route` quando vem no payload. Sem rota, cai nos `type` já
 /// contratados — não inventa tipo novo.
-/// Rotas de personal (`/alunos/…`) não ficam no caminho do aluno.
-String? resolveFcmTapRoute(Map<String, dynamic> data) {
+/// Rotas de personal (`/alunos/…`, hubs operacionais) não ficam no caminho
+/// do aluno. Passe [role] quando conhecido para não reescrever push do personal.
+String? resolveFcmTapRoute(Map<String, dynamic> data, {String? role}) {
   var route = _asRoute(data['route']);
-  route ??= _fallbackByType(data);
+  route ??= _fallbackByType(data, role: role);
   if (route == null) {
     final chatId = _asToken(data['chatId']);
     final alunoId = _asToken(data['alunoId']);
     if (chatId != null) {
-      route = '/chat/aluno';
+      route = role == 'PERSONAL' ? '/chat/inbox' : '/chat/aluno';
     } else if (alunoId != null) {
-      route = '/dashboard/aluno';
+      route = role == 'PERSONAL'
+          ? '/alunos/$alunoId'
+          : '/dashboard/aluno';
     }
   }
 
-  route = _sanitizeAlunoFacingRoute(route, data);
+  route = _sanitizeAlunoFacingRoute(route, data, role: role);
 
   final execucaoId = _asToken(data['execucaoId']);
   if (execucaoId != null &&
@@ -33,8 +36,17 @@ String? resolveFcmTapRoute(Map<String, dynamic> data) {
   return route;
 }
 
-String? _fallbackByType(Map<String, dynamic> data) {
+String? _fallbackByType(Map<String, dynamic> data, {String? role}) {
   final type = (data['type'] ?? data['tipo'])?.toString().trim().toLowerCase();
+  if (role == 'PERSONAL') {
+    return switch (type) {
+      'mensalidade' || 'dunning' => '/financeiro',
+      'chat' => '/chat/inbox',
+      'plan_sync' || 'trial_expired' || 'trial' => '/assinatura',
+      'retencao' => '/retencao',
+      _ => null,
+    };
+  }
   return switch (type) {
     'mensalidade' || 'dunning' => '/financeiro/aluno',
     'treino' => '/checkin/treinos',
@@ -43,27 +55,62 @@ String? _fallbackByType(Map<String, dynamic> data) {
     'automacao' ||
     'winback' ||
     'coach' ||
-    'broadcast' => '/dashboard/aluno',
+    'broadcast' ||
+    'retencao' => '/dashboard/aluno',
     'chat' => '/chat/aluno',
     'anamnese' => '/aluno/anamnese',
     'plan_sync' || 'trial_expired' || 'trial' => '/assinatura',
-    'retencao' => '/retencao',
     _ => null,
   };
 }
 
 /// Push do aluno não deve abrir hub do personal.
-String? _sanitizeAlunoFacingRoute(String? route, Map<String, dynamic> data) {
+String? _sanitizeAlunoFacingRoute(
+  String? route,
+  Map<String, dynamic> data, {
+  String? role,
+}) {
   if (route == null) return null;
+  // Personal mantém hubs operacionais (ex.: /retencao no toque do personal).
+  if (role == 'PERSONAL') return route;
+
   if (route.startsWith('/alunos/')) {
-    return _fallbackByType(data) ?? '/dashboard/aluno';
+    return _fallbackByType(data, role: role) ?? '/dashboard/aluno';
   }
   if (route == '/financeiro') return '/financeiro/aluno';
   if (route == '/chat/inbox') return '/chat/aluno';
   if (route == '/dashboard/personal' || route == '/dashboard') {
     return '/dashboard/aluno';
   }
+  if (_isPersonalOperationalHub(route)) {
+    return _fallbackByType(data, role: role) ?? '/dashboard/aluno';
+  }
   return route;
+}
+
+bool _isPersonalOperationalHub(String route) {
+  const hubs = {
+    '/retencao',
+    '/dunning',
+    '/leads-publicos',
+    '/leads',
+    '/winback',
+    '/ofertas-upsell',
+    '/cancel-save',
+    '/automacoes',
+    '/analytics',
+    '/relatorios/global',
+    '/relatorio/business',
+    '/broadcasts',
+    '/coach',
+    '/ranking',
+    '/grupo-aulas',
+    '/recorrencia',
+    '/nps',
+    '/chat/inbox',
+  };
+  if (hubs.contains(route)) return true;
+  return route.startsWith('/leads/') || route.startsWith('/ferramentas/');
 }
 
 String? _asRoute(Object? raw) {
