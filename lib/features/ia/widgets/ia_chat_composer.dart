@@ -20,12 +20,14 @@ class IaChatComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
     return Padding(
-      padding: EdgeInsets.only(
-        left: 12,
-        right: 8,
-        top: 8,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+      padding: EdgeInsets.fromLTRB(
+        12,
+        8,
+        8,
+        8 +
+            (mq.viewInsets.bottom > 0 ? 0 : mq.padding.bottom),
       ),
       child: Row(
         children: [

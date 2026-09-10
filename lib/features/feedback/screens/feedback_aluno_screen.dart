@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -147,6 +148,11 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
     }
   }
 
+  void _voltar() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/dashboard/aluno');
+  }
+
   Color _scoreColor(int? score) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return EagleTokens.scoreColor(score, isDark: isDark);
@@ -163,9 +169,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
       label: 'Form check',
       child: FxFormPopGuard(
         dirty: false,
-        onCancel: () async {
-          safePopOrGo(context, '/dashboard/aluno');
-        },
+        onCancel: () async => _voltar(),
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
@@ -174,7 +178,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
               feedbackVideoCountLabel(_items.length),
               FxHubFreshness.fromFetchedAt(_fetchedAt),
             ),
-            onBack: () => safePopOrGo(context, '/dashboard/aluno'),
+            onBack: _voltar,
           ),
           bottomNavigationBar:
               !_loading && _erro == null
