@@ -7,6 +7,9 @@ abstract class FocuxLegal {
   static const String termsUrl = 'https://focuxpersonal.com/termos';
   static const String privacyUrl = 'https://focuxpersonal.com/privacidade';
 
+  /// Versão dos docs enviada em `POST /api/lgpd/me/consent`.
+  static const String consentDocumentVersion = '2026-09';
+
   /// Vitrine completa (comparativo, ROI, features) — fora do app; ativar quando a web estiver no ar.
   static const bool plansMarketingWebLive = false;
 

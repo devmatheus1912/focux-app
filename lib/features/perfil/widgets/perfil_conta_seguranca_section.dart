@@ -13,6 +13,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
     required this.line,
     required this.onLogout,
     required this.onDeleteAccount,
+    this.onConsentTap,
     this.showMfa = false,
     this.onMfaTap,
   });
@@ -21,6 +22,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
   final Color line;
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
+  final VoidCallback? onConsentTap;
   final bool showMfa;
   final VoidCallback? onMfaTap;
 
@@ -55,9 +57,19 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
-              showDivider: false,
+              showDivider: onConsentTap != null,
               onTap: () => FocuxLegal.openPrivacy(),
             ),
+            if (onConsentTap != null)
+              FxSettingsTile(
+                icon: Icons.fact_check_outlined,
+                label: 'Consentimentos',
+                value: '',
+                mute: mute,
+                line: line,
+                showDivider: false,
+                onTap: onConsentTap,
+              ),
           ],
         ),
         const SizedBox(height: FxSettingsLayout.groupGap),
