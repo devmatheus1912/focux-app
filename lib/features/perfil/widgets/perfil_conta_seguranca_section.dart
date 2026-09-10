@@ -47,7 +47,6 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
-              picker: true,
               onTap: () => FocuxLegal.openTerms(),
             ),
             FxSettingsTile(
@@ -56,7 +55,6 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
-              picker: true,
               showDivider: false,
               onTap: () => FocuxLegal.openPrivacy(),
             ),

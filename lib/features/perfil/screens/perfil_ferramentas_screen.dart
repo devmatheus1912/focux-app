@@ -8,6 +8,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -40,6 +41,29 @@ class PerfilFerramentasScreen extends ConsumerWidget {
             HapticFeedback.selectionClick();
             safePopOrGo(context, '/perfil');
           },
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Sobre as ferramentas',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Mais ferramentas',
+                    subtitle: 'Atalhos do plano ativo.',
+                    tips: const [
+                      FxHelpTip(
+                        'Crescimento',
+                        'Cada linha abre a ferramenta. Itens bloqueados levam ao upgrade.',
+                        icon: 'trend',
+                      ),
+                      FxHelpTip(
+                        'Plano',
+                        'O que aparece depende do plano efetivo, não de um rótulo fixo.',
+                        icon: 'spark',
+                      ),
+                    ],
+                  ),
+            ),
+          ],
         ),
         body: featuresAsync.when(
           loading: () => const SkeletonList(count: 5),

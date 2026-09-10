@@ -17,7 +17,12 @@ class _PerfilVitrineTiles extends StatelessWidget {
   Widget build(BuildContext context) {
     final normalizedSlug = slug?.trim();
     final hasSlug = normalizedSlug != null && normalizedSlug.isNotEmpty;
-    final copyUrl = hasSlug ? Env.landingPageUrl(normalizedSlug) : '';
+    final linkValue =
+        hasSlug
+            ? (normalizedSlug.length > 22
+                ? '${normalizedSlug.substring(0, 20)}…'
+                : normalizedSlug)
+            : '';
 
     return Column(
       children: [
@@ -40,46 +45,13 @@ class _PerfilVitrineTiles extends StatelessWidget {
             onTap: onOpenEditor,
           )
         else ...[
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Wrap(
-              spacing: TokensStrip.s2,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    unawaited(
-                      copyLandingLink(
-                        context,
-                        url: copyUrl,
-                        successMessage:
-                            'Link copiado. Cole no Instagram ou WhatsApp.',
-                        reserveBottom: 96,
-                      ),
-                    );
-                  },
-                  child: const Text('Copiar link'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    unawaited(
-                      AnalyticsService.instance.track(
-                        ProductEvents.perfilShareTapped,
-                      ),
-                    );
-                    unawaited(
-                      copyLandingLink(
-                        context,
-                        url: copyUrl,
-                        successMessage:
-                            'Link pronto para compartilhar no Instagram ou WhatsApp.',
-                        reserveBottom: 96,
-                      ),
-                    );
-                  },
-                  child: const Text('Compartilhar'),
-                ),
-              ],
-            ),
+          FxSettingsTile(
+            icon: Icons.link_outlined,
+            label: 'Link público',
+            value: linkValue,
+            mute: mute,
+            line: line,
+            onTap: onOpenEditor,
           ),
           FxSettingsTile(
             icon: Icons.tune_outlined,
