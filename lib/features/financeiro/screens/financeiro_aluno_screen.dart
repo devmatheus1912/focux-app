@@ -29,6 +29,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_aluno_cobranca_sheet.dart';
 import '../widgets/financeiro_aluno_help_sheet.dart';
 
@@ -358,6 +359,20 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                                       () => context.push(
                                                         '/chat/aluno',
                                                       ),
+                                                  onPagarPix:
+                                                      item.status ==
+                                                                  'PENDENTE' ||
+                                                              item.status ==
+                                                                  'ATRASADO'
+                                                          ? () =>
+                                                              mostrarPixMensalidade(
+                                                                context:
+                                                                    context,
+                                                                ref: ref,
+                                                                id: item.id,
+                                                                asAluno: true,
+                                                              )
+                                                          : null,
                                                 ),
                                         subtitle: Text(
                                           financeiroMensalidadeStatusLabel(

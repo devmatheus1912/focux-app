@@ -362,6 +362,14 @@ class FinanceiroRepository {
     return PixData.fromJson(r.data as Map<String, dynamic>);
   }
 
+  Future<PixData> gerarPixAluno(int mensalidadeId) async {
+    final r = await _dio.post(
+      '/api/financeiro/mensalidades/aluno/minhas/$mensalidadeId/pix',
+      options: ApiClient.idempotent('mensalidade-pix-aluno-$mensalidadeId'),
+    );
+    return PixData.fromJson(r.data as Map<String, dynamic>);
+  }
+
   Future<Mensalidade> editarMensalidade(
     int id, {
     FxMoney? valor,
