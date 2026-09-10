@@ -152,12 +152,6 @@ class _RecorrenciaAlunoScreenState
       runSpacing: TokensStrip.s2,
       children: [
         DashboardHomeActionChip(
-          label: 'Hoje',
-          accent: primary,
-          isDark: isDark,
-          onPressed: _leave,
-        ),
-        DashboardHomeActionChip(
           label: 'Financeiro',
           accent: primary,
           isDark: isDark,
@@ -316,11 +310,15 @@ class _RecorrenciaAlunoScreenState
                                 const SizedBox(height: TokensStrip.s4),
                                 _chips(primary: primary, isDark: isDark),
                                 const SizedBox(height: TokensStrip.s4),
-                                const FxEmptyState(
+                                FxEmptyState(
                                   icon: 'coin',
                                   title: 'Sem assinatura recorrente ainda',
                                   subtitle:
                                       'Seu personal ainda não configurou cobrança automática mensal.',
+                                  action: FxEmptyAction(
+                                    label: 'Abrir chat',
+                                    onTap: () => context.push('/chat/aluno'),
+                                  ),
                                 ),
                               ] else ...[
                                 FxHubHeader(

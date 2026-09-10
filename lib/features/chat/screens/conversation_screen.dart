@@ -34,6 +34,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
@@ -92,6 +93,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   final List<ChatMsg> _msgs = [];
   final Map<String, GlobalKey> _messageKeys = {};
   final _ctrl = TextEditingController();
+  final _composerFocus = FocusNode();
   final _scroll = ScrollController();
   final _picker = ImagePicker();
   final _audioRecorder = AudioRecorder();
@@ -149,8 +151,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _scroll.removeListener(_handleScroll);
     _ctrl.removeListener(_handleComposerChange);
     _ctrl.dispose();
+    _composerFocus.dispose();
     _scroll.dispose();
     super.dispose();
+  }
+
+  void _focusComposer() {
+    _composerFocus.requestFocus();
   }
 
   void _handleComposerChange() {
@@ -348,10 +355,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
-    return fxScreenA11yScope(
-      label: 'Conversation',
-      child: FxShellScaffold(
+    final scaffold = FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
           title: title,
@@ -462,11 +468,15 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             },
                           )
                           : _msgs.isEmpty
-                          ? const FxEmptyState(
+                          ? FxEmptyState(
                             icon: 'message-circle',
                             title: 'Comece uma conversa',
                             subtitle:
                                 'Fotos, vídeos, áudios e ajustes do treino vão aparecer aqui em tempo real.',
+                            action: FxEmptyAction(
+                              label: 'Escrever mensagem',
+                              onTap: _focusComposer,
+                            ),
                           )
                           : ListView.builder(
                             controller: _scroll,
@@ -599,6 +609,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                       Expanded(
                                         child: TextField(
                                           controller: _ctrl,
+                                          focusNode: _composerFocus,
                                           style: TextStyle(
                                             color:
                                                 isDark
@@ -721,6 +732,25 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           ],
         ),
+    );
+
+    if (!_isAlunoMode) {
+      return fxScreenA11yScope(label: 'Conversation', child: scaffold);
+    }
+
+    return fxScreenA11yScope(
+      label: 'Conversation',
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (keyboardOpen) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: scaffold,
       ),
     );
   }
