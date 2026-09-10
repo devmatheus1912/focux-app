@@ -8,7 +8,12 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxShellAppBar'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, isNot(contains('_SupportHeader')));
+    expect(screen, isNot(contains('Navigator.of(context).maybePop')));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxSettingsTile'));

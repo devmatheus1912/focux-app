@@ -1,131 +1,5 @@
 part of 'suporte_screen.dart';
 
-class _SupportHeader extends StatelessWidget {
-  final SuporteTicket? ticket;
-  final VoidCallback onTicketsTap;
-
-  const _SupportHeader({required this.ticket, required this.onTicketsTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final onSurface = Theme.of(context).colorScheme.onSurface;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 12, 12, 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (Navigator.of(context).canPop()) ...[
-            IconButton(
-              tooltip: 'Voltar',
-              onPressed: () => Navigator.of(context).maybePop(),
-              icon: const Icon(Icons.arrow_back_rounded),
-            ),
-            const SizedBox(width: 4),
-          ],
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: primary,
-                child: const BrandedAppIcon(size: 34),
-              ),
-              Positioned(
-                right: 1,
-                bottom: 1,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: EagleTokens.good,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.surface,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Suporte Focux',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Flexible(
-                      child: Text(
-                        'online · resposta imediata',
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: EagleTokens.good,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    if (ticket != null)
-                      Flexible(
-                        child: Text(
-                          '  /  Ticket #${ticket!.id}',
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(
-                            color: TokensStrip.textSecondary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          InkWell(
-            onTap: onTicketsTap,
-            borderRadius: BorderRadius.circular(999),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                'Ajuda',
-                style: TextStyle(
-                  color: primary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _QuickActions extends StatelessWidget {
   final ValueChanged<String> onPromptTap;
   final VoidCallback onOpenTicketTap;
@@ -220,7 +94,11 @@ class _ChatComposer extends StatelessWidget {
         12,
         10,
         12,
-        10 + MediaQuery.of(context).viewPadding.bottom,
+        10 +
+            math.max(
+              MediaQuery.viewPaddingOf(context).bottom,
+              MediaQuery.viewInsetsOf(context).bottom,
+            ),
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,

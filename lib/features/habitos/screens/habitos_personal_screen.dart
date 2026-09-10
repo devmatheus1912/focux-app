@@ -23,6 +23,8 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -258,7 +260,110 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
 
   List<Widget> get _habitoRows {
     final mute = fxScreenMute(context);
+    final isDark = ShellChrome.of(context).isDark;
+    final primary = Theme.of(context).colorScheme.primary;
+    final focus = habitoFocusCompliance(_compliance);
+    final focusDanger =
+        focus != null && habitoComplianceDanger(focus.compliancePct);
+
     return [
+      if (focusDanger) ...[
+        FxStripCard(
+          emphasize: true,
+          semanticsLabel:
+              'Compliance baixa: ${habitoComplianceLabel(focus.alunoNome)}',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Quem precisa de atenção',
+                style: FocuxHubTypography.chip(mute),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                habitoComplianceLabel(focus.alunoNome),
+                style: FocuxHubTypography.kpi(
+                  color: ShellChrome.of(context).ink,
+                  fontSize: FocuxHubTypography.metricLg,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${habitoComplianceValue(focus.compliancePct)} · ${habitoComplianceSubtitle(focus.checksSemana)}',
+                style: FocuxHubTypography.body(
+                  color: ShellChrome.of(context).ink,
+                ).copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  DashboardHomeActionChip(
+                    label: 'Abrir aluno',
+                    accent: EagleTokens.bad,
+                    isDark: isDark,
+                    onPressed: () => context.push('/alunos/${focus.alunoId}'),
+                  ),
+                  DashboardHomeActionChip(
+                    label: 'Novo hábito',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: _novoHabito,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+      ] else if (_habitos.isNotEmpty) ...[
+        FxStripCard(
+          emphasize: true,
+          semanticsLabel: 'Próximo hábito: ${_habitos.first.titulo}',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Próximo hábito', style: FocuxHubTypography.chip(mute)),
+              const SizedBox(height: 6),
+              Text(
+                _habitos.first.titulo,
+                style: FocuxHubTypography.kpi(
+                  color: ShellChrome.of(context).ink,
+                  fontSize: FocuxHubTypography.metricLg,
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Wrap(
+                spacing: TokensStrip.s2,
+                runSpacing: TokensStrip.s2,
+                children: [
+                  DashboardHomeActionChip(
+                    label: 'Abrir',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: () async {
+                      final habito = _habitos.first;
+                      await context.push(
+                        habitoDetailPath(habito.id),
+                        extra: habito,
+                      );
+                      if (mounted) await _carregar();
+                    },
+                  ),
+                  DashboardHomeActionChip(
+                    label: 'Novo hábito',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: _novoHabito,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s4),
+      ],
       if (_habitos.isEmpty)
         FxEmptyState(
           icon: 'circle-check',
@@ -310,6 +415,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           icon: 'trend',
           title: habitoComplianceEmptyTitle(_query),
           subtitle: habitoComplianceEmptySubtitle(_query),
+          action:
+              _query.trim().isEmpty
+                  ? FxEmptyAction(label: 'Novo hábito', onTap: _novoHabito)
+                  : null,
         )
       else ...[
         const DashboardSectionHeader(title: 'Compliance da semana'),
@@ -321,25 +430,28 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
             trailing: Text(
               habitoComplianceValue(item.compliancePct),
               style: FocuxHubTypography.bodyMuted(
-                color: habitoComplianceDanger(item.compliancePct)
-                    ? EagleTokens.bad
-                    : mute,
+                color:
+                    habitoComplianceDanger(item.compliancePct)
+                        ? EagleTokens.bad
+                        : mute,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            accent: habitoComplianceDanger(item.compliancePct)
-                ? EagleTokens.bad
-                : null,
+            accent:
+                habitoComplianceDanger(item.compliancePct)
+                    ? EagleTokens.bad
+                    : null,
             onTap: () => context.push('/alunos/${item.alunoId}'),
           ),
         if (_hasMore)
           FxSatelliteListTile(
             title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
-            subtitle: _carregandoMais
-                ? null
-                : Text(
-                    'Mais ${_totalCompliance - _compliance.length} nesta lista.',
-                  ),
+            subtitle:
+                _carregandoMais
+                    ? null
+                    : Text(
+                      'Mais ${_totalCompliance - _compliance.length} nesta lista.',
+                    ),
             onTap: _carregandoMais ? null : _carregarMais,
           ),
       ],

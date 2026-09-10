@@ -46,6 +46,9 @@ void main() {
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('habitoFocusCompliance'));
     expect(screen, contains('Buscar aluno'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('onTapOutside'));
