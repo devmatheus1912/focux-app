@@ -31,7 +31,30 @@ void main() {
     expect(resolveFcmTapRoute({'type': 'anamnese'}), '/aluno/anamnese');
     expect(resolveFcmTapRoute({'type': 'broadcast'}), '/dashboard/aluno');
     expect(resolveFcmTapRoute({'type': 'plan_sync'}), '/assinatura');
-    expect(resolveFcmTapRoute({'type': 'retencao'}), '/retencao');
+    expect(resolveFcmTapRoute({'type': 'retencao'}), '/dashboard/aluno');
+    expect(
+      resolveFcmTapRoute({'type': 'retencao'}, role: 'PERSONAL'),
+      '/retencao',
+    );
+  });
+
+  test('hub operacional do personal não abre na sessão aluno', () {
+    expect(
+      resolveFcmTapRoute({'route': '/retencao'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/dunning'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/leads-publicos'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/retencao'}, role: 'PERSONAL'),
+      '/retencao',
+    );
   });
 
   test('sem type usa hub do aluno, não /alunos do personal', () {

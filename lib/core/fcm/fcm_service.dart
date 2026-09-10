@@ -110,12 +110,19 @@ class FcmService {
   }
 
   static void _handleNotificationTap(RemoteMessage message) {
+    unawaited(_handleNotificationTapAsync(message));
+  }
+
+  static Future<void> _handleNotificationTapAsync(
+    RemoteMessage message,
+  ) async {
     try {
       final data = message.data;
       if (data['type'] == 'plan_sync') {
-        unawaited(_dispatchPlanSync(data));
+        await _dispatchPlanSync(data);
       }
-      final route = resolveFcmTapRoute(data);
+      final role = await SecureStorage.getRole();
+      final route = resolveFcmTapRoute(data, role: role);
       if (route == null) return;
       // Apenas rotas internas: rejeita absolutas (proteção contra phishing
       // através de notificações com URL externa).
