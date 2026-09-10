@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
@@ -166,6 +167,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
           },
           child: FxShellScaffold(
             useMesh: true,
+            constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Hábito',
               subtitle: habito == null
@@ -284,6 +286,50 @@ class _HabitoDetailBody extends StatelessWidget {
                       ativo: habito.ativo,
                     ),
                   ),
+                  if (forAluno && habito.ativo) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    FxStripCard(
+                      emphasize: true,
+                      accent: primary,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hoje',
+                            style: FocuxHubTypography.chip(
+                              fxScreenMute(context),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            habito.feitoHoje ? 'Feito' : 'Pendente',
+                            style: FocuxHubTypography.kpi(
+                              color: fxScreenInk(context),
+                              fontSize: FocuxHubTypography.metricLg,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            habito.feitoHoje
+                                ? 'Check de hoje registrado'
+                                : 'Marque quando concluir',
+                            style: FocuxHubTypography.bodyMuted(
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: TokensStrip.s3),
+                          DashboardHomeActionChip(
+                            label: habitoStickyAluno(habito.feitoHoje),
+                            accent: primary,
+                            isDark: isDark,
+                            enabled: !busy,
+                            onPressed: onSticky,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: TokensStrip.s4),
                   OperationalMetricTile(
                     label: 'Sequência',
@@ -314,16 +360,18 @@ class _HabitoDetailBody extends StatelessWidget {
                     color: primary,
                     isDark: isDark,
                   ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Alcance',
-                    value: habitoAlcanceLabel(habito.alunoId),
-                    hint: habito.alunoId == null
-                        ? 'Vale para a base'
-                        : 'Só este aluno',
-                    color: primary,
-                    isDark: isDark,
-                  ),
+                  if (!forAluno) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Alcance',
+                      value: habitoAlcanceLabel(habito.alunoId),
+                      hint: habito.alunoId == null
+                          ? 'Vale para a base'
+                          : 'Só este aluno',
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                  ],
                   const SizedBox(height: TokensStrip.s3),
                   Wrap(
                     spacing: TokensStrip.s2,
@@ -398,22 +446,7 @@ class _HabitoDetailBody extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ] else if (forAluno && habito.ativo)
-                    Wrap(
-                      spacing: TokensStrip.s2,
-                      runSpacing: TokensStrip.s2,
-                      children: [
-                        DashboardHomeActionChip(
-                          label: habito.feitoHoje
-                              ? 'Feito hoje'
-                              : 'Pendente hoje',
-                          accent: primary,
-                          isDark: isDark,
-                          enabled: !busy,
-                          onPressed: onSticky,
-                        ),
-                      ],
-                    ),
+                  ],
                 ],
               ),
             ),
