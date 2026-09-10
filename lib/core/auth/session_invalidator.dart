@@ -15,6 +15,8 @@ import '../../features/onboarding/data/onboarding_wizard_client_cache.dart';
 import '../../features/planos/data/plano_features_bff_cache.dart';
 import '../api/offline_sync_service.dart';
 import '../cache/offline_cache.dart';
+import '../health/health_service.dart';
+import '../health/home_widget_service.dart';
 import '../storage/secure_storage.dart';
 
 class SessionInvalidator {
@@ -37,6 +39,7 @@ class SessionInvalidator {
       _clearEntitlementCaches(),
       MigracaoMagicaDraftCache.clear(),
       AlunoFollowUpStore.clearAll(),
+      _clearHealthSession(),
     ]);
     _notifier.value++;
     if (kDebugMode && reason != null && reason.isNotEmpty) {
@@ -63,6 +66,17 @@ class SessionInvalidator {
       for (final key in _entitlementKeys) {
         await prefs.remove(key);
       }
+    } catch (_) {}
+  }
+
+  /// Health Connect / Apple Health + widget de recuperação não podem sobreviver
+  /// ao logout em aparelho compartilhado.
+  static Future<void> _clearHealthSession() async {
+    try {
+      await HealthService.revokeAccess();
+    } catch (_) {}
+    try {
+      await HomeWidgetService.clear();
     } catch (_) {}
   }
 }

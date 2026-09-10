@@ -38,4 +38,14 @@ class HomeWidgetService {
       );
     } catch (_) {}
   }
+
+  /// Zera o widget de recuperação no logout (não deixa vitais do usuário anterior).
+  static Future<void> clear() async {
+    await updateRecovery(
+      recoveryScore: 0,
+      recoveryLabel: '',
+      recoveryHint: '',
+      steps: 0,
+    );
+  }
 }
