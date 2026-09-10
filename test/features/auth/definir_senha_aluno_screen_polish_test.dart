@@ -19,7 +19,11 @@ void main() {
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('ScaleTransition')));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('authUnfocusAndLeave'));
+    expect(screen, contains('_sairSemDefinirSenha'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('canPop: false'));
+    expect(screen, contains('authUnfocusAndGo'));
+    expect(screen, isNot(contains("authUnfocusAndLeave(context, '/login?role=aluno')")));
     expect(screen, contains('AutofillHints.newPassword'));
     expect(screen, contains('ProductEvents.passwordDefined'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));

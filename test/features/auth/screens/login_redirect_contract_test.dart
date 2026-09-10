@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('login honors safe from route after authentication', () {
-    final login = File(
+    final login = readScreenSourceBundle(
       'lib/features/auth/screens/login_screen.dart',
-    ).readAsStringSync();
+    );
     final util = File(
       'lib/features/auth/utils/post_login_redirect.dart',
     ).readAsStringSync();
@@ -28,12 +30,19 @@ void main() {
   });
 
   test('student password change still overrides from route', () {
-    final login = File(
+    final login = readScreenSourceBundle(
       'lib/features/auth/screens/login_screen.dart',
-    ).readAsStringSync();
+    );
 
     expect(login, contains('requiresChange'));
     expect(login, contains("'/aluno/definir-senha'"));
     expect(login, contains("_postLoginRedirect(context, isAluno: true)"));
+
+    final redirect = File(
+      'lib/core/router/app_router_redirect.dart',
+    ).readAsStringSync();
+    expect(redirect, contains('passwordChangeRedirect'));
+    expect(redirect, contains('getRequiresPasswordChange()'));
+    expect(redirect, contains("path == '/aluno/definir-senha'"));
   });
 }
