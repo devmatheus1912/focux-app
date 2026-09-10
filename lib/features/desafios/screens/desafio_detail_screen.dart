@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -290,6 +291,51 @@ class _DesafioDetailBody extends StatelessWidget {
                       fim: desafio.fim,
                     ),
                   ),
+                  if (forAluno) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    FxStripCard(
+                      emphasize: true,
+                      accent: primary,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sua posição',
+                            style: FocuxHubTypography.chip(
+                              fxScreenMute(context),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            desafioMeuLugarValue(meuIndex),
+                            style: FocuxHubTypography.kpi(
+                              color: fxScreenInk(context),
+                              fontSize: FocuxHubTypography.metricLg,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            desafioMeuLugarHint(
+                              index: meuIndex,
+                              pontos: meusPontos,
+                              metaPontos: desafio.metaPontos,
+                            ),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: TokensStrip.s3),
+                          DashboardHomeActionChip(
+                            label: desafioStickyAlunoLabel(desafio.tipo),
+                            accent: primary,
+                            isDark: isDark,
+                            onPressed: onAlunoSticky,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: TokensStrip.s4),
                   OperationalMetricTile(
                     label: 'Prazo',
@@ -319,17 +365,11 @@ class _DesafioDetailBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s2),
                   OperationalMetricTile(
-                    label: forAluno ? 'Sua posição' : 'Tipo',
+                    label: forAluno ? 'Pontos' : 'Tipo',
                     value: forAluno
-                        ? desafioMeuLugarValue(meuIndex)
+                        ? desafioLeaderboardPoints(meusPontos)
                         : desafioTipoLabel(desafio.tipo),
-                    hint: forAluno
-                        ? desafioMeuLugarHint(
-                            index: meuIndex,
-                            pontos: meusPontos,
-                            metaPontos: desafio.metaPontos,
-                          )
-                        : desafioMetaLabel(desafio.metaPontos),
+                    hint: desafioMetaLabel(desafio.metaPontos),
                     color: primary,
                     isDark: isDark,
                   ),
@@ -344,20 +384,13 @@ class _DesafioDetailBody extends StatelessWidget {
                         isDark: isDark,
                         onPressed: onLeave,
                       ),
-                      if (forAluno) ...[
+                      if (forAluno)
                         DashboardHomeActionChip(
                           label: 'Hoje',
                           accent: primary,
                           isDark: isDark,
                           onPressed: () => context.push('/dashboard/aluno'),
                         ),
-                        DashboardHomeActionChip(
-                          label: desafioTipoLabel(desafio.tipo),
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: onAlunoSticky,
-                        ),
-                      ],
                       if (!forAluno &&
                           first != null &&
                           first.alunoId > 0)
@@ -386,15 +419,32 @@ class _DesafioDetailBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   if (secao == desafioSecaoCampanha)
-                    Text(
-                      (descricao == null || descricao.isEmpty)
-                          ? desafioCampanhaEmpty()
-                          : descricao,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
+                    (descricao == null || descricao.isEmpty)
+                        ? (forAluno
+                            ? FxEmptyState(
+                                icon: 'spark',
+                                title: desafioCampanhaEmpty(),
+                                subtitle:
+                                    'Prazo e meta continuam nos números acima.',
+                                action: FxEmptyAction(
+                                  label: desafioStickyAlunoLabel(desafio.tipo),
+                                  onTap: onAlunoSticky,
+                                ),
+                              )
+                            : Text(
+                                desafioCampanhaEmpty(),
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: fxScreenMute(context),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ))
+                        : Text(
+                            descricao,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: fxScreenMute(context),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
                   else if (ranking.isEmpty)
                     FxEmptyState(
                       icon: 'spark',

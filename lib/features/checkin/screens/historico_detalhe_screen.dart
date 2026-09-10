@@ -253,13 +253,6 @@ class _DetalheBody extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s3),
-                        DashboardHomeActionChip(
-                          label: historicoStickyLabel(execucao.status),
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: onAct,
-                        ),
                       ],
                     ),
                   ),
