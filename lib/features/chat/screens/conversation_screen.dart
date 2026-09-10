@@ -362,6 +362,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
     final scaffold = FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: title,
           subtitle: subtitle,

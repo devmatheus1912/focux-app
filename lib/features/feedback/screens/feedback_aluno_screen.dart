@@ -172,6 +172,7 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
         onCancel: () async => _voltar(),
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Form check',
             subtitle: FxHubFreshness.joinCount(

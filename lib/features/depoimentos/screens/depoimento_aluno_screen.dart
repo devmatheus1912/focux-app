@@ -88,6 +88,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           extendBody: true,
           appBar: FxShellAppBar(
             title: 'Deixar Depoimento',

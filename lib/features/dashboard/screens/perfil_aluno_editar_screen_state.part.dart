@@ -424,6 +424,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Editar cadastro',
             subtitle: freshnessLabel,

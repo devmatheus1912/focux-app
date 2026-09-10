@@ -331,70 +331,51 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = chrome.isDark;
 
-    if (_loading) {
-      return fxScreenA11yScope(
-        label: 'Minha anamnese',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Anamnese',
-            subtitle: 'Ficha de saúde e objetivos',
-            onBack: _cancel,
-          ),
-          body: const SkeletonList(count: 6),
-        ),
-      );
-    }
-    if (_erro != null) {
-      return fxScreenA11yScope(
-        label: 'Minha anamnese',
-        child: FxShellScaffold(
-          useMesh: true,
-          appBar: FxShellAppBar(
-            title: 'Anamnese',
-            subtitle: 'Ficha de saúde e objetivos',
-            onBack: _cancel,
-          ),
-          body: FxErrorState(
-            chromeOnDark: isDark,
-            primary: primary,
-            message: _erro!,
-            onRetry: _load,
-            title: 'Não conseguimos carregar a anamnese',
-          ),
-        ),
-      );
-    }
-
     final a = _anamnese ?? Anamnese();
-    final showBanner = a.alunoDevePreencher || _enviada;
+    final showBanner = !_loading && _erro == null && (a.alunoDevePreencher || _enviada);
+    final formReady = !_loading && _erro == null;
 
     return fxScreenA11yScope(
       label: 'Minha anamnese',
       child: FxFormPopGuard(
-        dirty: _dirty,
+        dirty: formReady && _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Anamnese',
             subtitle: 'Ficha de saúde e objetivos',
             onBack: _cancel,
           ),
-          bottomNavigationBar: FxFormStickyBar(
-            child: Semantics(
-              button: true,
-              enabled: !_saving,
-              label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
-              child: FxLiquidPrimaryButton(
-                label: 'Salvar',
-                loading: _saving,
-                loadingLabel: 'Salvando…',
-                onPressed: _saving ? null : _salvar,
-              ),
-            ),
-          ),
-          body: SafeArea(
+          bottomNavigationBar:
+              formReady
+                  ? FxFormStickyBar(
+                    child: Semantics(
+                      button: true,
+                      enabled: !_saving,
+                      label: _saving ? 'Salvando anamnese' : 'Salvar anamnese',
+                      child: FxLiquidPrimaryButton(
+                        label: 'Salvar',
+                        loading: _saving,
+                        loadingLabel: 'Salvando…',
+                        onPressed: _saving ? null : _salvar,
+                      ),
+                    ),
+                  )
+                  : null,
+          body:
+              _loading
+                  ? const SkeletonList(count: 6)
+                  : _erro != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _load,
+                    title: 'Não conseguimos carregar a anamnese',
+                  )
+                  : SafeArea(
             bottom: false,
             child: FxContentWidthLimiter(
               child: RefreshIndicator(

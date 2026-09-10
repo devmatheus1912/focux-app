@@ -58,6 +58,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             label: 'Boas-vindas',
             child: const FxShellScaffold(
               useMesh: true,
+              constrainWidth: false,
               appBar: FxShellAppBar(title: 'Boas-vindas'),
               body: SkeletonList(count: 4),
             ),
@@ -67,6 +68,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             label: 'Boas-vindas',
             child: FxShellScaffold(
               useMesh: true,
+              constrainWidth: false,
               appBar: const FxShellAppBar(title: 'Boas-vindas'),
               body: FxErrorState(
                 chromeOnDark: chrome.isDark,
@@ -104,6 +106,7 @@ class AlunoActivationScreen extends ConsumerWidget {
             label: 'Boas-vindas',
             child: FxShellScaffold(
               useMesh: true,
+              constrainWidth: false,
               appBar: FxShellAppBar(
                 title: 'Boas-vindas',
                 subtitle: progress.etapaLabel,
