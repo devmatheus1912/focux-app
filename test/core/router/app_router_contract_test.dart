@@ -81,6 +81,8 @@ void main() {
     );
     expect(redirect, contains('Future<String?> authRedirect'));
     expect(redirect, contains('SecureStorage.getToken()'));
+    expect(redirect, contains('SecureStorage.getRequiresPasswordChange()'));
+    expect(redirect, contains('passwordChangeRedirect'));
     expect(
       redirect,
       contains("return from.isEmpty ? '/login' : '/login?from=\$from'"),

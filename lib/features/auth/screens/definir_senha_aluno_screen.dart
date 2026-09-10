@@ -36,6 +36,7 @@ class _DefinirSenhaAlunoScreenState
   final _novaSenhaCtrl = TextEditingController();
   final _confirmacaoCtrl = TextEditingController();
   bool _loading = false;
+  bool _saindo = false;
   String? _error;
   bool _showSenhaAtual = false;
   bool _showNovaSenha = false;
@@ -60,30 +61,39 @@ class _DefinirSenhaAlunoScreenState
   Widget build(BuildContext context) {
     return fxScreenA11yScope(
       label: definirSenhaHelpTitle(),
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: fxTransparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          body: AuthShell(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s5,
-                    TokensStrip.s2,
-                    TokensStrip.s5,
-                    0,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+            FocusManager.instance.primaryFocus?.unfocus();
+            return;
+          }
+          unawaited(_sairSemDefinirSenha());
+        },
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: fxTransparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            body: AuthShell(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s5,
+                      TokensStrip.s2,
+                      TokensStrip.s5,
+                      0,
+                    ),
+                    child: AuthStickyRoleBar(
+                      roleLabel: 'ALUNO',
+                      onBack: () => unawaited(_sairSemDefinirSenha()),
+                    ),
                   ),
-                  child: AuthStickyRoleBar(
-                    roleLabel: 'ALUNO',
-                    onBack:
-                        () => authUnfocusAndLeave(context, '/login?role=aluno'),
-                  ),
-                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: authScrollPadding(
@@ -251,6 +261,7 @@ class _DefinirSenhaAlunoScreenState
             ),
           ),
         ),
+      ),
       ),
     );
   }

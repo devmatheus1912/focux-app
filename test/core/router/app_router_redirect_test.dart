@@ -40,4 +40,55 @@ void main() {
     expect(homePathForRole('ALUNO'), '/dashboard/aluno');
     expect(homePathForRole('PERSONAL'), '/dashboard/personal');
   });
+
+  test('aluno with pending password change cannot leave definir-senha', () {
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'ALUNO',
+        path: '/dashboard/aluno',
+      ),
+      '/aluno/definir-senha',
+    );
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'ALUNO',
+        path: '/login',
+      ),
+      '/aluno/definir-senha',
+    );
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'ALUNO',
+        path: '/home',
+      ),
+      '/aluno/definir-senha',
+    );
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'ALUNO',
+        path: '/aluno/definir-senha',
+      ),
+      isNull,
+    );
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: false,
+        role: 'ALUNO',
+        path: '/dashboard/aluno',
+      ),
+      isNull,
+    );
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'PERSONAL',
+        path: '/dashboard/personal',
+      ),
+      isNull,
+    );
+  });
 }

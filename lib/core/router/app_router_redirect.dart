@@ -10,10 +10,21 @@ Future<String?> authRedirect(GoRouterState state) async {
   final token = (await SecureStorage.getToken())?.trim();
   final hasToken = token != null && token.isNotEmpty;
 
-  // Sessão ativa: sai do funil pré-login (onboarding / login sem return-to).
-  if (hasToken &&
-      shouldLeavePreLoginGate(path, state.uri.queryParameters)) {
-    return homePathForRole(await SecureStorage.getRole());
+  if (hasToken) {
+    final role = await SecureStorage.getRole();
+    final requiresPasswordChange =
+        await SecureStorage.getRequiresPasswordChange();
+    final forced = passwordChangeRedirect(
+      requiresPasswordChange: requiresPasswordChange,
+      role: role,
+      path: path,
+    );
+    if (forced != null) return forced;
+
+    // Sessão ativa: sai do funil pré-login (onboarding / login sem return-to).
+    if (shouldLeavePreLoginGate(path, state.uri.queryParameters)) {
+      return homePathForRole(role);
+    }
   }
 
   if (isPublicLocation(path)) {
@@ -34,6 +45,17 @@ Future<String?> authRedirect(GoRouterState state) async {
   }
 
   return null;
+}
+
+/// Aluno com senha provisória só pode ficar em `/aluno/definir-senha`.
+String? passwordChangeRedirect({
+  required bool requiresPasswordChange,
+  required String? role,
+  required String path,
+}) {
+  if (!requiresPasswordChange || role != 'ALUNO') return null;
+  if (path == '/aluno/definir-senha') return null;
+  return '/aluno/definir-senha';
 }
 
 /// Home da role após login (ou ao pular o gate pré-login com token).
