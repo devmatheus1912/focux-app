@@ -22,6 +22,16 @@ void main() {
 
     expect(invalidator, contains('ValueNotifier<int>'));
     expect(invalidator, contains('SecureStorage.clearAll()'));
+    expect(invalidator, contains('AlunosHomeClientCache.clear()'));
+    expect(invalidator, contains('Aluno360ClientCache.clear()'));
+    expect(invalidator, contains('DashboardHomeClientCache.clear()'));
+    expect(invalidator, contains('PlanoFeaturesBffCache.clear()'));
+    expect(invalidator, contains('MigracaoMagicaDraftCache.clear()'));
+    expect(invalidator, contains('AlunoFollowUpStore.clearAll()'));
+    expect(invalidator, contains('EvolucaoHomeClientCache.clear()'));
+    expect(invalidator, contains('AgendaWeekClientCache.clear()'));
+    expect(invalidator, contains('OnboardingWizardClientCache.clear()'));
+    expect(invalidator, contains('BibliotecaWizardDraftCache.clear()'));
     expect(invalidator, contains('_notifier.value++'));
   });
 

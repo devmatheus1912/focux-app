@@ -24,4 +24,15 @@ void main() {
     expect(main, contains('_resetCustomTheme();'));
     expect(main, contains('if (!mounted) return;'));
   });
+
+  test('session cache evictor drops static tenant snapshots on login/logout', () {
+    final evictor =
+        File('lib/core/auth/session_cache_evictor.dart').readAsStringSync();
+    expect(
+      evictor,
+      contains('SessionInvalidator.clearTenantMemoryCaches()'),
+    );
+    expect(evictor, contains('invalidateAlunosCaches(ref)'));
+    expect(evictor, contains('invalidateAgendaCaches(ref)'));
+  });
 }
