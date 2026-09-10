@@ -38,7 +38,7 @@ class PerfilAlunoScreen extends ConsumerWidget {
       label: 'Meu perfil',
       child: FxShellScaffold(
         useMesh: true,
-        constrainWidth: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Meu perfil',
           showBack: false,

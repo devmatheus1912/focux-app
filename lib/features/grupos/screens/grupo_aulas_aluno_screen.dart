@@ -134,6 +134,10 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
   }
 
   Future<void> _inscrever(GrupoAula aula) async {
+    if (aula.inscrito) {
+      await _cancelar(aula);
+      return;
+    }
     if (aula.lotada) {
       await showFxNoticeSheet(
         context,
@@ -154,6 +158,29 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
       await GrupoAulaRepository(ref.read(apiClientProvider)).inscrever(aula.id);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Inscrição confirmada!');
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _cancelar(GrupoAula aula) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Sair desta aula?',
+      message: aula.titulo,
+      confirmLabel: 'Sair',
+      destructive: true,
+      icon: Icons.logout_rounded,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await GrupoAulaRepository(
+        ref.read(apiClientProvider),
+      ).cancelarInscricao(aula.id);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Inscrição cancelada.');
       await _load();
     } catch (e) {
       if (!mounted) return;
@@ -286,6 +313,16 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                   inscritos: a.inscritos,
                   capacidadeMax: a.capacidadeMax,
                 );
+                final trailingLabel = a.inscrito
+                    ? 'Inscrito'
+                    : lotada
+                    ? 'Lotada'
+                    : 'Inscrever';
+                final trailingColor = a.inscrito
+                    ? Theme.of(context).colorScheme.primary
+                    : lotada
+                    ? EagleTokens.warn
+                    : Theme.of(context).colorScheme.primary;
                 return FxSatelliteListTile(
                   title: a.titulo,
                   titleCase: false,
@@ -293,11 +330,9 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                     '${grupoAulaSubtitle(inicio: a.inicio, localAula: a.localAula)} · ${grupoAulaVagasLabel(inscritos: a.inscritos, capacidadeMax: a.capacidadeMax)}',
                   ),
                   trailing: Text(
-                    lotada ? 'Lotada' : 'Inscrever',
+                    trailingLabel,
                     style: FocuxHubTypography.bodyMuted(
-                      color: lotada
-                          ? EagleTokens.warn
-                          : Theme.of(context).colorScheme.primary,
+                      color: trailingColor,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

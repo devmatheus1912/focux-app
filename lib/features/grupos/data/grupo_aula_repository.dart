@@ -13,6 +13,7 @@ class GrupoAula {
   final int inscritos;
   final String? localAula;
   final String status;
+  final bool inscrito;
 
   GrupoAula({
     required this.id,
@@ -24,6 +25,7 @@ class GrupoAula {
     required this.status,
     this.descricao,
     this.localAula,
+    this.inscrito = false,
   });
 
   factory GrupoAula.fromJson(Map<String, dynamic> j) => GrupoAula(
@@ -36,9 +38,10 @@ class GrupoAula {
     inscritos: (j['inscritos'] as num?)?.toInt() ?? 0,
     localAula: j['localAula'] as String?,
     status: j['status'] as String? ?? 'ABERTA',
+    inscrito: j['inscrito'] as bool? ?? false,
   );
 
-  bool get lotada => inscritos >= capacidadeMax;
+  bool get lotada => !inscrito && inscritos >= capacidadeMax;
 }
 
 class GrupoAulaRepository {

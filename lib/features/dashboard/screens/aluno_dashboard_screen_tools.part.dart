@@ -100,6 +100,18 @@ class _StudentToolsSection extends StatelessWidget {
         route: '/agenda/aluno',
         featured: true,
       ),
+      _StudentToolAction(
+        icon: Icons.dynamic_feed_outlined,
+        title: 'Feed',
+        subtitle: 'Novidades do personal',
+        route: '/feed/aluno',
+      ),
+      _StudentToolAction(
+        icon: Icons.rate_review_outlined,
+        title: 'Depoimentos',
+        subtitle: 'Avalie seu personal',
+        route: '/depoimentos-aluno',
+      ),
     ];
 
     final featured = tools.where((t) => t.featured).toList(growable: false);

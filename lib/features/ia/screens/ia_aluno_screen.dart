@@ -449,7 +449,9 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
                           child: Text(
                             m.texto,
                             style: TextStyle(
-                              color: m.isUser ? Colors.white : null,
+                              color: m.isUser
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : null,
                             ),
                           ),
                         ),
