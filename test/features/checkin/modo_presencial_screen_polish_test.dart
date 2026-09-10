@@ -16,8 +16,10 @@ void main() {
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('CheckinRestFocusView'));
     expect(screen, contains('didChangeAppLifecycleState'));
+    expect(screen, contains('Exercício concluído'));
     expect(screen, isNot(contains('Navigator.pop')));
     expect(screen, isNot(contains('ListView(')));
     expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains("'Concluído'")));
   });
 }
