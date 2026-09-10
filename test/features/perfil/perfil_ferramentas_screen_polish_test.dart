@@ -26,6 +26,8 @@ void main() {
     expect(screen, contains('FxSettingsTile'));
     expect(screen, contains('GatedProfileShortcuts'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxHelpSheet'));
     expect(screen, isNot(contains('Color(0x')));
   });
 

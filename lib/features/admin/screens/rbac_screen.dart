@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 
-import '../../../core/theme/design_tokens.dart';
+import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -34,15 +41,43 @@ class RbacScreen extends ConsumerWidget {
     final permissoesAsync = ref.watch(permissoesRbacProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final accent = BrandPalette.softened(primary);
+    final mute = chrome.mute;
+    final line = chrome.line;
 
     return fxScreenA11yScope(
-      label: 'Controle de Acessos',
+      label: 'Controle de acessos',
       child: FxShellScaffold(
         useMesh: true,
         appBar: FxShellAppBar(
-          title: 'Controle de Acessos',
-          subtitle: 'Permissões operacionais do personal',
+          title: 'Controle de acessos',
+          subtitle: 'Permissões operacionais',
+          onBack: () {
+            HapticFeedback.selectionClick();
+            safePopOrGo(context, '/perfil');
+          },
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Como funcionam as permissões',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Controle de acessos',
+                    subtitle: 'Recurso + nível. Só o dono altera.',
+                    tips: const [
+                      FxHelpTip(
+                        'Conceder',
+                        'Escolha recurso e nível. Nada muda sozinho.',
+                        icon: 'key',
+                      ),
+                      FxHelpTip(
+                        'Revogar',
+                        'Abra a linha e confirme. Ação destrutiva.',
+                        icon: 'alert-triangle',
+                      ),
+                    ],
+                  ),
+            ),
             Semantics(
               button: true,
               label: 'Conceder permissão',
@@ -59,7 +94,7 @@ class RbacScreen extends ConsumerWidget {
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: chrome.isDark,
-                primary: primary,
+                primary: accent,
                 message: friendlyError(e),
                 onRetry: () => ref.invalidate(permissoesRbacProvider),
                 title: 'Não carregamos as permissões',
@@ -77,52 +112,39 @@ class RbacScreen extends ConsumerWidget {
                 ),
               );
             }
-            return ListView.builder(
-              itemCount: permissoes.length,
-              padding: const EdgeInsets.all(TokensStrip.s4),
-              itemBuilder: (ctx, i) {
-                final p = permissoes[i];
-                return fxListTileCardShell(
-                  context: ctx,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          p.nivel == 'ADMIN'
-                              ? EagleTokens.bad.withValues(alpha: 0.1)
-                              : primary.withValues(alpha: 0.1),
-                      child: Icon(
-                        p.nivel == 'ADMIN' ? Icons.security : Icons.vpn_key,
-                        color: p.nivel == 'ADMIN' ? EagleTokens.bad : primary,
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                FxSettingsLayout.pageInset,
+                FxSettingsLayout.pageInset,
+                FxSettingsLayout.groupGap * 2,
+              ),
+              children: [
+                FxSettingsGroup(
+                  header: 'Permissões',
+                  caption: 'Toque para ajustar o nível ou revogar.',
+                  children: [
+                    for (var i = 0; i < permissoes.length; i++)
+                      FxSettingsTile(
+                        icon:
+                            permissoes[i].nivel == 'ADMIN'
+                                ? Icons.security_outlined
+                                : Icons.vpn_key_outlined,
+                        label: permissoes[i].recurso,
+                        value: permissoes[i].nivel,
+                        mute: mute,
+                        line: line,
+                        showDivider: i < permissoes.length - 1,
+                        onTap:
+                            () => _showGerenciarPermissao(
+                              context,
+                              ref,
+                              permissoes[i],
+                            ),
                       ),
-                    ),
-                    title: Text(
-                      p.recurso,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: chrome.ink,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Nível: ${p.nivel}',
-                      style: TextStyle(color: chrome.mute),
-                    ),
-                    trailing: Semantics(
-                      button: true,
-                      label: 'Revogar permissão de ${p.recurso}',
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: EagleTokens.bad,
-                        ),
-                        tooltip: 'Revogar permissão',
-                        onPressed:
-                            () => _revogarPermissao(context, ref, p.recurso),
-                      ),
-                    ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ],
             );
           },
         ),
@@ -135,14 +157,142 @@ class RbacScreen extends ConsumerWidget {
     WidgetRef ref,
     String recurso,
   ) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Revogar $recurso?',
+      message: 'Quem usava este acesso perde na hora.',
+      confirmLabel: 'Revogar',
+      destructive: true,
+      icon: Icons.delete_outline_rounded,
+    );
+    if (!ok || !context.mounted) return;
     try {
       await ref.read(rbacRepositoryProvider).revogar(recurso);
       ref.invalidate(permissoesRbacProvider);
+      if (context.mounted) {
+        FeedbackHelper.showSuccess(context, 'Permissão revogada');
+      }
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
       }
     }
+  }
+
+  Future<void> _showGerenciarPermissao(
+    BuildContext context,
+    WidgetRef ref,
+    PermissaoRbac permissao,
+  ) async {
+    var nivel = permissao.nivel;
+    await showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final primary = Theme.of(ctx).colorScheme.primary;
+        final mute = ShellChrome.forDark(isDark).mute;
+        final line = ShellChrome.forDark(isDark).line;
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return FxHomeSheetSurface(
+              isDark: isDark,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FxHomeSheetHandle(isDark: isDark),
+                  SizedBox(height: TokensStrip.s4),
+                  FxHomeSheetHeader(
+                    isDark: isDark,
+                    title: permissao.recurso,
+                    subtitle: 'Ajuste o nível ou revogue o acesso.',
+                    leading: Icon(
+                      Icons.vpn_key_outlined,
+                      color: primary,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(height: TokensStrip.s3),
+                  FxSettingsGroup(
+                    children: [
+                      FxSettingsTile(
+                        icon: Icons.tune_outlined,
+                        label: 'Nível',
+                        value: nivel,
+                        mute: mute,
+                        line: line,
+                        picker: true,
+                        showDivider: false,
+                        onTap: () async {
+                          final picked = await showFxInsetPickerSheet<String>(
+                            ctx,
+                            title: 'Nível',
+                            selected: nivel,
+                            items: [
+                              for (final n in permissoesRbacNiveis)
+                                FxInsetPickerSheetItem(value: n, label: n),
+                            ],
+                          );
+                          if (picked == null) return;
+                          setState(() => nivel = picked);
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: TokensStrip.s4),
+                  FxLiquidPrimaryButton(
+                    label: 'Salvar nível',
+                    onPressed:
+                        nivel == permissao.nivel
+                            ? null
+                            : () async {
+                              try {
+                                await ref
+                                    .read(rbacRepositoryProvider)
+                                    .conceder(
+                                      recurso: permissao.recurso,
+                                      nivel: nivel,
+                                    );
+                                ref.invalidate(permissoesRbacProvider);
+                                if (ctx.mounted) {
+                                  FxHomeSheetChrome.dismissAndPop(ctx);
+                                }
+                              } catch (e) {
+                                if (ctx.mounted) {
+                                  FeedbackHelper.showError(
+                                    ctx,
+                                    friendlyError(e),
+                                  );
+                                }
+                              }
+                            },
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      FxHomeSheetChrome.dismissAndPop(ctx);
+                      if (context.mounted) {
+                        await _revogarPermissao(
+                          context,
+                          ref,
+                          permissao.recurso,
+                        );
+                      }
+                    },
+                    child: Text(
+                      'Revogar acesso',
+                      style: TextStyle(
+                        color: Theme.of(ctx).colorScheme.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showConcederPermissao(BuildContext context, WidgetRef ref) {
@@ -154,13 +304,12 @@ class RbacScreen extends ConsumerWidget {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final primary = Theme.of(ctx).colorScheme.primary;
+        final mute = ShellChrome.forDark(isDark).mute;
+        final line = ShellChrome.forDark(isDark).line;
         return StatefulBuilder(
           builder: (ctx, setState) {
             return FxHomeSheetSurface(
               isDark: isDark,
-              maxHeight:
-                  MediaQuery.sizeOf(ctx).height *
-                  FxHomeSheetChrome.maxHeightFactor,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -178,30 +327,54 @@ class RbacScreen extends ConsumerWidget {
                     ),
                   ),
                   SizedBox(height: TokensStrip.s3),
-                  DropdownButtonFormField<String>(
-                    initialValue: recursoSelecionado,
-                    decoration: FxInputDeco.build(context, 'Recurso'),
-                    items:
-                        permissoesRbacRecursos
-                            .map(
-                              (r) => DropdownMenuItem(value: r, child: Text(r)),
-                            )
-                            .toList(),
-                    onChanged: (v) => setState(() => recursoSelecionado = v!),
+                  FxSettingsGroup(
+                    children: [
+                      FxSettingsTile(
+                        icon: Icons.folder_outlined,
+                        label: 'Recurso',
+                        value: recursoSelecionado,
+                        mute: mute,
+                        line: line,
+                        picker: true,
+                        onTap: () async {
+                          final picked = await showFxInsetPickerSheet<String>(
+                            ctx,
+                            title: 'Recurso',
+                            selected: recursoSelecionado,
+                            items: [
+                              for (final r in permissoesRbacRecursos)
+                                FxInsetPickerSheetItem(value: r, label: r),
+                            ],
+                          );
+                          if (picked == null) return;
+                          setState(() => recursoSelecionado = picked);
+                        },
+                      ),
+                      FxSettingsTile(
+                        icon: Icons.tune_outlined,
+                        label: 'Nível',
+                        value: nivelSelecionado,
+                        mute: mute,
+                        line: line,
+                        picker: true,
+                        showDivider: false,
+                        onTap: () async {
+                          final picked = await showFxInsetPickerSheet<String>(
+                            ctx,
+                            title: 'Nível',
+                            selected: nivelSelecionado,
+                            items: [
+                              for (final n in permissoesRbacNiveis)
+                                FxInsetPickerSheetItem(value: n, label: n),
+                            ],
+                          );
+                          if (picked == null) return;
+                          setState(() => nivelSelecionado = picked);
+                        },
+                      ),
+                    ],
                   ),
                   SizedBox(height: TokensStrip.s4),
-                  DropdownButtonFormField<String>(
-                    initialValue: nivelSelecionado,
-                    decoration: FxInputDeco.build(context, 'Nível'),
-                    items:
-                        permissoesRbacNiveis
-                            .map(
-                              (n) => DropdownMenuItem(value: n, child: Text(n)),
-                            )
-                            .toList(),
-                    onChanged: (v) => setState(() => nivelSelecionado = v!),
-                  ),
-                  SizedBox(height: TokensStrip.s5),
                   FxLiquidPrimaryButton(
                     label: 'Salvar',
                     onPressed: () async {
@@ -213,7 +386,9 @@ class RbacScreen extends ConsumerWidget {
                               nivel: nivelSelecionado,
                             );
                         ref.invalidate(permissoesRbacProvider);
-                        if (ctx.mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) {
+                          FxHomeSheetChrome.dismissAndPop(ctx);
+                        }
                       } catch (e) {
                         if (ctx.mounted) {
                           FeedbackHelper.showError(ctx, friendlyError(e));

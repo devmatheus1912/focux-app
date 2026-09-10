@@ -66,6 +66,34 @@ class _PerfilBodyState extends State<_PerfilBody> {
         title: 'Perfil',
         subtitle: freshnessLabel,
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
+        actions: [
+          FxHelpIconButton(
+            tooltip: 'Sobre o perfil',
+            onTap:
+                () => showFxHelpSheet(
+                  context,
+                  title: 'Perfil',
+                  subtitle: 'Conta, marca e operação em um lugar.',
+                  tips: const [
+                    FxHelpTip(
+                      'Completar',
+                      'Se faltar dado, o chip Completar leva ao formulário.',
+                      icon: 'user',
+                    ),
+                    FxHelpTip(
+                      'Marca',
+                      'Link e personalização da landing ficam em Personalizar.',
+                      icon: 'spark',
+                    ),
+                    FxHelpTip(
+                      'Conta',
+                      'Sair e excluir ficam no fim, isolados.',
+                      icon: 'shield',
+                    ),
+                  ],
+                ),
+          ),
+        ],
       ),
       body: Stack(
         children: [
