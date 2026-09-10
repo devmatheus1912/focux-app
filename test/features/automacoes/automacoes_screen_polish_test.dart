@@ -29,6 +29,9 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('logs('));
     expect(screen, contains('iniciarFluxo'));
+    expect(screen, contains('pausar'));
+    expect(screen, contains('retomar'));
+    expect(screen, contains('_toggleFluxoAtivo'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('alunosHomeProvider'));
     expect(screen, contains('Carregar mais'));

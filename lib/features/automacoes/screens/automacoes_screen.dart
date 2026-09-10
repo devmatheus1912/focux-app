@@ -205,10 +205,50 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
         initial: pagina,
         onLoadMore: (page) => ref.read(_repo).logs(fluxo.id, page: page),
         onIniciar: () => _iniciarParaAluno(fluxo),
+        onToggleAtivo: _toggleFluxoAtivo,
       );
+      if (!mounted) return;
+      await _load();
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<AutomacaoFluxo?> _toggleFluxoAtivo(AutomacaoFluxo fluxo) async {
+    final pausar = fluxo.ativo;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: pausar
+          ? automacaoPausarConfirmTitle(fluxo.nome)
+          : automacaoRetomarConfirmTitle(fluxo.nome),
+      message: pausar
+          ? automacaoPausarConfirmMessage()
+          : automacaoRetomarConfirmMessage(),
+      icon: pausar ? Icons.pause_circle_rounded : Icons.play_circle_rounded,
+      confirmLabel: pausar ? 'Pausar' : 'Retomar',
+    );
+    if (!ok || !mounted) return null;
+    try {
+      final updated = pausar
+          ? await ref.read(_repo).pausar(fluxo.id)
+          : await ref.read(_repo).retomar(fluxo.id);
+      if (!mounted) return updated;
+      setState(() {
+        _fluxos = [
+          for (final f in _fluxos)
+            if (f.id == updated.id) updated else f,
+        ];
+      });
+      FeedbackHelper.showSuccess(
+        context,
+        pausar ? automacaoPausarSuccess() : automacaoRetomarSuccess(),
+      );
+      return updated;
+    } catch (e) {
+      if (!mounted) return null;
+      FeedbackHelper.showError(context, friendlyError(e));
+      return null;
     }
   }
 

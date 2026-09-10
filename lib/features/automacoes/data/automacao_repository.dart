@@ -28,6 +28,15 @@ class AutomacaoFluxo {
     ativo: j['ativo'] as bool? ?? false,
     templateId: j['templateId'] as String?,
   );
+
+  AutomacaoFluxo copyWith({bool? ativo}) => AutomacaoFluxo(
+    id: id,
+    nome: nome,
+    descricao: descricao,
+    triggerTipo: triggerTipo,
+    ativo: ativo ?? this.ativo,
+    templateId: templateId,
+  );
 }
 
 class AutomacaoTemplate {
@@ -139,6 +148,16 @@ class AutomacaoRepository {
     required int alunoId,
   }) async {
     await _dio.post('/api/automacoes/$fluxoId/iniciar/$alunoId');
+  }
+
+  Future<AutomacaoFluxo> pausar(int fluxoId) async {
+    final r = await _dio.post('/api/automacoes/$fluxoId/pause');
+    return AutomacaoFluxo.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<AutomacaoFluxo> retomar(int fluxoId) async {
+    final r = await _dio.post('/api/automacoes/$fluxoId/resume');
+    return AutomacaoFluxo.fromJson(r.data as Map<String, dynamic>);
   }
 }
 
