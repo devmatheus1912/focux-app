@@ -1,33 +1,37 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/fx_utils.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/widgets/branded_app_identity.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../data/suporte_repository.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import 'package:focux_app/core/widgets/fx_input_deco.dart';
-import '../../../core/theme/tokens_strip.dart';
-import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../data/suporte_repository.dart';
 import '../utils/suporte_display.dart';
 
 part 'suporte_screen_widgets.part.dart';
@@ -171,61 +175,92 @@ class _SuporteScreenState extends ConsumerState<SuporteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ticket = _ticketCriado;
+    final subtitle =
+        ticket == null
+            ? 'Chat e tickets'
+            : 'Ticket #${ticket.id} vinculado';
+
     return fxScreenA11yScope(
       label: 'Suporte',
       child: FxShellScaffold(
         constrainWidth: false,
         useMesh: true,
-        extendBody: true,
-        safeArea: false,
-        body: FxContentWidthLimiter(
-          child: SafeArea(
-            child: Column(
-              children: [
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _SupportHeader(
-                          ticket: _ticketCriado,
-                          onTicketsTap: _abrirTicketsSheet,
-                        ),
-                        _QuickActions(
-                          onPromptTap: _enviarMensagem,
-                          onOpenTicketTap: _abrirTicketSheet,
-                          onTicketsTap: _abrirTicketsSheet,
-                        ),
-                      ],
-                    ),
+        appBar: FxShellAppBar(
+          title: 'Suporte Focux',
+          subtitle: subtitle,
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/perfil');
+          },
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Como pedir ajuda',
+              onTap:
+                  () => showFxHelpSheet(
+                    context,
+                    title: 'Suporte',
+                    subtitle: 'Chat rápido ou ticket formal.',
+                    tips: const [
+                      FxHelpTip(
+                        'Chat',
+                        'Escreva abaixo. Atalhos enviam um prompt pronto.',
+                        icon: 'chat',
+                      ),
+                      FxHelpTip(
+                        'Ticket',
+                        'Abra um ticket quando precisar de rastreio.',
+                        icon: 'ticket',
+                      ),
+                      FxHelpTip(
+                        'Meus tickets',
+                        'Lista o que você já abriu nesta conta.',
+                        icon: 'list',
+                      ),
+                    ],
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollCtrl,
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      14,
-                      16,
-                      18,
-                    ),
-                    itemCount: _mensagens.length + (_enviandoChat ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index >= _mensagens.length) {
-                        return const _TypingIndicator();
-                      }
-                      return _BubbleMensagem(msg: _mensagens[index]);
-                    },
-                  ),
-                ),
-                _ChatComposer(
-                  controller: _chatCtrl,
-                  sending: _enviandoChat,
-                  onSend: () => _enviarMensagem(),
-                ),
-              ],
             ),
+            IconButton(
+              tooltip: 'Meus tickets',
+              icon: const Icon(Icons.confirmation_number_outlined),
+              onPressed: _abrirTicketsSheet,
+            ),
+          ],
+        ),
+        body: FxContentWidthLimiter(
+          child: Column(
+            children: [
+              _QuickActions(
+                onPromptTap: _enviarMensagem,
+                onOpenTicketTap: _abrirTicketSheet,
+                onTicketsTap: _abrirTicketsSheet,
+              ),
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollCtrl,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s4,
+                    14,
+                    16,
+                    18,
+                  ),
+                  itemCount: _mensagens.length + (_enviandoChat ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= _mensagens.length) {
+                      return const _TypingIndicator();
+                    }
+                    return _BubbleMensagem(msg: _mensagens[index]);
+                  },
+                ),
+              ),
+              _ChatComposer(
+                controller: _chatCtrl,
+                sending: _enviandoChat,
+                onSend: () => _enviarMensagem(),
+              ),
+            ],
           ),
         ),
       ),

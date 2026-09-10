@@ -42,6 +42,24 @@ void main() {
     expect(habitoComplianceFxIcon(10), 'alert-triangle');
     expect(habitoComplianceDanger(39), isTrue);
     expect(habitoComplianceDanger(40), isFalse);
+    expect(
+      habitoFocusCompliance([
+        ComplianceItem(
+          alunoId: 1,
+          alunoNome: 'Ana',
+          checksSemana: 2,
+          compliancePct: 80,
+        ),
+        ComplianceItem(
+          alunoId: 2,
+          alunoNome: 'Bia',
+          checksSemana: 0,
+          compliancePct: 20,
+        ),
+      ])?.alunoId,
+      2,
+    );
+    expect(habitoFocusCompliance(const []), isNull);
   });
 
   test('habitoCountLabel cobre vazio e plural', () {

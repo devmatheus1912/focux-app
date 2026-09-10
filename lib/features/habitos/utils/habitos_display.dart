@@ -54,6 +54,18 @@ String habitoComplianceFxIcon(int pct) {
 
 bool habitoComplianceDanger(int pct) => pct < 40;
 
+/// Prioriza quem está em risco; senão o primeiro da lista.
+ComplianceItem? habitoFocusCompliance(List<ComplianceItem> items) {
+  if (items.isEmpty) return null;
+  ComplianceItem? worst;
+  for (final item in items) {
+    if (worst == null || item.compliancePct < worst.compliancePct) {
+      worst = item;
+    }
+  }
+  return worst;
+}
+
 const habitoComoCalculamos =
     'Compliance é checks da semana sobre a meta. Vale para todos os alunos ativos.';
 

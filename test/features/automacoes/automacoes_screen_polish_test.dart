@@ -25,6 +25,8 @@ void main() {
     expect(screen, contains('/perfil/ferramentas'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('logs('));
     expect(screen, contains('iniciarFluxo'));
     expect(screen, contains('showFxInsetPickerSheet'));

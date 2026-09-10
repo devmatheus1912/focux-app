@@ -27,7 +27,12 @@ extension on _AutomacoesScreenState {
                   : 'Templates aparecem aqui para você ativar o primeiro fluxo.',
               action: filtered
                   ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearQuery)
-                  : null,
+                  : (_templates.isNotEmpty
+                      ? FxEmptyAction(
+                        label: 'Ativar ${_templates.first.nome}',
+                        onTap: () => _ativar(_templates.first),
+                      )
+                      : FxEmptyAction(label: 'Atualizar', onTap: _load)),
             ),
           ],
         ),
@@ -51,19 +56,67 @@ extension on _AutomacoesScreenState {
           FxSettingsLayout.pageInset,
           TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        itemCount: rows.length + (showMore ? 1 : 0),
+        itemCount:
+            rows.length +
+            (showMore ? 1 : 0) +
+            (templates.isNotEmpty ? 1 : 0),
         itemBuilder: (context, i) {
-          if (showMore && i == rows.length) {
+          final focusOffset = templates.isNotEmpty ? 1 : 0;
+          if (templates.isNotEmpty && i == 0) {
+            final t = templates.first;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s4),
+              child: FxStripCard(
+                emphasize: true,
+                semanticsLabel: 'Ativar template ${t.nome}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Próximo template',
+                      style: FocuxHubTypography.chip(fxScreenMute(context)),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      t.nome,
+                      style: FocuxHubTypography.kpi(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: FocuxHubTypography.metricLg,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      automacaoTriggerLabel(t.triggerTipo),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
+                    DashboardHomeActionChip(
+                      label: 'Ativar',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => _ativar(t),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          final rowIndex = i - focusOffset;
+          if (showMore && rowIndex == rows.length) {
             return FxSatelliteListTile(
               title: _carregandoMais ? 'Carregando…' : 'Carregar mais',
               onTap: _carregandoMais ? null : _carregarMais,
             );
           }
-          final row = rows[i];
+          final row = rows[rowIndex];
           if (row is String) {
             return Padding(
               padding: EdgeInsets.only(
-                top: i == 0 ? 0 : TokensStrip.s3,
+                top: rowIndex == 0 ? 0 : TokensStrip.s3,
                 bottom: TokensStrip.s2,
               ),
               child: Text(
