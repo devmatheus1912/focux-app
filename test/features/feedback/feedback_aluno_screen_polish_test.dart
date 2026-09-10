@@ -17,7 +17,9 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('bottomNavigationBar'));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
