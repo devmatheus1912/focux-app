@@ -8,7 +8,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -68,14 +68,6 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
     if (_salvando) return;
     if (!_formKey.currentState!.validate()) return;
     HapticFeedback.mediumImpact();
-    final ok = await showFxConfirmSheet(
-      context,
-      title: feedPublicarConfirmTitle(),
-      message: feedPublicarConfirmMessage(),
-      icon: Icons.rss_feed_outlined,
-      confirmLabel: feedPublicarConfirmLabel(),
-    );
-    if (!ok || !mounted) return;
     setState(() => _salvando = true);
     try {
       String? midiaUrl;
@@ -98,7 +90,7 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
       );
       if (mounted) {
         HapticFeedback.heavyImpact();
-        Navigator.of(context).pop(true);
+        FxHomeSheetChrome.dismissAndPop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -130,106 +122,103 @@ class _FeedComposerSheetState extends State<FeedComposerSheet> {
   @override
   Widget build(BuildContext context) {
     final temMidia = feedTipoTemMidia(_tipoSelecionado);
-    return Padding(
-      padding: EdgeInsets.only(
-        left: FxSettingsLayout.pageInset,
-        right: FxSettingsLayout.pageInset,
-        top: TokensStrip.s3,
-        bottom: MediaQuery.of(context).viewInsets.bottom + TokensStrip.s4,
+    // viewInsets já sobe em FxHomeSheetChrome.paddingOf — sem pad duplicado (A23).
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        TokensStrip.s3,
+        FxSettingsLayout.pageInset,
+        TokensStrip.s2,
       ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxSettingsGroup(
               children: [
-                FxSettingsGroup(
-                  children: [
-                    FxSettingsTile(
-                      fxIcon: 'article',
-                      label: 'Tipo de post',
-                      value: feedTipoLabel(_tipoSelecionado),
-                      picker: true,
-                      onTap: _salvando ? null : _abrirTipo,
-                    ),
-                    AlunoInsetFormField(
-                      controller: _tituloCtrl,
-                      label: 'Título',
-                      icon: Icons.title_outlined,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(feedTituloMax),
-                      ],
-                      validator:
-                          (v) =>
-                              (v == null || v.trim().isEmpty)
-                                  ? 'Informe o título'
-                                  : null,
-                    ),
-                    AlunoInsetFormField(
-                      controller: _conteudoCtrl,
-                      label: 'Conteúdo',
-                      icon: Icons.notes_outlined,
-                      maxLines: 4,
-                      showDivider: false,
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(feedConteudoMax),
-                      ],
-                      validator:
-                          (v) =>
-                              (v == null || v.trim().isEmpty)
-                                  ? 'Informe o conteúdo'
-                                  : null,
-                    ),
-                  ],
+                FxSettingsTile(
+                  fxIcon: 'article',
+                  label: 'Tipo de post',
+                  value: feedTipoLabel(_tipoSelecionado),
+                  picker: true,
+                  onTap: _salvando ? null : _abrirTipo,
                 ),
-                if (temMidia) ...[
-                  const SizedBox(height: TokensStrip.s3),
-                  FxSettingsGroup(
-                    children: [
-                      FxSettingsTile(
-                        fxIcon: _tipoSelecionado == 'VIDEO' ? 'trend' : 'article',
-                        label: feedMidiaCta(
-                          tipo: _tipoSelecionado,
-                          hasFile: _midiaSelecionada != null,
-                        ),
-                        value:
-                            _escolhendoMidia
-                                ? 'Abrindo…'
-                                : (_midiaSelecionada?.name ?? 'Galeria'),
-                        picker: true,
-                        onTap:
-                            _salvando || _escolhendoMidia
-                                ? null
-                                : () => _escolherMidia(_tipoSelecionado),
-                        showDivider: _midiaSelecionada != null,
-                      ),
-                      if (_midiaSelecionada != null)
-                        FxSettingsTile(
-                          fxIcon: 'x',
-                          label: 'Remover arquivo',
-                          value: '',
-                          danger: true,
-                          showDivider: false,
-                          onTap:
-                              _salvando
-                                  ? null
-                                  : () => setState(() => _midiaSelecionada = null),
-                        ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: TokensStrip.s3),
-                FxLiquidPrimaryButton(
-                  label: feedPublicarTileLabel(),
-                  loading: _salvando,
-                  loadingLabel: 'Publicando…',
-                  onPressed: _salvando ? null : _publicar,
+                AlunoInsetFormField(
+                  controller: _tituloCtrl,
+                  label: 'Título',
+                  icon: Icons.title_outlined,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(feedTituloMax),
+                  ],
+                  validator:
+                      (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Informe o título'
+                              : null,
+                ),
+                AlunoInsetFormField(
+                  controller: _conteudoCtrl,
+                  label: 'Conteúdo',
+                  icon: Icons.notes_outlined,
+                  maxLines: 4,
+                  showDivider: false,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(feedConteudoMax),
+                  ],
+                  validator:
+                      (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Informe o conteúdo'
+                              : null,
                 ),
               ],
             ),
-          ),
+            if (temMidia) ...[
+              const SizedBox(height: TokensStrip.s3),
+              FxSettingsGroup(
+                children: [
+                  FxSettingsTile(
+                    fxIcon: _tipoSelecionado == 'VIDEO' ? 'trend' : 'article',
+                    label: feedMidiaCta(
+                      tipo: _tipoSelecionado,
+                      hasFile: _midiaSelecionada != null,
+                    ),
+                    value:
+                        _escolhendoMidia
+                            ? 'Abrindo…'
+                            : (_midiaSelecionada?.name ?? 'Galeria'),
+                    picker: true,
+                    onTap:
+                        _salvando || _escolhendoMidia
+                            ? null
+                            : () => _escolherMidia(_tipoSelecionado),
+                    showDivider: _midiaSelecionada != null,
+                  ),
+                  if (_midiaSelecionada != null)
+                    FxSettingsTile(
+                      fxIcon: 'x',
+                      label: 'Remover arquivo',
+                      value: '',
+                      danger: true,
+                      showDivider: false,
+                      onTap:
+                          _salvando
+                              ? null
+                              : () => setState(() => _midiaSelecionada = null),
+                    ),
+                ],
+              ),
+            ],
+            const SizedBox(height: TokensStrip.s3),
+            FxLiquidPrimaryButton(
+              label: feedPublicarTileLabel(),
+              loading: _salvando,
+              loadingLabel: 'Publicando…',
+              onPressed: _salvando ? null : _publicar,
+            ),
+          ],
         ),
       ),
     );

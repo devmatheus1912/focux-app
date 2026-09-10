@@ -168,8 +168,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           isDark: isDark,
           maxHeight:
               MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor,
+          expand: true,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               FxHomeSheetHandle(isDark: isDark),
               Padding(
@@ -186,7 +187,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   leading: FxIcon(name: 'article', color: accent, size: 18),
                 ),
               ),
-              FeedComposerSheet(ref: ref),
+              Expanded(child: FeedComposerSheet(ref: ref)),
             ],
           ),
         );

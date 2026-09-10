@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
@@ -155,7 +155,8 @@ class UpgradePromptSheet {
                 ),
               ),
               const SizedBox(height: 14),
-              FilledButton(
+              FxLiquidPrimaryButton(
+                label: offer.ctaLabel,
                 onPressed: () {
                   if (respectCooldown) {
                     UpgradePromptCooldown.markShown(key);
@@ -168,7 +169,7 @@ class UpgradePromptSheet {
                       'plan_id': plan.apiName,
                     },
                   );
-                  Navigator.pop(ctx);
+                  FxHomeSheetChrome.dismissAndPop(ctx);
                   final capQuery =
                       capability != null && capability.isNotEmpty
                           ? '&capability=${Uri.encodeComponent(capability)}'
@@ -177,22 +178,13 @@ class UpgradePromptSheet {
                     '/assinatura?plano=${plan.apiName}&source=$source&feature=${Uri.encodeComponent(featureName)}$capQuery',
                   );
                 },
-                style: FilledButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: EagleTokens.inkDeep,
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                child: Text(
-                  offer.ctaLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
               ),
               TextButton(
                 onPressed: () {
                   if (respectCooldown) {
                     UpgradePromptCooldown.markShown(key);
                   }
-                  Navigator.pop(ctx);
+                  FxHomeSheetChrome.dismissAndPop(ctx);
                 },
                 child: const Text('Agora não'),
               ),
@@ -200,7 +192,7 @@ class UpgradePromptSheet {
                 TextButton(
                   onPressed: () async {
                     await UpgradePromptCooldown.dismissForever(key);
-                    if (ctx.mounted) Navigator.pop(ctx);
+                    if (ctx.mounted) FxHomeSheetChrome.dismissAndPop(ctx);
                   },
                   child: Text(
                     'Não mostrar novamente',

@@ -42,6 +42,8 @@ void main() {
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('feedPublicarConfirmTitle')));
     expect(screen, contains('FeedComposerSheet'));
+    expect(screen, contains('expand: true'));
+    expect(screen, contains('Expanded(child: FeedComposerSheet'));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('FloatingActionButton')));

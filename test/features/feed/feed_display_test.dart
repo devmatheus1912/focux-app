@@ -48,15 +48,9 @@ void main() {
     expect(feedListChipFixado(FeedListChip.dica), isNull);
   });
 
-  test('publicar confirma e limita tamanho', () {
+  test('publicar limita tamanho', () {
     expect(feedTituloMax, 255);
     expect(feedConteudoMax, 4000);
     expect(feedPublicarTileLabel(), 'Publicar');
-    expect(feedPublicarConfirmTitle(), 'Publicar no feed?');
-    expect(
-      feedPublicarConfirmMessage(),
-      'Os alunos passam a ver esta publicação no feed deles.',
-    );
-    expect(feedPublicarConfirmLabel(), 'Publicar');
   });
 }
