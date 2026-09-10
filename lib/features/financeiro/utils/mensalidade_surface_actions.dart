@@ -102,6 +102,7 @@ Future<void> mostrarPixMensalidade({
   required BuildContext context,
   required WidgetRef ref,
   required int id,
+  bool asAluno = false,
 }) async {
   PixData? pix;
   var carregando = true;
@@ -113,8 +114,10 @@ Future<void> mostrarPixMensalidade({
         (ctx) => StatefulBuilder(
           builder: (ctx, setDialogState) {
             if (carregando && pix == null && erro == null) {
-              mensalidadeRepo(ref)
-                  .gerarPix(id)
+              final repo = mensalidadeRepo(ref);
+              final future =
+                  asAluno ? repo.gerarPixAluno(id) : repo.gerarPix(id);
+              future
                   .then((p) {
                     setDialogState(() {
                       pix = p;

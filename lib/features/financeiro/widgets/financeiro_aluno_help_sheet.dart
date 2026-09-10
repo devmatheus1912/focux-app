@@ -15,8 +15,8 @@ Future<void> showFinanceiroAlunoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Ação',
-        'O botão de baixo abre o chat. PIX e baixa de pagamento o personal faz.',
-        icon: 'message-circle',
+        'Em cobrança aberta, gere o PIX na ficha. O status atualiza quando o pagamento confirmar. Chat fica para dúvida.',
+        icon: 'pix',
       ),
       FxHelpTip(
         'Assinatura',

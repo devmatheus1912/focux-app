@@ -10,7 +10,11 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
   BuildContext context, {
   required Mensalidade item,
   required VoidCallback onFalar,
+  VoidCallback? onPagarPix,
 }) {
+  final aberta = item.status == 'PENDENTE' || item.status == 'ATRASADO';
+  final podePix = aberta && onPagarPix != null;
+
   return showFxHelpSheet(
     context,
     title: financeiroMensalidadeMesPorExtenso(item.mesReferencia),
@@ -22,20 +26,42 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
         financeiroMensalidadeStatusLabel(item.status),
         icon: item.status == 'ATRASADO' ? 'alert-triangle' : 'circle-check',
       ),
-      const FxHelpTip(
+      FxHelpTip(
         'Como pagar',
-        'Peça o PIX ou confirmação ao personal pelo chat. Pagamento direto no app ainda não está liberado para aluno.',
-        icon: 'message-circle',
+        podePix
+            ? 'Gere o PIX aqui. Depois que o pagamento confirmar, o status atualiza sozinho.'
+            : item.status == 'PAGO'
+            ? 'Esta cobrança já está quitada.'
+            : 'Fale com o personal se precisar de ajuda com o pagamento.',
+        icon: 'pix',
       ),
     ],
     extra: [
-      FxLiquidPrimaryButton(
-        label: 'Falar com o personal',
-        onPressed: () {
-          Navigator.of(context).pop();
-          onFalar();
-        },
-      ),
+      if (podePix)
+        FxLiquidPrimaryButton(
+          label: 'Pagar com PIX',
+          onPressed: () {
+            Navigator.of(context).pop();
+            onPagarPix();
+          },
+        ),
+      if (podePix) const SizedBox(height: 8),
+      if (podePix)
+        FxLiquidSecondaryButton(
+          label: 'Falar com o personal',
+          onPressed: () {
+            Navigator.of(context).pop();
+            onFalar();
+          },
+        )
+      else
+        FxLiquidPrimaryButton(
+          label: 'Falar com o personal',
+          onPressed: () {
+            Navigator.of(context).pop();
+            onFalar();
+          },
+        ),
     ],
   );
 }
