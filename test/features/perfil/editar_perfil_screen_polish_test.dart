@@ -22,6 +22,11 @@ void main() {
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains('showFxConfirmSheet'));
     expect(screen, isNot(contains('DashboardHomeActionChip')));
     expect(screen, contains("'Salvando…'"));
     expect(screen, contains('Salvando alterações do perfil'));

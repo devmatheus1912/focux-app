@@ -16,7 +16,10 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, isNot(contains('centerTitle: true')));
-    expect(screen, contains('BrandPalette.sectionAction'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains("label: 'Concluir'"));
     expect(screen, isNot(contains('dashboardPrioritiesChipBackground')));
     expect(
       screen,

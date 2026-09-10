@@ -9,8 +9,11 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -34,11 +37,21 @@ class AlunoEquipamentosScreen extends ConsumerStatefulWidget {
 
 class _AlunoEquipamentosScreenState
     extends ConsumerState<AlunoEquipamentosScreen> {
+  Set<Equipamento>? _baseline;
   Set<Equipamento>? _selected;
   bool _saving = false;
 
+  bool get _dirty {
+    final selected = _selected;
+    final baseline = _baseline;
+    if (selected == null || baseline == null) return false;
+    return selected.length != baseline.length ||
+        !selected.containsAll(baseline);
+  }
+
   void _hydrate(Set<Equipamento> fromAluno) {
     if (_selected != null) return;
+    _baseline = {...fromAluno};
     _selected = {...fromAluno};
   }
 
@@ -50,6 +63,20 @@ class _AlunoEquipamentosScreenState
       current.add(equipamento);
     }
     setState(() => _selected = current);
+  }
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Descartar alterações?',
+        message: 'O que você alterou não será salvo.',
+        confirmLabel: 'Descartar',
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/alunos/${widget.alunoId}');
   }
 
   Future<void> _save() async {
@@ -81,22 +108,26 @@ class _AlunoEquipamentosScreenState
 
     return fxScreenA11yScope(
       label: 'Equipamentos',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Equipamentos',
-          subtitle: satelliteFirstName(alunoAsync.valueOrNull?.nome),
-          onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3,
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Equipamentos',
+            subtitle: satelliteFirstName(alunoAsync.valueOrNull?.nome),
+            leadingWidth: 92,
+            leading: TextButton(
+              onPressed: _cancel,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Cancelar'),
             ),
+          ),
+          bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: !_saving,
@@ -109,90 +140,93 @@ class _AlunoEquipamentosScreenState
               ),
             ),
           ),
-        ),
-        body: alunoAsync.when(
-          loading:
-              () => const Padding(
-                padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                child: SkeletonList(count: 6),
-              ),
-          error:
-              (e, _) => FxErrorState(
-                chromeOnDark: chrome.isDark,
-                primary: primary,
-                message: friendlyError(e),
-                onRetry: () => ref.invalidate(alunoProvider(widget.alunoId)),
-                title: 'Não conseguimos carregar os equipamentos',
-              ),
-          data: (aluno) {
-            _hydrate(aluno.equipamentosDisponiveis);
-            final current = _selected ?? {};
-            return RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(alunoProvider(widget.alunoId));
-                final fresh = await ref.read(
-                  alunoProvider(widget.alunoId).future,
-                );
-                if (!mounted) return;
-                setState(
-                  () => _selected = {...fresh.equipamentosDisponiveis},
-                );
-              },
-              child: FxContentWidthLimiter(
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3,
-                    FxSettingsLayout.pageInset,
-                    88,
-                  ),
-                  itemCount: Equipamento.values.length + 2,
-                  itemBuilder: (context, i) {
-                    if (i == 0) {
-                      return const Padding(
-                        padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                        child: DashboardSectionHeader(title: 'Disponíveis'),
-                      );
-                    }
-                    if (i == Equipamento.values.length + 1) {
+          body: alunoAsync.when(
+            loading:
+                () => const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 6),
+                ),
+            error:
+                (e, _) => FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: primary,
+                  message: friendlyError(e),
+                  onRetry: () => ref.invalidate(alunoProvider(widget.alunoId)),
+                  title: 'Não conseguimos carregar os equipamentos',
+                ),
+            data: (aluno) {
+              _hydrate(aluno.equipamentosDisponiveis);
+              final current = _selected ?? {};
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(alunoProvider(widget.alunoId));
+                  final fresh = await ref.read(
+                    alunoProvider(widget.alunoId).future,
+                  );
+                  if (!mounted) return;
+                  setState(() {
+                    _baseline = {...fresh.equipamentosDisponiveis};
+                    _selected = {...fresh.equipamentosDisponiveis};
+                  });
+                },
+                child: FxContentWidthLimiter(
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                      FxSettingsLayout.pageInset,
+                      24,
+                    ),
+                    itemCount: Equipamento.values.length + 2,
+                    itemBuilder: (context, i) {
+                      if (i == 0) {
+                        return const Padding(
+                          padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                          child: DashboardSectionHeader(title: 'Disponíveis'),
+                        );
+                      }
+                      if (i == Equipamento.values.length + 1) {
+                        return FxSatelliteListTile(
+                          title: 'Sem restrição',
+                          subtitle: const Text(
+                            'Não filtrar substituições por equipamento.',
+                          ),
+                          onTap: _saving
+                              ? null
+                              : () => setState(() => _selected = {}),
+                        );
+                      }
+                      final equipamento = Equipamento.values[i - 1];
+                      final selected = current.contains(equipamento);
+                      final primary =
+                          Theme.of(context).colorScheme.primary;
                       return FxSatelliteListTile(
-                        title: 'Sem restrição',
-                        subtitle: const Text(
-                          'Não filtrar substituições por equipamento.',
+                        title:
+                            TaxonomyLabels.equipamento[equipamento] ??
+                            equipamento.backendName,
+                        trailing: Text(
+                          equipamentoChoiceValue(selected),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: selected
+                                ? primary
+                                : fxScreenMute(context),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
+                        accent: selected ? primary : null,
                         onTap: _saving
                             ? null
-                            : () => setState(() => _selected = {}),
+                            : () => _toggle(equipamento),
                       );
-                    }
-                    final equipamento = Equipamento.values[i - 1];
-                    final selected = current.contains(equipamento);
-                    final primary =
-                        Theme.of(context).colorScheme.primary;
-                    return FxSatelliteListTile(
-                      title:
-                          TaxonomyLabels.equipamento[equipamento] ??
-                          equipamento.backendName,
-                      trailing: Text(
-                        equipamentoChoiceValue(selected),
-                        style: FocuxHubTypography.bodyMuted(
-                          color: selected
-                              ? primary
-                              : fxScreenMute(context),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      accent: selected ? primary : null,
-                      onTap: _saving
-                          ? null
-                          : () => _toggle(equipamento),
-                    );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
