@@ -52,6 +52,9 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
+    expect(screen, contains('FxFormStickyBar'));
+    expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('safePopOrGo'));
     expect(screen, contains('PAR-Q+'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('salvarMinha'));

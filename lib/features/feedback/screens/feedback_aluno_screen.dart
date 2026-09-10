@@ -16,6 +16,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -160,106 +161,107 @@ class _FeedbackAlunoScreenState extends ConsumerState<FeedbackAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Form check',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Form check',
-          subtitle: FxHubFreshness.joinCount(
-            feedbackVideoCountLabel(_items.length),
-            FxHubFreshness.fromFetchedAt(_fetchedAt),
+      child: FxFormPopGuard(
+        dirty: false,
+        onCancel: () async {
+          safePopOrGo(context, '/dashboard/aluno');
+        },
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Form check',
+            subtitle: FxHubFreshness.joinCount(
+              feedbackVideoCountLabel(_items.length),
+              FxHubFreshness.fromFetchedAt(_fetchedAt),
+            ),
+            onBack: () => safePopOrGo(context, '/dashboard/aluno'),
           ),
-          onBack: () => safePopOrGo(context, '/dashboard/aluno'),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
-                TokensStrip.s2,
-                TokensStrip.s4,
-                TokensStrip.s2,
-              ),
-              child: DecoratedBox(
-                decoration: fxStripCardDecoration(
-                  context,
-                  accent: primary,
-                  radius: TokensStrip.rCard,
-                  glowStrength: 0.03,
+          bottomNavigationBar:
+              !_loading && _erro == null
+                  ? FxFormStickyBar(
+                    child: FxLiquidPrimaryButton(
+                      label: 'Enviar vídeo',
+                      onPressed: _enviar,
+                    ),
+                  )
+                  : null,
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  TokensStrip.s2,
+                  TokensStrip.s4,
+                  TokensStrip.s2,
                 ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: _onQueryChanged,
-                  onTapOutside:
-                      (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: 'Buscar no comentário',
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: primary,
-                      size: 20,
-                    ),
-                    suffixIcon:
-                        _query.trim().isEmpty
-                            ? null
-                            : IconButton(
-                              tooltip: 'Limpar busca',
-                              onPressed: () {
-                                _searchDebounce?.cancel();
-                                _searchCtrl.clear();
-                                setState(() => _query = '');
-                                _load(reset: true);
-                              },
-                              icon: Icon(
-                                Icons.close_rounded,
-                                color: mute,
-                                size: 18,
+                child: DecoratedBox(
+                  decoration: fxStripCardDecoration(
+                    context,
+                    accent: primary,
+                    radius: TokensStrip.rCard,
+                    glowStrength: 0.03,
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: _onQueryChanged,
+                    onTapOutside:
+                        (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      isDense: true,
+                      hintText: 'Buscar no comentário',
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        color: primary,
+                        size: 20,
+                      ),
+                      suffixIcon:
+                          _query.trim().isEmpty
+                              ? null
+                              : IconButton(
+                                tooltip: 'Limpar busca',
+                                onPressed: () {
+                                  _searchDebounce?.cancel();
+                                  _searchCtrl.clear();
+                                  setState(() => _query = '');
+                                  _load(reset: true);
+                                },
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: mute,
+                                  size: 18,
+                                ),
                               ),
-                            ),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child:
-                  _loading
-                      ? const Padding(
-                        padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 4),
-                      )
-                      : _erro != null
-                      ? FxErrorState(
-                        chromeOnDark: isDark,
-                        primary: primary,
-                        message: _erro!,
-                        onRetry: () => _load(reset: true),
-                        title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      )
-                      : FxContentWidthLimiter(child: _buildList(chrome, primary, isDark)),
-            ),
-            if (!_loading && _erro == null)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                  ),
-                  child: FxLiquidPrimaryButton(
-                    label: 'Enviar vídeo',
-                    onPressed: _enviar,
-                  ),
-                ),
+              Expanded(
+                child:
+                    _loading
+                        ? const Padding(
+                          padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                          child: SkeletonList(count: 4),
+                        )
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: () => _load(reset: true),
+                          title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                        )
+                        : FxContentWidthLimiter(
+                          child: _buildList(chrome, primary, isDark),
+                        ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );

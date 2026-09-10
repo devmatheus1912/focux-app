@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -75,10 +79,67 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   bool _loading = true;
   bool _saving = false;
   bool _enviada = false;
+  bool _dirty = false;
+  bool _applying = false;
+  bool _wired = false;
   String? _erro;
 
   AnamneseRepository get _repo =>
       AnamneseRepository(ref.read(apiClientProvider));
+
+  List<TextEditingController> get _allCtrls => [
+    _parqOutraDetalheCtrl,
+    _historicoCtrl,
+    _cirurgiasCtrl,
+    _doresCtrl,
+    _lesoesCtrl,
+    _medicCtrl,
+    _alergiasCtrl,
+    _gestacaoCtrl,
+    _historicoFamiliarCtrl,
+    _sintomasCvCtrl,
+    _qualidadeSonoCtrl,
+    _estresseCtrl,
+    _tabagismoCtrl,
+    _alcoolCtrl,
+    _obsCtrl,
+    _objetivoCtrl,
+    _objDetalhadoCtrl,
+    _prefTreinoCtrl,
+    _restricoesCtrl,
+    _historicoAtividadeCtrl,
+    _motivoInterrupcoesCtrl,
+    _motivacaoCtrl,
+    _algoMaisCtrl,
+  ];
+
+  void _markDirty() {
+    if (_applying || _dirty) return;
+    if (mounted) setState(() => _dirty = true);
+  }
+
+  void _ensureDirtyWiring() {
+    if (_wired) return;
+    _wired = true;
+    for (final c in _allCtrls) {
+      c.addListener(_markDirty);
+    }
+  }
+
+  Future<void> _cancel() async {
+    FxKeyboardDismissScope.dismiss();
+    if (_dirty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Sair sem salvar?',
+        message: 'As respostas desta ficha ainda não foram enviadas.',
+        confirmLabel: 'Sair',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    safePopOrGo(context, '/dashboard/aluno');
+  }
 
   @override
   void initState() {
@@ -88,29 +149,11 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
 
   @override
   void dispose() {
-    _parqOutraDetalheCtrl.dispose();
-    _historicoCtrl.dispose();
-    _cirurgiasCtrl.dispose();
-    _doresCtrl.dispose();
-    _lesoesCtrl.dispose();
-    _medicCtrl.dispose();
-    _alergiasCtrl.dispose();
-    _gestacaoCtrl.dispose();
-    _historicoFamiliarCtrl.dispose();
-    _sintomasCvCtrl.dispose();
-    _qualidadeSonoCtrl.dispose();
-    _estresseCtrl.dispose();
-    _tabagismoCtrl.dispose();
-    _alcoolCtrl.dispose();
-    _obsCtrl.dispose();
-    _objetivoCtrl.dispose();
-    _objDetalhadoCtrl.dispose();
-    _prefTreinoCtrl.dispose();
-    _restricoesCtrl.dispose();
-    _historicoAtividadeCtrl.dispose();
-    _motivoInterrupcoesCtrl.dispose();
-    _motivacaoCtrl.dispose();
-    _algoMaisCtrl.dispose();
+    for (final c in _allCtrls) {
+      c
+        ..removeListener(_markDirty)
+        ..dispose();
+    }
     super.dispose();
   }
 
@@ -138,6 +181,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
           _anamnese = Anamnese();
           _loading = false;
         });
+        _ensureDirtyWiring();
       } else {
         setState(() {
           _erro = friendlyError(e);
@@ -148,6 +192,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   }
 
   void _apply(Anamnese a) {
+    _applying = true;
     for (final q in anamneseParqPerguntas) {
       _parq[q.key] = anamneseParqValue(a, q.key);
     }
@@ -176,6 +221,9 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     _motivoInterrupcoesCtrl.text = a.motivoInterrupcoes ?? '';
     _motivacaoCtrl.text = a.motivacaoAtual ?? '';
     _algoMaisCtrl.text = a.algoMais ?? '';
+    _applying = false;
+    _ensureDirtyWiring();
+    _dirty = false;
   }
 
   Future<void> _abrirDisponibilidade() async {
@@ -193,6 +241,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     );
     if (!mounted || picked == null) return;
     setState(() => _dispSemanal = picked);
+    _markDirty();
   }
 
   Future<void> _abrirSono() async {
@@ -207,6 +256,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     );
     if (!mounted || picked == null) return;
     setState(() => _sonoHoras = picked.toDouble());
+    _markDirty();
   }
 
   Map<String, dynamic> _payload() => {
@@ -249,6 +299,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
       setState(() {
         _anamnese = a;
         _enviada = true;
+        _dirty = false;
       });
       FeedbackHelper.showSuccess(context, 'Enviada para revisão do personal.');
     } catch (e) {
@@ -267,13 +318,14 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     if (_loading) {
       return fxScreenA11yScope(
         label: 'Minha anamnese',
-        child: const FxShellScaffold(
+        child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Anamnese',
             subtitle: 'Ficha de saúde e objetivos',
+            onBack: _cancel,
           ),
-          body: SkeletonList(count: 6),
+          body: const SkeletonList(count: 6),
         ),
       );
     }
@@ -282,9 +334,10 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
         label: 'Minha anamnese',
         child: FxShellScaffold(
           useMesh: true,
-          appBar: const FxShellAppBar(
+          appBar: FxShellAppBar(
             title: 'Anamnese',
             subtitle: 'Ficha de saúde e objetivos',
+            onBack: _cancel,
           ),
           body: FxErrorState(
             chromeOnDark: isDark,
@@ -302,21 +355,17 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
 
     return fxScreenA11yScope(
       label: 'Minha anamnese',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: const FxShellAppBar(
-          title: 'Anamnese',
-          subtitle: 'Ficha de saúde e objetivos',
-        ),
-        bottomNavigationBar: SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
+      child: FxFormPopGuard(
+        dirty: _dirty,
+        onCancel: _cancel,
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Anamnese',
+            subtitle: 'Ficha de saúde e objetivos',
+            onBack: _cancel,
+          ),
+          bottomNavigationBar: FxFormStickyBar(
             child: Semantics(
               button: true,
               enabled: !_saving,
@@ -329,24 +378,23 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
               ),
             ),
           ),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: FxContentWidthLimiter(
-            child: RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  8,
-                  FxSettingsLayout.pageInset,
-                  24,
-                ),
-                children: [
-                  if (showBanner) ...[
+          body: SafeArea(
+            bottom: false,
+            child: FxContentWidthLimiter(
+              child: RefreshIndicator(
+                onRefresh: _load,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    8,
+                    FxSettingsLayout.pageInset,
+                    24,
+                  ),
+                  children: [
+                    if (showBanner) ...[
                     AnamneseStatusBanner(
                       title: _enviada && !a.alunoDevePreencher
                           ? 'Enviada para revisão'
@@ -389,6 +437,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                                 _parq[anamneseParqPerguntas[i].key] =
                                     v == 'true';
                               });
+                              _markDirty();
                             },
                           ),
                         ),
@@ -613,6 +662,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );
