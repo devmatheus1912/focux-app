@@ -379,7 +379,6 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
                   alunoId: widget.alunoId,
                   secao: _secao,
                   onSecao: (value) => setState(() => _secao = value),
-                  onSolicitar: _solicitar,
                   onRevisar: _revisar,
                 ),
               ],

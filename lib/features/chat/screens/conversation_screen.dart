@@ -524,15 +524,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                   ),
                                 ),
                               )
-                              : FxEmptyState(
+                              // Composer sticky já é o affordance (§10) —
+                              // empty sem CTA duplicado.
+                              : const FxEmptyState(
                                 icon: 'message-circle',
                                 title: 'Comece uma conversa',
                                 subtitle:
                                     'Fotos, vídeos, áudios e ajustes do treino vão aparecer aqui em tempo real.',
-                                action: FxEmptyAction(
-                                  label: 'Escrever mensagem',
-                                  onTap: _focusComposer,
-                                ),
                               )
                           : ListView.builder(
                             controller: _scroll,

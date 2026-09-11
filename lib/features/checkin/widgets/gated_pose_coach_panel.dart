@@ -9,6 +9,9 @@ import '../../subscription/models/subscription_plan.dart';
 import 'pose_coach_panel.dart';
 
 /// Pose Coach with Enterprise gate + heuristic form hints.
+///
+/// Mid-workout upsell is personal-facing only. For alunos without the
+/// capability we show an honest hide (no Assinar CTA).
 class GatedPoseCoachPanel extends ConsumerWidget {
   const GatedPoseCoachPanel({
     super.key,
@@ -17,6 +20,7 @@ class GatedPoseCoachPanel extends ConsumerWidget {
     required this.brand,
     required this.dark,
     required this.onRepCompleted,
+    this.forAluno = false,
   });
 
   final String exerciseName;
@@ -24,6 +28,7 @@ class GatedPoseCoachPanel extends ConsumerWidget {
   final Color brand;
   final bool dark;
   final VoidCallback onRepCompleted;
+  final bool forAluno;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,7 +39,10 @@ class GatedPoseCoachPanel extends ConsumerWidget {
       featureName: 'Pose Coach',
       requiredPlan: SubscriptionPlan.ENTERPRISE,
       capability: 'poseCoach',
-      lockedBuilder: _UpgradeHint(brand: brand, dark: dark),
+      lockedBuilder:
+          forAluno
+              ? _AlunoUnavailableHint(brand: brand)
+              : _UpgradeHint(brand: brand, dark: dark),
       child: PoseCoachPanel(
         exerciseName: exerciseName,
         targetReps: targetReps,
@@ -55,10 +63,31 @@ class _UpgradeHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FxSatelliteListTile(
-      title: 'Pose Coach ML — Enterprise',
+      title: 'Pose Coach — plano Enterprise do personal',
       titleCase: false,
-      subtitle: const Text('Análise de postura em tempo real'),
+      subtitle: const Text(
+        'Análise de postura em tempo real no plano Enterprise da sua conta Focux.',
+      ),
       leading: Icon(Icons.lock_outline, color: brand),
+      accent: brand,
+      margin: EdgeInsets.zero,
+    );
+  }
+}
+
+class _AlunoUnavailableHint extends StatelessWidget {
+  const _AlunoUnavailableHint({required this.brand});
+  final Color brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return FxSatelliteListTile(
+      title: 'Pose Coach indisponível neste treino',
+      titleCase: false,
+      subtitle: const Text(
+        'Recurso do plano Enterprise do seu personal — não é uma assinatura sua.',
+      ),
+      leading: Icon(Icons.info_outline, color: brand),
       accent: brand,
       margin: EdgeInsets.zero,
     );

@@ -39,7 +39,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
           SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Nova mensagem',
+            title: 'Nova conversa',
             leading: Icon(
               Icons.chat_bubble_outline_rounded,
               color: primary,
@@ -266,7 +266,6 @@ class _InboxTabPane extends StatelessWidget {
     required this.selectedAlunoIds,
     required this.onRetry,
     required this.onRefresh,
-    required this.onNovaConversa,
     required this.onConversationAction,
     required this.onOpenThread,
     required this.onToggleSelection,
@@ -283,7 +282,6 @@ class _InboxTabPane extends StatelessWidget {
   final Set<int> selectedAlunoIds;
   final VoidCallback onRetry;
   final Future<void> Function() onRefresh;
-  final VoidCallback onNovaConversa;
   final Future<void> Function(int alunoId, String action) onConversationAction;
   final void Function(int alunoId, {Object? extra}) onOpenThread;
   final ValueChanged<int> onToggleSelection;
@@ -309,17 +307,11 @@ class _InboxTabPane extends StatelessWidget {
           ),
       data: (items) {
         if (items.isEmpty) {
+          // Sticky "Nova conversa" é o único CTA (§11) — empty sem action.
           return FxEmptyState(
             icon: isArchived ? 'article' : 'chat',
             title: chatInboxEmptyTitle(view),
             subtitle: chatInboxEmptySubtitle(view),
-            action:
-                isArchived
-                    ? null
-                    : FxEmptyAction(
-                      label: 'Nova conversa',
-                      onTap: onNovaConversa,
-                    ),
           );
         }
         return RefreshIndicator(

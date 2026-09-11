@@ -55,6 +55,7 @@ Future<int?> showCheckinFilaSheet(
 Future<void> showCheckinCoachSheet(
   BuildContext context, {
   required ExecucaoExercicio ee,
+  bool forAluno = false,
 }) {
   final chrome = ShellChrome.of(context);
   final primary = Theme.of(context).colorScheme.primary;
@@ -74,6 +75,7 @@ Future<void> showCheckinCoachSheet(
           targetReps: checkinParseTargetReps(ee.repeticoes),
           brand: brand,
           dark: chrome.isDark,
+          forAluno: forAluno,
           onRepCompleted: () {},
         ),
       );
@@ -98,6 +100,8 @@ Future<void> showCheckinDemoSheet(
           url: ee.videoUrl!,
           brand: brand,
           dark: dark,
+          videoSource: ee.videoSource,
+          licenseStatus: ee.licenseStatus,
         );
       } else if (ee.thumbnailUrl?.isNotEmpty == true) {
         preview = CheckinExerciseThumbnailPreview(

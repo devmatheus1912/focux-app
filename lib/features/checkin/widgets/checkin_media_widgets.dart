@@ -22,10 +22,10 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
   });
 
   String _badgeLabel() {
-    if (licenseStatus == 'LICENSED') return 'Video licenciado';
-    if (videoSource == 'PERSONAL_UPLOAD') return 'Video do personal';
+    if (licenseStatus == 'LICENSED') return 'Vídeo licenciado';
+    if (videoSource == 'PERSONAL_UPLOAD') return 'Enviado pelo personal';
     if (videoSource == 'FOCUX_LIBRARY') return 'Biblioteca Focux';
-    return 'Tecnica do exercicio';
+    return 'Técnica do exercício';
   }
 
   IconData _badgeIcon() {
@@ -182,12 +182,16 @@ class CheckinExerciseVideoPreview extends StatefulWidget {
   final String url;
   final Color brand;
   final bool dark;
+  final String? videoSource;
+  final String? licenseStatus;
 
   const CheckinExerciseVideoPreview({
     super.key,
     required this.url,
     required this.brand,
     required this.dark,
+    this.videoSource,
+    this.licenseStatus,
   });
 
   @override
@@ -222,6 +226,12 @@ class _CheckinExerciseVideoPreviewState
     super.dispose();
   }
 
+  String? get _videoBadgeLabel {
+    if (widget.licenseStatus == 'LICENSED') return 'Vídeo licenciado';
+    if (widget.videoSource == 'PERSONAL_UPLOAD') return 'Enviado pelo personal';
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_failed) {
@@ -242,6 +252,7 @@ class _CheckinExerciseVideoPreviewState
       );
     }
 
+    final badge = _videoBadgeLabel;
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
@@ -286,32 +297,37 @@ class _CheckinExerciseVideoPreviewState
               foregroundColor: Colors.white,
             ),
           ),
-          Positioned(
-            left: 12,
-            bottom: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.48),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.verified_rounded, color: Colors.white, size: 15),
-                  SizedBox(width: 5),
-                  Text(
-                    'Video do personal',
-                    style: TextStyle(
+          if (badge != null)
+            Positioned(
+              left: 12,
+              bottom: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.48),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.person_rounded,
                       color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
+                      size: 15,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 5),
+                    Text(
+                      badge,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -345,7 +361,7 @@ class CheckinVideoFallback extends StatelessWidget {
           Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
           const SizedBox(height: 6),
           Text(
-            'Video proprio do personal disponivel',
+            'Vídeo próprio do personal disponível',
             style: TextStyle(
               color: brand,
               fontSize: 12.5,

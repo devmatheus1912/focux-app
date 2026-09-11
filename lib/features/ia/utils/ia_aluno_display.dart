@@ -1,17 +1,15 @@
-enum IaAlunoHubView { chat, progressao }
+enum IaAlunoHubView { chat }
 
 String iaAlunoHubViewLabel(IaAlunoHubView view) => switch (view) {
   IaAlunoHubView.chat => 'Chat',
-  IaAlunoHubView.progressao => 'Progressão',
 };
 
 String iaAlunoHubSubtitle(IaAlunoHubView view) => switch (view) {
   IaAlunoHubView.chat => 'Pergunte sobre treino ou saúde',
-  IaAlunoHubView.progressao => 'Recomendações de carga, só se você pedir',
 };
 
 const iaAlunoComoCalculamos =
-    'Chat e progressão só rodam se você pedir. Nada é aplicado sozinho.';
+    'O assistente só responde se você pedir. Progressão de carga é do personal — não há Assinar Pro no app do aluno.';
 
 const iaChatComoCalculamos =
     'O assistente responde ao que você escreve. Não aplica treino sozinho.';
