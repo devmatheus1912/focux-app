@@ -91,8 +91,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       ref.invalidate(treinoProvider(treino.id));
       if (mounted) {
         HapticFeedback.heavyImpact();
-        context.pop(true);
-        context.push(
+        // pushReplacement evita pop+push (tela branca / freeze no go_router).
+        context.pushReplacement(
           '/treinos/${treino.id}/exercicios/add',
           extra:
               widget.alunoId == null

@@ -57,10 +57,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;
     final profileComplete = profileScore >= 100;
-    final scrollBottomPad =
-        profileComplete
-            ? TokensStrip.s5
-            : PerfilLayout.stickyOverlayReserve;
+    // Editar fica na app bar — sem chip Completar duplicado.
+    const scrollBottomPad = TokensStrip.s5;
 
     return FxShellScaffold(
       useMesh: true,
@@ -70,10 +68,26 @@ class _PerfilBodyState extends State<_PerfilBody> {
         subtitle: freshnessLabel,
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
-          IconButton(
-            tooltip: 'Editar perfil',
-            onPressed: onEditPerfil,
-            icon: Icon(Icons.edit_outlined, color: chrome.ink),
+          Tooltip(
+            message: 'Editar perfil',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onEditPerfil,
+                borderRadius: BorderRadius.circular(18),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: chrome.headerAction(radius: 18),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.edit_rounded,
+                    size: 18,
+                    color: chrome.ink,
+                  ),
+                ),
+              ),
+            ),
           ),
           FxHelpIconButton(
             tooltip: 'Sobre o perfil',
@@ -85,7 +99,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   tips: const [
                     FxHelpTip(
                       'Editar',
-                      'O lápis no topo abre o cadastro. Completar só aparece se faltar dado.',
+                      'O lápis no topo abre o cadastro e a marca.',
                       icon: 'user',
                     ),
                     FxHelpTip(
@@ -103,9 +117,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          RefreshIndicator(
+      body: RefreshIndicator(
             color: accent,
             onRefresh: onRefresh,
             child: CustomScrollView(
@@ -251,28 +263,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
               ],
             ),
           ),
-          if (!profileComplete)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: SafeArea(
-                top: false,
-                child: FxStaggerItem(
-                  index: 0,
-                  slideOffset: 12,
-                  duration: const Duration(milliseconds: 380),
-                  child: PerfilStickyBar(
-                    accent: accent,
-                    isDark: isDark,
-                    visible: true,
-                    onComplete: onEditPerfil,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

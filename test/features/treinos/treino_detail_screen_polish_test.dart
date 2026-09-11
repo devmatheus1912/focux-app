@@ -83,7 +83,7 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt)'));
     expect(screen, contains('FxHubHeader'));
-    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, isNot(contains('OperationalMetricTile')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showTreinoDetailHelpSheet'));
     expect(screen, contains('FxShellAppBar'));
@@ -121,10 +121,11 @@ void main() {
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('DashboardHomeActionChip'));
-    expect(screen, contains('treinoDetailSeriesCount'));
-    expect(screen, contains('treinoDetailCargaValue'));
-    expect(screen, contains("label: 'Grupos'"));
-    expect(screen, contains("label: 'Carga'"));
+    expect(screen, contains('treinoDetailMetaLine'));
+    expect(screen, isNot(contains("label: 'Grupos'")));
+    expect(screen, isNot(contains("label: 'Carga'")));
+    expect(screen, isNot(contains("label: 'Exercícios'")));
+    expect(screen, isNot(contains("label: 'Séries'")));
     expect(screen, isNot(contains('freshnessLabel')));
     expect(screen, contains("label: 'Atribuir'"));
     expect(screen, contains("label: 'Lista'"));

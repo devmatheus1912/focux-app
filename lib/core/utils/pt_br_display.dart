@@ -95,7 +95,13 @@ String displayPtBr(String value) {
   return result;
 }
 
-String displayExerciseName(String nome) => displayPtBr(nome.trim());
+String displayExerciseName(String nome) {
+  var result = nome.trim();
+  // MoveKit / legado EN → PT (mantém tags EN no seed para busca).
+  result = result.replaceAll('Cable', 'Cabo');
+  result = result.replaceAll('cable', 'cabo');
+  return displayPtBr(result);
+}
 
 /// Nome do treino com acentos comuns (ex.: Força).
 String displayWorkoutName(String raw) {

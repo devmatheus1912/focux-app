@@ -35,7 +35,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
