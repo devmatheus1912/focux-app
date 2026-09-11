@@ -26,12 +26,22 @@ void main() {
     expect(firstAltoRetencao(scores)?.alunoNome, 'Nathalia');
     expect(
       retencaoContagensSubtitulo(
-        alto: 9,
+        alto: 1,
         medio: 0,
         saudavel: 0,
         topNomeados: 1,
       ),
-      contains('1 com nome no top'),
+      '0 médios · 0 saudáveis',
     );
+    expect(
+      retencaoContagensSubtitulo(
+        alto: 1,
+        medio: 0,
+        saudavel: 0,
+        topNomeados: 0,
+      ),
+      contains('atualize a base'),
+    );
+    expect(retencaoComoCalculamos, contains('ATIVOS'));
   });
 }
