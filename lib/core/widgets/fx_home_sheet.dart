@@ -71,25 +71,27 @@ Future<T?> showFxHomeSheet<T>(
     enableDrag: enableDrag,
     backgroundColor: fxTransparent,
     barrierColor: FxHomeSheetChrome.barrier(isDark),
-    builder: (ctx) {
+    builder: (modalCtx) {
       final maxH =
-          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.expandHeightFactor;
-      Widget sheet = _FxHomeSheetEnter(
+          MediaQuery.sizeOf(modalCtx).height *
+          FxHomeSheetChrome.expandHeightFactor;
+      // Theme must wrap a Builder so `builder`'s context (and Theme.of) see
+      // forceDark — otherwise callers that read brightness from the modal
+      // ctx (e.g. showFxHelpSheet) stay on the ambient light theme.
+      Widget sheetFor(BuildContext sheetCtx) => _FxHomeSheetEnter(
         child: Align(
           alignment: Alignment.bottomCenter,
           child: ConstrainedBox(
             constraints: BoxConstraints(maxHeight: maxH),
-            child: builder(ctx),
+            child: builder(sheetCtx),
           ),
         ),
       );
-      if (forceDark) {
-        sheet = Theme(
-          data: AppTheme.buildDarkTheme(primary),
-          child: sheet,
-        );
-      }
-      return sheet;
+      if (!forceDark) return sheetFor(modalCtx);
+      return Theme(
+        data: AppTheme.buildDarkTheme(primary),
+        child: Builder(builder: sheetFor),
+      );
     },
   );
 }
