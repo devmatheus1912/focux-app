@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -61,6 +62,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
   late int _rpe;
   late bool _useRpe;
   late bool _dor;
+  bool _rpeHintLoaded = false;
+  bool _showRpeHint = false;
 
   @override
   void initState() {
@@ -76,6 +79,30 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
     // Liga por padrão: aluno precisa ver o esforço explicado (não só sigla).
     _useRpe = true;
     _dor = widget.initialDor;
+    _loadRpeHint();
+  }
+
+  Future<void> _loadRpeHint() async {
+    final show = await checkinConsumeRpeFirstUseHint();
+    if (!mounted) return;
+    setState(() {
+      _showRpeHint = show;
+      _rpeHintLoaded = true;
+    });
+  }
+
+  String get _rpeHintBody =>
+      widget.rpeAlvo == null
+          ? checkinRpeSectionHint
+          : checkinRpeAlvoHint(widget.rpeAlvo!);
+
+  void _openRpeHelp() {
+    showFxHelpSheet(
+      context,
+      title: checkinRpeSectionTitle,
+      subtitle: 'Como marcar o esforço desta série.',
+      tips: [FxHelpTip('Esforço sentido', _rpeHintBody, icon: 'dumbbell')],
+    );
   }
 
   @override
@@ -220,12 +247,24 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              checkinRpeSectionTitle,
-                              style: TextStyle(
-                                color: ink,
-                                fontWeight: FontWeight.w900,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    checkinRpeSectionTitle,
+                                    style: TextStyle(
+                                      color: ink,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ),
+                                if (_rpeHintLoaded && !_showRpeHint)
+                                  FxHelpIconButton(
+                                    tooltip: 'Esforço sentido',
+                                    size: 28,
+                                    onTap: _openRpeHelp,
+                                  ),
+                              ],
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -260,13 +299,17 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.rpeAlvo == null
-                        ? checkinRpeSectionHint
-                        : checkinRpeAlvoHint(widget.rpeAlvo!),
-                    style: TextStyle(color: mute, fontSize: 12, height: 1.35),
-                  ),
+                  if (_showRpeHint) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _rpeHintBody,
+                      style: TextStyle(
+                        color: mute,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
                   Slider(
                     value: _rpe.toDouble(),
                     min: 1,

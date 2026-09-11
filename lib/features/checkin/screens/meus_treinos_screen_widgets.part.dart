@@ -7,15 +7,15 @@ class _TrainingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: EdgeInsets.fromLTRB(TokensStrip.s5, 8, 20, 0),
+      padding: EdgeInsets.fromLTRB(TokensStrip.s5, 6, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SkeletonLoader(height: 132, borderRadius: 24),
-          SizedBox(height: 18),
-          SkeletonLoader(height: 150, borderRadius: TokensStrip.rCard),
+          SkeletonLoader(height: 96, borderRadius: 24),
           SizedBox(height: 12),
-          SkeletonLoader(height: 150, borderRadius: TokensStrip.rCard),
+          SkeletonLoader(height: 120, borderRadius: TokensStrip.rCard),
+          SizedBox(height: 8),
+          SkeletonLoader(height: 120, borderRadius: TokensStrip.rCard),
         ],
       ),
     );
@@ -24,6 +24,7 @@ class _TrainingSkeleton extends StatelessWidget {
 
 class _TrainingHero extends StatelessWidget {
   final int ativos;
+  final int startableCount;
   final int total;
   final int totalExercicios;
   final int totalConcluidos;
@@ -31,6 +32,7 @@ class _TrainingHero extends StatelessWidget {
 
   const _TrainingHero({
     required this.ativos,
+    required this.startableCount,
     required this.total,
     required this.totalExercicios,
     required this.totalConcluidos,
@@ -46,14 +48,27 @@ class _TrainingHero extends StatelessWidget {
     final progresso =
         totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
     final hasExercises = totalExercicios > 0;
-    final headline =
-        hasExercises
-            ? '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}'
-            : 'Plano em montagem';
-    final subtitle =
-        hasExercises
-            ? '$total no plano atual · $totalConcluidos/$totalExercicios exercícios'
-            : '$total treino${total == 1 ? '' : 's'} no plano atual';
+    final hasStartable = startableCount > 0;
+    final String headline;
+    final String subtitle;
+    if (hasStartable) {
+      headline =
+          startableCount == 1
+              ? '1 treino pronto para iniciar'
+              : '$startableCount treinos prontos para iniciar';
+      subtitle =
+          hasExercises
+              ? '$total no plano · $totalConcluidos/$totalExercicios exercícios'
+              : '$total no plano atual · toque em Iniciar';
+    } else if (hasExercises) {
+      headline =
+          '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}';
+      subtitle =
+          '$total no plano atual · $totalConcluidos/$totalExercicios exercícios';
+    } else {
+      headline = 'Plano em montagem';
+      subtitle = '$total treino${total == 1 ? '' : 's'} no plano atual';
+    }
 
     return FxStripCard(
       emphasize: true,
@@ -64,11 +79,11 @@ class _TrainingHero extends StatelessWidget {
           Text(
             headline,
             style: FocuxHubTypography.sectionTitle(context, color: ink).copyWith(
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             subtitle,
             style: FocuxHubTypography.bodyMuted(
@@ -76,19 +91,20 @@ class _TrainingHero extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 14),
-          if (hasExercises)
+          if (hasExercises) ...[
+            const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 value: progresso,
-                minHeight: 7,
+                minHeight: 6,
                 backgroundColor:
                     isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                 valueColor: AlwaysStoppedAnimation(primary),
               ),
-            )
-          else
+            ),
+          ] else if (!hasStartable) ...[
+            const SizedBox(height: 8),
             Text(
               'A sessão já está no radar. Os exercícios aparecem quando forem liberados.',
               style: FocuxHubTypography.bodyMuted(
@@ -96,6 +112,7 @@ class _TrainingHero extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ).copyWith(fontSize: 12.5, height: 1.35),
             ),
+          ],
         ],
       ),
     );
@@ -150,7 +167,10 @@ class _TrainingPlanCard extends StatelessWidget {
       onTap: handleAction,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
-        padding: const EdgeInsets.all(TokensStrip.s4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s4,
+          vertical: TokensStrip.s3,
+        ),
         decoration: chrome.listCard(
           primary: concluido ? EagleTokens.good : primary,
         ),
@@ -160,23 +180,24 @@ class _TrainingPlanCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 54,
-                  height: 54,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color:
                         concluido
                             ? EagleTokens.good.withValues(alpha: 0.12)
                             : BrandPalette.soft(primary, dark: isDark),
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     concluido
                         ? Icons.check_rounded
                         : Icons.fitness_center_rounded,
                     color: concluido ? EagleTokens.good : primary,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,14 +208,14 @@ class _TrainingPlanCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ink,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 4),
                       Wrap(
                         spacing: 8,
-                        runSpacing: 6,
+                        runSpacing: 4,
                         children: [
                           _PlanMeta(
                             icon: Icons.list_alt_rounded,
@@ -210,55 +231,48 @@ class _TrainingPlanCard extends StatelessWidget {
                               text: '$mediaCount videos',
                               color: mute,
                             ),
-                          _PlanMeta(
-                            icon: Icons.timer_outlined,
-                            text:
-                                '~${(treino.exercicios.length * 4).clamp(8, 90)}min',
-                            color: mute,
-                          ),
+                          if (hasExercises)
+                            _PlanMeta(
+                              icon: Icons.timer_outlined,
+                              text:
+                                  '~${(treino.exercicios.length * 4).clamp(8, 90)}min',
+                              color: mute,
+                            ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: mute),
+                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
               ],
             ),
-            const SizedBox(height: 14),
-            if (hasExercises)
+            if (hasExercises) ...[
+              const SizedBox(height: 10),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 7,
+                  minHeight: 6,
                   backgroundColor:
                       isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                   valueColor: AlwaysStoppedAnimation(
                     concluido ? EagleTokens.good : primary,
                   ),
                 ),
-              )
-            else
-              Container(
-                height: 7,
-                decoration: BoxDecoration(
-                  color:
-                      isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
-                  borderRadius: BorderRadius.circular(999),
-                ),
               ),
-            const SizedBox(height: 10),
+            ],
+            const SizedBox(height: 8),
             if (aguardando) ...[
               Text(
                 'Treino reservado. A ficha abre assim que o personal liberar os exercícios.',
                 style: TextStyle(
                   color: mute,
-                  fontSize: 12.5,
-                  height: 1.35,
+                  fontSize: 12,
+                  height: 1.3,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               SizedBox(
                 width: double.infinity,
                 child: FxLiquidPrimaryButton(
@@ -279,7 +293,7 @@ class _TrainingPlanCard extends StatelessWidget {
                           : '$done de ${treino.exercicios.length} exercicios ja marcados.',
                       style: TextStyle(
                         color: mute,
-                        fontSize: 12.5,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -364,12 +378,14 @@ class _TrainingReadinessSection extends StatelessWidget {
   final int totalExercicios;
   final int totalConcluidos;
   final int ativos;
+  final bool hasStartable;
   final bool isDark;
 
   const _TrainingReadinessSection({
     required this.totalExercicios,
     required this.totalConcluidos,
     required this.ativos,
+    required this.hasStartable,
     required this.isDark,
   });
 
@@ -381,8 +397,16 @@ class _TrainingReadinessSection extends StatelessWidget {
     final mute = chrome.mute;
     final hasExercises = totalExercicios > 0;
 
+    // Start-first: when Iniciar exists, skip the loud "Próxima liberação" pipeline.
+    if (hasStartable && !hasExercises) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s4,
+        vertical: TokensStrip.s3,
+      ),
       decoration: chrome.listCard(primary: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -391,19 +415,19 @@ class _TrainingReadinessSection extends StatelessWidget {
             hasExercises ? 'Antes de treinar' : 'Próxima liberação',
             style: TextStyle(
               color: ink,
-              fontSize: 17,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.25,
+              fontSize: hasExercises ? 15 : 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             hasExercises
                 ? 'Entre com foco, registre as séries e finalize com feedback.'
                 : 'O que falta para a sessão guiada aparecer.',
-            style: TextStyle(color: mute, fontSize: 12.3, height: 1.28),
+            style: TextStyle(color: mute, fontSize: 12, height: 1.28),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           if (hasExercises)
             Row(
               children: [
@@ -416,7 +440,7 @@ class _TrainingReadinessSection extends StatelessWidget {
                     isDark: isDark,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: _ReadinessPill(
                     icon: Icons.local_fire_department_outlined,
@@ -440,7 +464,7 @@ class _TrainingReadinessSection extends StatelessWidget {
                     isDark: isDark,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Expanded(
                   child: _ReadinessMarker(
                     icon: Icons.tune_rounded,
@@ -450,7 +474,7 @@ class _TrainingReadinessSection extends StatelessWidget {
                     isDark: isDark,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Expanded(
                   child: _ReadinessMarker(
                     icon: Icons.play_circle_outline_rounded,
@@ -491,29 +515,29 @@ class _ReadinessMarker extends StatelessWidget {
     final mute = chrome.mute;
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(8),
       decoration: chrome.listCard(primary: color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: BrandPalette.soft(color, dark: isDark),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, size: 17, color: color),
+            child: Icon(icon, size: 15, color: color),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 2),
@@ -523,7 +547,7 @@ class _ReadinessMarker extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: mute,
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -554,15 +578,15 @@ class _ReadinessPill extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: BrandPalette.soft(color, dark: isDark),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 8),
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -573,7 +597,7 @@ class _ReadinessPill extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: mute,
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -584,8 +608,8 @@ class _ReadinessPill extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],

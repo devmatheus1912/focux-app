@@ -7,6 +7,8 @@ class _StudentJourneyCard extends ConsumerStatefulWidget {
   final AsyncValue<List<ExecucaoTreino>> historicoAsync;
   final AsyncValue<List<ChatMsg>> chatAsync;
   final bool isDark;
+  final bool agendaReviewed;
+  final Future<void> Function()? onReturnedFromTask;
 
   const _StudentJourneyCard({
     required this.aluno,
@@ -15,6 +17,8 @@ class _StudentJourneyCard extends ConsumerStatefulWidget {
     required this.historicoAsync,
     required this.chatAsync,
     required this.isDark,
+    this.agendaReviewed = false,
+    this.onReturnedFromTask,
   });
 
   @override
@@ -43,6 +47,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
       treinos: widget.treinos,
       historico: historico,
       mensagens: mensagens,
+      agendaReviewed: widget.agendaReviewed,
     );
     final nextTask = plan.nextTask;
     final visibleTasks = [if (nextTask != null) nextTask];
@@ -176,7 +181,12 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
 
   void _openTask(AlunoAutonomyTask task) {
     _trackTask(task, 'CLICKED', null);
-    context.push(task.route);
+    unawaited(
+      context.push(task.route).then((_) async {
+        final reload = widget.onReturnedFromTask;
+        if (reload != null) await reload();
+      }),
+    );
   }
 
   void _trackTask(

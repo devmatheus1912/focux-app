@@ -91,8 +91,45 @@ void main() {
     );
     expect(card, contains('checkinExecutionControlMin'));
     expect(card, contains('FxLiquidPrimaryButton'));
+    expect(card, contains('checkinTextLooksNonPtBr'));
+    expect(card, contains('checkinErrosComunsFallback'));
+    expect(card, contains('CheckinExerciseVideoPreview'));
+    expect(card, contains('CheckinExerciseThumbnailPreview'));
+    expect(card, contains('CheckinExerciseMediaPreview'));
+    expect(card, contains("'Ampliar'"));
+    expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('ExpansionTile')));
     expect(card, isNot(contains('LinearProgressIndicator')));
     expect(card, isNot(contains('GatedPoseCoachPanel')));
+  });
+
+  test('checkin execution alinha card no topo com scroll', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/checkin/screens/checkin_screen.dart',
+    );
+    expect(screen, contains('alignment: Alignment.topCenter'));
+    expect(screen, contains('onOpenTips:'));
+    expect(screen, contains('CheckinSerieCard'));
+  });
+
+  test('RPE sheet esconde hint longo após first-use', () {
+    final sheet = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
+    );
+    expect(sheet, contains('checkinConsumeRpeFirstUseHint'));
+    expect(sheet, contains('FxHelpIconButton'));
+    expect(sheet, contains('Esforço sentido'));
+    expect(sheet, contains('showFxHelpSheet'));
+  });
+
+  test('demo sheet usa preview maior com autoplay muted', () {
+    final media = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_media_widgets.dart',
+    );
+    expect(media, contains('checkinMediaPreviewHeight'));
+    expect(media, contains('setVolume(0)'));
+    expect(media, contains('setLooping(true)'));
+    expect(media, isNot(contains('IconButton.filled')));
+    expect(media, isNot(contains('height: 168')));
   });
 }

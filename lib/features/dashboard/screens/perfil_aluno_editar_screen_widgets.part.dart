@@ -136,16 +136,12 @@ class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final IconData icon;
-  final bool requiredField;
-  final int maxLines;
   final TextInputType? keyboardType;
 
   const _Field({
     required this.controller,
     required this.label,
     required this.icon,
-    this.requiredField = false,
-    this.maxLines = 1,
     this.keyboardType,
   });
 
@@ -155,17 +151,10 @@ class _Field extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
-        maxLines: maxLines,
+        maxLines: 1,
         keyboardType: keyboardType,
         onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         decoration: FxInputDeco.build(context, label, icon: icon),
-        validator:
-            requiredField
-                ? (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Obrigatorio.'
-                        : null
-                : null,
       ),
     );
   }

@@ -39,6 +39,23 @@ void main() {
       expect(isTreinoDisponivelParaIniciar(treino), isFalse);
     });
 
+    test('ordenacao start-first coloca iniciaveis no topo', () {
+      final reservado = ExecucaoTreino(
+        treinoId: 1,
+        treinoNome: 'Reservado',
+        status: 'AGUARDANDO_LIBERACAO',
+        exercicios: const [],
+      );
+      final pronto = ExecucaoTreino(
+        treinoId: 2,
+        treinoNome: 'Pronto',
+        status: 'DISPONIVEL',
+        exercicios: const [],
+      );
+      final ordered = treinosOrdenadosStartFirst([reservado, pronto]);
+      expect(ordered.map((t) => t.treinoId), [2, 1]);
+    });
+
     test('consistencia conta dias unicos e nao N execucoes', () {
       final historico = [
         ExecucaoTreino(

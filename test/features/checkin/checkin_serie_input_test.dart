@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/utils/checkin_serie_input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('prescription range is not editable seed', () {
@@ -32,5 +33,14 @@ void main() {
     expect(checkinRpeSectionTitle, contains('Esforço'));
     expect(checkinRpeSectionHint, contains('não é quantidade de reps'));
     expect(checkinRpeAlvoHint(7), contains('Cansativo'));
+  });
+
+  test('RPE first-use hint is consumed once via SharedPreferences', () async {
+    SharedPreferences.setMockInitialValues({});
+    expect(checkinRpeHintSeenKey, 'checkin_rpe_hint_seen_v1');
+    expect(await checkinConsumeRpeFirstUseHint(), isTrue);
+    expect(await checkinConsumeRpeFirstUseHint(), isFalse);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool(checkinRpeHintSeenKey), isTrue);
   });
 }

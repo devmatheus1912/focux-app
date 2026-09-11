@@ -12,12 +12,15 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('FxHubFreshness.joinCount'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('showBack: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('meusTreinosPagina'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('_hasMore'));
+    expect(screen, contains('treinosOrdenadosStartFirst'));
+    expect(screen, contains('startableCount'));
+    expect(screen, contains('hasStartable'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

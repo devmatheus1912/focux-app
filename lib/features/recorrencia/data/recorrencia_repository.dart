@@ -3,6 +3,20 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
 import '../../../core/money/fx_money.dart';
 
+/// Safe map parse for recorrência responses (null / `"null"` / non-Map → null).
+Map<String, dynamic>? recorrenciaResponseMap(Object? data) {
+  if (data == null) return null;
+  if (data is String) {
+    final trimmed = data.trim();
+    if (trimmed.isEmpty || trimmed.toLowerCase() == 'null') return null;
+    return null;
+  }
+  if (data is Map) {
+    return Map<String, dynamic>.from(data);
+  }
+  return null;
+}
+
 class RecorrenciaAssinatura {
   final int id;
   final int alunoId;
@@ -81,17 +95,30 @@ class RecorrenciaRepository {
 
   Future<RecorrenciaAssinatura?> minha() async {
     final r = await _dio.get('/api/recorrencia/minha');
-    if (r.data == null) return null;
-    return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+    final map = recorrenciaResponseMap(r.data);
+    if (map == null) return null;
+    return RecorrenciaAssinatura.fromJson(map);
   }
 
   Future<RecorrenciaAssinatura> pausarMinha() async {
     final r = await _dio.post('/api/recorrencia/minha/pausar');
-    return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+    final map = recorrenciaResponseMap(r.data);
+    if (map == null) {
+      throw const FormatException(
+        'Não foi possível pausar a assinatura. Tente de novo.',
+      );
+    }
+    return RecorrenciaAssinatura.fromJson(map);
   }
 
   Future<RecorrenciaAssinatura> retomarMinha() async {
     final r = await _dio.post('/api/recorrencia/minha/retomar');
-    return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+    final map = recorrenciaResponseMap(r.data);
+    if (map == null) {
+      throw const FormatException(
+        'Não foi possível retomar a assinatura. Tente de novo.',
+      );
+    }
+    return RecorrenciaAssinatura.fromJson(map);
   }
 }
