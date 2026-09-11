@@ -20,19 +20,19 @@ Future<void> openMontarPorModelo({
 }) async {
   HapticFeedback.selectionClick();
   final preset = workoutBuilderPresetById('hypertrophy');
-  await Navigator.push<void>(
+  final completed = await Navigator.push<bool>(
     context,
     MaterialPageRoute(
-      builder:
-          (_) => FxShellScaffold(
+      builder: (routeContext) => FxShellScaffold(
             useMesh: true,
             appBar: FxShellAppBar(
               title: 'Montar por modelo',
               subtitle: 'Pela frequência do aluno',
-              onBack: () => Navigator.pop(context),
+              onBack: () => Navigator.pop(routeContext, false),
             ),
             body: TemplateSplitPicker(
               alreadyInTreinoIds: alreadyInTreinoIds,
+              onCompleted: () => Navigator.pop(routeContext, true),
               onAdicionar: (Exercicio exercicio) async {
                 try {
                   await ref
@@ -51,16 +51,16 @@ Future<void> openMontarPorModelo({
                     'template_uso',
                     props: {'treinoId': treinoId, 'exId': exercicio.id},
                   );
-                  if (context.mounted) {
+                  if (routeContext.mounted) {
                     HapticFeedback.mediumImpact();
                     FeedbackHelper.showSuccess(
-                      context,
+                      routeContext,
                       '${exercicio.nomeDisplay} adicionado.',
                     );
                   }
                 } catch (e) {
-                  if (context.mounted) {
-                    FeedbackHelper.showError(context, friendlyError(e));
+                  if (routeContext.mounted) {
+                    FeedbackHelper.showError(routeContext, friendlyError(e));
                   }
                 }
               },
@@ -70,4 +70,10 @@ Future<void> openMontarPorModelo({
   );
   ref.invalidate(treinoProvider(treinoId));
   ref.invalidate(treinoPickerHomeProvider(treinoId));
+  if (completed == true && context.mounted) {
+    FeedbackHelper.showSuccess(
+      context,
+      'Modelo concluído! Exercícios adicionados ao treino.',
+    );
+  }
 }

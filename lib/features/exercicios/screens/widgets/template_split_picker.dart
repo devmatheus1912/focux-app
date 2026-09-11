@@ -6,7 +6,6 @@ import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
-import '../../../../core/widgets/feedback_helper.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
@@ -20,10 +19,12 @@ class TemplateSplitPicker extends StatelessWidget {
   const TemplateSplitPicker({
     super.key,
     required this.onAdicionar,
+    this.onCompleted,
     this.alreadyInTreinoIds = const {},
   });
 
   final Future<void> Function(Exercicio exercicio) onAdicionar;
+  final VoidCallback? onCompleted;
   final Set<int> alreadyInTreinoIds;
 
   void _openTemplate(BuildContext context, TemplateSplit template) {
@@ -36,6 +37,7 @@ class TemplateSplitPicker extends StatelessWidget {
               template: template,
               alreadyInTreinoIds: alreadyInTreinoIds,
               onAdicionar: onAdicionar,
+              onCompleted: onCompleted,
             ),
       ),
     );
@@ -164,11 +166,13 @@ class _TemplateSlotEditor extends ConsumerStatefulWidget {
   const _TemplateSlotEditor({
     required this.template,
     required this.onAdicionar,
+    this.onCompleted,
     this.alreadyInTreinoIds = const {},
   });
 
   final TemplateSplit template;
   final Future<void> Function(Exercicio exercicio) onAdicionar;
+  final VoidCallback? onCompleted;
   final Set<int> alreadyInTreinoIds;
 
   @override
@@ -193,7 +197,8 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
     final soft = BrandPalette.softened(primary);
 
     return FxShellScaffold(
-      useMesh: true,
+      // Pai já traz mesh — evita segundo CinematicMesh (custo/crash em low-end).
+      useMesh: false,
       appBar: FxShellAppBar(
         title: widget.template.nome,
         subtitle: '$done de $slotsTotal exercícios',
@@ -255,12 +260,9 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
             _TemplateCompleteCard(
               onBackToWorkout: () {
                 HapticFeedback.mediumImpact();
-                FeedbackHelper.showSuccess(
-                  context,
-                  'Modelo concluído! Exercícios adicionados ao treino.',
-                );
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
+                // Só fecha o editor; o pai (Montar por modelo) fecha e mostra snack.
+                Navigator.pop(context);
+                widget.onCompleted?.call();
               },
             ),
           ],

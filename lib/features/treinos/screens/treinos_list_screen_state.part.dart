@@ -510,7 +510,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   widget.alunoId == null
                       ? (uiHints?.createCtaLabel ?? 'Criar treino')
                       : 'Criar treino';
-              final showStickyCreate = !_selectionMode;
+              final showStickyCreate =
+                  !_selectionMode && loadedTreinos.isNotEmpty;
 
               return Column(
                 children: [
