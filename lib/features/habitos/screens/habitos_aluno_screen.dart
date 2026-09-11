@@ -17,6 +17,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -182,69 +183,93 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
         requiredPlan: SubscriptionPlan.PRO,
         capability: 'habitCoaching',
         child: PopScope(
-          canPop: !keyboardOpen,
+          canPop: false,
           onPopInvokedWithResult: (didPop, _) {
             if (didPop) return;
-            FxKeyboardDismissScope.dismiss();
+            if (keyboardOpen || _searchFocus.hasFocus) {
+              FxKeyboardDismissScope.dismiss();
+              return;
+            }
+            safePopOrGo(context, '/dashboard/aluno');
           },
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Meus hábitos',
-              subtitle: FxHubFreshness.joinCount(
-                habitoCountLabel(_loading ? 0 : _total),
-                _loading ? null : freshnessLabel,
-              ),
-              onBack: () {
-                FxKeyboardDismissScope.dismiss();
-                safePopOrGo(context, '/dashboard/aluno');
-              },
-            ),
-            body: _loading
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 5),
-                  )
-                : _error != null
-                ? FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: scheme.primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _error!,
-                    onRetry: _carregar,
-                  )
-                : Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
+          child: FxKeyboardDismissScope(
+            child: FxShellScaffold(
+              useMesh: true,
+              constrainWidth: false,
+              appBar: FxShellAppBar(
+                title: 'Meus hábitos',
+                subtitle: FxHubFreshness.joinCount(
+                  habitoCountLabel(_loading ? 0 : _total),
+                  _loading ? null : freshnessLabel,
+                ),
+                onBack: () {
+                  FxKeyboardDismissScope.dismiss();
+                  safePopOrGo(context, '/dashboard/aluno');
+                },
+                actions: [
+                  FxHelpIconButton(
+                    tooltip: 'Como usar os hábitos',
+                    onTap: () => showFxHelpSheet(
+                      context,
+                      title: 'Hábitos',
+                      subtitle: 'Metas diárias que seu personal cadastrou.',
+                      tips: const [
+                        FxHelpTip('Como calculamos', habitoComoCalculamos),
+                        FxHelpTip(
+                          'Marcar',
+                          'O checkbox marca o check de hoje. Toque no hábito abre o detalhe.',
                         ),
-                        child: TextField(
-                          controller: _searchCtrl,
-                          focusNode: _searchFocus,
-                          textInputAction: TextInputAction.search,
-                          onChanged: _onQueryChanged,
-                          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                          decoration: InputDecoration(
-                            hintText: 'Buscar hábito',
-                            prefixIcon: const Icon(Icons.search_rounded),
-                            border: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              body: _loading
+                  ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 5),
+                    )
+                  : _error != null
+                  ? FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: scheme.primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _error!,
+                      onRetry: _carregar,
+                    )
+                  : Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                            TokensStrip.s4,
+                            TokensStrip.s2,
+                          ),
+                          child: TextField(
+                            controller: _searchCtrl,
+                            focusNode: _searchFocus,
+                            textInputAction: TextInputAction.search,
+                            onChanged: _onQueryChanged,
+                            onTapOutside: (_) =>
+                                FxKeyboardDismissScope.dismiss(),
+                            decoration: InputDecoration(
+                              hintText: 'Buscar hábito',
+                              prefixIcon: const Icon(Icons.search_rounded),
+                              border: FxInputDeco.outlineBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: FxContentWidthLimiter(
-                          child: _buildList(searching),
+                        Expanded(
+                          child: FxContentWidthLimiter(
+                            child: _buildList(searching),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

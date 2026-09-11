@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -206,7 +207,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
                 ? FxErrorState(
                     chromeOnDark: isDark,
                     primary: primary,
-                    title: 'Não conseguimos carregar o hábito',
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
                     message: _erro!,
                     onRetry: _load,
                   )

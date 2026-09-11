@@ -106,9 +106,9 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   '/aluno/recorrencia': FocuxSurfaceSpec(type: _s3, logicalParent: _alunoHome),
   '/aluno/trilhas': FocuxSurfaceSpec(type: _s3, logicalParent: _alunoHome),
   '/aluno/grupo-aulas': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
+  // Deep link legado (§38 hide) — redirect-only, sem superfície.
   '/aluno/form-check': FocuxSurfaceSpec(
-    type: _s5,
-    hasInput: true,
+    type: _s1,
     logicalParent: _alunoHome,
     redirectTo: _alunoHome,
   ),
@@ -297,7 +297,12 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: _perfil,
   ),
   '/ia/chat': FocuxSurfaceSpec(type: _s1, logicalParent: '/ia/copiloto'),
-  '/ia/aluno': FocuxSurfaceSpec(type: _s1, logicalParent: _alunoHome),
+  // Deep link legado (§38 hide) — redirect-only, sem superfície.
+  '/ia/aluno': FocuxSurfaceSpec(
+    type: _s1,
+    logicalParent: _alunoHome,
+    redirectTo: _alunoHome,
+  ),
   '/ia/checkin': FocuxSurfaceSpec(type: _s1, logicalParent: '/ia/copiloto'),
   '/ia/progressao/aceitar': FocuxSurfaceSpec(
     type: _s5,

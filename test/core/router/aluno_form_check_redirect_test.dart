@@ -12,6 +12,15 @@ void main() {
     expect(routes, isNot(contains('FeedbackAlunoScreen')));
   });
 
+  test('ia/aluno redireciona para home (§38 hide)', () {
+    final routes = readScreenSourceBundle(
+      'lib/core/router/app_router_chrome_routes.dart',
+    );
+    expect(routes, contains("path: '/ia/aluno'"));
+    expect(routes, contains("redirect: (context, state) => '/dashboard/aluno'"));
+    expect(routes, isNot(contains('IaAlunoScreen')));
+  });
+
   test('post-login aluno não aceita deep link /ia/aluno', () {
     final util = readScreenSourceBundle(
       'lib/features/auth/utils/post_login_redirect.dart',
