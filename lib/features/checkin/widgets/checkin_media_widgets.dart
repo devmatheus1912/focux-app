@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../utils/checkin_video_badge.dart';
 
 class CheckinExerciseThumbnailPreview extends StatelessWidget {
   final String url;
@@ -21,21 +22,16 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
     required this.dark,
   });
 
-  String _badgeLabel() {
-    if (licenseStatus == 'LICENSED') return 'Vídeo licenciado';
-    if (videoSource == 'PERSONAL_UPLOAD') return 'Enviado pelo personal';
-    if (videoSource == 'FOCUX_LIBRARY') return 'Biblioteca Focux';
-    return 'Técnica do exercício';
-  }
-
-  IconData _badgeIcon() {
-    if (licenseStatus == 'LICENSED') return Icons.verified_rounded;
-    if (videoSource == 'PERSONAL_UPLOAD') return Icons.person_rounded;
-    return Icons.play_arrow_rounded;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final badge = CheckinVideoBadge.label(
+      licenseStatus: licenseStatus,
+      videoSource: videoSource,
+    );
+    final badgeIcon = CheckinVideoBadge.icon(
+      licenseStatus: licenseStatus,
+      videoSource: videoSource,
+    );
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
@@ -68,32 +64,33 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            left: 12,
-            bottom: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.48),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(_badgeIcon(), color: Colors.white, size: 15),
-                  const SizedBox(width: 4),
-                  Text(
-                    _badgeLabel(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
+          if (badge != null && badgeIcon != null)
+            Positioned(
+              left: 12,
+              bottom: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.48),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(badgeIcon, color: Colors.white, size: 15),
+                    const SizedBox(width: 4),
+                    Text(
+                      badge,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -226,12 +223,6 @@ class _CheckinExerciseVideoPreviewState
     super.dispose();
   }
 
-  String? get _videoBadgeLabel {
-    if (widget.licenseStatus == 'LICENSED') return 'Vídeo licenciado';
-    if (widget.videoSource == 'PERSONAL_UPLOAD') return 'Enviado pelo personal';
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     if (_failed) {
@@ -252,7 +243,14 @@ class _CheckinExerciseVideoPreviewState
       );
     }
 
-    final badge = _videoBadgeLabel;
+    final badge = CheckinVideoBadge.label(
+      licenseStatus: widget.licenseStatus,
+      videoSource: widget.videoSource,
+    );
+    final badgeIcon = CheckinVideoBadge.icon(
+      licenseStatus: widget.licenseStatus,
+      videoSource: widget.videoSource,
+    );
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
@@ -297,7 +295,7 @@ class _CheckinExerciseVideoPreviewState
               foregroundColor: Colors.white,
             ),
           ),
-          if (badge != null)
+          if (badge != null && badgeIcon != null)
             Positioned(
               left: 12,
               bottom: 12,
@@ -310,11 +308,7 @@ class _CheckinExerciseVideoPreviewState
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                      size: 15,
-                    ),
+                    Icon(badgeIcon, color: Colors.white, size: 15),
                     const SizedBox(width: 5),
                     Text(
                       badge,
