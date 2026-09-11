@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/hero_teal.dart';
@@ -56,8 +57,12 @@ Future<T?> showFxHomeSheet<T>(
   bool isScrollControlled = true,
   bool isDismissible = true,
   bool enableDrag = true,
+  /// Auth/splash S6: sheet herda dark de marca mesmo se o SO estiver claro.
+  bool forceDark = false,
 }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final primary = Theme.of(context).colorScheme.primary;
+  final isDark =
+      forceDark || Theme.of(context).brightness == Brightness.dark;
   return showModalBottomSheet<T>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -69,7 +74,7 @@ Future<T?> showFxHomeSheet<T>(
     builder: (ctx) {
       final maxH =
           MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.expandHeightFactor;
-      return _FxHomeSheetEnter(
+      Widget sheet = _FxHomeSheetEnter(
         child: Align(
           alignment: Alignment.bottomCenter,
           child: ConstrainedBox(
@@ -78,6 +83,13 @@ Future<T?> showFxHomeSheet<T>(
           ),
         ),
       );
+      if (forceDark) {
+        sheet = Theme(
+          data: AppTheme.buildDarkTheme(primary),
+          child: sheet,
+        );
+      }
+      return sheet;
     },
   );
 }

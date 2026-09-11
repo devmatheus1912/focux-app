@@ -109,23 +109,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
           .read(checkinRepositoryProvider)
           .iniciar(widget.treinoId);
       if (!mounted) return;
-      final status = execucao.status.trim().toUpperCase();
-      if (status == 'CONCLUIDO') {
-        setState(() {
-          _execucao = execucao;
-          _loading = false;
-        });
-        await FxCelebrationOverlay.show(
-          context,
-          title: 'Treino já concluído',
-          subtitle: 'Abra o histórico para rever ou treine de novo pela lista.',
-          icon: Icons.check_circle_rounded,
-        );
-        if (!mounted) return;
-        safePopOrGo(context, '/checkin/treinos');
-        return;
-      }
-      // Idempotente: mesmo id em retry/double-tap — retoma a execução.
+      // BE: CONCLUIDO antigo → nova execução EM_ANDAMENTO (idempotência só
+      // retoma EM_ANDAMENTO). Não celebrar/sair no start.
       setState(() {
         _execucao = execucao;
         _loading = false;

@@ -24,5 +24,14 @@ void main() {
     expect(retencaoNomeExibivel('Aluno'), isFalse);
     expect(retencaoItemsForFiltro(scores, null).single.alunoNome, 'Nathalia');
     expect(firstAltoRetencao(scores)?.alunoNome, 'Nathalia');
+    expect(
+      retencaoContagensSubtitulo(
+        alto: 9,
+        medio: 0,
+        saudavel: 0,
+        topNomeados: 1,
+      ),
+      contains('1 com nome no top'),
+    );
   });
 }
