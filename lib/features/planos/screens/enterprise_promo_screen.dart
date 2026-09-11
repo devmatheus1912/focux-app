@@ -149,7 +149,9 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s5),
                           Text(
-                            'Transforme seu negócio.\nExperimente o Enterprise.',
+                            useStore
+                                ? 'Enterprise com 30 dias grátis\nna ${subscriptionChannelLabel()}'
+                                : 'Transforme seu negócio.\nExperimente o Enterprise.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,
@@ -206,7 +208,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                     const SizedBox(width: TokensStrip.s2),
                                     Text(
                                       useStore
-                                          ? 'Assinatura pela loja'
+                                          ? '30 dias grátis na loja'
                                           : '$kPaywallMaxPlanTrialDays dias grátis',
                                       style: FocuxHubTypography.sectionTitle(
                                         context,
@@ -218,8 +220,9 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   useStore
-                                      ? 'Ofertas introdutórias são aplicadas pela '
-                                          '${subscriptionChannelLabel()} ao concluir a compra.'
+                                      ? 'O trial de 30 dias do Enterprise é aplicado pela '
+                                          '${subscriptionChannelLabel()} ao confirmar a assinatura. '
+                                          'Cancele na loja antes do fim do trial para não ser cobrado.'
                                       : 'Cancele antes de $dateStr para evitar cobrança.',
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
@@ -243,12 +246,12 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                             button: true,
                             label:
                                 useStore
-                                    ? 'Continuar na loja'
+                                    ? 'Começar 30 dias grátis na loja'
                                     : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
                             child: FxLiquidPrimaryButton(
                               label:
                                   useStore
-                                      ? 'Continuar na loja'
+                                      ? 'Começar 30 dias grátis'
                                       : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
                               loading: _starting,
                               onPressed: _starting ? null : _continueToCheckout,

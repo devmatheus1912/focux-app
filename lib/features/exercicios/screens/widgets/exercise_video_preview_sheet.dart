@@ -241,7 +241,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: AspectRatio(
-                    aspectRatio: 1,
+                    aspectRatio: 16 / 9,
                     child:
                         showSyncOnly
                             ? _PreviewLoading(mute: mute)
@@ -250,7 +250,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                             : Image.network(
                               displayUrl,
                               key: ValueKey(displayUrl),
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                               errorBuilder: (_, __, ___) {
                                 WidgetsBinding.instance.addPostFrameCallback((
                                   _,
@@ -407,9 +407,9 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
 
     return FxHomeSheetSurface(
       isDark: isDark,
-      expand: true,
-      maxHeight: MediaQuery.sizeOf(context).height * 0.82,
+      maxHeight: MediaQuery.sizeOf(context).height * 0.72,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -428,9 +428,11 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
             ),
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: AspectRatio(
+              // MoveKit e demos de academia são landscape — 16:9 evita letterbox alto.
+              aspectRatio: 16 / 9,
               child: ColoredBox(
                 color: Colors.black,
                 child:
@@ -456,6 +458,7 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
               ),
             ),
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

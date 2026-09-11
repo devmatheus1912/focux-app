@@ -322,16 +322,7 @@ class _TreinoDetailBody extends StatelessWidget {
                     icon: 'dumbbell',
                     title: 'Nenhum exercício ainda',
                     subtitle:
-                        'Adicione exercícios da biblioteca curada para montar este treino.',
-                    action: FxEmptyAction(
-                      label: 'Montar por modelo',
-                      onTap: () => openMontarPorModelo(
-                        context: context,
-                        ref: ref,
-                        treinoId: treinoId,
-                        alreadyInTreinoIds: const {},
-                      ),
-                    ),
+                        'Adicione da biblioteca ou monte rápido por um modelo de split.',
                   ),
                 ),
               )
@@ -361,10 +352,32 @@ class _TreinoDetailBody extends StatelessWidget {
               FxSettingsLayout.pageInset,
               TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
             ),
-            child: FxLiquidPrimaryButton(
-              label: 'Adicionar exercício',
-              onPressed: () => openAdd(),
-            ),
+            child:
+                treino.exercicios.isEmpty
+                    ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FxLiquidPrimaryButton(
+                          label: 'Adicionar exercício',
+                          onPressed: () => openAdd(),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => openMontarPorModelo(
+                            context: context,
+                            ref: ref,
+                            treinoId: treinoId,
+                            alreadyInTreinoIds: const {},
+                          ),
+                          child: const Text('Montar por modelo'),
+                        ),
+                      ],
+                    )
+                    : FxLiquidPrimaryButton(
+                      label: 'Adicionar exercício',
+                      onPressed: () => openAdd(),
+                    ),
           ),
         ),
       ],
