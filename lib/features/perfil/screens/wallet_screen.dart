@@ -33,6 +33,9 @@ import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../financeiro/data/financeiro_repository.dart';
+import '../../../core/widgets/feature_gate.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../subscription/models/subscription_plan.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/wallet_pix_validation.dart';
@@ -268,6 +271,18 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilWalletProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final features = ref.watch(planoFeaturesProvider).valueOrNull;
+    final hasFinanceiro = features?.financeiro == true;
+
+    if (features == null || !hasFinanceiro) {
+      return const FeatureGate(
+        featureName: 'Financeiro',
+        requiredPlan: SubscriptionPlan.PRO,
+        capability: 'financeiro',
+        child: SizedBox.shrink(),
+      );
+    }
+
     final showSticky = !perfilAsync.isLoading && !perfilAsync.hasError;
 
     return fxScreenA11yScope(

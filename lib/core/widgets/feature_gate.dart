@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../../features/dashboard/utils/dashboard_home_client_cache.dart';
 import '../../features/planos/utils/plano_capability.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/auth/providers/auth_provider.dart';
+import '../../features/onboarding/data/onboarding_repository.dart';
+import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
 import '../../features/subscription/plan_entitlements.dart';
@@ -14,6 +17,10 @@ import '../router/role_home.dart';
 import '../router/safe_navigation.dart';
 import '../theme/design_tokens.dart';
 import '../theme/tokens_strip.dart';
+import '../utils/friendly_error.dart';
+import 'feedback_helper.dart';
+import 'fx_empty_state.dart';
+import 'fx_motion.dart';
 import 'fx_shell_scaffold.dart';
 import 'skeleton_loader.dart';
 
@@ -241,14 +248,18 @@ class _LockedScreen extends ConsumerStatefulWidget {
 }
 
 class _LockedScreenState extends ConsumerState<_LockedScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Locked screen is enough — no auto-sheet on mount (evita spam de upsell).
-  }
+  var _skipping = false;
 
   @override
   Widget build(BuildContext context) {
+    final isAluno =
+        ref.read(authProvider.notifier).currentRole == UserRole.aluno;
+    if (isAluno) {
+      return _alunoLocked(context);
+    }
+
+    final fromAtivacao =
+        GoRouterState.of(context).uri.queryParameters['from'] == 'ativacao';
     final offer = PlanEntitlements.lockedOffer(
       featureName: widget.featureName,
       capability: widget.capability,
@@ -319,10 +330,67 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
                   ),
                 ),
               ),
+              if (fromAtivacao) ...[
+                const SizedBox(height: TokensStrip.s2),
+                FxLiquidSecondaryButton(
+                  label: _skipping ? 'Pulando…' : 'Pular por agora',
+                  onPressed: _skipping ? null : () => _pularAtivacao(context),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _alunoLocked(BuildContext context) {
+    return FxShellScaffold(
+      useMesh: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: BackButton(
+          onPressed: () => safePopOr(context, () => goToRoleHome(context, ref)),
+        ),
+      ),
+      body: FxEmptyState(
+        icon: 'lock',
+        title: 'Indisponível no momento',
+        subtitle:
+            'Seu personal ainda não liberou ${widget.featureName.toLowerCase()} '
+            'no plano dele. Fale com ele se precisar.',
+        action: FxEmptyAction(
+          label: 'Voltar',
+          onTap: () => safePopOr(context, () => goToRoleHome(context, ref)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pularAtivacao(BuildContext context) async {
+    setState(() => _skipping = true);
+    try {
+      await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
+      DashboardHomeClientCache.clear();
+      ref.invalidate(dashboardHomeProvider);
+      ref.invalidate(onboardingStatusProvider);
+      AnalyticsService.instance.track(
+        ProductEvents.setupWizardCompleted,
+        props: {
+          'source': 'feature_gate_skip',
+          'feature': widget.featureName,
+          if (widget.capability != null) 'capability': widget.capability!,
+        },
+      );
+      if (!context.mounted) return;
+      context.go('/dashboard/personal');
+    } catch (e) {
+      if (context.mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() => _skipping = false);
+    }
   }
 }

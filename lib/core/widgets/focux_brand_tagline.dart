@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../brand/focux_brand_copy.dart';
 import '../theme/focux_hub_typography.dart';
+import '../theme/tokens_strip.dart';
+import '../brand/focux_brand_copy.dart';
 
 /// Tagline de marca — hook unificado em splash, login e onboarding.
 class FocuxBrandTagline extends StatelessWidget {
@@ -21,6 +22,10 @@ class FocuxBrandTagline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mute = isDark
+        ? Colors.white.withValues(alpha: 0.88)
+        : TokensStrip.textPrimary.withValues(alpha: 0.88);
     final align = center ? TextAlign.center : TextAlign.left;
     final hook =
         aluno ? FocuxBrandCopy.onboardingHookAluno : FocuxBrandCopy.onboardingHook;
@@ -38,7 +43,7 @@ class FocuxBrandTagline extends StatelessWidget {
           textAlign: align,
           text: TextSpan(
             style: FocuxHubTypography.body(
-              color: Colors.white.withValues(alpha: 0.88),
+              color: mute,
             ).copyWith(
               fontSize: fontSize,
               fontWeight: FontWeight.w500,

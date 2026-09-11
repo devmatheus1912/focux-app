@@ -77,8 +77,8 @@ class _StudentToolsSection extends StatelessWidget {
       ),
       _StudentToolAction(
         icon: Icons.autorenew,
-        title: 'Assinatura',
-        subtitle: 'Recorrência',
+        title: 'Pagamento automático',
+        subtitle: 'Se o personal ativou',
         route: '/aluno/recorrencia',
       ),
       _StudentToolAction(

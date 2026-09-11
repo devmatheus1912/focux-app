@@ -26,7 +26,6 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
@@ -192,29 +191,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
           color: primary,
           isDark: isDark,
         ),
-        const SizedBox(height: TokensStrip.s3),
-        _atalhos(primary: primary, isDark: isDark),
-      ],
-    );
-  }
-
-  Widget _atalhos({required Color primary, required bool isDark}) {
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      children: [
-        DashboardHomeActionChip(
-          label: 'Assinatura',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.push('/aluno/recorrencia'),
-        ),
-        DashboardHomeActionChip(
-          label: 'Chat',
-          accent: primary,
-          isDark: isDark,
-          onPressed: () => context.push('/chat/aluno'),
-        ),
       ],
     );
   }
@@ -290,11 +266,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         title: 'Nenhuma mensalidade',
                                         subtitle:
                                             'Quando seu personal lançar uma cobrança, ela aparece aqui.',
-                                        action: FxEmptyAction(
-                                          label: 'Abrir chat',
-                                          onTap: () =>
-                                              context.push('/chat/aluno'),
-                                        ),
                                       ),
                                     ],
                                   )

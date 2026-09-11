@@ -15,12 +15,11 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../auth/utils/auth_layout.dart';
+import '../../onboarding/utils/onboarding_wizard_display.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../onboarding/utils/onboarding_wizard_display.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_activation_display.dart';
 
@@ -155,10 +154,14 @@ class AlunoActivationScreen extends ConsumerWidget {
                 ),
                 children: [
                   Center(
-                    child: FxConversionLockup(
-                      width: authLogoWidthFor(context, withTagline: true),
-                      semanticLabel: 'Focux ALUNO',
-                      aluno: true,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 64),
+                      child: FxConversionLockup(
+                        width: 96,
+                        semanticLabel: 'Focux ALUNO',
+                        aluno: true,
+                        taglineSize: 12.5,
+                      ),
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s4),

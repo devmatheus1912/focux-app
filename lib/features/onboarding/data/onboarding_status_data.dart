@@ -6,6 +6,7 @@ class OnboardingStatusData {
   final bool pacoteCriado;
   final bool habitoConfigurado;
   final bool linkBioConfigurado;
+  final bool wizardCompleto;
 
   OnboardingStatusData({
     required this.perfilCompleto,
@@ -15,6 +16,7 @@ class OnboardingStatusData {
     required this.pacoteCriado,
     required this.habitoConfigurado,
     required this.linkBioConfigurado,
+    this.wizardCompleto = false,
   });
 
   /// Ordem canônica: aluno → treino → perfil → PIX → pacote → hábito → link.
@@ -43,9 +45,11 @@ class OnboardingStatusData {
     return (etapasFeitas(includeLinkBio: includeLinkBio) * 100 / total).round();
   }
 
+  /// Fez todas as etapas **ou** encerrou o wizard (pular gated / concluir).
   bool ativacaoCompleta({bool includeLinkBio = true}) =>
+      wizardCompleto ||
       etapasFeitas(includeLinkBio: includeLinkBio) >=
-      etapasTotal(includeLinkBio: includeLinkBio);
+          etapasTotal(includeLinkBio: includeLinkBio);
 
   factory OnboardingStatusData.fromJson(Map<String, dynamic> json) {
     return OnboardingStatusData(
@@ -61,6 +65,7 @@ class OnboardingStatusData {
       pacoteCriado: json['pacoteCriado'] as bool? ?? false,
       habitoConfigurado: json['habitoConfigurado'] as bool? ?? false,
       linkBioConfigurado: json['linkBioConfigurado'] as bool? ?? false,
+      wizardCompleto: json['wizardCompleto'] as bool? ?? false,
     );
   }
 }

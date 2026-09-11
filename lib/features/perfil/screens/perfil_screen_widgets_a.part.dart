@@ -70,6 +70,11 @@ class _PerfilBodyState extends State<_PerfilBody> {
         subtitle: freshnessLabel,
         onBack: () => safePopOrGo(context, '/dashboard/personal'),
         actions: [
+          IconButton(
+            tooltip: 'Editar perfil',
+            onPressed: onEditPerfil,
+            icon: Icon(Icons.edit_outlined, color: chrome.ink),
+          ),
           FxHelpIconButton(
             tooltip: 'Sobre o perfil',
             onTap:
@@ -79,8 +84,8 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   subtitle: 'Conta, marca e operação em um lugar.',
                   tips: const [
                     FxHelpTip(
-                      'Completar',
-                      'Se faltar dado, o chip Completar leva ao formulário.',
+                      'Editar',
+                      'O lápis no topo abre o cadastro. Completar só aparece se faltar dado.',
                       icon: 'user',
                     ),
                     FxHelpTip(

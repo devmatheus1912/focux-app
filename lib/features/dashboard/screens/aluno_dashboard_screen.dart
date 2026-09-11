@@ -105,10 +105,17 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             homeAsync.when(
               data:
                   (home) => NotificacaoBadgeButton(
+                    size: FxHelpChrome.iconSize,
                     countOverride: home.notificacoesNaoLidas,
                   ),
-              loading: () => const NotificacaoBadgeButton(),
-              error: (_, __) => const NotificacaoBadgeButton(),
+              loading:
+                  () => const NotificacaoBadgeButton(
+                    size: FxHelpChrome.iconSize,
+                  ),
+              error:
+                  (_, __) => const NotificacaoBadgeButton(
+                    size: FxHelpChrome.iconSize,
+                  ),
             ),
             homeAsync.when(
               data:
@@ -124,7 +131,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
               loading:
                   () => const Padding(
                     padding: EdgeInsets.only(right: 12),
-                    child: CircleAvatar(radius: 17),
+                    child: CircleAvatar(radius: 18),
                   ),
               error: (_, __) => const SizedBox(width: 8),
             ),
