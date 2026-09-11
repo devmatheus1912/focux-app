@@ -52,8 +52,16 @@ void main() {
       '/dashboard/aluno',
     );
     expect(
+      resolveFcmTapRoute({'route': '/depoimentos'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
       resolveFcmTapRoute({'route': '/retencao'}, role: 'PERSONAL'),
       '/retencao',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/depoimentos'}, role: 'PERSONAL'),
+      '/depoimentos',
     );
   });
 

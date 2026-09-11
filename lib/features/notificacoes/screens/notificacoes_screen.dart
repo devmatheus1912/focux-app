@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/fcm/fcm_tap_route.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -20,6 +21,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
@@ -127,7 +129,15 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       }
       final route = item.route;
       if (route != null && route.startsWith('/') && context.mounted) {
-        context.push(route);
+        final role = ref.read(userRoleProvider);
+        final roleStr = role == UserRole.aluno ? 'ALUNO' : 'PERSONAL';
+        final sanitized = resolveFcmTapRoute(
+          {'route': route, 'type': item.tipo},
+          role: roleStr,
+        );
+        if (sanitized != null && context.mounted) {
+          context.push(sanitized);
+        }
       }
     }
 

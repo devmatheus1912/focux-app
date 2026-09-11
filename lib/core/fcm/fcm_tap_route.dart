@@ -108,6 +108,9 @@ bool _isPersonalOperationalHub(String route) {
     '/recorrencia',
     '/nps',
     '/chat/inbox',
+    '/depoimentos',
+    '/galeria',
+    '/feedback-videos',
   };
   if (hubs.contains(route)) return true;
   return route.startsWith('/leads/') || route.startsWith('/ferramentas/');
