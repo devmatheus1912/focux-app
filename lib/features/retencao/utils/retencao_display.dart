@@ -10,7 +10,9 @@ String retencaoRiscoLabel(String risco) => switch (risco.trim().toUpperCase()) {
 bool retencaoRiscoAlto(String risco) => risco.trim().toUpperCase() == 'ALTO';
 
 const retencaoComoCalculamos =
-    'Score 0–100: alto abaixo de 40, médio 40–69, saudável 70 ou mais. O catálogo pagina a base e busca pelo nome.';
+    'Score 0–100: alto abaixo de 40, médio 40–69, saudável 70 ou mais. '
+    'Contagens vêm do último score por aluno (podem incluir inativos). '
+    'O catálogo pagina a base e busca pelo nome.';
 
 const retencaoFiltroAlto = 'alto';
 
@@ -23,6 +25,23 @@ bool retencaoNomeExibivel(String nome) {
   final t = nome.trim();
   if (t.isEmpty) return false;
   return t.toLowerCase() != 'aluno';
+}
+
+/// Subtítulo do card de foco: contagens BE + recorte nomeado do top.
+String retencaoContagensSubtitulo({
+  required int alto,
+  required int medio,
+  required int saudavel,
+  required int topNomeados,
+}) {
+  final base = '$medio médios · $saudavel saudáveis';
+  if (alto > 0 && topNomeados == 0) {
+    return '$base · top sem nome — confira a base';
+  }
+  if (alto > topNomeados && topNomeados > 0) {
+    return '$base · $topNomeados com nome no top';
+  }
+  return base;
 }
 
 String retencaoNormalizeFiltro(String? raw) {

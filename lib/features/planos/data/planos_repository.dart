@@ -307,7 +307,11 @@ class PlanoFeatures {
   }
 
   factory PlanoFeatures.fromJson(Map<String, dynamic> j) {
-    final f = (j['features'] as Map?)?.cast<String, dynamic>() ?? const {};
+    final featuresRaw = j['features'];
+    final f =
+        featuresRaw is Map
+            ? featuresRaw.cast<String, dynamic>()
+            : const <String, dynamic>{};
     final plano = subscriptionPlanFromApi(j['plano'] as String?);
     return PlanoFeatures(
       plano: plano,
