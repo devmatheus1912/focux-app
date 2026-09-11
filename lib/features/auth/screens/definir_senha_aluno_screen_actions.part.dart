@@ -9,6 +9,7 @@ extension on _DefinirSenhaAlunoScreenState {
       message: definirSenhaSairMessage(),
       confirmLabel: definirSenhaSairConfirmLabel(),
       destructive: true,
+      forceDark: true,
     );
     if (!ok || !mounted) return;
     _saindo = true;
@@ -26,6 +27,7 @@ extension on _DefinirSenhaAlunoScreenState {
       context,
       title: definirSenhaHelpTitle(),
       subtitle: definirSenhaHelpSubtitle(),
+      forceDark: true,
       tips: [
         FxHelpTip('Provisória', definirSenhaHelpAtualBody(), icon: 'route'),
         FxHelpTip('Nova', definirSenhaHelpNovaBody(), icon: 'spark'),
@@ -42,6 +44,7 @@ extension on _DefinirSenhaAlunoScreenState {
       title: definirSenhaConfirmTitle(),
       message: definirSenhaConfirmMessage(),
       confirmLabel: definirSenhaSalvarLabel(),
+      forceDark: true,
     );
     if (!ok || !mounted) return;
     await _submit();

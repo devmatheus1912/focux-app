@@ -341,6 +341,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     if (_erro is IaOperationalException) {
       await IaQuotaUpgrade.showUpgradeDialog(
         context,
+        ref,
         error: _erro! as IaOperationalException,
         features: ref.read(planoFeaturesProvider).valueOrNull,
       );

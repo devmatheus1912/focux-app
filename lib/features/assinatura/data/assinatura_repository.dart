@@ -36,20 +36,24 @@ class AssinaturaRepository {
     final planosRaw = (raw['planos'] as List<dynamic>? ?? const []);
     final planos =
         planosRaw
-            .map((e) => Plano.fromJson(e as Map<String, dynamic>))
+            .whereType<Map>()
+            .map((e) => Plano.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-    final vitrineRaw =
-        (raw['vitrine'] as Map<String, dynamic>?) ?? <String, dynamic>{};
+    final vitrineRaw = raw['vitrine'];
+    final vitrineMap =
+        vitrineRaw is Map
+            ? Map<String, dynamic>.from(vitrineRaw)
+            : <String, dynamic>{};
     PaywallVitrineSnapshot vitrine;
     try {
-      vitrine = PaywallVitrineSnapshot.fromApi(vitrineRaw);
+      vitrine = PaywallVitrineSnapshot.fromApi(vitrineMap);
     } catch (_) {
       vitrine = PaywallVitrineSnapshot.fromCatalog();
     }
     PlanoFeatures? me;
     final meRaw = raw['me'];
-    if (meRaw is Map<String, dynamic>) {
-      me = PlanoFeatures.fromJson(meRaw);
+    if (meRaw is Map) {
+      me = PlanoFeatures.fromJson(Map<String, dynamic>.from(meRaw));
     }
     return PaywallHomeBundle(planos: planos, vitrine: vitrine, me: me);
   }

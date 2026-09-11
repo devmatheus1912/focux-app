@@ -2,14 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/ia/utils/ia_aluno_display.dart';
 
 void main() {
-  test('iaAlunoHubView labels', () {
+  test('aluno IA hub is chat-only', () {
+    expect(IaAlunoHubView.values, [IaAlunoHubView.chat]);
     expect(iaAlunoHubViewLabel(IaAlunoHubView.chat), 'Chat');
-    expect(iaAlunoHubViewLabel(IaAlunoHubView.progressao), 'Progressão');
     expect(
-      iaAlunoHubSubtitle(IaAlunoHubView.progressao),
-      contains('só se você pedir'),
+      iaAlunoHubSubtitle(IaAlunoHubView.chat),
+      'Pergunte sobre treino ou saúde',
     );
-    expect(iaAlunoComoCalculamos, contains('pedir'));
-    expect(iaChatComoCalculamos, contains('escreve'));
+    expect(iaAlunoComoCalculamos, contains('personal'));
   });
 }

@@ -22,6 +22,62 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
     return '${parts.first[0]}${parts[1][0]}'.toUpperCase();
   }
 
+  Future<void> _openMenu(BuildContext context) async {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    await showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        return FxHomeSheetSurface(
+          isDark: chrome.isDark,
+          maxHeight: MediaQuery.sizeOf(ctx).height * 0.42,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FxHomeSheetHandle(isDark: chrome.isDark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: chrome.isDark,
+                title: aluno.nome.split(' ').first,
+                subtitle: 'Conta do aluno',
+                leading: Icon(
+                  Icons.person_outline_rounded,
+                  color: primary,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              FxSatelliteListTile(
+                title: 'Perfil',
+                leading: Icon(Icons.person_outline_rounded, color: primary),
+                accent: primary,
+                margin: EdgeInsets.zero,
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  onProfile();
+                },
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              FxSatelliteListTile(
+                title: 'Sair',
+                leading: Icon(Icons.logout_rounded, color: EagleTokens.bad),
+                accent: EagleTokens.bad,
+                margin: EdgeInsets.zero,
+                onTap: () async {
+                  Navigator.of(ctx).pop();
+                  await onLogout();
+                },
+              ),
+              SizedBox(
+                height: TokensStrip.s4 + MediaQuery.paddingOf(ctx).bottom,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -29,57 +85,29 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(right: 12),
-      child: PopupMenuButton<_AlunoHeaderAction>(
-        tooltip: 'Perfil do aluno',
-        offset: const Offset(0, 42),
-        onSelected: (action) async {
-          switch (action) {
-            case _AlunoHeaderAction.profile:
-              onProfile();
-              break;
-            case _AlunoHeaderAction.logout:
-              await onLogout();
-              break;
-          }
-        },
-        itemBuilder:
-            (context) => const [
-              PopupMenuItem(
-                value: _AlunoHeaderAction.profile,
-                child: Row(
-                  children: [
-                    Icon(Icons.person_outline),
-                    SizedBox(width: 10),
-                    Text('Perfil'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: _AlunoHeaderAction.logout,
-                child: Row(
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 10),
-                    Text('Sair'),
-                  ],
-                ),
-              ),
-            ],
-        child: CircleAvatar(
-          radius: 18,
-          backgroundColor: BrandPalette.soft(primary, dark: isDark),
-          backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!.trim()) : null,
-          child:
-              hasFoto
-                  ? null
-                  : Text(
-                    _initials(aluno.nome),
-                    style: TextStyle(
-                      color: primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
+      child: Semantics(
+        button: true,
+        label: 'Perfil do aluno',
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: () => _openMenu(context),
+          child: CircleAvatar(
+            radius: 18,
+            backgroundColor: BrandPalette.soft(primary, dark: isDark),
+            backgroundImage:
+                hasFoto ? NetworkImage(aluno.fotoUrl!.trim()) : null,
+            child:
+                hasFoto
+                    ? null
+                    : Text(
+                      _initials(aluno.nome),
+                      style: TextStyle(
+                        color: primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
+          ),
         ),
       ),
     );

@@ -740,7 +740,7 @@ class _MediaMetadataPanel extends StatelessWidget {
   String _formatSource(String value) {
     return switch (value) {
       'FOCUX_LIBRARY' => 'Biblioteca Focux',
-      'PERSONAL_UPLOAD' => 'Video do personal',
+      'PERSONAL_UPLOAD' => 'Enviado pelo personal',
       _ => value.replaceAll('_', ' '),
     };
   }

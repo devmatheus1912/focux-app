@@ -71,10 +71,12 @@ Future<void> showFxHelpSheet(
   List<FxHelpTip> tips = const [],
   String? footer,
   List<Widget> extra = const [],
+  bool forceDark = false,
 }) {
   HapticFeedback.selectionClick();
   return showFxHomeSheet<void>(
     context,
+    forceDark: forceDark,
     builder: (ctx) {
       final isDark = Theme.of(ctx).brightness == Brightness.dark;
       return FxHelpSheetFrame(

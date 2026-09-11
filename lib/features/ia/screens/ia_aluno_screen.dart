@@ -8,14 +8,9 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/chat/data/chat_repository.dart';
 import '../data/ia_repository.dart';
-import '../models/ia_progressao_carga_result.dart';
-import '../widgets/ia_progressao_loading_skeleton.dart';
-import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_chat_composer.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import '../../../core/widgets/fx_loading.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
-import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -27,7 +22,6 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -41,12 +35,11 @@ class IaAlunoScreen extends ConsumerStatefulWidget {
 }
 
 class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
-  IaAlunoHubView _view = IaAlunoHubView.chat;
+  static const _view = IaAlunoHubView.chat;
   int? _alunoId;
   bool _resolving = true;
   Object? _resolveError;
   DateTime? _fetchedAt;
-  final _generateTick = ValueNotifier<int>(0);
   final _focusChatTick = ValueNotifier<int>(0);
 
   @override
@@ -57,23 +50,8 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
 
   @override
   void dispose() {
-    _generateTick.dispose();
     _focusChatTick.dispose();
     super.dispose();
-  }
-
-  Future<void> _abrirVista() async {
-    final picked = await showFxInsetPickerSheet<IaAlunoHubView>(
-      context,
-      title: 'Ver',
-      selected: _view,
-      items: [
-        for (final v in IaAlunoHubView.values)
-          FxInsetPickerSheetItem(value: v, label: iaAlunoHubViewLabel(v)),
-      ],
-    );
-    if (!mounted || picked == null || picked == _view) return;
-    setState(() => _view = picked);
   }
 
   Future<void> _resolverAlunoId() async {
@@ -157,16 +135,11 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
                 tips: const [
                   FxHelpTip('Como calculamos', iaAlunoComoCalculamos),
                   FxHelpTip(
-                    'Visão',
-                    'Chat responde perguntas. Progressão só gera se você pedir.',
+                    'Chat',
+                    'Pergunte sobre treino ou saúde. Progressão de carga fica com o personal.',
                   ),
                 ],
               ),
-            ),
-            ShellHeaderIconButton(
-              icon: 'spark',
-              tooltip: 'Trocar visão',
-              onTap: _abrirVista,
             ),
           ],
         ),
@@ -218,38 +191,19 @@ class _IaAlunoScreenState extends ConsumerState<IaAlunoScreen> {
                               ),
                               const SizedBox(height: TokensStrip.s3),
                               DashboardHomeActionChip(
-                                label:
-                                    _view == IaAlunoHubView.chat
-                                        ? 'Fazer pergunta'
-                                        : 'Gerar progressão',
+                                label: 'Fazer pergunta',
                                 accent: primary,
                                 isDark: chrome.isDark,
-                                onPressed: () {
-                                  if (_view == IaAlunoHubView.chat) {
-                                    setState(() => _view = IaAlunoHubView.chat);
-                                    _focusChatTick.value++;
-                                  } else {
-                                    _generateTick.value++;
-                                  }
-                                },
+                                onPressed: () => _focusChatTick.value++,
                               ),
                             ],
                           ),
                         ),
                       ),
                       Expanded(
-                        child: IndexedStack(
-                          index: _view.index,
-                          children: [
-                            _ChatTab(
-                              alunoId: _alunoId,
-                              focusChatTick: _focusChatTick,
-                            ),
-                            _ProgressaoTab(
-                              alunoId: _alunoId,
-                              generateTick: _generateTick,
-                            ),
-                          ],
+                        child: _ChatTab(
+                          alunoId: _alunoId,
+                          focusChatTick: _focusChatTick,
                         ),
                       ),
                     ],
@@ -471,141 +425,3 @@ class _ChatTabState extends ConsumerState<_ChatTab> {
   }
 }
 
-// ─── Progressão Tab ───────────────────────────────────────────────────────────
-
-class _ProgressaoTab extends ConsumerStatefulWidget {
-  final int? alunoId;
-  final ValueNotifier<int> generateTick;
-  const _ProgressaoTab({this.alunoId, required this.generateTick});
-
-  @override
-  ConsumerState<_ProgressaoTab> createState() => _ProgressaoTabState();
-}
-
-class _ProgressaoTabState extends ConsumerState<_ProgressaoTab> {
-  bool _loading = false;
-  IaProgressaoCargaResult? _resultado;
-  Object? _erro;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.generateTick.addListener(_onGenerateTick);
-  }
-
-  @override
-  void didUpdateWidget(covariant _ProgressaoTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.generateTick != widget.generateTick) {
-      oldWidget.generateTick.removeListener(_onGenerateTick);
-      widget.generateTick.addListener(_onGenerateTick);
-    }
-  }
-
-  void _onGenerateTick() {
-    if (!mounted || _loading) return;
-    _gerarProgressao();
-  }
-
-  @override
-  void dispose() {
-    widget.generateTick.removeListener(_onGenerateTick);
-    super.dispose();
-  }
-
-  Future<void> _gerarProgressao() async {
-    final id = widget.alunoId;
-    if (id == null || id <= 0) {
-      FeedbackHelper.showError(
-        context,
-        'Não foi possível identificar seu perfil de aluno.',
-      );
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _resultado = null;
-      _erro = null;
-    });
-    try {
-      final repo = IaRepository(ref.read(apiClientProvider));
-      final r = await repo.progressaoCarga(id);
-      if (mounted) setState(() => _resultado = r);
-    } catch (e) {
-      if (mounted) {
-        setState(() => _erro = e);
-        await IaQuotaUpgrade.handleError(context, ref, e);
-      }
-    }
-    if (mounted) setState(() => _loading = false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    return SingleChildScrollView(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.all(TokensStrip.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (_resultado == null && !_loading && _erro == null)
-            FxEmptyState(
-              icon: 'spark',
-              title: 'Progressão de carga',
-              subtitle:
-                  'Gere recomendações com base no seu histórico de treinos.',
-              action: FxEmptyAction(
-                label: 'Gerar recomendações',
-                onTap: _gerarProgressao,
-              ),
-            )
-          else ...[
-            Text(
-              'Progressão de Carga',
-              style: FocuxHubTypography.sectionTitle(
-                context,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Gere recomendações personalizadas de progressão de carga com base no seu histórico de treinos.',
-              style: TextStyle(color: TokensStrip.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            const IaSafetyDisclaimer(compact: true),
-            const SizedBox(height: 20),
-            FxLiquidPrimaryButton(
-              label: _loading ? 'Analisando...' : 'Gerar Recomendações',
-              icon: Icons.auto_awesome,
-              loading: _loading,
-              onPressed: _loading ? null : _gerarProgressao,
-            ),
-          ],
-          if (_loading) const IaProgressaoLoadingSkeleton(),
-          if (_erro != null) ...[
-            const SizedBox(height: TokensStrip.s4),
-            FxErrorState(
-              chromeOnDark: chrome.isDark,
-              primary: primary,
-              message: friendlyError(_erro!),
-              onRetry: _gerarProgressao,
-            ),
-          ],
-          if (_resultado != null) ...[
-            const SizedBox(height: 20),
-            const Divider(),
-            const SizedBox(height: 8),
-            IaProgressaoResultView(
-              result: _resultado!,
-              showSectionTitle: false,
-              showApplyTreino: false,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}

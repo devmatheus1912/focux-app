@@ -22,9 +22,12 @@ Future<bool> showFxConfirmSheet(
   IconData? confirmIcon,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
+  /// Auth S6: força chrome dark de marca (não herda light do SO).
+  bool forceDark = false,
 }) async {
   final confirmed = await showFxHomeSheet<bool>(
     context,
+    forceDark: forceDark,
     builder:
         (ctx) => _FxConfirmSheet(
           title: title,
