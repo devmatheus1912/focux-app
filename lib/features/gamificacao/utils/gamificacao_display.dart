@@ -77,7 +77,7 @@ String gamificacaoRotaDoBadge(String tipo, {required bool isAluno}) {
   if (!isAluno) return '/alunos';
   switch (tipo.trim().toUpperCase()) {
     case 'FIRST_AI':
-      return '/ia/aluno';
+      return '/chat/aluno';
     default:
       return '/checkin';
   }

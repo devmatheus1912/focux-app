@@ -45,6 +45,13 @@ class _StudentToolsSection extends StatelessWidget {
       group: _StudentToolGroup.saude,
     ),
     _StudentToolAction(
+      icon: Icons.route_outlined,
+      title: 'Trilhas',
+      subtitle: 'Metas e progresso',
+      route: '/aluno/trilhas',
+      group: _StudentToolGroup.saude,
+    ),
+    _StudentToolAction(
       icon: Icons.watch_outlined,
       title: 'Prontidão',
       subtitle: 'Wearables',

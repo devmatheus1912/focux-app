@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
 import '../models/checkin_personal_home.dart';
+import '../utils/checkin_json.dart';
 
 class ExecucaoExercicio {
   final int id;
@@ -66,36 +67,39 @@ class ExecucaoExercicio {
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) =>
       ExecucaoExercicio(
-        id: j['id'] as int,
-        treinoExercicioId: j['treinoExercicioId'] as int,
-        exercicioNome: j['exercicioNome'] as String,
-        gifUrl: j['gifUrl'] as String?,
-        thumbnailUrl: j['thumbnailUrl'] as String?,
-        videoUrl: j['videoUrl'] as String?,
-        videoSource: j['videoSource'] as String?,
-        licenseStatus: j['licenseStatus'] as String?,
-        errosComuns: j['errosComuns'] as String?,
-        contraindicacoes: j['contraindicacoes'] as String?,
-        substitutos: j['substitutos'] as String?,
-        series: j['series'] as int?,
-        repeticoes: j['repeticoes'] as String?,
-        cargaKg: _toDouble(j['cargaKg']),
-        descansoSegundos: j['descansoSegundos'] as int?,
-        observacoes: j['observacoes'] as String?,
-        seriesFeitas: j['seriesFeitas'] as int,
-        concluido: j['concluido'] as bool,
-        feedback: j['feedback'] as String?,
-        rpe: j['rpe'] as int?,
-        rpeAlvo: (j['rpeAlvo'] as num?)?.toInt(),
-        dor: j['dor'] as bool? ?? false,
-        cargaAnteriorKg: _toDouble(j['cargaAnteriorKg']),
-        seriesFeitasAnterior: j['seriesFeitasAnterior'] as int?,
-        feedbackAnterior: j['feedbackAnterior'] as String?,
-        rpeAnterior: j['rpeAnterior'] as int?,
-        dorAnterior: j['dorAnterior'] as bool?,
+        id: checkinJsonIntOr(j['id']),
+        treinoExercicioId: checkinJsonIntOr(j['treinoExercicioId']),
+        exercicioNome: checkinJsonStringOr(j['exercicioNome'], 'Exercício'),
+        gifUrl: checkinJsonString(j['gifUrl']),
+        thumbnailUrl: checkinJsonString(j['thumbnailUrl']),
+        videoUrl: checkinJsonString(j['videoUrl']),
+        videoSource: checkinJsonString(j['videoSource']),
+        licenseStatus: checkinJsonString(j['licenseStatus']),
+        errosComuns: checkinJsonString(j['errosComuns']),
+        contraindicacoes: checkinJsonString(j['contraindicacoes']),
+        substitutos: checkinJsonString(j['substitutos']),
+        series: checkinJsonInt(j['series']),
+        repeticoes: checkinJsonString(j['repeticoes']),
+        cargaKg: checkinJsonDouble(j['cargaKg']),
+        descansoSegundos: checkinJsonInt(j['descansoSegundos']),
+        observacoes: checkinJsonString(j['observacoes']),
+        seriesFeitas: checkinJsonIntOr(j['seriesFeitas']),
+        concluido: checkinJsonBool(j['concluido']),
+        feedback: checkinJsonString(j['feedback']),
+        rpe: checkinJsonInt(j['rpe']),
+        rpeAlvo: checkinJsonInt(j['rpeAlvo']),
+        dor: checkinJsonBool(j['dor']),
+        cargaAnteriorKg: checkinJsonDouble(j['cargaAnteriorKg']),
+        seriesFeitasAnterior: checkinJsonInt(j['seriesFeitasAnterior']),
+        feedbackAnterior: checkinJsonString(j['feedbackAnterior']),
+        rpeAnterior: checkinJsonInt(j['rpeAnterior']),
+        dorAnterior:
+            j['dorAnterior'] == null
+                ? null
+                : checkinJsonBool(j['dorAnterior']),
         seriesDetalhes:
-            (j['seriesDetalhes'] as List<dynamic>? ?? const [])
-                .map((e) => ExecucaoSerie.fromJson(e as Map<String, dynamic>))
+            checkinJsonMapList(j['seriesDetalhes'])
+                .map(ExecucaoSerie.fromJson)
                 .toList(),
       );
 
@@ -190,14 +194,14 @@ class ExecucaoSerie {
   });
 
   factory ExecucaoSerie.fromJson(Map<String, dynamic> json) => ExecucaoSerie(
-    id: json['id'] as int,
-    numero: json['numero'] as int,
-    cargaKg: _toDouble(json['cargaKg']),
-    repeticoes: json['repeticoes'] as String?,
-    feedback: json['feedback'] as String?,
-    rpe: json['rpe'] as int?,
-    dor: json['dor'] as bool? ?? false,
-    criadoEm: json['criadoEm'] as String?,
+    id: checkinJsonIntOr(json['id']),
+    numero: checkinJsonIntOr(json['numero']),
+    cargaKg: checkinJsonDouble(json['cargaKg']),
+    repeticoes: checkinJsonString(json['repeticoes']),
+    feedback: checkinJsonString(json['feedback']),
+    rpe: checkinJsonInt(json['rpe']),
+    dor: checkinJsonBool(json['dor']),
+    criadoEm: checkinJsonString(json['criadoEm']),
   );
 
   Map<String, dynamic> toJson() => {
@@ -210,12 +214,6 @@ class ExecucaoSerie {
     'dor': dor,
     'criadoEm': criadoEm,
   };
-}
-
-double? _toDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is num) return value.toDouble();
-  return double.tryParse(value.toString());
 }
 
 class ExecucaoTreino {
@@ -242,24 +240,20 @@ class ExecucaoTreino {
   });
 
   factory ExecucaoTreino.fromJson(Map<String, dynamic> j) => ExecucaoTreino(
-    id: j['id'] as int?,
-    treinoId: j['treinoId'] as int,
-    treinoNome: j['treinoNome'] as String,
-    status: j['status'] as String,
-    iniciadoEm: j['iniciadoEm'] as String?,
-    concluidoEm: j['concluidoEm'] as String?,
+    id: checkinJsonInt(j['id']),
+    treinoId: checkinJsonIntOr(j['treinoId']),
+    treinoNome: checkinJsonStringOr(j['treinoNome'], 'Treino'),
+    status: checkinJsonStringOr(j['status'], 'PENDENTE'),
+    iniciadoEm: checkinJsonString(j['iniciadoEm']),
+    concluidoEm: checkinJsonString(j['concluidoEm']),
     exercicios:
-        (j['exercicios'] as List<dynamic>? ?? const [])
-            .map((e) => ExecucaoExercicio.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        checkinJsonMapList(j['exercicios']).map(ExecucaoExercicio.fromJson).toList(),
     evolucoesCarga:
-        (j['evolucoesCarga'] as List<dynamic>? ?? const [])
-            .map((e) => EvolucaoCarga.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        checkinJsonMapList(j['evolucoesCarga']).map(EvolucaoCarga.fromJson).toList(),
     evolucoesPerformance:
-        (j['evolucoesPerformance'] as List<dynamic>? ?? const [])
-            .map((e) => EvolucaoPerformance.fromJson(e as Map<String, dynamic>))
-            .toList(),
+        checkinJsonMapList(
+          j['evolucoesPerformance'],
+        ).map(EvolucaoPerformance.fromJson).toList(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -295,13 +289,13 @@ class EvolucaoCarga {
   });
 
   factory EvolucaoCarga.fromJson(Map<String, dynamic> json) => EvolucaoCarga(
-    exercicioId: json['exercicioId'] as int,
-    exercicioNome: json['exercicioNome'] as String,
-    cargaAnteriorKg: _toDouble(json['cargaAnteriorKg']) ?? 0,
-    cargaAtualKg: _toDouble(json['cargaAtualKg']) ?? 0,
-    diferencaKg: _toDouble(json['diferencaKg']) ?? 0,
-    percentual: json['percentual'] as int?,
-    mensagem: json['mensagem'] as String? ?? '',
+    exercicioId: checkinJsonIntOr(json['exercicioId']),
+    exercicioNome: checkinJsonStringOr(json['exercicioNome'], 'Exercício'),
+    cargaAnteriorKg: checkinJsonDouble(json['cargaAnteriorKg']) ?? 0,
+    cargaAtualKg: checkinJsonDouble(json['cargaAtualKg']) ?? 0,
+    diferencaKg: checkinJsonDouble(json['diferencaKg']) ?? 0,
+    percentual: checkinJsonInt(json['percentual']),
+    mensagem: checkinJsonStringOr(json['mensagem']),
   );
 }
 
@@ -330,16 +324,51 @@ class EvolucaoPerformance {
 
   factory EvolucaoPerformance.fromJson(Map<String, dynamic> json) =>
       EvolucaoPerformance(
-        tipo: json['tipo'] as String? ?? 'CARGA',
-        exercicioId: json['exercicioId'] as int,
-        exercicioNome: json['exercicioNome'] as String,
-        valorAnterior: _toDouble(json['valorAnterior']) ?? 0,
-        valorAtual: _toDouble(json['valorAtual']) ?? 0,
-        diferenca: _toDouble(json['diferenca']) ?? 0,
-        percentual: json['percentual'] as int?,
-        unidade: json['unidade'] as String? ?? '',
-        mensagem: json['mensagem'] as String? ?? '',
+        tipo: checkinJsonStringOr(json['tipo'], 'CARGA'),
+        exercicioId: checkinJsonIntOr(json['exercicioId']),
+        exercicioNome: checkinJsonStringOr(json['exercicioNome'], 'Exercício'),
+        valorAnterior: checkinJsonDouble(json['valorAnterior']) ?? 0,
+        valorAtual: checkinJsonDouble(json['valorAtual']) ?? 0,
+        diferenca: checkinJsonDouble(json['diferenca']) ?? 0,
+        percentual: checkinJsonInt(json['percentual']),
+        unidade: checkinJsonStringOr(json['unidade']),
+        mensagem: checkinJsonStringOr(json['mensagem']),
       );
+}
+
+Pagina<ExecucaoTreino> parseExecucaoTreinoPagina(Map<String, dynamic> json) {
+  final raw = json['content'];
+  if (raw is! List) {
+    throw FormatException(
+      'Pagina exige content (array). Chaves recebidas: ${json.keys.join(', ')}',
+    );
+  }
+  final content = <ExecucaoTreino>[];
+  for (final item in raw) {
+    final map = checkinJsonMap(item);
+    if (map == null) continue;
+    try {
+      content.add(ExecucaoTreino.fromJson(map));
+    } catch (_) {
+      // Linha corrompida não derruba a lista inteira.
+    }
+  }
+  return Pagina<ExecucaoTreino>(
+    content: content,
+    hasNext: json['hasNext'] == true,
+    page: checkinJsonInt(json['page']),
+    size: checkinJsonInt(json['size']),
+    totalElements: checkinJsonInt(json['totalElements']),
+    nextCursor: checkinJsonString(json['nextCursor']),
+  );
+}
+
+Map<String, dynamic> _requireJsonMap(dynamic data, String endpoint) {
+  final map = checkinJsonMap(data);
+  if (map == null) {
+    throw FormatException('$endpoint devolve objeto JSON.');
+  }
+  return map;
 }
 
 class CheckinRepository {
@@ -361,10 +390,7 @@ class CheckinRepository {
         'GET /api/checkin/meus-treinos devolve Pagina, não lista crua.',
       );
     }
-    return Pagina.fromJson(
-      Map<String, dynamic>.from(data),
-      (e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>),
-    );
+    return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
   }
 
   Future<List<ExecucaoTreino>> meusTreinos({int page = 0, int size = 20}) async {
@@ -376,7 +402,9 @@ class CheckinRepository {
       '/api/checkin/iniciar',
       data: {'treinoId': treinoId},
     );
-    return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'POST /api/checkin/iniciar'),
+    );
   }
 
   Future<ExecucaoExercicio> marcarExercicio(
@@ -396,7 +424,12 @@ class CheckinRepository {
         if (dor != null) 'dor': dor,
       },
     );
-    return ExecucaoExercicio.fromJson(r.data as Map<String, dynamic>);
+    return ExecucaoExercicio.fromJson(
+      _requireJsonMap(
+        r.data,
+        'PUT /api/checkin/{id}/exercicio/{treinoExercicioId}',
+      ),
+    );
   }
 
   Future<ExecucaoExercicio> registrarSerie(
@@ -421,21 +454,26 @@ class CheckinRepository {
         if (dor != null) 'dor': dor,
       },
     );
-    return ExecucaoExercicio.fromJson(r.data as Map<String, dynamic>);
+    return ExecucaoExercicio.fromJson(
+      _requireJsonMap(
+        r.data,
+        'POST /api/checkin/{id}/exercicio/{treinoExercicioId}/series',
+      ),
+    );
   }
 
   Future<ExecucaoTreino> concluir(int execucaoId) async {
     final r = await _dio.put('/api/checkin/$execucaoId/concluir');
-    return ExecucaoTreino.fromJson(r.data as Map<String, dynamic>);
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'PUT /api/checkin/{id}/concluir'),
+    );
   }
 
   Future<ExecucaoTreino> detalhe(int execucaoId) async {
     final r = await _dio.get('/api/checkin/$execucaoId');
-    final data = r.data;
-    if (data is! Map) {
-      throw FormatException('GET /api/checkin/{id} devolve a execução.');
-    }
-    return ExecucaoTreino.fromJson(Map<String, dynamic>.from(data));
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'GET /api/checkin/{id}'),
+    );
   }
 
   Future<Pagina<ExecucaoTreino>> historico({
@@ -461,10 +499,7 @@ class CheckinRepository {
         'GET /api/checkin/historico devolve Pagina, não lista crua.',
       );
     }
-    return Pagina.fromJson(
-      Map<String, dynamic>.from(data),
-      (item) => ExecucaoTreino.fromJson(Map<String, dynamic>.from(item as Map)),
-    );
+    return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
   }
 
   static const personalHomePageSize = 20;
@@ -483,7 +518,7 @@ class CheckinRepository {
       },
     );
     return CheckinPersonalHomeBundle.fromJson(
-      Map<String, dynamic>.from(r.data as Map),
+      _requireJsonMap(r.data, 'GET /api/checkin/personal/home'),
     );
   }
 }

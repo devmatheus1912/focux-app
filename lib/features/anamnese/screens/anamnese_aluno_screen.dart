@@ -138,7 +138,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
       );
       if (!ok || !mounted) return;
     }
-    safePopOrGo(context, '/dashboard/aluno');
+    safePopOrGo(context, '/aluno/perfil');
   }
 
   @override
@@ -377,20 +377,21 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                   )
                   : SafeArea(
             bottom: false,
-            child: FxContentWidthLimiter(
-              child: RefreshIndicator(
-                onRefresh: _load,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    8,
-                    FxSettingsLayout.pageInset,
-                    24,
-                  ),
-                  children: [
+            child: FxKeyboardDismissScope(
+              child: FxContentWidthLimiter(
+                child: RefreshIndicator(
+                  onRefresh: _load,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    padding: EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      8,
+                      FxSettingsLayout.pageInset,
+                      24 + MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    children: [
                     if (showBanner) ...[
                     AnamneseStatusBanner(
                       title: _enviada && !a.alunoDevePreencher
@@ -659,6 +660,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
               ),
             ),
           ),
+        ),
         ),
         ),
       ),

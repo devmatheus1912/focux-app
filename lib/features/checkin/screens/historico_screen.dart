@@ -12,6 +12,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -104,11 +105,17 @@ class _HistoricoCheckinScreenState
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _erro = friendlyError(e);
-        _loading = false;
-        _loadingMore = false;
-      });
+      final message = friendlyError(e);
+      if (reset) {
+        setState(() {
+          _erro = message;
+          _loading = false;
+          _loadingMore = false;
+        });
+      } else {
+        setState(() => _loadingMore = false);
+        FeedbackHelper.showError(context, message);
+      }
     }
   }
 
@@ -160,6 +167,8 @@ class _HistoricoCheckinScreenState
                 : '${historicoCountLabel(count)}${_hasNext ? '+' : ''}',
             _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
           ),
+          showBack: true,
+          fallbackLocation: '/checkin/treinos',
           onBack: _leave,
           actions: [
             FxHelpIconButton(

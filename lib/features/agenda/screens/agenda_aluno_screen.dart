@@ -222,10 +222,14 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Minha Agenda',
       child: PopScope(
-        canPop: !keyboardOpen,
+        canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          FxKeyboardDismissScope.dismiss();
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
           useMesh: true,
@@ -335,10 +339,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                   icon: searching ? 'search' : 'calendar',
                   title: searching
                       ? 'Nenhum compromisso encontrado'
-                      : 'Nenhum agendamento',
+                      : 'Nenhuma sessão marcada',
                   subtitle: searching
                       ? 'Ajuste a busca ou o filtro para achar outra sessão.'
-                      : 'Quando seu personal marcar uma sessão, ela aparece aqui. Dúvida? Fale no chat.',
+                      : 'Seu personal ainda não agendou nada com você. Quando marcar, aparece aqui.',
                   action: searching
                       ? FxEmptyAction(
                           label: 'Limpar filtros',

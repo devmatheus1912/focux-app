@@ -64,7 +64,7 @@ void main() {
     expect(screen, isNot(contains('/ia/aluno')));
     expect(screen, isNot(contains('/aluno/form-check')));
     expect(screen, isNot(contains('/aluno/desafios')));
-    expect(screen, isNot(contains('/aluno/trilhas')));
+    expect(screen, contains('/aluno/trilhas'));
     expect(screen, isNot(contains('/aluno/grupo-aulas')));
     expect(screen, isNot(contains('/gamificacao')));
     expect(screen, isNot(contains('FxSatelliteListTile')));

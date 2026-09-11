@@ -16,13 +16,16 @@ void main() {
     expect(screen, contains('meusAgendamentosPagina'));
     expect(screen, contains('FxHubFreshness.joinCount'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains('canPop: false'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('icalTokenAluno'));
     expect(screen, contains('Confirmar presença'));
     expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('Nenhuma sessão marcada'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('markAlunoAgendaReviewed'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('context.pop()')));
     expect(screen, isNot(contains('FilledButton')));

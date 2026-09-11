@@ -110,11 +110,12 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     type: _s5,
     hasInput: true,
     logicalParent: _alunoHome,
+    redirectTo: _alunoHome,
   ),
   '/aluno/anamnese': FocuxSurfaceSpec(
     type: _s5,
     hasInput: true,
-    logicalParent: _alunoHome,
+    logicalParent: '/aluno/perfil',
   ),
   '/dashboard/qualidade': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
   '/dashboard/command-center/copiloto': FocuxSurfaceSpec(

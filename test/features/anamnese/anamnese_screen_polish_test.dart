@@ -47,6 +47,7 @@ void main() {
     );
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('showFxInsetPickerSheet'));
@@ -55,6 +56,8 @@ void main() {
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains("safePopOrGo(context, '/aluno/perfil')"));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('PAR-Q+'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('salvarMinha'));

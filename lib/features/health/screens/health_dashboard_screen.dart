@@ -26,7 +26,6 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import '../utils/health_dashboard_display.dart';
-import 'package:focux_app/core/widgets/feedback_helper.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -88,11 +87,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       if (mounted) {
         setState(() {
           _loading = false;
+          _erro = 'Saúde não disponível neste dispositivo';
         });
-        FeedbackHelper.showError(
-          context,
-          'Saúde não disponível neste dispositivo',
-        );
       }
     }
   }

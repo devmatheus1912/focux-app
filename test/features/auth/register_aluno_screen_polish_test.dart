@@ -21,6 +21,9 @@ void main() {
     expect(screen, contains('minLength: 8'));
     expect(screen, contains('Mín. 8 caracteres'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains('canPop: false'));
+    expect(screen, contains('_voltar'));
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('authUnfocusAndGo'));
     expect(screen, contains('AutofillHints.email'));

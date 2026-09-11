@@ -13,37 +13,16 @@ void main() {
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(
-      screen,
-      anyOf(
-        contains('FxContentWidthLimiter'),
-        isNot(contains('constrainWidth: false')),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('FxKeyboardDismissScope'));
+    expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('/dashboard/aluno'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('showDialog')));
     expect(screen, contains('_showImageViewer'));

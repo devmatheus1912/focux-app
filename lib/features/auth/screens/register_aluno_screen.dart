@@ -127,42 +127,56 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
     }
   }
 
+  String get _loginFallback {
+    final slug = widget.personalSlug?.trim();
+    if (slug == null || slug.isEmpty) return '/login?role=aluno';
+    return '/login?role=aluno&p=${Uri.encodeComponent(slug)}';
+  }
+
+  void _voltar() {
+    if (_loading) return;
+    authUnfocusAndLeave(context, _loginFallback);
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
 
     return fxScreenA11yScope(
       label: 'Criar conta aluno',
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light,
-          statusBarBrightness: Brightness.dark,
-        ),
-        child: Scaffold(
-          body: AuthShell(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s5,
-                    TokensStrip.s2,
-                    TokensStrip.s5,
-                    0,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          if (MediaQuery.viewInsetsOf(context).bottom > 0) {
+            FocusManager.instance.primaryFocus?.unfocus();
+            return;
+          }
+          _voltar();
+        },
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            body: AuthShell(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s5,
+                      TokensStrip.s2,
+                      TokensStrip.s5,
+                      0,
+                    ),
+                    child: AuthStickyRoleBar(
+                      roleLabel: 'ALUNO',
+                      onBack: _voltar,
+                    ),
                   ),
-                  child: AuthStickyRoleBar(
-                    roleLabel: 'ALUNO',
-                    onBack:
-                        () => authUnfocusAndLeave(
-                          context,
-                          widget.personalSlug == null ||
-                                  widget.personalSlug!.trim().isEmpty
-                              ? '/login?role=aluno'
-                              : '/login?role=aluno&p=${Uri.encodeComponent(widget.personalSlug!.trim())}',
-                        ),
-                  ),
-                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: authScrollPadding(
@@ -384,6 +398,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

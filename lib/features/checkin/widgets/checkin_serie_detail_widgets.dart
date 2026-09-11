@@ -7,6 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -127,73 +128,75 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
       isDark: dark,
       maxHeight:
           MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FxHomeSheetHandle(isDark: dark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: dark,
-              title: widget.title,
-              leading: Icon(
-                Icons.fitness_center_rounded,
-                color: brand,
-                size: 18,
-              ),
-            ),
-            const SizedBox(height: 14),
-            if (widget.prescricacaoHint != null) ...[
-              Text(
-                widget.prescricacaoHint!,
-                style: TextStyle(
-                  color: mute,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
+      child: FxKeyboardDismissScope(
+        child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FxHomeSheetHandle(isDark: dark),
+              SizedBox(height: TokensStrip.s4),
+              FxHomeSheetHeader(
+                isDark: dark,
+                title: widget.title,
+                leading: Icon(
+                  Icons.fitness_center_rounded,
+                  color: brand,
+                  size: 18,
                 ),
               ),
-              const SizedBox(height: TokensStrip.s3),
-            ],
-            Row(
-              children: [
-                Expanded(
-                  child: CheckinSerieField(
-                    controller: _cargaController,
-                    label: 'Carga',
-                    suffix: 'kg',
-                    icon: Icons.scale_rounded,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
-                    ],
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    dark: dark,
+              const SizedBox(height: 14),
+              if (widget.prescricacaoHint != null) ...[
+                Text(
+                  widget.prescricacaoHint!,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: CheckinSerieField(
-                    controller: _repsController,
-                    label: 'Reps feitas',
-                    suffix: 'x',
-                    icon: Icons.repeat_rounded,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    ink: ink,
-                    mute: mute,
-                    line: line,
-                    dark: dark,
-                  ),
-                ),
+                const SizedBox(height: TokensStrip.s3),
               ],
-            ),
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckinSerieField(
+                      controller: _cargaController,
+                      label: 'Carga',
+                      suffix: 'kg',
+                      icon: Icons.scale_rounded,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9,.]')),
+                      ],
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      dark: dark,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CheckinSerieField(
+                      controller: _repsController,
+                      label: 'Reps feitas',
+                      suffix: 'x',
+                      icon: Icons.repeat_rounded,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      ink: ink,
+                      mute: mute,
+                      line: line,
+                      dark: dark,
+                    ),
+                  ),
+                ],
+              ),
             const SizedBox(height: TokensStrip.s4),
             Text(
               'Sensação',
@@ -372,6 +375,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

@@ -22,6 +22,8 @@ void main() {
     );
     expect(gamificacaoRotaDoBadge('PR_CARGA', isAluno: true), '/checkin');
     expect(gamificacaoRotaDoBadge('PR_CARGA', isAluno: false), '/alunos');
+    expect(gamificacaoRotaDoBadge('FIRST_AI', isAluno: true), '/chat/aluno');
+    expect(gamificacaoRotaDoBadge('FIRST_AI', isAluno: false), '/alunos');
     expect(gamificacaoPersonalEmptyTitle, contains('base'));
     expect(gamificacaoComoCalculamos, contains('personal'));
     expect(gamificacaoFocusLabel(isAluno: false), 'Ver alunos');

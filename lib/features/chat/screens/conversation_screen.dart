@@ -360,17 +360,19 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final subtitle = _subtitle(brand);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
+    final backFallback =
+        _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal';
+
     final scaffold = FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: title,
           subtitle: subtitle,
-          onBack:
-              () => safePopOrGo(
-                context,
-                _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal',
-              ),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, backFallback);
+          },
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 4),
@@ -408,7 +410,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           ],
         ),
-        body: Stack(
+        body: FxKeyboardDismissScope(
+          child: Stack(
           children: [
             Positioned.fill(
               child: ConversationChatBackdrop(
@@ -534,6 +537,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               )
                           : ListView.builder(
                             controller: _scroll,
+                            keyboardDismissBehavior:
+                                ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
                             itemCount:
                                 _msgs.length +
@@ -697,6 +702,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                           minLines: 1,
                                           maxLines: 5,
                                           textInputAction: TextInputAction.send,
+                                          onTapOutside:
+                                              (_) =>
+                                                  FxKeyboardDismissScope
+                                                      .dismiss(),
                                           onSubmitted: (_) => _sendText(),
                                         ),
                                       ),
@@ -786,11 +795,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             ),
           ],
         ),
+        ),
     );
-
-    if (!_isAlunoMode) {
-      return fxScreenA11yScope(label: 'Conversation', child: scaffold);
-    }
 
     return fxScreenA11yScope(
       label: 'Conversation',
@@ -802,7 +808,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             FxKeyboardDismissScope.dismiss();
             return;
           }
-          safePopOrGo(context, '/dashboard/aluno');
+          safePopOrGo(context, backFallback);
         },
         child: scaffold,
       ),

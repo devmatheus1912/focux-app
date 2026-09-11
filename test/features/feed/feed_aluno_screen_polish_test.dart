@@ -48,7 +48,10 @@ void main() {
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, contains('FxHubFreshness.joinCount'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains('canPop: false'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
+    expect(screen, contains('Voltar ao início'));
     expect(screen, contains('FeedListChip'));
     expect(screen, contains('listarAlunoPagina'));
     expect(screen, contains('FxToggleChip'));

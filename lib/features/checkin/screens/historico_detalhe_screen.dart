@@ -137,19 +137,23 @@ class _HistoricoDetalheScreenState
                     child: SkeletonList(count: 4),
                   )
                   : _erro != null && execucao == null
-                  ? FxErrorState(
-                    chromeOnDark: isDark,
-                    primary: primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _erro!,
-                    onRetry: _carregar,
+                  ? FxContentWidthLimiter(
+                    child: FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _erro!,
+                      onRetry: _carregar,
+                    ),
                   )
                   : execucao == null
-                  ? FxEmptyState(
-                    icon: 'dumbbell',
-                    title: 'Treino não encontrado',
-                    subtitle: 'Volte ao histórico e escolha outro.',
-                    action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                  ? FxContentWidthLimiter(
+                    child: FxEmptyState(
+                      icon: 'dumbbell',
+                      title: 'Treino não encontrado',
+                      subtitle: 'Volte ao histórico e escolha outro.',
+                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
+                    ),
                   )
                   : _DetalheBody(
                     execucao: execucao,

@@ -177,12 +177,12 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   : 'Nenhuma publicação ainda',
               subtitle: searching
                   ? 'Ajuste a busca ou o filtro para achar outra publicação.'
-                  : 'Seu personal ainda não publicou no feed. Volte em breve.',
+                  : 'Quando seu personal publicar no feed, as novidades aparecem aqui.',
               action: searching
                   ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
                   : FxEmptyAction(
-                      label: 'Abrir chat',
-                      onTap: () => context.push('/chat/aluno'),
+                      label: 'Voltar ao início',
+                      onTap: () => safePopOrGo(context, '/dashboard/aluno'),
                     ),
             ),
           ],
@@ -234,14 +234,14 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Feed',
       child: PopScope(
-        canPop: !keyboardOpen && !_searchFocus.hasFocus,
+        canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
           if (keyboardOpen || _searchFocus.hasFocus) {
             FxKeyboardDismissScope.dismiss();
             return;
           }
-          FxKeyboardDismissScope.dismiss();
+          safePopOrGo(context, '/dashboard/aluno');
         },
         child: FxShellScaffold(
           useMesh: true,

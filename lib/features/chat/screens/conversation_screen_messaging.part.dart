@@ -4,6 +4,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
   Future<void> _sendText() async {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _uploading) return;
+    FxKeyboardDismissScope.dismiss();
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {

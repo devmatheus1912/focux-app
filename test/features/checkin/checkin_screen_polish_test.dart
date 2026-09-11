@@ -120,6 +120,9 @@ void main() {
     expect(sheet, contains('FxHelpIconButton'));
     expect(sheet, contains('Esforço sentido'));
     expect(sheet, contains('showFxHelpSheet'));
+    expect(sheet, contains('FxKeyboardDismissScope'));
+    expect(sheet, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(sheet, contains('FxHomeSheetSurface'));
   });
 
   test('demo sheet usa preview maior com autoplay muted', () {
