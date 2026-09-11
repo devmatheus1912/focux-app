@@ -11,7 +11,7 @@ bool retencaoRiscoAlto(String risco) => risco.trim().toUpperCase() == 'ALTO';
 
 const retencaoComoCalculamos =
     'Score 0–100: alto abaixo de 40, médio 40–69, saudável 70 ou mais. '
-    'Contagens vêm do último score por aluno (podem incluir inativos). '
+    'Contagens e top consideram só alunos ATIVOS com nome (BE). '
     'O catálogo pagina a base e busca pelo nome.';
 
 const retencaoFiltroAlto = 'alto';
@@ -24,10 +24,12 @@ const retencaoEmptySubtitle =
 bool retencaoNomeExibivel(String nome) {
   final t = nome.trim();
   if (t.isEmpty) return false;
+  // Defesa FE: BE (#46) já exclui blank/"Aluno"; mantém filtro se payload antigo.
   return t.toLowerCase() != 'aluno';
 }
 
-/// Subtítulo do card de foco: contagens BE + recorte nomeado do top.
+/// Subtítulo do card de foco. Contagens BE já são ATIVO+#46; topNomeados
+/// só reforça se o payload ainda trouxer placeholder.
 String retencaoContagensSubtitulo({
   required int alto,
   required int medio,
@@ -36,10 +38,7 @@ String retencaoContagensSubtitulo({
 }) {
   final base = '$medio médios · $saudavel saudáveis';
   if (alto > 0 && topNomeados == 0) {
-    return '$base · top sem nome — confira a base';
-  }
-  if (alto > topNomeados && topNomeados > 0) {
-    return '$base · $topNomeados com nome no top';
+    return '$base · atualize a base se o top vier vazio';
   }
   return base;
 }
