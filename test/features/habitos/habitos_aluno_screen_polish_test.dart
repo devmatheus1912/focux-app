@@ -4,19 +4,33 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('habitos aluno cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/habitos/screens/habitos_aluno_screen.dart');
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    final screen = readScreenSourceBundle(
+      'lib/features/habitos/screens/habitos_aluno_screen.dart',
+    );
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(screen, contains('constrainWidth: false'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('habitoAlunoDetailPath'));
     expect(screen, contains('FxHubFreshness.joinCount'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains('canPop: false'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
+    expect(screen, contains('FeatureGate'));
+    expect(screen, contains('habitCoaching'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('meusHabitosPagina'));

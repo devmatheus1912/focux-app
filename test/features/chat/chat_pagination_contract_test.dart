@@ -30,9 +30,11 @@ void main() {
     expect(ofensores, isEmpty);
   });
 
-  test('resolucao do proprio alunoId pede uma mensagem, nao o historico', () {
+  test('conversa aluno usa historico paginado', () {
     final tela =
-        File('lib/features/ia/screens/ia_aluno_screen.dart').readAsStringSync();
-    expect(tela, contains('historicoAlunoPage(limit: 1)'));
+        File('lib/features/chat/screens/conversation_screen.dart')
+            .readAsStringSync();
+    expect(tela, contains('historicoAlunoPage'));
+    expect(tela, isNot(contains('.historicoAluno()')));
   });
 }

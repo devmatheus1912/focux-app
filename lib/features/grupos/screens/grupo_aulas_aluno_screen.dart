@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -199,67 +200,96 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
     return fxScreenA11yScope(
       label: 'Aulas em grupo',
       child: PopScope(
-        canPop: !keyboardOpen,
+        canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (didPop) return;
-          FxKeyboardDismissScope.dismiss();
+          if (keyboardOpen || _searchFocus.hasFocus) {
+            FxKeyboardDismissScope.dismiss();
+            return;
+          }
+          safePopOrGo(context, '/dashboard/aluno');
         },
-        child: FxShellScaffold(
-          useMesh: true,
-          constrainWidth: false,
-          appBar: FxShellAppBar(
-            title: 'Aulas em grupo',
-            subtitle: FxHubFreshness.joinCount(
-              grupoAulaCountLabel(_loading ? 0 : _total),
-              _loading ? null : freshnessLabel,
-            ),
-            onBack: () {
-              FxKeyboardDismissScope.dismiss();
-              safePopOrGo(context, '/dashboard/aluno');
-            },
-          ),
-          body: _loading
-              ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-              : _erro != null
-              ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: scheme.primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
+        child: FxKeyboardDismissScope(
+          child: FxShellScaffold(
+            useMesh: true,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Aulas em grupo',
+              subtitle: FxHubFreshness.joinCount(
+                grupoAulaCountLabel(_loading ? 0 : _total),
+                _loading ? null : freshnessLabel,
+              ),
+              onBack: () {
+                FxKeyboardDismissScope.dismiss();
+                safePopOrGo(context, '/dashboard/aluno');
+              },
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar aulas em grupo',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Aulas em grupo',
+                    subtitle: 'Turmas abertas pelo seu personal.',
+                    tips: const [
+                      FxHelpTip(
+                        'Inscrever',
+                        'Toque na aula para entrar. Se estiver lotada, espere a próxima.',
                       ),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        focusNode: _searchFocus,
-                        textInputAction: TextInputAction.search,
-                        onChanged: _onQueryChanged,
-                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                        decoration: InputDecoration(
-                          hintText: 'Buscar aula',
-                          prefixIcon: const Icon(Icons.search_rounded),
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      FxHelpTip(
+                        'Sair',
+                        'Toque de novo numa aula inscrita para cancelar.',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            body: _loading
+                ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 4),
+                  )
+                : _erro != null
+                ? FxErrorState(
+                    chromeOnDark: chrome.isDark,
+                    primary: scheme.primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          focusNode: _searchFocus,
+                          textInputAction: TextInputAction.search,
+                          onChanged: _onQueryChanged,
+                          onTapOutside: (_) =>
+                              FxKeyboardDismissScope.dismiss(),
+                          decoration: InputDecoration(
+                            hintText: 'Buscar aula',
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            border: FxInputDeco.outlineBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: FxContentWidthLimiter(child: _buildList(searching)),
-                    ),
-                  ],
-                ),
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildList(searching),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

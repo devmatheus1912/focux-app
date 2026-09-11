@@ -30,6 +30,20 @@ class _StudentToolsSection extends StatelessWidget {
       featured: true,
     ),
     _StudentToolAction(
+      icon: Icons.flag_outlined,
+      title: 'Desafios',
+      subtitle: 'Campanhas e ranking',
+      route: '/aluno/desafios',
+      group: _StudentToolGroup.treino,
+    ),
+    _StudentToolAction(
+      icon: Icons.groups_outlined,
+      title: 'Aulas grupo',
+      subtitle: 'Turmas abertas',
+      route: '/aluno/grupo-aulas',
+      group: _StudentToolGroup.treino,
+    ),
+    _StudentToolAction(
       icon: Icons.assignment_outlined,
       title: 'Anamnese',
       subtitle: 'Ficha de saúde',
