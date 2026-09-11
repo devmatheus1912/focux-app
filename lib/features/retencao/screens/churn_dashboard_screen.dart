@@ -318,7 +318,13 @@ class _RetencaoFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${home.medio} médios · ${home.saudavel} saudáveis',
+            retencaoContagensSubtitulo(
+              alto: home.alto,
+              medio: home.medio,
+              saudavel: home.saudavel,
+              topNomeados:
+                  retencaoItemsForFiltro(home.top3, null).length,
+            ),
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),

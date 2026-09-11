@@ -9,7 +9,6 @@ class _AnamneseBody extends StatelessWidget {
     required this.alunoId,
     required this.secao,
     required this.onSecao,
-    required this.onSolicitar,
     required this.onRevisar,
   });
 
@@ -20,7 +19,6 @@ class _AnamneseBody extends StatelessWidget {
   final int alunoId;
   final String secao;
   final ValueChanged<String> onSecao;
-  final VoidCallback onSolicitar;
   final Future<void> Function({
     required String status,
     required String title,
@@ -111,14 +109,11 @@ class _AnamneseBody extends StatelessWidget {
         ],
         if (a.isNaoIniciada) ...[
           const SizedBox(height: TokensStrip.s5),
-          FxEmptyState(
+          // CTA único no sticky S3 — empty sem action (§11 / §13).
+          const FxEmptyState(
             icon: 'article',
             title: 'Nenhuma ficha ainda',
             subtitle: 'O aluno preenche a anamnese. Você solicita e revisa.',
-            action: FxEmptyAction(
-              label: 'Solicitar anamnese',
-              onTap: acting ? () {} : onSolicitar,
-            ),
           ),
         ] else if (a.isSolicitada && !a.personalPodeRevisar) ...[
           const SizedBox(height: TokensStrip.s5),

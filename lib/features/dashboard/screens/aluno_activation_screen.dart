@@ -12,7 +12,6 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../onboarding/utils/onboarding_wizard_display.dart';
@@ -153,18 +152,6 @@ class AlunoActivationScreen extends ConsumerWidget {
                   TokensStrip.s5,
                 ),
                 children: [
-                  Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 64),
-                      child: FxConversionLockup(
-                        width: 96,
-                        semanticLabel: 'Focux ALUNO',
-                        aluno: true,
-                        taglineSize: 12.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
                   FxWizardStepDots(
                     current: progress.allDone
                         ? progress.totalCount

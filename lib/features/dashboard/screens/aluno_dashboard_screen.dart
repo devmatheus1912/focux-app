@@ -250,4 +250,3 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   }
 }
 
-enum _AlunoHeaderAction { profile, logout }

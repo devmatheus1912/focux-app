@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -61,7 +62,8 @@ class IaQuotaUpgrade {
   }
 
   static Future<bool> showUpgradeDialog(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     IaOperationalException? error,
     PlanoFeatures? features,
   }) async {
@@ -83,6 +85,20 @@ class IaQuotaUpgrade {
     );
 
     if (!context.mounted) return false;
+
+    final isAluno = ref.read(userRoleProvider) == UserRole.aluno;
+    if (isAluno) {
+      await showFxNoticeSheet(
+        context,
+        title: 'Recurso do seu personal',
+        message:
+            'IA Copiloto e Assinar Pro são da conta Focux do personal — '
+            'não da sua. Peça ao personal se precisar de progressão de carga.',
+        actionLabel: 'Entendi',
+        icon: Icons.info_outline_rounded,
+      );
+      return false;
+    }
 
     final upgrade = offer.targetPlan == null
         ? await _showQuotaNotice(context, offer)
@@ -109,7 +125,7 @@ class IaQuotaUpgrade {
   ) async {
     final features = ref.read(planoFeaturesProvider).valueOrNull;
     if (features == null || !isBlockedLocally(features)) return true;
-    await showUpgradeDialog(context, features: features);
+    await showUpgradeDialog(context, ref, features: features);
     return false;
   }
 
@@ -124,6 +140,7 @@ class IaQuotaUpgrade {
     }
     await showUpgradeDialog(
       context,
+      ref,
       error: error,
       features: ref.read(planoFeaturesProvider).valueOrNull,
     );

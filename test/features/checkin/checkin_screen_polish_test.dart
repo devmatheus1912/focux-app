@@ -42,6 +42,10 @@ void main() {
     expect(screen, contains('_abrirFila'));
     expect(screen, contains('_currentExercise'));
     expect(screen, contains('useMesh: false'));
+    expect(screen, contains('scaffoldBackgroundColor'));
+    expect(screen, contains('ColoredBox'));
+    expect(screen, contains('checkinSerieRepsSeed'));
+    expect(screen, contains('Preparando seu treino'));
     expect(screen, contains('CheckinRestFocusView'));
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('checkinFinalizarLabel'));

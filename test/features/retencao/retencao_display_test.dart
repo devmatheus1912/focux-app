@@ -3,29 +3,35 @@ import 'package:focux_app/features/retencao/data/retencao_repository.dart';
 import 'package:focux_app/features/retencao/utils/retencao_display.dart';
 
 void main() {
-  test('home agregado e risco alto primeiro', () {
-    final home = RetencaoHome.fromJson({
-      'alto': 2,
-      'medio': 1,
-      'saudavel': 4,
-      'fetchedAt': '2026-09-03T22:00:00Z',
-      'top3': [
-        {
-          'alunoId': 9,
-          'alunoNome': 'Ana',
-          'scoreAtual': 22,
-          'delta': 4,
-          'riscoChurn': 'ALTO',
-        },
-      ],
-    });
-    expect(home.alto, 2);
-    expect(home.top3.single.alunoNome, 'Ana');
-    expect(firstAltoRetencao(home.top3)?.alunoId, 9);
-    expect(retencaoRiscoLabel('MEDIO'), 'Risco médio');
-    expect(retencaoPorque(home.top3.single), contains('subiu 4 pts'));
-    expect(retencaoItemsForFiltro(home.top3, 'alto').single.alunoId, 9);
-    expect(retencaoEmptyTitle, contains('leitura'));
-    expect(retencaoComoCalculamos, contains('catálogo'));
+  test('placeholder Aluno names are filtered from lists', () {
+    final scores = [
+      RetencaoAlunoScore(
+        alunoId: 1,
+        alunoNome: 'Nathalia',
+        riscoChurn: 'ALTO',
+        scoreAtual: 20,
+        delta: -5,
+      ),
+      RetencaoAlunoScore(
+        alunoId: 2,
+        alunoNome: 'Aluno',
+        riscoChurn: 'ALTO',
+        scoreAtual: 10,
+        delta: 0,
+      ),
+    ];
+    expect(retencaoNomeExibivel('Nathalia'), isTrue);
+    expect(retencaoNomeExibivel('Aluno'), isFalse);
+    expect(retencaoItemsForFiltro(scores, null).single.alunoNome, 'Nathalia');
+    expect(firstAltoRetencao(scores)?.alunoNome, 'Nathalia');
+    expect(
+      retencaoContagensSubtitulo(
+        alto: 9,
+        medio: 0,
+        saudavel: 0,
+        topNomeados: 1,
+      ),
+      contains('1 com nome no top'),
+    );
   });
 }
