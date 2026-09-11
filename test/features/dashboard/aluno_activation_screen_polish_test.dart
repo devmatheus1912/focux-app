@@ -15,6 +15,8 @@ void main() {
     expect(screen, contains('FxWizardPopGuard'));
     expect(screen, contains('FxWizardStepDots'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('alunoActivationProgress'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('alunoActivationLeaveTitle'));

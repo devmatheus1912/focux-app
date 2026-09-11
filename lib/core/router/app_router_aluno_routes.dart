@@ -17,7 +17,6 @@ import 'app_router_redirect.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
-import '../../features/feedback/screens/feedback_aluno_screen.dart';
 import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
 import '../widgets/fx_route_chrome.dart';
 
@@ -122,9 +121,10 @@ List<RouteBase> buildAlunoRoutes() {
         path: '/aluno/grupo-aulas',
         builder: (context, state) => const FxRouteChrome(child: GrupoAulasAlunoScreen()),
       ),
+      // §38 hide: form-check fora do catálogo; deep link antigo → home aluno.
       GoRoute(
         path: '/aluno/form-check',
-        builder: (context, state) => const FxRouteChrome(child: FeedbackAlunoScreen()),
+        redirect: (context, state) => '/dashboard/aluno',
       ),
       GoRoute(
         path: '/aluno/perfil/editar',

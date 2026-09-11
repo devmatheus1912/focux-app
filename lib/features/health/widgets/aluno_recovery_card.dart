@@ -8,6 +8,7 @@ import '../../health/data/health_repository.dart';
 import '../../../core/health/health_service.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_rive_player.dart';
 import 'recovery_score_ring.dart';
@@ -70,7 +71,15 @@ class AlunoRecoveryCard extends ConsumerWidget {
         final primary = Theme.of(context).colorScheme.primary;
         return _shell(context, primary, isDark, child: const FxLoading());
       },
-      error: (_, __) => const SizedBox.shrink(),
+      error: (err, _) => _RecoverySoftError(
+        isDark: isDark,
+        message: friendlyError(
+          err,
+          fallback: 'Não foi possível carregar a prontidão.',
+        ),
+        onRetry: () => ref.invalidate(alunoRecoveryProvider),
+        onOpen: () => context.push('/saude'),
+      ),
       data: (data) => _buildFromSnapshot(context, data),
     );
   }
@@ -217,6 +226,68 @@ class _ConnectCard extends StatelessWidget {
               Icon(Icons.north_east, size: 16, color: primary),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecoverySoftError extends StatelessWidget {
+  const _RecoverySoftError({
+    required this.isDark,
+    required this.message,
+    required this.onRetry,
+    required this.onOpen,
+  });
+
+  final bool isDark;
+  final String message;
+  final VoidCallback onRetry;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final ink = isDark ? EagleTokens.darkInk : EagleTokens.ink;
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: primary.withValues(alpha: 0.16)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Prontidão indisponível',
+              style: TextStyle(
+                color: ink,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              message,
+              style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: onRetry,
+                  child: const Text('Tentar de novo'),
+                ),
+                TextButton(
+                  onPressed: onOpen,
+                  child: const Text('Abrir Saúde'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

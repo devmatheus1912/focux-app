@@ -16,6 +16,7 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
@@ -237,9 +238,9 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                       (e, _) => FxErrorState(
                         chromeOnDark: chrome,
                         primary: primary,
+                        title: 'Não conseguimos carregar as trilhas',
                         message: friendlyError(e),
                         onRetry: _refresh,
-                        title: 'Não conseguimos carregar as trilhas',
                       ),
                   data: (lista) {
                     _stampFreshness();
@@ -267,7 +268,10 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                     ),
                     child: FxLiquidPrimaryButton(
                       label: 'Ir aos treinos',
-                      onPressed: () => context.push('/checkin/treinos'),
+                      onPressed: () {
+                        FxKeyboardDismissScope.dismiss();
+                        context.push('/checkin/treinos');
+                      },
                     ),
                   ),
                 ),

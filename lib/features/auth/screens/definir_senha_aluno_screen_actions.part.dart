@@ -3,6 +3,7 @@ part of 'definir_senha_aluno_screen.dart';
 extension on _DefinirSenhaAlunoScreenState {
   Future<void> _sairSemDefinirSenha() async {
     if (_loading || _saindo) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     final ok = await showFxConfirmSheet(
       context,
       title: definirSenhaSairTitle(),
@@ -39,6 +40,7 @@ extension on _DefinirSenhaAlunoScreenState {
     if (_loading) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     final ok = await showFxConfirmSheet(
       context,
       title: definirSenhaConfirmTitle(),

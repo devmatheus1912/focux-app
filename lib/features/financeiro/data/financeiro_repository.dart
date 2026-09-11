@@ -18,10 +18,10 @@ class PixData {
   });
 
   factory PixData.fromJson(Map<String, dynamic> j) => PixData(
-    paymentId: j['paymentId'] as int,
-    pixCopiaECola: j['pixCopiaECola'] as String,
-    qrCodeBase64: j['qrCodeBase64'] as String,
-    status: j['status'] as String,
+    paymentId: (j['paymentId'] as num?)?.toInt() ?? 0,
+    pixCopiaECola: j['pixCopiaECola']?.toString() ?? '',
+    qrCodeBase64: j['qrCodeBase64']?.toString() ?? '',
+    status: j['status']?.toString() ?? '',
   );
 }
 
@@ -51,14 +51,14 @@ class Mensalidade {
   factory Mensalidade.fromJson(Map<String, dynamic> j) {
     final raw = j['contatos'];
     return Mensalidade(
-      id: j['id'] as int,
-      alunoId: j['alunoId'] as int,
-      alunoNome: j['alunoNome'] as String,
+      id: (j['id'] as num?)?.toInt() ?? 0,
+      alunoId: (j['alunoId'] as num?)?.toInt() ?? 0,
+      alunoNome: j['alunoNome']?.toString() ?? '',
       valor: j['valor'],
-      mesReferencia: j['mesReferencia'] as String,
-      status: j['status'] as String,
-      pagoEm: j['pagoEm'] as String?,
-      vencimento: j['vencimento'] as String?,
+      mesReferencia: j['mesReferencia']?.toString() ?? '',
+      status: j['status']?.toString() ?? '',
+      pagoEm: j['pagoEm']?.toString(),
+      vencimento: j['vencimento']?.toString(),
       contatos: raw is List
           ? raw
               .whereType<Map>()
@@ -359,7 +359,11 @@ class FinanceiroRepository {
       // mensalidade e o aluno recebe dois QR codes válidos.
       options: ApiClient.idempotent('mensalidade-pix-$mensalidadeId'),
     );
-    return PixData.fromJson(r.data as Map<String, dynamic>);
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('POST .../pix devolve objeto PIX.');
+    }
+    return PixData.fromJson(Map<String, dynamic>.from(data));
   }
 
   Future<PixData> gerarPixAluno(int mensalidadeId) async {
@@ -367,7 +371,11 @@ class FinanceiroRepository {
       '/api/financeiro/mensalidades/aluno/minhas/$mensalidadeId/pix',
       options: ApiClient.idempotent('mensalidade-pix-aluno-$mensalidadeId'),
     );
-    return PixData.fromJson(r.data as Map<String, dynamic>);
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('POST .../aluno/.../pix devolve objeto PIX.');
+    }
+    return PixData.fromJson(Map<String, dynamic>.from(data));
   }
 
   Future<Mensalidade> editarMensalidade(
@@ -410,7 +418,13 @@ class FinanceiroRepository {
       '/api/financeiro/mensalidades/aluno/minhas',
       queryParameters: {'page': page, 'size': size},
     );
-    return MensalidadesPage.fromJson(r.data as Map<String, dynamic>);
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException(
+        'GET /api/financeiro/mensalidades/aluno/minhas devolve objeto, não lista crua.',
+      );
+    }
+    return MensalidadesPage.fromJson(Map<String, dynamic>.from(data));
   }
 }
 
@@ -431,7 +445,10 @@ class MensalidadesPage {
   factory MensalidadesPage.fromJson(Map<String, dynamic> j) => MensalidadesPage(
     mensalidades:
         (j['mensalidades'] as List? ?? const [])
-            .map((e) => Mensalidade.fromJson(e as Map<String, dynamic>))
+            .whereType<Map>()
+            .map(
+              (e) => Mensalidade.fromJson(Map<String, dynamic>.from(e)),
+            )
             .toList(),
     page: (j['page'] as num?)?.toInt() ?? 0,
     size: (j['size'] as num?)?.toInt() ?? 20,

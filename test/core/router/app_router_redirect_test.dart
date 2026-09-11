@@ -27,6 +27,8 @@ void main() {
     expect(isPersonalOnlyLocation('/habitos/4'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/trilhas'), isTrue);
     expect(isAlunoOnlyLocation('/aluno/recorrencia'), isTrue);
+    expect(isAlunoOnlyLocation('/aluno/form-check'), isTrue);
+    expect(isAlunoOnlyLocation('/aluno/grupo-aulas'), isTrue);
     expect(isPersonalOnlyLocation('/retencao'), isTrue);
     expect(isPersonalOnlyLocation('/dunning'), isTrue);
     expect(isPersonalOnlyLocation('/leads-publicos'), isTrue);

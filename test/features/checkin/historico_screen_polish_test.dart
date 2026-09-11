@@ -12,11 +12,14 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.joinCount'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('safePopOrGo'));
+    expect(screen, contains('showBack: true'));
+    expect(screen, contains("fallbackLocation: '/checkin/treinos'"));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('historicoDetalhePath'));
@@ -31,5 +34,6 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('FeedbackHelper.showError'));
   });
 }

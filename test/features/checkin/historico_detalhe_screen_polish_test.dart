@@ -28,6 +28,11 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('Treino não encontrado'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('FocuxMicrocopy.naoFoiPossivelCarregar'));
     expect(screen, contains('historicoDetalheSecoes'));
     expect(screen, contains('historicoSecaoNotas'));
     expect(screen, contains('historicoNotaLine'));

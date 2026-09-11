@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -9,6 +10,7 @@ import '../data/depoimento_repository.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -17,6 +19,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
@@ -31,10 +34,11 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
   int _nota = 5;
   bool _enviando = false;
   bool _enviado = false;
+  bool _loading = true;
+  String? _loadErro;
 
   bool get _isDirty =>
-      !_enviado &&
-      (_textoCtrl.text.trim().isNotEmpty || _nota != 5);
+      !_enviado && (_textoCtrl.text.trim().isNotEmpty || _nota != 5);
 
   @override
   void initState() {
@@ -42,12 +46,39 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
     _textoCtrl.addListener(() {
       if (mounted) setState(() {});
     });
+    _carregar();
   }
 
   @override
   void dispose() {
     _textoCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _carregar() async {
+    setState(() {
+      _loading = true;
+      _loadErro = null;
+    });
+    try {
+      final meus = await DepoimentoRepository(
+        ref.read(apiClientProvider),
+      ).listarMeus();
+      if (!mounted) return;
+      setState(() {
+        _enviado = meus.isNotEmpty;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadErro = friendlyError(
+          e,
+          fallback: 'Não foi possível carregar seus depoimentos.',
+        );
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _cancel() async {
@@ -66,6 +97,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
 
   Future<void> _enviar() async {
     if (!_formKey.currentState!.validate()) return;
+    FxKeyboardDismissScope.dismiss();
     setState(() => _enviando = true);
     try {
       await DepoimentoRepository(
@@ -81,110 +113,132 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
+
     return fxScreenA11yScope(
       label: 'Deixar Depoimento',
-      child: FxFormPopGuard(
-        dirty: _isDirty,
-        onCancel: _cancel,
-        child: FxShellScaffold(
-          useMesh: true,
-          constrainWidth: false,
-          extendBody: true,
-          appBar: FxShellAppBar(
-            title: 'Deixar Depoimento',
-            subtitle: 'Conte como foi sua experiência',
-            onBack: _cancel,
-          ),
-          bottomNavigationBar:
-              _enviado
-                  ? null
-                  : FxFormStickyBar(
-                    child: FxLiquidPrimaryButton(
-                      label: 'Enviar depoimento',
-                      loading: _enviando,
-                      loadingLabel: 'Enviando…',
-                      onPressed: _enviando ? null : _enviar,
+      child: FxKeyboardDismissScope(
+        child: FxFormPopGuard(
+          dirty: _isDirty,
+          onCancel: _cancel,
+          child: FxShellScaffold(
+            useMesh: true,
+            constrainWidth: false,
+            extendBody: true,
+            appBar: FxShellAppBar(
+              title: 'Deixar Depoimento',
+              subtitle: 'Conte como foi sua experiência',
+              onBack: _cancel,
+            ),
+            bottomNavigationBar:
+                _loading || _loadErro != null || _enviado
+                    ? null
+                    : FxFormStickyBar(
+                      child: FxLiquidPrimaryButton(
+                        label: 'Enviar depoimento',
+                        loading: _enviando,
+                        loadingLabel: 'Enviando…',
+                        onPressed: _enviando ? null : _enviar,
+                      ),
                     ),
-                  ),
-          body:
-              _enviado
-                  ? FxEmptyState(
-                    icon: 'circle-check',
-                    title: 'Depoimento enviado!',
-                    subtitle: 'Aguardando aprovação do seu personal.',
-                    action: FxEmptyAction(
-                      label: 'Voltar',
-                      onTap: () => safePopOrGo(context, '/dashboard/aluno'),
-                    ),
-                  )
-                  : SingleChildScrollView(
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.all(TokensStrip.s5),
-                    child: Form(
-                      key: _formKey,
-                      child: FxSettingsGroup(
-                        header: 'Seu depoimento',
-                        caption: 'Nota e texto para o personal.',
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: TokensStrip.s3,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(
-                                5,
-                                (i) => GestureDetector(
-                                  onTap:
-                                      _enviando
-                                          ? null
-                                          : () => setState(() => _nota = i + 1),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    child: Icon(
-                                      i < _nota
-                                          ? Icons.star
-                                          : Icons.star_border,
-                                      color: EagleTokens.goldStar,
-                                      size: 44,
+            body:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.all(TokensStrip.s4),
+                      child: SkeletonList(count: 4),
+                    )
+                    : _loadErro != null
+                    ? FxErrorState(
+                      chromeOnDark: isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _loadErro!,
+                      onRetry: _carregar,
+                    )
+                    : _enviado
+                    ? FxEmptyState(
+                      icon: 'circle-check',
+                      title: 'Depoimento enviado!',
+                      subtitle: 'Aguardando aprovação do seu personal.',
+                      action: FxEmptyAction(
+                        label: 'Voltar',
+                        onTap:
+                            () => safePopOrGo(context, '/dashboard/aluno'),
+                      ),
+                    )
+                    : SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.all(TokensStrip.s5),
+                      child: Form(
+                        key: _formKey,
+                        child: FxSettingsGroup(
+                          header: 'Seu depoimento',
+                          caption: 'Nota e texto para o personal.',
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: TokensStrip.s3,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  5,
+                                  (i) => GestureDetector(
+                                    onTap:
+                                        _enviando
+                                            ? null
+                                            : () =>
+                                                setState(() => _nota = i + 1),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      child: Icon(
+                                        i < _nota
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        color: EagleTokens.goldStar,
+                                        size: 44,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.groupPadH,
-                              0,
-                              FxSettingsLayout.groupPadH,
-                              FxSettingsLayout.groupPadV,
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.groupPadH,
+                                0,
+                                FxSettingsLayout.groupPadH,
+                                FxSettingsLayout.groupPadV,
+                              ),
+                              child: TextFormField(
+                                controller: _textoCtrl,
+                                maxLines: 5,
+                                maxLength: 500,
+                                enabled: !_enviando,
+                                onTapOutside:
+                                    (_) => FxKeyboardDismissScope.dismiss(),
+                                decoration: FxInputDeco.build(
+                                  context,
+                                  'Depoimento',
+                                  hint:
+                                      'Conte como foi sua experiência com seu personal trainer...',
+                                ).copyWith(alignLabelWithHint: true),
+                                validator:
+                                    (v) =>
+                                        (v == null || v.trim().length < 10)
+                                            ? 'Mínimo 10 caracteres'
+                                            : null,
+                              ),
                             ),
-                            child: TextFormField(
-                              controller: _textoCtrl,
-                              maxLines: 5,
-                              maxLength: 500,
-                              enabled: !_enviando,
-                              decoration: FxInputDeco.build(
-                                context,
-                                'Depoimento',
-                                hint:
-                                    'Conte como foi sua experiência com seu personal trainer...',
-                              ).copyWith(alignLabelWithHint: true),
-                              validator:
-                                  (v) =>
-                                      (v == null || v.trim().length < 10)
-                                          ? 'Mínimo 10 caracteres'
-                                          : null,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
+          ),
         ),
       ),
     );

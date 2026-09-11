@@ -31,6 +31,8 @@ extension ConversationScreenSheetsSearch on _ConversationScreenState {
                     TextField(
                       controller: ctrl,
                       autofocus: true,
+                      onTapOutside:
+                          (_) => FxKeyboardDismissScope.dismiss(),
                       onChanged: (value) => setSheetState(() => query = value),
                       onSubmitted: (_) async {
                         await _performSearch(

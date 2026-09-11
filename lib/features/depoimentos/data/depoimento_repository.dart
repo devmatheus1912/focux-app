@@ -20,12 +20,12 @@ class DepoimentoModel {
   });
 
   factory DepoimentoModel.fromJson(Map<String, dynamic> j) => DepoimentoModel(
-    id: j['id'] as int,
-    nomeAluno: j['nomeAluno'] as String? ?? '',
-    fotoAluno: j['fotoAluno'] as String?,
-    texto: j['texto'] as String? ?? '',
-    nota: j['nota'] as int? ?? 5,
-    aprovado: j['aprovado'] as bool? ?? false,
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    nomeAluno: j['nomeAluno']?.toString() ?? '',
+    fotoAluno: j['fotoAluno']?.toString(),
+    texto: j['texto']?.toString() ?? '',
+    nota: (j['nota'] as num?)?.toInt() ?? 5,
+    aprovado: j['aprovado'] == true,
   );
 }
 
@@ -41,13 +41,22 @@ class DepoimentoRepository {
       '/api/depoimentos',
       data: {'texto': texto, 'nota': nota},
     );
-    return DepoimentoModel.fromJson(r.data as Map<String, dynamic>);
+    final data = r.data;
+    if (data is! Map) {
+      throw FormatException('POST /api/depoimentos devolve objeto.');
+    }
+    return DepoimentoModel.fromJson(Map<String, dynamic>.from(data));
   }
 
   Future<List<DepoimentoModel>> listarMeus() async {
     final r = await _dio.get('/api/depoimentos');
-    return (r.data as List)
-        .map((e) => DepoimentoModel.fromJson(e as Map<String, dynamic>))
+    final data = r.data;
+    if (data is! List) {
+      throw FormatException('GET /api/depoimentos devolve lista.');
+    }
+    return data
+        .whereType<Map>()
+        .map((e) => DepoimentoModel.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 

@@ -12,7 +12,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../onboarding/utils/onboarding_wizard_display.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -31,6 +33,7 @@ class AlunoActivationScreen extends ConsumerWidget {
   }
 
   Future<void> _sair(BuildContext context, int alunoId) async {
+    FxKeyboardDismissScope.dismiss();
     final leave = await showFxConfirmSheet(
       context,
       title: alunoActivationLeaveTitle(),
@@ -144,59 +147,63 @@ class AlunoActivationScreen extends ConsumerWidget {
                   },
                 ),
               ),
-              body: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s5,
-                ),
-                children: [
-                  FxWizardStepDots(
-                    current: progress.allDone
-                        ? progress.totalCount
-                        : (progress.doneCount + 1).clamp(
-                          1,
-                          progress.totalCount,
-                        ),
-                    total: progress.totalCount,
-                    color: primary,
+              body: FxContentWidthLimiter(
+                child: ListView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s4,
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s5,
                   ),
-                  const SizedBox(height: TokensStrip.s4),
-                  Text(
-                    'Olá, ${aluno.nome.split(' ').first}',
-                    style: FocuxHubTypography.pageTitle(
-                      context,
-                      color: chrome.ink,
+                  children: [
+                    FxWizardStepDots(
+                      current: progress.allDone
+                          ? progress.totalCount
+                          : (progress.doneCount + 1).clamp(
+                            1,
+                            progress.totalCount,
+                          ),
+                      total: progress.totalCount,
+                      color: primary,
                     ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  Text(
-                    progress.allDone
-                        ? FocuxBrandCopy.alunoActivationReadyTitle
-                        : alunoActivationQuestion(allDone: false),
-                    style: FocuxHubTypography.sectionTitle(
-                      context,
-                      color: chrome.ink,
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  Text(
-                    progress.allDone
-                        ? FocuxBrandCopy.alunoActivationReadyBody
-                        : step.description,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: chrome.mute,
-                    ),
-                  ),
-                  if (!progress.allDone) ...[
                     const SizedBox(height: TokensStrip.s4),
                     Text(
-                      step.title,
-                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      'Olá, ${aluno.nome.split(' ').first}',
+                      style: FocuxHubTypography.pageTitle(
+                        context,
+                        color: chrome.ink,
+                      ),
                     ),
+                    const SizedBox(height: TokensStrip.s2),
+                    Text(
+                      progress.allDone
+                          ? FocuxBrandCopy.alunoActivationReadyTitle
+                          : alunoActivationQuestion(allDone: false),
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
+                        color: chrome.ink,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    Text(
+                      progress.allDone
+                          ? FocuxBrandCopy.alunoActivationReadyBody
+                          : step.description,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: chrome.mute,
+                      ),
+                    ),
+                    if (!progress.allDone) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      Text(
+                        step.title,
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

@@ -50,7 +50,6 @@ bool isAlunoPath(String path) {
       path == '/financeiro/aluno' ||
       path == '/feed/aluno' ||
       path == '/agenda/aluno' ||
-      path == '/ia/aluno' ||
       path == '/depoimentos-aluno' ||
       path == '/gamificacao' ||
       path == '/notificacoes' ||

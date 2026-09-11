@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -107,6 +108,30 @@ Future<void> mostrarPixMensalidade({
   PixData? pix;
   var carregando = true;
   String? erro;
+  var loadToken = 0;
+
+  Future<void> carregar(void Function(void Function()) setDialogState) async {
+    final token = ++loadToken;
+    setDialogState(() {
+      carregando = true;
+      erro = null;
+    });
+    try {
+      final repo = mensalidadeRepo(ref);
+      final p = asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
+      if (token != loadToken) return;
+      setDialogState(() {
+        pix = p;
+        carregando = false;
+      });
+    } catch (e) {
+      if (token != loadToken) return;
+      setDialogState(() {
+        erro = friendlyError(e);
+        carregando = false;
+      });
+    }
+  }
 
   await showFxHomeSheet<void>(
     context,
@@ -114,26 +139,23 @@ Future<void> mostrarPixMensalidade({
         (ctx) => StatefulBuilder(
           builder: (ctx, setDialogState) {
             if (carregando && pix == null && erro == null) {
-              final repo = mensalidadeRepo(ref);
-              final future =
-                  asAluno ? repo.gerarPixAluno(id) : repo.gerarPix(id);
-              future
-                  .then((p) {
-                    setDialogState(() {
-                      pix = p;
-                      carregando = false;
-                    });
-                  })
-                  .catchError((e) {
-                    setDialogState(() {
-                      erro = friendlyError(e);
-                      carregando = false;
-                    });
-                  });
+              unawaited(carregar(setDialogState));
             }
 
             final isDark = Theme.of(ctx).brightness == Brightness.dark;
             final primary = Theme.of(ctx).colorScheme.primary;
+            Uint8List? qrBytes;
+            var displayErro = erro;
+            if (!carregando && displayErro == null && pix != null) {
+              final rawQr = pix!.qrCodeBase64.trim();
+              if (rawQr.isNotEmpty) {
+                try {
+                  qrBytes = base64Decode(rawQr);
+                } catch (_) {
+                  displayErro = 'Não foi possível exibir o QR Code do PIX.';
+                }
+              }
+            }
             return FxHomeSheetSurface(
               isDark: isDark,
               child: Column(
@@ -150,29 +172,63 @@ Future<void> mostrarPixMensalidade({
                   SizedBox(height: TokensStrip.s4),
                   if (carregando)
                     const SizedBox(height: 80, child: FxLoading())
-                  else if (erro != null)
-                    Text(
-                      erro!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: EagleTokens.bad,
-                        fontSize: 13,
-                        height: 1.35,
-                        fontWeight: FontWeight.w600,
+                  else if (displayErro != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Column(
+                        children: [
+                          Text(
+                            displayErro,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: EagleTokens.bad,
+                              fontSize: 13,
+                              height: 1.35,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: TokensStrip.s3),
+                          TextButton(
+                            onPressed: () => carregar(setDialogState),
+                            child: const Text('Tentar de novo'),
+                          ),
+                        ],
                       ),
                     )
                   else ...[
-                    Image.memory(
-                      base64Decode(pix!.qrCodeBase64),
-                      width: 200,
-                      height: 200,
-                    ),
+                    if (qrBytes != null)
+                      Image.memory(
+                        qrBytes,
+                        width: 200,
+                        height: 200,
+                      )
+                    else
+                      Text(
+                        'PIX gerado. Use o botão abaixo para copiar o código.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color:
+                              isDark
+                                  ? EagleTokens.darkInkMute
+                                  : TokensStrip.textSecondary,
+                          fontSize: 13,
+                          height: 1.35,
+                        ),
+                      ),
                     const SizedBox(height: TokensStrip.s4),
                     TextButton.icon(
                       icon: const Icon(Icons.copy),
                       label: const Text('Copiar codigo PIX'),
                       onPressed: () async {
-                        await copySensitiveToClipboard(pix!.pixCopiaECola);
+                        final code = pix?.pixCopiaECola.trim() ?? '';
+                        if (code.isEmpty) {
+                          FeedbackHelper.showError(
+                            ctx,
+                            'Código PIX indisponível. Tente gerar de novo.',
+                          );
+                          return;
+                        }
+                        await copySensitiveToClipboard(code);
                         if (ctx.mounted) {
                           FeedbackHelper.showSuccess(
                             ctx,
@@ -184,7 +240,7 @@ Future<void> mostrarPixMensalidade({
                   ],
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
+                    onPressed: () => FxHomeSheetChrome.dismissAndPop(ctx),
                     child: const Text('Fechar'),
                   ),
                 ],

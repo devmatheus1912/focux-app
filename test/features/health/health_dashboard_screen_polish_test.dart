@@ -55,6 +55,8 @@ void main() {
     expect(screen, contains('homeHelpOpened'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('FxEmptyState'));
     expect(screen, isNot(contains('class _MetricCard')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

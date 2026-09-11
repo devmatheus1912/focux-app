@@ -24,7 +24,7 @@ void main() {
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/aluno')"));
     expect(screen, contains("'/checkin/treinos'"));
-    expect(screen, contains("label: 'Início'"));
+    expect(screen, contains("label: 'Hábitos'"));
     expect(screen, contains("'/aluno/habitos'"));
     expect(screen, contains("'/chat/aluno'"));
     expect(screen, contains('trilhaListaPrazoValue'));
@@ -35,6 +35,8 @@ void main() {
     expect(screen, contains('subtitle: freshness'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showAlunoTrilhasHelpSheet'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, isNot(contains('criarTrilha')));
     expect(screen, isNot(contains('deletar')));
     expect(screen, isNot(contains('FloatingActionButton')));

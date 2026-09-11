@@ -23,6 +23,7 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('canPop: false'));
     expect(screen, contains('authUnfocusAndGo'));
+    expect(screen, contains('primaryFocus?.unfocus()'));
     expect(screen, isNot(contains("authUnfocusAndLeave(context, '/login?role=aluno')")));
     expect(screen, contains('AutofillHints.newPassword'));
     expect(screen, contains('ProductEvents.passwordDefined'));

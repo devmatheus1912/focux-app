@@ -15,6 +15,10 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(screen, contains('FxErrorState'));
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('listarMeus'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, isNot(contains('Navigator.of(context).pop()')));
   });
 }
