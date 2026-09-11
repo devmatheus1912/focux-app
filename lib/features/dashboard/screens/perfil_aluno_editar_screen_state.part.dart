@@ -456,17 +456,18 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
             final aluno = home.aluno;
             final medidas = home.medidas;
             _loadIfNeeded(aluno);
-            return Form(
+            return FxKeyboardDismissScope(
+              child: Form(
               key: _formKey,
               child: FxContentWidthLimiter(
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
                     8,
                     FxSettingsLayout.pageInset,
-                    24,
+                    24 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -755,6 +756,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                   ],
                 ),
               ),
+            ),
             ),
             );
           },

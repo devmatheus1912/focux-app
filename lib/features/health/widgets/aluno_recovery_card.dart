@@ -11,27 +11,56 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_rive_player.dart';
+import '../utils/health_dashboard_display.dart';
 import 'recovery_score_ring.dart';
 
-final alunoRecoveryProvider = FutureProvider<RecoverySnapshot?>((ref) async {
-  if (!await HealthService.isAuthorized()) return null;
+/// Resultado do provider local (não-BFF): snapshot + soft error sem engolir falha.
+class AlunoRecoveryView {
+  const AlunoRecoveryView({this.snapshot, this.softError});
+
+  final RecoverySnapshot? snapshot;
+  final String? softError;
+}
+
+final alunoRecoveryProvider = FutureProvider<AlunoRecoveryView>((ref) async {
+  if (!await HealthService.isAuthorized()) {
+    return const AlunoRecoveryView();
+  }
   final repo = HealthRepository.fromClient(ref.read(apiClientProvider));
   try {
     final summary = await HealthService.getTodaySummary();
-    final synced = await repo.syncToday(summary);
-    await HomeWidgetService.updateRecovery(
-      recoveryScore: synced.recoveryScore,
-      recoveryLabel: synced.recoveryLabel,
-      recoveryHint: synced.recoveryHint,
-      steps: synced.steps,
-    );
-    return synced;
-  } catch (_) {
     try {
-      return await repo.fetchLatestRecovery();
+      final synced = await repo.syncToday(summary);
+      await HomeWidgetService.updateRecovery(
+        recoveryScore: synced.recoveryScore,
+        recoveryLabel: synced.recoveryLabel,
+        recoveryHint: synced.recoveryHint,
+        steps: synced.steps,
+      );
+      return AlunoRecoveryView(snapshot: synced);
+    } catch (e) {
+      try {
+        final latest = await repo.fetchLatestRecovery();
+        return AlunoRecoveryView(
+          snapshot: latest,
+          softError: saudeSyncSoftError(friendlyError(e)),
+        );
+      } catch (_) {
+        return AlunoRecoveryView(
+          snapshot: RecoverySnapshot.fromSummary(summary),
+          softError: saudeSyncSoftError(friendlyError(e)),
+        );
+      }
+    }
+  } catch (e) {
+    try {
+      final latest = await repo.fetchLatestRecovery();
+      return AlunoRecoveryView(
+        snapshot: latest,
+        softError: saudeSyncSoftError(friendlyError(e)),
+      );
     } catch (_) {
-      final summary = await HealthService.getTodaySummary();
-      return RecoverySnapshot.fromSummary(summary);
+      rethrow;
     }
   }
 });
@@ -80,7 +109,25 @@ class AlunoRecoveryCard extends ConsumerWidget {
         onRetry: () => ref.invalidate(alunoRecoveryProvider),
         onOpen: () => context.push('/saude'),
       ),
-      data: (data) => _buildFromSnapshot(context, data),
+      data: (view) {
+        if (view.softError != null && view.snapshot != null) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _RecoverySoftError(
+                isDark: isDark,
+                title: 'Sync parcial',
+                message: view.softError!,
+                onRetry: () => ref.invalidate(alunoRecoveryProvider),
+                onOpen: () => context.push('/saude'),
+              ),
+              const SizedBox(height: 8),
+              _buildFromSnapshot(context, view.snapshot),
+            ],
+          );
+        }
+        return _buildFromSnapshot(context, view.snapshot);
+      },
     );
   }
 
@@ -126,7 +173,7 @@ class AlunoRecoveryCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Prontidao do dia',
+                          'Prontidão do dia',
                           style: TextStyle(
                             color: mute,
                             fontSize: 11.5,
@@ -219,7 +266,7 @@ class _ConnectCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Conecte Apple Health ou Google Fit para ver sua prontidao diaria.',
+                  'Conecte Apple Health ou Google Fit para ver sua prontidão diária.',
                   style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
                 ),
               ),
@@ -238,9 +285,11 @@ class _RecoverySoftError extends StatelessWidget {
     required this.message,
     required this.onRetry,
     required this.onOpen,
+    this.title = 'Prontidão indisponível',
   });
 
   final bool isDark;
+  final String title;
   final String message;
   final VoidCallback onRetry;
   final VoidCallback onOpen;
@@ -262,7 +311,7 @@ class _RecoverySoftError extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Prontidão indisponível',
+              title,
               style: TextStyle(
                 color: ink,
                 fontSize: 14,

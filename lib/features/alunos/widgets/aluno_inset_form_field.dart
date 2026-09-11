@@ -5,6 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 /// Campo inset dentro de [FxSettingsGroup] — paridade Editar Perfil.
@@ -58,8 +59,7 @@ class AlunoInsetFormField extends StatelessWidget {
             maxLines: maxLines,
             textInputAction:
                 maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
-            onTapOutside:
-                (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
             style: FxSettingsLayout.rowLabel(color: fxScreenInk(context)),
             decoration: FxInputDeco.insetGrouped(
               context,

@@ -19,6 +19,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -310,6 +311,7 @@ Future<bool> registrarContatoMensalidade({
           ),
         ),
         maxLines: 2,
+        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
       ),
     );
     if (confirm != true) return false;

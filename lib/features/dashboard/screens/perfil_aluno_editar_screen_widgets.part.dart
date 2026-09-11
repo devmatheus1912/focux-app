@@ -153,7 +153,7 @@ class _Field extends StatelessWidget {
         controller: controller,
         maxLines: 1,
         keyboardType: keyboardType,
-        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
         decoration: FxInputDeco.build(context, label, icon: icon),
       ),
     );

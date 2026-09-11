@@ -15,6 +15,8 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(screen, contains('FxKeyboardDismissScope'));
+    expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('Salvar meu perfil'));
     expect(screen, contains('friendlyError'));
     expect(screen, isNot(contains('DashboardHomeActionChip')));

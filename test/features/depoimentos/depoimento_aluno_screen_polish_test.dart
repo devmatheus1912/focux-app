@@ -19,6 +19,8 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('listarMeus'));
     expect(screen, contains('FxKeyboardDismissScope'));
+    expect(screen, contains('onTapOutside'));
+    expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('Navigator.of(context).pop()')));
   });
 }

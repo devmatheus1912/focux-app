@@ -35,6 +35,7 @@ void main() {
     expect(screen, contains('financeiroAlunoProximoVencimentoValue'));
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, contains('showFinanceiroAlunoCobrancaSheet'));
+    expect(screen, contains('mostrarPixMensalidade'));
     expect(screen, contains('circle-check'));
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));
