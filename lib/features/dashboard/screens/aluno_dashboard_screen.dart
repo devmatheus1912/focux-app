@@ -21,6 +21,8 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../widgets/dashboard_home_action_chip.dart';
 import '../widgets/dashboard_section_header.dart';
@@ -30,7 +32,6 @@ import '../../anamnese/widgets/anamnese_status_banner.dart';
 import '../../anamnese/utils/anamnese_display.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../chat/data/chat_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/data/meus_treinos_mem_cache.dart';
@@ -41,6 +42,7 @@ import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../data/aluno_autonomy_plan.dart';
+import '../data/aluno_onboarding_prefs.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_home_display.dart';
 import '../utils/aluno_volume_format.dart';
@@ -60,6 +62,19 @@ class AlunoDashboardScreen extends ConsumerStatefulWidget {
 
 class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   var _npsPrompted = false;
+  var _agendaReviewed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadAgendaReviewed());
+  }
+
+  Future<void> _loadAgendaReviewed() async {
+    final reviewed = await isAlunoAgendaReviewed();
+    if (!mounted) return;
+    setState(() => _agendaReviewed = reviewed);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,10 +138,6 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                     aluno: home.aluno,
                     isDark: isDark,
                     onProfile: () => context.push('/aluno/perfil'),
-                    onLogout: () async {
-                      await ref.read(authProvider.notifier).logout();
-                      if (context.mounted) context.go('/login');
-                    },
                   ),
               loading:
                   () => const Padding(
@@ -161,13 +172,17 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
               treinos: home.treinos,
               historico: home.historico,
               mensagens: home.chat.toSyntheticMessages(),
+              agendaReviewed: _agendaReviewed,
             );
 
             return RefreshIndicator(
               onRefresh: () async {
                 ref.invalidate(alunoDashboardHomeProvider);
                 ref.invalidate(minhaAnamneseProvider);
-                await ref.read(alunoDashboardHomeProvider.future);
+                await Future.wait([
+                  ref.read(alunoDashboardHomeProvider.future),
+                  _loadAgendaReviewed(),
+                ]);
               },
               child: FxContentWidthLimiter(
                 child: SingleChildScrollView(
@@ -235,6 +250,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                           home.chat.toSyntheticMessages(),
                         ),
                         isDark: isDark,
+                        agendaReviewed: _agendaReviewed,
+                        onReturnedFromTask: _loadAgendaReviewed,
                       ),
                       const SizedBox(height: TokensStrip.s5),
                       const _StudentToolsSection(),

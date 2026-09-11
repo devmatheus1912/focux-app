@@ -98,8 +98,42 @@ void main() {
         plan.tasks.firstWhere((task) => task.id == 'treino-semana').done,
         true,
       );
+      expect(
+        plan.tasks.firstWhere((task) => task.id == 'agenda-semana').done,
+        false,
+      );
     },
   );
+
+  test('marca agenda-semana done quando agendaReviewed', () {
+    final plan = buildAlunoAutonomyPlan(
+      aluno: Aluno(
+        id: 1,
+        nome: 'Aluno Completo',
+        email: 'aluno@focux.test',
+        objetivo: 'Hipertrofia',
+        status: 'ATIVO',
+        fotoUrl: 'https://cdn.test/foto.jpg',
+        telefone: '11999999999',
+        whatsapp: '11999999999',
+        genero: 'M',
+        peso: 80,
+        altura: 1.8,
+        dataNascimento: '1995-01-10',
+      ),
+      medidas: [MedidaCorporal(id: 1, data: '2026-04-20', peso: 80)],
+      treinos: const [],
+      historico: const [],
+      mensagens: const [],
+      now: DateTime(2026, 4, 28),
+      agendaReviewed: true,
+    );
+
+    expect(
+      plan.tasks.firstWhere((task) => task.id == 'agenda-semana').done,
+      true,
+    );
+  });
 
   test('home experience prioriza treino, score e narrativa proprietaria', () {
     final home = buildAlunoHomeExperience(
@@ -168,11 +202,58 @@ void main() {
     expect(home.action.mode, AlunoHomeMode.workoutReady);
     expect(home.action.title, 'Treino A');
     expect(home.action.cta, 'Treinar agora');
+    expect(home.action.description, contains('1 exercícios'));
     expect(home.score.value, greaterThanOrEqualTo(70));
     expect(home.score.rhythmLabel, isNotEmpty);
     expect(home.objectiveLens.primaryMetric, 'volume e carga');
     expect(home.narratives.join(' '), contains('Treino A'));
     expect(home.narratives.join(' '), contains('Supino'));
+  });
+
+  test('workoutReady sem exercícios evita copy de 0 exercícios', () {
+    final home = buildAlunoHomeExperience(
+      aluno: Aluno(
+        id: 1,
+        nome: 'Thales Aluno',
+        email: 'thales@focux.test',
+        objetivo: 'Hipertrofia',
+        status: 'ATIVO',
+        fotoUrl: 'https://cdn.test/foto.jpg',
+        telefone: '11999999999',
+        whatsapp: '11999999999',
+        genero: 'M',
+        peso: 80,
+        altura: 1.8,
+        dataNascimento: '1995-01-10',
+      ),
+      medidas: [MedidaCorporal(id: 1, data: '2026-05-01', peso: 80)],
+      treinos: [
+        ExecucaoTreino(
+          treinoId: 7,
+          treinoNome: 'Treino A',
+          status: 'DISPONIVEL',
+          exercicios: const [],
+        ),
+      ],
+      historico: [
+        ExecucaoTreino(
+          treinoId: 6,
+          treinoNome: 'Treino B',
+          status: 'CONCLUIDO',
+          concluidoEm: '2026-05-03T10:00:00',
+          exercicios: const [],
+        ),
+      ],
+      mensagens: const [],
+      now: DateTime(2026, 5, 5),
+    );
+
+    expect(home.action.mode, AlunoHomeMode.workoutReady);
+    expect(home.action.description, isNot(contains('0 exercícios')));
+    expect(
+      home.action.description,
+      'Sessão pronta para iniciar com registro de séries.',
+    );
   });
 
   test('ficha aguardando liberacao nao oferece CTA de iniciar', () {

@@ -507,38 +507,49 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                             : Column(
                               children: [
                                 Expanded(
-                                  child: SingleChildScrollView(
-                                    child: CheckinSerieCard(
-                                      ee: current,
-                                      index: currentIndex,
-                                      total: exercicios.length,
-                                      onRegistrar:
-                                          () => _registrarSerieDetalhada(
-                                            current,
-                                            numero: current.seriesFeitas + 1,
-                                          ),
-                                      onDesfazer:
-                                          current.seriesFeitas > 0
-                                              ? () => _marcar(
-                                                current,
-                                                current.seriesFeitas - 1,
-                                              )
-                                              : null,
-                                      onOpenCoach:
-                                          showCoach
-                                              ? () => showCheckinCoachSheet(
-                                                context,
-                                                ee: current,
-                                                forAluno: isAluno,
-                                              )
-                                              : null,
-                                      onOpenDemo:
-                                          checkinExerciseHasDemo(current)
-                                              ? () => showCheckinDemoSheet(
-                                                context,
-                                                ee: current,
-                                              )
-                                              : null,
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: SingleChildScrollView(
+                                      child: CheckinSerieCard(
+                                        ee: current,
+                                        index: currentIndex,
+                                        total: exercicios.length,
+                                        onRegistrar:
+                                            () => _registrarSerieDetalhada(
+                                              current,
+                                              numero: current.seriesFeitas + 1,
+                                            ),
+                                        onDesfazer:
+                                            current.seriesFeitas > 0
+                                                ? () => _marcar(
+                                                  current,
+                                                  current.seriesFeitas - 1,
+                                                )
+                                                : null,
+                                        onOpenTips:
+                                            checkinExerciseHasTips(current)
+                                                ? () =>
+                                                    showCheckinExerciseTipsSheet(
+                                                      context,
+                                                      ee: current,
+                                                    )
+                                                : null,
+                                        onOpenCoach:
+                                            showCoach
+                                                ? () => showCheckinCoachSheet(
+                                                  context,
+                                                  ee: current,
+                                                  forAluno: isAluno,
+                                                )
+                                                : null,
+                                        onOpenDemo:
+                                            checkinExerciseHasDemo(current)
+                                                ? () => showCheckinDemoSheet(
+                                                  context,
+                                                  ee: current,
+                                                )
+                                                : null,
+                                      ),
                                     ),
                                   ),
                                 ),

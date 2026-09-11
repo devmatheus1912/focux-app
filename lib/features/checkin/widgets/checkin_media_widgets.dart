@@ -6,6 +6,9 @@ import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../utils/checkin_video_badge.dart';
 
+/// Fixed preview height for thumbnails / loading (demo sheet + inline).
+const double checkinMediaPreviewHeight = 228;
+
 class CheckinExerciseThumbnailPreview extends StatelessWidget {
   final String url;
   final String? videoSource;
@@ -38,7 +41,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
         children: [
           Image.network(
             url,
-            height: 168,
+            height: checkinMediaPreviewHeight,
             width: double.infinity,
             fit: BoxFit.cover,
             errorBuilder:
@@ -58,7 +61,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.22),
                   ],
                 ),
               ),
@@ -66,30 +69,9 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
           ),
           if (badge != null && badgeIcon != null)
             Positioned(
-              left: 12,
-              bottom: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.48),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(badgeIcon, color: Colors.white, size: 15),
-                    const SizedBox(width: 4),
-                    Text(
-                      badge,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              left: 10,
+              bottom: 10,
+              child: _CheckinMediaBadge(label: badge, icon: badgeIcon),
             ),
         ],
       ),
@@ -117,7 +99,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
         children: [
           Image.network(
             url,
-            height: 168,
+            height: checkinMediaPreviewHeight,
             width: double.infinity,
             fit: BoxFit.cover,
             errorBuilder:
@@ -137,36 +119,18 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.42),
+                    Colors.black.withValues(alpha: 0.20),
                   ],
                 ),
               ),
             ),
           ),
           Positioned(
-            left: 12,
-            bottom: 12,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.48),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.play_arrow_rounded, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    'Tecnica do exercicio',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
+            left: 10,
+            bottom: 10,
+            child: const _CheckinMediaBadge(
+              label: 'Tecnica do exercicio',
+              icon: Icons.play_arrow_rounded,
             ),
           ),
         ],
@@ -201,24 +165,47 @@ class _CheckinExerciseVideoPreviewState
   late final VideoPlayerController _controller;
   bool _ready = false;
   bool _failed = false;
+  bool _playing = false;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
+      ..addListener(_onVideoTick)
       ..initialize()
-          .then((_) {
+          .then((_) async {
             if (!mounted) return;
-            _controller.setLooping(true);
-            setState(() => _ready = true);
+            await _controller.setLooping(true);
+            await _controller.setVolume(0);
+            await _controller.play();
+            if (!mounted) return;
+            setState(() {
+              _ready = true;
+              _playing = _controller.value.isPlaying;
+            });
           })
           .catchError((_) {
             if (mounted) setState(() => _failed = true);
           });
   }
 
+  void _onVideoTick() {
+    final playing = _controller.value.isPlaying;
+    if (playing == _playing || !mounted) return;
+    setState(() => _playing = playing);
+  }
+
+  void _togglePlay() {
+    if (_controller.value.isPlaying) {
+      _controller.pause();
+    } else {
+      _controller.play();
+    }
+  }
+
   @override
   void dispose() {
+    _controller.removeListener(_onVideoTick);
     _controller.dispose();
     super.dispose();
   }
@@ -230,7 +217,7 @@ class _CheckinExerciseVideoPreviewState
     }
     if (!_ready) {
       return Container(
-        height: 168,
+        height: checkinMediaPreviewHeight,
         width: double.infinity,
         decoration: BoxDecoration(
           color:
@@ -254,7 +241,6 @@ class _CheckinExerciseVideoPreviewState
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
-        alignment: Alignment.center,
         children: [
           AspectRatio(
             aspectRatio:
@@ -270,58 +256,73 @@ class _CheckinExerciseVideoPreviewState
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.10),
-                    Colors.black.withValues(alpha: 0.46),
+                    Colors.black.withValues(alpha: 0.04),
+                    Colors.black.withValues(alpha: 0.18),
                   ],
                 ),
               ),
             ),
           ),
-          IconButton.filled(
-            onPressed: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-            },
-            icon: Icon(
-              _controller.value.isPlaying
-                  ? Icons.pause_rounded
-                  : Icons.play_arrow_rounded,
-            ),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.black.withValues(alpha: 0.46),
-              foregroundColor: Colors.white,
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: Material(
+              color: Colors.black.withValues(alpha: 0.42),
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: _togglePlay,
+                child: SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: Icon(
+                    _playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
             ),
           ),
           if (badge != null && badgeIcon != null)
             Positioned(
-              left: 12,
-              bottom: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.48),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(badgeIcon, color: Colors.white, size: 15),
-                    const SizedBox(width: 5),
-                    Text(
-                      badge,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              left: 10,
+              bottom: 10,
+              child: _CheckinMediaBadge(label: badge, icon: badgeIcon),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CheckinMediaBadge extends StatelessWidget {
+  final String label;
+  final IconData icon;
+
+  const _CheckinMediaBadge({required this.label, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 13),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ],
       ),
     );

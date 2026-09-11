@@ -125,7 +125,10 @@ Future<void> showCheckinDemoSheet(
           TokensStrip.s4,
           TokensStrip.s4,
         ),
-        child: preview,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: checkinMediaPreviewHeight),
+          child: preview,
+        ),
       );
     },
   );

@@ -37,6 +37,20 @@ bool isTreinoDisponivelParaIniciar(ExecucaoTreino treino) {
 List<ExecucaoTreino> treinosProntosParaIniciar(List<ExecucaoTreino> treinos) =>
     treinos.where(isTreinoDisponivelParaIniciar).toList(growable: false);
 
+/// Startable first — job is find & start, not pipeline noise.
+List<ExecucaoTreino> treinosOrdenadosStartFirst(List<ExecucaoTreino> treinos) {
+  final pronto = <ExecucaoTreino>[];
+  final resto = <ExecucaoTreino>[];
+  for (final t in treinos) {
+    if (isTreinoDisponivelParaIniciar(t)) {
+      pronto.add(t);
+    } else {
+      resto.add(t);
+    }
+  }
+  return [...pronto, ...resto];
+}
+
 /// Conta dias distintos com ≥1 execução `CONCLUIDO` na semana corrente.
 int countUniqueCompletedDaysThisWeek(
   List<ExecucaoTreino> historico, {

@@ -9,6 +9,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../perfil/utils/lgpd_consent_display.dart';
 import '../../perfil/widgets/perfil_lgpd_consent_sheet.dart';
 import '../../perfil/widgets/perfil_sticky_bar.dart';
@@ -202,6 +204,15 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
                 child: FxSettingsGroup(
                   children: [
                     FxSettingsTile(
+                      icon: Icons.logout_rounded,
+                      label: 'Sair da conta',
+                      value: '',
+                      mute: chrome.mute,
+                      line: chrome.line,
+                      danger: true,
+                      onTap: () => _confirmLogout(context, ref),
+                    ),
+                    FxSettingsTile(
                       icon: Icons.delete_forever_outlined,
                       label: 'Excluir minha conta',
                       value: '',
@@ -235,4 +246,19 @@ class _PerfilAlunoHubBody extends ConsumerWidget {
       ],
     );
   }
+}
+
+Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+  final confirmed = await showFxConfirmSheet(
+    context,
+    title: 'Sair da conta',
+    message: 'Deseja encerrar esta sessão neste aparelho?',
+    confirmLabel: 'Sair',
+    icon: Icons.logout_rounded,
+    destructive: true,
+  );
+  if (confirmed != true || !context.mounted) return;
+  await ref.read(authProvider.notifier).logout();
+  if (!context.mounted) return;
+  context.go('/login');
 }

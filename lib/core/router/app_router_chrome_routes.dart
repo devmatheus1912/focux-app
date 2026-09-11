@@ -56,7 +56,6 @@ import '../../features/perfil/screens/landing_editor_screen.dart';
 import '../../features/dunning/screens/dunning_ops_screen.dart';
 import '../../features/winback/screens/winback_screen.dart';
 import '../../features/evolucao/screens/engajamento_screen.dart';
-import '../../features/ia/screens/ia_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_mensalidade_detail_screen.dart';
 import '../../features/financeiro/data/financeiro_repository.dart';
@@ -564,7 +563,8 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/ia/aluno',
-            builder: (context, state) => const IaAlunoScreen(),
+            // Hide até quota do personal no contexto-aluno (§38).
+            redirect: (context, state) => '/dashboard/aluno',
           ),
           GoRoute(
             path: '/ia/checkin',

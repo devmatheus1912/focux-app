@@ -27,6 +27,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../dashboard/data/aluno_onboarding_prefs.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_display.dart';
 import '../utils/agenda_status.dart';
@@ -55,6 +56,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(markAlunoAgendaReviewed());
     _load();
   }
 

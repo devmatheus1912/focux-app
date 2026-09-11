@@ -142,6 +142,7 @@ AlunoHomeExperience buildAlunoHomeExperience({
   required List<ExecucaoTreino> historico,
   required List<ChatMsg> mensagens,
   DateTime? now,
+  bool agendaReviewed = false,
 }) {
   final today = now ?? DateTime.now();
   final plan = buildAlunoAutonomyPlan(
@@ -151,6 +152,7 @@ AlunoHomeExperience buildAlunoHomeExperience({
     historico: historico,
     mensagens: mensagens,
     now: today,
+    agendaReviewed: agendaReviewed,
   );
   final score = _buildFocuxScore(
     aluno: aluno,
@@ -195,6 +197,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
   required List<ExecucaoTreino> historico,
   required List<ChatMsg> mensagens,
   DateTime? now,
+  bool agendaReviewed = false,
 }) {
   final today = now ?? DateTime.now();
   final profileCompletion = _profileCompletion(aluno);
@@ -315,7 +318,7 @@ AlunoAutonomyPlan buildAlunoAutonomyPlan({
         route: '/agenda/aluno',
         kind: AlunoTaskKind.agenda,
         priority: AlunoTaskPriority.baixa,
-        done: false,
+        done: agendaReviewed,
       ),
       AlunoAutonomyTask(
         id: 'financeiro',
@@ -404,12 +407,15 @@ AlunoHomeAction _mainHomeAction({
 
   if (startable.isNotEmpty) {
     final workout = startable.first;
+    final exerciseCount = workout.exercicios.length;
     return AlunoHomeAction(
       mode: AlunoHomeMode.workoutReady,
       eyebrow: 'Plano de hoje',
       title: workout.treinoNome,
       description:
-          '${workout.exercicios.length} exercícios prontos para trabalhar ${lens.primaryMetric.toLowerCase()}.',
+          exerciseCount == 0
+              ? 'Sessão pronta para iniciar com registro de séries.'
+              : '$exerciseCount exercícios prontos para trabalhar ${lens.primaryMetric.toLowerCase()}.',
       cta: 'Treinar agora',
       route: '/checkin/executar',
       routeExtra: workout.treinoId,

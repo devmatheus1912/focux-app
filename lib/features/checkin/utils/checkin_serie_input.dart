@@ -4,6 +4,22 @@
 /// The student logs the actual reps performed (integer count).
 library;
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+/// SharedPreferences flag: long RPE copy shown once, then only via `?`.
+const checkinRpeHintSeenKey = 'checkin_rpe_hint_seen_v1';
+
+/// Returns `true` the first time (caller should show the long hint), then
+/// marks the key so later opens hide the paragraph.
+Future<bool> checkinConsumeRpeFirstUseHint() async {
+  final prefs = await SharedPreferences.getInstance();
+  final seen = prefs.getBool(checkinRpeHintSeenKey) ?? false;
+  if (!seen) {
+    await prefs.setBool(checkinRpeHintSeenKey, true);
+  }
+  return !seen;
+}
+
 bool checkinIsPrescriptionRange(String? value) {
   final t = value?.trim() ?? '';
   if (t.isEmpty) return false;

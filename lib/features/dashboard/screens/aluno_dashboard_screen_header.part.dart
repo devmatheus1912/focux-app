@@ -4,13 +4,11 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
   final VoidCallback onProfile;
-  final Future<void> Function() onLogout;
 
   const _AlunoAppBarProfileMenu({
     required this.aluno,
     required this.isDark,
     required this.onProfile,
-    required this.onLogout,
   });
 
   String _initials(String nome) {
@@ -20,62 +18,6 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
       return parts.first[0].toUpperCase();
     }
     return '${parts.first[0]}${parts[1][0]}'.toUpperCase();
-  }
-
-  Future<void> _openMenu(BuildContext context) async {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    await showFxHomeSheet<void>(
-      context,
-      builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: chrome.isDark,
-          maxHeight: MediaQuery.sizeOf(ctx).height * 0.42,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FxHomeSheetHandle(isDark: chrome.isDark),
-              SizedBox(height: TokensStrip.s4),
-              FxHomeSheetHeader(
-                isDark: chrome.isDark,
-                title: aluno.nome.split(' ').first,
-                subtitle: 'Conta do aluno',
-                leading: Icon(
-                  Icons.person_outline_rounded,
-                  color: primary,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              FxSatelliteListTile(
-                title: 'Perfil',
-                leading: Icon(Icons.person_outline_rounded, color: primary),
-                accent: primary,
-                margin: EdgeInsets.zero,
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  onProfile();
-                },
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              FxSatelliteListTile(
-                title: 'Sair',
-                leading: Icon(Icons.logout_rounded, color: EagleTokens.bad),
-                accent: EagleTokens.bad,
-                margin: EdgeInsets.zero,
-                onTap: () async {
-                  Navigator.of(ctx).pop();
-                  await onLogout();
-                },
-              ),
-              SizedBox(
-                height: TokensStrip.s4 + MediaQuery.paddingOf(ctx).bottom,
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -90,7 +32,7 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
         label: 'Perfil do aluno',
         child: InkWell(
           customBorder: const CircleBorder(),
-          onTap: () => _openMenu(context),
+          onTap: onProfile,
           child: CircleAvatar(
             radius: 18,
             backgroundColor: BrandPalette.soft(primary, dark: isDark),

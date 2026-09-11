@@ -150,21 +150,25 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                   ),
                 ),
                 builder: (context, _) {
+                  final ordered = treinosOrdenadosStartFirst(treinos);
                   final ativos =
-                      treinos
+                      ordered
                           .where((t) => t.status.toUpperCase() != 'CONCLUIDO')
                           .length;
-                  final totalExercicios = treinos.fold<int>(
+                  final startableCount =
+                      ordered.where(isTreinoDisponivelParaIniciar).length;
+                  final hasStartable = startableCount > 0;
+                  final totalExercicios = ordered.fold<int>(
                     0,
                     (sum, t) => sum + t.exercicios.length,
                   );
-                  final totalConcluidos = treinos.fold<int>(
+                  final totalConcluidos = ordered.fold<int>(
                     0,
                     (sum, t) =>
                         sum + t.exercicios.where((e) => e.concluido).length,
                   );
                   final itemCount =
-                      treinos.length +
+                      ordered.length +
                       (_hasMore || _loadMoreError != null ? 1 : 0);
 
                   return RefreshIndicator(
@@ -175,18 +179,19 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
                       slivers: [
-                        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                        const SliverToBoxAdapter(child: SizedBox(height: 6)),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(
                               TokensStrip.s5,
                               0,
                               20,
-                              18,
+                              12,
                             ),
                             child: _TrainingHero(
                               ativos: ativos,
-                              total: treinos.length,
+                              startableCount: startableCount,
+                              total: ordered.length,
                               totalExercicios: totalExercicios,
                               totalConcluidos: totalConcluidos,
                               isDark: isDark,
@@ -198,14 +203,14 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                             TokensStrip.s5,
                             0,
                             20,
-                            14,
+                            10,
                           ),
                           sliver: SliverList.separated(
                             itemCount: itemCount,
                             separatorBuilder:
-                                (_, __) => const SizedBox(height: 12),
+                                (_, __) => const SizedBox(height: 8),
                             itemBuilder: (context, index) {
-                              if (index >= treinos.length) {
+                              if (index >= ordered.length) {
                                 if (_loadMoreError != null) {
                                   return TextButton(
                                     onPressed: _loadMore,
@@ -222,13 +227,13 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                 );
                               }
                               return _TrainingPlanCard(
-                                treino: treinos[index],
+                                treino: ordered[index],
                                 isDark: isDark,
                                 starting:
                                     _startingTreinoId ==
-                                    treinos[index].treinoId,
+                                    ordered[index].treinoId,
                                 onStart: () {
-                                  final treino = treinos[index];
+                                  final treino = ordered[index];
                                   if (_startingTreinoId != null) return;
                                   setState(
                                     () => _startingTreinoId = treino.treinoId,
@@ -266,6 +271,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                               totalExercicios: totalExercicios,
                               totalConcluidos: totalConcluidos,
                               ativos: ativos,
+                              hasStartable: hasStartable,
                               isDark: isDark,
                             ),
                           ),

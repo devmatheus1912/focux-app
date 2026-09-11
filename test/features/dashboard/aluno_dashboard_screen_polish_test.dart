@@ -58,8 +58,16 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('Ver catálogo'));
     expect(screen, contains('Como calculamos'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, contains('FxSettingsGroup'));
+    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('Atalhos da conta.'));
+    expect(screen, isNot(contains('/ia/aluno')));
+    expect(screen, isNot(contains('/aluno/form-check')));
+    expect(screen, isNot(contains('/aluno/desafios')));
+    expect(screen, isNot(contains('/aluno/trilhas')));
+    expect(screen, isNot(contains('/aluno/grupo-aulas')));
+    expect(screen, isNot(contains('/gamificacao')));
+    expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('class _AlunoProfileCard')));
   });
 }
