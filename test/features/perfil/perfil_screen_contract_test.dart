@@ -34,8 +34,9 @@ void main() {
     expect(find.textContaining('Marca'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsNothing);
     expect(find.text('Vitrine'), findsOneWidget);
-    expect(find.text('Compartilhar'), findsOneWidget);
-    expect(find.text('Completar'), findsOneWidget);
+    expect(find.text('Link público'), findsOneWidget);
+    // Completar sticky removido — editar fica só no lápis da app bar.
+    expect(find.text('Completar'), findsNothing);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
     expect(find.textContaining('alunos'), findsNothing);
@@ -66,7 +67,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Completar'), findsWidgets);
+    expect(find.text('Completar'), findsNothing);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Conta e segurança'), findsOneWidget);
@@ -110,7 +111,7 @@ void main() {
     expect(find.text('Hoje'), findsNothing);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
-    expect(find.text('Compartilhar'), findsOneWidget);
+    expect(find.text('Link público'), findsOneWidget);
     expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsNothing);
   });

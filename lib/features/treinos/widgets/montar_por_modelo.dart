@@ -24,7 +24,8 @@ Future<void> openMontarPorModelo({
     context,
     MaterialPageRoute(
       builder: (routeContext) => FxShellScaffold(
-            useMesh: true,
+            // Sem segundo mesh: detalhe do treino já tem CinematicMesh.
+            useMesh: false,
             appBar: FxShellAppBar(
               title: 'Montar por modelo',
               subtitle: 'Pela frequência do aluno',
@@ -32,7 +33,11 @@ Future<void> openMontarPorModelo({
             ),
             body: TemplateSplitPicker(
               alreadyInTreinoIds: alreadyInTreinoIds,
-              onCompleted: () => Navigator.pop(routeContext, true),
+              onCompleted: () {
+                if (routeContext.mounted) {
+                  Navigator.pop(routeContext, true);
+                }
+              },
               onAdicionar: (Exercicio exercicio) async {
                 try {
                   await ref

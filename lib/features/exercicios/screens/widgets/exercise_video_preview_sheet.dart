@@ -240,36 +240,47 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                 const SizedBox(height: 12),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
+                  clipBehavior: Clip.hardEdge,
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
-                    child:
-                        showSyncOnly
-                            ? _PreviewLoading(mute: mute)
-                            : displayUrl == null
-                            ? _PreviewUnavailable(mute: mute, pending: pending)
-                            : Image.network(
-                              displayUrl,
-                              key: ValueKey(displayUrl),
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) {
-                                WidgetsBinding.instance.addPostFrameCallback((
-                                  _,
-                                ) {
-                                  if (mounted) _tryNextCandidate();
-                                });
-                                if (!_exhausted) {
+                    // Fundo da folha — preto no letterbox vira “risco” na prévia.
+                    child: ColoredBox(
+                      color: isDark
+                          ? TokensStrip.cinematicSurface
+                          : TokensStrip.cardBg,
+                      child:
+                          showSyncOnly
+                              ? _PreviewLoading(mute: mute)
+                              : displayUrl == null
+                              ? _PreviewUnavailable(
+                                mute: mute,
+                                pending: pending,
+                              )
+                              : Image.network(
+                                displayUrl,
+                                key: ValueKey(displayUrl),
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                errorBuilder: (_, __, ___) {
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    if (mounted) _tryNextCandidate();
+                                  });
+                                  if (!_exhausted) {
+                                    return _PreviewLoading(mute: mute);
+                                  }
+                                  return _PreviewUnavailable(
+                                    mute: mute,
+                                    pending: pending,
+                                  );
+                                },
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
                                   return _PreviewLoading(mute: mute);
-                                }
-                                return _PreviewUnavailable(
-                                  mute: mute,
-                                  pending: pending,
-                                );
-                              },
-                              loadingBuilder: (context, child, progress) {
-                                if (progress == null) return child;
-                                return _PreviewLoading(mute: mute);
-                              },
-                            ),
+                                },
+                              ),
+                    ),
                   ),
                 ),
               ],
@@ -288,13 +299,17 @@ class _PreviewLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ColoredBox(
-      color: Colors.black,
+      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const FxLoading(size: 28, color: Colors.white),
+            FxLoading(
+              size: 28,
+              color: isDark ? Colors.white : TokensStrip.textPrimary,
+            ),
             const SizedBox(height: 12),
             Text(
               'Carregando demonstração...',
@@ -315,8 +330,9 @@ class _PreviewUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ColoredBox(
-      color: Colors.black,
+      color: isDark ? TokensStrip.cinematicSurface : TokensStrip.cardBg,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -430,11 +446,13 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.hardEdge,
             child: AspectRatio(
-              // MoveKit e demos de academia são landscape — 16:9 evita letterbox alto.
               aspectRatio: 16 / 9,
               child: ColoredBox(
-                color: Colors.black,
+                color: isDark
+                    ? TokensStrip.cinematicSurface
+                    : TokensStrip.cardBg,
                 child:
                     _failed
                         ? Center(
@@ -445,15 +463,21 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
                         )
                         : _ready && _controller != null
                         ? FittedBox(
-                          fit: BoxFit.contain,
+                          fit: BoxFit.cover,
+                          clipBehavior: Clip.hardEdge,
                           child: SizedBox(
                             width: _controller!.value.size.width,
                             height: _controller!.value.size.height,
                             child: VideoPlayer(_controller!),
                           ),
                         )
-                        : const Center(
-                          child: FxLoading(size: 28, color: Colors.white),
+                        : Center(
+                          child: FxLoading(
+                            size: 28,
+                            color: isDark
+                                ? Colors.white
+                                : TokensStrip.textPrimary,
+                          ),
                         ),
               ),
             ),
