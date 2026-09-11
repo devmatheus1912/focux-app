@@ -40,7 +40,8 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('hubCount:'));
-    expect(screen, contains('Nova mensagem'));
+    expect(screen, contains('Nova conversa'));
+    expect(screen, isNot(contains('Nova mensagem')));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('IndexedStack'));

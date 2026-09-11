@@ -30,6 +30,7 @@ class CheckinSerieDetailSheet extends StatefulWidget {
   final String title;
   final double? initialCargaKg;
   final String? initialRepeticoes;
+  final String? prescricacaoHint;
   final String? initialFeedback;
   final int? initialRpe;
   final int? rpeAlvo;
@@ -40,6 +41,7 @@ class CheckinSerieDetailSheet extends StatefulWidget {
     required this.title,
     required this.initialCargaKg,
     required this.initialRepeticoes,
+    this.prescricacaoHint,
     required this.initialFeedback,
     required this.initialRpe,
     this.rpeAlvo,
@@ -113,6 +115,17 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               ),
             ),
             const SizedBox(height: 14),
+            if (widget.prescricacaoHint != null) ...[
+              Text(
+                widget.prescricacaoHint!,
+                style: TextStyle(
+                  color: mute,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+            ],
             Row(
               children: [
                 Expanded(
@@ -137,10 +150,13 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                 Expanded(
                   child: CheckinSerieField(
                     controller: _repsController,
-                    label: 'Reps',
+                    label: 'Reps feitas',
                     suffix: 'x',
                     icon: Icons.repeat_rounded,
-                    keyboardType: TextInputType.text,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     ink: ink,
                     mute: mute,
                     line: line,
@@ -151,7 +167,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
             ),
             const SizedBox(height: TokensStrip.s4),
             Text(
-              'Sensacao',
+              'Sensação',
               style: TextStyle(
                 color: mute,
                 fontSize: 12,
@@ -164,7 +180,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               runSpacing: 8,
               children: [
                 CheckinFeedbackChip(
-                  label: 'Facil',
+                  label: 'Fácil',
                   selected: _feedback == 'FACIL',
                   color: brand,
                   onTap: () => _toggleFeedback('FACIL'),
@@ -176,7 +192,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   onTap: () => _toggleFeedback('OK'),
                 ),
                 CheckinFeedbackChip(
-                  label: 'Dificil',
+                  label: 'Difícil',
                   selected: _feedback == 'DIFICIL',
                   color: brand,
                   onTap: () => _toggleFeedback('DIFICIL'),
@@ -199,7 +215,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     children: [
                       Expanded(
                         child: Text(
-                          'RPE ${_useRpe ? _rpe : "-"}',
+                          'RPE ${_useRpe ? _rpe : "—"}',
                           style: TextStyle(
                             color: ink,
                             fontWeight: FontWeight.w900,
@@ -241,14 +257,15 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                             ? (value) => setState(() => _rpe = value.round())
                             : null,
                   ),
-                  if (widget.rpeAlvo != null)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Ficha sugere RPE ${widget.rpeAlvo} (escala 1–10).',
-                        style: TextStyle(color: mute, fontSize: 12),
-                      ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      widget.rpeAlvo == null
+                          ? 'RPE é esforço percebido (1–10), não o número de reps. As reps feitas ficam no campo acima.'
+                          : 'Ficha sugere RPE ${widget.rpeAlvo} (esforço 1–10). Reps feitas ficam no campo acima.',
+                      style: TextStyle(color: mute, fontSize: 12),
                     ),
+                  ),
                 ],
               ),
             ),
@@ -267,7 +284,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     }
                   }),
               title: Text(
-                'Senti dor nesta serie',
+                'Senti dor nesta série',
                 style: TextStyle(color: ink, fontWeight: FontWeight.w800),
               ),
               subtitle: Text(
@@ -279,7 +296,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
             SizedBox(
               width: double.infinity,
               child: FxLiquidPrimaryButton(
-                label: 'Salvar serie',
+                label: 'Salvar série',
                 icon: Icons.check_rounded,
                 onPressed: _submit,
               ),

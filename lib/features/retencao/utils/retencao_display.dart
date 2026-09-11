@@ -19,6 +19,12 @@ const retencaoEmptyTitle = 'Ainda sem leitura desta base';
 const retencaoEmptySubtitle =
     'O cálculo roda no domingo. Cadastre alunos ativos ou fale no win-back com quem já sumiu.';
 
+bool retencaoNomeExibivel(String nome) {
+  final t = nome.trim();
+  if (t.isEmpty) return false;
+  return t.toLowerCase() != 'aluno';
+}
+
 String retencaoNormalizeFiltro(String? raw) {
   final value = (raw ?? '').trim().toLowerCase();
   return value == retencaoFiltroAlto ? retencaoFiltroAlto : '';
@@ -35,15 +41,18 @@ List<RetencaoAlunoScore> retencaoItemsForFiltro(
   List<RetencaoAlunoScore> scores,
   String? filtro,
 ) {
+  final named = scores.where((s) => retencaoNomeExibivel(s.alunoNome)).toList();
   if (retencaoNormalizeFiltro(filtro) == retencaoFiltroAlto) {
-    return scores.where((s) => retencaoRiscoAlto(s.riscoChurn)).toList();
+    return named.where((s) => retencaoRiscoAlto(s.riscoChurn)).toList();
   }
-  return scores;
+  return named;
 }
 
 RetencaoAlunoScore? firstAltoRetencao(List<RetencaoAlunoScore> scores) {
   for (final s in scores) {
-    if (retencaoRiscoAlto(s.riscoChurn)) return s;
+    if (retencaoRiscoAlto(s.riscoChurn) && retencaoNomeExibivel(s.alunoNome)) {
+      return s;
+    }
   }
   return null;
 }

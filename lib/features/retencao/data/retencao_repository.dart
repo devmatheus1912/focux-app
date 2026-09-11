@@ -23,7 +23,9 @@ class RetencaoAlunoScore {
   factory RetencaoAlunoScore.fromJson(Map<String, dynamic> j) =>
       RetencaoAlunoScore(
         alunoId: (j['alunoId'] as num).toInt(),
-        alunoNome: j['alunoNome'] as String? ?? 'Aluno',
+        alunoNome: (j['alunoNome'] as String?)?.trim().isNotEmpty == true
+            ? (j['alunoNome'] as String).trim()
+            : 'Aluno',
         scoreAtual: (j['scoreAtual'] as num?)?.toInt() ?? 0,
         scoreAnterior: (j['scoreAnterior'] as num?)?.toInt(),
         delta: (j['delta'] as num?)?.toInt() ?? 0,

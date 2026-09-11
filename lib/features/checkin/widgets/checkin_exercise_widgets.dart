@@ -124,7 +124,7 @@ class CheckinSerieCard extends StatelessWidget {
                 if (onOpenCoach != null)
                   TextButton(
                     onPressed: onOpenCoach,
-                    child: const Text('Coach'),
+                    child: const Text('Postura'),
                   ),
               ],
             ),
