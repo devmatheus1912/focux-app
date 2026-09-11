@@ -35,8 +35,8 @@ void main() {
     expect(find.text('Prontidão comercial'), findsNothing);
     expect(find.text('Vitrine'), findsOneWidget);
     expect(find.text('Link público'), findsOneWidget);
-    // Completar sticky removido — editar fica só no lápis da app bar.
-    expect(find.text('Completar'), findsNothing);
+    // Completar sticky: P0 S2 quando há lacuna (fixture sem foto/telefone).
+    expect(find.text('Completar'), findsOneWidget);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
     expect(find.textContaining('alunos'), findsNothing);
@@ -67,7 +67,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Completar'), findsNothing);
+    expect(find.text('Completar'), findsOneWidget);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Conta e segurança'), findsOneWidget);

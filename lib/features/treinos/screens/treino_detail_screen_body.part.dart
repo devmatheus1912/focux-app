@@ -174,10 +174,50 @@ class _TreinoDetailBody extends StatelessWidget {
                   children: [
                     FxHubHeader(
                       title: displayName,
-                      subtitle: [
-                        contextLabel,
-                        metaLine,
-                      ].where((s) => s.trim().isNotEmpty).join(' · '),
+                      // Identidade só — métricas ficam nos tiles (S3; sem repetir).
+                      subtitle: contextLabel,
+                    ),
+                    const SizedBox(height: TokensStrip.s4),
+                    OperationalMetricTile(
+                      label: 'Exercícios',
+                      value: '${orderedExercises.length}',
+                      hint:
+                          orderedExercises.isEmpty
+                              ? 'Monte a lista'
+                              : metaLine,
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Séries',
+                      value: '${treinoDetailSeriesCount(orderedExercises)}',
+                      hint:
+                          orderedExercises.isEmpty
+                              ? 'Ainda vazio'
+                              : treinoDetailSeriesHint(
+                                treinoDetailGroupCount(orderedExercises),
+                              ),
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Grupos',
+                      value: '${treinoDetailGroupCount(orderedExercises)}',
+                      hint: treinoDetailGroupTileHint(
+                        treinoDetailGroupCount(orderedExercises),
+                      ),
+                      color: primary,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    OperationalMetricTile(
+                      label: 'Carga',
+                      value: treinoDetailCargaValue(orderedExercises),
+                      hint: treinoDetailCargaHint(orderedExercises),
+                      color: primary,
+                      isDark: isDark,
                     ),
                     const SizedBox(height: TokensStrip.s3),
                     Wrap(

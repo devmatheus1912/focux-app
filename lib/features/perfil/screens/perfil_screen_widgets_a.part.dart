@@ -57,8 +57,11 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;
     final profileComplete = profileScore >= 100;
-    // Editar fica na app bar — sem chip Completar duplicado.
-    const scrollBottomPad = TokensStrip.s5;
+    // S2: chip Completar é o P0 só com pendência; lápis soft na app bar abre o editor.
+    final scrollBottomPad =
+        profileComplete
+            ? TokensStrip.s5
+            : PerfilLayout.stickyOverlayReserve;
 
     return FxShellScaffold(
       useMesh: true,
@@ -83,7 +86,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   child: Icon(
                     Icons.edit_rounded,
                     size: 18,
-                    color: chrome.ink,
+                    color: BrandPalette.softened(primaryColor),
                   ),
                 ),
               ),
@@ -99,7 +102,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                   tips: const [
                     FxHelpTip(
                       'Editar',
-                      'O lápis no topo abre o cadastro e a marca.',
+                      'O lápis no topo abre o cadastro. Completar só aparece se faltar dado.',
                       icon: 'user',
                     ),
                     FxHelpTip(
@@ -117,7 +120,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
           ),
         ],
       ),
-      body: RefreshIndicator(
+      body: Stack(
+        children: [
+          RefreshIndicator(
             color: accent,
             onRefresh: onRefresh,
             child: CustomScrollView(
@@ -263,6 +268,20 @@ class _PerfilBodyState extends State<_PerfilBody> {
               ],
             ),
           ),
+          if (!profileComplete)
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: PerfilStickyBar(
+                  accent: accent,
+                  isDark: isDark,
+                  visible: true,
+                  onComplete: onEditPerfil,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
