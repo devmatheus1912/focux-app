@@ -29,3 +29,29 @@ String? checkinSeriePrescricaoHint(String? prescricacao) {
   if (t.isEmpty) return null;
   return 'Prescrição do personal: $t';
 }
+
+/// Plain-language RPE for students who don't know the acronym.
+String checkinRpePlainLabel(int rpe) {
+  final v = rpe.clamp(1, 10);
+  return switch (v) {
+    1 || 2 => 'Muito leve',
+    3 || 4 => 'Leve',
+    5 || 6 => 'Moderado',
+    7 => 'Cansativo',
+    8 => 'Pesado',
+    9 => 'Muito pesado',
+    _ => 'No limite',
+  };
+}
+
+String checkinRpeValueLine(int rpe) => '$rpe · ${checkinRpePlainLabel(rpe)}';
+
+const checkinRpeSectionTitle = 'Esforço sentido (RPE)';
+
+const checkinRpeSectionHint =
+    'RPE não é quantidade de reps. É o quão difícil a série pareceu '
+    '(1 = muito leve, 10 = no limite). As reps feitas ficam no campo acima.';
+
+String checkinRpeAlvoHint(int alvo) =>
+    'Seu personal pediu esforço perto de $alvo (${checkinRpePlainLabel(alvo)}). '
+    'Ajuste pelo que você sentiu nesta série.';
