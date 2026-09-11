@@ -32,6 +32,7 @@ import '../widgets/perfil_lgpd_consent_sheet.dart';
 import '../widgets/perfil_marca_vitrine_section.dart';
 import '../widgets/perfil_operacao_section.dart';
 import '../widgets/perfil_public_link_sheet.dart';
+import '../widgets/perfil_sticky_bar.dart';
 import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
