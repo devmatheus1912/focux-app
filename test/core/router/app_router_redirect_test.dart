@@ -33,6 +33,8 @@ void main() {
     expect(isPersonalOnlyLocation('/leads/kanban'), isTrue);
     expect(isPersonalOnlyLocation('/winback'), isTrue);
     expect(isPersonalOnlyLocation('/relatorio/business'), isTrue);
+    expect(isPersonalOnlyLocation('/depoimentos'), isTrue);
+    expect(isPersonalOnlyLocation('/depoimentos-aluno'), isFalse);
   });
 
   test('logged-in users leave pre-login gate', () {

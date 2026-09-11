@@ -172,6 +172,7 @@ bool isPersonalOnlyLocation(String path) {
     '/coach',
     '/galeria',
     '/feedback-videos',
+    '/depoimentos',
     '/busca',
     '/analytics',
     '/admin/rbac',
