@@ -78,7 +78,10 @@ Future<void> showFxHelpSheet(
     context,
     forceDark: forceDark,
     builder: (ctx) {
-      final isDark = Theme.of(ctx).brightness == Brightness.dark;
+      // Prefer Theme after forceDark wrap; also OR forceDark so chrome never
+      // falls back to ambient light if a caller reads the wrong context.
+      final isDark =
+          forceDark || Theme.of(ctx).brightness == Brightness.dark;
       return FxHelpSheetFrame(
         isDark: isDark,
         title: title,

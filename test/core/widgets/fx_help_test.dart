@@ -86,4 +86,41 @@ void main() {
     expect(find.text('Entendi'), findsNothing);
     expect(find.byTooltip('Fechar'), findsOneWidget);
   });
+
+  testWidgets('forceDark pinta a help sheet mesmo com tema claro do SO', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.light(),
+        home: Scaffold(
+          body: Builder(
+            builder:
+                (context) => TextButton(
+                  onPressed:
+                      () => showFxHelpSheet(
+                        context,
+                        forceDark: true,
+                        title: 'Definir senha',
+                        subtitle: 'Dicas rápidas.',
+                      ),
+                  child: const Text('Abrir'),
+                ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Abrir'));
+    await tester.pumpAndSettle();
+
+    final frame = tester.widget<FxHelpSheetFrame>(
+      find.byType(FxHelpSheetFrame),
+    );
+    expect(frame.isDark, isTrue);
+    expect(
+      Theme.of(tester.element(find.byType(FxHelpSheetFrame))).brightness,
+      Brightness.dark,
+    );
+  });
 }
