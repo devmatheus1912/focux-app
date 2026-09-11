@@ -26,6 +26,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import '../utils/health_dashboard_display.dart';
+import '../widgets/recovery_score_ring.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -42,6 +43,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   bool _authorized = false;
   bool _loading = true;
   String? _erro;
+  String? _syncSoftError;
   HealthSummary? _summary;
   RecoverySnapshot? _recovery;
   DateTime? _fetchedAt;
@@ -58,20 +60,30 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       if (auth) {
         await _loadData();
       } else {
-        if (mounted) setState(() => _loading = false);
+        if (mounted) {
+          setState(() {
+            _loading = false;
+            _erro = null;
+            _syncSoftError = null;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
           _loading = false;
           _erro = friendlyError(e);
+          _syncSoftError = null;
         });
       }
     }
   }
 
   Future<void> _requestAccess() async {
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final granted = await HealthService.requestAuthorization();
       if (granted) {
@@ -83,11 +95,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           });
         }
       }
-    } catch (_) {
+    } catch (e) {
       if (mounted) {
         setState(() {
           _loading = false;
-          _erro = 'Saúde não disponível neste dispositivo';
+          _erro = friendlyError(
+            e,
+            fallback: 'Saúde não disponível neste dispositivo.',
+          );
         });
       }
     }
@@ -97,6 +112,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     try {
       final summary = await HealthService.getTodaySummary();
       RecoverySnapshot? synced;
+      String? soft;
       try {
         final repo = HealthRepository.fromClient(ApiClient());
         synced = await repo.syncToday(summary);
@@ -106,8 +122,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           recoveryHint: synced.recoveryHint,
           steps: synced.steps,
         );
-      } catch (_) {
+      } catch (e) {
         synced = RecoverySnapshot.fromSummary(summary);
+        soft = saudeSyncSoftError(friendlyError(e));
       }
       if (mounted) {
         setState(() {
@@ -115,6 +132,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           _summary = summary;
           _recovery = synced;
           _loading = false;
+          _erro = null;
+          _syncSoftError = soft;
           _fetchedAt = DateTime.now();
         });
       }
@@ -123,7 +142,15 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         setState(() {
           _loading = false;
           // Só troca a tela por erro quando ainda não há dados em tela.
-          if (_summary == null) _erro = friendlyError(e);
+          if (_summary == null) {
+            _erro = friendlyError(e);
+            _syncSoftError = null;
+          } else {
+            _syncSoftError = friendlyError(
+              e,
+              fallback: saudeSyncSoftError(),
+            );
+          }
         });
       }
     }
@@ -145,6 +172,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       _summary = null;
       _recovery = null;
       _fetchedAt = null;
+      _syncSoftError = null;
+      _erro = null;
     });
   }
 
@@ -152,6 +181,10 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
+    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final subtitle =
+        freshness ??
+        (_authorized ? 'Apple Health e Google Fit' : 'Conecte o wearable');
 
     return fxScreenA11yScope(
       label: 'Saúde',
@@ -160,9 +193,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Saúde',
-          subtitle:
-              FxHubFreshness.fromFetchedAt(_fetchedAt) ??
-              'Apple Health e Google Fit',
+          subtitle: subtitle,
           showBack: false,
           actions: [
             FxHelpIconButton(
@@ -173,21 +204,21 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   props: {'surface': 'saude'},
                 );
                 showFxHelpSheet(
-                    context,
-                    title: 'Saúde',
-                    subtitle: 'Prontidão do dia a partir do wearable.',
-                    tips: const [
-                      FxHelpTip('Como calculamos', saudeComoCalculamos),
-                      FxHelpTip(
-                        'Conectar',
-                        'Autorize o Apple Health ou o Google Fit.',
-                      ),
-                      FxHelpTip('Prontidão', 'O card do topo é o foco do dia.'),
-                      FxHelpTip(
-                        'Desconectar',
-                        'Revogue o acesso no fim da tela.',
-                      ),
-                    ],
+                  context,
+                  title: 'Saúde',
+                  subtitle: 'Prontidão do dia a partir do wearable.',
+                  tips: const [
+                    FxHelpTip('Como calculamos', saudeComoCalculamos),
+                    FxHelpTip(
+                      'Conectar',
+                      'Autorize o Apple Health ou o Google Fit.',
+                    ),
+                    FxHelpTip('Prontidão', 'O card do topo é o foco do dia.'),
+                    FxHelpTip(
+                      'Desconectar',
+                      'Revogue o acesso no fim da tela.',
+                    ),
+                  ],
                 );
               },
             ),
@@ -206,7 +237,10 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   message: _erro!,
                   title: FocuxMicrocopy.naoFoiPossivelCarregar,
                   onRetry: () {
-                    setState(() => _erro = null);
+                    setState(() {
+                      _erro = null;
+                      _loading = true;
+                    });
                     _checkAuth();
                   },
                 )
@@ -223,13 +257,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          const SizedBox(height: 48),
+          const SizedBox(height: TokensStrip.s6),
           FxEmptyState(
             icon: 'spark',
             title: 'Conecte seu Apple Health ou Google Fit',
             subtitle:
                 'Sincronize passos, frequência cardíaca, calorias e sono para acompanhar sua saúde.',
-            action: FxEmptyAction(label: 'Conectar', onTap: _requestAccess),
+            action: FxEmptyAction(
+              label: saudeConectarCtaLabel(),
+              onTap: _requestAccess,
+            ),
           ),
         ],
       ),
@@ -240,6 +277,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final s = _summary!;
     final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
     final chrome = ShellChrome.forDark(isDark);
+    final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: () async {
         AnalyticsService.instance.track(
@@ -261,23 +299,44 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Prontidão', style: FocuxHubTypography.chip(chrome.mute)),
-                const SizedBox(height: 6),
-                Text(
-                  '${recovery.recoveryScore}%',
-                  style: FocuxHubTypography.kpi(
-                    color: chrome.ink,
-                    fontSize: FocuxHubTypography.metricLg,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    RecoveryScoreRing(
+                      score: recovery.recoveryScore,
+                      color: primary,
+                      size: 72,
+                    ),
+                    const SizedBox(width: TokensStrip.s3),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prontidão',
+                            style: FocuxHubTypography.chip(chrome.mute),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${recovery.recoveryScore}%',
+                            style: FocuxHubTypography.kpi(
+                              color: chrome.ink,
+                              fontSize: FocuxHubTypography.metricLg,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            recovery.recoveryLabel,
+                            style: FocuxHubTypography.body(
+                              color: chrome.ink,
+                            ).copyWith(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  recovery.recoveryLabel,
-                  style: FocuxHubTypography.body(
-                    color: chrome.ink,
-                  ).copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: TokensStrip.s2),
                 Text(
                   recovery.recoveryHint,
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
@@ -286,8 +345,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: DashboardHomeActionChip(
-                    label: saudeAtualizarLabel(),
-                    accent: Theme.of(context).colorScheme.primary,
+                    label:
+                        _syncSoftError != null
+                            ? saudeSyncSoftRetryLabel()
+                            : saudeAtualizarLabel(),
+                    accent: primary,
                     isDark: isDark,
                     onPressed: _loadData,
                   ),
@@ -295,6 +357,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               ],
             ),
           ),
+          if (_syncSoftError != null) ...[
+            const SizedBox(height: TokensStrip.s3),
+            _SaudeSoftSyncBanner(
+              isDark: isDark,
+              message: _syncSoftError!,
+              onRetry: _loadData,
+            ),
+          ],
           const SizedBox(height: TokensStrip.s4),
           const DashboardSectionHeader(title: 'Resumo de hoje'),
           const SizedBox(height: TokensStrip.s3),
@@ -337,6 +407,63 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             onTap: _desconectar,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SaudeSoftSyncBanner extends StatelessWidget {
+  const _SaudeSoftSyncBanner({
+    required this.isDark,
+    required this.message,
+    required this.onRetry,
+  });
+
+  final bool isDark;
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.forDark(isDark);
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: primary.withValues(alpha: 0.18)),
+          color: primary.withValues(alpha: isDark ? 0.10 : 0.06),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Sync parcial',
+              style: FocuxHubTypography.body(
+                color: chrome.ink,
+              ).copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              message,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+            const SizedBox(height: 6),
+            TextButton(
+              onPressed: onRetry,
+              style: TextButton.styleFrom(
+                foregroundColor: primary,
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(saudeSyncSoftRetryLabel()),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -21,6 +21,9 @@ void main() {
     expect(screen, contains('minLength: 8'));
     expect(screen, contains('Mín. 8 caracteres'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('authScrollPadding'));
+    expect(screen, contains('AuthShell'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('canPop: false'));
     expect(screen, contains('_voltar'));

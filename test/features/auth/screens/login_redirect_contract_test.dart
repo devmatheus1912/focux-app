@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../support/screen_source_bundle.dart';
+import '../../../support/screen_source_bundle.dart';
 
 void main() {
   test('login honors safe from route after authentication', () {

@@ -6,6 +6,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../auth/providers/auth_provider.dart';
 
 Future<void> confirmDeleteAlunoAccount(
@@ -30,11 +31,13 @@ Future<void> confirmDeleteAlunoAccount(
         TextField(
           controller: passwordCtrl,
           obscureText: true,
+          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
           decoration: FxInputDeco.build(context, 'Senha atual'),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: confirmCtrl,
+          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
           decoration: FxInputDeco.build(context, 'Digite EXCLUIR'),
         ),
       ],

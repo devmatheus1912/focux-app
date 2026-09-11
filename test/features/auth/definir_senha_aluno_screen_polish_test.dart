@@ -18,7 +18,10 @@ void main() {
     expect(screen, contains('minLength: kDefinirSenhaMinLength'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, isNot(contains('ScaleTransition')));
+    expect(screen, contains('AuthShell'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('authScrollPadding'));
     expect(screen, contains('_sairSemDefinirSenha'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('canPop: false'));

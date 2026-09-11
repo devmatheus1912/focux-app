@@ -121,7 +121,9 @@ void main() {
     expect(sheet, contains('Esforço sentido'));
     expect(sheet, contains('showFxHelpSheet'));
     expect(sheet, contains('FxKeyboardDismissScope'));
+    expect(sheet, contains('FxKeyboardDismissScope.dismiss'));
     expect(sheet, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
+    expect(sheet, contains('onTapOutside'));
     expect(sheet, contains('FxHomeSheetSurface'));
   });
 

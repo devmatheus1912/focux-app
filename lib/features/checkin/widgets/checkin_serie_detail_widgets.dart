@@ -393,6 +393,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
   }
 
   void _submit() {
+    FxKeyboardDismissScope.dismiss();
     Navigator.pop(
       context,
       CheckinSeriePayload(
@@ -457,6 +458,7 @@ class CheckinSerieField extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       style: TextStyle(color: ink, fontWeight: FontWeight.w900),
+      onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: mute, fontWeight: FontWeight.w700),
