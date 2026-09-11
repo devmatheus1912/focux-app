@@ -7,16 +7,26 @@ import '../../../core/theme/tokens_strip.dart';
 
 /// Normaliza rotas do wizard para deep-links consistentes no app.
 String normalizeSetupActionRoute(String route) {
-  switch (route) {
-    case '/treinos':
-      return '/treinos/novo';
-    case '/financeiro':
-      return '/perfil/wallet';
-    case '/perfil':
-      return '/perfil/editar';
-    default:
-      return route;
+  final uri = Uri.parse(route);
+  final path = switch (uri.path) {
+    '/treinos' => '/treinos/novo',
+    '/financeiro' => '/perfil/wallet',
+    '/perfil' => '/perfil/editar',
+    _ => uri.path.isEmpty ? route : uri.path,
+  };
+  if (uri.hasQuery) {
+    return Uri(path: path, queryParameters: uri.queryParameters).toString();
   }
+  return path;
+}
+
+/// Marca navegação vinda da ativação (FeatureGate oferece "Pular por agora").
+String setupActionRouteFromAtivacao(String route) {
+  final normalized = normalizeSetupActionRoute(route);
+  final uri = Uri.parse(normalized);
+  final params = Map<String, String>.from(uri.queryParameters);
+  params['from'] = 'ativacao';
+  return uri.replace(queryParameters: params).toString();
 }
 
 String setupStepFxIconName(String name) {

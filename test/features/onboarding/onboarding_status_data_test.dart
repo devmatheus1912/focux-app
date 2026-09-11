@@ -54,6 +54,21 @@ void main() {
       expect(data.ativacaoCompleta(), isTrue);
     });
 
+    test('ativacaoCompleta quando wizardCompleto mesmo com etapas faltando', () {
+      final data = OnboardingStatusData(
+        perfilCompleto: false,
+        primeiroAlunoAdicionado: true,
+        primeiroTreinoCriado: false,
+        pagamentoConfigurado: false,
+        pacoteCriado: false,
+        habitoConfigurado: false,
+        linkBioConfigurado: false,
+        wizardCompleto: true,
+      );
+
+      expect(data.ativacaoCompleta(), isTrue);
+    });
+
     test('fromJson inclui pacote, hábito e link na bio', () {
       final data = OnboardingStatusData.fromJson({
         'perfilCompleto': true,

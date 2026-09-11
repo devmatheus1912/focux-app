@@ -10,19 +10,24 @@ import '../widgets/setup_step_widgets.dart';
 /// `/perfil/editar` exige [PerfilPersonal] no `extra`; sem isso o router
 /// redireciona para o hub `/perfil`. Setup sempre carrega o perfil antes.
 bool isSetupPerfilEditRoute(String route) =>
-    normalizeSetupActionRoute(route) == '/perfil/editar';
+    Uri.parse(normalizeSetupActionRoute(route)).path == '/perfil/editar';
 
 Future<T?> pushSetupActionRoute<T extends Object?>(
   BuildContext context,
   WidgetRef ref,
-  String route,
-) async {
+  String route, {
+  bool fromAtivacao = true,
+}) async {
   final normalized = normalizeSetupActionRoute(route);
-  if (normalized == '/perfil/editar') {
+  final target =
+      fromAtivacao
+          ? setupActionRouteFromAtivacao(normalized)
+          : normalized;
+  if (isSetupPerfilEditRoute(normalized)) {
     try {
       final perfil = await ref.read(perfilProvider.future);
       if (!context.mounted) return null;
-      return context.push<T>('/perfil/editar', extra: perfil);
+      return context.push<T>(target, extra: perfil);
     } catch (e) {
       if (context.mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -31,5 +36,5 @@ Future<T?> pushSetupActionRoute<T extends Object?>(
     }
   }
   if (!context.mounted) return null;
-  return context.push<T>(normalized);
+  return context.push<T>(target);
 }

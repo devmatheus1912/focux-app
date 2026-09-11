@@ -66,7 +66,7 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
               ),
             ],
         child: CircleAvatar(
-          radius: 17,
+          radius: 18,
           backgroundColor: BrandPalette.soft(primary, dark: isDark),
           backgroundImage: hasFoto ? NetworkImage(aluno.fotoUrl!.trim()) : null,
           child:
