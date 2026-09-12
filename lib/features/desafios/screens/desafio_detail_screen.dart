@@ -294,7 +294,7 @@ class _DesafioDetailBody extends StatelessWidget {
                   if (forAluno) ...[
                     const SizedBox(height: TokensStrip.s4),
                     FxStripCard(
-                      emphasize: true,
+                      emphasize: false,
                       accent: primary,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,13 +324,6 @@ class _DesafioDetailBody extends StatelessWidget {
                               color: fxScreenMute(context),
                               fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          DashboardHomeActionChip(
-                            label: desafioStickyAlunoLabel(desafio.tipo),
-                            accent: primary,
-                            isDark: isDark,
-                            onPressed: onAlunoSticky,
                           ),
                         ],
                       ),

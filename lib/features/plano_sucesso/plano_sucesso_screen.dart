@@ -160,6 +160,96 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     }
   }
 
+  Future<void> _editarPlano() async {
+    final plano = context.read<PlanoSucessoProvider>().plano;
+    if (plano == null) return;
+    HapticFeedback.selectionClick();
+    final objetivo = TextEditingController(text: plano.objetivoPrincipal);
+    final pendentes = plano.marcos.where((m) => !m.atingido).toList();
+    final marcoCtrls = [
+      for (final m in pendentes) TextEditingController(text: m.titulo),
+    ];
+    final novo1 = TextEditingController();
+    final novo2 = TextEditingController();
+    var saved = false;
+
+    try {
+      if (!mounted) return;
+      final ok = await showFxFormSheet(
+        context,
+        title: 'Editar plano',
+        subtitle: 'Objetivo e etapas ainda pendentes. Marcos feitos ficam.',
+        icon: Icons.edit_outlined,
+        confirmLabel: 'Salvar',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AlunoInsetFormField(
+              controller: objetivo,
+              label: 'Objetivo',
+              icon: Icons.flag_outlined,
+            ),
+            for (var i = 0; i < marcoCtrls.length; i++)
+              AlunoInsetFormField(
+                controller: marcoCtrls[i],
+                label: 'Etapa pendente',
+                icon: Icons.check_circle_outline,
+              ),
+            AlunoInsetFormField(
+              controller: novo1,
+              label: 'Nova etapa (opcional)',
+              icon: Icons.add_circle_outline,
+            ),
+            AlunoInsetFormField(
+              controller: novo2,
+              label: 'Outra etapa (opcional)',
+              icon: Icons.add_circle_outline,
+              showDivider: false,
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+      final objetivoTxt = objetivo.text.trim();
+      if (objetivoTxt.isEmpty) {
+        if (mounted) {
+          FeedbackHelper.showWarn(context, 'Objetivo é obrigatório.');
+        }
+        return;
+      }
+      final marcos = <({int? id, String titulo})>[
+        for (var i = 0; i < pendentes.length; i++)
+          if (marcoCtrls[i].text.trim().isNotEmpty)
+            (id: pendentes[i].id, titulo: marcoCtrls[i].text.trim()),
+        for (final raw in [novo1.text, novo2.text])
+          if (raw.trim().isNotEmpty) (id: null, titulo: raw.trim()),
+      ];
+      if (!mounted) return;
+      await context.read<PlanoSucessoProvider>().atualizarPlano(
+        planoId: plano.id,
+        alunoId: widget.alunoId,
+        objetivoPrincipal: objetivoTxt,
+        marcos: marcos,
+      );
+      saved = true;
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      objetivo.dispose();
+      for (final c in marcoCtrls) {
+        c.dispose();
+      }
+      novo1.dispose();
+      novo2.dispose();
+    }
+    if (saved && mounted) {
+      setState(() => _fetchedAt = DateTime.now());
+      FeedbackHelper.showSuccess(context, 'Plano atualizado.');
+    }
+  }
+
   Future<void> _remarcarRevisao() async {
     final plano = context.read<PlanoSucessoProvider>().plano;
     if (plano == null) return;
@@ -416,7 +506,11 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
           statusHint: planoSucessoInicioHint(plano.dataInicio),
         ),
         const SizedBox(height: TokensStrip.s4),
-        _alunoChips(primary: primary, isDark: isDark),
+        _alunoChips(
+          primary: primary,
+          isDark: isDark,
+          onEditar: _editarPlano,
+        ),
         const SizedBox(height: TokensStrip.s5),
         for (var i = 0; i < plano.marcos.length; i++)
           FxSatelliteListTile(

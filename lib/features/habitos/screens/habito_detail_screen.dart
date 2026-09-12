@@ -290,7 +290,7 @@ class _HabitoDetailBody extends StatelessWidget {
                   if (forAluno && habito.ativo) ...[
                     const SizedBox(height: TokensStrip.s4),
                     FxStripCard(
-                      emphasize: true,
+                      emphasize: false,
                       accent: primary,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,14 +318,6 @@ class _HabitoDetailBody extends StatelessWidget {
                               color: fxScreenMute(context),
                               fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          DashboardHomeActionChip(
-                            label: habitoStickyAluno(habito.feitoHoje),
-                            accent: primary,
-                            isDark: isDark,
-                            enabled: !busy,
-                            onPressed: onSticky,
                           ),
                         ],
                       ),
@@ -410,6 +402,30 @@ class _HabitoDetailBody extends StatelessWidget {
                     onSelect: onSecao,
                   ),
                   const SizedBox(height: TokensStrip.s4),
+                  if (secao == habitoDetalheSecaoResumo) ...[
+                    Text(
+                      habitoResumoLine(
+                        streak: habito.streakAtual,
+                        feitos: habito.feitosNaSemana,
+                        meta: habito.metaSemanal,
+                      ),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (habitoChecksLine(habito.checks) case final checksLine
+                        when checksLine.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      Text(
+                        checksLine,
+                        style: FocuxHubTypography.bodyMuted(
+                          color: fxScreenMute(context),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
                   if (secao == habitoDetalheSecaoSobre) ...[
                     if (!habito.ativo) ...[
                       Text(

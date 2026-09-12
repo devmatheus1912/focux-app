@@ -162,6 +162,14 @@ String habitoStickyPersonal() => 'Desativar hábito';
 String habitoStickyAluno(bool feitoHoje) =>
     feitoHoje ? 'Desmarcar hoje' : 'Marcar hoje';
 
+String habitoResumoLine({
+  required int streak,
+  required int feitos,
+  required int meta,
+}) {
+  return 'Sequência $streak · $feitos de $meta na semana.';
+}
+
 String habitoSobreEmpty() => 'Sem descrição neste hábito.';
 
 String habitoDesativadoChip() => 'Desativado';

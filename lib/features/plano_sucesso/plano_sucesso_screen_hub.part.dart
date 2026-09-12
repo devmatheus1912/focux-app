@@ -34,11 +34,22 @@ extension _PlanoSucessoHub on _PlanoSucessoScreenState {
     ];
   }
 
-  Widget _alunoChips({required Color primary, required bool isDark}) {
+  Widget _alunoChips({
+    required Color primary,
+    required bool isDark,
+    VoidCallback? onEditar,
+  }) {
     return Wrap(
       spacing: TokensStrip.s2,
       runSpacing: TokensStrip.s2,
       children: [
+        if (onEditar != null)
+          DashboardHomeActionChip(
+            label: 'Editar',
+            accent: primary,
+            isDark: isDark,
+            onPressed: onEditar,
+          ),
         DashboardHomeActionChip(
           label: 'Lista',
           accent: primary,

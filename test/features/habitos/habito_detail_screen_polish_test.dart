@@ -28,6 +28,9 @@ void main() {
     expect(screen, contains('desativar'));
     expect(screen, contains('toggleHoje'));
     expect(screen, contains('.buscar('));
+    expect(screen, contains('habitoResumoLine'));
+    expect(screen, contains('emphasize: false'));
+    expect(screen, isNot(contains('emphasize: true')));
     expect(screen, contains('habitoDesativadoChip'));
     expect(screen, contains('habitoLembreteLine'));
     expect(screen, contains('habitoChecksLine'));
