@@ -1,8 +1,8 @@
 import { test, expect } from '../_fixtures';
 
 /**
- * P1 (status.md): /api/ia/chat e /api/ia/progressao-carga retornavam 403 para aluno.
- * Esse teste falha se o 403 voltar.
+ * P1: /ia/aluno (chat) não pode morrer em 403 fatal.
+ * Progressão de carga é só PERSONAL — não cobre /api/ia/progressao-carga aqui.
  */
 test.describe('@p1 aluno IA (regressão 403)', () => {
   test('rota /ia/aluno abre sem 403 fatal', async ({ page, errors }) => {

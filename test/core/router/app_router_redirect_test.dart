@@ -34,6 +34,8 @@ void main() {
     expect(isPersonalOnlyLocation('/leads-publicos'), isTrue);
     expect(isPersonalOnlyLocation('/leads/kanban'), isTrue);
     expect(isPersonalOnlyLocation('/winback'), isTrue);
+    expect(isPersonalOnlyLocation('/alunos/9/ia/progressao'), isTrue);
+    expect(isPersonalOnlyLocation('/ia/progressao/aceitar'), isTrue);
     expect(isPersonalOnlyLocation('/relatorio/business'), isTrue);
     expect(isPersonalOnlyLocation('/depoimentos'), isTrue);
     expect(isPersonalOnlyLocation('/depoimentos-aluno'), isFalse);
