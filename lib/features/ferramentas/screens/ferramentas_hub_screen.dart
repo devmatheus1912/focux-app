@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -85,27 +86,33 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
       loading:
           () => FxShellScaffold(
             useMesh: true,
+            constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
               onBack: () => safePopOrGo(context, '/dashboard/personal'),
             ),
-            body: const Padding(
-              padding: EdgeInsets.all(TokensStrip.s4),
-              child: SkeletonList(count: 4),
+            body: const FxContentWidthLimiter(
+              child: Padding(
+                padding: EdgeInsets.all(TokensStrip.s4),
+                child: SkeletonList(count: 4),
+              ),
             ),
           ),
       error:
           (e, _) => FxShellScaffold(
             useMesh: true,
+            constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
               onBack: () => safePopOrGo(context, '/dashboard/personal'),
             ),
-            body: FxErrorState(
-              chromeOnDark: chrome.isDark,
-              primary: scheme.primary,
-              message: '$e',
-              onRetry: () => ref.invalidate(ferramentasCatalogoProvider),
+            body: FxContentWidthLimiter(
+              child: FxErrorState(
+                chromeOnDark: chrome.isDark,
+                primary: scheme.primary,
+                message: '$e',
+                onRetry: () => ref.invalidate(ferramentasCatalogoProvider),
+              ),
             ),
           ),
       data: (catalogo) {
@@ -113,14 +120,17 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
         if (item == null || !item.isHubComAbas) {
           return FxShellScaffold(
             useMesh: true,
+            constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Ferramentas',
               onBack: () => safePopOrGo(context, '/dashboard/personal'),
             ),
-            body: const FxEmptyState(
-              icon: 'spark',
-              title: 'Hub indisponível',
-              subtitle: 'Este agrupamento não está no catálogo atual.',
+            body: const FxContentWidthLimiter(
+              child: FxEmptyState(
+                icon: 'spark',
+                title: 'Hub indisponível',
+                subtitle: 'Este agrupamento não está no catálogo atual.',
+              ),
             ),
           );
         }
@@ -138,46 +148,48 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
               subtitle: hub?.titulo ?? item.subtitulo,
               onBack: () => safePopOrGo(context, '/dashboard/personal'),
             ),
-            body: Column(
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: TabBar(
-                    controller: tabs,
-                    isScrollable: _abas.length > 3,
-                    labelColor: scheme.primary,
-                    unselectedLabelColor: chrome.mute,
-                    indicatorColor: scheme.primary,
-                    labelStyle: FocuxHubTypography.body(
-                      color: scheme.primary,
-                    ).copyWith(fontWeight: FontWeight.w700),
-                    tabs: [for (final aba in _abas) Tab(text: aba.titulo)],
-                  ),
-                ),
-                Expanded(
-                  child: FxStaggerItem(
-                    index: 0,
-                    child: TabBarView(
+            body: FxContentWidthLimiter(
+              child: Column(
+                children: [
+                  Material(
+                    color: Colors.transparent,
+                    child: TabBar(
                       controller: tabs,
-                      children: [
-                        for (final aba in _abas)
-                          HubEmbedScope(
-                            child:
-                                buildFerramentasTabScreen(aba.rotaApp) ??
-                                Center(
-                                  child: Text(
-                                    'Rota não mapeada: ${aba.rotaApp ?? aba.id}',
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: chrome.mute,
-                                    ),
-                                  ),
-                                ),
-                          ),
-                      ],
+                      isScrollable: _abas.length > 3,
+                      labelColor: scheme.primary,
+                      unselectedLabelColor: chrome.mute,
+                      indicatorColor: scheme.primary,
+                      labelStyle: FocuxHubTypography.body(
+                        color: scheme.primary,
+                      ).copyWith(fontWeight: FontWeight.w700),
+                      tabs: [for (final aba in _abas) Tab(text: aba.titulo)],
                     ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: FxStaggerItem(
+                      index: 0,
+                      child: TabBarView(
+                        controller: tabs,
+                        children: [
+                          for (final aba in _abas)
+                            HubEmbedScope(
+                              child:
+                                  buildFerramentasTabScreen(aba.rotaApp) ??
+                                  Center(
+                                    child: Text(
+                                      'Rota não mapeada: ${aba.rotaApp ?? aba.id}',
+                                      style: FocuxHubTypography.bodyMuted(
+                                        color: chrome.mute,
+                                      ),
+                                    ),
+                                  ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

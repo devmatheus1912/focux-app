@@ -1,12 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('perfil aluno hub é S2 inset sem form nem KPI', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/dashboard/screens/perfil_aluno_screen.dart',
-    );
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+      ),
+      File(
+        'lib/features/dashboard/widgets/perfil_aluno_hub_body.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/utils/aluno_confirm_logout.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxSettingsGroup'));

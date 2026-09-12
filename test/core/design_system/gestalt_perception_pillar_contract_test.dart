@@ -66,6 +66,11 @@ void main() {
           source += File(widget).readAsStringSync();
         }
       }
+      if (path.endsWith('financeiro_screen.dart')) {
+        source += readScreenSourceBundle(
+          'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
+        );
+      }
 
       final hasGrouping = FocuxGestalt.hubGestaltPatterns
           .any((pattern) => source.contains(pattern));
@@ -95,9 +100,12 @@ void main() {
     final source = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_screen.dart',
     );
+    final mensalidades = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
+    );
     expect(source, contains('IndexedStack'));
     expect(source, contains('showFxInsetPickerSheet'));
-    expect(source, contains('FxSettingsGroup'));
+    expect(mensalidades, contains('FxSettingsGroup'));
     expect(source, isNot(contains('TabBar')));
   });
 }

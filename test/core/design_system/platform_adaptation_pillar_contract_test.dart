@@ -42,7 +42,6 @@ void main() {
     const financeiroTabs = [
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
       'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
-      'lib/features/financeiro/screens/financeiro_mensalidades_tab_actions.part.dart',
     ];
 
     for (final path in hubScreens) {
@@ -53,7 +52,7 @@ void main() {
       }
       if (path.endsWith('financeiro_screen.dart')) {
         for (final tab in financeiroTabs) {
-          source += File(tab).readAsStringSync();
+          source += readScreenSourceBundle(tab);
         }
       }
 

@@ -442,26 +442,36 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
         const SizedBox(height: FxSettingsLayout.groupGap),
         FxStaggerItem(
           index: 0,
-          child: FxSettingsGroup(
-            header: 'Link público',
-            caption:
-                state._publicado
-                    ? 'No ar em focuxpersonal.com'
-                    : 'Após publicar · white-label (sem “| Focux”).',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: TokensStrip.s3,
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FxSettingsLayout.groupPadH,
                 ),
-                title: Text(
-                  urlLabel,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                child: Text(
+                  'Link público',
+                  style: FxSettingsLayout.sectionHeader(color: chrome.mute),
                 ),
+              ),
+              const SizedBox(height: FxSettingsLayout.captionAfterHeader),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FxSettingsLayout.groupPadH,
+                ),
+                child: Text(
+                  state._publicado
+                      ? 'No ar em focuxpersonal.com'
+                      : 'Após publicar · white-label (sem “| Focux”).',
+                  style: FxSettingsLayout.footer(color: chrome.mute),
+                ),
+              ),
+              const SizedBox(height: FxSettingsLayout.headerToGroup),
+              FxSatelliteListTile(
+                title: urlLabel,
+                titleCase: false,
                 subtitle: Text(
                   state._publicado ? 'No ar' : 'Rascunho',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: chrome.mute,
-                  ),
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -542,15 +552,23 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxStaggerItem(
             index: 2,
-            child: FxSettingsGroup(
-              header: 'Serviços',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.groupPadH,
+                  ),
+                  child: Text(
+                    'Serviços',
+                    style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+                  ),
+                ),
+                const SizedBox(height: FxSettingsLayout.headerToGroup),
                 for (final item in state._servicos)
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s3,
-                    ),
-                    title: Text(item.titulo),
+                  FxSatelliteListTile(
+                    title: item.titulo,
+                    titleCase: false,
                     subtitle: Text(item.descricao),
                   ),
               ],
@@ -561,15 +579,33 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxStaggerItem(
             index: 3,
-            child: FxSettingsGroup(
-              header: 'Método',
-              caption: 'Gerado a partir da entrevista.',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.groupPadH,
+                  ),
+                  child: Text(
+                    'Método',
+                    style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+                  ),
+                ),
+                const SizedBox(height: FxSettingsLayout.captionAfterHeader),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.groupPadH,
+                  ),
+                  child: Text(
+                    'Gerado a partir da entrevista.',
+                    style: FxSettingsLayout.footer(color: chrome.mute),
+                  ),
+                ),
+                const SizedBox(height: FxSettingsLayout.headerToGroup),
                 for (var i = 0; i < state._metodo.length; i++)
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s3,
-                    ),
+                  FxSatelliteListTile(
+                    title: state._metodo[i].titulo,
+                    titleCase: false,
                     leading: CircleAvatar(
                       radius: 14,
                       backgroundColor: BrandPalette.softened(primary)
@@ -583,7 +619,6 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                         ),
                       ),
                     ),
-                    title: Text(state._metodo[i].titulo),
                     subtitle: Text(state._metodo[i].descricao),
                   ),
               ],
@@ -594,16 +629,24 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxStaggerItem(
             index: 4,
-            child: FxSettingsGroup(
-              header: 'FAQ',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.groupPadH,
+                  ),
+                  child: Text(
+                    'FAQ',
+                    style: FxSettingsLayout.sectionHeader(color: chrome.mute),
+                  ),
+                ),
+                const SizedBox(height: FxSettingsLayout.headerToGroup),
                 for (final item in state._faq)
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s3,
-                      vertical: TokensStrip.s1,
-                    ),
-                    title: Text(item.pergunta),
+                  FxSatelliteListTile(
+                    title: item.pergunta,
+                    titleCase: false,
+                    isThreeLine: true,
                     subtitle: Text(item.resposta),
                   ),
               ],
@@ -712,7 +755,7 @@ class _LandingStudioImageSlot extends StatelessWidget {
               decoration: chrome.panel(radius: TokensStrip.rMd),
               child: uploading
                   ? const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: FxLoading(strokeWidth: 2),
                     )
                   : hasImage
                   ? ClipRRect(

@@ -7,6 +7,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -121,9 +122,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       });
       await _reload();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('MFA ativado com sucesso.')),
-      );
+      FeedbackHelper.showSuccess(context, 'MFA ativado com sucesso.');
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -164,9 +163,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       setState(() => _busy = false);
       await _reload();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('MFA desativado.')),
-      );
+      FeedbackHelper.showSuccess(context, 'MFA desativado.');
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -179,9 +176,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
   Future<void> _copy(String value, String label) async {
     await Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label copiado.')),
-    );
+    FeedbackHelper.showSuccess(context, '$label copiado.');
   }
 
   void _pop() {

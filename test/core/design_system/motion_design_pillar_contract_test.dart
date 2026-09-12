@@ -68,12 +68,9 @@ void main() {
         }
       }
       if (path.endsWith('financeiro_screen.dart')) {
-        source += File(
+        source += readScreenSourceBundle(
           'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
-        ).readAsStringSync();
-        source += File(
-          'lib/features/financeiro/screens/financeiro_mensalidades_tab_actions.part.dart',
-        ).readAsStringSync();
+        );
       }
 
       final hasMotion = FocuxMotion.hubMotionPatterns
