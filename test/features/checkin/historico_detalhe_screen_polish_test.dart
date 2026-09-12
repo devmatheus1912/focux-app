@@ -12,6 +12,8 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxHubHeader'));
     expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: false'));
+    expect(screen, isNot(contains('emphasize: true')));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('historicoStickyLabel'));

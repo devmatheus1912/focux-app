@@ -228,7 +228,7 @@ class _DetalheBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   FxStripCard(
-                    emphasize: true,
+                    emphasize: false,
                     accent: primary,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

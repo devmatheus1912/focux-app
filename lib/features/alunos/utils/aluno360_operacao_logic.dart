@@ -988,3 +988,32 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
     ),
   );
 }
+
+/// §9 S3: faixa de 2–4 métricas. Risco no hero → sem duplicar foco; drop
+/// prontidão/risco extras que empurravam a strip para 5–6 tiles.
+List<OperacaoStatusCardKind> resolveOperacaoStatusMetricKinds({
+  required bool heroShowsRisco,
+  required OperacaoDominantMetricKind dominantKind,
+}) {
+  final kinds = <OperacaoStatusCardKind>[];
+  if (heroShowsRisco) {
+    kinds.add(OperacaoStatusCardKind.aderencia);
+    kinds.add(OperacaoStatusCardKind.ultimoTreino);
+  } else {
+    kinds.add(switch (dominantKind) {
+      OperacaoDominantMetricKind.risco => OperacaoStatusCardKind.focoDoDia,
+      OperacaoDominantMetricKind.aderencia => OperacaoStatusCardKind.aderencia,
+      OperacaoDominantMetricKind.prontidao => OperacaoStatusCardKind.prontidao,
+    });
+    if (dominantKind != OperacaoDominantMetricKind.aderencia) {
+      kinds.add(OperacaoStatusCardKind.aderencia);
+    }
+    if (dominantKind != OperacaoDominantMetricKind.risco) {
+      kinds.add(OperacaoStatusCardKind.ultimoTreino);
+    }
+  }
+  if (kinds.length < 4) {
+    kinds.add(OperacaoStatusCardKind.checkins7d);
+  }
+  return kinds.take(4).toList(growable: false);
+}
