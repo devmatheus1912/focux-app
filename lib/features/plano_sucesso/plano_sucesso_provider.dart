@@ -74,4 +74,29 @@ class PlanoSucessoProvider with ChangeNotifier {
     _erro = null;
     notifyListeners();
   }
+
+  Future<void> atualizarPlano({
+    required int planoId,
+    required int alunoId,
+    required String objetivoPrincipal,
+    required List<({int? id, String titulo})> marcos,
+  }) async {
+    await _api.dio.patch(
+      '/api/planos-sucesso/$planoId',
+      data: {
+        'objetivoPrincipal': objetivoPrincipal,
+        'marcos': [
+          for (final m in marcos)
+            {
+              if (m.id != null) 'id': m.id,
+              'titulo': m.titulo,
+            },
+        ],
+      },
+    );
+    final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
+    _plano = PlanoSucesso.fromJson(res.data);
+    _erro = null;
+    notifyListeners();
+  }
 }

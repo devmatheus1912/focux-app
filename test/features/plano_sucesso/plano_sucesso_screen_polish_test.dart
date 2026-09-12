@@ -20,6 +20,8 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('showDatePicker')));
     expect(screen, contains('revisarPlano'));
+    expect(screen, contains('atualizarPlano'));
+    expect(screen, contains("label: 'Editar'"));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxFormSheet'));
