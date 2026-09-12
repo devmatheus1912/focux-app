@@ -34,6 +34,7 @@ void main() {
     expect(screen, isNot(contains('class _ChurnScoreCard')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('retencaoHubViewed'));
     expect(screen, contains('alertaRiscoOpened'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('isDark'));

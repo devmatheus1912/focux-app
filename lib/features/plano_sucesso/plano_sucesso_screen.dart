@@ -11,6 +11,7 @@ import '../../core/utils/friendly_error.dart';
 import '../../core/utils/fx_utils.dart';
 import '../../core/ux/fx_hub_freshness.dart';
 import '../../core/widgets/feedback_helper.dart';
+import '../../core/widgets/fx_confirm_sheet.dart';
 import '../../core/widgets/fx_content_width_limiter.dart';
 import '../../core/widgets/fx_empty_state.dart';
 import '../../core/widgets/fx_error_state.dart';
@@ -165,7 +166,9 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
     if (plano == null) return;
     HapticFeedback.selectionClick();
     final objetivo = TextEditingController(text: plano.objetivoPrincipal);
-    final pendentes = plano.marcos.where((m) => !m.atingido).toList();
+    final pendentes = List<MarcoSucesso>.of(
+      plano.marcos.where((m) => !m.atingido),
+    );
     final marcoCtrls = [
       for (final m in pendentes) TextEditingController(text: m.titulo),
     ];
@@ -178,35 +181,74 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
       final ok = await showFxFormSheet(
         context,
         title: 'Editar plano',
-        subtitle: 'Objetivo e etapas ainda pendentes. Marcos feitos ficam.',
+        subtitle: 'Objetivo e etapas pendentes. Feitas ficam. Remover apaga já.',
         icon: Icons.edit_outlined,
         confirmLabel: 'Salvar',
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AlunoInsetFormField(
-              controller: objetivo,
-              label: 'Objetivo',
-              icon: Icons.flag_outlined,
-            ),
-            for (var i = 0; i < marcoCtrls.length; i++)
-              AlunoInsetFormField(
-                controller: marcoCtrls[i],
-                label: 'Etapa pendente',
-                icon: Icons.check_circle_outline,
-              ),
-            AlunoInsetFormField(
-              controller: novo1,
-              label: 'Nova etapa (opcional)',
-              icon: Icons.add_circle_outline,
-            ),
-            AlunoInsetFormField(
-              controller: novo2,
-              label: 'Outra etapa (opcional)',
-              icon: Icons.add_circle_outline,
-              showDivider: false,
-            ),
-          ],
+        child: StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AlunoInsetFormField(
+                  controller: objetivo,
+                  label: 'Objetivo',
+                  icon: Icons.flag_outlined,
+                ),
+                for (var i = 0; i < marcoCtrls.length; i++) ...[
+                  AlunoInsetFormField(
+                    controller: marcoCtrls[i],
+                    label: 'Etapa pendente',
+                    icon: Icons.check_circle_outline,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () async {
+                        final marcoId = pendentes[i].id;
+                        final confirm = await showFxConfirmSheet(
+                          context,
+                          title: 'Remover esta etapa?',
+                          message: pendentes[i].titulo,
+                          confirmLabel: 'Remover',
+                        );
+                        if (!confirm || !context.mounted) return;
+                        try {
+                          await context.read<PlanoSucessoProvider>().removerMarco(
+                            marcoId,
+                            alunoId: widget.alunoId,
+                          );
+                          setSheetState(() {
+                            final dead = marcoCtrls.removeAt(i);
+                            pendentes.removeAt(i);
+                            dead.dispose();
+                          });
+                          if (context.mounted) {
+                            FeedbackHelper.showSuccess(context, 'Etapa removida.');
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            FeedbackHelper.showError(context, friendlyError(e));
+                          }
+                        }
+                      },
+                      child: const Text('Remover etapa'),
+                    ),
+                  ),
+                ],
+                AlunoInsetFormField(
+                  controller: novo1,
+                  label: 'Nova etapa (opcional)',
+                  icon: Icons.add_circle_outline,
+                ),
+                AlunoInsetFormField(
+                  controller: novo2,
+                  label: 'Outra etapa (opcional)',
+                  icon: Icons.add_circle_outline,
+                  showDivider: false,
+                ),
+              ],
+            );
+          },
         ),
       );
       if (ok != true) return;

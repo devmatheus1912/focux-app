@@ -21,7 +21,9 @@ void main() {
     expect(screen, isNot(contains('showDatePicker')));
     expect(screen, contains('revisarPlano'));
     expect(screen, contains('atualizarPlano'));
+    expect(screen, contains('removerMarco'));
     expect(screen, contains("label: 'Editar'"));
+    expect(screen, contains('Remover etapa'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxFormSheet'));

@@ -10,7 +10,6 @@ const ROTAS_ALUNO = [
   '/chat/aluno',
   '/agenda/aluno',
   '/financeiro/aluno',
-  '/ia/aluno',
   '/depoimentos-aluno',
   '/gamificacao',
   '/notificacoes',

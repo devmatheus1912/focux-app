@@ -45,11 +45,35 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   bool _loading = true;
   String? _error;
   var _filtro = '';
+  final _openedAt = DateTime.now();
+  var _viewTracked = false;
+  var _ttvTracked = false;
 
   @override
   void initState() {
     super.initState();
     _load();
+  }
+
+  void _trackViewIfNeeded() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AnalyticsService.instance.track(
+      ProductEvents.retencaoHubViewed,
+      props: {
+        'alto': _home?.alto ?? 0,
+        'medio': _home?.medio ?? 0,
+      },
+    );
+    if (!_ttvTracked) {
+      _ttvTracked = true;
+      AnalyticsService.instance.track(
+        ProductEvents.retencaoHubTtv,
+        props: {
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+        },
+      );
+    }
   }
 
   Future<void> _load() async {
@@ -64,6 +88,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         _home = home;
         _loading = false;
       });
+      _trackViewIfNeeded();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -133,8 +158,11 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar a retenção',
-              onTap:
-                  () => showFxHelpSheet(
+              onTap: () {
+                AnalyticsService.instance.track(
+                  ProductEvents.retencaoHubHelpOpened,
+                );
+                showFxHelpSheet(
                     context,
                     title: 'Saúde da base',
                     subtitle: 'Quem está em risco e o que fazer agora.',
@@ -153,7 +181,8 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                         'Histórico win-back guarda os pushes. Cobrança auto lista falhas de pagamento.',
                       ),
                     ],
-                  ),
+                  );
+              },
             ),
           ],
         ),
@@ -169,7 +198,12 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                 )
                 : RefreshIndicator(
                   color: primary,
-                  onRefresh: _load,
+                  onRefresh: () async {
+                    AnalyticsService.instance.track(
+                      ProductEvents.retencaoHubRefreshed,
+                    );
+                    await _load();
+                  },
                   child:
                       home == null || home.isEmpty
                           ? ListView(

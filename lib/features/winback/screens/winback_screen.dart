@@ -54,11 +54,32 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
   var _carregandoMais = false;
   String? _erro;
   DateTime? _fetchedAt;
+  final _openedAt = DateTime.now();
+  var _viewTracked = false;
+  var _ttvTracked = false;
 
   @override
   void initState() {
     super.initState();
     _carregar();
+  }
+
+  void _trackViewIfNeeded() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AnalyticsService.instance.track(
+      ProductEvents.winbackHubViewed,
+      props: {'total': _total},
+    );
+    if (!_ttvTracked) {
+      _ttvTracked = true;
+      AnalyticsService.instance.track(
+        ProductEvents.winbackHubTtv,
+        props: {
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+        },
+      );
+    }
   }
 
   @override
@@ -94,6 +115,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
         _loading = false;
         _fetchedAt = DateTime.now();
       });
+      _trackViewIfNeeded();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -192,7 +214,9 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
           actions: [
             FxHelpIconButton(
               tooltip: 'Como funciona o win-back',
-              onTap: () => showFxHelpSheet(
+              onTap: () {
+                AnalyticsService.instance.track(ProductEvents.winbackHubHelpOpened);
+                showFxHelpSheet(
                 context,
                 title: 'Histórico win-back',
                 subtitle: 'Log dos pushes automáticos — risco ao vivo fica em Saúde da base.',
@@ -207,7 +231,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                     'Quem está em risco agora e o que fazer — use o botão Saúde da base.',
                   ),
                 ],
-              ),
+              );
+              },
             ),
           ],
         ),
@@ -248,7 +273,10 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                 Expanded(
                   child: RefreshIndicator(
               color: primary,
-              onRefresh: _carregar,
+              onRefresh: () async {
+                AnalyticsService.instance.track(ProductEvents.winbackHubRefreshed);
+                await _carregar();
+              },
               child: _entries.isEmpty
                   ? ListView(
                     physics: const AlwaysScrollableScrollPhysics(),

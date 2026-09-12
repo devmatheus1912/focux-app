@@ -2061,7 +2061,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **Check-in / execução** | `/checkin`, `/checkin/executar`, histórico, presencial, `/checkin/treinos` | S1/S8/S4 | Iniciar, pausar, avançar, concluir; progresso sobrevive background; sair com confirm. Histórico encontrável. Presencial não mistura lista de biblioteca com o alvo de execução (A18). |
 | **Financeiro** | `/financeiro`, `/financeiro/aluno`, `/financeiro/mensalidades/:id` | S1/S3 | Cobrar, marcar pago, atrasadas, detalhe da mensalidade com P0. Lote marcar-pago do BE: se a UI não tem, propor no scorecard — não deixar o personal cobrando um a um se o contrato de lote existe. `double` no contrato é dívida, não trava visual. |
 | **Chat** | `/chat/inbox`, `/chat/aluno`, `/alunos/:id/chat` | S4 + conversa | Inbox com unread **do chat**. Amplitude: enviar, ler, buscar, estado da conversa. **Profundidade do compositor (§36.2):** tudo que `POST /api/chat/enviar`, upload, reações, editar/apagar, tipos de mídia **já** no contrato — texto, imagem, vídeo, áudio, emoji/reação. Não deixar “só texto” se o BE e o app já conhecem mídia. Teclado §14.2 rigoroso. |
-| **IA copiloto** | `/ia/copiloto`, `/ia/chat`, `/ia/aluno`, progressão | S1/S7 | Opt-in, nunca autoaplicar no first paint. Quota e gate via capability. Insight com CTA que executa ou empurra a rota certa. Timeout vira erro, não loading infinito. |
+| **IA copiloto** | `/ia/copiloto`, `/ia/chat`, progressão (só personal) | S1/S7 | Opt-in, nunca autoaplicar no first paint. Quota e gate via capability. Insight com CTA que executa ou empurra a rota certa. Timeout vira erro, não loading infinito. Sem superfície IA no app do aluno. |
 
 ### 37.2 Relacionamento, crescimento e marca
 

@@ -60,6 +60,14 @@ class PlanoSucessoProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> removerMarco(int marcoId, {required int alunoId}) async {
+    await _api.dio.delete('/api/planos-sucesso/marcos/$marcoId');
+    final res = await _api.dio.get('/api/planos-sucesso/aluno/$alunoId');
+    _plano = PlanoSucesso.fromJson(res.data);
+    _erro = null;
+    notifyListeners();
+  }
+
   Future<void> revisarPlano({
     required int planoId,
     required int alunoId,

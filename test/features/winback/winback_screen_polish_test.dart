@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('winbackHubViewed'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('emphasize: false'));
     expect(screen, contains('FxInputDeco.build'));

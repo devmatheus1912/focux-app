@@ -297,12 +297,6 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: _perfil,
   ),
   '/ia/chat': FocuxSurfaceSpec(type: _s1, logicalParent: '/ia/copiloto'),
-  // Deep link legado (§38 hide) — redirect-only, sem superfície.
-  '/ia/aluno': FocuxSurfaceSpec(
-    type: _s1,
-    logicalParent: _alunoHome,
-    redirectTo: _alunoHome,
-  ),
   '/ia/checkin': FocuxSurfaceSpec(type: _s1, logicalParent: '/ia/copiloto'),
   '/ia/progressao/aceitar': FocuxSurfaceSpec(
     type: _s5,
