@@ -37,5 +37,10 @@ void main() {
     expect(screen, contains('alertaRiscoOpened'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('isDark'));
+    expect(screen, contains('PopScope'));
+    expect(screen, contains("context.push('/winback')"));
+    expect(screen, contains("context.push('/dunning')"));
+    expect(screen, contains('Histórico win-back'));
+    expect(screen, contains('Cobrança auto'));
   });
 }

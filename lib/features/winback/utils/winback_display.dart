@@ -78,7 +78,7 @@ String winbackSearchEmptySubtitle(String query) => query.trim().isEmpty
     : 'Nada com esse nome neste log.';
 
 String winbackHubSubtitle(String? freshness) {
-  const base = 'Push de reengajamento';
+  const base = 'Log dos pushes automáticos';
   final stamp = freshness?.trim();
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';
