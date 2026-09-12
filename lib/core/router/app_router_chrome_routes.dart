@@ -562,11 +562,6 @@ RouteBase buildChromeShellRoute() {
             builder: (context, state) => const IaChatScreen(),
           ),
           GoRoute(
-            path: '/ia/aluno',
-            // Hide até quota do personal no contexto-aluno (§38).
-            redirect: (context, state) => '/dashboard/aluno',
-          ),
-          GoRoute(
             path: '/ia/checkin',
             redirect: (context, state) => '/ia/copiloto',
           ),

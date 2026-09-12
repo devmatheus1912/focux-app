@@ -108,7 +108,6 @@ bool isAlunoOnlyLocation(String path) {
     '/financeiro/aluno',
     '/feed/aluno',
     '/agenda/aluno',
-    '/ia/aluno',
     '/depoimentos-aluno',
     '/checkin/treinos',
     '/checkin/executar',

@@ -281,7 +281,7 @@ POST	/api/habitos/me/{habitoId}/check	AT	HabitoController.java:165
 GET	/api/habitos/streaks/{alunoId}	AL	HabitoController.java:114
 GET	/api/habitos/templates	AL	HabitoController.java:56
 DELETE	/api/habitos/{id}	AT	HabitoController.java:93
-POST	/api/ia/chat	AR	IaController.java:57
+POST	/api/ia/chat	AR	IaController.java:59
 POST	/api/ia/confirmar-publicar/{alunoId}	A	IaController.java:85
 POST	/api/ia/copiloto/acao/executar	CRO	IaCopilotoController.java:39
 POST	/api/ia/copiloto/acoes	CRO	IaCopilotoController.java:47

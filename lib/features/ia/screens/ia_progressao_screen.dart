@@ -7,6 +7,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -57,9 +58,37 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   final _historico = TextEditingController();
   final _scrollController = ScrollController();
   final _resultKey = GlobalKey();
+  final _openedAt = DateTime.now();
   bool _loading = false;
   IaProgressaoCargaResult? _resultado;
   String? _erro;
+  var _viewTracked = false;
+  var _ttvTracked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _trackViewIfNeeded());
+  }
+
+  void _trackViewIfNeeded() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AnalyticsService.instance.track(
+      ProductEvents.iaProgressaoViewed,
+      props: {'alunoId': widget.alunoId},
+    );
+    if (!_ttvTracked) {
+      _ttvTracked = true;
+      AnalyticsService.instance.track(
+        ProductEvents.iaProgressaoTtv,
+        props: {
+          'alunoId': widget.alunoId,
+          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+        },
+      );
+    }
+  }
 
   Future<void> _exportarPdf(IaProgressaoCargaResult resultado) async {
     final parsed = resultado.toParsed();
@@ -166,6 +195,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
   }
 
   void _showHelp() {
+    AnalyticsService.instance.track(
+      ProductEvents.iaProgressaoHelpOpened,
+      props: {'alunoId': widget.alunoId},
+    );
     showFxHelpSheet(
       context,
       title: 'Progressão de carga',
@@ -214,6 +247,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       confirmLabel: progressaoConfirmLabel(),
     );
     if (!ok || !mounted) return;
+    AnalyticsService.instance.track(
+      ProductEvents.iaProgressaoCtaTapped,
+      props: {'alunoId': widget.alunoId},
+    );
     setState(() {
       _loading = true;
       _resultado = null;
