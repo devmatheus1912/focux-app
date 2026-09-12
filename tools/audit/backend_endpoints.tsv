@@ -290,7 +290,7 @@ GET	/api/ia/copiloto/home	CRO	IaCopilotoHomeController.java:40
 GET	/api/ia/copiloto/insights	CROL	IaCopilotoController.java:55
 GET	/api/ia/copiloto/proxima-acao/{alunoId}	CRO	IaCopilotoController.java:31
 POST	/api/ia/gerar-treino	AR	IaController.java:29
-POST	/api/ia/progressao-carga	ARO	IaController.java:45
+POST	/api/ia/progressao-carga	AR	IaController.java:50
 GET	/api/ia/progressao/sugestoes	AL	IaController.java:93
 POST	/api/ia/progressao/sugestoes/{id}/aceitar	A	IaController.java:105
 POST	/api/ia/progressao/sugestoes/{id}/rejeitar	A	IaController.java:111
