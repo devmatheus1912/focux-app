@@ -222,7 +222,7 @@ void main() {
     );
     expect(
       exerciciosList,
-      contains("safePopOrGo(context, '/dashboard/personal')"),
+      contains("safePopOrGo(context, '/treinos')"),
     );
     expect(identidade, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(agendaNovo, contains("safePopOrGo(context, '/agenda')"));
