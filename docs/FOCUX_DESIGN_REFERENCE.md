@@ -1,17 +1,17 @@
 # Focux Personal — Referência oficial de design e engenharia
 
-**Padrão de excelência do aplicativo (visual, UX, job, arquitetura, segurança, dados, ops).**
-**Versão:** 2.2 · **Data:** 2026-09-03 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+**Padrão de excelência do aplicativo (visual, UX, job, arquitetura, segurança, dados, ops, system design).**
+**Versão:** 3.0 · **Data:** 2026-09-12 · **Plataforma de referência:** iOS (HIG) com paridade Android.
 
-> **Programa vigente (v2.2): reimplementação do zero até a loja.** Toda rota do Personal e do Aluno volta à fila — inclusive as que o Ruflo já “elevou” só com pele/anatomia. Scorecard visual antigo **não** isenta a tela. O programa só termina no freeze §39 com binário de App Store / Play. Ver [§0.6](#06-reimplementação-do-zero-até-a-loja).
+> **Programa vigente (v3): reimplementação do zero até a loja + constituição de sistema.** Toda rota do Personal e do Aluno volta à fila — inclusive as que o Ruflo já “elevou” só com pele/anatomia. Scorecard visual antigo **não** isenta a tela. O programa só termina no freeze §39 com binário de App Store / Play. System design normativo vive em [docs/system/](system/00-mapa.md) (Parte VIII). Ver [§0.6](#06-reimplementação-do-zero-até-a-loja) e [§40](#40-system-design--constituição).
 
-> **Barra de produção (v2.1–2.2).** Pele e anatomia não bastam. Uma tela só está pronta quando o **job do domínio** está completo (amplitude **e** profundidade de affordance), **voltar** funciona em todo caminho de entrada, o **teclado iOS** fecha sem freeze, os **quatro estados** existem, e o caminho de dados foi auditado. O Ruflo não declara lote encerrado só porque a tela “parece Focux”. Ver [§0.5](#05-barra-de-produção-v21) e [§39](#39-freeze-de-produção).
+> **Barra de produção (v2.1–3).** Pele e anatomia não bastam. Uma tela só está pronta quando o **job do domínio** está completo (amplitude **e** profundidade de affordance), **voltar** funciona em todo caminho de entrada, o **teclado iOS** fecha sem freeze, os **quatro estados** existem, o caminho de dados foi auditado, e a feature respeita os **gates de sistema** ([11-gates](system/11-gates-feature.md)). O Ruflo não declara lote encerrado só porque a tela “parece Focux”. Ver [§0.5](#05-barra-de-produção-v21) e [§39](#39-freeze-de-produção).
 
-> **Este arquivo é a única referência canônica.** Ele **substitui e aposenta**:
+> **Este arquivo é a única referência canônica (índice).** Ele **substitui e aposenta**:
 > - `PERFIL_DESIGN_REFERENCE.md` (v1 — escopo `/perfil`, fold inset)
 > - `FOCUX_80_PILARES.md` (v1 — constituição dos 80 pilares)
 >
-> Todo o conteúdo normativo dos dois foi absorvido aqui. Não consultar os arquivos antigos: onde houver divergência, **este documento vence**.
+> Detalhe de system design: árvore `docs/system/*` (Parte VIII). Contrato pareado API: [CONTRATO_APP_BACKEND.md](CONTRATO_APP_BACKEND.md). Onde houver divergência, **este documento vence**.
 
 ---
 
@@ -81,6 +81,14 @@
 - [38. Decisão ship / hide / delete](#38-decisão-ship--hide--delete)
 - [39. Freeze de produção](#39-freeze-de-produção)
 
+**Parte VIII — System design (normativo, v3)**
+- [40. System design — constituição](#40-system-design--constituição)
+- [41. Trade-offs e consistência](#41-trade-offs-e-consistência)
+- [42. Topologia e dados](#42-topologia-e-dados)
+- [43. API, cache e async](#43-api-cache-e-async)
+- [44. Mídia, segurança e observabilidade](#44-mídia-segurança-e-observabilidade)
+- [45. Evolução e gates de feature](#45-evolução-e-gates-de-feature)
+
 **Apêndices**
 - [A. Registro de auditoria: hub Perfil](#a-registro-de-auditoria-hub-perfil)
 - [B. Mortos: não reintroduzir](#b-mortos-não-reintroduzir)
@@ -89,7 +97,7 @@
 
 ## 0.1 Regra de ouro
 
-> **A pele é constante. A anatomia é função do job da tela.**
+> **A pele é constante. A anatomia é função do job da tela. O sistema é coerente (dados, async, cache, segurança).**
 
 Duas telas do Focux devem ser reconhecíveis como do mesmo produto em 200 ms (pele) e distinguíveis como jobs diferentes em 1 s (anatomia). Se toda tela parece a mesma tela, a pele venceu a anatomia — e isso é defeito, não consistência.
 
@@ -98,6 +106,8 @@ Corolário operacional: **antes de editar qualquer tela, classifique-a** em um d
 Uma tela linda com regra, contrato ou tenant errados é pior do que não mexer.
 
 Corolário de produção (v2.1): **uma tela linda com job incompleto, voltar morto ou teclado preso também é pior do que não mexer.** Pele sem operação não é Focux.
+
+Corolário de sistema (v3): **feature linda que concede PRO sem captura, cacheia entitlement sem evict ou fura tenant também é pior do que não mexer.** Seguir [docs/system/](system/00-mapa.md) e o checklist [11-gates](system/11-gates-feature.md).
 
 ---
 
@@ -125,13 +135,15 @@ Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache 
 
 Em caso de conflito, decidir nesta ordem:
 
-1. **Segurança, tenant, LGPD, auth, pagamento** (§20, pilares 52–68) — nunca cede a estética.
-2. **Regra de negócio e contrato de dados** (§16–§18) — nunca cede a estética.
+1. **Segurança, tenant, LGPD, auth, pagamento** (§20, Parte VIII / `docs/system/08`, pilares 52–68) — nunca cede a estética.
+2. **Regra de negócio, contrato de dados e system design** (§16–§18, §40–§45, `docs/system/*`) — nunca cede a estética. Detalhe em `docs/system/` cede a este índice se divergir.
 3. **Acessibilidade, teclado e alvo de toque** (§14.2, §15, pilares 33/38/94) — nunca cede a densidade nem a animação.
 4. **Navegação previsível, job completo e profundidade** (§14.1, §36, pilares 2/44/93/95/101) — nunca cede a “já parece elevado” nem a “já restilamos ontem”.
 5. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
 6. **Pele** (§1–§8) — vence variação criativa local.
 7. **Preferência estética** — último critério.
+
+Contrato pareado app↔API: [CONTRATO_APP_BACKEND.md](CONTRATO_APP_BACKEND.md) — mudanças breaking exigem PR pareado.
 
 ---
 
@@ -2226,6 +2238,50 @@ Pode subir para a loja: sim | não — <motivo>
 ```
 
 **"Pode subir: sim"** só com 39.2 verde e 39.3 explícito (aberto = risco aceito **por escrito pelo dono**, não pelo agente).
+
+---
+
+# Parte VIII — System design (normativo, v3)
+
+Conceitos adaptados do [System Design Primer](https://github.com/donnemartin/system-design-primer) (CC BY-SA 4.0) à topologia real Focux. **Não** copiar o primer: seguir as decisões em `docs/system/`.
+
+## 40. System design — constituição
+
+> **Pele + anatomia + job sem sistema coerente ainda não é Focux de loja.**
+
+Mapa e glossário: [system/00-mapa.md](system/00-mapa.md).
+
+Toda feature que toca API, dinheiro, cache, job, webhook ou mídia marca o checklist [system/11-gates-feature.md](system/11-gates-feature.md) no scorecard (`system: 11-gates ok | gaps: …`).
+
+## 41. Trade-offs e consistência
+
+Resumo: dinheiro/tenant/entitlement = **consistência forte**; feed/FCM/freshness = eventual ok. Proibido throughput que duplica cobrança.
+
+Detalhe: [system/01-tradeoffs.md](system/01-tradeoffs.md).
+
+## 42. Topologia e dados
+
+Monólito Spring + Flutter + Postgres (+ Redis opcional) + Cloudinary + webhooks. Sem microsserviços até gatilho. Tenant por `personalId`/`alunoId`; dinheiro `BigDecimal`.
+
+Detalhe: [system/02-topologia.md](system/02-topologia.md) · [system/03-dados.md](system/03-dados.md).
+
+## 43. API, cache e async
+
+REST + envelopes do CONTRATO; idempotência em webhooks/PIX/IAP; cache-aside com TTL+evict; ShedLock nos crons; SaaS só com fatura `payment.status=approved` (nunca `authorized` de preapproval sozinho); dunning não pause/reativa MP para “curar” plano.
+
+Detalhe: [system/04-api.md](system/04-api.md) · [system/05-cache.md](system/05-cache.md) · [system/06-async.md](system/06-async.md).
+
+## 44. Mídia, segurança e observabilidade
+
+Cloudinary como CDN; sem SSRF em URL do client; §20 + HMAC/JWT/pins; medir antes de escalar.
+
+Detalhe: [system/07-media-cdn.md](system/07-media-cdn.md) · [system/08-seguranca-sistema.md](system/08-seguranca-sistema.md) · [system/09-observabilidade.md](system/09-observabilidade.md).
+
+## 45. Evolução e gates de feature
+
+O que ainda **não** fazemos (Kafka, shard, multi-region) e quando reabrir. Checklist obrigatório de feature.
+
+Detalhe: [system/10-evolucao.md](system/10-evolucao.md) · [system/11-gates-feature.md](system/11-gates-feature.md).
 
 ---
 
