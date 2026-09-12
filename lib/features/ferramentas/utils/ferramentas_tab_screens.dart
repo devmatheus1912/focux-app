@@ -22,6 +22,7 @@ import '../../perfil/screens/white_label_settings_screen.dart';
 import '../../recorrencia/screens/recorrencia_screen.dart';
 import '../../referral/screens/referral_screen.dart';
 import '../../relatorio/screens/business_reports_screen.dart';
+import '../../retencao/screens/churn_dashboard_screen.dart';
 import '../../winback/screens/winback_screen.dart';
 import 'ferramentas_icons.dart';
 
@@ -46,6 +47,8 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
       return const LeadsPublicosScreen();
     case '/winback':
       return const WinbackScreen();
+    case '/retencao':
+      return const ChurnDashboardScreen();
     case '/perfil/landing-editor':
       return const LandingEditorScreen();
     case '/nps':

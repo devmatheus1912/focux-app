@@ -116,7 +116,17 @@ String? normalizeFerramentasRotaApp(String? rotaApp) {
       return '/relatorio/business';
     case '/cobranca-auto':
     case '/cobranca':
+    case '/financeiro/cobranca-auto':
       return '/dunning';
+    case '/financeiro/recorrencia':
+      return '/recorrencia';
+    case '/financeiro/receita':
+      return '/relatorio/business';
+    case '/retencao/recuperacao':
+    case '/retencao/saude':
+      return '/retencao';
+    case '/retencao/nps':
+      return '/nps';
     case '/marca-propria':
       return '/white-label';
     case '/indique':

@@ -18,6 +18,8 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -167,23 +169,33 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
-      label: 'Win-back automático',
-      child: FxShellScaffold(
+      label: 'Histórico win-back',
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Win-back automático',
+          title: 'Histórico win-back',
           subtitle: winbackHubSubtitle(freshness),
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
           actions: [
             FxHelpIconButton(
               tooltip: 'Como funciona o win-back',
               onTap: () => showFxHelpSheet(
                 context,
-                title: 'Win-back',
-                subtitle: 'Push automático para aluno inativo.',
+                title: 'Histórico win-back',
+                subtitle: 'Log dos pushes automáticos — risco ao vivo fica em Saúde da base.',
                 tips: const [
                   FxHelpTip('Como calculamos', winbackComoCalculamos),
                   FxHelpTip(
@@ -191,8 +203,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                     'Toque no envio para escrever, cobrar ou abrir o 360. Trial do personal não aparece aqui.',
                   ),
                   FxHelpTip(
-                    'Retenção',
-                    'A saúde da base continua em Retenção.',
+                    'Saúde da base',
+                    'Quem está em risco agora e o que fazer — use o botão Saúde da base.',
                   ),
                 ],
               ),
@@ -248,12 +260,6 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                         icon: 'bell',
                         title: winbackSearchEmptyTitle(_query),
                         subtitle: winbackSearchEmptySubtitle(_query),
-                        action: _query.isEmpty
-                            ? FxEmptyAction(
-                                label: 'Saúde da base',
-                                onTap: _abrirRetencao,
-                              )
-                            : null,
                       ),
                     ],
                   )
@@ -281,7 +287,6 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                                   onAluno: () => _abrirAluno(first),
                                   onChat: () => _abrirChat(first),
                                   onCobrar: () => _abrirCobranca(first),
-                                  onRetencao: _abrirRetencao,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const DashboardSectionHeader(title: 'Envios'),
@@ -322,8 +327,25 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                   ),
                   ),
                 ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      TokensStrip.s4,
+                      TokensStrip.s2,
+                      TokensStrip.s4,
+                      TokensStrip.s3 +
+                          MediaQuery.viewInsetsOf(context).bottom,
+                    ),
+                    child: FxLiquidPrimaryButton(
+                      label: 'Saúde da base',
+                      onPressed: _abrirRetencao,
+                    ),
+                  ),
+                ),
               ],
             ),
+      ),
       ),
     );
   }
@@ -337,7 +359,6 @@ class _WinbackFocusCard extends StatelessWidget {
     required this.onAluno,
     required this.onChat,
     required this.onCobrar,
-    required this.onRetencao,
   });
 
   final int total;
@@ -346,14 +367,13 @@ class _WinbackFocusCard extends StatelessWidget {
   final VoidCallback onAluno;
   final VoidCallback onChat;
   final VoidCallback onCobrar;
-  final VoidCallback onRetencao;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forDark(isDark);
     final canOpen = first.alunoId != null && first.alunoId! > 0;
     return FxStripCard(
-      emphasize: true,
+      emphasize: false,
       semanticsLabel:
           '${winbackCountLabel(total)}. Último ${winbackAlunoLabel(first.alunoNome)}',
       child: Column(
@@ -371,43 +391,36 @@ class _WinbackFocusCard extends StatelessWidget {
               ),
             ),
           ),
-            const SizedBox(height: 6),
-            Text(
-              '${winbackCountLabel(total)} · ${winbackTipoLabel(first.tipo)}',
-              style: FocuxHubTypography.body(
-                color: chrome.ink,
-              ).copyWith(fontWeight: FontWeight.w700),
-            ),
+          const SizedBox(height: 6),
+          Text(
+            '${winbackCountLabel(total)} · ${winbackTipoLabel(first.tipo)}',
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w700),
+          ),
+          if (canOpen) ...[
             const SizedBox(height: TokensStrip.s3),
             Wrap(
               spacing: TokensStrip.s2,
               runSpacing: TokensStrip.s2,
               children: [
-                if (canOpen)
-                  DashboardHomeActionChip(
-                    label: 'Escrever',
-                    accent: Theme.of(context).colorScheme.primary,
-                    isDark: isDark,
-                    onPressed: onChat,
-                  ),
-                if (canOpen)
-                  DashboardHomeActionChip(
-                    label: 'Cobrar',
-                    accent: EagleTokens.moneyGreen,
-                    isDark: isDark,
-                    onPressed: onCobrar,
-                  ),
-                if (!canOpen)
-                  DashboardHomeActionChip(
-                    label: 'Saúde da base',
-                    accent: Theme.of(context).colorScheme.primary,
-                    isDark: isDark,
-                    onPressed: onRetencao,
-                  ),
+                DashboardHomeActionChip(
+                  label: 'Escrever',
+                  accent: Theme.of(context).colorScheme.primary,
+                  isDark: isDark,
+                  onPressed: onChat,
+                ),
+                DashboardHomeActionChip(
+                  label: 'Cobrar',
+                  accent: EagleTokens.moneyGreen,
+                  isDark: isDark,
+                  onPressed: onCobrar,
+                ),
               ],
             ),
           ],
-        ),
+        ],
+      ),
     );
   }
 }

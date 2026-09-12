@@ -43,10 +43,10 @@ void main() {
     expect(winbackCountLabel(1), '1 envio');
     expect(winbackCountLabel(4), '4 envios');
     expect(winbackComoCalculamos, contains('7º'));
-    expect(winbackHubSubtitle(null), 'Push de reengajamento');
+    expect(winbackHubSubtitle(null), 'Log dos pushes automáticos');
     expect(
       winbackHubSubtitle('Atualizado agora'),
-      'Push de reengajamento · Atualizado agora',
+      'Log dos pushes automáticos · Atualizado agora',
     );
     expect(winbackSearchEmptyTitle(''), 'Nenhum envio ainda');
     expect(winbackSearchEmptyTitle('Ana'), 'Nenhum envio encontrado');

@@ -14,6 +14,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -109,16 +110,26 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final home = _home;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(home?.fetchedAt);
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Saúde da base',
-      child: FxShellScaffold(
+      child: PopScope(
+        canPop: !keyboardOpen,
+        onPopInvokedWithResult: (didPop, _) {
+          if (didPop) return;
+          FxKeyboardDismissScope.dismiss();
+        },
+        child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Saúde da base',
           subtitle: freshnessLabel ?? 'Score de retenção por aluno',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () {
+            FxKeyboardDismissScope.dismiss();
+            safePopOrGo(context, '/dashboard/personal');
+          },
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar a retenção',
@@ -136,6 +147,10 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       FxHelpTip(
                         'Lista',
                         'Os 3 primeiros já vêm do servidor. Ver todos abre a base paginada.',
+                      ),
+                      FxHelpTip(
+                        'Satélites',
+                        'Histórico win-back guarda os pushes. Cobrança auto lista falhas de pagamento.',
                       ),
                     ],
                   ),
@@ -195,6 +210,27 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   onAluno: _abrirAluno,
                                   onChat: _abrirChat,
                                   onCobrar: _abrirCobranca,
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    DashboardHomeActionChip(
+                                      label: 'Histórico win-back',
+                                      accent: Theme.of(context)
+                                          .colorScheme
+                                          .primary,
+                                      isDark: isDark,
+                                      onPressed: () => context.push('/winback'),
+                                    ),
+                                    DashboardHomeActionChip(
+                                      label: 'Cobrança auto',
+                                      accent: EagleTokens.moneyGreen,
+                                      isDark: isDark,
+                                      onPressed: () => context.push('/dunning'),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(
@@ -262,6 +298,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                             ),
                           ),
                 ),
+      ),
       ),
     );
   }

@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/dunning_repository.dart';
@@ -117,6 +118,10 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
         },
       );
     }
+  }
+
+  void _abrirRetencao() {
+    context.push('/retencao');
   }
 
   void _abrirFinanceiro() {
@@ -271,8 +276,8 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                           title: 'Tudo em dia',
                           subtitle: 'Nenhuma falha de pagamento em aberto.',
                           action: FxEmptyAction(
-                            label: 'Ver financeiro',
-                            onTap: _abrirFinanceiro,
+                            label: 'Saúde da base',
+                            onTap: _abrirRetencao,
                           ),
                         ),
                       ],
@@ -305,6 +310,19 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                                     !dunningHasAluno(firstFalha.alunoId)
                                 ? _abrirAssinatura
                                 : null,
+                          ),
+                          const SizedBox(height: TokensStrip.s3),
+                          Wrap(
+                            spacing: TokensStrip.s2,
+                            runSpacing: TokensStrip.s2,
+                            children: [
+                              DashboardHomeActionChip(
+                                label: 'Saúde da base',
+                                accent: Theme.of(context).colorScheme.primary,
+                                isDark: isDark,
+                                onPressed: _abrirRetencao,
+                              ),
+                            ],
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(

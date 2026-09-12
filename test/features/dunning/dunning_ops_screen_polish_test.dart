@@ -44,6 +44,8 @@ void main() {
     expect(screen, contains('Ver mais'));
     expect(screen, contains('alunoNome'));
     expect(screen, contains('circle-check'));
+    expect(screen, contains('Saúde da base'));
+    expect(screen, contains("context.push('/retencao')"));
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));
     expect(screen, isNot(contains('aluno_id')));
