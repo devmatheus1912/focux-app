@@ -21,6 +21,8 @@ void main() {
     expect(screen, isNot(contains('showDatePicker')));
     expect(screen, contains('revisarPlano'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('showFxFormSheet'));
     expect(screen, contains("icon: 'calendar'"));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));

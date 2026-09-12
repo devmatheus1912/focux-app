@@ -1280,4 +1280,44 @@ void main() {
       );
     });
   });
+
+  group('resolveOperacaoStatusMetricKinds', () {
+    test('caps at 4 and drops prontidão/risco extras', () {
+      final kinds = resolveOperacaoStatusMetricKinds(
+        heroShowsRisco: false,
+        dominantKind: OperacaoDominantMetricKind.aderencia,
+      );
+      expect(kinds.length, lessThanOrEqualTo(4));
+      expect(kinds.first, OperacaoStatusCardKind.aderencia);
+      expect(kinds, contains(OperacaoStatusCardKind.ultimoTreino));
+      expect(kinds, contains(OperacaoStatusCardKind.checkins7d));
+      expect(kinds, isNot(contains(OperacaoStatusCardKind.prontidao)));
+      expect(kinds, isNot(contains(OperacaoStatusCardKind.risco)));
+    });
+
+    test('when hero shows risco, strip stays lean', () {
+      final kinds = resolveOperacaoStatusMetricKinds(
+        heroShowsRisco: true,
+        dominantKind: OperacaoDominantMetricKind.risco,
+      );
+      expect(kinds, [
+        OperacaoStatusCardKind.aderencia,
+        OperacaoStatusCardKind.ultimoTreino,
+        OperacaoStatusCardKind.checkins7d,
+      ]);
+    });
+
+    test('prontidão dominante ainda cabe em 4', () {
+      final kinds = resolveOperacaoStatusMetricKinds(
+        heroShowsRisco: false,
+        dominantKind: OperacaoDominantMetricKind.prontidao,
+      );
+      expect(kinds, [
+        OperacaoStatusCardKind.prontidao,
+        OperacaoStatusCardKind.aderencia,
+        OperacaoStatusCardKind.ultimoTreino,
+        OperacaoStatusCardKind.checkins7d,
+      ]);
+    });
+  });
 }

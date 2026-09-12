@@ -201,99 +201,89 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       );
     }
 
-    OperacaoStatusCardKind dominantKind() {
-      return switch (dominant.kind) {
-        OperacaoDominantMetricKind.risco => OperacaoStatusCardKind.focoDoDia,
-        OperacaoDominantMetricKind.aderencia => OperacaoStatusCardKind.aderencia,
-        OperacaoDominantMetricKind.prontidao => OperacaoStatusCardKind.prontidao,
-      };
-    }
-
-    final metrics = <Widget>[
-      if (!heroShowsRisco)
-        metric(
+    Widget tileForKind(OperacaoStatusCardKind kind) {
+      return switch (kind) {
+        OperacaoStatusCardKind.focoDoDia => metric(
           label: dominant.label,
           value: dominant.value,
           hint: dominant.hint,
           color: _dominantAccent(dominant, aderenciaColor, riscoColor, primary),
           alert: dominant.kind == OperacaoDominantMetricKind.risco,
-          kind: dominantKind(),
+          kind: kind,
           icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
         ),
-      if (heroShowsRisco) ...[
-        metric(
-          label: 'Aderência',
-          value:
-              aluno.aderenciaPercent == null
+        OperacaoStatusCardKind.prontidao => metric(
+          label: dominant.kind == OperacaoDominantMetricKind.prontidao
+              ? dominant.label
+              : 'Prontidão',
+          value: dominant.kind == OperacaoDominantMetricKind.prontidao
+              ? dominant.value
+              : (aluno.scoreProntidao == null
                   ? '—'
-                  : '${aluno.aderenciaPercent}%',
-          hint: 'Concluídos / iniciados · 30 dias',
-          color: aderenciaColor,
-          alert: (aluno.aderenciaPercent ?? 0) <= 0,
-          kind: OperacaoStatusCardKind.aderencia,
-          icon: Icons.percent_rounded,
-        ),
-        metric(
-          label: semTreinoLabel,
-          value: semTreinoDisplay,
-          hint: semTreinoSubtitle,
-          color: semTreinoAccent,
-          alert: (dias ?? 0) >= diasLimite,
-          kind: OperacaoStatusCardKind.ultimoTreino,
-          icon: Icons.pause_circle_outline_rounded,
-        ),
-      ] else ...[
-        metric(
-          label: 'Prontidão',
-          value:
-              aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
-          hint: 'Índice operacional',
+                  : '${aluno.scoreProntidao}'),
+          hint: dominant.kind == OperacaoDominantMetricKind.prontidao
+              ? dominant.hint
+              : 'Índice operacional',
           color: primary,
           alert: false,
-          kind: OperacaoStatusCardKind.prontidao,
+          kind: kind,
           icon: Icons.speed_rounded,
         ),
-        metric(
-          label: 'Aderência',
-          value:
-              aluno.aderenciaPercent == null
+        OperacaoStatusCardKind.aderencia => metric(
+          label: dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                  !heroShowsRisco
+              ? dominant.label
+              : 'Aderência',
+          value: dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                  !heroShowsRisco
+              ? dominant.value
+              : (aluno.aderenciaPercent == null
                   ? '—'
-                  : '${aluno.aderenciaPercent}%',
-          hint: 'Concluídos / iniciados · 30 dias',
+                  : '${aluno.aderenciaPercent}%'),
+          hint: dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                  !heroShowsRisco
+              ? dominant.hint
+              : 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
-          kind: OperacaoStatusCardKind.aderencia,
+          kind: kind,
           icon: Icons.percent_rounded,
         ),
-        metric(
+        OperacaoStatusCardKind.ultimoTreino => metric(
           label: semTreinoLabel,
           value: semTreinoDisplay,
           hint: semTreinoSubtitle,
           color: semTreinoAccent,
           alert: (dias ?? 0) >= diasLimite,
-          kind: OperacaoStatusCardKind.ultimoTreino,
+          kind: kind,
           icon: Icons.pause_circle_outline_rounded,
         ),
-        metric(
+        OperacaoStatusCardKind.risco => metric(
           label: 'Risco',
           value: formatRiscoNivel(aluno.riscoNivel),
           hint: aluno.emRisco ? 'Em risco' : 'Estável',
           color: riscoColor,
           alert: aluno.emRisco,
-          kind: OperacaoStatusCardKind.risco,
+          kind: kind,
           icon: riscoMetricIcon(aluno.riscoNivel),
         ),
-      ],
-      metric(
-        label: 'Check-ins · 7 dias',
-        value: weekValue,
-        hint: adherenceEmpty?.message ?? week.caption,
-        color: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
-        alert: !week.hasAnyCheckin && week.points.isNotEmpty,
-        kind: OperacaoStatusCardKind.checkins7d,
-        icon: Icons.calendar_view_week_rounded,
-      ),
-    ];
+        OperacaoStatusCardKind.checkins7d => metric(
+          label: 'Check-ins · 7 dias',
+          value: weekValue,
+          hint: adherenceEmpty?.message ?? week.caption,
+          color: week.hasAnyCheckin ? aderenciaColor : EagleTokens.warn,
+          alert: !week.hasAnyCheckin && week.points.isNotEmpty,
+          kind: kind,
+          icon: Icons.calendar_view_week_rounded,
+        ),
+      };
+    }
+
+    final metrics =
+        resolveOperacaoStatusMetricKinds(
+          heroShowsRisco: heroShowsRisco,
+          dominantKind: dominant.kind,
+        ).map(tileForKind).toList(growable: false);
 
     return Column(
       key: const ValueKey('aluno360_operacao_status'),
