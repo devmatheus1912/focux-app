@@ -11,19 +11,15 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/equipe_repository.dart';
@@ -148,39 +144,6 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
     }
   }
 
-  Future<void> _convidar() async {
-    final ctrl = TextEditingController();
-    var sent = false;
-    try {
-      final ok = await showFxFormSheet(
-        context,
-        title: 'Convidar assistente',
-        icon: Icons.mail_outline_rounded,
-        confirmLabel: 'Convidar',
-        child: AlunoInsetFormField(
-          controller: ctrl,
-          label: 'Email',
-          icon: Icons.alternate_email_outlined,
-          keyboardType: TextInputType.emailAddress,
-          showDivider: false,
-        ),
-      );
-      if (ok != true || ctrl.text.trim().isEmpty) return;
-      await ref
-          .read(equipeRepositoryProvider)
-          .convidar(email: ctrl.text.trim());
-      sent = true;
-      if (mounted) FeedbackHelper.showSuccess(context, 'Convite enviado');
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      ctrl.dispose();
-    }
-    if (sent) await _load();
-  }
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -219,15 +182,15 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
                   onTap: () => showFxHelpSheet(
                     context,
                     title: 'Equipe',
-                    subtitle: 'Convites e papéis de quem te ajuda na operação.',
+                    subtitle: 'Quem te ajuda na operação (somente leitura por enquanto).',
                     tips: const [
                       FxHelpTip(
-                        'Convidar',
-                        'O botão de baixo envia o convite por e-mail.',
+                        'Lista',
+                        'Veja membros e status. Convites e papéis voltam quando o RBAC fechar.',
                       ),
                       FxHelpTip(
                         'Status',
-                        'Convites ficam pendentes até a pessoa aceitar.',
+                        'Filtros: todos, convites e ativos.',
                       ),
                     ],
                   ),
@@ -325,23 +288,6 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
                         )
                       : FxContentWidthLimiter(child: _buildBody()),
                 ),
-                if (!_loading && _error == null)
-                  SafeArea(
-                    top: false,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s2,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s3 +
-                            MediaQuery.viewInsetsOf(context).bottom,
-                      ),
-                      child: FxLiquidPrimaryButton(
-                        label: 'Convidar',
-                        onPressed: _convidar,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -369,7 +315,7 @@ class _EquipeScreenState extends ConsumerState<EquipeScreen> {
                       : 'Nenhum membro',
                   subtitle: filtered
                       ? 'Ajuste a busca ou o filtro.'
-                      : 'Convide assistentes para escalar sua operação.',
+                      : 'Convites e papéis ficam ocultos até o RBAC de equipe fechar.',
                   action: filtered
                       ? FxEmptyAction(
                           label: 'Limpar filtros',

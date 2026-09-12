@@ -37,11 +37,4 @@ class EquipeRepository {
       (item) => TenantMembro.fromJson(Map<String, dynamic>.from(item as Map)),
     );
   }
-
-  Future<void> convidar({required String email}) async {
-    await _dio.post(
-      '/api/tenant/membros',
-      data: {'userEmail': email, 'role': 'SECRETARIA'},
-    );
-  }
 }
