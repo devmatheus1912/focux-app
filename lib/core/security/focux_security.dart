@@ -26,9 +26,9 @@ abstract final class FocuxSecurity {
     'android/app/proguard-rules.pro',
   ];
 
-  /// Monorepo local (`Focux Personal/`) — testes rodam só se o path existir.
+  /// Docs e website no monorepo — testes rodam só se o path existir.
   static const List<String> monorepoHardeningSources = [
-    '../docs/PERFIL_DESIGN_REFERENCE.md',
+    'docs/FOCUX_DESIGN_REFERENCE.md',
     '../focux-website/vercel.json',
     '../focux-website/client/public/.well-known/assetlinks.json',
   ];

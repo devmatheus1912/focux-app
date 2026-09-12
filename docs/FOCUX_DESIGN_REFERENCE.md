@@ -149,18 +149,7 @@ Contrato pareado app↔API: [CONTRATO_APP_BACKEND.md](CONTRATO_APP_BACKEND.md) �
 
 ## 0.4 Migração: pendências ao aposentar os arquivos v1
 
-Ao adotar este arquivo, os ponteiros para os documentos antigos ficam órfãos. **Tarefas de migração** (executar no primeiro lote da implementação em massa, em PR próprio de documentação):
-
-| Onde | Referência atual | Ação |
-|---|---|---|
-| `lib/core/security/focux_security.dart` | `'../docs/PERFIL_DESIGN_REFERENCE.md'` em `coreSources` | Apontar para `../docs/FOCUX_DESIGN_REFERENCE.md` |
-| `lib/core/theme/fx_settings_layout.dart` (dartdoc) | `D:/Focux Personal/docs/PERFIL_DESIGN_REFERENCE.md` | Idem, e ajustar o texto para "estrutura padrão de S2" |
-| `test/core/design_system/security_pillar_contract_test.dart` | Asserção do nome do arquivo | Atualizar no mesmo commit |
-| `test/core/security/platform_hardening_test.dart` | Idem | Atualizar no mesmo commit |
-| Regra Cursor `focux-10-10` | Cita os dois arquivos | Substituída pelo skill `/ruflo` + rule `focux-design` (ambos apontam só para este) |
-| `docs/` | `PERFIL_DESIGN_REFERENCE.md`, `FOCUX_80_PILARES.md` | Apagar após o commit acima (pilar 72 — não deixar "por precaução") |
-
-Enquanto a atualização não acontecer, **não apagar os arquivos v1**: o gate `security_pillar_contract_test` referencia o nome e quebra o CI.
+**Feito (2026-09-12).** Ponteiros de código/testes apontam para este arquivo; `PERFIL_DESIGN_REFERENCE.md` e `FOCUX_80_PILARES.md` foram apagados. Relatórios BE de auditoria/onda (`BACKEND_AUDIT.md`, etc.) aposentados — SSOT de sistema em [docs/system/](system/00-mapa.md) e ponteiro `focux-backend/docs/SYSTEM.md`.
 
 ---
 
@@ -1157,7 +1146,7 @@ Sintomas típicos de backend legado, com o alvo correspondente. Cada item vira l
 
 ### 22.6 Estado do backend em 2026-09-02 e travas sobre o plano de design
 
-Resultado da primeira varredura de `focux-backend`. Relatório completo em `focux-backend/docs/BACKEND_AUDIT.md`.
+Resultado da primeira varredura de `focux-backend` (snapshot histórico absorvido aqui; o relatório `BACKEND_AUDIT.md` foi aposentado).
 
 **Placar: 4 de 15 metas passam.** Spring Boot 3.4.4 (fora do suporte OSS) · JDK 21 · 432 endpoints · 12 P0 · 22 P1.
 
