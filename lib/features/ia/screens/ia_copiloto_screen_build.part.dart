@@ -96,7 +96,9 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       children: [
                     SizedBox(height: TokensStrip.s3),
 
-                    Padding(
+                    FxStaggerItem(
+                      index: 0,
+                      child: Padding(
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,
                         0,
@@ -122,9 +124,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                 onTap: _selecionarAluno,
                               ),
                     ),
+                    ),
 
                     // Mode selector
-                    Padding(
+                    FxStaggerItem(
+                      index: 1,
+                      child: Padding(
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,
                         0,
@@ -144,6 +149,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                           setState(() => _modeIdx = index);
                         },
                       ),
+                    ),
                     ),
 
                     // Pre-gerar: contexto + disclaimer (somem após resultado — fold livre p/ Insights).

@@ -23,6 +23,7 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../widgets/ia_copilot_create_task_sheet.dart';
 import '../widgets/ia_copiloto_help_sheet.dart';
 import '../widgets/ia_quota_upgrade.dart';

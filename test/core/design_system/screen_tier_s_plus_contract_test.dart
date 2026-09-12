@@ -15,6 +15,8 @@ void main() {
     'lib/features/checkin/screens/checkin_screen.dart',
     'lib/features/checkin/screens/meus_treinos_screen.dart',
     'lib/features/checkin/screens/historico_screen.dart',
+    // Chat full-bleed (backdrop) — limiter quebraria a composição.
+    'lib/features/chat/screens/conversation_screen.dart',
     'lib/features/auth/screens/splash_screen.dart',
     'lib/features/auth/screens/login_screen.dart',
     'lib/features/auth/screens/register_screen.dart',

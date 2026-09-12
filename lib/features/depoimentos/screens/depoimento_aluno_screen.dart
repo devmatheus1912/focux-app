@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -142,36 +143,37 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                         onPressed: _enviando ? null : _enviar,
                       ),
                     ),
-            body:
-                _loading
-                    ? const Padding(
-                      padding: EdgeInsets.all(TokensStrip.s4),
-                      child: SkeletonList(count: 4),
-                    )
-                    : _loadErro != null
-                    ? FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      message: _loadErro!,
-                      onRetry: _carregar,
-                    )
-                    : _enviado
-                    ? FxEmptyState(
-                      icon: 'circle-check',
-                      title: 'Depoimento enviado!',
-                      subtitle: 'Aguardando aprovação do seu personal.',
-                      action: FxEmptyAction(
-                        label: 'Voltar',
-                        onTap:
-                            () => safePopOrGo(context, '/dashboard/aluno'),
-                      ),
-                    )
-                    : SingleChildScrollView(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: const EdgeInsets.all(TokensStrip.s5),
-                      child: Form(
+            body: FxContentWidthLimiter(
+              child:
+                  _loading
+                      ? const Padding(
+                        padding: EdgeInsets.all(TokensStrip.s4),
+                        child: SkeletonList(count: 4),
+                      )
+                      : _loadErro != null
+                      ? FxErrorState(
+                        chromeOnDark: isDark,
+                        primary: primary,
+                        title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                        message: _loadErro!,
+                        onRetry: _carregar,
+                      )
+                      : _enviado
+                      ? FxEmptyState(
+                        icon: 'circle-check',
+                        title: 'Depoimento enviado!',
+                        subtitle: 'Aguardando aprovação do seu personal.',
+                        action: FxEmptyAction(
+                          label: 'Voltar',
+                          onTap:
+                              () => safePopOrGo(context, '/dashboard/aluno'),
+                        ),
+                      )
+                      : SingleChildScrollView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: const EdgeInsets.all(TokensStrip.s5),
+                        child: Form(
                         key: _formKey,
                         child: FxSettingsGroup(
                           header: 'Seu depoimento',
@@ -238,6 +240,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                         ),
                       ),
                     ),
+            ),
           ),
         ),
       ),
