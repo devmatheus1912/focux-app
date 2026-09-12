@@ -16,7 +16,6 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxHubFreshness.joinCount'));
-    expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('FeatureGate'));
     expect(screen, contains('equipeRbac'));
     expect(screen, contains('PopScope'));
@@ -25,12 +24,18 @@ void main() {
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('viewInsetsOf'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('listar('));
     expect(screen, contains('page:'));
+    // §38 / §39.3 — mutate equipe hide até RBAC P0
+    expect(screen, isNot(contains('convidar')));
+    expect(screen, isNot(contains('Convidar')));
+    expect(screen, isNot(contains('showFxFormSheet')));
+    expect(screen, isNot(contains('FxLiquidPrimaryButton')));
+    expect(screen, isNot(contains('.put(')));
+    expect(screen, isNot(contains('.delete(')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('onTap: () {}')));
@@ -38,5 +43,17 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('context.pop()')));
+  });
+
+  test('equipe repository is read-only until RBAC P0', () {
+    final repo = readScreenSourceBundle(
+      'lib/features/perfil/data/equipe_repository.dart',
+    );
+    expect(repo, contains('/api/tenant/membros'));
+    expect(repo, contains('listar'));
+    expect(repo, isNot(contains('convidar')));
+    expect(repo, isNot(contains('.post(')));
+    expect(repo, isNot(contains('.put(')));
+    expect(repo, isNot(contains('.delete(')));
   });
 }
