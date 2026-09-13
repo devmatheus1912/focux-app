@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -133,16 +132,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   }
 
   Future<void> _abrirVideo(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri == null) {
-      if (mounted) {
-        FeedbackHelper.showError(context, 'Não foi possível abrir a URL');
-      }
-      return;
-    }
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else if (mounted) {
+    final opened = await launchSafeHttpUrl(url);
+    if (!opened && mounted) {
       FeedbackHelper.showError(context, 'Não foi possível abrir a URL');
     }
   }

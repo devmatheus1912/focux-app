@@ -1,3 +1,5 @@
+import '../router/app_router_redirect.dart';
+
 /// Resolve a rota do toque FCM a partir de `message.data`.
 ///
 /// Usa `route` quando vem no payload. Sem rota, cai nos `type` já
@@ -82,38 +84,11 @@ String? _sanitizeAlunoFacingRoute(
   if (route == '/dashboard/personal' || route == '/dashboard') {
     return '/dashboard/aluno';
   }
-  if (_isPersonalOperationalHub(route)) {
+  // Paridade com authRedirect: qualquer hub PERSONAL_ONLY remapeia.
+  if (isPersonalOnlyLocation(route)) {
     return _fallbackByType(data, role: role) ?? '/dashboard/aluno';
   }
   return route;
-}
-
-bool _isPersonalOperationalHub(String route) {
-  const hubs = {
-    '/retencao',
-    '/dunning',
-    '/leads-publicos',
-    '/leads',
-    '/winback',
-    '/ofertas-upsell',
-    '/cancel-save',
-    '/automacoes',
-    '/analytics',
-    '/relatorios/global',
-    '/relatorio/business',
-    '/broadcasts',
-    '/coach',
-    '/ranking',
-    '/grupo-aulas',
-    '/recorrencia',
-    '/nps',
-    '/chat/inbox',
-    '/depoimentos',
-    '/galeria',
-    '/feedback-videos',
-  };
-  if (hubs.contains(route)) return true;
-  return route.startsWith('/leads/') || route.startsWith('/ferramentas/');
 }
 
 String? _asRoute(Object? raw) {
