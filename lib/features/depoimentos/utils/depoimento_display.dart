@@ -35,6 +35,16 @@ String depoimentoStatusLabel({required bool aprovado}) =>
     aprovado ? 'Aprovado' : 'Pendente';
 
 String depoimentoNotaLabel(int nota) {
+<<<<<<< HEAD
   final n = nota.clamp(1, 5);
   return '$n/5';
+=======
+  return switch (nota.clamp(1, 5)) {
+    1 => '1 — Fraco',
+    2 => '2 — Regular',
+    3 => '3 — Bom',
+    4 => '4 — Muito bom',
+    _ => '5 — Excelente',
+  };
+>>>>>>> origin/cursor/satelites-s5-depoimento-aluno-e119
 }
