@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('depoimento aluno cumpre contrato Tier S+', () {
+  test('depoimento aluno cumpre contrato Tier S+ (S5)', () {
     final screen = readScreenSourceBundle(
       'lib/features/depoimentos/screens/depoimento_aluno_screen.dart',
     );
@@ -21,6 +21,11 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains('onTapOutside'));
     expect(screen, contains('keyboardDismissBehavior'));
+    expect(screen, contains('Cancelar'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxStarRating'));
+    expect(screen, contains('depoimentoNotaLabel'));
+    expect(screen, contains('showFxHelpSheet'));
     expect(screen, isNot(contains('Navigator.of(context).pop()')));
   });
 }

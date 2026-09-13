@@ -7,6 +7,9 @@ void main() {
     expect(depoimentoCountLabel(1), '1 depoimento');
     expect(depoimentoCountLabel(3), '3 depoimentos');
     expect(depoimentoChipLabel(DepoimentoChip.pendentes), 'Pendentes');
+    expect(depoimentoNotaLabel(1), '1 — Fraco');
+    expect(depoimentoNotaLabel(5), '5 — Excelente');
+    expect(depoimentoNotaLabel(9), '5 — Excelente');
     expect(
       depoimentoMatches(
         nomeAluno: 'Ana',
