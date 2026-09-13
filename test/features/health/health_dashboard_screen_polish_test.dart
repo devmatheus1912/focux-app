@@ -37,6 +37,11 @@ void main() {
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('ShellHeaderIconButton'));
+    expect(screen, contains('refresh-cw'));
+    expect(screen, contains('_refreshing'));
+    expect(screen, contains('Expanded('));
+    expect(screen, contains('Atualizar'));
     expect(screen, isNot(contains('class _MetricCard')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
