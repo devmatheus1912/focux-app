@@ -203,6 +203,34 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                 FxSettingsLayout.pageInset,
                 0,
                 FxSettingsLayout.pageInset,
+                TokensStrip.s2,
+              ),
+              child: Row(
+                children: [
+                  for (var i = 0; i < 5; i++)
+                    Icon(
+                      i < item.nota.clamp(1, 5)
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 18,
+                      color: EagleTokens.goldStar,
+                    ),
+                  const SizedBox(width: 8),
+                  Text(
+                    depoimentoNotaLabel(item.nota),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.mute,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                0,
+                FxSettingsLayout.pageInset,
                 TokensStrip.s3,
               ),
               child: Text(item.texto, style: TextStyle(color: chrome.ink)),
@@ -431,27 +459,55 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
             );
           }
           final d = visible[i];
-          return FxSatelliteListTile(
-            title: d.nomeAluno,
-            subtitle: Text(
-              d.texto,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            leading: AlunoAvatar(
-              name: d.nomeAluno,
-              photoUrl: d.fotoAluno,
-              variant: AlunoAvatarVariant.strip,
-            ),
-            trailing: Text(
-              depoimentoStatusLabel(aprovado: d.aprovado),
-              style: FocuxHubTypography.bodyMuted(
-                color: d.aprovado ? EagleTokens.good : chrome.mute,
-                fontWeight: FontWeight.w600,
+          return FxStaggerItem(
+            index: i,
+            child: FxSatelliteListTile(
+              title: d.nomeAluno,
+              subtitle: Text(
+                d.texto,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
+              leading: AlunoAvatar(
+                name: d.nomeAluno,
+                photoUrl: d.fotoAluno,
+                variant: AlunoAvatarVariant.strip,
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 14,
+                        color: EagleTokens.goldStar,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        depoimentoNotaLabel(d.nota),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: chrome.ink,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    depoimentoStatusLabel(aprovado: d.aprovado),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: d.aprovado ? EagleTokens.good : chrome.mute,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              accent: d.aprovado ? null : primary,
+              onTap: () => _openItem(d),
             ),
-            accent: d.aprovado ? null : primary,
-            onTap: () => _openItem(d),
           );
         },
       ),

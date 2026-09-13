@@ -20,6 +20,8 @@ void main() {
     expect(screen, contains('/perfil/ferramentas'));
     expect(screen, contains('listarParaPersonalPagina'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('depoimentoNotaLabel'));
+    expect(screen, contains('FxStaggerItem'));
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('Color(')));
   });

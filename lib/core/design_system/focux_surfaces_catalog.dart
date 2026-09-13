@@ -318,7 +318,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: _home,
   ),
-  '/feed/aluno': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
+  '/feed/aluno': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _alunoHome,
+  ),
   '/leads': FocuxSurfaceSpec(
     type: _s4,
     hasInput: true,
