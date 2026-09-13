@@ -43,6 +43,7 @@ class HealthDashboardScreen extends StatefulWidget {
 class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   bool _authorized = false;
   bool _loading = true;
+  bool _refreshing = false;
   String? _erro;
   String? _syncSoftError;
   HealthSummary? _summary;
@@ -158,18 +159,24 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   }
 
   Future<void> _refreshDashboard() async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
     AnalyticsService.instance.track(
       ProductEvents.homeRefreshed,
       props: {'surface': 'saude'},
     );
-    await _loadData();
-    if (!mounted) return;
-    if (_syncSoftError != null) {
-      FeedbackHelper.showWarn(context, _syncSoftError!);
-      return;
-    }
-    if (_summary != null) {
-      FeedbackHelper.showSuccess(context, 'Prontidão atualizada');
+    try {
+      await _loadData();
+      if (!mounted) return;
+      if (_syncSoftError != null) {
+        FeedbackHelper.showWarn(context, _syncSoftError!);
+        return;
+      }
+      if (_summary != null) {
+        FeedbackHelper.showSuccess(context, 'Prontidão atualizada');
+      }
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
     }
   }
 
@@ -213,6 +220,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           subtitle: subtitle,
           showBack: false,
           actions: [
+            if (_authorized && !_loading)
+              ShellHeaderIconButton(
+                icon: 'refresh-cw',
+                tooltip: saudeAtualizarLabel(),
+                onTap: _refreshing ? null : _refreshDashboard,
+              ),
+            if (_authorized && !_loading)
+              SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
               tooltip: 'Como usar Saúde',
               onTap: () {
@@ -231,6 +246,10 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                       'Autorize o Apple Health ou o Google Fit.',
                     ),
                     FxHelpTip('Prontidão', 'O card do topo é o foco do dia.'),
+                    FxHelpTip(
+                      'Atualizar',
+                      'O ícone de sync no topo relê o wearable e envia ao servidor.',
+                    ),
                     FxHelpTip(
                       'Desconectar',
                       'Revogue o acesso no fim da tela.',
@@ -356,12 +375,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: DashboardHomeActionChip(
-                    label:
-                        _syncSoftError != null
+                    label: _refreshing
+                        ? 'Atualizando…'
+                        : _syncSoftError != null
                             ? saudeSyncSoftRetryLabel()
                             : saudeAtualizarLabel(),
                     accent: primary,
                     isDark: isDark,
+                    enabled: !_refreshing,
                     onPressed: _refreshDashboard,
                   ),
                 ),
@@ -373,43 +394,64 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             _SaudeSoftSyncBanner(
               isDark: isDark,
               message: _syncSoftError!,
-              onRetry: _loadData,
+              onRetry: _refreshDashboard,
             ),
           ],
           const SizedBox(height: TokensStrip.s4),
           const DashboardSectionHeader(title: 'Resumo de hoje'),
           const SizedBox(height: TokensStrip.s3),
-          OperationalMetricTile(
-            label: 'Passos',
-            value: '${s.steps}',
-            hint: 'Hoje',
-            color: EagleTokens.good,
-            isDark: isDark,
+          Row(
+            children: [
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Passos',
+                  value: '${s.steps}',
+                  hint: 'Hoje',
+                  color: EagleTokens.good,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Calorias',
+                  value: '${s.caloriesBurned.toInt()} kcal',
+                  hint: 'Gasto estimado',
+                  color: EagleTokens.warn,
+                  isDark: isDark,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Calorias',
-            value: '${s.caloriesBurned.toInt()} kcal',
-            hint: 'Gasto estimado',
-            color: EagleTokens.warn,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'FC média',
-            value: s.avgHeartRate > 0 ? '${s.avgHeartRate.toInt()} bpm' : '--',
-            hint: 'Frequência',
-            color: EagleTokens.bad,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Sono',
-            value:
-                s.sleepHours > 0 ? '${s.sleepHours.toStringAsFixed(1)}h' : '--',
-            hint: 'Última noite',
-            color: EagleTokens.purple,
-            isDark: isDark,
+          Row(
+            children: [
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'FC média',
+                  value:
+                      s.avgHeartRate > 0
+                          ? '${s.avgHeartRate.toInt()} bpm'
+                          : '--',
+                  hint: 'Frequência',
+                  color: EagleTokens.bad,
+                  isDark: isDark,
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Sono',
+                  value:
+                      s.sleepHours > 0
+                          ? '${s.sleepHours.toStringAsFixed(1)}h'
+                          : '--',
+                  hint: 'Última noite',
+                  color: EagleTokens.purple,
+                  isDark: isDark,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s5),
           FxConversionTextLink(
