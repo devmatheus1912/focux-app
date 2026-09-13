@@ -34,6 +34,9 @@ void main() {
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('FeedListChip'));
     expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FeedPostCard'));
+    expect(screen, contains('_searchFocus'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, isNot(contains('label: feedPublicarTileLabel')));
     expect(screen, isNot(contains('feedPublicarTileLabel()')));
     expect(screen, isNot(contains('showFxInsetPickerSheet')));

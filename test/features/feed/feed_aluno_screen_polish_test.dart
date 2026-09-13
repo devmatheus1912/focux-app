@@ -55,6 +55,10 @@ void main() {
     expect(screen, contains('FeedListChip'));
     expect(screen, contains('listarAlunoPagina'));
     expect(screen, contains('FxToggleChip'));
+    expect(screen, contains('FeedPostCard'));
+    expect(screen, contains('fxStripCardDecoration'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }
