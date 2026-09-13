@@ -166,7 +166,7 @@ class CheckinSerieCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: FocuxHubTypography.kpi(
               color: brand,
-              fontSize: TokensStrip.fontH1 + 8,
+              fontSize: TokensStrip.fontH1 + 14,
               fontWeight: FontWeight.w800,
             ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
           ),
@@ -188,7 +188,7 @@ class CheckinSerieCard extends StatelessWidget {
             const SizedBox(height: TokensStrip.s3),
             FxStripCard(
               emphasize: true,
-              glowStrength: 0.08,
+              glowStrength: 0.14,
               accent: brand,
               padding: EdgeInsets.zero,
               child: ClipRRect(
@@ -224,10 +224,12 @@ class CheckinSerieCard extends StatelessWidget {
               child: Text(checkinDesfazerLabel()),
             ),
           ],
-          if (onOpenTips != null || onOpenDemo != null || onOpenCoach != null)
+          if (onOpenTips != null || onOpenDemo != null || onOpenCoach != null) ...[
+            const SizedBox(height: TokensStrip.s3),
             Wrap(
               alignment: WrapAlignment.center,
-              spacing: TokensStrip.s3,
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
               children: [
                 if (onOpenTips != null)
                   TextButton(onPressed: onOpenTips, child: const Text('Dicas')),
@@ -238,12 +240,19 @@ class CheckinSerieCard extends StatelessWidget {
                     child: const Text('Demonstração'),
                   ),
                 if (onOpenCoach != null)
-                  TextButton(
+                  OutlinedButton.icon(
                     onPressed: onOpenCoach,
-                    child: const Text('Postura'),
+                    icon: Icon(Icons.accessibility_new_rounded, color: brand),
+                    label: const Text('Postura'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: brand,
+                      side: BorderSide(color: brand.withValues(alpha: 0.45)),
+                      minimumSize: const Size(48, 48),
+                    ),
                   ),
               ],
             ),
+          ],
         ],
       ),
     );

@@ -9,7 +9,6 @@ import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 
 Future<void> openPoseCameraCoach(
   BuildContext context, {
@@ -25,19 +24,22 @@ Future<void> openPoseCameraCoach(
     return;
   }
 
-  await showFxHomeSheet<void>(
-    context,
-    builder:
-        (ctx) => _CameraCoachSheet(
-          exerciseName: exerciseName,
-          brand: brand,
-          onRep: onRep,
-        ),
+  // Full-screen — evita sheet aninhado em cima do sheet Postura (bug de layout).
+  await Navigator.of(context, rootNavigator: true).push<void>(
+    MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder:
+          (ctx) => _CameraCoachPage(
+            exerciseName: exerciseName,
+            brand: brand,
+            onRep: onRep,
+          ),
+    ),
   );
 }
 
-class _CameraCoachSheet extends StatefulWidget {
-  const _CameraCoachSheet({
+class _CameraCoachPage extends StatefulWidget {
+  const _CameraCoachPage({
     required this.exerciseName,
     required this.brand,
     required this.onRep,
@@ -48,10 +50,10 @@ class _CameraCoachSheet extends StatefulWidget {
   final VoidCallback onRep;
 
   @override
-  State<_CameraCoachSheet> createState() => _CameraCoachSheetState();
+  State<_CameraCoachPage> createState() => _CameraCoachPageState();
 }
 
-class _CameraCoachSheetState extends State<_CameraCoachSheet> {
+class _CameraCoachPageState extends State<_CameraCoachPage> {
   CameraController? _controller;
   PoseDetector? _detector;
   bool _ready = false;
@@ -174,48 +176,61 @@ class _CameraCoachSheetState extends State<_CameraCoachSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      expand: true,
-      maxHeight:
-          MediaQuery.sizeOf(context).height *
-          FxHomeSheetChrome.expandHeightFactor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxHomeSheetHandle(isDark: isDark),
-          SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: 'MediaPipe · ${widget.exerciseName}',
-            subtitle: _status,
-            leading: Icon(Icons.videocam_outlined, color: primary, size: 18),
-          ),
-          const SizedBox(height: 14),
-          Expanded(
-            child: ListView(
-              children: [
-                ClipRRect(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.exerciseName),
+        leading: IconButton(
+          tooltip: 'Fechar',
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(TokensStrip.s4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _status,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: SizedBox(
-                    height: 280,
+                  child: ColoredBox(
+                    color: Colors.black,
                     child:
                         _ready && _controller != null
                             ? CameraPreview(_controller!)
-                            : Center(child: Text(_status)),
+                            : Center(
+                              child: Text(
+                                _status,
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                            ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Fechar coach'),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Reps detectadas: $_detectedReps',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: primary,
+                  fontWeight: FontWeight.w800,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Fechar coach'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
