@@ -33,3 +33,8 @@ bool depoimentoMatches({
 
 String depoimentoStatusLabel({required bool aprovado}) =>
     aprovado ? 'Aprovado' : 'Pendente';
+
+String depoimentoNotaLabel(int nota) {
+  final n = nota.clamp(1, 5);
+  return '$n/5';
+}

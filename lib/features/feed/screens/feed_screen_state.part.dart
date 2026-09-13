@@ -4,6 +4,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   final Map<int, int> _curtidasLocais = {};
   final Map<int, int> _comentariosLocais = {};
   final _searchController = TextEditingController();
+  final _searchFocus = FocusNode();
   Timer? _searchDebounce;
   List<FeedPost> _posts = [];
   var _query = '';
@@ -25,7 +26,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
+    _searchFocus.dispose();
     super.dispose();
+  }
+
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/dashboard/personal');
   }
 
   void _onQueryChanged(String value) {
@@ -252,7 +259,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             );
           }
           final p = visible[i];
-          return _FeedPostCard(
+          return FeedPostCard(
             post: p,
             index: i,
             primary: primary,
@@ -279,98 +286,99 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Feed',
-      child: PopScope(
-        canPop: !keyboardOpen,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          FxKeyboardDismissScope.dismiss();
-        },
-        child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Feed',
-          subtitle: FxHubFreshness.joinCount(
-            feedCountLabel(_posts.length),
-            freshnessLabel,
-          ),
-          onBack: () {
-            FxKeyboardDismissScope.dismiss();
-            safePopOrGo(context, '/dashboard/personal');
+      child: FxKeyboardDismissScope(
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (keyboardOpen || _searchFocus.hasFocus) {
+              FxKeyboardDismissScope.dismiss();
+              return;
+            }
+            _leave();
           },
-          actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar o feed',
-              onTap: () => showFxHelpSheet(
-                context,
-                title: 'Feed',
-                subtitle: 'Publicações que os alunos veem no app deles.',
-                tips: const [
-                  FxHelpTip(
-                    'Publicar',
-                    'O criar no rodapé abre texto, imagem ou vídeo.',
-                  ),
-                  FxHelpTip(
-                    'Comentários',
-                    'Você lê o que os alunos escreveram. Curtir e comentar é no app deles.',
-                  ),
-                ],
+          child: FxShellScaffold(
+            useMesh: true,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Feed',
+              subtitle: FxHubFreshness.joinCount(
+                '${feedCountLabel(_posts.length)}${_hasMore && !_loading ? '+' : ''}',
+                _loading ? null : freshnessLabel,
               ),
+              onBack: _leave,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar o feed',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Feed',
+                    subtitle: 'Publicações que os alunos veem no app deles.',
+                    tips: const [
+                      FxHelpTip(
+                        'Publicar',
+                        'O criar no rodapé abre texto, imagem ou vídeo.',
+                      ),
+                      FxHelpTip(
+                        'Comentários',
+                        'Você lê o que os alunos escreveram. Curtir e comentar é no app deles.',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        body:
-            _loading
+            body: _loading
                 ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 4),
+                  )
                 : _erro != null
                 ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  message: _erro!,
-                  onRetry: _load,
-                )
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
                 : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                      ),
-                      child: DecoratedBox(
-                        decoration: fxStripCardDecoration(
-                          context,
-                          accent: primary,
-                          radius: TokensStrip.rCard,
-                          glowStrength: 0.03,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
                         ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _onQueryChanged,
-                          onTapOutside:
-                              (_) =>
-                                  FocusManager.instance.primaryFocus?.unfocus(),
-                          textInputAction: TextInputAction.search,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            hintText: 'Buscar publicação',
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 12,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search_rounded,
-                              color: primary,
-                              size: 20,
-                            ),
-                            suffixIcon:
-                                _query.trim().isEmpty
-                                    ? null
-                                    : IconButton(
+                        child: DecoratedBox(
+                          decoration: fxStripCardDecoration(
+                            context,
+                            accent: primary,
+                            radius: TokensStrip.rCard,
+                            glowStrength: 0.03,
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocus,
+                            onChanged: _onQueryChanged,
+                            onTapOutside: (_) =>
+                                FxKeyboardDismissScope.dismiss(),
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              hintText: 'Buscar publicação',
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: primary,
+                                size: 20,
+                              ),
+                              suffixIcon: _query.trim().isEmpty
+                                  ? null
+                                  : IconButton(
                                       tooltip: 'Limpar busca',
                                       onPressed: _clearQuery,
                                       icon: Icon(
@@ -379,60 +387,61 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                         size: 18,
                                       ),
                                     ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        0,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                      ),
-                      child: Wrap(
-                        spacing: TokensStrip.s2,
-                        runSpacing: TokensStrip.s2,
-                        children: [
-                          for (final chip in FeedListChip.values)
-                            FxToggleChip(
-                              label: feedListChipLabel(chip),
-                              selected: _chip == chip,
-                              isDark: isDark,
-                              onTap: () {
-                                if (_chip == chip) return;
-                                setState(() => _chip = chip);
-                                _load();
-                              },
                             ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: FxContentWidthLimiter(
-                        child: _buildBody(primary, visible),
-                      ),
-                    ),
-                    if (!_loading && _erro == null)
-                      SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s2,
-                            FxSettingsLayout.pageInset,
-                            TokensStrip.s3 +
-                                MediaQuery.viewInsetsOf(context).bottom,
-                          ),
-                          child: FxLiquidPrimaryButton(
-                            label: 'Nova publicação',
-                            onPressed: _abrirFormulario,
                           ),
                         ),
                       ),
-                  ],
-                ),
-      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          0,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: Wrap(
+                          spacing: TokensStrip.s2,
+                          runSpacing: TokensStrip.s2,
+                          children: [
+                            for (final chip in FeedListChip.values)
+                              FxToggleChip(
+                                label: feedListChipLabel(chip),
+                                selected: _chip == chip,
+                                isDark: isDark,
+                                onTap: () {
+                                  if (_chip == chip) return;
+                                  setState(() => _chip = chip);
+                                  _load();
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildBody(primary, visible),
+                        ),
+                      ),
+                      if (!_loading && _erro == null)
+                        SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s3 +
+                                  MediaQuery.viewInsetsOf(context).bottom,
+                            ),
+                            child: FxLiquidPrimaryButton(
+                              label: 'Nova publicação',
+                              onPressed: _abrirFormulario,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
       ),
     );
   }

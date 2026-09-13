@@ -60,6 +60,11 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     _load();
   }
 
+  void _leave() {
+    FxKeyboardDismissScope.dismiss();
+    safePopOrGo(context, '/dashboard/aluno');
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -146,16 +151,14 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final aluno = ref.read(alunoMeProvider).valueOrNull;
     showFxHomeSheet<void>(
       context,
-      builder:
-          (ctx) => FeedCommentsSheet(
-            postId: postId,
-            repo: FeedRepository(ref.read(apiClientProvider)),
-            currentAlunoId: aluno?.id,
-            currentAlunoFotoUrl: aluno?.fotoUrl,
-            onComentou:
-                (novoTotal) =>
-                    setState(() => _comentariosLocais[postId] = novoTotal),
-          ),
+      builder: (ctx) => FeedCommentsSheet(
+        postId: postId,
+        repo: FeedRepository(ref.read(apiClientProvider)),
+        currentAlunoId: aluno?.id,
+        currentAlunoFotoUrl: aluno?.fotoUrl,
+        onComentou: (novoTotal) =>
+            setState(() => _comentariosLocais[postId] = novoTotal),
+      ),
     );
   }
 
@@ -171,7 +174,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           children: [
             FxEmptyState(
-              icon: searching ? 'search' : 'file-text',
+              icon: searching ? 'search' : 'rss',
               title: searching
                   ? 'Nada encontrado'
                   : 'Nenhuma publicação ainda',
@@ -182,7 +185,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                   ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
                   : FxEmptyAction(
                       label: 'Voltar ao início',
-                      onTap: () => safePopOrGo(context, '/dashboard/aluno'),
+                      onTap: _leave,
                     ),
             ),
           ],
@@ -195,11 +198,11 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          32,
+          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         itemCount: _posts.length + (_hasMore ? 1 : 0),
         itemBuilder: (_, i) {
@@ -210,8 +213,9 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             );
           }
           final p = _posts[i];
-          return _AlunoFeedPostCard(
+          return FeedPostCard(
             post: p,
+            index: i,
             primary: primary,
             curtidas: _curtidasLocais[p.id] ?? p.totalCurtidas,
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
@@ -233,110 +237,149 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Feed',
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          if (keyboardOpen || _searchFocus.hasFocus) {
-            FxKeyboardDismissScope.dismiss();
-            return;
-          }
-          safePopOrGo(context, '/dashboard/aluno');
-        },
-        child: FxShellScaffold(
-          useMesh: true,
-          constrainWidth: false,
-          appBar: FxShellAppBar(
-            title: 'Feed',
-            subtitle: FxHubFreshness.joinCount(
-              '${feedCountLabel(_posts.length)}${_hasMore && !_loading ? '+' : ''}',
-              _loading ? null : freshnessLabel,
-            ),
-            onBack: () {
+      child: FxKeyboardDismissScope(
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) {
+            if (didPop) return;
+            if (keyboardOpen || _searchFocus.hasFocus) {
               FxKeyboardDismissScope.dismiss();
-              safePopOrGo(context, '/dashboard/aluno');
-            },
-          ),
-          body: _loading
-              ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-              : _erro != null
-              ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
+              return;
+            }
+            _leave();
+          },
+          child: FxShellScaffold(
+            useMesh: true,
+            constrainWidth: false,
+            appBar: FxShellAppBar(
+              title: 'Feed',
+              subtitle: FxHubFreshness.joinCount(
+                '${feedCountLabel(_posts.length)}${_hasMore && !_loading ? '+' : ''}',
+                _loading ? null : freshnessLabel,
+              ),
+              onBack: _leave,
+              actions: [
+                FxHelpIconButton(
+                  tooltip: 'Como usar o feed',
+                  onTap: () => showFxHelpSheet(
+                    context,
+                    title: 'Feed',
+                    subtitle: 'Novidades que seu personal publica para você.',
+                    tips: const [
+                      FxHelpTip(
+                        'Curtir e comentar',
+                        'Toque em Curtir ou Comentários em qualquer publicação.',
                       ),
-                      child: TextField(
-                        controller: _searchController,
-                        focusNode: _searchFocus,
-                        onChanged: _onQueryChanged,
-                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          hintText: 'Buscar publicação',
-                          prefixIcon: Icon(
-                            Icons.search_rounded,
-                            color: primary,
-                            size: 20,
+                      FxHelpTip(
+                        'Vídeo',
+                        'Toque no preview para abrir o vídeo em tela cheia.',
+                      ),
+                      FxHelpTip(
+                        'Filtros',
+                        'Busque por texto ou filtre por tipo e fixados.',
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            body: _loading
+                ? const Padding(
+                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: SkeletonList(count: 4),
+                  )
+                : _erro != null
+                ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                    message: _erro!,
+                    onRetry: _load,
+                  )
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: DecoratedBox(
+                          decoration: fxStripCardDecoration(
+                            context,
+                            accent: primary,
+                            radius: TokensStrip.rCard,
+                            glowStrength: 0.03,
                           ),
-                          suffixIcon: _query.trim().isEmpty
-                              ? null
-                              : IconButton(
-                                  tooltip: 'Limpar busca',
-                                  onPressed: _clearQuery,
-                                  icon: Icon(
-                                    Icons.close_rounded,
-                                    color: mute,
-                                    size: 18,
-                                  ),
-                                ),
+                          child: TextField(
+                            controller: _searchController,
+                            focusNode: _searchFocus,
+                            onChanged: _onQueryChanged,
+                            onTapOutside: (_) =>
+                                FxKeyboardDismissScope.dismiss(),
+                            textInputAction: TextInputAction.search,
+                            decoration: InputDecoration(
+                              isDense: true,
+                              hintText: 'Buscar publicação',
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 12,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.search_rounded,
+                                color: primary,
+                                size: 20,
+                              ),
+                              suffixIcon: _query.trim().isEmpty
+                                  ? null
+                                  : IconButton(
+                                      tooltip: 'Limpar busca',
+                                      onPressed: _clearQuery,
+                                      icon: Icon(
+                                        Icons.close_rounded,
+                                        color: mute,
+                                        size: 18,
+                                      ),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        0,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          0,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: Wrap(
+                          spacing: TokensStrip.s2,
+                          runSpacing: TokensStrip.s2,
+                          children: [
+                            for (final chip in FeedListChip.values)
+                              FxToggleChip(
+                                label: feedListChipLabel(chip),
+                                selected: _chip == chip,
+                                isDark: isDark,
+                                onTap: () {
+                                  if (_chip == chip) return;
+                                  setState(() => _chip = chip);
+                                  _load();
+                                },
+                              ),
+                          ],
+                        ),
                       ),
-                      child: Wrap(
-                        spacing: TokensStrip.s2,
-                        runSpacing: TokensStrip.s2,
-                        children: [
-                          for (final chip in FeedListChip.values)
-                            FxToggleChip(
-                              label: feedListChipLabel(chip),
-                              selected: _chip == chip,
-                              isDark: isDark,
-                              onTap: () {
-                                if (_chip == chip) return;
-                                setState(() => _chip = chip);
-                                _load();
-                              },
-                            ),
-                        ],
+                      Expanded(
+                        child: FxContentWidthLimiter(
+                          child: _buildBody(primary),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: FxContentWidthLimiter(child: _buildBody(primary)),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
