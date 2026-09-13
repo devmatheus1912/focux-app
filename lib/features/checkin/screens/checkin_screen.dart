@@ -547,13 +547,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                                   forAluno: isAluno,
                                                 )
                                                 : null,
-                                        onOpenDemo:
-                                            checkinExerciseHasDemo(current)
-                                                ? () => showCheckinDemoSheet(
-                                                  context,
-                                                  ee: current,
-                                                )
-                                                : null,
+                                        onOpenDemo: null,
                                       ),
                                     ),
                                   ),
