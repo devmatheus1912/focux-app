@@ -10,6 +10,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_conversion.dart';
@@ -156,6 +157,22 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     }
   }
 
+  Future<void> _refreshDashboard() async {
+    AnalyticsService.instance.track(
+      ProductEvents.homeRefreshed,
+      props: {'surface': 'saude'},
+    );
+    await _loadData();
+    if (!mounted) return;
+    if (_syncSoftError != null) {
+      FeedbackHelper.showWarn(context, _syncSoftError!);
+      return;
+    }
+    if (_summary != null) {
+      FeedbackHelper.showSuccess(context, 'Prontidão atualizada');
+    }
+  }
+
   Future<void> _desconectar() async {
     final ok = await showFxConfirmSheet(
       context,
@@ -279,13 +296,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final chrome = ShellChrome.forDark(isDark);
     final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
-      onRefresh: () async {
-        AnalyticsService.instance.track(
-          ProductEvents.homeRefreshed,
-          props: {'surface': 'saude'},
-        );
-        await _loadData();
-      },
+      onRefresh: _refreshDashboard,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -351,7 +362,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                             : saudeAtualizarLabel(),
                     accent: primary,
                     isDark: isDark,
-                    onPressed: _loadData,
+                    onPressed: _refreshDashboard,
                   ),
                 ),
               ],

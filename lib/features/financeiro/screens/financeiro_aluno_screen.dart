@@ -266,11 +266,6 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                         title: 'Nenhuma mensalidade',
                                         subtitle:
                                             'Quando seu personal lançar uma cobrança, ela aparece aqui.',
-                                        action: FxEmptyAction(
-                                          label: 'Falar com o personal',
-                                          onTap:
-                                              () => context.push('/chat/aluno'),
-                                        ),
                                       ),
                                     ],
                                   )

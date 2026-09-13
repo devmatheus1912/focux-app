@@ -73,14 +73,22 @@ String historicoPrMetric(int count) => '$count';
 String historicoPrHint(int count) =>
     count == 0 ? 'Sem recorde nesta sessão' : (count == 1 ? '1 recorde' : '$count recordes');
 
-String? historicoDuracaoLabel(String? iniciadoEm, String? concluidoEm) {
+String? historicoDuracaoLabel(
+  String? iniciadoEm,
+  String? concluidoEm, {
+  bool sessaoAberta = false,
+}) {
   final start = DateTime.tryParse((iniciadoEm ?? '').trim());
   if (start == null) return null;
   final endRaw = (concluidoEm ?? '').trim();
   final end = endRaw.isEmpty ? null : DateTime.tryParse(endRaw);
+  // Sessão fechada sem concluidoEm → não inventa duração até "agora" (vira 13h+).
+  if (end == null && !sessaoAberta) return null;
   final stop = end ?? DateTime.now();
   final minutes = stop.difference(start).inMinutes;
   if (minutes < 0) return null;
+  // Relógio esquecido / sessão zumbi — não mostra absurdo.
+  if (minutes > 8 * 60) return null;
   if (minutes < 60) return '$minutes min';
   final hours = minutes ~/ 60;
   final rest = minutes % 60;
@@ -103,18 +111,24 @@ String historicoExercicioSubtitle({
   required int seriesFeitas,
   int? series,
   required bool concluido,
+  bool sessaoConcluida = false,
   String? carga,
   int? rpe,
   bool dor = false,
 }) {
   final seriesLabel =
       series == null ? '$seriesFeitas séries' : '$seriesFeitas/$series séries';
+  final statusLabel = concluido
+      ? 'Feito'
+      : sessaoConcluida
+          ? (seriesFeitas > 0 ? 'Parcial' : 'Não feito')
+          : 'Pendente';
   final parts = <String>[
     seriesLabel,
     if ((carga ?? '').trim().isNotEmpty) carga!.trim(),
     if (rpe != null) 'RPE $rpe',
     if (dor) 'Dor',
-    concluido ? 'Feito' : 'Pendente',
+    statusLabel,
   ];
   return parts.join(' · ');
 }

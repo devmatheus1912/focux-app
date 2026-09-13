@@ -63,20 +63,39 @@ Future<void> showCheckinCoachSheet(
   return showFxHomeSheet<void>(
     context,
     builder: (ctx) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          TokensStrip.s3,
-          TokensStrip.s4,
-          TokensStrip.s4,
-        ),
-        child: GatedPoseCoachPanel(
-          exerciseName: ee.exercicioNome,
-          targetReps: checkinParseTargetReps(ee.repeticoes),
-          brand: brand,
-          dark: chrome.isDark,
-          forAluno: forAluno,
-          onRepCompleted: () {},
+      return FxHomeSheetSurface(
+        isDark: chrome.isDark,
+        expand: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: chrome.isDark),
+            FxHomeSheetHeader(
+              isDark: chrome.isDark,
+              leading: Icon(Icons.accessibility_new_rounded, color: brand),
+              title: 'Postura',
+              subtitle: ee.exercicioNome,
+            ),
+            const SizedBox(height: TokensStrip.s3),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  0,
+                  TokensStrip.s4,
+                  TokensStrip.s4,
+                ),
+                child: GatedPoseCoachPanel(
+                  exerciseName: ee.exercicioNome,
+                  targetReps: checkinParseTargetReps(ee.repeticoes),
+                  brand: brand,
+                  dark: chrome.isDark,
+                  forAluno: forAluno,
+                  onRepCompleted: () {},
+                ),
+              ),
+            ),
+          ],
         ),
       );
     },

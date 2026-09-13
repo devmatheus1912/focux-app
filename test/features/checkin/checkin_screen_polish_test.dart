@@ -96,7 +96,9 @@ void main() {
     expect(card, contains('CheckinExerciseVideoPreview'));
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));
-    expect(card, contains("'Ampliar'"));
+    expect(card, contains("'Demonstração'"));
+    expect(card, isNot(contains("'Ampliar'")));
+    expect(card, contains('FxStripCard'));
     expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('ExpansionTile')));
     expect(card, isNot(contains('LinearProgressIndicator')));

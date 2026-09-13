@@ -63,6 +63,19 @@ void main() {
       '1h 15min',
     );
     expect(
+      historicoDuracaoLabel('2026-09-07T10:00:00', null),
+      isNull,
+    );
+    expect(
+      historicoExercicioSubtitle(
+        seriesFeitas: 1,
+        series: 4,
+        concluido: false,
+        sessaoConcluida: true,
+      ),
+      '1/4 séries · Parcial',
+    );
+    expect(
       historicoPrLine(exercicioNome: 'Supino', mensagem: 'Carga nova'),
       'Supino · Carga nova',
     );

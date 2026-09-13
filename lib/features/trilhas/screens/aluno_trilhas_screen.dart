@@ -388,10 +388,6 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                   title: 'Nenhuma trilha atribuída',
                   subtitle:
                       'Quando o personal criar uma meta, o progresso aparece aqui.',
-                  action: FxEmptyAction(
-                    label: 'Ir aos treinos',
-                    onTap: () => context.push('/checkin/treinos'),
-                  ),
                 ),
               ),
             )
