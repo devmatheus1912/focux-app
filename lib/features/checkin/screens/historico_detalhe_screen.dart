@@ -198,6 +198,7 @@ class _DetalheBody extends StatelessWidget {
     final duracao = historicoDuracaoLabel(
       execucao.iniciadoEm,
       execucao.concluidoEm,
+      sessaoAberta: !concluido,
     );
     final prs = execucao.evolucoesPerformance;
     final cargas = execucao.evolucoesCarga;
@@ -290,22 +291,16 @@ class _DetalheBody extends StatelessWidget {
                     runSpacing: TokensStrip.s2,
                     children: [
                       DashboardHomeActionChip(
-                        label: 'Histórico',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: onLeave,
-                      ),
-                      DashboardHomeActionChip(
                         label: 'Treinos',
                         accent: primary,
                         isDark: isDark,
-                        onPressed: () => context.push('/checkin/treinos'),
+                        onPressed: () => context.go('/checkin/treinos'),
                       ),
                       DashboardHomeActionChip(
                         label: 'Hoje',
                         accent: primary,
                         isDark: isDark,
-                        onPressed: () => context.push('/dashboard/aluno'),
+                        onPressed: () => context.go('/dashboard/aluno'),
                       ),
                     ],
                   ),
@@ -318,27 +313,14 @@ class _DetalheBody extends StatelessWidget {
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   if (secao == historicoSecaoRecordes)
-                    ..._recordes(
-                      prs,
-                      cargas,
-                      stickyLabel: historicoStickyLabel(execucao.status),
-                      onAct: onAct,
-                    )
+                    ..._recordes(prs, cargas)
                   else if (secao == historicoSecaoNotas)
-                    ..._notas(
-                      execucao.exercicios,
-                      stickyLabel: historicoStickyLabel(execucao.status),
-                      onAct: onAct,
-                    )
+                    ..._notas(execucao.exercicios)
                   else if (execucao.exercicios.isEmpty)
-                    FxEmptyState(
+                    const FxEmptyState(
                       icon: 'dumbbell',
                       title: 'Sem exercícios nesta execução',
                       subtitle: 'O treino ainda pode ser feito de novo.',
-                      action: FxEmptyAction(
-                        label: historicoStickyLabel(execucao.status),
-                        onTap: onAct,
-                      ),
                     )
                   else
                     for (final item in execucao.exercicios)
@@ -349,6 +331,7 @@ class _DetalheBody extends StatelessWidget {
                             seriesFeitas: item.seriesFeitas,
                             series: item.series,
                             concluido: item.concluido,
+                            sessaoConcluida: concluido,
                             carga: _carga(item),
                             rpe: _rpe(item),
                             dor: item.dor ||
@@ -389,11 +372,7 @@ class _DetalheBody extends StatelessWidget {
     );
   }
 
-  List<Widget> _notas(
-    List<ExecucaoExercicio> exercicios, {
-    required String stickyLabel,
-    required VoidCallback onAct,
-  }) {
+  List<Widget> _notas(List<ExecucaoExercicio> exercicios) {
     final tiles = <Widget>[
       for (final item in exercicios)
         if (historicoNotaLine(
@@ -413,11 +392,10 @@ class _DetalheBody extends StatelessWidget {
     ];
     if (tiles.isEmpty) {
       return [
-        FxEmptyState(
+        const FxEmptyState(
           icon: 'article',
-          title: historicoNotasEmpty(),
+          title: 'Nenhuma nota nesta sessão',
           subtitle: 'Observação e feedback do exercício aparecem aqui.',
-          action: FxEmptyAction(label: stickyLabel, onTap: onAct),
         ),
       ];
     }
@@ -426,17 +404,14 @@ class _DetalheBody extends StatelessWidget {
 
   List<Widget> _recordes(
     List<EvolucaoPerformance> prs,
-    List<EvolucaoCarga> cargas, {
-    required String stickyLabel,
-    required VoidCallback onAct,
-  }) {
+    List<EvolucaoCarga> cargas,
+  ) {
     if (prs.isEmpty && cargas.isEmpty) {
       return [
-        FxEmptyState(
+        const FxEmptyState(
           icon: 'star',
-          title: historicoRecordesEmpty(),
+          title: 'Nenhum recorde nesta sessão',
           subtitle: 'Quando bater carga ou volume, o recorde aparece aqui.',
-          action: FxEmptyAction(label: stickyLabel, onTap: onAct),
         ),
       ];
     }

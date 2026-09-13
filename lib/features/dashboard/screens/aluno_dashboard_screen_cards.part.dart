@@ -53,6 +53,11 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     final visibleTasks = [if (nextTask != null) nextTask];
     _trackVisibleTasks(visibleTasks, plan.profileCompletion);
 
+    // Pendências 100% → some card (não misturar com % de perfil incompleto).
+    if (plan.progress >= 100 && nextTask == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: fxListCardDecoration(context, accent: primary),
@@ -115,7 +120,9 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${plan.doneCount} de ${plan.tasks.length} pendências fechadas. Perfil ${plan.profileCompletion}%.',
+            plan.progress >= 100
+                ? '${plan.doneCount} de ${plan.tasks.length} pendências fechadas.'
+                : '${plan.doneCount} de ${plan.tasks.length} pendências fechadas. Perfil ${plan.profileCompletion}%.',
             style: TextStyle(
               color: mute,
               fontSize: 12.5,

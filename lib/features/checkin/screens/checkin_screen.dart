@@ -120,6 +120,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
               ? DateTime.now()
               : DateTime.parse(execucao.iniciadoEm!).toLocal();
       _duration = DateTime.now().difference(_startedAt);
+      // Sessão zumbi (relógio aberto dias) — timer de UI recomeça, não mostra 28h.
+      if (_duration.inHours >= 8) {
+        _startedAt = DateTime.now();
+        _duration = Duration.zero;
+      }
       _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;

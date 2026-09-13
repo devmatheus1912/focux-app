@@ -8,6 +8,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
 import 'checkin_media_widgets.dart';
@@ -164,9 +165,9 @@ class CheckinSerieCard extends StatelessWidget {
             checkinSerieKpiLabel(ee.seriesFeitas, ee.series),
             textAlign: TextAlign.center,
             style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: TokensStrip.fontH1,
-              fontWeight: FontWeight.w600,
+              color: brand,
+              fontSize: TokensStrip.fontH1 + 8,
+              fontWeight: FontWeight.w800,
             ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -185,7 +186,20 @@ class CheckinSerieCard extends StatelessWidget {
           ],
           if (hasDemo) ...[
             const SizedBox(height: TokensStrip.s3),
-            _inlineDemoPreview(ee: ee, brand: brand, dark: chrome.isDark),
+            FxStripCard(
+              emphasize: true,
+              glowStrength: 0.08,
+              accent: brand,
+              padding: EdgeInsets.zero,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: _inlineDemoPreview(
+                  ee: ee,
+                  brand: brand,
+                  dark: chrome.isDark,
+                ),
+              ),
+            ),
             const SizedBox(height: TokensStrip.s4),
           ] else
             const SizedBox(height: TokensStrip.s5),
@@ -217,10 +231,11 @@ class CheckinSerieCard extends StatelessWidget {
               children: [
                 if (onOpenTips != null)
                   TextButton(onPressed: onOpenTips, child: const Text('Dicas')),
-                if (onOpenDemo != null)
+                // Demo já inline → sem Ampliar. Sem preview → "Demonstração".
+                if (onOpenDemo != null && !hasDemo)
                   TextButton(
                     onPressed: onOpenDemo,
-                    child: Text(hasDemo ? 'Ampliar' : 'Demonstração'),
+                    child: const Text('Demonstração'),
                   ),
                 if (onOpenCoach != null)
                   TextButton(

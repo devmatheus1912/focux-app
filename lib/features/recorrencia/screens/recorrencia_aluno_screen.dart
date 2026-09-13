@@ -328,10 +328,6 @@ class _RecorrenciaAlunoScreenState
                                   title: 'Sem assinatura recorrente ainda',
                                   subtitle:
                                       'Seu personal ainda não configurou cobrança automática mensal.',
-                                  action: FxEmptyAction(
-                                    label: 'Abrir chat',
-                                    onTap: () => context.push('/chat/aluno'),
-                                  ),
                                 ),
                               ] else ...[
                                 FxHubHeader(
