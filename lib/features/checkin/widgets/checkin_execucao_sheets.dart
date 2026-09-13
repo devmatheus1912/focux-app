@@ -77,21 +77,27 @@ Future<void> showCheckinCoachSheet(
               subtitle: ee.exercicioNome,
             ),
             const SizedBox(height: TokensStrip.s3),
+            // Altura bounded (expand sheet). ScrollView solto bugava Postura.
             Expanded(
-              child: SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.fromLTRB(
                   TokensStrip.s4,
                   0,
                   TokensStrip.s4,
                   TokensStrip.s4,
                 ),
-                child: GatedPoseCoachPanel(
-                  exerciseName: ee.exercicioNome,
-                  targetReps: checkinParseTargetReps(ee.repeticoes),
-                  brand: brand,
-                  dark: chrome.isDark,
-                  forAluno: forAluno,
-                  onRepCompleted: () {},
+                child: ListView(
+                  physics: const ClampingScrollPhysics(),
+                  children: [
+                    GatedPoseCoachPanel(
+                      exerciseName: ee.exercicioNome,
+                      targetReps: checkinParseTargetReps(ee.repeticoes),
+                      brand: brand,
+                      dark: chrome.isDark,
+                      forAluno: forAluno,
+                      onRepCompleted: () {},
+                    ),
+                  ],
                 ),
               ),
             ),
