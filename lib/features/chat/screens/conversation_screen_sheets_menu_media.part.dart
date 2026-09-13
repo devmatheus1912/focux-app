@@ -196,7 +196,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
       _showImageViewer(url);
       return;
     }
-    final opened = await launchUrlString(url);
+    final opened = await launchSafeHttpUrl(url);
     if (!opened && mounted) {
       FeedbackHelper.showError(context, 'Nao foi possivel abrir o anexo.');
     }

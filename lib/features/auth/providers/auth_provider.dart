@@ -205,6 +205,7 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
 
   Future<void> logout() async {
     await _repo.logout();
+    ApiClient.resetIdempotencyScopes();
     await SessionInvalidator.invalidate(reason: 'logout manual');
     _currentRole = null;
     _requiresPasswordChange = false;

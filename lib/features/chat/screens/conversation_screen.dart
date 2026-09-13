@@ -12,9 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:stomp_dart_client/stomp_dart_client.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
 import '../../../core/api/media_upload_service.dart';
+import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/config/env.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/router/safe_navigation.dart';

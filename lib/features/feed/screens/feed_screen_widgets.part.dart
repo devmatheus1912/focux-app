@@ -180,10 +180,7 @@ class _FeedVideoPreview extends StatelessWidget {
                 color: BrandPalette.deep(primary),
                 child: Center(
                   child: TextButton.icon(
-                    onPressed: () => launchUrl(
-                      Uri.parse(url),
-                      mode: LaunchMode.externalApplication,
-                    ),
+                    onPressed: () => launchSafeHttpUrl(url),
                     icon: const Icon(Icons.play_arrow_rounded),
                     label: const Text('Abrir vídeo'),
                   ),

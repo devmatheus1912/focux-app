@@ -157,6 +157,7 @@ class ApiClient {
           if (!_isRefreshing &&
               _shouldInvalidateSession(e) &&
               e.requestOptions.extra['fxNoInvalidate'] != true) {
+            resetIdempotencyScopes();
             await SessionInvalidator.invalidate(
               reason:
                   'API ${e.response?.statusCode} em ${e.requestOptions.path}',
@@ -266,8 +267,7 @@ class ApiClient {
     return key;
   }
 
-  /// Só para teste: a janela é estática e vazaria entre casos.
-  @visibleForTesting
+  /// Limpa chaves em memória no logout / invalidate de sessão.
   static void resetIdempotencyScopes() => _scopedKeys.clear();
 
   /// Catálogo não-PII apenas (planos). Dashboard/hoje/treinos ficam fora do disco.

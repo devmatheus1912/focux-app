@@ -56,6 +56,26 @@ void main() {
       '/dashboard/aluno',
     );
     expect(
+      resolveFcmTapRoute({'route': '/loja'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/pacotes'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/busca'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/assinatura'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
+      resolveFcmTapRoute({'route': '/perfil/equipe'}, role: 'ALUNO'),
+      '/dashboard/aluno',
+    );
+    expect(
       resolveFcmTapRoute({'route': '/retencao'}, role: 'PERSONAL'),
       '/retencao',
     );
