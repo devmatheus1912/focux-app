@@ -139,4 +139,21 @@ void main() {
     expect(media, isNot(contains('IconButton.filled')));
     expect(media, isNot(contains('height: 168')));
   });
+
+  test('postura camera abre full-screen, nao sheet aninhado', () {
+    final camera = readScreenSourceBundle(
+      'lib/features/checkin/widgets/pose_coach_camera_mobile.dart',
+    );
+    expect(camera, contains('fullscreenDialog: true'));
+    expect(camera, contains('rootNavigator: true'));
+    expect(camera, contains('_CameraCoachPage'));
+    expect(camera, isNot(contains('showFxHomeSheet')));
+    final sheet = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
+    );
+    expect(sheet, contains('expand: true'));
+    expect(sheet, contains('ListView'));
+    expect(sheet, contains('GatedPoseCoachPanel'));
+  });
+
 }
