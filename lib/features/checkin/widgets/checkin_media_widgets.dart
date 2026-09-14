@@ -162,51 +162,93 @@ class CheckinExerciseVideoPreview extends StatefulWidget {
 
 class _CheckinExerciseVideoPreviewState
     extends State<CheckinExerciseVideoPreview> {
-  late final VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   bool _ready = false;
   bool _failed = false;
   bool _playing = false;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-      ..addListener(_onVideoTick)
-      ..initialize()
-          .then((_) async {
-            if (!mounted) return;
-            await _controller.setLooping(true);
-            await _controller.setVolume(0);
-            await _controller.play();
-            if (!mounted) return;
-            setState(() {
-              _ready = true;
-              _playing = _controller.value.isPlaying;
-            });
-          })
-          .catchError((_) {
-            if (mounted) setState(() => _failed = true);
-          });
+    _load(widget.url);
+  }
+
+  @override
+  void didUpdateWidget(CheckinExerciseVideoPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url != widget.url) {
+      _load(widget.url);
+    }
+  }
+
+  Future<void> _load(String url) async {
+    final generation = ++_loadGeneration;
+    final previous = _controller;
+    if (previous != null) {
+      previous.removeListener(_onVideoTick);
+      await previous.dispose();
+    }
+    if (!mounted || generation != _loadGeneration) return;
+
+    setState(() {
+      _controller = null;
+      _ready = false;
+      _failed = false;
+      _playing = false;
+    });
+
+    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    controller.addListener(_onVideoTick);
+    _controller = controller;
+
+    try {
+      await controller.initialize();
+      if (!mounted || generation != _loadGeneration || _controller != controller) {
+        await controller.dispose();
+        return;
+      }
+      await controller.setLooping(true);
+      await controller.setVolume(0);
+      await controller.play();
+      if (!mounted || generation != _loadGeneration || _controller != controller) {
+        return;
+      }
+      setState(() {
+        _ready = true;
+        _playing = controller.value.isPlaying;
+      });
+    } catch (_) {
+      if (!mounted || generation != _loadGeneration) return;
+      setState(() => _failed = true);
+    }
   }
 
   void _onVideoTick() {
-    final playing = _controller.value.isPlaying;
-    if (playing == _playing || !mounted) return;
+    final controller = _controller;
+    if (controller == null || !mounted) return;
+    final playing = controller.value.isPlaying;
+    if (playing == _playing) return;
     setState(() => _playing = playing);
   }
 
   void _togglePlay() {
-    if (_controller.value.isPlaying) {
-      _controller.pause();
+    final controller = _controller;
+    if (controller == null || !_ready) return;
+    if (controller.value.isPlaying) {
+      controller.pause();
     } else {
-      _controller.play();
+      controller.play();
     }
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onVideoTick);
-    _controller.dispose();
+    final controller = _controller;
+    if (controller != null) {
+      controller.removeListener(_onVideoTick);
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -215,7 +257,8 @@ class _CheckinExerciseVideoPreviewState
     if (_failed) {
       return CheckinVideoFallback(brand: widget.brand, dark: widget.dark);
     }
-    if (!_ready) {
+    final controller = _controller;
+    if (!_ready || controller == null) {
       return Container(
         height: checkinMediaPreviewHeight,
         width: double.infinity,
@@ -244,10 +287,10 @@ class _CheckinExerciseVideoPreviewState
         children: [
           AspectRatio(
             aspectRatio:
-                _controller.value.aspectRatio == 0
+                controller.value.aspectRatio == 0
                     ? 16 / 9
-                    : _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+                    : controller.value.aspectRatio,
+            child: VideoPlayer(controller),
           ),
           Positioned.fill(
             child: DecoratedBox(

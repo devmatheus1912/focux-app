@@ -221,35 +221,32 @@ class CheckinSerieCard extends StatelessWidget {
             const SizedBox(height: TokensStrip.s2),
             TextButton(
               onPressed: onDesfazer,
-              child: Text(checkinDesfazerLabel()),
+              child: Text(
+                checkinDesfazerLabel(),
+                style: TextStyle(color: chrome.mute),
+              ),
             ),
           ],
-          if (onOpenTips != null || onOpenDemo != null || onOpenCoach != null) ...[
+          if (onOpenCoach != null ||
+              (onOpenDemo != null && !hasDemo) ||
+              onOpenTips != null) ...[
             const SizedBox(height: TokensStrip.s3),
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (onOpenTips != null)
-                  TextButton(onPressed: onOpenTips, child: const Text('Dicas')),
-                // Demo já inline → sem Ampliar. Sem preview → "Demonstração".
+                if (onOpenCoach != null)
+                  _CheckinPosturaHelp(
+                    onTap: onOpenCoach!,
+                    ink: chrome.ink,
+                  ),
                 if (onOpenDemo != null && !hasDemo)
                   TextButton(
                     onPressed: onOpenDemo,
                     child: const Text('Demonstração'),
                   ),
-                if (onOpenCoach != null)
-                  OutlinedButton.icon(
-                    onPressed: onOpenCoach,
-                    icon: Icon(Icons.accessibility_new_rounded, color: brand),
-                    label: const Text('Postura'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: brand,
-                      side: BorderSide(color: brand.withValues(alpha: 0.45)),
-                      minimumSize: const Size(48, 48),
-                    ),
-                  ),
+                // Dicas ficam no ? do header (S8 chrome mínimo).
+                if (onOpenTips != null && onOpenCoach == null)
+                  TextButton(onPressed: onOpenTips, child: const Text('Dicas')),
               ],
             ),
           ],
@@ -263,8 +260,12 @@ class CheckinSerieCard extends StatelessWidget {
     required Color brand,
     required bool dark,
   }) {
+    final mediaKey = ValueKey(
+      'checkin-demo-${ee.treinoExercicioId}-${ee.videoUrl ?? ee.thumbnailUrl ?? ee.gifUrl}',
+    );
     if (ee.videoUrl?.isNotEmpty == true) {
       return CheckinExerciseVideoPreview(
+        key: mediaKey,
         url: ee.videoUrl!,
         brand: brand,
         dark: dark,
@@ -274,6 +275,7 @@ class CheckinSerieCard extends StatelessWidget {
     }
     if (ee.thumbnailUrl?.isNotEmpty == true) {
       return CheckinExerciseThumbnailPreview(
+        key: mediaKey,
         url: ee.thumbnailUrl!,
         videoSource: ee.videoSource,
         licenseStatus: ee.licenseStatus,
@@ -282,6 +284,7 @@ class CheckinSerieCard extends StatelessWidget {
       );
     }
     return CheckinExerciseMediaPreview(
+      key: mediaKey,
       url: ee.gifUrl!,
       brand: brand,
       dark: dark,
@@ -296,6 +299,45 @@ class CheckinSerieCard extends StatelessWidget {
     ];
     if (parts.isEmpty) return null;
     return 'Última vez: ${parts.join(' · ')}';
+  }
+}
+
+/// Postura: rótulo + `FxHelpIconButton` canônico (não outlined genérico).
+class _CheckinPosturaHelp extends StatelessWidget {
+  const _CheckinPosturaHelp({
+    required this.onTap,
+    required this.ink,
+  });
+
+  final VoidCallback onTap;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s2,
+        vertical: TokensStrip.s1,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Postura',
+            style: FocuxHubTypography.bodyMuted(
+              color: ink,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: FxHelpChrome.gap),
+          FxHelpIconButton(
+            tooltip: 'Ajuda de postura',
+            onTap: onTap,
+            expandHitTarget: true,
+          ),
+        ],
+      ),
+    );
   }
 }
 

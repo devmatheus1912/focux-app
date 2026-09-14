@@ -100,6 +100,11 @@ void main() {
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
     expect(card, contains('BrandPalette.accent'));
+    expect(card, contains('_CheckinPosturaHelp'));
+    expect(card, contains('FxHelpIconButton'));
+    expect(card, contains('Ajuda de postura'));
+    expect(card, contains('ValueKey'));
+    expect(card, isNot(contains('OutlinedButton.icon')));
     expect(card, isNot(contains('ExpansionTile')));
     expect(card, isNot(contains('LinearProgressIndicator')));
     expect(card, isNot(contains('GatedPoseCoachPanel')));
@@ -136,8 +141,18 @@ void main() {
     expect(media, contains('checkinMediaPreviewHeight'));
     expect(media, contains('setVolume(0)'));
     expect(media, contains('setLooping(true)'));
+    expect(media, contains('didUpdateWidget'));
+    expect(media, contains('_load('));
     expect(media, isNot(contains('IconButton.filled')));
     expect(media, isNot(contains('height: 168')));
+  });
+
+  test('troca de exercício remonta o card com ValueKey', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/checkin/screens/checkin_screen.dart',
+    );
+    expect(screen, contains('ValueKey('));
+    expect(screen, contains('treinoExercicioId'));
   });
 
   test('postura camera abre full-screen, nao sheet aninhado', () {

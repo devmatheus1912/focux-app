@@ -61,8 +61,9 @@ class CheckinWorkoutHeader extends StatelessWidget {
             ),
             if (onHelp != null)
               FxHelpIconButton(
-                tooltip: 'Dicas deste exercício',
+                tooltip: 'Dicas do exercício',
                 onTap: onHelp!,
+                expandHitTarget: true,
               ),
             SizedBox(
               height: checkinExecutionControlMin,
