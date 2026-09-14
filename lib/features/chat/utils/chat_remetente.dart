@@ -15,3 +15,15 @@ String chatRemetenteLabel({
   }
   return remetente == 'PERSONAL' ? 'Você' : 'Aluno';
 }
+
+String chatInboxPreview({
+  required String remetente,
+  required String mensagem,
+  String? tipoMidia,
+}) {
+  if (chatIsSistema(remetente, tipoMidia)) return 'Sistema: $mensagem';
+  if (remetente.trim().toUpperCase() == 'PERSONAL') {
+    return 'Você: $mensagem';
+  }
+  return mensagem;
+}

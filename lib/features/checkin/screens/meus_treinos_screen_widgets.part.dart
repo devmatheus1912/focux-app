@@ -153,7 +153,7 @@ class _TrainingPlanCard extends StatelessWidget {
     final concluido = status == treinoStatusConcluido;
     final canStart = isTreinoDisponivelParaIniciar(treino) || concluido;
     void handleAction() {
-      if (starting) return;
+      if (starting || confirming) return;
       if (aguardando) {
         _showTrainingPendingSheet(
           context: context,
@@ -308,7 +308,7 @@ class _TrainingPlanCard extends StatelessWidget {
                         concluido
                             ? Icons.replay_rounded
                             : Icons.play_arrow_rounded,
-                    onPressed: starting ? null : handleAction,
+                    onPressed: starting || confirming ? null : handleAction,
                     loading: starting,
                     loadingLabel: 'Abrindo…',
                     expand: false,
@@ -323,7 +323,7 @@ class _TrainingPlanCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: confirming ? null : onConfirmPlano,
+                  onPressed: confirming || starting ? null : onConfirmPlano,
                   style: TextButton.styleFrom(
                     minimumSize: const Size(64, checkinExecutionControlMin),
                   ),

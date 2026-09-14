@@ -21,38 +21,35 @@ class CheckinRestBanner extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     return Material(
       color: chrome.cardFill,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            TokensStrip.s2,
-            TokensStrip.s4,
-            TokensStrip.s2,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Descanso · ${seconds}s',
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: chrome.ink,
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s2,
+          TokensStrip.s4,
+          TokensStrip.s2,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Descanso · ${seconds}s',
+                style: FocuxHubTypography.sectionTitle(
+                  context,
+                  color: chrome.ink,
                 ),
               ),
-              SizedBox(
-                height: checkinExecutionControlMin,
-                child: TextButton(
-                  onPressed: onSkip,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(64, checkinExecutionControlMin),
-                  ),
-                  child: Text(checkinPularDescansoLabel()),
+            ),
+            SizedBox(
+              height: checkinExecutionControlMin,
+              child: TextButton(
+                onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(64, checkinExecutionControlMin),
                 ),
+                child: Text(checkinPularDescansoLabel()),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
