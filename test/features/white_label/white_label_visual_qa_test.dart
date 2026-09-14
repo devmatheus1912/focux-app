@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/app_theme.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/theme/focux_contrast.dart';
@@ -74,6 +75,36 @@ void main() {
       secondary: const Color(0xFFC9A962),
     );
     expect(midnight.colorScheme.primary, isNot(const Color(0xFF1A2332)));
+  });
+
+  test('AuthShell forceDark re-wrap keeps brand gold, not Focux teal', () {
+    for (final palette in CuratedBrandPalette.premium) {
+      if (palette.id == CuratedBrandPalette.focuxDefault.id) continue;
+      final first = AppTheme.buildDarkTheme(
+        palette.primary,
+        secondary: palette.secondary,
+      );
+      // AuthShell / FxHomeSheet passam colorScheme de volta ao tema.
+      final second = AppTheme.buildDarkTheme(
+        first.colorScheme.primary,
+        secondary: first.colorScheme.secondary,
+      );
+      expect(
+        second.colorScheme.secondary,
+        first.colorScheme.secondary,
+        reason: '${palette.name} secondary after AuthShell wrap',
+      );
+      expect(
+        second.colorScheme.secondary,
+        isNot(BrandPalette.defaultSecondary),
+        reason: '${palette.name} must not snap to Focux teal',
+      );
+      expect(
+        second.colorScheme.primary,
+        isNot(BrandPalette.defaultPrimary),
+        reason: '${palette.name} must not snap to Focux cyan',
+      );
+    }
   });
 }
 
