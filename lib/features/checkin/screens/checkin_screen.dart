@@ -33,6 +33,7 @@ import '../widgets/checkin_execucao_sheets.dart';
 import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_timer_widgets.dart';
+import '../utils/checkin_exercise_tips.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../dashboard/utils/dashboard_home_client_cache.dart';

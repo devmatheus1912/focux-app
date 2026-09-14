@@ -107,23 +107,37 @@ void main() {
     expect(card, contains('checkinConfirmarRestanteLabel'));
     expect(card, contains('checkinTrocarExercicioHint'));
     expect(card, contains('_CheckinSetSteppers'));
-    expect(card, contains('checkinTextLooksNonPtBr'));
-    expect(card, contains('checkinErrosComunsFallback'));
+    expect(card, contains('_CheckinStepperButton'));
     expect(card, contains('CheckinExerciseVideoPreview'));
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));
     expect(card, contains("'Demonstração'"));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
+    expect(card, contains('glowStrength: 0.08'));
+    expect(card, contains('glowStrength: 0.06'));
     expect(card, contains('BrandPalette.accent'));
     expect(card, contains('_CheckinPosturaHelp'));
     expect(card, contains('FxHelpIconButton'));
     expect(card, contains('Ajuda de postura'));
     expect(card, contains('ValueKey'));
+    expect(card, contains('VerticalDivider'));
+    expect(card, contains('checkin_exercise_tips.dart'));
     expect(card, isNot(contains('OutlinedButton.icon')));
     expect(card, isNot(contains('ExpansionTile')));
     expect(card, isNot(contains('LinearProgressIndicator')));
     expect(card, isNot(contains('GatedPoseCoachPanel')));
+    expect(card, isNot(contains('chevron_')));
+  });
+
+  test('tips e locale do exercício vivem no util SRP', () {
+    final tips = readScreenSourceBundle(
+      'lib/features/checkin/utils/checkin_exercise_tips.dart',
+    );
+    expect(tips, contains('checkinTextLooksNonPtBr'));
+    expect(tips, contains('checkinErrosComunsFallback'));
+    expect(tips, contains('showCheckinExerciseTipsSheet'));
+    expect(tips, contains('checkinExerciseHasDemo'));
   });
 
   test('checkin execution alinha card no topo com scroll', () {

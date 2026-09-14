@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/checkin/widgets/checkin_exercise_widgets.dart';
+import 'package:focux_app/features/checkin/utils/checkin_exercise_tips.dart';
 
 void main() {
   test('checkinTextLooksNonPtBr catches English cues and stopwords', () {
