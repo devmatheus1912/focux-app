@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/core/theme/focux_contrast.dart';
 
@@ -67,10 +68,49 @@ void main() {
       if (darkChrome != palette.primary) {
         expect(
           FocuxContrast.contrastRatio(white, darkChrome),
-          greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
+          greaterThanOrEqualTo(FocuxContrast.wcagAaNormal),
           reason: '${palette.name} white label on remapped chrome',
         );
       }
+    }
+  });
+
+  test('dark chrome re-entry keeps brand secondary, not Focux teal', () {
+    for (final palette in CuratedBrandPalette.premium) {
+      final chrome = palette.chromeFor(dark: true);
+      final second = CuratedBrandPalette.safeSecondaryFor(
+        chrome,
+        palette.secondary,
+      );
+      expect(
+        second,
+        palette.secondary,
+        reason: '${palette.name} secondary after chrome re-entry',
+      );
+      if (palette.id != CuratedBrandPalette.focuxDefault.id) {
+        expect(
+          second,
+          isNot(BrandPalette.defaultSecondary),
+          reason: '${palette.name} must not snap to Focux teal',
+        );
+      }
+      final again = CuratedBrandPalette.chromeAccent(
+        chrome,
+        second,
+        dark: true,
+      );
+      if (palette.id != CuratedBrandPalette.focuxDefault.id) {
+        expect(
+          again,
+          isNot(BrandPalette.defaultPrimary),
+          reason: '${palette.name} second pass must not snap to Focux cyan',
+        );
+      }
+      expect(
+        FocuxContrast.contrastRatio(again, const Color(0xFF0B0E14)),
+        greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
+        reason: '${palette.name} second pass still reads on mesh',
+      );
     }
   });
 }
