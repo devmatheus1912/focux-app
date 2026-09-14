@@ -119,11 +119,11 @@ void main() {
     );
     expect(
       financeiroLotePagoChipLabel(modoSelecao: true, selecionados: 2),
-      'Marcar 2 pagos',
+      'Marcar 2 pagas',
     );
     expect(
       financeiroLotePagoConfirmMessage(1),
-      contains('deste aluno'),
+      contains('esta cobrança'),
     );
   });
 

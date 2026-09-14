@@ -27,8 +27,8 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
   void _toggleLote(Mensalidade m) {
     if (!financeiroStatusAberto(m.status)) return;
     setState(() {
-      if (!_selecionados.add(m.alunoId)) {
-        _selecionados.remove(m.alunoId);
+      if (!_selecionados.add(m.id)) {
+        _selecionados.remove(m.id);
       }
     });
   }
