@@ -155,31 +155,42 @@ class CuratedBrandPalette {
   }
 
   /// Login e [FxLiquidPrimaryButton] pintam o rótulo de branco. Depois de
-  /// promover um ouro/menta claro, escurece até o branco ler — sem voltar
-  /// ao navy que some no mesh.
+  /// promover um ouro/menta claro, escurece até o branco ler em AA (4.5:1)
+  /// — sem voltar ao navy que some no mesh. 3:1 deixava o acento falhar
+  /// [isReadablePrimary] e o [safeSecondaryFor] trocava o ouro pelo teal.
   static Color _ensureWhiteLabelOnDark(
     Color color,
     Color surface,
     double minVsSurface,
   ) {
     const white = Color(0xFFFFFFFF);
-    const minWhite = FocuxContrast.wcagAaLarge;
+    const minWhite = FocuxContrast.wcagAaNormal;
     var hsl = HSLColor.fromColor(color);
     var current = color;
-    for (var i = 0; i < 16; i++) {
+    for (var i = 0; i < 24; i++) {
       final vsWhite = FocuxContrast.contrastRatio(white, current);
       final vsSurface = FocuxContrast.contrastRatio(current, surface);
       if (vsWhite >= minWhite && vsSurface >= minVsSurface) {
         return current;
       }
       if (vsWhite < minWhite) {
-        hsl = hsl.withLightness((hsl.lightness - 0.04).clamp(0.22, 0.72));
+        hsl = hsl.withLightness((hsl.lightness - 0.03).clamp(0.18, 0.72));
       } else {
-        hsl = hsl.withLightness((hsl.lightness + 0.04).clamp(0.22, 0.72));
+        hsl = hsl.withLightness((hsl.lightness + 0.03).clamp(0.18, 0.72));
       }
       current = hsl.toColor();
     }
     return current;
+  }
+
+  /// Acento já levantado p/ mesh escuro (AuthShell / sheet forceDark).
+  /// Não é [isReadablePrimary] de paleta *salva* — navy/carvão falham aqui
+  /// de propósito; ouro/menta escurecido passa.
+  static bool _isUsableDarkChrome(Color color) {
+    final vsSurface = FocuxContrast.contrastRatio(color, EagleTokens.darkBg);
+    final vsWhite = FocuxContrast.contrastRatio(const Color(0xFFFFFFFF), color);
+    return vsSurface >= FocuxContrast.wcagAaLarge &&
+        vsWhite >= FocuxContrast.wcagAaNormal;
   }
 
   static bool isReadablePrimary(Color primary) {
@@ -214,6 +225,9 @@ class CuratedBrandPalette {
   }
 
   static Color safeSecondaryFor(Color primary, Color secondary) {
+    // AuthShell / forceDark reaplicam colorScheme.primary já remapado.
+    // safePrimary disso virava teal Focux e closest() trocava o ouro.
+    if (_isUsableDarkChrome(primary)) return secondary;
     final normalizedPrimary = safePrimary(primary);
     if (isSafePair(normalizedPrimary, secondary)) return secondary;
     return closest(normalizedPrimary, secondary).secondary;
