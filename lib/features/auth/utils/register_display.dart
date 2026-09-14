@@ -30,4 +30,5 @@ String registerHelpGoogleBody() =>
     'Google cria ou entra na mesma conta personal, sem código.';
 
 String registerHelpAppleBody() =>
-    'Apple cria ou entra na mesma conta personal, sem código.';
+    'Apple cria ou entra na mesma conta personal. Na tela da Apple, '
+    'escolha Compartilhar meu e-mail (não Ocultar).';
