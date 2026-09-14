@@ -46,11 +46,16 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   }
 
   Future<void> _confirmarPlano(ExecucaoTreino treino) async {
-    if (_confirmingTreinoId != null) return;
+    if (_confirmingTreinoId != null || _startingTreinoId != null) return;
     setState(() => _confirmingTreinoId = treino.treinoId);
     try {
       await ref.read(checkinRepositoryProvider).confirmarPlano(treino.treinoId);
+      MeusTreinosMemCache.clear();
+      EvolucaoHomeClientCache.clear();
+      Aluno360ClientCache.clear();
+      ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
+      ref.invalidate(alunoDashboardHomeProvider);
       if (!mounted) return;
       await FxCelebrationOverlay.show(
         context,
@@ -236,7 +241,10 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                     () => _confirmarPlano(ordered[index]),
                                 onStart: () {
                                   final treino = ordered[index];
-                                  if (_startingTreinoId != null) return;
+                                  if (_startingTreinoId != null ||
+                                      _confirmingTreinoId != null) {
+                                    return;
+                                  }
                                   setState(
                                     () => _startingTreinoId = treino.treinoId,
                                   );
