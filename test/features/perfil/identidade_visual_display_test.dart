@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/features/perfil/utils/identidade_visual_display.dart';
 
 void main() {
@@ -32,6 +34,51 @@ void main() {
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
     expect(identidadeHelpSubtitle(), contains('Editar perfil'));
     expect(identidadeLogoSloganSubtitle(), contains('login white-label'));
+    expect(identidadeAlunoVisibilityLabel(), contains('aluno'));
     expect(identidadeDiscardTitle(), 'Sair sem salvar?');
+  });
+
+  test('dirty e freshness da identidade', () {
+    expect(
+      identidadeIsDirty(
+        perfilLoaded: false,
+        slogan: 'a',
+        baselineSlogan: 'b',
+        logoUrl: null,
+        baselineLogo: null,
+        palette: CuratedBrandPalette.focuxDefault,
+        baselinePalette: CuratedBrandPalette.focuxDefault,
+      ),
+      isFalse,
+    );
+    expect(
+      identidadeIsDirty(
+        perfilLoaded: true,
+        slogan: 'novo',
+        baselineSlogan: 'velho',
+        logoUrl: null,
+        baselineLogo: null,
+        palette: CuratedBrandPalette.focuxDefault,
+        baselinePalette: CuratedBrandPalette.focuxDefault,
+      ),
+      isTrue,
+    );
+    expect(
+      identidadeHeroAnimDuration(reduceMotion: true),
+      Duration.zero,
+    );
+    expect(
+      identidadeHeroAnimDuration(reduceMotion: false).inMilliseconds,
+      greaterThan(0),
+    );
+    final now = DateTime(2026, 9, 14, 12);
+    expect(
+      identidadeAppBarSubtitle(
+        hasWhiteLabel: true,
+        fetchedAt: now.subtract(const Duration(seconds: 5)),
+        now: now,
+      ),
+      'Sua marca no app · Atualizado agora',
+    );
   });
 }

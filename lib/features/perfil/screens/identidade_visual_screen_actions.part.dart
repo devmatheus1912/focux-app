@@ -1,6 +1,9 @@
 part of 'identidade_visual_screen.dart';
 
 Future<void> _abrirIdentidadeAjuda(BuildContext context) {
+  unawaited(
+    AnalyticsService.instance.track(ProductEvents.identidadeHelpOpened),
+  );
   return showFxHelpSheet(
     context,
     title: identidadeHelpTitle(),
@@ -82,12 +85,14 @@ extension on _IdentidadeVisualScreenState {
     await _salvar(
       hasWhiteLabel: hasWhiteLabel,
       successMessage: 'Cores padrão do Focux restauradas!',
+      restored: true,
     );
   }
 
   Future<void> _salvar({
     required bool hasWhiteLabel,
     String successMessage = 'Identidade visual salva!',
+    bool restored = false,
   }) async {
     if (!hasWhiteLabel) return;
     setState(() => _salvando = true);
@@ -109,7 +114,21 @@ extension on _IdentidadeVisualScreenState {
         ref.read(logoUrlProvider.notifier).state = _logoUrl;
       }
       ref.invalidate(perfilProvider);
+      unawaited(
+        AnalyticsService.instance.track(
+          restored
+              ? ProductEvents.identidadeRestored
+              : ProductEvents.identidadeSaved,
+          props: {
+            'palette': _palette.id,
+            'hasLogo': _logoUrl != null && _logoUrl!.isNotEmpty,
+            'hasSlogan': slogan.isNotEmpty,
+            'setup': widget.isSetup,
+          },
+        ),
+      );
       if (mounted) {
+        _fetchedAt = DateTime.now();
         _snapshotBaseline();
         FeedbackHelper.showInfo(context, successMessage);
         if (widget.isSetup) context.pop(true);

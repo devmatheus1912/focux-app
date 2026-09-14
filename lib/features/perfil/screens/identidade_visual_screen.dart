@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
@@ -55,6 +58,8 @@ class _IdentidadeVisualScreenState
   bool _salvando = false;
   bool _uploadingLogo = false;
   bool _perfilLoaded = false;
+  bool _viewTracked = false;
+  DateTime? _fetchedAt;
   String? _logoUrl;
   String _baselineSlogan = '';
   String? _baselineLogo;
@@ -67,9 +72,6 @@ class _IdentidadeVisualScreenState
   void initState() {
     super.initState();
     _sloganCtrl.addListener(_onFieldChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(perfilProvider);
-    });
   }
 
   @override
@@ -82,12 +84,15 @@ class _IdentidadeVisualScreenState
     if (mounted) setState(() {});
   }
 
-  bool get _dirty {
-    if (!_perfilLoaded) return false;
-    return _sloganCtrl.text != _baselineSlogan ||
-        _logoUrl != _baselineLogo ||
-        _palette != _baselinePalette;
-  }
+  bool get _dirty => identidadeIsDirty(
+    perfilLoaded: _perfilLoaded,
+    slogan: _sloganCtrl.text,
+    baselineSlogan: _baselineSlogan,
+    logoUrl: _logoUrl,
+    baselineLogo: _baselineLogo,
+    palette: _palette,
+    baselinePalette: _baselinePalette,
+  );
 
   void _snapshotBaseline() {
     _baselineSlogan = _sloganCtrl.text;
@@ -106,6 +111,14 @@ class _IdentidadeVisualScreenState
       if (!leave || !mounted) return;
     }
     safePopOrGo(context, '/perfil');
+  }
+
+  Future<void> _refresh() async {
+    setState(() => _perfilLoaded = false);
+    ref.invalidate(perfilProvider);
+    unawaited(
+      AnalyticsService.instance.track(ProductEvents.identidadeRefreshed),
+    );
   }
 
   void _applyPerfil(PerfilPersonal perfil) {
@@ -127,6 +140,7 @@ class _IdentidadeVisualScreenState
     secondary = CuratedBrandPalette.safeSecondaryFor(primary, secondary);
     _palette = CuratedBrandPalette.resolve(primary, secondary);
     _perfilLoaded = true;
+    _fetchedAt = DateTime.now();
     _snapshotBaseline();
   }
 
@@ -136,6 +150,16 @@ class _IdentidadeVisualScreenState
     final perfil = perfilAsync.value;
     if (perfil != null && !_perfilLoaded) {
       _applyPerfil(perfil);
+    }
+
+    if (perfil != null && !_viewTracked) {
+      _viewTracked = true;
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.identidadeViewed,
+          props: {'setup': widget.isSetup},
+        ),
+      );
     }
 
     if (perfil == null) {
@@ -153,7 +177,7 @@ class _IdentidadeVisualScreenState
                     chromeOnDark: ShellChrome.of(context).isDark,
                     primary: Theme.of(context).colorScheme.primary,
                     message: friendlyError(perfilAsync.error!),
-                    onRetry: () => ref.invalidate(perfilProvider),
+                    onRetry: _refresh,
                   )
                   : const SkeletonList(count: 6),
         ),
@@ -163,179 +187,198 @@ class _IdentidadeVisualScreenState
     final chrome = ShellChrome.of(context);
     final plano = perfil.plano;
     final hasWhiteLabel = identidadeHasWhiteLabel(
-      featureWhiteLabel: ref.watch(planoFeaturesProvider).valueOrNull?.whiteLabel,
+      featureWhiteLabel:
+          ref.watch(planoFeaturesProvider).valueOrNull?.whiteLabel,
       plano: plano,
     );
     final nomePersonal = perfil.nome;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
 
     return FxFormPopGuard(
       dirty: _dirty,
       onCancel: _pedirSair,
       child: fxScreenA11yScope(
-      label: 'Identidade Visual',
-      child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
-          subtitle: hasWhiteLabel ? 'Sua marca no app' : 'Marca no app',
-          onBack: _pedirSair,
-          actions: [
-            FxHelpIconButton(
-              tooltip: identidadeHelpTitle(),
-              onTap: () => _abrirIdentidadeAjuda(context),
+        label: 'Identidade Visual',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: widget.isSetup ? 'Configurar meu app' : 'Identidade Visual',
+            subtitle: identidadeAppBarSubtitle(
+              hasWhiteLabel: hasWhiteLabel,
+              fetchedAt: _fetchedAt,
             ),
-            const SizedBox(width: TokensStrip.s2),
-          ],
-        ),
-        bottomNavigationBar:
-            hasWhiteLabel
-                ? FxFormStickyBar(
-                  child: FxLiquidPrimaryButton(
-                    label: identidadeSalvarLabel(isSetup: widget.isSetup),
-                    loading: _salvando,
-                    loadingLabel: identidadeSalvandoLabel(),
-                    onPressed:
-                        _salvando
-                            ? null
-                            : () => _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
-                  ),
-                )
-                : null,
-        body: CustomScrollView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
+            onBack: _pedirSair,
+            actions: [
+              FxHelpIconButton(
+                tooltip: identidadeHelpTitle(),
+                onTap: () => _abrirIdentidadeAjuda(context),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+            ],
           ),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                4,
-                FxSettingsLayout.pageInset,
-                120,
+          bottomNavigationBar:
+              hasWhiteLabel
+                  ? FxFormStickyBar(
+                    child: FxLiquidPrimaryButton(
+                      label: identidadeSalvarLabel(isSetup: widget.isSetup),
+                      loading: _salvando,
+                      loadingLabel: identidadeSalvandoLabel(),
+                      onPressed:
+                          _salvando
+                              ? null
+                              : () =>
+                                  _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
+                    ),
+                  )
+                  : null,
+          body: RefreshIndicator(
+            color: Theme.of(context).colorScheme.primary,
+            onRefresh: _refresh,
+            child: CustomScrollView(
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
               ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  if (!hasWhiteLabel) ...[
-                    _PaywallCard(
-                      onTap: () => context.go('/assinatura'),
-                      chrome: chrome,
-                    ),
-                    const SizedBox(height: 18),
-                  ],
-                  AbsorbPointer(
-                    absorbing: !hasWhiteLabel,
-                    child: Opacity(
-                      opacity: hasWhiteLabel ? 1 : 0.38,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _LiveBrandHero(
-                            primary: _corPrimaria,
-                            secondary: _corSecundaria,
-                            name: nomePersonal,
-                            slogan: _sloganCtrl.text.trim(),
-                            logoUrl: _logoUrl,
-                            paletteName: _palette.name,
-                          ),
-                          const SizedBox(height: TokensStrip.s4),
-                          ShellSurface(
-                            accent: _corPrimaria,
-                            padding: const EdgeInsets.all(18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _PanelTitle(
-                                  icon: Icons.auto_awesome_outlined,
-                                  title: 'Logo e slogan',
-                                  subtitle: identidadeLogoSloganSubtitle(),
-                                  accent: _corPrimaria,
-                                  mute: chrome.mute,
-                                ),
-                                const SizedBox(height: 18),
-                                Center(
-                                  child: _LogoUploadRing(
-                                    nome: nomePersonal,
-                                    logoUrl: _logoUrl,
-                                    primary: _corPrimaria,
-                                    secondary: _corSecundaria,
-                                    uploading: _uploadingLogo,
-                                    onTap:
-                                        hasWhiteLabel ? _pedirTrocarLogo : null,
-                                  ),
-                                ),
-                                const SizedBox(height: 18),
-                                _BrandField(
-                                  label: 'Slogan',
-                                  controller: _sloganCtrl,
-                                  enabled: hasWhiteLabel,
-                                  accent: _corPrimaria,
-                                  icon: Icons.format_quote_outlined,
-                                  hint:
-                                      'Transformando vidas através do movimento',
-                                  maxLength: 200,
-                                  maxLines: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          ShellSurface(
-                            accent: _corPrimaria,
-                            padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _PanelTitle(
-                                  icon: Icons.palette_outlined,
-                                  title: 'Paleta premium',
-                                  subtitle:
-                                      'Pares curados com contraste seguro — nunca quebra o app.',
-                                  accent: _corPrimaria,
-                                  mute: chrome.mute,
-                                ),
-                                const SizedBox(height: 14),
-                                _CuratedPaletteGrid(
-                                  selected: _palette,
-                                  onSelect:
-                                      hasWhiteLabel
-                                          ? (p) {
-                                            HapticFeedback.selectionClick();
-                                            setState(() => _palette = p);
-                                          }
-                                          : null,
-                                ),
-                                if (hasWhiteLabel) ...[
-                                  const SizedBox(height: 10),
-                                  TextButton(
-                                    onPressed:
-                                        () => _pedirRestaurarCores(
-                                          hasWhiteLabel: hasWhiteLabel,
-                                        ),
-                                    style: TextButton.styleFrom(
-                                      minimumSize: const Size(
-                                        FxSettingsLayout.rowMinHeight,
-                                        FxSettingsLayout.rowMinHeight,
-                                      ),
-                                      alignment: Alignment.centerLeft,
-                                    ),
-                                    child: Text(
-                                      identidadeRestaurarCoresLabel(),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    4,
+                    FxSettingsLayout.pageInset,
+                    120,
                   ),
-                ]),
-              ),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      if (!hasWhiteLabel) ...[
+                        _PaywallCard(
+                          onTap: () => context.go('/assinatura'),
+                          chrome: chrome,
+                        ),
+                        const SizedBox(height: 18),
+                      ],
+                      AbsorbPointer(
+                        absorbing: !hasWhiteLabel,
+                        child: Opacity(
+                          opacity: hasWhiteLabel ? 1 : 0.38,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _LiveBrandHero(
+                                primary: _corPrimaria,
+                                secondary: _corSecundaria,
+                                name: nomePersonal,
+                                slogan: _sloganCtrl.text.trim(),
+                                logoUrl: _logoUrl,
+                                paletteName: _palette.name,
+                                reduceMotion: reduceMotion,
+                              ),
+                              const SizedBox(height: TokensStrip.s4),
+                              ShellSurface(
+                                accent: _corPrimaria,
+                                padding: const EdgeInsets.all(18),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _PanelTitle(
+                                      icon: Icons.auto_awesome_outlined,
+                                      title: 'Logo e slogan',
+                                      subtitle: identidadeLogoSloganSubtitle(),
+                                      accent: _corPrimaria,
+                                      mute: chrome.mute,
+                                    ),
+                                    const SizedBox(height: 18),
+                                    Center(
+                                      child: _LogoUploadRing(
+                                        nome: nomePersonal,
+                                        logoUrl: _logoUrl,
+                                        primary: _corPrimaria,
+                                        secondary: _corSecundaria,
+                                        uploading: _uploadingLogo,
+                                        onTap:
+                                            hasWhiteLabel
+                                                ? _pedirTrocarLogo
+                                                : null,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 18),
+                                    _BrandField(
+                                      label: 'Slogan',
+                                      controller: _sloganCtrl,
+                                      enabled: hasWhiteLabel,
+                                      accent: _corPrimaria,
+                                      icon: Icons.format_quote_outlined,
+                                      hint:
+                                          'Transformando vidas através do movimento',
+                                      maxLength: 200,
+                                      maxLines: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              ShellSurface(
+                                accent: _corPrimaria,
+                                padding: const EdgeInsets.fromLTRB(
+                                  18,
+                                  18,
+                                  18,
+                                  14,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _PanelTitle(
+                                      icon: Icons.palette_outlined,
+                                      title: 'Paleta premium',
+                                      subtitle: identidadePaletteSubtitle(),
+                                      accent: _corPrimaria,
+                                      mute: chrome.mute,
+                                    ),
+                                    const SizedBox(height: 14),
+                                    _CuratedPaletteGrid(
+                                      selected: _palette,
+                                      onSelect:
+                                          hasWhiteLabel
+                                              ? (p) {
+                                                HapticFeedback.selectionClick();
+                                                setState(() => _palette = p);
+                                              }
+                                              : null,
+                                    ),
+                                    if (hasWhiteLabel) ...[
+                                      const SizedBox(height: 10),
+                                      TextButton(
+                                        onPressed:
+                                            () => _pedirRestaurarCores(
+                                              hasWhiteLabel: hasWhiteLabel,
+                                            ),
+                                        style: TextButton.styleFrom(
+                                          minimumSize: const Size(
+                                            FxSettingsLayout.rowMinHeight,
+                                            FxSettingsLayout.rowMinHeight,
+                                          ),
+                                          alignment: Alignment.centerLeft,
+                                        ),
+                                        child: Text(
+                                          identidadeRestaurarCoresLabel(),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
       ),
     );
   }
