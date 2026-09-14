@@ -397,7 +397,7 @@ class _FinanceiroMensalidadesTabState
                                       final item = _items[i];
                                       final overdue = item.status == 'ATRASADO';
                                       final selected = _selecionados.contains(
-                                        item.alunoId,
+                                        item.id,
                                       );
                                       return FxSatelliteListTile(
                                         title: item.alunoNome,

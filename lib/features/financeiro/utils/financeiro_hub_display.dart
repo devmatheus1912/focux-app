@@ -299,21 +299,21 @@ String financeiroLotePagoChipLabel({
   required int selecionados,
 }) {
   if (!modoSelecao) return 'Marcar lote';
-  if (selecionados <= 0) return 'Selecione alunos';
+  if (selecionados <= 0) return 'Selecione cobranças';
   return selecionados == 1
-      ? 'Marcar 1 aluno pago'
-      : 'Marcar $selecionados pagos';
+      ? 'Marcar 1 cobrança paga'
+      : 'Marcar $selecionados pagas';
 }
 
-String financeiroLotePagoConfirmMessage(int alunos) =>
-    alunos == 1
-        ? 'Marca como pago as mensalidades em aberto deste aluno.'
-        : 'Marca como pago as mensalidades em aberto destes $alunos alunos.';
+String financeiroLotePagoConfirmMessage(int cobrancas) =>
+    cobrancas == 1
+        ? 'Marca como paga esta cobrança selecionada.'
+        : 'Marca como pagas estas $cobrancas cobranças selecionadas.';
 
-String financeiroLotePagoSuccess(int alunos) =>
-    alunos == 1
-        ? 'Mensalidades deste aluno marcadas como pagas.'
-        : 'Mensalidades de $alunos alunos marcadas como pagas.';
+String financeiroLotePagoSuccess(int cobrancas) =>
+    cobrancas == 1
+        ? 'Cobrança marcada como paga.'
+        : '$cobrancas cobranças marcadas como pagas.';
 
 String financeiroMesPickerValue(String mesReferencia) {
   final raw = mesReferencia.trim();

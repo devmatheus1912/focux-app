@@ -286,12 +286,12 @@ class FinanceiroRepository {
     await _dio.patch('/api/financeiro/mensalidades/atualizar-atrasos');
   }
 
-  Future<void> marcarLotePago(List<int> alunoIds) async {
-    final ids = alunoIds.toSet().toList();
+  Future<void> marcarLotePago(List<int> mensalidadeIds) async {
+    final ids = mensalidadeIds.toSet().toList()..sort();
     await _dio.post(
-      '/api/financeiro/mensalidades/lote-pago',
-      data: {'alunoIds': ids},
-      options: ApiClient.idempotent('mensalidade-lote-${ids.join('-')}'),
+      '/api/financeiro/lote/marcar-pago',
+      data: {'mensalidadeIds': ids},
+      options: ApiClient.idempotent('mensalidade-lote-ids-${ids.join('-')}'),
     );
   }
 

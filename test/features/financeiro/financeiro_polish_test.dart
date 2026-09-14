@@ -71,7 +71,8 @@ void main() {
     final router = readScreenSourceBundle(
       'lib/core/router/app_router_chrome_routes.dart',
     );
-    expect(repo, contains('/api/financeiro/mensalidades/lote-pago'));
+    expect(repo, contains('/api/financeiro/lote/marcar-pago'));
+    expect(repo, contains('mensalidadeIds'));
     expect(repo, contains("get('/api/financeiro/mensalidades/\$id')"));
     expect(repo, contains('Future<Mensalidade> buscar(int id)'));
     expect(repo, contains("j['contatos']"));
