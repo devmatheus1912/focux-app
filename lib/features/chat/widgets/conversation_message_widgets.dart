@@ -44,8 +44,7 @@ class ConversationDateDivider extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color:
-                  isDark ? EagleTokens.slate400 : TokensStrip.textSecondary,
+              color: isDark ? EagleTokens.slate400 : TokensStrip.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -397,6 +396,7 @@ class ConversationChatBackdropPainter extends CustomPainter {
 class ConversationBubble extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
+  final bool system;
   final bool isDark;
   final Color accentColor;
   final bool highlighted;
@@ -409,6 +409,7 @@ class ConversationBubble extends StatelessWidget {
     super.key,
     required this.msg,
     required this.mine,
+    this.system = false,
     required this.isDark,
     required this.accentColor,
     required this.highlighted,
@@ -436,7 +437,10 @@ class ConversationBubble extends StatelessWidget {
     );
 
     return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment:
+          system
+              ? Alignment.center
+              : (mine ? Alignment.centerRight : Alignment.centerLeft),
       child: GestureDetector(
         onLongPress: onLongPress,
         child: AnimatedContainer(
@@ -488,6 +492,18 @@ class ConversationBubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (system)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    'Sistema',
+                    style: TextStyle(
+                      color: metaColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               if (!deleted && msg.replyToMessageId != null)
                 ConversationReplySnippet(
                   mine: mine,

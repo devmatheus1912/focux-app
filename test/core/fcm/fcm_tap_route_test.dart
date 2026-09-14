@@ -4,10 +4,7 @@ import 'package:focux_app/core/fcm/fcm_tap_route.dart';
 void main() {
   test('route de personal vaza e vira rota do aluno', () {
     expect(
-      resolveFcmTapRoute({
-        'type': 'mensalidade',
-        'route': '/financeiro',
-      }),
+      resolveFcmTapRoute({'type': 'mensalidade', 'route': '/financeiro'}),
       '/financeiro/aluno',
     );
     expect(
@@ -21,12 +18,13 @@ void main() {
   });
 
   test('sem route cai no type já contratado', () {
-    expect(
-      resolveFcmTapRoute({'type': 'mensalidade'}),
-      '/financeiro/aluno',
-    );
+    expect(resolveFcmTapRoute({'type': 'mensalidade'}), '/financeiro/aluno');
     expect(resolveFcmTapRoute({'type': 'dunning'}), '/financeiro/aluno');
     expect(resolveFcmTapRoute({'type': 'treino'}), '/checkin/treinos');
+    expect(
+      resolveFcmTapRoute({'type': 'treino', 'treinoId': '11'}),
+      '/checkin/executar?treinoId=11',
+    );
     expect(resolveFcmTapRoute({'type': 'chat'}), '/chat/aluno');
     expect(resolveFcmTapRoute({'type': 'anamnese'}), '/aluno/anamnese');
     expect(resolveFcmTapRoute({'type': 'broadcast'}), '/dashboard/aluno');
@@ -92,11 +90,19 @@ void main() {
 
   test('execucaoId empurra o histórico do check-in', () {
     expect(
+      resolveFcmTapRoute({'type': 'treino', 'execucaoId': '44'}),
+      '/checkin/historico/44',
+    );
+  });
+
+  test('treinoId vence execucaoId no type treino', () {
+    expect(
       resolveFcmTapRoute({
         'type': 'treino',
+        'treinoId': '11',
         'execucaoId': '44',
       }),
-      '/checkin/historico/44',
+      '/checkin/executar?treinoId=11',
     );
   });
 

@@ -9,6 +9,7 @@ String meusTreinosCountLabel(int count) {
 class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   DateTime? _fetchedAt;
   int? _startingTreinoId;
+  int? _confirmingTreinoId;
   final List<ExecucaoTreino> _extra = [];
   var _page = 0;
   var _hasMore = false;
@@ -44,6 +45,30 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     }
   }
 
+  Future<void> _confirmarPlano(ExecucaoTreino treino) async {
+    if (_confirmingTreinoId != null) return;
+    setState(() => _confirmingTreinoId = treino.treinoId);
+    try {
+      await ref.read(checkinRepositoryProvider).confirmarPlano(treino.treinoId);
+      ref.invalidate(meusTreinosProvider);
+      if (!mounted) return;
+      await FxCelebrationOverlay.show(
+        context,
+        title: 'Treino registrado',
+        subtitle: 'Sequência conta a semana, não o dia. Descanso não zera.',
+        icon: Icons.check_circle_rounded,
+      );
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted && _confirmingTreinoId == treino.treinoId) {
+        setState(() => _confirmingTreinoId = null);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final treinosAsync = ref.watch(meusTreinosProvider);
@@ -70,9 +95,10 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final base = treinosAsync.valueOrNull?.content ?? const <ExecucaoTreino>[];
     final treinos = [...base, ..._extra];
-    final count = treinosAsync.hasValue
-        ? (treinosAsync.value!.totalElements ?? treinos.length)
-        : treinos.length;
+    final count =
+        treinosAsync.hasValue
+            ? (treinosAsync.value!.totalElements ?? treinos.length)
+            : treinos.length;
 
     return fxScreenA11yScope(
       label: 'Sua rotina',
@@ -203,6 +229,11 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                 starting:
                                     _startingTreinoId ==
                                     ordered[index].treinoId,
+                                confirming:
+                                    _confirmingTreinoId ==
+                                    ordered[index].treinoId,
+                                onConfirmPlano:
+                                    () => _confirmarPlano(ordered[index]),
                                 onStart: () {
                                   final treino = ordered[index];
                                   if (_startingTreinoId != null) return;

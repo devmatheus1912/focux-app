@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -19,6 +20,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -42,6 +44,25 @@ class _CheckinPersonalHubScreenState
   DateTime? _fetchedAt;
   var _viewTracked = false;
   var _ttvTracked = false;
+  int? _cobrandoAlunoId;
+
+  Future<void> _cobrar(CheckinPersonalPendente pendente) async {
+    if (_cobrandoAlunoId != null) return;
+    setState(() => _cobrandoAlunoId = pendente.alunoId);
+    try {
+      await ref
+          .read(alunoRepositoryProvider)
+          .cobrarTreino(pendente.alunoId, treinoId: pendente.treinoId);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Lembrete enviado');
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    } finally {
+      if (mounted) setState(() => _cobrandoAlunoId = null);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +83,7 @@ class _CheckinPersonalHubScreenState
         final home = homeAsync.requireValue;
         AnalyticsService.instance.track(
           ProductEvents.checkinHubViewed,
-          props: {
-            'hoje': home.checkinsHoje,
-            'semana': home.semana.length,
-          },
+          props: {'hoje': home.checkinsHoje, 'semana': home.semana.length},
         );
         if (!_ttvTracked) {
           _ttvTracked = true;
@@ -119,7 +137,9 @@ class _CheckinPersonalHubScreenState
                 onRetry: () => ref.invalidate(checkinPersonalHomeProvider),
               ),
           data: (home) {
-            if (home.hoje.isEmpty && home.semana.isEmpty) {
+            if (home.hoje.isEmpty &&
+                home.semana.isEmpty &&
+                home.pendentes.isEmpty) {
               return FxEmptyState(
                 icon: 'dumbbell',
                 title: 'Nenhum check-in nesta semana',
@@ -154,6 +174,22 @@ class _CheckinPersonalHubScreenState
                   ),
                   children: [
                     _CheckinTodayCard(home: home, isDark: isDark),
+                    if (home.pendentes.isNotEmpty) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      DashboardSectionHeader(
+                        title:
+                            home.pendentes.length == 1
+                                ? '1 aluno sem check-in hoje'
+                                : '${home.pendentes.length} sem check-in hoje',
+                      ),
+                      const SizedBox(height: TokensStrip.s2),
+                      for (final pendente in home.pendentes)
+                        _CheckinPendenteTile(
+                          pendente: pendente,
+                          loading: _cobrandoAlunoId == pendente.alunoId,
+                          onCobrar: () => _cobrar(pendente),
+                        ),
+                    ],
                     if (home.hoje.isNotEmpty) ...[
                       const SizedBox(height: TokensStrip.s4),
                       _CheckinSection(
@@ -196,8 +232,7 @@ class _CheckinTodayCard extends StatelessWidget {
     final count = home.checkinsHoje;
     return FxStripCard(
       emphasize: true,
-      semanticsLabel:
-          count == 1 ? '1 check-in hoje' : '$count check-ins hoje',
+      semanticsLabel: count == 1 ? '1 check-in hoje' : '$count check-ins hoje',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -308,6 +343,35 @@ class _CheckinTile extends StatelessWidget {
                 ),
               ),
       onTap: () => context.push('/alunos/${item.alunoId}'),
+    );
+  }
+}
+
+class _CheckinPendenteTile extends StatelessWidget {
+  const _CheckinPendenteTile({
+    required this.pendente,
+    required this.loading,
+    required this.onCobrar,
+  });
+
+  final CheckinPersonalPendente pendente;
+  final bool loading;
+  final VoidCallback onCobrar;
+
+  @override
+  Widget build(BuildContext context) {
+    return FxSatelliteListTile(
+      title: pendente.alunoNome,
+      subtitle: Text(pendente.treinoNome),
+      leading: AlunoAvatar(
+        name: pendente.alunoNome,
+        variant: AlunoAvatarVariant.strip,
+      ),
+      trailing: TextButton(
+        onPressed: loading ? null : onCobrar,
+        child: Text(loading ? 'Enviando…' : 'Cobrar treino'),
+      ),
+      onTap: () => context.push('/alunos/${pendente.alunoId}'),
     );
   }
 }

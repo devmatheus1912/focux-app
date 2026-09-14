@@ -95,7 +95,8 @@ do personal; o token anterior deixa de validar.
 `q` (nome do treino) e `status` opcionais. `GET /api/checkin/{id}` devolve a
 execução do aluno autenticado. O campo `historico` do hub aluno é a primeira
 página (60) do mesmo critério, não o dump. Notificação de evolução do aluno
-abre `/checkin/historico/{id}` quando o payload traz `execucaoId`. `GET /api/feedback-videos`,
+abre `/checkin/historico/{id}` quando o payload traz `execucaoId` e não traz
+`treinoId`. Push `type=treino` com `treinoId` abre `/checkin/executar?treinoId=`. `GET /api/feedback-videos`,
 `/aluno/{id}` e `/me` usam offset `PaginaResponse` no banco, com `q` no
 comentário. `GET /api/leads` pagina no banco com `status` e `q` (nome,
 objetivo, origem).
@@ -374,4 +375,38 @@ da home. Sem e-mail.
 `ativo=false` (listas `GET /api/habitos/home` e `GET /api/habitos/me`
 continuam só ativos). A resposta inclui `ativo`. Deep link / FCM de
 desativado deixa de ficar cego.
+
+## 9. Check-in do aluno — seed, 1 toque, streak semanal — acordado
+
+`POST /api/checkin/{id}/exercicio/{treinoExercicioId}/series` aceita `cargaKg`
+e `repeticoes` nulos. O servidor preenche: última sessão do mesmo número de
+série → primeiro número da prescrição (`8-12` → `8`) → série anterior desta
+sessão. `GET /api/checkin/{id}` inclui `seriesAnteriores` (séries da última
+sessão concluída daquele exercício) e `cargaAnteriorKg` é a maior carga
+logada nessa sessão, não a prescrição.
+
+`POST /api/checkin/{id}/exercicio/{treinoExercicioId}/confirmar-restante`
+preenche as séries que faltam com o mesmo seed. Rate 30/min.
+
+`POST /api/checkin/confirmar-plano` (`{ "treinoId" }`) inicia (ou retoma),
+preenche o restante e conclui. Se já houver `CONCLUIDO` hoje para o mesmo
+treino, devolve essa execução. Rate 12/min.
+
+`GET /api/checkin/personal/home` inclui `pendentes`: alunos ativos com treino
+atribuído e sem check-in `CONCLUIDO` hoje (fold 8).
+
+`POST /api/alunos/{id}/cobrar-treino` (PERSONAL, `{ "treinoId" }` opcional)
+grava log `COBRAR_TREINO` e manda FCM `type=treino` com
+`route=/checkin/executar?treinoId={id}`. Falha de FCM não reverte o log.
+Rate 20/min.
+
+Push `type=treino` + `treinoId` abre `/checkin/executar?treinoId=`. Não
+enviar `execucaoId` nesse payload: `execucaoId` sozinho continua abrindo
+`/checkin/historico/{id}` (evolução).
+
+Chat de resumo do treino usa `remetente=SISTEMA` e `tipoMidia=TREINO_RESUMO`.
+Não impersona o personal.
+
+Streak do aluno é semanal (ISO): dia de descanso na mesma semana não zera;
+semana vazia recomeça. Badge `STREAK_10` = 10 semanas.
 

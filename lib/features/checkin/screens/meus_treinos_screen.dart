@@ -13,6 +13,8 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_async_body.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -23,6 +25,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
 import '../providers/checkin_provider.dart';
+import '../utils/checkin_execucao_display.dart';
 import '../utils/treino_ficha_status.dart';
 
 part 'meus_treinos_screen_state.part.dart';

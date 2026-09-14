@@ -70,7 +70,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '$streakDays dias',
+                      streakDays == 1 ? '1 semana' : '$streakDays semanas',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -87,13 +87,16 @@ class ProgressoSemanalWidget extends StatelessWidget {
             style: TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 8),
+          const Text(
+            'Semana com pelo menos um treino. Dia de descanso não zera.',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
               final now = DateTime.now();
-              final startOfWeek = now.subtract(
-                Duration(days: now.weekday - 1),
-              );
+              final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
               final currentDay = DateTime(
                 startOfWeek.year,
                 startOfWeek.month,
