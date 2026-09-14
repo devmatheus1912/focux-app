@@ -18,13 +18,15 @@ void main() {
     expect(screen, contains('checkinFocusAction'));
     expect(screen, contains('showCheckinPersonalCatalogSheet'));
     expect(
-      File('lib/features/checkin/widgets/checkin_personal_help_sheet.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/checkin/widgets/checkin_personal_help_sheet.dart',
+      ).readAsStringSync(),
       contains('Como calculamos'),
     );
     expect(
-      File('lib/features/checkin/widgets/checkin_personal_catalog_sheet.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/checkin/widgets/checkin_personal_catalog_sheet.dart',
+      ).readAsStringSync(),
       allOf(contains('Carregar mais'), contains('onTapOutside')),
     );
     expect(screen, contains('FxStripCard'));
@@ -39,6 +41,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('checkinHubViewed'));
+    expect(screen, contains('Cobrar treino'));
+    expect(screen, contains('pendentes'));
     expect(screen, isNot(contains('/checkin/executar')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });

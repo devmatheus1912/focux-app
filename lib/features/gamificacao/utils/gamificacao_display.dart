@@ -1,5 +1,5 @@
 const gamificacaoComoCalculamos =
-    'No aluno, sequência é dias seguidos com treino. No personal, o número é quantos alunos estão em sequência e o recorde é o maior streak da base. O servidor só concede streak, frequência e PR.';
+    'No aluno, sequência é semanas com pelo menos um treino. Dia de descanso na mesma semana não zera; semana vazia recomeça. No personal, o número é quantos alunos estão em sequência e o recorde é o maior streak da base. O servidor só concede streak, frequência e PR.';
 
 const gamificacaoAlunoEmptyTitle = 'Sua evolução começa no treino';
 
@@ -16,9 +16,9 @@ String gamificacaoStreakTitle({required bool isAluno}) =>
 
 String gamificacaoStreakLabel(int streak, {bool isAluno = true}) {
   if (isAluno) {
-    if (streak <= 0) return '0 dias';
-    if (streak == 1) return '1 dia';
-    return '$streak dias';
+    if (streak <= 0) return '0 semanas';
+    if (streak == 1) return '1 semana';
+    return '$streak semanas';
   }
   if (streak <= 0) return '0 alunos';
   if (streak == 1) return '1 aluno';
@@ -32,12 +32,12 @@ String gamificacaoStreakHint({
 }) {
   if (isAluno) {
     return streak == 0
-        ? 'Um treino hoje recomeça a série'
-        : 'Recorde ${recorde}d';
+        ? 'Um treino nesta semana recomeça a série'
+        : 'Recorde $recorde sem';
   }
   return streak == 0
       ? 'Ninguém em sequência agora'
-      : 'Recorde da base ${recorde}d';
+      : 'Recorde da base $recorde sem';
 }
 
 List<T> gamificacaoBadgePreview<T>(List<T> items) =>
@@ -47,8 +47,8 @@ String gamificacaoComoGanhar(String tipo, {bool isAluno = true}) {
   switch (tipo.trim().toUpperCase()) {
     case 'STREAK_10':
       return isAluno
-          ? 'Treine 10 dias seguidos'
-          : 'Algum aluno treina 10 dias seguidos';
+          ? 'Treine 10 semanas (descanso na semana não zera)'
+          : 'Algum aluno cumpre 10 semanas de treino';
     case 'FREQUENCIA_100':
       return isAluno
           ? 'Conclua todos os treinos do mês (mín. 4)'

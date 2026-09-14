@@ -37,6 +37,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../utils/chat_inbox_display.dart';
+import '../utils/chat_remetente.dart';
 import '../utils/aluno_picker_list.dart';
 
 part 'chat_inbox_screen_state.part.dart';

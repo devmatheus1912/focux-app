@@ -78,10 +78,10 @@ class _TrainingHero extends StatelessWidget {
         children: [
           Text(
             headline,
-            style: FocuxHubTypography.sectionTitle(context, color: ink).copyWith(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: FocuxHubTypography.sectionTitle(
+              context,
+              color: ink,
+            ).copyWith(fontSize: 17, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 4),
           Text(
@@ -123,13 +123,17 @@ class _TrainingPlanCard extends StatelessWidget {
   final ExecucaoTreino treino;
   final bool isDark;
   final bool starting;
+  final bool confirming;
   final VoidCallback onStart;
+  final VoidCallback? onConfirmPlano;
 
   const _TrainingPlanCard({
     required this.treino,
     required this.isDark,
     required this.onStart,
+    this.onConfirmPlano,
     this.starting = false,
+    this.confirming = false,
   });
 
   @override
@@ -311,6 +315,25 @@ class _TrainingPlanCard extends StatelessWidget {
                   ),
                 ],
               ),
+            if (!aguardando &&
+                !concluido &&
+                canStart &&
+                onConfirmPlano != null) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: confirming ? null : onConfirmPlano,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(64, checkinExecutionControlMin),
+                  ),
+                  child: Text(
+                    confirming ? 'Registrando…' : 'Fiz o treino',
+                    style: TextStyle(color: mute, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

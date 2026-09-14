@@ -33,6 +33,7 @@ class ExecucaoExercicio {
   final int? rpeAnterior;
   final bool? dorAnterior;
   final List<ExecucaoSerie> seriesDetalhes;
+  final List<ExecucaoSerie> seriesAnteriores;
 
   ExecucaoExercicio({
     required this.id,
@@ -63,6 +64,7 @@ class ExecucaoExercicio {
     this.rpeAnterior,
     this.dorAnterior,
     this.seriesDetalhes = const [],
+    this.seriesAnteriores = const [],
   });
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) =>
@@ -94,13 +96,15 @@ class ExecucaoExercicio {
         feedbackAnterior: checkinJsonString(j['feedbackAnterior']),
         rpeAnterior: checkinJsonInt(j['rpeAnterior']),
         dorAnterior:
-            j['dorAnterior'] == null
-                ? null
-                : checkinJsonBool(j['dorAnterior']),
+            j['dorAnterior'] == null ? null : checkinJsonBool(j['dorAnterior']),
         seriesDetalhes:
-            checkinJsonMapList(j['seriesDetalhes'])
-                .map(ExecucaoSerie.fromJson)
-                .toList(),
+            checkinJsonMapList(
+              j['seriesDetalhes'],
+            ).map(ExecucaoSerie.fromJson).toList(),
+        seriesAnteriores:
+            checkinJsonMapList(
+              j['seriesAnteriores'],
+            ).map(ExecucaoSerie.fromJson).toList(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -132,6 +136,7 @@ class ExecucaoExercicio {
     'rpeAnterior': rpeAnterior,
     'dorAnterior': dorAnterior,
     'seriesDetalhes': seriesDetalhes.map((s) => s.toJson()).toList(),
+    'seriesAnteriores': seriesAnteriores.map((s) => s.toJson()).toList(),
   };
 
   ExecucaoExercicio copyWith({
@@ -169,6 +174,7 @@ class ExecucaoExercicio {
     rpeAnterior: rpeAnterior,
     dorAnterior: dorAnterior,
     seriesDetalhes: seriesDetalhes,
+    seriesAnteriores: seriesAnteriores,
   );
 }
 
@@ -247,9 +253,13 @@ class ExecucaoTreino {
     iniciadoEm: checkinJsonString(j['iniciadoEm']),
     concluidoEm: checkinJsonString(j['concluidoEm']),
     exercicios:
-        checkinJsonMapList(j['exercicios']).map(ExecucaoExercicio.fromJson).toList(),
+        checkinJsonMapList(
+          j['exercicios'],
+        ).map(ExecucaoExercicio.fromJson).toList(),
     evolucoesCarga:
-        checkinJsonMapList(j['evolucoesCarga']).map(EvolucaoCarga.fromJson).toList(),
+        checkinJsonMapList(
+          j['evolucoesCarga'],
+        ).map(EvolucaoCarga.fromJson).toList(),
     evolucoesPerformance:
         checkinJsonMapList(
           j['evolucoesPerformance'],
@@ -393,7 +403,10 @@ class CheckinRepository {
     return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
   }
 
-  Future<List<ExecucaoTreino>> meusTreinos({int page = 0, int size = 20}) async {
+  Future<List<ExecucaoTreino>> meusTreinos({
+    int page = 0,
+    int size = 20,
+  }) async {
     return (await meusTreinosPagina(page: page, size: size)).content;
   }
 
@@ -459,6 +472,31 @@ class CheckinRepository {
         r.data,
         'POST /api/checkin/{id}/exercicio/{treinoExercicioId}/series',
       ),
+    );
+  }
+
+  Future<ExecucaoExercicio> confirmarRestante(
+    int execucaoId,
+    int treinoExercicioId,
+  ) async {
+    final r = await _dio.post(
+      '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/confirmar-restante',
+    );
+    return ExecucaoExercicio.fromJson(
+      _requireJsonMap(
+        r.data,
+        'POST /api/checkin/{id}/exercicio/{treinoExercicioId}/confirmar-restante',
+      ),
+    );
+  }
+
+  Future<ExecucaoTreino> confirmarPlano(int treinoId) async {
+    final r = await _dio.post(
+      '/api/checkin/confirmar-plano',
+      data: {'treinoId': treinoId},
+    );
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'POST /api/checkin/confirmar-plano'),
     );
   }
 
