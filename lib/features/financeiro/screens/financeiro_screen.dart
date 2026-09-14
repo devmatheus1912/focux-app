@@ -37,6 +37,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
+  /// Incrementa para pedir abertura do form na aba Mensalidades.
+  int _novaMensalidadeToken = 0;
 
   @override
   void initState() {
@@ -73,6 +75,17 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       props: {'source': source},
     );
     setState(() => _view = FinanceiroHubView.mensalidades);
+  }
+
+  void _abrirNovaMensalidade({String source = 'hub'}) {
+    AnalyticsService.instance.track(
+      ProductEvents.financeiroMensalidadesOpened,
+      props: {'source': source},
+    );
+    setState(() {
+      _view = FinanceiroHubView.mensalidades;
+      _novaMensalidadeToken++;
+    });
   }
 
   @override
@@ -162,6 +175,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
         body: FxContentWidthLimiter(
           child: FinanceiroHubScope(
             goToMensalidades: _irParaMensalidades,
+            openNovaMensalidade: _abrirNovaMensalidade,
             child: Column(
               children: [
                 if (widget.initialAlunoId != null)
@@ -175,6 +189,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                       const FinanceiroDashboardScreen(),
                       FinanceiroMensalidadesTab(
                         initialAlunoId: widget.initialAlunoId,
+                        novaMensalidadeToken: _novaMensalidadeToken,
                       ),
                       const FinanceiroResumoScreen(),
                     ],

@@ -42,6 +42,10 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('FxEmptyAction'));
+    expect(screen, contains("'Nova mensalidade'"));
+    expect(screen, contains('openNovaMensalidade'));
+    expect(screen, isNot(contains('d.zeroCta')));
+    expect(screen, isNot(contains("'Abrir mensalidades'")));
     expect(screen, contains('take(3)'));
   });
 }

@@ -40,9 +40,15 @@ part 'financeiro_mensalidades_tab_forms.part.dart';
 part 'financeiro_mensalidades_tab_widgets.part.dart';
 
 class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
-  const FinanceiroMensalidadesTab({super.key, this.initialAlunoId});
+  const FinanceiroMensalidadesTab({
+    super.key,
+    this.initialAlunoId,
+    this.novaMensalidadeToken = 0,
+  });
 
   final int? initialAlunoId;
+  /// Quando incrementa, abre o formulário de nova mensalidade (hub empty CTA).
+  final int novaMensalidadeToken;
 
   @override
   ConsumerState<FinanceiroMensalidadesTab> createState() =>
@@ -65,12 +71,32 @@ class _FinanceiroMensalidadesTabState
   final _selecionados = <int>{};
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
+  int _handledNovaToken = 0;
 
   @override
   void initState() {
     super.initState();
     _load();
     _searchCtrl.addListener(_onSearchChanged);
+    _scheduleNovaMensalidadeIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant FinanceiroMensalidadesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.novaMensalidadeToken != oldWidget.novaMensalidadeToken) {
+      _scheduleNovaMensalidadeIfNeeded();
+    }
+  }
+
+  void _scheduleNovaMensalidadeIfNeeded() {
+    final token = widget.novaMensalidadeToken;
+    if (token <= 0 || token == _handledNovaToken) return;
+    _handledNovaToken = token;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _abrirFormularioNovaMensalidade();
+    });
   }
 
   @override
@@ -292,136 +318,150 @@ class _FinanceiroMensalidadesTabState
                       message: _erro!,
                       onRetry: () => _load(force: true),
                     )
-                    : _items.isEmpty
-                    ? _buildMensalidadesEmpty(context)
                     : Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            FxSettingsLayout.pageInset,
-                            8,
-                            FxSettingsLayout.pageInset,
-                            8,
-                          ),
-                          child: Wrap(
-                            spacing: TokensStrip.s2,
-                            runSpacing: TokensStrip.s2,
-                            children: [
-                              DashboardHomeActionChip(
-                                label: 'Atualizar atrasos',
-                                accent: primary,
-                                isDark: chrome.isDark,
-                                onPressed: _atualizarAtrasos,
-                              ),
-                              if (_items.any(
-                                (m) => financeiroStatusAberto(m.status),
-                              ))
+                        if (_items.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              8,
+                              FxSettingsLayout.pageInset,
+                              8,
+                            ),
+                            child: Wrap(
+                              spacing: TokensStrip.s2,
+                              runSpacing: TokensStrip.s2,
+                              children: [
                                 DashboardHomeActionChip(
-                                  label: financeiroLotePagoChipLabel(
-                                    modoSelecao: _modoSelecao,
-                                    selecionados: _selecionados.length,
+                                  label: 'Atualizar atrasos',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: _atualizarAtrasos,
+                                ),
+                                if (_items.any(
+                                  (m) => financeiroStatusAberto(m.status),
+                                ))
+                                  DashboardHomeActionChip(
+                                    label: financeiroLotePagoChipLabel(
+                                      modoSelecao: _modoSelecao,
+                                      selecionados: _selecionados.length,
+                                    ),
+                                    accent: EagleTokens.moneyGreen,
+                                    isDark: chrome.isDark,
+                                    onPressed: _modoSelecao
+                                        ? _confirmarLotePago
+                                        : _entrarModoLote,
                                   ),
-                                  accent: EagleTokens.moneyGreen,
-                                  isDark: chrome.isDark,
-                                  onPressed: _modoSelecao
-                                      ? _confirmarLotePago
-                                      : _entrarModoLote,
-                                ),
-                              if (_modoSelecao)
-                                DashboardHomeActionChip(
-                                  label: 'Cancelar',
-                                  accent: chrome.mute,
-                                  isDark: chrome.isDark,
-                                  onPressed: _sairModoLote,
-                                ),
-                            ],
+                                if (_modoSelecao)
+                                  DashboardHomeActionChip(
+                                    label: 'Cancelar',
+                                    accent: chrome.mute,
+                                    isDark: chrome.isDark,
+                                    onPressed: _sairModoLote,
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
                         Expanded(
-                          child: ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              0,
-                              FxSettingsLayout.pageInset,
-                              24,
-                            ),
-                            itemCount: _items.length + (_hasMore ? 1 : 0),
-                            itemBuilder: (context, i) {
-                              if (i >= _items.length) {
-                                return FxSatelliteListTile(
-                                  title:
-                                      _carregandoMais
-                                          ? 'Carregando…'
-                                          : 'Carregar mais',
-                                  titleCase: false,
-                                  onTap:
-                                      _carregandoMais ? null : _carregarMais,
-                                  leading: FxIcon(
-                                    name: 'plus',
-                                    size: 18,
-                                    color: primary,
+                          child:
+                              _items.isEmpty
+                                  ? _buildMensalidadesEmpty(context)
+                                  : ListView.builder(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      FxSettingsLayout.pageInset,
+                                      0,
+                                      FxSettingsLayout.pageInset,
+                                      24,
+                                    ),
+                                    itemCount:
+                                        _items.length + (_hasMore ? 1 : 0),
+                                    itemBuilder: (context, i) {
+                                      if (i >= _items.length) {
+                                        return FxSatelliteListTile(
+                                          title:
+                                              _carregandoMais
+                                                  ? 'Carregando…'
+                                                  : 'Carregar mais',
+                                          titleCase: false,
+                                          onTap:
+                                              _carregandoMais
+                                                  ? null
+                                                  : _carregarMais,
+                                          leading: FxIcon(
+                                            name: 'plus',
+                                            size: 18,
+                                            color: primary,
+                                          ),
+                                        );
+                                      }
+                                      final item = _items[i];
+                                      final overdue = item.status == 'ATRASADO';
+                                      final selected = _selecionados.contains(
+                                        item.alunoId,
+                                      );
+                                      return FxSatelliteListTile(
+                                        title: item.alunoNome,
+                                        subtitle: Text(
+                                          financeiroMensalidadeSubtitle(
+                                            item.status,
+                                            item.mesReferencia,
+                                          ),
+                                        ),
+                                        onTap: () => _modoSelecao
+                                            ? _toggleLote(item)
+                                            : _abrirAcoes(item),
+                                        accent:
+                                            overdue
+                                                ? EagleTokens.bad
+                                                : primary,
+                                        leading: FxIcon(
+                                          name:
+                                              _modoSelecao && selected
+                                                  ? 'circle-check'
+                                                  : overdue
+                                                  ? 'alert-triangle'
+                                                  : item.status == 'PAGO'
+                                                  ? 'circle-check'
+                                                  : 'coin',
+                                          size: 18,
+                                          color:
+                                              overdue
+                                                  ? EagleTokens.bad
+                                                  : primary,
+                                        ),
+                                        trailing: Text(
+                                          item.valor.format(
+                                            showDecimals: false,
+                                          ),
+                                          style: TextStyle(
+                                            color: chrome.ink,
+                                            fontWeight: FontWeight.w700,
+                                            fontFeatures: const [
+                                              FontFeature.tabularFigures(),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              }
-                              final item = _items[i];
-                              final overdue = item.status == 'ATRASADO';
-                              final selected = _selecionados.contains(
-                                item.alunoId,
-                              );
-                              return FxSatelliteListTile(
-                                title: item.alunoNome,
-                                subtitle: Text(
-                                  financeiroMensalidadeSubtitle(
-                                    item.status,
-                                    item.mesReferencia,
-                                  ),
-                                ),
-                                onTap: () => _modoSelecao
-                                    ? _toggleLote(item)
-                                    : _abrirAcoes(item),
-                                accent: overdue ? EagleTokens.bad : primary,
-                                leading: FxIcon(
-                                  name:
-                                      _modoSelecao && selected
-                                          ? 'circle-check'
-                                          : overdue
-                                          ? 'alert-triangle'
-                                          : item.status == 'PAGO'
-                                          ? 'circle-check'
-                                          : 'coin',
-                                  size: 18,
-                                  color:
-                                      overdue ? EagleTokens.bad : primary,
-                                ),
-                                trailing: Text(
-                                  item.valor.format(showDecimals: false),
-                                  style: TextStyle(
-                                    color: chrome.ink,
-                                    fontWeight: FontWeight.w700,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
                         ),
-                        SafeArea(
-                          top: false,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s2,
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s3,
-                            ),
-                            child: FxLiquidPrimaryButton(
-                              label: 'Nova mensalidade',
-                              onPressed: _abrirFormularioNovaMensalidade,
+                        // Empty já tem FxEmptyAction — sticky só com lista (1 P0).
+                        if (_items.isNotEmpty)
+                          SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s3,
+                              ),
+                              child: FxLiquidPrimaryButton(
+                                label: 'Nova mensalidade',
+                                onPressed: _abrirFormularioNovaMensalidade,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
           ),
