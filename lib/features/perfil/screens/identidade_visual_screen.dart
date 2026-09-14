@@ -49,9 +49,6 @@ class IdentidadeVisualScreen extends ConsumerStatefulWidget {
 
 class _IdentidadeVisualScreenState
     extends ConsumerState<IdentidadeVisualScreen> {
-  final _descCtrl = TextEditingController();
-  final _espCtrl = TextEditingController();
-  final _instaCtrl = TextEditingController();
   final _sloganCtrl = TextEditingController();
 
   late CuratedBrandPalette _palette = CuratedBrandPalette.focuxDefault;
@@ -60,9 +57,6 @@ class _IdentidadeVisualScreenState
   bool _perfilLoaded = false;
   String? _logoUrl;
   String _baselineSlogan = '';
-  String _baselineDesc = '';
-  String _baselineEsp = '';
-  String _baselineInsta = '';
   String? _baselineLogo;
   CuratedBrandPalette? _baselinePalette;
 
@@ -73,9 +67,6 @@ class _IdentidadeVisualScreenState
   void initState() {
     super.initState();
     _sloganCtrl.addListener(_onFieldChanged);
-    _descCtrl.addListener(_onFieldChanged);
-    _espCtrl.addListener(_onFieldChanged);
-    _instaCtrl.addListener(_onFieldChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(perfilProvider);
     });
@@ -83,9 +74,6 @@ class _IdentidadeVisualScreenState
 
   @override
   void dispose() {
-    _descCtrl.dispose();
-    _espCtrl.dispose();
-    _instaCtrl.dispose();
     _sloganCtrl.dispose();
     super.dispose();
   }
@@ -97,18 +85,12 @@ class _IdentidadeVisualScreenState
   bool get _dirty {
     if (!_perfilLoaded) return false;
     return _sloganCtrl.text != _baselineSlogan ||
-        _descCtrl.text != _baselineDesc ||
-        _espCtrl.text != _baselineEsp ||
-        _instaCtrl.text != _baselineInsta ||
         _logoUrl != _baselineLogo ||
         _palette != _baselinePalette;
   }
 
   void _snapshotBaseline() {
     _baselineSlogan = _sloganCtrl.text;
-    _baselineDesc = _descCtrl.text;
-    _baselineEsp = _espCtrl.text;
-    _baselineInsta = _instaCtrl.text;
     _baselineLogo = _logoUrl;
     _baselinePalette = _palette;
   }
@@ -127,9 +109,6 @@ class _IdentidadeVisualScreenState
   }
 
   void _applyPerfil(PerfilPersonal perfil) {
-    _descCtrl.text = perfil.descricaoProfissional ?? '';
-    _espCtrl.text = perfil.especialidades ?? '';
-    _instaCtrl.text = perfil.instagram ?? '';
     _sloganCtrl.text = perfil.slogan ?? '';
     _logoUrl = perfil.logoUrl;
 
@@ -344,54 +323,6 @@ class _IdentidadeVisualScreenState
                                     ),
                                   ),
                                 ],
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          ShellSurface(
-                            accent: _corPrimaria,
-                            padding: const EdgeInsets.all(18),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _PanelTitle(
-                                  icon: Icons.badge_outlined,
-                                  title: 'Perfil profissional',
-                                  subtitle:
-                                      identidadePerfilProfissionalSubtitle(),
-                                  accent: _corPrimaria,
-                                  mute: chrome.mute,
-                                ),
-                                const SizedBox(height: 18),
-                                _BrandField(
-                                  label: 'Descrição profissional',
-                                  controller: _descCtrl,
-                                  enabled: hasWhiteLabel,
-                                  accent: _corPrimaria,
-                                  hint:
-                                      'Trajetória, metodologia, diferencial...',
-                                  maxLines: 4,
-                                  maxLength: 500,
-                                ),
-                                const SizedBox(height: 14),
-                                _BrandField(
-                                  label: 'Especialidades',
-                                  controller: _espCtrl,
-                                  enabled: hasWhiteLabel,
-                                  accent: _corPrimaria,
-                                  icon: Icons.fitness_center_outlined,
-                                  hint:
-                                      'Musculação, Funcional, Emagrecimento...',
-                                ),
-                                const SizedBox(height: 14),
-                                _BrandField(
-                                  label: 'Instagram',
-                                  controller: _instaCtrl,
-                                  enabled: hasWhiteLabel,
-                                  accent: _corPrimaria,
-                                  icon: Icons.alternate_email,
-                                  hint: '@seuperfil',
-                                ),
                               ],
                             ),
                           ),

@@ -192,7 +192,7 @@ class _CheckinTodayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final count = home.checkinsHoje;
     return FxStripCard(
       emphasize: true,

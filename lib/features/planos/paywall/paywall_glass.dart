@@ -40,7 +40,7 @@ class PaywallGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tint = accent ?? TokensStrip.primary;
+    final tint = accent ?? Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget surface = expand
         ? Container(
@@ -104,7 +104,8 @@ class _TierGlowWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!enabled || TokensStrip.prefersReducedMotion(context)) return child;
-    final isBrand = color == TokensStrip.primary;
+    final brand = Theme.of(context).colorScheme.primary;
+    final isBrand = color == brand || color == TokensStrip.primary;
     final s = (isBrand ? 0.28 : 0.14) * strength.clamp(0.0, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -39,14 +39,14 @@ class _FinanceiroKpiGroup extends StatelessWidget {
                   Text(
                     'Recebido · $mes',
                     style: FocuxHubTypography.chip(
-                      ShellChrome.forDark(isDark).mute,
+                      ShellChrome.forBrightness(context, isDark).mute,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     recebido,
                     style: FocuxHubTypography.kpi(
-                      color: ShellChrome.forDark(isDark).ink,
+                      color: ShellChrome.forBrightness(context, isDark).ink,
                       fontSize: FocuxHubTypography.metricLg,
                     ),
                   ),
@@ -58,7 +58,7 @@ class _FinanceiroKpiGroup extends StatelessWidget {
                         ? 'Faltam $pendenteLabel para a meta'
                         : 'Meta do mês sob controle',
                     style: FocuxHubTypography.body(
-                      color: ShellChrome.forDark(isDark).ink,
+                      color: ShellChrome.forBrightness(context, isDark).ink,
                     ).copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: TokensStrip.s3),

@@ -398,7 +398,7 @@ class _WinbackFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final canOpen = first.alunoId != null && first.alunoId! > 0;
     return FxStripCard(
       emphasize: false,

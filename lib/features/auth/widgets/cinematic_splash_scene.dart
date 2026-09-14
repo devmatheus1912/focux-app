@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/focux_brand_tagline.dart';
 import '../../../core/widgets/focux_official_logo.dart';
@@ -212,7 +211,7 @@ class _LoadingRail extends StatelessWidget {
                 borderRadius: BorderRadius.circular(99),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: heroTealSurface(0.06),
+                    color: primary.withValues(alpha: 0.06),
                     border: Border.all(color: primary.withValues(alpha: 0.14)),
                   ),
                   child: Align(

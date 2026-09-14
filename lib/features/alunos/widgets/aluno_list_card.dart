@@ -89,7 +89,7 @@ class AlunoListCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final secondaryInk = alunoListSecondaryInk(isDark);

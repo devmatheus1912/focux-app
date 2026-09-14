@@ -21,6 +21,7 @@ import '../../../core/widgets/cinematic_mesh_background.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/mesh_scope.dart';
+import '../../perfil/utils/brand_slogan_display.dart';
 import '../utils/auth_layout.dart';
 
 export '../utils/auth_layout.dart'
@@ -60,11 +61,15 @@ class AuthShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final secondary = Theme.of(context).colorScheme.secondary;
     // Mesh é sempre escuro; o tema do app (light no celular) não pode
     // pintar card branco com tinta branca por cima.
     final content =
         forceDark
-            ? Theme(data: AppTheme.buildDarkTheme(primary), child: child)
+            ? Theme(
+              data: AppTheme.buildDarkTheme(primary, secondary: secondary),
+              child: child,
+            )
             : child;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: FocuxSystemChrome.dark,
@@ -162,6 +167,7 @@ class AuthWordmark extends ConsumerWidget {
     final hideFocux = ref.watch(hideFocuxBrandingProvider);
     final appName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
+    final slogan = ref.watch(sloganProvider)?.trim();
     final align = center ? TextAlign.center : TextAlign.left;
     final crossAxis =
         center ? CrossAxisAlignment.center : CrossAxisAlignment.start;
@@ -173,6 +179,10 @@ class AuthWordmark extends ConsumerWidget {
               : (personalName != null && personalName.trim().isNotEmpty)
               ? personalName.trim()
               : 'Meu Personal';
+      final sloganText =
+          (slogan != null && slogan.isNotEmpty)
+              ? formatBrandSloganForDisplay(slogan)
+              : null;
       return Column(
         crossAxisAlignment: crossAxis,
         children: [
@@ -188,13 +198,50 @@ class AuthWordmark extends ConsumerWidget {
           ),
           if (showTagline) ...[
             const SizedBox(height: 10),
-            FocuxBrandTagline(center: center, fontSize: taglineSize),
+            if (sloganText != null)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: Text(
+                  sloganText,
+                  textAlign: align,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: Colors.white.withValues(alpha: 0.88),
+                  ).copyWith(
+                    fontSize: taglineSize,
+                    fontWeight: FontWeight.w500,
+                    height: 1.45,
+                  ),
+                ),
+              )
+            else
+              FocuxBrandTagline(center: center, fontSize: taglineSize),
           ],
         ],
       );
     }
 
     if (!showTagline) return const SizedBox.shrink();
+
+    final sloganText =
+        (slogan != null && slogan.isNotEmpty)
+            ? formatBrandSloganForDisplay(slogan)
+            : null;
+    if (sloganText != null) {
+      return ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Text(
+          sloganText,
+          textAlign: align,
+          style: FocuxHubTypography.bodyMuted(
+            color: Colors.white.withValues(alpha: 0.88),
+          ).copyWith(
+            fontSize: taglineSize,
+            fontWeight: FontWeight.w500,
+            height: 1.45,
+          ),
+        ),
+      );
+    }
 
     return FocuxBrandTagline(center: center, fontSize: taglineSize);
   }

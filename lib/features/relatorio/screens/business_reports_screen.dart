@@ -277,7 +277,7 @@ class _BusinessFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     return FxStripCard(
       emphasize: true,
       semanticsLabel: 'Recebido ${businessMoneyLabel(snap.mrrAtual)}',

@@ -112,7 +112,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
       builder: (sheetContext) {
         final isDark = Theme.of(sheetContext).brightness == Brightness.dark;
         final primary = Theme.of(sheetContext).colorScheme.primary;
-        final mute = ShellChrome.forDark(isDark).mute;
+        final mute = ShellChrome.forBrightness(context, isDark).mute;
         final marco = trilhaProximoMarco(trilha);
         final maxHeight =
             MediaQuery.sizeOf(sheetContext).height *
@@ -438,7 +438,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                             Text(
                               'Próximo marco',
                               style: FocuxHubTypography.chip(
-                                ShellChrome.forDark(isDark).mute,
+                                ShellChrome.forBrightness(context, isDark).mute,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -446,14 +446,14 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                               marco.titulo,
                               style: FocuxHubTypography.sectionTitle(
                                 context,
-                                color: ShellChrome.forDark(isDark).ink,
+                                color: ShellChrome.forBrightness(context, isDark).ink,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               focus.titulo,
                               style: FocuxHubTypography.bodyMuted(
-                                color: ShellChrome.forDark(isDark).mute,
+                                color: ShellChrome.forBrightness(context, isDark).mute,
                               ),
                             ),
                             const SizedBox(height: TokensStrip.s3),

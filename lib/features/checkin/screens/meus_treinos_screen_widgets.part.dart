@@ -42,7 +42,7 @@ class _TrainingHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final progresso =
@@ -135,7 +135,7 @@ class _TrainingPlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final done = treino.exercicios.where((e) => e.concluido).length;
@@ -324,7 +324,7 @@ void _showTrainingPendingSheet({
   required bool isDark,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
-  final chrome = ShellChrome.forDark(isDark);
+  final chrome = ShellChrome.forBrightness(context, isDark);
   final ink = chrome.ink;
 
   showFxHomeSheet<void>(
@@ -392,7 +392,7 @@ class _TrainingReadinessSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final hasExercises = totalExercicios > 0;
@@ -510,7 +510,7 @@ class _ReadinessMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
 

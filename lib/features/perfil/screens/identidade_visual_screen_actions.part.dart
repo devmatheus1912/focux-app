@@ -94,9 +94,6 @@ extension on _IdentidadeVisualScreenState {
     try {
       final dio = ref.read(apiClientProvider).dio;
       final body = <String, dynamic>{
-        'descricaoProfissional': _descCtrl.text.trim(),
-        'especialidades': _espCtrl.text.trim(),
-        'instagram': _instaCtrl.text.trim(),
         'corPrimaria': BrandPalette.toHex(_corPrimaria),
         'corSecundaria': BrandPalette.toHex(_corSecundaria),
         'slogan': _sloganCtrl.text.trim(),
@@ -104,6 +101,10 @@ extension on _IdentidadeVisualScreenState {
       if (_logoUrl != null) body['logoUrl'] = _logoUrl;
       await dio.put('/api/personal/identidade', data: body);
       ref.read(primaryColorProvider.notifier).state = _corPrimaria;
+      ref.read(secondaryColorProvider.notifier).state = _corSecundaria;
+      final slogan = _sloganCtrl.text.trim();
+      ref.read(sloganProvider.notifier).state =
+          slogan.isNotEmpty ? slogan : null;
       if (_logoUrl != null && _logoUrl!.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = _logoUrl;
       }

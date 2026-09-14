@@ -415,7 +415,8 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
                         index: 3,
                         child: FxSettingsGroup(
                           header: 'Bio',
-                          caption: 'Apresentação curta na landing (até 500).',
+                          caption:
+                              'Bio, especialidades e Instagram — usados no app e na landing.',
                           children: [
                             _PerfilFormField(
                               controller: _bioCtrl,

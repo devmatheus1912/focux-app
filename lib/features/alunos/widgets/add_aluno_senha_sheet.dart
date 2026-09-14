@@ -21,7 +21,7 @@ Future<void> showAddAlunoSenhaSheet({
   String? personalSlug,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final chrome = ShellChrome.forDark(isDark);
+  final chrome = ShellChrome.forBrightness(context, isDark);
   final senha = aluno.senhaProvisoria ?? '';
   final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
   final hasWhatsapp = whatsappNumber.isNotEmpty;

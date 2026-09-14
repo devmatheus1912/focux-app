@@ -14,7 +14,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
@@ -220,7 +220,7 @@ class _AssignWorkoutSheetState extends State<_AssignWorkoutSheet> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
 
     return TreinoHomeSheetSurface(
       isDark: isDark,

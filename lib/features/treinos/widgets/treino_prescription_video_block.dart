@@ -203,7 +203,7 @@ class _TreinoPrescriptionVideoBlockState
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(widget.isDark);
+    final chrome = ShellChrome.forBrightness(context, widget.isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final brand = BrandPalette.softened(primary);
     final locked = widget.busy || _mediaLoading;

@@ -312,7 +312,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   Widget _buildDashboard(bool isDark) {
     final s = _summary!;
     final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
       onRefresh: _refreshDashboard,
@@ -479,7 +479,7 @@ class _SaudeSoftSyncBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     return Material(
       color: Colors.transparent,
       child: Container(

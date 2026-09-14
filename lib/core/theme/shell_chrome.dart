@@ -6,9 +6,12 @@ import 'tokens_strip.dart';
 
 /// Dual-theme Liquid Glass surface system for shell tabs over cinematic mesh.
 class ShellPalette {
-  const ShellPalette(this.isDark);
+  const ShellPalette(this.isDark, {this.brand = EagleTokens.brand});
 
   final bool isDark;
+
+  /// Active brand accent (white-label primary, else Focux teal).
+  final Color brand;
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
   Color get mute => isDark ? EagleTokens.darkInkMute : const Color(0xFF374151);
@@ -27,6 +30,7 @@ class ShellPalette {
     Color? accent,
     int elevationLevel = 3,
   }) {
+    final glow = accent ?? brand;
     if (isDark) {
       return TokensStrip.glassPanel(
         dark: true,
@@ -48,7 +52,7 @@ class ShellPalette {
       boxShadow: [
         ...TokensStrip.cardShadow(),
         ...TokensStrip.coloredDepthGlow(
-          accent ?? TokensStrip.primary,
+          glow,
           strength: accent != null ? 0.32 : 0.22,
         ),
       ],
@@ -60,7 +64,7 @@ class ShellPalette {
     Color? primary,
     double radius = TokensStrip.rCard,
   }) {
-    final accent = primary ?? EagleTokens.brandAccent;
+    final accent = primary ?? brand;
     if (selected) {
       return BoxDecoration(
         color: accent.withValues(alpha: isDark ? 0.20 : 0.10),
@@ -82,15 +86,16 @@ class ShellPalette {
         dark: true,
         radius: radius,
         elevationLevel: 4,
+        accent: brand,
       );
     }
     return BoxDecoration(
       color: TokensStrip.cardBg,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: TokensStrip.primary.withValues(alpha: 0.14)),
+      border: Border.all(color: brand.withValues(alpha: 0.14)),
       boxShadow: [
         ...TokensStrip.cardShadow(),
-        ...TokensStrip.coloredDepthGlow(TokensStrip.primary, strength: 0.22),
+        ...TokensStrip.coloredDepthGlow(brand, strength: 0.22),
       ],
     );
   }
@@ -109,7 +114,7 @@ class ShellPalette {
   }) => panel(radius: radius, accent: accent, elevationLevel: 12);
 
   BoxDecoration searchField({Color? primary, double radius = TokensStrip.rMd}) {
-    final accent = primary ?? EagleTokens.brandAccent;
+    final accent = primary ?? brand;
     return TokensStrip.glassPanel(
       dark: isDark,
       radius: radius,
@@ -120,10 +125,21 @@ class ShellPalette {
 }
 
 abstract class ShellChrome {
-  static ShellPalette of(BuildContext context) =>
-      ShellPalette(Theme.of(context).brightness == Brightness.dark);
+  static ShellPalette of(BuildContext context) {
+    final theme = Theme.of(context);
+    return ShellPalette(
+      theme.brightness == Brightness.dark,
+      brand: theme.colorScheme.primary,
+    );
+  }
 
-  static ShellPalette forDark(bool isDark) => ShellPalette(isDark);
+  /// Prefer when [isDark] may differ from [ThemeData.brightness].
+  static ShellPalette forBrightness(BuildContext context, bool isDark) =>
+      ShellPalette(isDark, brand: Theme.of(context).colorScheme.primary);
+
+  /// Legacy — prefer [of] / [forBrightness] so white-label brand propagates.
+  static ShellPalette forDark(bool isDark, {Color? brand}) =>
+      ShellPalette(isDark, brand: brand ?? EagleTokens.brand);
 }
 
 /// Circular header control — strip card (light) / glass (dark).
@@ -146,6 +162,7 @@ class ShellHeaderIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final brand = Theme.of(context).colorScheme.primary;
     final radius = size / 2;
     final compact = size <= 38;
     final dotSize = compact ? 7.0 : 8.0;
@@ -186,7 +203,7 @@ class ShellHeaderIconButton extends StatelessWidget {
                             )
                             : null,
                     decoration: BoxDecoration(
-                      color: TokensStrip.primary,
+                      color: brand,
                       shape:
                           badgeCount > 9 ? BoxShape.rectangle : BoxShape.circle,
                       borderRadius:
@@ -199,7 +216,7 @@ class ShellHeaderIconButton extends StatelessWidget {
                         width: compact ? 1.25 : 1.5,
                       ),
                       boxShadow: TokensStrip.coloredDepthGlow(
-                        TokensStrip.primary,
+                        brand,
                         strength: compact ? 0.28 : 0.35,
                       ),
                     ),

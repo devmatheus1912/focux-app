@@ -41,16 +41,13 @@ String identidadeDiscardConfirm() => 'Sair';
 String identidadeHelpTitle() => 'Identidade visual';
 
 String identidadeHelpSubtitle() =>
-    'Marca no app do aluno e no login. Landing tem tela própria.';
+    'Marca no app do aluno e no login. Bio e redes ficam em Editar perfil.';
 
 String identidadeHelpMarcaBody() =>
-    'Logo, slogan e paleta curada no app. Página de captura fica em Landing.';
+    'Logo, slogan e paleta curada. Landing e bio profissional têm telas próprias.';
 
 String identidadeHelpSalvarBody() =>
     'Confirme antes de gravar. Restaurar cores aplica o padrão Focux na hora.';
 
 String identidadeLogoSloganSubtitle() =>
-    'Logo no chrome do app. Slogan no home do aluno (e na landing ao publicar).';
-
-String identidadePerfilProfissionalSubtitle() =>
-    'Bio e canais no app e convites — não substitui o editor de landing.';
+    'Logo no chrome do app. Slogan no login white-label e no home do aluno.';

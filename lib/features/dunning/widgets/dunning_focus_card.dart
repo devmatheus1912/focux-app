@@ -33,7 +33,7 @@ class DunningFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final abertas = snap.abertas;
     return FxStripCard(
       emphasize: true,
