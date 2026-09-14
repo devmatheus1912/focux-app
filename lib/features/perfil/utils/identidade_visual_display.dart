@@ -19,8 +19,6 @@ String identidadeSalvarConfirmTitle() => 'Salvar identidade visual?';
 String identidadeSalvarConfirmMessage() =>
     'Logo, cores e slogan passam a aparecer no app e no login dos alunos.';
 
-String identidadeLandingEditorLabel() => 'Landing page';
-
 String identidadeRestaurarCoresLabel() => 'Restaurar cores padrão';
 
 String identidadeRestaurarConfirmTitle() => 'Restaurar cores padrão?';
@@ -43,10 +41,16 @@ String identidadeDiscardConfirm() => 'Sair';
 String identidadeHelpTitle() => 'Identidade visual';
 
 String identidadeHelpSubtitle() =>
-    'Marca no app do aluno, no login e na landing.';
+    'Marca no app do aluno e no login. Landing tem tela própria.';
 
 String identidadeHelpMarcaBody() =>
-    'Logo, slogan e paleta curada. Só o plano com marca branca publica.';
+    'Logo, slogan e paleta curada no app. Página de captura fica em Landing.';
 
 String identidadeHelpSalvarBody() =>
     'Confirme antes de gravar. Restaurar cores aplica o padrão Focux na hora.';
+
+String identidadeLogoSloganSubtitle() =>
+    'Logo no chrome do app. Slogan no home do aluno (e na landing ao publicar).';
+
+String identidadePerfilProfissionalSubtitle() =>
+    'Bio e canais no app e convites — não substitui o editor de landing.';

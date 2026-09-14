@@ -17,8 +17,6 @@ import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -26,13 +24,13 @@ import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/brand_slogan_display.dart';
 import '../utils/identidade_visual_display.dart';
-import '../../subscription/utils/landing_editor_access.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_typography.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/utils/dashboard_readability.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 
@@ -260,23 +258,6 @@ class _IdentidadeVisualScreenState
                             logoUrl: _logoUrl,
                             paletteName: _palette.name,
                           ),
-                          const SizedBox(height: 12),
-                          if (hasWhiteLabel)
-                            FxSettingsGroup(
-                              children: [
-                                FxSettingsTile(
-                                  fxIcon: 'article',
-                                  label: identidadeLandingEditorLabel(),
-                                  value: 'Landing',
-                                  showDivider: false,
-                                  onTap:
-                                      () => openLandingEditorOrUpgrade(
-                                        context,
-                                        ref,
-                                      ),
-                                ),
-                              ],
-                            ),
                           const SizedBox(height: TokensStrip.s4),
                           ShellSurface(
                             accent: _corPrimaria,
@@ -287,8 +268,7 @@ class _IdentidadeVisualScreenState
                                 _PanelTitle(
                                   icon: Icons.auto_awesome_outlined,
                                   title: 'Logo e slogan',
-                                  subtitle:
-                                      'Aparece no app, login e áreas do aluno.',
+                                  subtitle: identidadeLogoSloganSubtitle(),
                                   accent: _corPrimaria,
                                   mute: chrome.mute,
                                 ),
@@ -378,7 +358,7 @@ class _IdentidadeVisualScreenState
                                   icon: Icons.badge_outlined,
                                   title: 'Perfil profissional',
                                   subtitle:
-                                      'Bio e canais usados no app e convites.',
+                                      identidadePerfilProfissionalSubtitle(),
                                   accent: _corPrimaria,
                                   mute: chrome.mute,
                                 ),
