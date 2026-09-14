@@ -13,6 +13,7 @@ import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
 import '../../features/perfil/screens/perfil_ferramentas_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
+import '../../features/perfil/screens/brand_public_identity_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
 import '../../features/convites/screens/convites_screen.dart';
 import '../../features/checkin/screens/checkin_personal_hub_screen.dart';
@@ -517,6 +518,17 @@ RouteBase buildChromeShellRoute() {
                     perfil: state.extra as PerfilPersonal,
                   ),
                 ),
+          ),
+          GoRoute(
+            path: '/perfil/link-publico',
+            pageBuilder: (context, state) => fxTransitionPage(
+              state: state,
+              child: BrandPublicIdentityScreen(
+                perfil: state.extra is PerfilPersonal
+                    ? state.extra as PerfilPersonal
+                    : null,
+              ),
+            ),
           ),
           GoRoute(
             path: '/perfil/wallet',

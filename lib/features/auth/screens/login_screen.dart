@@ -30,6 +30,7 @@ import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/apple_sign_in_button.dart';
+import '../widgets/apple_share_email_prompt.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 

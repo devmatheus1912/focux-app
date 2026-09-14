@@ -149,6 +149,7 @@ bool isPersonalOnlyLocation(String path) {
     '/perfil',
     '/configuracoes',
     '/perfil/editar',
+    '/perfil/link-publico',
     '/perfil/wallet',
     '/perfil/ferramentas',
     '/perfil/mfa',

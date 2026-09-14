@@ -111,6 +111,8 @@ class PerfilPersonal {
   final List<LandingFaqItem> faq;
   final int? readinessPercent;
   final List<String>? readinessMissing;
+  final bool slugEditable;
+  final bool needsBrandPublicIdentity;
   final ResumoMensal? resumoMensal;
 
   PerfilPersonal({
@@ -162,6 +164,8 @@ class PerfilPersonal {
     this.faq = const [],
     this.readinessPercent,
     this.readinessMissing,
+    this.slugEditable = false,
+    this.needsBrandPublicIdentity = false,
     this.resumoMensal,
   });
 
@@ -230,6 +234,9 @@ class PerfilPersonal {
         (json['readinessMissing'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList(),
+    slugEditable: json['slugEditable'] as bool? ?? false,
+    needsBrandPublicIdentity:
+        json['needsBrandPublicIdentity'] as bool? ?? false,
     resumoMensal:
         json['resumoMensal'] is Map
             ? ResumoMensal.fromJson(
@@ -264,6 +271,7 @@ class PerfilRepository {
     String? descricaoProfissional,
     String? especialidades,
     String? instagram,
+    String? slug,
   }) async {
     final response = await _dio.put(
       '/api/personal/perfil',
@@ -278,6 +286,7 @@ class PerfilRepository {
           'descricaoProfissional': descricaoProfissional,
         if (especialidades != null) 'especialidades': especialidades,
         if (instagram != null) 'instagram': instagram,
+        if (slug != null) 'slug': slug,
       },
     );
     return PerfilPersonal.fromJson(response.data as Map<String, dynamic>);

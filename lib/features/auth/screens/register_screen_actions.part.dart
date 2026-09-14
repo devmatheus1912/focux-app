@@ -214,6 +214,9 @@ extension on _RegisterScreenState {
   Future<void> _submitApple() async {
     if (_loading || _loadingGoogle || _loadingApple) return;
 
+    final shareOk = await confirmAppleShareEmail(context);
+    if (!shareOk || !mounted) return;
+
     setState(() {
       _loadingApple = true;
       _error = null;
@@ -241,6 +244,15 @@ extension on _RegisterScreenState {
           props: {'role': 'personal', 'method': 'apple'},
         ),
       );
+      try {
+        final perfil = await ref.read(perfilProvider.future);
+        if (!mounted) return;
+        if (perfil.needsBrandPublicIdentity) {
+          context.go('/perfil/link-publico');
+          return;
+        }
+      } catch (_) {}
+      if (!mounted) return;
       context.go('/dashboard/personal');
     } catch (error) {
       HapticFeedback.heavyImpact();

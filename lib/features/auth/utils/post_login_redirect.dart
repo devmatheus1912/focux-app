@@ -79,6 +79,7 @@ bool isPersonalPath(String path) {
       path == '/relatorios/global' ||
       path == '/suporte' ||
       path == '/perfil' ||
+      path == '/perfil/link-publico' ||
       path == '/perfil/mfa' ||
       path == '/identidade-visual' ||
       path == '/setup/identidade' ||

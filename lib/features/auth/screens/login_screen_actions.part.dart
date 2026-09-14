@@ -77,10 +77,9 @@ extension on _LoginScreenState {
         if (await _maybeOpenMfa(result, method: 'password')) return;
         if (!mounted) return;
         _trackLogin(success: true, method: 'password');
-        final dest = _postLoginRedirect(context, isAluno: false);
         await _prefetchPersonalAfterLogin();
         if (!mounted) return;
-        context.go(dest);
+        context.go(await _personalPostLoginDestination());
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -154,10 +153,9 @@ extension on _LoginScreenState {
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
-        final dest = _postLoginRedirect(context, isAluno: false);
         await _prefetchPersonalAfterLogin();
         if (!mounted) return;
-        context.go(dest);
+        context.go(await _personalPostLoginDestination());
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -175,6 +173,8 @@ extension on _LoginScreenState {
 
   Future<void> _submitApple() async {
     if (_loading || _loadingGoogle || _loadingApple) return;
+    final shareOk = await confirmAppleShareEmail(context);
+    if (!shareOk || !mounted) return;
     setState(() {
       _loadingApple = true;
       _error = null;
@@ -206,10 +206,9 @@ extension on _LoginScreenState {
       if (_isAluno) {
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
-        final dest = _postLoginRedirect(context, isAluno: false);
         await _prefetchPersonalAfterLogin();
         if (!mounted) return;
-        context.go(dest);
+        context.go(await _personalPostLoginDestination());
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
@@ -231,6 +230,16 @@ extension on _LoginScreenState {
     final from = GoRouterState.of(context).uri.queryParameters['from'];
     if (from == null) return fallback;
     return safePostLoginPath(from, isAluno: isAluno) ?? fallback;
+  }
+
+  Future<String> _personalPostLoginDestination() async {
+    try {
+      final perfil = ref.read(perfilProvider).valueOrNull;
+      if (perfil?.needsBrandPublicIdentity == true) {
+        return '/perfil/link-publico';
+      }
+    } catch (_) {}
+    return _postLoginRedirect(context, isAluno: false);
   }
 
   Future<void> _prefetchPersonalAfterLogin() async {

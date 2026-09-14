@@ -101,15 +101,17 @@ class Env {
     return base;
   }
 
-  /// Landing HTML pública servida pelo backend (`/p/{slug}`).
-  static String landingPageUrl(String slug) => '$_webBase/p/$slug';
+  /// Landing HTML pública — sempre host de marca (nunca Railway na URL compartilhada).
+  static String landingPageUrl(String slug) =>
+      'https://$publicWebDisplayHost/p/$slug';
 
   /// Link de acesso do aluno com slug.
   /// Usa `/p/{slug}` (App Link já registrado); no app redireciona para login.
   static String alunoLoginUrl(String slug) => landingPageUrl(slug.trim());
 
   /// Página de captura de leads (`/c/{slug}`).
-  static String capturaPageUrl(String slug) => '$_webBase/c/$slug';
+  static String capturaPageUrl(String slug) =>
+      'https://$publicWebDisplayHost/c/$slug';
 
   static const String _brandWebHost = 'focuxpersonal.com';
 
