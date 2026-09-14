@@ -295,24 +295,10 @@ extension on _LandingEditorScreenState {
         FeedbackHelper.showWarn(context, 'Preview indisponível ainda.');
         return;
       }
-      final uri = Uri.dataFromString(
-        html,
-        mimeType: 'text/html',
-        encoding: utf8,
-      );
-      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!mounted) return;
-      if (!opened) {
-        FeedbackHelper.showWarn(context, 'Não foi possível abrir o preview.');
-        return;
-      }
       unawaited(
         AnalyticsService.instance.track(ProductEvents.landingPreviewOpened),
       );
-      FeedbackHelper.showInfo(
-        context,
-        'Abrindo preview. Publique para o link canônico.',
-      );
+      await openLandingPreviewScreen(context, html: html);
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));

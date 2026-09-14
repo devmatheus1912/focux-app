@@ -291,8 +291,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         FxStaggerItem(
           index: 5,
           child: FxSettingsGroup(
-            header: 'Contato',
-            caption: 'CTA da página e redes.',
+            header: 'Contato da vitrine',
+            caption:
+                'Só na página pública. Telefone e Instagram do app ficam em Editar perfil.',
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -310,7 +311,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                       inputFormatters: [BrPhone.formatter()],
                       decoration: FxInputDeco.build(
                         context,
-                        'WhatsApp',
+                        'WhatsApp do CTA',
                         hint: '(11) 99999-9999',
                         icon: Icons.chat_outlined,
                       ),
@@ -321,7 +322,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                       textInputAction: TextInputAction.done,
                       decoration: FxInputDeco.build(
                         context,
-                        'Instagram',
+                        'Instagram da página',
                         hint: 'seu.usuario',
                         icon: Icons.camera_alt_outlined,
                       ),

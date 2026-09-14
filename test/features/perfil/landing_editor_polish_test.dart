@@ -35,6 +35,8 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('ProductEvents.landingViewed'));
     expect(screen, contains('copyLandingLink'));
+    expect(screen, contains('openLandingPreviewScreen'));
+    expect(screen, contains('Contato da vitrine'));
     expect(screen, isNot(contains('AnimatedPadding')));
   });
 }
