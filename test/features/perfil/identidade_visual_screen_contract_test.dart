@@ -44,6 +44,8 @@ void main() {
     expect(find.text('Identidade Visual'), findsOneWidget);
     expect(find.text(identidadeSalvarLabel(isSetup: false)), findsOneWidget);
     expect(find.textContaining('Visível no app do aluno'), findsOneWidget);
+    expect(find.text(identidadeLightPreviewLabel()), findsOneWidget);
+    expect(find.text(identidadeDarkPreviewLabel()), findsOneWidget);
     expect(find.text('Assinar Enterprise'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsWidgets);
   });
