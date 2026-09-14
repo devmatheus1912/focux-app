@@ -48,9 +48,11 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('identidadeHasWhiteLabel'));
     expect(screen, contains('Assinar Enterprise'));
-    expect(screen, contains('_LiveBrandHero'));
+    expect(screen, contains('_PaletteThemePreviewPair'));
+    expect(screen, contains('_PaletteThemePreview'));
     expect(screen, contains('_CuratedPaletteGrid'));
-    expect(screen, contains('_PaletteDarkPreview'));
+    expect(screen, isNot(contains('_LiveBrandHero')));
+    expect(screen, isNot(contains('_PaletteDarkPreview')));
     expect(screen, contains('_LogoUploadRing'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxFormStickyBar'));

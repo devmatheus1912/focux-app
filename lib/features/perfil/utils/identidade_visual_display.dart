@@ -60,7 +60,9 @@ String identidadeAlunoVisibilityLabel() => 'Visível no app do aluno';
 String identidadePaletteSubtitle() =>
     'Acento visível no claro e no escuro — o login é sempre escuro.';
 
-String identidadeDarkPreviewLabel() => 'Assim no modo escuro e no login';
+String identidadeLightPreviewLabel() => 'Modo claro';
+
+String identidadeDarkPreviewLabel() => 'Modo escuro · login';
 
 Duration identidadeHeroAnimDuration({required bool reduceMotion}) =>
     reduceMotion ? Duration.zero : const Duration(milliseconds: 320);
