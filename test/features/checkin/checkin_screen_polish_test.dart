@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/widgets/checkin_timer_widgets.dart';
 
 import '../../support/screen_source_bundle.dart';
 
@@ -53,10 +55,7 @@ void main() {
       readScreenSourceBundle(
         'lib/features/checkin/widgets/checkin_timer_widgets.dart',
       ),
-      allOf(
-        contains('class CheckinRestBanner'),
-        isNot(contains('SafeArea(')),
-      ),
+      allOf(contains('class CheckinRestBanner'), isNot(contains('SafeArea('))),
     );
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
@@ -134,6 +133,61 @@ void main() {
     expect(screen, contains('alignment: Alignment.topCenter'));
     expect(screen, contains('onOpenTips:'));
     expect(screen, contains('CheckinSerieCard'));
+  });
+
+  test('faixa de descanso não cobre o toque para trocar', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/checkin/screens/checkin_screen.dart',
+    );
+    expect(screen, isNot(contains('Positioned(')));
+    expect(screen, isNot(contains('Stack(')));
+    expect(screen, contains('if (_showRestTimer)'));
+    expect(
+      screen.indexOf('CheckinRestBanner('),
+      lessThan(screen.indexOf('CheckinSerieCard(')),
+    );
+    final timers = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_timer_widgets.dart',
+    );
+    expect(timers, contains('this.onTrocar'));
+    expect(timers, contains("child: const Text('Trocar')"));
+  });
+
+  testWidgets('Trocar e o título ficam tocáveis durante o descanso', (
+    tester,
+  ) async {
+    var trocarTaps = 0;
+    var titleTaps = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              CheckinRestBanner(
+                seconds: 45,
+                onSkip: () {},
+                onTrocar: () => trocarTaps++,
+              ),
+              GestureDetector(
+                onTap: () => titleTaps++,
+                behavior: HitTestBehavior.opaque,
+                child: const SizedBox(
+                  width: double.infinity,
+                  height: 80,
+                  child: Center(child: Text('Supino reto')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Trocar'));
+    await tester.tap(find.text('Supino reto'));
+    expect(trocarTaps, 1);
+    expect(titleTaps, 1);
+    expect(tester.takeException(), isNull);
   });
 
   test('RPE sheet esconde hint longo após first-use', () {
