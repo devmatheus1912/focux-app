@@ -59,7 +59,7 @@ class _TrainingHero extends StatelessWidget {
       subtitle =
           hasExercises
               ? '$total no plano · $totalConcluidos/$totalExercicios exercícios'
-              : '$total no plano atual · toque em Iniciar';
+              : '$total no plano atual';
     } else if (hasExercises) {
       headline =
           '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}';
@@ -224,9 +224,11 @@ class _TrainingPlanCard extends StatelessWidget {
                           _PlanMeta(
                             icon: Icons.list_alt_rounded,
                             text:
-                                hasExercises
+                                aguardando
+                                    ? 'em preparação'
+                                    : hasExercises
                                     ? '${treino.exercicios.length} exercícios'
-                                    : 'em preparação',
+                                    : 'Pronto para treinar',
                             color: mute,
                           ),
                           if (mediaCount > 0)
@@ -247,7 +249,6 @@ class _TrainingPlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: mute, size: 20),
               ],
             ),
             if (hasExercises) ...[
@@ -285,54 +286,44 @@ class _TrainingPlanCard extends StatelessWidget {
                   onPressed: handleAction,
                 ),
               ),
-            ] else
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      concluido
-                          ? 'Treino finalizado. Historico salvo.'
-                          : done == 0
-                          ? 'Pronto para iniciar com registro de séries.'
-                          : '$done de ${treino.exercicios.length} exercicios ja marcados.',
-                      style: TextStyle(
-                        color: mute,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  FxLiquidPrimaryButton(
-                    label: concluido ? 'Rever' : 'Iniciar',
-                    icon:
-                        concluido
-                            ? Icons.replay_rounded
-                            : Icons.play_arrow_rounded,
-                    onPressed: starting || confirming ? null : handleAction,
-                    loading: starting,
-                    loadingLabel: 'Abrindo…',
-                    expand: false,
-                  ),
-                ],
-              ),
-            if (!aguardando &&
-                !concluido &&
-                canStart &&
-                onConfirmPlano != null) ...[
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: confirming || starting ? null : onConfirmPlano,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(64, checkinExecutionControlMin),
-                  ),
-                  child: Text(
-                    confirming ? 'Registrando…' : 'Fiz o treino',
-                    style: TextStyle(color: mute, fontWeight: FontWeight.w700),
+            ] else ...[
+              if (!concluido) ...[
+                Text(
+                  done == 0
+                      ? 'Iniciar registra carga e reps. Fiz o treino confirma o plano de uma vez.'
+                      : '$done de ${treino.exercicios.length} exercícios já marcados.',
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
                   ),
                 ),
+                const SizedBox(height: 10),
+              ],
+              SizedBox(
+                width: double.infinity,
+                child: FxLiquidPrimaryButton(
+                  label: concluido ? 'Rever' : 'Iniciar',
+                  icon:
+                      concluido
+                          ? Icons.replay_rounded
+                          : Icons.play_arrow_rounded,
+                  onPressed: starting || confirming ? null : handleAction,
+                  loading: starting,
+                  loadingLabel: 'Abrindo…',
+                ),
               ),
+              if (!aguardando &&
+                  !concluido &&
+                  canStart &&
+                  onConfirmPlano != null) ...[
+                const SizedBox(height: 8),
+                FxLiquidSecondaryButton(
+                  label: confirming ? 'Registrando…' : 'Fiz o treino',
+                  onPressed: confirming || starting ? null : onConfirmPlano,
+                ),
+              ],
             ],
           ],
         ),

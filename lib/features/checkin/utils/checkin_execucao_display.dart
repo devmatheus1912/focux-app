@@ -37,11 +37,11 @@ String checkinSerieKpiLabel(int feitas, int? total) {
 
 String checkinChromeContextLine({
   required String duration,
-  required int concluido,
+  required int current,
   required int total,
 }) {
   if (total <= 0) return duration;
-  return '$duration · $concluido/$total exercícios';
+  return '$duration · exercício $current de $total';
 }
 
 String checkinSeriesRepsLabel(int? series, String? reps) {
@@ -51,14 +51,11 @@ String checkinSeriesRepsLabel(int? series, String? reps) {
 }
 
 String checkinSerieContextLine({
-  required int index,
-  required int total,
   required String seriesReps,
   String? carga,
   int? descansoSegundos,
 }) {
   final parts = <String>[
-    '$index/$total',
     seriesReps,
     if (carga != null && carga.trim().isNotEmpty) carga.trim(),
     if (descansoSegundos != null && descansoSegundos > 0)
@@ -96,6 +93,32 @@ String checkinEvolucaoTipoLabel(String tipo) {
 
 String checkinRegistrarLabel({required bool first}) =>
     first ? 'Registrar série' : 'Próxima série';
+
+String checkinConfirmarRestanteLabel({required int feitas, required int? total}) {
+  final left = (total ?? 0) - feitas;
+  if (left <= 1) return 'Confirmar série que falta';
+  return 'Confirmar $left séries que faltam';
+}
+
+String checkinTrocarExercicioHint({required int index, required int total}) =>
+    'Exercício $index de $total · toque para trocar';
+
+T checkinPickCurrentExercise<T>({
+  required List<T> exercicios,
+  required int Function(T item) idOf,
+  required bool Function(T item) concluidoOf,
+  int? focoId,
+}) {
+  if (focoId != null) {
+    for (final item in exercicios) {
+      if (idOf(item) == focoId) return item;
+    }
+  }
+  return exercicios.firstWhere(
+    (item) => !concluidoOf(item),
+    orElse: () => exercicios.last,
+  );
+}
 
 String checkinDesfazerLabel() => 'Desfazer série';
 

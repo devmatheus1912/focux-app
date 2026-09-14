@@ -29,7 +29,6 @@ import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../data/checkin_repository.dart';
 import '../data/meus_treinos_mem_cache.dart';
 import '../providers/checkin_provider.dart';
-import '../utils/checkin_execucao_display.dart';
 import '../utils/treino_ficha_status.dart';
 
 part 'meus_treinos_screen_state.part.dart';
