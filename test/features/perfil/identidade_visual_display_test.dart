@@ -35,7 +35,8 @@ void main() {
     expect(identidadeHelpSubtitle(), contains('Editar perfil'));
     expect(identidadeLogoSloganSubtitle(), contains('home do aluno'));
     expect(identidadePaletteSubtitle(), contains('login é sempre escuro'));
-    expect(identidadeDarkPreviewLabel(), contains('modo escuro'));
+    expect(identidadeLightPreviewLabel(), 'Modo claro');
+    expect(identidadeDarkPreviewLabel(), contains('Modo escuro'));
     expect(identidadeAlunoVisibilityLabel(), contains('aluno'));
     expect(identidadeDiscardTitle(), 'Sair sem salvar?');
   });

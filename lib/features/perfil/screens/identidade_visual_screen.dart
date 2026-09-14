@@ -268,13 +268,11 @@ class _IdentidadeVisualScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                _LiveBrandHero(
-                                  primary: _corPrimaria,
-                                  secondary: _corSecundaria,
+                                _PaletteThemePreviewPair(
+                                  palette: _palette,
                                   name: nomePersonal,
                                   slogan: _sloganCtrl.text.trim(),
                                   logoUrl: _logoUrl,
-                                  paletteName: _palette.name,
                                   reduceMotion: reduceMotion,
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
@@ -353,8 +351,6 @@ class _IdentidadeVisualScreenState
                                                 }
                                                 : null,
                                       ),
-                                      const SizedBox(height: 12),
-                                      _PaletteDarkPreview(palette: _palette),
                                       if (hasWhiteLabel) ...[
                                         const SizedBox(height: 10),
                                         TextButton(
