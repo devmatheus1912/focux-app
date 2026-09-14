@@ -28,38 +28,45 @@ class AppTheme {
     Color? color,
     double? letterSpacing,
     double? height,
-  }) =>
-      AppTypography.inter(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        letterSpacing: letterSpacing,
-        height: height,
-      );
+  }) => AppTypography.inter(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    letterSpacing: letterSpacing,
+    height: height,
+  );
 
   static TextStyle _mono({
     double? fontSize,
     FontWeight? fontWeight,
     Color? color,
     double? letterSpacing,
-  }) =>
-      AppTypography.mono(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-        letterSpacing: letterSpacing,
-      );
+  }) => AppTypography.mono(
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    letterSpacing: letterSpacing,
+  );
 
-  static ThemeData _build(Color primary, bool dark, {Color? secondary}) {
+  static ThemeData _build(Color storedPrimary, bool dark, {Color? secondary}) {
+    final resolvedSecondary =
+        secondary != null
+            ? CuratedBrandPalette.safeSecondaryFor(storedPrimary, secondary)
+            : (dark
+                ? BrandPalette.accent(storedPrimary)
+                : BrandPalette.deep(storedPrimary));
+    // Dark mesh / login: navy/carvão como primary some. Chrome visível
+    // (ouro, menta, cobre) vira ColorScheme.primary; o hex salvo não muda.
+    final primary = CuratedBrandPalette.chromeAccent(
+      storedPrimary,
+      resolvedSecondary,
+      dark: dark,
+    );
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primarySofter = BrandPalette.softer(primary, dark: dark);
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
     final onPrimary = _readableOn(primary);
-    final resolvedSecondary =
-        secondary != null
-            ? CuratedBrandPalette.safeSecondaryFor(primary, secondary)
-            : (dark ? primaryAccent : primaryDeep);
     final onSecondary = _readableOn(resolvedSecondary);
     final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
     final scaffold = dark ? EagleTokens.darkBg : EagleTokens.paper;
@@ -239,9 +246,10 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
           side: BorderSide(
-            color: dark
-                ? TokensStrip.glassBorder(dark: dark, accent: primaryAccent)
-                : TokensStrip.borderDefault,
+            color:
+                dark
+                    ? TokensStrip.glassBorder(dark: dark, accent: primaryAccent)
+                    : TokensStrip.borderDefault,
           ),
         ),
         margin: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
@@ -265,13 +273,19 @@ class AppTheme {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
-            color: dark ? TokensStrip.glassBorder(dark: dark) : TokensStrip.borderDefault,
+            color:
+                dark
+                    ? TokensStrip.glassBorder(dark: dark)
+                    : TokensStrip.borderDefault,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(TokensStrip.rInput),
           borderSide: BorderSide(
-            color: dark ? TokensStrip.glassBorder(dark: dark) : TokensStrip.borderDefault,
+            color:
+                dark
+                    ? TokensStrip.glassBorder(dark: dark)
+                    : TokensStrip.borderDefault,
           ),
         ),
         focusedBorder: OutlineInputBorder(
@@ -316,9 +330,10 @@ class AppTheme {
             borderRadius: BorderRadius.circular(TokensStrip.rButton),
           ),
           side: BorderSide(
-            color: dark
-                ? TokensStrip.glassBorder(dark: dark, accent: primary)
-                : primary,
+            color:
+                dark
+                    ? TokensStrip.glassBorder(dark: dark, accent: primary)
+                    : primary,
             width: 1.2,
           ),
           textStyle: _inter(fontSize: 15, fontWeight: FontWeight.w600),
@@ -342,9 +357,8 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         side: BorderSide(
-          color: dark
-              ? EagleTokens.glassBorder
-              : outline.withValues(alpha: 0.5),
+          color:
+              dark ? EagleTokens.glassBorder : outline.withValues(alpha: 0.5),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

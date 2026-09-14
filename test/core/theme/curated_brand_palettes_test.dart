@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
+import 'package:focux_app/core/theme/focux_contrast.dart';
 
 void main() {
   test('all curated palettes are safe pairs with readable primary', () {
@@ -44,5 +45,32 @@ void main() {
       CuratedBrandPalette.safePrimary(const Color(0xFFF5F5F5)),
       isNot(equals(const Color(0xFFF5F5F5))),
     );
+  });
+
+  test('dark chrome accent stays visible on mesh and keeps white labels', () {
+    const mesh = Color(0xFF0B0E14);
+    const white = Color(0xFFFFFFFF);
+    for (final palette in CuratedBrandPalette.premium) {
+      final lightChrome = palette.chromeFor(dark: false);
+      expect(
+        lightChrome,
+        palette.primary,
+        reason: '${palette.name} light keeps stored primary',
+      );
+
+      final darkChrome = palette.chromeFor(dark: true);
+      expect(
+        FocuxContrast.contrastRatio(darkChrome, mesh),
+        greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
+        reason: '${palette.name} icon on dark mesh',
+      );
+      if (darkChrome != palette.primary) {
+        expect(
+          FocuxContrast.contrastRatio(white, darkChrome),
+          greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
+          reason: '${palette.name} white label on remapped chrome',
+        );
+      }
+    }
   });
 }

@@ -14,10 +14,7 @@ void main() {
       isFalse,
     );
     expect(
-      identidadeHasWhiteLabel(
-        featureWhiteLabel: null,
-        plano: 'enterprise_pro',
-      ),
+      identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'enterprise_pro'),
       isTrue,
     );
     expect(
@@ -29,11 +26,16 @@ void main() {
   test('copy da identidade confirma save, restore e logo', () {
     expect(identidadeSalvarLabel(isSetup: true), 'Finalizar configuração');
     expect(identidadeSalvarLabel(isSetup: false), 'Salvar marca');
-    expect(identidadeSalvarConfirmMessage(), contains('login dos alunos'));
+    expect(
+      identidadeSalvarConfirmMessage(),
+      contains('app do personal e do aluno'),
+    );
     expect(identidadeRestaurarConfirmTitle(), contains('cores padrão'));
     expect(identidadeLogoConfirmMessage(), contains('rascunho'));
     expect(identidadeHelpSubtitle(), contains('Editar perfil'));
-    expect(identidadeLogoSloganSubtitle(), contains('login white-label'));
+    expect(identidadeLogoSloganSubtitle(), contains('home do aluno'));
+    expect(identidadePaletteSubtitle(), contains('login é sempre escuro'));
+    expect(identidadeDarkPreviewLabel(), contains('modo escuro'));
     expect(identidadeAlunoVisibilityLabel(), contains('aluno'));
     expect(identidadeDiscardTitle(), 'Sair sem salvar?');
   });
@@ -63,10 +65,7 @@ void main() {
       ),
       isTrue,
     );
-    expect(
-      identidadeHeroAnimDuration(reduceMotion: true),
-      Duration.zero,
-    );
+    expect(identidadeHeroAnimDuration(reduceMotion: true), Duration.zero);
     expect(
       identidadeHeroAnimDuration(reduceMotion: false).inMilliseconds,
       greaterThan(0),

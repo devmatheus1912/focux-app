@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'brand_palette.dart';
+import 'design_tokens.dart';
 import 'focux_contrast.dart';
 
 /// Curated primary + secondary pairs — always safe together in the app.
@@ -123,7 +124,63 @@ class CuratedBrandPalette {
     return best;
   }
 
-  static Color readableOn(Color background) => FocuxContrast.readableOn(background);
+  static Color readableOn(Color background) =>
+      FocuxContrast.readableOn(background);
+
+  /// Acento de chrome (ícones, CTA, login). Paletas premium gravam o
+  /// *clima* escuro em [primary] (navy, carvão) e o ouro/menta em
+  /// [secondary]. No escuro, [primary] some no mesh — promovemos o
+  /// papel visível sem regravar o hex no servidor.
+  Color chromeFor({required bool dark}) =>
+      chromeAccent(primary, secondary, dark: dark);
+
+  static Color chromeAccent(
+    Color primary,
+    Color secondary, {
+    required bool dark,
+  }) {
+    final surface = dark ? EagleTokens.darkBg : EagleTokens.paper;
+    const minVsSurface = FocuxContrast.wcagAaLarge;
+    if (FocuxContrast.contrastRatio(primary, surface) >= minVsSurface) {
+      return primary;
+    }
+    if (!dark) {
+      return primary;
+    }
+    var candidate = secondary;
+    if (FocuxContrast.contrastRatio(candidate, surface) < minVsSurface) {
+      candidate = BrandPalette.accent(primary);
+    }
+    return _ensureWhiteLabelOnDark(candidate, surface, minVsSurface);
+  }
+
+  /// Login e [FxLiquidPrimaryButton] pintam o rótulo de branco. Depois de
+  /// promover um ouro/menta claro, escurece até o branco ler — sem voltar
+  /// ao navy que some no mesh.
+  static Color _ensureWhiteLabelOnDark(
+    Color color,
+    Color surface,
+    double minVsSurface,
+  ) {
+    const white = Color(0xFFFFFFFF);
+    const minWhite = FocuxContrast.wcagAaLarge;
+    var hsl = HSLColor.fromColor(color);
+    var current = color;
+    for (var i = 0; i < 16; i++) {
+      final vsWhite = FocuxContrast.contrastRatio(white, current);
+      final vsSurface = FocuxContrast.contrastRatio(current, surface);
+      if (vsWhite >= minWhite && vsSurface >= minVsSurface) {
+        return current;
+      }
+      if (vsWhite < minWhite) {
+        hsl = hsl.withLightness((hsl.lightness - 0.04).clamp(0.22, 0.72));
+      } else {
+        hsl = hsl.withLightness((hsl.lightness + 0.04).clamp(0.22, 0.72));
+      }
+      current = hsl.toColor();
+    }
+    return current;
+  }
 
   static bool isReadablePrimary(Color primary) {
     final hsl = HSLColor.fromColor(primary);
