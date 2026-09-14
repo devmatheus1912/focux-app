@@ -1,3 +1,4 @@
+import '../../subscription/models/subscription_plan.dart';
 import '../data/planos_repository.dart';
 
 /// Resolve flags de capability vindas de `/api/planos/me`.
@@ -36,6 +37,11 @@ class PlanoCapability {
         return features.lojaDigital;
       case 'poseCoach':
         return features.poseCoach;
+      // Tier-only no BE (sem bool em /planos/me.features).
+      case 'leads':
+        return features.plano.canAccess(SubscriptionPlan.PRO);
+      case 'nfse':
+        return features.plano.canAccess(SubscriptionPlan.ENTERPRISE);
       default:
         return false;
     }
