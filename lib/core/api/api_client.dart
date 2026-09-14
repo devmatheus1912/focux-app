@@ -164,27 +164,12 @@ class ApiClient {
             );
           }
 
-          // ── Error Reporter ──────────────────────────────────────
-          if (e.requestOptions.path != '/api/suporte/analisar-erro' &&
-              !_isAuthPath(e.requestOptions.path)) {
-            try {
-              final token = await SecureStorage.getToken();
-              final role = await SecureStorage.getRole();
-              if (token != null && role == 'PERSONAL') {
-                final reporterDio = Dio(BaseOptions(baseUrl: _baseUrl));
-                TlsCertificatePinning.apply(reporterDio);
-                reporterDio.options.headers['Authorization'] = 'Bearer $token';
-                await reporterDio.post(
-                  '/api/suporte/analisar-erro',
-                  data: {
-                    'erro': _safeErrorMessage(e),
-                    'stacktrace': _safeErrorContext(e),
-                  },
-                );
-              }
-            } catch (_) {
-              // Error reporter is best-effort telemetry — silent fail is correct.
-            }
+          // ── Error Reporter (best-effort, gated) ────────────────
+          // Never await: concurrent failures would stampede the BE.
+          // Gate is sync so 500 parallel onError calls can't all pass.
+          if (_tryReserveErrorReportSlot(e)) {
+            // ignore: unawaited_futures
+            _sendErrorReport(e);
           }
           handler.next(e);
         },
@@ -324,13 +309,100 @@ class ApiClient {
     if (e.requestOptions.path == '/api/suporte/analisar-erro') return false;
     if (e.response != null) {
       final status = e.response?.statusCode ?? 0;
-      return status == 408 || status == 429 || status >= 500;
+      // Never auto-retry 429 — amplifies rate-limit storms on the BE.
+      return status == 408 || status >= 500;
     }
     return e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.unknown;
+  }
+
+  /// Cap client→`/api/suporte/analisar-erro` so a failing screen can't DDoS
+  /// the tenant rate-limit bucket (BE allows 10/min; we stay well under).
+  static const int _errorReportMaxPerWindow = 5;
+  static const Duration _errorReportWindow = Duration(seconds: 60);
+  static final List<DateTime> _errorReportAt = <DateTime>[];
+  static final Set<String> _errorReportFingerprints = <String>{};
+  static DateTime? _errorReportFingerprintWindowStart;
+  static Dio? _errorReporterDio;
+
+  /// Sync reservation: returns false if this error must not hit the BE.
+  @visibleForTesting
+  static bool tryReserveErrorReportSlotForTest(DioException e) =>
+      _tryReserveErrorReportSlot(e);
+
+  @visibleForTesting
+  static void resetErrorReportGateForTest() {
+    _errorReportAt.clear();
+    _errorReportFingerprints.clear();
+    _errorReportFingerprintWindowStart = null;
+  }
+
+  static bool _tryReserveErrorReportSlot(DioException e) {
+    if (!_shouldReportApiError(e)) return false;
+
+    final now = DateTime.now();
+    _errorReportAt.removeWhere(
+      (t) => now.difference(t) > _errorReportWindow,
+    );
+    if (_errorReportAt.length >= _errorReportMaxPerWindow) return false;
+
+    final windowStart = _errorReportFingerprintWindowStart;
+    if (windowStart == null ||
+        now.difference(windowStart) > _errorReportWindow) {
+      _errorReportFingerprintWindowStart = now;
+      _errorReportFingerprints.clear();
+    }
+    final fingerprint =
+        '${e.type.name}|${e.response?.statusCode}|${_normalizePath(e.requestOptions.path)}';
+    if (!_errorReportFingerprints.add(fingerprint)) return false;
+
+    _errorReportAt.add(now);
+    return true;
+  }
+
+  static bool _shouldReportApiError(DioException e) {
+    final path = e.requestOptions.path;
+    if (path == '/api/suporte/analisar-erro') return false;
+    if (_isAuthPath(path)) return false;
+    final status = e.response?.statusCode;
+    // Auth / rate-limit / client validation are noise for the ticket pipeline.
+    if (status == 401 || status == 403 || status == 429) return false;
+    if (status != null && status >= 400 && status < 500) return false;
+    return true;
+  }
+
+  static Future<void> _sendErrorReport(DioException e) async {
+    try {
+      final token = await SecureStorage.getToken();
+      final role = await SecureStorage.getRole();
+      if (token == null || role != 'PERSONAL') return;
+
+      final reporter = _errorReporterDio ??= () {
+        final d = Dio(
+          BaseOptions(
+            baseUrl: _baseUrl,
+            connectTimeout: const Duration(seconds: 8),
+            receiveTimeout: const Duration(seconds: 8),
+            sendTimeout: const Duration(seconds: 8),
+          ),
+        );
+        TlsCertificatePinning.apply(d);
+        return d;
+      }();
+      reporter.options.headers['Authorization'] = 'Bearer $token';
+      await reporter.post(
+        '/api/suporte/analisar-erro',
+        data: {
+          'erro': _safeErrorMessage(e),
+          'stacktrace': _safeErrorContext(e),
+        },
+      );
+    } catch (_) {
+      // Best-effort telemetry — silent fail is correct.
+    }
   }
 
   static bool _shouldInvalidateSession(DioException e) {
