@@ -7,15 +7,10 @@ void main() {
     expect(depoimentoCountLabel(1), '1 depoimento');
     expect(depoimentoCountLabel(3), '3 depoimentos');
     expect(depoimentoChipLabel(DepoimentoChip.pendentes), 'Pendentes');
-<<<<<<< HEAD
-    expect(depoimentoNotaLabel(5), '5/5');
-    expect(depoimentoNotaLabel(0), '1/5');
-    expect(depoimentoNotaLabel(9), '5/5');
-=======
     expect(depoimentoNotaLabel(1), '1 — Fraco');
     expect(depoimentoNotaLabel(5), '5 — Excelente');
+    expect(depoimentoNotaLabel(0), '1 — Fraco');
     expect(depoimentoNotaLabel(9), '5 — Excelente');
->>>>>>> origin/cursor/satelites-s5-depoimento-aluno-e119
     expect(
       depoimentoMatches(
         nomeAluno: 'Ana',
