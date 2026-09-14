@@ -1,7 +1,7 @@
 import '../models/checkin_personal_home.dart';
 
 const checkinComoCalculamos =
-    'Hoje conta só treinos concluídos hoje, igual ao pulso da Home. Semana são os 6 dias anteriores. O catálogo pagina esse recorte.';
+    'Hoje conta só treinos concluídos hoje, igual ao pulso da Home. Semana são os 6 dias anteriores. Pendentes são alunos ativos com treino e sem check-in concluído hoje. O catálogo pagina o recorte de 7 dias.';
 
 class CheckinFocusAction {
   const CheckinFocusAction({required this.label, this.alunoId});

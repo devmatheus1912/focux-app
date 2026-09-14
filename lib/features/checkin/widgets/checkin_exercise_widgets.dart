@@ -113,6 +113,14 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onOpenCoach;
   final VoidCallback? onOpenDemo;
   final VoidCallback? onOpenTips;
+  final VoidCallback? onAjustar;
+  final VoidCallback? onConfirmarRestante;
+  final double? draftCargaKg;
+  final int? draftReps;
+  final VoidCallback? onPlusCarga;
+  final VoidCallback? onMinusCarga;
+  final VoidCallback? onPlusReps;
+  final VoidCallback? onMinusReps;
 
   const CheckinSerieCard({
     super.key,
@@ -124,6 +132,14 @@ class CheckinSerieCard extends StatelessWidget {
     this.onOpenCoach,
     this.onOpenDemo,
     this.onOpenTips,
+    this.onAjustar,
+    this.onConfirmarRestante,
+    this.draftCargaKg,
+    this.draftReps,
+    this.onPlusCarga,
+    this.onMinusCarga,
+    this.onPlusReps,
+    this.onMinusReps,
   });
 
   @override
@@ -203,15 +219,54 @@ class CheckinSerieCard extends StatelessWidget {
             const SizedBox(height: TokensStrip.s4),
           ] else
             const SizedBox(height: TokensStrip.s5),
-          if (!done)
+          if (!done) ...[
+            _CheckinSetSteppers(
+              cargaKg: draftCargaKg ?? ee.cargaKg,
+              reps: draftReps,
+              onPlusCarga: onPlusCarga,
+              onMinusCarga: onMinusCarga,
+              onPlusReps: onPlusReps,
+              onMinusReps: onMinusReps,
+            ),
+            const SizedBox(height: TokensStrip.s3),
             SizedBox(
               height: checkinExecutionControlMin,
               child: FxLiquidPrimaryButton(
                 label: checkinRegistrarLabel(first: ee.seriesFeitas <= 0),
                 onPressed: onRegistrar,
               ),
-            )
-          else
+            ),
+            if (onAjustar != null || onConfirmarRestante != null) ...[
+              const SizedBox(height: TokensStrip.s2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (onAjustar != null)
+                    TextButton(
+                      onPressed: onAjustar,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(64, checkinExecutionControlMin),
+                      ),
+                      child: Text(
+                        'Ajustar',
+                        style: TextStyle(color: chrome.mute),
+                      ),
+                    ),
+                  if (onConfirmarRestante != null)
+                    TextButton(
+                      onPressed: onConfirmarRestante,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(64, checkinExecutionControlMin),
+                      ),
+                      child: Text(
+                        'Confirmar restantes',
+                        style: TextStyle(color: chrome.mute),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ] else
             Text(
               'Exercício concluído',
               textAlign: TextAlign.center,
@@ -235,10 +290,7 @@ class CheckinSerieCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (onOpenCoach != null)
-                  _CheckinPosturaHelp(
-                    onTap: onOpenCoach!,
-                    ink: chrome.ink,
-                  ),
+                  _CheckinPosturaHelp(onTap: onOpenCoach!, ink: chrome.ink),
                 if (onOpenDemo != null && !hasDemo)
                   TextButton(
                     onPressed: onOpenDemo,
@@ -302,12 +354,119 @@ class CheckinSerieCard extends StatelessWidget {
   }
 }
 
+class _CheckinSetSteppers extends StatelessWidget {
+  const _CheckinSetSteppers({
+    required this.cargaKg,
+    required this.reps,
+    this.onPlusCarga,
+    this.onMinusCarga,
+    this.onPlusReps,
+    this.onMinusReps,
+  });
+
+  final double? cargaKg;
+  final int? reps;
+  final VoidCallback? onPlusCarga;
+  final VoidCallback? onMinusCarga;
+  final VoidCallback? onPlusReps;
+  final VoidCallback? onMinusReps;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Row(
+      children: [
+        Expanded(
+          child: _CheckinStepper(
+            label: 'kg',
+            value: checkinCargaLabel(cargaKg) ?? '—',
+            onMinus: onMinusCarga,
+            onPlus: onPlusCarga,
+            mute: chrome.mute,
+            ink: chrome.ink,
+          ),
+        ),
+        const SizedBox(width: TokensStrip.s3),
+        Expanded(
+          child: _CheckinStepper(
+            label: 'reps',
+            value: reps == null ? '—' : '$reps',
+            onMinus: onMinusReps,
+            onPlus: onPlusReps,
+            mute: chrome.mute,
+            ink: chrome.ink,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CheckinStepper extends StatelessWidget {
+  const _CheckinStepper({
+    required this.label,
+    required this.value,
+    required this.mute,
+    required this.ink,
+    this.onMinus,
+    this.onPlus,
+  });
+
+  final String label;
+  final String value;
+  final Color mute;
+  final Color ink;
+  final VoidCallback? onMinus;
+  final VoidCallback? onPlus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: FocuxHubTypography.bodyMuted(color: mute)),
+        const SizedBox(height: TokensStrip.s1),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              onPressed: onMinus,
+              tooltip: 'Diminuir $label',
+              style: IconButton.styleFrom(
+                minimumSize: const Size(
+                  checkinExecutionControlMin,
+                  checkinExecutionControlMin,
+                ),
+              ),
+              icon: Icon(Icons.remove_rounded, color: ink),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.sectionTitle(context, color: ink),
+              ),
+            ),
+            IconButton(
+              onPressed: onPlus,
+              tooltip: 'Aumentar $label',
+              style: IconButton.styleFrom(
+                minimumSize: const Size(
+                  checkinExecutionControlMin,
+                  checkinExecutionControlMin,
+                ),
+              ),
+              icon: Icon(Icons.add_rounded, color: ink),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 /// Postura: rótulo + `FxHelpIconButton` canônico (não outlined genérico).
 class _CheckinPosturaHelp extends StatelessWidget {
-  const _CheckinPosturaHelp({
-    required this.onTap,
-    required this.ink,
-  });
+  const _CheckinPosturaHelp({required this.onTap, required this.ink});
 
   final VoidCallback onTap;
   final Color ink;

@@ -61,6 +61,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   Timer? _restTimer;
   int? _focoTreinoExercicioId;
   DateTime _startedAt = DateTime.now();
+  final Map<String, CheckinCurrentSetSeed> _drafts = {};
 
   @override
   void initState() {
@@ -167,6 +168,76 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     }
   }
 
+  String _draftKey(ExecucaoExercicio ee) =>
+      '${ee.treinoExercicioId}-${ee.seriesFeitas + 1}';
+
+  CheckinCurrentSetSeed _draftFor(ExecucaoExercicio ee) {
+    return _drafts[_draftKey(ee)] ??
+        checkinCurrentSetSeed(ee: ee, numero: ee.seriesFeitas + 1);
+  }
+
+  void _writeDraft(ExecucaoExercicio ee, CheckinCurrentSetSeed seed) {
+    setState(() => _drafts[_draftKey(ee)] = seed);
+  }
+
+  void _bumpCarga(ExecucaoExercicio ee, double delta) {
+    final current = _draftFor(ee);
+    final next = ((current.cargaKg ?? 0) + delta).clamp(0, 500).toDouble();
+    _writeDraft(ee, CheckinCurrentSetSeed(cargaKg: next, reps: current.reps));
+  }
+
+  void _bumpReps(ExecucaoExercicio ee, int delta) {
+    final current = _draftFor(ee);
+    final next = ((current.reps ?? 0) + delta).clamp(0, 50).toInt();
+    _writeDraft(
+      ee,
+      CheckinCurrentSetSeed(cargaKg: current.cargaKg, reps: next),
+    );
+  }
+
+  Future<void> _registrarSerieRapida(ExecucaoExercicio ee) async {
+    if (_execucao == null) return;
+    final numero = (ee.seriesFeitas + 1).clamp(1, ee.series ?? 999);
+    final draft = _draftFor(ee);
+    try {
+      HapticFeedback.selectionClick();
+      final updated = await ref
+          .read(checkinRepositoryProvider)
+          .registrarSerie(
+            _execucao!.id!,
+            ee.treinoExercicioId,
+            numero: numero,
+            cargaKg: draft.cargaKg,
+            repeticoes: draft.reps == null ? null : '${draft.reps}',
+          );
+      if (!mounted) return;
+      _applyUpdated(updated);
+      if (numero > ee.seriesFeitas) {
+        _startRestTimer(ee.descansoSegundos ?? 60);
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
+  Future<void> _confirmarRestante(ExecucaoExercicio ee) async {
+    if (_execucao == null) return;
+    try {
+      HapticFeedback.selectionClick();
+      final updated = await ref
+          .read(checkinRepositoryProvider)
+          .confirmarRestante(_execucao!.id!, ee.treinoExercicioId);
+      if (!mounted) return;
+      _applyUpdated(updated);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
   Future<void> _registrarSerieDetalhada(
     ExecucaoExercicio ee, {
     required int numero,
@@ -180,11 +251,15 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       builder:
           (context) => CheckinSerieDetailSheet(
             title: 'Série $safeNumero',
-            initialCargaKg: serie?.cargaKg ?? ee.cargaKg,
-            initialRepeticoes: checkinSerieRepsSeed(
-              serieRepeticoes: serie?.repeticoes,
-              prescricacao: ee.repeticoes,
-            ),
+            initialCargaKg:
+                serie?.cargaKg ?? _draftFor(ee).cargaKg ?? ee.cargaKg,
+            initialRepeticoes:
+                serie?.repeticoes ??
+                (_draftFor(ee).reps == null ? null : '${_draftFor(ee).reps}') ??
+                checkinSerieRepsSeed(
+                  serieRepeticoes: null,
+                  prescricacao: ee.repeticoes,
+                ),
             prescricacaoHint: checkinSeriePrescricaoHint(ee.repeticoes),
             initialFeedback: serie?.feedback ?? ee.feedback,
             initialRpe: serie?.rpe ?? ee.rpe,
@@ -285,7 +360,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         await FxCelebrationOverlay.show(
           context,
           title: 'Treino concluído!',
-          subtitle: 'Histórico atualizado. Continue a sequência.',
+          subtitle: 'Sequência conta a semana, não o dia. Descanso não zera.',
           icon: Icons.check_circle_rounded,
         );
       }
@@ -486,16 +561,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                             : null,
                   ),
                   Expanded(
-                    child:
-                        _showRestTimer
-                            ? CheckinRestFocusView(
-                              seconds: _restSeconds,
-                              onSkip: () {
-                                _restTimer?.cancel();
-                                setState(() => _showRestTimer = false);
-                              },
-                            )
-                            : exercicios.isEmpty
+                    child: Stack(
+                      children: [
+                        exercicios.isEmpty
                             ? const FxEmptyState(
                               icon: 'dumbbell',
                               title: 'Treino sem exercícios',
@@ -522,11 +590,31 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                         ee: current,
                                         index: currentIndex,
                                         total: exercicios.length,
+                                        draftCargaKg:
+                                            _draftFor(current).cargaKg,
+                                        draftReps: _draftFor(current).reps,
+                                        onPlusCarga:
+                                            () => _bumpCarga(current, 2.5),
+                                        onMinusCarga:
+                                            () => _bumpCarga(current, -2.5),
+                                        onPlusReps: () => _bumpReps(current, 1),
+                                        onMinusReps:
+                                            () => _bumpReps(current, -1),
                                         onRegistrar:
+                                            () =>
+                                                _registrarSerieRapida(current),
+                                        onAjustar:
                                             () => _registrarSerieDetalhada(
                                               current,
                                               numero: current.seriesFeitas + 1,
                                             ),
+                                        onConfirmarRestante:
+                                            current.series != null &&
+                                                    current.seriesFeitas <
+                                                        current.series!
+                                                ? () =>
+                                                    _confirmarRestante(current)
+                                                : null,
                                         onDesfazer:
                                             current.seriesFeitas > 0
                                                 ? () => _marcar(
@@ -574,8 +662,23 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                   ),
                               ],
                             ),
+                        if (_showRestTimer)
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: CheckinRestBanner(
+                              seconds: _restSeconds,
+                              onSkip: () {
+                                _restTimer?.cancel();
+                                setState(() => _showRestTimer = false);
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  if (exercicios.isNotEmpty && !_showRestTimer)
+                  if (exercicios.isNotEmpty)
                     SafeArea(
                       top: false,
                       child: Padding(

@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
@@ -213,37 +215,43 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: riscoMetricIcon(dominant.riscoNivel ?? aluno.riscoNivel),
         ),
         OperacaoStatusCardKind.prontidao => metric(
-          label: dominant.kind == OperacaoDominantMetricKind.prontidao
-              ? dominant.label
-              : 'Prontidão',
-          value: dominant.kind == OperacaoDominantMetricKind.prontidao
-              ? dominant.value
-              : (aluno.scoreProntidao == null
-                  ? '—'
-                  : '${aluno.scoreProntidao}'),
-          hint: dominant.kind == OperacaoDominantMetricKind.prontidao
-              ? dominant.hint
-              : 'Índice operacional',
+          label:
+              dominant.kind == OperacaoDominantMetricKind.prontidao
+                  ? dominant.label
+                  : 'Prontidão',
+          value:
+              dominant.kind == OperacaoDominantMetricKind.prontidao
+                  ? dominant.value
+                  : (aluno.scoreProntidao == null
+                      ? '—'
+                      : '${aluno.scoreProntidao}'),
+          hint:
+              dominant.kind == OperacaoDominantMetricKind.prontidao
+                  ? dominant.hint
+                  : 'Índice operacional',
           color: primary,
           alert: false,
           kind: kind,
           icon: Icons.speed_rounded,
         ),
         OperacaoStatusCardKind.aderencia => metric(
-          label: dominant.kind == OperacaoDominantMetricKind.aderencia &&
-                  !heroShowsRisco
-              ? dominant.label
-              : 'Aderência',
-          value: dominant.kind == OperacaoDominantMetricKind.aderencia &&
-                  !heroShowsRisco
-              ? dominant.value
-              : (aluno.aderenciaPercent == null
-                  ? '—'
-                  : '${aluno.aderenciaPercent}%'),
-          hint: dominant.kind == OperacaoDominantMetricKind.aderencia &&
-                  !heroShowsRisco
-              ? dominant.hint
-              : 'Concluídos / iniciados · 30 dias',
+          label:
+              dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                      !heroShowsRisco
+                  ? dominant.label
+                  : 'Aderência',
+          value:
+              dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                      !heroShowsRisco
+                  ? dominant.value
+                  : (aluno.aderenciaPercent == null
+                      ? '—'
+                      : '${aluno.aderenciaPercent}%'),
+          hint:
+              dominant.kind == OperacaoDominantMetricKind.aderencia &&
+                      !heroShowsRisco
+                  ? dominant.hint
+                  : 'Concluídos / iniciados · 30 dias',
           color: aderenciaColor,
           alert: (aluno.aderenciaPercent ?? 0) <= 0,
           kind: kind,
@@ -279,11 +287,10 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       };
     }
 
-    final metrics =
-        resolveOperacaoStatusMetricKinds(
-          heroShowsRisco: heroShowsRisco,
-          dominantKind: dominant.kind,
-        ).map(tileForKind).toList(growable: false);
+    final metrics = resolveOperacaoStatusMetricKinds(
+      heroShowsRisco: heroShowsRisco,
+      dominantKind: dominant.kind,
+    ).map(tileForKind).toList(growable: false);
 
     return Column(
       key: const ValueKey('aluno360_operacao_status'),
@@ -355,12 +362,20 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
               label: 'Pedir check-in',
               accent: primary,
               isDark: isDark,
-              onPressed:
-                  () => showAlunoCheckinMessageSheet(
+              onPressed: () async {
+                try {
+                  await ref.read(alunoRepositoryProvider).cobrarTreino(alunoId);
+                  if (!context.mounted) return;
+                  FeedbackHelper.showSuccess(
                     context,
-                    alunoId: alunoId,
-                    alunoNome: aluno.nome,
-                  ),
+                    'Lembrete enviado',
+                    placement: FeedbackPlacement.operacaoTop,
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  FeedbackHelper.showError(context, friendlyError(e));
+                }
+              },
             ),
           ),
       ],

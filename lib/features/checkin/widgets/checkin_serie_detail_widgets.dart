@@ -77,8 +77,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
     );
     _feedback = widget.initialFeedback;
     _rpe = widget.initialRpe ?? widget.rpeAlvo ?? 7;
-    // Liga por padrão: aluno precisa ver o esforço explicado (não só sigla).
-    _useRpe = true;
+    // RPE fica no Ajustar, desligado por padrão — 1 toque não pede esforço.
+    _useRpe = widget.initialRpe != null;
     _dor = widget.initialDor;
     _loadRpeHint();
   }

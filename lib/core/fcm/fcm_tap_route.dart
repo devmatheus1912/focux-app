@@ -15,16 +15,22 @@ String? resolveFcmTapRoute(Map<String, dynamic> data, {String? role}) {
     if (chatId != null) {
       route = role == 'PERSONAL' ? '/chat/inbox' : '/chat/aluno';
     } else if (alunoId != null) {
-      route = role == 'PERSONAL'
-          ? '/alunos/$alunoId'
-          : '/dashboard/aluno';
+      route = role == 'PERSONAL' ? '/alunos/$alunoId' : '/dashboard/aluno';
     }
   }
 
   route = _sanitizeAlunoFacingRoute(route, data, role: role);
 
   final execucaoId = _asToken(data['execucaoId']);
-  if (execucaoId != null &&
+  final treinoId = _asToken(data['treinoId']);
+  final type = (data['type'] ?? data['tipo'])?.toString().trim().toLowerCase();
+  if (treinoId != null &&
+      type == 'treino' &&
+      (route == null ||
+          route == '/checkin/treinos' ||
+          route == '/dashboard/aluno')) {
+    route = '/checkin/executar?treinoId=$treinoId';
+  } else if (execucaoId != null &&
       (route == null ||
           route == '/dashboard/aluno' ||
           route == '/checkin/treinos' ||
@@ -49,9 +55,13 @@ String? _fallbackByType(Map<String, dynamic> data, {String? role}) {
       _ => null,
     };
   }
+  final treinoId = _asToken(data['treinoId']);
   return switch (type) {
     'mensalidade' || 'dunning' => '/financeiro/aluno',
-    'treino' => '/checkin/treinos',
+    'treino' =>
+      treinoId == null
+          ? '/checkin/treinos'
+          : '/checkin/executar?treinoId=$treinoId',
     'engajamento' ||
     'upsell' ||
     'automacao' ||

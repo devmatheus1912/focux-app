@@ -6,6 +6,8 @@ library;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/checkin_repository.dart';
+
 /// SharedPreferences flag: long RPE copy shown once, then only via `?`.
 const checkinRpeHintSeenKey = 'checkin_rpe_hint_seen_v1';
 
@@ -26,8 +28,8 @@ bool checkinIsPrescriptionRange(String? value) {
   return RegExp(r'^\d+\s*[-–—]\s*\d+$').hasMatch(t);
 }
 
-/// Seed the editable reps field: last logged set, else empty.
-/// Never seed with a prescription range like `8-12`.
+/// Seed the editable reps field: last logged set, else first number of the
+/// prescription (`8-12` → `8`). Never copy the range itself into the field.
 String checkinSerieRepsSeed({
   required String? serieRepeticoes,
   required String? prescricacao,
@@ -36,8 +38,60 @@ String checkinSerieRepsSeed({
   if (logged.isNotEmpty && !checkinIsPrescriptionRange(logged)) {
     return logged;
   }
-  // Prescription is context only — leave blank for the student to fill.
-  return '';
+  return checkinFirstRepsToken(prescricacao) ?? '';
+}
+
+String? checkinFirstRepsToken(String? prescription) {
+  final t = prescription?.trim() ?? '';
+  if (t.isEmpty) return null;
+  final match = RegExp(r'(\d+)').firstMatch(t);
+  return match?.group(1);
+}
+
+class CheckinCurrentSetSeed {
+  const CheckinCurrentSetSeed({this.cargaKg, this.reps});
+
+  final double? cargaKg;
+  final int? reps;
+}
+
+/// Last session matching set → prescription → previous set this session.
+CheckinCurrentSetSeed checkinCurrentSetSeed({
+  required ExecucaoExercicio ee,
+  required int numero,
+}) {
+  ExecucaoSerie? byNumero(List<ExecucaoSerie> series, int n) {
+    for (final s in series) {
+      if (s.numero == n) return s;
+    }
+    return null;
+  }
+
+  final previous = byNumero(ee.seriesAnteriores, numero);
+  if (previous != null &&
+      (previous.cargaKg != null ||
+          (previous.repeticoes != null &&
+              previous.repeticoes!.trim().isNotEmpty &&
+              !checkinIsPrescriptionRange(previous.repeticoes)))) {
+    return CheckinCurrentSetSeed(
+      cargaKg: previous.cargaKg ?? ee.cargaKg,
+      reps: int.tryParse(checkinFirstRepsToken(previous.repeticoes) ?? ''),
+    );
+  }
+  final prescReps = int.tryParse(checkinFirstRepsToken(ee.repeticoes) ?? '');
+  if (ee.cargaKg != null || prescReps != null) {
+    return CheckinCurrentSetSeed(cargaKg: ee.cargaKg, reps: prescReps);
+  }
+  if (numero > 1) {
+    final prior = byNumero(ee.seriesDetalhes, numero - 1);
+    if (prior != null) {
+      return CheckinCurrentSetSeed(
+        cargaKg: prior.cargaKg,
+        reps: int.tryParse(checkinFirstRepsToken(prior.repeticoes) ?? ''),
+      );
+    }
+  }
+  return const CheckinCurrentSetSeed();
 }
 
 String? checkinSeriePrescricaoHint(String? prescricacao) {
