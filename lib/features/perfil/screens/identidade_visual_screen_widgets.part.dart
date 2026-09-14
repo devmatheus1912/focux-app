@@ -1,194 +1,187 @@
 part of 'identidade_visual_screen.dart';
 
-class _LiveBrandHero extends StatelessWidget {
-  const _LiveBrandHero({
-    required this.primary,
-    required this.secondary,
+class _PaletteThemePreviewPair extends StatelessWidget {
+  const _PaletteThemePreviewPair({
+    required this.palette,
     required this.name,
     required this.slogan,
     required this.logoUrl,
-    required this.paletteName,
     required this.reduceMotion,
   });
 
-  final Color primary;
-  final Color secondary;
+  final CuratedBrandPalette palette;
   final String name;
   final String slogan;
   final String? logoUrl;
-  final String paletteName;
   final bool reduceMotion;
 
   @override
   Widget build(BuildContext context) {
-    final onHero = CuratedBrandPalette.readableOn(primary);
-    final frost = onHero.withValues(alpha: 0.14);
-    final frostBorder = onHero.withValues(alpha: 0.22);
-    final mutedOnHero = onHero.withValues(alpha: 0.82);
-
-    return AnimatedContainer(
-      duration: identidadeHeroAnimDuration(reduceMotion: reduceMotion),
-      curve: Curves.easeOutCubic,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            BrandPalette.deep(primary),
-            primary,
-            BrandPalette.softened(secondary, amount: 0.12),
-          ],
+    final mute = ShellChrome.of(context).mute;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          identidadeAlunoVisibilityLabel(),
+          style: FocuxHubTypography.chip(mute).copyWith(letterSpacing: 0.2),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: 0.32),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
-            spreadRadius: -6,
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -24,
-            top: -24,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: onHero.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -18,
-            bottom: -30,
-            child: Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: secondary.withValues(alpha: 0.22),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: frost,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: frostBorder),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: EagleTokens.good,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Preview · $paletteName',
-                            style: FocuxHubTypography.chip(
-                              mutedOnHero,
-                            ).copyWith(letterSpacing: 0.3),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: frost,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: frostBorder),
-                      ),
-                      child: Text(
-                        identidadeAlunoVisibilityLabel(),
-                        style: FocuxHubTypography.chip(
-                          mutedOnHero,
-                        ).copyWith(letterSpacing: 0.2),
-                      ),
-                    ),
-                  ],
+        const SizedBox(height: TokensStrip.s3),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _PaletteThemePreview(
+                  dark: false,
+                  palette: palette,
+                  name: name,
+                  slogan: slogan,
+                  logoUrl: logoUrl,
+                  reduceMotion: reduceMotion,
                 ),
-                const SizedBox(height: TokensStrip.s4),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: onHero.withValues(alpha: 0.16),
-                      backgroundImage:
-                          logoUrl != null && logoUrl!.isNotEmpty
-                              ? NetworkImage(logoUrl!)
-                              : null,
-                      child:
-                          logoUrl == null || logoUrl!.isEmpty
-                              ? Text(
-                                name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                                style: FocuxTypography.headline(color: onHero),
-                              )
-                              : null,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name.isNotEmpty ? name : 'Seu app Focux',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.pageTitle(
-                              context,
-                              color: onHero,
-                            ).copyWith(letterSpacing: -0.5, height: 1),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            slogan.isNotEmpty
-                                ? formatBrandSloganForDisplay(slogan)
-                                : 'Slogan aparece aqui em tempo real',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: FocuxHubTypography.bodyMuted(
-                              color: mutedOnHero,
-                              fontWeight: FontWeight.w500,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _PaletteThemePreview(
+                  dark: true,
+                  palette: palette,
+                  name: name,
+                  slogan: slogan,
+                  logoUrl: logoUrl,
+                  reduceMotion: reduceMotion,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PaletteThemePreview extends StatelessWidget {
+  const _PaletteThemePreview({
+    required this.dark,
+    required this.palette,
+    required this.name,
+    required this.slogan,
+    required this.logoUrl,
+    required this.reduceMotion,
+  });
+
+  final bool dark;
+  final CuratedBrandPalette palette;
+  final String name;
+  final String slogan;
+  final String? logoUrl;
+  final bool reduceMotion;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = palette.chromeFor(dark: dark);
+    final onAccent = CuratedBrandPalette.readableOn(accent);
+    final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
+    final ink = dark ? EagleTokens.darkInk : EagleTokens.ink;
+    final mute = dark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final line = dark ? EagleTokens.darkLine : EagleTokens.line;
+    final label =
+        dark ? identidadeDarkPreviewLabel() : identidadeLightPreviewLabel();
+    final displayName = name.isNotEmpty ? name : 'Seu app Focux';
+    final displaySlogan =
+        slogan.isNotEmpty
+            ? formatBrandSloganForDisplay(slogan)
+            : 'Slogan aparece aqui em tempo real';
+
+    return Semantics(
+      label: label,
+      child: AnimatedContainer(
+        duration: identidadeHeroAnimDuration(reduceMotion: reduceMotion),
+        curve: Curves.easeOutCubic,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          border: Border.all(color: line),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.chip(
+                  mute,
+                ).copyWith(letterSpacing: 0.2),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: accent.withValues(alpha: 0.18),
+                    backgroundImage:
+                        logoUrl != null && logoUrl!.isNotEmpty
+                            ? NetworkImage(logoUrl!)
+                            : null,
+                    child:
+                        logoUrl == null || logoUrl!.isEmpty
+                            ? Text(
+                              displayName[0].toUpperCase(),
+                              style: FocuxHubTypography.chip(
+                                accent,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                            )
+                            : null,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: ink,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                displaySlogan,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  fontWeight: FontWeight.w500,
+                  height: 1.3,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 10),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: Text(
+                      'Entrar',
+                      style: FocuxHubTypography.chip(
+                        onAccent,
+                      ).copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -618,86 +611,6 @@ class _PanelTitle extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PaletteDarkPreview extends StatelessWidget {
-  const _PaletteDarkPreview({required this.palette});
-
-  final CuratedBrandPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = palette.chromeFor(dark: true);
-    final onAccent = CuratedBrandPalette.readableOn(accent);
-    return Semantics(
-      label: identidadeDarkPreviewLabel(),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: EagleTokens.darkBg,
-          borderRadius: BorderRadius.circular(TokensStrip.rCard),
-          border: Border.all(color: EagleTokens.darkLine),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                identidadeDarkPreviewLabel(),
-                style: FocuxHubTypography.chip(
-                  EagleTokens.darkInkMute,
-                ).copyWith(letterSpacing: 0.2),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.auto_awesome_outlined,
-                      size: 18,
-                      color: accent,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Ícones e botões',
-                      style: FocuxHubTypography.bodyMuted(
-                        color: EagleTokens.darkInk,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(TokensStrip.rButton),
-                    ),
-                    child: Text(
-                      'Entrar',
-                      style: FocuxHubTypography.chip(
-                        onAccent,
-                      ).copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
