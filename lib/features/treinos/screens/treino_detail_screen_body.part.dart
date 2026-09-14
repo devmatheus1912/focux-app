@@ -109,7 +109,7 @@ class _TreinoDetailBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = ref.read(treinoRepositoryProvider);
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final contextLabel = _workoutContextLabel(treino, alunoNome);
     final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]

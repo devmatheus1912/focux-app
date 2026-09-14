@@ -23,7 +23,7 @@ class _ExercicioRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;

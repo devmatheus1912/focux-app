@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'brand_palette.dart';
+import 'curated_brand_palettes.dart';
 import 'design_tokens.dart';
 import 'focux_hub_typography.dart';
 import 'fx_page_transitions_builder.dart';
 import 'tokens_strip.dart';
 
 class AppTheme {
-  static ThemeData buildTheme(Color primary) => _build(primary, false);
-  static ThemeData buildDarkTheme(Color primary) => _build(primary, true);
+  static ThemeData buildTheme(Color primary, {Color? secondary}) =>
+      _build(primary, false, secondary: secondary);
+
+  static ThemeData buildDarkTheme(Color primary, {Color? secondary}) =>
+      _build(primary, true, secondary: secondary);
 
   static Color _readableOn(Color color) {
     return ThemeData.estimateBrightnessForColor(color) == Brightness.dark
@@ -46,12 +50,17 @@ class AppTheme {
         letterSpacing: letterSpacing,
       );
 
-  static ThemeData _build(Color primary, bool dark) {
+  static ThemeData _build(Color primary, bool dark, {Color? secondary}) {
     final primarySoft = BrandPalette.soft(primary, dark: dark);
     final primarySofter = BrandPalette.softer(primary, dark: dark);
     final primaryDeep = BrandPalette.deep(primary);
     final primaryAccent = BrandPalette.accent(primary);
     final onPrimary = _readableOn(primary);
+    final resolvedSecondary =
+        secondary != null
+            ? CuratedBrandPalette.safeSecondaryFor(primary, secondary)
+            : (dark ? primaryAccent : primaryDeep);
+    final onSecondary = _readableOn(resolvedSecondary);
     final surface = dark ? EagleTokens.darkCard : EagleTokens.card;
     final scaffold = dark ? EagleTokens.darkBg : EagleTokens.paper;
     final onSurface = dark ? EagleTokens.darkInk : EagleTokens.ink;
@@ -73,8 +82,8 @@ class AppTheme {
       onPrimary: onPrimary,
       primaryContainer: dark ? primarySofter : primarySoft,
       onPrimaryContainer: dark ? primaryAccent : primaryDeep,
-      secondary: dark ? primaryAccent : primaryDeep,
-      onSecondary: Colors.white,
+      secondary: resolvedSecondary,
+      onSecondary: onSecondary,
       secondaryContainer: dark ? EagleTokens.darkCardHi : primarySofter,
       onSecondaryContainer: onSurface,
       tertiary: EagleTokens.good,

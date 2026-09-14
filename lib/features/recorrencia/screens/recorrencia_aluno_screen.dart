@@ -350,14 +350,14 @@ class _RecorrenciaAlunoScreenState
                                         ),
                                         style: FocuxHubTypography.sectionTitle(
                                           context,
-                                          color: ShellChrome.forDark(isDark).ink,
+                                          color: ShellChrome.forBrightness(context, isDark).ink,
                                         ),
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
                                         recorrenciaValorLabel(assinatura.valor),
                                         style: FocuxHubTypography.kpi(
-                                          color: ShellChrome.forDark(isDark).ink,
+                                          color: ShellChrome.forBrightness(context, isDark).ink,
                                           fontSize: FocuxHubTypography.metricLg,
                                         ),
                                       ),

@@ -11,6 +11,8 @@ import '../../../core/api/api_error.dart';
 import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/storage/personal_slug_store.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -77,6 +79,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.read(hideFocuxBrandingProvider.notifier).state = false;
     ref.read(personalNameProvider.notifier).state = null;
     ref.read(appDisplayNameProvider.notifier).state = null;
+    ref.read(sloganProvider.notifier).state = null;
+    ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
+    ref.read(secondaryColorProvider.notifier).state =
+        BrandPalette.defaultSecondary;
   }
 
   @override

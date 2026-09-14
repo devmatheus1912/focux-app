@@ -412,7 +412,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
       homeAsync.valueOrNull?.fetchedAt,
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final ink = chrome.ink;
     final line = chrome.line;
     final mute = chrome.mute;

@@ -94,7 +94,7 @@ class IaCopilotHeaderStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(dark);
+    final chrome = ShellChrome.forBrightness(context, dark);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: chrome.headerAction(radius: 999),

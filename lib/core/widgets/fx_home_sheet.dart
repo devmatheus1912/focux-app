@@ -61,6 +61,7 @@ Future<T?> showFxHomeSheet<T>(
   bool forceDark = false,
 }) {
   final primary = Theme.of(context).colorScheme.primary;
+  final secondary = Theme.of(context).colorScheme.secondary;
   final isDark =
       forceDark || Theme.of(context).brightness == Brightness.dark;
   return showModalBottomSheet<T>(
@@ -89,7 +90,7 @@ Future<T?> showFxHomeSheet<T>(
       );
       if (!forceDark) return sheetFor(modalCtx);
       return Theme(
-        data: AppTheme.buildDarkTheme(primary),
+        data: AppTheme.buildDarkTheme(primary, secondary: secondary),
         child: Builder(builder: sheetFor),
       );
     },
@@ -149,7 +150,7 @@ class FxHomeSheetHandle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = ShellChrome.forDark(isDark).line;
+    final line = ShellChrome.forBrightness(context, isDark).line;
     return Center(
       child: Container(
         width: FxHomeSheetChrome.handleWidth,
@@ -182,7 +183,7 @@ class FxHomeSheetSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outerPad = FxHomeSheetChrome.paddingOf(context);
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     // Sheet fill opaco (não glass 0.72) — dark não mistura com o fundo.
     final fill = chrome.sheetFill;
@@ -251,7 +252,7 @@ class FxHomeSheetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = isDark ?? Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(dark);
+    final chrome = ShellChrome.forBrightness(context, dark);
     final caption = chrome.mute;
     final subtitleText = subtitle?.trim();
 

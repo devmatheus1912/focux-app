@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'brand_palette.dart';
 import 'design_tokens.dart';
 
 const _themePrefKey = 'focux_appearance_mode';
@@ -12,7 +13,13 @@ final themeModeProvider = StateNotifierProvider<ThemeModeController, ThemeMode>(
 
 final primaryColorProvider = StateProvider<Color>((ref) => EagleTokens.brand);
 
+final secondaryColorProvider = StateProvider<Color>(
+  (ref) => BrandPalette.defaultSecondary,
+);
+
 final logoUrlProvider = StateProvider<String?>((ref) => null);
+
+final sloganProvider = StateProvider<String?>((ref) => null);
 
 final personalNameProvider = StateProvider<String?>((ref) => null);
 

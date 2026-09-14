@@ -29,7 +29,7 @@ class PerfilAppearanceSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final mute = chrome.mute;
     final line = chrome.line;
 

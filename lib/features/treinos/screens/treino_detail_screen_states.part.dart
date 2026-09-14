@@ -135,7 +135,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forDark(widget.isDark);
+    final chrome = ShellChrome.forBrightness(context, widget.isDark);
     final busy = _saving || _videoBusy;
 
     return PrescriptionEditorSheet(

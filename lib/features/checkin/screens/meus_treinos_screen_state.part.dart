@@ -63,7 +63,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       });
     });
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
 

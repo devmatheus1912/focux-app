@@ -344,7 +344,7 @@ class _RankingFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final desconto = rankingDescontoLabel(first.descontoPercentual);
     return FxStripCard(
       emphasize: true,

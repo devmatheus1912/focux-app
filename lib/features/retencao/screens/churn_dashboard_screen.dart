@@ -355,7 +355,7 @@ class _RetencaoFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final alto = home.alto;
     final firstAlto = firstAltoRetencao(home.top3);
     return FxStripCard(

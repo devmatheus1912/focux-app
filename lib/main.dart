@@ -22,6 +22,7 @@ import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/brand_palette.dart';
 import 'core/theme/curated_brand_palettes.dart';
 import 'core/theme/design_tokens.dart';
 import 'core/theme/focux_system_chrome.dart';
@@ -183,12 +184,18 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       );
       final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       if (!mounted) return;
-      ref.read(primaryColorProvider.notifier).state = _safePrimaryColor(
-        perfil.corPrimaria,
+      final primary = _safePrimaryColor(perfil.corPrimaria);
+      ref.read(primaryColorProvider.notifier).state = primary;
+      ref.read(secondaryColorProvider.notifier).state = _safeSecondaryColor(
+        primary,
+        perfil.corSecundaria,
       );
       if (perfil.logoUrl != null && perfil.logoUrl!.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
       }
+      final slogan = perfil.slogan?.trim();
+      ref.read(sloganProvider.notifier).state =
+          (slogan != null && slogan.isNotEmpty) ? slogan : null;
       ref.read(personalNameProvider.notifier).state = perfil.nome;
       return;
     } catch (error) {
@@ -211,13 +218,19 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
       final data = response.data as Map<String, dynamic>;
       if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;
-      ref.read(primaryColorProvider.notifier).state = _safePrimaryColor(
-        corPrimaria,
+      final primary = _safePrimaryColor(corPrimaria);
+      ref.read(primaryColorProvider.notifier).state = primary;
+      ref.read(secondaryColorProvider.notifier).state = _safeSecondaryColor(
+        primary,
+        data['corSecundaria'] as String?,
       );
       final logoUrl = data['logoUrl'] as String?;
       if (logoUrl != null && logoUrl.isNotEmpty) {
         ref.read(logoUrlProvider.notifier).state = logoUrl;
       }
+      final slogan = (data['slogan'] as String?)?.trim();
+      ref.read(sloganProvider.notifier).state =
+          (slogan != null && slogan.isNotEmpty) ? slogan : null;
       final nomePersonal = data['nomePersonal'] as String?;
       if (nomePersonal != null && nomePersonal.isNotEmpty) {
         ref.read(personalNameProvider.notifier).state = nomePersonal;
@@ -233,7 +246,10 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
   void _resetCustomTheme() {
     ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
+    ref.read(secondaryColorProvider.notifier).state =
+        BrandPalette.defaultSecondary;
     ref.read(logoUrlProvider.notifier).state = null;
+    ref.read(sloganProvider.notifier).state = null;
     ref.read(personalNameProvider.notifier).state = null;
     ref.read(hideFocuxBrandingProvider.notifier).state = false;
     ref.read(appDisplayNameProvider.notifier).state = null;
@@ -248,6 +264,23 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     // Align with CuratedBrandPalette: dark neutrals (Midnight Gold, Obsidian…)
     // are valid brand primaries — the old sat<0.12 gate wiped them back to Focux.
     return CuratedBrandPalette.safePrimary(Color(parsed));
+  }
+
+  Color _safeSecondaryColor(Color primary, String? raw) {
+    if (raw == null || raw.length != 7 || !raw.startsWith('#')) {
+      return CuratedBrandPalette.safeSecondaryFor(
+        primary,
+        BrandPalette.defaultSecondary,
+      );
+    }
+    final parsed = int.tryParse(raw.replaceFirst('#', '0xFF'));
+    if (parsed == null) {
+      return CuratedBrandPalette.safeSecondaryFor(
+        primary,
+        BrandPalette.defaultSecondary,
+      );
+    }
+    return CuratedBrandPalette.safeSecondaryFor(primary, Color(parsed));
   }
 
   @override
@@ -266,6 +299,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
     final themeMode = ref.watch(themeModeProvider);
     final primaryColor = ref.watch(primaryColorProvider);
+    final secondaryColor = ref.watch(secondaryColorProvider);
     final hideFocux = ref.watch(hideFocuxBrandingProvider);
     final appDisplayName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
@@ -278,8 +312,11 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
     return MaterialApp.router(
       title: appTitle,
-      theme: AppTheme.buildTheme(primaryColor),
-      darkTheme: AppTheme.buildDarkTheme(primaryColor),
+      theme: AppTheme.buildTheme(primaryColor, secondary: secondaryColor),
+      darkTheme: AppTheme.buildDarkTheme(
+        primaryColor,
+        secondary: secondaryColor,
+      ),
       themeMode: themeMode,
       themeAnimationDuration: const Duration(milliseconds: 600),
       themeAnimationCurve: Curves.easeInOutCubic,

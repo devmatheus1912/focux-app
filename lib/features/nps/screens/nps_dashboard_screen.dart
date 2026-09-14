@@ -320,7 +320,7 @@ class _NpsFocusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     return FxStripCard(
       emphasize: true,
       semanticsLabel: 'NPS ${resumo.npsScore.toStringAsFixed(1)}',

@@ -258,7 +258,7 @@ class _StreakCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final streak = data.streak.streakAtual;
     return FxStripCard(
       emphasize: true,

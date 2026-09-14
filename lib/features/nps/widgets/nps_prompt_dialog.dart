@@ -69,7 +69,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
 
     return FxHomeSheetSurface(

@@ -114,7 +114,7 @@ class FxHelpSheetFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final brand = BrandPalette.softened(Theme.of(context).colorScheme.primary);
     final footnote = footer?.trim();
     final hasFootnote = footnote != null && footnote.isNotEmpty;

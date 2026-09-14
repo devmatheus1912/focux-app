@@ -227,7 +227,7 @@ class _QualidadeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final next = qualidadeNextAction(data);
     final band = qualidadeScoreBand(data.score);
     final scoreColor = switch (band) {

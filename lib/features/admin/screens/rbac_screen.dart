@@ -190,8 +190,8 @@ class RbacScreen extends ConsumerWidget {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final primary = Theme.of(ctx).colorScheme.primary;
-        final mute = ShellChrome.forDark(isDark).mute;
-        final line = ShellChrome.forDark(isDark).line;
+        final mute = ShellChrome.forBrightness(context, isDark).mute;
+        final line = ShellChrome.forBrightness(context, isDark).line;
         return StatefulBuilder(
           builder: (ctx, setState) {
             return FxHomeSheetSurface(
@@ -304,8 +304,8 @@ class RbacScreen extends ConsumerWidget {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final primary = Theme.of(ctx).colorScheme.primary;
-        final mute = ShellChrome.forDark(isDark).mute;
-        final line = ShellChrome.forDark(isDark).line;
+        final mute = ShellChrome.forBrightness(context, isDark).mute;
+        final line = ShellChrome.forBrightness(context, isDark).line;
         return StatefulBuilder(
           builder: (ctx, setState) {
             return FxHomeSheetSurface(

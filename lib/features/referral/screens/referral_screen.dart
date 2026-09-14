@@ -182,7 +182,7 @@ class _ReferralBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.forDark(isDark);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final codigo = referralCodigoLabel(info.codigo);
     return ListView(

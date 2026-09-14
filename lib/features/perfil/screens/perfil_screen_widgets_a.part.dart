@@ -164,6 +164,19 @@ class _PerfilBodyState extends State<_PerfilBody> {
                               color: ink,
                             ),
                           ),
+                          if (perfil.slogan != null &&
+                              perfil.slogan!.trim().isNotEmpty) ...[
+                            const SizedBox(height: TokensStrip.s1),
+                            Text(
+                              formatBrandSloganForDisplay(
+                                perfil.slogan!.trim(),
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: FxSettingsLayout.subhead(color: mute),
+                            ),
+                          ],
                           const SizedBox(height: TokensStrip.s1),
                           Text(
                             _buildSubtitle(perfil),
