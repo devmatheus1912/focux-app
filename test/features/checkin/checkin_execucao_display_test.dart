@@ -20,17 +20,27 @@ void main() {
     expect(checkinSeriesRepsLabel(3, '12'), '3 × 12');
     expect(
       checkinSerieContextLine(
-        index: 2,
-        total: 6,
         seriesReps: '3 × 12',
         carga: '80 kg',
         descansoSegundos: 60,
       ),
-      '2/6 · 3 × 12 · 80 kg · descanso 60s',
+      '3 × 12 · 80 kg · descanso 60s',
     );
     expect(
-      checkinChromeContextLine(duration: '08:12', concluido: 1, total: 5),
-      '08:12 · 1/5 exercícios',
+      checkinChromeContextLine(duration: '08:12', current: 2, total: 5),
+      '08:12 · exercício 2 de 5',
+    );
+    expect(
+      checkinConfirmarRestanteLabel(feitas: 3, total: 4),
+      'Confirmar série que falta',
+    );
+    expect(
+      checkinConfirmarRestanteLabel(feitas: 1, total: 4),
+      'Confirmar 3 séries que faltam',
+    );
+    expect(
+      checkinTrocarExercicioHint(index: 2, total: 2),
+      'Exercício 2 de 2 · toque para trocar',
     );
   });
 
@@ -66,5 +76,29 @@ void main() {
     expect(checkinCargaLabel(7.5), '7,5 kg');
     expect(checkinRegistrarLabel(first: true), 'Registrar série');
     expect(checkinPularDescansoLabel(), 'Pular descanso');
+  });
+
+  test('trocar exercício honra o foco mesmo se o item já foi concluído', () {
+    const items = [
+      (id: 1, done: true),
+      (id: 2, done: false),
+    ];
+    expect(
+      checkinPickCurrentExercise(
+        exercicios: items,
+        idOf: (e) => e.id,
+        concluidoOf: (e) => e.done,
+        focoId: 1,
+      ).id,
+      1,
+    );
+    expect(
+      checkinPickCurrentExercise(
+        exercicios: items,
+        idOf: (e) => e.id,
+        concluidoOf: (e) => e.done,
+      ).id,
+      2,
+    );
   });
 }

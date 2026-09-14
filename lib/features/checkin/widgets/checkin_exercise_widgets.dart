@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -115,6 +116,7 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onOpenTips;
   final VoidCallback? onAjustar;
   final VoidCallback? onConfirmarRestante;
+  final VoidCallback? onTrocar;
   final double? draftCargaKg;
   final int? draftReps;
   final VoidCallback? onPlusCarga;
@@ -134,6 +136,7 @@ class CheckinSerieCard extends StatelessWidget {
     this.onOpenTips,
     this.onAjustar,
     this.onConfirmarRestante,
+    this.onTrocar,
     this.draftCargaKg,
     this.draftReps,
     this.onPlusCarga,
@@ -151,8 +154,6 @@ class CheckinSerieCard extends StatelessWidget {
     final target = ee.series ?? 0;
     final done = ee.concluido || (target > 0 && ee.seriesFeitas >= target);
     final contextLine = checkinSerieContextLine(
-      index: index,
-      total: total,
       seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
       carga: checkinCargaLabel(ee.cargaKg),
       descansoSegundos: ee.descansoSegundos,
@@ -169,12 +170,37 @@ class CheckinSerieCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            ee.exercicioNome,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.sectionTitle(context, color: chrome.ink),
+          GestureDetector(
+            onTap:
+                onTrocar == null
+                    ? null
+                    : () {
+                      HapticFeedback.selectionClick();
+                      onTrocar!();
+                    },
+            behavior: HitTestBehavior.opaque,
+            child: Column(
+              children: [
+                Text(
+                  ee.exercicioNome,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                ),
+                if (onTrocar != null) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  Text(
+                    checkinTrocarExercicioHint(index: index, total: total),
+                    textAlign: TextAlign.center,
+                    style: FocuxTypography.bodySmall(color: brand),
+                  ),
+                ],
+              ],
+            ),
           ),
           const SizedBox(height: TokensStrip.s3),
           Text(
@@ -259,7 +285,10 @@ class CheckinSerieCard extends StatelessWidget {
                         minimumSize: const Size(64, checkinExecutionControlMin),
                       ),
                       child: Text(
-                        'Confirmar restantes',
+                        checkinConfirmarRestanteLabel(
+                          feitas: ee.seriesFeitas,
+                          total: ee.series,
+                        ),
                         style: TextStyle(color: chrome.mute),
                       ),
                     ),

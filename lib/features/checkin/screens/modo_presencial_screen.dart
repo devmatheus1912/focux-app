@@ -419,8 +419,6 @@ class _State extends ConsumerState<ModoPresencialScreen>
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   checkinSerieContextLine(
-                    index: _currentIdx + 1,
-                    total: total,
                     seriesReps: checkinSeriesRepsLabel(
                       ex.series,
                       ex.repeticoes,
