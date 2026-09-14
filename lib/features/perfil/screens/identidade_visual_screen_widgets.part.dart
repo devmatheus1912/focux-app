@@ -8,6 +8,7 @@ class _LiveBrandHero extends StatelessWidget {
     required this.slogan,
     required this.logoUrl,
     required this.paletteName,
+    required this.reduceMotion,
   });
 
   final Color primary;
@@ -16,6 +17,7 @@ class _LiveBrandHero extends StatelessWidget {
   final String slogan;
   final String? logoUrl;
   final String paletteName;
+  final bool reduceMotion;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class _LiveBrandHero extends StatelessWidget {
     final mutedOnHero = onHero.withValues(alpha: 0.82);
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 320),
+      duration: identidadeHeroAnimDuration(reduceMotion: reduceMotion),
       curve: Curves.easeOutCubic,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -79,36 +81,59 @@ class _LiveBrandHero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: frost,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: frostBorder),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: EagleTokens.good,
-                          shape: BoxShape.circle,
-                        ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Preview ao vivo · $paletteName',
+                      decoration: BoxDecoration(
+                        color: frost,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: frostBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: EagleTokens.good,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Preview · $paletteName',
+                            style: FocuxHubTypography.chip(
+                              mutedOnHero,
+                            ).copyWith(letterSpacing: 0.3),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: frost,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: frostBorder),
+                      ),
+                      child: Text(
+                        identidadeAlunoVisibilityLabel(),
                         style: FocuxHubTypography.chip(
                           mutedOnHero,
-                        ).copyWith(letterSpacing: 0.3),
+                        ).copyWith(letterSpacing: 0.2),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: TokensStrip.s4),
                 Row(

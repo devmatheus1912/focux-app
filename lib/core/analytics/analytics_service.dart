@@ -285,4 +285,10 @@ class ProductEvents {
   static const perfilStickyTapped = 'perfil_sticky_tapped';
   static const perfilShareTapped = 'perfil_share_tapped';
   static const perfilMarcaHintOpened = 'perfil_marca_hint_opened';
+
+  static const identidadeViewed = 'identidade_viewed';
+  static const identidadeRefreshed = 'identidade_refreshed';
+  static const identidadeHelpOpened = 'identidade_help_opened';
+  static const identidadeSaved = 'identidade_saved';
+  static const identidadeRestored = 'identidade_restored';
 }

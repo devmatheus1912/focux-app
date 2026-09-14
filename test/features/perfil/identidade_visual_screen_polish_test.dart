@@ -39,7 +39,8 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/perfil/screens/identidade_visual_screen.dart',
     );
-    expect(screen, contains('FxSettingsTile'));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('identidadeHasWhiteLabel'));
@@ -52,9 +53,13 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(screen, contains('identidadeRestaurarCoresLabel()'));
+    expect(screen, contains('ProductEvents.identidadeViewed'));
+    expect(screen, contains('identidadeAppBarSubtitle'));
     expect(screen, isNot(contains('label: identidadeRestaurarCoresLabel')));
     expect(screen, isNot(contains('picker: true')));
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('Editor da landing (Enterprise)')));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, isNot(contains('Descrição profissional')));
   });
 }

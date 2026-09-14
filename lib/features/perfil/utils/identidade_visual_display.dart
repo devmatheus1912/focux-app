@@ -1,3 +1,6 @@
+import '../../../core/theme/curated_brand_palettes.dart';
+import '../../../core/ux/fx_hub_freshness.dart';
+
 bool identidadeHasWhiteLabel({
   required bool? featureWhiteLabel,
   required String plano,
@@ -51,3 +54,37 @@ String identidadeHelpSalvarBody() =>
 
 String identidadeLogoSloganSubtitle() =>
     'Logo no chrome do app. Slogan no login white-label e no home do aluno.';
+
+String identidadeAlunoVisibilityLabel() => 'Visível no app do aluno';
+
+String identidadePaletteSubtitle() =>
+    'Pares curados com contraste seguro — nunca quebra o app.';
+
+Duration identidadeHeroAnimDuration({required bool reduceMotion}) =>
+    reduceMotion ? Duration.zero : const Duration(milliseconds: 320);
+
+bool identidadeIsDirty({
+  required bool perfilLoaded,
+  required String slogan,
+  required String baselineSlogan,
+  required String? logoUrl,
+  required String? baselineLogo,
+  required CuratedBrandPalette palette,
+  required CuratedBrandPalette? baselinePalette,
+}) {
+  if (!perfilLoaded) return false;
+  return slogan != baselineSlogan ||
+      logoUrl != baselineLogo ||
+      palette != baselinePalette;
+}
+
+String identidadeAppBarSubtitle({
+  required bool hasWhiteLabel,
+  required DateTime? fetchedAt,
+  DateTime? now,
+}) {
+  return FxHubFreshness.joinCount(
+    hasWhiteLabel ? 'Sua marca no app' : 'Marca no app',
+    FxHubFreshness.fromFetchedAt(fetchedAt, now: now),
+  );
+}
