@@ -143,6 +143,8 @@ void main() {
     expect(media, contains('setLooping(true)'));
     expect(media, contains('didUpdateWidget'));
     expect(media, contains('_load('));
+    expect(media, contains('_release('));
+    expect(media, contains('_loadGeneration++'));
     expect(media, isNot(contains('IconButton.filled')));
     expect(media, isNot(contains('height: 168')));
   });

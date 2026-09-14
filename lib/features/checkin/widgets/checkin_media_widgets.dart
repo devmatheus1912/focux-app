@@ -182,45 +182,58 @@ class _CheckinExerciseVideoPreviewState
     }
   }
 
+  Future<void> _release(VideoPlayerController? controller) async {
+    if (controller == null) return;
+    controller.removeListener(_onVideoTick);
+    if (identical(_controller, controller)) {
+      _controller = null;
+    }
+    await controller.dispose();
+  }
+
   Future<void> _load(String url) async {
     final generation = ++_loadGeneration;
+    // Drop any published controller before starting a new load.
     final previous = _controller;
-    if (previous != null) {
-      previous.removeListener(_onVideoTick);
-      await previous.dispose();
-    }
+    _controller = null;
+    await _release(previous);
     if (!mounted || generation != _loadGeneration) return;
 
     setState(() {
-      _controller = null;
       _ready = false;
       _failed = false;
       _playing = false;
     });
 
+    // Keep the controller local until ready so cancel/error always owns cleanup.
     final controller = VideoPlayerController.networkUrl(Uri.parse(url));
     controller.addListener(_onVideoTick);
-    _controller = controller;
 
     try {
       await controller.initialize();
-      if (!mounted || generation != _loadGeneration || _controller != controller) {
-        await controller.dispose();
+      if (!mounted || generation != _loadGeneration) {
+        await _release(controller);
         return;
       }
       await controller.setLooping(true);
       await controller.setVolume(0);
       await controller.play();
-      if (!mounted || generation != _loadGeneration || _controller != controller) {
+      if (!mounted || generation != _loadGeneration) {
+        await _release(controller);
         return;
       }
+      _controller = controller;
       setState(() {
         _ready = true;
         _playing = controller.value.isPlaying;
       });
     } catch (_) {
+      await _release(controller);
       if (!mounted || generation != _loadGeneration) return;
-      setState(() => _failed = true);
+      setState(() {
+        _failed = true;
+        _ready = false;
+      });
     }
   }
 
@@ -244,7 +257,10 @@ class _CheckinExerciseVideoPreviewState
 
   @override
   void dispose() {
+    // Invalidate in-flight loads; their local controller is released in _load.
+    _loadGeneration++;
     final controller = _controller;
+    _controller = null;
     if (controller != null) {
       controller.removeListener(_onVideoTick);
       controller.dispose();
