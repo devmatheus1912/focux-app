@@ -49,6 +49,10 @@ void main() {
     expect(screen, contains('hasStartable'));
     expect(screen, contains('Fiz o treino'));
     expect(screen, contains('confirmarPlano'));
+    expect(screen, contains('alunoDashboardHomeProvider'));
+    expect(screen, contains('historicoCheckinProvider'));
+    expect(screen, contains('MeusTreinosMemCache.clear'));
+    expect(screen, contains('starting || confirming'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

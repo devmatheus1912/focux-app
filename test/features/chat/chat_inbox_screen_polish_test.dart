@@ -31,6 +31,7 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('chatInboxPreview'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('chatInboxViewed'));

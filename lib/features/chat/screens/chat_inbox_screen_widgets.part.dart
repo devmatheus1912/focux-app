@@ -228,10 +228,10 @@ class _InboxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(isDark || !isDark);
-    final preview =
-        item.ultimoRemetente == 'PERSONAL'
-            ? 'Você: ${item.ultimaMensagem}'
-            : item.ultimaMensagem;
+    final preview = chatInboxPreview(
+      remetente: item.ultimoRemetente,
+      mensagem: item.ultimaMensagem,
+    );
     final unread = item.naoLidas;
     final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(

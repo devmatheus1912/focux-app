@@ -48,6 +48,15 @@ void main() {
     expect(screen, contains('Preparando seu treino'));
     expect(screen, contains('CheckinRestBanner'));
     expect(screen, isNot(contains('CheckinRestFocusView')));
+    expect(
+      readScreenSourceBundle(
+        'lib/features/checkin/widgets/checkin_timer_widgets.dart',
+      ),
+      allOf(
+        contains('class CheckinRestBanner'),
+        isNot(contains('SafeArea(')),
+      ),
+    );
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
     expect(screen, contains('onConfirmarRestante:'));
