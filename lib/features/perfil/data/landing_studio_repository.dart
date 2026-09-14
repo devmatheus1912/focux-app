@@ -78,6 +78,7 @@ class LandingEntrevista {
       nomeMarca.trim().isNotEmpty &&
       nicho.trim().isNotEmpty &&
       promessa.trim().isNotEmpty &&
+      ofertaNome.trim().isNotEmpty &&
       cta.trim().isNotEmpty;
 }
 
@@ -280,10 +281,23 @@ class LandingStudioState {
     final podePublicar =
         json['podePublicar'] as bool? ?? gerado.hasPublishableCopy;
 
+    // BE `LandingEstadoResponse` envia mídia flat no root; saveMidia
+    // histórico pode envelopar em `midia`. Aceita os dois.
+    final nestedMidia = asMap(json['midia']);
+    final midia = LandingMidia.fromJson(
+      nestedMidia ??
+          {
+            if (json['heroImageUrl'] != null)
+              'heroImageUrl': json['heroImageUrl'],
+            if (json['bioImageUrl'] != null) 'bioImageUrl': json['bioImageUrl'],
+            if (json['accentColor'] != null) 'accentColor': json['accentColor'],
+          },
+    );
+
     return LandingStudioState(
       entrevista: LandingEntrevista.fromJson(asMap(json['entrevista'])),
       gerado: gerado,
-      midia: LandingMidia.fromJson(asMap(json['midia'])),
+      midia: midia,
       publicUrl: publicUrl,
       slug: (json['slug'] as String?)?.trim(),
       publicado: json['publicado'] as bool? ?? false,

@@ -32,6 +32,9 @@ void main() {
     expect(screen, isNot(contains('landing/presets')));
     expect(screen, isNot(contains('gerar-hero')));
     expect(screen, isNot(contains('offerCta')));
+    expect(screen, contains('RefreshIndicator'));
+    expect(screen, contains('ProductEvents.landingViewed'));
+    expect(screen, contains('copyLandingLink'));
     expect(screen, isNot(contains('AnimatedPadding')));
   });
 }
