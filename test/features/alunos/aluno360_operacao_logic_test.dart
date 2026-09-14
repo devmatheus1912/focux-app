@@ -65,6 +65,21 @@ void main() {
       expect(action.destination, OperacaoStickyDestination.chat);
     });
 
+    test('routes planejar proxima evolucao to evolucao tab', () {
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Planejar próxima evolução',
+          motivo: 'Radar',
+          fonte: 'RADAR',
+          prioridade: 'P2',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.destination, OperacaoStickyDestination.evolucao);
+    });
+
     test('open task without proxima acao falls back to Ver tarefa', () {
       final action = resolveOperacaoStickyAction(
         aluno: _aluno(),

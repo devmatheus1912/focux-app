@@ -132,15 +132,6 @@ class _Aluno360RecoveryInsightCardState
                             ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          snapshot.recoveryHint,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Aluno360Layout.captionStyle(
-                            context,
-                          ).copyWith(color: mute, height: 1.3),
-                        ),
                       ],
                     ),
                   ),
