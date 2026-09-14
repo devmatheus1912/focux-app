@@ -35,11 +35,11 @@ class PerfilStickyBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chipFg = dashboardPrioritiesChipForeground(
-      TokensStrip.primary,
+      accent,
       isDark: isDark,
     );
     final chipBg = dashboardPrioritiesChipBackground(
-      TokensStrip.primary,
+      accent,
       isDark: isDark,
     );
 

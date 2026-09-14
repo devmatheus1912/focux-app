@@ -22,6 +22,7 @@ import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/curated_brand_palettes.dart';
 import 'core/theme/design_tokens.dart';
 import 'core/theme/focux_system_chrome.dart';
 import 'core/theme/theme_provider.dart';
@@ -244,12 +245,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     }
     final parsed = int.tryParse(raw.replaceFirst('#', '0xFF'));
     if (parsed == null) return EagleTokens.brand;
-    final color = Color(parsed);
-    final hsl = HSLColor.fromColor(color);
-    if (hsl.lightness > 0.86 || hsl.saturation < 0.12) {
-      return EagleTokens.brand;
-    }
-    return color;
+    // Align with CuratedBrandPalette: dark neutrals (Midnight Gold, Obsidian…)
+    // are valid brand primaries — the old sat<0.12 gate wiped them back to Focux.
+    return CuratedBrandPalette.safePrimary(Color(parsed));
   }
 
   @override
