@@ -46,7 +46,11 @@ void main() {
     expect(screen, contains('ColoredBox'));
     expect(screen, contains('checkinSerieRepsSeed'));
     expect(screen, contains('Preparando seu treino'));
-    expect(screen, contains('CheckinRestFocusView'));
+    expect(screen, contains('CheckinRestBanner'));
+    expect(screen, isNot(contains('CheckinRestFocusView')));
+    expect(screen, contains('_registrarSerieRapida'));
+    expect(screen, contains('onAjustar:'));
+    expect(screen, contains('onConfirmarRestante:'));
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('checkinFinalizarLabel'));
     expect(screen, contains('Trocar exercício'));
@@ -91,6 +95,9 @@ void main() {
     );
     expect(card, contains('checkinExecutionControlMin'));
     expect(card, contains('FxLiquidPrimaryButton'));
+    expect(card, contains("'Ajustar'"));
+    expect(card, contains("'Confirmar restantes'"));
+    expect(card, contains('_CheckinSetSteppers'));
     expect(card, contains('checkinTextLooksNonPtBr'));
     expect(card, contains('checkinErrosComunsFallback'));
     expect(card, contains('CheckinExerciseVideoPreview'));
@@ -172,5 +179,4 @@ void main() {
     expect(sheet, contains('ListView'));
     expect(sheet, contains('GatedPoseCoachPanel'));
   });
-
 }

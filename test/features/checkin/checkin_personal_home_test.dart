@@ -17,16 +17,14 @@ void main() {
       ],
       'semana': [],
       'itens': [
-        {
-          'id': 9,
-          'alunoId': 3,
-          'alunoNome': 'Ana',
-          'treinoNome': 'Full body',
-        },
+        {'id': 9, 'alunoId': 3, 'alunoNome': 'Ana', 'treinoNome': 'Full body'},
       ],
       'page': 0,
       'totalItens': 1,
       'hasNext': false,
+      'pendentes': [
+        {'alunoId': 4, 'alunoNome': 'Bia', 'treinoId': 2, 'treinoNome': 'A'},
+      ],
     });
     expect(bundle.checkinsHoje, 1);
     expect(bundle.hoje.single.alunoId, 3);
@@ -34,5 +32,7 @@ void main() {
     expect(bundle.semana, isEmpty);
     expect(bundle.itens.single.alunoId, 3);
     expect(bundle.hasNext, isFalse);
+    expect(bundle.pendentes.single.alunoId, 4);
+    expect(bundle.pendentes.single.treinoId, 2);
   });
 }

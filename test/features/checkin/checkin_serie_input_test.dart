@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/data/checkin_repository.dart';
 import 'package:focux_app/features/checkin/utils/checkin_serie_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,20 +10,40 @@ void main() {
     expect(checkinIsPrescriptionRange('10'), isFalse);
     expect(
       checkinSerieRepsSeed(serieRepeticoes: null, prescricacao: '8-12'),
-      '',
+      '8',
     );
     expect(
       checkinSerieRepsSeed(serieRepeticoes: '8-12', prescricacao: '8-12'),
-      '',
+      '8',
     );
     expect(
       checkinSerieRepsSeed(serieRepeticoes: '15', prescricacao: '8-12'),
       '15',
     );
-    expect(
-      checkinSeriePrescricaoHint('8-12'),
-      'Prescrição do personal: 8-12',
+    expect(checkinSeriePrescricaoHint('8-12'), 'Prescrição do personal: 8-12');
+  });
+
+  test('current set prefers last session then prescription', () {
+    final previous = ExecucaoSerie(
+      id: 1,
+      numero: 1,
+      cargaKg: 80,
+      repeticoes: '9',
     );
+    final ee = ExecucaoExercicio(
+      id: 1,
+      treinoExercicioId: 2,
+      exercicioNome: 'Supino',
+      series: 3,
+      repeticoes: '8-12',
+      cargaKg: 20,
+      seriesFeitas: 0,
+      concluido: false,
+      seriesAnteriores: [previous],
+    );
+    final seed = checkinCurrentSetSeed(ee: ee, numero: 1);
+    expect(seed.cargaKg, 80);
+    expect(seed.reps, 9);
   });
 
   test('RPE plain labels help students who do not know the acronym', () {

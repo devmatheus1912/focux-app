@@ -38,10 +38,7 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
   }
 
   String _replySenderLabel(String remetente) {
-    if (_isAlunoMode) {
-      return remetente == 'ALUNO' ? 'Você' : 'Personal';
-    }
-    return remetente == 'PERSONAL' ? 'Você' : 'Aluno';
+    return chatRemetenteLabel(remetente: remetente, isAlunoMode: _isAlunoMode);
   }
 
   String _previewText(ChatMsg msg) {

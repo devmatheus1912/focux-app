@@ -803,6 +803,13 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<void> cobrarTreino(int id, {int? treinoId}) async {
+    await _dio.post(
+      '/api/alunos/$id/cobrar-treino',
+      data: {if (treinoId != null) 'treinoId': treinoId},
+    );
+  }
+
   Future<void> atualizarStatusLote(List<int> ids, String status) async {
     await _dio.patch(
       '/api/alunos/lote/status',

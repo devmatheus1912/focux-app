@@ -3,10 +3,7 @@ import 'package:focux_app/features/checkin/models/checkin_personal_home.dart';
 import 'package:focux_app/features/checkin/utils/checkin_personal_display.dart';
 
 void main() {
-  CheckinPersonalItem item({
-    required int alunoId,
-    required String nome,
-  }) {
+  CheckinPersonalItem item({required int alunoId, required String nome}) {
     return CheckinPersonalItem(
       id: alunoId,
       alunoId: alunoId,
@@ -20,11 +17,7 @@ void main() {
     expect(checkinPrimeiroNome('Ana Silva'), 'Ana');
     expect(
       checkinFocusAction(
-        const CheckinPersonalHomeBundle(
-          checkinsHoje: 0,
-          hoje: [],
-          semana: [],
-        ),
+        const CheckinPersonalHomeBundle(checkinsHoje: 0, hoje: [], semana: []),
       ).label,
       'Ver alunos',
     );

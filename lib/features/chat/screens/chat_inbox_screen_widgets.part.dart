@@ -181,9 +181,14 @@ class _SearchResultTile extends StatelessWidget {
     assert(isDark || !isDark);
     assert(ink.a >= 0 && mute.a >= 0);
     final who = alunoNome?.trim();
-    final title = (who != null && who.isNotEmpty)
-        ? who
-        : (msg.remetente == 'PERSONAL' ? 'Você' : 'Aluno');
+    final title =
+        (who != null && who.isNotEmpty)
+            ? who
+            : chatRemetenteLabel(
+              remetente: msg.remetente,
+              isAlunoMode: false,
+              tipoMidia: msg.tipoMidia,
+            );
     return FxSatelliteListTile(
       title: title,
       subtitle: Text(msg.conteudo),
@@ -223,9 +228,10 @@ class _InboxTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(isDark || !isDark);
-    final preview = item.ultimoRemetente == 'PERSONAL'
-        ? 'Você: ${item.ultimaMensagem}'
-        : item.ultimaMensagem;
+    final preview =
+        item.ultimoRemetente == 'PERSONAL'
+            ? 'Você: ${item.ultimaMensagem}'
+            : item.ultimaMensagem;
     final unread = item.naoLidas;
     final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(
@@ -233,13 +239,14 @@ class _InboxTile extends StatelessWidget {
       child: FxSatelliteListTile(
         title: item.alunoNome,
         subtitle: Text(preview),
-        leading: selecting && selected
-            ? Icon(Icons.check_rounded, color: primary)
-            : AlunoAvatar(
-              name: item.alunoNome,
-              photoUrl: item.fotoUrl,
-              variant: AlunoAvatarVariant.strip,
-            ),
+        leading:
+            selecting && selected
+                ? Icon(Icons.check_rounded, color: primary)
+                : AlunoAvatar(
+                  name: item.alunoNome,
+                  photoUrl: item.fotoUrl,
+                  variant: AlunoAvatarVariant.strip,
+                ),
         trailing: Text(
           unread > 0
               ? (unread > 99 ? '99+' : '$unread')

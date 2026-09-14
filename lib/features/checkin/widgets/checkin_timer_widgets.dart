@@ -6,6 +6,59 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../utils/checkin_execucao_display.dart';
 
+class CheckinRestBanner extends StatelessWidget {
+  final int seconds;
+  final VoidCallback onSkip;
+
+  const CheckinRestBanner({
+    super.key,
+    required this.seconds,
+    required this.onSkip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Material(
+      color: chrome.cardFill,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s2,
+            TokensStrip.s4,
+            TokensStrip.s2,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Descanso · ${seconds}s',
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: checkinExecutionControlMin,
+                child: TextButton(
+                  onPressed: onSkip,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(64, checkinExecutionControlMin),
+                  ),
+                  child: Text(checkinPularDescansoLabel()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CheckinRestFocusView extends StatelessWidget {
   final int seconds;
   final VoidCallback onSkip;

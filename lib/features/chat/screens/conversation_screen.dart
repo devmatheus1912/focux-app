@@ -27,6 +27,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../utils/chat_remetente.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -336,12 +337,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   }
 
   bool _isIncoming(ChatMsg msg) {
+    if (chatIsSistema(msg.remetente, msg.tipoMidia)) return true;
     return _isAlunoMode
         ? msg.remetente == 'PERSONAL'
         : msg.remetente == 'ALUNO';
   }
 
   bool _isMine(ChatMsg msg) {
+    if (chatIsSistema(msg.remetente, msg.tipoMidia)) return false;
     return _isAlunoMode
         ? msg.remetente == 'ALUNO'
         : msg.remetente == 'PERSONAL';
@@ -574,6 +577,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                       child: ConversationBubble(
                                         msg: msg,
                                         mine: _isMine(msg),
+                                        system: chatIsSistema(
+                                          msg.remetente,
+                                          msg.tipoMidia,
+                                        ),
                                         isDark: isDark,
                                         accentColor: primary,
                                         highlighted:

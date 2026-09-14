@@ -21,6 +21,11 @@ Future<void> showCheckinPersonalHelpSheet(BuildContext context) {
         icon: 'users',
       ),
       FxHelpTip(
+        'Pendentes',
+        'Alunos ativos com treino e sem check-in hoje. Cobrar treino manda um push para o aluno abrir a execução.',
+        icon: 'bell',
+      ),
+      FxHelpTip(
         'Live',
         'Executar série e timer ficam no celular do aluno. Aqui o personal só acompanha.',
         icon: 'dumbbell',
