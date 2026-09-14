@@ -18,6 +18,7 @@ Future<void> _abrirIdentidadeAjuda(BuildContext context) {
 extension on _IdentidadeVisualScreenState {
   Future<void> _pedirTrocarLogo() async {
     if (_uploadingLogo) return;
+    FxKeyboardDismissScope.dismiss();
     final ok = await showFxConfirmSheet(
       context,
       title: identidadeLogoConfirmTitle(),
@@ -30,6 +31,7 @@ extension on _IdentidadeVisualScreenState {
 
   Future<void> _pedirSalvar({required bool hasWhiteLabel}) async {
     if (!hasWhiteLabel || _salvando) return;
+    FxKeyboardDismissScope.dismiss();
     final ok = await showFxConfirmSheet(
       context,
       title: identidadeSalvarConfirmTitle(),
@@ -42,6 +44,7 @@ extension on _IdentidadeVisualScreenState {
 
   Future<void> _pedirRestaurarCores({required bool hasWhiteLabel}) async {
     if (!hasWhiteLabel || _salvando) return;
+    FxKeyboardDismissScope.dismiss();
     final ok = await showFxConfirmSheet(
       context,
       title: identidadeRestaurarConfirmTitle(),

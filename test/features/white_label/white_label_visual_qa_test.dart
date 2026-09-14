@@ -5,7 +5,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/app_theme.dart';
+import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
+import 'package:focux_app/core/theme/focux_contrast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
@@ -50,6 +52,28 @@ void main() {
 
       expect(contrast, greaterThanOrEqualTo(4.5), reason: scenario.name);
     }
+  });
+
+  test('dark theme remaps atmosphere primaries so chrome reads on mesh', () {
+    for (final palette in CuratedBrandPalette.premium) {
+      final theme = AppTheme.buildDarkTheme(
+        palette.primary,
+        secondary: palette.secondary,
+      );
+      expect(
+        FocuxContrast.contrastRatio(
+          theme.colorScheme.primary,
+          EagleTokens.darkBg,
+        ),
+        greaterThanOrEqualTo(FocuxContrast.wcagAaLarge),
+        reason: palette.name,
+      );
+    }
+    final midnight = AppTheme.buildDarkTheme(
+      const Color(0xFF1A2332),
+      secondary: const Color(0xFFC9A962),
+    );
+    expect(midnight.colorScheme.primary, isNot(const Color(0xFF1A2332)));
   });
 }
 

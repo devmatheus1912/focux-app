@@ -149,9 +149,7 @@ class _LiveBrandHero extends StatelessWidget {
                           logoUrl == null || logoUrl!.isEmpty
                               ? Text(
                                 name.isNotEmpty ? name[0].toUpperCase() : 'P',
-                                style: FocuxTypography.headline(
-                                  color: onHero,
-                                ),
+                                style: FocuxTypography.headline(color: onHero),
                               )
                               : null,
                     ),
@@ -243,8 +241,9 @@ class _LogoUploadRing extends StatelessWidget {
               shape: BoxShape.circle,
               color: ShellChrome.of(context).cardFill,
               border: Border.all(
-                color: CuratedBrandPalette.readableOn(primary)
-                    .withValues(alpha: 0.65),
+                color: CuratedBrandPalette.readableOn(
+                  primary,
+                ).withValues(alpha: 0.65),
                 width: 2,
               ),
             ),
@@ -256,7 +255,11 @@ class _LogoUploadRing extends StatelessWidget {
                       child: Text(
                         nome.isNotEmpty ? nome[0].toUpperCase() : '?',
                         style: FocuxTypography.display(
-                          color: primary,
+                          color: CuratedBrandPalette.chromeAccent(
+                            primary,
+                            secondary,
+                            dark: ShellChrome.of(context).isDark,
+                          ),
                         ).copyWith(fontSize: 36),
                       ),
                     ),
@@ -342,7 +345,7 @@ class _CuratedPaletteGrid extends StatelessWidget {
                 border: Border.all(
                   color:
                       isSelected
-                          ? palette.primary
+                          ? palette.chromeFor(dark: chrome.isDark)
                           : chrome.line.withValues(alpha: 0.9),
                   width: isSelected ? 2 : 1,
                 ),
@@ -431,9 +434,9 @@ class _CuratedPaletteGrid extends StatelessWidget {
                     palette.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.chip(chrome.ink).copyWith(
-                      letterSpacing: -0.2,
-                    ),
+                    style: FocuxHubTypography.chip(
+                      chrome.ink,
+                    ).copyWith(letterSpacing: -0.2),
                   ),
                   Text(
                     palette.subtitle,
@@ -485,9 +488,9 @@ class _BrandField extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: FocuxHubTypography.chip(chrome.mute).copyWith(
-            letterSpacing: 0.8,
-          ),
+          style: FocuxHubTypography.chip(
+            chrome.mute,
+          ).copyWith(letterSpacing: 0.8),
         ),
         const SizedBox(height: 8),
         AnimatedContainer(
@@ -537,6 +540,7 @@ class _BrandField extends StatelessWidget {
               ),
               counterText: '',
             ),
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
           ),
         ),
         if (maxLength != null)
@@ -614,6 +618,86 @@ class _PanelTitle extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PaletteDarkPreview extends StatelessWidget {
+  const _PaletteDarkPreview({required this.palette});
+
+  final CuratedBrandPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = palette.chromeFor(dark: true);
+    final onAccent = CuratedBrandPalette.readableOn(accent);
+    return Semantics(
+      label: identidadeDarkPreviewLabel(),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: EagleTokens.darkBg,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          border: Border.all(color: EagleTokens.darkLine),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                identidadeDarkPreviewLabel(),
+                style: FocuxHubTypography.chip(
+                  EagleTokens.darkInkMute,
+                ).copyWith(letterSpacing: 0.2),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.auto_awesome_outlined,
+                      size: 18,
+                      color: accent,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Ícones e botões',
+                      style: FocuxHubTypography.bodyMuted(
+                        color: EagleTokens.darkInk,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent,
+                      borderRadius: BorderRadius.circular(TokensStrip.rButton),
+                    ),
+                    child: Text(
+                      'Entrar',
+                      style: FocuxHubTypography.chip(
+                        onAccent,
+                      ).copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
