@@ -7,7 +7,10 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/perfil/screens/identidade_visual_screen.dart',
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(
+      screen,
+      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
+    );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(
@@ -47,10 +50,12 @@ void main() {
     expect(screen, contains('Assinar Enterprise'));
     expect(screen, contains('_LiveBrandHero'));
     expect(screen, contains('_CuratedPaletteGrid'));
+    expect(screen, contains('_PaletteDarkPreview'));
     expect(screen, contains('_LogoUploadRing'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(screen, contains('identidadeRestaurarCoresLabel()'));
     expect(screen, contains('ProductEvents.identidadeViewed'));

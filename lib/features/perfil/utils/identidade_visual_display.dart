@@ -20,7 +20,7 @@ String identidadeConfirmarLabel() => 'Confirmar';
 String identidadeSalvarConfirmTitle() => 'Salvar identidade visual?';
 
 String identidadeSalvarConfirmMessage() =>
-    'Logo, cores e slogan passam a aparecer no app e no login dos alunos.';
+    'Logo, cores e slogan passam a aparecer no app do personal e do aluno.';
 
 String identidadeRestaurarCoresLabel() => 'Restaurar cores padrão';
 
@@ -44,21 +44,23 @@ String identidadeDiscardConfirm() => 'Sair';
 String identidadeHelpTitle() => 'Identidade visual';
 
 String identidadeHelpSubtitle() =>
-    'Marca no app do aluno e no login. Bio e redes ficam em Editar perfil.';
+    'Marca no app após o login. Bio e redes ficam em Editar perfil.';
 
 String identidadeHelpMarcaBody() =>
-    'Logo, slogan e paleta curada. Landing e bio profissional têm telas próprias.';
+    'Logo, slogan e paleta curada. O login público continua Focux; a marca entra na sessão. Landing e bio têm telas próprias.';
 
 String identidadeHelpSalvarBody() =>
     'Confirme antes de gravar. Restaurar cores aplica o padrão Focux na hora.';
 
 String identidadeLogoSloganSubtitle() =>
-    'Logo no chrome do app. Slogan no login white-label e no home do aluno.';
+    'Logo no chrome depois do login. Slogan no home do aluno.';
 
 String identidadeAlunoVisibilityLabel() => 'Visível no app do aluno';
 
 String identidadePaletteSubtitle() =>
-    'Pares curados com contraste seguro — nunca quebra o app.';
+    'Acento visível no claro e no escuro — o login é sempre escuro.';
+
+String identidadeDarkPreviewLabel() => 'Assim no modo escuro e no login';
 
 Duration identidadeHeroAnimDuration({required bool reduceMotion}) =>
     reduceMotion ? Duration.zero : const Duration(milliseconds: 320);
