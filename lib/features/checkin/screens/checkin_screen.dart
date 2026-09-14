@@ -559,9 +559,20 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                             )
                             : null,
                   ),
+                  if (_showRestTimer)
+                    CheckinRestBanner(
+                      seconds: _restSeconds,
+                      onSkip: () {
+                        _restTimer?.cancel();
+                        setState(() => _showRestTimer = false);
+                      },
+                      onTrocar:
+                          exercicios.length > 1
+                              ? () => _abrirFila(exercicios)
+                              : null,
+                    ),
                   Expanded(
-                    child: Stack(
-                      children: [
+                    child:
                         exercicios.isEmpty
                             ? const FxEmptyState(
                               icon: 'dumbbell',
@@ -576,93 +587,63 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                               subtitle:
                                   'Volte à lista de treinos e tente de novo.',
                             )
-                            : Column(
-                              children: [
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.topCenter,
-                                    child: SingleChildScrollView(
-                                      child: CheckinSerieCard(
-                                        key: ValueKey(
-                                          current.treinoExercicioId,
-                                        ),
-                                        ee: current,
-                                        index: currentIndex,
-                                        total: exercicios.length,
-                                        draftCargaKg:
-                                            _draftFor(current).cargaKg,
-                                        draftReps: _draftFor(current).reps,
-                                        onPlusCarga:
-                                            () => _bumpCarga(current, 2.5),
-                                        onMinusCarga:
-                                            () => _bumpCarga(current, -2.5),
-                                        onPlusReps: () => _bumpReps(current, 1),
-                                        onMinusReps:
-                                            () => _bumpReps(current, -1),
-                                        onRegistrar:
-                                            () =>
-                                                _registrarSerieRapida(current),
-                                        onAjustar:
-                                            () => _registrarSerieDetalhada(
-                                              current,
-                                              numero: current.seriesFeitas + 1,
-                                            ),
-                                        onConfirmarRestante:
-                                            current.series != null &&
-                                                    current.seriesFeitas <
-                                                        current.series!
-                                                ? () =>
-                                                    _confirmarRestante(current)
-                                                : null,
-                                        onTrocar:
-                                            exercicios.length > 1
-                                                ? () => _abrirFila(exercicios)
-                                                : null,
-                                        onDesfazer:
-                                            current.seriesFeitas > 0
-                                                ? () => _marcar(
-                                                  current,
-                                                  current.seriesFeitas - 1,
-                                                )
-                                                : null,
-                                        onOpenTips:
-                                            checkinExerciseHasTips(current)
-                                                ? () =>
-                                                    showCheckinExerciseTipsSheet(
-                                                      context,
-                                                      ee: current,
-                                                    )
-                                                : null,
-                                        onOpenCoach:
-                                            showCoach
-                                                ? () => showCheckinCoachSheet(
-                                                  context,
-                                                  ee: current,
-                                                  forAluno: isAluno,
-                                                )
-                                                : null,
-                                        onOpenDemo: null,
+                            : Align(
+                              alignment: Alignment.topCenter,
+                              child: SingleChildScrollView(
+                                child: CheckinSerieCard(
+                                  key: ValueKey(current.treinoExercicioId),
+                                  ee: current,
+                                  index: currentIndex,
+                                  total: exercicios.length,
+                                  draftCargaKg: _draftFor(current).cargaKg,
+                                  draftReps: _draftFor(current).reps,
+                                  onPlusCarga: () => _bumpCarga(current, 2.5),
+                                  onMinusCarga: () => _bumpCarga(current, -2.5),
+                                  onPlusReps: () => _bumpReps(current, 1),
+                                  onMinusReps: () => _bumpReps(current, -1),
+                                  onRegistrar:
+                                      () => _registrarSerieRapida(current),
+                                  onAjustar:
+                                      () => _registrarSerieDetalhada(
+                                        current,
+                                        numero: current.seriesFeitas + 1,
                                       ),
-                                    ),
-                                  ),
+                                  onConfirmarRestante:
+                                      current.series != null &&
+                                              current.seriesFeitas <
+                                                  current.series!
+                                          ? () => _confirmarRestante(current)
+                                          : null,
+                                  onTrocar:
+                                      exercicios.length > 1
+                                          ? () => _abrirFila(exercicios)
+                                          : null,
+                                  onDesfazer:
+                                      current.seriesFeitas > 0
+                                          ? () => _marcar(
+                                            current,
+                                            current.seriesFeitas - 1,
+                                          )
+                                          : null,
+                                  onOpenTips:
+                                      checkinExerciseHasTips(current)
+                                          ? () => showCheckinExerciseTipsSheet(
+                                            context,
+                                            ee: current,
+                                          )
+                                          : null,
+                                  onOpenCoach:
+                                      showCoach
+                                          ? () => showCheckinCoachSheet(
+                                            context,
+                                            ee: current,
+                                            forAluno: isAluno,
+                                          )
+                                          : null,
+                                  onOpenDemo: null,
                                 ),
-                              ],
+                              ),
                             ),
-                        if (_showRestTimer)
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: CheckinRestBanner(
-                              seconds: _restSeconds,
-                              onSkip: () {
-                                _restTimer?.cancel();
-                                setState(() => _showRestTimer = false);
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
                   ),
                   if (exercicios.isNotEmpty)
                     SafeArea(
