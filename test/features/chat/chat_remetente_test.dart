@@ -14,6 +14,21 @@ void main() {
       chatRemetenteLabel(remetente: 'PERSONAL', isAlunoMode: true),
       'Personal',
     );
-    expect(chatRemetenteLabel(remetente: 'ALUNO', isAlunoMode: false), 'Aluno');
+    expect(
+      chatRemetenteLabel(remetente: 'ALUNO', isAlunoMode: false),
+      'Aluno',
+    );
+    expect(
+      chatInboxPreview(remetente: 'SISTEMA', mensagem: 'Treino concluído'),
+      'Sistema: Treino concluído',
+    );
+    expect(
+      chatInboxPreview(remetente: 'PERSONAL', mensagem: 'Bora'),
+      'Você: Bora',
+    );
+    expect(
+      chatInboxPreview(remetente: 'ALUNO', mensagem: 'Ok'),
+      'Ok',
+    );
   });
 }
