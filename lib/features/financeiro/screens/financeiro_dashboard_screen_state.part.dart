@@ -67,16 +67,14 @@ class _FinanceiroDashboardScreenState
         child: FxEmptyState(
           icon: 'coin',
           title: 'Sem dados financeiros',
-          subtitle:
-              d.zeroCta?.trim().isNotEmpty == true
-                  ? d.zeroCta!
-                  : 'Lance cobranças e mensalidades para ver o dashboard.',
+          // Nunca ecoar BE zeroCta "Abrir financeiro" aqui — já estamos no hub.
+          subtitle: 'Lance a primeira mensalidade para ver o dashboard.',
           action: FxEmptyAction(
-            label: 'Abrir mensalidades',
+            label: 'Nova mensalidade',
             onTap:
                 () => FinanceiroHubScope.maybeOf(
                   context,
-                )?.goToMensalidades(source: 'empty'),
+                )?.openNovaMensalidade(source: 'empty_resumo'),
           ),
         ),
       );

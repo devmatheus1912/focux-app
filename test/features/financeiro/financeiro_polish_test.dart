@@ -21,6 +21,12 @@ void main() {
     expect(shell, isNot(contains('class _MensalidadesTab')));
     expect(shell, isNot(contains('_MiniAction')));
 
+    expect(shell, contains('openNovaMensalidade'));
+    expect(shell, contains('novaMensalidadeToken'));
+    expect(tab, contains('novaMensalidadeToken'));
+    expect(tab, contains('_scheduleNovaMensalidadeIfNeeded'));
+    expect(tab, contains('FxEmptyAction'));
+    expect(tab, contains("'Nova mensalidade'"));
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('FxSatelliteListTile'));
     expect(tab, contains('ListView.builder'));
