@@ -9,11 +9,13 @@ import '../utils/checkin_execucao_display.dart';
 class CheckinRestBanner extends StatelessWidget {
   final int seconds;
   final VoidCallback onSkip;
+  final VoidCallback? onTrocar;
 
   const CheckinRestBanner({
     super.key,
     required this.seconds,
     required this.onSkip,
+    this.onTrocar,
   });
 
   @override
@@ -33,6 +35,8 @@ class CheckinRestBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 'Descanso · ${seconds}s',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: FocuxHubTypography.sectionTitle(
                   context,
                   color: chrome.ink,
@@ -49,6 +53,17 @@ class CheckinRestBanner extends StatelessWidget {
                 child: Text(checkinPularDescansoLabel()),
               ),
             ),
+            if (onTrocar != null)
+              SizedBox(
+                height: checkinExecutionControlMin,
+                child: TextButton(
+                  onPressed: onTrocar,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(64, checkinExecutionControlMin),
+                  ),
+                  child: const Text('Trocar'),
+                ),
+              ),
           ],
         ),
       ),
