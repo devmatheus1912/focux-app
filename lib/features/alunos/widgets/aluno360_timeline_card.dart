@@ -159,42 +159,20 @@ class Aluno360TimelineCard extends StatelessWidget {
   }
 
   String _timelineTileLabel(Timeline360Item item) {
-    final kindHeader = timeline360KindHeader(
+    return timeline360ListLabel(
       kind: item.kind,
       title: item.title,
       meta: item.meta,
     );
-    if (timeline360ShowTitleRow(
-      kind: item.kind,
-      title: item.title,
-      meta: item.meta,
-    )) {
-      return item.title;
-    }
-    return kindHeader;
   }
 
   String _timelineTileSubtitle(Timeline360Item item) {
-    final previewBody =
-        item.kind == 'Chat'
-            ? timeline360ChatPreviewBody(
-              item.body,
-              alunoFirstName: aluno.nome.split(' ').first,
-            )
-            : item.kind == 'Autonomia'
-            ? timeline360LocalizeAutonomiaActionCode(item.body)
-            : item.body;
-    final showMeta = timeline360ShouldShowMetaChip(
+    return timeline360ListSubtitle(
       kind: item.kind,
-      meta: item.meta,
-      priority: item.priority,
       title: item.title,
+      body: item.body,
+      alunoFirstName: aluno.nome.split(' ').first,
     );
-    final showPriority = timeline360ShouldShowPriorityBadge(kind: item.kind);
-    final parts = <String>[previewBody];
-    if (showPriority) parts.add(item.priority);
-    if (showMeta && item.meta.isNotEmpty) parts.add(item.meta);
-    return parts.join(' · ');
   }
 
   @override
@@ -313,7 +291,11 @@ class Aluno360TimelineCard extends StatelessWidget {
                 index: i,
                 child: FxSatelliteListTile(
                   title: _timelineTileLabel(visibleItems[i]),
-                  subtitle: Text(_timelineTileSubtitle(visibleItems[i])),
+                  subtitle: Text(
+                    _timelineTileSubtitle(visibleItems[i]),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   accent: visibleItems[i].color,
                   onTap: () => _onTimelineItemTap(context, visibleItems[i]),
                   trailing: Text(
@@ -492,33 +474,22 @@ class Timeline360Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final previewBody =
-        item.kind == 'Chat'
-            ? timeline360ChatPreviewBody(
-              item.body,
-              alunoFirstName: alunoFirstName,
-            )
-            : item.kind == 'Autonomia'
-            ? timeline360LocalizeAutonomiaActionCode(item.body)
-            : item.body;
+    final previewBody = timeline360ListSubtitle(
+      kind: item.kind,
+      title: item.title,
+      body: item.body,
+      alunoFirstName: alunoFirstName,
+    );
     final expandable = timeline360BodyExpandable(
       item.body,
       kind: item.kind,
       previewBody: previewBody,
     );
-    final kindHeader = timeline360KindHeader(
+    final label = timeline360ListLabel(
       kind: item.kind,
       title: item.title,
       meta: item.meta,
     );
-    final label =
-        timeline360ShowTitleRow(
-          kind: item.kind,
-          title: item.title,
-          meta: item.meta,
-        )
-            ? item.title
-            : kindHeader;
 
     void onTap() {
       if (expandable) {

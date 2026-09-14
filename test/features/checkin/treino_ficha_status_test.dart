@@ -121,5 +121,24 @@ void main() {
       expect(week.hasAnyCheckin, isTrue);
       expect(week.points.where((p) => p.checkins > 0).length, 1);
     });
+
+    test('weekRatioLabel usa 7 dias mesmo quando totalSemana é soma de check-ins', () {
+      final bundle = AderenciaSemanalBundle.fromJson({
+        'dias': [
+          {'dia': '2026-09-11', 'weekday': 'S', 'checkins': 2},
+          {'dia': '2026-09-12', 'weekday': 'S', 'checkins': 1},
+        ],
+        'totalSemana': 3,
+        'streakAtual': 2,
+        'diasComCheckin': 2,
+        'resumo': '2 de 7 dias com check-in',
+      });
+      final week = summarizeAderenciaWeek(
+        parseAderenciaSemanal(bundle.diasMaps),
+        bundle: bundle,
+      );
+      expect(week.weekRatioLabel, '2/7');
+      expect(week.caption, '2 de 7 dias com check-in');
+    });
   });
 }

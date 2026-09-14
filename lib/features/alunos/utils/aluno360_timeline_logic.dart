@@ -409,6 +409,57 @@ String timeline360KindHeader({
   return kind;
 }
 
+/// Label curto na lista (preview + histórico) — evita título longo com `…`.
+String timeline360ListLabel({
+  required String kind,
+  required String title,
+  required String meta,
+}) {
+  if (kind == 'Chat') {
+    return timeline360KindHeader(kind: kind, title: title, meta: meta);
+  }
+  if (kind == 'Check-in') return 'Check-in concluído';
+  final trimmed = title.trim();
+  if (trimmed.isEmpty) return kind;
+  // Legado: "Check-in concluído · Treino A"
+  if (trimmed.toLowerCase().startsWith('check-in concluído')) {
+    return 'Check-in concluído';
+  }
+  if (trimmed.contains(' · ') && trimmed.length > 28) {
+    return trimmed.split(' · ').first.trim();
+  }
+  if (trimmed.length > 32) return kind;
+  return trimmed;
+}
+
+/// Subtítulo da lista: só o corpo (sem `· P2 · meta`).
+String timeline360ListSubtitle({
+  required String kind,
+  required String title,
+  required String body,
+  String? alunoFirstName,
+}) {
+  if (kind == 'Chat') {
+    return timeline360ChatPreviewBody(body, alunoFirstName: alunoFirstName);
+  }
+  if (kind == 'Autonomia') {
+    return timeline360LocalizeAutonomiaActionCode(body);
+  }
+  if (kind == 'Check-in') {
+    final parts = title.split(' · ');
+    if (parts.length >= 2) {
+      final treino = parts.sublist(1).join(' · ').trim();
+      if (treino.isNotEmpty) return treino;
+    }
+    // Título já curto: corpo pode trazer "… · Treino A"
+    final bodyParts = body.split(' · ');
+    if (bodyParts.length >= 2) {
+      return bodyParts.sublist(1).join(' · ').trim();
+    }
+  }
+  return body.trim();
+}
+
 /// Sheet/modal title for a timeline item.
 String timeline360SheetTitle({
   required String kind,

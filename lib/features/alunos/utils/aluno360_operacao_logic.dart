@@ -179,7 +179,8 @@ class AderenciaWeekSummary {
     if (points.isEmpty) return 'Sem dados';
     final daysWith =
         daysWithCheckin ?? points.where((p) => p.checkins > 0).length;
-    final denom = totalSemana ?? points.length;
+    // Janela fixa de 7 dias — totalSemana é soma de check-ins, não dias.
+    const denom = 7;
     if (!hasAnyCheckin) {
       return '0 de $denom dias';
     }
@@ -189,9 +190,9 @@ class AderenciaWeekSummary {
   String get weekRatioLabel {
     final daysWith =
         daysWithCheckin ?? points.where((p) => p.checkins > 0).length;
-    final denom = totalSemana ?? (points.isEmpty ? 7 : points.length);
     if (points.isEmpty && daysWithCheckin == null) return '—';
-    return '$daysWith/$denom';
+    // Sempre dias-com-check-in / 7 (nunca totalSemana = soma de check-ins).
+    return '$daysWith/7';
   }
 }
 
@@ -257,6 +258,13 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
       lower.contains('perfil') ||
       lower.contains('lacuna')) {
     return OperacaoStickyDestination.editAluno;
+  }
+  if (lower.contains('evolu') ||
+      lower.contains('planejar') ||
+      lower.contains('radar') ||
+      lower.contains('volume') ||
+      lower.contains('pr ')) {
+    return OperacaoStickyDestination.evolucao;
   }
   return OperacaoStickyDestination.commandCenter;
 }

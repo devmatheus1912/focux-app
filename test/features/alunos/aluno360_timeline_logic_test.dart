@@ -317,6 +317,54 @@ void main() {
     });
   });
 
+  group('timeline360ListLabel', () {
+    test('check-in short label without treino name', () {
+      expect(
+        timeline360ListLabel(
+          kind: 'Check-in',
+          title: 'Check-in concluído · Treino A',
+          meta: 'CONCLUIDO',
+        ),
+        'Check-in concluído',
+      );
+    });
+
+    test('long autonomia title falls back to kind', () {
+      expect(
+        timeline360ListLabel(
+          kind: 'Autonomia',
+          title: 'Conferir agenda da semana completa com o aluno',
+          meta: 'CLICKED',
+        ),
+        'Autonomia',
+      );
+    });
+  });
+
+  group('timeline360ListSubtitle', () {
+    test('check-in uses treino from legacy title', () {
+      expect(
+        timeline360ListSubtitle(
+          kind: 'Check-in',
+          title: 'Check-in concluído · Treino A',
+          body: 'Treino registrado com séries.',
+        ),
+        'Treino A',
+      );
+    });
+
+    test('radar body stays without priority or meta join', () {
+      expect(
+        timeline360ListSubtitle(
+          kind: 'Radar',
+          title: 'Radar Focux · 87 pts',
+          body: 'Nathalia fechou 2 treino(s) em 7 dias.',
+        ),
+        'Nathalia fechou 2 treino(s) em 7 dias.',
+      );
+    });
+  });
+
   group('timeline360ShouldShowMetaChip', () {
     test('hides radar mapa corporal meta when P0 badge is shown', () {
       expect(
