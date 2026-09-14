@@ -40,6 +40,7 @@ void main() {
     expect(screen, contains('FxExecutionPopGuard'));
     expect(screen, contains('_sair'));
     expect(screen, contains('_abrirFila'));
+    expect(screen, contains('onTrocar:'));
     expect(screen, contains('_currentExercise'));
     expect(screen, contains('useMesh: false'));
     expect(screen, contains('scaffoldBackgroundColor'));
@@ -62,7 +63,6 @@ void main() {
     expect(screen, contains('onConfirmarRestante:'));
     expect(screen, contains('checkinExecutionControlMin'));
     expect(screen, contains('checkinFinalizarLabel'));
-    expect(screen, contains('Trocar exercício'));
     expect(screen, contains('selectedId:'));
     expect(screen, contains('FxLoading'));
     expect(screen, isNot(contains('ListView(')));
@@ -105,7 +105,8 @@ void main() {
     expect(card, contains('checkinExecutionControlMin'));
     expect(card, contains('FxLiquidPrimaryButton'));
     expect(card, contains("'Ajustar'"));
-    expect(card, contains("'Confirmar restantes'"));
+    expect(card, contains('checkinConfirmarRestanteLabel'));
+    expect(card, contains('checkinTrocarExercicioHint'));
     expect(card, contains('_CheckinSetSteppers'));
     expect(card, contains('checkinTextLooksNonPtBr'));
     expect(card, contains('checkinErrosComunsFallback'));

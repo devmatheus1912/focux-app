@@ -404,16 +404,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   ExecucaoExercicio _currentExercise(List<ExecucaoExercicio> exercicios) {
-    if (_focoTreinoExercicioId != null) {
-      for (final e in exercicios) {
-        if (e.treinoExercicioId == _focoTreinoExercicioId && !e.concluido) {
-          return e;
-        }
-      }
-    }
-    return exercicios.firstWhere(
-      (e) => !e.concluido,
-      orElse: () => exercicios.last,
+    return checkinPickCurrentExercise(
+      exercicios: exercicios,
+      idOf: (e) => e.treinoExercicioId,
+      concluidoOf: (e) => e.concluido,
+      focoId: _focoTreinoExercicioId,
     );
   }
 
@@ -433,13 +428,18 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   Future<void> _abrirFila(List<ExecucaoExercicio> exercicios) async {
+    final currentId = _currentExercise(exercicios).treinoExercicioId;
     final picked = await showCheckinFilaSheet(
       context,
       exercicios: exercicios,
-      selectedId: _currentExercise(exercicios).treinoExercicioId,
+      selectedId: currentId,
     );
-    if (picked == null || !mounted) return;
-    setState(() => _focoTreinoExercicioId = picked);
+    if (picked == null || !mounted || picked == currentId) return;
+    _restTimer?.cancel();
+    setState(() {
+      _showRestTimer = false;
+      _focoTreinoExercicioId = picked;
+    });
   }
 
   Widget _executionShell({required Widget body}) {
@@ -525,7 +525,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     }
 
     final exercicios = _execucao?.exercicios ?? [];
-    final concluidos = exercicios.where((e) => e.concluido).length;
     final current = exercicios.isEmpty ? null : _currentExercise(exercicios);
     final currentIndex = current == null ? 0 : exercicios.indexOf(current) + 1;
     final allDone =
@@ -548,7 +547,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                     treinoNome: _execucao?.treinoNome ?? 'Treino',
                     contextLine: checkinChromeContextLine(
                       duration: checkinDurationLabel(_duration),
-                      concluido: concluidos,
+                      current: currentIndex,
                       total: exercicios.length,
                     ),
                     onBack: _sair,
@@ -615,6 +614,10 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                                 ? () =>
                                                     _confirmarRestante(current)
                                                 : null,
+                                        onTrocar:
+                                            exercicios.length > 1
+                                                ? () => _abrirFila(exercicios)
+                                                : null,
                                         onDesfazer:
                                             current.seriesFeitas > 0
                                                 ? () => _marcar(
@@ -643,23 +646,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                     ),
                                   ),
                                 ),
-                                if (exercicios.length > 1)
-                                  SizedBox(
-                                    height: checkinExecutionControlMin,
-                                    child: TextButton(
-                                      onPressed: () => _abrirFila(exercicios),
-                                      style: TextButton.styleFrom(
-                                        minimumSize: const Size(
-                                          48,
-                                          checkinExecutionControlMin,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Trocar exercício',
-                                        style: TextStyle(color: chrome.mute),
-                                      ),
-                                    ),
-                                  ),
                               ],
                             ),
                         if (_showRestTimer)
