@@ -516,6 +516,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                     alignment: Alignment.topCenter,
                                     child: SingleChildScrollView(
                                       child: CheckinSerieCard(
+                                        key: ValueKey(
+                                          current.treinoExercicioId,
+                                        ),
                                         ee: current,
                                         index: currentIndex,
                                         total: exercicios.length,
@@ -553,11 +556,20 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                   ),
                                 ),
                                 if (exercicios.length > 1)
-                                  TextButton(
-                                    onPressed: () => _abrirFila(exercicios),
-                                    child: Text(
-                                      'Trocar exercício',
-                                      style: TextStyle(color: chrome.mute),
+                                  SizedBox(
+                                    height: checkinExecutionControlMin,
+                                    child: TextButton(
+                                      onPressed: () => _abrirFila(exercicios),
+                                      style: TextButton.styleFrom(
+                                        minimumSize: const Size(
+                                          48,
+                                          checkinExecutionControlMin,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Trocar exercício',
+                                        style: TextStyle(color: chrome.mute),
+                                      ),
                                     ),
                                   ),
                               ],
@@ -587,6 +599,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                   : TextButton(
                                     onPressed: _concluindo ? null : _concluir,
                                     style: TextButton.styleFrom(
+                                      foregroundColor: chrome.mute,
                                       minimumSize: const Size(
                                         double.infinity,
                                         checkinExecutionControlMin,
