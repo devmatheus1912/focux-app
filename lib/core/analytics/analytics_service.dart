@@ -291,4 +291,11 @@ class ProductEvents {
   static const identidadeHelpOpened = 'identidade_help_opened';
   static const identidadeSaved = 'identidade_saved';
   static const identidadeRestored = 'identidade_restored';
+
+  static const landingViewed = 'landing_viewed';
+  static const landingRefreshed = 'landing_refreshed';
+  static const landingHelpOpened = 'landing_help_opened';
+  static const landingGerado = 'landing_gerado';
+  static const landingPublicado = 'landing_publicado';
+  static const landingPreviewOpened = 'landing_preview_opened';
 }

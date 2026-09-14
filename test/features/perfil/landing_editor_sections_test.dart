@@ -55,4 +55,50 @@ void main() {
     expect(state.gerado.heroTitle, 'H');
     expect(state.midia.heroImageUrl, 'https://x/y.jpg');
   });
+
+  test('LandingStudioState.fromJson aceita midia flat do BE', () {
+    final state = LandingStudioState.fromJson({
+      'slug': 'ana',
+      'publicUrl': 'https://focuxpersonal.com/p/ana',
+      'publicado': false,
+      'podePublicar': true,
+      'heroImageUrl': 'https://cdn/hero.jpg',
+      'bioImageUrl': 'https://cdn/bio.jpg',
+      'accentColor': '#0F766E',
+      'entrevista': {
+        'nomeMarca': 'Ana',
+        'nicho': 'N',
+        'promessa': 'P',
+        'ofertaNome': 'Oferta',
+        'cta': 'C',
+      },
+      'gerado': {'heroTitle': 'H', 'primaryCta': 'CTA'},
+    });
+
+    expect(state.midia.heroImageUrl, 'https://cdn/hero.jpg');
+    expect(state.midia.bioImageUrl, 'https://cdn/bio.jpg');
+    expect(state.midia.accentColor, '#0F766E');
+  });
+
+  test('isReadyToGenerate exige ofertaNome (paridade BE)', () {
+    expect(
+      const LandingEntrevista(
+        nomeMarca: 'A',
+        nicho: 'N',
+        promessa: 'P',
+        cta: 'C',
+      ).isReadyToGenerate,
+      isFalse,
+    );
+    expect(
+      const LandingEntrevista(
+        nomeMarca: 'A',
+        nicho: 'N',
+        promessa: 'P',
+        ofertaNome: 'Consultoria',
+        cta: 'C',
+      ).isReadyToGenerate,
+      isTrue,
+    );
+  });
 }
