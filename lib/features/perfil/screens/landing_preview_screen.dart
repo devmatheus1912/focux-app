@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
@@ -27,26 +29,45 @@ class LandingPreviewScreen extends StatefulWidget {
 }
 
 class _LandingPreviewScreenState extends State<LandingPreviewScreen> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   bool _loading = true;
+  bool _unsupported = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) {
-            if (mounted) setState(() => _loading = false);
-          },
-        ),
-      )
-      ..loadHtmlString(widget.html);
+    if (!_platformSupportsWebView) {
+      _unsupported = true;
+      _loading = false;
+      return;
+    }
+    try {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (_) {
+              if (mounted) setState(() => _loading = false);
+            },
+          ),
+        )
+        ..loadHtmlString(widget.html);
+    } catch (_) {
+      _unsupported = true;
+      _loading = false;
+    }
+  }
+
+  static bool get _platformSupportsWebView {
+    if (kIsWeb) return true;
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
   }
 
   @override
   Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
     return FxShellScaffold(
       useMesh: false,
       appBar: FxShellAppBar(
@@ -54,18 +75,40 @@ class _LandingPreviewScreenState extends State<LandingPreviewScreen> {
         subtitle: 'Como o lead vê · ainda não publicado',
         onBack: () => Navigator.of(context).maybePop(),
       ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (_loading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(TokensStrip.s4),
-                child: CircularProgressIndicator(),
-              ),
+      body: _unsupported
+          ? ListView(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              children: [
+                Text(
+                  'Preview completo roda no app Android/iOS. '
+                  'Neste desktop, use o HTML abaixo ou publique o link.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: chrome.mute,
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                SelectableText(
+                  widget.html,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontFamily: 'monospace',
+                    color: chrome.mute,
+                  ),
+                ),
+              ],
+            )
+          : Stack(
+              children: [
+                if (_controller != null)
+                  WebViewWidget(controller: _controller!),
+                if (_loading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(TokensStrip.s4),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
     );
   }
 }
