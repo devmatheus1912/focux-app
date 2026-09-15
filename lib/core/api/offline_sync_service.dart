@@ -126,9 +126,13 @@ class OfflineSyncService {
   static void Function(DroppedMutation)? onMutationDropped;
 
   /// Add a failed request to the queue (sem body sensível).
-  static Future<void> enqueueRequest(RequestOptions options) async {
-    if (_isSensitivePath(options.path)) {
-      return;
+  ///
+  /// Returns `true` only when the mutation is actually persisted. Callers that
+  /// acknowledge the write as "queued" (HTTP 202) must check this — otherwise
+  /// a sensitive path looks successful and is never retried.
+  static Future<bool> enqueueRequest(RequestOptions options) async {
+    if (isSensitivePath(options.path)) {
+      return false;
     }
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
@@ -145,9 +149,13 @@ class OfflineSyncService {
 
     queueList.add(req.toJson());
     await prefs.setString(_queueKey, jsonEncode(queueList));
+    return true;
   }
 
-  static bool _isSensitivePath(String path) {
+  /// Mutations whose caller needs the real entity (or must not look successful
+  /// if nothing was stored). Check-in numbered sets and finance writes are
+  /// included: a fake 202 body is parsed as a series/fatura and loses data.
+  static bool isSensitivePath(String path) {
     final p = path.toLowerCase();
     return p.contains('/chat') ||
         p.contains('/anamnese') ||
@@ -156,6 +164,8 @@ class OfflineSyncService {
         p.contains('/wallet') ||
         p.contains('/mensalidade') ||
         p.contains('/pagamento') ||
+        p.contains('/financeiro') ||
+        p.contains('/checkin') ||
         p.contains('/auth') ||
         p.contains('/alunos') ||
         p.contains('/leads') ||
@@ -169,7 +179,7 @@ class OfflineSyncService {
   static dynamic _sanitizeQueueData(String path, dynamic data) {
     if (data == null) return null;
     if (data is FormData) return null;
-    if (_isSensitivePath(path)) return null;
+    if (isSensitivePath(path)) return null;
     return data;
   }
 

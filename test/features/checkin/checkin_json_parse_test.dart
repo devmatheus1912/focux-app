@@ -109,6 +109,26 @@ void main() {
     });
   });
 
+  test('checkinRequireEntityJson rejeita o envelope 202 queued', () {
+    expect(checkinIsQueuedAck({'status': 'queued', 'message': 'Offline.'}), isTrue);
+    expect(
+      checkinIsQueuedAck({
+        'id': 9,
+        'treinoId': 3,
+        'status': 'EM_ANDAMENTO',
+        'exercicios': const [],
+      }),
+      isFalse,
+    );
+    expect(
+      () => checkinRequireEntityJson(
+        {'status': 'queued', 'message': 'Offline. Sincronizará quando houver rede.'},
+        'POST /api/checkin/{id}/exercicio/{treinoExercicioId}/series',
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('ExecucaoTreino.fromJson não quebra em campos nullable tipados errado', () {
     final treino = ExecucaoTreino.fromJson({
       'id': null,
