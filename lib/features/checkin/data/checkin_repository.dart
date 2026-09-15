@@ -373,13 +373,8 @@ Pagina<ExecucaoTreino> parseExecucaoTreinoPagina(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _requireJsonMap(dynamic data, String endpoint) {
-  final map = checkinJsonMap(data);
-  if (map == null) {
-    throw FormatException('$endpoint devolve objeto JSON.');
-  }
-  return map;
-}
+Map<String, dynamic> _requireJsonMap(dynamic data, String endpoint) =>
+    checkinRequireEntityJson(data, endpoint);
 
 class CheckinRepository {
   final Dio _dio;

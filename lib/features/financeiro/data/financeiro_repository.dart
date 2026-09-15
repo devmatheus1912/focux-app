@@ -17,12 +17,19 @@ class PixData {
     required this.status,
   });
 
-  factory PixData.fromJson(Map<String, dynamic> j) => PixData(
-    paymentId: (j['paymentId'] as num?)?.toInt() ?? 0,
-    pixCopiaECola: j['pixCopiaECola']?.toString() ?? '',
-    qrCodeBase64: j['qrCodeBase64']?.toString() ?? '',
-    status: j['status']?.toString() ?? '',
-  );
+  factory PixData.fromJson(Map<String, dynamic> j) {
+    if (j['status']?.toString() == 'queued' && j['paymentId'] == null) {
+      throw const FormatException(
+        'PIX não foi gerado (sem rede). Tente de novo.',
+      );
+    }
+    return PixData(
+      paymentId: (j['paymentId'] as num?)?.toInt() ?? 0,
+      pixCopiaECola: j['pixCopiaECola']?.toString() ?? '',
+      qrCodeBase64: j['qrCodeBase64']?.toString() ?? '',
+      status: j['status']?.toString() ?? '',
+    );
+  }
 }
 
 class Mensalidade {
@@ -49,6 +56,11 @@ class Mensalidade {
   }) : valor = FxMoney.parse(valor);
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) {
+    if (j['status']?.toString() == 'queued' && j['id'] == null) {
+      throw const FormatException(
+        'Mensalidade não foi persistida (sem rede). Tente de novo.',
+      );
+    }
     final raw = j['contatos'];
     return Mensalidade(
       id: (j['id'] as num?)?.toInt() ?? 0,
