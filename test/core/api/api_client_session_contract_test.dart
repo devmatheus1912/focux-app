@@ -9,6 +9,8 @@ void main() {
         File('lib/core/auth/session_invalidator.dart').readAsStringSync();
 
     expect(apiClient, contains('SessionInvalidator.invalidate'));
+    expect(apiClient, contains('if (queued)'));
+    expect(apiClient, contains('OfflineSyncService.isSensitivePath'));
     expect(
       apiClient,
       matches(RegExp(r'!_isRefreshing\s*&&\s*_shouldInvalidateSession\(e\)')),

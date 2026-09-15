@@ -34,7 +34,7 @@ class _StubAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-/// Path fora de `_isSensitivePath`, senao a fila nem enfileira.
+/// Path fora de [OfflineSyncService.isSensitivePath], senao a fila nem enfileira.
 const _path = '/api/treinos/1/concluir';
 
 Future<Dio> _seedQueue(int statusCode, {required _StubAdapter adapter}) async {
