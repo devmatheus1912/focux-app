@@ -82,17 +82,21 @@ class ApiClient {
               e.type == DioExceptionType.connectionTimeout) {
             final method = e.requestOptions.method.toUpperCase();
             if (_canQueueOfflineMutation(e.requestOptions)) {
-              await OfflineSyncService.enqueueRequest(e.requestOptions);
-              return handler.resolve(
-                Response(
-                  requestOptions: e.requestOptions,
-                  statusCode: 202,
-                  data: {
-                    'status': 'queued',
-                    'message': 'Offline. Sincronizará quando houver rede.',
-                  },
-                ),
+              final queued = await OfflineSyncService.enqueueRequest(
+                e.requestOptions,
               );
+              if (queued) {
+                return handler.resolve(
+                  Response(
+                    requestOptions: e.requestOptions,
+                    statusCode: 202,
+                    data: {
+                      'status': 'queued',
+                      'message': 'Offline. Sincronizará quando houver rede.',
+                    },
+                  ),
+                );
+              }
             }
 
             if (method == 'GET' && _shouldCachePath(e.requestOptions.path)) {
@@ -199,10 +203,15 @@ class ApiClient {
     if (options.extra['fxNoOfflineQueue'] == true) return false;
     if (_isAuthPath(options.path)) return false;
     if (options.path == '/api/suporte/analisar-erro') return false;
+    if (OfflineSyncService.isSensitivePath(options.path)) return false;
 
     final method = options.method.toUpperCase();
     return method == 'POST' || method == 'PUT' || method == 'DELETE';
   }
+
+  @visibleForTesting
+  static bool canQueueOfflineMutationForTest(RequestOptions options) =>
+      _canQueueOfflineMutation(options);
 
   static bool _hasHeader(Map<String, dynamic> headers, String name) {
     final target = name.toLowerCase();
