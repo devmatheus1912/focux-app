@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -154,7 +155,21 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
                                   item,
                                   accent: primary,
                                   isDark: isDark,
+                                  alunoId: aluno.id,
                                 );
+                              });
+                            },
+                            onRouteTap: (tileContext, item) {
+                              final link = resolveTimeline360DeepLinkForPersonal(
+                                link: item.deepLink,
+                                alunoId: aluno.id,
+                              );
+                              if (link.isEmpty) return;
+                              final host = context;
+                              Navigator.of(tileContext).pop();
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (!host.mounted) return;
+                                host.push(link);
                               });
                             },
                           ),

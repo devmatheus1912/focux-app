@@ -221,6 +221,28 @@ void main() {
     });
   });
 
+  group('resolveTimeline360DeepLinkForPersonal', () {
+    test('rewrites aluno checkin shell to treinos-list', () {
+      expect(
+        resolveTimeline360DeepLinkForPersonal(
+          link: '/checkin/treinos',
+          alunoId: 42,
+        ),
+        '/alunos/42/treinos-list',
+      );
+    });
+
+    test('keeps personal routes intact', () {
+      expect(
+        resolveTimeline360DeepLinkForPersonal(
+          link: '/alunos/7/chat',
+          alunoId: 7,
+        ),
+        '/alunos/7/chat',
+      );
+    });
+  });
+
   group('timeline360ExpandLinkLabel', () {
     test('chat vs other kinds', () {
       expect(

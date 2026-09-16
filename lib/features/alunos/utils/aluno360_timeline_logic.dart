@@ -574,6 +574,19 @@ String formatTimeline360Date(DateTime? value) {
   return '$day/$month às $hour:$minute';
 }
 
+/// Personal app: never push aluno-shell routes from Aluno 360 timeline.
+String resolveTimeline360DeepLinkForPersonal({
+  required String? link,
+  required int alunoId,
+}) {
+  final raw = link?.trim() ?? '';
+  if (raw.isEmpty) return '';
+  if (raw == '/checkin/treinos' || raw.startsWith('/checkin/')) {
+    return '/alunos/$alunoId/treinos-list';
+  }
+  return raw;
+}
+
 bool timeline360HasFooterChips({
   required String kind,
   required String meta,

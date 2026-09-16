@@ -129,7 +129,6 @@ class Aluno360TimelineCard extends StatelessWidget {
   }
 
   void _onTimelineItemTap(BuildContext context, Timeline360Item item) {
-    final link = item.deepLink;
     final previewBody =
         item.kind == 'Chat'
             ? timeline360ChatPreviewBody(
@@ -150,10 +149,15 @@ class Aluno360TimelineCard extends StatelessWidget {
         item,
         accent: Theme.of(context).colorScheme.primary,
         isDark: isDark,
+        alunoId: aluno.id,
       );
       return;
     }
-    if (link != null && link.isNotEmpty) {
+    final link = resolveTimeline360DeepLinkForPersonal(
+      link: item.deepLink,
+      alunoId: aluno.id,
+    );
+    if (link.isNotEmpty) {
       context.push(link);
     }
   }
@@ -364,9 +368,16 @@ void showTimeline360BodySheet(
   Timeline360Item item, {
   required Color accent,
   required bool isDark,
+  int? alunoId,
 }) {
   final ink = fxScreenInk(context);
-  final link = item.deepLink;
+  final link =
+      alunoId == null
+          ? (item.deepLink?.trim() ?? '')
+          : resolveTimeline360DeepLinkForPersonal(
+            link: item.deepLink,
+            alunoId: alunoId,
+          );
   final title = timeline360SheetTitle(
     kind: item.kind,
     title: item.title,
@@ -411,14 +422,18 @@ void showTimeline360BodySheet(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (link != null && link.isNotEmpty) ...[
+                    if (link.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           onPressed: () {
+                            final host = context;
                             Navigator.of(ctx).pop();
-                            ctx.push(link);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (!host.mounted) return;
+                              host.push(link);
+                            });
                           },
                           icon: Icon(
                             item.kind == 'Chat'
@@ -460,6 +475,7 @@ class Timeline360Tile extends StatelessWidget {
     required this.accent,
     this.alunoFirstName,
     this.onExpandableTap,
+    this.onRouteTap,
     this.showSpineBelow = false,
     this.inkWell = true,
   });
@@ -469,6 +485,8 @@ class Timeline360Tile extends StatelessWidget {
   final Color accent;
   final String? alunoFirstName;
   final Timeline360ExpandableTap? onExpandableTap;
+  /// Quando o tile está dentro de um sheet modal: fechar sheet antes do push.
+  final Timeline360ExpandableTap? onRouteTap;
   final bool showSpineBelow;
   final bool inkWell;
 
@@ -506,9 +524,12 @@ class Timeline360Tile extends StatelessWidget {
         return;
       }
       final link = item.deepLink;
-      if (link != null && link.isNotEmpty) {
-        context.push(link);
+      if (link == null || link.isEmpty) return;
+      if (onRouteTap != null) {
+        onRouteTap!(context, item);
+        return;
       }
+      context.push(link);
     }
 
     final hasRoute = item.deepLink != null && item.deepLink!.isNotEmpty;

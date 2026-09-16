@@ -431,10 +431,10 @@ OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {
   if (aderencia != null) {
     return OperacaoDominantMetric(
       kind: OperacaoDominantMetricKind.aderencia,
-      label: 'Aderência semanal',
+      label: 'Aderência · 30 dias',
       value: '$aderencia%',
-      hint: 'Métrica dominante da semana',
-      semanticsLabel: 'Aderência $aderencia por cento',
+      hint: 'Concluídos / iniciados nos últimos 30 dias',
+      semanticsLabel: 'Aderência $aderencia por cento em 30 dias',
     );
   }
 

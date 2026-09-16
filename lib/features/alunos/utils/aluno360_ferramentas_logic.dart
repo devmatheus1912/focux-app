@@ -137,7 +137,7 @@ abstract final class Aluno360FerramentasLogic {
       Aluno360MeasurementRow(
         field: Aluno360MeasurementField.gordura,
         label: 'Gordura corporal',
-        subtitle: gorduraOk ? '$bf%' : 'Registrar no comparativo',
+        subtitle: gorduraOk ? '$bf%' : 'Registrar na avaliação física',
         value: pendingFieldValue(complete: gorduraOk),
         complete: gorduraOk,
         highlight: !gorduraOk,
@@ -145,7 +145,7 @@ abstract final class Aluno360FerramentasLogic {
       Aluno360MeasurementRow(
         field: Aluno360MeasurementField.massaMagra,
         label: 'Massa magra',
-        subtitle: massaOk ? '$massaMagra kg' : 'Registrar no comparativo',
+        subtitle: massaOk ? '$massaMagra kg' : 'Registrar na avaliação física',
         value: pendingFieldValue(complete: massaOk),
         complete: massaOk,
         highlight: !massaOk,
