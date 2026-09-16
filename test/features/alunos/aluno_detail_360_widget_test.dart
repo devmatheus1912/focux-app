@@ -12,6 +12,7 @@ import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _proPlanoFeatures = PlanoFeatures(
@@ -301,6 +302,11 @@ final _operacaoFixture = Aluno360Operacao(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+    SharedPreferences.setMockInitialValues({});
+  });
+
   for (final scale in [1.0, 1.25]) {
     testWidgets('Operação tab status + sticky CTA at textScaler $scale', (
       tester,
@@ -342,7 +348,8 @@ void main() {
     await _pumpAlunoDetail(tester);
 
     await tester.tap(find.text('Evolução'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
 
     await tester.ensureVisible(
       find.byKey(const ValueKey('aluno360_evolucao_empty')),
@@ -351,8 +358,8 @@ void main() {
 
     expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
     expect(find.text('Pedir check-in'), findsWidgets);
-    expect(find.text('Ver treinos'), findsWidgets);
     expect(find.text('Abrir chat'), findsWidgets);
+    expect(find.text('Ver treinos'), findsNothing);
 
     await tester.ensureVisible(find.byKey(const ValueKey('aluno360_timeline_empty')));
     await tester.pump();
@@ -369,15 +376,16 @@ void main() {
       await _pumpAlunoDetail(tester, textScale: scale);
 
       await tester.tap(find.text('Ferramentas'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
 
       expect(find.byKey(const ValueKey('aluno360_ferramentas_modulos')), findsOneWidget);
       expect(find.text('Medidas'), findsOneWidget);
       expect(find.text('Idade'), findsOneWidget);
       expect(find.text('Gordura corporal'), findsOneWidget);
       expect(find.text('Composição corporal'), findsOneWidget);
-      expect(find.text('Treino & evolução'), findsOneWidget);
-      expect(find.text('Perfil & gestão'), findsOneWidget);
+      expect(find.text('Atalhos do aluno'), findsOneWidget);
+      expect(find.text('Mais ferramentas'), findsOneWidget);
       expect(find.text('Treinos'), findsOneWidget);
       expect(find.text('IA Progresso'), findsOneWidget);
       expect(find.text('Gordura'), findsNothing);
@@ -391,6 +399,7 @@ void main() {
         ),
         findsOneWidget,
       );
+      expect(find.text('Equipamentos'), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }

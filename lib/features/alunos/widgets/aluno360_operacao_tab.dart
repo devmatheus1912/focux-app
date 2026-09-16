@@ -105,12 +105,13 @@ class Aluno360OperacaoTab extends ConsumerWidget {
               ],
             );
           }
+          // P0 do momento (copiloto / próxima ação) acima do diagnóstico (A30).
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              operationalSection,
-              const SizedBox(height: Aluno360Layout.sectionGap),
               copilotCard,
+              const SizedBox(height: Aluno360Layout.sectionGap),
+              operationalSection,
             ],
           );
         },

@@ -9,6 +9,25 @@ import 'aluno360_operacao_logic.dart';
 /// Módulos da aba Ferramentas sujeitos a gate de plano.
 enum Aluno360FerramentasGatedModule { iaProgresso, feedbackVideo }
 
+/// Catálogo de módulos Ferramentas (S3) — fold priorizado vs. overflow (A30).
+enum Aluno360FerramentasModule {
+  treinos,
+  equipamentos,
+  iaProgresso,
+  composicao,
+  aderencia,
+  planoSucesso,
+  trilhas,
+  engajamento,
+  anamnese,
+  mensalidades,
+  chat,
+  feedbackVideo,
+}
+
+/// Grupo visual do módulo no catálogo completo.
+enum Aluno360FerramentasModuleGroup { treino, perfil }
+
 /// Campo de medida corporal na aba Ferramentas.
 enum Aluno360MeasurementField { idade, altura, gordura, massaMagra }
 
@@ -41,9 +60,105 @@ abstract final class Aluno360FerramentasLogic {
   static const String medidasCaption =
       'Idade, altura e composição para acompanhar evolução.';
   static const String treinoCaption =
-      'Treinos, equipamentos e marcos do aluno.';
+      'O que precisa de atenção agora — o resto em Mais.';
   static const String perfilCaption =
       'Cadastro, financeiro e comunicação.';
+
+  /// Máximo de módulos no first paint (sem contar "Mais ferramentas").
+  static const int foldModuleLimit = 5;
+
+  static Aluno360FerramentasModuleGroup moduleGroup(
+    Aluno360FerramentasModule module,
+  ) {
+    return switch (module) {
+      Aluno360FerramentasModule.treinos ||
+      Aluno360FerramentasModule.equipamentos ||
+      Aluno360FerramentasModule.iaProgresso ||
+      Aluno360FerramentasModule.composicao ||
+      Aluno360FerramentasModule.aderencia ||
+      Aluno360FerramentasModule.planoSucesso ||
+      Aluno360FerramentasModule.trilhas ||
+      Aluno360FerramentasModule.engajamento =>
+        Aluno360FerramentasModuleGroup.treino,
+      Aluno360FerramentasModule.anamnese ||
+      Aluno360FerramentasModule.mensalidades ||
+      Aluno360FerramentasModule.chat ||
+      Aluno360FerramentasModule.feedbackVideo =>
+        Aluno360FerramentasModuleGroup.perfil,
+    };
+  }
+
+  static int modulePriority(
+    Aluno360FerramentasModule module, {
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+    String? anamneseStatus,
+    List<Map<String, dynamic>>? aderenciaSemanal,
+  }) {
+    final financeHot =
+        aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
+    final composicaoHot = composicaoCorporalPending(bf: bf, massaMagra: massaMagra);
+    final anamneseHot = anamneseNeedsAttention(anamneseStatus);
+    final aderenciaHot = aderenciaNeedsAttention(
+      aluno: aluno,
+      aderenciaSemanal: aderenciaSemanal,
+    );
+    final dias = aluno.diasSemTreino ?? 0;
+
+    return switch (module) {
+      Aluno360FerramentasModule.treinos => dias >= 7 ? 210 : 120,
+      Aluno360FerramentasModule.mensalidades => financeHot ? 220 : 40,
+      Aluno360FerramentasModule.anamnese => anamneseHot ? 200 : 55,
+      Aluno360FerramentasModule.composicao => composicaoHot ? 190 : 50,
+      Aluno360FerramentasModule.aderencia => aderenciaHot ? 180 : 70,
+      Aluno360FerramentasModule.chat => 100,
+      Aluno360FerramentasModule.iaProgresso => 85,
+      Aluno360FerramentasModule.equipamentos => 60,
+      Aluno360FerramentasModule.planoSucesso => 35,
+      Aluno360FerramentasModule.trilhas => 30,
+      Aluno360FerramentasModule.engajamento => 25,
+      Aluno360FerramentasModule.feedbackVideo => 20,
+    };
+  }
+
+  /// Split A30: top-N no fold; resto atrás de um toque.
+  static ({
+    List<Aluno360FerramentasModule> fold,
+    List<Aluno360FerramentasModule> overflow,
+  }) splitModulesForFold({
+    required Aluno aluno,
+    String? bf,
+    String? massaMagra,
+    String? anamneseStatus,
+    List<Map<String, dynamic>>? aderenciaSemanal,
+    int limit = foldModuleLimit,
+  }) {
+    final ranked = Aluno360FerramentasModule.values.toList(growable: false)
+      ..sort((a, b) {
+        final pa = modulePriority(
+          a,
+          aluno: aluno,
+          bf: bf,
+          massaMagra: massaMagra,
+          anamneseStatus: anamneseStatus,
+          aderenciaSemanal: aderenciaSemanal,
+        );
+        final pb = modulePriority(
+          b,
+          aluno: aluno,
+          bf: bf,
+          massaMagra: massaMagra,
+          anamneseStatus: anamneseStatus,
+          aderenciaSemanal: aderenciaSemanal,
+        );
+        if (pa != pb) return pb.compareTo(pa);
+        return a.index.compareTo(b.index);
+      });
+    final fold = ranked.take(limit).toList(growable: false);
+    final overflow = ranked.skip(limit).toList(growable: false);
+    return (fold: fold, overflow: overflow);
+  }
 
   static List<double> aderenciaSparklineValues(
     List<Map<String, dynamic>>? raw,

@@ -221,23 +221,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                     onPressed:
                                         () => _openCheckinMessage(context),
                                   ),
-                                  DashboardHomeActionChip(
-                                    label: 'Abrir chat',
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed:
-                                        () => context.push(
-                                          '/alunos/$alunoId/chat',
-                                          extra: alunoNome,
-                                        ),
-                                  ),
-                                  if (!timelineHasSignals)
-                                    DashboardHomeActionChip(
-                                      label: 'Ver treinos',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed: () => _openTreinos(context),
-                                    ),
                                   if (hasRadarP0 && !timelineHasSignals)
                                     DashboardHomeActionChip(
                                       label: 'Radar corporal',
@@ -246,6 +229,17 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                       onPressed:
                                           () => context.push(
                                             '/alunos/$alunoId/evolucao-comparativo',
+                                            extra: alunoNome,
+                                          ),
+                                    )
+                                  else
+                                    DashboardHomeActionChip(
+                                      label: 'Abrir chat',
+                                      accent: primary,
+                                      isDark: isDark,
+                                      onPressed:
+                                          () => context.push(
+                                            '/alunos/$alunoId/chat',
                                             extra: alunoNome,
                                           ),
                                     ),
