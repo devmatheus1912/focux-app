@@ -41,10 +41,6 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
   final bool hasRadarP0;
   final bool suppressRadarHint;
 
-  void _openEvolucao(BuildContext context) {
-    context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
-  }
-
   void _openComparativo(BuildContext context) {
     context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
   }
@@ -157,12 +153,13 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                         isDark: isDark,
                         onPressed: () => _openComparativo(context),
                       ),
-                      DashboardHomeActionChip(
-                        label: 'Ver radar',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: () => _openEvolucao(context),
-                      ),
+                      if (showRadarHint)
+                        DashboardHomeActionChip(
+                          label: 'Radar corporal',
+                          accent: EagleTokens.warn,
+                          isDark: isDark,
+                          onPressed: () => _openComparativo(context),
+                        ),
                     ],
                   ),
                 ],

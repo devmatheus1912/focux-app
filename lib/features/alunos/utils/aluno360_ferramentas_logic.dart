@@ -67,6 +67,15 @@ abstract final class Aluno360FerramentasLogic {
   /// Máximo de módulos no first paint (sem contar "Mais ferramentas").
   static const int foldModuleLimit = 5;
 
+  /// Duplicados do fold (já cobertos em Operação/Evolução/sticky) — só em Mais.
+  static const Set<Aluno360FerramentasModule> foldOverflowOnly = {
+    Aluno360FerramentasModule.treinos,
+    Aluno360FerramentasModule.chat,
+    Aluno360FerramentasModule.iaProgresso,
+    Aluno360FerramentasModule.aderencia,
+    Aluno360FerramentasModule.mensalidades,
+  };
+
   static Aluno360FerramentasModuleGroup moduleGroup(
     Aluno360FerramentasModule module,
   ) {
@@ -104,16 +113,16 @@ abstract final class Aluno360FerramentasLogic {
       aluno: aluno,
       aderenciaSemanal: aderenciaSemanal,
     );
-    final dias = aluno.diasSemTreino ?? 0;
 
     return switch (module) {
-      Aluno360FerramentasModule.treinos => dias >= 7 ? 210 : 120,
-      Aluno360FerramentasModule.mensalidades => financeHot ? 220 : 40,
+      // Duplicados da home/operação → overflow (prioridade baixa).
+      Aluno360FerramentasModule.treinos => 5,
+      Aluno360FerramentasModule.chat => 4,
+      Aluno360FerramentasModule.iaProgresso => 3,
+      Aluno360FerramentasModule.mensalidades => financeHot ? 220 : 2,
+      Aluno360FerramentasModule.aderencia => aderenciaHot ? 180 : 1,
       Aluno360FerramentasModule.anamnese => anamneseHot ? 200 : 55,
       Aluno360FerramentasModule.composicao => composicaoHot ? 190 : 50,
-      Aluno360FerramentasModule.aderencia => aderenciaHot ? 180 : 70,
-      Aluno360FerramentasModule.chat => 100,
-      Aluno360FerramentasModule.iaProgresso => 85,
       Aluno360FerramentasModule.equipamentos => 60,
       Aluno360FerramentasModule.planoSucesso => 35,
       Aluno360FerramentasModule.trilhas => 30,
@@ -155,8 +164,15 @@ abstract final class Aluno360FerramentasLogic {
         if (pa != pb) return pb.compareTo(pa);
         return a.index.compareTo(b.index);
       });
-    final fold = ranked.take(limit).toList(growable: false);
-    final overflow = ranked.skip(limit).toList(growable: false);
+    final foldCandidates =
+        ranked.where((m) => !foldOverflowOnly.contains(m)).toList();
+    final forcedOverflow =
+        ranked.where(foldOverflowOnly.contains).toList(growable: false);
+    final fold = foldCandidates.take(limit).toList(growable: false);
+    final overflow = [
+      ...foldCandidates.skip(limit),
+      ...forcedOverflow,
+    ];
     return (fold: fold, overflow: overflow);
   }
 
@@ -272,16 +288,21 @@ abstract final class Aluno360FerramentasLogic {
     String? bf,
     String? massaMagra,
   }) {
-    if (bf != null && massaMagra != null) return 'OK';
-    if (bf != null || massaMagra != null) return 'Parcial';
+    final bfOk = bf != null && bf.trim().isNotEmpty;
+    final mmOk = massaMagra != null && massaMagra.trim().isNotEmpty;
+    if (bfOk && mmOk) return 'OK';
+    if (bfOk || mmOk) return 'Parcial';
     return 'Pendente';
   }
 
+  /// Pendente só sem gordura e sem massa; um preenchido = parcial (não hot).
   static bool composicaoCorporalPending({
     String? bf,
     String? massaMagra,
   }) {
-    return bf == null || massaMagra == null;
+    final bfOk = bf != null && bf.trim().isNotEmpty;
+    final mmOk = massaMagra != null && massaMagra.trim().isNotEmpty;
+    return !bfOk && !mmOk;
   }
 
   static String anamneseValue(String? status) {

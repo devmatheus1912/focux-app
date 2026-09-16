@@ -40,5 +40,10 @@ void main() {
     expect(screen, isNot(contains('check-circle')));
     expect(screen, isNot(contains('Aluno #')));
     expect(screen, isNot(contains("showError(context, '\$e')")));
+    final cobranca = readScreenSourceBundle(
+      'lib/features/financeiro/widgets/financeiro_aluno_cobranca_sheet.dart',
+    );
+    expect(cobranca, contains('rootNavigator: true'));
+    expect(cobranca, contains('Pagar com PIX'));
   });
 }

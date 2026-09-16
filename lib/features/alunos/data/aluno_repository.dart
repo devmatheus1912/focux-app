@@ -617,11 +617,16 @@ class Aluno360ComposicaoResumo {
     this.massaMuscular,
   });
 
-  factory Aluno360ComposicaoResumo.fromJson(Map<String, dynamic> json) =>
-      Aluno360ComposicaoResumo(
-        percGordura: (json['percGordura'] as num?)?.toDouble(),
-        massaMuscular: (json['massaMuscular'] as num?)?.toDouble(),
-      );
+  factory Aluno360ComposicaoResumo.fromJson(Map<String, dynamic> json) {
+    final massa =
+        (json['massaMuscular'] as num?)?.toDouble() ??
+        (json['percMassa'] as num?)?.toDouble() ??
+        (json['massaMagra'] as num?)?.toDouble();
+    return Aluno360ComposicaoResumo(
+      percGordura: (json['percGordura'] as num?)?.toDouble(),
+      massaMuscular: massa,
+    );
+  }
 }
 
 class Aluno360AnamneseResumo {

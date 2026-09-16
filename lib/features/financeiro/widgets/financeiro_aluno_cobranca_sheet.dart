@@ -41,7 +41,7 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
         FxLiquidPrimaryButton(
           label: 'Pagar com PIX',
           onPressed: () {
-            Navigator.of(context).pop();
+            // Mantém a sheet de cobrança aberta; o PIX empilha por cima.
             onPagarPix();
           },
         ),
@@ -50,7 +50,7 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
         FxLiquidSecondaryButton(
           label: 'Falar com o personal',
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             onFalar();
           },
         )
@@ -58,7 +58,7 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
         FxLiquidPrimaryButton(
           label: 'Falar com o personal',
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context, rootNavigator: true).pop();
             onFalar();
           },
         ),

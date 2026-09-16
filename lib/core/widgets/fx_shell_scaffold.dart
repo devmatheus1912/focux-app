@@ -366,6 +366,7 @@ class FxSatelliteListTile extends StatelessWidget {
     this.leading,
     this.trailing,
     this.onTap,
+    this.onLongPress,
     this.accent,
     this.margin = const EdgeInsets.only(bottom: 10),
     this.isThreeLine = false,
@@ -377,6 +378,7 @@ class FxSatelliteListTile extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final Color? accent;
   final EdgeInsetsGeometry margin;
   final bool isThreeLine;
@@ -396,6 +398,7 @@ class FxSatelliteListTile extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
         isThreeLine: isThreeLine,
         onTap: onTap,
+        onLongPress: onLongPress,
         leading: leading,
         trailing: trailing,
         title: Text(

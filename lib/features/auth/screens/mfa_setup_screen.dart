@@ -39,6 +39,8 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
   final _confirmController = TextEditingController();
   final _disablePasswordController = TextEditingController();
   final _disableCodeController = TextEditingController();
+  final _disableEmailOtpController = TextEditingController();
+  bool _emailOtpSent = false;
 
   @override
   void initState() {
@@ -51,6 +53,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
     _confirmController.dispose();
     _disablePasswordController.dispose();
     _disableCodeController.dispose();
+    _disableEmailOtpController.dispose();
     super.dispose();
   }
 
@@ -132,12 +135,43 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
     }
   }
 
+  Future<void> _requestEmailOtp() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authProvider.notifier).mfaDisableRequestEmailOtp();
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _emailOtpSent = true;
+      });
+      FeedbackHelper.showSuccess(context, 'Código enviado ao e-mail da conta.');
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = mapMfaSetupError(error);
+      });
+    }
+  }
+
   Future<void> _disable() async {
     if (_busy) return;
     final senha = _disablePasswordController.text;
+    final emailOtp = _disableEmailOtpController.text.trim();
     final code = _disableCodeController.text.trim();
-    if (senha.isEmpty || code.isEmpty) {
-      setState(() => _error = 'Informe senha e código para desativar.');
+    if (code.isEmpty) {
+      setState(() => _error = 'Informe o código do autenticador.');
+      return;
+    }
+    if (senha.isEmpty && emailOtp.isEmpty) {
+      setState(
+        () => _error =
+            'Informe a senha ou peça o código por e-mail (contas Apple/Google).',
+      );
       return;
     }
     final ok = await showFxConfirmSheet(
@@ -154,13 +188,19 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       _error = null;
     });
     try {
-      await ref
-          .read(authProvider.notifier)
-          .mfaDisable(senha: senha, code: code);
+      await ref.read(authProvider.notifier).mfaDisable(
+            senha: senha.isEmpty ? null : senha,
+            emailOtp: emailOtp.isEmpty ? null : emailOtp,
+            code: code,
+          );
       if (!mounted) return;
       _disablePasswordController.clear();
       _disableCodeController.clear();
-      setState(() => _busy = false);
+      _disableEmailOtpController.clear();
+      setState(() {
+        _busy = false;
+        _emailOtpSent = false;
+      });
       await _reload();
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'MFA desativado.');
@@ -347,17 +387,12 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                       ],
                     ] else ...[
                       Text(
-                        'Para desativar, confirme com sua senha e um código do autenticador (ou recovery).',
+                        _status?.emailOtpPreferred == true
+                            ? 'Conta Apple/Google: use o código do autenticador + código enviado ao e-mail (ou senha, se tiver).'
+                            : 'Confirme com senha (ou código por e-mail) e o autenticador.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: _disablePasswordController,
-                        obscureText: true,
-                        enabled: !_busy,
-                        decoration: const InputDecoration(labelText: 'Senha'),
-                      ),
-                      const SizedBox(height: 8),
                       TextField(
                         controller: _disableCodeController,
                         enabled: !_busy,
@@ -365,7 +400,44 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                           labelText: 'Código MFA ou recovery',
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _disablePasswordController,
+                        obscureText: true,
+                        enabled: !_busy,
+                        decoration: const InputDecoration(
+                          labelText: 'Senha (se a conta tiver)',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: _disableEmailOtpController,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        enabled: !_busy,
+                        decoration: InputDecoration(
+                          labelText: 'Código do e-mail',
+                          counterText: '',
+                          helperText: _emailOtpSent
+                              ? 'Enviado — digite os 6 dígitos'
+                              : 'Sem senha? Peça o código no e-mail da conta',
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: _busy ? null : _requestEmailOtp,
+                          child: Text(
+                            _emailOtpSent
+                                ? 'Reenviar código por e-mail'
+                                : 'Enviar código por e-mail',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       FxLiquidPrimaryButton(
                         label: 'Desativar MFA',
                         loading: _busy,

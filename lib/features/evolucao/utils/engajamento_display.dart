@@ -15,6 +15,8 @@ String engajamentoTipoLabel(String? tipo) {
       return 'Medida';
     case 'MENSAGEM':
       return 'Mensagem';
+    case 'EM_ANDAMENTO':
+      return 'Em andamento';
     case '':
       return 'Evento';
     default:
@@ -52,9 +54,30 @@ String engajamentoWhenLabel(String dataHora) {
   }
 }
 
+String engajamentoStatusLabel(String? status) {
+  switch ((status ?? '').trim().toUpperCase()) {
+    case 'EM_ANDAMENTO':
+      return 'Em andamento';
+    case 'CONCLUIDO':
+      return 'Concluído';
+    case 'CANCELADO':
+      return 'Cancelado';
+    case '':
+      return '';
+    default:
+      return status!.trim();
+  }
+}
+
 String engajamentoEventoLabel(String? descricao, String? tipo) {
   final text = descricao?.trim();
-  if (text != null && text.isNotEmpty) return text;
+  if (text != null && text.isNotEmpty) {
+    return text
+        .replaceAll('EM_ANDAMENTO', 'Em andamento')
+        .replaceAll('CONCLUIDO', 'Concluído')
+        .replaceAll('CANCELADO', 'Cancelado')
+        .replaceAll('_', ' ');
+  }
   return engajamentoTipoLabel(tipo);
 }
 

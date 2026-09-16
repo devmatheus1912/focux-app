@@ -35,9 +35,9 @@ enum FinanceiroListaToolId { atualizarAtrasos, marcarLote, cancelarLote }
 
 ({FinanceiroListaToolId? foldChip, List<FinanceiroListaToolId> mais})
 financeiroListaTools({
-  required bool temAberto,
   required bool modoSelecao,
 }) {
+  // Idle: lote via long-press; atrasos via pull-to-refresh. Mais só no lote.
   if (modoSelecao) {
     return (
       foldChip: FinanceiroListaToolId.marcarLote,
@@ -49,10 +49,7 @@ financeiroListaTools({
   }
   return (
     foldChip: null,
-    mais: [
-      FinanceiroListaToolId.atualizarAtrasos,
-      if (temAberto) FinanceiroListaToolId.marcarLote,
-    ],
+    mais: const <FinanceiroListaToolId>[],
   );
 }
 
@@ -84,8 +81,6 @@ List<MensalidadeDetailActionId> mensalidadeDetailMaisActions({
   required bool pending,
 }) =>
     [
-      MensalidadeDetailActionId.aluno,
-      MensalidadeDetailActionId.financeiro,
       MensalidadeDetailActionId.edit,
       if (pending) MensalidadeDetailActionId.pix,
       if (pending) MensalidadeDetailActionId.chat,

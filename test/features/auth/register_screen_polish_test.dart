@@ -69,7 +69,8 @@ void main() {
     expect(screen, contains('appleSignInEnabled'));
     expect(screen, contains('resolveAppleSignInOffered'));
     expect(screen, contains('environmentStatus'));
-    expect(screen, contains('!Platform.isIOS'));
+    expect(screen, contains('_googleEnabled'));
+    expect(screen, isNot(contains('!Platform.isIOS')));
     expect(screen, contains('FocuxLegal'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('authUnfocusAndLeave'));

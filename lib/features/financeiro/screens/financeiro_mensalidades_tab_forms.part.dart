@@ -5,9 +5,36 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
     final formKey = GlobalKey<FormState>();
     final valorCtrl = TextEditingController();
     var mesReferencia = '';
-    int? alunoSelecionadoId;
+    // Prefetch before sheet so the aluno picker never infinite-spins.
+    List<Aluno> alunos = const [];
+    try {
+      alunos = await ref.read(alunosProvider.future);
+    } catch (_) {
+      alunos = ref.read(alunosProvider).valueOrNull ?? const [];
+    }
+
+    int? alunoSelecionadoId = widget.initialAlunoId;
     String? alunoSelecionadoNome;
+    if (alunoSelecionadoId != null) {
+      for (final a in alunos) {
+        if (a.id == alunoSelecionadoId) {
+          alunoSelecionadoNome = a.nome;
+          break;
+        }
+      }
+      if (alunoSelecionadoNome == null) {
+        try {
+          final a = await ref.read(alunoProvider(alunoSelecionadoId).future);
+          alunoSelecionadoNome = a.nome;
+        } catch (_) {}
+      }
+    }
     var salvando = false;
+
+    if (!mounted) {
+      valorCtrl.dispose();
+      return;
+    }
 
     try {
       await showFxHomeSheet(
@@ -43,61 +70,42 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                         SizedBox(height: TokensStrip.s3),
                         FxSettingsGroup(
                           children: [
-                            ref.watch(alunosProvider).when(
-                              loading: () => const SizedBox(
-                                height: 48,
-                                child: FxLoading(),
+                            FxSettingsTile(
+                              fxIcon: 'users',
+                              label: 'Aluno',
+                              value: financeiroAlunoPickerValue(
+                                alunoSelecionadoNome,
                               ),
-                              error:
-                                  (e, _) => Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Text(
-                                      'Não foi possível carregar alunos.',
-                                      style: TextStyle(
-                                        color: Theme.of(ctx).colorScheme.error,
-                                      ),
-                                    ),
-                                  ),
-                              data:
-                                  (alunos) => FxSettingsTile(
-                                    fxIcon: 'users',
-                                    label: 'Aluno',
-                                    value: financeiroAlunoPickerValue(
-                                      alunoSelecionadoNome,
-                                    ),
-                                    picker: true,
-                                    onTap: alunos.isEmpty
-                                        ? null
-                                        : () async {
-                                            final picked =
-                                                await showFxInsetPickerSheet<
-                                                  int
-                                                >(
-                                              ctx,
-                                              title: 'Aluno',
-                                              selected: alunoSelecionadoId,
-                                              items: [
-                                                for (final a in alunos)
-                                                  FxInsetPickerSheetItem(
-                                                    value: a.id,
-                                                    label: a.nome,
-                                                  ),
-                                              ],
-                                            );
-                                            if (picked == null) return;
-                                            String? nome;
-                                            for (final a in alunos) {
-                                              if (a.id == picked) {
-                                                nome = a.nome;
-                                                break;
-                                              }
-                                            }
-                                            setModalState(() {
-                                              alunoSelecionadoId = picked;
-                                              alunoSelecionadoNome = nome;
-                                            });
-                                          },
-                                  ),
+                              picker: true,
+                              onTap: alunos.isEmpty
+                                  ? null
+                                  : () async {
+                                      final picked =
+                                          await showFxInsetPickerSheet<int>(
+                                        ctx,
+                                        title: 'Aluno',
+                                        selected: alunoSelecionadoId,
+                                        items: [
+                                          for (final a in alunos)
+                                            FxInsetPickerSheetItem(
+                                              value: a.id,
+                                              label: a.nome,
+                                            ),
+                                        ],
+                                      );
+                                      if (picked == null) return;
+                                      String? nome;
+                                      for (final a in alunos) {
+                                        if (a.id == picked) {
+                                          nome = a.nome;
+                                          break;
+                                        }
+                                      }
+                                      setModalState(() {
+                                        alunoSelecionadoId = picked;
+                                        alunoSelecionadoNome = nome;
+                                      });
+                                    },
                             ),
                             AlunoInsetFormField(
                               controller: valorCtrl,

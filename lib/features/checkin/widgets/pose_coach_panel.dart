@@ -85,13 +85,18 @@ class _PoseCoachPanelState extends State<PoseCoachPanel> {
                 ),
               ),
               TextButton.icon(
-                onPressed:
-                    () => openPoseCameraCoach(
+                onPressed: () async {
+                  try {
+                    await openPoseCameraCoach(
                       context,
                       exerciseName: widget.exerciseName,
                       brand: widget.brand,
                       onRep: _registerRep,
-                    ),
+                    );
+                  } catch (_) {
+                    // openPoseCameraCoach already surfaces friendly status.
+                  }
+                },
                 icon: const Icon(Icons.videocam_outlined, size: 16),
                 label: const Text('Camera'),
               ),

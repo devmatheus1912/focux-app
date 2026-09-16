@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
+import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_copilot_task_actions.dart';
+import 'aluno_outreach_message_sheet.dart';
 
 /// Ações secundárias da Operação — atrás de um toque (v3.1 / A30).
-class Aluno360StudentQuickActions extends StatelessWidget {
+class Aluno360StudentQuickActions extends ConsumerWidget {
   const Aluno360StudentQuickActions({
     super.key,
     required this.aluno,
@@ -26,7 +32,48 @@ class Aluno360StudentQuickActions extends StatelessWidget {
   final VoidCallback onEvolve;
   final VoidCallback? onLista;
 
-  Future<void> _openMaisAcoes(BuildContext context) async {
+  Future<void> _criarTarefa(BuildContext context, WidgetRef ref) async {
+    final operacao = ref.read(aluno360OperacaoProvider(aluno.id));
+    final fromProxima = operacao?.effectiveProxima?.acao.trim() ?? '';
+    final acao =
+        fromProxima.isNotEmpty
+            ? fromProxima
+            : copilotFallbackAction(aluno, null);
+    ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).state = true;
+    try {
+      await criarTarefaCopilotoFromAluno360(
+        context: context,
+        ref: ref,
+        aluno: aluno,
+        acao: acao,
+      );
+    } finally {
+      ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).state = false;
+    }
+  }
+
+  void _abrirChat(BuildContext context, WidgetRef ref) {
+    final operacao = ref.read(aluno360OperacaoProvider(aluno.id));
+    final draft =
+        operacao?.effectiveProxima?.mensagemSugerida?.trim() ??
+        operacao?.outreachMessage.trim() ??
+        '';
+    if (draft.isNotEmpty) {
+      showAlunoOutreachMessageSheet(
+        context,
+        alunoId: aluno.id,
+        alunoNome: aluno.nome,
+        message: draft,
+        title: 'Mensagem sugerida',
+        subtitle: 'Copiloto · revise antes de enviar.',
+        icon: Icons.auto_awesome_rounded,
+      );
+      return;
+    }
+    context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+  }
+
+  Future<void> _openMaisAcoes(BuildContext context, WidgetRef ref) async {
     final firstName = aluno.nome.split(' ').first;
     final items = <FxInsetPickerSheetItem<VoidCallback>>[
       if (onLista != null)
@@ -36,6 +83,18 @@ class Aluno360StudentQuickActions extends StatelessWidget {
           subtitle: 'Voltar para a lista',
           icon: Icons.list_alt_rounded,
         ),
+      FxInsetPickerSheetItem(
+        value: () => _criarTarefa(context, ref),
+        label: 'Criar tarefa',
+        subtitle: 'Abre no comando do dia',
+        icon: Icons.playlist_add_check_rounded,
+      ),
+      FxInsetPickerSheetItem(
+        value: () => _abrirChat(context, ref),
+        label: 'Chat',
+        subtitle: 'Mensagem ou conversa com $firstName',
+        icon: Icons.chat_bubble_outline_rounded,
+      ),
       FxInsetPickerSheetItem(
         value: onPassword,
         label: 'Senha de acesso',
@@ -68,7 +127,7 @@ class Aluno360StudentQuickActions extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final firstName = aluno.nome.split(' ').first;
     return Semantics(
       container: true,
@@ -79,7 +138,7 @@ class Aluno360StudentQuickActions extends StatelessWidget {
           label: 'Mais ações',
           accent: primary,
           isDark: isDark,
-          onPressed: () => _openMaisAcoes(context),
+          onPressed: () => _openMaisAcoes(context, ref),
         ),
       ),
     );

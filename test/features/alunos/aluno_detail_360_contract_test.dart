@@ -178,7 +178,8 @@ void main() {
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains("'Criar tarefa'"));
     expect(screen, contains('TextButton'));
-    expect(screen, isNot(contains("label: 'Criar tarefa'")));
+    // Criar tarefa vive no sticky / Mais (#10), não floater TextButton do card.
+    expect(screen, contains("label: 'Criar tarefa'"));
     expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));

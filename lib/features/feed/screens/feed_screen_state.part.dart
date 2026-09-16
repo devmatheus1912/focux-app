@@ -298,7 +298,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             _leave();
           },
           child: FxShellScaffold(
-            useMesh: true,
+            useMesh: false,
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: 'Feed',

@@ -44,16 +44,16 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String get _modePromise {
     switch (_mode) {
       case 'Progressão':
-        return 'Lê histórico, check-ins e aderência para sugerir ajuste de carga, volume ou frequência — você decide o que aplicar.';
+        return 'Lê os treinos do plano e a aderência para sugerir ajuste de carga, volume ou frequência — você decide o que aplicar.';
       default:
-        return 'Analisa objetivo, nível, equipamentos e histórico do aluno. Você monta e edita os treinos na aba Treinos.';
+        return 'Analisa objetivo, nível, equipamentos e treinos do plano. Você monta e edita os treinos na aba Treinos.';
     }
   }
 
   List<String> get _modeChecks {
     switch (_mode) {
       case 'Progressão':
-        return ['Histórico recente', 'Prontidão wearable', 'Próxima ação'];
+        return ['Treinos do plano', 'Prontidão wearable', 'Próxima ação'];
       default:
         return ['Objetivo e nível', 'Foco de volume', 'Próxima ação sugerida'];
     }
@@ -98,7 +98,7 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String get _resultNote {
     switch (_mode) {
       case 'Progressão':
-        return 'Recomendações de progressão com base em check-ins e histórico. Revise antes de ajustar carga ou volume na prática.';
+        return 'Recomendações de progressão com base nos treinos do plano. Revise antes de ajustar carga ou volume na prática.';
       default:
         return 'Recomendações para prescrever o treino. Use como apoio à decisão; monte e publique o treino manualmente em Treinos.';
     }

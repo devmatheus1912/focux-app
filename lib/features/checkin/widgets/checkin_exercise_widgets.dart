@@ -25,7 +25,6 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onDesfazer;
   final VoidCallback? onOpenCoach;
   final VoidCallback? onOpenDemo;
-  final VoidCallback? onOpenTips;
   final VoidCallback? onAjustar;
   final VoidCallback? onConfirmarRestante;
   final VoidCallback? onTrocar;
@@ -45,7 +44,6 @@ class CheckinSerieCard extends StatelessWidget {
     this.onDesfazer,
     this.onOpenCoach,
     this.onOpenDemo,
-    this.onOpenTips,
     this.onAjustar,
     this.onConfirmarRestante,
     this.onTrocar,
@@ -200,8 +198,7 @@ class CheckinSerieCard extends StatelessWidget {
                 onConfirmarRestante != null ||
                 onDesfazer != null ||
                 onOpenCoach != null ||
-                (onOpenDemo != null && !hasDemo) ||
-                onOpenTips != null) ...[
+                (onOpenDemo != null && !hasDemo)) ...[
               const SizedBox(height: TokensStrip.s1),
               TextButton(
                 onPressed: () {
@@ -272,14 +269,6 @@ class CheckinSerieCard extends StatelessWidget {
                                   onTap: () {
                                     Navigator.of(ctx).pop();
                                     onOpenDemo!();
-                                  },
-                                ),
-                              if (onOpenTips != null)
-                                ListTile(
-                                  title: const Text('Dicas'),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onOpenTips!();
                                   },
                                 ),
                             ],

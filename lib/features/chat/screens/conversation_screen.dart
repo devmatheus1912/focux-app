@@ -28,6 +28,7 @@ import '../../alunos/providers/aluno_detail_providers.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_remetente.dart';
+import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -253,11 +254,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final repo = ChatRepository(ref.read(apiClientProvider));
     if (_isAlunoMode) {
       await repo.marcarLidoAluno();
+    } else if (_alunoId != null) {
+      await repo.marcarLido(_alunoId!);
+    } else {
       return;
     }
-    if (_alunoId != null) {
-      await repo.marcarLido(_alunoId!);
-    }
+    if (mounted) invalidateChatInboxCaches(ref);
   }
 
   Future<void> _connectWs(int alunoId) async {

@@ -253,10 +253,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              InkWell(
-                                onTap: () => _openTreinos(context),
-                                borderRadius: BorderRadius.circular(12),
-                                child: OperationalMetricTile(
+                              OperationalMetricTile(
                                   label: 'Sinal de evolução',
                                   value: sinalLabel(ev.sinal),
                                   hint: ev.resumo,
@@ -268,7 +265,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                           ? OperationalMetricEmphasis.alert
                                           : OperationalMetricEmphasis.normal,
                                 ),
-                              ),
                               if (sparklineData.isNotEmpty) ...[
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(
@@ -286,35 +282,24 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 ),
                               ],
                               const SizedBox(height: TokensStrip.s2),
-                              InkWell(
-                                onTap: () => _openTreinos(context),
-                                borderRadius: BorderRadius.circular(12),
-                                child: OperationalMetricTile(
+                              OperationalMetricTile(
                                   label: 'Volume da semana',
                                   value: formatAlunoVolumeKg(ev.volumeSemanal),
                                   hint: 'Soma de carga × reps nos check-ins',
                                   color: primary,
                                   isDark: isDark,
                                 ),
-                              ),
                               const SizedBox(height: TokensStrip.s2),
-                              InkWell(
-                                onTap: () => _openTreinos(context),
-                                borderRadius: BorderRadius.circular(12),
-                                child: OperationalMetricTile(
+                              OperationalMetricTile(
                                   label: 'Volume do mês',
                                   value: formatAlunoVolumeKg(ev.volumeMensal),
                                   hint: 'Mesma conta nos últimos 30 dias',
                                   color: primary,
                                   isDark: isDark,
                                 ),
-                              ),
                               if (_ultimoPrValue(ev) != null) ...[
                                 const SizedBox(height: TokensStrip.s2),
-                                InkWell(
-                                  onTap: () => _openTreinos(context),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: OperationalMetricTile(
+                                OperationalMetricTile(
                                     label: 'Volume Último PR',
                                     value: _ultimoPrValue(ev)!,
                                     hint:
@@ -325,14 +310,10 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                     color: EagleTokens.good,
                                     isDark: isDark,
                                   ),
-                                ),
                               ],
                               if (ev.tendenciaVolumePct != null) ...[
                                 const SizedBox(height: TokensStrip.s2),
-                                InkWell(
-                                  onTap: () => _openTreinos(context),
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: OperationalMetricTile(
+                                OperationalMetricTile(
                                     label: 'Tendência de volume',
                                     value:
                                         '${ev.tendenciaVolumePct! > 0 ? '+' : ''}${ev.tendenciaVolumePct}%',
@@ -343,7 +324,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                             : EagleTokens.bad,
                                     isDark: isDark,
                                   ),
-                                ),
                               ],
                               if (ev.proximaAcao.trim().isNotEmpty) ...[
                                 const SizedBox(height: TokensStrip.s3),

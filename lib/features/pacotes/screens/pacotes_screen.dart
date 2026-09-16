@@ -15,6 +15,7 @@ import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -26,6 +27,8 @@ import '../providers/pacotes_provider.dart';
 import '../utils/pacote_display.dart';
 import '../widgets/novo_pacote_sheet.dart';
 import '../widgets/pacotes_storefront_widgets.dart';
+
+enum _PacoteMaisAcao { copiarLink, verVitrine }
 
 class PacotesScreen extends ConsumerStatefulWidget {
   const PacotesScreen({super.key});
@@ -180,6 +183,32 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
   void _verVitrine() => openStorefrontPreview(context, _slug);
 
+  Future<void> _abrirMais() async {
+    final slug = _slug;
+    final hasLink = slug != null && slug.isNotEmpty;
+    final picked = await showFxInsetPickerSheet<_PacoteMaisAcao>(
+      context,
+      title: 'Mais em pacotes',
+      items: [
+        FxInsetPickerSheetItem(
+          value: _PacoteMaisAcao.copiarLink,
+          label: hasLink ? 'Copiar link da página' : 'Link indisponível',
+        ),
+        FxInsetPickerSheetItem(
+          value: _PacoteMaisAcao.verVitrine,
+          label: hasLink ? 'Abrir página de vendas' : 'Página indisponível',
+        ),
+      ],
+    );
+    if (!mounted || picked == null) return;
+    switch (picked) {
+      case _PacoteMaisAcao.copiarLink:
+        _copiarLink();
+      case _PacoteMaisAcao.verVitrine:
+        _verVitrine();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -215,6 +244,14 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
             ),
             onBack: _leave,
             actions: [
+              IconButton(
+                tooltip: 'Mais em pacotes',
+                onPressed: _abrirMais,
+                icon: Icon(
+                  Icons.more_horiz_rounded,
+                  color: chrome.mute,
+                ),
+              ),
               FxHelpIconButton(
                 tooltip: 'Como usar pacotes',
                 onTap: () => showFxHelpSheet(
@@ -228,7 +265,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                     ),
                     FxHelpTip(
                       'Link',
-                      'Copie o link do card da vitrine, não do topo.',
+                      'Copiar e abrir a página ficam em Mais, no topo.',
                     ),
                   ],
                 ),
@@ -347,11 +384,10 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
 
   Widget _buildList(List<Pacote> visible) {
     final primary = Theme.of(context).colorScheme.primary;
-    final slug = _slug;
-    final hasLink = slug != null && slug.isNotEmpty;
     final filtered =
         _query.trim().isNotEmpty || _chip != PacoteChip.todos;
-    final linkCount = hasLink ? 1 : 0;
+    // Landing/link card saiu do fold — Copiar/Abrir ficam em Mais.
+    const linkCount = 0;
     final overviewCount = visible.isNotEmpty ? 2 : 0;
     final base = 1 + linkCount + overviewCount;
     final itemCount =
@@ -372,13 +408,6 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (index == 0) return const PacotesComoFuncionaCard();
-          if (hasLink && index == 1) {
-            return StorefrontLinkCard(
-              slug: slug,
-              onCopy: _copiarLink,
-              onPreview: _verVitrine,
-            );
-          }
           if (visible.isNotEmpty) {
             final overviewIndex = 1 + linkCount;
             if (index == overviewIndex) {
@@ -391,7 +420,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                   bottom: TokensStrip.s2,
                 ),
                 child: Text(
-                  'Seus planos (aparecem no link acima)',
+                  'Seus planos (link da página em Mais)',
                   style: TextStyle(
                     color: fxScreenMute(context),
                     fontWeight: FontWeight.w600,

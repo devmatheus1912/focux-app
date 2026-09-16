@@ -329,6 +329,7 @@ class _DetailBody extends StatelessWidget {
                   FxHubHeader(
                     title: mensalidade.alunoNome,
                     subtitle: financeiroMensalidadeHubSubtitle(mes: mes),
+                    onTitleTap: onOpenAluno,
                   ),
                   const SizedBox(height: TokensStrip.s4),
                   OperationalMetricTile(

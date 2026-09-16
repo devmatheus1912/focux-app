@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,6 @@ import '../widgets/auth_shell.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
 import '../widgets/apple_sign_in_button.dart';
-import '../widgets/apple_share_email_prompt.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -100,8 +98,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       } catch (_) {}
       final caps = await ref.read(authRepositoryProvider).capabilities();
       if (!mounted) return;
-      final showGoogle =
-          Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
+      final showGoogle = Env.googleWebClientId.isNotEmpty;
       final appleOffered = resolveAppleSignInOffered(
         capabilitiesEnabled: caps.appleSignInEnabled,
         environmentStatus: status,
@@ -118,8 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       try {
         status = await ref.read(authRepositoryProvider).environmentStatus();
       } catch (_) {}
-      final showGoogle =
-          Env.googleWebClientId.isNotEmpty && !Platform.isIOS;
+      final showGoogle = Env.googleWebClientId.isNotEmpty;
       final appleOffered = resolveAppleSignInOffered(
         capabilitiesEnabled: false,
         environmentStatus: status,

@@ -23,6 +23,7 @@ void main() {
 
     expect(shell, contains('openNovaMensalidade'));
     expect(shell, contains('novaMensalidadeToken'));
+    expect(shell, contains('alunosProvider.future'));
     expect(tab, contains('novaMensalidadeToken'));
     expect(tab, contains('_scheduleNovaMensalidadeIfNeeded'));
     expect(tab, contains('FxEmptyAction'));
@@ -48,6 +49,12 @@ void main() {
     expect(tab, contains('Carregar mais'));
     expect(tab, contains('marcarLotePago'));
     expect(tab, contains('Marcar lote'));
+    expect(tab, contains('RefreshIndicator'));
+    expect(tab, contains('onLongPress'));
+    expect(tab, contains('_onPullRefresh'));
+    expect(tab, contains('atualizarAtrasos'));
+    expect(tab, contains('alunosProvider.future'));
+    expect(tab, contains('initialAlunoId'));
     expect(tab, contains('FxErrorState'));
     expect(tab, contains('FeedbackHelper.showSuccess'));
     expect(tab, isNot(contains('class _MiniAction')));
@@ -55,6 +62,7 @@ void main() {
     expect(tab, isNot(contains('check-circle')));
     expect(tab, isNot(contains('DropdownButtonFormField')));
     expect(tab, isNot(contains('Clipboard.setData')));
+    expect(tab, isNot(contains('ref.watch(alunosProvider).when(')));
 
     final dashboard = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
@@ -88,6 +96,7 @@ void main() {
     expect(detail, contains('FxLiquidPrimaryButton'));
     expect(detail, contains('Marcar como paga'));
     expect(detail, contains('FxHubHeader'));
+    expect(detail, contains('onTitleTap'));
     expect(detail, contains('FxHelpIconButton'));
     expect(detail, contains('safePopOrGo'));
     expect(detail, contains('OperationalMetricTile'));
@@ -123,6 +132,9 @@ void main() {
     expect(actions, contains('copySensitiveToClipboard'));
     expect(actions, contains('showFxConfirmSheet'));
     expect(actions, contains('FxLiquidPrimaryButton'));
+    expect(actions, contains('/perfil/wallet'));
+    expect(actions, contains('precisaCarteira'));
+    expect(actions, contains('Gerando PIX'));
     expect(actions, isNot(contains("'Salvando…' : 'Confirmar'")));
   });
 }

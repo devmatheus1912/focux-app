@@ -41,6 +41,11 @@ void main() {
     expect(tryExterno, lessThan(instancia));
   });
 
+  test('pos-login reclama o token FCM com JWT', () {
+    expect(fcm, contains('registrarSeAutenticado'));
+    expect(authRepo, contains('FcmService.registrarSeAutenticado'));
+  });
+
   test('tap com execucaoId abre o detalhe do historico do aluno', () {
     expect(fcm, contains('resolveFcmTapRoute'));
     expect(tapRoute, contains("data['execucaoId']"));

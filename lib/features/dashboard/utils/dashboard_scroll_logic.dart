@@ -4,14 +4,12 @@
 /// só aparece depois que o painel de próximas ações sai da viewport.
 const double dashboardScrollOffsetEpsilon = 2;
 
-/// Sticky só quando o painel de próximas ações saiu da viewport (medido via
-/// GlobalKey em runtime), ainda há prioridades extras, e o bloco de tools
-/// não está na faixa do chip (evita cobrir «Mais ferramentas» / catálogo).
+/// Sticky «Ver prioridades» desligado — CTA fixo «Mais prioridades» no painel basta (#33).
 bool dashboardShowsStickyPrioritiesAction({
   required bool panelOffscreen,
   required bool showPrioritiesLink,
   bool toolsBlocksSticky = false,
-}) => panelOffscreen && showPrioritiesLink && !toolsBlocksSticky;
+}) => false;
 
 /// Tools entraram na faixa inferior (sticky + dock) — some o overlay.
 bool dashboardToolsBlocksSticky({
