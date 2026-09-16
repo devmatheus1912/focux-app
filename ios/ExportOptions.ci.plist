@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template CI — o workflow preenche provisioningProfiles em runtime.
+  Assinatura local no Mac continua em ExportOptions.plist (automatic).
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store</string>
+	<key>teamID</key>
+	<string>TVY2QLKX54</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>destination</key>
+	<string>export</string>
+	<key>compileBitcode</key>
+	<false/>
+	<key>stripSwiftSymbols</key>
+	<true/>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.focux.focuxApp</key>
+		<string>REPLACE_PROFILE_NAME</string>
+	</dict>
+</dict>
+</plist>
