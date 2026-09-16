@@ -57,8 +57,20 @@ platform :ios do
 end
 
 def revoke_orphan_distribution_certs!(api_key)
-  # Token já vem do app_store_connect_api_key; reatribui para Spaceship.
-  Spaceship::ConnectAPI.token = api_key
+  # app_store_connect_api_key devolve Hash — Spaceship exige Token object.
+  token =
+    if api_key.respond_to?(:key_id) && !api_key.is_a?(Hash)
+      api_key
+    else
+      Spaceship::ConnectAPI::Token.create(
+        key_id: api_key[:key_id] || api_key["key_id"],
+        issuer_id: api_key[:issuer_id] || api_key["issuer_id"],
+        key: api_key[:key] || api_key["key"],
+        duration: api_key[:duration] || api_key["duration"] || 1200,
+        in_house: api_key[:in_house] || api_key["in_house"] || false
+      )
+    end
+  Spaceship::ConnectAPI.token = token
 
   types = %w[DISTRIBUTION IOS_DISTRIBUTION]
   certs = Spaceship::ConnectAPI::Certificate.all.select do |c|
