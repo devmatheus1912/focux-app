@@ -1,6 +1,8 @@
 # Assinatura via App Store Connect API (equivalente ao Codemagic Automatic).
-# Não precisa de Mac local nem de .p12: o runner do Actions gera CSR/cert/profile.
+# Runner do Actions é efêmero: a chave privada do cert morre no fim do job.
+# Por isso revogamos Distribution órfãos antes de criar um novo (limite Apple = 2).
 
+opt_out_usage
 default_platform(:ios)
 
 platform :ios do
@@ -27,8 +29,8 @@ platform :ios do
       add_to_search_list: true
     )
 
-    # Se o cert da Codemagic existir sem a chave privada, o Fastlane cria outro
-    # (Apple permite até 2 Distribution). Se falhar com limite, revoke um na portal.
+    revoke_orphan_distribution_certs!(api_key)
+
     cert(
       api_key: api_key,
       keychain_path: File.expand_path("~/Library/Keychains/#{keychain_name}-db"),
@@ -51,5 +53,26 @@ platform :ios do
     end
 
     UI.success("Signing ready: #{ENV['SIGH_NAME']} (#{ENV['SIGH_UUID']})")
+  end
+end
+
+def revoke_orphan_distribution_certs!(api_key)
+  # Token já vem do app_store_connect_api_key; reatribui para Spaceship.
+  Spaceship::ConnectAPI.token = api_key
+
+  types = %w[DISTRIBUTION IOS_DISTRIBUTION]
+  certs = Spaceship::ConnectAPI::Certificate.all.select do |c|
+    types.include?(c.certificate_type.to_s)
+  end
+
+  if certs.empty?
+    UI.message("Nenhum Distribution cert na conta — ok.")
+    return
+  end
+
+  UI.important("Revogando #{certs.length} Distribution cert(s) órfão(s) (CI sem chave privada persistida)...")
+  certs.each do |certificate|
+    UI.message("Revoke #{certificate.id} (#{certificate.certificate_type})")
+    certificate.delete!
   end
 end
