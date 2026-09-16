@@ -41,7 +41,14 @@ void main() {
   });
 
   test('S4 satélites com busca liberam dismiss de teclado', () {
-    for (final path in ['/habitos', '/desafios', '/grupo-aulas']) {
+    for (final path in [
+      '/habitos',
+      '/desafios',
+      '/grupo-aulas',
+      '/aluno/habitos',
+      '/aluno/desafios',
+      '/aluno/grupo-aulas',
+    ]) {
       final match = FocuxSurfaces.resolve(path);
       expect(match, isNotNull, reason: path);
       expect(match!.spec.type, FocuxSurfaceType.s4, reason: path);

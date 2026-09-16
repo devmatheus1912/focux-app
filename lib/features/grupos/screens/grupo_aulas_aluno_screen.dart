@@ -209,87 +209,84 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
           }
           safePopOrGo(context, '/dashboard/aluno');
         },
-        child: FxKeyboardDismissScope(
-          child: FxShellScaffold(
-            useMesh: true,
-            constrainWidth: false,
-            appBar: FxShellAppBar(
-              title: 'Aulas em grupo',
-              subtitle: FxHubFreshness.joinCount(
-                grupoAulaCountLabel(_loading ? 0 : _total),
-                _loading ? null : freshnessLabel,
-              ),
-              onBack: () {
-                FxKeyboardDismissScope.dismiss();
-                safePopOrGo(context, '/dashboard/aluno');
-              },
-              actions: [
-                FxHelpIconButton(
-                  tooltip: 'Como usar aulas em grupo',
-                  onTap: () => showFxHelpSheet(
-                    context,
-                    title: 'Aulas em grupo',
-                    subtitle: 'Turmas abertas pelo seu personal.',
-                    tips: const [
-                      FxHelpTip(
-                        'Inscrever',
-                        'Toque na aula para entrar. Se estiver lotada, espere a próxima.',
-                      ),
-                      FxHelpTip(
-                        'Sair',
-                        'Toque de novo numa aula inscrita para cancelar.',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        child: FxShellScaffold(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: 'Aulas em grupo',
+            subtitle: FxHubFreshness.joinCount(
+              grupoAulaCountLabel(_loading ? 0 : _total),
+              _loading ? null : freshnessLabel,
             ),
-            body: _loading
-                ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 4),
-                  )
-                : _erro != null
-                ? FxErrorState(
-                    chromeOnDark: chrome.isDark,
-                    primary: scheme.primary,
-                    title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                    message: _erro!,
-                    onRetry: _load,
-                  )
-                : Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: TextField(
-                          controller: _searchCtrl,
-                          focusNode: _searchFocus,
-                          textInputAction: TextInputAction.search,
-                          onChanged: _onQueryChanged,
-                          onTapOutside: (_) =>
-                              FxKeyboardDismissScope.dismiss(),
-                          decoration: InputDecoration(
-                            hintText: 'Buscar aula',
-                            prefixIcon: const Icon(Icons.search_rounded),
-                            border: FxInputDeco.outlineBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/aluno');
+            },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar aulas em grupo',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Aulas em grupo',
+                  subtitle: 'Turmas abertas pelo seu personal.',
+                  tips: const [
+                    FxHelpTip(
+                      'Inscrever',
+                      'Toque na aula para entrar. Se estiver lotada, espere a próxima.',
+                    ),
+                    FxHelpTip(
+                      'Sair',
+                      'Toque de novo numa aula inscrita para cancelar.',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          body: _loading
+              ? const Padding(
+                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                  child: SkeletonList(count: 4),
+                )
+              : _erro != null
+              ? FxErrorState(
+                  chromeOnDark: chrome.isDark,
+                  primary: scheme.primary,
+                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                  message: _erro!,
+                  onRetry: _load,
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                        TokensStrip.s4,
+                        TokensStrip.s2,
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        focusNode: _searchFocus,
+                        textInputAction: TextInputAction.search,
+                        onChanged: _onQueryChanged,
+                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                        decoration: InputDecoration(
+                          hintText: 'Buscar aula',
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          border: FxInputDeco.outlineBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: FxContentWidthLimiter(
-                          child: _buildList(searching),
-                        ),
+                    ),
+                    Expanded(
+                      child: FxContentWidthLimiter(
+                        child: _buildList(searching),
                       ),
-                    ],
-                  ),
-          ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
