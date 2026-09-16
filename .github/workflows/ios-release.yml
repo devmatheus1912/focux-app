@@ -48,10 +48,13 @@ jobs:
 
       - name: Select Xcode
         run: |
+          # connectivity_plus >=7.1 precisa Xcode 26.1.1+ (NWPath.isUltraConstrained)
           for p in \
-            /Applications/Xcode_16.2.app/Contents/Developer \
-            /Applications/Xcode_16.1.app/Contents/Developer \
-            /Applications/Xcode_16.0.app/Contents/Developer \
+            /Applications/Xcode_26.3.app/Contents/Developer \
+            /Applications/Xcode_26.2.app/Contents/Developer \
+            /Applications/Xcode_26.1.1.app/Contents/Developer \
+            /Applications/Xcode_26.0.1.app/Contents/Developer \
+            /Applications/Xcode_16.4.app/Contents/Developer \
             /Applications/Xcode.app/Contents/Developer
           do
             if [[ -d "$p" ]]; then
