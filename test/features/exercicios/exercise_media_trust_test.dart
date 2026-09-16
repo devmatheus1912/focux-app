@@ -67,27 +67,26 @@ void main() {
     expect(treinoDetail, contains('TreinoPrescriptionVideoBlock'));
   });
 
-  test('exercise media import surface exposes editorial approval controls', () {
-    final list =
-        File(
-          'lib/features/exercicios/screens/exercicios_list_screen.dart',
-        ).readAsStringSync();
-
-    expect(list, contains('Aprovar editorialmente'));
-    expect(list, contains('Notas editoriais padrao'));
-    expect(list, contains('previewMidias(midias)'));
-    expect(list, contains('importarMidias(midias)'));
-  });
-
-  test('prévia de vídeo cabe na sheet da Home', () {
+  test('prévia de vídeo real na sheet; sem stub em breve (§38)', () {
     final preview =
         File(
           'lib/features/exercicios/screens/widgets/exercise_video_preview_sheet.dart',
         ).readAsStringSync();
-    expect(preview, contains('expand: true'));
-    expect(preview, contains('FittedBox'));
-    expect(preview, contains('BoxFit.contain'));
-    expect(preview, contains('height * 0.82'));
     expect(preview, contains('VideoPlayer(_controller!)'));
+    expect(preview, contains('FittedBox'));
+    expect(preview, contains('FxHomeSheetSurface'));
+    expect(preview, contains('§38 hide'));
+    expect(preview, isNot(contains('Demo oficial em breve')));
+    expect(preview, isNot(contains('ExerciseLibraryDemoStandbySheet')));
+    expect(preview, isNot(contains('showLibraryDemoStandbySheet')));
+  });
+
+  test('canPreview não oferece demo oficial em standby', () {
+    final thumb =
+        File(
+          'lib/features/exercicios/screens/widgets/exercise_media_thumb.dart',
+        ).readAsStringSync();
+    expect(thumb, contains('if (kBibliotecaLibraryVideosStandby) return false;'));
+    expect(thumb, isNot(contains('exercicio.curado) return true')));
   });
 }

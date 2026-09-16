@@ -297,7 +297,7 @@ class _ExerciseChoiceTile extends StatelessWidget {
       accessory: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (exercicio.hasPlayableMedia)
+          if (canPreviewExerciseMedia(exercicio))
             GestureDetector(
               onTap: () {
                 HapticFeedback.selectionClick();

@@ -147,14 +147,25 @@ void main() {
       expect(preview, contains('_v=456'));
     });
 
-    test('canPreviewExerciseMedia inclui curado em standby', () {
+    test('canPreviewExerciseMedia esconde curado em standby (§38)', () {
       final curado = Exercicio(
         id: 4,
         nome: 'Agachamento',
         curado: true,
         curatedId: 10,
       );
-      expect(canPreviewExerciseMedia(curado), isTrue);
+      expect(canPreviewExerciseMedia(curado), isFalse);
+    });
+
+    test('canPreviewExerciseMedia permite vídeo do personal em standby', () {
+      final personal = Exercicio(
+        id: 5,
+        nome: 'Agachamento',
+        videoUrl: 'https://cdn.focux.app/a.mp4',
+        videoSource: 'PERSONAL_UPLOAD',
+        licenseStatus: 'PERSONAL_OWNED',
+      );
+      expect(canPreviewExerciseMedia(personal), isTrue);
     });
   });
 

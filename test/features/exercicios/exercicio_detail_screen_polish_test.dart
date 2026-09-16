@@ -24,6 +24,7 @@ void main() {
     expect(screen, isNot(contains('ExerciseVideoUploadStrip')));
     expect(screen, contains('_PrescriptionReadinessPanel'));
     expect(screen, contains('_VideoPlayer'));
+    expect(screen, contains('exercicioHasPublishedLibraryMedia'));
     expect(screen, contains('FxHubHeader'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxHelpIconButton'));

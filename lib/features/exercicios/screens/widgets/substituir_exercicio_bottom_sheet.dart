@@ -307,7 +307,7 @@ class _AlternativaTile extends StatelessWidget {
       showDivider: showDivider,
       onTap: onTap,
       accessory:
-          exercicio.hasPlayableMedia
+          canPreviewExerciseMedia(exercicio)
               ? GestureDetector(
                 onTap: () {
                   HapticFeedback.selectionClick();
