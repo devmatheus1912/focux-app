@@ -28,6 +28,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../data/avaliacao_repository.dart';
 import '../utils/evolucao_comparativo_display.dart';
@@ -222,7 +223,7 @@ class _EvolucaoComparativoScreenState
             'percGordura':
                 double.tryParse(gordura.text.trim().replaceAll(',', '.')),
           if (massaMagra.text.trim().isNotEmpty)
-            'massaMuscular':
+            'percMassa':
                 double.tryParse(massaMagra.text.trim().replaceAll(',', '.')),
           if (cintura.text.trim().isNotEmpty)
             'cinturaCm':
@@ -230,6 +231,7 @@ class _EvolucaoComparativoScreenState
         },
       );
       saved = true;
+      await invalidateAluno360Providers(ref, widget.alunoId);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
