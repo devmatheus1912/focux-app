@@ -477,6 +477,8 @@ void main() {
       );
       expect(metric.kind, OperacaoDominantMetricKind.aderencia);
       expect(metric.value, '55%');
+      expect(metric.label, 'Aderência · 30 dias');
+      expect(metric.hint, contains('30 dias'));
     });
   });
 

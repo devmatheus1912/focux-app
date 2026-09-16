@@ -199,9 +199,14 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
         icon: 'zap',
       ),
       FxHelpTip(
-        'Aderência',
-        'Check-ins da semana atual versus meta.',
+        'Aderência · 30 dias',
+        'Percentual de treinos concluídos entre os iniciados nos últimos 30 dias — não é o mesmo que check-ins da semana.',
         icon: 'trend',
+      ),
+      FxHelpTip(
+        'Check-ins · 7 dias',
+        'Quantos dias da semana tiveram pelo menos um check-in concluído (data de conclusão).',
+        icon: 'calendar',
       ),
       FxHelpTip(
         'Sem treino',
@@ -210,7 +215,7 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Barras da semana',
-        'Verde = check-in; vermelho = dia perdido; anel = hoje.',
+        'Verde = check-in concluído; vermelho = dia sem registro; anel = hoje.',
         icon: 'calendar',
       ),
     ],
