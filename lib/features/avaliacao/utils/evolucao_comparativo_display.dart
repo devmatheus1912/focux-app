@@ -93,17 +93,10 @@ List<EvolucaoComparativoMetrica> evolucaoComparativoMetricas({
       menorEMelhor: true,
     ),
     EvolucaoComparativoMetrica(
-      label: '% Massa',
-      unidade: '%',
-      primeira: primeira.percMassa,
-      atual: atual.percMassa,
-      menorEMelhor: false,
-    ),
-    EvolucaoComparativoMetrica(
-      label: 'Massa muscular',
+      label: 'Massa magra',
       unidade: 'kg',
-      primeira: primeira.massaMuscular,
-      atual: atual.massaMuscular,
+      primeira: primeira.percMassa ?? primeira.massaMuscular,
+      atual: atual.percMassa ?? atual.massaMuscular,
       menorEMelhor: false,
     ),
     EvolucaoComparativoMetrica(
