@@ -131,7 +131,7 @@ jobs:
             echo "::error::PROVISIONING_PROFILE_NAME vazio — sync_signing falhou?"
             exit 1
           fi
-          /usr/libexec/PlistBuddy -c "Set :provisioningProfiles:$APP_BUNDLE_ID $PROVISIONING_PROFILE_NAME" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Set :provisioningProfiles:${APP_BUNDLE_ID} \"${PROVISIONING_PROFILE_NAME}\"" ios/ExportOptions.ci.plist
           plutil -lint ios/ExportOptions.ci.plist
           cat ios/ExportOptions.ci.plist
 
