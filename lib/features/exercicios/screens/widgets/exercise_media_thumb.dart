@@ -270,8 +270,10 @@ bool exercicioHasPublishedLibraryMedia(Exercicio exercicio) {
       exercicio.videoUrl?.trim().isNotEmpty == true) {
     return true;
   }
+  // MoveKit / FOCUX_LIBRARY: vídeo versionado no CDN conta como demo pronta.
   return isCloudinaryPublishedUrl(exercicio.thumbnailUrl) ||
-      isCloudinaryPublishedUrl(exercicio.gifUrl);
+      isCloudinaryPublishedUrl(exercicio.gifUrl) ||
+      isCloudinaryPublishedUrl(exercicio.videoUrl);
 }
 
 /// URLs para tentar carregar prévia da biblioteca (GIF, thumb, transform).
@@ -317,11 +319,18 @@ String? exercisePreviewMediaUrlFor(Exercicio exercicio) {
     return null;
   }
   if (!exercicioHasPublishedLibraryMedia(exercicio)) return null;
-  return exercisePreviewMediaUrl(
+  final fromRaster = exercisePreviewMediaUrl(
     thumbnailUrl: exercicio.thumbnailUrl,
     gifUrl: exercicio.gifUrl,
     videoUrl: exercicio.videoUrl,
   );
+  if (fromRaster != null) return fromRaster;
+  final video = exercicio.videoUrl?.trim();
+  if (video != null && video.isNotEmpty) {
+    final poster = cloudinaryVideoPosterUrl(video);
+    if (poster != null) return _cacheBustMediaUrl(poster, video);
+  }
+  return null;
 }
 
 String _cacheBustMediaUrl(String url, String? seed) {
@@ -436,8 +445,8 @@ bool exercicioHasPersonalVideo(Exercicio exercicio) {
       exercicio.videoUrl?.trim().isNotEmpty == true;
 }
 
-/// Abre prévia útil: vídeo próprio ou demo publicada da biblioteca.
-/// Em standby da biblioteca (§38 hide): sem sheet "em breve".
+/// Abre prévia útil: vídeo próprio ou demo MoveKit/biblioteca publicada.
+/// Sem mídia tocável: sem atalho (nunca sheet "em breve").
 bool canPreviewExerciseMedia(Exercicio exercicio) {
   if (exercicioHasPersonalVideo(exercicio)) return true;
   if (exercicioHasPublishedLibraryMedia(exercicio)) return true;

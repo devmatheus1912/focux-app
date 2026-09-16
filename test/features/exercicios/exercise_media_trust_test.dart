@@ -75,18 +75,17 @@ void main() {
     expect(preview, contains('VideoPlayer(_controller!)'));
     expect(preview, contains('FittedBox'));
     expect(preview, contains('FxHomeSheetSurface'));
-    expect(preview, contains('§38 hide'));
     expect(preview, isNot(contains('Demo oficial em breve')));
     expect(preview, isNot(contains('ExerciseLibraryDemoStandbySheet')));
     expect(preview, isNot(contains('showLibraryDemoStandbySheet')));
   });
 
-  test('canPreview não oferece demo oficial em standby', () {
+  test('MoveKit publicado conta como mídia da biblioteca', () {
     final thumb =
         File(
           'lib/features/exercicios/screens/widgets/exercise_media_thumb.dart',
         ).readAsStringSync();
+    expect(thumb, contains('isCloudinaryPublishedUrl(exercicio.videoUrl)'));
     expect(thumb, contains('if (kBibliotecaLibraryVideosStandby) return false;'));
-    expect(thumb, isNot(contains('exercicio.curado) return true')));
   });
 }

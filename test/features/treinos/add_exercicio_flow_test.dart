@@ -147,7 +147,7 @@ void main() {
       expect(preview, contains('_v=456'));
     });
 
-    test('canPreviewExerciseMedia esconde curado em standby (§38)', () {
+    test('canPreviewExerciseMedia esconde curado sem mídia (§38)', () {
       final curado = Exercicio(
         id: 4,
         nome: 'Agachamento',
@@ -166,6 +166,23 @@ void main() {
         licenseStatus: 'PERSONAL_OWNED',
       );
       expect(canPreviewExerciseMedia(personal), isTrue);
+    });
+
+    test('canPreviewExerciseMedia permite MoveKit publicado', () {
+      final movekit = Exercicio(
+        id: 6,
+        nome: 'Arnold press',
+        videoUrl:
+            'https://res.cloudinary.com/doai3xaaz/video/upload/f_mp4,vc_h264/v1789083982/focux/exercicios/movekit/videos/arnold-press.mp4',
+        thumbnailUrl:
+            'https://res.cloudinary.com/doai3xaaz/image/upload/v1789083983/focux/exercicios/movekit/thumbs/arnold-press.webp',
+        videoSource: 'MOVEKIT',
+        licenseStatus: 'LICENSED',
+        curado: true,
+        curatedId: 42,
+      );
+      expect(exercicioHasPublishedLibraryMedia(movekit), isTrue);
+      expect(canPreviewExerciseMedia(movekit), isTrue);
     });
   });
 
