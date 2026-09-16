@@ -1,0 +1,55 @@
+# Assinatura via App Store Connect API (equivalente ao Codemagic Automatic).
+# Não precisa de Mac local nem de .p12: o runner do Actions gera CSR/cert/profile.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Distribution cert + App Store profile via ASC API"
+  lane :sync_signing do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_ISSUER_ID"),
+      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH"),
+      duration: 1200,
+      in_house: false
+    )
+
+    keychain_name = ENV.fetch("MATCH_KEYCHAIN_NAME", "focux-signing")
+    keychain_password = ENV.fetch("KEYCHAIN_PASSWORD")
+
+    create_keychain(
+      name: keychain_name,
+      password: keychain_password,
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false,
+      add_to_search_list: true
+    )
+
+    # Se o cert da Codemagic existir sem a chave privada, o Fastlane cria outro
+    # (Apple permite até 2 Distribution). Se falhar com limite, revoke um na portal.
+    cert(
+      api_key: api_key,
+      keychain_path: File.expand_path("~/Library/Keychains/#{keychain_name}-db"),
+      keychain_password: keychain_password
+    )
+
+    sigh(
+      api_key: api_key,
+      app_identifier: ENV.fetch("APP_BUNDLE_ID", "com.focux.focuxApp"),
+      provisioning_name: "Focux Personal AppStore GHA",
+      force: true
+    )
+
+    github_env = ENV["GITHUB_ENV"]
+    if github_env && !github_env.empty?
+      File.open(github_env, "a") do |f|
+        f.puts "PROVISIONING_PROFILE_NAME=#{ENV.fetch('SIGH_NAME')}"
+        f.puts "PROVISIONING_PROFILE_UUID=#{ENV.fetch('SIGH_UUID')}"
+      end
+    end
+
+    UI.success("Signing ready: #{ENV['SIGH_NAME']} (#{ENV['SIGH_UUID']})")
+  end
+end

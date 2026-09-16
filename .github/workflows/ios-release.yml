@@ -1,9 +1,15 @@
 name: iOS Release
 
-# Build IPA assinado (App Store / TestFlight) com certificate pinning.
-# Dispare em Actions → iOS Release → Run workflow (ou tag v*).
+# Build IPA assinado (TestFlight) com certificate pinning.
+# Assinatura = App Store Connect API (igual Codemagic Automatic) — sem Mac local / sem .p12.
 #
-# Secrets obrigatórios: ver comentário no job e o passo a passo no chat.
+# Secrets obrigatórios:
+#   API_CERT_PINS
+#   APP_STORE_CONNECT_API_KEY_ID
+#   APP_STORE_CONNECT_API_ISSUER_ID
+#   APP_STORE_CONNECT_API_KEY_BASE64
+#
+# Opcionais: API_URL, PUBLIC_WEB_URL, GOOGLE_*
 
 on:
   workflow_dispatch:
@@ -28,6 +34,7 @@ env:
   APPLE_TEAM_ID: TVY2QLKX54
   API_URL_DEFAULT: https://focux-backend-production.up.railway.app
   PUBLIC_WEB_URL_DEFAULT: https://focuxpersonal.com
+  MATCH_KEYCHAIN_NAME: focux-signing
 
 jobs:
   build-ipa:
@@ -41,7 +48,6 @@ jobs:
 
       - name: Select Xcode
         run: |
-          # Prefer a stable Xcode on the image; fall back to default.
           for p in \
             /Applications/Xcode_16.2.app/Contents/Developer \
             /Applications/Xcode_16.1.app/Contents/Developer \
@@ -81,47 +87,47 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Install Apple certificate + provisioning profile
+      - name: Install Fastlane
+        run: gem install fastlane --no-document
+
+      - name: Sync signing (ASC API → cert + profile)
         env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
-          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APP_BUNDLE_ID: ${{ env.APP_BUNDLE_ID }}
+          MATCH_KEYCHAIN_NAME: ${{ env.MATCH_KEYCHAIN_NAME }}
         run: |
           set -euo pipefail
-          if [[ -z "${BUILD_CERTIFICATE_BASE64:-}" || -z "${BUILD_PROVISION_PROFILE_BASE64:-}" || -z "${P12_PASSWORD:-}" || -z "${KEYCHAIN_PASSWORD:-}" ]]; then
-            echo "::error::Faltam secrets de assinatura (BUILD_CERTIFICATE_BASE64, P12_PASSWORD, BUILD_PROVISION_PROFILE_BASE64, KEYCHAIN_PASSWORD)."
+          if [[ -z "${APP_STORE_CONNECT_API_KEY_ID:-}" || -z "${APP_STORE_CONNECT_API_ISSUER_ID:-}" || -z "${APP_STORE_CONNECT_API_KEY_BASE64:-}" ]]; then
+            echo "::error::Faltam secrets ASC: APP_STORE_CONNECT_API_KEY_ID, APP_STORE_CONNECT_API_ISSUER_ID, APP_STORE_CONNECT_API_KEY_BASE64."
             exit 1
           fi
 
-          CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
-          PP_PATH="$RUNNER_TEMP/build_pp.mobileprovision"
-          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          # Senha efêmera do keychain no runner (não precisa de Mac / .p12).
+          if [[ -z "${KEYCHAIN_PASSWORD:-}" ]]; then
+            KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+            echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
+            export KEYCHAIN_PASSWORD
+          fi
 
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
-          echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o "$PP_PATH"
+          KEY_DIR="$RUNNER_TEMP/asc_keys"
+          mkdir -p "$KEY_DIR"
+          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+          echo -n "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode -o "$KEY_PATH"
+          export APP_STORE_CONNECT_API_KEY_PATH="$KEY_PATH"
 
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychain -d user -s "$KEYCHAIN_PATH"
-
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          PP_PLIST="$RUNNER_TEMP/pp.plist"
-          security cms -D -i "$PP_PATH" > "$PP_PLIST"
-          PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$PP_PLIST")
-          PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print Name' "$PP_PLIST")
-          cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
-
-          echo "PROVISIONING_PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
-          echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
-          echo "Installed profile: $PROFILE_NAME ($PROFILE_UUID)"
+          cd ios
+          fastlane sync_signing
 
       - name: Write ExportOptions.ci.plist
         run: |
           set -euo pipefail
+          if [[ -z "${PROVISIONING_PROFILE_NAME:-}" ]]; then
+            echo "::error::PROVISIONING_PROFILE_NAME vazio — sync_signing falhou?"
+            exit 1
+          fi
           /usr/libexec/PlistBuddy -c "Set :provisioningProfiles:$APP_BUNDLE_ID $PROVISIONING_PROFILE_NAME" ios/ExportOptions.ci.plist
           plutil -lint ios/ExportOptions.ci.plist
           cat ios/ExportOptions.ci.plist
@@ -207,8 +213,6 @@ jobs:
           fi
           IPA="${ipas[0]}"
           echo "Uploading ${IPA} to App Store Connect..."
-          # Sintaxe documentada pela Apple: --upload-app -f <path> -t <platform>
-          # (--file / --upload-package sozinhos quebram em alguns Xcodes)
           xcrun altool --upload-app \
             -f "${IPA}" \
             -t ios \
@@ -218,4 +222,5 @@ jobs:
       - name: Cleanup keychain
         if: always()
         run: |
-          security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db" 2>/dev/null || true
+          security delete-keychain "$HOME/Library/Keychains/${MATCH_KEYCHAIN_NAME}-db" 2>/dev/null || true
+          security delete-keychain "$HOME/Library/Keychains/${MATCH_KEYCHAIN_NAME}.keychain-db" 2>/dev/null || true
