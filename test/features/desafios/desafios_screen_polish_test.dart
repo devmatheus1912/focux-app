@@ -21,6 +21,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('Buscar desafio'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('desafioDetailPath'));
     expect(screen, contains('showFxInsetPickerSheet'));

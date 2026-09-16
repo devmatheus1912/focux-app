@@ -40,6 +40,15 @@ void main() {
     expect(FocuxSurfaces.resolveParent(match), '/perfil');
   });
 
+  test('S4 satélites com busca liberam dismiss de teclado', () {
+    for (final path in ['/habitos', '/desafios', '/grupo-aulas']) {
+      final match = FocuxSurfaces.resolve(path);
+      expect(match, isNotNull, reason: path);
+      expect(match!.spec.type, FocuxSurfaceType.s4, reason: path);
+      expect(match.spec.hasInput, isTrue, reason: path);
+    }
+  });
+
   test('progressao de carga is S3 with keyboard input', () {
     final match = FocuxSurfaces.resolve('/alunos/9/ia/progressao');
     expect(match, isNotNull);
