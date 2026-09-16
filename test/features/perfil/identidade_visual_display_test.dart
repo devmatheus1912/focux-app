@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/curated_brand_palettes.dart';
 import 'package:focux_app/features/perfil/utils/identidade_visual_display.dart';
