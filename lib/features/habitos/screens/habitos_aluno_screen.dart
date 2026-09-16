@@ -192,8 +192,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
             }
             safePopOrGo(context, '/dashboard/aluno');
           },
-          child: FxKeyboardDismissScope(
-            child: FxShellScaffold(
+          child: FxShellScaffold(
               useMesh: true,
               constrainWidth: false,
               appBar: FxShellAppBar(
@@ -269,7 +268,6 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                         ),
                       ],
                     ),
-            ),
           ),
         ),
       ),
