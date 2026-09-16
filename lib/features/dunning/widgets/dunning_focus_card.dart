@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/dunning_repository.dart';
@@ -31,10 +33,59 @@ class DunningFocusCard extends StatelessWidget {
   final VoidCallback? onCobrar;
   final VoidCallback? onAssinatura;
 
+  VoidCallback? _runner(DunningFocusActionId id) => switch (id) {
+    DunningFocusActionId.chat => onChat,
+    DunningFocusActionId.cobrar => onCobrar,
+    DunningFocusActionId.assinatura => onAssinatura,
+    DunningFocusActionId.marcar => onMarcar,
+    DunningFocusActionId.financeiro => onFinanceiro,
+  };
+
+  Color _accent(BuildContext context, DunningFocusActionId id) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return switch (id) {
+      DunningFocusActionId.cobrar => EagleTokens.moneyGreen,
+      DunningFocusActionId.marcar => EagleTokens.bad,
+      _ => primary,
+    };
+  }
+
+  Future<void> _openMais(
+    BuildContext context,
+    List<DunningFocusActionId> secondary,
+  ) async {
+    final chosen = await showFxInsetPickerSheet<DunningFocusActionId>(
+      context,
+      title: 'Mais ações',
+      headerIcon: Icons.more_horiz_rounded,
+      selected: null,
+      items: [
+        for (final id in secondary)
+          FxInsetPickerSheetItem(
+            value: id,
+            label: dunningFocusActionLabel(id),
+          ),
+      ],
+    );
+    if (chosen == null) return;
+    HapticFeedback.selectionClick();
+    _runner(chosen)?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, isDark);
+    final falha = firstFalha;
+    final split = dunningFocusActions(
+      hasFalha: falha != null,
+      canChat: onChat != null && falha != null && dunningHasAluno(falha.alunoId),
+      canCobrar:
+          onCobrar != null && falha != null && dunningHasAluno(falha.alunoId),
+      canAssinatura: onAssinatura != null,
+    );
     final abertas = snap.abertas;
+    final primaryRun = _runner(split.primary);
+
     return FxStripCard(
       emphasize: true,
       semanticsLabel: '$abertas falhas em aberto',
@@ -63,53 +114,25 @@ class DunningFocusCard extends StatelessWidget {
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
-            children: _focusChips(context),
+            children: [
+              if (primaryRun != null)
+                DashboardHomeActionChip(
+                  label: dunningFocusActionLabel(split.primary),
+                  accent: _accent(context, split.primary),
+                  isDark: isDark,
+                  onPressed: primaryRun,
+                ),
+              if (split.secondary.isNotEmpty)
+                DashboardHomeActionChip(
+                  label: 'Mais ações',
+                  accent: chrome.mute,
+                  isDark: isDark,
+                  onPressed: () => _openMais(context, split.secondary),
+                ),
+            ],
           ),
         ],
       ),
     );
-  }
-
-  List<Widget> _focusChips(BuildContext context) {
-    final falha = firstFalha;
-    if (falha == null) {
-      return [
-        DashboardHomeActionChip(
-          label: 'Ver financeiro',
-          accent: Theme.of(context).colorScheme.primary,
-          isDark: isDark,
-          onPressed: onFinanceiro,
-        ),
-      ];
-    }
-    return [
-      if (onChat != null && dunningHasAluno(falha.alunoId))
-        DashboardHomeActionChip(
-          label: 'Escrever',
-          accent: Theme.of(context).colorScheme.primary,
-          isDark: isDark,
-          onPressed: onChat!,
-        ),
-      if (onCobrar != null && dunningHasAluno(falha.alunoId))
-        DashboardHomeActionChip(
-          label: 'Cobrar',
-          accent: EagleTokens.moneyGreen,
-          isDark: isDark,
-          onPressed: onCobrar!,
-        ),
-      if (onAssinatura != null)
-        DashboardHomeActionChip(
-          label: 'Assinatura',
-          accent: Theme.of(context).colorScheme.primary,
-          isDark: isDark,
-          onPressed: onAssinatura!,
-        ),
-      DashboardHomeActionChip(
-        label: 'Marcar primeira',
-        accent: EagleTokens.bad,
-        isDark: isDark,
-        onPressed: onMarcar,
-      ),
-    ];
   }
 }

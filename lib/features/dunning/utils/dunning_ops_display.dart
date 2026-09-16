@@ -61,3 +61,39 @@ bool dunningHasAluno(int? alunoId) => alunoId != null && alunoId > 0;
 
 bool dunningIsAssinaturaFocux(String contexto) =>
     contexto.trim().toUpperCase() == 'FOCUX_SUBSCRIPTION';
+
+/// Ações do focus card — 1 P0 no fold (A30 / §0.1).
+enum DunningFocusActionId { chat, cobrar, assinatura, marcar, financeiro }
+
+({DunningFocusActionId primary, List<DunningFocusActionId> secondary})
+dunningFocusActions({
+  required bool hasFalha,
+  required bool canChat,
+  required bool canCobrar,
+  required bool canAssinatura,
+}) {
+  if (!hasFalha) {
+    return (
+      primary: DunningFocusActionId.financeiro,
+      secondary: const <DunningFocusActionId>[],
+    );
+  }
+  final ordered = <DunningFocusActionId>[
+    if (canCobrar) DunningFocusActionId.cobrar,
+    if (canChat) DunningFocusActionId.chat,
+    if (canAssinatura) DunningFocusActionId.assinatura,
+    DunningFocusActionId.marcar,
+  ];
+  return (
+    primary: ordered.first,
+    secondary: ordered.skip(1).toList(growable: false),
+  );
+}
+
+String dunningFocusActionLabel(DunningFocusActionId id) => switch (id) {
+  DunningFocusActionId.chat => 'Escrever',
+  DunningFocusActionId.cobrar => 'Cobrar',
+  DunningFocusActionId.assinatura => 'Assinatura',
+  DunningFocusActionId.marcar => 'Marcar primeira',
+  DunningFocusActionId.financeiro => 'Ver financeiro',
+};

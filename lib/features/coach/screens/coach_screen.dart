@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -213,6 +215,38 @@ class _CoachFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, isDark);
+    final primary = Theme.of(context).colorScheme.primary;
+    final split = coachFocusActions(
+      canChat: focus.alunoId > 0,
+      canAgenda: coachAgendaRota(focus) != null,
+    );
+
+    VoidCallback run(CoachFocusActionId id) => switch (id) {
+      CoachFocusActionId.open => onOpen,
+      CoachFocusActionId.chat => onChat,
+      CoachFocusActionId.agenda => onAgenda,
+      CoachFocusActionId.ack => onAck,
+    };
+
+    Future<void> openMais() async {
+      final chosen = await showFxInsetPickerSheet<CoachFocusActionId>(
+        context,
+        title: 'Mais ações',
+        headerIcon: Icons.more_horiz_rounded,
+        selected: null,
+        items: [
+          for (final id in split.secondary)
+            FxInsetPickerSheetItem(
+              value: id,
+              label: coachFocusActionLabel(id),
+            ),
+        ],
+      );
+      if (chosen == null) return;
+      HapticFeedback.selectionClick();
+      run(chosen)();
+    }
+
     return FxStripCard(
       emphasize: true,
       semanticsLabel: 'Próxima orientação. $pending pendentes.',
@@ -249,31 +283,18 @@ class _CoachFocusCard extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               DashboardHomeActionChip(
-                label: 'Abrir aluno',
-                accent: Theme.of(context).colorScheme.primary,
+                label: coachFocusActionLabel(split.primary),
+                accent: primary,
                 isDark: isDark,
-                onPressed: onOpen,
+                onPressed: run(split.primary),
               ),
-              if (focus.alunoId > 0)
+              if (split.secondary.isNotEmpty)
                 DashboardHomeActionChip(
-                  label: 'Escrever',
-                  accent: Theme.of(context).colorScheme.primary,
+                  label: 'Mais ações',
+                  accent: chrome.mute,
                   isDark: isDark,
-                  onPressed: onChat,
+                  onPressed: openMais,
                 ),
-              if (coachAgendaRota(focus) != null)
-                DashboardHomeActionChip(
-                  label: 'Agenda',
-                  accent: Theme.of(context).colorScheme.primary,
-                  isDark: isDark,
-                  onPressed: onAgenda,
-                ),
-              DashboardHomeActionChip(
-                label: 'Entendi',
-                accent: chrome.mute,
-                isDark: isDark,
-                onPressed: onAck,
-              ),
             ],
           ),
         ],

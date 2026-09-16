@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +15,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -246,25 +248,39 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   onCobrar: _abrirCobranca,
                                 ),
                                 const SizedBox(height: TokensStrip.s3),
-                                Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    DashboardHomeActionChip(
-                                      label: 'Histórico win-back',
-                                      accent: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
-                                      isDark: isDark,
-                                      onPressed: () => context.push('/winback'),
-                                    ),
-                                    DashboardHomeActionChip(
-                                      label: 'Cobrança auto',
-                                      accent: EagleTokens.moneyGreen,
-                                      isDark: isDark,
-                                      onPressed: () => context.push('/dunning'),
-                                    ),
-                                  ],
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: DashboardHomeActionChip(
+                                    label: 'Mais hubs',
+                                    accent: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
+                                    isDark: isDark,
+                                    onPressed: () async {
+                                      final chosen =
+                                          await showFxInsetPickerSheet<
+                                            RetencaoHubLinkId
+                                          >(
+                                            context,
+                                            title: 'Hubs relacionados',
+                                            headerIcon: Icons.apps_outlined,
+                                            selected: null,
+                                            items: [
+                                              for (final id in retencaoHubLinks)
+                                                FxInsetPickerSheetItem(
+                                                  value: id,
+                                                  label:
+                                                      retencaoHubLinkLabel(id),
+                                                ),
+                                            ],
+                                          );
+                                      if (chosen == null || !context.mounted) {
+                                        return;
+                                      }
+                                      HapticFeedback.selectionClick();
+                                      context.push(retencaoHubLinkRoute(chosen));
+                                    },
+                                  ),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(
@@ -356,8 +372,40 @@ class _RetencaoFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, isDark);
+    final primary = Theme.of(context).colorScheme.primary;
     final alto = home.alto;
     final firstAlto = firstAltoRetencao(home.top3);
+    final split = retencaoFocusActions(hasAlto: firstAlto != null);
+
+    VoidCallback run(RetencaoFocusActionId id) => switch (id) {
+      RetencaoFocusActionId.chat => () => onChat(firstAlto!),
+      RetencaoFocusActionId.cobrar => () => onCobrar(firstAlto!),
+      RetencaoFocusActionId.aluno360 => () => onAluno(firstAlto!),
+      RetencaoFocusActionId.verAlunos => () {
+        AnalyticsService.instance.track(ProductEvents.alunosViewed);
+        goPersonalShellTab(context, '/alunos');
+      },
+    };
+
+    Future<void> openMais() async {
+      final chosen = await showFxInsetPickerSheet<RetencaoFocusActionId>(
+        context,
+        title: 'Mais ações',
+        headerIcon: Icons.more_horiz_rounded,
+        selected: null,
+        items: [
+          for (final id in split.secondary)
+            FxInsetPickerSheetItem(
+              value: id,
+              label: retencaoFocusActionLabel(id),
+            ),
+        ],
+      );
+      if (chosen == null) return;
+      HapticFeedback.selectionClick();
+      run(chosen)();
+    }
+
     return FxStripCard(
       emphasize: true,
       semanticsLabel:
@@ -403,34 +451,21 @@ class _RetencaoFocusCard extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              if (firstAlto != null) ...[
+              DashboardHomeActionChip(
+                label: retencaoFocusActionLabel(split.primary),
+                accent:
+                    split.primary == RetencaoFocusActionId.chat
+                        ? EagleTokens.bad
+                        : primary,
+                isDark: isDark,
+                onPressed: run(split.primary),
+              ),
+              if (split.secondary.isNotEmpty)
                 DashboardHomeActionChip(
-                  label: 'Escrever',
-                  accent: EagleTokens.bad,
+                  label: 'Mais ações',
+                  accent: chrome.mute,
                   isDark: isDark,
-                  onPressed: () => onChat(firstAlto),
-                ),
-                DashboardHomeActionChip(
-                  label: 'Cobrar',
-                  accent: EagleTokens.moneyGreen,
-                  isDark: isDark,
-                  onPressed: () => onCobrar(firstAlto),
-                ),
-                DashboardHomeActionChip(
-                  label: 'Abrir 360',
-                  accent: Theme.of(context).colorScheme.primary,
-                  isDark: isDark,
-                  onPressed: () => onAluno(firstAlto),
-                ),
-              ] else
-                DashboardHomeActionChip(
-                  label: 'Ver alunos',
-                  accent: Theme.of(context).colorScheme.primary,
-                  isDark: isDark,
-                  onPressed: () {
-                    AnalyticsService.instance.track(ProductEvents.alunosViewed);
-                    goPersonalShellTab(context, '/alunos');
-                  },
+                  onPressed: openMais,
                 ),
             ],
           ),

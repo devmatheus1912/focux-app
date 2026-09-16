@@ -4,9 +4,14 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('coach cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/coach/screens/coach_screen.dart',
-    );
+    final screen = [
+      readScreenSourceBundle(
+        'lib/features/coach/screens/coach_screen.dart',
+      ),
+      readScreenSourceBundle(
+        'lib/features/coach/utils/coach_display.dart',
+      ),
+    ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('constrainWidth: false'));
@@ -21,13 +26,16 @@ void main() {
     expect(screen, contains('Abrir aluno'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Agenda'));
+    expect(screen, contains('Mais ações'));
+    expect(screen, contains('coachFocusActions'));
+    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('coachEmptyTitle'));
     expect(screen, contains('Ver alunos'));
     expect(screen, contains('showCoachCatalogSheet'));
     expect(screen, contains('Ver todos'));
     expect(screen, contains('homeCoachDismissed'));
     expect(screen, contains('Como calculamos'));
-    expect(screen, contains('ShellChrome.forDark'));
+    expect(screen, contains('ShellChrome.forBrightness'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

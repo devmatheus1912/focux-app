@@ -35,3 +35,28 @@ bool coachPedeAgenda(String? tipo) {
 
 String? coachAgendaRota(CoachHomeItem item) =>
     coachPedeAgenda(item.tipo) ? '/agenda' : null;
+
+/// Ações do card de foco — P0 no fold, resto sob demanda (A30 / §0.1).
+enum CoachFocusActionId { open, chat, agenda, ack }
+
+({CoachFocusActionId primary, List<CoachFocusActionId> secondary})
+coachFocusActions({
+  required bool canChat,
+  required bool canAgenda,
+}) {
+  return (
+    primary: CoachFocusActionId.open,
+    secondary: [
+      if (canChat) CoachFocusActionId.chat,
+      if (canAgenda) CoachFocusActionId.agenda,
+      CoachFocusActionId.ack,
+    ],
+  );
+}
+
+String coachFocusActionLabel(CoachFocusActionId id) => switch (id) {
+  CoachFocusActionId.open => 'Abrir aluno',
+  CoachFocusActionId.chat => 'Escrever',
+  CoachFocusActionId.agenda => 'Agenda',
+  CoachFocusActionId.ack => 'Entendi',
+};
