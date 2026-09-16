@@ -27,11 +27,79 @@ class _WalletFormFields extends StatelessWidget {
   final VoidCallback onCopiarChave;
   final ResumoMensal? resumoMensal;
 
+  Future<void> _openMais(BuildContext context) async {
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final temChave = chavePixCtrl.text.trim().isNotEmpty;
+    await showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FxHomeSheetHandle(isDark: isDark),
+                FxHomeSheetHeader(
+                  leading: Icon(Icons.more_horiz_rounded, color: primary),
+                  title: 'Mais',
+                  subtitle: 'Atalhos e resumo do mês',
+                  isDark: isDark,
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    DashboardHomeActionChip(
+                      label: 'Perfil',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        safePopOrGo(context, '/perfil');
+                      },
+                    ),
+                    DashboardHomeActionChip(
+                      label: walletVerFinanceiroLabel(),
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        context.push('/financeiro');
+                      },
+                    ),
+                    if (temChave)
+                      DashboardHomeActionChip(
+                        label: walletCopiarTileLabel(),
+                        accent: primary,
+                        isDark: isDark,
+                        enabled: !carregando,
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          onCopiarChave();
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: TokensStrip.s4),
+                _ResumoMensalCard(resumo: resumoMensal),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final temChave = chavePixCtrl.text.trim().isNotEmpty;
+    final masked = maskPixKeyForDisplay(tipoChavePix, chavePixCtrl.text);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,22 +109,20 @@ class _WalletFormFields extends StatelessWidget {
           subtitle: walletHubSubtitle(),
         ),
         const SizedBox(height: TokensStrip.s3),
+        OperationalMetricTile(
+          label: 'PIX',
+          value: walletPixStatusValue(tipoChavePix, chavePixCtrl.text),
+          hint: masked.isEmpty
+              ? walletPixStatusHint(tipoChavePix, chavePixCtrl.text)
+              : '${WalletPixValidation.labelForTipo(tipoChavePix ?? '')} · $masked',
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s3),
         Wrap(
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
-            DashboardHomeActionChip(
-              label: 'Perfil',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => safePopOrGo(context, '/perfil'),
-            ),
-            DashboardHomeActionChip(
-              label: walletVerFinanceiroLabel(),
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push('/financeiro'),
-            ),
             DashboardHomeActionChip(
               label: walletTipoChipLabel(tipoChavePix),
               accent: primary,
@@ -64,26 +130,14 @@ class _WalletFormFields extends StatelessWidget {
               enabled: !carregando,
               onPressed: onSelecionarTipo,
             ),
-            if (temChave)
-              DashboardHomeActionChip(
-                label: walletCopiarTileLabel(),
-                accent: primary,
-                isDark: isDark,
-                enabled: !carregando,
-                onPressed: onCopiarChave,
-              ),
+            DashboardHomeActionChip(
+              label: 'Mais',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => _openMais(context),
+            ),
           ],
         ),
-        const SizedBox(height: TokensStrip.s4),
-        OperationalMetricTile(
-          label: 'PIX',
-          value: walletPixStatusValue(tipoChavePix, chavePixCtrl.text),
-          hint: walletPixStatusHint(tipoChavePix, chavePixCtrl.text),
-          color: primary,
-          isDark: isDark,
-        ),
-        const SizedBox(height: TokensStrip.s3),
-        _ResumoMensalCard(resumo: resumoMensal),
         const SizedBox(height: TokensStrip.s4),
         AlunoSegmentedChoice(
           options: walletDetalheSecoes,

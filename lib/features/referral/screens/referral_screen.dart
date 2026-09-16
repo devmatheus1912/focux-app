@@ -20,6 +20,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/referral_repository.dart';
@@ -226,7 +227,7 @@ class _ReferralBody extends StatelessWidget {
                   if (referralTemLink(info.linkCompartilhamento))
                     DashboardHomeActionChip(
                       label: 'Só o link',
-                      accent: primary,
+                      accent: chrome.mute,
                       isDark: isDark,
                       onPressed: onCopyLink,
                     ),
@@ -243,6 +244,15 @@ class _ReferralBody extends StatelessWidget {
           color: primary,
           isDark: isDark,
         ),
+        const SizedBox(height: TokensStrip.s4),
+        const DashboardSectionHeader(title: 'Como funciona'),
+        const SizedBox(height: TokensStrip.s2),
+        for (final passo in referralComoFuncionaPassos)
+          FxSatelliteListTile(
+            title: passo.titulo,
+            titleCase: false,
+            subtitle: Text(passo.detalhe),
+          ),
       ],
     );
   }

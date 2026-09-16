@@ -156,6 +156,13 @@ String formatBrlCurrency(Object value, {bool showDecimals = true}) {
   return '$prefix R\$ ${buffer.toString()}$decimals'.replaceFirst(' ', '');
 }
 
+/// Contagem com singular/plural PT-BR (ex.: 1 curtida / 3 curtidas).
+String ptCountLabel(int count, String singular, String plural) {
+  if (count <= 0) return '0 $plural';
+  if (count == 1) return '1 $singular';
+  return '$count $plural';
+}
+
 /// Rótulo de mês/ano em português (ex.: Maio 2026).
 String monthYearLabelPtBr(DateTime date) {
   const months = [

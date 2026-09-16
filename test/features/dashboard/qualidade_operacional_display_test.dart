@@ -33,10 +33,29 @@ void main() {
       qualidadeNextAction(data(ticket: 200, retencao: 80)).route,
       '/financeiro',
     );
+    expect(
+      qualidadeNextAction(data(ticket: 200, retencao: 80)).label,
+      'Mensalidades',
+    );
     expect(qualidadeNextAction(data()).route, '/alunos');
     expect(qualidadeNextAction(data()).shellTab, isTrue);
     expect(qualidadeComoCalculamos, contains('ticket'));
     expect(qualidadeComoCalculamos, contains('recorte'));
     expect(qualidadeComoCalculamos, contains('retenção'));
+  });
+
+  test('recomendação segue as métricas, não o texto cru do BE', () {
+    expect(
+      qualidadeRecomendacaoDisplay(data(ticket: 200, retencao: 80)),
+      contains('precificação'),
+    );
+    expect(
+      qualidadeRecomendacaoDisplay(data(retencao: 60)),
+      contains('retenção'),
+    );
+    expect(
+      qualidadeRecomendacaoDisplay(data()),
+      'ok',
+    );
   });
 }

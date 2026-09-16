@@ -106,6 +106,7 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
           {
             'id': 'hub-captacao',
             'titulo': 'Captação',
+            'subtitulo': 'Leads públicos e landing',
             'unlocked': true,
             'papel': 'essencial',
             'legacyIds': ['lead-publico', 'landing', 'Lead Público'],
@@ -135,11 +136,13 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
       {
         'id': 'vendas',
         'titulo': 'Vendas',
+        'subtitulo': 'Pacotes e loja',
         'papel': 'essencial',
         'itens': [
           {
             'id': 'hub-vendas',
             'titulo': 'Vendas',
+            'subtitulo': 'Pacotes e loja',
             'unlocked': true,
             'papel': 'essencial',
             'legacyIds': ['pacotes', 'loja'],
@@ -178,11 +181,13 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
       {
         'id': 'financeiro',
         'titulo': 'Financeiro',
+        'subtitulo': 'Receita, recorrência e cobrança',
         'papel': 'essencial',
         'itens': [
           {
             'id': 'hub-financeiro',
             'titulo': 'Financeiro',
+            'subtitulo': 'Receita, recorrência e cobrança',
             'unlocked': true,
             'papel': 'essencial',
             'legacyIds': [

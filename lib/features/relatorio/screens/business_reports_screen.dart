@@ -175,7 +175,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           subtitle:
                               'Quando houver mensalidades, o MRR e a retenção aparecem aqui.',
                           action: FxEmptyAction(
-                            label: 'Ver financeiro',
+                            label: 'Mensalidades',
                             onTap: _abrirFinanceiro,
                           ),
                         ),
@@ -278,6 +278,7 @@ class _BusinessFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, isDark);
+    final primary = Theme.of(context).colorScheme.primary;
     return FxStripCard(
       emphasize: true,
       semanticsLabel: 'Recebido ${businessMoneyLabel(snap.mrrAtual)}',
@@ -308,10 +309,10 @@ class _BusinessFocusCard extends StatelessWidget {
               DashboardHomeActionChip(
                 label: businessTemInadimplencia(snap.inadimplentes)
                     ? 'Cobrar atrasados'
-                    : 'Ver financeiro',
+                    : 'Mensalidades',
                 accent: businessTemInadimplencia(snap.inadimplentes)
                     ? EagleTokens.bad
-                    : EagleTokens.moneyGreen,
+                    : primary,
                 isDark: isDark,
                 onPressed: onFinanceiro,
               ),

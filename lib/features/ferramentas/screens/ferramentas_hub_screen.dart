@@ -67,13 +67,48 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
       initialIndex: _abas.isEmpty ? 0 : initial.clamp(0, _abas.length - 1),
     );
     _tabs!.addListener(() {
+      if (!mounted) return;
       if (_tabs!.indexIsChanging) return;
+      setState(() {});
       final aba = _abas[_tabs!.index];
       AnalyticsService.instance.track(
         'ferramentas_hub_aba',
         props: {'hub': item.id, 'aba': aba.id},
       );
     });
+  }
+
+  /// Subtítulo = aba ativa ou copy do item — nunca o mesmo texto do título.
+  String? _hubSubtitle({
+    required CatalogoEntrada item,
+    required CatalogoEntrada? activeAba,
+  }) {
+    final abaTitulo = activeAba == null ? null : _hubTabLabel(activeAba);
+    if (abaTitulo != null &&
+        abaTitulo.isNotEmpty &&
+        abaTitulo.toLowerCase() != item.titulo.toLowerCase()) {
+      return abaTitulo;
+    }
+    final sub = item.subtitulo?.trim();
+    if (sub != null &&
+        sub.isNotEmpty &&
+        sub.toLowerCase() != item.titulo.toLowerCase()) {
+      return sub;
+    }
+    return null;
+  }
+
+  String _hubTabLabel(CatalogoEntrada aba) {
+    switch (aba.id) {
+      case 'receita-recorrente':
+        return 'Receita';
+      case 'cobranca-auto':
+        return 'Cobrança';
+      case 'leads-publicos':
+        return 'Leads';
+      default:
+        return aba.titulo;
+    }
   }
 
   @override
@@ -136,7 +171,12 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
         }
         _ensureTabs(item);
         final tabs = _tabs!;
-        final hub = catalogo.hubForEntrada(item);
+        final activeAba =
+            _abas.isEmpty ? null : _abas[tabs.index.clamp(0, _abas.length - 1)];
+        final hubSubtitle = _hubSubtitle(
+          item: item,
+          activeAba: activeAba,
+        );
 
         return fxScreenA11yScope(
           label: item.titulo,
@@ -145,7 +185,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
             constrainWidth: false,
             appBar: FxShellAppBar(
               title: item.titulo,
-              subtitle: hub?.titulo ?? item.subtitulo,
+              subtitle: hubSubtitle,
               onBack: () => safePopOrGo(context, '/dashboard/personal'),
             ),
             body: FxContentWidthLimiter(
@@ -153,16 +193,25 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
                 children: [
                   Material(
                     color: Colors.transparent,
-                    child: TabBar(
-                      controller: tabs,
-                      isScrollable: _abas.length > 3,
-                      labelColor: scheme.primary,
-                      unselectedLabelColor: chrome.mute,
-                      indicatorColor: scheme.primary,
-                      labelStyle: FocuxHubTypography.body(
-                        color: scheme.primary,
-                      ).copyWith(fontWeight: FontWeight.w700),
-                      tabs: [for (final aba in _abas) Tab(text: aba.titulo)],
+                    child: AnimatedBuilder(
+                      animation: tabs,
+                      builder: (context, _) {
+                        return TabBar(
+                          controller: tabs,
+                          isScrollable: true,
+                          tabAlignment: TabAlignment.start,
+                          labelColor: scheme.primary,
+                          unselectedLabelColor: chrome.mute,
+                          indicatorColor: scheme.primary,
+                          labelStyle: FocuxHubTypography.body(
+                            color: scheme.primary,
+                          ).copyWith(fontWeight: FontWeight.w700),
+                          tabs: [
+                            for (final aba in _abas)
+                              Tab(text: _hubTabLabel(aba)),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   Expanded(

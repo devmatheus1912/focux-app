@@ -301,15 +301,9 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 children: [
                   DashboardHomeActionChip(
                     label: 'Abrir aluno',
-                    accent: EagleTokens.bad,
-                    isDark: isDark,
-                    onPressed: () => context.push('/alunos/${focus.alunoId}'),
-                  ),
-                  DashboardHomeActionChip(
-                    label: 'Novo hábito',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: _novoHabito,
+                    onPressed: () => context.push('/alunos/${focus.alunoId}'),
                   ),
                 ],
               ),
@@ -351,12 +345,6 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                       if (mounted) await _carregar();
                     },
                   ),
-                  DashboardHomeActionChip(
-                    label: 'Novo hábito',
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed: _novoHabito,
-                  ),
                 ],
               ),
             ],
@@ -367,9 +355,8 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       if (_habitos.isEmpty)
         FxEmptyState(
           icon: 'circle-check',
-          title: 'Nenhum hábito cadastrado',
-          subtitle:
-              'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.',
+          title: habitoEmptyTitle(hasCompliance: _compliance.isNotEmpty),
+          subtitle: habitoEmptySubtitle(hasCompliance: _compliance.isNotEmpty),
         )
       else ...[
         const DashboardSectionHeader(title: 'Hábitos cadastrados'),

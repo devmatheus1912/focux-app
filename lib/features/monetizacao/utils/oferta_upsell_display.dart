@@ -30,7 +30,7 @@ String ofertaValorLabel(Object valor) =>
     valor is FxMoney ? valor.format() : formatBrlCurrency(valor as num);
 
 String ofertaHubSubtitle(String? freshness) {
-  const base = 'Gatilho, valor e copy da oferta';
+  const base = 'Ofertas ativas';
   final stamp = freshness?.trim();
   if (stamp == null || stamp.isEmpty) return base;
   return '$base · $stamp';

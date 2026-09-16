@@ -40,19 +40,24 @@ bool alunoHeroShouldShowStatusBadge({
   return true;
 }
 
-AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
+AlunoHeroStatusVisual alunoHeroStatusVisual(
+  Aluno aluno, {
+  bool isDark = true,
+}) {
   if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
     return AlunoHeroStatusVisual(
       label: 'Inadimplente',
-      background: Colors.white.withValues(alpha: 0.14),
-      foreground: EagleTokens.riskCoralLight,
+      background:
+          isDark ? Colors.white.withValues(alpha: 0.14) : EagleTokens.badSoft,
+      foreground: isDark ? EagleTokens.riskCoralLight : EagleTokens.bad,
     );
   }
   if (aluno.status == 'INATIVO') {
     return AlunoHeroStatusVisual(
       label: 'Inativo',
-      background: Colors.white.withValues(alpha: 0.14),
-      foreground: EagleTokens.warmPeach,
+      background:
+          isDark ? Colors.white.withValues(alpha: 0.14) : EagleTokens.warnSoft,
+      foreground: isDark ? EagleTokens.warmPeach : EagleTokens.warn,
     );
   }
   if (aluno.emRisco) {
@@ -62,10 +67,12 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno) {
       foreground: Colors.white,
     );
   }
+  // Claro: verde escuro sobre verde claro (nunca claro sobre claro).
   return AlunoHeroStatusVisual(
     label: 'Ativo',
-    background: Colors.white.withValues(alpha: 0.14),
-    foreground: EagleTokens.goodAccent,
+    background:
+        isDark ? Colors.white.withValues(alpha: 0.14) : EagleTokens.goodSoft,
+    foreground: isDark ? EagleTokens.goodAccent : EagleTokens.good,
   );
 }
 

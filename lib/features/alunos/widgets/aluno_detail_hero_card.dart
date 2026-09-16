@@ -33,7 +33,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final displayName = fxTitleCaseName(aluno.nome);
     final objectiveDefined = alunoObjectiveIsDefined(aluno.objetivo);
     final objective = prettyAlunoObjective(aluno.objetivo);
-    final status = alunoHeroStatusVisual(aluno);
+    final status = alunoHeroStatusVisual(aluno, isDark: isDark);
     final signal = alunoHeroPrimarySignal(aluno);
     final caption = alunoHeroCaption(aluno, signal);
     final contextLine = alunoHeroContextLine(signal, caption);
@@ -306,7 +306,8 @@ class _IdentityStatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: status.background.withValues(alpha: isDark ? 0.35 : 0.18),
+        color:
+            isDark ? status.background.withValues(alpha: 0.35) : status.background,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: status.foreground.withValues(alpha: 0.35)),
       ),

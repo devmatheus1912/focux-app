@@ -104,6 +104,9 @@ void main() {
     expect(card, contains('checkinExecutionControlMin'));
     expect(card, contains('FxLiquidPrimaryButton'));
     expect(card, contains("'Ajustar'"));
+    expect(card, contains("'Mais'"));
+    expect(card, contains("'Mais na série'"));
+    expect(card, contains('showFxHomeSheet'));
     expect(card, contains('checkinConfirmarRestanteLabel'));
     expect(card, contains('checkinTrocarExercicioHint'));
     expect(card, contains('_CheckinSetSteppers'));
@@ -112,14 +115,13 @@ void main() {
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));
     expect(card, contains("'Demonstração'"));
+    expect(card, contains("'Postura'"));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
     expect(card, contains('glowStrength: 0.08'));
     expect(card, contains('glowStrength: 0.06'));
     expect(card, contains('BrandPalette.accent'));
-    expect(card, contains('_CheckinPosturaHelp'));
-    expect(card, contains('FxHelpIconButton'));
-    expect(card, contains('Ajuda de postura'));
+    expect(card, isNot(contains('_CheckinPosturaHelp')));
     expect(card, contains('ValueKey'));
     expect(card, contains('VerticalDivider'));
     expect(card, contains('checkin_exercise_tips.dart'));

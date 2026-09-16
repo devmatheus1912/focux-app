@@ -39,7 +39,7 @@ QualidadeNextAction qualidadeNextAction(QualidadeOperacionalData data) {
   }
   if (data.ticketPessoal < data.ticketMercado) {
     return const QualidadeNextAction(
-      label: 'Ver financeiro',
+      label: 'Mensalidades',
       route: '/financeiro',
       shellTab: false,
     );
@@ -49,4 +49,22 @@ QualidadeNextAction qualidadeNextAction(QualidadeOperacionalData data) {
     route: '/alunos',
     shellTab: true,
   );
+}
+
+/// Insight coerente com as métricas do card (não só o texto cru do BE).
+String qualidadeRecomendacaoDisplay(QualidadeOperacionalData data) {
+  final retencaoOk = data.retencaoPessoal >= data.retencaoMercado;
+  final ticketOk = data.ticketPessoal >= data.ticketMercado;
+  if (retencaoOk && !ticketOk) {
+    return 'Retenção forte. Foque em precificação e ticket médio.';
+  }
+  if (!retencaoOk && ticketOk) {
+    return 'Atenção à retenção. Veja quem está em risco na base.';
+  }
+  if (!retencaoOk && !ticketOk) {
+    return 'Atenção à retenção e precificação. Comece pela base em risco.';
+  }
+  final be = data.recomendacao.trim();
+  if (be.isNotEmpty) return be;
+  return 'Operação saudável. Continue acompanhando a base.';
 }

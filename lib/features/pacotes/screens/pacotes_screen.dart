@@ -188,7 +188,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     final visible = _visible;
 
     return fxScreenA11yScope(
-      label: 'Planos & link de vendas',
+      label: 'Pacotes',
       child: FeatureGate(
         featureName: 'Loja Digital',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
@@ -208,7 +208,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           dismissKeyboard: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
-            title: 'Planos & link de vendas',
+            title: 'Pacotes',
             subtitle: FxHubFreshness.joinCount(
               pacoteCountLabel(_loading ? 0 : _total),
               FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -216,14 +216,14 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
             onBack: _leave,
             actions: [
               FxHelpIconButton(
-                tooltip: 'Como usar planos',
+                tooltip: 'Como usar pacotes',
                 onTap: () => showFxHelpSheet(
                   context,
-                  title: 'Planos',
+                  title: 'Pacotes',
                   subtitle: 'Preço e link para o aluno comprar no WhatsApp.',
                   tips: const [
                     FxHelpTip(
-                      'Novo plano',
+                      'Novo pacote',
                       'O botão de baixo publica na sua página de vendas.',
                     ),
                     FxHelpTip(

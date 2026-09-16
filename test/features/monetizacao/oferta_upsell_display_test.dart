@@ -29,10 +29,10 @@ void main() {
   });
 
   test('ofertaHubSubtitle junta freshness', () {
-    expect(ofertaHubSubtitle(null), 'Gatilho, valor e copy da oferta');
+    expect(ofertaHubSubtitle(null), 'Ofertas ativas');
     expect(
       ofertaHubSubtitle('há 1 min'),
-      'Gatilho, valor e copy da oferta · há 1 min',
+      'Ofertas ativas · há 1 min',
     );
   });
 }
