@@ -198,13 +198,22 @@ jobs:
           mkdir -p "$HOME/.appstoreconnect/private_keys"
           KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
           echo -n "$ASC_KEY_BASE64" | base64 --decode -o "$KEY_PATH"
-          IPA=$(ls build/ios/ipa/*.ipa | head -n1)
-          echo "Uploading $IPA to App Store Connect..."
+
+          shopt -s nullglob
+          ipas=(build/ios/ipa/*.ipa)
+          if [[ ${#ipas[@]} -eq 0 ]]; then
+            echo "::error::Nenhum IPA em build/ios/ipa/"
+            exit 1
+          fi
+          IPA="${ipas[0]}"
+          echo "Uploading ${IPA} to App Store Connect..."
+          # Sintaxe documentada pela Apple: --upload-app -f <path> -t <platform>
+          # (--file / --upload-package sozinhos quebram em alguns Xcodes)
           xcrun altool --upload-app \
-            --type ios \
-            --file "$IPA" \
-            --apiKey "$ASC_KEY_ID" \
-            --apiIssuer "$ASC_ISSUER_ID"
+            -f "${IPA}" \
+            -t ios \
+            --apiKey "${ASC_KEY_ID}" \
+            --apiIssuer "${ASC_ISSUER_ID}"
 
       - name: Cleanup keychain
         if: always()
