@@ -15,7 +15,9 @@ void main() {
     expect(screen, contains('IndexedStack'));
     expect(screen, contains('financeiroViewed'));
     expect(screen, contains('financeiroHelpOpened'));
-    expect(screen, contains('coin'));
+    expect(screen, contains('Mais no financeiro'));
+    expect(screen, contains('FinanceiroHubView.mensalidades'));
+    expect(screen, contains('financeiroHubSecondaryViews'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('PopupMenuButton')));

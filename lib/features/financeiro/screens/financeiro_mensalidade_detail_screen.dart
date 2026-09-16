@@ -15,13 +15,13 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
@@ -52,7 +52,6 @@ class _FinanceiroMensalidadeDetailScreenState
   var _changed = false;
   String? _erro;
   DateTime? _fetchedAt;
-  var _secao = financeiroMensalidadeSecaoCobranca;
 
   @override
   void initState() {
@@ -219,8 +218,6 @@ class _FinanceiroMensalidadeDetailScreenState
                     contatos: _contatos,
                     pending: _pending(m),
                     paying: _paying,
-                    secao: _secao,
-                    onSecao: (value) => setState(() => _secao = value),
                     onRefresh: _carregar,
                     onPay: _pagar,
                     onEdit: _editar,
@@ -251,8 +248,6 @@ class _DetailBody extends StatelessWidget {
     required this.contatos,
     required this.pending,
     required this.paying,
-    required this.secao,
-    required this.onSecao,
     required this.onRefresh,
     required this.onPay,
     required this.onEdit,
@@ -266,8 +261,6 @@ class _DetailBody extends StatelessWidget {
   final List<MensalidadeContato> contatos;
   final bool pending;
   final bool paying;
-  final String secao;
-  final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
   final VoidCallback onPay;
   final VoidCallback onEdit;
@@ -275,6 +268,36 @@ class _DetailBody extends StatelessWidget {
   final VoidCallback onPix;
   final VoidCallback onChat;
   final VoidCallback onContato;
+
+  Future<void> _openMais(BuildContext context) async {
+    final actions = mensalidadeDetailMaisActions(pending: pending);
+    final chosen = await showFxInsetPickerSheet<MensalidadeDetailActionId>(
+      context,
+      title: 'Mais ações',
+      items: [
+        for (final id in actions)
+          FxInsetPickerSheetItem(
+            value: id,
+            label: mensalidadeDetailActionLabel(id),
+          ),
+      ],
+    );
+    if (chosen == null || !context.mounted) return;
+    switch (chosen) {
+      case MensalidadeDetailActionId.aluno:
+        onOpenAluno();
+      case MensalidadeDetailActionId.financeiro:
+        context.push('/financeiro');
+      case MensalidadeDetailActionId.edit:
+        onEdit();
+      case MensalidadeDetailActionId.pix:
+        onPix();
+      case MensalidadeDetailActionId.chat:
+        onChat();
+      case MensalidadeDetailActionId.contato:
+        onContato();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -355,54 +378,34 @@ class _DetailBody extends StatelessWidget {
                     isDark: isDark,
                   ),
                   const SizedBox(height: TokensStrip.s3),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      DashboardHomeActionChip(
-                        label: 'Aluno',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: onOpenAluno,
-                      ),
-                      DashboardHomeActionChip(
-                        label: 'Financeiro',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: () => context.push('/financeiro'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  AlunoSegmentedChoice(
-                    options: financeiroMensalidadeDetalheSecoes,
-                    selected: secao,
-                    isDark: isDark,
-                    onSelect: onSecao,
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (secao == financeiroMensalidadeSecaoContatos)
-                    ..._contatos(context, primary, isDark)
-                  else
-                    Wrap(
-                      spacing: TokensStrip.s2,
-                      runSpacing: TokensStrip.s2,
-                      children: [
-                        DashboardHomeActionChip(
-                          label: 'Editar',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: onEdit,
-                        ),
-                        if (pending)
-                          DashboardHomeActionChip(
-                            label: 'PIX',
-                            accent: primary,
-                            isDark: isDark,
-                            onPressed: onPix,
-                          ),
-                      ],
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: 'Mais ações',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => _openMais(context),
                     ),
+                  ),
+                  const SizedBox(height: TokensStrip.s4),
+                  if (contatos.isEmpty)
+                    FxEmptyState(
+                      icon: 'chat',
+                      title: financeiroContatosEmpty(),
+                      subtitle:
+                          'Registre WhatsApp, ligação ou visita desta cobrança.',
+                    )
+                  else
+                    for (final item in contatos)
+                      FxSatelliteListTile(
+                        title: financeiroContatoTipoLabel(item.tipo),
+                        subtitle: Text(
+                          financeiroContatoSubtitle(
+                            item.observacao,
+                            item.registradoEm,
+                          ),
+                        ),
+                      ),
                 ],
               ),
             ),
@@ -426,48 +429,5 @@ class _DetailBody extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  List<Widget> _contatos(
-    BuildContext context,
-    Color primary,
-    bool isDark,
-  ) {
-    return [
-      Wrap(
-        spacing: TokensStrip.s2,
-        runSpacing: TokensStrip.s2,
-        children: [
-          if (pending)
-            DashboardHomeActionChip(
-              label: 'Cobrar no chat',
-              accent: primary,
-              isDark: isDark,
-              onPressed: onChat,
-            ),
-          DashboardHomeActionChip(
-            label: 'Registrar contato',
-            accent: primary,
-            isDark: isDark,
-            onPressed: onContato,
-          ),
-        ],
-      ),
-      const SizedBox(height: TokensStrip.s4),
-      if (contatos.isEmpty)
-        FxEmptyState(
-          icon: 'chat',
-          title: financeiroContatosEmpty(),
-          subtitle: 'Registre WhatsApp, ligação ou visita desta cobrança.',
-        )
-      else
-        for (final item in contatos)
-          FxSatelliteListTile(
-            title: financeiroContatoTipoLabel(item.tipo),
-            subtitle: Text(
-              financeiroContatoSubtitle(item.observacao, item.registradoEm),
-            ),
-          ),
-    ];
   }
 }

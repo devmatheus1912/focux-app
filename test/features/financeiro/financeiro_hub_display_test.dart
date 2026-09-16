@@ -2,23 +2,52 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/financeiro/utils/financeiro_hub_display.dart';
 
 void main() {
-  test('financeiroHubViewLabel e subtitle', () {
-    expect(financeiroHubViewLabel(FinanceiroHubView.resumo), 'Resumo');
+  test('financeiroHubViewLabel e subtitle — P0 mensalidades', () {
     expect(
       financeiroHubViewLabel(FinanceiroHubView.mensalidades),
       'Mensalidades',
     );
-    expect(financeiroHubViewLabel(FinanceiroHubView.metricas), 'Métricas');
+    expect(financeiroHubViewLabel(FinanceiroHubView.panorama), 'Panorama');
+    expect(financeiroHubViewLabel(FinanceiroHubView.porMes), 'Por mês');
     expect(
-      financeiroHubSubtitle(view: FinanceiroHubView.resumo, freshness: null),
-      'Resumo',
+      financeiroHubSubtitle(
+        view: FinanceiroHubView.mensalidades,
+        freshness: null,
+      ),
+      'Mensalidades',
     );
     expect(
       financeiroHubSubtitle(
-        view: FinanceiroHubView.metricas,
+        view: FinanceiroHubView.porMes,
         freshness: 'há 1 min',
       ),
-      'Métricas · há 1 min',
+      'Por mês · há 1 min',
+    );
+    expect(financeiroHubSecondaryViews, hasLength(2));
+    expect(FinanceiroHubView.mensalidades.index, 0);
+  });
+
+  test('financeiroListaTools e detalhe Mais — A30', () {
+    final idle = financeiroListaTools(temAberto: true, modoSelecao: false);
+    expect(idle.foldChip, isNull);
+    expect(idle.mais, contains(FinanceiroListaToolId.atualizarAtrasos));
+    expect(idle.mais, contains(FinanceiroListaToolId.marcarLote));
+
+    final lote = financeiroListaTools(temAberto: true, modoSelecao: true);
+    expect(lote.foldChip, FinanceiroListaToolId.marcarLote);
+    expect(lote.mais, contains(FinanceiroListaToolId.cancelarLote));
+
+    final mais = mensalidadeDetailMaisActions(pending: true);
+    expect(mais.first, MensalidadeDetailActionId.aluno);
+    expect(mais, contains(MensalidadeDetailActionId.pix));
+    expect(mais, contains(MensalidadeDetailActionId.chat));
+    expect(
+      mensalidadeDetailMaisActions(pending: false),
+      isNot(contains(MensalidadeDetailActionId.pix)),
+    );
+    expect(
+      mensalidadeDetailActionLabel(MensalidadeDetailActionId.financeiro),
+      'Lista de mensalidades',
     );
   });
 
@@ -186,7 +215,6 @@ void main() {
   });
 
   test('financeiro contato do detalhe S3', () {
-    expect(financeiroMensalidadeDetalheSecoes, hasLength(2));
     expect(financeiroContatosEmpty(), 'Nenhum contato nesta cobrança');
     expect(
       financeiroContatoSubtitle(null, '2026-09-07T12:00:00'),
