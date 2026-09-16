@@ -1,6 +1,6 @@
-/// Vídeos oficiais da biblioteca serão gravados depois.
+/// Batch publish de GIFs placeholder e banners de pendência ficam em standby.
 ///
-/// Enquanto em standby: sem publicação em lote no Cloudinary, sem banners de
-/// pendência, UX focada no upload do personal, e prévia de demo **escondida**
-/// (§38) — sem sheet "em breve".
+/// A biblioteca MoveKit (demos 3D no Cloudinary) **já é live** — prévia usa
+/// `videoUrl`/`gifUrl`/`thumb` publicados. Sem mídia publicada: sem atalho
+/// (não abrir sheet "em breve").
 const kBibliotecaLibraryVideosStandby = true;

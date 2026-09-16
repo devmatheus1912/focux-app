@@ -11,7 +11,7 @@ import '../../services/biblioteca_media_config.dart';
 import '../../services/biblioteca_sync_status.dart';
 import 'exercise_media_thumb.dart';
 
-/// Abre prévia do vídeo próprio ou da demonstração da biblioteca (GIF).
+/// Abre prévia do vídeo próprio ou da demonstração da biblioteca (GIF/MoveKit).
 Future<void> showExerciseMediaPreview(
   BuildContext context, {
   required Exercicio exercicio,
@@ -20,9 +20,8 @@ Future<void> showExerciseMediaPreview(
   if (video != null && video.isNotEmpty) {
     return showExerciseVideoPreview(context, exercicio: exercicio, url: video);
   }
-  // §38 hide: biblioteca em standby sem mídia publicada — não abrir "em breve".
-  if (kBibliotecaLibraryVideosStandby &&
-      !exercicioHasPublishedLibraryMedia(exercicio)) {
+  // Sem mídia publicada: não abrir sheet "em breve" (§38 hide do stub).
+  if (!exercicioHasPublishedLibraryMedia(exercicio)) {
     return Future.value();
   }
   final gif = exercicio.gifUrl?.trim();
