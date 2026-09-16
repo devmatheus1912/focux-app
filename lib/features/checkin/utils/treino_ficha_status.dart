@@ -37,6 +37,46 @@ bool isTreinoDisponivelParaIniciar(ExecucaoTreino treino) {
 List<ExecucaoTreino> treinosProntosParaIniciar(List<ExecucaoTreino> treinos) =>
     treinos.where(isTreinoDisponivelParaIniciar).toList(growable: false);
 
+/// Próximo treino do dia: retoma EM_ANDAMENTO; senão gira após o último concluído.
+ExecucaoTreino? proximoTreinoParaHoje({
+  required List<ExecucaoTreino> treinos,
+  List<ExecucaoTreino> historico = const [],
+}) {
+  final startable = treinosProntosParaIniciar(treinos);
+  if (startable.isEmpty) return null;
+
+  for (final t in startable) {
+    if (normalizeTreinoStatus(t.status) == treinoStatusEmAndamento) {
+      return t;
+    }
+  }
+
+  ExecucaoTreino? lastDone;
+  DateTime? lastDt;
+  for (final h in historico) {
+    if (normalizeTreinoStatus(h.status) != treinoStatusConcluido) continue;
+    final raw = h.concluidoEm ?? h.iniciadoEm;
+    if (raw == null) continue;
+    final dt = DateTime.tryParse(raw)?.toLocal();
+    if (dt == null) continue;
+    if (lastDt == null || dt.isAfter(lastDt)) {
+      lastDt = dt;
+      lastDone = h;
+    }
+  }
+  if (lastDone == null) return startable.first;
+
+  final ids = treinos.map((t) => t.treinoId).toList(growable: false);
+  final idx = ids.indexOf(lastDone.treinoId);
+  if (idx < 0) return startable.first;
+
+  for (var step = 1; step <= treinos.length; step++) {
+    final cand = treinos[(idx + step) % treinos.length];
+    if (isTreinoDisponivelParaIniciar(cand)) return cand;
+  }
+  return startable.first;
+}
+
 /// Startable first — job is find & start, not pipeline noise.
 List<ExecucaoTreino> treinosOrdenadosStartFirst(List<ExecucaoTreino> treinos) {
   final pronto = <ExecucaoTreino>[];

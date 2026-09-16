@@ -61,25 +61,6 @@ class _FinanceiroDashboardScreenState
         d.vencimentosProximos.isEmpty &&
         d.topAlunos.isEmpty;
 
-    if (zeroData) {
-      return fxScreenA11yScope(
-        label: 'Dashboard financeiro',
-        child: FxEmptyState(
-          icon: 'coin',
-          title: 'Sem dados financeiros',
-          // Nunca ecoar BE zeroCta "Abrir financeiro" aqui — já estamos no hub.
-          subtitle: 'Lance a primeira mensalidade para ver o dashboard.',
-          action: FxEmptyAction(
-            label: 'Nova mensalidade',
-            onTap:
-                () => FinanceiroHubScope.maybeOf(
-                  context,
-                )?.openNovaMensalidade(source: 'empty_resumo'),
-          ),
-        ),
-      );
-    }
-
     return fxScreenA11yScope(
       label: 'Dashboard financeiro',
       child: RefreshIndicator(
@@ -100,17 +81,33 @@ class _FinanceiroDashboardScreenState
               ),
               child: SmartPricingCard(),
             ),
-            const SizedBox(height: FxSettingsLayout.groupGap),
-            _FinanceiroKpiGroup(data: d),
-            const SizedBox(height: FxSettingsLayout.groupGap),
-            _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
-            if (d.vencimentosProximos.isNotEmpty) ...[
+            const FinanceiroResumoScreen(),
+            if (zeroData) ...[
               const SizedBox(height: FxSettingsLayout.groupGap),
-              _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
-            ],
-            if (d.topAlunos.isNotEmpty) ...[
+              FxEmptyState(
+                icon: 'coin',
+                title: 'Sem dados financeiros',
+                // Nunca ecoar BE zeroCta "Abrir financeiro" aqui — já estamos no hub.
+                subtitle: 'Lance a primeira mensalidade para ver o dashboard.',
+                action: FxEmptyAction(
+                  label: 'Nova mensalidade',
+                  onTap:
+                      () => FinanceiroHubScope.maybeOf(
+                        context,
+                      )?.openNovaMensalidade(source: 'empty_resumo'),
+                ),
+              ),
+            ] else ...[
               const SizedBox(height: FxSettingsLayout.groupGap),
-              _FinanceiroTopAlunosGroup(items: d.topAlunos),
+              _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
+              if (d.vencimentosProximos.isNotEmpty) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
+              ],
+              if (d.topAlunos.isNotEmpty) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                _FinanceiroTopAlunosGroup(items: d.topAlunos),
+              ],
             ],
           ],
         ),

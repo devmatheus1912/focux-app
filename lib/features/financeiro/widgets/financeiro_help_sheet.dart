@@ -7,7 +7,7 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
     context,
     title: 'Como usar o financeiro',
     subtitle:
-        'A lista de mensalidades é o centro. Panorama e por mês ficam em Mais.',
+        'A lista de mensalidades é o centro. Panorama fica em Mais.',
     tips: const [
       FxHelpTip(
         'Mensalidades',
@@ -16,13 +16,8 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Panorama',
-        'Recebido, pendente e meta do mês. Abra em Mais → Panorama.',
+        'Troque o mês, veja recebido e inadimplentes. Abra em Mais → Panorama.',
         icon: 'dollar-sign',
-      ),
-      FxHelpTip(
-        'Por mês',
-        'Troque o mês e veja o recorte. Abra em Mais → Por mês.',
-        icon: 'target',
       ),
       FxHelpTip(
         'Como calculamos',
