@@ -29,6 +29,22 @@ String referralHubSubtitle(String? freshness) {
   return '$base · $stamp';
 }
 
+/// Passos do "Como funciona" — preenche o fundo do hub sem inventar regra.
+const referralComoFuncionaPassos = [
+  (
+    titulo: '1. Compartilhe o convite',
+    detalhe: 'Copie o texto ou só o link e envie para outro personal.',
+  ),
+  (
+    titulo: '2. Ele entra com seu código',
+    detalhe: 'O código identifica a indicação no cadastro dele.',
+  ),
+  (
+    titulo: '3. Você ganha 30 dias',
+    detalhe: 'Dias extras no seu plano a cada conversão.',
+  ),
+];
+
 String referralHeaderSubtitle({
   required int usos,
   String? freshness,

@@ -7,7 +7,7 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../data/checkin_repository.dart';
@@ -129,9 +129,10 @@ class CheckinSerieCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: FocuxHubTypography.kpi(
                     color: brand,
-                    fontSize: TokensStrip.fontH1 + 10,
+                    fontSize: TokensStrip.fontH1 + 4,
                     fontWeight: FontWeight.w800,
                   ).copyWith(
+                    height: 1.05,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
@@ -195,37 +196,103 @@ class CheckinSerieCard extends StatelessWidget {
                 onPressed: onRegistrar,
               ),
             ),
-            if (onAjustar != null || onConfirmarRestante != null) ...[
+            if (onAjustar != null ||
+                onConfirmarRestante != null ||
+                onDesfazer != null ||
+                onOpenCoach != null ||
+                (onOpenDemo != null && !hasDemo) ||
+                onOpenTips != null) ...[
               const SizedBox(height: TokensStrip.s1),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (onAjustar != null)
-                    TextButton(
-                      onPressed: onAjustar,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(64, checkinExecutionControlMin),
-                      ),
-                      child: Text(
-                        'Ajustar',
-                        style: TextStyle(color: chrome.mute),
-                      ),
-                    ),
-                  if (onConfirmarRestante != null)
-                    TextButton(
-                      onPressed: onConfirmarRestante,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(64, checkinExecutionControlMin),
-                      ),
-                      child: Text(
-                        checkinConfirmarRestanteLabel(
-                          feitas: ee.seriesFeitas,
-                          total: ee.series,
+              TextButton(
+                onPressed: () {
+                  showFxHomeSheet<void>(
+                    context,
+                    builder: (ctx) {
+                      final sheetDark =
+                          Theme.of(ctx).brightness == Brightness.dark;
+                      return FxHomeSheetSurface(
+                        isDark: sheetDark,
+                        child: SafeArea(
+                          top: false,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              FxHomeSheetHandle(isDark: sheetDark),
+                              FxHomeSheetHeader(
+                                leading: Icon(
+                                  Icons.more_horiz_rounded,
+                                  color: brand,
+                                ),
+                                title: 'Mais na série',
+                                subtitle: 'Ajustes e ações secundárias',
+                                isDark: sheetDark,
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              if (onAjustar != null)
+                                ListTile(
+                                  title: const Text('Ajustar'),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onAjustar!();
+                                  },
+                                ),
+                              if (onConfirmarRestante != null)
+                                ListTile(
+                                  title: Text(
+                                    checkinConfirmarRestanteLabel(
+                                      feitas: ee.seriesFeitas,
+                                      total: ee.series,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onConfirmarRestante!();
+                                  },
+                                ),
+                              if (onDesfazer != null)
+                                ListTile(
+                                  title: Text(checkinDesfazerLabel()),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onDesfazer!();
+                                  },
+                                ),
+                              if (onOpenCoach != null)
+                                ListTile(
+                                  title: const Text('Postura'),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onOpenCoach!();
+                                  },
+                                ),
+                              if (onOpenDemo != null && !hasDemo)
+                                ListTile(
+                                  title: const Text('Demonstração'),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onOpenDemo!();
+                                  },
+                                ),
+                              if (onOpenTips != null)
+                                ListTile(
+                                  title: const Text('Dicas'),
+                                  onTap: () {
+                                    Navigator.of(ctx).pop();
+                                    onOpenTips!();
+                                  },
+                                ),
+                            ],
+                          ),
                         ),
-                        style: TextStyle(color: chrome.mute),
-                      ),
-                    ),
-                ],
+                      );
+                    },
+                  );
+                },
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(64, checkinExecutionControlMin),
+                ),
+                child: Text('Mais', style: TextStyle(color: chrome.mute)),
               ),
             ],
           ] else
@@ -242,36 +309,6 @@ class CheckinSerieCard extends StatelessWidget {
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ),
-          if (onDesfazer != null) ...[
-            const SizedBox(height: TokensStrip.s1),
-            TextButton(
-              onPressed: onDesfazer,
-              child: Text(
-                checkinDesfazerLabel(),
-                style: TextStyle(color: chrome.mute),
-              ),
-            ),
-          ],
-          if (onOpenCoach != null ||
-              (onOpenDemo != null && !hasDemo) ||
-              onOpenTips != null) ...[
-            const SizedBox(height: TokensStrip.s2),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (onOpenCoach != null)
-                  _CheckinPosturaHelp(onTap: onOpenCoach!, ink: chrome.ink),
-                if (onOpenDemo != null && !hasDemo)
-                  TextButton(
-                    onPressed: onOpenDemo,
-                    child: const Text('Demonstração'),
-                  ),
-                // Dicas ficam no ? do header (S8 chrome mínimo).
-                if (onOpenTips != null && onOpenCoach == null)
-                  TextButton(onPressed: onOpenTips, child: const Text('Dicas')),
-              ],
-            ),
-          ],
         ],
       ),
     );

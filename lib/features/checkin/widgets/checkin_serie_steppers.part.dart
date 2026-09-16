@@ -154,39 +154,3 @@ class _CheckinStepperButton extends StatelessWidget {
     );
   }
 }
-
-/// Postura: rótulo + `FxHelpIconButton` canônico (não outlined genérico).
-class _CheckinPosturaHelp extends StatelessWidget {
-  const _CheckinPosturaHelp({required this.onTap, required this.ink});
-
-  final VoidCallback onTap;
-  final Color ink;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TokensStrip.s2,
-        vertical: TokensStrip.s1,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Postura',
-            style: FocuxHubTypography.bodyMuted(
-              color: ink,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: FxHelpChrome.gap),
-          FxHelpIconButton(
-            tooltip: 'Ajuda de postura',
-            onTap: onTap,
-            expandHitTarget: true,
-          ),
-        ],
-      ),
-    );
-  }
-}

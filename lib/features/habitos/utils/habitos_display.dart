@@ -97,6 +97,14 @@ String habitoCountLabel(int count) {
   return '$count hábitos';
 }
 
+/// Empty de hábitos: com compliance na tela não afirma vazio total.
+String habitoEmptyTitle({required bool hasCompliance}) =>
+    hasCompliance ? 'Nenhum hábito ainda' : 'Nenhum hábito cadastrado';
+
+String habitoEmptySubtitle({required bool hasCompliance}) => hasCompliance
+    ? 'Crie um novo no rodapé. A compliance da semana segue abaixo.'
+    : 'Hábitos diários (água, sono, refeições) aumentam aderência e reduzem churn.';
+
 String habitoComplianceEmptyTitle(String query) =>
     query.trim().isEmpty ? 'Sem dados ainda' : 'Nenhum aluno encontrado';
 

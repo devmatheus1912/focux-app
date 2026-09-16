@@ -266,7 +266,7 @@ class _QualidadeBody extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                data.recomendacao,
+                qualidadeRecomendacaoDisplay(data),
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
               const SizedBox(height: TokensStrip.s3),

@@ -237,12 +237,22 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           descricao: oferta.descricao,
         ),
       ),
-      trailing: Text(
-        ofertaValorLabel(oferta.valor),
-        style: FocuxHubTypography.bodyMuted(
-          color: fxScreenMute(context),
-          fontWeight: FontWeight.w700,
-        ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            ofertaValorLabel(oferta.valor),
+            style: FocuxHubTypography.bodyMuted(
+              color: fxScreenMute(context),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: TokensStrip.s2),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: fxScreenMute(context),
+          ),
+        ],
       ),
       onTap: () => _abrirEditor(existing: oferta),
     );

@@ -128,7 +128,7 @@ class AlunoDetailHeroSkeleton extends StatelessWidget {
     final preview = listPreview;
     if (preview != null) {
       final displayName = fxTitleCaseName(preview.nome);
-      final status = alunoHeroStatusVisual(preview);
+      final status = alunoHeroStatusVisual(preview, isDark: isDark);
       return Container(
         key: const ValueKey('aluno360_hero_skeleton_preview'),
         width: double.infinity,

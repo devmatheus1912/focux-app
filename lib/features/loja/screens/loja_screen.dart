@@ -151,6 +151,18 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     final visibleCount = _view == LojaHubView.vitrine
         ? (_loading ? 0 : _pacotesTotal)
         : (_loading ? 0 : _pedidosTotal);
+    // A30/A7: sem busca quando não há nada para buscar; sticky só quando a
+    // vitrine tem conteúdo (empty já tem o CTA "Ir para pacotes").
+    final loaded = !_loading && _error == null;
+    final showSearch =
+        !loaded ||
+        _query.isNotEmpty ||
+        _pacotes.isNotEmpty ||
+        _pedidos.isNotEmpty;
+    final showSticky =
+        loaded &&
+        _view == LojaHubView.vitrine &&
+        _visiblePacotes.isNotEmpty;
     final planoFromHome = _planoFromHome;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -209,6 +221,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
             ),
             body: Column(
               children: [
+                if (showSearch)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
                     TokensStrip.s4,
@@ -303,7 +316,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                           ),
                         ),
                 ),
-                if (!_loading && _error == null)
+                if (showSticky)
                   SafeArea(
                     top: false,
                     child: Padding(
@@ -315,7 +328,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                             MediaQuery.viewInsetsOf(context).bottom,
                       ),
                       child: FxLiquidPrimaryButton(
-                        label: 'Ir para planos',
+                        label: 'Ir para pacotes',
                         onPressed: () => context.push('/pacotes'),
                       ),
                     ),

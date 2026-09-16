@@ -223,12 +223,21 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     return parts.join(' · ');
   }
 
+  /// Hierarquia: 1 primária sólida (Contato feito) + secundárias outlined.
   List<Widget> _buildFollowUpChips({
     required Color primary,
     required DateTime? followUpDate,
     required bool isSnoozed,
     required dynamic actions,
   }) {
+    Widget secondary(String label, VoidCallback onPressed) {
+      return OutlinedButton(
+        style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary),
+        onPressed: _busy ? null : onPressed,
+        child: Text(label),
+      );
+    }
+
     return [
       DashboardHomeActionChip(
         label: 'Contato feito',
@@ -237,31 +246,15 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
         enabled: !_busy,
         onPressed: () => _markContactDone(actions),
       ),
-      DashboardHomeActionChip(
-        label:
-            followUpDate == null
-                ? 'Definir data'
-                : 'Data ${_formatDate(followUpDate)}',
-        accent: primary,
-        isDark: widget.isDark,
-        enabled: !_busy,
-        onPressed: _pickFollowUpDate,
+      secondary(
+        followUpDate == null
+            ? 'Definir data'
+            : 'Data ${_formatDate(followUpDate)}',
+        _pickFollowUpDate,
       ),
-      DashboardHomeActionChip(
-        label: 'Adiar',
-        accent: primary,
-        isDark: widget.isDark,
-        enabled: !_busy,
-        onPressed: () => _showSnoozeSheet(actions),
-      ),
+      secondary('Adiar', () => _showSnoozeSheet(actions)),
       if (followUpDate != null || isSnoozed)
-        DashboardHomeActionChip(
-          label: 'Limpar',
-          accent: primary,
-          isDark: widget.isDark,
-          enabled: !_busy,
-          onPressed: () => _confirmClearFollowUp(actions),
-        ),
+        secondary('Limpar', () => _confirmClearFollowUp(actions)),
     ];
   }
 

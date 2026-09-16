@@ -131,6 +131,25 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     );
   }
 
+  Future<void> _abrirMaisHubs() async {
+    final chosen = await showFxInsetPickerSheet<RetencaoHubLinkId>(
+      context,
+      title: 'Hubs relacionados',
+      headerIcon: Icons.apps_outlined,
+      selected: null,
+      items: [
+        for (final id in retencaoHubLinks)
+          FxInsetPickerSheetItem(
+            value: id,
+            label: retencaoHubLinkLabel(id),
+          ),
+      ],
+    );
+    if (chosen == null || !mounted) return;
+    HapticFeedback.selectionClick();
+    context.push(retencaoHubLinkRoute(chosen));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -158,6 +177,12 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
             safePopOrGo(context, '/dashboard/personal');
           },
           actions: [
+            ShellHeaderIconButton(
+              icon: 'route',
+              tooltip: 'Hubs relacionados',
+              onTap: _abrirMaisHubs,
+            ),
+            const SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
               tooltip: 'Como usar a retenção',
               onTap: () {
@@ -246,41 +271,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   onAluno: _abrirAluno,
                                   onChat: _abrirChat,
                                   onCobrar: _abrirCobranca,
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: DashboardHomeActionChip(
-                                    label: 'Mais hubs',
-                                    accent: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                    isDark: isDark,
-                                    onPressed: () async {
-                                      final chosen =
-                                          await showFxInsetPickerSheet<
-                                            RetencaoHubLinkId
-                                          >(
-                                            context,
-                                            title: 'Hubs relacionados',
-                                            headerIcon: Icons.apps_outlined,
-                                            selected: null,
-                                            items: [
-                                              for (final id in retencaoHubLinks)
-                                                FxInsetPickerSheetItem(
-                                                  value: id,
-                                                  label:
-                                                      retencaoHubLinkLabel(id),
-                                                ),
-                                            ],
-                                          );
-                                      if (chosen == null || !context.mounted) {
-                                        return;
-                                      }
-                                      HapticFeedback.selectionClick();
-                                      context.push(retencaoHubLinkRoute(chosen));
-                                    },
-                                  ),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(

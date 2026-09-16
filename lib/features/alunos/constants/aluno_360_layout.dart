@@ -19,6 +19,10 @@ abstract final class Aluno360Layout {
   static const double tabContentGap = TokensStrip.s4;
   /// Chip overlay (paridade Perfil/Home) — uma linha de chips alinhados à direita.
   static const double stickyBarContentHeight = 64;
+
+  /// Linha opcional de chips secundários (Tarefa/Chat) acima da primária:
+  /// chip 48 + gap s2. Sempre reservada para o conteúdo nunca ficar clipado.
+  static const double stickyBarSecondaryRowHeight = 48 + TokensStrip.s2;
   static const double stickyBarScrimHeight = 28;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;
@@ -70,6 +74,7 @@ abstract final class Aluno360Layout {
   /// Bottom padding so Operação content clears the sticky overlay CTA.
   static double stickyBarTotalHeight(BuildContext context) {
     return stickyBarContentHeight +
+        stickyBarSecondaryRowHeight +
         MediaQuery.paddingOf(context).bottom +
         MediaQuery.viewInsetsOf(context).bottom;
   }

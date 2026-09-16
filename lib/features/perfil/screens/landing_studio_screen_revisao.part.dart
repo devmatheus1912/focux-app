@@ -21,7 +21,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
         TokensStrip.s4,
         TokensStrip.s2,
         TokensStrip.s4,
-        TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+        140 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       children: [
         DecoratedBox(
@@ -323,7 +323,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
           child: FxSettingsGroup(
             header: 'Fotos',
             caption:
-                'Priorize a foto hero real. Sem ela o backend usa atmosfera — nunca stock humano.',
+                'Use uma foto real sua na capa. Sem ela, o site usa imagem de atmosfera — nunca foto de banco de pessoas.',
             children: [
               Padding(
                 padding: const EdgeInsets.all(TokensStrip.s3),
@@ -439,7 +439,8 @@ class _LandingStudioImageSlot extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 12,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ),

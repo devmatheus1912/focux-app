@@ -19,7 +19,6 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -288,6 +287,19 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                         icon: 'bell',
                         title: winbackSearchEmptyTitle(_query),
                         subtitle: winbackSearchEmptySubtitle(_query),
+                        action: _query.trim().isEmpty
+                            ? FxEmptyAction(
+                                label: 'Saúde da base',
+                                onTap: _abrirRetencao,
+                              )
+                            : FxEmptyAction(
+                                label: 'Limpar busca',
+                                onTap: () {
+                                  _searchCtrl.clear();
+                                  _query = '';
+                                  _carregar();
+                                },
+                              ),
                       ),
                     ],
                   )
@@ -315,6 +327,21 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                                   onAluno: () => _abrirAluno(first),
                                   onChat: () => _abrirChat(first),
                                   onCobrar: () => _abrirCobranca(first),
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    DashboardHomeActionChip(
+                                      label: 'Saúde da base',
+                                      accent: Theme.of(context)
+                                          .colorScheme
+                                          .primary,
+                                      isDark: isDark,
+                                      onPressed: _abrirRetencao,
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const DashboardSectionHeader(title: 'Envios'),
@@ -353,22 +380,6 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                       },
                     ),
                   ),
-                  ),
-                ),
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      TokensStrip.s2,
-                      TokensStrip.s4,
-                      TokensStrip.s3 +
-                          MediaQuery.viewInsetsOf(context).bottom,
-                    ),
-                    child: FxLiquidPrimaryButton(
-                      label: 'Saúde da base',
-                      onPressed: _abrirRetencao,
-                    ),
                   ),
                 ),
               ],

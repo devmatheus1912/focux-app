@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -172,11 +173,13 @@ class FeedPostCard extends StatelessWidget {
                     TextButton.icon(
                       onPressed: onCurtir,
                       icon: const Icon(Icons.thumb_up_alt_outlined, size: 18),
-                      label: Text('$curtidas Curtir'),
+                      label: Text(
+                        ptCountLabel(curtidas, 'curtida', 'curtidas'),
+                      ),
                     )
                   else
                     Text(
-                      '$curtidas curtidas',
+                      ptCountLabel(curtidas, 'curtida', 'curtidas'),
                       style: FocuxHubTypography.bodyMuted(
                         color: ShellChrome.of(context).mute,
                         fontWeight: FontWeight.w600,
@@ -185,7 +188,9 @@ class FeedPostCard extends StatelessWidget {
                   TextButton.icon(
                     onPressed: onComentar,
                     icon: const Icon(Icons.comment_outlined, size: 18),
-                    label: Text('$comentarios comentários'),
+                    label: Text(
+                      ptCountLabel(comentarios, 'comentário', 'comentários'),
+                    ),
                   ),
                 ],
               ),

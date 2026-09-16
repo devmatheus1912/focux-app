@@ -230,7 +230,7 @@ extension on _LojaScreenState {
                   : 'Nenhum pacote na vitrine',
               subtitle: filtered
                   ? 'Ajuste a busca.'
-                  : 'Crie planos em Planos & link de vendas para vender pela loja.',
+                  : 'Crie pacotes em Pacotes para vender pela loja.',
               action: filtered
                   ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
                   : FxEmptyAction(

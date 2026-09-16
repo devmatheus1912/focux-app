@@ -214,6 +214,32 @@ String walletPixStatusHint(String? tipo, String chave) {
   return 'Falta a chave PIX';
 }
 
+/// Máscara para exibir chave PIX (CPF/CNPJ/telefone) sem PII completa.
+String maskPixKeyForDisplay(String? tipo, String chave) {
+  final raw = chave.trim();
+  if (raw.isEmpty) return '';
+  final t = (tipo ?? '').trim().toUpperCase();
+  final digits = raw.replaceAll(RegExp(r'\D'), '');
+  switch (t) {
+    case 'CPF':
+      if (digits.length < 11) return '***.***.***-**';
+      return '***.${digits.substring(3, 6)}.${digits.substring(6, 9)}-**';
+    case 'CNPJ':
+      if (digits.length < 14) return '**.***.***/****-**';
+      return '**.${digits.substring(2, 5)}.${digits.substring(5, 8)}/****-**';
+    case 'TELEFONE':
+      if (digits.length < 8) return '(**) *****-****';
+      return '(**) *****-${digits.substring(digits.length - 4)}';
+    case 'EMAIL':
+      final at = raw.indexOf('@');
+      if (at <= 1) return '***@$raw';
+      return '${raw[0]}***${raw.substring(at)}';
+    default:
+      if (raw.length <= 8) return '••••••••';
+      return '${raw.substring(0, 4)}••••${raw.substring(raw.length - 4)}';
+  }
+}
+
 class _CpfInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
