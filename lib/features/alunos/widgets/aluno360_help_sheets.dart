@@ -166,7 +166,7 @@ Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Aba Ferramentas',
-    subtitle: 'Atalhos para treino, corpo, financeiro e comunicação.',
+    subtitle: 'P0 no fold; o catálogo completo fica em Mais ferramentas.',
     tips: const [
       FxHelpTip(
         'Medidas',
@@ -174,13 +174,13 @@ Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
         icon: 'trend',
       ),
       FxHelpTip(
-        'Treino & evolução',
-        'Treinos, equipamentos, IA de progresso e plano de sucesso do aluno.',
+        'Atalhos do aluno',
+        'Só o que precisa de atenção agora — treinos, anamnese, composição, chat.',
         icon: 'dumbbell',
       ),
       FxHelpTip(
-        'Perfil & gestão',
-        'Anamnese, mensalidades, chat e feedback em vídeo.',
+        'Mais ferramentas',
+        'Equipamentos, trilhas, engajamento, feedback e o restante do catálogo.',
         icon: 'people',
       ),
     ],

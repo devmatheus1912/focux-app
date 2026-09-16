@@ -5,7 +5,6 @@ import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_ferramentas_mini_sparkline.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,7 +58,7 @@ void main() {
       child: MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(
-            size: Size(390, 1200),
+            size: Size(390, 1600),
             textScaler: TextScaler.linear(1.3),
           ),
           child: Scaffold(
@@ -95,14 +94,16 @@ void main() {
     expect(find.text('Idade'), findsOneWidget);
     expect(find.text('Altura'), findsOneWidget);
     expect(find.text('Pendente'), findsNWidgets(3));
-    expect(find.text('Treino & evolução'), findsOneWidget);
-    expect(find.text('Perfil & gestão'), findsOneWidget);
+    expect(find.text('Atalhos do aluno'), findsOneWidget);
+    expect(find.text('Mais ferramentas'), findsOneWidget);
     expect(find.text('Gordura'), findsNothing);
     expect(find.text('Gordura corporal'), findsOneWidget);
     expect(find.text('Massa magra'), findsOneWidget);
-    expect(find.text('IA Progresso'), findsOneWidget);
-    expect(find.text('Aderência'), findsOneWidget);
-    expect(find.byType(Aluno360FerramentasMiniSparkline), findsOneWidget);
+    expect(find.text('Anamnese'), findsOneWidget);
+    expect(find.text('Composição corporal'), findsOneWidget);
+    expect(find.text('Treinos'), findsOneWidget);
+    expect(find.text('Mais ferramentas'), findsOneWidget);
+    expect(find.text('Aderência'), findsNothing);
 
     expect(tester.takeException(), isNull);
   });

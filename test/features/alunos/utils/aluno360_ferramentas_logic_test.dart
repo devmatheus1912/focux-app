@@ -171,5 +171,35 @@ void main() {
       expect(label, startsWith('Aderência semanal:'));
       expect(label, contains(weekdayNameFromIso(_isoDay(anchor))));
     });
+
+    test('splitModulesForFold keeps hot modules and caps fold size', () {
+      final aluno = Aluno(
+        id: 1,
+        nome: 'Ana',
+        email: 'ana@test.com',
+        status: 'ATIVO',
+        statusFinanceiro: 'INADIMPLENTE',
+        aderenciaPercent: 0,
+        diasSemTreino: 10,
+      );
+      final split = Aluno360FerramentasLogic.splitModulesForFold(
+        aluno: aluno,
+        bf: null,
+        massaMagra: null,
+        anamneseStatus: 'PREENCHIDA',
+        aderenciaSemanal: const [],
+      );
+      expect(split.fold.length, Aluno360FerramentasLogic.foldModuleLimit);
+      expect(split.overflow, isNotEmpty);
+      expect(
+        split.fold.first,
+        Aluno360FerramentasModule.mensalidades,
+      );
+      expect(split.fold, contains(Aluno360FerramentasModule.treinos));
+      expect(
+        {...split.fold, ...split.overflow}.length,
+        Aluno360FerramentasModule.values.length,
+      );
+    });
   });
 }
