@@ -20,9 +20,10 @@ Future<void> showExerciseMediaPreview(
   if (video != null && video.isNotEmpty) {
     return showExerciseVideoPreview(context, exercicio: exercicio, url: video);
   }
+  // §38 hide: biblioteca em standby sem mídia publicada — não abrir "em breve".
   if (kBibliotecaLibraryVideosStandby &&
       !exercicioHasPublishedLibraryMedia(exercicio)) {
-    return showLibraryDemoStandbySheet(context, exercicio: exercicio);
+    return Future.value();
   }
   final gif = exercicio.gifUrl?.trim();
   if (gif == null || gif.isEmpty) return Future.value();
@@ -48,94 +49,6 @@ Future<void> showExerciseVideoPreview(
           isPersonalVideo: exercicioHasPersonalVideo(exercicio),
         ),
   );
-}
-
-Future<void> showLibraryDemoStandbySheet(
-  BuildContext context, {
-  required Exercicio exercicio,
-}) {
-  return showFxHomeSheet<void>(
-    context,
-    builder: (_) => ExerciseLibraryDemoStandbySheet(exercicio: exercicio),
-  );
-}
-
-class ExerciseLibraryDemoStandbySheet extends StatelessWidget {
-  const ExerciseLibraryDemoStandbySheet({super.key, required this.exercicio});
-
-  final Exercicio exercicio;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FxHomeSheetHandle(isDark: isDark),
-          SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: exercicio.nomeDisplay,
-            subtitle: 'Demo oficial em breve',
-            leading: Icon(
-              Icons.video_library_outlined,
-              color: primary,
-              size: 18,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ColoredBox(
-                color: primary.withValues(alpha: isDark ? 0.12 : 0.08),
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.video_library_outlined,
-                        color: primary,
-                        size: 40,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'A demonstração oficial deste exercício será '
-                        'publicada em breve.',
-                        textAlign: TextAlign.center,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute,
-                          fontWeight: FontWeight.w700,
-                          height: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Enquanto isso, envie seu vídeo na tela anterior.',
-                        textAlign: TextAlign.center,
-                        style: FocuxHubTypography.bodyMuted(
-                          color: mute.withValues(alpha: 0.85),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class ExerciseGifPreviewSheet extends StatefulWidget {
@@ -197,7 +110,7 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
 
     if (kBibliotecaLibraryVideosStandby &&
         !exercicioHasPublishedLibraryMedia(widget.exercicio)) {
-      return ExerciseLibraryDemoStandbySheet(exercicio: widget.exercicio);
+      return const SizedBox.shrink();
     }
 
     return ListenableBuilder(

@@ -36,6 +36,7 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../utils/exercicio_detail_display.dart';
 import '../utils/exercise_video_upload_spec.dart';
 import '../widgets/exercicio_detail_help_sheet.dart';
+import 'widgets/exercise_media_thumb.dart';
 
 part 'exercicio_detail_screen_state.part.dart';
 part 'exercicio_detail_screen_widgets.part.dart';

@@ -304,8 +304,9 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                               if (ex.videoUrl?.isNotEmpty == true) ...[
                                 const SizedBox(height: 12),
                                 _VideoPlayer(url: ex.videoUrl!),
-                              ] else if (ex.gifUrl != null ||
-                                  ex.thumbnailUrl != null) ...[
+                              ] else if (exercicioHasPublishedLibraryMedia(
+                                ex,
+                              )) ...[
                                 const SizedBox(height: 12),
                                 _ExercisePreviewImage(
                                   url: ex.gifUrl ?? ex.thumbnailUrl!,

@@ -436,10 +436,11 @@ bool exercicioHasPersonalVideo(Exercicio exercicio) {
       exercicio.videoUrl?.trim().isNotEmpty == true;
 }
 
-/// Abre prévia útil: vídeo próprio, demo publicada ou sheet standby.
+/// Abre prévia útil: vídeo próprio ou demo publicada da biblioteca.
+/// Em standby da biblioteca (§38 hide): sem sheet "em breve".
 bool canPreviewExerciseMedia(Exercicio exercicio) {
   if (exercicioHasPersonalVideo(exercicio)) return true;
   if (exercicioHasPublishedLibraryMedia(exercicio)) return true;
-  if (kBibliotecaLibraryVideosStandby && exercicio.curado) return true;
+  if (kBibliotecaLibraryVideosStandby) return false;
   return exercicio.hasPlayableMedia;
 }
