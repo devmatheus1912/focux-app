@@ -14,6 +14,7 @@ class FxHubHeader extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.quietChrome = false,
+    this.onTitleTap,
   });
 
   final String title;
@@ -21,6 +22,7 @@ class FxHubHeader extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final bool quietChrome;
+  final VoidCallback? onTitleTap;
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +30,16 @@ class FxHubHeader extends StatelessWidget {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final glow = quietChrome ? 0.02 : 0.04;
+    final titleText = Text(
+      title,
+      style: FocuxHubTypography.sectionTitle(context, color: ink),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
 
     return Semantics(
       header: true,
+      button: onTitleTap != null,
       label: [
         title,
         if (freshnessLabel != null && freshnessLabel!.isNotEmpty) freshnessLabel!,
@@ -54,12 +63,14 @@ class FxHubHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: FocuxHubTypography.sectionTitle(context, color: ink),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  if (onTitleTap != null)
+                    GestureDetector(
+                      onTap: onTitleTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: titleText,
+                    )
+                  else
+                    titleText,
                   if (freshnessLabel != null && freshnessLabel!.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(

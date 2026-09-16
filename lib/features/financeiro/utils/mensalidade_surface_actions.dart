@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/money/fx_money.dart';
@@ -26,11 +27,34 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../perfil/providers/perfil_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
+
+bool _mensagemIndicaCarteiraSemChave(String msg) {
+  final lower = msg.toLowerCase();
+  if (lower.contains('informe a chave') || lower.contains('sem chave')) {
+    return true;
+  }
+  if (lower.contains('cadastre') && lower.contains('pix')) return true;
+  return lower.contains('chave') &&
+      (lower.contains('pix') ||
+          lower.contains('carteira') ||
+          lower.contains('wallet'));
+}
+
+Future<bool> _perfilTemChavePix(WidgetRef ref) async {
+  try {
+    final perfil = await ref.read(perfilProvider.future);
+    final chave = perfil.chavePix?.trim() ?? '';
+    return chave.isNotEmpty;
+  } catch (_) {
+    return true; // Don't block PIX if perfil fetch fails — API decides.
+  }
+}
 
 Future<String?> pickMensalidadeMesReferencia(
   BuildContext ctx, {
@@ -109,6 +133,7 @@ Future<void> mostrarPixMensalidade({
   PixData? pix;
   var carregando = true;
   String? erro;
+  var precisaCarteira = false;
   var loadToken = 0;
 
   Future<void> carregar(void Function(void Function()) setDialogState) async {
@@ -116,8 +141,22 @@ Future<void> mostrarPixMensalidade({
     setDialogState(() {
       carregando = true;
       erro = null;
+      precisaCarteira = false;
     });
     try {
+      if (!asAluno) {
+        final temChave = await _perfilTemChavePix(ref);
+        if (token != loadToken) return;
+        if (!temChave) {
+          setDialogState(() {
+            precisaCarteira = true;
+            erro =
+                'Cadastre sua chave PIX na carteira para gerar cobranças.';
+            carregando = false;
+          });
+          return;
+        }
+      }
       final repo = mensalidadeRepo(ref);
       final p = asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
       if (token != loadToken) return;
@@ -127,8 +166,10 @@ Future<void> mostrarPixMensalidade({
       });
     } catch (e) {
       if (token != loadToken) return;
+      final msg = friendlyError(e);
       setDialogState(() {
-        erro = friendlyError(e);
+        erro = msg;
+        precisaCarteira = !asAluno && _mensagemIndicaCarteiraSemChave(msg);
         carregando = false;
       });
     }
@@ -172,7 +213,27 @@ Future<void> mostrarPixMensalidade({
                   ),
                   SizedBox(height: TokensStrip.s4),
                   if (carregando)
-                    const SizedBox(height: 80, child: FxLoading())
+                    SizedBox(
+                      height: 96,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const FxLoading(),
+                          const SizedBox(height: TokensStrip.s2),
+                          Text(
+                            'Gerando PIX…',
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? EagleTokens.darkInkMute
+                                      : TokensStrip.textSecondary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   else if (displayErro != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -189,10 +250,19 @@ Future<void> mostrarPixMensalidade({
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s3),
-                          TextButton(
-                            onPressed: () => carregar(setDialogState),
-                            child: const Text('Tentar de novo'),
-                          ),
+                          if (precisaCarteira)
+                            FxLiquidPrimaryButton(
+                              label: 'Abrir carteira',
+                              onPressed: () {
+                                FxHomeSheetChrome.dismissAndPop(ctx);
+                                context.push('/perfil/wallet');
+                              },
+                            )
+                          else
+                            TextButton(
+                              onPressed: () => carregar(setDialogState),
+                              child: const Text('Tentar de novo'),
+                            ),
                         ],
                       ),
                     )

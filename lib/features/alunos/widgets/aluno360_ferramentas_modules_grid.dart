@@ -211,7 +211,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         title: 'Treinos',
         subtitle: Text(
           aluno.diasSemTreino == null
-              ? 'Histórico completo'
+              ? 'Treinos do plano'
               : aluno.diasSemTreino! >= 7
               ? '${aluno.diasSemTreino} dias sem treino'
               : 'Ativo recentemente',

@@ -18,7 +18,6 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -26,6 +25,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -166,11 +166,13 @@ class _FinanceiroMensalidadesTabState
     });
   }
 
-  Future<void> _load({bool force = false}) async {
-    setState(() {
-      _loading = true;
-      _erro = null;
-    });
+  Future<void> _load({bool force = false, bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+      });
+    }
     try {
       if (force) {
         invalidateFinanceiroCaches(ref);
@@ -202,6 +204,18 @@ class _FinanceiroMensalidadesTabState
         _loading = false;
       });
     }
+  }
+
+  Future<void> _onPullRefresh() async {
+    try {
+      await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).atualizarAtrasos();
+    } catch (_) {
+      // Refresh still reloads the list even if atrasos fail.
+    }
+    if (!mounted) return;
+    await _load(force: true, silent: true);
   }
 
   Future<void> _carregarMais() async {
@@ -320,7 +334,7 @@ class _FinanceiroMensalidadesTabState
                     )
                     : Column(
                       children: [
-                        if (_items.isNotEmpty)
+                        if (_items.isNotEmpty && _modoSelecao)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
                               FxSettingsLayout.pageInset,
@@ -330,11 +344,7 @@ class _FinanceiroMensalidadesTabState
                             ),
                             child: Builder(
                               builder: (context) {
-                                final temAberto = _items.any(
-                                  (m) => financeiroStatusAberto(m.status),
-                                );
                                 final tools = financeiroListaTools(
-                                  temAberto: temAberto,
                                   modoSelecao: _modoSelecao,
                                 );
                                 Future<void> runTool(
@@ -409,84 +419,125 @@ class _FinanceiroMensalidadesTabState
                         Expanded(
                           child:
                               _items.isEmpty
-                                  ? _buildMensalidadesEmpty(context)
-                                  : ListView.builder(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      FxSettingsLayout.pageInset,
-                                      0,
-                                      FxSettingsLayout.pageInset,
-                                      24,
-                                    ),
-                                    itemCount:
-                                        _items.length + (_hasMore ? 1 : 0),
-                                    itemBuilder: (context, i) {
-                                      if (i >= _items.length) {
-                                        return FxSatelliteListTile(
-                                          title:
-                                              _carregandoMais
-                                                  ? 'Carregando…'
-                                                  : 'Carregar mais',
-                                          titleCase: false,
-                                          onTap:
-                                              _carregandoMais
-                                                  ? null
-                                                  : _carregarMais,
-                                          leading: FxIcon(
-                                            name: 'plus',
-                                            size: 18,
-                                            color: primary,
-                                          ),
-                                        );
-                                      }
-                                      final item = _items[i];
-                                      final overdue = item.status == 'ATRASADO';
-                                      final selected = _selecionados.contains(
-                                        item.id,
-                                      );
-                                      return FxSatelliteListTile(
-                                        title: item.alunoNome,
-                                        subtitle: Text(
-                                          financeiroMensalidadeSubtitle(
-                                            item.status,
-                                            item.mesReferencia,
+                                  ? RefreshIndicator(
+                                    onRefresh: _onPullRefresh,
+                                    child: ListView(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      padding: const EdgeInsets.fromLTRB(
+                                        FxSettingsLayout.pageInset,
+                                        0,
+                                        FxSettingsLayout.pageInset,
+                                        24,
+                                      ),
+                                      children: [
+                                        SizedBox(
+                                          height:
+                                              MediaQuery.sizeOf(
+                                                context,
+                                              ).height *
+                                              0.45,
+                                          child: _buildMensalidadesEmpty(
+                                            context,
                                           ),
                                         ),
-                                        onTap: () => _modoSelecao
-                                            ? _toggleLote(item)
-                                            : _abrirAcoes(item),
-                                        accent:
-                                            overdue
-                                                ? EagleTokens.bad
-                                                : primary,
-                                        leading: FxIcon(
-                                          name:
-                                              _modoSelecao && selected
-                                                  ? 'circle-check'
-                                                  : overdue
-                                                  ? 'alert-triangle'
-                                                  : item.status == 'PAGO'
-                                                  ? 'circle-check'
-                                                  : 'coin',
-                                          size: 18,
-                                          color:
+                                      ],
+                                    ),
+                                  )
+                                  : RefreshIndicator(
+                                    onRefresh: _onPullRefresh,
+                                    child: ListView.builder(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      padding: const EdgeInsets.fromLTRB(
+                                        FxSettingsLayout.pageInset,
+                                        0,
+                                        FxSettingsLayout.pageInset,
+                                        24,
+                                      ),
+                                      itemCount:
+                                          _items.length + (_hasMore ? 1 : 0),
+                                      itemBuilder: (context, i) {
+                                        if (i >= _items.length) {
+                                          return FxSatelliteListTile(
+                                            title:
+                                                _carregandoMais
+                                                    ? 'Carregando…'
+                                                    : 'Carregar mais',
+                                            titleCase: false,
+                                            onTap:
+                                                _carregandoMais
+                                                    ? null
+                                                    : _carregarMais,
+                                            leading: FxIcon(
+                                              name: 'plus',
+                                              size: 18,
+                                              color: primary,
+                                            ),
+                                          );
+                                        }
+                                        final item = _items[i];
+                                        final overdue =
+                                            item.status == 'ATRASADO';
+                                        final selected = _selecionados.contains(
+                                          item.id,
+                                        );
+                                        final aberto = financeiroStatusAberto(
+                                          item.status,
+                                        );
+                                        return FxSatelliteListTile(
+                                          title: item.alunoNome,
+                                          subtitle: Text(
+                                            financeiroMensalidadeSubtitle(
+                                              item.status,
+                                              item.mesReferencia,
+                                            ),
+                                          ),
+                                          onTap: () => _modoSelecao
+                                              ? _toggleLote(item)
+                                              : _abrirAcoes(item),
+                                          onLongPress: aberto
+                                              ? () {
+                                                  if (!_modoSelecao) {
+                                                    _entrarModoLote();
+                                                  }
+                                                  _toggleLote(item);
+                                                }
+                                              : null,
+                                          accent:
                                               overdue
                                                   ? EagleTokens.bad
                                                   : primary,
-                                        ),
-                                        trailing: Text(
-                                          item.valor.format(
-                                            showDecimals: false,
+                                          leading: FxIcon(
+                                            name:
+                                                _modoSelecao && selected
+                                                    ? 'circle-check'
+                                                    : overdue
+                                                    ? 'alert-triangle'
+                                                    : item.status == 'PAGO'
+                                                    ? 'circle-check'
+                                                    : 'coin',
+                                            size: 18,
+                                            color:
+                                                overdue
+                                                    ? EagleTokens.bad
+                                                    : primary,
                                           ),
-                                          style: TextStyle(
-                                            color: chrome.ink,
-                                            fontWeight: FontWeight.w700,
-                                            fontFeatures: const [
-                                              FontFeature.tabularFigures(),
-                                            ],
+                                          trailing: Text(
+                                            item.valor.format(
+                                              showDecimals: false,
+                                            ),
+                                            style: TextStyle(
+                                              color: chrome.ink,
+                                              fontWeight: FontWeight.w700,
+                                              fontFeatures: const [
+                                                FontFeature.tabularFigures(),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
+                                        );
+                                      },
+                                    ),
                                   ),
                         ),
                         // Empty já tem FxEmptyAction — sticky só com lista (1 P0).

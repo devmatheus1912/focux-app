@@ -9,6 +9,7 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../utils/aluno360_copilot_task_actions.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
@@ -105,7 +106,34 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       followUpDue: followUpDue,
       proximaAcaoText: effectiveProxima?.acao,
     );
+    // Sem floaters no card: Criar tarefa / Chat sobem para o sticky (#10).
+    final showSecondaryCreateTask =
+        !hasOpenTask &&
+        !operacao.hideCopilotTaskRow &&
+        (effectiveProxima?.acao.trim().isNotEmpty ?? false);
+    final showSecondaryChatMais =
+        showSecondaryChat ||
+        (!hasOpenTask &&
+            !operacao.hideCopilotChatRow &&
+            !sticky.isChatAction);
     final stickyDisplayLabel = operacao.stickyDisplayLabel;
+
+    Future<void> createTask() async {
+      final acao = effectiveProxima?.acao.trim() ?? '';
+      if (acao.isEmpty) return;
+      HapticFeedback.lightImpact();
+      ref.read(alunoCopilotCreatingProvider(alunoId).notifier).state = true;
+      try {
+        await criarTarefaCopilotoFromAluno360(
+          context: context,
+          ref: ref,
+          aluno: aluno,
+          acao: acao,
+        );
+      } finally {
+        ref.read(alunoCopilotCreatingProvider(alunoId).notifier).state = false;
+      }
+    }
 
     return SafeArea(
       top: false,
@@ -124,13 +152,23 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (showSecondaryCommandCenter || showSecondaryChat)
+              if (showSecondaryCommandCenter ||
+                  showSecondaryChatMais ||
+                  showSecondaryCreateTask)
                 Padding(
                   padding: const EdgeInsets.only(bottom: TokensStrip.s2),
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
+                      if (showSecondaryCreateTask)
+                        DashboardHomeActionChip(
+                          label: 'Criar tarefa',
+                          accent: primary,
+                          isDark: isDark,
+                          enabled: !creating,
+                          onPressed: createTask,
+                        ),
                       if (showSecondaryCommandCenter)
                         DashboardHomeActionChip(
                           label: 'Tarefa',
@@ -138,7 +176,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
                           isDark: isDark,
                           onPressed: openCommandCenter,
                         ),
-                      if (showSecondaryChat)
+                      if (showSecondaryChatMais)
                         DashboardHomeActionChip(
                           label: 'Chat',
                           accent: primary,

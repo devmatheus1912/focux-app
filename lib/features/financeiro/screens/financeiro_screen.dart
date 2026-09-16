@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -81,6 +83,14 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
     AnalyticsService.instance.track(
       ProductEvents.financeiroMensalidadesOpened,
       props: {'source': source},
+    );
+    // Prefetch in parallel so the sheet opens with alunos ready.
+    unawaited(
+      Future(() async {
+        try {
+          await ref.read(alunosProvider.future);
+        } catch (_) {}
+      }),
     );
     setState(() {
       _view = FinanceiroHubView.mensalidades;

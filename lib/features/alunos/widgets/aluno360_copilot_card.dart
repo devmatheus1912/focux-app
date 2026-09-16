@@ -216,6 +216,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final caption =
         showContactBadge ? '$subtitle · Contato prioritário' : subtitle;
 
+    final mute = fxScreenMute(context);
+
     return Semantics(
       container: true,
       label: 'Prioridade do dia, copiloto operacional',
@@ -228,38 +230,56 @@ class Aluno360CopilotCard extends ConsumerWidget {
             onAction: () => showAluno360CopilotHelpSheet(context),
           ),
           const SizedBox(height: 4),
-          Text(
-            caption,
-            style: TextStyle(
-              color: fxScreenMute(context),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Aluno360CopilotIaRefreshButton(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  caption,
+                  style: TextStyle(
+                    color: mute,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    height: 1.35,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Aluno360CopilotIaRefreshButton(
                 alunoId: aluno.id,
                 primary: primary,
               ),
-            ),
+            ],
           ),
-          // Status line / thin bar only — never overlay skeleton on the card body.
+          // Instruções + barra no mesmo card enquanto a IA gera.
           if (iaLoading) ...[
+            const SizedBox(height: TokensStrip.s3),
             Semantics(
               liveRegion: true,
               label: caption,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  minHeight: iaRefreshing ? 4 : 3,
-                  backgroundColor: primary.withValues(alpha: 0.12),
-                  color: primary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'A IA está montando a sugestão do dia com base no '
+                    'perfil, financeiro e autonomia deste aluno.',
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      minHeight: iaRefreshing ? 4 : 3,
+                      backgroundColor: primary.withValues(alpha: 0.12),
+                      color: primary,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8),

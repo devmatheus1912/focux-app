@@ -116,6 +116,8 @@ void main() {
     expect(card, contains('CheckinExerciseMediaPreview'));
     expect(card, contains("'Demonstração'"));
     expect(card, contains("'Postura'"));
+    expect(card, isNot(contains("'Dicas'")));
+    expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
     expect(card, contains('glowStrength: 0.08'));
@@ -147,7 +149,9 @@ void main() {
       'lib/features/checkin/screens/checkin_screen.dart',
     );
     expect(screen, contains('alignment: Alignment.topCenter'));
-    expect(screen, contains('onOpenTips:'));
+    expect(screen, contains('onHelp:'));
+    expect(screen, contains('showCheckinExerciseTipsSheet'));
+    expect(screen, isNot(contains('onOpenTips:')));
     expect(screen, contains('CheckinSerieCard'));
   });
 
@@ -251,6 +255,11 @@ void main() {
     expect(camera, contains('fullscreenDialog: true'));
     expect(camera, contains('rootNavigator: true'));
     expect(camera, contains('_CameraCoachPage'));
+    expect(camera, contains('_safeDisposeController'));
+    expect(camera, contains('_isPermissionDenied'));
+    expect(camera, contains('_disposing'));
+    expect(camera, contains('stopImageStream'));
+    expect(camera, contains('ImageFormatGroup.bgra8888'));
     expect(camera, isNot(contains('showFxHomeSheet')));
     final sheet = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_execucao_sheets.dart',

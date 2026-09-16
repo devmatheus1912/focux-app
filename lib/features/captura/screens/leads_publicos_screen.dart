@@ -178,7 +178,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
       if (leadPublicoPodeCriarAluno(lead.email))
         const FxInsetPickerSheetItem(
           value: _LeadPublicoAcao.criarAluno,
-          label: 'Criar aluno',
+          label: 'Converter em aluno',
         ),
       const FxInsetPickerSheetItem(
         value: _LeadPublicoAcao.converter,
@@ -236,11 +236,11 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                   subtitle: 'Contatos que chegaram pela sua página pública.',
                   tips: const [
                     FxHelpTip(
-                      'Criar aluno',
-                      'O botão de baixo abre o cadastro. No card, dá pra pré-preencher.',
+                      'Converter em aluno',
+                      'No card, abre o cadastro já com nome e e-mail do lead.',
                     ),
                     FxHelpTip(
-                      'Converter',
+                      'Marcar convertido',
                       'Toque no lead novo para marcar quando virar aluno.',
                     ),
                   ],

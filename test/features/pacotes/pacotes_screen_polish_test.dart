@@ -26,6 +26,9 @@ void main() {
     expect(screen, contains('/financeiro'));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('Carregar mais'));
+    expect(screen, contains('_abrirMais'));
+    expect(screen, contains('Mais em pacotes'));
+    expect(screen, isNot(contains('StorefrontLinkCard')));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('context.pop()')));

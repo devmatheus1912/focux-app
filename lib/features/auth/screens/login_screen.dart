@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +31,6 @@ import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/apple_sign_in_button.dart';
-import '../widgets/apple_share_email_prompt.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -146,8 +144,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         environmentStatus: status,
       );
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
-      // iOS: Apple é o social principal; Google oculto até GIDClientID estável em TF.
-      final showGoogle = appClientConfigured && !Platform.isIOS;
+      // Ambos sociais quando o ambiente permite — iPhone também usa Gmail.
+      final showGoogle = appClientConfigured;
       setState(() {
         _appleEnabled =
             appleOffered && AppleSignInService.isSupportedPlatform;
@@ -189,7 +187,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         environmentStatus: status,
       );
       final appClientConfigured = Env.googleWebClientId.isNotEmpty;
-      final showGoogle = appClientConfigured && !Platform.isIOS;
+      final showGoogle = appClientConfigured;
       setState(() {
         _appleEnabled =
             appleOffered && AppleSignInService.isSupportedPlatform;
@@ -198,7 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _googleStatusTitle = null;
           _googleStatusNote = null;
           _googleStatusAction = null;
-        } else if (!appClientConfigured && !Platform.isIOS) {
+        } else if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
           _googleStatusNote =
               'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';

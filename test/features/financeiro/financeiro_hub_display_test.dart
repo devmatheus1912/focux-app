@@ -28,17 +28,19 @@ void main() {
   });
 
   test('financeiroListaTools e detalhe Mais — A30', () {
-    final idle = financeiroListaTools(temAberto: true, modoSelecao: false);
+    final idle = financeiroListaTools(modoSelecao: false);
     expect(idle.foldChip, isNull);
-    expect(idle.mais, contains(FinanceiroListaToolId.atualizarAtrasos));
-    expect(idle.mais, contains(FinanceiroListaToolId.marcarLote));
+    expect(idle.mais, isEmpty);
 
-    final lote = financeiroListaTools(temAberto: true, modoSelecao: true);
+    final lote = financeiroListaTools(modoSelecao: true);
     expect(lote.foldChip, FinanceiroListaToolId.marcarLote);
     expect(lote.mais, contains(FinanceiroListaToolId.cancelarLote));
+    expect(lote.mais, contains(FinanceiroListaToolId.atualizarAtrasos));
 
     final mais = mensalidadeDetailMaisActions(pending: true);
-    expect(mais.first, MensalidadeDetailActionId.aluno);
+    expect(mais, isNot(contains(MensalidadeDetailActionId.aluno)));
+    expect(mais, isNot(contains(MensalidadeDetailActionId.financeiro)));
+    expect(mais.first, MensalidadeDetailActionId.edit);
     expect(mais, contains(MensalidadeDetailActionId.pix));
     expect(mais, contains(MensalidadeDetailActionId.chat));
     expect(

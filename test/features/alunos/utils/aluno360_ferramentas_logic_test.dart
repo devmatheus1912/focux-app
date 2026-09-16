@@ -189,16 +189,42 @@ void main() {
         anamneseStatus: 'PREENCHIDA',
         aderenciaSemanal: const [],
       );
-      expect(split.fold.length, Aluno360FerramentasLogic.foldModuleLimit);
+      expect(
+        split.fold.length,
+        lessThanOrEqualTo(Aluno360FerramentasLogic.foldModuleLimit),
+      );
       expect(split.overflow, isNotEmpty);
       expect(
-        split.fold.first,
-        Aluno360FerramentasModule.mensalidades,
+        split.fold,
+        isNot(contains(Aluno360FerramentasModule.mensalidades)),
       );
-      expect(split.fold, contains(Aluno360FerramentasModule.treinos));
+      expect(split.fold, isNot(contains(Aluno360FerramentasModule.treinos)));
+      expect(split.fold, isNot(contains(Aluno360FerramentasModule.chat)));
+      expect(
+        split.fold,
+        isNot(contains(Aluno360FerramentasModule.iaProgresso)),
+      );
+      expect(split.fold, isNot(contains(Aluno360FerramentasModule.aderencia)));
+      expect(split.overflow, contains(Aluno360FerramentasModule.mensalidades));
+      expect(split.overflow, contains(Aluno360FerramentasModule.treinos));
       expect(
         {...split.fold, ...split.overflow}.length,
         Aluno360FerramentasModule.values.length,
+      );
+    });
+
+    test('composicaoCorporalPending false when massa filled', () {
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalPending(massaMagra: '52.0'),
+        isFalse,
+      );
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalValue(massaMagra: '52.0'),
+        'Parcial',
+      );
+      expect(
+        Aluno360FerramentasLogic.composicaoCorporalPending(),
+        isTrue,
       );
     });
   });

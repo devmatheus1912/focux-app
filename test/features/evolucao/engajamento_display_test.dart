@@ -36,8 +36,11 @@ void main() {
 
   test('engajamentoEventoLabel e subtitle', () {
     expect(engajamentoEventoLabel('  Treino A - CONCLUIDO  ', 'TREINO'),
-        'Treino A - CONCLUIDO');
+        'Treino A - Concluído');
+    expect(engajamentoEventoLabel('EM_ANDAMENTO', 'TREINO'), 'Em andamento');
     expect(engajamentoEventoLabel('  ', 'MEDIDA'), 'Medida');
+    expect(engajamentoStatusLabel('EM_ANDAMENTO'), 'Em andamento');
+    expect(engajamentoStatusLabel('CONCLUIDO'), 'Concluído');
     expect(
       engajamentoEventoSubtitle(
         tipo: 'TREINO',

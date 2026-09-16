@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -25,17 +27,25 @@ Future<void> openPoseCameraCoach(
   }
 
   // Full-screen — evita sheet aninhado em cima do sheet Postura (bug de layout).
-  await Navigator.of(context, rootNavigator: true).push<void>(
-    MaterialPageRoute<void>(
-      fullscreenDialog: true,
-      builder:
-          (ctx) => _CameraCoachPage(
-            exerciseName: exerciseName,
-            brand: brand,
-            onRep: onRep,
-          ),
-    ),
-  );
+  try {
+    await Navigator.of(context, rootNavigator: true).push<void>(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder:
+            (ctx) => _CameraCoachPage(
+              exerciseName: exerciseName,
+              brand: brand,
+              onRep: onRep,
+            ),
+      ),
+    );
+  } catch (_) {
+    if (!context.mounted) return;
+    FeedbackHelper.showWarn(
+      context,
+      'Nao foi possivel abrir a camera agora.',
+    );
+  }
 }
 
 class _CameraCoachPage extends StatefulWidget {
@@ -57,6 +67,7 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
   CameraController? _controller;
   PoseDetector? _detector;
   bool _ready = false;
+  bool _disposing = false;
   String _status = 'Iniciando camera...';
   int _detectedReps = 0;
   double _lastElbowAngle = 180;
@@ -65,40 +76,83 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    unawaited(_initCamera());
+  }
+
+  Future<void> _safeStopStream(CameraController? controller) async {
+    if (controller == null) return;
+    try {
+      if (controller.value.isStreamingImages) {
+        await controller.stopImageStream();
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _safeDisposeController(CameraController? controller) async {
+    if (controller == null) return;
+    try {
+      await _safeStopStream(controller);
+    } catch (_) {}
+    try {
+      await controller.dispose();
+    } catch (_) {}
+  }
+
+  bool _isPermissionDenied(Object error) {
+    if (error is CameraException) {
+      final code = error.code.toLowerCase();
+      return code.contains('denied');
+    }
+    final msg = error.toString().toLowerCase();
+    return msg.contains('permission') && msg.contains('denied');
   }
 
   Future<void> _initCamera() async {
+    CameraController? controller;
     try {
       final cameras = await availableCameras();
+      if (!mounted || _disposing) return;
       if (cameras.isEmpty) {
         setState(() => _status = 'Nenhuma camera encontrada.');
         return;
       }
 
-      final controller = CameraController(
-        cameras.first,
+      final preferred =
+          cameras.where((c) => c.lensDirection == CameraLensDirection.front);
+      final camera = preferred.isNotEmpty ? preferred.first : cameras.first;
+
+      controller = CameraController(
+        camera,
         ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.nv21,
+        imageFormatGroup:
+            Platform.isAndroid
+                ? ImageFormatGroup.nv21
+                : ImageFormatGroup.bgra8888,
       );
       await controller.initialize();
+      if (!mounted || _disposing) {
+        await _safeDisposeController(controller);
+        return;
+      }
 
       _detector = PoseDetector(
         options: PoseDetectorOptions(
           mode: PoseDetectionMode.stream,
-          model: PoseDetectionModel.accurate,
+          model: PoseDetectionModel.base,
         ),
       );
 
       await controller.startImageStream((image) async {
-        if (_processing || _detector == null) return;
+        if (_disposing || !mounted || _processing || _detector == null) {
+          return;
+        }
         _processing = true;
         try {
           final input = _inputImageFromCameraImage(image);
           if (input == null) return;
           final poses = await _detector!.processImage(input);
-          if (poses.isEmpty) return;
+          if (_disposing || !mounted || poses.isEmpty) return;
           _trackRep(poses.first);
         } catch (_) {
         } finally {
@@ -106,7 +160,10 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
         }
       });
 
-      if (!mounted) return;
+      if (!mounted || _disposing) {
+        await _safeDisposeController(controller);
+        return;
+      }
       setState(() {
         _controller = controller;
         _ready = true;
@@ -114,27 +171,61 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
             'Enquadre corpo inteiro. Flexione e estenda para contar reps.';
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _status = 'Camera indisponivel.');
+      await _safeDisposeController(controller);
+      if (!mounted || _disposing) return;
+      setState(() {
+        _ready = false;
+        _controller = null;
+        _status =
+            _isPermissionDenied(e)
+                ? 'Permissao de camera negada. Ative nas configuracoes do aparelho.'
+                : 'Camera indisponivel.';
+      });
     }
   }
 
   InputImage? _inputImageFromCameraImage(CameraImage image) {
-    final rotation = InputImageRotation.rotation0deg;
-    final format = InputImageFormat.nv21;
-    final plane = image.planes.first;
-    return InputImage.fromBytes(
-      bytes: plane.bytes,
-      metadata: InputImageMetadata(
-        size: Size(image.width.toDouble(), image.height.toDouble()),
-        rotation: rotation,
-        format: format,
-        bytesPerRow: plane.bytesPerRow,
-      ),
-    );
+    try {
+      if (image.planes.isEmpty) return null;
+      final format =
+          Platform.isAndroid ? InputImageFormat.nv21 : InputImageFormat.bgra8888;
+      final plane = image.planes.first;
+      final bytes =
+          Platform.isAndroid
+              ? _concatPlanes(image.planes)
+              : plane.bytes;
+      if (bytes == null) return null;
+      return InputImage.fromBytes(
+        bytes: bytes,
+        metadata: InputImageMetadata(
+          size: Size(image.width.toDouble(), image.height.toDouble()),
+          rotation: InputImageRotation.rotation0deg,
+          format: format,
+          bytesPerRow: plane.bytesPerRow,
+        ),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Uint8List? _concatPlanes(List<Plane> planes) {
+    try {
+      final total = planes.fold<int>(0, (sum, p) => sum + p.bytes.length);
+      final out = Uint8List(total);
+      var offset = 0;
+      for (final plane in planes) {
+        out.setRange(offset, offset + plane.bytes.length, plane.bytes);
+        offset += plane.bytes.length;
+      }
+      return out;
+    } catch (_) {
+      return null;
+    }
   }
 
   void _trackRep(Pose pose) {
+    if (_disposing || !mounted) return;
     final leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
     final leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
     final leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
@@ -147,12 +238,14 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
     );
 
     if (_lastElbowAngle > 130 && angle < 90) {
-      if (!mounted) return;
+      if (!mounted || _disposing) return;
       setState(() {
         _detectedReps++;
         _status = 'Rep $_detectedReps detectada via MediaPipe!';
       });
-      widget.onRep();
+      try {
+        widget.onRep();
+      } catch (_) {}
       HapticFeedback.lightImpact();
     }
     _lastElbowAngle = angle;
@@ -169,14 +262,30 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
 
   @override
   void dispose() {
-    _controller?.dispose();
-    _detector?.close();
+    _disposing = true;
+    _ready = false;
+    final controller = _controller;
+    _controller = null;
+    final detector = _detector;
+    _detector = null;
+    unawaited(() async {
+      await _safeDisposeController(controller);
+      try {
+        await detector?.close();
+      } catch (_) {}
+    }());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final controller = _controller;
+    final showPreview =
+        _ready &&
+        !_disposing &&
+        controller != null &&
+        controller.value.isInitialized;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.exerciseName),
@@ -203,8 +312,8 @@ class _CameraCoachPageState extends State<_CameraCoachPage> {
                   child: ColoredBox(
                     color: Colors.black,
                     child:
-                        _ready && _controller != null
-                            ? CameraPreview(_controller!)
+                        showPreview
+                            ? CameraPreview(controller)
                             : Center(
                               child: Text(
                                 _status,

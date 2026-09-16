@@ -143,6 +143,19 @@ class FcmService {
     }
   }
 
+  /// Após login — boot pode ter rodado `init` sem JWT.
+  static Future<void> registrarSeAutenticado(ApiClient apiClient) async {
+    try {
+      final jwtToken = await SecureStorage.getToken();
+      if (jwtToken == null) return;
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
+      await _registrarToken(token, apiClient);
+    } catch (e) {
+      debugPrint('[Focux] FCM post-login register error: $e');
+    }
+  }
+
   /// Desfaz o vínculo do dispositivo com a conta que está saindo.
   ///
   /// Precisa rodar **antes** de o JWT ser apagado, porque o endpoint exige

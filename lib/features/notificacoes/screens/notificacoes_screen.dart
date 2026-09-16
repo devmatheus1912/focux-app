@@ -22,6 +22,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
@@ -126,6 +127,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
         await repo.marcarLida(item.id);
         ref.invalidate(notificacoesProvider);
         ref.invalidate(notificacoesNaoLidasProvider);
+        ref.invalidate(dashboardHomeProvider);
+        ref.invalidate(alunoDashboardHomeProvider);
       }
       final route = item.route;
       if (route != null && route.startsWith('/') && context.mounted) {
@@ -209,6 +212,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     await repo.marcarTodasLidas();
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
+                    ref.invalidate(dashboardHomeProvider);
+                    ref.invalidate(alunoDashboardHomeProvider);
                     if (!context.mounted) return;
                     FeedbackHelper.showSuccess(
                       context,

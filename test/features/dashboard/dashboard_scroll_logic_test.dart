@@ -3,7 +3,7 @@ import 'package:focux_app/features/dashboard/utils/dashboard_scroll_logic.dart';
 
 void main() {
   group('dashboardShowsStickyPrioritiesAction', () {
-    test('sticky only when panel is offscreen and link is available', () {
+    test('sticky always off — Mais prioridades fixo no painel (#33)', () {
       expect(
         dashboardShowsStickyPrioritiesAction(
           panelOffscreen: false,
@@ -23,7 +23,7 @@ void main() {
           panelOffscreen: true,
           showPrioritiesLink: true,
         ),
-        isTrue,
+        isFalse,
       );
       expect(
         dashboardShowsStickyPrioritiesAction(

@@ -223,7 +223,7 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     return parts.join(' · ');
   }
 
-  /// Hierarquia: 1 primária sólida (Contato feito) + secundárias outlined.
+  /// Hierarquia: 1 primária filled + secundárias outlined (mesmos tokens Operação).
   List<Widget> _buildFollowUpChips({
     required Color primary,
     required DateTime? followUpDate,
@@ -239,12 +239,10 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
     }
 
     return [
-      DashboardHomeActionChip(
-        label: 'Contato feito',
-        accent: primary,
-        isDark: widget.isDark,
-        enabled: !_busy,
-        onPressed: () => _markContactDone(actions),
+      FilledButton(
+        style: Aluno360Layout.operacaoFilledButtonStyle(context, primary),
+        onPressed: _busy ? null : () => _markContactDone(actions),
+        child: const Text('Contato feito'),
       ),
       secondary(
         followUpDate == null

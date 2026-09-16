@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/fcm/fcm_service.dart';
@@ -57,15 +59,18 @@ class MfaStatus {
   const MfaStatus({
     required this.enabled,
     required this.recoveryCodesRemaining,
+    this.emailOtpPreferred = false,
   });
 
   final bool enabled;
   final int recoveryCodesRemaining;
+  final bool emailOtpPreferred;
 
   factory MfaStatus.fromJson(Map<String, dynamic> json) {
     return MfaStatus(
       enabled: json['enabled'] as bool? ?? false,
       recoveryCodesRemaining: json['recoveryCodesRemaining'] as int? ?? 0,
+      emailOtpPreferred: json['emailOtpPreferred'] as bool? ?? false,
     );
   }
 }
@@ -210,8 +215,11 @@ bool resolveAppleSignInOffered({
 
 class AuthRepository {
   final Dio _dio;
+  final ApiClient _client;
 
-  AuthRepository(ApiClient client) : _dio = client.dio;
+  AuthRepository(ApiClient client)
+      : _client = client,
+        _dio = client.dio;
 
   Future<AuthCapabilities> capabilities() async {
     final response = await _dio.get('/api/auth/capabilities');
@@ -264,6 +272,7 @@ class AuthRepository {
       await SecureStorage.saveRefreshToken(refreshToken);
     }
     await SecureStorage.saveRole('PERSONAL');
+    unawaited(FcmService.registrarSeAutenticado(_client));
     return token;
   }
 
@@ -296,6 +305,7 @@ class AuthRepository {
     }
     await SecureStorage.saveRole('ALUNO');
     await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
+    unawaited(FcmService.registrarSeAutenticado(_client));
     return requiresPasswordChange;
   }
 
@@ -372,11 +382,23 @@ class AuthRepository {
     await _dio.post('/api/auth/mfa/confirm', data: {'code': code.trim()});
   }
 
-  Future<void> mfaDisable({required String senha, required String code}) async {
+  Future<void> mfaDisable({
+    String? senha,
+    String? emailOtp,
+    required String code,
+  }) async {
     await _dio.post(
       '/api/auth/mfa/disable',
-      data: {'senha': senha, 'code': code.trim()},
+      data: {
+        if (senha != null && senha.isNotEmpty) 'senha': senha,
+        if (emailOtp != null && emailOtp.isNotEmpty) 'emailOtp': emailOtp,
+        'code': code.trim(),
+      },
     );
+  }
+
+  Future<void> mfaDisableRequestEmailOtp() async {
+    await _dio.post('/api/auth/mfa/disable/request-email-otp');
   }
 
   /// Interpreta AuthResponse: MFA challenge (sem persistir) ou sessão completa.
@@ -415,6 +437,8 @@ class AuthRepository {
     }
     await SecureStorage.saveRole(role);
     await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
+    // Boot pode ter registrado FCM sem JWT — reclama token agora.
+    unawaited(FcmService.registrarSeAutenticado(_client));
   }
 
   Future<String> registerAluno(
@@ -443,6 +467,7 @@ class AuthRepository {
     }
     await SecureStorage.saveRole('ALUNO');
     await SecureStorage.saveRequiresPasswordChange(false);
+    unawaited(FcmService.registrarSeAutenticado(_client));
     return token;
   }
 

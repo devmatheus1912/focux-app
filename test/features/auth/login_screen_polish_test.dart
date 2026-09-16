@@ -80,7 +80,8 @@ void main() {
     expect(screen, contains('appleSignInEnabled'));
     expect(screen, contains('resolveAppleSignInOffered'));
     expect(screen, contains('environmentStatus'));
-    expect(screen, contains('!Platform.isIOS'));
+    expect(screen, contains('_googleEnabled'));
+    expect(screen, isNot(contains('!Platform.isIOS')));
     expect(screen, contains('AuthField'));
     expect(screen, contains('LayoutBuilder'));
     expect(screen, contains('keyboardDismissBehavior'));

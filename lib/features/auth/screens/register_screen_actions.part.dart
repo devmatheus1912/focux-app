@@ -214,9 +214,6 @@ extension on _RegisterScreenState {
   Future<void> _submitApple() async {
     if (_loading || _loadingGoogle || _loadingApple) return;
 
-    final shareOk = await confirmAppleShareEmail(context);
-    if (!shareOk || !mounted) return;
-
     setState(() {
       _loadingApple = true;
       _error = null;

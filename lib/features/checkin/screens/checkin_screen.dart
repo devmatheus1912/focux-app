@@ -626,13 +626,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                             current.seriesFeitas - 1,
                                           )
                                           : null,
-                                  onOpenTips:
-                                      checkinExerciseHasTips(current)
-                                          ? () => showCheckinExerciseTipsSheet(
-                                            context,
-                                            ee: current,
-                                          )
-                                          : null,
                                   onOpenCoach:
                                       showCoach
                                           ? () => showCheckinCoachSheet(
