@@ -1,7 +1,7 @@
 # Focux Personal — Referência oficial de design e engenharia
 
 **Padrão de excelência do aplicativo (visual, UX, job, arquitetura, segurança, dados, ops, system design).**
-**Versão:** 3.0 · **Data:** 2026-09-12 · **Plataforma de referência:** iOS (HIG) com paridade Android.
+**Versão:** 3.1 · **Data:** 2026-09-15 · **Plataforma de referência:** iOS (HIG) com paridade Android.
 
 > **Programa vigente (v3): reimplementação do zero até a loja + constituição de sistema.** Toda rota do Personal e do Aluno volta à fila — inclusive as que o Ruflo já “elevou” só com pele/anatomia. Scorecard visual antigo **não** isenta a tela. O programa só termina no freeze §39 com binário de App Store / Play. System design normativo vive em [docs/system/](system/00-mapa.md) (Parte VIII). Ver [§0.6](#06-reimplementação-do-zero-até-a-loja) e [§40](#40-system-design--constituição).
 
@@ -97,7 +97,7 @@
 
 ## 0.1 Regra de ouro
 
-> **A pele é constante. A anatomia é função do job da tela. O sistema é coerente (dados, async, cache, segurança).**
+> **A pele é constante. A anatomia é função do job da tela. O sistema é coerente (dados, async, cache, segurança). Personal e aluno manuseiam rápido: superfície simples, profundidade no P0 do momento.**
 
 Duas telas do Focux devem ser reconhecíveis como do mesmo produto em 200 ms (pele) e distinguíveis como jobs diferentes em 1 s (anatomia). Se toda tela parece a mesma tela, a pele venceu a anatomia — e isso é defeito, não consistência.
 
@@ -108,6 +108,8 @@ Uma tela linda com regra, contrato ou tenant errados é pior do que não mexer.
 Corolário de produção (v2.1): **uma tela linda com job incompleto, voltar morto ou teclado preso também é pior do que não mexer.** Pele sem operação não é Focux.
 
 Corolário de sistema (v3): **feature linda que concede PRO sem captura, cacheia entitlement sem evict ou fura tenant também é pior do que não mexer.** Seguir [docs/system/](system/00-mapa.md) e o checklist [11-gates](system/11-gates-feature.md).
+
+Corolário de manuseio (v3.1): **personal e aluno não operam um SaaS “de painel” — operam o dia em poucos toques.** Ação do momento em ≤2 toques a partir do first paint (pilar 1); valor above the fold (pilar 13); uma decisão dominante (§11). Job completo (§36) e catálogo (§37) **permanecem**: o domínio fecha ponta a ponta. O que muda é a **superfície** — profundidade no P0 do momento; secundário atrás de um toque, sheet ou rota; o que não fecha fica em hide (§38). **Proibido** (A30): despejar todas as affordances do contrato no first paint “para completar profundidade”. Profundidade sem revelação progressiva (§12) é regressão de produto, não excelência.
 
 ---
 
@@ -126,8 +128,9 @@ A v1 (`PERFIL_DESIGN_REFERENCE.md`) era excelente para o que se propunha — o f
 | 7 | Backend: "na dúvida, propor" | Correto, mas passivo — sem proposta, nada era proposto. | §22 torna a auditoria de backend **obrigatória e entregável** em toda tela tocada, com template e severidade. |
 | 8 | *(v2.1)* Pronto = visual elevado | Lote Ruflo encerrava com pele/anatomia; voltar, teclado, job e freeze ficavam para “depois”. | Pronto = visual **e** operação. §0.5, §14, §36–§39. Tela rasa (A21), voltar morto (A22) e teclado preso (A23) são regressão. |
 | 9 | *(v2.2)* Tela já restilada = pronta | Lotes só de pele passaram batido: seta morta, teclado preso, job raso, affordance pobre. | **Reimplementação do zero até a loja (§0.6).** Nenhum lote visual anterior isenta a rota. Amplitude **e** profundidade (§36). A29. |
+| 10 | *(v3.1)* Job completo = mostrar tudo | §36.2 lido como muro de affordances no first paint; app “poderoso” e lento de usar. | Manuseio rápido na superfície (§0.1); profundidade no P0; resto sob demanda (§12) ou hide (§38). A30. |
 
-Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21. A v2.2 **não** pede um SaaS com todos os módulos imagináveis: pede o Focux **inteiro e profundo** no que já é o produto, até o binário da loja.
+Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache e performance da v1 continuam vigentes, íntegras, em §16–§21. A v2.2 **não** pede um SaaS com todos os módulos imagináveis: pede o Focux **inteiro e profundo** no que já é o produto, até o binário da loja. A v3.1 **não** relaxa profundidade: exige que ela seja **manuseável** (rápida) para personal e aluno.
 
 ---
 
@@ -135,10 +138,10 @@ Nada foi relaxado: todas as regras de negócio, segurança, tenant, LGPD, cache 
 
 Em caso de conflito, decidir nesta ordem:
 
-1. **Segurança, tenant, LGPD, auth, pagamento** (§20, Parte VIII / `docs/system/08`, pilares 52–68) — nunca cede a estética.
+1. **Segurança, tenant, LGPD, auth, pagamento** (§20, Parte VIII / `docs/system/08`, pilares 52–68) — nunca cede a estética nem a “simplificar a UI”.
 2. **Regra de negócio, contrato de dados e system design** (§16–§18, §40–§45, `docs/system/*`) — nunca cede a estética. Detalhe em `docs/system/` cede a este índice se divergir.
 3. **Acessibilidade, teclado e alvo de toque** (§14.2, §15, pilares 33/38/94) — nunca cede a densidade nem a animação.
-4. **Navegação previsível, job completo e profundidade** (§14.1, §36, pilares 2/44/93/95/101) — nunca cede a “já parece elevado” nem a “já restilamos ontem”.
+4. **Manuseio rápido + navegação previsível + job completo** (§0.1, §12, §14.1, §36, pilares 1/2/13/44/93/95/101) — nunca cede a “já parece elevado”, a “já restilamos ontem”, nem a muro de affordances (A30). Profundidade sem ≤2 toques / revelação progressiva **não** fecha o lote.
 5. **Anatomia da superfície** (§9–§12) — vence a preferência pessoal e vence "como a outra tela faz".
 6. **Pele** (§1–§8) — vence variação criativa local.
 7. **Preferência estética** — último critério.
@@ -221,10 +224,11 @@ Lotes anteriores (pele, tokens, inset, “parece Focux”, scorecard só de 1–
 |---|---|
 | Núcleo do dia (§37.1) 100% | Inventar comunidade, loja paralela, 12 gamificações |
 | Profundidade no compositor/ação cujo contrato já existe | Botão morto “em breve” |
+| Manuseio rápido: P0 do momento em ≤2 toques; secundário sob demanda | Muro de affordances no first paint (A30) |
 | Uma aposta diferenciadora **já no app** (pose, migração, copiloto) completa | Meia dúzia de apostas rasas |
 | Hide honesto do que não fecha | Chevron para stub |
 
-Diferenciação de loja: **poucas coisas impossíveis de largar**, ponta a ponta. Quantidade de telas não quebra concorrência; tela rasa sim.
+Diferenciação de loja: **poucas coisas impossíveis de largar**, ponta a ponta e **rápidas de usar**. Quantidade de telas não quebra concorrência; tela rasa **ou** tela sobrecarregada sim.
 
 ### Fim do programa
 
@@ -660,13 +664,13 @@ Hierarquia não é subjetiva: é contável. Números aplicam-se **por viewport**
 
 ## 12. Densidade e revelação progressiva
 
-Este bloco é o antídoto direto do "muro de informação repetida".
+Este bloco é o antídoto direto do "muro de informação repetida" **e** do "muro de affordances" (A30). É a mecânica do corolário de manuseio (§0.1): poder completo, complexidade sob demanda.
 
 1. **Regra da agregação (3).** Se **3 ou mais** itens consecutivos exibem o mesmo sinal (mesmo status, mesmo aviso, mesma pendência), remover o sinal das linhas e colocar **um** resumo no topo do bloco: `4 pendentes`, filtrável. Repetição idêntica não informa — só polui.
 2. **Regra do 3 por linha.** Uma linha de lista carrega no máximo: título, uma linha de contexto, um sinal de status, um valor. O quarto sinal vai para o detalhe (S3).
 3. **Top-N em hub.** Rails e blocos de S1 mostram top-N com "ver todos" para S4. Nunca lista completa em hub.
 4. **Secundário não compete.** Bloco secundário de S1 fica abaixo do P0, com header próprio (`DashboardSectionHeader`) e sem tratamento de destaque. Quando o bloco for longo, mover o excedente para a rota S4 do domínio.
-5. **Detalhe atrás de um toque.** Explicação de score, histórico e metadado vão para long-press / sheet de ajuda (`showFxHelpSheet`), não para a superfície.
+5. **Detalhe atrás de um toque.** Explicação de score, histórico e metadado vão para long-press / sheet de ajuda (`showFxHelpSheet`), não para a superfície. Affordances avançadas do P0 (mídia extra, ações raras) também: compositor limpo + overflow/sheet — não um teclado de opções no first paint.
 6. **Vazio não é branco.** Todo vazio tem ícone + título + subtítulo + uma ação (pilar 25).
 7. **Densidade por tipo:** S8 é a mais esparsa (1 informação dominante); S4 a mais densa (mas ≤3 sinais/linha); S1/S3 no meio; S2 é regular por construção (linhas de 52).
 
@@ -1548,7 +1552,7 @@ Entregável único, sem tocar em código: **planilha de rotas**, uma linha por d
 | Pai lógico | Fallback de `safePopOrGo` |
 | Tem input? | Sim/não — se sim, contrato §14.2 aplica |
 | Estrutura atual | O que está lá hoje (ex.: "inset-grouped") |
-| Divergência | Anti-padrão identificado (§31, incl. A21–A29) |
+| Divergência | Anti-padrão identificado (§31, incl. A21–A30) |
 | P0 atual / correto | Qual é a ação primária e como está tratada |
 | Job mínimo §37 | O que o domínio exige vs. o que a tela faz hoje |
 | Endpoint(s) | Caminho de dados |
@@ -1687,6 +1691,7 @@ Catálogo de defeitos. Cada um tem nome para poder ser citado em revisão.
 | **A27** | P0 atrás do teclado | CTA full-width invisível com teclado aberto | Footer sticky com `viewInsets` (§14.2) |
 | **A28** | Freeze sem planilha | Lote visual encerrado; rotas fora do inventário §28.1 | Inventário completo; §39 só com cinco eixos verdes |
 | **A29** | Já elevado, pular | “Restilamos ontem” / scorecard só de pele usado para isentar a rota | Reabrir no programa §0.6; cinco eixos + §36.2 |
+| **A30** | Muro de affordances | First paint com todas as opções do contrato “para completar profundidade”; app lento de usar | 1 P0 do momento; extras sob demanda (§0.1, §12); profundidade sem esvaziar o job (§36) |
 
 ## 32. Gates verificáveis
 
@@ -1730,8 +1735,9 @@ Job: <uma frase>
 Pai lógico (voltar): <rota>
 Input / teclado: <não | sim — contrato 14.2>
 P0: <ação primária e tratamento>
+Manuseio §0.1: <≤2 toques / 10s ok | gap: ... | A30 se muro>
 Job mínimo §37: <coberto | gap: ... | hide/delete §38>
-Profundidade P0 §36.2: <affordances do contrato vs UI>
+Profundidade P0 §36.2: <affordances do contrato vs UI — sob demanda, não muro>
 Reimplementação §0.6: <reaberta | NÃO pular — A29>
 Estados: loading / vazio / erro / freshness — <ok | o que falta>
 Caminhos de entrada: push / go / FCM — <ok | o que falta>
@@ -1756,8 +1762,8 @@ Fechar com: **Nota geral (pilares com nota, N/A fora): X/10.**
 ### 33.4 Checklist rápido antes do ship
 
 - [ ] Tipo de superfície declarado; job da rota claro; chrome/dock no shell certo
-- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31 (incl. A21–A29)
-- [ ] 1 P0 no tratamento do tipo; ≤2 P1; ≤1 `emphasize` por viewport
+- [ ] Esqueleto do tipo respeitado; nenhum anti-padrão de §31 (incl. A21–A30)
+- [ ] 1 P0 no tratamento do tipo; ≤2 P1; ≤1 `emphasize` por viewport; manuseio ≤2 toques / sem A30 (§0.1)
 - [ ] Densidade dentro de §12 (≤3 sinais/linha; agregação a partir de 3 repetições)
 - [ ] Loading / vazio / erro / retry / freshness
 - [ ] Tokens, tipografia, sheets e toque 48dp — sem paleta paralela
@@ -1996,13 +2002,19 @@ Esta parte não inventa produto. Ela afirma o que **já existe** no Focux (rotas
 
 Dois eixos. Faltar qualquer um reprova o lote. “Enviar mensagem” com um campo de texto, quando o contrato já tem mídia, é profundidade pobre — não é job cumprido.
 
+**Manuseio (§0.1):** completar amplitude/profundidade **não** autoriza A30. O contrato entra na UI; o first paint mostra o P0 do momento. Affordances extras ficam a um toque (overflow, sheet, anexo, long-press) — o personal e o aluno executam em ≤2 toques sem escanear um painel de opções.
+
 ### 36.1 Amplitude (ciclo do domínio)
 
 **Tela rasa em amplitude (A21).** A pele está correta, o tipo até pode estar certo, mas a operação cabe em uma frase pobre: "ver lista", "ver log", "criar um título". O personal espera o ciclo: criar / atribuir / pausar / encerrar / notificar — o que o domínio já tem no BE.
 
-**Teste de uma pergunta, obrigatório no scorecard:**
+**Teste de uma pergunta, obrigatório no scorecard (personal):**
 
 > "O personal abre esta tela para fazer o quê em 10 segundos?"
+
+**Teste espelho (aluno), quando a rota for do shell aluno:**
+
+> "O aluno abre esta tela para fazer o quê em 10 segundos?"
 
 Se a resposta honesta for só "olhar", a tela não está pronta. S1 decide e age. S3 entende e age. S4 encontra, filtra e cria. S5 captura e confirma. S8 executa. S6 converte.
 
@@ -2039,6 +2051,7 @@ Se a resposta honesta for só "olhar", a tela não está pronta. S1 decide e age
 - Métricas sem ação, ou ação sem contexto (número órfão + A4 juntos).
 - P0 com um único modo de entrada quando o contrato já tem vários (texto sem mídia; criar sem atribuir; ver sem agir).
 - Lote anterior só de pele usado como desculpa para não reabrir (A29).
+- Todas as affordances do contrato no first paint sem hierarquia (A30) — profundidade “completa” e manuseio lento.
 
 ## 37. Catálogo SaaS fitness: potencial mínimo por domínio
 
@@ -2113,14 +2126,16 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 
 ### 37.5 Shell do aluno
 
-Toda rota em `buildAlunoRoutes` tem job mínimo **do aluno**, não um recorte quebrado do personal:
+Toda rota em `buildAlunoRoutes` tem job mínimo **do aluno**, não um recorte quebrado do personal.
+
+**Manuseio (v3.1):** o aluno quer ainda menos painel que o personal. Home = o que fazer agora; treino = executar (S8); resto sob demanda. Mesmo critério de ≤2 toques / 10 segundos (§0.1, §36.1). Gêmeo com muro de opções ou stub (A25/A30) reprova.
 
 | Superfície aluno | Mínimo |
 |---|---|
-| Home aluno | O que fazer hoje (treino, mensagem, cobrança visível se o contrato mostrar) |
-| Treinos / check-in | Executar o treino atribuído (S8) |
-| Hábitos / recorrência / grupos / feed / form-check / evolução / perfil | Operar o gêmeo, com voltar e teclado |
-| Ativação | S6/S9 de senha/primeiro acesso completo |
+| Home aluno | O que fazer hoje (treino, mensagem, cobrança visível se o contrato mostrar) — 1 P0, sem catálogo de módulos no fold |
+| Treinos / check-in | Executar o treino atribuído (S8); controles na thumb zone |
+| Hábitos / recorrência / grupos / feed / form-check / evolução / perfil | Operar o gêmeo, com voltar e teclado; secundário atrás de um toque |
+| Ativação | S6/S9 de senha/primeiro acesso completo; conversão em ≤2 toques |
 
 A25 (gêmeo stub) reprova o domínio inteiro, não só a tela aluno.
 
@@ -2390,6 +2405,6 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 
 **Picker:** `_AlunosSheetCheckRow` e rows custom com `InkWell` + `Icons.check` em sheets de seleção. Highlight de seleção recuado dentro de `FxSettingsGroup` sem `edgeToEdgeRows`.
 
-**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12), tela rasa (A21), voltar morto (A22), teclado preso (A23), overlay cru (A24), gêmeo stub (A25), destino morto (A26), P0 atrás do teclado (A27), freeze sem planilha (A28), já elevado pular (A29).
+**Padrões proibidos (§31):** CTA com chevron (A2), inset-grouped fora de S2 (A1), CTA full-width em hub/ajustes (A7), botão branco sobre preto (A8), `showError(context, '$e')` (A11), `if (plano == 'FREE')` em widget (A12), tela rasa (A21), voltar morto (A22), teclado preso (A23), overlay cru (A24), gêmeo stub (A25), destino morto (A26), P0 atrás do teclado (A27), freeze sem planilha (A28), já elevado pular (A29), muro de affordances (A30).
 
 **Regra geral:** ao remover, remover de verdade — arquivo, campos, testes do fold antigo, no mesmo commit (§30).
