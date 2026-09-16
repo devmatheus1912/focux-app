@@ -157,12 +157,13 @@ jobs:
             EXTRA+=(--dart-define=GOOGLE_IOS_CLIENT_ID="$GOOGLE_IOS_CLIENT_ID")
           fi
 
+          # EXTRA vazia + set -u → "unbound variable" no bash do runner
           flutter build ipa --release \
             --dart-define=API_URL="$API_URL" \
             --dart-define=PUBLIC_WEB_URL="$PUBLIC_WEB_URL" \
             --dart-define=API_CERT_PINS="$API_CERT_PINS" \
             --dart-define=REQUIRE_API_CERT_PINS=true \
-            "${EXTRA[@]}" \
+            ${EXTRA[@]+"${EXTRA[@]}"} \
             --export-options-plist=ios/ExportOptions.ci.plist \
             -- \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
