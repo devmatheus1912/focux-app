@@ -45,6 +45,10 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
     context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
   }
 
+  void _openComparativo(BuildContext context) {
+    context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
@@ -64,7 +68,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
           ),
           const SizedBox(height: TokensStrip.s3),
           InkWell(
-            onTap: () => _openEvolucao(context),
+            onTap: () => _openComparativo(context),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Peso atual',
@@ -75,7 +79,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
               hint:
                   showRadarHint
                       ? 'Mapa corporal pendente no radar'
-                      : 'Toque para abrir evolução',
+                      : 'Toque para abrir o comparativo',
               color: primary,
               isDark: isDark,
             ),
@@ -98,7 +102,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Tentar histórico',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => _openEvolucao(context),
+                    onPressed: () => _openComparativo(context),
                   ),
                 ),
             data: (series) {
@@ -113,7 +117,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Registrar primeira medida',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => _openEvolucao(context),
+                    onPressed: () => _openComparativo(context),
                   ),
                 );
               }
@@ -129,7 +133,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Abrir histórico de medições corporais',
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
-                      onTap: () => _openEvolucao(context),
+                      onTap: () => _openComparativo(context),
                       child:               Aluno360WeightTrendSparkline(
                         values: weightSeries,
                         deltaKg: delta,
@@ -143,14 +147,23 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s2),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: DashboardHomeActionChip(
-                      label: 'Ver radar e medidas',
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: () => _openEvolucao(context),
-                    ),
+                  Wrap(
+                    spacing: TokensStrip.s2,
+                    runSpacing: TokensStrip.s2,
+                    children: [
+                      DashboardHomeActionChip(
+                        label: 'Registrar medida',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed: () => _openComparativo(context),
+                      ),
+                      DashboardHomeActionChip(
+                        label: 'Ver radar',
+                        accent: primary,
+                        isDark: isDark,
+                        onPressed: () => _openEvolucao(context),
+                      ),
+                    ],
                   ),
                 ],
               );

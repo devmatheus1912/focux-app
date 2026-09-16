@@ -245,7 +245,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                       isDark: isDark,
                                       onPressed:
                                           () => context.push(
-                                            '/alunos/$alunoId/evolucao',
+                                            '/alunos/$alunoId/evolucao-comparativo',
                                             extra: alunoNome,
                                           ),
                                     ),
