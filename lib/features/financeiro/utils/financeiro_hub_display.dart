@@ -1,17 +1,24 @@
 import '../../alunos/utils/satellite_screen_utils.dart';
 
-enum FinanceiroHubView { resumo, mensalidades, metricas }
+/// Hub financeiro — P0 = lista de mensalidades (A30 / §0.1).
+enum FinanceiroHubView { mensalidades, panorama, porMes }
 
 String financeiroHubViewLabel(FinanceiroHubView view) {
   switch (view) {
-    case FinanceiroHubView.resumo:
-      return 'Resumo';
     case FinanceiroHubView.mensalidades:
       return 'Mensalidades';
-    case FinanceiroHubView.metricas:
-      return 'Métricas';
+    case FinanceiroHubView.panorama:
+      return 'Panorama';
+    case FinanceiroHubView.porMes:
+      return 'Por mês';
   }
 }
+
+/// Vistas secundárias — atrás de um toque no hub.
+const financeiroHubSecondaryViews = <FinanceiroHubView>[
+  FinanceiroHubView.panorama,
+  FinanceiroHubView.porMes,
+];
 
 String financeiroHubSubtitle({
   required FinanceiroHubView view,
@@ -22,6 +29,78 @@ String financeiroHubSubtitle({
   if (fresh == null || fresh.isEmpty) return vista;
   return '$vista · $fresh';
 }
+
+/// Ferramentas da lista — sticky é Nova; resto sob Mais.
+enum FinanceiroListaToolId { atualizarAtrasos, marcarLote, cancelarLote }
+
+({FinanceiroListaToolId? foldChip, List<FinanceiroListaToolId> mais})
+financeiroListaTools({
+  required bool temAberto,
+  required bool modoSelecao,
+}) {
+  if (modoSelecao) {
+    return (
+      foldChip: FinanceiroListaToolId.marcarLote,
+      mais: const [
+        FinanceiroListaToolId.cancelarLote,
+        FinanceiroListaToolId.atualizarAtrasos,
+      ],
+    );
+  }
+  return (
+    foldChip: null,
+    mais: [
+      FinanceiroListaToolId.atualizarAtrasos,
+      if (temAberto) FinanceiroListaToolId.marcarLote,
+    ],
+  );
+}
+
+String financeiroListaToolLabel(
+  FinanceiroListaToolId id, {
+  required bool modoSelecao,
+  required int selecionados,
+}) =>
+    switch (id) {
+      FinanceiroListaToolId.atualizarAtrasos => 'Atualizar atrasos',
+      FinanceiroListaToolId.marcarLote => financeiroLotePagoChipLabel(
+        modoSelecao: modoSelecao,
+        selecionados: selecionados,
+      ),
+      FinanceiroListaToolId.cancelarLote => 'Cancelar seleção',
+    };
+
+/// Ações do detalhe S3 — sticky P0 separado; estas vão no Mais.
+enum MensalidadeDetailActionId {
+  aluno,
+  financeiro,
+  edit,
+  pix,
+  chat,
+  contato,
+}
+
+List<MensalidadeDetailActionId> mensalidadeDetailMaisActions({
+  required bool pending,
+}) =>
+    [
+      MensalidadeDetailActionId.aluno,
+      MensalidadeDetailActionId.financeiro,
+      MensalidadeDetailActionId.edit,
+      if (pending) MensalidadeDetailActionId.pix,
+      if (pending) MensalidadeDetailActionId.chat,
+      MensalidadeDetailActionId.contato,
+    ];
+
+String mensalidadeDetailActionLabel(MensalidadeDetailActionId id) =>
+    switch (id) {
+      MensalidadeDetailActionId.aluno => 'Abrir aluno',
+      MensalidadeDetailActionId.financeiro => 'Lista de mensalidades',
+      MensalidadeDetailActionId.edit => 'Editar',
+      MensalidadeDetailActionId.pix => 'PIX',
+      MensalidadeDetailActionId.chat => 'Cobrar no chat',
+      MensalidadeDetailActionId.contato => 'Registrar contato',
+    };
 
 String financeiroMensalidadeVencimentoLabel({
   required String mesReferencia,
@@ -326,14 +405,6 @@ String financeiroAlunoPickerValue(String? nome) {
   if (n == null || n.isEmpty) return 'Selecionar';
   return n;
 }
-
-const financeiroMensalidadeSecaoCobranca = 'cobranca';
-const financeiroMensalidadeSecaoContatos = 'contatos';
-
-const financeiroMensalidadeDetalheSecoes = <({String value, String label})>[
-  (value: financeiroMensalidadeSecaoCobranca, label: 'Cobrança'),
-  (value: financeiroMensalidadeSecaoContatos, label: 'Contatos'),
-];
 
 String financeiroContatoWhenLabel(String? registradoEm) =>
     financeiroMensalidadePagoEmLabel(registradoEm);

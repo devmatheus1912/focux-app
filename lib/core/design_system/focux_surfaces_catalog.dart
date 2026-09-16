@@ -269,7 +269,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/agenda',
   ),
   '/agenda/aluno': FocuxSurfaceSpec(type: _s4, logicalParent: _alunoHome),
-  '/financeiro': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
+  '/financeiro': FocuxSurfaceSpec(
+    type: _s1,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/perfil': FocuxSurfaceSpec(type: _s2, logicalParent: _home),
   '/perfil/mfa': FocuxSurfaceSpec(
     type: _s5,

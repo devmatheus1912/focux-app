@@ -27,10 +27,13 @@ void main() {
     expect(screen, contains('showFinanceiroMensalidadeHelpSheet'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('DashboardHomeActionChip'));
-    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('mensalidadeDetailMaisActions'));
+    expect(screen, contains('Mais ações'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains("safePopOrGo("));
     expect(screen, contains("'/financeiro'"));
     expect(screen, isNot(contains('FxSettingsGroup')));
+    expect(screen, isNot(contains('AlunoSegmentedChoice')));
   });
 }

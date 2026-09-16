@@ -328,38 +328,82 @@ class _FinanceiroMensalidadesTabState
                               FxSettingsLayout.pageInset,
                               8,
                             ),
-                            child: Wrap(
-                              spacing: TokensStrip.s2,
-                              runSpacing: TokensStrip.s2,
-                              children: [
-                                DashboardHomeActionChip(
-                                  label: 'Atualizar atrasos',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _atualizarAtrasos,
-                                ),
-                                if (_items.any(
+                            child: Builder(
+                              builder: (context) {
+                                final temAberto = _items.any(
                                   (m) => financeiroStatusAberto(m.status),
-                                ))
-                                  DashboardHomeActionChip(
-                                    label: financeiroLotePagoChipLabel(
-                                      modoSelecao: _modoSelecao,
-                                      selecionados: _selecionados.length,
-                                    ),
-                                    accent: EagleTokens.moneyGreen,
-                                    isDark: chrome.isDark,
-                                    onPressed: _modoSelecao
-                                        ? _confirmarLotePago
-                                        : _entrarModoLote,
-                                  ),
-                                if (_modoSelecao)
-                                  DashboardHomeActionChip(
-                                    label: 'Cancelar',
-                                    accent: chrome.mute,
-                                    isDark: chrome.isDark,
-                                    onPressed: _sairModoLote,
-                                  ),
-                              ],
+                                );
+                                final tools = financeiroListaTools(
+                                  temAberto: temAberto,
+                                  modoSelecao: _modoSelecao,
+                                );
+                                Future<void> runTool(
+                                  FinanceiroListaToolId id,
+                                ) async {
+                                  switch (id) {
+                                    case FinanceiroListaToolId.atualizarAtrasos:
+                                      await _atualizarAtrasos();
+                                    case FinanceiroListaToolId.marcarLote:
+                                      if (_modoSelecao) {
+                                        await _confirmarLotePago();
+                                      } else {
+                                        _entrarModoLote();
+                                      }
+                                    case FinanceiroListaToolId.cancelarLote:
+                                      _sairModoLote();
+                                  }
+                                }
+
+                                Future<void> openMais() async {
+                                  final chosen =
+                                      await showFxInsetPickerSheet<
+                                        FinanceiroListaToolId
+                                      >(
+                                        context,
+                                        title: 'Mais na lista',
+                                        items: [
+                                          for (final id in tools.mais)
+                                            FxInsetPickerSheetItem(
+                                              value: id,
+                                              label: financeiroListaToolLabel(
+                                                id,
+                                                modoSelecao: _modoSelecao,
+                                                selecionados:
+                                                    _selecionados.length,
+                                              ),
+                                            ),
+                                        ],
+                                      );
+                                  if (chosen == null || !mounted) return;
+                                  await runTool(chosen);
+                                }
+
+                                return Wrap(
+                                  spacing: TokensStrip.s2,
+                                  runSpacing: TokensStrip.s2,
+                                  children: [
+                                    if (tools.foldChip != null)
+                                      DashboardHomeActionChip(
+                                        label: financeiroListaToolLabel(
+                                          tools.foldChip!,
+                                          modoSelecao: _modoSelecao,
+                                          selecionados: _selecionados.length,
+                                        ),
+                                        accent: EagleTokens.moneyGreen,
+                                        isDark: chrome.isDark,
+                                        onPressed: () =>
+                                            runTool(tools.foldChip!),
+                                      ),
+                                    if (tools.mais.isNotEmpty)
+                                      DashboardHomeActionChip(
+                                        label: 'Mais',
+                                        accent: chrome.mute,
+                                        isDark: chrome.isDark,
+                                        onPressed: openMais,
+                                      ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         Expanded(

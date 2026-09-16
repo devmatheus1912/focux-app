@@ -33,30 +33,30 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
 }
 
 class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
-  late FinanceiroHubView _view;
+  /// P0 do domínio = lista (A30). Panorama / por mês atrás de Mais.
+  FinanceiroHubView _view = FinanceiroHubView.mensalidades;
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
+
   /// Incrementa para pedir abertura do form na aba Mensalidades.
   int _novaMensalidadeToken = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _view =
-        widget.initialAlunoId != null
-            ? FinanceiroHubView.mensalidades
-            : FinanceiroHubView.resumo;
-  }
-
-  Future<void> _abrirVista() async {
+  Future<void> _abrirMaisVistas() async {
     final picked = await showFxInsetPickerSheet<FinanceiroHubView>(
       context,
-      title: 'Ver',
+      title: 'Mais no financeiro',
       selected: _view,
       items: [
-        for (final v in FinanceiroHubView.values)
-          FxInsetPickerSheetItem(value: v, label: financeiroHubViewLabel(v)),
+        FxInsetPickerSheetItem(
+          value: FinanceiroHubView.mensalidades,
+          label: financeiroHubViewLabel(FinanceiroHubView.mensalidades),
+        ),
+        for (final v in financeiroHubSecondaryViews)
+          FxInsetPickerSheetItem(
+            value: v,
+            label: financeiroHubViewLabel(v),
+          ),
       ],
     );
     if (!mounted || picked == null || picked == _view) return;
@@ -157,8 +157,8 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
           actions: [
             ShellHeaderIconButton(
               icon: 'coin',
-              tooltip: 'Trocar visão',
-              onTap: _abrirVista,
+              tooltip: 'Mais no financeiro',
+              onTap: _abrirMaisVistas,
             ),
             SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
@@ -186,11 +186,11 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                   child: IndexedStack(
                     index: _view.index,
                     children: [
-                      const FinanceiroDashboardScreen(),
                       FinanceiroMensalidadesTab(
                         initialAlunoId: widget.initialAlunoId,
                         novaMensalidadeToken: _novaMensalidadeToken,
                       ),
+                      const FinanceiroDashboardScreen(),
                       const FinanceiroResumoScreen(),
                     ],
                   ),
