@@ -52,6 +52,7 @@ void main() {
     expect(screen, contains('Buscar aluno'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('onTapOutside'));
+    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, isNot(contains(r'showError(context, $e)')));
   });
 }

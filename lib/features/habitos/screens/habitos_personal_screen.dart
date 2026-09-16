@@ -486,7 +486,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
               _query = next;
               _carregar();
             },
-            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
             decoration: InputDecoration(
               hintText: 'Buscar aluno',
               prefixIcon: const Icon(Icons.search_rounded),

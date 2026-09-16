@@ -383,14 +383,22 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: '/assinatura',
   ),
-  '/habitos': FocuxSurfaceSpec(type: _s4, logicalParent: _ferramentas),
+  '/habitos': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _ferramentas,
+  ),
   '/habitos/:id': FocuxSurfaceSpec(type: _s3, logicalParent: '/habitos'),
   '/automacoes': FocuxSurfaceSpec(
     type: _s4,
     hasInput: true,
     logicalParent: _ferramentas,
   ),
-  '/desafios': FocuxSurfaceSpec(type: _s4, logicalParent: _ferramentas),
+  '/desafios': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _ferramentas,
+  ),
   '/desafios/:id': FocuxSurfaceSpec(type: _s3, logicalParent: '/desafios'),
   '/loja': FocuxSurfaceSpec(
     type: _s4,
@@ -434,7 +442,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: '/financeiro',
   ),
   '/nps': FocuxSurfaceSpec(type: _s1, logicalParent: _home),
-  '/grupo-aulas': FocuxSurfaceSpec(type: _s4, logicalParent: _home),
+  '/grupo-aulas': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: _home,
+  ),
   '/migracao-magica': FocuxSurfaceSpec(
     type: _s9,
     hasInput: true,
