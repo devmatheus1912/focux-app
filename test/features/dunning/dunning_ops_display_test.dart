@@ -53,4 +53,27 @@ void main() {
     expect(dunningIsAssinaturaFocux('FOCUX_SUBSCRIPTION'), isTrue);
     expect(dunningIsAssinaturaFocux('ALUNO_MENSALIDADE'), isFalse);
   });
+
+  test('dunningFocusActions prefers cobrar as P0', () {
+    final split = dunningFocusActions(
+      hasFalha: true,
+      canChat: true,
+      canCobrar: true,
+      canAssinatura: true,
+    );
+    expect(split.primary, DunningFocusActionId.cobrar);
+    expect(split.secondary, [
+      DunningFocusActionId.chat,
+      DunningFocusActionId.assinatura,
+      DunningFocusActionId.marcar,
+    ]);
+    final empty = dunningFocusActions(
+      hasFalha: false,
+      canChat: false,
+      canCobrar: false,
+      canAssinatura: false,
+    );
+    expect(empty.primary, DunningFocusActionId.financeiro);
+    expect(empty.secondary, isEmpty);
+  });
 }

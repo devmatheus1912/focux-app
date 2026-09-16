@@ -11,6 +11,9 @@ void main() {
       readScreenSourceBundle(
         'lib/features/retencao/widgets/retencao_acoes_sheet.dart',
       ),
+      readScreenSourceBundle(
+        'lib/features/retencao/utils/retencao_display.dart',
+      ),
     ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
@@ -25,6 +28,10 @@ void main() {
     expect(screen, contains('showRetencaoAcoesSheet'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Cobrar'));
+    expect(screen, contains('Mais ações'));
+    expect(screen, contains('Mais hubs'));
+    expect(screen, contains('retencaoFocusActions'));
+    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('retencaoEmptyTitle'));
     expect(screen, isNot(contains('Scores em breve')));
@@ -39,8 +46,8 @@ void main() {
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('isDark'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains("context.push('/winback')"));
-    expect(screen, contains("context.push('/dunning')"));
+    expect(screen, contains("'/winback'"));
+    expect(screen, contains("'/dunning'"));
     expect(screen, contains('Histórico win-back'));
     expect(screen, contains('Cobrança auto'));
   });

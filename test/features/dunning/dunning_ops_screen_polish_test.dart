@@ -14,6 +14,9 @@ void main() {
       readScreenSourceBundle(
         'lib/features/dunning/widgets/dunning_acoes_sheet.dart',
       ),
+      readScreenSourceBundle(
+        'lib/features/dunning/utils/dunning_ops_display.dart',
+      ),
     ].join('\n');
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
@@ -41,6 +44,9 @@ void main() {
     expect(screen, contains('showDunningAcoesSheet'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Cobrar'));
+    expect(screen, contains('Mais ações'));
+    expect(screen, contains('dunningFocusActions'));
+    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('Ver mais'));
     expect(screen, contains('alunoNome'));
     expect(screen, contains('circle-check'));

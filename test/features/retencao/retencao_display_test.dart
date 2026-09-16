@@ -44,4 +44,19 @@ void main() {
     );
     expect(retencaoComoCalculamos, contains('ATIVOS'));
   });
+
+  test('retencaoFocusActions and hub links stay A30-shaped', () {
+    final hot = retencaoFocusActions(hasAlto: true);
+    expect(hot.primary, RetencaoFocusActionId.chat);
+    expect(hot.secondary, [
+      RetencaoFocusActionId.cobrar,
+      RetencaoFocusActionId.aluno360,
+    ]);
+    final cold = retencaoFocusActions(hasAlto: false);
+    expect(cold.primary, RetencaoFocusActionId.verAlunos);
+    expect(cold.secondary, isEmpty);
+    expect(retencaoHubLinks, hasLength(2));
+    expect(retencaoHubLinkRoute(RetencaoHubLinkId.winback), '/winback');
+    expect(retencaoHubLinkLabel(RetencaoHubLinkId.dunning), 'Cobrança auto');
+  });
 }

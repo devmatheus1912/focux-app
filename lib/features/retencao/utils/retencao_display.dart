@@ -74,3 +74,48 @@ RetencaoAlunoScore? firstAltoRetencao(List<RetencaoAlunoScore> scores) {
   }
   return null;
 }
+
+/// Ações do focus — 1 P0 no fold (A30 / §0.1).
+enum RetencaoFocusActionId { chat, cobrar, aluno360, verAlunos }
+
+({RetencaoFocusActionId primary, List<RetencaoFocusActionId> secondary})
+retencaoFocusActions({required bool hasAlto}) {
+  if (!hasAlto) {
+    return (
+      primary: RetencaoFocusActionId.verAlunos,
+      secondary: const <RetencaoFocusActionId>[],
+    );
+  }
+  return (
+    primary: RetencaoFocusActionId.chat,
+    secondary: const [
+      RetencaoFocusActionId.cobrar,
+      RetencaoFocusActionId.aluno360,
+    ],
+  );
+}
+
+String retencaoFocusActionLabel(RetencaoFocusActionId id) => switch (id) {
+  RetencaoFocusActionId.chat => 'Escrever',
+  RetencaoFocusActionId.cobrar => 'Cobrar',
+  RetencaoFocusActionId.aluno360 => 'Abrir 360',
+  RetencaoFocusActionId.verAlunos => 'Ver alunos',
+};
+
+/// Hubs satélite do fold — atrás de um toque.
+enum RetencaoHubLinkId { winback, dunning }
+
+const retencaoHubLinks = <RetencaoHubLinkId>[
+  RetencaoHubLinkId.winback,
+  RetencaoHubLinkId.dunning,
+];
+
+String retencaoHubLinkLabel(RetencaoHubLinkId id) => switch (id) {
+  RetencaoHubLinkId.winback => 'Histórico win-back',
+  RetencaoHubLinkId.dunning => 'Cobrança auto',
+};
+
+String retencaoHubLinkRoute(RetencaoHubLinkId id) => switch (id) {
+  RetencaoHubLinkId.winback => '/winback',
+  RetencaoHubLinkId.dunning => '/dunning',
+};

@@ -40,4 +40,17 @@ void main() {
     expect(coachEmptySubtitle, contains('check-in'));
     expect(coachComoCalculamos, contains('catálogo'));
   });
+
+  test('coachFocusActions keeps open as P0 and secondary under demand', () {
+    final full = coachFocusActions(canChat: true, canAgenda: true);
+    expect(full.primary, CoachFocusActionId.open);
+    expect(full.secondary, [
+      CoachFocusActionId.chat,
+      CoachFocusActionId.agenda,
+      CoachFocusActionId.ack,
+    ]);
+    final lean = coachFocusActions(canChat: false, canAgenda: false);
+    expect(lean.secondary, [CoachFocusActionId.ack]);
+    expect(coachFocusActionLabel(CoachFocusActionId.open), 'Abrir aluno');
+  });
 }
