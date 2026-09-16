@@ -171,6 +171,8 @@ String relatorioAlunoStickyEmpty() => 'Ver evolução';
 
 String relatorioAlunoCheckinChip() => 'Pedir check-in';
 
+String relatorioAlunoMaisChip() => 'Mais';
+
 const relatorioDetalheSecaoResumo = 'resumo';
 const relatorioDetalheSecaoComparativo = 'comparativo';
 

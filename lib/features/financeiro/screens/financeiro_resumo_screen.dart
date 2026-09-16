@@ -118,6 +118,8 @@ class _FinanceiroResumoScreenState
     return fxScreenA11yScope(
       label: 'Financeiro métricas. ${freshnessLabel ?? mesLabel}',
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
@@ -136,25 +138,47 @@ class _FinanceiroResumoScreenState
               ),
             ),
           ),
-          Expanded(
-            child:
-                _loading
-                    ? const SkeletonList(count: 5)
-                    : _erro != null
-                    ? FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      message: _erro!,
-                      onRetry: _carregar,
-                    )
-                    : _resumo == null
-                    ? const FxEmptyState(
-                      icon: 'coin',
-                      title: 'Sem dados para exibir',
-                      subtitle: 'Nenhuma mensalidade neste período.',
-                    )
-                    : _buildContent(isDark, freshnessLabel),
-          ),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                0,
+              ),
+              child: SkeletonList(count: 5),
+            )
+          else if (_erro != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                0,
+              ),
+              child: FxErrorState(
+                chromeOnDark: isDark,
+                primary: primary,
+                message: _erro!,
+                onRetry: _carregar,
+              ),
+            )
+          else if (_resumo == null)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
+                TokensStrip.s3,
+                FxSettingsLayout.pageInset,
+                0,
+              ),
+              child: FxEmptyState(
+                icon: 'coin',
+                title: 'Sem dados para exibir',
+                subtitle: 'Nenhuma mensalidade neste período.',
+              ),
+            )
+          else
+            _buildContent(isDark, freshnessLabel),
         ],
       ),
     );
@@ -163,83 +187,86 @@ class _FinanceiroResumoScreenState
   Widget _buildContent(bool isDark, String? freshnessLabel) {
     final r = _resumo!;
 
-    return ListView(
+    return Padding(
       padding: const EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
-        0,
+        TokensStrip.s3,
         FxSettingsLayout.pageInset,
-        32,
+        0,
       ),
-      children: [
-        _DonutChartCard(resumo: r, isDark: isDark),
-        const SizedBox(height: TokensStrip.s4),
-        DashboardSectionHeader(
-          title: 'Do mês',
-          actionLabel: 'Mensalidades',
-          onAction: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-            source: 'metricas',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DonutChartCard(resumo: r, isDark: isDark),
+          const SizedBox(height: TokensStrip.s4),
+          DashboardSectionHeader(
+            title: 'Do mês',
+            actionLabel: 'Mensalidades',
+            onAction: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+              source: 'metricas',
+            ),
           ),
-        ),
-        if (freshnessLabel != null) ...[
+          if (freshnessLabel != null) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              freshnessLabel,
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s3),
+          InkWell(
+            onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+              source: 'metricas',
+            ),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Recebido',
+              value: r.totalRecebido.format(showDecimals: false),
+              hint:
+                  'Previsto ${r.totalPrevisto.format(showDecimals: false)}',
+              color: EagleTokens.moneyGreen,
+              isDark: isDark,
+            ),
+          ),
           const SizedBox(height: TokensStrip.s2),
-          Text(
-            freshnessLabel,
-            style: FocuxHubTypography.bodyMuted(
-              color: fxScreenMute(context),
-              fontWeight: FontWeight.w600,
+          InkWell(
+            onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+              source: 'metricas',
+            ),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Inadimplentes',
+              value: '${r.inadimplentes}',
+              hint:
+                  'Ticket ${r.ticketMedio.format(showDecimals: false)}',
+              color: r.inadimplentes > 0
+                  ? EagleTokens.bad
+                  : Theme.of(context).colorScheme.primary,
+              isDark: isDark,
+              emphasis: r.inadimplentes > 0
+                  ? OperationalMetricEmphasis.alert
+                  : OperationalMetricEmphasis.normal,
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          InkWell(
+            onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
+              source: 'metricas',
+            ),
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Acumulado anual',
+              value: r.acumuladoAnual.format(showDecimals: false),
+              hint: 'Soma do ano em curso',
+              color: Theme.of(context).colorScheme.primary,
+              isDark: isDark,
             ),
           ),
         ],
-        const SizedBox(height: TokensStrip.s3),
-        InkWell(
-          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-            source: 'metricas',
-          ),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Recebido',
-            value: r.totalRecebido.format(showDecimals: false),
-            hint:
-                'Previsto ${r.totalPrevisto.format(showDecimals: false)}',
-            color: EagleTokens.moneyGreen,
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        InkWell(
-          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-            source: 'metricas',
-          ),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Inadimplentes',
-            value: '${r.inadimplentes}',
-            hint:
-                'Ticket ${r.ticketMedio.format(showDecimals: false)}',
-            color: r.inadimplentes > 0
-                ? EagleTokens.bad
-                : Theme.of(context).colorScheme.primary,
-            isDark: isDark,
-            emphasis: r.inadimplentes > 0
-                ? OperationalMetricEmphasis.alert
-                : OperationalMetricEmphasis.normal,
-          ),
-        ),
-        const SizedBox(height: TokensStrip.s2),
-        InkWell(
-          onTap: () => FinanceiroHubScope.maybeOf(context)?.goToMensalidades(
-            source: 'metricas',
-          ),
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Acumulado anual',
-            value: r.acumuladoAnual.format(showDecimals: false),
-            hint: 'Soma do ano em curso',
-            color: Theme.of(context).colorScheme.primary,
-            isDark: isDark,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

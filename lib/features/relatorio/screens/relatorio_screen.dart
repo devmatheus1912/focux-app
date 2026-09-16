@@ -190,6 +190,35 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     }
   }
 
+  Future<void> _abrirMaisAcoes() async {
+    final chosen = await showFxInsetPickerSheet<String>(
+      context,
+      title: 'Mais',
+      headerIcon: Icons.more_horiz_rounded,
+      selected: null,
+      items: const [
+        FxInsetPickerSheetItem(
+          value: 'aluno',
+          label: 'Aluno',
+          subtitle: 'Voltar ao 360',
+          icon: Icons.person_outline_rounded,
+        ),
+        FxInsetPickerSheetItem(
+          value: 'chat',
+          label: 'Chat',
+          subtitle: 'Mensagem com o aluno',
+          icon: Icons.chat_bubble_outline_rounded,
+        ),
+      ],
+    );
+    if (!mounted || chosen == null) return;
+    if (chosen == 'aluno') {
+      context.push('/alunos/${widget.alunoId}');
+    } else if (chosen == 'chat') {
+      context.push('/alunos/${widget.alunoId}/chat');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -326,20 +355,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   isDark: isDark,
                   onPressed: _abrirPeriodo,
                 ),
-                DashboardHomeActionChip(
-                  label: 'Aluno',
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed:
-                      () => context.push('/alunos/${widget.alunoId}'),
-                ),
-                DashboardHomeActionChip(
-                  label: 'Chat',
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed:
-                      () => context.push('/alunos/${widget.alunoId}/chat'),
-                ),
                 if (dados != null &&
                     dados.treinosTotal > 0 &&
                     relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent))
@@ -354,6 +369,12 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                           alunoNome: widget.alunoNome,
                         ),
                   ),
+                DashboardHomeActionChip(
+                  label: relatorioAlunoMaisChip(),
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: _abrirMaisAcoes,
+                ),
               ],
             ),
             ..._metricTiles(dados: dados, isDark: isDark, primary: primary),

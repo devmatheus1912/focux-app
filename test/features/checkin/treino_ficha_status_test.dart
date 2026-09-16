@@ -56,6 +56,67 @@ void main() {
       expect(ordered.map((t) => t.treinoId), [2, 1]);
     });
 
+    test('proximoTreinoParaHoje gira apos ultimo concluido', () {
+      final a = ExecucaoTreino(
+        treinoId: 1,
+        treinoNome: 'Treino A',
+        status: 'DISPONIVEL',
+        exercicios: const [],
+      );
+      final b = ExecucaoTreino(
+        treinoId: 2,
+        treinoNome: 'Treino B',
+        status: 'DISPONIVEL',
+        exercicios: const [],
+      );
+      final c = ExecucaoTreino(
+        treinoId: 3,
+        treinoNome: 'Treino C',
+        status: 'DISPONIVEL',
+        exercicios: const [],
+      );
+      expect(
+        proximoTreinoParaHoje(treinos: [a, b, c])?.treinoNome,
+        'Treino A',
+      );
+      expect(
+        proximoTreinoParaHoje(
+          treinos: [a, b, c],
+          historico: [
+            ExecucaoTreino(
+              treinoId: 1,
+              treinoNome: 'Treino A',
+              status: 'CONCLUIDO',
+              concluidoEm: '2026-09-15T10:00:00',
+              exercicios: const [],
+            ),
+          ],
+        )?.treinoNome,
+        'Treino B',
+      );
+      final emAndamento = ExecucaoTreino(
+        treinoId: 3,
+        treinoNome: 'Treino C',
+        status: 'EM_ANDAMENTO',
+        exercicios: const [],
+      );
+      expect(
+        proximoTreinoParaHoje(
+          treinos: [a, b, emAndamento],
+          historico: [
+            ExecucaoTreino(
+              treinoId: 1,
+              treinoNome: 'Treino A',
+              status: 'CONCLUIDO',
+              concluidoEm: '2026-09-15T10:00:00',
+              exercicios: const [],
+            ),
+          ],
+        )?.treinoId,
+        3,
+      );
+    });
+
     test('consistencia conta dias unicos e nao N execucoes', () {
       final historico = [
         ExecucaoTreino(
@@ -103,9 +164,16 @@ void main() {
     });
 
     test('bundle hidrata resumo e diasComCheckin', () {
+      final today = DateTime.now();
+      final day = DateTime(today.year, today.month, today.day)
+          .subtract(const Duration(days: 2));
+      final iso =
+          '${day.year.toString().padLeft(4, '0')}-'
+          '${day.month.toString().padLeft(2, '0')}-'
+          '${day.day.toString().padLeft(2, '0')}';
       final bundle = AderenciaSemanalBundle.fromJson({
         'dias': [
-          {'dia': '2026-09-09', 'weekday': 'Q', 'checkins': 1},
+          {'dia': iso, 'weekday': 'Q', 'checkins': 1},
         ],
         'totalSemana': 7,
         'streakAtual': 1,
@@ -123,10 +191,19 @@ void main() {
     });
 
     test('weekRatioLabel usa 7 dias mesmo quando totalSemana é soma de check-ins', () {
+      final today = DateTime.now();
+      String isoDaysAgo(int ago) {
+        final day = DateTime(today.year, today.month, today.day)
+            .subtract(Duration(days: ago));
+        return '${day.year.toString().padLeft(4, '0')}-'
+            '${day.month.toString().padLeft(2, '0')}-'
+            '${day.day.toString().padLeft(2, '0')}';
+      }
+
       final bundle = AderenciaSemanalBundle.fromJson({
         'dias': [
-          {'dia': '2026-09-11', 'weekday': 'S', 'checkins': 2},
-          {'dia': '2026-09-12', 'weekday': 'S', 'checkins': 1},
+          {'dia': isoDaysAgo(3), 'weekday': 'S', 'checkins': 2},
+          {'dia': isoDaysAgo(2), 'weekday': 'S', 'checkins': 1},
         ],
         'totalSemana': 3,
         'streakAtual': 2,

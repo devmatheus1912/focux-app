@@ -23,7 +23,6 @@ import '../utils/financeiro_hub_display.dart';
 import '../widgets/financeiro_help_sheet.dart';
 import 'financeiro_dashboard_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
-import 'financeiro_resumo_screen.dart';
 
 class FinanceiroScreen extends ConsumerStatefulWidget {
   const FinanceiroScreen({super.key, this.initialAlunoId});
@@ -35,7 +34,7 @@ class FinanceiroScreen extends ConsumerStatefulWidget {
 }
 
 class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
-  /// P0 do domínio = lista (A30). Panorama / por mês atrás de Mais.
+  /// P0 do domínio = lista (A30). Panorama (mês + KPIs) atrás de Mais.
   FinanceiroHubView _view = FinanceiroHubView.mensalidades;
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
@@ -201,7 +200,6 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
                         novaMensalidadeToken: _novaMensalidadeToken,
                       ),
                       const FinanceiroDashboardScreen(),
-                      const FinanceiroResumoScreen(),
                     ],
                   ),
                 ),

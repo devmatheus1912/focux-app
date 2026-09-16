@@ -179,7 +179,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
           actions: [
             ShellHeaderIconButton(
               icon: 'route',
-              tooltip: 'Hubs relacionados',
+              tooltip: 'Mais hubs',
               onTap: _abrirMaisHubs,
             ),
             const SizedBox(width: FxHelpChrome.gap),
@@ -396,8 +396,18 @@ class _RetencaoFocusCard extends StatelessWidget {
       run(chosen)();
     }
 
+    final focusTitle =
+        firstAlto != null
+            ? firstAlto.alunoNome
+            : (alto == 0
+                ? 'Ninguém em alerta agora'
+                : alto == 1
+                ? '1 aluno em risco alto'
+                : '$alto alunos em risco alto');
+
     return FxStripCard(
       emphasize: true,
+      padding: const EdgeInsets.all(TokensStrip.s3),
       semanticsLabel:
           alto == 0
               ? 'Nenhum aluno em risco alto'
@@ -405,27 +415,17 @@ class _RetencaoFocusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Risco alto', style: FocuxHubTypography.chip(chrome.mute)),
-          const SizedBox(height: 6),
+          Text('Risco alto · $alto', style: FocuxHubTypography.chip(chrome.mute)),
+          const SizedBox(height: TokensStrip.s2),
           Text(
-            '$alto',
-            style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            alto == 0
-                ? 'Ninguém em alerta agora'
-                : alto == 1
-                ? 'Aluno precisa de contato'
-                : 'Alunos precisam de contato',
+            focusTitle,
             style: FocuxHubTypography.body(
               color: chrome.ink,
             ).copyWith(fontWeight: FontWeight.w700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             retencaoContagensSubtitulo(
               alto: home.alto,
@@ -436,7 +436,7 @@ class _RetencaoFocusCard extends StatelessWidget {
             ),
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
@@ -478,6 +478,7 @@ class _RetencaoTile extends StatelessWidget {
       title: score.alunoNome,
       subtitle: Text(retencaoPorque(score)),
       accent: alto ? EagleTokens.bad : null,
+      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
       onTap: onTap,
     );
   }

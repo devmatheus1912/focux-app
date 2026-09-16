@@ -36,7 +36,7 @@ void main() {
       ),
     );
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FinanceiroResumoScreen'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, isNot(contains('FxSettingsGroup')));
@@ -47,5 +47,6 @@ void main() {
     expect(screen, isNot(contains('d.zeroCta')));
     expect(screen, isNot(contains("'Abrir mensalidades'")));
     expect(screen, contains('take(3)'));
+    expect(screen, isNot(contains('_FinanceiroKpiGroup')));
   });
 }

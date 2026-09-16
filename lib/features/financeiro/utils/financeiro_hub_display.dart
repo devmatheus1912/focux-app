@@ -1,7 +1,8 @@
 import '../../alunos/utils/satellite_screen_utils.dart';
 
 /// Hub financeiro — P0 = lista de mensalidades (A30 / §0.1).
-enum FinanceiroHubView { mensalidades, panorama, porMes }
+/// Panorama = read model único (mês + KPIs/charts).
+enum FinanceiroHubView { mensalidades, panorama }
 
 String financeiroHubViewLabel(FinanceiroHubView view) {
   switch (view) {
@@ -9,15 +10,12 @@ String financeiroHubViewLabel(FinanceiroHubView view) {
       return 'Mensalidades';
     case FinanceiroHubView.panorama:
       return 'Panorama';
-    case FinanceiroHubView.porMes:
-      return 'Por mês';
   }
 }
 
 /// Vistas secundárias — atrás de um toque no hub.
 const financeiroHubSecondaryViews = <FinanceiroHubView>[
   FinanceiroHubView.panorama,
-  FinanceiroHubView.porMes,
 ];
 
 String financeiroHubSubtitle({

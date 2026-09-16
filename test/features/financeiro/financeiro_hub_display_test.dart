@@ -8,7 +8,6 @@ void main() {
       'Mensalidades',
     );
     expect(financeiroHubViewLabel(FinanceiroHubView.panorama), 'Panorama');
-    expect(financeiroHubViewLabel(FinanceiroHubView.porMes), 'Por mês');
     expect(
       financeiroHubSubtitle(
         view: FinanceiroHubView.mensalidades,
@@ -18,13 +17,15 @@ void main() {
     );
     expect(
       financeiroHubSubtitle(
-        view: FinanceiroHubView.porMes,
+        view: FinanceiroHubView.panorama,
         freshness: 'há 1 min',
       ),
-      'Por mês · há 1 min',
+      'Panorama · há 1 min',
     );
-    expect(financeiroHubSecondaryViews, hasLength(2));
+    expect(financeiroHubSecondaryViews, hasLength(1));
+    expect(financeiroHubSecondaryViews, contains(FinanceiroHubView.panorama));
     expect(FinanceiroHubView.mensalidades.index, 0);
+    expect(FinanceiroHubView.panorama.index, 1);
   });
 
   test('financeiroListaTools e detalhe Mais — A30', () {

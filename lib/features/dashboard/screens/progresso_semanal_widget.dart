@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 
@@ -30,14 +31,14 @@ class ProgressoSemanalWidget extends StatelessWidget {
             : (completedThisWeek / weeklyGoal).clamp(0.0, 1.0);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [cs.primary, BrandPalette.deep(cs.primary)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,12 +55,12 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
+                  horizontal: TokensStrip.s3,
+                  vertical: TokensStrip.s1,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
                 ),
                 child: Row(
                   children: [
@@ -68,12 +69,12 @@ class ProgressoSemanalWidget extends StatelessWidget {
                       color: Colors.white,
                       size: 16,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: TokensStrip.s1),
                     Text(
                       streakDays == 1 ? '1 semana' : '$streakDays semanas',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: FocuxHubTypography.chip(Colors.white).copyWith(
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -81,17 +82,19 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const Text(
+          const SizedBox(height: TokensStrip.s4),
+          Text(
             'Treinos concluídos nesta semana',
-            style: TextStyle(color: Colors.white70),
+            style: FocuxHubTypography.bodyMuted(color: Colors.white70),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          const SizedBox(height: TokensStrip.s2),
+          Text(
             'Semana com pelo menos um treino. Dia de descanso não zera.',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: FocuxHubTypography.bodyMuted(
+              color: Colors.white70,
+            ).copyWith(fontSize: 12),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: TokensStrip.s2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
@@ -140,7 +143,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: TokensStrip.s4),
           Row(
             children: [
               Expanded(
@@ -149,16 +152,15 @@ class ProgressoSemanalWidget extends StatelessWidget {
                   backgroundColor: Colors.white24,
                   color: Colors.white,
                   minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: TokensStrip.s3),
               Text(
                 '$completedThisWeek/$weeklyGoal',
-                style: const TextStyle(
+                style: FocuxHubTypography.body(
                   color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+                ).copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),

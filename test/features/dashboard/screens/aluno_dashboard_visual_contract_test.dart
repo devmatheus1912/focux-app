@@ -45,7 +45,7 @@ void main() {
     expect(screen, contains('BrandPalette.deep(cs.primary)'));
     expect(screen, contains("'Consistência'"));
     expect(screen, contains("'Treinos concluídos nesta semana'"));
-    expect(screen, contains('color: Colors.white,'));
+    expect(screen, contains('TokensStrip.rCard'));
     expect(screen, isNot(contains('cs.tertiary')));
     expect(screen, isNot(contains('EagleTokens.good')));
   });

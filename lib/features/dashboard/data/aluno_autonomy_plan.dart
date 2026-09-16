@@ -386,13 +386,18 @@ AlunoHomeAction _mainHomeAction({
     );
   }
 
-  final startable = treinosProntosParaIniciar(treinos);
   final awaiting = treinos.where(isTreinoAguardandoLiberacao).toList();
   final lastWorkout = _latestWorkoutDate(historico);
   final inactiveDays =
       lastWorkout == null ? 99 : now.difference(lastWorkout).inDays;
-  if (inactiveDays >= 7 && startable.isNotEmpty) {
-    final workout = startable.first;
+  // FE rotation — not stickyLabel (that's personal 360 / CopilotAcaoEnricher).
+  // BE findPendentesCheckinHoje* still MIN(at.id) ≈ Treino A for FCM.
+  final nextWorkout = proximoTreinoParaHoje(
+    treinos: treinos,
+    historico: historico,
+  );
+  if (inactiveDays >= 7 && nextWorkout != null) {
+    final workout = nextWorkout;
     return AlunoHomeAction(
       mode: AlunoHomeMode.comeback,
       eyebrow: 'Retomada inteligente',
@@ -405,8 +410,8 @@ AlunoHomeAction _mainHomeAction({
     );
   }
 
-  if (startable.isNotEmpty) {
-    final workout = startable.first;
+  if (nextWorkout != null) {
+    final workout = nextWorkout;
     final exerciseCount = workout.exercicios.length;
     return AlunoHomeAction(
       mode: AlunoHomeMode.workoutReady,
@@ -595,9 +600,13 @@ List<String> _homeNarratives({
         ..sort((a, b) => b.enviadoEm.compareTo(a.enviadoEm));
   final startable = treinosProntosParaIniciar(treinos);
   final awaiting = treinos.where(isTreinoAguardandoLiberacao).toList();
+  final nextWorkout = proximoTreinoParaHoje(
+    treinos: treinos,
+    historico: historico,
+  );
   return [
-    if (startable.isNotEmpty)
-      '$firstName tem ${startable.first.treinoNome} pronto com foco em ${lens.primaryMetric}.',
+    if (nextWorkout != null)
+      '$firstName tem ${nextWorkout.treinoNome} pronto com foco em ${lens.primaryMetric}.',
     if (startable.isEmpty && awaiting.isNotEmpty)
       '${awaiting.first.treinoNome} está em preparação — aguardando liberação dos exercícios.',
     if (completed7 > 0)

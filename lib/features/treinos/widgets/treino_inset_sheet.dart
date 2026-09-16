@@ -36,13 +36,9 @@ List<Widget> treinoInsetActionChildren({
   required List<TreinoInsetActionSpec> actions,
   Color? accent,
 }) {
-  final nav = [
+  final safe = [
     for (final a in actions)
-      if (a.showChevron && !a.danger) a,
-  ];
-  final commands = [
-    for (final a in actions)
-      if (!a.showChevron && !a.danger) a,
+      if (!a.danger) a,
   ];
   final dangers = [
     for (final a in actions)
@@ -50,37 +46,25 @@ List<Widget> treinoInsetActionChildren({
   ];
 
   return [
-    if (nav.isNotEmpty)
+    if (safe.isNotEmpty)
       FxSettingsGroup(
         accent: accent,
         children: [
-          for (var i = 0; i < nav.length; i++)
+          for (var i = 0; i < safe.length; i++)
             FxSettingsTile(
-              icon: nav[i].icon,
+              icon: safe[i].icon,
               accent: accent,
-              label: nav[i].label,
-              subtitle: nav[i].subtitle,
+              label: safe[i].label,
+              subtitle: safe[i].subtitle,
               value: '',
-              highlight: nav[i].highlight,
-              showDivider: i < nav.length - 1,
-              onTap: nav[i].onTap,
+              highlight: safe[i].highlight,
+              // Chevron só em push de rota (Abrir). Comandos: picker esconde seta.
+              picker: !safe[i].showChevron,
+              showDivider: i < safe.length - 1,
+              onTap: safe[i].onTap,
             ),
         ],
       ),
-    for (final command in commands) ...[
-      const SizedBox(height: FxSettingsLayout.groupGap),
-      TextButton(
-        onPressed: command.onTap,
-        style: TextButton.styleFrom(
-          minimumSize: const Size(
-            TreinosLayout.touchTarget,
-            TreinosLayout.touchTarget,
-          ),
-          alignment: Alignment.centerLeft,
-        ),
-        child: Text(command.label),
-      ),
-    ],
     for (final danger in dangers) ...[
       const SizedBox(height: FxSettingsLayout.groupGap),
       SizedBox(

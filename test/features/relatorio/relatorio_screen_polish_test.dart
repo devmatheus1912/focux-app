@@ -27,6 +27,10 @@ void main() {
     expect(screen, contains('/alunos/\${widget.alunoId}/evolucao'));
     expect(screen, contains('/alunos/\${widget.alunoId}/chat'));
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));
+    expect(screen, contains('relatorioAlunoMaisChip'));
+    expect(screen, contains('_abrirMaisAcoes'));
+    expect(screen, isNot(contains('DashboardHomeActionChip(\n                  label: \'Aluno\'')));
+    expect(screen, isNot(contains('DashboardHomeActionChip(\n                  label: \'Chat\'')));
     expect(screen, contains('PopScope'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('relatorioAlunoCheckinChip'));
