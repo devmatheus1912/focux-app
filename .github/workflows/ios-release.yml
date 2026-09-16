@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v5
 
       - name: Select Xcode
         run: |
@@ -178,7 +178,7 @@ jobs:
             --export-options-plist=ios/ExportOptions.ci.plist
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: focux-ios-ipa
           path: build/ios/ipa/*.ipa
@@ -186,7 +186,7 @@ jobs:
           retention-days: 14
 
       - name: Upload dSYM (if present)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: focux-ios-dsym
           path: build/ios/archive/Runner.xcarchive/dSYMs
