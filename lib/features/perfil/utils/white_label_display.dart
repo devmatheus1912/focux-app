@@ -1,12 +1,22 @@
 // Copy / gates da tela Marca própria (S2).
 
-/// Verificar domínio só com host preenchido e ainda não verificado.
+const whiteLabelLandingModos = [
+  (value: 'CAPTURA', label: 'Formulário'),
+  (value: 'SITE', label: 'Página'),
+];
+
+/// Verificar só com host salvo (BE lê o domínio persistido) e ainda não verificado.
 bool whiteLabelCanVerifyDomain({
   required String domainDraft,
+  required String? dominioSalvo,
   required bool dominioVerificado,
 }) {
   if (dominioVerificado) return false;
-  return domainDraft.trim().isNotEmpty;
+  final draft = domainDraft.trim().toLowerCase();
+  if (draft.isEmpty) return false;
+  final salvo = (dominioSalvo ?? '').trim().toLowerCase();
+  if (salvo.isEmpty) return false;
+  return draft == salvo;
 }
 
 /// Passos CNAME/TXT a partir de `dnsInstrucoes` do BE — sem inventar host.
@@ -23,10 +33,25 @@ List<String> whiteLabelDnsSteps(String dnsInstrucoes) {
   return lines;
 }
 
-String whiteLabelCnameHint(String domainDraft) {
+/// Caption CNAME/TXT — host do draft + token do BE quando existir.
+String whiteLabelCnameHint(
+  String domainDraft, {
+  String? verificacaoToken,
+}) {
   final host = domainDraft.trim().toLowerCase();
   if (host.isEmpty) {
     return 'CNAME do subdomínio → cname.focux.app · depois TXT _focux com o token.';
   }
-  return 'CNAME $host → cname.focux.app';
+  final token = (verificacaoToken ?? '').trim();
+  if (token.isEmpty) {
+    return 'CNAME $host → cname.focux.app · salve para gerar o TXT _focux.$host.';
+  }
+  return 'CNAME $host → cname.focux.app · TXT _focux.$host → $token';
 }
+
+String whiteLabelChecklistValue(bool done) => done ? 'Pronto' : 'Pendente';
+
+String whiteLabelLandingCaption(String modo) =>
+    modo == 'CAPTURA'
+        ? 'Link curto de captura no dashboard e anúncios.'
+        : 'Página completa com foto, planos e depoimentos.';

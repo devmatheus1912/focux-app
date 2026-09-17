@@ -18,6 +18,8 @@ class ProgressoSemanalWidget extends StatelessWidget {
   final List<ExecucaoTreino> historico;
   final int streakAtual;
 
+  static const _weekdayLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -29,6 +31,12 @@ class ProgressoSemanalWidget extends StatelessWidget {
         weeklyGoal == 0
             ? 0.0
             : (completedThisWeek / weeklyGoal).clamp(0.0, 1.0);
+    final now = DateTime.now();
+    final startOfWeek = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
 
     return Container(
       padding: const EdgeInsets.all(TokensStrip.s4),
@@ -67,15 +75,12 @@ class ProgressoSemanalWidget extends StatelessWidget {
                     const Icon(
                       Icons.local_fire_department,
                       color: Colors.white,
-                      size: 16,
+                      size: TokensStrip.fontBodySm + 3,
                     ),
                     const SizedBox(width: TokensStrip.s1),
                     Text(
                       streakDays == 1 ? '1 semana' : '$streakDays semanas',
-                      style: FocuxHubTypography.chip(Colors.white).copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                      style: FocuxHubTypography.chip(Colors.white),
                     ),
                   ],
                 ),
@@ -90,32 +95,23 @@ class ProgressoSemanalWidget extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           Text(
             'Semana com pelo menos um treino. Dia de descanso não zera.',
-            style: FocuxHubTypography.bodyMuted(
-              color: Colors.white70,
-            ).copyWith(fontSize: 12),
+            style: FocuxHubTypography.cardSubtitle(color: Colors.white70),
           ),
           const SizedBox(height: TokensStrip.s2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
-              final now = DateTime.now();
-              final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
               final currentDay = DateTime(
                 startOfWeek.year,
                 startOfWeek.month,
                 startOfWeek.day + index,
               );
-              final done = historico.any(
-                (t) => _sameDate(t.concluidoEm, currentDay),
-              );
-              final isToday = _sameDateIso(
-                DateTime.now().toIso8601String(),
-                currentDay,
-              );
+              final done = _dayHasCompletedWorkout(historico, currentDay);
+              final isToday = _isSameCalendarDay(now, currentDay);
 
               return Container(
-                width: 32,
-                height: 32,
+                width: TokensStrip.s6,
+                height: TokensStrip.s6,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color:
@@ -132,11 +128,9 @@ class ProgressoSemanalWidget extends StatelessWidget {
                       done
                           ? Icon(Icons.check, color: cs.primary, size: 16)
                           : Text(
-                            ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'][index],
-                            style: TextStyle(
-                              color: isToday ? Colors.white : Colors.white54,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                            _weekdayLetters[index],
+                            style: FocuxHubTypography.chip(
+                              isToday ? Colors.white : Colors.white54,
                             ),
                           ),
                 ),
@@ -151,16 +145,17 @@ class ProgressoSemanalWidget extends StatelessWidget {
                   value: progressValue,
                   backgroundColor: Colors.white24,
                   color: Colors.white,
-                  minHeight: 8,
+                  minHeight: TokensStrip.s2,
                   borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 ),
               ),
               const SizedBox(width: TokensStrip.s3),
               Text(
                 '$completedThisWeek/$weeklyGoal',
-                style: FocuxHubTypography.body(
+                style: FocuxHubTypography.metric(
                   color: Colors.white,
-                ).copyWith(fontWeight: FontWeight.w700),
+                  fontSize: FocuxHubTypography.metricEm,
+                ),
               ),
             ],
           ),
@@ -169,16 +164,24 @@ class ProgressoSemanalWidget extends StatelessWidget {
     );
   }
 
-  bool _sameDate(String? iso, DateTime day) {
-    if (iso == null) return false;
-    final dt = DateTime.tryParse(iso)?.toLocal();
-    if (dt == null) return false;
-    return dt.year == day.year && dt.month == day.month && dt.day == day.day;
+  /// Alinha com [countUniqueCompletedDaysThisWeek]: só CONCLUIDO, dia local.
+  static bool _dayHasCompletedWorkout(
+    List<ExecucaoTreino> historico,
+    DateTime day,
+  ) {
+    for (final item in historico) {
+      if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) {
+        continue;
+      }
+      final raw = item.concluidoEm ?? item.iniciadoEm;
+      if (raw == null) continue;
+      final dt = DateTime.tryParse(raw)?.toLocal();
+      if (dt == null) continue;
+      if (_isSameCalendarDay(dt, day)) return true;
+    }
+    return false;
   }
 
-  bool _sameDateIso(String iso, DateTime day) {
-    final dt = DateTime.tryParse(iso)?.toLocal();
-    if (dt == null) return false;
-    return dt.year == day.year && dt.month == day.month && dt.day == day.day;
-  }
+  static bool _isSameCalendarDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 }

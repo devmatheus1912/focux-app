@@ -22,8 +22,10 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/white_label_repository.dart';
 import '../utils/white_label_display.dart';
@@ -105,6 +107,7 @@ class _WhiteLabelSettingsScreenState
   }
 
   Future<void> _salvar() async {
+    FxKeyboardDismissScope.dismiss();
     setState(() => _salvando = true);
     try {
       await ref
@@ -131,6 +134,7 @@ class _WhiteLabelSettingsScreenState
   }
 
   Future<void> _verificarDominio() async {
+    FxKeyboardDismissScope.dismiss();
     setState(() => _verificando = true);
     try {
       await ref.read(whiteLabelRepositoryProvider).verifyDomain();
@@ -153,6 +157,8 @@ class _WhiteLabelSettingsScreenState
     final config = configAsync.valueOrNull;
     if (config != null) _apply(config);
     final chrome = ShellChrome.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final canSave = _isDirty && !_salvando;
 
     final gated = FeatureGate(
       featureName: 'Marca própria',
@@ -176,281 +182,281 @@ class _WhiteLabelSettingsScreenState
                   : FxFormStickyBar(
                     child: Semantics(
                       button: true,
-                      enabled: !_salvando,
+                      enabled: canSave,
                       label: 'Salvar configurações de marca própria',
                       child: FxLiquidPrimaryButton(
-                        label: 'Salvar configurações',
+                        label: 'Salvar',
                         loading: _salvando,
                         loadingLabel: 'Salvando…',
-                        onPressed: _salvando ? null : _salvar,
+                        onPressed: canSave ? _salvar : null,
                       ),
                     ),
                   ),
-          body: FxContentWidthLimiter(
-            child:
-                config == null
-                    ? (configAsync.hasError
-                        ? FxErrorState(
-                          chromeOnDark:
-                              Theme.of(context).brightness == Brightness.dark,
-                          primary: Theme.of(context).colorScheme.primary,
-                          message: friendlyError(configAsync.error!),
-                          onRetry: () =>
-                              ref.invalidate(whiteLabelConfigProvider),
-                        )
-                        : const SkeletonList(count: 5))
-                    : ListView(
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      padding: EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s2,
-                        FxSettingsLayout.pageInset,
-                        88,
-                      ),
-                      children: [
-                        FxSettingsGroup(
-                          header: 'App do aluno',
-                          caption:
-                              'Login, splash e cards sociais usam só a sua marca.',
-                          children: [
-                            Semantics(
-                              toggled: _ocultarFocux,
-                              label: 'Ocultar marca Focux',
-                              child: SwitchListTile(
-                                contentPadding: EdgeInsets.zero,
-                                value: _ocultarFocux,
-                                onChanged:
-                                    (v) => setState(() => _ocultarFocux = v),
-                                title: const Text('Ocultar marca Focux'),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: TokensStrip.s3,
-                              ),
-                              child: TextField(
-                                controller: _appNameCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Nome do app (aluno)',
-                                  hint: 'Ex: Studio João Silva',
-                                ),
-                              ),
-                            ),
-                          ],
+          body: FxKeyboardDismissScope(
+            child: FxContentWidthLimiter(
+              child:
+                  config == null
+                      ? (configAsync.hasError
+                          ? FxErrorState(
+                            chromeOnDark: isDark,
+                            primary: Theme.of(context).colorScheme.primary,
+                            message: friendlyError(configAsync.error!),
+                            onRetry: () =>
+                                ref.invalidate(whiteLabelConfigProvider),
+                          )
+                          : const SkeletonList(count: 4))
+                      : ListView(
+                        keyboardDismissBehavior:
+                            ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s2,
+                          FxSettingsLayout.pageInset,
+                          88,
                         ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Domínio customizado',
-                          caption: whiteLabelCnameHint(_domainCtrl.text),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: TokensStrip.s2,
-                                bottom: TokensStrip.s2,
-                              ),
-                              child: TextField(
-                                controller: _domainCtrl,
-                                decoration: FxInputDeco.build(
-                                  context,
-                                  'Domínio',
-                                  hint: 'treino.seudominio.com.br',
+                        children: [
+                          FxSettingsGroup(
+                            header: 'App do aluno',
+                            caption:
+                                'Login, splash e cards sociais usam só a sua marca.',
+                            children: [
+                              FxSettingsTile(
+                                icon: Icons.visibility_off_outlined,
+                                label: 'Ocultar marca Focux',
+                                value: '',
+                                showDivider: true,
+                                accessory: Switch.adaptive(
+                                  value: _ocultarFocux,
+                                  onChanged:
+                                      (v) => setState(() => _ocultarFocux = v),
                                 ),
-                                autocorrect: false,
-                                keyboardType: TextInputType.url,
                               ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: TokensStrip.s1,
+                                  bottom: TokensStrip.s1,
+                                ),
+                                child: TextField(
+                                  controller: _appNameCtrl,
+                                  textInputAction: TextInputAction.next,
+                                  onTapOutside:
+                                      (_) => FxKeyboardDismissScope.dismiss(),
+                                  decoration: FxInputDeco.build(
+                                    context,
+                                    'Nome do app (aluno)',
+                                    hint: 'Ex: Studio João Silva',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          FxSettingsGroup(
+                            header: 'Domínio customizado',
+                            caption: whiteLabelCnameHint(
+                              _domainCtrl.text,
+                              verificacaoToken: config.dominioVerificacaoToken,
                             ),
-                            if (config.dominioVerificado)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: TokensStrip.s2,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.verified_rounded,
-                                      color: EagleTokens.success,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: TokensStrip.s2),
-                                    Text(
-                                      'Domínio verificado',
-                                      style: FocuxHubTypography.bodyMuted(
-                                        color: EagleTokens.success,
+                            footer:
+                                whiteLabelDnsSteps(config.dnsInstrucoes).isEmpty
+                                    ? null
+                                    : Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: FxSettingsLayout.groupPadH,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          for (final step in whiteLabelDnsSteps(
+                                            config.dnsInstrucoes,
+                                          ))
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
+                                              child: Text(
+                                                '• $step',
+                                                style:
+                                                    FocuxHubTypography.bodyMuted(
+                                                      color: chrome.mute,
+                                                      height: 1.35,
+                                                    ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
-                                  ],
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: TokensStrip.s1,
+                                  bottom: TokensStrip.s1,
+                                ),
+                                child: TextField(
+                                  controller: _domainCtrl,
+                                  decoration: FxInputDeco.build(
+                                    context,
+                                    'Domínio',
+                                    hint: 'treino.seudominio.com.br',
+                                  ),
+                                  autocorrect: false,
+                                  keyboardType: TextInputType.url,
+                                  textInputAction: TextInputAction.done,
+                                  onTapOutside:
+                                      (_) => FxKeyboardDismissScope.dismiss(),
+                                  onSubmitted:
+                                      (_) => FxKeyboardDismissScope.dismiss(),
                                 ),
                               ),
-                            if (whiteLabelDnsSteps(
-                              config.dnsInstrucoes,
-                            ).isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: TokensStrip.s2,
+                              if (config.dominioVerificado)
+                                FxSettingsTile(
+                                  icon: Icons.verified_rounded,
+                                  label: 'Domínio verificado',
+                                  value: '',
+                                  accent: EagleTokens.success,
+                                  showDivider: false,
                                 ),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(
-                                    TokensStrip.s3,
+                              if (whiteLabelCanVerifyDomain(
+                                domainDraft: _domainCtrl.text,
+                                dominioSalvo: config.dominioCustomizado,
+                                dominioVerificado: config.dominioVerificado,
+                              ))
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: TokensStrip.s1,
+                                    bottom: TokensStrip.s1,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: chrome.cardFill,
-                                    borderRadius: BorderRadius.circular(
-                                      TokensStrip.rCard,
-                                    ),
-                                    border: Border.all(color: chrome.line),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'DNS',
-                                        style: FocuxHubTypography.chip(
-                                          chrome.mute,
-                                        ),
-                                      ),
-                                      const SizedBox(height: TokensStrip.s2),
-                                      for (final step in whiteLabelDnsSteps(
-                                        config.dnsInstrucoes,
-                                      ))
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 6,
-                                          ),
-                                          child: Text(
-                                            '• $step',
-                                            style:
-                                                FocuxHubTypography.bodyMuted(
-                                                  color: chrome.mute,
-                                                  height: 1.4,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: OutlinedButton.icon(
+                                      onPressed:
+                                          _verificando
+                                              ? null
+                                              : _verificarDominio,
+                                      icon:
+                                          _verificando
+                                              ? const SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child: FxLoading(
+                                                  strokeWidth: 2,
                                                 ),
-                                          ),
-                                        ),
-                                    ],
+                                              )
+                                              : const Icon(Icons.dns_outlined),
+                                      label: const Text('Verificar domínio'),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            if (whiteLabelCanVerifyDomain(
-                              domainDraft: _domainCtrl.text,
-                              dominioVerificado: config.dominioVerificado,
-                            ))
+                            ],
+                          ),
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          FxSettingsGroup(
+                            header: 'Como você vende',
+                            caption: whiteLabelLandingCaption(_landingModo),
+                            children: [
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: TokensStrip.s2,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: TokensStrip.s1,
                                 ),
-                                child: OutlinedButton.icon(
-                                  onPressed:
-                                      _verificando ? null : _verificarDominio,
-                                  icon:
-                                      _verificando
-                                          ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: FxLoading(strokeWidth: 2),
-                                          )
-                                          : const Icon(Icons.dns_outlined),
-                                  label: const Text('Verificar domínio'),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header: 'Como você vende',
-                          caption:
-                              _landingModo == 'CAPTURA'
-                                  ? 'Destaque o link curto de captura no dashboard e anúncios.'
-                                  : 'Destaque a página completa com foto, planos e depoimentos.',
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: TokensStrip.s2,
-                              ),
-                              child: Semantics(
-                                label: 'Modo de venda da landing',
-                                child: SegmentedButton<String>(
-                                  showSelectedIcon: false,
-                                  segments: const [
-                                    ButtonSegment(
-                                      value: 'CAPTURA',
-                                      label: Text('Formulário rápido'),
-                                    ),
-                                    ButtonSegment(
-                                      value: 'SITE',
-                                      label: Text('Página completa'),
-                                    ),
-                                  ],
-                                  selected: {_landingModo},
-                                  onSelectionChanged:
-                                      (s) => setState(
-                                        () => _landingModo = s.first,
-                                      ),
-                                ),
-                              ),
-                            ),
-                            if (config.slug != null &&
-                                config.slug!.isNotEmpty) ...[
-                              _linkTile(
-                                title: 'Página completa',
-                                hint: 'Ideal para Instagram, WhatsApp e bio.',
-                                displayLabel: Env.landingPageDisplayLabel(
-                                  config.slug!,
-                                ),
-                                copyUrl:
-                                    config.publicLandingUrl.isNotEmpty
-                                        ? config.publicLandingUrl
-                                        : Env.landingPageUrl(config.slug!),
-                              ),
-                              _linkTile(
-                                title: 'Formulário rápido',
-                                hint: 'Só nome e WhatsApp — use em anúncios.',
-                                displayLabel: Env.capturaPageDisplayLabel(
-                                  config.slug!,
-                                ),
-                                copyUrl:
-                                    config.publicCapturaUrl.isNotEmpty
-                                        ? config.publicCapturaUrl
-                                        : Env.capturaPageUrl(config.slug!),
-                              ),
-                            ] else
-                              _linkTile(
-                                title: 'Página completa',
-                                hint:
-                                    'Configure seu link público no perfil primeiro.',
-                                displayLabel: 'focuxpersonal.com/p/seu-nome',
-                                copyUrl: config.publicLandingUrl,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: FxSettingsLayout.groupGap),
-                        FxSettingsGroup(
-                          header:
-                              'Checklist (${config.checklistScore}/${config.checklist.length})',
-                          children: [
-                            for (final item in config.checklist)
-                              CheckboxListTile(
-                                contentPadding: EdgeInsets.zero,
-                                value: item.done,
-                                onChanged: null,
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                                title: Text(
-                                  item.label,
-                                  style: FocuxHubTypography.body(
-                                    color:
-                                        Theme.of(
-                                          context,
-                                        ).colorScheme.onSurface,
+                                child: Semantics(
+                                  label: 'Modo de venda da landing',
+                                  child: AlunoSegmentedChoice(
+                                    options: whiteLabelLandingModos,
+                                    selected: _landingModo,
+                                    isDark: isDark,
+                                    onSelect:
+                                        (v) =>
+                                            setState(() => _landingModo = v),
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
-                      ],
-                    ),
+                              if (config.slug != null &&
+                                  config.slug!.isNotEmpty) ...[
+                                _linkTile(
+                                  chrome: chrome,
+                                  title: 'Página completa',
+                                  displayLabel: Env.landingPageDisplayLabel(
+                                    config.slug!,
+                                  ),
+                                  copyUrl:
+                                      config.publicLandingUrl.isNotEmpty
+                                          ? config.publicLandingUrl
+                                          : Env.landingPageUrl(config.slug!),
+                                  showDivider: true,
+                                ),
+                                _linkTile(
+                                  chrome: chrome,
+                                  title: 'Formulário rápido',
+                                  displayLabel: Env.capturaPageDisplayLabel(
+                                    config.slug!,
+                                  ),
+                                  copyUrl:
+                                      config.publicCapturaUrl.isNotEmpty
+                                          ? config.publicCapturaUrl
+                                          : Env.capturaPageUrl(config.slug!),
+                                  showDivider: false,
+                                ),
+                              ] else
+                                _linkTile(
+                                  chrome: chrome,
+                                  title: 'Página completa',
+                                  displayLabel: 'focuxpersonal.com/p/seu-nome',
+                                  copyUrl: config.publicLandingUrl,
+                                  showDivider: false,
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: FxSettingsLayout.groupGap),
+                          Theme(
+                            data: Theme.of(
+                              context,
+                            ).copyWith(dividerColor: Colors.transparent),
+                            child: ExpansionTile(
+                              tilePadding: EdgeInsets.zero,
+                              title: Text(
+                                'Checklist (${config.checklistScore}/${config.checklist.length})',
+                                style: FocuxHubTypography.body(
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ).copyWith(fontWeight: FontWeight.w700),
+                              ),
+                              subtitle: Text(
+                                'Máquina de vendas — sob demanda',
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.mute,
+                                ),
+                              ),
+                              children: [
+                                FxSettingsGroup(
+                                  children: [
+                                    for (var i = 0;
+                                        i < config.checklist.length;
+                                        i++)
+                                      FxSettingsTile(
+                                        icon:
+                                            config.checklist[i].done
+                                                ? Icons.check_circle_outline
+                                                : Icons.radio_button_unchecked,
+                                        label: config.checklist[i].label,
+                                        value: whiteLabelChecklistValue(
+                                          config.checklist[i].done,
+                                        ),
+                                        accent:
+                                            config.checklist[i].done
+                                                ? EagleTokens.success
+                                                : null,
+                                        showDivider:
+                                            i < config.checklist.length - 1,
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+            ),
           ),
         ),
       ),
@@ -460,68 +466,29 @@ class _WhiteLabelSettingsScreenState
   }
 
   Widget _linkTile({
+    required ShellPalette chrome,
     required String title,
-    required String hint,
     required String displayLabel,
     required String copyUrl,
+    required bool showDivider,
   }) {
     if (copyUrl.isEmpty && displayLabel.isEmpty) return const SizedBox.shrink();
-    final chrome = ShellChrome.of(context);
     final urlToCopy = copyUrl.isNotEmpty ? copyUrl : displayLabel;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
-      decoration: fxListCardDecoration(context, radius: TokensStrip.rCard),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: FocuxHubTypography.body(
-                color: Theme.of(context).colorScheme.onSurface,
-              ).copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              hint,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: chrome.cardFill,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                displayLabel,
-                style: FocuxHubTypography.bodyMuted(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed:
-                    urlToCopy.isEmpty
-                        ? null
-                        : () {
-                          Clipboard.setData(ClipboardData(text: urlToCopy));
-                          FeedbackHelper.showSuccess(context, 'Link copiado');
-                        },
-                icon: const Icon(Icons.copy_rounded, size: 18),
-                label: const Text('Copiar link'),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return FxSettingsTile(
+      icon: Icons.link_outlined,
+      label: title,
+      value: displayLabel,
+      mute: chrome.mute,
+      line: chrome.line,
+      showDivider: showDivider,
+      onTap:
+          urlToCopy.isEmpty
+              ? null
+              : () {
+                Clipboard.setData(ClipboardData(text: urlToCopy));
+                FeedbackHelper.showSuccess(context, 'Link copiado');
+              },
     );
   }
 }

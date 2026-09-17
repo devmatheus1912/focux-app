@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/money/fx_money.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
@@ -31,9 +32,9 @@ void main() {
       },
     });
 
-    expect(bundle.dashboard.receitaMes, 1200.0);
+    expect(bundle.dashboard.receitaMes, FxMoney.parse(1200.0));
     expect(bundle.mensalidades, isEmpty);
-    expect(bundle.resumoMesAtual.totalRecebido, 900.0);
+    expect(bundle.resumoMesAtual.totalRecebido, FxMoney.parse(900.0));
     expect(bundle.planoFeatures?.plano, SubscriptionPlan.PRO);
     expect(bundle.planoFeatures?.financeiro, isTrue);
     expect(bundle.hasMore, isFalse);
@@ -72,6 +73,6 @@ void main() {
     });
 
     expect(bundle.planoFeatures, isNull);
-    expect(bundle.resumoMesAtual.totalRecebido, 0);
+    expect(bundle.resumoMesAtual.totalRecebido, FxMoney.zero);
   });
 }

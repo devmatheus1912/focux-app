@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -260,7 +261,9 @@ class _FinanceiroMensalidadesTabState
     final primary = Theme.of(context).colorScheme.primary;
     return fxScreenA11yScope(
       label: 'Mensalidades',
-      child: Column(
+      child: FxKeyboardPopScope(
+        child: FxKeyboardDismissScope(
+          child: Column(
         children: [
           if (widget.initialAlunoId == null)
             Padding(
@@ -272,6 +275,8 @@ class _FinanceiroMensalidadesTabState
             ),
             child: TextField(
               controller: _searchCtrl,
+              textInputAction: TextInputAction.search,
+              onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
               decoration: InputDecoration(
                 hintText: 'Buscar por nome do aluno',
                 hintStyle: TextStyle(
@@ -334,6 +339,27 @@ class _FinanceiroMensalidadesTabState
                     )
                     : Column(
                       children: [
+                        if (_items.isNotEmpty && !_modoSelecao)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              8,
+                              FxSettingsLayout.pageInset,
+                              8,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: DashboardHomeActionChip(
+                                label: 'Nova mensalidade',
+                                accent: EagleTokens.moneyGreen,
+                                isDark: chrome.isDark,
+                                onPressed: () {
+                                  FxKeyboardDismissScope.dismiss();
+                                  _abrirFormularioNovaMensalidade();
+                                },
+                              ),
+                            ),
+                          ),
                         if (_items.isNotEmpty && _modoSelecao)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -540,27 +566,12 @@ class _FinanceiroMensalidadesTabState
                                     ),
                                   ),
                         ),
-                        // Empty já tem FxEmptyAction — sticky só com lista (1 P0).
-                        if (_items.isNotEmpty)
-                          SafeArea(
-                            top: false,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s2,
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3,
-                              ),
-                              child: FxLiquidPrimaryButton(
-                                label: 'Nova mensalidade',
-                                onPressed: _abrirFormularioNovaMensalidade,
-                              ),
-                            ),
-                          ),
                       ],
                     ),
           ),
         ],
+      ),
+        ),
       ),
     );
   }

@@ -4,18 +4,52 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('financeiro resumo cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle('lib/features/financeiro/screens/financeiro_resumo_screen.dart');
+    final screen = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
+    );
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxShellScaffold(')));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxStripCard'));
+    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('Ver mensalidades'));
+    expect(screen, contains('FxHubFreshness'));
+    expect(screen, isNot(contains('PieChart')));
+    expect(screen, isNot(contains('_DonutChartCard')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('_NavArrow')));
     expect(screen, isNot(contains('Icons.chevron')));
-    expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
-    expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
-    expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
+    expect(
+      screen,
+      anyOf(
+        contains('FxContentWidthLimiter'),
+        isNot(contains('constrainWidth: false')),
+      ),
+    );
+    expect(
+      screen,
+      anyOf(
+        contains('friendlyError'),
+        contains('DashboardErrorState'),
+        contains('FxEmptyState'),
+        contains('_erro'),
+        contains('_TrainingEmptyState'),
+        contains('ref.invalidate'),
+      ),
+    );
+    expect(
+      screen,
+      anyOf(
+        contains('FxLoading'),
+        contains('SkeletonLoader'),
+        contains('SkeletonList'),
+        contains('DashboardShimmer'),
+        contains('Shimmer'),
+        contains('isLoading'),
+      ),
+    );
   });
 }

@@ -5,6 +5,7 @@ class _FinanceiroDashboardScreenState
   FinanceiroDashboard? _data;
   bool _loading = true;
   String? _erro;
+  FinanceiroPanoramaExtraId? _extraAberto;
 
   @override
   void initState() {
@@ -37,6 +38,23 @@ class _FinanceiroDashboardScreenState
     }
   }
 
+  Future<void> _abrirMaisExtras() async {
+    final picked = await showFxInsetPickerSheet<FinanceiroPanoramaExtraId>(
+      context,
+      title: 'Mais no panorama',
+      selected: _extraAberto,
+      items: [
+        for (final id in financeiroPanoramaExtras)
+          FxInsetPickerSheetItem(
+            value: id,
+            label: financeiroPanoramaExtraLabel(id),
+          ),
+      ],
+    );
+    if (!mounted || picked == null) return;
+    setState(() => _extraAberto = picked);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -56,6 +74,7 @@ class _FinanceiroDashboardScreenState
 
     final d = _data!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = Theme.of(context).colorScheme.primary;
     final zeroData =
         !d.receitaMes.isPositive &&
         d.vencimentosProximos.isEmpty &&
@@ -72,15 +91,6 @@ class _FinanceiroDashboardScreenState
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.only(bottom: 110),
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                0,
-              ),
-              child: SmartPricingCard(),
-            ),
             const FinanceiroResumoScreen(),
             if (zeroData) ...[
               const SizedBox(height: FxSettingsLayout.groupGap),
@@ -98,15 +108,44 @@ class _FinanceiroDashboardScreenState
                 ),
               ),
             ] else ...[
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                  FxSettingsLayout.pageInset,
+                  0,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: DashboardHomeActionChip(
+                    label: 'Mais',
+                    accent: primary,
+                    isDark: isDark,
+                    onPressed: _abrirMaisExtras,
+                  ),
+                ),
+              ),
               if (d.vencimentosProximos.isNotEmpty) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
               ],
-              if (d.topAlunos.isNotEmpty) ...[
+              if (_extraAberto == FinanceiroPanoramaExtraId.evolucao) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                _EvolucaoChart(items: d.evolucaoMensal, isDark: isDark),
+              ],
+              if (_extraAberto == FinanceiroPanoramaExtraId.topAlunos &&
+                  d.topAlunos.isNotEmpty) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
                 _FinanceiroTopAlunosGroup(items: d.topAlunos),
+              ],
+              if (_extraAberto == FinanceiroPanoramaExtraId.pricing) ...[
+                const SizedBox(height: FxSettingsLayout.groupGap),
+                const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: FxSettingsLayout.pageInset,
+                  ),
+                  child: SmartPricingCard(),
+                ),
               ],
             ],
           ],

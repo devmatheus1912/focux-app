@@ -156,16 +156,10 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final home = _home;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(home?.fetchedAt);
-    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
       label: 'Saúde da base',
-      child: PopScope(
-        canPop: !keyboardOpen,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          FxKeyboardDismissScope.dismiss();
-        },
+      child: FxKeyboardPopScope(
         child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
@@ -339,7 +333,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                           ),
                 ),
       ),
-      ),
+    ),
     );
   }
 }
