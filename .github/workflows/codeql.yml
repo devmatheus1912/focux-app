@@ -9,8 +9,6 @@ on:
 
 permissions:
   contents: read
-  actions: read
-  security-events: write
 
 jobs:
   analyze:
@@ -25,9 +23,11 @@ jobs:
           languages: javascript-typescript
           paths: e2e
 
+      # Repo sem Code Scanning habilitado (GHAS) — upload SARIF sempre falha
+      # com "Code scanning is not enabled" e polui a inbox. Semgrep cobre SAST.
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          # Precisa de actions:read no job; sem isso o upload falha com
-          # "Resource not accessible by integration" e polui a inbox.
           category: "/language:javascript-typescript"
+          upload: never
+          upload-database: false
