@@ -1,10 +1,26 @@
 name: Analyze
 
+# PR = lane rápida (analyze + orphan).
+# Push main/develop = suite completa (+ unit tests).
+# Cancela runs antigos do mesmo PR/ref para não queimar minutos.
+
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.cursor/**'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.cursor/**'
   workflow_dispatch:
+
+concurrency:
+  group: analyze-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -13,6 +29,7 @@ jobs:
   dart:
     name: Dart analyze (fatal warnings)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -27,8 +44,11 @@ jobs:
       - name: Analyze without warnings or infos
         run: dart analyze --fatal-warnings --fatal-infos
 
-      - name: Unit tests
-        run: flutter test
-
       - name: Orphan dart scan
         run: dart run tools/find_orphan_dart.dart
+
+      # Unit tests são o maior custo (~15+ min / 500+ specs).
+      # Em PR ficam de fora; rodam em push main/develop ou manual.
+      - name: Unit tests
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: flutter test --concurrency=4
