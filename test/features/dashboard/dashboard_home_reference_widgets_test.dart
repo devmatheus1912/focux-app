@@ -15,7 +15,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00BFA5)),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B4F5C)),
         ),
         home: Scaffold(
           body: DashboardFinanceEmptyState(mes: 'agosto', onOpen: () {}),

@@ -7,6 +7,7 @@ import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 import 'package:focux_app/features/ia/data/ia_repository.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -89,7 +90,7 @@ void main() {
             body: AlunoOperacaoAdherenceLegend(
               activeColor: Colors.green,
               missColor: Colors.red,
-              todayRingColor: Colors.teal,
+              todayRingColor: BrandPalette.defaultPrimary,
             ),
           ),
         ),

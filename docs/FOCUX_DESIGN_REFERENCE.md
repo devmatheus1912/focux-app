@@ -288,8 +288,9 @@ Marca canônica do Focux (substitui o cyan-teal `#13C2C2`). Fonte de verdade: `t
 | Hover / ink | `#083D47` | `TokensStrip.primaryHover` / `EagleTokens.brandInk` / `BrandPalette.defaultInk` |
 | Mid (links, H2 tingido) | `#0A6B7A` | `TokensStrip.neonTeal` / `EagleTokens.brandSecondary` |
 | Secondary / glow (companion claro) | `#3D9AAD` | `TokensStrip.neonGlow` / `EagleTokens.brandAccent` / `BrandPalette.defaultSecondary` |
-| Soft (light tint) | `#D5E8EC` | `EagleTokens.brandSoft` |
-| Softer (light wash) | `#EBF4F6` | `EagleTokens.brandSofter` |
+| Soft (light tint) | `#D5E8EC` | `EagleTokens.brandSoft` / `TokensStrip.chipSelectedFill` |
+| Softer (light wash) | `#EBF4F6` | `EagleTokens.brandSofter` / `TokensStrip.tooltipBg` / `specIdleFill` |
+| Soft border | `#9ECAD4` | `TokensStrip.tooltipBorder` / `specIdleBorder` |
 | Deep (lerp / hero dark) | `#051F26` | `EagleTokens.brandDeep` |
 | Mesh light A | `#E4EFF1` | `TokensStrip.lightMeshA` |
 | Curated default | — | `CuratedBrandPalette.focuxDefault` (“Focux Original”) |
@@ -301,7 +302,7 @@ Marca canônica do Focux (substitui o cyan-teal `#13C2C2`). Fonte de verdade: `t
 | Light | `#0B4F5C` sólido; label branco | Primary (contrasta no paper) | `brandSoft` / `BrandPalette.soft(primary)` | `BrandPalette.deep(primary)` |
 | Dark | Primary sólido; label branco | Primary some no mesh cinematográfico → `chromeAccent` promove o glow `#3D9AAD` | `BrandPalette.soft(primary, dark: true)` | `BrandPalette.accent(primary)` |
 
-Legado cyan (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`) permanece só em `BrandPalette.isDefaultBrandColors` / `EagleTokens.legacyBrandCyan*` para reset de perfil — **não** usar em UI nova.
+Legado cyan (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`, softs `#9DE8E8` / `#D4F5F5`) permanece só em `BrandPalette.isDefaultBrandColors` / `EagleTokens.legacyBrandCyan*` / `BrandPalette.resolveStored*` para reset de perfil — **não** usar em UI nova.
 
 ### 4.1 Espaço, raio, blur — `lib/core/theme/tokens_strip.dart`
 

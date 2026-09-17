@@ -115,7 +115,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                   _statChip(
                     'API ✅',
                     _endpointResults.values.where((r) => r.ok).length,
-                    Colors.teal,
+                    EagleTokens.brand,
                   ),
                 ],
               ),
