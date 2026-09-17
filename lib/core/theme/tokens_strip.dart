@@ -65,7 +65,6 @@ abstract class TokensStrip {
       );
 
   // ── Azul petróleo premium (aliases) ──────────────────────────────────
-  static const Color neonCyan = primary;
   static const Color neonTeal = Color(0xFF0A6B7A);
   static const Color neonGlow = Color(0xFF3D9AAD);
   static const Color neonDeep = primaryHover;
