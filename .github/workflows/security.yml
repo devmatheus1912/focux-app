@@ -7,6 +7,9 @@ on:
 
 permissions:
   contents: read
+  # gitleaks-action lista commits do PR via API — sem isso: 403
+  # "Resource not accessible by integration" em pull_request.
+  pull-requests: read
 
 jobs:
   gitleaks:
