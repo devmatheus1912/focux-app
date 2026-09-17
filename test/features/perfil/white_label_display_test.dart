@@ -69,4 +69,17 @@ void main() {
     expect(whiteLabelLandingCaption('CAPTURA'), contains('captura'));
     expect(whiteLabelChecklistValue(true), 'Pronto');
   });
+
+  test('checklist deep-link e gate SITE', () {
+    expect(whiteLabelChecklistRoute('entrevista'), '/perfil/landing-editor');
+    expect(whiteLabelChecklistRoute('gerado'), '/perfil/landing-editor');
+    expect(whiteLabelChecklistRoute('publicado'), '/perfil/landing-editor');
+    expect(whiteLabelChecklistRoute('cta'), '/perfil/editar');
+    expect(whiteLabelChecklistRoute('captura'), isNull);
+    expect(whiteLabelChecklistRoute('dominio'), isNull);
+    expect(whiteLabelChecklistRoute('app'), isNull);
+    expect(whiteLabelNeedsLandingCompleta('SITE'), isTrue);
+    expect(whiteLabelNeedsLandingCompleta('CAPTURA'), isFalse);
+    expect(whiteLabelNeedsLandingCompleta('site'), isTrue);
+  });
 }

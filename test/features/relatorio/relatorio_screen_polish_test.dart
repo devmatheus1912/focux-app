@@ -57,6 +57,8 @@ void main() {
     expect(screen, contains('relatorioAlunoPeriodoOpcoes'));
     expect(screen, contains('relatorioAlunoPeriodoMetricValue'));
     expect(screen, contains('relatorioAlunoResumoCaption'));
-    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('whiteLabelConfigProvider'));
+    expect(screen, contains('appDisplayName'));
+    expect(screen, contains('ocultarMarcaFocux'));
   });
 }

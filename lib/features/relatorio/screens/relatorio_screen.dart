@@ -36,6 +36,7 @@ import '../utils/relatorio_aluno_display.dart';
 import '../utils/relatorio_global_display.dart';
 import '../utils/relatorio_pdf_export.dart';
 import '../widgets/relatorio_aluno_help_sheet.dart';
+import '../../perfil/data/white_label_repository.dart';
 
 part 'relatorio_screen_metrics.part.dart';
 
@@ -162,6 +163,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     if (dados == null || _exporting) return;
     setState(() => _exporting = true);
     try {
+      final wl = ref.read(whiteLabelConfigProvider).valueOrNull;
       await exportRelatorioPdf(
         alunoNome: widget.alunoNome,
         periodoLabel: relatorioPeriodoLabelPdf(
@@ -176,6 +178,8 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
         ),
         dados: dados,
         comparativo: _comparativo,
+        appDisplayName: wl?.appDisplayName,
+        ocultarMarcaFocux: wl?.ocultarMarcaFocux ?? false,
       );
       AnalyticsService.instance.track(
         ProductEvents.relatorioAlunoPdfExported,

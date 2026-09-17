@@ -33,11 +33,25 @@ class DateTimeRangePdf {
   final DateTime end;
 }
 
+/// Carimbo do PDF: marca própria quando white-label ativo; senão FOCUX.
+String relatorioPdfBrandLabel({
+  String? appDisplayName,
+  bool ocultarMarcaFocux = false,
+}) {
+  if (ocultarMarcaFocux) {
+    final n = (appDisplayName ?? '').trim();
+    if (n.isNotEmpty) return n;
+  }
+  return 'FOCUX';
+}
+
 Future<void> exportRelatorioPdf({
   required String alunoNome,
   required String periodoLabel,
   required AderenciaData dados,
   ComparativoPeriodo? comparativo,
+  String? appDisplayName,
+  bool ocultarMarcaFocux = false,
 }) async {
   final gerado = DateTime.now();
   final geradoLabel =
@@ -47,6 +61,11 @@ Future<void> exportRelatorioPdf({
       '${gerado.hour.toString().padLeft(2, '0')}:'
       '${gerado.minute.toString().padLeft(2, '0')}';
   final checkIns = comparativo?.checkInsAtual;
+  final brand = relatorioPdfBrandLabel(
+    appDisplayName: appDisplayName,
+    ocultarMarcaFocux: ocultarMarcaFocux,
+  );
+  final branded = brand != 'FOCUX';
 
   final doc = pw.Document();
   doc.addPage(
@@ -57,7 +76,7 @@ Future<void> exportRelatorioPdf({
         return pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            _pdfHeader(),
+            _pdfHeader(brand: brand, branded: branded),
             pw.SizedBox(height: 20),
             pw.Text(
               'Relatório de aderência',
@@ -155,7 +174,7 @@ Future<void> exportRelatorioPdf({
               ),
             ],
             pw.Spacer(),
-            _pdfFooter(geradoLabel),
+            _pdfFooter(geradoLabel, brand: brand, branded: branded),
           ],
         );
       },
@@ -164,7 +183,7 @@ Future<void> exportRelatorioPdf({
   await Printing.layoutPdf(onLayout: (_) async => doc.save());
 }
 
-pw.Widget _pdfHeader() {
+pw.Widget _pdfHeader({required String brand, required bool branded}) {
   return pw.Container(
     width: double.infinity,
     padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -176,16 +195,16 @@ pw.Widget _pdfHeader() {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(
-          'FOCUX',
+          brand.toUpperCase(),
           style: pw.TextStyle(
-            fontSize: 14,
+            fontSize: branded ? 12 : 14,
             fontWeight: pw.FontWeight.bold,
             color: _pdfTeal,
-            letterSpacing: 1.2,
+            letterSpacing: branded ? 0.6 : 1.2,
           ),
         ),
         pw.Text(
-          'Personal',
+          branded ? 'Relatório' : 'Personal',
           style: const pw.TextStyle(fontSize: 10, color: PdfColors.white),
         ),
       ],
@@ -231,7 +250,11 @@ pw.Widget _pdfKpiCard(String title, String value) {
   );
 }
 
-pw.Widget _pdfFooter(String geradoLabel) {
+pw.Widget _pdfFooter(
+  String geradoLabel, {
+  required String brand,
+  required bool branded,
+}) {
   return pw.Column(
     children: [
       pw.Container(height: 1, color: _pdfLine),
@@ -244,7 +267,7 @@ pw.Widget _pdfFooter(String geradoLabel) {
             style: const pw.TextStyle(fontSize: 9, color: _pdfMute),
           ),
           pw.Text(
-            'focux.app',
+            branded ? brand : 'focux.app',
             style: pw.TextStyle(
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
