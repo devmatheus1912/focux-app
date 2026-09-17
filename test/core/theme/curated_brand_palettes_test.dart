@@ -75,7 +75,7 @@ void main() {
     }
   });
 
-  test('dark chrome re-entry keeps brand secondary, not Focux teal', () {
+  test('dark chrome re-entry keeps brand secondary, not Focux default', () {
     for (final palette in CuratedBrandPalette.premium) {
       final chrome = palette.chromeFor(dark: true);
       final second = CuratedBrandPalette.safeSecondaryFor(
@@ -91,7 +91,7 @@ void main() {
         expect(
           second,
           isNot(BrandPalette.defaultSecondary),
-          reason: '${palette.name} must not snap to Focux teal',
+          reason: '${palette.name} must not snap to Focux brand secondary',
         );
       }
       final again = CuratedBrandPalette.chromeAccent(
@@ -103,7 +103,7 @@ void main() {
         expect(
           again,
           isNot(BrandPalette.defaultPrimary),
-          reason: '${palette.name} second pass must not snap to Focux cyan',
+          reason: '${palette.name} second pass must not snap to Focux primary',
         );
       }
       expect(

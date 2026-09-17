@@ -184,7 +184,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF13C2C2)),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B4F5C)),
         ),
         home: const Scaffold(
           body: DashboardHomeActivationStrip(

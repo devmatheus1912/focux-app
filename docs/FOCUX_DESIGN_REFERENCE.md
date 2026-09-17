@@ -254,7 +254,7 @@ Uma tela só é "Focux" se **todos** estes sete itens estiverem presentes. Este 
 
 1. **Fundo mesh cinematográfico** — `CinematicMeshBackground` + `MeshScope` (via `FxShellScaffold(useMesh: true)` ou herdado do shell). Nunca fundo chapado; nunca preto puro estilo ChatGPT.
 2. **Superfície glass** — `ShellChrome.of(context).panel(...)`, `FxGlassSurface`, `fxStripCardDecoration` ou `fxListCardDecoration`. Fill translúcido, borda 1px tingida na marca, luz interna no topo.
-3. **Teal da marca como único acento** — `TokensStrip.primary` (`#13C2C2`) ou a cor do personal via `BrandPalette.softened(...)`. Zero `#007AFF`, zero poço colorido, zero paleta paralela.
+3. **Azul petróleo da marca como único acento** — `TokensStrip.primary` (`#0B4F5C`) ou a cor do personal via `BrandPalette.softened(...)`. Zero `#007AFF`, zero poço colorido, zero paleta paralela. Paleta oficial completa em [§4.0](#40-paleta-oficial--azul-petróleo).
 4. **Profundidade com glow tingido** — `TokensStrip.coloredDepthGlow` / `interactiveGlow` / `elevation(level, dark:)`. Sombra neutra sozinha não é a marca.
 5. **Geometria de raio** — 8 input · 12 card · 20 grupo/painel · 50 pill (botão). Nunca raio arbitrário.
 6. **Entrada coreografada** — `FxPremiumEntrance` na tela, `FxStaggerItem` nos blocos, respeitando `TokensStrip.prefersReducedMotion`.
@@ -266,7 +266,7 @@ Se os sete estão lá, a tela é Focux **mesmo sendo** um formulário, um timer 
 
 | Camada | Fonte canônica | Copiar sempre | Nunca copiar |
 |---|---|---|---|
-| Identidade | §2 deste arquivo | Mesh, glass, teal da marca, `ShellChrome` | Tema preto ChatGPT, CTA branco invertido, hero invertido no Financeiro |
+| Identidade | §2 deste arquivo | Mesh, glass, azul petróleo da marca, `ShellChrome` | Tema preto ChatGPT, CTA branco invertido, hero invertido no Financeiro |
 | Tipografia | `FocuxHubTypography` | `pageTitle` / `sectionTitle` / `cardTitle` / `bodyMuted` / `metric` / `kpi` | Escala Dynamic Type 17pt como família própria; `Inter 17` ad-hoc; `pageTitle` 22 solto |
 | Cor | Marca do personal | Ícone leading `BrandPalette.softened`; texto `chrome.ink`; muted `chrome.mute`; destrutivo `EagleTokens.bad` | Poços coloridos, azul iOS `#007AFF`, gradiente decorativo sem função |
 | Estrutura | **Taxonomia §9 — nunca outra tela** | O esqueleto do tipo da tela | O esqueleto de um tipo diferente (em especial: inset-grouped fora de S2) |
@@ -277,6 +277,31 @@ Se os sete estão lá, a tela é Focux **mesmo sendo** um formulário, um timer 
 ## 4. Tokens canônicos
 
 Zero número mágico solto na árvore de widgets (pilar 16). Se um valor não está aqui nem em `TokensStrip`/`FxSettingsLayout`/`DashboardLayout`, ele não entra no diff.
+
+### 4.0 Paleta oficial — azul petróleo
+
+Marca canônica do Focux (substitui o cyan-teal `#13C2C2`). Fonte de verdade: `tokens_strip.dart`, `design_tokens.dart`, `brand_palette.dart`. White-label do personal continua via `corPrimaria` / `BrandPalette.*` — esta tabela é o **default da plataforma**.
+
+| Papel | Hex | Token |
+|---|---|---|
+| Primary (CTA, acento oficial) | `#0B4F5C` | `TokensStrip.primary` / `EagleTokens.brand` / `BrandPalette.defaultPrimary` |
+| Hover / ink | `#083D47` | `TokensStrip.primaryHover` / `EagleTokens.brandInk` / `BrandPalette.defaultInk` |
+| Mid (links, H2 tingido) | `#0A6B7A` | `TokensStrip.neonTeal` / `EagleTokens.brandSecondary` |
+| Secondary / glow (companion claro) | `#3D9AAD` | `TokensStrip.neonGlow` / `EagleTokens.brandAccent` / `BrandPalette.defaultSecondary` |
+| Soft (light tint) | `#D5E8EC` | `EagleTokens.brandSoft` |
+| Softer (light wash) | `#EBF4F6` | `EagleTokens.brandSofter` |
+| Deep (lerp / hero dark) | `#051F26` | `EagleTokens.brandDeep` |
+| Mesh light A | `#E4EFF1` | `TokensStrip.lightMeshA` |
+| Curated default | — | `CuratedBrandPalette.focuxDefault` (“Focux Original”) |
+
+**Light vs dark (sem quebra de tonalidade):**
+
+| Tema | Primary / CTA | Chrome no mesh | Soft / wash | Heading de seção |
+|---|---|---|---|---|
+| Light | `#0B4F5C` sólido; label branco | Primary (contrasta no paper) | `brandSoft` / `BrandPalette.soft(primary)` | `BrandPalette.deep(primary)` |
+| Dark | Primary sólido; label branco | Primary some no mesh cinematográfico → `chromeAccent` promove o glow `#3D9AAD` | `BrandPalette.soft(primary, dark: true)` | `BrandPalette.accent(primary)` |
+
+Legado cyan (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`) permanece só em `BrandPalette.isDefaultBrandColors` / `EagleTokens.legacyBrandCyan*` para reset de perfil — **não** usar em UI nova.
 
 ### 4.1 Espaço, raio, blur — `lib/core/theme/tokens_strip.dart`
 
@@ -526,7 +551,7 @@ Quatro subtipos. Cada um tem um chrome fechado; não inventar um quinto.
 
 | Subtipo | API | Corpo | Saída |
 |---|---|---|---|
-| **Picker** (1 valor) | `showFxInsetPickerSheet` | `FxSettingsGroup(edgeToEdgeRows: true)` + `FxInsetPickerOption` (check teal) | Fecha no tap |
+| **Picker** (1 valor) | `showFxInsetPickerSheet` | `FxSettingsGroup(edgeToEdgeRows: true)` + `FxInsetPickerOption` (check da marca) | Fecha no tap |
 | **Form** | `showFxFormSheet` | Campos curtos | Confirmar / Cancelar |
 | **Confirm** | `showFxConfirmSheet` | Uma frase + consequência | Confirmar (destrutivo em `EagleTokens.bad`) + haptic |
 | **Notice / Help** | `showFxNoticeSheet` / `showFxHelpSheet` | Texto + `FxHelpTipRow` | Um "Fechar" |
@@ -587,14 +612,14 @@ Escolha do componente é **função da intenção**, nunca da aparência desejad
 | Intenção | Componente | Affordance | Nunca |
 |---|---|---|---|
 | Navegar para outra tela (ver/editar mais) | `FxSettingsTile` (S2) · `FxSatelliteListTile` (S3/S4) | Chevron 17 muted | — |
-| Escolher 1 valor entre poucos, em sheet | `showFxInsetPickerSheet` / `FxInsetPickerOption` | Check teal | Chevron |
+| Escolher 1 valor entre poucos, em sheet | `showFxInsetPickerSheet` / `FxInsetPickerOption` | Check da marca | Chevron |
 | Escolher 1 valor, muitos itens | `FxInsetPickerOption.list` + busca acima | Check + busca | Chevron; lista sem busca |
 | Escolher 1 entre 2–4 fixas, inline | `AlunoSegmentedChoice` / chips inline | Segmented | Linha com chevron |
 | Escolher vários | `FxToggleChip` em wrap/grid | Chip selecionado | Picker de lista |
 | Alternar booleano | `FxSettingsTile(accessory: Switch…)` | Switch | Chevron + sheet |
 | **Ação primária transacional** (entrar, salvar, pagar, iniciar, confirmar, assinar) | `FxLiquidPrimaryButton` | Pill r50 + gradiente + glow | **`FxSettingsTile` / chevron** |
 | Ação secundária | `FxLiquidSecondaryButton` | Pill outline | Segundo primário |
-| Ação terciária | `TextButton` / link teal | Texto | Botão cheio |
+| Ação terciária | `TextButton` / link da marca | Texto | Botão cheio |
 | Ação in-card em hub | `DashboardHomeActionChip` / `CommandActionTile` | Chip | Full-width |
 | Ação destrutiva | `showFxConfirmSheet` + linha/botão `danger` | Vermelho `EagleTokens.bad` + haptic | Swipe sem confirmação; destrutivo junto do resto |
 | Abrir ajuda/contexto | `FxHelpIconButton` → `showFxHelpSheet` | Ícone `?` na app bar | Linha de ajuda no meio da lista |
@@ -1669,9 +1694,9 @@ Catálogo de defeitos. Cada um tem nome para poder ser citado em revisão.
 | **A5** | Dois primários | Dois botões com glow competindo | Rebaixar um a `FxLiquidSecondaryButton` |
 | **A6** | Número órfão | Métrica sem unidade nem contexto | Unidade/rótulo no mesmo bloco (pilar 40) |
 | **A7** | Full-width fora de lugar | CTA full-width em hub ou ajustes | Chip in-card (§11) |
-| **A8** | Tema emprestado | Botão branco sobre preto, azul iOS, hero invertido | Mesh + glass + teal (§2) |
+| **A8** | Tema emprestado | Botão branco sobre preto, azul iOS, hero invertido | Mesh + glass + azul petróleo (§2) |
 | **A9** | KPI em ajustes | Card de métrica dentro de S2 | Mover para S1/S3 |
-| **A10** | Picker com chevron | Escolha de valor exibindo chevron | Check teal em `FxInsetPickerOption` |
+| **A10** | Picker com chevron | Escolha de valor exibindo chevron | Check da marca em `FxInsetPickerOption` |
 | **A11** | Stack na tela | `showError(context, '$e')` | `friendlyError` / `FxAsyncBody` |
 | **A12** | Regra no widget | `if (plano == 'FREE')` na UI | `effectivePlanoFeatures` / capability |
 | **A13** | Sheet sem altura | `Flexible`/`Expanded` em `Column(min)` sem cap | `expand: true` + `Expanded(ListView)` |
@@ -1932,7 +1957,7 @@ Padrão **global** para escolher **um** valor em bottom sheet (tema, nível, tax
 1. **Chrome:** `showFxHomeSheet` → `FxHomeSheetSurface` → `FxHomeSheetHandle` + `FxHomeSheetHeader` (título + subtítulo de contexto).
 2. **Grupo:** `FxSettingsGroup(accent: primary, edgeToEdgeRows: true)` — sem padding interno; `ClipRRect` no card.
 3. **Linha:** `FxInsetPickerOption` — altura mínima `rowMinHeight` (52), padding horizontal `groupPadH` (16).
-4. **Selecionado:** fundo `accent` a 10% (light) / 16% (dark) **de borda a borda**; label em bold + `Icons.check_rounded` teal à direita; cantos arredondados no primeiro e no último item.
+4. **Selecionado:** fundo `accent` a 10% (light) / 16% (dark) **de borda a borda**; label em bold + `Icons.check_rounded` da marca à direita; cantos arredondados no primeiro e no último item.
 5. **Ícone opcional** à esquerda (22, cor da marca); **subtítulo opcional** (`bodyMuted`).
 6. **Haptic:** `HapticFeedback.selectionClick()` no tap — já dentro do widget, não duplicar no caller.
 7. **Proibido:** `BoxDecoration` manual com `alpha: 0.08` dentro de grupo com padding — gera highlight quebrado.
@@ -2313,7 +2338,7 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 | 1 | Produtividade operacional | 10 | Conta / marca / operação em poucos toques |
 | 2 | Rota & job | 10 | Hub único; Ferramentas em rota própria |
 | 3 | Lógica & regras | 10 | FE ∪ API `readinessMissing` (`PersonalReadiness`) |
-| 4 | Hierarquia de decisão | 10 | Sticky `Completar`/`Hoje` + Planos em destaque teal |
+| 4 | Hierarquia de decisão | 10 | Sticky `Completar`/`Hoje` + Planos em destaque da marca |
 | 5 | Valor aluno | 10 | `%` + `readinessPercent` visíveis |
 | 6 | Descoberta | 10 | Caption + long-press em Marca |
 | 7 | First-run | 10 | Grupo de prontidão só quando incompleto |
@@ -2323,10 +2348,10 @@ Auditoria concluída em 2026-08-25 sobre `/perfil` + `/perfil/ferramentas` — *
 | 11 | Gates de plano | 10 | `verificarAcesso`; tile `locked`; contrato intacto |
 | 12 | Unread | N/A | Sem unread |
 | 13 | Time-to-value | 10 | Hero + 1º grupo sem scroll extra |
-| 14 | Identidade visual | 10 | Mesh/glass/teal; não copia o preto do ChatGPT |
+| 14 | Identidade visual | 10 | Mesh/glass/azul petróleo; não copia o preto do ChatGPT |
 | 15 | Tipografia | 10 | Papéis de `FocuxHubTypography`; sem Inter 17 ad-hoc |
 | 16 | Espaçamento | 10 | `FxSettingsLayout` 16/24/52/20 |
-| 17 | Contraste | 10 | Labels `ink`; ícone teal sobre chrome |
+| 17 | Contraste | 10 | Labels `ink`; ícone da marca sobre chrome |
 | 18 | Dark/light | 10 | `cardFill` e avatar ring via `ShellChrome` |
 | 19 | Hierarquia visual | 10 | Nome = headline; linhas = `cardTitle` |
 | 20 | Design system | 10 | `FxSettings*` em core |

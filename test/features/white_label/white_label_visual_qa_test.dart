@@ -77,7 +77,7 @@ void main() {
     expect(midnight.colorScheme.primary, isNot(const Color(0xFF1A2332)));
   });
 
-  test('AuthShell forceDark re-wrap keeps brand gold, not Focux teal', () {
+  test('AuthShell forceDark re-wrap keeps brand gold, not Focux default', () {
     for (final palette in CuratedBrandPalette.premium) {
       if (palette.id == CuratedBrandPalette.focuxDefault.id) continue;
       final first = AppTheme.buildDarkTheme(
@@ -97,7 +97,7 @@ void main() {
       expect(
         second.colorScheme.secondary,
         isNot(BrandPalette.defaultSecondary),
-        reason: '${palette.name} must not snap to Focux teal',
+        reason: '${palette.name} must not snap to Focux default',
       );
       expect(
         second.colorScheme.primary,

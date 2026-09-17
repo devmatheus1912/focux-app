@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 abstract class TokensStrip {
   static const String version = '1.0.0';
 
-  // ── TOKENS STRIP v1.0.0 canonical palette ────────────────────────────
-  static const Color primary = Color(0xFF13C2C2);
-  static const Color primaryHover = Color(0xFF0D9494);
+  // ── TOKENS STRIP v1.0.0 canonical palette (azul petróleo) ────────────
+  static const Color primary = Color(0xFF0B4F5C);
+  static const Color primaryHover = Color(0xFF083D47);
   static const Color disabled = Color(0xFFC8C8C8);
   static const Color pageBg = Color(0xFFF4F6F8);
   static const Color cardBg = Color(0xFFFFFFFF);
@@ -64,10 +64,10 @@ abstract class TokensStrip {
         height: leadingBody,
       );
 
-  // ── Neon cyan / teal premium (aliases) ───────────────────────────────
+  // ── Azul petróleo premium (aliases) ──────────────────────────────────
   static const Color neonCyan = primary;
-  static const Color neonTeal = Color(0xFF18B5B5);
-  static const Color neonGlow = Color(0xFF4DD0E1);
+  static const Color neonTeal = Color(0xFF0A6B7A);
+  static const Color neonGlow = Color(0xFF3D9AAD);
   static const Color neonDeep = primaryHover;
 
   // ── Cinematic dark ───────────────────────────────────────────────────
@@ -76,7 +76,7 @@ abstract class TokensStrip {
   static const Color cinematicElevated = Color(0xFF1A2330);
 
   // ── Light mesh ───────────────────────────────────────────────────────
-  static const Color lightMeshA = Color(0xFFE8F4F4);
+  static const Color lightMeshA = Color(0xFFE4EFF1);
   static const Color lightMeshB = Color(0xFFF4F6F8);
   static const Color lightMeshC = Color(0xFFEDF2F4);
 

@@ -6,17 +6,22 @@ import 'design_tokens.dart';
 /// Used by white-label: personal's corPrimaria is passed here to generate
 /// a harmonious set of tints that work across light and dark modes.
 ///
-/// Tested with cyan (default Focux), warm reds, greens, purples.
+/// Tested with azul petróleo (default Focux), warm reds, greens, purples.
 class BrandPalette {
-  static const Color defaultPrimary = Color(0xFF13C2C2);
-  static const Color defaultSecondary = Color(0xFF007D8A);
-  static const Color defaultInk = Color(0xFF0E9E9E);
-  static const String defaultPrimaryHex = '#13C2C2';
-  static const String defaultSecondaryHex = '#007D8A';
+  static const Color defaultPrimary = Color(0xFF0B4F5C);
+  static const Color defaultSecondary = Color(0xFF3D9AAD);
+  static const Color defaultInk = Color(0xFF083D47);
+  static const String defaultPrimaryHex = '#0B4F5C';
+  static const String defaultSecondaryHex = '#3D9AAD';
 
-  /// Previous default cyan kept for reset detection on saved profiles.
-  static const String legacyPrimaryHex = '#1EC8C8';
-  static const String legacySecondaryHex = '#0097A7';
+  /// Defaults anteriores (cyan-teal) — reset / detecção de perfil legado.
+  static const String legacyPrimaryHex = '#13C2C2';
+  static const String legacySecondaryHex = '#007D8A';
+  static const String legacyPrimaryHexOlder = '#1EC8C8';
+  static const String legacySecondaryHexOlder = '#0097A7';
+
+  /// Tom médio oficial (hover claro / links) — aceito como secondary default.
+  static const String brandMidHex = '#0A6B7A';
 
   static bool isDefaultBrandColors({
     String? corPrimaria,
@@ -24,8 +29,18 @@ class BrandPalette {
   }) {
     final primary = _normalizeHex(corPrimaria);
     final secondary = _normalizeHex(corSecundaria);
-    const primaryDefaults = {defaultPrimaryHex, legacyPrimaryHex};
-    const secondaryDefaults = {defaultSecondaryHex, legacySecondaryHex};
+    const primaryDefaults = {
+      defaultPrimaryHex,
+      legacyPrimaryHex,
+      legacyPrimaryHexOlder,
+    };
+    const secondaryDefaults = {
+      defaultSecondaryHex,
+      brandMidHex,
+      legacySecondaryHex,
+      legacySecondaryHexOlder,
+      '#4DD0E1',
+    };
     return (primary == null || primaryDefaults.contains(primary)) &&
         (secondary == null || secondaryDefaults.contains(secondary));
   }
@@ -91,7 +106,7 @@ class BrandPalette {
     return next.toColor();
   }
 
-  /// H2 section titles on page surfaces — deep teal (light) / glow (dark).
+  /// H2 section titles on page surfaces — deep brand (light) / glow (dark).
   static Color sectionHeading(Color primary, {required bool dark}) =>
       dark ? accent(primary) : deep(primary);
 
