@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_button.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,7 @@ void main() {
             body: Aluno360CopilotExecutarAcaoButton(
               alunoId: 7,
               spec: spec,
-              primary: Colors.teal,
+              primary: BrandPalette.defaultPrimary,
             ),
           ),
         ),
@@ -60,7 +61,7 @@ void main() {
             body: Aluno360CopilotExecutarAcaoButton(
               alunoId: 7,
               spec: spec,
-              primary: Colors.teal,
+              primary: BrandPalette.defaultPrimary,
             ),
           ),
         ),

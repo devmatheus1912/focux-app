@@ -14,27 +14,27 @@
     <!-- F Gradients (Same as logo_icon.svg) -->
     <linearGradient id="app-grad-body" x1="0%" y1="0%" x2="80%" y2="100%">
       <stop offset="0%" stop-color="#1C3FAA"/>
-      <stop offset="45%" stop-color="#1A3ABF"/>
+      <stop offset="45%" stop-color="#083D47"/>
       <stop offset="100%" stop-color="#080E2E"/>
     </linearGradient>
 
     <linearGradient id="app-grad-gloss-top" x1="10%" y1="0%" x2="90%" y2="100%">
       <stop offset="0%" stop-color="#EFF6FF"/>
       <stop offset="30%" stop-color="#BFDBFE"/>
-      <stop offset="75%" stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.55"/>
+      <stop offset="75%" stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.55"/>
     </linearGradient>
 
     <linearGradient id="app-grad-gloss-mid" x1="5%" y1="0%" x2="95%" y2="100%">
       <stop offset="0%" stop-color="#93C5FD"/>
-      <stop offset="55%" stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.5"/>
     </linearGradient>
 
     <linearGradient id="app-grad-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#22D3EE"/>
-      <stop offset="60%" stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#22D3EE"/>
+      <stop offset="0%" stop-color="#3D9AAD"/>
+      <stop offset="60%" stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#3D9AAD"/>
     </linearGradient>
 
     <!-- Filters -->
@@ -110,7 +110,7 @@
       filter="url(#app-neon-glow)" opacity="0.9"/>
 
     <!-- Circuit Traces -->
-    <g opacity="0.8" stroke="#22D3EE" stroke-linecap="round" fill="none">
+    <g opacity="0.8" stroke="#3D9AAD" stroke-linecap="round" fill="none">
       <line x1="132" y1="330" x2="230" y2="330" stroke-width="2.5"/>
       <line x1="230" y1="330" x2="230" y2="375" stroke-width="2.5"/>
       <line x1="230" y1="375" x2="282" y2="375" stroke-width="2.5"/>
@@ -126,7 +126,7 @@
     </g>
 
     <!-- Circuit Dots -->
-    <g fill="#22D3EE" filter="url(#app-dot-glow)">
+    <g fill="#3D9AAD" filter="url(#app-dot-glow)">
       <circle cx="230" cy="330" r="5.5"/>
       <circle cx="230" cy="375" r="5"/>
       <circle cx="195" cy="460" r="5.5"/>
@@ -151,11 +151,11 @@
       </g>
     </g>
     <g transform="translate(215, 840)" filter="url(#app-dot-glow)">
-      <path d="M 0,-21 A 21,21 0 1,1 15,10.5 A 13.5,13.5 0 1,0 0,-21 Z" fill="#22D3EE" opacity="0.9"/>
+      <path d="M 0,-21 A 21,21 0 1,1 15,10.5 A 13.5,13.5 0 1,0 0,-21 Z" fill="#3D9AAD" opacity="0.9"/>
     </g>
 
     <!-- Heartbeat -->
-    <g stroke="#22D3EE" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#app-soft-glow)" opacity="0.8">
+    <g stroke="#3D9AAD" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#app-soft-glow)" opacity="0.8">
       <polyline points="315,570 340,570 350,550 365,592 378,542 392,598 405,570 440,570"/>
     </g>
     

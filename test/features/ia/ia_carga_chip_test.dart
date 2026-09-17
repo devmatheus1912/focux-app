@@ -16,7 +16,7 @@ void main() {
             body: IaCargaChip(
               label: 'Sugerido',
               valor: '82,5kg 3x12',
-              color: Color(0xFF26A69A),
+              color: Color(0xFF0B4F5C),
               deltaLabel: '+2,5 kg',
             ),
           ),

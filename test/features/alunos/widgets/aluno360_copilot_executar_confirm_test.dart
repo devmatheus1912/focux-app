@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +47,7 @@ void main() {
                     showCopilotExecutarConfirmSheet(
                       context,
                       spec: spec,
-                      primary: Colors.teal,
+                      primary: BrandPalette.defaultPrimary,
                     );
                   },
                   child: const Text('Abrir'),
