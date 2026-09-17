@@ -4,6 +4,7 @@ import 'package:focux_app/core/ux/fx_hub_freshness.dart';
 import 'package:focux_app/core/widgets/fx_error_state.dart';
 import 'package:focux_app/core/widgets/fx_empty_state.dart';
 import 'package:focux_app/core/widgets/fx_hub_header.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
   group('FxHubFreshness', () {
@@ -35,7 +36,7 @@ void main() {
         home: Scaffold(
           body: FxErrorState(
             chromeOnDark: false,
-            primary: Colors.teal,
+            primary: BrandPalette.defaultPrimary,
             message: 'falhou',
             onRetry: () => retried = true,
           ),

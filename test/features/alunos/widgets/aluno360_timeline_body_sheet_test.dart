@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 const _longChatBodies = [
   'Primeira mensagem longa sobre treino: me manda carga e repetições para eu ajustar o plano completo.',
@@ -34,10 +35,10 @@ void main() {
                         meta: 'PERSONAL',
                         priority: 'P3',
                         icon: Icons.chat_bubble_outline,
-                        color: Colors.teal,
+                        color: BrandPalette.defaultPrimary,
                         deepLink: '/alunos/42/chat',
                       ),
-                      accent: Colors.teal,
+                      accent: BrandPalette.defaultPrimary,
                       isDark: false,
                     );
                   },
@@ -70,7 +71,7 @@ void main() {
       meta: 'PERSONAL',
       priority: 'P3',
       icon: Icons.chat_bubble_outline,
-      color: Colors.teal,
+      color: BrandPalette.defaultPrimary,
       deepLink: '/alunos/42/chat',
     );
 
@@ -90,7 +91,7 @@ void main() {
                             child: Timeline360Tile(
                               item: item,
                               isDark: false,
-                              accent: Colors.teal,
+                              accent: BrandPalette.defaultPrimary,
                               onExpandableTap: (tileContext, tapped) {
                                 Navigator.of(tileContext).pop();
                                 WidgetsBinding.instance.addPostFrameCallback((
@@ -99,7 +100,7 @@ void main() {
                                   showTimeline360BodySheet(
                                     hostContext,
                                     tapped,
-                                    accent: Colors.teal,
+                                    accent: BrandPalette.defaultPrimary,
                                     isDark: false,
                                   );
                                 });
@@ -146,11 +147,11 @@ void main() {
               meta: 'PERSONAL',
               priority: 'P3',
               icon: Icons.chat_bubble_outline,
-              color: Colors.teal,
+              color: BrandPalette.defaultPrimary,
               deepLink: '/alunos/42/chat',
             ),
             isDark: false,
-            accent: Colors.teal,
+            accent: BrandPalette.defaultPrimary,
           ),
         ),
       ),
@@ -177,7 +178,7 @@ void main() {
               deepLink: '/alunos/42',
             ),
             isDark: false,
-            accent: Colors.teal,
+            accent: BrandPalette.defaultPrimary,
           ),
         ),
       ),

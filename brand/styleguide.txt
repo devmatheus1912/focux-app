@@ -1,17 +1,25 @@
 FOCUX PERSONAL - BRAND STYLEGUIDE
 
-1. CORES
+1. CORES — azul petróleo (plataforma)
 ────────────────────────────────────────────────────────────
-Fundo Primário:    #05070D (Navy/Black profundo)
-Fundo Secundário:  #0B1220 (Navy Dark)
+Fundo Primário:    #0B0E14 (cinematic dark)
+Fundo Secundário:  #121820 (dark card)
+Deep / hero:       #051F26
 
-Primária/Destaque: #3B82F6 (Azul Royal)
-Secundária/Luz:    #60A5FA (Azul Claro)
-Neon/Circuitos:    #22D3EE (Ciano)
+Primary (CTA):     #0B4F5C (azul petróleo)
+Hover / ink:       #083D47
+Mid (links/H2):    #0A6B7A
+Glow / secondary:  #3D9AAD
+Soft tint:         #D5E8EC
+Softer wash:       #EBF4F6
+Soft border:       #9ECAD4
 
-Texto Principal:   #FFFFFF (Branco puro para 'FOCUX')
-Texto Secundário:  #E5E7EB (Soft White para slogan)
-Neutros:           #9CA3AF, #6B7280, #374151
+Texto Principal:   #FFFFFF (branco em hero/CTA)
+Texto Ink:         #1A1A2E
+Texto Mute:        #6B7280
+Neutros:           #9CA3AF, #6B7280, #374151, #E5E7EB
+
+Legado (NÃO usar em UI nova): #13C2C2, #1EC8C8, #22D3EE, #3B82F6
 
 2. TIPOGRAFIA
 ────────────────────────────────────────────────────────────
@@ -19,9 +27,9 @@ Fonte Principal: Inter (substituta: Montserrat)
 
 Uso por elemento:
 - FOCUX: ExtraBold (800) / Cor: #FFFFFF / Tracking: -4
-- PERSONAL: Bold (700) / Cor: #60A5FA / Tracking: +150 a +220 (muito espaçado)
+- PERSONAL: Bold (700) / Cor: #3D9AAD / Tracking: +150 a +220
 - Slogan Base: Light (300) / Cor: #E5E7EB / Tracking: +80
-- Slogan "IA": Bold (700) / Cor: #22D3EE / Efeito: Glow sutil
+- Slogan "IA": Bold (700) / Cor: #3D9AAD / Efeito: Glow sutil petróleo
 
 3. ESPAÇAMENTOS E PROPORÇÕES
 ────────────────────────────────────────────────────────────
