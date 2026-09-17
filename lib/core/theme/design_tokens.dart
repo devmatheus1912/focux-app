@@ -129,9 +129,6 @@ abstract class EagleTokens {
   static const Color strengthWeak = Color(0xFFFF7A7A);
   static const Color strengthMid = Color(0xFFFFC857);
   static const Color strengthStrong = Color(0xFF38E68A);
-  /// Defaults cyan anteriores — reset / detecção de perfil legado.
-  static const Color legacyBrandCyan = Color(0xFF13C2C2);
-  static const Color legacyBrandCyanOlder = Color(0xFF1EC8C8);
 
   // Special
   static const Color gold = Color(0xFFE5B84C);

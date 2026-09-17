@@ -131,8 +131,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/logo_official.png
-    - assets/images/logo_icon.png
+    - assets/images/logo_oficial_fundo_claro.png
+    - assets/images/logo_oficial_fundo_escuro.png
     - assets/images/logo_splash.png
     - assets/images/logo_splash_icon.png
     - assets/animations/confetti_success.riv

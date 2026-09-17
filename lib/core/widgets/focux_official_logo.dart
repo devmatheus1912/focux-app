@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Logo oficial Focux Personal — asset único em todo o app.
+/// Logo oficial Focux Personal — variantes prontas para fundo claro e escuro.
+///
+/// Assets baixados do Drive (não alterar pixels):
+/// - [assetLight] — `Logo-oficial-ParaFundoClaro.png`
+/// - [assetDark] — `Logo-oficial-ParaFundoEscuro.png`
 class FocuxOfficialLogo extends StatelessWidget {
   const FocuxOfficialLogo({
     super.key,
@@ -36,8 +40,15 @@ class FocuxOfficialLogo extends StatelessWidget {
         variant = FocuxLogoVariant.icon,
         alignment = Alignment.center;
 
-  static const asset = 'assets/images/logo_official.png';
-  static const iconAsset = 'assets/images/logo_icon.png';
+  /// Logo para fundos claros (modo light).
+  static const assetLight = 'assets/images/logo_oficial_fundo_claro.png';
+
+  /// Logo para fundos escuros (modo dark / splash cinematográfico).
+  static const assetDark = 'assets/images/logo_oficial_fundo_escuro.png';
+
+  /// Alias light — preferir [assetOf] / [assetFor].
+  static const asset = assetLight;
+  static const iconAsset = assetLight;
 
   final double? width;
   final double? height;
@@ -45,11 +56,20 @@ class FocuxOfficialLogo extends StatelessWidget {
   final String? logoUrl;
   final Alignment alignment;
 
+  static String assetFor({required bool dark}) => dark ? assetDark : assetLight;
+
+  static String assetOf(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return assetFor(dark: dark);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (logoUrl != null && logoUrl!.trim().isNotEmpty) {
-      return _networkLogo(logoUrl!.trim());
+      return _networkLogo(context, logoUrl!.trim());
     }
+
+    final assetPath = assetOf(context);
 
     if (variant == FocuxLogoVariant.icon) {
       final side = width ?? height ?? 40;
@@ -60,7 +80,7 @@ class FocuxOfficialLogo extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(inset),
           child: Image.asset(
-            iconAsset,
+            assetPath,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,
             gaplessPlayback: true,
@@ -71,7 +91,7 @@ class FocuxOfficialLogo extends StatelessWidget {
     }
 
     return Image.asset(
-      asset,
+      assetPath,
       width: width,
       height: height,
       fit: BoxFit.contain,
@@ -82,7 +102,7 @@ class FocuxOfficialLogo extends StatelessWidget {
     );
   }
 
-  Widget _networkLogo(String url) {
+  Widget _networkLogo(BuildContext context, String url) {
     if (variant == FocuxLogoVariant.icon) {
       final side = width ?? height ?? 40;
       return SizedBox(
@@ -93,7 +113,7 @@ class FocuxOfficialLogo extends StatelessWidget {
             url,
             fit: BoxFit.cover,
             filterQuality: FilterQuality.high,
-            errorBuilder: (_, __, ___) => _fallbackAsset(),
+            errorBuilder: (_, __, ___) => _fallbackAsset(context),
           ),
         ),
       );
@@ -105,16 +125,17 @@ class FocuxOfficialLogo extends StatelessWidget {
       height: height,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
-      errorBuilder: (_, __, ___) => _fallbackAsset(),
+      errorBuilder: (_, __, ___) => _fallbackAsset(context),
     );
   }
 
-  Widget _fallbackAsset() {
+  Widget _fallbackAsset(BuildContext context) {
+    final assetPath = assetOf(context);
     if (variant == FocuxLogoVariant.icon) {
-      return Image.asset(iconAsset, fit: BoxFit.contain);
+      return Image.asset(assetPath, fit: BoxFit.contain);
     }
     return Image.asset(
-      asset,
+      assetPath,
       width: width,
       height: height,
       fit: BoxFit.contain,
