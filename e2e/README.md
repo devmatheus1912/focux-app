@@ -83,7 +83,7 @@ e2e/
 
 ## CI
 
-No GitHub Actions (`e2e.yml`), se `E2E_PERSONAL_*` / `E2E_ALUNO_*` não estiverem nos secrets do repo, só o project **public** roda (smoke de rotas). Contas autenticadas ficam de fora em vez de falhar o job.
+`e2e.yml` roda só em **push main/develop** ou manual (não em PR). Sem secrets `E2E_PERSONAL_*` / `E2E_ALUNO_*`, só o project **public** roda.
 
 O fixture ignora ruído de CORS `localhost` → API de produção (`Access-Control-Allow-Origin` / `net::ERR_FAILED`).
 
