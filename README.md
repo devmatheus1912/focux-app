@@ -108,7 +108,7 @@ flutter test integration_test
 
 E2E web: `cd e2e && npm install && npx playwright test`
 
-CI: analyze, test, build web e Playwright (ver `.github/workflows/`).
+CI (minutos enxutos): PR = analyze + orphan + gitleaks + semgrep. Push main = + unit tests + E2E Playwright. CodeQL só semanal/manual. Ver `.github/workflows/`.
 
 ### i18n
 
