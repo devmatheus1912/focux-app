@@ -302,7 +302,7 @@ Marca canônica do Focux (substitui o cyan-teal `#13C2C2`). Fonte de verdade: `t
 | Light | `#0B4F5C` sólido; label branco | Primary (contrasta no paper) | `brandSoft` / `BrandPalette.soft(primary)` | `BrandPalette.deep(primary)` |
 | Dark | Primary sólido; label branco | Primary some no mesh cinematográfico → `chromeAccent` promove o glow `#3D9AAD` | `BrandPalette.soft(primary, dark: true)` | `BrandPalette.accent(primary)` |
 
-Legado cyan (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`, softs `#9DE8E8` / `#D4F5F5`) permanece só em `BrandPalette.isDefaultBrandColors` / `EagleTokens.legacyBrandCyan*` / `BrandPalette.resolveStored*` para reset de perfil — **não** usar em UI nova.
+Legado cyan (`#13C2C2`, `#1EC8C8`, `#007D8A`, `#0097A7`) permanece só em `BrandPalette.isDefaultBrandColors` / `BrandPalette.resolveStored*` para remap de perfil no BE — **não** usar em UI nova. Logos oficiais: `logo_oficial_fundo_claro.png` / `logo_oficial_fundo_escuro.png` via `FocuxOfficialLogo`.
 
 ### 4.1 Espaço, raio, blur — `lib/core/theme/tokens_strip.dart`
 

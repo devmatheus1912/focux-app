@@ -1,49 +1,30 @@
 FOCUX PERSONAL - BRAND STYLEGUIDE
 
-1. CORES — azul petróleo (plataforma)
+1. LOGOS OFICIAIS (não alterar pixels)
 ────────────────────────────────────────────────────────────
-Fundo Primário:    #0B0E14 (cinematic dark)
-Fundo Secundário:  #121820 (dark card)
-Deep / hero:       #051F26
+Fonte: Google Drive "Focux Personal"
+  - Logo-oficial-ParaFundoClaro.png  → assets/images/logo_oficial_fundo_claro.png
+  - Logo-oficial-ParaFundoEscuro.png → assets/images/logo_oficial_fundo_escuro.png
 
-Primary (CTA):     #0B4F5C (azul petróleo)
+Uso no app: FocuxOfficialLogo escolhe pela brightness do Theme
+  - light → fundo_claro
+  - dark / AuthShell forceDark → fundo_escuro
+
+Cópias de referência em brand/ (mesmos bytes do Drive).
+
+2. CORES — azul petróleo (plataforma)
+────────────────────────────────────────────────────────────
+Primary (CTA):     #0B4F5C
 Hover / ink:       #083D47
 Mid (links/H2):    #0A6B7A
 Glow / secondary:  #3D9AAD
 Soft tint:         #D5E8EC
 Softer wash:       #EBF4F6
-Soft border:       #9ECAD4
 
-Texto Principal:   #FFFFFF (branco em hero/CTA)
+Fundo cinematic:   #0B0E14
 Texto Ink:         #1A1A2E
-Texto Mute:        #6B7280
-Neutros:           #9CA3AF, #6B7280, #374151, #E5E7EB
 
-Legado (NÃO usar em UI nova): #13C2C2, #1EC8C8, #22D3EE, #3B82F6
-
-2. TIPOGRAFIA
+3. SPLASH / LAUNCHER
 ────────────────────────────────────────────────────────────
-Fonte Principal: Inter (substituta: Montserrat)
-
-Uso por elemento:
-- FOCUX: ExtraBold (800) / Cor: #FFFFFF / Tracking: -4
-- PERSONAL: Bold (700) / Cor: #3D9AAD / Tracking: +150 a +220
-- Slogan Base: Light (300) / Cor: #E5E7EB / Tracking: +80
-- Slogan "IA": Bold (700) / Cor: #3D9AAD / Efeito: Glow sutil petróleo
-
-3. ESPAÇAMENTOS E PROPORÇÕES
-────────────────────────────────────────────────────────────
-- Proporção ícone/texto: O ícone 'F' ocupa ~44% da largura visual; O texto ocupa ~52%.
-- Gap: Margem entre o ícone e o texto é de ~6% da largura total do canvas.
-- Altura do texto: O bloco de texto corresponde a cerca de 60-80% da altura total do ícone.
-- Alinhamento: Tudo centralizado verticalmente em relação ao eixo (Y) do ícone F.
-
-4. EXPORTAÇÃO RASTER (INSTRUÇÕES)
-────────────────────────────────────────────────────────────
-Para gerar os PNGs exatos via linha de comando usando ImageMagick (se instalado):
-
-Logo Horizontal (3000x2000, 300 DPI):
-magick -density 300 -background none logo_horizontal.svg logo_horizontal.png
-
-App Icon 1024 (com cantos):
-magick -density 300 -background none app_icon_1024.svg app_icon_1024.png
+Splash nativo (fundo #0B0E14): logo_splash*.png = cópia da variante escuro
+Launcher / adaptive (fundo branco): logo_icon_*.png = cópia da variante claro
