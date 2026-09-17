@@ -58,7 +58,7 @@ dependencies:
   speech_to_text: ^7.3.0
   firebase_crashlytics: ^4.3.10
   in_app_purchase: ^3.2.3
-  image_picker: ^1.1.2
+  image_picker: ^1.2.3
   just_audio: ^0.9.42
   path_provider: ^2.1.5
   record: ^6.2.0
