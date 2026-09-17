@@ -654,7 +654,7 @@ class PlanosRepository {
 
   Future<PlanoFeatures> getPlanoFeatures() async {
     try {
-      return getPlanoFeaturesFresh();
+      return await getPlanoFeaturesFresh();
     } catch (_) {
       final cached = await loadCachedPlanoFeatures();
       if (cached != null) return cached;
@@ -675,7 +675,7 @@ class PlanosRepository {
   /// Reconcilia plano no servidor (IAP/validade) e retorna `/me` atualizado.
   Future<PlanoFeatures> reconcilePlanoFeatures() async {
     await _dio.post('/api/planos/reconcile');
-    return getPlanoFeaturesFresh();
+    return await getPlanoFeaturesFresh();
   }
 
   Future<PlanoFeatures?> loadCachedPlanoFeatures() async {
@@ -767,7 +767,7 @@ class PlanosRepository {
 
   /// Restore purchases — re-syncs subscription state from backend.
   Future<PlanoFeatures> syncSubscription() async {
-    return getPlanoFeaturesFresh();
+    return await getPlanoFeaturesFresh();
   }
 }
 
