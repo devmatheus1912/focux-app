@@ -5,17 +5,17 @@ export 'app_typography.dart';
 /// FX Design System — Focux · TOKENS STRIP v1.0.0
 /// Fonte única de verdade para todos os tokens visuais.
 ///
-/// Palette: Neon cyan-teal + cinematic dark · Liquid Glass surfaces.
+/// Palette: Azul petróleo + cinematic dark · Liquid Glass surfaces.
 /// Typography: Inter (display/body) + JetBrains Mono (technical/numbers).
 abstract class EagleTokens {
-  // ── Brand (TOKENS STRIP #13C2C2) ───────────────────────────────────
-  static const Color brand = Color(0xFF13C2C2);
-  static const Color brandInk = Color(0xFF0D9494);
-  static const Color brandSecondary = Color(0xFF0D9494);
-  static const Color brandSoft = Color(0xFFD9F2F2);
-  static const Color brandSofter = Color(0xFFEDF8F8);
-  static const Color brandDeep = Color(0xFF0A2E2E);
-  static const Color brandAccent = Color(0xFF4DD0E1);
+  // ── Brand (TOKENS STRIP #0B4F5C — azul petróleo) ───────────────────
+  static const Color brand = Color(0xFF0B4F5C);
+  static const Color brandInk = Color(0xFF083D47);
+  static const Color brandSecondary = Color(0xFF0A6B7A);
+  static const Color brandSoft = Color(0xFFD5E8EC);
+  static const Color brandSofter = Color(0xFFEBF4F6);
+  static const Color brandDeep = Color(0xFF051F26);
+  static const Color brandAccent = Color(0xFF3D9AAD);
 
   // ── Neutral Light ───────────────────────────────────────────────────
   static const Color ink = Color(0xFF1A1A2E);
@@ -98,9 +98,9 @@ abstract class EagleTokens {
   static const Color authErrorSoft = Color(0xFFFFB6B6);
   static const Color authSuccessSoft = Color(0xFF8FE3B3);
   static const Color authErrorBorder = Color(0xFFFF8B8B);
-  static const Color tierEnterprise = Color(0xFF1A5F5F);
-  static const Color tierEnterpriseInk = Color(0xFF0D4A4A);
-  static const Color tierEnterpriseProInk = Color(0xFF066666);
+  static const Color tierEnterprise = Color(0xFF0A4A54);
+  static const Color tierEnterpriseInk = Color(0xFF083D47);
+  static const Color tierEnterpriseProInk = Color(0xFF0A6B7A);
   static const Color chromeNeutralDark = Color(0xFF5C6B78);
   static const Color brightGreen = Color(0xFF4ADE80);
   static const Color goldStar = Color(0xFFF59E0B);
@@ -129,7 +129,9 @@ abstract class EagleTokens {
   static const Color strengthWeak = Color(0xFFFF7A7A);
   static const Color strengthMid = Color(0xFFFFC857);
   static const Color strengthStrong = Color(0xFF38E68A);
-  static const Color legacyBrandCyan = Color(0xFF1EC8C8);
+  /// Defaults cyan anteriores — reset / detecção de perfil legado.
+  static const Color legacyBrandCyan = Color(0xFF13C2C2);
+  static const Color legacyBrandCyanOlder = Color(0xFF1EC8C8);
 
   // Special
   static const Color gold = Color(0xFFE5B84C);
@@ -158,7 +160,7 @@ abstract class EagleTokens {
   /// Hero mesh dark gradient stops for auth/splash backgrounds.
   static const List<Color> heroMeshDark = [
     Color(0xFF0B0E14),
-    Color(0xFF0D2830),
+    Color(0xFF0A2A32),
     Color(0xFF121820),
   ];
 
@@ -191,12 +193,12 @@ abstract class EagleTokens {
 
   // ── Hero Gradients ──────────────────────────────────────────────────
   static const List<Color> heroGradientLight = [
-    Color(0xFF13C2C2),
-    Color(0xFF18B5B5),
+    Color(0xFF0B4F5C),
+    Color(0xFF0A6B7A),
   ];
 
   static const List<Color> heroGradientDark = [
-    Color(0xFF0A2E2E),
+    Color(0xFF051F26),
     Color(0xFF080C10),
   ];
 

@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#12343C",
-    "theme_color": "#13C2C2",
+    "theme_color": "#0B4F5C",
     "description": "Plataforma para personal trainers gerirem alunos, treinos e captacao de leads.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
