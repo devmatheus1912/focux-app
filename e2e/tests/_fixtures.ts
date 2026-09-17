@@ -100,10 +100,15 @@ export const test = base.extend<{ errors: Errors }>({
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
+        // CORS / blocked XHR from localhost → production is expected in CI
+        // until the API allows the ephemeral serve origin. Ignore that noise.
         if (
           text.includes('flutter_service_worker') ||
           text.includes('Synthetic package output') ||
           text.includes('was tree-shaken') ||
+          text.includes('Access-Control-Allow-Origin') ||
+          text.includes('blocked by CORS policy') ||
+          text.includes('net::ERR_FAILED') ||
           (text.includes('Failed to load resource') && text.includes('chrome-extension')) ||
           text.includes('Failed to load resource: the server responded with a status of 400') ||
           text.includes('Failed to load resource: the server responded with a status of 401') ||

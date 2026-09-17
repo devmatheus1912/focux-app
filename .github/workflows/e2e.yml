@@ -66,6 +66,17 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
+      # Sem contas QA nos secrets: só o project `public` roda.
+      # Configure E2E_PERSONAL_* / E2E_ALUNO_* no repo para a suite autenticada.
+      - name: Check E2E secrets
+        env:
+          E2E_PERSONAL_EMAIL: ${{ secrets.E2E_PERSONAL_EMAIL }}
+          E2E_ALUNO_EMAIL: ${{ secrets.E2E_ALUNO_EMAIL }}
+        run: |
+          if [ -z "$E2E_PERSONAL_EMAIL" ] || [ -z "$E2E_ALUNO_EMAIL" ]; then
+            echo "::warning::E2E auth secrets ausentes — Playwright rodará só o project public (@p0 smoke)."
+          fi
+
       - name: Run Playwright
         working-directory: e2e
         env:
