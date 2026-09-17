@@ -18,6 +18,22 @@ const financeiroHubSecondaryViews = <FinanceiroHubView>[
   FinanceiroHubView.panorama,
 ];
 
+/// Extras do Panorama — fora do fold (A30 / §12).
+enum FinanceiroPanoramaExtraId { evolucao, topAlunos, pricing }
+
+const financeiroPanoramaExtras = <FinanceiroPanoramaExtraId>[
+  FinanceiroPanoramaExtraId.evolucao,
+  FinanceiroPanoramaExtraId.topAlunos,
+  FinanceiroPanoramaExtraId.pricing,
+];
+
+String financeiroPanoramaExtraLabel(FinanceiroPanoramaExtraId id) =>
+    switch (id) {
+      FinanceiroPanoramaExtraId.evolucao => 'Evolução · 6 meses',
+      FinanceiroPanoramaExtraId.topAlunos => 'Top alunos',
+      FinanceiroPanoramaExtraId.pricing => 'Preço sugerido',
+    };
+
 String financeiroHubSubtitle({
   required FinanceiroHubView view,
   String? freshness,

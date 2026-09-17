@@ -10,6 +10,9 @@ void main() {
     final global = readScreenSourceBundle(
       'lib/features/relatorio/screens/relatorio_global_screen.dart',
     );
+    final pdf = readScreenSourceBundle(
+      'lib/features/relatorio/utils/relatorio_pdf_export.dart',
+    );
 
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('FxSettingsGroup')));
@@ -17,8 +20,14 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('Exportar relatório em PDF'));
+    expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains("value: 'checkin'"));
     expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));
     expect(screen, isNot(contains('_PeriodPill')));
+
+    expect(pdf, contains('_pdfHeader'));
+    expect(pdf, contains('FOCUX'));
+    expect(pdf, contains('_pdfTeal'));
 
     expect(global, contains('fxScreenA11yScope'));
     expect(global, isNot(contains('FxSettingsGroup')));

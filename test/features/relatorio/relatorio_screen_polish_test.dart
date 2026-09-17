@@ -29,11 +29,26 @@ void main() {
     expect(screen, contains("'/alunos/\${widget.alunoId}'"));
     expect(screen, contains('relatorioAlunoMaisChip'));
     expect(screen, contains('_abrirMaisAcoes'));
-    expect(screen, isNot(contains('DashboardHomeActionChip(\n                  label: \'Aluno\'')));
-    expect(screen, isNot(contains('DashboardHomeActionChip(\n                  label: \'Chat\'')));
+    expect(screen, contains('relatorioAlunoCheckinChip'));
+    expect(screen, contains("value: 'checkin'"));
+    expect(
+      screen,
+      isNot(contains("DashboardHomeActionChip(\n                  label: 'Aluno'")),
+    );
+    expect(
+      screen,
+      isNot(contains("DashboardHomeActionChip(\n                  label: 'Chat'")),
+    );
+    expect(
+      screen,
+      isNot(
+        contains(
+          'DashboardHomeActionChip(\n                    label: relatorioAlunoCheckinChip()',
+        ),
+      ),
+    );
     expect(screen, contains('PopScope'));
     expect(screen, contains('AlunoSegmentedChoice'));
-    expect(screen, contains('relatorioAlunoCheckinChip'));
     expect(screen, isNot(contains('constrainWidth: false')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('_PeriodPill')));

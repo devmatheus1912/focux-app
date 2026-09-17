@@ -191,19 +191,30 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
   }
 
   Future<void> _abrirMaisAcoes() async {
+    final baixa =
+        _dados != null &&
+        _dados!.treinosTotal > 0 &&
+        relatorioAlunoAderenciaBaixa(_dados!.taxaAderenciaPercent);
     final chosen = await showFxInsetPickerSheet<String>(
       context,
       title: 'Mais',
       headerIcon: Icons.more_horiz_rounded,
       selected: null,
-      items: const [
-        FxInsetPickerSheetItem(
+      items: [
+        if (baixa)
+          FxInsetPickerSheetItem(
+            value: 'checkin',
+            label: relatorioAlunoCheckinChip(),
+            subtitle: 'Lembrar o aluno de marcar presença',
+            icon: Icons.fact_check_outlined,
+          ),
+        const FxInsetPickerSheetItem(
           value: 'aluno',
           label: 'Aluno',
           subtitle: 'Voltar ao 360',
           icon: Icons.person_outline_rounded,
         ),
-        FxInsetPickerSheetItem(
+        const FxInsetPickerSheetItem(
           value: 'chat',
           label: 'Chat',
           subtitle: 'Mensagem com o aluno',
@@ -212,7 +223,13 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
       ],
     );
     if (!mounted || chosen == null) return;
-    if (chosen == 'aluno') {
+    if (chosen == 'checkin') {
+      await showAlunoCheckinMessageSheet(
+        context,
+        alunoId: widget.alunoId,
+        alunoNome: widget.alunoNome,
+      );
+    } else if (chosen == 'aluno') {
       context.push('/alunos/${widget.alunoId}');
     } else if (chosen == 'chat') {
       context.push('/alunos/${widget.alunoId}/chat');
@@ -355,20 +372,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   isDark: isDark,
                   onPressed: _abrirPeriodo,
                 ),
-                if (dados != null &&
-                    dados.treinosTotal > 0 &&
-                    relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent))
-                  DashboardHomeActionChip(
-                    label: relatorioAlunoCheckinChip(),
-                    accent: primary,
-                    isDark: isDark,
-                    onPressed:
-                        () => showAlunoCheckinMessageSheet(
-                          context,
-                          alunoId: widget.alunoId,
-                          alunoNome: widget.alunoNome,
-                        ),
-                  ),
                 DashboardHomeActionChip(
                   label: relatorioAlunoMaisChip(),
                   accent: primary,

@@ -103,6 +103,8 @@ void main() {
     ).readAsStringSync();
     expect(inset, contains('treinoInsetActionChildren'));
     expect(inset, isNot(contains('treinoInsetActionTiles')));
+    expect(inset, contains('picker: !safe[i].showChevron'));
+    expect(inset, contains('this.showChevron = false'));
     expect(inset, contains('ElevatedButton'));
     expect(inset, contains('child: Text(confirmLabel)'));
     expect(inset, isNot(contains('label: confirmLabel')));

@@ -46,6 +46,7 @@ void main() {
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('isDark'));
     expect(screen, contains('PopScope'));
+    expect(screen, contains('FxKeyboardPopScope'));
     expect(screen, contains("'/winback'"));
     expect(screen, contains("'/dunning'"));
     expect(screen, contains('Histórico win-back'));

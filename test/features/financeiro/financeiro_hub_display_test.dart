@@ -26,6 +26,11 @@ void main() {
     expect(financeiroHubSecondaryViews, contains(FinanceiroHubView.panorama));
     expect(FinanceiroHubView.mensalidades.index, 0);
     expect(FinanceiroHubView.panorama.index, 1);
+    expect(financeiroPanoramaExtras, hasLength(3));
+    expect(
+      financeiroPanoramaExtraLabel(FinanceiroPanoramaExtraId.evolucao),
+      'Evolução · 6 meses',
+    );
   });
 
   test('financeiroListaTools e detalhe Mais — A30', () {

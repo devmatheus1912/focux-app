@@ -67,9 +67,21 @@ void main() {
     final dashboard = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
     );
-    expect(dashboard, contains('emphasize: true'));
-    expect(dashboard, contains('Ver mensalidades'));
-    expect(dashboard, contains('FxStripCard'));
+    final resumo = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
+    );
+    expect(dashboard, contains('FinanceiroResumoScreen'));
+    expect(dashboard, contains('financeiroPanoramaExtras'));
+    expect(dashboard, contains("'Mais'"));
+    expect(dashboard, contains('SmartPricingCard'));
+    expect(resumo, contains('emphasize: true'));
+    expect(resumo, contains('Ver mensalidades'));
+    expect(resumo, contains('FxStripCard'));
+    expect(resumo, isNot(contains('PieChart')));
+    expect(resumo, isNot(contains('_DonutChartCard')));
+    expect(tab, contains('DashboardHomeActionChip'));
+    expect(tab, contains('FxKeyboardPopScope'));
+    expect(tab, contains('FxKeyboardDismissScope'));
   });
 
   test('mensalidade detalhe busca por id sem extra', () {

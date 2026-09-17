@@ -276,6 +276,85 @@ void main() {
     expect(home.action.routeExtra, 8);
   });
 
+  test('plano de hoje retoma EM_ANDAMENTO antes de girar', () {
+    final home = buildAlunoHomeExperience(
+      aluno: Aluno(
+        id: 1,
+        nome: 'Thales Aluno',
+        email: 'thales@focux.test',
+        objetivo: 'Hipertrofia',
+        status: 'ATIVO',
+        fotoUrl: 'https://cdn.test/foto.jpg',
+        telefone: '11999999999',
+        whatsapp: '11999999999',
+        genero: 'M',
+        peso: 80,
+        altura: 1.8,
+        dataNascimento: '1995-01-10',
+      ),
+      medidas: [MedidaCorporal(id: 1, data: '2026-05-01', peso: 80)],
+      treinos: [
+        ExecucaoTreino(
+          treinoId: 7,
+          treinoNome: 'Treino A',
+          status: 'DISPONIVEL',
+          exercicios: [
+            ExecucaoExercicio(
+              id: 1,
+              treinoExercicioId: 1,
+              exercicioNome: 'Supino',
+              seriesFeitas: 0,
+              concluido: false,
+            ),
+          ],
+        ),
+        ExecucaoTreino(
+          treinoId: 9,
+          treinoNome: 'Treino C',
+          status: 'EM_ANDAMENTO',
+          exercicios: [
+            ExecucaoExercicio(
+              id: 3,
+              treinoExercicioId: 3,
+              exercicioNome: 'Remada',
+              seriesFeitas: 1,
+              concluido: false,
+            ),
+          ],
+        ),
+        ExecucaoTreino(
+          treinoId: 8,
+          treinoNome: 'Treino B',
+          status: 'DISPONIVEL',
+          exercicios: [
+            ExecucaoExercicio(
+              id: 2,
+              treinoExercicioId: 2,
+              exercicioNome: 'Agachamento',
+              seriesFeitas: 0,
+              concluido: false,
+            ),
+          ],
+        ),
+      ],
+      historico: [
+        ExecucaoTreino(
+          treinoId: 7,
+          treinoNome: 'Treino A',
+          status: 'CONCLUIDO',
+          concluidoEm: '2026-05-04T10:00:00',
+          exercicios: const [],
+        ),
+      ],
+      mensagens: const [],
+      now: DateTime(2026, 5, 5),
+    );
+
+    expect(home.action.mode, AlunoHomeMode.workoutReady);
+    expect(home.action.title, 'Treino C');
+    expect(home.action.routeExtra, 9);
+  });
+
   test('workoutReady sem exercícios evita copy de 0 exercícios', () {
     final home = buildAlunoHomeExperience(
       aluno: Aluno(

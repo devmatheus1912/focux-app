@@ -19,8 +19,7 @@ void main() {
     expect(screen, contains('BoxConstraints(maxWidth: 180)'));
     expect(screen, contains('BoxConstraints(maxWidth: 132)'));
     expect(screen, contains('class _AlunoAppBarProfileMenu'));
-    expect(screen, contains("Text('Perfil')"));
-    expect(screen, contains("Text('Sair')"));
+    expect(screen, contains("label: 'Perfil do aluno'"));
     expect(screen, contains('class _WorkoutMetricPill'));
     expect(screen, contains('class _WorkoutInsightPill'));
     expect(screen, contains('buildAlunoHomeExperience'));
@@ -46,6 +45,14 @@ void main() {
     expect(screen, contains("'Consistência'"));
     expect(screen, contains("'Treinos concluídos nesta semana'"));
     expect(screen, contains('TokensStrip.rCard'));
+    expect(screen, contains('countUniqueCompletedDaysThisWeek'));
+    expect(screen, contains('FocuxHubTypography.sectionTitle'));
+    expect(screen, contains('FocuxHubTypography.chip'));
+    expect(screen, contains('FocuxHubTypography.bodyMuted'));
+    expect(screen, contains('FocuxHubTypography.cardSubtitle'));
+    expect(screen, contains('FocuxHubTypography.metric'));
+    expect(screen, isNot(contains('fontSize: 12')));
+    expect(screen, isNot(contains('TextStyle(')));
     expect(screen, isNot(contains('cs.tertiary')));
     expect(screen, isNot(contains('EagleTokens.good')));
   });
@@ -54,6 +61,10 @@ void main() {
     final hub = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_screen.dart',
     );
+    final hubBody =
+        File(
+          'lib/features/dashboard/widgets/perfil_aluno_hub_body.dart',
+        ).readAsStringSync();
     final profile = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
     );
@@ -63,7 +74,7 @@ void main() {
         ).readAsStringSync();
 
     expect(hub, contains('Editar cadastro'));
-    expect(hub, contains('Anamnese'));
+    expect(hubBody, contains('Anamnese'));
     expect(profile, contains('foto de evolução'));
     expect(profile, contains('friendlyError'));
     expect(profile, contains('segurança e aderência'));
