@@ -10,7 +10,7 @@ class ShellPalette {
 
   final bool isDark;
 
-  /// Active brand accent (white-label primary, else Focux teal).
+  /// Active brand accent (white-label primary, else Focux azul petróleo).
   final Color brand;
 
   Color get ink => isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;

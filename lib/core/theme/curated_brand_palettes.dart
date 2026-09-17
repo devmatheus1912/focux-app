@@ -23,7 +23,7 @@ class CuratedBrandPalette {
   static const focuxDefault = CuratedBrandPalette(
     id: 'focux_default',
     name: 'Focux Original',
-    subtitle: 'Cyan oficial da plataforma',
+    subtitle: 'Azul petróleo oficial da plataforma',
     primary: BrandPalette.defaultPrimary,
     secondary: BrandPalette.defaultSecondary,
   );
@@ -157,7 +157,7 @@ class CuratedBrandPalette {
   /// Login e [FxLiquidPrimaryButton] pintam o rótulo de branco. Depois de
   /// promover um ouro/menta claro, escurece até o branco ler em AA (4.5:1)
   /// — sem voltar ao navy que some no mesh. 3:1 deixava o acento falhar
-  /// [isReadablePrimary] e o [safeSecondaryFor] trocava o ouro pelo teal.
+  /// [isReadablePrimary] e o [safeSecondaryFor] trocava o ouro pelo default.
   static Color _ensureWhiteLabelOnDark(
     Color color,
     Color surface,
@@ -226,7 +226,7 @@ class CuratedBrandPalette {
 
   static Color safeSecondaryFor(Color primary, Color secondary) {
     // AuthShell / forceDark reaplicam colorScheme.primary já remapado.
-    // safePrimary disso virava teal Focux e closest() trocava o ouro.
+    // safePrimary disso virava default Focux e closest() trocava o ouro.
     if (_isUsableDarkChrome(primary)) return secondary;
     final normalizedPrimary = safePrimary(primary);
     if (isSafePair(normalizedPrimary, secondary)) return secondary;
