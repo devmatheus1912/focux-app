@@ -11,7 +11,7 @@
 /// - [EagleTokens] — semântica extra (good/warn/bad, dark ink/mute) e paleta
 ///   dark. A escala `radius*` dela é LEGADO: raio novo = TokensStrip.
 /// - [BrandPalette] — cor do personal (white-label): softened/deep/accent e
-///   papéis de seção. Nunca hardcode teal em tela white-label.
+///   papéis de seção. Nunca hardcode a cor da marca em tela white-label.
 ///
 /// ## Tipografia
 /// - [FocuxHubTypography] — pageTitle/sectionTitle/eyebrow/body/bodyMuted/

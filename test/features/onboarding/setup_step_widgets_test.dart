@@ -40,7 +40,7 @@ void main() {
               children: [
                 DashboardPrioritiesOverlay(
                   isDark: false,
-                  primary: const Color(0xFF13C2C2),
+                  primary: const Color(0xFF0B4F5C),
                   label: 'Continuar',
                   onTap: () {},
                 ),

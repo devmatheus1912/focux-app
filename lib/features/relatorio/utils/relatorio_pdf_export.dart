@@ -4,10 +4,10 @@ import 'package:printing/printing.dart';
 
 import '../data/relatorio_repository.dart';
 
-/// Brand tokens mirrored as [PdfColor] (EagleTokens navy/teal).
+/// Brand tokens mirrored as [PdfColor] (EagleTokens navy / azul petróleo).
 const PdfColor _pdfNavy = PdfColor.fromInt(0xFF0B1524);
-const PdfColor _pdfTeal = PdfColor.fromInt(0xFF13C2C2);
-const PdfColor _pdfTealDeep = PdfColor.fromInt(0xFF0D9494);
+const PdfColor _pdfBrand = PdfColor.fromInt(0xFF0B4F5C);
+const PdfColor _pdfBrandDeep = PdfColor.fromInt(0xFF083D47);
 const PdfColor _pdfInk = PdfColor.fromInt(0xFF1A1A2E);
 const PdfColor _pdfMute = PdfColor.fromInt(0xFF6B7280);
 const PdfColor _pdfLine = PdfColor.fromInt(0xFFE5E7EB);
@@ -92,7 +92,7 @@ Future<void> exportRelatorioPdf({
               style: pw.TextStyle(
                 fontSize: 14,
                 fontWeight: pw.FontWeight.bold,
-                color: _pdfTealDeep,
+                color: _pdfBrandDeep,
               ),
             ),
             pw.SizedBox(height: 4),
@@ -199,7 +199,7 @@ pw.Widget _pdfHeader({required String brand, required bool branded}) {
           style: pw.TextStyle(
             fontSize: branded ? 12 : 14,
             fontWeight: pw.FontWeight.bold,
-            color: _pdfTeal,
+            color: _pdfBrand,
             letterSpacing: branded ? 0.6 : 1.2,
           ),
         ),
@@ -227,7 +227,7 @@ pw.Widget _pdfKpiCard(String title, String value) {
           width: 28,
           height: 3,
           decoration: const pw.BoxDecoration(
-            color: _pdfTeal,
+            color: _pdfBrand,
             borderRadius: pw.BorderRadius.all(pw.Radius.circular(2)),
           ),
         ),
@@ -271,7 +271,7 @@ pw.Widget _pdfFooter(
             style: pw.TextStyle(
               fontSize: 9,
               fontWeight: pw.FontWeight.bold,
-              color: _pdfTealDeep,
+              color: _pdfBrandDeep,
             ),
           ),
         ],

@@ -17,7 +17,7 @@ void main() {
   ];
 
   final hardcodedBrandHex = RegExp(
-    r'Color\(0xFF13C2C2\)|Color\(0xFF1EC8C8\)',
+    r'Color\(0xFF0B4F5C\)|Color\(0xFF13C2C2\)|Color\(0xFF1EC8C8\)',
   );
 
   test('branding catalog and automated gates exist', () {

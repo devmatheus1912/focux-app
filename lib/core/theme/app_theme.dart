@@ -306,8 +306,8 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primary,
-          // Brand fills are saturated teals — always white label (onPrimary
-          // would pick dark ink on bright primaries like #13C2C2).
+          // Brand fills are saturated petroleum blues — always white label
+          // (onPrimary would pick dark ink on mid primaries).
           foregroundColor: Colors.white,
           disabledBackgroundColor: TokensStrip.disabled.withValues(alpha: 0.35),
           disabledForegroundColor: TokensStrip.disabled,
