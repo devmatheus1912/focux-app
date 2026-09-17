@@ -81,6 +81,12 @@ e2e/
 └── playwright-report/          # gerado após rodar
 ```
 
+## CI
+
+No GitHub Actions (`e2e.yml`), se `E2E_PERSONAL_*` / `E2E_ALUNO_*` não estiverem nos secrets do repo, só o project **public** roda (smoke de rotas). Contas autenticadas ficam de fora em vez de falhar o job.
+
+O fixture ignora ruído de CORS `localhost` → API de produção (`Access-Control-Allow-Origin` / `net::ERR_FAILED`).
+
 ## Tags
 
 - `@p0` — release-blocker, deve passar antes do publish

@@ -9,11 +9,10 @@ const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:61791';
 setup('autentica personal', async ({ page }) => {
   mkdirSync('.auth', { recursive: true });
 
-  const email = process.env.E2E_PERSONAL_EMAIL;
-  const senha = process.env.E2E_PERSONAL_SENHA;
-  if (!email || !senha) {
-    throw new Error('Set E2E_PERSONAL_EMAIL and E2E_PERSONAL_SENHA in .env');
-  }
+  const email = process.env.E2E_PERSONAL_EMAIL?.trim();
+  const senha = process.env.E2E_PERSONAL_SENHA?.trim();
+  setup.skip(!email || !senha, 'Set E2E_PERSONAL_EMAIL and E2E_PERSONAL_SENHA in .env');
+  if (!email || !senha) return;
 
   await page.goto(`${BASE_URL}/#/login`);
   await page.waitForLoadState('domcontentloaded');
