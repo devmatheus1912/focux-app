@@ -1,5 +1,61 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type Project } from '@playwright/test';
 import 'dotenv/config';
+
+const hasPersonalAuth = !!(
+  process.env.E2E_PERSONAL_EMAIL?.trim() && process.env.E2E_PERSONAL_SENHA?.trim()
+);
+const hasAlunoAuth = !!(
+  process.env.E2E_ALUNO_EMAIL?.trim() && process.env.E2E_ALUNO_SENHA?.trim()
+);
+
+if (process.env.CI) {
+  if (!hasPersonalAuth) {
+    console.warn(
+      '[e2e] E2E_PERSONAL_EMAIL/SENHA ausentes — pulando projects auth-personal + personal',
+    );
+  }
+  if (!hasAlunoAuth) {
+    console.warn(
+      '[e2e] E2E_ALUNO_EMAIL/SENHA ausentes — pulando projects auth-aluno + aluno',
+    );
+  }
+}
+
+const projects: Project[] = [
+  ...(hasPersonalAuth
+    ? ([
+        { name: 'auth-personal', testMatch: /auth\.personal\.setup\.ts/ },
+        {
+          name: 'personal',
+          testMatch: /\/personal\/.*\.spec\.ts/,
+          use: {
+            ...devices['Desktop Chrome'],
+            storageState: '.auth/personal.json',
+          },
+          dependencies: ['auth-personal'],
+        },
+      ] as Project[])
+    : []),
+  ...(hasAlunoAuth
+    ? ([
+        { name: 'auth-aluno', testMatch: /auth\.aluno\.setup\.ts/ },
+        {
+          name: 'aluno',
+          testMatch: /\/aluno\/.*\.spec\.ts/,
+          use: {
+            ...devices['Desktop Chrome'],
+            storageState: '.auth/aluno.json',
+          },
+          dependencies: ['auth-aluno'],
+        },
+      ] as Project[])
+    : []),
+  {
+    name: 'public',
+    testMatch: /\/public\/.*\.spec\.ts/,
+    use: { ...devices['Desktop Chrome'] },
+  },
+];
 
 export default defineConfig({
   testDir: './tests',
@@ -30,32 +86,5 @@ export default defineConfig({
       args: ['--force-renderer-accessibility'],
     },
   },
-  projects: [
-    { name: 'auth-personal', testMatch: /auth\.personal\.setup\.ts/ },
-    { name: 'auth-aluno',    testMatch: /auth\.aluno\.setup\.ts/ },
-
-    {
-      name: 'personal',
-      testMatch: /\/personal\/.*\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: '.auth/personal.json',
-      },
-      dependencies: ['auth-personal'],
-    },
-    {
-      name: 'aluno',
-      testMatch: /\/aluno\/.*\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: '.auth/aluno.json',
-      },
-      dependencies: ['auth-aluno'],
-    },
-    {
-      name: 'public',
-      testMatch: /\/public\/.*\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
-    },
-  ],
+  projects,
 });
