@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 IaCopilotProximaAcao _iaPayload(Map<String, dynamic> json) =>
     IaCopilotProximaAcao.fromJson(json);
@@ -172,7 +173,7 @@ void main() {
       final signals = resolveCopilotSignals(
         aluno: _aluno(telefone: '11999999999', objetivo: 'Força'),
         resumo: null,
-        primary: Colors.teal,
+        primary: BrandPalette.defaultPrimary,
       );
       expect(signals, hasLength(4));
       expect(signals.first.label, 'Perfil');

@@ -4,7 +4,7 @@
   Canvas: 3000×2000 px | Background: #05070D
   Layout: F icon (0–1320px) | gap 180px | text block (1500–2900px)
   Fonts: Inter ExtraBold / Bold / Regular — embed via @font-face or substitute Montserrat
-  Palette primary: #3B82F6 #60A5FA #22D3EE
+  Palette primary: #0A6B7A #3D9AAD #3D9AAD
   Palette neutral: #05070D #0B1220 #E5E7EB #9CA3AF
   Layers: background | icon-F | text-FOCUX | text-PERSONAL | slogan
 -->
@@ -16,9 +16,9 @@
       :root {
         --c-bg:      #05070D;
         --c-dark2:   #0B1220;
-        --c-primary: #3B82F6;
-        --c-light:   #60A5FA;
-        --c-cyan:    #22D3EE;
+        --c-primary: #0A6B7A;
+        --c-light:   #3D9AAD;
+        --c-glow:    #3D9AAD;
         --c-white:   #FFFFFF;
         --c-soft:    #E5E7EB;
         --c-mid:     #9CA3AF;
@@ -38,21 +38,21 @@
     <!-- ── Gradients ── -->
     <linearGradient id="h-grad-body" x1="0%" y1="0%" x2="80%" y2="100%">
       <stop offset="0%"   stop-color="#1C3FAA"/>
-      <stop offset="45%"  stop-color="#1A3ABF"/>
+      <stop offset="45%"  stop-color="#083D47"/>
       <stop offset="100%" stop-color="#080E2E"/>
     </linearGradient>
 
     <linearGradient id="h-grad-gloss-top" x1="5%" y1="0%" x2="95%" y2="100%">
       <stop offset="0%"   stop-color="#EFF6FF"/>
       <stop offset="28%"  stop-color="#BFDBFE"/>
-      <stop offset="72%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.55"/>
+      <stop offset="72%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.55"/>
     </linearGradient>
 
     <linearGradient id="h-grad-gloss-mid" x1="5%" y1="0%" x2="95%" y2="100%">
       <stop offset="0%"   stop-color="#93C5FD"/>
-      <stop offset="55%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="55%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.5"/>
     </linearGradient>
 
     <radialGradient id="h-ambient" cx="44%" cy="50%" r="42%">
@@ -61,15 +61,15 @@
     </radialGradient>
 
     <linearGradient id="h-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#22D3EE"/>
-      <stop offset="55%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#22D3EE"/>
+      <stop offset="0%"   stop-color="#3D9AAD"/>
+      <stop offset="55%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#3D9AAD"/>
     </linearGradient>
 
     <!-- X letter gradient overlay -->
     <linearGradient id="x-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#22D3EE"/>
-      <stop offset="100%" stop-color="#3B82F6"/>
+      <stop offset="0%"   stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A"/>
     </linearGradient>
 
     <!-- ── Filters ── -->
@@ -171,7 +171,7 @@
          L 132,97 C 133,79 144,75 158,75 Z"/>
 
     <!-- Circuit traces -->
-    <g stroke="#22D3EE" stroke-linecap="round" fill="none">
+    <g stroke="#3D9AAD" stroke-linecap="round" fill="none">
       <line x1="132" y1="330" x2="230" y2="330" stroke-width="2"/>
       <line x1="230" y1="330" x2="230" y2="375" stroke-width="2"/>
       <line x1="230" y1="375" x2="282" y2="375" stroke-width="2"/>
@@ -187,7 +187,7 @@
     </g>
 
     <!-- Circuit nodes -->
-    <g fill="#22D3EE" filter="url(#h-dot-glow)">
+    <g fill="#3D9AAD" filter="url(#h-dot-glow)">
       <circle cx="230" cy="330" r="5.5" class="dot-pulse"/>
       <circle cx="230" cy="375" r="5"   class="dot-pulse-b"/>
       <circle cx="195" cy="460" r="5.5" class="dot-pulse"/>
@@ -198,7 +198,7 @@
     </g>
 
     <!-- Ambient tiny dots -->
-    <g fill="#60A5FA" opacity="0.5">
+    <g fill="#3D9AAD" opacity="0.5">
       <circle cx="155" cy="555" r="3.5"/>
       <circle cx="178" cy="600" r="2.8"/>
       <circle cx="155" cy="785" r="3"/>
@@ -222,12 +222,12 @@
     <!-- Moon icon -->
     <g transform="translate(215,840)" filter="url(#h-dot-glow)">
       <path d="M 0,-19 A 19,19 0 1,1 13.5,9.5 A 12.5,12.5 0 1,0 0,-19 Z"
-            fill="#22D3EE" opacity="0.9"/>
+            fill="#3D9AAD" opacity="0.9"/>
     </g>
 
     <!-- Heartbeat line -->
     <polyline points="315,572 342,572 354,548 370,598 385,540 402,598 418,572 456,572"
-      stroke="#22D3EE" stroke-width="2.8" fill="none"
+      stroke="#3D9AAD" stroke-width="2.8" fill="none"
       stroke-linecap="round" stroke-linejoin="round"
       filter="url(#h-soft)" opacity="0.78"/>
 
@@ -253,7 +253,7 @@
       letter-spacing="-4"
       fill="#FFFFFF">FOCUX</text>
 
-    <!-- "X" gradient overlay — ciano to blue diagonal -->
+    <!-- "X" gradient overlay — glow petróleo to blue diagonal -->
     <text x="0" y="0"
       font-family="Inter, Montserrat, 'Arial Black', sans-serif"
       font-size="310" font-weight="800"
@@ -275,7 +275,7 @@
       font-family="Inter, Montserrat, Arial, sans-serif"
       font-size="118" font-weight="700"
       letter-spacing="52"
-      fill="#60A5FA">PERSONAL</text>
+      fill="#3D9AAD">PERSONAL</text>
 
     <!-- Separator line -->
     <line x1="0" y1="148" x2="1480" y2="148"
@@ -294,7 +294,7 @@
       font-family="Inter, Montserrat, Arial, sans-serif"
       font-size="110" font-weight="700"
       letter-spacing="8"
-      fill="#22D3EE"
+      fill="#3D9AAD"
       filter="url(#cyan-glow)">IA</text>
   </g>
 

@@ -256,31 +256,17 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
   }
 
   Color _safePrimaryColor(String? raw) {
-    if (raw == null || raw.length != 7 || !raw.startsWith('#')) {
-      return EagleTokens.brand;
-    }
-    final parsed = int.tryParse(raw.replaceFirst('#', '0xFF'));
-    if (parsed == null) return EagleTokens.brand;
-    // Align with CuratedBrandPalette: dark neutrals (Midnight Gold, Obsidian…)
-    // are valid brand primaries — the old sat<0.12 gate wiped them back to Focux.
-    return CuratedBrandPalette.safePrimary(Color(parsed));
+    // Cyan legado no BE (#13C2C2) vira azul petróleo — senão só o login muda.
+    return CuratedBrandPalette.safePrimary(
+      BrandPalette.resolveStoredPrimary(raw),
+    );
   }
 
   Color _safeSecondaryColor(Color primary, String? raw) {
-    if (raw == null || raw.length != 7 || !raw.startsWith('#')) {
-      return CuratedBrandPalette.safeSecondaryFor(
-        primary,
-        BrandPalette.defaultSecondary,
-      );
-    }
-    final parsed = int.tryParse(raw.replaceFirst('#', '0xFF'));
-    if (parsed == null) {
-      return CuratedBrandPalette.safeSecondaryFor(
-        primary,
-        BrandPalette.defaultSecondary,
-      );
-    }
-    return CuratedBrandPalette.safeSecondaryFor(primary, Color(parsed));
+    return CuratedBrandPalette.safeSecondaryFor(
+      primary,
+      BrandPalette.resolveStoredSecondary(raw),
+    );
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
+import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
   testWidgets('Ver ação completa expands truncated prescription', (tester) async {
@@ -19,7 +20,7 @@ void main() {
               title: 'Prioridade do dia',
               action: longAction,
               reason: 'Priorize contato.',
-              color: Colors.teal,
+              color: BrandPalette.defaultPrimary,
               showTitle: false,
             ),
           ),
@@ -49,7 +50,7 @@ void main() {
               title: 'Prioridade do dia',
               action: 'Retomar contato.',
               reason: 'Priorize contato · sem registro recente · aderência 0%',
-              color: Colors.teal,
+              color: BrandPalette.defaultPrimary,
               showTitle: false,
             ),
           ),
@@ -78,7 +79,7 @@ void main() {
           home: Scaffold(
             body: Aluno360CopilotPrescriptionBody(
               aluno: aluno,
-              primary: Colors.teal,
+              primary: BrandPalette.defaultPrimary,
               fallback: 'Fallback',
               seed360: const {
                 'acao':

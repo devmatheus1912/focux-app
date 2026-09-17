@@ -102,7 +102,7 @@ void main() {
       expect(
         second.colorScheme.primary,
         isNot(BrandPalette.defaultPrimary),
-        reason: '${palette.name} must not snap to Focux cyan',
+        reason: '${palette.name} must not snap to Focux petroleum default',
       );
     }
   });

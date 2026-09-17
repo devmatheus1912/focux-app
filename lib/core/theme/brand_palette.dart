@@ -23,26 +23,55 @@ class BrandPalette {
   /// Tom médio oficial (hover claro / links) — aceito como secondary default.
   static const String brandMidHex = '#0A6B7A';
 
+  static const Set<String> _primaryDefaults = {
+    defaultPrimaryHex,
+    legacyPrimaryHex,
+    legacyPrimaryHexOlder,
+  };
+
+  static const Set<String> _secondaryDefaults = {
+    defaultSecondaryHex,
+    brandMidHex,
+    legacySecondaryHex,
+    legacySecondaryHexOlder,
+    '#4DD0E1',
+  };
+
   static bool isDefaultBrandColors({
     String? corPrimaria,
     String? corSecundaria,
   }) {
     final primary = _normalizeHex(corPrimaria);
     final secondary = _normalizeHex(corSecundaria);
-    const primaryDefaults = {
-      defaultPrimaryHex,
-      legacyPrimaryHex,
-      legacyPrimaryHexOlder,
-    };
-    const secondaryDefaults = {
-      defaultSecondaryHex,
-      brandMidHex,
-      legacySecondaryHex,
-      legacySecondaryHexOlder,
-      '#4DD0E1',
-    };
-    return (primary == null || primaryDefaults.contains(primary)) &&
-        (secondary == null || secondaryDefaults.contains(secondary));
+    return (primary == null || _primaryDefaults.contains(primary)) &&
+        (secondary == null || _secondaryDefaults.contains(secondary));
+  }
+
+  /// Hex salvo no perfil → cor de tema.
+  /// Cyan legado (`#13C2C2` / `#1EC8C8`) e o petróleo atual mapeiam para
+  /// [defaultPrimary]. White-label customizado passa intacto.
+  ///
+  /// Login usa [EagleTokens.brand] direto; após auth o tema vinha do
+  /// `corPrimaria` do BE — sem este remap a shell inteira ficava cyan.
+  static Color resolveStoredPrimary(String? raw) {
+    final norm = _normalizeHex(raw);
+    if (norm == null || _primaryDefaults.contains(norm)) {
+      return defaultPrimary;
+    }
+    final parsed = int.tryParse(norm.replaceFirst('#', '0xFF'));
+    if (parsed == null) return defaultPrimary;
+    return Color(parsed);
+  }
+
+  /// Idem para secondary: legado `#007D8A` / `#0097A7` → [defaultSecondary].
+  static Color resolveStoredSecondary(String? raw) {
+    final norm = _normalizeHex(raw);
+    if (norm == null || _secondaryDefaults.contains(norm)) {
+      return defaultSecondary;
+    }
+    final parsed = int.tryParse(norm.replaceFirst('#', '0xFF'));
+    if (parsed == null) return defaultSecondary;
+    return Color(parsed);
   }
 
   static String toHex(Color color) =>

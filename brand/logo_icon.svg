@@ -2,7 +2,7 @@
 <!--
   FOCUX PERSONAL — Logo Icon (F symbol)
   ViewBox: 0 0 1000 1000 | Transparent background
-  Palette: #05070D #0D1B5C #1A3ABF #3B82F6 #60A5FA #22D3EE #DBEAFE
+  Palette: #05070D #051F26 #083D47 #0A6B7A #3D9AAD #3D9AAD #DBEAFE
   Layer order: ambient → f-shadow → f-body → gloss-top → gloss-mid → rim-glow → circuit-traces → details
 -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -13,9 +13,9 @@
       :root {
         --c-bg:      #05070D;
         --c-dark2:   #0B1220;
-        --c-primary: #3B82F6;
-        --c-light:   #60A5FA;
-        --c-cyan:    #22D3EE;
+        --c-primary: #0A6B7A;
+        --c-light:   #3D9AAD;
+        --c-glow:    #3D9AAD;
         --c-white:   #E5E7EB;
         --c-mid:     #9CA3AF;
         --c-muted:   #6B7280;
@@ -26,21 +26,21 @@
     <!-- ── Gradients ── -->
     <linearGradient id="grad-body" x1="0%" y1="0%" x2="80%" y2="100%">
       <stop offset="0%"   stop-color="#1C3FAA"/>
-      <stop offset="45%"  stop-color="#1A3ABF"/>
+      <stop offset="45%"  stop-color="#083D47"/>
       <stop offset="100%" stop-color="#080E2E"/>
     </linearGradient>
 
     <linearGradient id="grad-gloss-top" x1="10%" y1="0%" x2="90%" y2="100%">
       <stop offset="0%"   stop-color="#EFF6FF"/>
       <stop offset="30%"  stop-color="#BFDBFE"/>
-      <stop offset="75%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.55"/>
+      <stop offset="75%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.55"/>
     </linearGradient>
 
     <linearGradient id="grad-gloss-mid" x1="5%" y1="0%" x2="95%" y2="100%">
       <stop offset="0%"   stop-color="#93C5FD"/>
-      <stop offset="55%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="55%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#0A6B7A" stop-opacity="0.5"/>
     </linearGradient>
 
     <radialGradient id="grad-ambient" cx="50%" cy="45%" r="52%">
@@ -49,9 +49,9 @@
     </radialGradient>
 
     <linearGradient id="grad-rim" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#22D3EE"/>
-      <stop offset="60%"  stop-color="#60A5FA"/>
-      <stop offset="100%" stop-color="#22D3EE"/>
+      <stop offset="0%"   stop-color="#3D9AAD"/>
+      <stop offset="60%"  stop-color="#3D9AAD"/>
+      <stop offset="100%" stop-color="#3D9AAD"/>
     </linearGradient>
 
     <!-- ── Filters ── -->
@@ -129,7 +129,7 @@
     filter="url(#neon-glow)" opacity="0.85"/>
 
   <!-- ── Circuit traces ── -->
-  <g id="circuit-traces" opacity="0.72" stroke="#22D3EE" stroke-linecap="round" fill="none">
+  <g id="circuit-traces" opacity="0.72" stroke="#3D9AAD" stroke-linecap="round" fill="none">
     <!-- Horizontal trace 1 -->
     <line x1="132" y1="330" x2="230" y2="330" stroke-width="1.6"/>
     <line x1="230" y1="330" x2="230" y2="375" stroke-width="1.6"/>
@@ -150,7 +150,7 @@
   </g>
 
   <!-- Circuit dots (connection nodes) -->
-  <g id="circuit-dots" fill="#22D3EE" filter="url(#dot-glow)">
+  <g id="circuit-dots" fill="#3D9AAD" filter="url(#dot-glow)">
     <circle cx="230" cy="330" r="4.5"/>
     <circle cx="230" cy="375" r="4"/>
     <circle cx="195" cy="460" r="4.5"/>
@@ -161,7 +161,7 @@
   </g>
 
   <!-- Smaller ambient circuit dots -->
-  <g fill="#60A5FA" opacity="0.5">
+  <g fill="#3D9AAD" opacity="0.5">
     <circle cx="155" cy="550" r="3"/>
     <circle cx="175" cy="590" r="2.2"/>
     <circle cx="155" cy="780" r="2.5"/>
@@ -186,11 +186,11 @@
   <!-- ── Moon icon (lower stem) ── -->
   <g id="moon-icon" transform="translate(215, 840)" filter="url(#dot-glow)">
     <path d="M 0,-17 A 17,17 0 1,1 12,8.5 A 11,11 0 1,0 0,-17 Z"
-          fill="#22D3EE" opacity="0.88"/>
+          fill="#3D9AAD" opacity="0.88"/>
   </g>
 
   <!-- ── Heartbeat line (bottom of middle arm) ── -->
-  <g id="heartbeat-line" stroke="#22D3EE" stroke-width="2.2" fill="none"
+  <g id="heartbeat-line" stroke="#3D9AAD" stroke-width="2.2" fill="none"
      stroke-linecap="round" stroke-linejoin="round" filter="url(#soft-glow)" opacity="0.75">
     <polyline points="315,570 340,570 350,550 365,592 378,542 392,598 405,570 440,570"/>
   </g>

@@ -148,11 +148,12 @@ abstract class TokensStrip {
   // ── Feedback surfaces (toast / tooltip) ───────────────────────────────
   static const Color toastSuccessBg = Color(0xFFEAF7F0);
   static const Color toastSuccessBorder = Color(0xFFB8E6D0);
-  static const Color tooltipBg = Color(0xFFE8F8FA);
-  static const Color tooltipBorder = Color(0xFF9DE8E8);
-  static const Color specIdleFill = Color(0xFFEAF8F8);
-  static const Color specIdleBorder = Color(0xFF9DE8E8);
-  static const Color chipSelectedFill = Color(0xFFD4F5F5);
+  // Soft fills — azul petróleo (§4.0), não mint/cyan legado.
+  static const Color tooltipBg = Color(0xFFEBF4F6); // brandSofter
+  static const Color tooltipBorder = Color(0xFF9ECAD4);
+  static const Color specIdleFill = Color(0xFFEBF4F6);
+  static const Color specIdleBorder = Color(0xFF9ECAD4);
+  static const Color chipSelectedFill = Color(0xFFD5E8EC); // brandSoft
 
   // ── Badge palette ─────────────────────────────────────────────────────
   static const Color badgeError = Color(0xFFDC2626);
