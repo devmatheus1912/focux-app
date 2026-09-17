@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -26,7 +27,10 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
+import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../subscription/utils/landing_editor_access.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/white_label_repository.dart';
 import '../utils/white_label_display.dart';
 
@@ -149,6 +153,35 @@ class _WhiteLabelSettingsScreenState
     } finally {
       if (mounted) setState(() => _verificando = false);
     }
+  }
+
+  Future<void> _onLandingModoSelect(String v) async {
+    if (whiteLabelNeedsLandingCompleta(v)) {
+      final features = ref.read(planoFeaturesProvider).valueOrNull;
+      if (features?.landingCompleta != true) {
+        if (!mounted) return;
+        await UpgradePromptSheet.show(
+          context: context,
+          featureName: 'Landing page completa',
+          capability: 'landingCompleta',
+          requiredPlan: SubscriptionPlan.ENTERPRISE,
+          source: 'marca_landing_site',
+        );
+        return;
+      }
+    }
+    setState(() => _landingModo = v);
+  }
+
+  Future<void> _onChecklistTap(WhiteLabelChecklistItem item) async {
+    if (item.done) return;
+    final route = whiteLabelChecklistRoute(item.id);
+    if (route == null) return;
+    if (route == '/perfil/landing-editor') {
+      await openLandingEditorOrUpgrade(context, ref);
+      return;
+    }
+    if (mounted) context.push(route);
   }
 
   @override
@@ -365,9 +398,9 @@ class _WhiteLabelSettingsScreenState
                                     options: whiteLabelLandingModos,
                                     selected: _landingModo,
                                     isDark: isDark,
-                                    onSelect:
-                                        (v) =>
-                                            setState(() => _landingModo = v),
+                                    onSelect: (v) {
+                                      _onLandingModoSelect(v);
+                                    },
                                   ),
                                 ),
                               ),
@@ -448,6 +481,18 @@ class _WhiteLabelSettingsScreenState
                                                 : null,
                                         showDivider:
                                             i < config.checklist.length - 1,
+                                        onTap:
+                                            config.checklist[i].done ||
+                                                    whiteLabelChecklistRoute(
+                                                          config
+                                                              .checklist[i]
+                                                              .id,
+                                                        ) ==
+                                                        null
+                                                ? null
+                                                : () => _onChecklistTap(
+                                                  config.checklist[i],
+                                                ),
                                       ),
                                   ],
                                 ),

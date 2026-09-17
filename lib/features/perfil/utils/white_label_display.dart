@@ -55,3 +55,21 @@ String whiteLabelLandingCaption(String modo) =>
     modo == 'CAPTURA'
         ? 'Link curto de captura no dashboard e anúncios.'
         : 'Página completa com foto, planos e depoimentos.';
+
+/// Deep-link do passo pendente — null = já está nesta tela.
+String? whiteLabelChecklistRoute(String id) {
+  switch (id) {
+    case 'entrevista':
+    case 'gerado':
+    case 'publicado':
+      return '/perfil/landing-editor';
+    case 'cta':
+      return '/perfil/editar';
+    default:
+      return null;
+  }
+}
+
+/// SITE exige LANDING_COMPLETA; CAPTURA não.
+bool whiteLabelNeedsLandingCompleta(String modo) =>
+    modo.trim().toUpperCase() == 'SITE';

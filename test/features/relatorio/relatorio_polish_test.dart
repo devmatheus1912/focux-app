@@ -27,6 +27,7 @@ void main() {
 
     expect(pdf, contains('_pdfHeader'));
     expect(pdf, contains('FOCUX'));
+    expect(pdf, contains('relatorioPdfBrandLabel'));
     expect(pdf, contains('_pdfTeal'));
 
     expect(global, contains('fxScreenA11yScope'));
