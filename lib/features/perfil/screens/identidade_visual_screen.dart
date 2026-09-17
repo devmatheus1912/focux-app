@@ -127,21 +127,13 @@ class _IdentidadeVisualScreenState
     _sloganCtrl.text = perfil.slogan ?? '';
     _logoUrl = perfil.logoUrl;
 
-    var primary = BrandPalette.defaultPrimary;
-    var secondary = BrandPalette.defaultSecondary;
-    if (perfil.corPrimaria != null && perfil.corPrimaria!.length == 7) {
-      final hex = int.tryParse(perfil.corPrimaria!.replaceFirst('#', '0xFF'));
-      if (hex != null) primary = Color(hex);
-    }
-    if (perfil.corSecundaria != null && perfil.corSecundaria!.length == 7) {
-      final hex = int.tryParse(perfil.corSecundaria!.replaceFirst('#', '0xFF'));
-      if (hex != null) secondary = Color(hex);
-    }
+    // Cyan legado no perfil → Focux Original (azul petróleo), não slate teal.
+    var primary = BrandPalette.resolveStoredPrimary(perfil.corPrimaria);
+    var secondary = BrandPalette.resolveStoredSecondary(perfil.corSecundaria);
 
     primary = CuratedBrandPalette.safePrimary(primary);
     secondary = CuratedBrandPalette.safeSecondaryFor(primary, secondary);
-    _palette = CuratedBrandPalette.resolve(primary, secondary);
-    _perfilLoaded = true;
+    _palette = CuratedBrandPalette.resolve(primary, secondary);    _perfilLoaded = true;
     _fetchedAt = DateTime.now();
     _snapshotBaseline();
   }
