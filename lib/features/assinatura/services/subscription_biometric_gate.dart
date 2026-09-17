@@ -15,7 +15,7 @@ class SubscriptionBiometricGate {
       final isSupported = await _auth.isDeviceSupported();
       if (!canCheck && !isSupported) return true;
 
-      return _auth.authenticate(
+      return await _auth.authenticate(
         localizedReason: 'Confirme para assinar o plano $planName',
         options: const AuthenticationOptions(
           biometricOnly: false,
