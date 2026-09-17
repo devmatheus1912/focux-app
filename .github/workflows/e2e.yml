@@ -1,21 +1,33 @@
 name: E2E
 
+# Só push main/develop + manual (nunca PR — evita build web + Playwright em cada PR).
+# Analyze/orphan ficam no workflow Analyze (sem duplicar minutos).
+
 on:
   push:
     branches: [main, develop]
-  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.cursor/**'
+      - '.github/workflows/ios-release.yml'
+      - '.github/workflows/codeql.yml'
+      - '.github/workflows/security.yml'
+      - '.github/workflows/semgrep.yml'
   workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  # Secrets de conta real: só push/manual (nunca em PR de fork).
   playwright:
     name: Playwright on Chrome
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     env:
       E2E_BASE_URL: http://localhost:61791
@@ -30,12 +42,6 @@ jobs:
 
       - name: Flutter pub get
         run: flutter pub get
-
-      - name: Flutter analyze
-        run: dart analyze --fatal-warnings --fatal-infos
-
-      - name: Orphan dart scan
-        run: dart run tools/find_orphan_dart.dart
 
       - name: Build flutter web
         env:
@@ -59,15 +65,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
       - name: Install Playwright
         working-directory: e2e
         run: |
-          npm install
+          npm ci
           npx playwright install --with-deps chromium
 
       # Sem contas QA nos secrets: só o project `public` roda.
-      # Configure E2E_PERSONAL_* / E2E_ALUNO_* no repo para a suite autenticada.
       - name: Check E2E secrets
         env:
           E2E_PERSONAL_EMAIL: ${{ secrets.E2E_PERSONAL_EMAIL }}
@@ -90,12 +103,12 @@ jobs:
         run: npm run test:p0
 
       - name: Upload Playwright report
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-${{ github.run_id }}
           path: e2e/playwright-report
-          retention-days: 14
+          retention-days: 5
 
       - name: Upload trace + videos
         if: failure()
@@ -103,4 +116,4 @@ jobs:
         with:
           name: test-results-${{ github.run_id }}
           path: e2e/test-results
-          retention-days: 7
+          retention-days: 5

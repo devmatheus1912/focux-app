@@ -4,17 +4,22 @@ on:
   push:
     branches: [main, develop]
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
   # gitleaks-action lista commits do PR via API — sem isso: 403
-  # "Resource not accessible by integration" em pull_request.
   pull-requests: read
 
 jobs:
   gitleaks:
     name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
