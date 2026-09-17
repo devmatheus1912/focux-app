@@ -178,7 +178,7 @@ jobs:
             --export-options-plist=ios/ExportOptions.ci.plist
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: focux-ios-ipa
           path: build/ios/ipa/*.ipa
@@ -186,7 +186,7 @@ jobs:
           retention-days: 14
 
       - name: Upload dSYM (if present)
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: focux-ios-dsym
           path: build/ios/archive/Runner.xcarchive/dSYMs
