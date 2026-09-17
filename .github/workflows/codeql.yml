@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   security-events: write
 
 jobs:
@@ -26,3 +27,7 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+        with:
+          # Precisa de actions:read no job; sem isso o upload falha com
+          # "Resource not accessible by integration" e polui a inbox.
+          category: "/language:javascript-typescript"
