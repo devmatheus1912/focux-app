@@ -415,6 +415,20 @@ class CheckinRepository {
     );
   }
 
+  /// Personal opera sessão presencial pelo aluno atribuído.
+  Future<ExecucaoTreino> iniciarPresencial({
+    required int treinoId,
+    required int alunoId,
+  }) async {
+    final r = await _dio.post(
+      '/api/checkin/personal/iniciar',
+      data: {'treinoId': treinoId, 'alunoId': alunoId},
+    );
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'POST /api/checkin/personal/iniciar'),
+    );
+  }
+
   Future<ExecucaoExercicio> marcarExercicio(
     int execucaoId,
     int treinoExercicioId,
@@ -449,9 +463,14 @@ class CheckinRepository {
     String? feedback,
     int? rpe,
     bool? dor,
+    int? presencialAlunoId,
   }) async {
+    final path =
+        presencialAlunoId != null
+            ? '/api/checkin/personal/$execucaoId/exercicio/$treinoExercicioId/series'
+            : '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/series';
     final r = await _dio.post(
-      '/api/checkin/$execucaoId/exercicio/$treinoExercicioId/series',
+      path,
       data: {
         'numero': numero,
         if (cargaKg != null) 'cargaKg': cargaKg,
@@ -465,7 +484,7 @@ class CheckinRepository {
     return ExecucaoExercicio.fromJson(
       _requireJsonMap(
         r.data,
-        'POST /api/checkin/{id}/exercicio/{treinoExercicioId}/series',
+        'POST checkin serie',
       ),
     );
   }
@@ -495,10 +514,17 @@ class CheckinRepository {
     );
   }
 
-  Future<ExecucaoTreino> concluir(int execucaoId) async {
-    final r = await _dio.put('/api/checkin/$execucaoId/concluir');
+  Future<ExecucaoTreino> concluir(
+    int execucaoId, {
+    int? presencialAlunoId,
+  }) async {
+    final path =
+        presencialAlunoId != null
+            ? '/api/checkin/personal/$execucaoId/concluir'
+            : '/api/checkin/$execucaoId/concluir';
+    final r = await _dio.put(path);
     return ExecucaoTreino.fromJson(
-      _requireJsonMap(r.data, 'PUT /api/checkin/{id}/concluir'),
+      _requireJsonMap(r.data, 'PUT checkin concluir'),
     );
   }
 

@@ -69,22 +69,3 @@ String _initials(String nome) {
   return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
       .toUpperCase();
 }
-
-Color _parseColor(String? value, {required Color fallback}) {
-  if (value == null || value.trim().isEmpty) {
-    return fallback;
-  }
-
-  final sanitized = value.trim().replaceFirst('#', '');
-  if (sanitized.length != 6 && sanitized.length != 8) {
-    return fallback;
-  }
-
-  final normalized = sanitized.length == 6 ? 'FF$sanitized' : sanitized;
-  final parsed = int.tryParse(normalized, radix: 16);
-  if (parsed == null) {
-    return fallback;
-  }
-
-  return Color(parsed);
-}

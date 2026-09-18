@@ -293,7 +293,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         )
                         : FxContentWidthLimiter(child: _buildBody(visible)),
               ),
-              if (!_loading && _erro == null)
+              if (!_loading && _erro == null && visible.isNotEmpty)
                 SafeArea(
                   top: false,
                   child: Padding(

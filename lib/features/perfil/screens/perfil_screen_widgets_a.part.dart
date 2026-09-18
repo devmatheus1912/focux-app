@@ -41,18 +41,13 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final onLogout = widget.onLogout;
     final onOpenLandingEditor = widget.onOpenLandingEditor;
     final onOpenPublicLink = widget.onOpenPublicLink;
-    final theme = Theme.of(context);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final ink = chrome.ink;
     final mute = chrome.mute;
     final line = chrome.line;
-    final themePrimary = theme.colorScheme.primary;
 
-    final primaryColor = _parseColor(
-      perfil.corPrimaria,
-      fallback: themePrimary,
-    );
+    final primaryColor = BrandPalette.resolveStoredPrimary(perfil.corPrimaria);
     final accent = BrandPalette.softened(primaryColor);
     final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;

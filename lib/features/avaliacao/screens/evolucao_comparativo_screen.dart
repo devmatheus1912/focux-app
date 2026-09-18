@@ -190,7 +190,7 @@ class _EvolucaoComparativoScreenState
             ),
             AlunoInsetFormField(
               controller: massaMagra,
-              label: 'Massa magra (kg)',
+              label: '% Massa magra',
               icon: Icons.fitness_center_outlined,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
@@ -441,6 +441,21 @@ class _EvolucaoComparativoScreenState
               primeira: c.primeira.percGordura,
               atual: c.atual.percGordura,
               menorEMelhor: true,
+            ).text,
+            color: Theme.of(context).colorScheme.primary,
+            isDark: Theme.of(context).brightness == Brightness.dark,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          OperationalMetricTile(
+            label: 'Massa magra',
+            value: evolucaoComparativoFmtValor(
+              c.atual.percMassa ?? c.atual.massaMuscular,
+              (c.atual.percMassa != null) ? '%' : 'kg',
+            ),
+            hint: evolucaoComparativoDelta(
+              primeira: c.primeira.percMassa ?? c.primeira.massaMuscular,
+              atual: c.atual.percMassa ?? c.atual.massaMuscular,
+              menorEMelhor: false,
             ).text,
             color: Theme.of(context).colorScheme.primary,
             isDark: Theme.of(context).brightness == Brightness.dark,

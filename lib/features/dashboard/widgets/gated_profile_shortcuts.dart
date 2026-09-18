@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ferramentas/data/ferramentas_catalogo_models.dart';
+import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 
-/// Atalhos de crescimento no Perfil — lista curada local (não depende do BFF).
-///
-/// O catálogo da Home/sheet vem do endpoint; aqui o job é atalho estável
-/// Automações / Loja / Equipe / Hábitos / Desafios com o mesmo gate de plano.
+/// Atalhos de crescimento no Perfil — mesma árvore do catálogo BFF quando
+/// disponível; seed local só cobre rota/label se o item não vier no catalogo.
 class GatedProfileShortcuts extends ConsumerWidget {
   const GatedProfileShortcuts({super.key, required this.tileBuilder});
 
@@ -70,27 +69,36 @@ class GatedProfileShortcuts extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final features = effectivePlanoFeatures(ref);
+    final catalogo = ref.watch(ferramentasCatalogoProvider).valueOrNull;
 
     return Column(
       children: [
         for (var i = 0; i < _entries.length; i++)
           () {
             final entry = _entries[i];
-            final shortcut = DashboardToolShortcut.fromEntrada(
-              CatalogoEntrada(
-                id: entry.legacyIds.first,
-                titulo: entry.label,
-                rotaApp: entry.rotaApp,
-                featureGate: entry.featureGate,
-                unlocked: true,
-                legacyIds: entry.legacyIds,
-              ),
-            );
+            CatalogoEntrada? fromCatalog;
+            if (catalogo != null) {
+              for (final id in entry.legacyIds) {
+                fromCatalog = catalogo.findByLegacyId(id);
+                if (fromCatalog != null) break;
+              }
+            }
+            final entrada =
+                fromCatalog ??
+                CatalogoEntrada(
+                  id: entry.legacyIds.first,
+                  titulo: entry.label,
+                  rotaApp: entry.rotaApp,
+                  featureGate: entry.featureGate,
+                  unlocked: true,
+                  legacyIds: entry.legacyIds,
+                );
+            final shortcut = DashboardToolShortcut.fromEntrada(entrada);
             final locked = !shortcut.isUnlocked(features);
             final tier = locked ? shortcut.tierBadgeLabel() : null;
             return tileBuilder(
               icon: entry.icon,
-              label: entry.label,
+              label: entrada.titulo.isNotEmpty ? entrada.titulo : entry.label,
               value: locked ? 'Plano $tier' : entry.value,
               locked: locked,
               showDivider: i != _entries.length - 1,

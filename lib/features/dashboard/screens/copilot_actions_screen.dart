@@ -13,7 +13,6 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_dock.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -98,39 +97,13 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
           title: 'Tarefas IA',
           subtitle:
               FxHubFreshness.fromFetchedAt(_fetchedAt) ?? 'Centro de Comando',
-          onBack: () => safePopOrGo(context, '/dashboard/personal'),
+          onBack: () => safePopOrGo(context, '/ia/copiloto'),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como funcionam as tarefas IA',
               onTap: _abrirAjuda,
             ),
           ],
-        ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TokensStrip.s4,
-            0,
-            TokensStrip.s4,
-            14,
-          ),
-          child: SafeArea(
-            top: false,
-            child: FxDock(
-              items: FxDockItems.personal,
-              currentIndex: 4,
-              isDark: dark,
-              onTap: (index) {
-                final path = switch (index) {
-                  0 => '/dashboard/personal',
-                  1 => '/alunos',
-                  2 => '/treinos',
-                  3 => '/agenda',
-                  _ => '/ia/copiloto',
-                };
-                context.go(path);
-              },
-            ),
-          ),
         ),
         body: FxContentWidthLimiter(
           child: Column(

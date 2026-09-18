@@ -232,8 +232,12 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/treinos' : null,
             builder:
-                (context, state) =>
-                    ModoPresencialScreen(treinoId: intPathParam(state, 'id')!),
+                (context, state) => ModoPresencialScreen(
+                  treinoId: intPathParam(state, 'id')!,
+                  alunoId: int.tryParse(
+                    state.uri.queryParameters['alunoId'] ?? '',
+                  ),
+                ),
           ),
           GoRoute(
             path: '/alunos/:id/anamnese',

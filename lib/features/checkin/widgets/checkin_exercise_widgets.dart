@@ -7,7 +7,7 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../data/checkin_repository.dart';
@@ -201,82 +201,65 @@ class CheckinSerieCard extends StatelessWidget {
                 (onOpenDemo != null && !hasDemo)) ...[
               const SizedBox(height: TokensStrip.s1),
               TextButton(
-                onPressed: () {
-                  showFxHomeSheet<void>(
+                onPressed: () async {
+                  final picked = await showFxInsetPickerSheet<String>(
                     context,
-                    builder: (ctx) {
-                      final sheetDark =
-                          Theme.of(ctx).brightness == Brightness.dark;
-                      return FxHomeSheetSurface(
-                        isDark: sheetDark,
-                        child: SafeArea(
-                          top: false,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              FxHomeSheetHandle(isDark: sheetDark),
-                              FxHomeSheetHeader(
-                                leading: Icon(
-                                  Icons.more_horiz_rounded,
-                                  color: brand,
-                                ),
-                                title: 'Mais na série',
-                                subtitle: 'Ajustes e ações secundárias',
-                                isDark: sheetDark,
-                              ),
-                              const SizedBox(height: TokensStrip.s2),
-                              if (onAjustar != null)
-                                ListTile(
-                                  title: const Text('Ajustar'),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onAjustar!();
-                                  },
-                                ),
-                              if (onConfirmarRestante != null)
-                                ListTile(
-                                  title: Text(
-                                    checkinConfirmarRestanteLabel(
-                                      feitas: ee.seriesFeitas,
-                                      total: ee.series,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onConfirmarRestante!();
-                                  },
-                                ),
-                              if (onDesfazer != null)
-                                ListTile(
-                                  title: Text(checkinDesfazerLabel()),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onDesfazer!();
-                                  },
-                                ),
-                              if (onOpenCoach != null)
-                                ListTile(
-                                  title: const Text('Postura'),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onOpenCoach!();
-                                  },
-                                ),
-                              if (onOpenDemo != null && !hasDemo)
-                                ListTile(
-                                  title: const Text('Demonstração'),
-                                  onTap: () {
-                                    Navigator.of(ctx).pop();
-                                    onOpenDemo!();
-                                  },
-                                ),
-                            ],
-                          ),
+                    title: 'Mais na série',
+                    subtitle: 'Ajustes e ações secundárias',
+                    headerIcon: Icons.more_horiz_rounded,
+                    items: [
+                      if (onAjustar != null)
+                        const FxInsetPickerSheetItem(
+                          value: 'ajustar',
+                          label: 'Ajustar',
+                          subtitle: 'Carga, reps e RPE',
+                          icon: Icons.tune_rounded,
                         ),
-                      );
-                    },
+                      if (onConfirmarRestante != null)
+                        FxInsetPickerSheetItem(
+                          value: 'confirmar',
+                          label: checkinConfirmarRestanteLabel(
+                            feitas: ee.seriesFeitas,
+                            total: ee.series,
+                          ),
+                          subtitle: 'Marca o que falta de uma vez',
+                          icon: Icons.done_all_rounded,
+                        ),
+                      if (onDesfazer != null)
+                        FxInsetPickerSheetItem(
+                          value: 'desfazer',
+                          label: checkinDesfazerLabel(),
+                          subtitle: 'Remove a última série',
+                          icon: Icons.undo_rounded,
+                        ),
+                      if (onOpenCoach != null)
+                        const FxInsetPickerSheetItem(
+                          value: 'postura',
+                          label: 'Postura',
+                          subtitle: 'Dicas de execução',
+                          icon: Icons.accessibility_new_rounded,
+                        ),
+                      if (onOpenDemo != null && !hasDemo)
+                        const FxInsetPickerSheetItem(
+                          value: 'demo',
+                          label: 'Demonstração',
+                          subtitle: 'Vídeo do exercício',
+                          icon: Icons.play_circle_outline_rounded,
+                        ),
+                    ],
                   );
+                  switch (picked) {
+                    case 'ajustar':
+                      onAjustar?.call();
+                    case 'confirmar':
+                      onConfirmarRestante?.call();
+                    case 'desfazer':
+                      onDesfazer?.call();
+                    case 'postura':
+                      onOpenCoach?.call();
+                    case 'demo':
+                      onOpenDemo?.call();
+                  }
                 },
                 style: TextButton.styleFrom(
                   minimumSize: const Size(64, checkinExecutionControlMin),
