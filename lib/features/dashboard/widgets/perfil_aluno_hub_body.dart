@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
@@ -60,7 +61,14 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                         child: CircleAvatar(
                           radius: FxSettingsLayout.avatarSize / 2,
                           backgroundImage:
-                              hasPhoto ? NetworkImage(photo) : null,
+                              hasPhoto
+                                  ? fxCachedNetworkImageProvider(
+                                    photo,
+                                    maxWidth:
+                                        (FxSettingsLayout.avatarSize * 3)
+                                            .round(),
+                                  )
+                                  : null,
                           backgroundColor: BrandPalette.soft(primary),
                           child:
                               hasPhoto

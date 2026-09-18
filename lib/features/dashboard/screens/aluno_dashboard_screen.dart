@@ -13,6 +13,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -118,20 +119,9 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                     ],
                   ),
             ),
-            homeAsync.when(
-              data:
-                  (home) => NotificacaoBadgeButton(
-                    size: FxHelpChrome.iconSize,
-                    countOverride: home.notificacoesNaoLidas,
-                  ),
-              loading:
-                  () => const NotificacaoBadgeButton(
-                    size: FxHelpChrome.iconSize,
-                  ),
-              error:
-                  (_, __) => const NotificacaoBadgeButton(
-                    size: FxHelpChrome.iconSize,
-                  ),
+            NotificacaoBadgeButton(
+              size: FxHelpChrome.iconSize,
+              countOverride: ref.watch(alunoHomeNotificacoesSelectProvider),
             ),
             homeAsync.when(
               data:
