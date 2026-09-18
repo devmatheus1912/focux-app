@@ -17,6 +17,9 @@ echo "==> Focux iOS release build"
 echo "    API_URL=$API_URL"
 echo "    API_CERT_PINS set (${#API_CERT_PINS} chars)"
 
+# Garante que o secret + builtins cobrem o leaf TLS ao vivo (evita IPA morto).
+bash "$ROOT/tools/release/verify-api-cert-pins.sh"
+
 flutter pub get
 (cd ios && pod install)
 

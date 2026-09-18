@@ -33,6 +33,12 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Apple/Google abrem sheet nativo: iOS suspende keep-alives.
+          // Recicla antes do POST de auth para não cair em DioException.unknown.
+          if (_isAuthPath(options.path) &&
+              options.method.toUpperCase() != 'GET') {
+            recycleHttpConnectionPool(_dio);
+          }
           final token = await SecureStorage.getToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';

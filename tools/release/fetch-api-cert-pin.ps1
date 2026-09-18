@@ -1,7 +1,7 @@
 # Gera pin TLS no formato do app (sha256 do DER do certificado leaf).
 # Uso: .\tools\release\fetch-api-cert-pin.ps1 [host]
 param(
-  [string]$HostName = "focux-backend-production.up.railway.app"
+  [string]$HostName = "api.focuxpersonal.com"
 )
 
 $tcp = New-Object System.Net.Sockets.TcpClient($HostName, 443)
