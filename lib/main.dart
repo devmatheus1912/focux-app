@@ -29,7 +29,10 @@ import 'core/theme/focux_system_chrome.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/utils/legacy_password_reset_redirect.dart';
+import 'features/dashboard/providers/dashboard_provider.dart';
+import 'features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'features/perfil/data/perfil_repository.dart';
+import 'features/perfil/providers/perfil_provider.dart';
 import 'l10n/app_localizations.dart';
 
 void main() {
@@ -144,10 +147,14 @@ class FocuxApp extends ConsumerStatefulWidget {
   ConsumerState<FocuxApp> createState() => _FocuxAppState();
 }
 
-class _FocuxAppState extends ConsumerState<FocuxApp> {
+class _FocuxAppState extends ConsumerState<FocuxApp>
+    with WidgetsBindingObserver {
+  DateTime? _pausedAt;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
@@ -160,8 +167,41 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     PlanSyncCoordinator.unbind();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _pausedAt = DateTime.now();
+      return;
+    }
+    if (state != AppLifecycleState.resumed) return;
+    final pausedAt = _pausedAt;
+    _pausedAt = null;
+    final away = pausedAt == null
+        ? Duration.zero
+        : DateTime.now().difference(pausedAt);
+    _onAppResumed(away);
+  }
+
+  void _onAppResumed(Duration away) {
+    if (!mounted) return;
+    final client = ref.read(apiClientProvider);
+    client.resetAfterAppResume();
+    // Só revalida após pausa longa — evita stampede em switches rápidos.
+    if (away < const Duration(minutes: 2)) return;
+    if (ref.read(authProvider) != AuthStatus.authenticated) return;
+    // Soft reload: não zera todos os caches de tenant (isso deixava telas frias).
+    if (away > DashboardHomeClientCache.ttl) {
+      DashboardHomeClientCache.clear();
+    }
+    ref.invalidate(dashboardHomeProvider);
+    ref.invalidate(perfilProvider);
+    unawaited(_loadCustomTheme());
   }
 
   Future<void> _loadCustomTheme() async {
@@ -177,7 +217,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
     try {
       // Use direct dio.get with no-invalidation flags to avoid clearing
       // the aluno session when /api/personal/perfil returns 401 (expected)
-      final dio = ApiClient().dio;
+      final dio = ref.read(apiClientProvider).dio;
       final r = await dio.get(
         '/api/personal/perfil',
         options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
@@ -208,7 +248,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp> {
 
   Future<void> _loadAlunoTheme() async {
     try {
-      final dio = ApiClient().dio;
+      final dio = ref.read(apiClientProvider).dio;
       // Mark as no-retry and no-invalidation to avoid clearing the aluno session
       // when this best-effort theme fetch returns 401/403 (expected for aluno role)
       final response = await dio.get(

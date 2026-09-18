@@ -12,7 +12,8 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
 /// Single BFF call for personal Home (personal + command center + financeiro).
 /// Respeita TTL client 90s (= cache BE `dashboard-home`); `invalidate` limpa.
 final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>((ref) async {
-  ref.onDispose(DashboardHomeClientCache.clear);
+  // Não limpar cache no dispose — invalidate pós-login/recarrega descartava o
+  // prefetch e pintava "Algo saiu do ar". Limpeza só no logout/tenant switch.
   final cached = DashboardHomeClientCache.getIfFresh();
   if (cached != null) return cached;
   final fresh = await ref.read(dashboardRepositoryProvider).getHome();

@@ -2,21 +2,24 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import '../api/api_client.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../features/auth/providers/auth_provider.dart';
 import '../api/offline_sync_service.dart';
 import '../theme/design_tokens.dart';
 
 /// Shows offline/sync status and flushes the offline queue when back online.
-class FxConnectivityBanner extends StatefulWidget {
+class FxConnectivityBanner extends ConsumerStatefulWidget {
   const FxConnectivityBanner({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<FxConnectivityBanner> createState() => _FxConnectivityBannerState();
+  ConsumerState<FxConnectivityBanner> createState() =>
+      _FxConnectivityBannerState();
 }
 
-class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
+class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _offline = false;
@@ -42,7 +45,9 @@ class _FxConnectivityBannerState extends State<FxConnectivityBanner> {
       _pending = pending;
     });
     if (!offline && pending > 0) {
-      await OfflineSyncService.syncPendingRequests(ApiClient().dio);
+      await OfflineSyncService.syncPendingRequests(
+        ref.read(apiClientProvider).dio,
+      );
       final after = await OfflineSyncService.getPendingCount();
       if (mounted) setState(() => _pending = after);
     }
