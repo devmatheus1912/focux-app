@@ -339,27 +339,6 @@ class _FinanceiroMensalidadesTabState
                     )
                     : Column(
                       children: [
-                        if (_items.isNotEmpty && !_modoSelecao)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              8,
-                              FxSettingsLayout.pageInset,
-                              8,
-                            ),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: DashboardHomeActionChip(
-                                label: 'Nova mensalidade',
-                                accent: EagleTokens.moneyGreen,
-                                isDark: chrome.isDark,
-                                onPressed: () {
-                                  FxKeyboardDismissScope.dismiss();
-                                  _abrirFormularioNovaMensalidade();
-                                },
-                              ),
-                            ),
-                          ),
                         if (_items.isNotEmpty && _modoSelecao)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -566,6 +545,26 @@ class _FinanceiroMensalidadesTabState
                                     ),
                                   ),
                         ),
+                        if (_items.isNotEmpty && !_modoSelecao)
+                          SafeArea(
+                            top: false,
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s2,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s3 +
+                                    MediaQuery.viewInsetsOf(context).bottom,
+                              ),
+                              child: FxLiquidPrimaryButton(
+                                label: 'Nova mensalidade',
+                                onPressed: () {
+                                  FxKeyboardDismissScope.dismiss();
+                                  _abrirFormularioNovaMensalidade();
+                                },
+                              ),
+                            ),
+                          ),
                       ],
                     ),
           ),

@@ -228,12 +228,15 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
                     showDivider: i < day.slots.length - 1,
                     alreadyInTreinoIds: widget.alreadyInTreinoIds,
                     onChoose: (ex) async {
+                      if (_saving) return;
                       setState(() => _saving = true);
                       try {
                         await widget.onAdicionar(ex);
                         if (mounted) {
                           setState(() => _done.add('${day.nome}-$i'));
                         }
+                      } catch (_) {
+                        // Erro já exibido em openMontarPorModelo.
                       } finally {
                         if (mounted) setState(() => _saving = false);
                       }
@@ -260,9 +263,13 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
             _TemplateCompleteCard(
               onBackToWorkout: () {
                 HapticFeedback.mediumImpact();
-                // Só fecha o editor; o pai (Montar por modelo) fecha e mostra snack.
-                Navigator.pop(context);
-                widget.onCompleted?.call();
+                // Fecha só o editor; onCompleted fecha Montar por modelo.
+                if (Navigator.of(context).canPop()) {
+                  Navigator.pop(context);
+                }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onCompleted?.call();
+                });
               },
             ),
           ],

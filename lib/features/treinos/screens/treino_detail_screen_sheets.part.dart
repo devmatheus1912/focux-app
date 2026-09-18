@@ -43,7 +43,26 @@ Future<void> _dispatchTreinoDetailAction({
         );
         break;
       }
-      context.push('/treino-presencial/$treinoId');
+      var aid = alunoId;
+      if (aid == null) {
+        try {
+          final alunos = await ref.read(alunosProvider.future);
+          if (!context.mounted) return;
+          aid = await _showTreinoSheet<int>(
+            context: context,
+            builder:
+                (dialogContext) =>
+                    _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
+          );
+        } catch (e) {
+          if (context.mounted) {
+            FeedbackHelper.showError(context, friendlyError(e));
+          }
+          break;
+        }
+      }
+      if (aid == null || !context.mounted) break;
+      context.push('/treino-presencial/$treinoId?alunoId=$aid');
       break;
     case 'assign':
       try {

@@ -39,22 +39,32 @@ Future<void> openMontarPorModelo({
                 }
               },
               onAdicionar: (Exercicio exercicio) async {
+                final exId = exercicio.id;
+                if (exId <= 0) {
+                  if (routeContext.mounted) {
+                    FeedbackHelper.showError(
+                      routeContext,
+                      'Exercício inválido. Escolha outro.',
+                    );
+                  }
+                  return;
+                }
                 try {
                   await ref
                       .read(treinoRepositoryProvider)
                       .adicionarExercicio(
                         treinoId,
-                        exercicio.id,
+                        exId,
                         series: preset.series,
                         repeticoes: preset.repeticoes,
                         descanso: preset.descansoSegundos,
                         observacoes: preset.observacoes,
                         tipoSerie: preset.tipoSerie,
                       );
-                  await RecentExerciseUsageStore.recordUsage(exercicio.id);
+                  await RecentExerciseUsageStore.recordUsage(exId);
                   AnalyticsService.instance.track(
                     'template_uso',
-                    props: {'treinoId': treinoId, 'exId': exercicio.id},
+                    props: {'treinoId': treinoId, 'exId': exId},
                   );
                   if (routeContext.mounted) {
                     HapticFeedback.mediumImpact();
@@ -67,6 +77,7 @@ Future<void> openMontarPorModelo({
                   if (routeContext.mounted) {
                     FeedbackHelper.showError(routeContext, friendlyError(e));
                   }
+                  rethrow;
                 }
               },
             ),

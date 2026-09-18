@@ -313,7 +313,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                     ),
               ),
             ),
-            if (homeAsync.hasValue)
+            if (homeAsync.hasValue &&
+                !(
+                  (_view == EvolucaoHubView.medidas &&
+                      (medidasAsync.asData?.value.isEmpty ?? false)) ||
+                  (_view == EvolucaoHubView.recordes &&
+                      (recordesAsync.asData?.value.isEmpty ?? false))
+                ))
               SafeArea(
                 top: false,
                 child: Padding(

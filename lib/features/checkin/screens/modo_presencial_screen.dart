@@ -30,7 +30,12 @@ import '../widgets/checkin_timer_widgets.dart';
 /// - Rest timer between sets
 class ModoPresencialScreen extends ConsumerStatefulWidget {
   final int treinoId;
-  const ModoPresencialScreen({super.key, required this.treinoId});
+  final int? alunoId;
+  const ModoPresencialScreen({
+    super.key,
+    required this.treinoId,
+    this.alunoId,
+  });
 
   @override
   ConsumerState<ModoPresencialScreen> createState() => _State();
@@ -98,9 +103,14 @@ class _State extends ConsumerState<ModoPresencialScreen>
     if (_startInFlight) return;
     _startInFlight = true;
     try {
-      final e = await ref
-          .read(checkinRepositoryProvider)
-          .iniciar(widget.treinoId);
+      final repo = ref.read(checkinRepositoryProvider);
+      final e =
+          widget.alunoId != null
+              ? await repo.iniciarPresencial(
+                treinoId: widget.treinoId,
+                alunoId: widget.alunoId!,
+              )
+              : await repo.iniciar(widget.treinoId);
       if (!mounted) return;
       _elapsed = checkinElapsedSince(e.iniciadoEm);
       _startedAt = DateTime.now().subtract(_elapsed);
@@ -149,7 +159,7 @@ class _State extends ConsumerState<ModoPresencialScreen>
   Future<void> _completeSerie(ExecucaoExercicio ex) async {
     HapticFeedback.mediumImpact();
     try {
-      await ref
+      final updated = await ref
           .read(checkinRepositoryProvider)
           .registrarSerie(
             _exec!.id!,
@@ -157,8 +167,48 @@ class _State extends ConsumerState<ModoPresencialScreen>
             numero: ex.seriesFeitas + 1,
             cargaKg: ex.cargaKg,
             repeticoes: ex.repeticoes,
+            presencialAlunoId: widget.alunoId,
           );
-      await _start();
+      if (!mounted || _exec == null) return;
+      final current = _exec!;
+      setState(() {
+        _exec = ExecucaoTreino(
+          id: current.id,
+          treinoId: current.treinoId,
+          treinoNome: current.treinoNome,
+          status: current.status,
+          iniciadoEm: current.iniciadoEm,
+          concluidoEm: current.concluidoEm,
+          exercicios:
+              current.exercicios
+                  .map(
+                    (e) =>
+                        e.treinoExercicioId == updated.treinoExercicioId
+                            ? updated
+                            : e,
+                  )
+                  .toList(),
+          evolucoesCarga: current.evolucoesCarga,
+          evolucoesPerformance: current.evolucoesPerformance,
+        );
+      });
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
+  }
+
+  Future<void> _concluirSessao() async {
+    final exec = _exec;
+    if (exec?.id == null) return;
+    try {
+      await ref
+          .read(checkinRepositoryProvider)
+          .concluir(exec!.id!, presencialAlunoId: widget.alunoId);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, 'Sessão presencial concluída.');
+      safePopOrGo(context, _parent);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -521,6 +571,16 @@ class _State extends ConsumerState<ModoPresencialScreen>
                         ),
                       ],
                     ),
+                  ),
+                )
+              else
+                SizedBox(
+                  width: double.infinity,
+                  height: checkinExecutionControlMin,
+                  child: FxLiquidPrimaryButton(
+                    label: 'Concluir sessão',
+                    icon: Icons.flag_rounded,
+                    onPressed: _concluirSessao,
                   ),
                 ),
             ],

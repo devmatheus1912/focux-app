@@ -94,7 +94,6 @@ class Aluno360FerramentasTab extends StatelessWidget {
       bf: bf,
       massaMagra: massaMagra,
     );
-    final evolucaoRoute = '/alunos/$alunoId/evolucao';
 
     final measurements = _section(
       0,
@@ -123,14 +122,18 @@ class Aluno360FerramentasTab extends StatelessWidget {
           else if (allComplete)
             Semantics(
               label:
-                  'Medidas em dia. $completeSummary. Toque para ver evolução.',
+                  'Medidas em dia. $completeSummary. Toque para ver composição no comparativo.',
               button: true,
               child: FxSatelliteListTile(
                 title: 'Medidas em dia',
                 titleCase: false,
                 subtitle: Text(completeSummary),
                 accent: primary,
-                onTap: () => context.push(evolucaoRoute, extra: aluno.nome),
+                onTap:
+                    () => context.push(
+                      '/alunos/$alunoId/evolucao-comparativo',
+                      extra: aluno.nome,
+                    ),
               ),
             )
           else
