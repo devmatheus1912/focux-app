@@ -37,7 +37,12 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
             radius: 18,
             backgroundColor: BrandPalette.soft(primary, dark: isDark),
             backgroundImage:
-                hasFoto ? NetworkImage(aluno.fotoUrl!.trim()) : null,
+                hasFoto
+                    ? fxCachedNetworkImageProvider(
+                      aluno.fotoUrl!.trim(),
+                      maxWidth: 72,
+                    )
+                    : null,
             child:
                 hasFoto
                     ? null
@@ -88,7 +93,12 @@ class _AlunoHeroCard extends StatelessWidget {
             radius: 18,
             backgroundColor: BrandPalette.soft(primary, dark: isDark),
             backgroundImage:
-                brand.logoUrl != null ? NetworkImage(brand.logoUrl!) : null,
+                brand.logoUrl != null
+                    ? fxCachedNetworkImageProvider(
+                      brand.logoUrl!,
+                      maxWidth: 72,
+                    )
+                    : null,
             child:
                 brand.logoUrl == null
                     ? Text(
