@@ -12,6 +12,11 @@ import '../config/env.dart';
 ///
 /// Pinning aplica **somente** aos hosts da API/WS ([Env.apiUrl], [Env.wsUrl]).
 /// Outros HTTPS (Google Fonts, Firebase, etc.) usam TLS padrão do sistema.
+///
+/// Pin no Dio é **connect-time** via [HttpClient.connectionFactory]
+/// ([createPinnedHttpClient]). Em Dio 5.9.x, [IOHttpClientAdapter.validateCertificate]
+/// só roda depois de `request.close()` — o body (senha / identityToken) já
+/// saiu na rede; por isso validateCertificate é só defesa em profundidade.
 class TlsCertificatePinning {
   TlsCertificatePinning._();
 
@@ -54,12 +59,8 @@ class TlsCertificatePinning {
     _overridesInstalled = true;
   }
 
-  /// Aplica pinning no Dio via [IOHttpClientAdapter.validateCertificate].
-  ///
-  /// **Não** usa [HttpClient.connectionFactory] no caminho Dio: o padrão
-  /// `ConnectionTask.fromSocket(SecureSocket.connect…)` é frágil no iOS
-  /// (keep-alive morto após Sign in with Apple → `DioException.unknown`
-  /// sem status). WebSocket continua pinado por [installGlobalOverrides].
+  /// Aplica pinning no Dio: connect-time ([createPinnedHttpClient]) +
+  /// validateCertificate (pós-response, defesa em profundidade).
   static void apply(Dio dio) {
     if (kIsWeb) return;
     final pins = _allowedPins();
@@ -74,8 +75,7 @@ class TlsCertificatePinning {
     }
 
     dio.httpClientAdapter = IOHttpClientAdapter(
-      // Cliente “direto” (sem HttpOverrides) — pool HTTP ajusta max/idle.
-      createHttpClient: baseHttpClient,
+      createHttpClient: () => createPinnedHttpClient(pins),
       validateCertificate: (cert, host, port) {
         if (!shouldPinHost(host)) return true;
         return matches(cert, pins);
@@ -84,7 +84,7 @@ class TlsCertificatePinning {
   }
 
   /// HttpClient real — sem reentrar em [HttpOverrides] (evita stack overflow).
-  /// Usado pelo pool Dio e por [createPinnedHttpClient] (WebSocket).
+  /// Usado por [createPinnedHttpClient] (Dio + WebSocket).
   static HttpClient baseHttpClient({SecurityContext? context}) {
     return HttpOverrides.runWithHttpOverrides(
       () => HttpClient(context: context),
@@ -123,16 +123,22 @@ class TlsCertificatePinning {
       if (!shouldEnforcePin(host, allowed)) {
         return SecureSocket.startConnect(host, port);
       }
-      final Future<Socket> future =
-          SecureSocket.connect(host, port).then((SecureSocket sock) {
-        if (!matches(sock.peerCertificate, allowed)) {
-          sock.destroy();
+      // Connect-time pin: rejeita leaf antes de qualquer byte HTTP.
+      SecureSocket? sock;
+      final Future<Socket> future = SecureSocket.connect(host, port).then((s) {
+        sock = s;
+        if (!matches(s.peerCertificate, allowed)) {
+          s.destroy();
           throw const TlsException('Certificate pin mismatch');
         }
-        return sock;
+        return s;
       });
       return Future<ConnectionTask<Socket>>.value(
-        ConnectionTask.fromSocket(future, () {}),
+        ConnectionTask.fromSocket(future, () {
+          try {
+            sock?.destroy();
+          } catch (_) {}
+        }),
       );
     };
   }
