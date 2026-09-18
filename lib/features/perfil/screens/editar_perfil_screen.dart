@@ -185,7 +185,6 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
   void _invalidateAfterSave() {
     ref.invalidate(perfilProvider);
     ref.invalidate(dashboardHomeProvider);
-    ref.invalidate(dashboardProvider);
     invalidatePacotesCaches(ref);
   }
 
