@@ -6,17 +6,12 @@ import 'package:focux_app/core/api/tls_certificate_pinning.dart';
 void main() {
   test('pinnedHosts inclui host da API de producao', () {
     final hosts = TlsCertificatePinning.pinnedHosts();
-    expect(
-      hosts,
-      contains('focux-backend-production.up.railway.app'),
-    );
+    expect(hosts, contains('api.focuxpersonal.com'));
   });
 
   test('shouldPinHost restringe pinning ao backend', () {
     expect(
-      TlsCertificatePinning.shouldPinHost(
-        'focux-backend-production.up.railway.app',
-      ),
+      TlsCertificatePinning.shouldPinHost('api.focuxpersonal.com'),
       isTrue,
     );
     expect(
@@ -31,17 +26,13 @@ void main() {
 
   test('sem pins o host da API usa TLS do sistema', () {
     expect(
-      TlsCertificatePinning.shouldEnforcePin(
-        'focux-backend-production.up.railway.app',
-        const {},
-      ),
+      TlsCertificatePinning.shouldEnforcePin('api.focuxpersonal.com', const {}),
       isFalse,
     );
     expect(
-      TlsCertificatePinning.shouldEnforcePin(
-        'focux-backend-production.up.railway.app',
-        {'sha256/abc'},
-      ),
+      TlsCertificatePinning.shouldEnforcePin('api.focuxpersonal.com', {
+        'sha256/abc',
+      }),
       isTrue,
     );
   });

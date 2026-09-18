@@ -32,7 +32,7 @@ permissions:
 env:
   APP_BUNDLE_ID: com.focux.focuxApp
   APPLE_TEAM_ID: TVY2QLKX54
-  API_URL_DEFAULT: https://focux-backend-production.up.railway.app
+  API_URL_DEFAULT: https://api.focuxpersonal.com
   PUBLIC_WEB_URL_DEFAULT: https://focuxpersonal.com
   MATCH_KEYCHAIN_NAME: focux-signing
 
