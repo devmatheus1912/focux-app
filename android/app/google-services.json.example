@@ -1,4 +1,5 @@
 {
+  "_comment": "Template only. Copy to google-services.json (gitignored). Never commit a real AIza… key.",
   "project_info": {
     "project_number": "000000000000",
     "project_id": "your-firebase-project-id",

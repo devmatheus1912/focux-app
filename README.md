@@ -128,6 +128,7 @@ Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 | Release | Hardening nos builds de loja |
 | Privacidade | LGPD e PII tratados no backend |
 | CI | Secrets só via GitHub Actions `secrets.*` |
+| Firebase client | `google-services.json` / `GoogleService-Info.plist` **fora do git**; só `*.example` |
 
 **Nunca versionar**
 
@@ -135,6 +136,16 @@ Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 - `android/key.properties`, `*.jks`, `*.keystore`, `*.p12`, `*.pem`
 - `android/app/google-services.json` e `ios/Runner/GoogleService-Info.plist` **reais**
 - service accounts, dumps de banco, senhas, PII de QA
+
+### Alert GitHub: Google API Key em `google-services.json`
+
+O arquivo real já está no `.gitignore` e **não** deve voltar ao índice. Se o Secret scanning ainda listar o alerta histórico:
+
+1. **Rotacionar** a Android API key no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Credentials → key do app Android → Regenerate / criar nova).
+2. **Restringir** a key nova: Application restriction = Android apps (`com.focux.focux_app` + SHA-1 do keystore de release/debug usados); API restriction = só APIs Firebase/Google necessárias.
+3. Baixar o `google-services.json` atualizado no Firebase Console e manter **só local** (ou secret `GOOGLE_SERVICES_JSON_BASE64` no CI — espelhando o fluxo iOS).
+4. No alerta do GitHub: **Close as revoked** (após regenerar). Não marque “false positive” se a key antiga ainda estiver ativa.
+5. Gate de regressão: `test/core/security/firebase_config_secrets_test.dart`.
 
 Erros de UI não devem expor detalhes técnicos internos. Em dúvida: não commitar.
 
