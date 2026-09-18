@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +25,7 @@ import '../data/auth_repository.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/auth_http_debug.dart';
 import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';

@@ -3,6 +3,11 @@ import 'package:flutter/services.dart';
 
 import '../../../core/api/api_error.dart';
 
+const _offlineCopy = 'Sem conexão com o servidor.';
+const _unavailableCopy = 'Servidor indisponível, tente novamente';
+const _rateLimitCopy = 'Muitas tentativas. Aguarde e tente de novo.';
+const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
+
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
 ///
 /// `codigo` é a fonte primária. Status HTTP com body nunca vira "sem conexão":
@@ -20,34 +25,24 @@ String mapLoginError(Object error) {
     // Resposta HTTP chegou — nunca tratar como falha de rede.
     if (statusCode != null) {
       if (statusCode == 401) return _loginCredenciaisCopy;
-      if (statusCode == 400) return _loginValidationCopy(error, api);
-      if (statusCode == 429) {
-        return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      if (statusCode == 400) return _validationCopy(error, api);
+      if (statusCode == 404) {
+        return _backendMessage(error) ?? 'Recurso não encontrado.';
       }
-      if (statusCode == 502 || statusCode == 503) {
-        return _loginServidorIndisponivelCopy;
-      }
+      if (statusCode == 429) return _rateLimitCopy;
+      if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
       return 'Não foi possível entrar agora.';
     }
 
-    if (_isLoginTransportFailure(error)) {
-      return 'Sem conexão com o servidor.';
-    }
+    if (_isAuthTransportFailure(error)) return _offlineCopy;
     return 'Não foi possível entrar agora.';
   }
-  if (_looksLikeSocketFailure(error)) {
-    return 'Sem conexão com o servidor.';
-  }
+  if (_looksLikeSocketFailure(error)) return _offlineCopy;
   return 'Não foi possível entrar agora.';
 }
 
-const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
-
-const _loginServidorIndisponivelCopy =
-    'Servidor indisponível, tente novamente';
-
 /// 400 de validação: detalhes de campo do contrato, senão `erro` do body.
-String _loginValidationCopy(DioException error, ApiError? api) {
+String _validationCopy(DioException error, ApiError? api) {
   final detalhes = api?.detalhes;
   if (detalhes != null && detalhes.isNotEmpty) {
     final fields = detalhes.entries
@@ -68,8 +63,10 @@ String _loginValidationCopy(DioException error, ApiError? api) {
       'Dados inválidos. Verifique e tente novamente.';
 }
 
-/// Timeout / connectionError / SocketException — sem response HTTP.
-bool _isLoginTransportFailure(DioException error) {
+/// Timeout / connectionError / SocketException / Failed host lookup.
+bool _isAuthTransportFailure(DioException error) {
+  // Se chegou status HTTP, nunca é "sem conexão".
+  if (error.response?.statusCode != null) return false;
   switch (error.type) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
@@ -77,7 +74,8 @@ bool _isLoginTransportFailure(DioException error) {
     case DioExceptionType.connectionError:
       return true;
     case DioExceptionType.unknown:
-      return _looksLikeSocketFailure(error.error);
+      return _looksLikeSocketFailure(error.error) ||
+          _looksLikeHostLookupFailure(error);
     case DioExceptionType.badResponse:
     case DioExceptionType.cancel:
     case DioExceptionType.badCertificate:
@@ -93,12 +91,30 @@ bool _looksLikeSocketFailure(Object? error) {
       name.contains('SocketException');
 }
 
-/// Extrai `message` do body JSON do backend, quando existir.
+bool _looksLikeHostLookupFailure(DioException error) {
+  final haystack =
+      '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
+  return haystack.contains('failed host lookup') ||
+      haystack.contains('host lookup') ||
+      haystack.contains('name resolution') ||
+      haystack.contains('nodename nor servname');
+}
+
+String? _offlineIfTransport(Object error) {
+  if (error is DioException) {
+    if (_isAuthTransportFailure(error)) return _offlineCopy;
+    return null;
+  }
+  if (_looksLikeSocketFailure(error)) return _offlineCopy;
+  return null;
+}
+
+/// Extrai `erro` (contrato) do body JSON do backend, quando existir.
 String? _backendMessage(Object error) {
   if (error is! DioException) return null;
   final body = error.response?.data;
   if (body is Map) {
-    for (final key in ['message', 'erro', 'mensagem', 'error']) {
+    for (final key in ['erro', 'message', 'mensagem', 'error']) {
       final raw = body[key];
       if (raw is String) {
         final msg = raw.trim();
@@ -110,10 +126,6 @@ String? _backendMessage(Object error) {
     final raw = body.trim();
     if (raw.isNotEmpty) return _humanizeProxyTimeout(raw);
   }
-  final dioMessage = error.message?.trim();
-  if (dioMessage != null && dioMessage.isNotEmpty) {
-    return _humanizeProxyTimeout(dioMessage);
-  }
   return null;
 }
 
@@ -123,24 +135,25 @@ String _humanizeProxyTimeout(String raw) {
       lower.contains('application failed') ||
       lower.contains('gateway timeout') ||
       lower.contains('service unavailable')) {
-    return 'Servidor indisponível no momento. Tente de novo em instantes.';
+    return _unavailableCopy;
   }
   return raw;
 }
 
 /// Pedido de código para recuperar senha.
 String mapEsqueciSenhaError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      return _backendMessage(error) ?? _rateLimitCopy;
     }
     if (statusCode == 400) {
       return _backendMessage(error) ??
           'Não foi possível enviar o código. Confira o e-mail e o papel.';
     }
+    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
     final msg = _backendMessage(error);
     if (msg != null) return msg;
   }
@@ -149,9 +162,10 @@ String mapEsqueciSenhaError(Object error) {
 
 /// Validação do código de 6 dígitos no reset de senha.
 String mapResetCodigoError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 429) {
       return _backendMessage(error) ??
           'Muitas tentativas. Aguarde e peça um novo código.';
@@ -159,6 +173,7 @@ String mapResetCodigoError(Object error) {
     if (statusCode == 400) {
       return _backendMessage(error) ?? 'Código inválido ou expirado.';
     }
+    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
     final msg = _backendMessage(error);
     if (msg != null) return msg;
   }
@@ -167,17 +182,18 @@ String mapResetCodigoError(Object error) {
 
 /// Confirmação da nova senha após o OTP.
 String mapResetSenhaError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      return _backendMessage(error) ?? _rateLimitCopy;
     }
     if (statusCode == 400) {
       return _backendMessage(error) ??
           'Código ou senha recusados. Solicite um novo código se expirou.';
     }
+    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
     final msg = _backendMessage(error);
     if (msg != null) return msg;
   }
@@ -191,12 +207,12 @@ String mapDefinirSenhaError(Object error) {
   if (codigo != null && ApiErrorCodes.passwordChallenge.contains(codigo)) {
     return 'Senha provisória incorreta. Confira e tente de novo.';
   }
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode ?? api?.status;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      return _backendMessage(error) ?? _rateLimitCopy;
     }
     if (statusCode == 401) {
       return 'Senha provisória incorreta. Confira e tente de novo.';
@@ -205,6 +221,7 @@ String mapDefinirSenhaError(Object error) {
       return _backendMessage(error) ??
           'A nova senha precisa ter no mínimo 8 caracteres.';
     }
+    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
   }
   return 'Não foi possível definir a nova senha. Verifique os dados.';
 }
@@ -216,18 +233,21 @@ String mapRegisterError(Object error) {
   if (codigo != null && ApiErrorCodes.alreadyExists.contains(codigo)) {
     return 'Este e-mail já está em uso.';
   }
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
-    final statusCode = error.response?.statusCode;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
+    final statusCode = error.response?.statusCode ?? api?.status;
     if (statusCode == 409) return 'Este e-mail já está em uso.';
     if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
-      return 'Servidor indisponível no momento. Tente de novo em instantes.';
+      return _unavailableCopy;
     }
     if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      return _backendMessage(error) ?? _rateLimitCopy;
     }
     if (statusCode == 400) {
+      if (api?.detalhes.isNotEmpty == true) {
+        return _validationCopy(error, api);
+      }
       return _backendMessage(error) ??
           'Código inválido ou dados incompletos. Confira e tente de novo.';
     }
@@ -244,27 +264,39 @@ String mapRegisterAlunoError(Object error) {
   if (codigo != null && ApiErrorCodes.alreadyExists.contains(codigo)) {
     return 'Este e-mail já está em uso neste espaço.';
   }
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode ?? api?.status;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 409) {
       return _backendMessage(error) ?? 'Este convite já foi utilizado.';
     }
+    if (statusCode == 404) {
+      return _backendMessage(error) ?? 'Personal não encontrado.';
+    }
     if (statusCode == 400) {
+      if (api?.detalhes.isNotEmpty == true) {
+        return _validationCopy(error, api);
+      }
       return _backendMessage(error) ??
           'Convite inválido ou expirado. Peça um novo código ao seu personal.';
     }
+    if (statusCode == 429) {
+      return _backendMessage(error) ?? _rateLimitCopy;
+    }
+    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
   }
   return mapRegisterError(error);
 }
 
 /// Envio do código de verificação no cadastro.
 String mapSignupCodeError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
     if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
-      return 'Servidor indisponível no momento. Tente de novo em instantes.';
+      return _unavailableCopy;
     }
     if (statusCode == 429) {
       return _backendMessage(error) ??
@@ -285,15 +317,22 @@ String mapSignupCodeError(Object error) {
 /// Nunca inclui token, e-mail ou payload bruto do erro na mensagem exibida
 /// ao usuário — apenas o texto de erro do backend, quando presente.
 String mapGoogleSignInError(Object error, {required bool isAluno}) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 401) {
-      return isAluno
-          ? 'Este Google não está vinculado a um aluno.'
-          : 'Não foi possível validar sua conta Google.';
+      return _backendMessage(error) ??
+          (isAluno
+              ? 'Este Google não está vinculado a um aluno.'
+              : 'Não foi possível validar sua conta Google.');
     }
     if (statusCode == 403) {
-      return 'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+      return _backendMessage(error) ??
+          'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+    }
+    if (statusCode == 404) {
+      return _backendMessage(error) ?? 'Recurso não encontrado.';
     }
     if (statusCode == 503) {
       return 'Google ainda não está configurado neste ambiente. Use e-mail e senha por enquanto.';
@@ -302,12 +341,12 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
       return _backendMessage(error) ??
           'Dados inválidos no cadastro com Google. Tente de novo.';
     }
+    if (statusCode == 429) return _rateLimitCopy;
     if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
-      return _backendMessage(error) ??
-          'Servidor indisponível no momento. Tente de novo em instantes.';
+      return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+      return 'Não foi possível entrar com Google agora.';
     }
     final msg = _backendMessage(error);
     return msg != null && msg.isNotEmpty
@@ -349,16 +388,28 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
 }
 
 /// Mapeia erros do Sign in with Apple para mensagens em pt-BR.
+///
+/// Em 401 prioriza `erro` do JSON (audience inválida, token inválido, etc.).
 String mapAppleSignInError(Object error, {required bool isAluno}) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 401) {
-      return isAluno
-          ? 'Este Apple ID não está vinculado a um aluno.'
-          : 'Não foi possível validar sua conta Apple.';
+      return _backendMessage(error) ??
+          (isAluno
+              ? 'Este Apple ID não está vinculado a um aluno.'
+              : 'Não foi possível validar sua conta Apple.');
     }
     if (statusCode == 403) {
-      return 'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+      return _backendMessage(error) ??
+          'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+    }
+    if (statusCode == 404) {
+      return _backendMessage(error) ??
+          (isAluno
+              ? 'Personal não encontrado. Confira o link (?p=slug).'
+              : 'Recurso não encontrado.');
     }
     if (statusCode == 503) {
       return 'Entrar com Apple ainda não está ativo neste ambiente. Use e-mail e senha por enquanto.';
@@ -367,12 +418,12 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
       return _backendMessage(error) ??
           'A Apple não enviou e-mail. Tente de novo ou use e-mail e senha.';
     }
+    if (statusCode == 429) return _rateLimitCopy;
     if (statusCode == 502 || statusCode == 504) {
-      return _backendMessage(error) ??
-          'Servidor indisponível no momento. Tente de novo em instantes.';
+      return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+      return 'Não foi possível entrar com Apple agora.';
     }
     final msg = _backendMessage(error);
     return msg != null && msg.isNotEmpty
@@ -402,6 +453,8 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
 
 /// Erros da challenge MFA no login (TOTP / recovery).
 String mapMfaVerifyError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 401 || statusCode == 400) {
@@ -411,15 +464,12 @@ String mapMfaVerifyError(Object error) {
     if (statusCode == 410 || statusCode == 408) {
       return 'A verificação expirou. Entre de novo e digite o código.';
     }
-    if (statusCode == 429) {
-      return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
-    }
-    if (statusCode == 502 || statusCode == 504) {
-      return _backendMessage(error) ??
-          'Servidor indisponível no momento. Tente de novo em instantes.';
+    if (statusCode == 429) return _rateLimitCopy;
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+      return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+      return 'Não foi possível verificar o código MFA.';
     }
     return _backendMessage(error) ?? 'Erro $statusCode na verificação MFA.';
   }
@@ -431,6 +481,8 @@ String mapMfaVerifyError(Object error) {
 
 /// Erros de setup / disable MFA nas configurações do Personal.
 String mapMfaSetupError(Object error) {
+  final offline = _offlineIfTransport(error);
+  if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 400 || statusCode == 401) {
@@ -449,14 +501,12 @@ String mapMfaSetupError(Object error) {
       return 'MFA ainda não está disponível neste ambiente.';
     }
     if (statusCode == 502 || statusCode == 504) {
-      return _backendMessage(error) ??
-          'Servidor indisponível no momento. Tente de novo em instantes.';
+      return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      return _backendMessage(error) ?? 'Sem conexão com o servidor.';
+      return 'Não foi possível atualizar o MFA agora.';
     }
     return _backendMessage(error) ?? 'Erro $statusCode ao configurar MFA.';
   }
   return 'Não foi possível atualizar o MFA agora.';
 }
-
