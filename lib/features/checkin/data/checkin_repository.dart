@@ -266,6 +266,19 @@ class ExecucaoTreino {
         ).map(EvolucaoPerformance.fromJson).toList(),
   );
 
+  /// Item slim do BFF `historicoResumo` (sem séries/mídia/evoluções).
+  factory ExecucaoTreino.fromHistoricoResumoJson(Map<String, dynamic> j) {
+    return ExecucaoTreino(
+      id: checkinJsonInt(j['id']),
+      treinoId: checkinJsonIntOr(j['treinoId']),
+      treinoNome: checkinJsonStringOr(j['treinoNome'], 'Treino'),
+      status: checkinJsonStringOr(j['status'], 'PENDENTE'),
+      iniciadoEm: checkinJsonString(j['iniciadoEm']),
+      concluidoEm: checkinJsonString(j['concluidoEm']),
+      exercicios: const [],
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'treinoId': treinoId,

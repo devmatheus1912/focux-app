@@ -20,6 +20,11 @@ analyzer:
     # Part-file extensions on private State types legitimately call setState.
     invalid_use_of_protected_member: ignore
     library_private_types_in_public_api: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

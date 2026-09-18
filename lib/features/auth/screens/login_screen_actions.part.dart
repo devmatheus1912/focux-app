@@ -73,6 +73,10 @@ extension on _LoginScreenState {
         _trackLogin(success: true, method: 'password');
         final requiresChange =
             ref.read(authProvider.notifier).requiresPasswordChange;
+        if (!requiresChange) {
+          await _prefetchAlunoAfterLogin();
+          if (!mounted) return;
+        }
         context.go(
           requiresChange
               ? '/aluno/definir-senha'
@@ -168,6 +172,8 @@ extension on _LoginScreenState {
       if (!mounted) return;
       _trackLogin(success: true, method: 'google');
       if (_isAluno) {
+        await _prefetchAlunoAfterLogin();
+        if (!mounted) return;
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
         await _prefetchPersonalAfterLogin();
@@ -232,6 +238,8 @@ extension on _LoginScreenState {
       if (!mounted) return;
       _trackLogin(success: true, method: 'apple');
       if (_isAluno) {
+        await _prefetchAlunoAfterLogin();
+        if (!mounted) return;
         context.go(_postLoginRedirect(context, isAluno: true));
       } else {
         await _prefetchPersonalAfterLogin();
@@ -275,11 +283,22 @@ extension on _LoginScreenState {
     try {
       // `main.dart` já faz invalidateSessionUserCaches no flip authenticated.
       // Segundo bust aqui matava o cache e flashava "Algo saiu do ar".
-      await prefetchPersonalDashboardHome(ref);
+      await Future.wait([
+        prefetchPersonalDashboardHome(ref),
+        ref.read(perfilProvider.future),
+      ]);
       prefetchAlunosHome(ref);
-      await ref.read(perfilProvider.future);
     } catch (_) {
       // Prefetch best-effort — Home ainda é o destino.
     }
+  }
+
+  Future<void> _prefetchAlunoAfterLogin() async {
+    try {
+      await Future.wait([
+        prefetchAlunoDashboardHome(ref),
+        ref.read(perfilProvider.future),
+      ]);
+    } catch (_) {}
   }
 }

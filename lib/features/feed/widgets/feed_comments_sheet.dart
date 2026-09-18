@@ -5,6 +5,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../data/feed_repository.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
@@ -179,7 +180,12 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                 ),
                                 foregroundColor: primary,
                                 backgroundImage:
-                                    hasFoto ? NetworkImage(fotoUrl) : null,
+                                    hasFoto
+                                        ? fxCachedNetworkImageProvider(
+                                          fotoUrl,
+                                          maxWidth: 96,
+                                        )
+                                        : null,
                                 child:
                                     hasFoto
                                         ? null

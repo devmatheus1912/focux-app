@@ -14,6 +14,7 @@ void invalidateSessionUserCaches(WidgetRef ref) {
   invalidateAlunosCaches(ref);
   invalidateAgendaCaches(ref);
   ref.invalidate(dashboardHomeProvider);
+  ref.invalidate(alunoDashboardHomeProvider);
   ref.invalidate(dashboardProvider);
   ref.invalidate(commandCenterProvider);
   ref.invalidate(perfilProvider);

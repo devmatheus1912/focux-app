@@ -4,10 +4,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(dashboardHomeProvider);
-    final coachPending = ref.watch(coachHomeProvider).maybeWhen(
-      data: (home) => home.pending,
-      orElse: () => 0,
-    );
+    final coachPendingSelect = ref.watch(personalHomeCoachPendentesSelectProvider);
+    final chatUnreadSelect = ref.watch(personalHomeChatUnreadSelectProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final chromeOnDark = themeDark;
@@ -35,6 +33,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (home) {
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
+                final coachPending =
+                    home.pulse?.coachPendentes ?? coachPendingSelect;
 
                 if (_homeFetchedAt == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -212,7 +212,8 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             prioritiesSheetActions: prioritiesSheetActions,
                             showPrioritiesLink: showPrioritiesLink,
                             commandPanelKey: _commandPanelKey,
-                            mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
+                            mensagensNaoLidas:
+                                home.pulse?.mensagensNaoLidas ?? chatUnreadSelect,
                             commandFade: _commandFade,
                             kpiFade: _kpiFade,
                             isCommandPreparing: false,
