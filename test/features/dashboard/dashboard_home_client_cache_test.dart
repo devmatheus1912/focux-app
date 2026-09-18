@@ -7,7 +7,7 @@ import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 void main() {
   setUp(DashboardHomeClientCache.clear);
 
-  DashboardHomeBundle _bundle() => DashboardHomeBundle(
+  DashboardHomeBundle sampleBundle() => DashboardHomeBundle(
     personal: DashboardData(
       totalAlunos: 1,
       alunosAtivos: 1,
@@ -36,7 +36,7 @@ void main() {
   );
 
   test('TTL 90s alinhado ao BE dashboard-home', () {
-    final bundle = _bundle();
+    final bundle = sampleBundle();
     final t0 = DateTime(2026, 8, 16, 12);
     DashboardHomeClientCache.put(bundle, now: t0);
     expect(
@@ -51,7 +51,7 @@ void main() {
 
   test('SWR: stale até 5min + claimRefresh single-flight', () {
     final t0 = DateTime(2026, 9, 18, 12);
-    DashboardHomeClientCache.put(_bundle(), now: t0);
+    DashboardHomeClientCache.put(sampleBundle(), now: t0);
     expect(
       DashboardHomeClientCache.getEvenIfStale(
         now: t0.add(const Duration(minutes: 2)),
