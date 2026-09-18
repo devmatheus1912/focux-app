@@ -135,7 +135,6 @@ class _FeedbackExercicioPickerSheetState
   final _searchCtrl = TextEditingController();
   Timer? _debounce;
   var _query = '';
-  var _page = 0;
   var _hasNext = false;
   var _loading = true;
   var _loadingMore = false;
@@ -170,7 +169,6 @@ class _FeedbackExercicioPickerSheetState
       setState(() {
         _loading = true;
         _error = null;
-        _page = 0;
         _items.clear();
       });
     } else {
@@ -194,7 +192,6 @@ class _FeedbackExercicioPickerSheetState
           ..clear()
           ..addAll(filtered.map((e) => (id: e.id, nome: e.nome)));
         _hasNext = false;
-        _page = 1;
         _loading = false;
         _loadingMore = false;
       });
