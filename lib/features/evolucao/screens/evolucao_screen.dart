@@ -28,6 +28,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -441,6 +442,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       }
       EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
+      await invalidateAluno360Providers(ref, widget.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Medida adicionada!');
     } catch (e) {

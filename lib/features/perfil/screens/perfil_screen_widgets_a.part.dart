@@ -141,6 +141,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                             nome: perfil.nome,
                             logoUrl: perfil.logoUrl,
                             primaryColor: primaryColor,
+                            profileScore: profileScore,
                             onTap: onPickPhoto,
                             loading: uploadingPhoto,
                             semanticsLabel:
