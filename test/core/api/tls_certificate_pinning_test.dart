@@ -57,6 +57,9 @@ void main() {
     // Nunca fechar adapter anterior — Client is closed no Apple.
     expect(RegExp(r'\.close\s*\(').hasMatch(pool), isFalse);
     expect(pool, contains('kHttpPoolResumeRecycleMinAway'));
+    // Pins vazios: apply no-op → ainda troca o adapter (Bugbot #106).
+    expect(pool, contains('identical(dio.httpClientAdapter, before)'));
+    expect(pool, contains('IOHttpClientAdapter('));
     expect(api, contains('newDetachedAuthDio'));
     expect(api, isNot(contains('recycleHttpConnectionPool(_dio);\n            options')));
     expect(repo, contains('_authPost'));
