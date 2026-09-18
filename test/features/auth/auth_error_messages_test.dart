@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/auth/utils/auth_error_messages.dart';
 
@@ -325,6 +326,41 @@ void main() {
         isAluno: true,
       ),
       contains('?p=slug'),
+    );
+  });
+
+  test('mapAppleSignInError expõe PlatformException nativa em vez de genérico', () {
+    expect(
+      mapAppleSignInError(
+        PlatformException(
+          code: 'apple_sign_in_failed',
+          message: 'The operation couldn’t be completed.',
+        ),
+        isAluno: false,
+      ),
+      contains('apple_sign_in_failed'),
+    );
+    expect(
+      mapAppleSignInError(
+        PlatformException(code: 'apple_sign_in_failed'),
+        isAluno: false,
+      ),
+      contains('Bundle ID'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 401,
+            data: {'erro': 'Nao foi possivel validar o token Apple.'},
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: false,
+      ),
+      'Nao foi possivel validar o token Apple.',
     );
   });
 
