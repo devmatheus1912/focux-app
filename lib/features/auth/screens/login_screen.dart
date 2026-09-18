@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
-import '../../../core/auth/session_cache_evictor.dart';
 import '../../../core/config/env.dart';
 import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/brand_palette.dart';
