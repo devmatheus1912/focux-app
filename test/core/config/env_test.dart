@@ -22,7 +22,8 @@ void main() {
     expect(Env.isProd, isTrue);
   });
 
-  test('apiCertPins inclui leaf pins de Railway e api.focuxpersonal.com', () {
+  test('apiCertPins inclui leaf pins em host de produção default', () {
+    expect(Env.targetsKnownProdApi, isTrue);
     expect(Env.apiCertPins.length, greaterThanOrEqualTo(2));
     expect(
       Env.apiCertPins.any((p) => p.contains('56ZylJhguSmnkPgt0hUNGj')),

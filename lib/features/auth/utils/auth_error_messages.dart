@@ -81,7 +81,8 @@ bool _isAuthTransportFailure(DioException error) {
       return true;
     case DioExceptionType.unknown:
       return _looksLikeSocketFailure(error.error) ||
-          _looksLikeHostLookupFailure(error);
+          _looksLikeHostLookupFailure(error) ||
+          _looksLikeHandshakeTransportFailure(error);
     case DioExceptionType.badResponse:
     case DioExceptionType.cancel:
     case DioExceptionType.badCertificate:
@@ -91,25 +92,29 @@ bool _isAuthTransportFailure(DioException error) {
 
 bool _isTlsOrPinFailure(Object error) {
   if (error is DioException) {
+    // badCertificate = validateCertificate / pin rejeitado.
     if (error.type == DioExceptionType.badCertificate) return true;
     final haystack =
         '${error.message ?? ''} ${error.error ?? ''} '
                 '${error.error?.runtimeType ?? ''}'
             .toLowerCase();
+    // Só mismatch de pin / verify — NÃO HandshakeException genérico
+    // (rede instável / captive portal).
     if (haystack.contains('certificate pin') ||
         haystack.contains('pin mismatch') ||
         haystack.contains('certificate_verify_failed') ||
-        haystack.contains('handshakeexception') ||
-        haystack.contains('tlsexception') ||
         haystack.contains('bad certificate')) {
+      return true;
+    }
+    if (haystack.contains('tlsexception') && haystack.contains('pin')) {
       return true;
     }
     return false;
   }
   final name = error.runtimeType.toString();
-  return name.contains('TlsException') ||
-      name.contains('HandshakeException') ||
-      name.contains('Certificate');
+  final msg = error.toString().toLowerCase();
+  if (name.contains('TlsException') && msg.contains('pin')) return true;
+  return false;
 }
 
 String? _tlsFailureCopy(Object error) {
@@ -132,6 +137,16 @@ bool _looksLikeHostLookupFailure(DioException error) {
       haystack.contains('host lookup') ||
       haystack.contains('name resolution') ||
       haystack.contains('nodename nor servname');
+}
+
+bool _looksLikeHandshakeTransportFailure(DioException error) {
+  final haystack =
+      '${error.message ?? ''} ${error.error ?? ''} '
+              '${error.error?.runtimeType ?? ''}'
+          .toLowerCase();
+  // Handshake genérico = transporte, não “atualize o app”.
+  return haystack.contains('handshakeexception') ||
+      (haystack.contains('handshake') && !haystack.contains('pin'));
 }
 
 String? _offlineIfTransport(Object error) {
