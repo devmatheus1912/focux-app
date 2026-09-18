@@ -124,8 +124,14 @@ class TlsCertificatePinning {
         return SecureSocket.startConnect(host, port);
       }
       // Connect-time pin: rejeita leaf antes de qualquer byte HTTP.
+      // Cancel durante o handshake marca [cancelled] — sock ainda null.
+      var cancelled = false;
       SecureSocket? sock;
       final Future<Socket> future = SecureSocket.connect(host, port).then((s) {
+        if (cancelled) {
+          s.destroy();
+          throw const SocketException('Connection cancelled');
+        }
         sock = s;
         if (!matches(s.peerCertificate, allowed)) {
           s.destroy();
@@ -135,6 +141,7 @@ class TlsCertificatePinning {
       });
       return Future<ConnectionTask<Socket>>.value(
         ConnectionTask.fromSocket(future, () {
+          cancelled = true;
           try {
             sock?.destroy();
           } catch (_) {}

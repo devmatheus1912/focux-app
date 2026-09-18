@@ -196,7 +196,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
   void _onAppResumed(Duration away) {
     if (!mounted) return;
     final client = ref.read(apiClientProvider);
-    client.resetAfterAppResume();
+    client.resetAfterAppResume(away);
     // Só revalida após pausa longa — evita stampede em switches rápidos.
     if (away < const Duration(minutes: 2)) return;
     if (ref.read(authProvider) != AuthStatus.authenticated) return;
