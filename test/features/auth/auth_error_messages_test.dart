@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -284,6 +286,38 @@ void main() {
         isAluno: false,
       ),
       'Sem conexão com o servidor.',
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          type: DioExceptionType.unknown,
+          error: OSError('Connection reset by peer', 54),
+        ),
+        isAluno: false,
+      ),
+      'Sem conexão com o servidor.',
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          type: DioExceptionType.badCertificate,
+        ),
+        isAluno: false,
+      ),
+      contains('conexão segura'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          type: DioExceptionType.unknown,
+          error: const TlsException('Certificate pin mismatch'),
+        ),
+        isAluno: false,
+      ),
+      contains('conexão segura'),
     );
     expect(
       mapLoginError(

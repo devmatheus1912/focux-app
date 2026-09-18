@@ -7,9 +7,9 @@ import 'tls_certificate_pinning.dart';
 
 /// Tunes the native HTTP client for many parallel API calls (dashboard + sync).
 ///
-/// Sem pins, [TlsCertificatePinning.createPinnedHttpClient] devolve um
-/// HttpClient normal — não pode pin-mismatch em sideload/release sem
-/// `API_CERT_PINS`.
+/// Usa [TlsCertificatePinning.baseHttpClient] (sem `connectionFactory`).
+/// Pinning do Dio fica em `validateCertificate` ([TlsCertificatePinning.apply]).
+/// `createPinnedHttpClient` fica só para WebSocket / [HttpOverrides.global].
 HttpClient? _pooledClient;
 
 void configureHttpConnectionPool(Dio dio) {
@@ -18,7 +18,7 @@ void configureHttpConnectionPool(Dio dio) {
     return;
   }
   adapter.createHttpClient = () {
-    final client = TlsCertificatePinning.createPinnedHttpClient();
+    final client = TlsCertificatePinning.baseHttpClient();
     client.maxConnectionsPerHost = 8;
     client.idleTimeout = const Duration(seconds: 20);
     _pooledClient = client;
