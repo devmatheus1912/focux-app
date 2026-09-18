@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/tls_certificate_pinning.dart';
 
+// Contract: Dio path must not use connectionFactory (iOS Apple unknown).
+
 void main() {
   test('pinnedHosts inclui host da API de producao', () {
     final hosts = TlsCertificatePinning.pinnedHosts();
@@ -41,6 +43,21 @@ void main() {
     HttpOverrides.global = _PinnedHttpOverrides({'sha256/test'});
     addTearDown(() => HttpOverrides.global = null);
     expect(() => TlsCertificatePinning.baseHttpClient(), returnsNormally);
+  });
+
+  test('Dio apply/pool usam baseHttpClient + validateCertificate', () {
+    final pinning =
+        File('lib/core/api/tls_certificate_pinning.dart').readAsStringSync();
+    final pool =
+        File('lib/core/api/api_client_connection_pool_io.dart').readAsStringSync();
+    expect(pinning, contains('createHttpClient: baseHttpClient'));
+    expect(pinning, contains('validateCertificate'));
+    expect(pool, contains('baseHttpClient()'));
+    // Código ativo do pool não chama createPinnedHttpClient (só Dio validateCertificate).
+    expect(
+      RegExp(r'createPinnedHttpClient\s*\(').hasMatch(pool),
+      isFalse,
+    );
   });
 }
 

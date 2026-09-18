@@ -125,9 +125,18 @@ String? _tlsFailureCopy(Object error) {
 bool _looksLikeSocketFailure(Object? error) {
   if (error == null) return false;
   final name = error.runtimeType.toString();
-  return name == 'SocketException' ||
+  if (name == 'SocketException' ||
       name == 'HttpException' ||
-      name.contains('SocketException');
+      name == 'OSError' ||
+      name.contains('SocketException') ||
+      name.contains('OSError')) {
+    return true;
+  }
+  final msg = error.toString().toLowerCase();
+  return msg.contains('connection reset') ||
+      msg.contains('broken pipe') ||
+      msg.contains('software caused connection abort') ||
+      msg.contains('connection closed');
 }
 
 bool _looksLikeHostLookupFailure(DioException error) {
@@ -476,7 +485,12 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
       return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      // Sem HTTP status e sem transporte classificado: ainda assim exponha o tipo.
+      // Sem HTTP status e sem transporte classificado: exponha tipo + causa.
+      final detail = _safeDioUnknownDetail(error);
+      if (detail != null) {
+        return 'Falha ao falar com o servidor (Apple). '
+            'Tipo: ${error.type.name} ($detail). Tente de novo.';
+      }
       return 'Falha ao falar com o servidor (Apple). '
           'Tipo: ${error.type.name}. Tente de novo.';
     }
@@ -535,6 +549,29 @@ String? _safeApplePlatformDetail(PlatformException error) {
       lower.contains('eyj') ||
       raw.length > 180) {
     return null;
+  }
+  return raw;
+}
+
+/// Detalhe curto de DioException.unknown (sem token/PII) para a UI.
+String? _safeDioUnknownDetail(DioException error) {
+  final parts = <String>[
+    if (error.error != null) error.error.runtimeType.toString(),
+    if (error.error != null) error.error.toString(),
+    if (error.message != null) error.message!,
+  ];
+  final raw = parts
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .join(' — ');
+  if (raw.isEmpty) return null;
+  final lower = raw.toLowerCase();
+  if (lower.contains('identitytoken') ||
+      lower.contains('eyj') ||
+      lower.contains('bearer ') ||
+      raw.length > 160) {
+    final typeOnly = error.error?.runtimeType.toString();
+    return typeOnly == null || typeOnly.isEmpty ? null : typeOnly;
   }
   return raw;
 }

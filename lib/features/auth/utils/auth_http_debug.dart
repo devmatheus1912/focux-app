@@ -32,6 +32,9 @@ void logAuthHttpError(String tag, Object error, {String? path}) {
       'type=${error.type.name} '
       'path=${path ?? error.requestOptions.path} '
       'apiUrl=${Env.apiUrl} '
+      'errorType=${error.error?.runtimeType} '
+      'error=${error.error} '
+      'message=${error.message} '
       'body=${error.response?.data}',
     );
     return;

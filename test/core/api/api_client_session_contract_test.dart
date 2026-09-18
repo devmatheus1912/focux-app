@@ -16,6 +16,7 @@ void main() {
       matches(RegExp(r'!_isRefreshing\s*&&\s*_shouldInvalidateSession\(e\)')),
     );
     expect(apiClient, contains("!_isAuthPath(e.requestOptions.path)"));
+    expect(apiClient, contains('recycleHttpConnectionPool(_dio)'));
     expect(apiClient, contains('e.response?.statusCode == 401'));
     expect(apiClient, contains('status == 401'));
     expect(apiClient, contains('status == 403'));
