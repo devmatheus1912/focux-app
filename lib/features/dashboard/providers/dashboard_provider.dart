@@ -92,10 +92,6 @@ final alunoDashboardHomeProvider =
   return fresh;
 });
 
-final dashboardProvider = FutureProvider<DashboardData>((ref) async {
-  return (await ref.watch(dashboardHomeProvider.future)).personal;
-});
-
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
 });
@@ -105,24 +101,6 @@ final alunoHomeNotificacoesSelectProvider = Provider<int>((ref) {
   return ref.watch(
     alunoDashboardHomeProvider.select(
       (async) => async.valueOrNull?.notificacoesNaoLidas ?? 0,
-    ),
-  );
-});
-
-/// Fatia do BFF personal — coach pendentes do pulse.
-final personalHomeCoachPendentesSelectProvider = Provider<int>((ref) {
-  return ref.watch(
-    dashboardHomeProvider.select(
-      (async) => async.valueOrNull?.pulse?.coachPendentes ?? 0,
-    ),
-  );
-});
-
-/// Fatia do BFF personal — unread de chat do pulse.
-final personalHomeChatUnreadSelectProvider = Provider<int>((ref) {
-  return ref.watch(
-    dashboardHomeProvider.select(
-      (async) => async.valueOrNull?.pulse?.mensagensNaoLidas ?? 0,
     ),
   );
 });
