@@ -33,11 +33,13 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Apple/Google abrem sheet nativo: iOS suspende keep-alives.
-          // Recicla antes do POST de auth para não cair em DioException.unknown.
+          // Após Apple/Google sheet, keep-alives podem estar mortos.
+          // Não reciclar o pool aqui: fechar o HttpClient ainda cacheado no
+          // Dio 5.9 gera DioException.unknown no POST do identityToken.
+          // Desliga persistentConnection só em mutações /auth/.
           if (_isAuthPath(options.path) &&
               options.method.toUpperCase() != 'GET') {
-            recycleHttpConnectionPool(_dio);
+            options.persistentConnection = false;
           }
           final token = await SecureStorage.getToken();
           if (token != null) {

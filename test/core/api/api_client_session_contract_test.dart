@@ -16,6 +16,9 @@ void main() {
       matches(RegExp(r'!_isRefreshing\s*&&\s*_shouldInvalidateSession\(e\)')),
     );
     expect(apiClient, contains("!_isAuthPath(e.requestOptions.path)"));
+    expect(apiClient, contains('persistentConnection = false'));
+    expect(apiClient, contains('Não reciclar o pool aqui'));
+    // Resume ainda recicla (trocando o adapter); onRequest não fecha o client.
     expect(apiClient, contains('recycleHttpConnectionPool(_dio)'));
     expect(apiClient, contains('e.response?.statusCode == 401'));
     expect(apiClient, contains('status == 401'));

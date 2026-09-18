@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 
@@ -7,31 +5,32 @@ import 'tls_certificate_pinning.dart';
 
 /// Tunes the native HTTP client for many parallel API calls (dashboard + sync).
 ///
-/// Usa [TlsCertificatePinning.baseHttpClient] (sem `connectionFactory`).
-/// Pinning do Dio fica em `validateCertificate` ([TlsCertificatePinning.apply]).
-/// `createPinnedHttpClient` fica só para WebSocket / [HttpOverrides.global].
-HttpClient? _pooledClient;
-
+/// Pin connect-time via [TlsCertificatePinning.createPinnedHttpClient].
+/// [recycleHttpConnectionPool] **substitui** o [IOHttpClientAdapter] inteiro —
+/// só fechar o HttpClient deixa o `_cachedHttpClient` privado do Dio 5.9
+/// apontando para um client já fechado (→ `DioException.unknown`).
 void configureHttpConnectionPool(Dio dio) {
   final adapter = dio.httpClientAdapter;
   if (adapter is! IOHttpClientAdapter) {
     return;
   }
   adapter.createHttpClient = () {
-    final client = TlsCertificatePinning.baseHttpClient();
+    final client = TlsCertificatePinning.createPinnedHttpClient();
     client.maxConnectionsPerHost = 8;
     client.idleTimeout = const Duration(seconds: 20);
-    _pooledClient = client;
     return client;
   };
 }
 
-/// Fecha keep-alives mortos após longo background (OS suspende sockets).
+/// Após background / sheet nativo: troca o adapter para Dio criar HttpClient novo.
 void recycleHttpConnectionPool(Dio dio) {
-  final stale = _pooledClient;
-  _pooledClient = null;
-  try {
-    stale?.close(force: true);
-  } catch (_) {}
+  final previous = dio.httpClientAdapter;
+  // Novo IOHttpClientAdapter ⇒ Dio descarta `_cachedHttpClient` fechado.
+  TlsCertificatePinning.apply(dio);
   configureHttpConnectionPool(dio);
+  if (!identical(previous, dio.httpClientAdapter)) {
+    try {
+      previous.close(force: true);
+    } catch (_) {}
+  }
 }
