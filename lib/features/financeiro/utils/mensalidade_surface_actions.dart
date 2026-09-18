@@ -27,6 +27,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../chat/screens/chat_inbox_screen.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
@@ -337,8 +338,19 @@ Future<void> cobrarMensalidadeViaChat({
   );
   try {
     final msg = await mensalidadeRepo(ref).cobrarViaChat(m.id);
+    ref.invalidate(chatInboxHomeProvider);
     if (context.mounted) {
       FeedbackHelper.showSuccess(context, msg);
+      final open = await showFxConfirmSheet(
+        context,
+        title: 'Abrir chat?',
+        message: 'A cobrança foi enviada. Quer ver a conversa agora?',
+        confirmLabel: 'Abrir chat',
+        cancelLabel: 'Depois',
+      );
+      if (open && context.mounted) {
+        context.push('/alunos/${m.alunoId}/chat', extra: m.alunoNome);
+      }
     }
   } catch (e) {
     if (context.mounted) {

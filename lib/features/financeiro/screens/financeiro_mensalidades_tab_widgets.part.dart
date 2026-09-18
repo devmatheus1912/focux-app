@@ -12,11 +12,7 @@ extension FinanceiroMensalidadesTabWidgets on _FinanceiroMensalidadesTabState {
     return FxEmptyState(
       icon: 'dollar-sign',
       title: 'Nenhuma mensalidade',
-      subtitle: 'Lance a primeira cobrança para um aluno.',
-      action: FxEmptyAction(
-        label: 'Nova mensalidade',
-        onTap: _abrirFormularioNovaMensalidade,
-      ),
+      subtitle: 'Lance a primeira cobrança pelo botão abaixo.',
     );
   }
 }

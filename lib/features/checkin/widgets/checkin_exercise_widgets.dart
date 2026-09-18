@@ -202,51 +202,53 @@ class CheckinSerieCard extends StatelessWidget {
               const SizedBox(height: TokensStrip.s1),
               TextButton(
                 onPressed: () async {
+                  final items = <FxInsetPickerSheetItem<String>>[
+                    if (onAjustar != null)
+                      const FxInsetPickerSheetItem(
+                        value: 'ajustar',
+                        label: 'Ajustar',
+                        subtitle: 'Carga, reps e RPE',
+                        icon: Icons.tune_rounded,
+                      ),
+                    if (onConfirmarRestante != null)
+                      FxInsetPickerSheetItem(
+                        value: 'confirmar',
+                        label: checkinConfirmarRestanteLabel(
+                          feitas: ee.seriesFeitas,
+                          total: ee.series,
+                        ),
+                        subtitle: 'Marca o que falta de uma vez',
+                        icon: Icons.done_all_rounded,
+                      ),
+                    if (onDesfazer != null)
+                      FxInsetPickerSheetItem(
+                        value: 'desfazer',
+                        label: checkinDesfazerLabel(),
+                        subtitle: 'Remove a última série',
+                        icon: Icons.undo_rounded,
+                      ),
+                    if (onOpenCoach != null)
+                      const FxInsetPickerSheetItem(
+                        value: 'postura',
+                        label: 'Postura',
+                        subtitle: 'Dicas de execução',
+                        icon: Icons.accessibility_new_rounded,
+                      ),
+                    if (onOpenDemo != null && !hasDemo)
+                      const FxInsetPickerSheetItem(
+                        value: 'demo',
+                        label: 'Demonstração',
+                        subtitle: 'Vídeo do exercício',
+                        icon: Icons.play_circle_outline_rounded,
+                      ),
+                  ];
+                  if (items.isEmpty) return;
                   final picked = await showFxInsetPickerSheet<String>(
                     context,
                     title: 'Mais na série',
                     subtitle: 'Ajustes e ações secundárias',
                     headerIcon: Icons.more_horiz_rounded,
-                    items: [
-                      if (onAjustar != null)
-                        const FxInsetPickerSheetItem(
-                          value: 'ajustar',
-                          label: 'Ajustar',
-                          subtitle: 'Carga, reps e RPE',
-                          icon: Icons.tune_rounded,
-                        ),
-                      if (onConfirmarRestante != null)
-                        FxInsetPickerSheetItem(
-                          value: 'confirmar',
-                          label: checkinConfirmarRestanteLabel(
-                            feitas: ee.seriesFeitas,
-                            total: ee.series,
-                          ),
-                          subtitle: 'Marca o que falta de uma vez',
-                          icon: Icons.done_all_rounded,
-                        ),
-                      if (onDesfazer != null)
-                        FxInsetPickerSheetItem(
-                          value: 'desfazer',
-                          label: checkinDesfazerLabel(),
-                          subtitle: 'Remove a última série',
-                          icon: Icons.undo_rounded,
-                        ),
-                      if (onOpenCoach != null)
-                        const FxInsetPickerSheetItem(
-                          value: 'postura',
-                          label: 'Postura',
-                          subtitle: 'Dicas de execução',
-                          icon: Icons.accessibility_new_rounded,
-                        ),
-                      if (onOpenDemo != null && !hasDemo)
-                        const FxInsetPickerSheetItem(
-                          value: 'demo',
-                          label: 'Demonstração',
-                          subtitle: 'Vídeo do exercício',
-                          icon: Icons.play_circle_outline_rounded,
-                        ),
-                    ],
+                    items: items,
                   );
                   switch (picked) {
                     case 'ajustar':

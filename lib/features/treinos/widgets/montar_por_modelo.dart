@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
 import '../data/workout_builder_preset.dart';
@@ -23,65 +22,79 @@ Future<void> openMontarPorModelo({
   final completed = await Navigator.push<bool>(
     context,
     MaterialPageRoute(
-      builder: (routeContext) => FxShellScaffold(
-            // Sem segundo mesh: detalhe do treino já tem CinematicMesh.
-            useMesh: false,
-            appBar: FxShellAppBar(
-              title: 'Montar por modelo',
-              subtitle: 'Pela frequência do aluno',
-              onBack: () => Navigator.pop(routeContext, false),
+      builder: (routeContext) {
+        final scheme = Theme.of(routeContext).colorScheme;
+        return Scaffold(
+          backgroundColor: scheme.surface,
+          appBar: AppBar(
+            title: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Montar por modelo'),
+                Text(
+                  'Pela frequência do aluno',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-            body: TemplateSplitPicker(
-              alreadyInTreinoIds: alreadyInTreinoIds,
-              onCompleted: () {
-                if (routeContext.mounted) {
-                  Navigator.pop(routeContext, true);
-                }
-              },
-              onAdicionar: (Exercicio exercicio) async {
-                final exId = exercicio.id;
-                if (exId <= 0) {
-                  if (routeContext.mounted) {
-                    FeedbackHelper.showError(
-                      routeContext,
-                      'Exercício inválido. Escolha outro.',
-                    );
-                  }
-                  return;
-                }
-                try {
-                  await ref
-                      .read(treinoRepositoryProvider)
-                      .adicionarExercicio(
-                        treinoId,
-                        exId,
-                        series: preset.series,
-                        repeticoes: preset.repeticoes,
-                        descanso: preset.descansoSegundos,
-                        observacoes: preset.observacoes,
-                        tipoSerie: preset.tipoSerie,
-                      );
-                  await RecentExerciseUsageStore.recordUsage(exId);
-                  AnalyticsService.instance.track(
-                    'template_uso',
-                    props: {'treinoId': treinoId, 'exId': exId},
-                  );
-                  if (routeContext.mounted) {
-                    HapticFeedback.mediumImpact();
-                    FeedbackHelper.showSuccess(
-                      routeContext,
-                      '${exercicio.nomeDisplay} adicionado.',
-                    );
-                  }
-                } catch (e) {
-                  if (routeContext.mounted) {
-                    FeedbackHelper.showError(routeContext, friendlyError(e));
-                  }
-                  rethrow;
-                }
-              },
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(routeContext, false),
             ),
           ),
+          body: TemplateSplitPicker(
+            alreadyInTreinoIds: alreadyInTreinoIds,
+            onCompleted: () {
+              if (routeContext.mounted) {
+                Navigator.pop(routeContext, true);
+              }
+            },
+            onAdicionar: (Exercicio exercicio) async {
+              final exId = exercicio.id;
+              if (exId <= 0) {
+                if (routeContext.mounted) {
+                  FeedbackHelper.showError(
+                    routeContext,
+                    'Exercício inválido. Escolha outro.',
+                  );
+                }
+                return;
+              }
+              try {
+                await ref
+                    .read(treinoRepositoryProvider)
+                    .adicionarExercicio(
+                      treinoId,
+                      exId,
+                      series: preset.series,
+                      repeticoes: preset.repeticoes,
+                      descanso: preset.descansoSegundos,
+                      observacoes: preset.observacoes,
+                      tipoSerie: preset.tipoSerie,
+                    );
+                await RecentExerciseUsageStore.recordUsage(exId);
+                AnalyticsService.instance.track(
+                  'template_uso',
+                  props: {'treinoId': treinoId, 'exId': exId},
+                );
+                if (routeContext.mounted) {
+                  HapticFeedback.mediumImpact();
+                  FeedbackHelper.showSuccess(
+                    routeContext,
+                    '${exercicio.nomeDisplay} adicionado.',
+                  );
+                }
+              } catch (e) {
+                if (routeContext.mounted) {
+                  FeedbackHelper.showError(routeContext, friendlyError(e));
+                }
+                rethrow;
+              }
+            },
+          ),
+        );
+      },
     ),
   );
   ref.invalidate(treinoProvider(treinoId));
