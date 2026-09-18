@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/tls_certificate_pinning.dart';
 
-// Contract: Dio path must not use connectionFactory (iOS Apple unknown).
-
 void main() {
   test('pinnedHosts inclui host da API de producao', () {
     final hosts = TlsCertificatePinning.pinnedHosts();
@@ -45,19 +43,18 @@ void main() {
     expect(() => TlsCertificatePinning.baseHttpClient(), returnsNormally);
   });
 
-  test('Dio apply/pool usam baseHttpClient + validateCertificate', () {
+  test('Dio apply/pool usam createPinnedHttpClient (connect-time pin)', () {
     final pinning =
         File('lib/core/api/tls_certificate_pinning.dart').readAsStringSync();
     final pool =
         File('lib/core/api/api_client_connection_pool_io.dart').readAsStringSync();
-    expect(pinning, contains('createHttpClient: baseHttpClient'));
+    expect(pinning, contains('createPinnedHttpClient(pins)'));
     expect(pinning, contains('validateCertificate'));
-    expect(pool, contains('baseHttpClient()'));
-    // Código ativo do pool não chama createPinnedHttpClient (só Dio validateCertificate).
-    expect(
-      RegExp(r'createPinnedHttpClient\s*\(').hasMatch(pool),
-      isFalse,
-    );
+    expect(pinning, contains('request.close()'));
+    expect(pool, contains('createPinnedHttpClient()'));
+    // recycle troca o adapter — não só fecha o client cacheado do Dio.
+    expect(pool, contains('TlsCertificatePinning.apply(dio)'));
+    expect(pool, contains('previous.close(force: true)'));
   });
 }
 

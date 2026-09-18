@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,11 +7,15 @@ import 'package:focux_app/core/api/api_client_connection_pool.dart';
 import 'package:focux_app/core/api/tls_certificate_pinning.dart';
 import 'package:focux_app/core/config/env.dart';
 
-/// Regressão ao vivo: Dio + validateCertificate + pool (caminho ApiClient)
-/// deve chegar no backend — pin errado via connectionFactory não é mais o
-/// caminho Dio (isso quebrava Apple com Tipo: unknown no iOS).
+/// Live against prod. Opt-in only — default CI must not depend on network.
+///
+///   ENABLE_LIVE_API_TESTS=1 flutter test test/features/auth/apple_auth_live_diagnose_test.dart
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  final liveEnabled =
+      Platform.environment['ENABLE_LIVE_API_TESTS'] == '1' ||
+      Platform.environment['ENABLE_LIVE_API_TESTS'] == 'true';
 
   test('ApiClient-like Dio reaches Apple 401 with live pins', () async {
     // ignore: avoid_print
@@ -29,8 +35,7 @@ void main() {
     TlsCertificatePinning.apply(dio);
     configureHttpConnectionPool(dio);
 
-    final adapter = dio.httpClientAdapter;
-    expect(adapter, isA<IOHttpClientAdapter>());
+    expect(dio.httpClientAdapter, isA<IOHttpClientAdapter>());
 
     try {
       await dio.post(
@@ -50,9 +55,10 @@ void main() {
       expect(e.response?.statusCode, 401);
       expect(e.type, DioExceptionType.badResponse);
     }
-  }, timeout: const Timeout(Duration(seconds: 45)));
+  }, skip: liveEnabled ? false : 'Set ENABLE_LIVE_API_TESTS=1', timeout: const Timeout(Duration(seconds: 45)));
 
-  test('wrong pin via validateCertificate → badCertificate', () async {
+  test('wrong pin via connectionFactory → unknown + pin', () async {
+    final wrong = {'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='};
     final dio = Dio(
       BaseOptions(
         baseUrl: Env.apiUrl,
@@ -61,11 +67,30 @@ void main() {
         headers: {'Content-Type': 'application/json'},
       ),
     );
-    final wrong = {'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='};
     dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: TlsCertificatePinning.baseHttpClient,
-      validateCertificate: (cert, host, port) {
-        return TlsCertificatePinning.matches(cert, wrong);
+      createHttpClient: () {
+        final client = TlsCertificatePinning.baseHttpClient();
+        client.connectionFactory = (uri, proxyHost, proxyPort) {
+          final host = uri.host;
+          final port = uri.hasPort ? uri.port : 443;
+          SecureSocket? sock;
+          final future = SecureSocket.connect(host, port).then((s) {
+            sock = s;
+            if (!TlsCertificatePinning.matches(s.peerCertificate, wrong)) {
+              s.destroy();
+              throw const TlsException('Certificate pin mismatch');
+            }
+            return s;
+          });
+          return Future<ConnectionTask<Socket>>.value(
+            ConnectionTask.fromSocket(future, () {
+              try {
+                sock?.destroy();
+              } catch (_) {}
+            }),
+          );
+        };
+        return client;
       },
     );
     try {
@@ -78,7 +103,8 @@ void main() {
       // ignore: avoid_print
       print('WRONG_PIN type=${e.type} status=${e.response?.statusCode}');
       expect(e.response?.statusCode, isNull);
-      expect(e.type, DioExceptionType.badCertificate);
+      expect(e.type, DioExceptionType.unknown);
+      expect('${e.error}'.toLowerCase(), contains('pin'));
     }
-  }, timeout: const Timeout(Duration(seconds: 30)));
+  }, skip: liveEnabled ? false : 'Set ENABLE_LIVE_API_TESTS=1', timeout: const Timeout(Duration(seconds: 30)));
 }
