@@ -11,12 +11,32 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>(
 );
 
 /// Single BFF call for personal Home (personal + command center + financeiro).
-/// Respeita TTL client 90s (= cache BE `dashboard-home`); `invalidate` limpa.
+/// Respeita TTL client 90s (= cache BE `dashboard-home`) + SWR; `invalidate` limpa.
 final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>((ref) async {
   // Não limpar cache no dispose — invalidate pós-login/recarrega descartava o
   // prefetch e pintava "Algo saiu do ar". Limpeza só no logout/tenant switch.
-  final cached = DashboardHomeClientCache.getIfFresh();
-  if (cached != null) return cached;
+  final freshHit = DashboardHomeClientCache.getIfFresh();
+  if (freshHit != null) return freshHit;
+
+  final staleHit = DashboardHomeClientCache.getEvenIfStale();
+  if (staleHit != null && DashboardHomeClientCache.claimRefresh()) {
+    Future<void>(() async {
+      try {
+        final fresh = await ref.read(dashboardRepositoryProvider).getHome();
+        if (fresh != null) {
+          DashboardHomeClientCache.put(fresh);
+          ref.invalidateSelf();
+        } else {
+          DashboardHomeClientCache.put(staleHit);
+        }
+      } catch (_) {
+        // Mantém stale.
+      } finally {
+        DashboardHomeClientCache.releaseRefresh();
+      }
+    });
+    return staleHit;
+  }
 
   final fresh = await ref.read(dashboardRepositoryProvider).getHome();
   if (fresh == null) {
@@ -78,4 +98,31 @@ final dashboardProvider = FutureProvider<DashboardData>((ref) async {
 
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
+});
+
+/// Fatia do BFF aluno — badge de notificações sem rebuild do hub inteiro.
+final alunoHomeNotificacoesSelectProvider = Provider<int>((ref) {
+  return ref.watch(
+    alunoDashboardHomeProvider.select(
+      (async) => async.valueOrNull?.notificacoesNaoLidas ?? 0,
+    ),
+  );
+});
+
+/// Fatia do BFF personal — coach pendentes do pulse.
+final personalHomeCoachPendentesSelectProvider = Provider<int>((ref) {
+  return ref.watch(
+    dashboardHomeProvider.select(
+      (async) => async.valueOrNull?.pulse?.coachPendentes ?? 0,
+    ),
+  );
+});
+
+/// Fatia do BFF personal — unread de chat do pulse.
+final personalHomeChatUnreadSelectProvider = Provider<int>((ref) {
+  return ref.watch(
+    dashboardHomeProvider.select(
+      (async) => async.valueOrNull?.pulse?.mensagensNaoLidas ?? 0,
+    ),
+  );
 });

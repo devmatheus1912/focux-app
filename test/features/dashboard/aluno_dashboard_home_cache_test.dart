@@ -86,6 +86,40 @@ void main() {
     expect(bundle.historico.first.id, 7);
   });
 
+  test('fallback historico dump: slim + cap 12', () {
+    final items = List.generate(
+      20,
+      (i) => {
+        'id': i + 1,
+        'treinoId': i + 1,
+        'treinoNome': 'T$i',
+        'status': 'CONCLUIDO',
+        'exercicios': [
+          {
+            'id': 1,
+            'treinoExercicioId': 1,
+            'exercicioNome': 'Squat',
+            'seriesFeitas': 3,
+            'concluido': true,
+            'dor': false,
+            'seriesDetalhes': [],
+            'seriesAnteriores': [],
+          },
+        ],
+      },
+    );
+    final bundle = AlunoDashboardHomeBundle.fromJson({
+      'aluno': {'id': 1, 'nome': 'A', 'email': 'a@t.com', 'status': 'ATIVO'},
+      'personalBrand': {},
+      'treinos': [],
+      'historico': items,
+      'medidas': [],
+      'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
+    });
+    expect(bundle.historico, hasLength(12));
+    expect(bundle.historico.every((e) => e.exercicios.isEmpty), isTrue);
+  });
+
   test('ExecucaoTreino.fromHistoricoResumoJson ignora mídia', () {
     final e = ExecucaoTreino.fromHistoricoResumoJson({
       'id': 1,

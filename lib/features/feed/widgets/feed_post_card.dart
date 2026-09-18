@@ -8,6 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/utils/safe_external_launch.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -148,11 +149,12 @@ class FeedPostCard extends StatelessWidget {
                     ? FeedVideoAttachmentTile(primary: primary, url: mUrl)
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        child: Image.network(
-                          mUrl,
+                        child: FxCachedNetworkImage(
+                          imageUrl: mUrl,
                           fit: BoxFit.cover,
                           height: 168,
                           width: double.infinity,
+                          memCacheHeight: 336,
                           errorBuilder: (_, __, ___) =>
                               FeedImagePlaceholder(primary: primary),
                         ),
@@ -252,7 +254,10 @@ class FeedPostAuthorHeader extends StatelessWidget {
         CircleAvatar(
           radius: 18,
           backgroundColor: primary.withValues(alpha: 0.14),
-          backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
+          backgroundImage:
+              hasAvatar
+                  ? fxCachedNetworkImageProvider(avatarUrl, maxWidth: 72)
+                  : null,
           child: hasAvatar
               ? null
               : Text(

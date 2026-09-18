@@ -362,9 +362,10 @@ class AlunoDashboardHomeBundle {
             .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
             .toList();
     List<ExecucaoTreino> parseHistorico(Map<String, dynamic> json) {
+      const historicoCap = 12;
       final resumo = json['historicoResumo'];
       if (resumo is List && resumo.isNotEmpty) {
-        return resumo
+        final list = resumo
             .whereType<Map>()
             .map(
               (e) => ExecucaoTreino.fromHistoricoResumoJson(
@@ -372,8 +373,26 @@ class AlunoDashboardHomeBundle {
               ),
             )
             .toList(growable: false);
+        if (list.length <= historicoCap) return list;
+        return list.sublist(0, historicoCap);
       }
-      return parseExec(json['historico']);
+      // API antiga: dump completo — slim + cap no client (Home não precisa séries).
+      final full = parseExec(json['historico']);
+      final slim = full
+          .take(historicoCap)
+          .map(
+            (e) => ExecucaoTreino(
+              id: e.id,
+              treinoId: e.treinoId,
+              treinoNome: e.treinoNome,
+              status: e.status,
+              iniciadoEm: e.iniciadoEm,
+              concluidoEm: e.concluidoEm,
+              exercicios: const [],
+            ),
+          )
+          .toList(growable: false);
+      return slim;
     }
     List<MedidaCorporal> parseMedidas(dynamic raw) {
       final list =

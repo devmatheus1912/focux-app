@@ -1,6 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+/// ImageProvider com cache em disco — para [CircleAvatar.backgroundImage].
+ImageProvider fxCachedNetworkImageProvider(String url, {int? maxWidth}) {
+  return CachedNetworkImageProvider(
+    url,
+    maxWidth: maxWidth,
+  );
+}
+
 /// Image.network com cache em disco (avatares / thumbs).
 class FxCachedNetworkImage extends StatelessWidget {
   const FxCachedNetworkImage({
