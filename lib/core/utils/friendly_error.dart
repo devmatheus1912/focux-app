@@ -40,28 +40,37 @@ String friendlyError(Object error, {String? fallback}) {
       case 422:
         return 'Dados incompletos ou inválidos.';
       case 429:
-        return 'Muitas tentativas. Aguarde um momento.';
+        return 'Muitas tentativas. Aguarde e tente de novo.';
       case 500:
         return 'Erro no servidor. Tente novamente em instantes.';
       case 502:
       case 503:
-        return _humanizeServerMessage(
-          error.message ?? 'Servidor temporariamente indisponível.',
-        );
+        return 'Servidor indisponível, tente novamente';
     }
 
-    // Network / timeout
-    switch (error.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        return 'Conexão lenta. Verifique sua internet.';
-      case DioExceptionType.connectionError:
-        return 'Sem conexão com o servidor.';
-      case DioExceptionType.cancel:
-        return 'Requisição cancelada.';
-      default:
-        break;
+    // Network / timeout — only when there was no HTTP status.
+    if (statusCode == null) {
+      switch (error.type) {
+        case DioExceptionType.connectionTimeout:
+        case DioExceptionType.sendTimeout:
+        case DioExceptionType.receiveTimeout:
+          return 'Conexão lenta. Verifique sua internet.';
+        case DioExceptionType.connectionError:
+          return 'Sem conexão com o servidor.';
+        case DioExceptionType.cancel:
+          return 'Requisição cancelada.';
+        case DioExceptionType.unknown:
+          final hay =
+              '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
+          if (hay.contains('socket') ||
+              hay.contains('failed host lookup') ||
+              hay.contains('host lookup')) {
+            return 'Sem conexão com o servidor.';
+          }
+          break;
+        default:
+          break;
+      }
     }
 
     return fb;

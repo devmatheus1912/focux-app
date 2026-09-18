@@ -22,6 +22,7 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../providers/auth_provider.dart';
 import '../data/auth_repository.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/auth_http_debug.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
