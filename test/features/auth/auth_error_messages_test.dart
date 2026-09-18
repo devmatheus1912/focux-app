@@ -304,6 +304,18 @@ void main() {
       ),
       contains('conexão segura'),
     );
+    // Handshake genérico = rede, não “atualize o app”.
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          type: DioExceptionType.connectionError,
+          error: Exception('HandshakeException: Connection terminated'),
+          message: 'The connection errored: HandshakeException',
+        ),
+      ),
+      'Sem conexão com o servidor.',
+    );
   });
 
   test('mapAppleSignInError exige personalSlug para aluno', () {
