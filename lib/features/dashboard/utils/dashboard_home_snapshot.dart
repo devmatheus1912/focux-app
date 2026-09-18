@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import '../../../core/money/fx_money.dart';
 import '../../alunos/data/aluno_repository.dart';
-import '../../checkin/data/checkin_repository.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../data/command_center_data.dart';
 import '../data/dashboard_repository.dart';
@@ -88,7 +87,6 @@ class DashboardHomeSnapshot {
     required DashboardHomeBundle home,
     required FinanceiroDashboard? finData,
     required List<Aluno>? alunos,
-    required List<ExecucaoTreino>? historicoCheckins,
     required CommandCenterData? commandCenter,
     required bool focusMode,
     required bool isCommandPreparing,
@@ -120,27 +118,10 @@ class DashboardHomeSnapshot {
             ? math.max(alunosEmRisco.length, bffRisco)
             : bffRisco;
 
-    final checkinsFromHistorico =
-        historicoCheckins == null
-            ? 0
-            : historicoCheckins.where((e) {
-              final concluded = DateTime.tryParse(e.concluidoEm ?? '');
-              if (concluded == null) return false;
-              final local = concluded.toLocal();
-              return local.year == clock.year &&
-                  local.month == clock.month &&
-                  local.day == clock.day;
-            }).length;
-    final checkinsHoje = home.pulse?.checkinsHoje ?? checkinsFromHistorico;
-    final fromPulse = dashboardCheckinsTrendFromPulse(
+    final checkinsHoje = home.pulse?.checkinsHoje ?? 0;
+    final checkinsTrend = dashboardCheckinsTrendFromPulse(
       home.pulse?.checkinsTrend,
     );
-    final checkinsTrend =
-        fromPulse.isNotEmpty
-            ? fromPulse
-            : historicoCheckins != null
-            ? dashboardCheckinsSparklineUltimos7Dias(historicoCheckins)
-            : const <double>[];
     final receitaTrend = dashboardReceitaSparklineMensal(
       finData?.evolucaoMensal ?? const [],
     );

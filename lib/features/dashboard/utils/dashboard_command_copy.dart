@@ -37,9 +37,6 @@ final RegExp _radarFocuxTitlePattern = RegExp(
   caseSensitive: false,
 );
 
-bool dashboardIsRadarFocuxTitle(String rawTitle) =>
-    _radarFocuxTitlePattern.hasMatch(rawTitle.trim());
-
 /// Nome do aluno para título do sheet (sem prefixo "Radar Focux").
 String? dashboardRadarStudentName(String rawTitle) {
   final match = _radarFocuxTitlePattern.firstMatch(rawTitle.trim());

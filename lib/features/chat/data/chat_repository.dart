@@ -212,10 +212,6 @@ class ChatRepository {
     return ChatPage.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<ChatInboxItem>> inbox() async {
-    return (await inboxPage()).items;
-  }
-
   Future<ChatInboxPage> inboxPage({
     int page = 0,
     int size = 50,
@@ -414,12 +410,6 @@ class ChatRepository {
     return r.data as Map<String, dynamic>;
   }
 
-  /// Get conversation state (pinned/archived/muted)
-  Future<Map<String, dynamic>> conversationState(int alunoId) async {
-    final r = await _dio.get('/api/chat/conversas/$alunoId/state');
-    return r.data as Map<String, dynamic>;
-  }
-
   Future<Pagina<ChatInboxItem>> inboxArchivedPage({
     int page = 0,
     int size = 50,
@@ -434,11 +424,6 @@ class ChatRepository {
       'GET /api/chat/inbox/archived',
       ChatInboxItem.fromJson,
     );
-  }
-
-  /// Global search across all conversations
-  Future<List<ChatMsg>> globalSearch(String query) async {
-    return (await globalSearchPage(query)).content;
   }
 
   Future<Pagina<ChatMsg>> globalSearchPage(
