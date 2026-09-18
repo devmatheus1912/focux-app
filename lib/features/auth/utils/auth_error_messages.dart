@@ -441,6 +441,8 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
 /// Mapeia erros do Sign in with Apple para mensagens em pt-BR.
 ///
 /// Em 401 prioriza `erro` do JSON (audience inválida, token inválido, etc.).
+/// Nunca engole PlatformException nativa com copy genérica — a causa real
+/// (failed / invalidResponse / unknown) precisa aparecer na UI.
 String mapAppleSignInError(Object error, {required bool isAluno}) {
   final offline = _offlineIfTransport(error);
   if (offline != null) return offline;
@@ -474,7 +476,9 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
       return _backendMessage(error) ?? _unavailableCopy;
     }
     if (statusCode == null) {
-      return 'Não foi possível entrar com Apple agora.';
+      // Sem HTTP status e sem transporte classificado: ainda assim exponha o tipo.
+      return 'Falha ao falar com o servidor (Apple). '
+          'Tipo: ${error.type.name}. Tente de novo.';
     }
     final msg = _backendMessage(error);
     return msg != null && msg.isNotEmpty
@@ -493,13 +497,46 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
     if (code.contains('canceled') || code.contains('cancelled')) {
       return 'Login com Apple cancelado.';
     }
+    if (code == 'apple_sign_in_failed' ||
+        code == 'apple_sign_in_invalidResponse' ||
+        code == 'apple_sign_in_notHandled' ||
+        code == 'apple_sign_in_notInteractive' ||
+        code == 'apple_sign_in_unknown' ||
+        code == 'apple_sign_in') {
+      final detail = _safeApplePlatformDetail(error);
+      if (detail != null) {
+        return 'Apple Sign-In falhou ($code): $detail';
+      }
+      return 'Apple Sign-In falhou ($code). Confira o Bundle ID '
+          'com.focux.focuxApp no Apple Developer e tente de novo.';
+    }
+    final detail = _safeApplePlatformDetail(error);
+    if (detail != null) {
+      return 'Apple Sign-In falhou ($code): $detail';
+    }
+    return 'Apple Sign-In falhou ($code). Tente de novo ou use e-mail e senha.';
   }
   if (error is StateError) {
     if (error.message == 'PERSONAL_SLUG_REQUIRED') {
       return 'Abra o link do seu personal (?p=slug) para entrar com Apple como aluno.';
     }
+    return 'Apple: ${error.message}';
   }
-  return 'Não foi possível entrar com Apple agora.';
+  return 'Não foi possível entrar com Apple agora '
+      '(${error.runtimeType}). Tente de novo ou use e-mail e senha.';
+}
+
+/// Mensagem curta e segura da PlatformException (sem token/PII).
+String? _safeApplePlatformDetail(PlatformException error) {
+  final raw = (error.message ?? '').trim();
+  if (raw.isEmpty) return null;
+  final lower = raw.toLowerCase();
+  if (lower.contains('identitytoken') ||
+      lower.contains('eyj') ||
+      raw.length > 180) {
+    return null;
+  }
+  return raw;
 }
 
 /// Erros da challenge MFA no login (TOTP / recovery).

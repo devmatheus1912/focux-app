@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/config/env.dart';
 
@@ -35,7 +36,18 @@ void logAuthHttpError(String tag, Object error, {String? path}) {
     );
     return;
   }
-  debugPrint('[$tag] AFTER apiUrl=${Env.apiUrl} error=$error');
+  if (error is PlatformException) {
+    debugPrint(
+      '[$tag] AFTER PlatformException code=${error.code} '
+      'message=${error.message} details=${error.details} '
+      'apiUrl=${Env.apiUrl}',
+    );
+    return;
+  }
+  debugPrint(
+    '[$tag] AFTER apiUrl=${Env.apiUrl} '
+    'runtimeType=${error.runtimeType} error=$error',
+  );
 }
 
 void logAuthHttpOk(String tag, {required String path, int? statusCode}) {
