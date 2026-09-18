@@ -93,19 +93,23 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo_icon_launcher.png"
-  adaptive_icon_background: "#FFFFFF"
+  # Braço só — sem wordmark FOCUX PERSONAL (ícone de launcher é pequeno).
+  image_path: "assets/images/logo_icon_arm.png"
+  adaptive_icon_background: "#0B0E14"
   adaptive_icon_foreground: "assets/images/logo_icon_fg.png"
-  adaptive_icon_foreground_inset: 8
-  background_color_ios: "#FFFFFF"
+  adaptive_icon_foreground_inset: 16
+  background_color_ios: "#0B0E14"
   remove_alpha_ios: true
 
 flutter_native_splash:
   color: "#0B0E14"
+  # Lockup padded (~36%) — master 1254² sem padding estourava a tela.
   image: assets/images/logo_splash.png
   android_gravity: center
+  ios_content_mode: center
   android_12:
     color: "#0B0E14"
+    # Android 12+ usa ícone circular — só o braço.
     image: assets/images/logo_splash_icon.png
     icon_background_color: "#0B0E14"
   android: true
@@ -133,6 +137,7 @@ flutter:
   assets:
     - assets/images/logo_oficial_fundo_claro.png
     - assets/images/logo_oficial_fundo_escuro.png
+    - assets/images/logo_icon_arm.png
     - assets/images/logo_splash.png
     - assets/images/logo_splash_icon.png
     - assets/animations/confetti_success.riv
