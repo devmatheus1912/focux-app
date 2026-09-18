@@ -18,6 +18,4 @@ abstract final class ApiEtagStore {
   }
 
   static void clear() => _etags.clear();
-
-  static void remove(String key) => _etags.remove(key);
 }

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../coach/utils/coach_display.dart';
-import '../../coach/widgets/coach_proativo_card.dart';
 import '../providers/dashboard_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
