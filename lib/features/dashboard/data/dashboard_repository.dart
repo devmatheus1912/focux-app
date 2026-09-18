@@ -363,8 +363,11 @@ class AlunoDashboardHomeBundle {
             .toList();
     List<ExecucaoTreino> parseHistorico(Map<String, dynamic> json) {
       const historicoCap = 12;
-      final resumo = json['historicoResumo'];
-      if (resumo is List && resumo.isNotEmpty) {
+      // BFF #75: se a chave `historicoResumo` veio (mesmo vazia), é a SSOT —
+      // não parsear dump `historico` rico.
+      if (json.containsKey('historicoResumo')) {
+        final resumo = json['historicoResumo'];
+        if (resumo is! List) return const [];
         final list = resumo
             .whereType<Map>()
             .map(
@@ -411,10 +414,14 @@ class AlunoDashboardHomeBundle {
       if (list.length <= 5) return list;
       return list.sublist(0, 5);
     }
-    List<AlunoOferta> parseUpsell(dynamic raw) =>
-        (raw as List? ?? const [])
-            .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
-            .toList();
+    List<AlunoOferta> parseUpsell(dynamic raw) {
+      final list =
+          (raw as List? ?? const [])
+              .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
+              .toList();
+      if (list.length <= 5) return list;
+      return list.sublist(0, 5);
+    }
     List<RecordePessoal> parseRecordes(dynamic raw) =>
         (raw as List? ?? const [])
             .map((e) => RecordePessoal.fromJson(e as Map<String, dynamic>))
