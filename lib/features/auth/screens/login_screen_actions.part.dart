@@ -83,6 +83,14 @@ extension on _LoginScreenState {
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
+      if (error is DioException) {
+        debugPrint(
+          '[login] statusCode=${error.response?.statusCode} '
+          'type=${error.type.name} body=${error.response?.data}',
+        );
+      } else {
+        debugPrint('[login] error=$error');
+      }
       _trackLogin(
         success: false,
         method: 'password',
