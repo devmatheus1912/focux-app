@@ -14,8 +14,8 @@ class Env {
   /// HTTP base URL for the Focux backend (no trailing slash).
   ///
   /// Prefer the brand API host. Railway continua válido via `--dart-define=API_URL=...`.
-  /// Pins TLS de **ambos** os hosts entram em [apiCertPins] para o release não
-  /// quebrar se o binário e o secret divergirem de host.
+  /// Em hosts de produção conhecidos, [apiCertPins] une pins built-in dos dois
+  /// leafs para o release não quebrar se o secret e a URL divergirem de host.
   static const String apiUrl = String.fromEnvironment(
     'API_URL',
     defaultValue: 'https://api.focuxpersonal.com',
@@ -29,13 +29,25 @@ class Env {
   );
 
   /// Leaf pins atuais (2026-09-18) — Railway + api.focuxpersonal.com.
-  /// Sempre unidos ao dart-define para o app falar com qualquer um dos hosts.
+  /// Só entram quando [apiUrl] aponta a um desses hosts de produção; staging/
+  /// tunnel sem `API_CERT_PINS` continua sem pinning (como antes).
   static const List<String> _builtinApiCertPins = [
     // focux-backend-production.up.railway.app
     'sha256/56ZylJhguSmnkPgt0hUNGj/AjFqCOm0Px/OmO5WdBRE=',
     // api.focuxpersonal.com
     'sha256/BWjzG+rPlj+2cnDnbI+4LLj9z1hOazfNYvbzUZMkazA=',
   ];
+
+  static const Set<String> _knownProdApiHosts = {
+    'api.focuxpersonal.com',
+    'focux-backend-production.up.railway.app',
+  };
+
+  /// True quando [apiUrl] é um dos hosts oficiais de produção.
+  static bool get targetsKnownProdApi {
+    final host = Uri.tryParse(apiUrl)?.host.toLowerCase() ?? '';
+    return _knownProdApiHosts.contains(host);
+  }
 
   static List<String> get apiCertPins {
     final fromDefine =
@@ -46,9 +58,12 @@ class Env {
                 .map((p) => p.trim())
                 .where((p) => p.isNotEmpty)
                 .toList();
+    // Staging / tunnel / README custom backend: só pins explícitos.
+    if (!targetsKnownProdApi) return fromDefine;
+    // Produção: dart-define ∪ builtins (Railway vs brand host).
     if (fromDefine.isEmpty) return List<String>.from(_builtinApiCertPins);
     final merged = <String>{
-      ...fromDefine.map((p) => p.trim()),
+      ...fromDefine,
       ..._builtinApiCertPins,
     };
     return merged.where((p) => p.isNotEmpty).toList();
