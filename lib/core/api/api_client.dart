@@ -33,15 +33,8 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Após Apple/Google sheet, keep-alives do HttpClient podem estar
-          // mortos. `persistentConnection=false` sozinho NÃO evita reusar o
-          // idle pool (Dio aplica o flag depois de openUrl). Soft-recycle
-          // troca o adapter (HttpClient novo) sem force-close do anterior.
-          if (_isAuthPath(options.path) &&
-              options.method.toUpperCase() != 'GET') {
-            recycleHttpConnectionPool(_dio);
-            options.persistentConnection = false;
-          }
+          // Auth mutações usam [newDetachedAuthDio] — não reciclar o pool
+          // compartilhado aqui (close → Client is closed no Apple).
           final token = await SecureStorage.getToken();
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -202,8 +195,28 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  /// Após background: destrava refresh. Recicla pool só se [away] ≥ 5s —
-  /// dismiss do sheet Apple dispara resume no mesmo instante do POST auth.
+  /// Dio isolado do pool principal (pin connect-time, sem recycle compartilhado).
+  ///
+  /// Login Apple/Google: o sheet nativo dispara `resumed` enquanto o POST roda;
+  /// reciclar/fechar o HttpClient do [_dio] gerava
+  /// `StateError: Bad state: Client is closed`.
+  Dio newDetachedAuthDio() {
+    final d = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 30),
+        headers: const {'Content-Type': 'application/json'},
+        persistentConnection: false,
+      ),
+    );
+    TlsCertificatePinning.apply(d);
+    return d;
+  }
+
+  /// Após background longo: destrava refresh. Recicla só se [away] ≥ 30s
+  /// (sheet Apple costuma passar de 5s — não mexer no pool no dismiss).
   void resetAfterAppResume([Duration away = Duration.zero]) {
     _isRefreshing = false;
     if (away < kHttpPoolResumeRecycleMinAway) return;
