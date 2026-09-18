@@ -27,9 +27,17 @@ const kHttpPoolResumeRecycleMinAway = Duration(seconds: 30);
 
 /// Troca o adapter para Dio criar HttpClient novo (sockets idle mortos).
 ///
-/// O adapter anterior é **abandonado** (sem `close`). IdleTimeout mata
-/// keep-alives; close explícito causava `Client is closed` no login Apple.
+/// Sempre atribui um [IOHttpClientAdapter] novo: se [TlsCertificatePinning.apply]
+/// no-op (pins vazios em sideload/staging), ainda assim Dio descarta
+/// `_cachedHttpClient`. O adapter anterior é abandonado — sem `close`.
 void recycleHttpConnectionPool(Dio dio) {
+  final before = dio.httpClientAdapter;
   TlsCertificatePinning.apply(dio);
+  if (identical(dio.httpClientAdapter, before)) {
+    // Pins vazios: apply não troca o adapter — força instância nova.
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: TlsCertificatePinning.baseHttpClient,
+    );
+  }
   configureHttpConnectionPool(dio);
 }
