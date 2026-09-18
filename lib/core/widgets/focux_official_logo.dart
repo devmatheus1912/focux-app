@@ -46,9 +46,12 @@ class FocuxOfficialLogo extends StatelessWidget {
   /// Logo para fundos escuros (modo dark / splash cinematográfico).
   static const assetDark = 'assets/images/logo_oficial_fundo_escuro.png';
 
+  /// Ícone app — só o braço (sem wordmark FOCUX PERSONAL).
+  static const assetArm = 'assets/images/logo_icon_arm.png';
+
   /// Alias light — preferir [assetOf] / [assetFor].
   static const asset = assetLight;
-  static const iconAsset = assetLight;
+  static const iconAsset = assetArm;
 
   final double? width;
   final double? height;
@@ -80,7 +83,7 @@ class FocuxOfficialLogo extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(inset),
           child: Image.asset(
-            assetPath,
+            assetArm,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,
             gaplessPlayback: true,
@@ -132,7 +135,7 @@ class FocuxOfficialLogo extends StatelessWidget {
   Widget _fallbackAsset(BuildContext context) {
     final assetPath = assetOf(context);
     if (variant == FocuxLogoVariant.icon) {
-      return Image.asset(assetPath, fit: BoxFit.contain);
+      return Image.asset(assetArm, fit: BoxFit.contain);
     }
     return Image.asset(
       assetPath,
