@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/api_etag_store.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../chat/data/chat_repository.dart';
@@ -11,7 +12,9 @@ import '../../health/data/health_repository.dart';
 import '../../monetizacao/data/upsell_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
+import '../utils/aluno_dashboard_home_client_cache.dart';
 import '../utils/dashboard_day_focus.dart';
+import '../utils/dashboard_home_client_cache.dart';
 import 'command_center_data.dart';
 
 class DashboardAderenciaTopItem {
@@ -196,11 +199,29 @@ class DashboardRepository {
 
   DashboardRepository(ApiClient client) : _dio = client.dio;
 
-  /// `null` = HTTP 304 (ETag) — caller deve reusar ClientCache.
+  /// `null` = HTTP 304 com body no ClientCache — caller reusa cache.
+  /// 304 órfão (sem body): limpa ETag, retry 1× sem If-None-Match, devolve 200.
   Future<DashboardHomeBundle?> getHome() async {
-    final response = await _dio.get('/api/dashboard/home');
-    if (response.statusCode == 304) return null;
-    final data = response.data;
+    // Garante probe do ClientCache antes do interceptor decidir If-None-Match.
+    DashboardHomeClientCache.hasBody;
+    final response = await _dio.get(DashboardHomeClientCache.etagPath);
+    if (response.statusCode != 304) {
+      return _parsePersonalHome(response.data);
+    }
+    if (DashboardHomeClientCache.hasBody) return null;
+
+    ApiEtagStore.removeForPath(
+      method: 'GET',
+      path: DashboardHomeClientCache.etagPath,
+    );
+    final retry = await _dio.get(
+      DashboardHomeClientCache.etagPath,
+      options: Options(extra: const {'fxSkipEtag': true}),
+    );
+    return _parsePersonalHome(retry.data);
+  }
+
+  DashboardHomeBundle _parsePersonalHome(dynamic data) {
     if (data is! Map<String, dynamic>) {
       throw StateError('GET /api/dashboard/home: body inválido');
     }
@@ -261,11 +282,28 @@ class DashboardRepository {
     );
   }
 
-  /// `null` = HTTP 304 (ETag) — caller deve reusar ClientCache.
+  /// `null` = HTTP 304 com body no ClientCache — caller reusa cache.
+  /// 304 órfão (sem body): limpa ETag, retry 1× sem If-None-Match, devolve 200.
   Future<AlunoDashboardHomeBundle?> getAlunoHome() async {
-    final response = await _dio.get('/api/dashboard/aluno/home');
-    if (response.statusCode == 304) return null;
-    final data = response.data;
+    AlunoDashboardHomeClientCache.hasBody;
+    final response = await _dio.get(AlunoDashboardHomeClientCache.etagPath);
+    if (response.statusCode != 304) {
+      return _parseAlunoHome(response.data);
+    }
+    if (AlunoDashboardHomeClientCache.hasBody) return null;
+
+    ApiEtagStore.removeForPath(
+      method: 'GET',
+      path: AlunoDashboardHomeClientCache.etagPath,
+    );
+    final retry = await _dio.get(
+      AlunoDashboardHomeClientCache.etagPath,
+      options: Options(extra: const {'fxSkipEtag': true}),
+    );
+    return _parseAlunoHome(retry.data);
+  }
+
+  AlunoDashboardHomeBundle _parseAlunoHome(dynamic data) {
     if (data is! Map<String, dynamic>) {
       throw StateError('GET /api/dashboard/aluno/home: body inválido');
     }

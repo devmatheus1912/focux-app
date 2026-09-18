@@ -50,7 +50,13 @@ class ApiClient {
             );
             final etag = ApiEtagStore.get(key);
             if (etag != null && etag.isNotEmpty) {
-              options.headers['If-None-Match'] = etag;
+              // Home BFF: só If-None-Match se houver body no ClientCache.
+              if (ApiEtagStore.requiresLocalBody(options.path) &&
+                  !ApiEtagStore.hasLocalBodyFor(options.path)) {
+                ApiEtagStore.remove(key);
+              } else {
+                options.headers['If-None-Match'] = etag;
+              }
             }
           }
           if (_shouldUseIdempotency(options) &&
