@@ -54,11 +54,15 @@ String friendlyError(Object error, {String? fallback}) {
           '${error.message ?? ''} ${error.error ?? ''} '
                   '${error.error?.runtimeType ?? ''}'
               .toLowerCase();
-      if (error.type == DioExceptionType.badCertificate ||
+      // Pin / badCertificate → copy de segurança. Handshake genérico = rede.
+      final isPinOrBadCert =
+          error.type == DioExceptionType.badCertificate ||
           hay.contains('certificate pin') ||
           hay.contains('pin mismatch') ||
-          hay.contains('tlsexception') ||
-          hay.contains('handshakeexception')) {
+          hay.contains('certificate_verify_failed') ||
+          hay.contains('bad certificate') ||
+          (hay.contains('tlsexception') && hay.contains('pin'));
+      if (isPinOrBadCert) {
         return 'Falha na conexão segura com o servidor. Atualize o app e tente de novo.';
       }
       switch (error.type) {
@@ -73,7 +77,9 @@ String friendlyError(Object error, {String? fallback}) {
         case DioExceptionType.unknown:
           if (hay.contains('socket') ||
               hay.contains('failed host lookup') ||
-              hay.contains('host lookup')) {
+              hay.contains('host lookup') ||
+              hay.contains('handshakeexception') ||
+              hay.contains('handshake')) {
             return 'Sem conexão com o servidor.';
           }
           break;
