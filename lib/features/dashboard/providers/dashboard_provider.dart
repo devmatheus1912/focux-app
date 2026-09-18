@@ -45,7 +45,14 @@ final dashboardHomeProvider = FutureProvider<DashboardHomeBundle>((ref) async {
       DashboardHomeClientCache.put(stale);
       return stale;
     }
-    throw StateError('Home personal: 304 sem cache local');
+    // Repository já fez retry do 304 órfão — não deve chegar aqui.
+    // Último recurso: um GET explícito sem ETag via repositório (hasBody=false).
+    final recovered = await ref.read(dashboardRepositoryProvider).getHome();
+    if (recovered != null) {
+      DashboardHomeClientCache.put(recovered);
+      return recovered;
+    }
+    throw StateError('GET /api/dashboard/home: resposta vazia');
   }
   DashboardHomeClientCache.put(fresh);
   return fresh;
@@ -86,7 +93,13 @@ final alunoDashboardHomeProvider =
       AlunoDashboardHomeClientCache.put(stale);
       return stale;
     }
-    throw StateError('Home aluno: 304 sem cache local');
+    final recovered =
+        await ref.read(dashboardRepositoryProvider).getAlunoHome();
+    if (recovered != null) {
+      AlunoDashboardHomeClientCache.put(recovered);
+      return recovered;
+    }
+    throw StateError('GET /api/dashboard/aluno/home: resposta vazia');
   }
   AlunoDashboardHomeClientCache.put(fresh);
   return fresh;
