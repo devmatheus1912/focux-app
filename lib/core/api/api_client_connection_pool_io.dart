@@ -6,9 +6,9 @@ import 'tls_certificate_pinning.dart';
 /// Tunes the native HTTP client for many parallel API calls (dashboard + sync).
 ///
 /// Pin connect-time via [TlsCertificatePinning.createPinnedHttpClient].
-/// [recycleHttpConnectionPool] troca o [IOHttpClientAdapter] (Dio descarta
-/// `_cachedHttpClient`) e fecha o anterior **sem force**, com atraso — nunca
-/// aborta POST /auth/ em voo quando o sheet Apple dispara `resumed`.
+/// [recycleHttpConnectionPool] só troca o adapter — **nunca** chama close no
+/// adapter anterior. Fechar (mesmo `force: false`) marca o HttpClient como
+/// closed e o POST Apple em voo vira `StateError: Client is closed`.
 void configureHttpConnectionPool(Dio dio) {
   final adapter = dio.httpClientAdapter;
   if (adapter is! IOHttpClientAdapter) {
@@ -22,26 +22,14 @@ void configureHttpConnectionPool(Dio dio) {
   };
 }
 
-/// Pausa mínima antes de reciclar no resume (sheet Apple/Google costuma ser
-/// mais curto; reciclar no meio do POST abortava o identityToken).
-const kHttpPoolResumeRecycleMinAway = Duration(seconds: 5);
-
-/// Atraso para fechar o adapter antigo sem force (deixa in-flight terminar).
-const kHttpPoolStaleAdapterCloseDelay = Duration(seconds: 5);
+/// Resume só recicla após background longo. Sheet Apple facilmente passa de 5s.
+const kHttpPoolResumeRecycleMinAway = Duration(seconds: 30);
 
 /// Troca o adapter para Dio criar HttpClient novo (sockets idle mortos).
 ///
-/// O adapter anterior fecha com `force: false` após [kHttpPoolStaleAdapterCloseDelay]
-/// — `force: true` no resume matava o POST Apple em andamento.
+/// O adapter anterior é **abandonado** (sem `close`). IdleTimeout mata
+/// keep-alives; close explícito causava `Client is closed` no login Apple.
 void recycleHttpConnectionPool(Dio dio) {
-  final previous = dio.httpClientAdapter;
   TlsCertificatePinning.apply(dio);
   configureHttpConnectionPool(dio);
-  if (identical(previous, dio.httpClientAdapter)) return;
-
-  Future<void>.delayed(kHttpPoolStaleAdapterCloseDelay, () {
-    try {
-      previous.close(force: false);
-    } catch (_) {}
-  });
 }
