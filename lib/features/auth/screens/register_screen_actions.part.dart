@@ -123,6 +123,13 @@ extension on _RegisterScreenState {
     HapticFeedback.mediumImpact();
 
     try {
+      logAuthApiUrl('register');
+      logAuthHttpCall(
+        'register',
+        path: '/api/auth/register/personal',
+        method: 'POST',
+        isAluno: false,
+      );
       await ref
           .read(authProvider.notifier)
           .register(
@@ -138,6 +145,7 @@ extension on _RegisterScreenState {
         return;
       }
 
+      logAuthHttpOk('register', path: '/api/auth/register/personal');
       ref.invalidate(perfilProvider);
       unawaited(
         AnalyticsService.instance.track(
@@ -149,6 +157,7 @@ extension on _RegisterScreenState {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
+      logAuthHttpError('register', error, path: '/api/auth/register/personal');
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.signupFailure,
@@ -221,9 +230,18 @@ extension on _RegisterScreenState {
     HapticFeedback.mediumImpact();
 
     try {
+      logAuthApiUrl('register/apple');
       final credential = await const AppleSignInService().signIn();
       if (credential == null) return;
 
+      logAuthHttpCall(
+        'register/apple',
+        path: '/api/auth/apple',
+        method: 'POST',
+        isAluno: false,
+        hasPersonalSlug: false,
+        identityTokenLen: credential.identityToken.length,
+      );
       final result = await ref.read(authProvider.notifier).loginApple(
             identityToken: credential.identityToken,
             isAluno: false,
@@ -232,6 +250,7 @@ extension on _RegisterScreenState {
           );
 
       if (!mounted) return;
+      logAuthHttpOk('register/apple', path: '/api/auth/apple');
       if (await _maybeOpenMfa(result, method: 'apple')) return;
       if (!mounted) return;
       ref.invalidate(perfilProvider);
@@ -254,6 +273,7 @@ extension on _RegisterScreenState {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
+      logAuthHttpError('register/apple', error, path: '/api/auth/apple');
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.signupFailure,

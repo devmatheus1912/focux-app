@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/auth_http_debug.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -85,6 +86,15 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
     HapticFeedback.mediumImpact();
 
     try {
+      logAuthApiUrl('register/aluno');
+      logAuthHttpCall(
+        'register/aluno',
+        path: '/api/auth/register/aluno',
+        method: 'POST',
+        isAluno: true,
+        hasPersonalSlug:
+            widget.personalSlug != null && widget.personalSlug!.trim().isNotEmpty,
+      );
       await ref
           .read(authProvider.notifier)
           .registerAluno(
@@ -95,6 +105,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
             personalSlug: widget.personalSlug,
           );
       if (mounted) {
+        logAuthHttpOk('register/aluno', path: '/api/auth/register/aluno');
         final slug = widget.personalSlug?.trim();
         if (slug != null && slug.isNotEmpty) {
           await PersonalSlugStore.save(slug);
@@ -111,6 +122,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
       }
     } catch (e) {
       HapticFeedback.heavyImpact();
+      logAuthHttpError('register/aluno', e, path: '/api/auth/register/aluno');
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.signupFailure,
