@@ -39,8 +39,9 @@ void main() {
     final helpers =
         File('lib/features/dashboard/utils/dashboard_sparkline_helpers.dart')
             .readAsStringSync();
-    expect(helpers, contains('dashboardCheckinsSparklineUltimos7Dias'));
+    expect(helpers, contains('dashboardCheckinsTrendFromPulse'));
     expect(helpers, contains('dashboardReceitaSparklineMensal'));
     expect(helpers, contains('List<double>'));
+    expect(helpers, isNot(contains('dashboardCheckinsSparklineUltimos7Dias')));
   });
 }
