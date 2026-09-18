@@ -1,36 +1,36 @@
 # Focux Personal — App
 
-> Cliente Flutter (mobile e web) para personal trainers e alunos operarem treino, alunos, financeiro, agenda, IA, comunicacao e crescimento em um unico produto multi-tenant.
+Cliente Flutter (Android, iOS e web) para personal trainers e alunos operarem treino, alunos, financeiro, agenda, IA e crescimento em um produto multi-tenant.
 
-## Visao geral
+> **Repositório público.** Não versionar secrets, keystores, Firebase real nem `.env`. Use só arquivos `*.example` com placeholders.
 
-Duas experiencias no mesmo app, conectadas ao `focux-backend`:
+## Visão geral
+
+Duas experiências no mesmo app, conectadas à API (`focux-backend`):
 
 | Perfil | Foco |
 |---|---|
 | **Personal** | Command Center, alunos, treinos, biblioteca, agenda, financeiro, IA, CRM, marca e planos |
-| **Aluno** | Treinos, check-in, evolucao, saude, chat, feed, pagamentos e notificacoes |
+| **Aluno** | Treinos, check-in, evolução, saúde, chat, feed, pagamentos e notificações |
 
-Autenticacao JWT, rotas por perfil (GoRouter) e design system **Tokens Strip / Liquid Glass** — referencia visual: Home Personal (`/dashboard/personal`).
+Autenticação JWT, rotas por perfil (GoRouter) e design system próprio (Tokens Strip / Liquid Glass).
 
-## Snapshot (ago/2026)
+## Snapshot
 
 | | |
 |---|---|
-| Versao | `1.2.0+3` |
+| Versão | `1.2.1+67` (ver `pubspec.yaml`) |
 | Flutter / Dart | SDK `^3.7` |
 | Branch | `main` |
 | Site | [focuxpersonal.com](https://focuxpersonal.com) |
-| Testes | ~970 casos em `test/` |
-| iOS | ver `TESTFLIGHT.md` |
 
 ## Ecossistema
 
-| Repositorio | Papel |
+| Repositório | Papel |
 |---|---|
 | `focux-app` | Este app |
-| `focux-backend` | API REST, WebSocket e regras de negocio |
-| `focux-website` | Site oficial, legal e superficies publicas |
+| `focux-backend` | API REST, WebSocket e regras de negócio |
+| `focux-website` | Site oficial e superfícies públicas |
 
 ## Stack
 
@@ -41,22 +41,22 @@ Flutter · Riverpod · GoRouter · Dio · Secure Storage · STOMP/WebSocket · F
 ```text
 lib/
 ├── core/          # api, auth, router, theme, widgets, security
-├── features/      # dominios (dashboard, alunos, treinos, ia, …)
+├── features/      # domínios (dashboard, alunos, treinos, ia, …)
 └── l10n/          # pt, en, es
 android/ · ios/ · web/ · test/ · integration_test/ · e2e/
 ```
 
-Hubs principais consomem BFF `GET …/home` (first paint em um request). Detalhe de rotas: `lib/core/router/`.
+Hubs principais usam BFF `GET …/home` (first paint em um request). Rotas: `lib/core/router/`.
 
 ## Escopo funcional (resumo)
 
 **Personal** — Command Center e Focux Score · Aluno 360 · treinos e biblioteca · IA copiloto · financeiro e PIX · agenda · chat, feed e broadcasts · leads, landing e identidade visual · alertas, analytics e planos.
 
-**Aluno** — dashboard · execucao de treino · evolucao e fotos · saude/recovery · chat e feed · financeiro · IA e gamificacao.
+**Aluno** — dashboard · execução de treino · evolução e fotos · saúde/recovery · chat e feed · financeiro · IA e gamificação.
 
 ## Desenvolvimento
 
-### Pre-requisitos
+### Pré-requisitos
 
 Flutter SDK · Android Studio ou Xcode · emulador ou Chrome · backend local ou remoto
 
@@ -64,15 +64,22 @@ Flutter SDK · Android Studio ou Xcode · emulador ou Chrome · backend local ou
 
 ```bash
 flutter pub get
-cp android/gradle.properties.example android/gradle.properties   # se necessario
+cp .env.local.example .env.local
+# Edite .env.local com placeholders locais (nunca commite este arquivo)
+
+cp android/gradle.properties.example android/gradle.properties   # se necessário
+cp android/key.properties.example android/key.properties         # só para release local
+cp android/app/google-services.json.example android/app/google-services.json
+cp ios/Runner/GoogleService-Info.plist.example ios/Runner/GoogleService-Info.plist
 ```
 
-Configuracao via `--dart-define` (ver `lib/core/config/env.dart`). Modelo local: `.env.local.example` → `.env.local` (gitignored). Scripts de release em `tools/release/` (config interna).
+Configuração de runtime via `--dart-define` (ver `lib/core/config/env.dart`).  
+Modelos seguros: `.env.local.example`, `android/key.properties.example`, `*.google-services*.example`.
 
-### Rodar
+### Rodar (local)
 
 ```bash
-# Android (emulador → host)
+# Android (emulador → host da máquina)
 flutter run -d emulator-5554 \
   --dart-define=API_URL=http://10.0.2.2:8080 \
   --dart-define=PUBLIC_WEB_URL=http://10.0.2.2:8080
@@ -83,57 +90,54 @@ flutter run -d chrome --web-port 61791 \
   --dart-define=PUBLIC_WEB_URL=http://localhost:61791
 ```
 
-PowerShell: use `` ` `` no lugar de `\` para continuar linha.
+No PowerShell, use `` ` `` no lugar de `\` para continuar a linha.
 
 ### Build
 
 ```bash
 flutter build apk --release \
-  --dart-define=API_URL=https://SEU_BACKEND \
-  --dart-define=PUBLIC_WEB_URL=https://focuxpersonal.com
+  --dart-define=API_URL=https://your-backend.example.com \
+  --dart-define=PUBLIC_WEB_URL=https://your-frontend.example.com
 
 flutter build appbundle --release
 flutter build web --release
 ```
 
-Preferir `tools/release/build-android.sh` e `build-ios.sh` para builds oficiais de loja.
+Use URLs e credenciais do **seu** ambiente. Não cole tokens reais no README nem no código.
 
 ### Qualidade
 
 ```bash
 dart analyze --fatal-warnings --fatal-infos
 flutter test
-flutter test integration_test
 ```
 
-E2E web: `cd e2e && npm install && npx playwright test`
-
-CI (minutos enxutos): PR = analyze + orphan + gitleaks + semgrep. Push main = + unit tests + E2E Playwright. CodeQL só semanal/manual. Ver `.github/workflows/`.
+E2E web (opcional): `cd e2e && npm install && npx playwright test`  
+CI: analyze, testes e varredura de secrets — ver `.github/workflows/`.
 
 ### i18n
 
 Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 
-## Seguranca e conformidade
+## Segurança (repo público)
 
-Postura defensiva: auth centralizada, HTTPS, dados minimos na UI, tenant isolado no backend.
-
-| Area | Postura |
+| Área | Postura |
 |---|---|
-| Sessao | JWT com refresh; logout limpa cliente e servidor |
-| Dados | Tokens so em storage seguro no mobile |
-| Release | Politica de hardening nos builds de loja |
+| Sessão | JWT com refresh; logout limpa cliente e servidor |
+| Dados no device | Tokens em storage seguro no mobile |
+| Release | Hardening nos builds de loja |
 | Privacidade | LGPD e PII tratados no backend |
-| IA | Disclaimer de supervisao profissional |
+| CI | Secrets só via GitHub Actions `secrets.*` |
 
-Erros nunca expoem detalhes tecnicos ao usuario. CI inclui analise estatica e varredura de secrets.
+**Nunca versionar**
 
-**Nao versionar:** credenciais, keystores, `google-services.json` real, configs locais sensiveis — use arquivos `.example`.
+- `.env`, `.env.local`, `e2e/.env`
+- `android/key.properties`, `*.jks`, `*.keystore`, `*.p12`, `*.pem`
+- `android/app/google-services.json` e `ios/Runner/GoogleService-Info.plist` **reais**
+- service accounts, dumps de banco, senhas, PII de QA
 
-## Roadmap
+Erros de UI não devem expor detalhes técnicos internos. Em dúvida: não commitar.
 
-Release mobile em producao · IAP completo · E2E nas rotas criticas · habitos e enterprise · health/wearables e pose coach
+## Licença
 
-## Licenca
-
-Projeto privado/proprietario. Uso, distribuicao e copia dependem de autorizacao do proprietario.
+Código proprietário. O repositório pode ser público para transparência; uso, distribuição e cópia dependem de autorização do proprietário.
