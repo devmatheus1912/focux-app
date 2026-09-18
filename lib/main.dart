@@ -49,7 +49,10 @@ void main() {
       yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
     });
     GoogleFonts.config.allowRuntimeFetching = kDebugMode;
-    debugPrint('[Focux] Env.apiUrl=${Env.apiUrl}');
+    debugPrint(
+      '[Focux] Env.apiUrl=${Env.apiUrl} '
+      'certPins=${Env.apiCertPins.length}',
+    );
     try {
       TlsCertificatePinning.installGlobalOverrides();
     } catch (error, stack) {

@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../core/api/api_error.dart';
 
 const _offlineCopy = 'Sem conexão com o servidor.';
+const _tlsCopy =
+    'Falha na conexão segura com o servidor. Atualize o app e tente de novo.';
 const _unavailableCopy = 'Servidor indisponível, tente novamente';
 const _rateLimitCopy = 'Muitas tentativas. Aguarde e tente de novo.';
 const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
@@ -11,14 +13,16 @@ const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
 ///
 /// `codigo` é a fonte primária. Status HTTP com body nunca vira "sem conexão":
-/// 401 → credenciais, 400 → validação, 502/503 → indisponível. Só falha de
-/// transporte (timeout / connectionError / SocketException) usa offline.
+/// 401 → credenciais, 400 → validação, 502/503 → indisponível. Pin/TLS ≠ rede.
+/// Offline só em timeout / connectionError real / SocketException.
 String mapLoginError(Object error) {
   final api = ApiError.from(error);
   final codigo = api?.codigo;
   if (codigo != null && ApiErrorCodes.credentials.contains(codigo)) {
     return _loginCredenciaisCopy;
   }
+  final tls = _tlsFailureCopy(error);
+  if (tls != null) return tls;
   if (error is DioException) {
     final statusCode = error.response?.statusCode ?? api?.status;
 
@@ -64,9 +68,11 @@ String _validationCopy(DioException error, ApiError? api) {
 }
 
 /// Timeout / connectionError / SocketException / Failed host lookup.
+/// Pin/TLS mismatch NÃO conta como offline (mensagem própria).
 bool _isAuthTransportFailure(DioException error) {
   // Se chegou status HTTP, nunca é "sem conexão".
   if (error.response?.statusCode != null) return false;
+  if (_isTlsOrPinFailure(error)) return false;
   switch (error.type) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
@@ -81,6 +87,34 @@ bool _isAuthTransportFailure(DioException error) {
     case DioExceptionType.badCertificate:
       return false;
   }
+}
+
+bool _isTlsOrPinFailure(Object error) {
+  if (error is DioException) {
+    if (error.type == DioExceptionType.badCertificate) return true;
+    final haystack =
+        '${error.message ?? ''} ${error.error ?? ''} '
+                '${error.error?.runtimeType ?? ''}'
+            .toLowerCase();
+    if (haystack.contains('certificate pin') ||
+        haystack.contains('pin mismatch') ||
+        haystack.contains('certificate_verify_failed') ||
+        haystack.contains('handshakeexception') ||
+        haystack.contains('tlsexception') ||
+        haystack.contains('bad certificate')) {
+      return true;
+    }
+    return false;
+  }
+  final name = error.runtimeType.toString();
+  return name.contains('TlsException') ||
+      name.contains('HandshakeException') ||
+      name.contains('Certificate');
+}
+
+String? _tlsFailureCopy(Object error) {
+  if (_isTlsOrPinFailure(error)) return _tlsCopy;
+  return null;
 }
 
 bool _looksLikeSocketFailure(Object? error) {
@@ -101,6 +135,8 @@ bool _looksLikeHostLookupFailure(DioException error) {
 }
 
 String? _offlineIfTransport(Object error) {
+  final tls = _tlsFailureCopy(error);
+  if (tls != null) return tls;
   if (error is DioException) {
     if (_isAuthTransportFailure(error)) return _offlineCopy;
     return null;
