@@ -410,3 +410,41 @@ Não impersona o personal.
 Streak do aluno é semanal (ISO): dia de descanso na mesma semana não zera;
 semana vazia recomeça. Badge `STREAK_10` = 10 semanas.
 
+
+---
+
+## 9. Dashboard Home snappy UX — confirmado (backend #75 ↔ app 1.2.1+85)
+
+Pareado com `focux-backend` PR #75 e `focux-app` snappy UX.
+
+### 9.1 `GET /api/dashboard/aluno/home`
+
+| Campo / regra | Contrato |
+|---|---|
+| `historicoResumo` | Array slim ≤12; sem séries/mídia/evoluções. SSOT do histórico na Home. |
+| `historico` | Tipicamente `[]` quando `historicoResumo` está presente. App: se a chave `historicoResumo` veio (mesmo vazia), **não** parseia dump rico. |
+| Caps | `medidas` ≤5, `coachMensagens` ≤5, `upsellPendentes` ≤5 (server + rede de segurança no client). |
+| `chat` | Resumo (`possuiMensagemDoAluno`, `ultimaMensagemAlunoEm`, `naoLidasDoPersonal`) — sem lista de mensagens. |
+| Cache | TTL **60s**; nome sugerido `dashboard-aluno-home`. |
+| HTTP | `ETag` + `Cache-Control: private, max-age=60`; `If-None-Match` → **304** sem body. |
+
+First paint do app: **um** GET deste BFF (+ prefetch pós-login). Sem sidecars de `/api/checkin/historico`, `/api/coach-proativo/mensagens`, `/api/aluno/medidas`, `/api/upsell/me/pendentes` no first paint quando o bundle já trouxe os campos.
+
+### 9.2 `GET /api/dashboard/home` (personal)
+
+| Campo / regra | Contrato |
+|---|---|
+| `pulse.coachPendentes` | Contagem canônica (alias legado `coachPending` aceito no app). |
+| `pulse.mensagensNaoLidas` | Unread de chat (SSOT da Home). |
+| `pulse.checkinsTrend` | 7 ints (hoje-6 … hoje). |
+| `planoFeatures` | Se presente, app faz `seedFromHome` e **não** chama `GET /api/planos/me` no first paint. |
+| Cache | TTL **90s** (`dashboard-home`) + evict no write path. |
+| HTTP | `ETag` + `Cache-Control: private, max-age=90`; `If-None-Match` → **304**. |
+
+First paint: **sem** `GET coachHome` / coach sidecar só por badge.
+
+### 9.3 App (consumidor)
+
+- ClientCache + SWR: aluno 60s / personal 90s (stale até 5min).
+- `ApiEtagStore` + interceptor Dio: envia `If-None-Match`; `validateStatus` aceita 304; repository devolve `null` → reusa ClientCache.
+- Evict de ETag/caches no logout (`SessionInvalidator` / `ApiEtagStore.clear()`).
