@@ -284,6 +284,26 @@ void main() {
       ),
       'Sem conexão com o servidor.',
     );
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          type: DioExceptionType.badCertificate,
+        ),
+      ),
+      contains('conexão segura'),
+    );
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          type: DioExceptionType.connectionError,
+          error: Exception('Certificate pin mismatch'),
+          message: 'Certificate pin mismatch',
+        ),
+      ),
+      contains('conexão segura'),
+    );
   });
 
   test('mapAppleSignInError exige personalSlug para aluno', () {

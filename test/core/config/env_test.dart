@@ -15,10 +15,22 @@ void main() {
 
   test('wsUrl derives from apiUrl', () {
     expect(Env.wsUrl, startsWith('wss://'));
-    expect(Env.wsUrl, contains('railway.app'));
+    expect(Env.wsUrl, contains('focuxpersonal.com'));
   });
 
-  test('isProd detects railway backend', () {
+  test('isProd detects brand API host', () {
     expect(Env.isProd, isTrue);
+  });
+
+  test('apiCertPins inclui leaf pins de Railway e api.focuxpersonal.com', () {
+    expect(Env.apiCertPins.length, greaterThanOrEqualTo(2));
+    expect(
+      Env.apiCertPins.any((p) => p.contains('56ZylJhguSmnkPgt0hUNGj')),
+      isTrue,
+    );
+    expect(
+      Env.apiCertPins.any((p) => p.contains('BWjzG+rPlj+2cnDnbI+4LLj9z1h')),
+      isTrue,
+    );
   });
 }

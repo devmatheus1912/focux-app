@@ -50,6 +50,17 @@ String friendlyError(Object error, {String? fallback}) {
 
     // Network / timeout — only when there was no HTTP status.
     if (statusCode == null) {
+      final hay =
+          '${error.message ?? ''} ${error.error ?? ''} '
+                  '${error.error?.runtimeType ?? ''}'
+              .toLowerCase();
+      if (error.type == DioExceptionType.badCertificate ||
+          hay.contains('certificate pin') ||
+          hay.contains('pin mismatch') ||
+          hay.contains('tlsexception') ||
+          hay.contains('handshakeexception')) {
+        return 'Falha na conexão segura com o servidor. Atualize o app e tente de novo.';
+      }
       switch (error.type) {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
@@ -60,8 +71,6 @@ String friendlyError(Object error, {String? fallback}) {
         case DioExceptionType.cancel:
           return 'Requisição cancelada.';
         case DioExceptionType.unknown:
-          final hay =
-              '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
           if (hay.contains('socket') ||
               hay.contains('failed host lookup') ||
               hay.contains('host lookup')) {
