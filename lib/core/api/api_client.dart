@@ -33,12 +33,13 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Após Apple/Google sheet, keep-alives podem estar mortos.
-          // Não reciclar o pool aqui: fechar o HttpClient ainda cacheado no
-          // Dio 5.9 gera DioException.unknown no POST do identityToken.
-          // Desliga persistentConnection só em mutações /auth/.
+          // Após Apple/Google sheet, keep-alives do HttpClient podem estar
+          // mortos. `persistentConnection=false` sozinho NÃO evita reusar o
+          // idle pool (Dio aplica o flag depois de openUrl). Soft-recycle
+          // troca o adapter (HttpClient novo) sem force-close do anterior.
           if (_isAuthPath(options.path) &&
               options.method.toUpperCase() != 'GET') {
+            recycleHttpConnectionPool(_dio);
             options.persistentConnection = false;
           }
           final token = await SecureStorage.getToken();
@@ -201,9 +202,11 @@ class ApiClient {
 
   Dio get dio => _dio;
 
-  /// Após longo background: destrava refresh pendente e recicla sockets idle.
-  void resetAfterAppResume() {
+  /// Após background: destrava refresh. Recicla pool só se [away] ≥ 5s —
+  /// dismiss do sheet Apple dispara resume no mesmo instante do POST auth.
+  void resetAfterAppResume([Duration away = Duration.zero]) {
     _isRefreshing = false;
+    if (away < kHttpPoolResumeRecycleMinAway) return;
     recycleHttpConnectionPool(_dio);
   }
 
