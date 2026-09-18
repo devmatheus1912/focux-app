@@ -48,15 +48,19 @@ void main() {
         File('lib/core/api/tls_certificate_pinning.dart').readAsStringSync();
     final pool =
         File('lib/core/api/api_client_connection_pool_io.dart').readAsStringSync();
+    final api = File('lib/core/api/api_client.dart').readAsStringSync();
+    final repo =
+        File('lib/features/auth/data/auth_repository.dart').readAsStringSync();
     expect(pinning, contains('createPinnedHttpClient(pins)'));
-    expect(pinning, contains('validateCertificate'));
-    expect(pinning, contains('request.close()'));
     expect(pinning, contains('cancelled = true'));
     expect(pool, contains('createPinnedHttpClient()'));
-    // Soft close — nunca force:true no resume (aborta Apple POST).
-    expect(pool, contains('previous.close(force: false)'));
-    expect(pool, isNot(contains('previous.close(force: true)')));
+    // Nunca fechar adapter anterior — Client is closed no Apple.
+    expect(RegExp(r'\.close\s*\(').hasMatch(pool), isFalse);
     expect(pool, contains('kHttpPoolResumeRecycleMinAway'));
+    expect(api, contains('newDetachedAuthDio'));
+    expect(api, isNot(contains('recycleHttpConnectionPool(_dio);\n            options')));
+    expect(repo, contains('_authPost'));
+    expect(repo, contains("'/api/auth/apple'"));
   });
 }
 

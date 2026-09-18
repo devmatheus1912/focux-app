@@ -221,6 +221,15 @@ class AuthRepository {
       : _client = client,
         _dio = client.dio;
 
+  /// POST de login/social em Dio **desacoplado** do pool — evita
+  /// `Client is closed` quando o resume recicla o adapter principal.
+  Future<Response<dynamic>> _authPost(
+    String path, {
+    Object? data,
+  }) {
+    return _client.newDetachedAuthDio().post(path, data: data);
+  }
+
   Future<AuthCapabilities> capabilities() async {
     final response = await _dio.get('/api/auth/capabilities');
     return AuthCapabilities.fromJson(response.data as Map<String, dynamic>);
@@ -234,7 +243,7 @@ class AuthRepository {
   }
 
   Future<AuthLoginResult> loginPersonal(String email, String password) async {
-    final response = await _dio.post(
+    final response = await _authPost(
       '/api/auth/login',
       data: {'email': email, 'senha': password},
     );
@@ -294,7 +303,7 @@ class AuthRepository {
     if (personalSlug != null && personalSlug.trim().isNotEmpty) {
       data['personalSlug'] = personalSlug.trim();
     }
-    final response = await _dio.post('/api/auth/login/aluno', data: data);
+    final response = await _authPost('/api/auth/login/aluno', data: data);
     final token = response.data['token'] as String;
     final refreshToken = response.data['refreshToken'] as String?;
     final requiresPasswordChange =
@@ -321,7 +330,7 @@ class AuthRepository {
     if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
       data['personalSlug'] = personalSlug.trim();
     }
-    final response = await _dio.post('/api/auth/google', data: data);
+    final response = await _authPost('/api/auth/google', data: data);
     return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
       fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
@@ -346,7 +355,7 @@ class AuthRepository {
     if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
       data['personalSlug'] = personalSlug.trim();
     }
-    final response = await _dio.post('/api/auth/apple', data: data);
+    final response = await _authPost('/api/auth/apple', data: data);
     return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
       fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
