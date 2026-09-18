@@ -54,6 +54,12 @@ class TlsCertificatePinning {
     _overridesInstalled = true;
   }
 
+  /// Aplica pinning no Dio via [IOHttpClientAdapter.validateCertificate].
+  ///
+  /// **Não** usa [HttpClient.connectionFactory] no caminho Dio: o padrão
+  /// `ConnectionTask.fromSocket(SecureSocket.connect…)` é frágil no iOS
+  /// (keep-alive morto após Sign in with Apple → `DioException.unknown`
+  /// sem status). WebSocket continua pinado por [installGlobalOverrides].
   static void apply(Dio dio) {
     if (kIsWeb) return;
     final pins = _allowedPins();
@@ -68,7 +74,8 @@ class TlsCertificatePinning {
     }
 
     dio.httpClientAdapter = IOHttpClientAdapter(
-      createHttpClient: () => createPinnedHttpClient(pins),
+      // Cliente “direto” (sem HttpOverrides) — pool HTTP ajusta max/idle.
+      createHttpClient: baseHttpClient,
       validateCertificate: (cert, host, port) {
         if (!shouldPinHost(host)) return true;
         return matches(cert, pins);
@@ -77,7 +84,7 @@ class TlsCertificatePinning {
   }
 
   /// HttpClient real — sem reentrar em [HttpOverrides] (evita stack overflow).
-  @visibleForTesting
+  /// Usado pelo pool Dio e por [createPinnedHttpClient] (WebSocket).
   static HttpClient baseHttpClient({SecurityContext? context}) {
     return HttpOverrides.runWithHttpOverrides(
       () => HttpClient(context: context),

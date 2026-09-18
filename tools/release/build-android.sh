@@ -17,6 +17,8 @@ echo "==> Focux Android release build"
 echo "    API_URL=$API_URL"
 echo "    API_CERT_PINS set (${#API_CERT_PINS} chars)"
 
+bash "$ROOT/tools/release/verify-api-cert-pins.sh"
+
 flutter pub get
 
 flutter build appbundle --release \

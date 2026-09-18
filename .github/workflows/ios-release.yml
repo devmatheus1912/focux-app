@@ -152,6 +152,8 @@ jobs:
           API_URL="${API_URL:-$API_URL_DEFAULT}"
           PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-$PUBLIC_WEB_URL_DEFAULT}"
 
+          bash tools/release/verify-api-cert-pins.sh
+
           EXTRA=()
           if [[ -n "${GOOGLE_WEB_CLIENT_ID:-}" ]]; then
             EXTRA+=(--dart-define=GOOGLE_WEB_CLIENT_ID="$GOOGLE_WEB_CLIENT_ID")
