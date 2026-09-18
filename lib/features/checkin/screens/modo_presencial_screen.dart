@@ -101,16 +101,21 @@ class _State extends ConsumerState<ModoPresencialScreen>
 
   Future<void> _start() async {
     if (_startInFlight) return;
+    final aid = widget.alunoId;
+    if (aid == null) {
+      setState(() {
+        _loading = false;
+        _erro = 'Selecione o aluno antes de iniciar o modo presencial.';
+      });
+      return;
+    }
     _startInFlight = true;
     try {
       final repo = ref.read(checkinRepositoryProvider);
-      final e =
-          widget.alunoId != null
-              ? await repo.iniciarPresencial(
-                treinoId: widget.treinoId,
-                alunoId: widget.alunoId!,
-              )
-              : await repo.iniciar(widget.treinoId);
+      final e = await repo.iniciarPresencial(
+        treinoId: widget.treinoId,
+        alunoId: aid,
+      );
       if (!mounted) return;
       _elapsed = checkinElapsedSince(e.iniciadoEm);
       _startedAt = DateTime.now().subtract(_elapsed);

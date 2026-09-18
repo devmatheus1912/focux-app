@@ -54,8 +54,8 @@ class Aluno360FerramentasTab extends StatelessWidget {
         context.push(evolucaoRoute, extra: aluno.nome);
       case Aluno360MeasurementField.gordura:
       case Aluno360MeasurementField.massaMagra:
-        // Composição corporal vive no Comparativo (% gordura / massa magra).
-        context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
+        // Composição corporal registra na Evolução (nova medida).
+        context.push(evolucaoRoute, extra: aluno.nome);
     }
   }
 
@@ -122,7 +122,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
           else if (allComplete)
             Semantics(
               label:
-                  'Medidas em dia. $completeSummary. Toque para ver composição no comparativo.',
+                  'Medidas em dia. $completeSummary. Toque para registrar ou ver evolução.',
               button: true,
               child: FxSatelliteListTile(
                 title: 'Medidas em dia',
@@ -131,7 +131,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
                 accent: primary,
                 onTap:
                     () => context.push(
-                      '/alunos/$alunoId/evolucao-comparativo',
+                      '/alunos/$alunoId/evolucao',
                       extra: aluno.nome,
                     ),
               ),

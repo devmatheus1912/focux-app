@@ -178,18 +178,23 @@ class _FeedbackExercicioPickerSheetState
       setState(() => _loadingMore = true);
     }
     try {
-      final page = await ref.read(exercicioRepositoryProvider).listarPickerPagina(
-        busca: _query,
-        page: reset ? 0 : _page,
-        size: 30,
-      );
+      final all = await FeedbackVideoRepository(
+        ref.read(apiClientProvider),
+      ).exerciciosDisponiveis();
+      final q = _query.toLowerCase();
+      final filtered =
+          q.isEmpty
+              ? all
+              : all
+                  .where((e) => e.nome.toLowerCase().contains(q))
+                  .toList(growable: false);
       if (!mounted) return;
       setState(() {
-        _items.addAll(
-          page.content.map((e) => (id: e.id, nome: e.nome)),
-        );
-        _hasNext = page.meta.hasNext;
-        _page = page.meta.page + 1;
+        _items
+          ..clear()
+          ..addAll(filtered.map((e) => (id: e.id, nome: e.nome)));
+        _hasNext = false;
+        _page = 1;
         _loading = false;
         _loadingMore = false;
       });

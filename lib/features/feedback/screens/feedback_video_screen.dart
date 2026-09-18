@@ -29,7 +29,6 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/exercicios/providers/exercicios_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../chat/utils/aluno_picker_list.dart';
 import '../data/feedback_video_repository.dart';
@@ -293,7 +292,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         )
                         : FxContentWidthLimiter(child: _buildBody(visible)),
               ),
-              if (!_loading && _erro == null && visible.isNotEmpty)
+              if (!_loading && _erro == null)
                 SafeArea(
                   top: false,
                   child: Padding(
@@ -352,12 +351,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 title: 'Nenhum feedback de vídeo',
                 subtitle:
                     widget.alunoNome != null
-                        ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou registre o primeiro feedback técnico.'
-                        : 'Registre o primeiro feedback técnico com URL do vídeo e comentário.',
-                action: FxEmptyAction(
-                  label: 'Novo feedback',
-                  onTap: _novoFeedback,
-                ),
+                        ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou use Novo feedback abaixo.'
+                        : 'Use Novo feedback abaixo para registrar o primeiro comentário técnico.',
               ),
           ],
         ),

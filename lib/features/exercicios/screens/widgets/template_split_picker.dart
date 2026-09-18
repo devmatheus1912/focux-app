@@ -9,7 +9,6 @@ import '../../../../core/theme/fx_settings_layout.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
-import '../../../../core/widgets/fx_shell_scaffold.dart';
 import '../../data/exercicio_repository.dart';
 import '../../data/template_splits.dart';
 import '../../utils/template_split_catalog.dart';
@@ -196,13 +195,28 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
     final primary = scheme.primary;
     final soft = BrandPalette.softened(primary);
 
-    return FxShellScaffold(
-      // Pai já traz mesh — evita segundo CinematicMesh (custo/crash em low-end).
-      useMesh: false,
-      appBar: FxShellAppBar(
-        title: widget.template.nome,
-        subtitle: '$done de $slotsTotal exercícios',
-        onBack: () => Navigator.pop(context),
+    // Scaffold simples — sem FxShellScaffold aninhado (crash em low-end).
+    return Scaffold(
+      backgroundColor: scheme.surface,
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(widget.template.nome),
+            Text(
+              '$done de $slotsTotal exercícios',
+              style: FocuxHubTypography.bodyMuted(
+                color: mute,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: ListView(
         padding: EdgeInsets.fromLTRB(

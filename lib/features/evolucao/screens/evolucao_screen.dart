@@ -31,6 +31,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/evolucao_repository.dart';
@@ -350,6 +351,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final abdomenCtrl = TextEditingController();
     final quadrilCtrl = TextEditingController();
     final bracoCtrl = TextEditingController();
+    final gorduraCtrl = TextEditingController();
+    final massaCtrl = TextEditingController();
     try {
       final saved = await showFxFormSheet(
         context,
@@ -390,19 +393,52 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
+            ),
+            AlunoInsetFormField(
+              controller: gorduraCtrl,
+              label: 'Gordura corporal (%)',
+              icon: Icons.pie_chart_outline_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            AlunoInsetFormField(
+              controller: massaCtrl,
+              label: 'Massa magra (kg)',
+              icon: Icons.fitness_center_outlined,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               showDivider: false,
             ),
           ],
         ),
       );
       if (saved != true) return;
-      await EvolucaoRepository(ref.read(apiClientProvider)).adicionarMedida(
+      final peso = double.tryParse(pesoCtrl.text.replaceAll(',', '.'));
+      final cintura = double.tryParse(abdomenCtrl.text.replaceAll(',', '.'));
+      final quadril = double.tryParse(quadrilCtrl.text.replaceAll(',', '.'));
+      final braco = double.tryParse(bracoCtrl.text.replaceAll(',', '.'));
+      final gordura = double.tryParse(gorduraCtrl.text.replaceAll(',', '.'));
+      final massa = double.tryParse(massaCtrl.text.replaceAll(',', '.'));
+      final api = ref.read(apiClientProvider);
+      await EvolucaoRepository(api).adicionarMedida(
         widget.alunoId,
-        peso: double.tryParse(pesoCtrl.text.replaceAll(',', '.')),
-        cintura: double.tryParse(abdomenCtrl.text.replaceAll(',', '.')),
-        quadril: double.tryParse(quadrilCtrl.text.replaceAll(',', '.')),
-        braco: double.tryParse(bracoCtrl.text.replaceAll(',', '.')),
+        peso: peso,
+        cintura: cintura,
+        quadril: quadril,
+        braco: braco,
       );
+      if (gordura != null || massa != null) {
+        await AvaliacaoRepository(api).registrar(widget.alunoId, {
+          if (peso != null) 'pesoKg': peso,
+          if (cintura != null) 'cinturaCm': cintura,
+          if (quadril != null) 'quadrilCm': quadril,
+          if (gordura != null) 'percGordura': gordura,
+          if (massa != null) 'percMassa': massa,
+          'observacoes': 'Registrado via evolução (nova medida)',
+        });
+      }
       EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
       if (!mounted) return;
@@ -415,6 +451,8 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       abdomenCtrl.dispose();
       quadrilCtrl.dispose();
       bracoCtrl.dispose();
+      gorduraCtrl.dispose();
+      massaCtrl.dispose();
     }
   }
 

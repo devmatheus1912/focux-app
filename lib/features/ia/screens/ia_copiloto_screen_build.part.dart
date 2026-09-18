@@ -126,9 +126,33 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                     ),
                     ),
 
-                    // Mode selector
                     FxStaggerItem(
                       index: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          0,
+                          FxSettingsLayout.pageInset,
+                          12,
+                        ),
+                        child: FxSatelliteListTile(
+                          title: 'Tarefas IA',
+                          subtitle: const Text(
+                            'Fila aberta, adiadas e concluídas',
+                          ),
+                          accent: brand,
+                          leading: Icon(Icons.checklist_rounded, color: brand),
+                          onTap:
+                              () => context.push(
+                                '/dashboard/command-center/copiloto',
+                              ),
+                        ),
+                      ),
+                    ),
+
+                    // Mode selector
+                    FxStaggerItem(
+                      index: 2,
                       child: Padding(
                       padding: const EdgeInsets.fromLTRB(
                         FxSettingsLayout.pageInset,

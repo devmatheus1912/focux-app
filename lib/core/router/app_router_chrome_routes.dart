@@ -232,12 +232,29 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/treinos' : null,
             builder:
-                (context, state) => ModoPresencialScreen(
-                  treinoId: intPathParam(state, 'id')!,
-                  alunoId: int.tryParse(
+                (context, state) {
+                  final fromQuery = int.tryParse(
                     state.uri.queryParameters['alunoId'] ?? '',
-                  ),
-                ),
+                  );
+                  final extra = state.extra;
+                  int? fromExtra;
+                  if (extra is Map) {
+                    final raw = extra['alunoId'];
+                    if (raw is int) {
+                      fromExtra = raw;
+                    } else if (raw is num) {
+                      fromExtra = raw.toInt();
+                    } else if (raw is String) {
+                      fromExtra = int.tryParse(raw);
+                    }
+                  } else if (extra is int) {
+                    fromExtra = extra;
+                  }
+                  return ModoPresencialScreen(
+                    treinoId: intPathParam(state, 'id')!,
+                    alunoId: fromQuery ?? fromExtra,
+                  );
+                },
           ),
           GoRoute(
             path: '/alunos/:id/anamnese',

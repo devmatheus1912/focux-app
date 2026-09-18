@@ -22,7 +22,6 @@ class _Avatar extends StatelessWidget {
     const size = FxSettingsLayout.avatarSize;
     final inner = size - TokensStrip.s1;
     final chrome = ShellChrome.of(context);
-    final ring = chrome.cardFill;
     Widget avatarContent() {
       return Text(
         _initials(nome),
@@ -48,7 +47,11 @@ class _Avatar extends StatelessWidget {
                 padding: const EdgeInsets.all(TokensStrip.s1 / 2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: ring,
+                  color: primaryColor.withValues(alpha: 0.14),
+                  border: Border.all(
+                    color: primaryColor.withValues(alpha: 0.55),
+                    width: 2.5,
+                  ),
                   boxShadow: const [
                     BoxShadow(
                       color: EagleTokens.shadowSoft,
@@ -58,7 +61,7 @@ class _Avatar extends StatelessWidget {
                   ],
                 ),
                 child: CircleAvatar(
-                  backgroundColor: ring,
+                  backgroundColor: chrome.cardFill,
                   child:
                       logoUrl != null && logoUrl!.isNotEmpty
                           ? ClipOval(
@@ -87,7 +90,10 @@ class _Avatar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: primaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: ring, width: TokensStrip.s1 / 2),
+                  border: Border.all(
+                    color: chrome.cardFill,
+                    width: TokensStrip.s1 / 2,
+                  ),
                 ),
                 child:
                     loading

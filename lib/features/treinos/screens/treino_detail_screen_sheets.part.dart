@@ -62,7 +62,10 @@ Future<void> _dispatchTreinoDetailAction({
         }
       }
       if (aid == null || !context.mounted) break;
-      context.push('/treino-presencial/$treinoId?alunoId=$aid');
+      context.push(
+        '/treino-presencial/$treinoId?alunoId=$aid',
+        extra: {'alunoId': aid},
+      );
       break;
     case 'assign':
       try {

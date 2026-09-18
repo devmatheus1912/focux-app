@@ -545,7 +545,7 @@ class _FinanceiroMensalidadesTabState
                                     ),
                                   ),
                         ),
-                        if (_items.isNotEmpty && !_modoSelecao)
+                        if (!_modoSelecao)
                           SafeArea(
                             top: false,
                             child: Padding(
