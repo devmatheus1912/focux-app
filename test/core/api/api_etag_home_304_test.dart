@@ -18,7 +18,7 @@ class _EtagHomeAdapter implements HttpClientAdapter {
   final Map<String, dynamic> body;
   final List<String?> ifNoneMatch = [];
   final List<int> statusCodes = [];
-  var _etag = '"home-v1"';
+  final _etag = '"home-v1"';
 
   @override
   Future<ResponseBody> fetch(
