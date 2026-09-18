@@ -176,11 +176,11 @@ void main() {
         ),
         isAluno: false,
       ),
-      'Servidor indisponível no momento. Tente de novo em instantes.',
+      'Servidor indisponível, tente novamente',
     );
   });
 
-  test('mapAppleSignInError humaniza 503 / 401 / 400', () {
+  test('mapAppleSignInError humaniza 503 / 401 / 400 e nunca 4xx como offline', () {
     expect(
       mapAppleSignInError(
         DioException(
@@ -194,6 +194,38 @@ void main() {
         isAluno: false,
       ),
       contains('ainda não está ativo'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 401,
+            data: {
+              'erro': 'Nao foi possivel validar o token Apple.',
+            },
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: false,
+      ),
+      'Nao foi possivel validar o token Apple.',
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 401,
+            data: {'erro': 'Audience Apple invalida'},
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: true,
+      ),
+      'Audience Apple invalida',
     );
     expect(
       mapAppleSignInError(
@@ -222,6 +254,35 @@ void main() {
         isAluno: true,
       ),
       contains('e-mail'),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/apple'),
+            statusCode: 404,
+            data: {'erro': 'Personal não encontrado'},
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+        isAluno: true,
+      ),
+      'Personal não encontrado',
+    );
+    expect(
+      mapAppleSignInError(dio(401), isAluno: false),
+      isNot(contains('Sem conexão')),
+    );
+    expect(
+      mapAppleSignInError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/apple'),
+          type: DioExceptionType.connectionError,
+        ),
+        isAluno: false,
+      ),
+      'Sem conexão com o servidor.',
     );
   });
 

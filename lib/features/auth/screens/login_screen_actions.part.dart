@@ -42,6 +42,7 @@ extension on _LoginScreenState {
     HapticFeedback.mediumImpact();
 
     try {
+      logAuthApiUrl('login');
       if (_isAluno) {
         final slug = _effectivePersonalSlug;
         if (slug == null || slug.isEmpty) {
@@ -51,6 +52,13 @@ extension on _LoginScreenState {
           });
           return;
         }
+        logAuthHttpCall(
+          'login',
+          path: '/api/auth/login/aluno',
+          method: 'POST',
+          isAluno: true,
+          hasPersonalSlug: true,
+        );
         await ref
             .read(authProvider.notifier)
             .loginAluno(
@@ -59,6 +67,7 @@ extension on _LoginScreenState {
               personalSlug: slug,
             );
         if (!mounted) return;
+        logAuthHttpOk('login', path: '/api/auth/login/aluno');
         await PersonalSlugStore.save(slug);
         if (!mounted) return;
         _trackLogin(success: true, method: 'password');
@@ -70,10 +79,17 @@ extension on _LoginScreenState {
               : _postLoginRedirect(context, isAluno: true),
         );
       } else {
+        logAuthHttpCall(
+          'login',
+          path: '/api/auth/login',
+          method: 'POST',
+          isAluno: false,
+        );
         final result = await ref
             .read(authProvider.notifier)
             .login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
+        logAuthHttpOk('login', path: '/api/auth/login');
         if (await _maybeOpenMfa(result, method: 'password')) return;
         if (!mounted) return;
         _trackLogin(success: true, method: 'password');
@@ -83,14 +99,7 @@ extension on _LoginScreenState {
       }
     } catch (error) {
       HapticFeedback.heavyImpact();
-      if (error is DioException) {
-        debugPrint(
-          '[login] statusCode=${error.response?.statusCode} '
-          'type=${error.type.name} body=${error.response?.data}',
-        );
-      } else {
-        debugPrint('[login] error=$error');
-      }
+      logAuthHttpError('login', error);
       _trackLogin(
         success: false,
         method: 'password',
@@ -187,6 +196,7 @@ extension on _LoginScreenState {
     });
     HapticFeedback.mediumImpact();
     try {
+      logAuthApiUrl('login/apple');
       final credential = await const AppleSignInService().signIn();
       if (credential == null) return;
       if (_isAluno &&
@@ -194,6 +204,17 @@ extension on _LoginScreenState {
               _effectivePersonalSlug!.isEmpty)) {
         throw StateError('PERSONAL_SLUG_REQUIRED');
       }
+      logAuthHttpCall(
+        'login/apple',
+        path: '/api/auth/apple',
+        method: 'POST',
+        isAluno: _isAluno,
+        hasPersonalSlug:
+            _isAluno &&
+            _effectivePersonalSlug != null &&
+            _effectivePersonalSlug!.isNotEmpty,
+        identityTokenLen: credential.identityToken.length,
+      );
       final result = await ref
           .read(authProvider.notifier)
           .loginApple(
@@ -204,6 +225,7 @@ extension on _LoginScreenState {
             personalSlug: _isAluno ? _effectivePersonalSlug : null,
           );
       if (!mounted) return;
+      logAuthHttpOk('login/apple', path: '/api/auth/apple');
       if (!_isAluno && await _maybeOpenMfa(result, method: 'apple')) {
         return;
       }
@@ -219,6 +241,7 @@ extension on _LoginScreenState {
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
+      logAuthHttpError('login/apple', error, path: '/api/auth/apple');
       _trackLogin(
         success: false,
         method: 'apple',

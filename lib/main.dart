@@ -13,6 +13,7 @@ import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/api/tls_certificate_pinning.dart';
 import 'core/auth/session_cache_evictor.dart';
+import 'core/config/env.dart';
 import 'core/crash/flutter_error_reporting.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
@@ -48,6 +49,7 @@ void main() {
       yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
     });
     GoogleFonts.config.allowRuntimeFetching = kDebugMode;
+    debugPrint('[Focux] Env.apiUrl=${Env.apiUrl}');
     try {
       TlsCertificatePinning.installGlobalOverrides();
     } catch (error, stack) {
