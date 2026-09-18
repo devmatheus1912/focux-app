@@ -22,8 +22,9 @@ void main() {
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('alunosHomeProvider'));
-    expect(screen, contains('listarPickerPagina'));
-    expect(screen, contains('busca: _query'));
+    expect(screen, contains('exerciciosDisponiveis'));
+    expect(screen, isNot(contains('listarPickerPagina')));
+    expect(screen, isNot(contains('busca: _query')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));

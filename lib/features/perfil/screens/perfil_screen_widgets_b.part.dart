@@ -4,6 +4,7 @@ class _Avatar extends StatelessWidget {
   final String nome;
   final String? logoUrl;
   final Color primaryColor;
+  final int profileScore;
   final VoidCallback onTap;
   final bool loading;
   final String semanticsLabel;
@@ -12,6 +13,7 @@ class _Avatar extends StatelessWidget {
     required this.nome,
     required this.logoUrl,
     required this.primaryColor,
+    required this.profileScore,
     required this.onTap,
     required this.loading,
     required this.semanticsLabel,
@@ -20,8 +22,10 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const size = FxSettingsLayout.avatarSize;
-    final inner = size - TokensStrip.s1;
+    final inner = size - TokensStrip.s3;
     final chrome = ShellChrome.of(context);
+    final progress = (profileScore.clamp(0, 100)) / 100.0;
+    final track = primaryColor.withValues(alpha: chrome.isDark ? 0.22 : 0.16);
     Widget avatarContent() {
       return Text(
         _initials(nome),
@@ -31,27 +35,34 @@ class _Avatar extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: semanticsLabel,
+      label: '$semanticsLabel. Perfil $profileScore por cento completo.',
       enabled: !loading,
       child: Stack(
         clipBehavior: Clip.none,
+        alignment: Alignment.center,
         children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CustomPaint(
+              painter: _ProfileScoreRingPainter(
+                progress: progress,
+                color: primaryColor,
+                trackColor: track,
+              ),
+            ),
+          ),
           Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: loading ? null : onTap,
               customBorder: const CircleBorder(),
               child: Container(
-                width: size,
-                height: size,
-                padding: const EdgeInsets.all(TokensStrip.s1 / 2),
+                width: size - 10,
+                height: size - 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: primaryColor.withValues(alpha: 0.14),
-                  border: Border.all(
-                    color: primaryColor.withValues(alpha: 0.55),
-                    width: 2.5,
-                  ),
+                  color: chrome.cardFill,
                   boxShadow: const [
                     BoxShadow(
                       color: EagleTokens.shadowSoft,
@@ -60,18 +71,16 @@ class _Avatar extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: CircleAvatar(
-                  backgroundColor: chrome.cardFill,
+                clipBehavior: Clip.antiAlias,
+                child: Center(
                   child:
                       logoUrl != null && logoUrl!.isNotEmpty
-                          ? ClipOval(
-                            child: Image.network(
-                              logoUrl!,
-                              width: inner,
-                              height: inner,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => avatarContent(),
-                            ),
+                          ? Image.network(
+                            logoUrl!,
+                            width: inner,
+                            height: inner,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => avatarContent(),
                           )
                           : avatarContent(),
                 ),
@@ -108,5 +117,45 @@ class _Avatar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _ProfileScoreRingPainter extends CustomPainter {
+  _ProfileScoreRingPainter({
+    required this.progress,
+    required this.color,
+    required this.trackColor,
+  });
+
+  final double progress;
+  final Color color;
+  final Color trackColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const stroke = 3.2;
+    final rect = Offset.zero & size;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke
+          ..strokeCap = StrokeCap.round;
+    paint.color = trackColor;
+    canvas.drawArc(rect.deflate(stroke / 2), 0, 6.283185307179586, false, paint);
+    paint.color = color;
+    canvas.drawArc(
+      rect.deflate(stroke / 2),
+      -1.5707963267948966,
+      6.283185307179586 * progress.clamp(0.0, 1.0),
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProfileScoreRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.trackColor != trackColor;
   }
 }

@@ -223,9 +223,9 @@ class _FeedbackExercicioPickerSheetState
           FxHomeSheetHandle(isDark: isDark),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Exercício',
-            subtitle: 'Busque pelo nome ou carregue mais.',
-            leading: Icon(Icons.fitness_center_outlined, color: primary, size: 20),
+            title: 'Exercício do feedback',
+            subtitle: 'Lista dos exercícios disponíveis para feedback de vídeo.',
+            leading: Icon(Icons.videocam_outlined, color: primary, size: 20),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(

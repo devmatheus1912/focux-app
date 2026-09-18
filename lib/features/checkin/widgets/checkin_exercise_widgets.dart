@@ -7,8 +7,10 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
@@ -202,17 +204,22 @@ class CheckinSerieCard extends StatelessWidget {
               const SizedBox(height: TokensStrip.s1),
               TextButton(
                 onPressed: () async {
-                  final items = <FxInsetPickerSheetItem<String>>[
+                  final actions = <({
+                    String id,
+                    String label,
+                    String subtitle,
+                    IconData icon,
+                  })>[
                     if (onAjustar != null)
-                      const FxInsetPickerSheetItem(
-                        value: 'ajustar',
+                      (
+                        id: 'ajustar',
                         label: 'Ajustar',
                         subtitle: 'Carga, reps e RPE',
                         icon: Icons.tune_rounded,
                       ),
                     if (onConfirmarRestante != null)
-                      FxInsetPickerSheetItem(
-                        value: 'confirmar',
+                      (
+                        id: 'confirmar',
                         label: checkinConfirmarRestanteLabel(
                           feitas: ee.seriesFeitas,
                           total: ee.series,
@@ -221,34 +228,77 @@ class CheckinSerieCard extends StatelessWidget {
                         icon: Icons.done_all_rounded,
                       ),
                     if (onDesfazer != null)
-                      FxInsetPickerSheetItem(
-                        value: 'desfazer',
+                      (
+                        id: 'desfazer',
                         label: checkinDesfazerLabel(),
                         subtitle: 'Remove a última série',
                         icon: Icons.undo_rounded,
                       ),
                     if (onOpenCoach != null)
-                      const FxInsetPickerSheetItem(
-                        value: 'postura',
+                      (
+                        id: 'postura',
                         label: 'Postura',
                         subtitle: 'Dicas de execução',
                         icon: Icons.accessibility_new_rounded,
                       ),
                     if (onOpenDemo != null && !hasDemo)
-                      const FxInsetPickerSheetItem(
-                        value: 'demo',
+                      (
+                        id: 'demo',
                         label: 'Demonstração',
                         subtitle: 'Vídeo do exercício',
                         icon: Icons.play_circle_outline_rounded,
                       ),
                   ];
-                  if (items.isEmpty) return;
-                  final picked = await showFxInsetPickerSheet<String>(
+                  if (actions.isEmpty) return;
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final primary = Theme.of(context).colorScheme.primary;
+                  final soft = BrandPalette.softened(primary);
+                  final picked = await showFxHomeSheet<String>(
                     context,
-                    title: 'Mais na série',
-                    subtitle: 'Ajustes e ações secundárias',
-                    headerIcon: Icons.more_horiz_rounded,
-                    items: items,
+                    builder: (ctx) {
+                      return FxHomeSheetSurface(
+                        isDark: isDark,
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FxHomeSheetHandle(isDark: isDark),
+                            const SizedBox(height: 8),
+                            FxHomeSheetHeader(
+                              isDark: isDark,
+                              title: 'Mais na série',
+                              subtitle: 'Ajustes e ações secundárias',
+                              leading: Icon(
+                                Icons.more_horiz_rounded,
+                                color: soft,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            FxSettingsGroup(
+                              accent: primary,
+                              children: [
+                                for (var i = 0; i < actions.length; i++)
+                                  FxSettingsTile(
+                                    icon: actions[i].icon,
+                                    accent: soft,
+                                    label: actions[i].label,
+                                    subtitle: actions[i].subtitle,
+                                    value: '',
+                                    picker: true,
+                                    showDivider: i < actions.length - 1,
+                                    onTap:
+                                        () => Navigator.of(
+                                          ctx,
+                                        ).pop(actions[i].id),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   );
                   switch (picked) {
                     case 'ajustar':
