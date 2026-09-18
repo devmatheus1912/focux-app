@@ -12,25 +12,46 @@ class Env {
   Env._();
 
   /// HTTP base URL for the Focux backend (no trailing slash).
+  ///
+  /// Prefer the brand API host. Railway continua válido via `--dart-define=API_URL=...`.
+  /// Pins TLS de **ambos** os hosts entram em [apiCertPins] para o release não
+  /// quebrar se o binário e o secret divergirem de host.
   static const String apiUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'https://focux-backend-production.up.railway.app',
+    defaultValue: 'https://api.focuxpersonal.com',
   );
 
-  /// SHA-256 pins opcionais para IAP/pagamentos (`sha256/<base64>` ou só base64).
+  /// SHA-256 pins (`sha256/<base64>` ou só base64), separados por vírgula.
   /// Ex.: `--dart-define=API_CERT_PINS=sha256/abc...,sha256/def...`
   static const String _apiCertPinsRaw = String.fromEnvironment(
     'API_CERT_PINS',
     defaultValue: '',
   );
 
+  /// Leaf pins atuais (2026-09-18) — Railway + api.focuxpersonal.com.
+  /// Sempre unidos ao dart-define para o app falar com qualquer um dos hosts.
+  static const List<String> _builtinApiCertPins = [
+    // focux-backend-production.up.railway.app
+    'sha256/56ZylJhguSmnkPgt0hUNGj/AjFqCOm0Px/OmO5WdBRE=',
+    // api.focuxpersonal.com
+    'sha256/BWjzG+rPlj+2cnDnbI+4LLj9z1hOazfNYvbzUZMkazA=',
+  ];
+
   static List<String> get apiCertPins {
-    if (_apiCertPinsRaw.isEmpty) return const [];
-    return _apiCertPinsRaw
-        .split(',')
-        .map((p) => p.trim())
-        .where((p) => p.isNotEmpty)
-        .toList();
+    final fromDefine =
+        _apiCertPinsRaw.isEmpty
+            ? const <String>[]
+            : _apiCertPinsRaw
+                .split(',')
+                .map((p) => p.trim())
+                .where((p) => p.isNotEmpty)
+                .toList();
+    if (fromDefine.isEmpty) return List<String>.from(_builtinApiCertPins);
+    final merged = <String>{
+      ...fromDefine.map((p) => p.trim()),
+      ..._builtinApiCertPins,
+    };
+    return merged.where((p) => p.isNotEmpty).toList();
   }
 
   /// Em release store: falha sem pins. Preferir `true` nos scripts build-*.sh.
@@ -92,7 +113,8 @@ class Env {
   static bool get isProd =>
       apiUrl.contains('focux-backend.onrender.com') ||
       apiUrl.contains('up.railway.app') ||
-      apiUrl.contains('api.focux.app');
+      apiUrl.contains('api.focux.app') ||
+      apiUrl.contains('api.focuxpersonal.com');
 
   static String get _webBase {
     final base = publicWebUrl.endsWith('/')
