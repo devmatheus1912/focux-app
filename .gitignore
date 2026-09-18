@@ -118,3 +118,7 @@ tool/monolith_audit.py
 # Local coverage
 coverage/
 *.lcov
+
+# QA gap screenshots / local dumps (never public)
+.tmp-gaps/
+.tmp-*/
