@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 
 class DashboardHeaderProfileAvatar extends StatelessWidget {
   const DashboardHeaderProfileAvatar({
@@ -75,8 +76,8 @@ class DashboardHeaderProfileAvatar extends StatelessWidget {
                   child: ClipOval(
                     child:
                         photoUrl != null && photoUrl!.isNotEmpty
-                            ? Image.network(
-                              photoUrl!,
+                            ? FxCachedNetworkImage(
+                              imageUrl: photoUrl!,
                               width: avatarRadius * 2,
                               height: avatarRadius * 2,
                               fit: BoxFit.cover,

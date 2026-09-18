@@ -1,14 +1,17 @@
 import '../data/dashboard_repository.dart';
 
-/// Cache client do BFF `/home` alinhado ao TTL BE (`dashboard-home` = 90s).
-abstract final class DashboardHomeClientCache {
-  static const ttl = Duration(seconds: 90);
+/// Cache client do BFF `/api/dashboard/aluno/home` (TTL BE = 60s).
+///
+/// SWR: após [ttl] ainda serve [staleTtl] e refresh em background.
+abstract final class AlunoDashboardHomeClientCache {
+  static const ttl = Duration(seconds: 60);
   static const staleTtl = Duration(minutes: 5);
 
-  static DashboardHomeBundle? _bundle;
+  static AlunoDashboardHomeBundle? _bundle;
   static DateTime? _fetchedAt;
+  static bool _refreshing = false;
 
-  static DashboardHomeBundle? getIfFresh({DateTime? now}) {
+  static AlunoDashboardHomeBundle? getIfFresh({DateTime? now}) {
     final bundle = _bundle;
     final at = _fetchedAt;
     if (bundle == null || at == null) return null;
@@ -17,7 +20,8 @@ abstract final class DashboardHomeClientCache {
     return bundle;
   }
 
-  static DashboardHomeBundle? getEvenIfStale({DateTime? now}) {
+  /// Serve expirado até [staleTtl] (stale-while-revalidate).
+  static AlunoDashboardHomeBundle? getEvenIfStale({DateTime? now}) {
     final bundle = _bundle;
     final at = _fetchedAt;
     if (bundle == null || at == null) return null;
@@ -29,7 +33,15 @@ abstract final class DashboardHomeClientCache {
     return bundle;
   }
 
-  static void put(DashboardHomeBundle bundle, {DateTime? now}) {
+  static bool claimRefresh() {
+    if (_refreshing) return false;
+    _refreshing = true;
+    return true;
+  }
+
+  static void releaseRefresh() => _refreshing = false;
+
+  static void put(AlunoDashboardHomeBundle bundle, {DateTime? now}) {
     _bundle = bundle;
     _fetchedAt = now ?? DateTime.now();
   }
@@ -37,6 +49,7 @@ abstract final class DashboardHomeClientCache {
   static void clear() {
     _bundle = null;
     _fetchedAt = null;
+    _refreshing = false;
   }
 
   static DateTime? get fetchedAt => _fetchedAt;

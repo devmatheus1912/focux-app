@@ -49,12 +49,14 @@ class DashboardAderenciaTopItem {
 class DashboardPulseSnapshot {
   final int? checkinsHoje;
   final int? mensagensNaoLidas;
+  final int? coachPendentes;
   final List<int> checkinsTrend;
   final String? emptyHint;
 
   const DashboardPulseSnapshot({
     this.checkinsHoje,
     this.mensagensNaoLidas,
+    this.coachPendentes,
     this.checkinsTrend = const [],
     this.emptyHint,
   });
@@ -64,6 +66,8 @@ class DashboardPulseSnapshot {
     return DashboardPulseSnapshot(
       checkinsHoje: (json['checkinsHoje'] as num?)?.toInt(),
       mensagensNaoLidas: (json['mensagensNaoLidas'] as num?)?.toInt(),
+      coachPendentes: (json['coachPendentes'] as num?)?.toInt() ??
+          (json['coachPending'] as num?)?.toInt(),
       checkinsTrend:
           trendRaw
               .map((e) => (e as num?)?.toInt() ?? 0)
@@ -192,9 +196,15 @@ class DashboardRepository {
 
   DashboardRepository(ApiClient client) : _dio = client.dio;
 
-  Future<DashboardHomeBundle> getHome() async {
+  /// `null` = HTTP 304 (ETag) — caller deve reusar ClientCache.
+  Future<DashboardHomeBundle?> getHome() async {
     final response = await _dio.get('/api/dashboard/home');
-    return DashboardHomeBundle.fromJson(response.data as Map<String, dynamic>);
+    if (response.statusCode == 304) return null;
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw StateError('GET /api/dashboard/home: body inválido');
+    }
+    return DashboardHomeBundle.fromJson(data);
   }
 
   static const iaCommandActionsPageSize = 20;
@@ -251,11 +261,15 @@ class DashboardRepository {
     );
   }
 
-  Future<AlunoDashboardHomeBundle> getAlunoHome() async {
+  /// `null` = HTTP 304 (ETag) — caller deve reusar ClientCache.
+  Future<AlunoDashboardHomeBundle?> getAlunoHome() async {
     final response = await _dio.get('/api/dashboard/aluno/home');
-    return AlunoDashboardHomeBundle.fromJson(
-      response.data as Map<String, dynamic>,
-    );
+    if (response.statusCode == 304) return null;
+    final data = response.data;
+    if (data is! Map<String, dynamic>) {
+      throw StateError('GET /api/dashboard/aluno/home: body inválido');
+    }
+    return AlunoDashboardHomeBundle.fromJson(data);
   }
 }
 
@@ -347,14 +361,37 @@ class AlunoDashboardHomeBundle {
         (raw as List? ?? const [])
             .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
             .toList();
-    List<MedidaCorporal> parseMedidas(dynamic raw) =>
-        (raw as List? ?? const [])
-            .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
-            .toList();
-    List<CoachMensagem> parseCoach(dynamic raw) =>
-        (raw as List? ?? const [])
-            .map((e) => CoachMensagem.fromJson(e as Map<String, dynamic>))
-            .toList();
+    List<ExecucaoTreino> parseHistorico(Map<String, dynamic> json) {
+      final resumo = json['historicoResumo'];
+      if (resumo is List && resumo.isNotEmpty) {
+        return resumo
+            .whereType<Map>()
+            .map(
+              (e) => ExecucaoTreino.fromHistoricoResumoJson(
+                Map<String, dynamic>.from(e),
+              ),
+            )
+            .toList(growable: false);
+      }
+      return parseExec(json['historico']);
+    }
+    List<MedidaCorporal> parseMedidas(dynamic raw) {
+      final list =
+          (raw as List? ?? const [])
+              .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
+              .toList();
+      // Caps client se o BFF ainda mandar dump completo.
+      if (list.length <= 5) return list;
+      return list.sublist(0, 5);
+    }
+    List<CoachMensagem> parseCoach(dynamic raw) {
+      final list =
+          (raw as List? ?? const [])
+              .map((e) => CoachMensagem.fromJson(e as Map<String, dynamic>))
+              .toList();
+      if (list.length <= 5) return list;
+      return list.sublist(0, 5);
+    }
     List<AlunoOferta> parseUpsell(dynamic raw) =>
         (raw as List? ?? const [])
             .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
@@ -370,15 +407,21 @@ class AlunoDashboardHomeBundle {
         (evolucaoHome is Map ? evolucaoHome['recordes'] : null);
 
     return AlunoDashboardHomeBundle(
-      aluno: Aluno.fromJson(json['aluno'] as Map<String, dynamic>),
+      aluno: Aluno.fromJson(
+        Map<String, dynamic>.from(json['aluno'] as Map),
+      ),
       personalBrand: PersonalBrand.fromJson(
-        json['personalBrand'] as Map<String, dynamic>? ?? const {},
+        Map<String, dynamic>.from(
+          (json['personalBrand'] as Map?) ?? const {},
+        ),
       ),
       treinos: parseExec(json['treinos']),
-      historico: parseExec(json['historico']),
+      historico: parseHistorico(json),
       medidas: parseMedidas(json['medidas']),
       chat: AlunoDashboardChatResumo.fromJson(
-        json['chat'] as Map<String, dynamic>?,
+        json['chat'] is Map
+            ? Map<String, dynamic>.from(json['chat'] as Map)
+            : null,
       ),
       notificacoesNaoLidas:
           (json['notificacoesNaoLidas'] as num?)?.toInt() ?? 0,

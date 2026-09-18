@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno_media_utils.dart';
 
@@ -59,8 +60,8 @@ class AlunoAvatar extends StatelessWidget {
 
     final face =
         resolvedUrl != null
-            ? Image.network(
-              resolvedUrl,
+            ? FxCachedNetworkImage(
+              imageUrl: resolvedUrl,
               width: inner,
               height: inner,
               fit: BoxFit.cover,

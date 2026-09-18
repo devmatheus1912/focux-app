@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'api_client_connection_pool.dart';
+import 'api_etag_store.dart';
 import '../auth/session_invalidator.dart';
 import '../config/env.dart';
 import '../planos/plano_cache_policy.dart';
@@ -24,6 +25,8 @@ class ApiClient {
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
+        // 304 Not Modified = sucesso (ETag / If-None-Match).
+        validateStatus: (status) => status != null && status >= 200 && status < 400,
       ),
     );
 
@@ -39,6 +42,17 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          if (options.method.toUpperCase() == 'GET' &&
+              options.extra['fxSkipEtag'] != true) {
+            final key = ApiEtagStore.keyFor(
+              method: options.method,
+              path: options.path,
+            );
+            final etag = ApiEtagStore.get(key);
+            if (etag != null && etag.isNotEmpty) {
+              options.headers['If-None-Match'] = etag;
+            }
+          }
           if (_shouldUseIdempotency(options) &&
               !_hasHeader(options.headers, 'Idempotency-Key')) {
             final scope = options.extra[_idempotencyScopeKey];
@@ -51,14 +65,26 @@ class ApiClient {
         },
         onResponse: (response, handler) {
           final method = response.requestOptions.method.toUpperCase();
-          if (method == 'GET' && response.statusCode == 200) {
-            final path = response.requestOptions.path;
-            if (_shouldCachePath(path)) {
-              LocalCache.put(
-                LocalCache.keyFor(response.requestOptions),
-                response.data,
-                ttl: _cacheTtlForPath(path),
+          if (method == 'GET') {
+            final etag = response.headers.value('etag');
+            if (etag != null && etag.isNotEmpty) {
+              ApiEtagStore.put(
+                ApiEtagStore.keyFor(
+                  method: method,
+                  path: response.requestOptions.path,
+                ),
+                etag,
               );
+            }
+            if (response.statusCode == 200) {
+              final path = response.requestOptions.path;
+              if (_shouldCachePath(path)) {
+                LocalCache.put(
+                  LocalCache.keyFor(response.requestOptions),
+                  response.data,
+                  ttl: _cacheTtlForPath(path),
+                );
+              }
             }
           }
           handler.next(response);
@@ -209,6 +235,8 @@ class ApiClient {
         sendTimeout: const Duration(seconds: 30),
         headers: const {'Content-Type': 'application/json'},
         persistentConnection: false,
+        validateStatus: (status) =>
+            status != null && status >= 200 && status < 400,
       ),
     );
     TlsCertificatePinning.apply(d);
