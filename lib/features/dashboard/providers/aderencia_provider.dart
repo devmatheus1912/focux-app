@@ -1,7 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../data/dashboard_repository.dart';
-import 'dashboard_provider.dart';
 
 class AderenciaAlunoResumo {
   final int alunoId;
@@ -31,13 +28,3 @@ class AderenciaAlunoResumo {
     );
   }
 }
-
-/// Top 3 aderência — preferencialmente do BFF `/api/dashboard/home` (sem N+1).
-final aderenciaTop3Provider = FutureProvider<List<AderenciaAlunoResumo>>((
-  ref,
-) async {
-  final home = await ref.watch(dashboardHomeProvider.future);
-  return home.topAderencia
-      .map(AderenciaAlunoResumo.fromHomeItem)
-      .toList(growable: false);
-});

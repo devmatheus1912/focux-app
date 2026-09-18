@@ -4,8 +4,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(dashboardHomeProvider);
-    final coachPendingSelect = ref.watch(personalHomeCoachPendentesSelectProvider);
-    final chatUnreadSelect = ref.watch(personalHomeChatUnreadSelectProvider);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final chromeOnDark = themeDark;
@@ -33,8 +31,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (home) {
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
-                final coachPending =
-                    home.pulse?.coachPendentes ?? coachPendingSelect;
+                final coachPending = home.pulse?.coachPendentes ?? 0;
 
                 if (_homeFetchedAt == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,7 +84,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   home: home,
                   finData: home.financeiro,
                   alunos: null,
-                  historicoCheckins: null,
                   commandCenter: home.commandCenter,
                   focusMode: _focusMode,
                   isCommandPreparing: false,
@@ -174,7 +170,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     DashboardHomeClientCache.clear();
                     PlanoFeaturesBffCache.clear();
                     ref.invalidate(dashboardHomeProvider);
-                    ref.invalidate(coachHomeProvider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
                     await _loadFinFromHome();
@@ -212,8 +207,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             prioritiesSheetActions: prioritiesSheetActions,
                             showPrioritiesLink: showPrioritiesLink,
                             commandPanelKey: _commandPanelKey,
-                            mensagensNaoLidas:
-                                home.pulse?.mensagensNaoLidas ?? chatUnreadSelect,
+                            mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
                             commandFade: _commandFade,
                             kpiFade: _kpiFade,
                             isCommandPreparing: false,

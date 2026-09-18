@@ -26,9 +26,3 @@ Duration dashboardMotionDuration(
   BuildContext context, {
   Duration normal = const Duration(milliseconds: 220),
 }) => TokensStrip.prefersReducedMotion(context) ? Duration.zero : normal;
-
-/// Stagger leve entre chips do pulso (respeita reduce motion).
-Duration dashboardStaggerDelay(BuildContext context, int index) {
-  if (TokensStrip.prefersReducedMotion(context)) return Duration.zero;
-  return Duration(milliseconds: 40 * index.clamp(0, 4));
-}
