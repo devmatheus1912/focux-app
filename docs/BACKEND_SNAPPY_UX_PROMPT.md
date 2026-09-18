@@ -1,7 +1,11 @@
 # Prompt backend — alinhar BFF 100% (snappy UX / produção)
 
-> **Como usar:** abra este arquivo no agente do `focux-backend` (ou cole o conteúdo integral).  
-> **App já pronto:** `focux-app` PR [#109](https://github.com/devmatheus1912/focux-app/pull/109) — `1.2.1+84` — branch `cursor/perf-snappy-ux-cd16`.  
+> **Status:** backend implementado em `focux-backend` PR **#75**.  
+> App paridade: `focux-app` `1.2.1+85` (branch `cursor/bff-parity-snappy-cd16`).  
+> Este doc permanece como referência histórica do pedido; o contrato vivo está em `docs/CONTRATO_APP_BACKEND.md` §9.
+
+> **Como usar (legado):** abra este arquivo no agente do `focux-backend` (ou cole o conteúdo integral).  
+> **App base:** PR [#109](https://github.com/devmatheus1912/focux-app/pull/109) — `1.2.1+84`.  
 > **Objetivo:** implementar o lado servidor completo, sem defer, alinhado ao contrato que o app já consome.
 
 ---
@@ -12,8 +16,8 @@ O Flutter já está production-ready e tolera API antiga **e** nova:
 
 | Lado | Estado |
 |------|--------|
-| App | ClientCache SWR, ETag/`If-None-Match`, `historicoResumo`, caps, `pulse.coachPendentes`, imagens cacheadas |
-| Backend | Falta slim no BFF, ETag/304, N+1 zero, caps server, Redis/evict, `pulse.coachPendentes` |
+| App | ClientCache SWR, ETag/`If-None-Match`, `historicoResumo`, caps, `pulse.coachPendentes`, imagens cacheadas — **paridade 1.2.1+85** |
+| Backend | **#75** — slim BFF, ETag/304, caps, `pulse.coachPendentes`, TTL 60s/90s |
 
 ### Fontes canônicas
 

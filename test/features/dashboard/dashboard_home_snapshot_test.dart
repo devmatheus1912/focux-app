@@ -64,6 +64,7 @@ void main() {
         pulse: const DashboardPulseSnapshot(
           checkinsHoje: 0,
           mensagensNaoLidas: 3,
+          coachPendentes: 4,
           checkinsTrend: [0, 0, 1, 0, 2, 0, 0],
         ),
         dayFocus: const DashboardDayFocus(
@@ -90,6 +91,7 @@ void main() {
       expect(snap.checkinsHoje, 0);
       expect(snap.checkinsTrend, [0.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0]);
       expect(snap.unreadCount, 3);
+      expect(home.pulse?.coachPendentes, 4);
       expect(snap.alunosEmRisco, isNotEmpty);
       expect(snap.alunosEmRisco.first.nome, 'Ana');
       expect(snap.focusRules.hideFeaturedTools, isTrue);

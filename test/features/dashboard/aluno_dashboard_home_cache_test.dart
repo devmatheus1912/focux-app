@@ -86,6 +86,27 @@ void main() {
     expect(bundle.historico.first.id, 7);
   });
 
+  test('historicoResumo vazio (chave presente) não cai no dump legado', () {
+    final bundle = AlunoDashboardHomeBundle.fromJson({
+      'aluno': {'id': 1, 'nome': 'A', 'email': 'a@t.com', 'status': 'ATIVO'},
+      'personalBrand': {},
+      'treinos': [],
+      'historicoResumo': [],
+      'historico': [
+        {
+          'id': 99,
+          'treinoId': 1,
+          'treinoNome': 'LEGADO',
+          'status': 'CONCLUIDO',
+          'exercicios': [],
+        },
+      ],
+      'medidas': [],
+      'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
+    });
+    expect(bundle.historico, isEmpty);
+  });
+
   test('fallback historico dump: slim + cap 12', () {
     final items = List.generate(
       20,
