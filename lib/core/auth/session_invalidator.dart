@@ -7,12 +7,14 @@ import '../../features/alunos/data/aluno_followup_store.dart';
 import '../../features/alunos/utils/aluno360_client_cache.dart';
 import '../../features/alunos/utils/alunos_home_client_cache.dart';
 import '../../features/checkin/data/meus_treinos_mem_cache.dart';
+import '../../features/dashboard/utils/aluno_dashboard_home_client_cache.dart';
 import '../../features/dashboard/utils/dashboard_home_client_cache.dart';
 import '../../features/evolucao/utils/evolucao_home_client_cache.dart';
 import '../../features/exercicios/data/biblioteca_wizard_draft.dart';
 import '../../features/growth/data/migracao_magica_draft_cache.dart';
 import '../../features/onboarding/data/onboarding_wizard_client_cache.dart';
 import '../../features/planos/data/plano_features_bff_cache.dart';
+import '../api/api_etag_store.dart';
 import '../api/offline_sync_service.dart';
 import '../cache/offline_cache.dart';
 import '../health/health_service.dart';
@@ -53,11 +55,13 @@ class SessionInvalidator {
     AlunosHomeClientCache.clear();
     Aluno360ClientCache.clear();
     DashboardHomeClientCache.clear();
+    AlunoDashboardHomeClientCache.clear();
     PlanoFeaturesBffCache.clear();
     EvolucaoHomeClientCache.clear();
     AgendaWeekClientCache.clear();
     OnboardingWizardClientCache.clear();
     BibliotecaWizardDraftCache.clear();
+    ApiEtagStore.clear();
   }
 
   static Future<void> _clearEntitlementCaches() async {
