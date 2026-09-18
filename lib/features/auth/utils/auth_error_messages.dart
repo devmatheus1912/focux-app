@@ -5,9 +5,9 @@ import '../../../core/api/api_error.dart';
 
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
 ///
-/// `codigo` é a fonte primária. Status 401 continua como fallback para
-/// backend antigo sem o campo. O texto de `erro` no servidor não é
-/// reescrito nem exibido cru.
+/// `codigo` é a fonte primária. Status HTTP com body nunca vira "sem conexão":
+/// 401 → credenciais, 400 → validação, 502/503 → indisponível. Só falha de
+/// transporte (timeout / connectionError / SocketException) usa offline.
 String mapLoginError(Object error) {
   final api = ApiError.from(error);
   final codigo = api?.codigo;
@@ -16,18 +16,82 @@ String mapLoginError(Object error) {
   }
   if (error is DioException) {
     final statusCode = error.response?.statusCode ?? api?.status;
-    if (statusCode == null) return 'Sem conexão com o servidor.';
-    if (statusCode == 401) return _loginCredenciaisCopy;
-    if (statusCode == 429) {
-      return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+
+    // Resposta HTTP chegou — nunca tratar como falha de rede.
+    if (statusCode != null) {
+      if (statusCode == 401) return _loginCredenciaisCopy;
+      if (statusCode == 400) return _loginValidationCopy(error, api);
+      if (statusCode == 429) {
+        return 'Muitas tentativas. Aguarde um pouco e tente de novo.';
+      }
+      if (statusCode == 502 || statusCode == 503) {
+        return _loginServidorIndisponivelCopy;
+      }
+      return 'Não foi possível entrar agora.';
     }
+
+    if (_isLoginTransportFailure(error)) {
+      return 'Sem conexão com o servidor.';
+    }
+    return 'Não foi possível entrar agora.';
+  }
+  if (_looksLikeSocketFailure(error)) {
+    return 'Sem conexão com o servidor.';
   }
   return 'Não foi possível entrar agora.';
 }
 
-const _loginCredenciaisCopy =
-    'Email ou senha incorretos. '
-    'Se você entrou com Google, use o botão Google ou redefina a senha.';
+const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
+
+const _loginServidorIndisponivelCopy =
+    'Servidor indisponível, tente novamente';
+
+/// 400 de validação: detalhes de campo do contrato, senão `erro` do body.
+String _loginValidationCopy(DioException error, ApiError? api) {
+  final detalhes = api?.detalhes;
+  if (detalhes != null && detalhes.isNotEmpty) {
+    final fields = detalhes.entries
+        .map((e) {
+          final key = e.key.trim();
+          final value = e.value.trim();
+          if (key.isEmpty) return value;
+          if (value.isEmpty) return key;
+          return '$key: $value';
+        })
+        .where((s) => s.isNotEmpty)
+        .join(' ');
+    if (fields.isNotEmpty) {
+      return 'Dados inválidos. $fields';
+    }
+  }
+  return _backendMessage(error) ??
+      'Dados inválidos. Verifique e tente novamente.';
+}
+
+/// Timeout / connectionError / SocketException — sem response HTTP.
+bool _isLoginTransportFailure(DioException error) {
+  switch (error.type) {
+    case DioExceptionType.connectionTimeout:
+    case DioExceptionType.sendTimeout:
+    case DioExceptionType.receiveTimeout:
+    case DioExceptionType.connectionError:
+      return true;
+    case DioExceptionType.unknown:
+      return _looksLikeSocketFailure(error.error);
+    case DioExceptionType.badResponse:
+    case DioExceptionType.cancel:
+    case DioExceptionType.badCertificate:
+      return false;
+  }
+}
+
+bool _looksLikeSocketFailure(Object? error) {
+  if (error == null) return false;
+  final name = error.runtimeType.toString();
+  return name == 'SocketException' ||
+      name == 'HttpException' ||
+      name.contains('SocketException');
+}
 
 /// Extrai `message` do body JSON do backend, quando existir.
 String? _backendMessage(Object error) {

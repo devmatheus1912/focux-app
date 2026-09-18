@@ -43,8 +43,8 @@ void main() {
     expect(mapSignupCodeError(dio(429)), contains('Aguarde'));
   });
 
-  test('mapLoginError cobre 401 e rate limit', () {
-    expect(mapLoginError(dio(401)), contains('Email ou senha'));
+  test('mapLoginError cobre 401, 400, 502 e rede real', () {
+    expect(mapLoginError(dio(401)), 'E-mail ou senha inválidos');
     expect(mapLoginError(dio(429)), contains('Muitas tentativas'));
     expect(
       mapLoginError(
@@ -61,7 +61,50 @@ void main() {
           type: DioExceptionType.badResponse,
         ),
       ),
-      contains('Email ou senha'),
+      'E-mail ou senha inválidos',
+    );
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/auth/login'),
+            statusCode: 400,
+            data: {
+              'erro': 'Requisição inválida',
+              'detalhes': {'senha': 'não deve estar em branco'},
+            },
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      ),
+      'Dados inválidos. senha: não deve estar em branco',
+    );
+    expect(
+      mapLoginError(dio(400, 'Campo senha é obrigatório')),
+      'Campo senha é obrigatório',
+    );
+    expect(
+      mapLoginError(dio(502)),
+      'Servidor indisponível, tente novamente',
+    );
+    expect(
+      mapLoginError(dio(503)),
+      'Servidor indisponível, tente novamente',
+    );
+    // badResponse com status nunca vira "sem conexão"
+    expect(mapLoginError(dio(401)), isNot(contains('Sem conexão')));
+    expect(mapLoginError(dio(400)), isNot(contains('Sem conexão')));
+    // Só transporte real
+    expect(mapLoginError(dio(null)), 'Sem conexão com o servidor.');
+    expect(
+      mapLoginError(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      ),
+      'Sem conexão com o servidor.',
     );
     expect(mapEsqueciSenhaError(dio(null)), 'Sem conexão com o servidor.');
     expect(mapEsqueciSenhaError(dio(429)), contains('Muitas tentativas'));
