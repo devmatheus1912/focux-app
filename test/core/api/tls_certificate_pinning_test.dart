@@ -51,10 +51,12 @@ void main() {
     expect(pinning, contains('createPinnedHttpClient(pins)'));
     expect(pinning, contains('validateCertificate'));
     expect(pinning, contains('request.close()'));
+    expect(pinning, contains('cancelled = true'));
     expect(pool, contains('createPinnedHttpClient()'));
-    // recycle troca o adapter — não só fecha o client cacheado do Dio.
-    expect(pool, contains('TlsCertificatePinning.apply(dio)'));
-    expect(pool, contains('previous.close(force: true)'));
+    // Soft close — nunca force:true no resume (aborta Apple POST).
+    expect(pool, contains('previous.close(force: false)'));
+    expect(pool, isNot(contains('previous.close(force: true)')));
+    expect(pool, contains('kHttpPoolResumeRecycleMinAway'));
   });
 }
 
