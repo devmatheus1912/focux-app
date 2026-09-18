@@ -242,9 +242,9 @@ extension on _LoginScreenState {
 
   Future<void> _prefetchPersonalAfterLogin() async {
     try {
-      invalidateSessionUserCaches(ref);
-      ref.invalidate(perfilProvider);
-      prefetchPersonalDashboardHome(ref);
+      // `main.dart` já faz invalidateSessionUserCaches no flip authenticated.
+      // Segundo bust aqui matava o cache e flashava "Algo saiu do ar".
+      await prefetchPersonalDashboardHome(ref);
       prefetchAlunosHome(ref);
       await ref.read(perfilProvider.future);
     } catch (_) {

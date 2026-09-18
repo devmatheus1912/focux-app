@@ -20,6 +20,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
           body: SafeArea(
             bottom: false,
             child: homeAsync.when(
+              skipLoadingOnReload: true,
               loading: () => DashboardShimmerLoading(themeDark: themeDark),
               error:
                   (e, _) => DashboardErrorState(

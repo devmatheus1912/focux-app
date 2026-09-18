@@ -126,7 +126,14 @@ class ApiClient {
             try {
               final refreshToken = await SecureStorage.getRefreshToken();
               if (refreshToken != null) {
-                final refreshDio = Dio(BaseOptions(baseUrl: _baseUrl));
+                final refreshDio = Dio(
+                  BaseOptions(
+                    baseUrl: _baseUrl,
+                    connectTimeout: const Duration(seconds: 10),
+                    receiveTimeout: const Duration(seconds: 10),
+                    sendTimeout: const Duration(seconds: 10),
+                  ),
+                );
                 TlsCertificatePinning.apply(refreshDio);
                 final resp = await refreshDio.post(
                   '/api/auth/refresh',
@@ -142,7 +149,6 @@ class ApiClient {
                 // Retry original request with new token
                 e.requestOptions.headers['Authorization'] = 'Bearer $newToken';
                 final retryResp = await _dio.fetch(e.requestOptions);
-                _isRefreshing = false;
                 return handler.resolve(retryResp);
               }
             } catch (refreshErr) {
@@ -154,8 +160,9 @@ class ApiClient {
                   '[ApiClient] Refresh failed${status != null ? ' status=$status' : ''}',
                 );
               }
+            } finally {
+              _isRefreshing = false;
             }
-            _isRefreshing = false;
           }
 
           if (!_isRefreshing &&
@@ -185,6 +192,12 @@ class ApiClient {
   }
 
   Dio get dio => _dio;
+
+  /// Após longo background: destrava refresh pendente e recicla sockets idle.
+  void resetAfterAppResume() {
+    _isRefreshing = false;
+    recycleHttpConnectionPool(_dio);
+  }
 
   static bool _shouldUseIdempotency(RequestOptions options) {
     if (_isAuthPath(options.path)) return false;
