@@ -32,7 +32,6 @@ import '../utils/chat_remetente.dart';
 import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -533,7 +532,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             controller: _scroll,
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                            padding: EdgeInsets.fromLTRB(
+                              TokensStrip.s3,
+                              TokensStrip.s3,
+                              TokensStrip.s3,
+                              TokensStrip.s2,
+                            ),
                             itemCount:
                                 _msgs.length +
                                 (_hasMoreMessages || _loadingOlder ? 1 : 0),
@@ -597,10 +601,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                   // Scaffold already resizes the body above the keyboard.
                   // Do not add viewInsets here, or the composer jumps upward.
                   padding: EdgeInsets.fromLTRB(
-                    12,
-                    10,
-                    12,
-                    10 +
+                    TokensStrip.s3,
+                    TokensStrip.s2,
+                    TokensStrip.s3,
+                    TokensStrip.s2 +
                         (MediaQuery.of(context).viewInsets.bottom > 0
                             ? 0
                             : MediaQuery.of(context).padding.bottom),

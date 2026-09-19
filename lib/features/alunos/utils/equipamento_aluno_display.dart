@@ -1,7 +1,5 @@
 import '../../exercicios/data/enums.dart';
 
-String equipamentoChoiceValue(bool on) => on ? 'Sim' : 'Não';
-
 String equipamentoFxIcon(Equipamento equipamento) {
   return switch (equipamento) {
     Equipamento.barra ||

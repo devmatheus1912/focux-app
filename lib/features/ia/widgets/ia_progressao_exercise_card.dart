@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'ia_carga_chip.dart';
@@ -54,11 +55,11 @@ class IaProgressaoExerciseCard extends StatelessWidget {
               ],
               Text(
                 exercicio,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                style: FocuxHubTypography.body(
+                  color: fxScreenInk(context),
+                ).copyWith(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: TokensStrip.s3),
               Row(
                 children: [
                   Expanded(
@@ -69,7 +70,9 @@ class IaProgressaoExerciseCard extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TokensStrip.s2,
+                    ),
                     child: Icon(
                       Icons.arrow_forward_rounded,
                       color: primary,
@@ -87,13 +90,13 @@ class IaProgressaoExerciseCard extends StatelessWidget {
                 ],
               ),
               if (justificativa != null && justificativa!.isNotEmpty) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: TokensStrip.s3),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(TokensStrip.s3),
                   decoration: BoxDecoration(
                     color: TokensStrip.textSecondary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(TokensStrip.rSm),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,16 +106,15 @@ class IaProgressaoExerciseCard extends StatelessWidget {
                         size: 14,
                         color: TokensStrip.textSecondary,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: TokensStrip.s2),
                       Expanded(
                         child: IaExpandableCopy(
                           text: justificativa!,
                           expandLabel: 'Ler justificativa completa',
                           collapseLabel: 'Ver menos',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            height: 1.4,
+                          style: FocuxHubTypography.bodyMuted(
                             color: TokensStrip.textSecondary,
+                            height: 1.4,
                           ),
                         ),
                       ),
@@ -121,7 +123,7 @@ class IaProgressaoExerciseCard extends StatelessWidget {
                 ),
               ],
               if (footerActions != null) ...[
-                const SizedBox(height: 14),
+                const SizedBox(height: TokensStrip.s3),
                 footerActions!,
               ],
             ],

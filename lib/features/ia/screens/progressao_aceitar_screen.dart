@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -54,6 +55,7 @@ class _ProgressaoAceitarScreenState
       label: 'Sugestões pendentes de progressão',
       child: FxShellScaffold(
         useMesh: true,
+        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Sugestões pendentes',
           subtitle: args.alunoNome,
@@ -61,9 +63,11 @@ class _ProgressaoAceitarScreenState
           actions: [
             Semantics(
               button: true,
+              enabled: _actingOnId == null,
               label: 'Atualizar sugestões pendentes',
               child: IconButton(
-                icon: const Icon(Icons.refresh),
+                tooltip: 'Atualizar',
+                icon: const Icon(Icons.refresh_rounded),
                 onPressed:
                     _actingOnId == null
                         ? () => ref.invalidate(
@@ -151,14 +155,14 @@ class _ProgressaoAceitarScreenState
                   return IaProgressaoCardEntrance(
                     index: i,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
                       child: IaProgressaoExerciseCard(
                         exercicio: sugestao.exercicio,
                         cargaAtual: sugestao.cargaAtual,
                         cargaSugerida: sugestao.cargaSugerida,
                         justificativa: sugestao.justificativa,
                         deltaLabel: sugestao.deltaLabel,
-                        padding: const EdgeInsets.all(TokensStrip.s4),
+                        padding: const EdgeInsets.all(TokensStrip.s3),
                         header: Row(
                           children: [
                             AlunoAvatar(
@@ -169,17 +173,15 @@ class _ProgressaoAceitarScreenState
                               photoUrl: args.alunoFotoUrl,
                               variant: AlunoAvatarVariant.strip,
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: TokensStrip.s2),
                             Expanded(
                               child: Text(
                                 sugestao.alunoNome ??
                                     args.alunoNome ??
                                     'Aluno',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
+                                style: FocuxHubTypography.body(
                                   color: chrome.ink,
-                                ),
+                                ).copyWith(fontWeight: FontWeight.w700),
                               ),
                             ),
                           ],
@@ -212,12 +214,22 @@ class _ProgressaoAceitarScreenState
                                   label: const Text('Rejeitar'),
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: EagleTokens.bad,
+                                    side: BorderSide(
+                                      color: EagleTokens.bad.withValues(
+                                        alpha: 0.55,
+                                      ),
+                                    ),
                                     minimumSize: const Size(48, 48),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        TokensStrip.rCard,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: TokensStrip.s3),
                             Expanded(
                               child: Semantics(
                                 button: true,
@@ -234,10 +246,12 @@ class _ProgressaoAceitarScreenState
                                           ),
                                   icon:
                                       busy
-                                          ? const FxLoading(
+                                          ? FxLoading(
                                             size: 18,
                                             strokeWidth: 2,
-                                            color: Colors.white,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
                                           )
                                           : const Icon(
                                             Icons.check_rounded,
@@ -245,8 +259,15 @@ class _ProgressaoAceitarScreenState
                                           ),
                                   label: const Text('Aceitar'),
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: EagleTokens.good,
+                                    backgroundColor: primary,
+                                    foregroundColor:
+                                        Theme.of(context).colorScheme.onPrimary,
                                     minimumSize: const Size(48, 48),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        TokensStrip.rCard,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

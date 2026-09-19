@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
@@ -23,15 +24,23 @@ class ConversationAttachOption extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s4,
+          vertical: TokensStrip.s3,
+        ),
         decoration: fxListCardDecoration(context, accent: primary),
         child: Row(
           children: [
             Icon(icon, color: primary),
-            const SizedBox(width: 12),
-            Text(label),
+            const SizedBox(width: TokensStrip.s3),
+            Text(
+              label,
+              style: FocuxHubTypography.body(
+                color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+              ),
+            ),
           ],
         ),
       ),
@@ -56,10 +65,21 @@ class ConversationReplyComposerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = Theme.of(context).colorScheme.primary;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+      margin: const EdgeInsets.fromLTRB(
+        TokensStrip.s2,
+        TokensStrip.s2,
+        TokensStrip.s2,
+        0,
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s3,
+        TokensStrip.s2,
+        TokensStrip.s2,
+        TokensStrip.s2,
+      ),
       decoration: fxListCardDecoration(context, accent: accentColor),
       child: Row(
         children: [
@@ -71,31 +91,21 @@ class ConversationReplyComposerBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: TokensStrip.s2),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   sender,
-                  style: TextStyle(
-                    color: accentColor,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: FocuxHubTypography.chip(accentColor),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   preview,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color:
-                        isDark
-                            ? EagleTokens.darkInkMute
-                            : TokensStrip.textSecondary,
-                    fontSize: 12,
-                  ),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
               ],
             ),
@@ -132,13 +142,20 @@ class ConversationSearchState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 30, color: TokensStrip.textSecondary),
-            const SizedBox(height: 10),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 4),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              title,
+              style: FocuxHubTypography.body(
+                color: TokensStrip.textPrimary,
+              ).copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: TokensStrip.s1),
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: TokensStrip.textSecondary),
+              style: FocuxHubTypography.bodyMuted(
+                color: TokensStrip.textSecondary,
+              ),
             ),
           ],
         ),
@@ -168,8 +185,18 @@ class ConversationRecordingComposerBar extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+      margin: const EdgeInsets.fromLTRB(
+        TokensStrip.s2,
+        TokensStrip.s2,
+        TokensStrip.s2,
+        0,
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s3,
+        TokensStrip.s2,
+        TokensStrip.s2,
+        TokensStrip.s2,
+      ),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         children: [
@@ -181,28 +208,29 @@ class ConversationRecordingComposerBar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: TokensStrip.s2),
           Expanded(
             child: Text(
               'Gravando $duration',
-              style: TextStyle(
-                color: ink,
-                fontSize: 13,
+              style: FocuxHubTypography.body(color: ink).copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
           IconButton(
-            tooltip: 'Cancelar audio',
+            tooltip: 'Cancelar áudio',
             visualDensity: VisualDensity.compact,
             onPressed: onCancel,
             icon: Icon(Icons.delete_outline_rounded, color: mute),
           ),
           IconButton(
-            tooltip: 'Enviar audio',
+            tooltip: 'Enviar áudio',
             visualDensity: VisualDensity.compact,
             onPressed: onSend,
-            icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white),
+            icon: Icon(
+              Icons.arrow_upward_rounded,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             style: IconButton.styleFrom(
               backgroundColor: primary,
               minimumSize: const Size(32, 32),

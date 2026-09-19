@@ -185,8 +185,9 @@ String relatorioAlunoHubSubtitle({
   required String alunoNome,
   required int diasAnalisados,
 }) {
-  if (diasAnalisados <= 0) return alunoNome;
-  return '$alunoNome · $diasAnalisados dias';
+  if (diasAnalisados <= 0) return 'Aderência do aluno';
+  if (diasAnalisados == 1) return 'Recorte de 1 dia';
+  return 'Recorte de $diasAnalisados dias';
 }
 
 String relatorioAlunoPeriodoMetricValue(int diasAnalisados) {

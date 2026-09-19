@@ -185,8 +185,10 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       final ok = await showFxConfirmSheet(
         context,
         title: 'Confirmar presença?',
-        message: '$title\n$when',
+        subtitle: title,
+        message: when,
         confirmLabel: 'Confirmar',
+        confirmIcon: Icons.check_rounded,
         icon: Icons.event_available_rounded,
       );
       if (!ok || !mounted) return;
@@ -358,11 +360,11 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
           : ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 FxSettingsLayout.pageInset,
-                8,
+                TokensStrip.s2,
                 FxSettingsLayout.pageInset,
-                32,
+                TokensStrip.s5,
               ),
               itemCount: _ags.length + (_hasMore ? 1 : 0),
               itemBuilder: (_, i) {
@@ -378,20 +380,28 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                   isDark: isDark,
                   primary: primary,
                 );
+                final needsConfirm = agendaStatusNeedsConfirm(ag.status);
                 return FxSatelliteListTile(
                   title: agendaAlunoDefaultTitle(ag.titulo),
                   titleCase: false,
                   accent: cor,
                   subtitle: Text(agendaAlunoWhenLabel(ag.inicio, ag.fim)),
-                  trailing: Text(
-                    agendaStatusNeedsConfirm(ag.status)
-                        ? 'Confirmar'
-                        : agendaStatusLabel(ag.status),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: cor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  trailing:
+                      needsConfirm
+                          ? Text(
+                            'Confirmar',
+                            style: FocuxHubTypography.chip(primary).copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: primary,
+                            ),
+                          )
+                          : Text(
+                            agendaStatusLabel(ag.status),
+                            style: FocuxHubTypography.bodyMuted(
+                              color: cor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   onTap: () => _onAgTap(ag),
                 );
               },
