@@ -18,7 +18,6 @@ void main() {
     'perfil',
     'planos',
     'assinatura',
-    'suporte',
     'onboarding',
     'agenda',
     'notificacoes',

@@ -211,7 +211,7 @@ const qaSmokeRoutes = <QaSmokeRoute>[
   QaSmokeRoute(
     id: 'personal-suporte',
     area: 'suporte',
-    label: 'Suporte Focux',
+    label: 'Suporte (site)',
     path: '/suporte',
     authMode: 'PERSONAL',
     expectedAnonymousRedirect: '/login?from=%2Fsuporte',
@@ -490,14 +490,6 @@ const qaSmokeEndpoints = <QaSmokeEndpoint>[
     area: 'broadcasts',
     method: 'GET',
     path: '/api/broadcasts',
-    authMode: 'PERSONAL',
-    expectedAnonymousStatus: 403,
-  ),
-  QaSmokeEndpoint(
-    id: 'suporte-tickets',
-    area: 'suporte',
-    method: 'GET',
-    path: '/api/suporte/tickets/meus',
     authMode: 'PERSONAL',
     expectedAnonymousStatus: 403,
   ),
