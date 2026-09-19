@@ -61,7 +61,7 @@ import '../../features/financeiro/screens/financeiro_aluno_screen.dart';
 import '../../features/financeiro/screens/financeiro_mensalidade_detail_screen.dart';
 import '../../features/financeiro/data/financeiro_repository.dart';
 import '../../features/notificacoes/screens/notificacoes_screen.dart';
-import '../../features/suporte/screens/suporte_screen.dart';
+import '../../features/suporte/screens/suporte_web_redirect_screen.dart';
 import '../../features/broadcasts/screens/broadcast_screen.dart';
 import '../../features/plano_sucesso/plano_sucesso_provider.dart';
 import '../../features/plano_sucesso/plano_sucesso_screen.dart';
@@ -936,7 +936,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/suporte',
-            builder: (context, state) => const SuporteScreen(),
+            builder: (context, state) => const SuporteWebRedirectScreen(),
           ),
           GoRoute(
             path: '/broadcasts',

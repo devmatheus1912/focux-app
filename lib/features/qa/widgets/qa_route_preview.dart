@@ -32,7 +32,7 @@ import '../../notificacoes/screens/notificacoes_screen.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../perfil/screens/perfil_screen.dart';
 import '../../assinatura/screens/assinatura_screen.dart';
-import '../../suporte/screens/suporte_screen.dart';
+import '../../suporte/screens/suporte_web_redirect_screen.dart';
 import '../../treinos/screens/treinos_list_screen.dart';
 import 'qa_preview_session.dart';
 
@@ -91,7 +91,7 @@ Widget _buildQaRouteScreen(Uri uri) {
     '/feed' => const FeedScreen(),
     '/exercicios' => const ExerciciosListScreen(),
     '/broadcasts' => const BroadcastScreen(),
-    '/suporte' => const SuporteScreen(),
+    '/suporte' => const SuporteWebRedirectScreen(),
     '/growth/migracao' => const MigracaoMagicaScreen(),
     '/notificacoes' => const NotificacoesScreen(),
     '/analytics' => const AnalyticsScreen(),

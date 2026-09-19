@@ -372,7 +372,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                       ),
                     ),
                     TextButton(
-                      onPressed: () => context.push('/suporte'),
+                      onPressed: () => FocuxLegal.openSupport(),
                       child: Text(
                         'Falar com suporte',
                         style: TextStyle(
