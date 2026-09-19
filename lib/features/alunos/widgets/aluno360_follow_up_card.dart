@@ -8,7 +8,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -314,11 +313,15 @@ class _Aluno360FollowUpCardState extends ConsumerState<Aluno360FollowUpCard> {
           if (compact)
             Align(
               alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: 'Registrar ou agendar',
-                accent: primary,
-                isDark: widget.isDark,
+              child: OutlinedButton(
+                style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                  context,
+                  primary,
+                ),
                 onPressed: () => setState(() => _expanded = !_expanded),
+                child: Text(
+                  _expanded ? 'Ocultar agendamento' : 'Agendar follow-up',
+                ),
               ),
             ),
           AnimatedSize(

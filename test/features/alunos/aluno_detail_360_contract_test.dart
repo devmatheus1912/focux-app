@@ -499,8 +499,11 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('aluno360FollowUpSemantics'),
-        contains('DashboardHomeActionChip'),
+        contains('Agendar follow-up'),
+        contains('operacaoOutlinedButtonStyle'),
         contains('showFxInsetPickerSheet'),
+        isNot(contains('DashboardHomeActionChip')),
+        isNot(contains('Registrar ou agendar')),
       ),
     );
     expect(
@@ -643,8 +646,9 @@ void main() {
         'lib/features/alunos/widgets/aluno360_follow_up_card.dart',
       ).readAsStringSync(),
       allOf(
-        contains('DashboardHomeActionChip'),
+        contains('Agendar follow-up'),
         contains('DashboardSectionHeader'),
+        contains('operacaoOutlinedButtonStyle'),
       ),
     );
     expect(
