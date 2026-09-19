@@ -1062,7 +1062,8 @@ void main() {
       );
       expect(snapshot.contactPriority, isTrue);
       expect(snapshot.hideCopilotTaskRow, isTrue);
-      expect(snapshot.showPrepareMessage, isTrue);
+      expect(snapshot.stickyAction.isChatAction, isTrue);
+      expect(snapshot.showPrepareMessage, isFalse);
       expect(snapshot.outreachMessage, 'Oi, Beatriz. Mensagem backend.');
     });
 
@@ -1082,7 +1083,7 @@ void main() {
       );
       expect(snapshot.stickyAction.isChatAction, isTrue);
       expect(snapshot.stickyAction.label, 'Retomar contato');
-      expect(snapshot.showPrepareMessage, isTrue);
+      expect(snapshot.showPrepareMessage, isFalse);
       expect(snapshot.outreachMessage, contains('Teste'));
     });
 

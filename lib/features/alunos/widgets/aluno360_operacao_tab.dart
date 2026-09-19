@@ -45,7 +45,7 @@ class _Aluno360OperacaoEntranceState extends State<Aluno360OperacaoEntrance> {
   }
 }
 
-/// Operação tab layout: follow-up → diagnostics → quick actions.
+/// Operação tab layout: métricas → prioridade → follow-up → atalhos (S3).
 class Aluno360OperacaoTab extends ConsumerWidget {
   const Aluno360OperacaoTab({
     super.key,
@@ -105,19 +105,18 @@ class Aluno360OperacaoTab extends ConsumerWidget {
               ],
             );
           }
-          // P0 do momento (copiloto / próxima ação) acima do diagnóstico (A30).
+          // S3: métricas above the fold; sticky carrega o P0 na thumb.
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              copilotCard,
-              const SizedBox(height: Aluno360Layout.sectionGap),
               operationalSection,
+              const SizedBox(height: Aluno360Layout.sectionGap),
+              copilotCard,
             ],
           );
         },
       );
     }
-
 
     return Semantics(
       container: true,
@@ -130,22 +129,17 @@ class Aluno360OperacaoTab extends ConsumerWidget {
               section(0, financeRiskBanner!),
               const SizedBox(height: Aluno360Layout.sectionGap),
             ],
+            section(1, diagnosticBody()),
             if (showFollowUp) ...[
-              section(1, followUpCard),
               const SizedBox(height: Aluno360Layout.sectionGap),
+              section(2, followUpCard),
             ],
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                section(2, diagnosticBody()),
-                if (recoveryCard != null) ...[
-                  const SizedBox(height: Aluno360Layout.sectionGap),
-                  section(4, recoveryCard!),
-                ],
-                const SizedBox(height: Aluno360Layout.sectionGap),
-                section(5, quickActions),
-              ],
-            ),
+            if (recoveryCard != null) ...[
+              const SizedBox(height: Aluno360Layout.sectionGap),
+              section(3, recoveryCard!),
+            ],
+            const SizedBox(height: Aluno360Layout.sectionGap),
+            section(4, quickActions),
           ],
         ),
       ),

@@ -638,8 +638,8 @@ bool shouldShowCopilotProfileGapsButton(
 
 /// Prescription block stays visible during IA refresh even if sticky matches 360.
 ///
-/// Contact priority keeps the prescription body (motivo + preparar mensagem);
-/// the sticky CTA remains the primary action and must not hollow the section.
+/// Contact priority keeps the prescription body (motivo);
+/// sticky chat já cobre "Preparar mensagem" / Retomar contato.
 bool shouldShowCopilotPrescriptionBlock({
   required bool forceIa,
   required OperacaoStickyAction sticky,
@@ -973,10 +973,12 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
       contactPriority && !acaoSugereChat(acao)
           ? contactPriorityOutreachAcao()
           : acao;
-  final showPrepareMessage = acaoSugereChat(acao) || contactPriority;
+  // Sticky chat já abre o sheet de mensagem — não duplicar "Preparar mensagem".
+  final wantsPrepare = acaoSugereChat(acao) || contactPriority;
+  final showPrepareMessage = wantsPrepare && !sticky.isChatAction;
   final hideCopilotChatRow =
       shouldHideCopilotChatCta(sticky: sticky, hasOpenTask: hasOpenTask) ||
-      showPrepareMessage;
+      wantsPrepare;
   return Aluno360OperacaoSnapshot(
     effectiveProxima: effectiveProxima,
     stickyAction: sticky,
