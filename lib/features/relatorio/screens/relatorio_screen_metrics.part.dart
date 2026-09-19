@@ -19,9 +19,9 @@ extension on _RelatorioScreenState {
         ),
         const SizedBox(height: TokensStrip.s2),
         OperationalMetricTile(
-          label: 'Treinos',
+          label: 'Dias',
           value: '0 / 0',
-          hint: 'Ainda sem treinos',
+          hint: 'Ainda sem dias com check-in',
           color: primary,
           isDark: isDark,
           emphasis: OperationalMetricEmphasis.muted,

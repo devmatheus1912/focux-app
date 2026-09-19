@@ -182,7 +182,6 @@ const relatorioDetalheSecoes = [
 ];
 
 String relatorioAlunoHubSubtitle({
-  required String alunoNome,
   required int diasAnalisados,
 }) {
   if (diasAnalisados <= 0) return 'Aderência do aluno';
