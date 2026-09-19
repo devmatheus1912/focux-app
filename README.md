@@ -139,13 +139,21 @@ Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 
 ### Alert GitHub: Google API Key em `google-services.json`
 
-O arquivo real já está no `.gitignore` e **não** deve voltar ao índice. Se o Secret scanning ainda listar o alerta histórico:
+O arquivo real já está no `.gitignore` e **não** deve voltar ao índice. Helper local (SHA-1 + validação + base64):
 
-1. **Rotacionar** a Android API key no [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (Credentials → key do app Android → Regenerate / criar nova).
-2. **Restringir** a key nova: Application restriction = Android apps (`com.focux.focux_app` + SHA-1 do keystore de release/debug usados); API restriction = só APIs Firebase/Google necessárias.
-3. Baixar o `google-services.json` atualizado no Firebase Console e manter **só local** (ou secret `GOOGLE_SERVICES_JSON_BASE64` no CI — espelhando o fluxo iOS).
-4. No alerta do GitHub: **Close as revoked** (após regenerar). Não marque “false positive” se a key antiga ainda estiver ativa.
-5. Gate de regressão: `test/core/security/firebase_config_secrets_test.dart`.
+```powershell
+powershell -File tools/rotate_firebase_android_api_key.ps1
+# depois de baixar o JSON novo:
+powershell -File tools/rotate_firebase_android_api_key.ps1 -ExpectKeyPrefix API_KEY_PREFIX -EncodeForCi
+```
+
+Checklist manual (Console Google / GitHub):
+
+1. [Credentials](https://console.cloud.google.com/apis/credentials) no mesmo Project ID do Firebase → **Create credentials → API key** (não regenere a antiga ainda).
+2. Edite a key nova → Application restrictions = **Android apps**, package `com.focux.focux_app` + cada SHA-1 (debug, release, Play App Signing). API restrictions = só APIs Firebase (sem Gemini/Maps). **Save**.
+3. Firebase Console → Project settings → app Android → **Download `google-services.json`** → salve em `android/app/google-services.json` (só local). Confirme que `current_key` mudou.
+4. Apague (ou regenere) a **key antiga** vazada. Só então feche o alerta do GitHub como **revoked**.
+5. Gate: `flutter test test/core/security/firebase_config_secrets_test.dart`.
 
 Erros de UI não devem expor detalhes técnicos internos. Em dúvida: não commitar.
 
