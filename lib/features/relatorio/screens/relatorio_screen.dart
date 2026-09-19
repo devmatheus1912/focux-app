@@ -358,7 +358,6 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
             FxHubHeader(
               title: fxTitleCaseName(widget.alunoNome),
               subtitle: relatorioAlunoHubSubtitle(
-                alunoNome: widget.alunoNome,
                 diasAnalisados: dados?.diasAnalisados ?? 0,
               ),
             ),
@@ -425,7 +424,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   color:
                       _comparativo!.deltaPercent < 0
                           ? EagleTokens.bad
-                          : EagleTokens.moneyGreen,
+                          : primary,
                   isDark: isDark,
                   emphasis:
                       _comparativo!.deltaPercent < 0

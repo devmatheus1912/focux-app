@@ -112,7 +112,7 @@ Future<void> exportRelatorioPdf({
                 pw.SizedBox(width: 10),
                 pw.Expanded(
                   child: _pdfKpiCard(
-                    'Treinos',
+                    'Dias',
                     '${dados.treinosConcluidos} / ${dados.treinosTotal}',
                   ),
                 ),
