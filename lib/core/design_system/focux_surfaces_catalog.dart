@@ -492,7 +492,6 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
   ),
   '/suporte': FocuxSurfaceSpec(
     type: _s4,
-    hasInput: true,
     logicalParent: _perfil,
   ),
   '/broadcasts': FocuxSurfaceSpec(
