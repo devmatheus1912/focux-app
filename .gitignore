@@ -79,6 +79,7 @@ scripts/node_modules/
 .claude/
 .agents/
 .kiro/
+.swarm/
 skills-lock.json
 .fvm/
 devtools_options.yaml
