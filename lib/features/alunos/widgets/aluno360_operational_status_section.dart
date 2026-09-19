@@ -118,10 +118,6 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         aluno.emRisco
             ? (isDark ? EagleTokens.warnAccent : EagleTokens.warn)
             : EagleTokens.semanticGood(isDark: isDark);
-    final neutralIdle =
-        isDark
-            ? EagleTokens.lineNeutralDark.withValues(alpha: 0.35)
-            : EagleTokens.lineNeutral;
     final showCheckinCta = shouldShowOperacaoCheckinCta(
       operacao: operacao,
       weekHasAnyCheckin: week.hasAnyCheckin,
@@ -339,10 +335,8 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
             child: AlunoOperacaoAdherenceBars(
               points: weekPoints,
               activeColor: EagleTokens.good,
-              idleColor: neutralIdle,
               missColor: isDark ? EagleTokens.warn : EagleTokens.riskCoral,
               todayRingColor: primary,
-              emptyWeek: !week.hasAnyCheckin,
             ),
           ),
         ),

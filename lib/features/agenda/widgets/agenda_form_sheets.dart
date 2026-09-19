@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -280,10 +281,32 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
       widget.initial.month,
       widget.initial.day,
     );
-    _selectedTime = TimeOfDay(
-      hour: widget.initial.hour,
-      minute: widget.initial.minute,
+    _selectedTime = _snapToSlot(
+      TimeOfDay(hour: widget.initial.hour, minute: widget.initial.minute),
     );
+  }
+
+  /// Grade só tem :00 e :30 — sem snap o botão nunca fica “selecionado”.
+  static TimeOfDay _snapToSlot(TimeOfDay raw) {
+    var hour = raw.hour;
+    var minute = raw.minute;
+    if (minute < 15) {
+      minute = 0;
+    } else if (minute < 45) {
+      minute = 30;
+    } else {
+      hour += 1;
+      minute = 0;
+    }
+    if (hour < 6) {
+      hour = 6;
+      minute = 0;
+    }
+    if (hour > 22 || (hour == 22 && minute > 0)) {
+      hour = 22;
+      minute = 0;
+    }
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   @override
@@ -359,30 +382,37 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
                     selected: selected,
                     label: 'Horário ${_timeLabel(slot)}',
                     child: InkWell(
-                      onTap: () => setState(() => _selectedTime = slot),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() => _selectedTime = slot);
+                      },
                       borderRadius: BorderRadius.circular(14),
                       child: Ink(
                         decoration: BoxDecoration(
                           color:
                               selected
-                                  ? BrandPalette.soft(
-                                    primary,
-                                    dark: chrome.isDark,
-                                  )
+                                  ? primary
                                   : chrome.cardFill,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color:
                                 selected
-                                    ? primary.withValues(alpha: 0.42)
+                                    ? primary
                                     : chrome.lineStrong,
+                            width: selected ? 2 : 1,
                           ),
                         ),
                         child: Center(
                           child: Text(
                             _timeLabel(slot),
                             style: FocuxHubTypography.cardTitle(
-                              color: selected ? primary : chrome.ink,
+                              color:
+                                  selected
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : chrome.ink,
+                            ).copyWith(
+                              fontWeight:
+                                  selected ? FontWeight.w800 : FontWeight.w600,
                             ),
                           ),
                         ),

@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -21,6 +22,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
@@ -253,12 +255,21 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                               keyboardDismissBehavior:
                                   ScrollViewKeyboardDismissBehavior.onDrag,
                               padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                TokensStrip.s2,
-                                TokensStrip.s4,
-                                40,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s3,
+                                FxSettingsLayout.pageInset,
+                                TokensStrip.s6,
                               ),
                               children: [
+                                _RetencaoMetricStrip(
+                                  home: home,
+                                  isDark: isDark,
+                                  primary: primary,
+                                  onFiltrarAlto: () => setState(
+                                    () => _filtro = retencaoFiltroAlto,
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
                                 _RetencaoFocusCard(
                                   home: home,
                                   isDark: isDark,
@@ -338,6 +349,73 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   }
 }
 
+class _RetencaoMetricStrip extends StatelessWidget {
+  const _RetencaoMetricStrip({
+    required this.home,
+    required this.isDark,
+    required this.primary,
+    required this.onFiltrarAlto,
+  });
+
+  final RetencaoHome home;
+  final bool isDark;
+  final Color primary;
+  final VoidCallback onFiltrarAlto;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          onTap: home.alto > 0 ? onFiltrarAlto : null,
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: 'Risco alto',
+            value: '${home.alto}',
+            hint: retencaoMetricAltoLabel(home.alto),
+            color: home.alto > 0 ? EagleTokens.bad : primary,
+            isDark: isDark,
+            emphasis:
+                home.alto > 0
+                    ? OperationalMetricEmphasis.alert
+                    : OperationalMetricEmphasis.normal,
+            semanticsLabel: '${home.alto} em risco alto',
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Row(
+          children: [
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Médio',
+                value: '${home.medio}',
+                hint: retencaoMetricMedioLabel(home.medio),
+                color: EagleTokens.warn,
+                isDark: isDark,
+                emphasis: OperationalMetricEmphasis.muted,
+                semanticsLabel: '${home.medio} risco médio',
+              ),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Saudável',
+                value: '${home.saudavel}',
+                hint: retencaoMetricSaudavelLabel(home.saudavel),
+                color: primary,
+                isDark: isDark,
+                emphasis: OperationalMetricEmphasis.muted,
+                semanticsLabel: '${home.saudavel} saudáveis',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class _RetencaoFocusCard extends StatelessWidget {
   const _RetencaoFocusCard({
     required this.home,
@@ -399,6 +477,16 @@ class _RetencaoFocusCard extends StatelessWidget {
                 ? '1 aluno em risco alto'
                 : '$alto alunos em risco alto');
 
+    final focusSubtitle =
+        firstAlto != null
+            ? retencaoPorque(firstAlto)
+            : retencaoContagensSubtitulo(
+              alto: home.alto,
+              medio: home.medio,
+              saudavel: home.saudavel,
+              topNomeados: retencaoItemsForFiltro(home.top3, null).length,
+            );
+
     return FxStripCard(
       emphasize: true,
       padding: const EdgeInsets.all(TokensStrip.s3),
@@ -409,7 +497,10 @@ class _RetencaoFocusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Risco alto · $alto', style: FocuxHubTypography.chip(chrome.mute)),
+          Text(
+            firstAlto != null ? 'Próximo contato' : 'Risco alto · $alto',
+            style: FocuxHubTypography.chip(chrome.mute),
+          ),
           const SizedBox(height: TokensStrip.s2),
           Text(
             focusTitle,
@@ -421,13 +512,7 @@ class _RetencaoFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            retencaoContagensSubtitulo(
-              alto: home.alto,
-              medio: home.medio,
-              saudavel: home.saudavel,
-              topNomeados:
-                  retencaoItemsForFiltro(home.top3, null).length,
-            ),
+            focusSubtitle,
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s2),

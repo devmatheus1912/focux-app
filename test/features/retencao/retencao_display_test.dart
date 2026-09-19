@@ -43,6 +43,10 @@ void main() {
       contains('atualize a base'),
     );
     expect(retencaoComoCalculamos, contains('ATIVOS'));
+    expect(retencaoComoCalculamos, contains('dias únicos'));
+    expect(retencaoEmptySubtitle, contains('dias únicos'));
+    expect(retencaoMetricAltoLabel(1), '1 alto');
+    expect(retencaoMetricMedioLabel(2), '2 médios');
   });
 
   test('retencaoFocusActions and hub links stay A30-shaped', () {

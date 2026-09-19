@@ -35,7 +35,7 @@ void main() {
 
   test('financeiroListaTools e detalhe Mais — A30', () {
     final idle = financeiroListaTools(modoSelecao: false);
-    expect(idle.foldChip, isNull);
+    expect(idle.foldChip, FinanceiroListaToolId.atualizarAtrasos);
     expect(idle.mais, isEmpty);
 
     final lote = financeiroListaTools(modoSelecao: true);

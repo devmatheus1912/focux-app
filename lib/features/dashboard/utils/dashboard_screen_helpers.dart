@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -125,16 +126,12 @@ String? dashboardPulseEmptyHint({
 }
 
 /// Cor primária do personal (BFF) — soft branding no chrome da Home.
+/// Remapeia cyan legado (#13C2C2) → petróleo, igual tema/perfil.
 Color? dashboardParseBrandColor(String? raw) {
   if (raw == null) return null;
-  var hex = raw.trim();
-  if (hex.isEmpty) return null;
-  if (hex.startsWith('#')) hex = hex.substring(1);
-  if (hex.length == 3) {
-    hex = hex.split('').map((c) => '$c$c').join();
-  }
-  if (hex.length != 6) return null;
-  final value = int.tryParse(hex, radix: 16);
-  if (value == null) return null;
-  return Color(0xFF000000 | value);
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  return CuratedBrandPalette.safePrimary(
+    BrandPalette.resolveStoredPrimary(trimmed),
+  );
 }

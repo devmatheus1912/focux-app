@@ -9,13 +9,6 @@ import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
 import 'checkin_media_widgets.dart';
-import 'gated_pose_coach_panel.dart';
-
-int? checkinParseTargetReps(String? reps) {
-  if (reps == null || reps.trim().isEmpty) return null;
-  final match = RegExp(r'\d+').firstMatch(reps);
-  return match == null ? null : int.tryParse(match.group(0)!);
-}
 
 String checkinEvolucaoValorLabel(double value, String unidade) {
   final base = checkinKgLabel(value);
@@ -49,62 +42,6 @@ Future<int?> showCheckinFilaSheet(
                   : Icons.fitness_center_rounded,
         ),
     ],
-  );
-}
-
-Future<void> showCheckinCoachSheet(
-  BuildContext context, {
-  required ExecucaoExercicio ee,
-  bool forAluno = false,
-}) {
-  final chrome = ShellChrome.of(context);
-  final primary = Theme.of(context).colorScheme.primary;
-  final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
-  return showFxHomeSheet<void>(
-    context,
-    builder: (ctx) {
-      return FxHomeSheetSurface(
-        isDark: chrome.isDark,
-        expand: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: chrome.isDark),
-            FxHomeSheetHeader(
-              isDark: chrome.isDark,
-              leading: Icon(Icons.accessibility_new_rounded, color: brand),
-              title: 'Postura',
-              subtitle: ee.exercicioNome,
-            ),
-            const SizedBox(height: TokensStrip.s3),
-            // Altura bounded (expand sheet). ScrollView solto bugava Postura.
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  TokensStrip.s4,
-                  0,
-                  TokensStrip.s4,
-                  TokensStrip.s4,
-                ),
-                child: ListView(
-                  physics: const ClampingScrollPhysics(),
-                  children: [
-                    GatedPoseCoachPanel(
-                      exerciseName: ee.exercicioNome,
-                      targetReps: checkinParseTargetReps(ee.repeticoes),
-                      brand: brand,
-                      dark: chrome.isDark,
-                      forAluno: forAluno,
-                      onRepCompleted: () {},
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
   );
 }
 

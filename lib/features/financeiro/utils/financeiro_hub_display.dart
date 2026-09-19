@@ -44,14 +44,13 @@ String financeiroHubSubtitle({
   return '$vista · $fresh';
 }
 
-/// Ferramentas da lista — sticky é Nova; resto sob Mais.
+/// Ferramentas da lista — sticky é Nova; resto sob Mais / chip.
 enum FinanceiroListaToolId { atualizarAtrasos, marcarLote, cancelarLote }
 
 ({FinanceiroListaToolId? foldChip, List<FinanceiroListaToolId> mais})
 financeiroListaTools({
   required bool modoSelecao,
 }) {
-  // Idle: lote via long-press; atrasos via pull-to-refresh. Mais só no lote.
   if (modoSelecao) {
     return (
       foldChip: FinanceiroListaToolId.marcarLote,
@@ -61,8 +60,9 @@ financeiroListaTools({
       ],
     );
   }
+  // Idle: atrasos no fold; lote continua por long-press na linha.
   return (
-    foldChip: null,
+    foldChip: FinanceiroListaToolId.atualizarAtrasos,
     mais: const <FinanceiroListaToolId>[],
   );
 }

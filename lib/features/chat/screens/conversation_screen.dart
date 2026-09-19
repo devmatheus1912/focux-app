@@ -22,9 +22,10 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/fx_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_remetente.dart';
@@ -37,6 +38,7 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -361,9 +363,14 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final brand =
         _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
+    final alunoFotoUrl =
+        _isPersonalMode && widget.alunoId != null
+            ? ref.watch(alunoProvider(widget.alunoId!)).valueOrNull?.fotoUrl
+            : null;
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final avatarUrl = _avatarImage(brand, alunoFotoUrl: alunoFotoUrl);
 
     final backFallback =
         _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal';
@@ -381,31 +388,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 4),
-              child: SizedBox(
-                height: 40,
-                width: 40,
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: primarySoft,
-                  backgroundImage:
-                      _avatarImage(brand) == null
-                          ? null
-                          : fxCachedNetworkImageProvider(
-                            _avatarImage(brand)!,
-                            maxWidth: 72,
-                          ),
-                  child:
-                      _avatarImage(brand) == null
-                          ? Text(
-                            fxInitials(title),
-                            style: TextStyle(
-                              color: primary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
-                          )
-                          : null,
-                ),
+              child: AlunoAvatar(
+                name: title,
+                photoUrl: avatarUrl,
+                variant: AlunoAvatarVariant.strip,
               ),
             ),
             IconButton(

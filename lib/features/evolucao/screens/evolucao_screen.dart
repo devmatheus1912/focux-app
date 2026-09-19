@@ -68,17 +68,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     }
   }
 
-  void _abrirAluno() {
-    context.push('/alunos/${widget.alunoId}', extra: widget.alunoNome);
-  }
-
-  void _abrirChat() {
-    context.push(
-      '/alunos/${widget.alunoId}/chat',
-      extra: widget.alunoNome,
-    );
-  }
-
   void _abrirFotos() {
     context.push(
       '/alunos/${widget.alunoId}/fotos',
@@ -187,72 +176,80 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               subtitle: evolucaoHubSubtitle(),
                             ),
                             const SizedBox(height: TokensStrip.s4),
-                            OperationalMetricTile(
-                              label: 'Peso',
-                              value: evolucaoPesoAtual(medidas ?? const []),
-                              hint: evolucaoUltimaMedidaHint(
-                                medidas ?? const [],
-                              ),
-                              color: primary,
-                              isDark: chrome.isDark,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OperationalMetricTile(
+                                    label: 'Peso',
+                                    value: evolucaoPesoAtual(
+                                      medidas ?? const [],
+                                    ),
+                                    hint: evolucaoUltimaMedidaHint(
+                                      medidas ?? const [],
+                                    ),
+                                    color: primary,
+                                    isDark: chrome.isDark,
+                                  ),
+                                ),
+                                const SizedBox(width: TokensStrip.s2),
+                                Expanded(
+                                  child: OperationalMetricTile(
+                                    label: 'Variação',
+                                    value: evolucaoVariacaoValue(
+                                      medidas ?? const [],
+                                    ),
+                                    hint: evolucaoVariacaoHint(
+                                      medidas ?? const [],
+                                    ),
+                                    color: primary,
+                                    isDark: chrome.isDark,
+                                    emphasis:
+                                        variacao == null || variacao.isEmpty
+                                            ? OperationalMetricEmphasis.muted
+                                            : OperationalMetricEmphasis.normal,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: TokensStrip.s2),
-                            OperationalMetricTile(
-                              label: 'Variação',
-                              value: evolucaoVariacaoValue(
-                                medidas ?? const [],
-                              ),
-                              hint: evolucaoVariacaoHint(
-                                medidas ?? const [],
-                              ),
-                              color: primary,
-                              isDark: chrome.isDark,
-                              emphasis:
-                                  variacao == null || variacao.isEmpty
-                                      ? OperationalMetricEmphasis.muted
-                                      : OperationalMetricEmphasis.normal,
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
-                            OperationalMetricTile(
-                              label: 'Medidas',
-                              value: evolucaoCountLabel(
-                                medidas?.length ?? 0,
-                                recordes: false,
-                              ),
-                              hint: evolucaoMedidasHint(medidas?.length ?? 0),
-                              color: primary,
-                              isDark: chrome.isDark,
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
-                            OperationalMetricTile(
-                              label: 'Recordes',
-                              value: evolucaoCountLabel(
-                                recordesAsync.asData?.value.length ?? 0,
-                                recordes: true,
-                              ),
-                              hint: evolucaoRecordesHint(
-                                recordesAsync.asData?.value.length ?? 0,
-                              ),
-                              color: primary,
-                              isDark: chrome.isDark,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OperationalMetricTile(
+                                    label: 'Medidas',
+                                    value: evolucaoCountLabel(
+                                      medidas?.length ?? 0,
+                                      recordes: false,
+                                    ),
+                                    hint: evolucaoMedidasHint(
+                                      medidas?.length ?? 0,
+                                    ),
+                                    color: primary,
+                                    isDark: chrome.isDark,
+                                  ),
+                                ),
+                                const SizedBox(width: TokensStrip.s2),
+                                Expanded(
+                                  child: OperationalMetricTile(
+                                    label: 'Recordes',
+                                    value: evolucaoCountLabel(
+                                      recordesAsync.asData?.value.length ?? 0,
+                                      recordes: true,
+                                    ),
+                                    hint: evolucaoRecordesHint(
+                                      recordesAsync.asData?.value.length ?? 0,
+                                    ),
+                                    color: primary,
+                                    isDark: chrome.isDark,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: TokensStrip.s3),
                             Wrap(
                               spacing: TokensStrip.s2,
                               runSpacing: TokensStrip.s2,
                               children: [
-                                DashboardHomeActionChip(
-                                  label: 'Aluno',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _abrirAluno,
-                                ),
-                                DashboardHomeActionChip(
-                                  label: 'Chat',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _abrirChat,
-                                ),
                                 DashboardHomeActionChip(
                                   label: 'Fotos',
                                   accent: primary,
@@ -273,7 +270,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: TokensStrip.s4),
+                            const SizedBox(height: TokensStrip.s3),
                             AlunoSegmentedChoice(
                               options: evolucaoDetalheSecoes,
                               selected: _view.name,
@@ -293,19 +290,27 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                             alunoNome: widget.alunoNome,
                             medidasAsync: medidasAsync,
                             onRegister: _mostrarDialogMedida,
-                            onRetry:
-                                () => ref.invalidate(
-                                  evolucaoHomeProvider(widget.alunoId),
-                                ),
+                            onRetry: () {
+                              EvolucaoHomeClientCache.invalidate(
+                                widget.alunoId,
+                              );
+                              ref.invalidate(
+                                evolucaoHomeProvider(widget.alunoId),
+                              );
+                            },
                           ),
                           _TabRecordes(
                             alunoNome: widget.alunoNome,
                             recordesAsync: recordesAsync,
                             onRegister: _mostrarDialogRecorde,
-                            onRetry:
-                                () => ref.invalidate(
-                                  evolucaoHomeProvider(widget.alunoId),
-                                ),
+                            onRetry: () {
+                              EvolucaoHomeClientCache.invalidate(
+                                widget.alunoId,
+                              );
+                              ref.invalidate(
+                                evolucaoHomeProvider(widget.alunoId),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -422,6 +427,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
       final braco = double.tryParse(bracoCtrl.text.replaceAll(',', '.'));
       final gordura = double.tryParse(gorduraCtrl.text.replaceAll(',', '.'));
       final massa = double.tryParse(massaCtrl.text.replaceAll(',', '.'));
+      if (peso == null &&
+          cintura == null &&
+          quadril == null &&
+          braco == null &&
+          gordura == null &&
+          massa == null) {
+        if (!mounted) return;
+        FeedbackHelper.showError(context, 'Informe ao menos um valor.');
+        return;
+      }
       final api = ref.read(apiClientProvider);
       await EvolucaoRepository(api).adicionarMedida(
         widget.alunoId,
@@ -430,19 +445,34 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         quadril: quadril,
         braco: braco,
       );
-      if (gordura != null || massa != null) {
-        await AvaliacaoRepository(api).registrar(widget.alunoId, {
-          if (peso != null) 'pesoKg': peso,
-          if (cintura != null) 'cinturaCm': cintura,
-          if (quadril != null) 'quadrilCm': quadril,
-          if (gordura != null) 'percGordura': gordura,
-          if (massa != null) 'percMassa': massa,
-          'observacoes': 'Registrado via evolução (nova medida)',
-        });
-      }
+      // Medida já persistiu — refresh UI mesmo se avaliação complementar falhar.
       EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
       await invalidateAluno360Providers(ref, widget.alunoId);
+      if (gordura != null || massa != null) {
+        try {
+          await AvaliacaoRepository(api).registrar(widget.alunoId, {
+            if (peso != null) 'pesoKg': peso,
+            if (cintura != null) 'cinturaCm': cintura,
+            if (quadril != null) 'quadrilCm': quadril,
+            if (gordura != null) 'percGordura': gordura,
+            if (massa != null) 'percMassa': massa,
+            'observacoes': 'Registrado via evolução (nova medida)',
+          });
+          await invalidateAluno360Providers(ref, widget.alunoId);
+        } catch (avaliacaoErr) {
+          if (mounted) {
+            FeedbackHelper.showError(
+              context,
+              friendlyError(
+                avaliacaoErr,
+                fallback: 'Medida salva. Gordura/massa não entraram na avaliação.',
+              ),
+            );
+          }
+          return;
+        }
+      }
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Medida adicionada!');
     } catch (e) {
@@ -461,8 +491,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
   Future<void> _mostrarDialogRecorde() async {
     final exercicioCtrl = TextEditingController();
     final cargaCtrl = TextEditingController();
-    final unidadeCtrl = TextEditingController(text: 'kg');
-    final obsCtrl = TextEditingController();
+    final repsCtrl = TextEditingController();
     try {
       final saved = await showFxFormSheet(
         context,
@@ -479,22 +508,17 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
             ),
             AlunoInsetFormField(
               controller: cargaCtrl,
-              label: 'Carga',
+              label: 'Carga (kg)',
               icon: Icons.tune_outlined,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
             ),
             AlunoInsetFormField(
-              controller: unidadeCtrl,
-              label: 'Unidade (kg, reps…)',
-              icon: Icons.straighten_outlined,
-            ),
-            AlunoInsetFormField(
-              controller: obsCtrl,
-              label: 'Observação',
-              icon: Icons.notes_outlined,
-              maxLines: 2,
+              controller: repsCtrl,
+              label: 'Repetições (opcional)',
+              icon: Icons.repeat_outlined,
+              keyboardType: TextInputType.number,
               showDivider: false,
             ),
           ],
@@ -511,8 +535,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
         widget.alunoId,
         exercicioNome: nome,
         carga: double.tryParse(cargaCtrl.text.replaceAll(',', '.')),
-        unidade: unidadeCtrl.text.trim(),
-        observacao: obsCtrl.text.trim(),
+        repeticoes: int.tryParse(repsCtrl.text.trim()),
       );
       EvolucaoHomeClientCache.invalidate(widget.alunoId);
       ref.invalidate(evolucaoHomeProvider(widget.alunoId));
@@ -524,8 +547,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     } finally {
       exercicioCtrl.dispose();
       cargaCtrl.dispose();
-      unidadeCtrl.dispose();
-      obsCtrl.dispose();
+      repsCtrl.dispose();
     }
   }
 }

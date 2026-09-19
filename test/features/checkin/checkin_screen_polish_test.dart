@@ -115,7 +115,8 @@ void main() {
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));
     expect(card, contains("'Demonstração'"));
-    expect(card, contains("'Postura'"));
+    expect(card, isNot(contains("'Postura'")));
+    expect(card, isNot(contains('onOpenCoach')));
     expect(card, isNot(contains("'Dicas'")));
     expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
@@ -248,7 +249,7 @@ void main() {
     expect(screen, contains('treinoExercicioId'));
   });
 
-  test('postura camera abre full-screen, nao sheet aninhado', () {
+  test('postura camera (módulo residual) abre full-screen', () {
     final camera = readScreenSourceBundle(
       'lib/features/checkin/widgets/pose_coach_camera_mobile.dart',
     );
@@ -264,8 +265,8 @@ void main() {
     final sheet = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
     );
-    expect(sheet, contains('expand: true'));
-    expect(sheet, contains('ListView'));
-    expect(sheet, contains('GatedPoseCoachPanel'));
+    expect(sheet, isNot(contains('showCheckinCoachSheet')));
+    expect(sheet, isNot(contains('GatedPoseCoachPanel')));
+    expect(sheet, contains('showCheckinDemoSheet'));
   });
 }

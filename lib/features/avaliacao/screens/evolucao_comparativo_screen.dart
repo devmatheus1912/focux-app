@@ -327,13 +327,6 @@ class _EvolucaoComparativoScreenState
       runSpacing: TokensStrip.s2,
       children: [
         DashboardHomeActionChip(
-          label: 'Lista',
-          accent: primary,
-          isDark: isDark,
-          onPressed:
-              () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
-        ),
-        DashboardHomeActionChip(
           label: 'Evolução',
           accent: primary,
           isDark: isDark,
@@ -344,12 +337,12 @@ class _EvolucaoComparativoScreenState
               ),
         ),
         DashboardHomeActionChip(
-          label: 'Chat',
+          label: 'Fotos',
           accent: primary,
           isDark: isDark,
           onPressed:
               () => context.push(
-                '/alunos/${widget.alunoId}/chat',
+                '/alunos/${widget.alunoId}/fotos',
                 extra: widget.alunoNome,
               ),
         ),
@@ -357,7 +350,91 @@ class _EvolucaoComparativoScreenState
     );
   }
 
+  Widget _metricGrid(ComparativoEvolucao c, Color primary, bool isDark) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Peso atual',
+                value: evolucaoComparativoFmtValor(c.atual.pesoKg, 'kg'),
+                hint: evolucaoComparativoPesoMetricHint(c.diferencaPeso),
+                color: primary,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'IMC',
+                value: evolucaoComparativoFmtValor(
+                  c.atual.imc ??
+                      evolucaoComparativoImc(c.atual.pesoKg, c.atual.alturaCm),
+                  '',
+                ),
+                hint: 'Da última avaliação',
+                color: primary,
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Row(
+          children: [
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Gordura',
+                value: evolucaoComparativoFmtValor(c.atual.percGordura, '%'),
+                hint: evolucaoComparativoDelta(
+                  primeira: c.primeira.percGordura,
+                  atual: c.atual.percGordura,
+                  menorEMelhor: true,
+                ).text,
+                color: primary,
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Massa magra',
+                value: evolucaoComparativoFmtValor(
+                  c.atual.percMassa ?? c.atual.massaMuscular,
+                  (c.atual.percMassa != null) ? '%' : 'kg',
+                ),
+                hint: evolucaoComparativoDelta(
+                  primeira: c.primeira.percMassa ?? c.primeira.massaMuscular,
+                  atual: c.atual.percMassa ?? c.atual.massaMuscular,
+                  menorEMelhor: false,
+                ).text,
+                color: primary,
+                isDark: isDark,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'Cintura',
+          value: evolucaoComparativoFmtValor(c.atual.circCintura, 'cm'),
+          hint: evolucaoComparativoDelta(
+            primeira: c.primeira.circCintura,
+            atual: c.atual.circCintura,
+            menorEMelhor: true,
+          ).text,
+          color: primary,
+          isDark: isDark,
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody() {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final isDark = chrome.isDark;
     final c = _comparativo;
     if (c == null || _semAvaliacao) {
       return RefreshIndicator(
@@ -376,10 +453,7 @@ class _EvolucaoComparativoScreenState
               subtitle: evolucaoComparativoHubSubtitle(),
             ),
             const SizedBox(height: TokensStrip.s3),
-            _chips(
-              primary: Theme.of(context).colorScheme.primary,
-              isDark: Theme.of(context).brightness == Brightness.dark,
-            ),
+            _chips(primary: primary, isDark: isDark),
             const SizedBox(height: TokensStrip.s5),
             FxEmptyState(
               icon: 'trend',
@@ -409,75 +483,11 @@ class _EvolucaoComparativoScreenState
               atual: evolucaoComparativoFmtData(c.atual.avaliadoEm),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(
-              top: TokensStrip.s4,
-              bottom: TokensStrip.s2,
-            ),
-            child: OperationalMetricTile(
-              label: 'Peso atual',
-              value: evolucaoComparativoFmtValor(c.atual.pesoKg, 'kg'),
-              hint: evolucaoComparativoPesoMetricHint(c.diferencaPeso),
-              color: Theme.of(context).colorScheme.primary,
-              isDark: Theme.of(context).brightness == Brightness.dark,
-            ),
-          ),
-          OperationalMetricTile(
-            label: 'IMC',
-            value: evolucaoComparativoFmtValor(
-              c.atual.imc ??
-                  evolucaoComparativoImc(c.atual.pesoKg, c.atual.alturaCm),
-              '',
-            ),
-            hint: 'Da última avaliação',
-            color: Theme.of(context).colorScheme.primary,
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Gordura',
-            value: evolucaoComparativoFmtValor(c.atual.percGordura, '%'),
-            hint: evolucaoComparativoDelta(
-              primeira: c.primeira.percGordura,
-              atual: c.atual.percGordura,
-              menorEMelhor: true,
-            ).text,
-            color: Theme.of(context).colorScheme.primary,
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Massa magra',
-            value: evolucaoComparativoFmtValor(
-              c.atual.percMassa ?? c.atual.massaMuscular,
-              (c.atual.percMassa != null) ? '%' : 'kg',
-            ),
-            hint: evolucaoComparativoDelta(
-              primeira: c.primeira.percMassa ?? c.primeira.massaMuscular,
-              atual: c.atual.percMassa ?? c.atual.massaMuscular,
-              menorEMelhor: false,
-            ).text,
-            color: Theme.of(context).colorScheme.primary,
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Cintura',
-            value: evolucaoComparativoFmtValor(c.atual.circCintura, 'cm'),
-            hint: evolucaoComparativoDelta(
-              primeira: c.primeira.circCintura,
-              atual: c.atual.circCintura,
-              menorEMelhor: true,
-            ).text,
-            color: Theme.of(context).colorScheme.primary,
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
           const SizedBox(height: TokensStrip.s3),
-          _chips(
-            primary: Theme.of(context).colorScheme.primary,
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
-          const SizedBox(height: TokensStrip.s3),
+          _chips(primary: primary, isDark: isDark),
+          const SizedBox(height: TokensStrip.s4),
+          _metricGrid(c, primary, isDark),
+          const SizedBox(height: TokensStrip.s4),
           EvolucaoComparativoTable(primeira: c.primeira, atual: c.atual),
           const SizedBox(height: TokensStrip.s3),
           _LegendaComparativo(),
@@ -492,19 +502,34 @@ class _LegendaComparativo extends StatelessWidget {
   Widget build(BuildContext context) {
     final mute = ShellChrome.of(context).mute;
     final style = FocuxHubTypography.bodyMuted(color: mute);
-    return Row(
+    return Wrap(
+      spacing: TokensStrip.s3,
+      runSpacing: TokensStrip.s2,
       children: [
-        const Icon(Icons.circle, size: 10, color: EagleTokens.good),
-        const SizedBox(width: TokensStrip.s1),
-        Text('Melhora', style: style),
-        const SizedBox(width: TokensStrip.s3),
-        const Icon(Icons.circle, size: 10, color: EagleTokens.bad),
-        const SizedBox(width: TokensStrip.s1),
-        Text('Piora', style: style),
-        const SizedBox(width: TokensStrip.s3),
-        Icon(Icons.circle, size: 10, color: mute),
-        const SizedBox(width: TokensStrip.s1),
-        Text('Sem alteração', style: style),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.circle, size: 10, color: EagleTokens.good),
+            const SizedBox(width: TokensStrip.s1),
+            Text('Melhora', style: style),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.circle, size: 10, color: EagleTokens.bad),
+            const SizedBox(width: TokensStrip.s1),
+            Text('Piora', style: style),
+          ],
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.circle, size: 10, color: mute),
+            const SizedBox(width: TokensStrip.s1),
+            Text('Sem alteração', style: style),
+          ],
+        ),
       ],
     );
   }

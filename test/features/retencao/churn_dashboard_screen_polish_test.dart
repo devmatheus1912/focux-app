@@ -51,5 +51,9 @@ void main() {
     expect(screen, contains("'/dunning'"));
     expect(screen, contains('Histórico win-back'));
     expect(screen, contains('Cobrança auto'));
+    expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains('FxSettingsLayout.pageInset'));
+    expect(screen, contains('Próximo contato'));
+    expect(screen, contains('dias únicos'));
   });
 }

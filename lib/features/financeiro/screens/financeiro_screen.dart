@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -165,7 +166,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
             ShellHeaderIconButton(
-              icon: 'coin',
+              icon: 'route',
               tooltip: 'Mais no financeiro',
               onTap: _abrirMaisVistas,
             ),
@@ -222,9 +223,9 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
     final nome = alunoAsync.valueOrNull?.nome;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
-        8,
+        TokensStrip.s2,
         FxSettingsLayout.pageInset,
         0,
       ),

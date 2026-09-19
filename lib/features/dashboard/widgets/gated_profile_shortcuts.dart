@@ -43,7 +43,7 @@ class GatedProfileShortcuts extends ConsumerWidget {
     _ProfileToolEntry(
       icon: Icons.groups_outlined,
       label: 'Equipe',
-      value: 'Assistentes',
+      value: 'Em breve',
       rotaApp: '/perfil/equipe',
       featureGate: 'EQUIPE_RBAC',
       legacyIds: ['equipe'],

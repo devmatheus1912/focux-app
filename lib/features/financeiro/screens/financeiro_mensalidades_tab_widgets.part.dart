@@ -10,9 +10,13 @@ extension FinanceiroMensalidadesTabWidgets on _FinanceiroMensalidadesTabState {
 
   Widget _buildMensalidadesEmpty(BuildContext context) {
     return FxEmptyState(
-      icon: 'dollar-sign',
+      icon: 'coin',
       title: 'Nenhuma mensalidade',
-      subtitle: 'Lance a primeira cobrança pelo botão abaixo.',
+      subtitle: 'Lance a primeira cobrança para começar o mês.',
+      action: FxEmptyAction(
+        label: 'Nova mensalidade',
+        onTap: _abrirFormularioNovaMensalidade,
+      ),
     );
   }
 }

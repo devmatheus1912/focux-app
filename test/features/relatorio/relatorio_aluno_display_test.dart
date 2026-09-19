@@ -82,7 +82,8 @@ void main() {
     expect(relatorioAlunoCheckinsMetricValue(8), '8');
     expect(
       relatorioAlunoResumoCaption(),
-      'Aderência é treinos concluídos sobre o total deste recorte.',
+      'Aderência é dias únicos com check-in concluído sobre os dias do recorte. '
+      'Dois treinos no mesmo dia contam como 1.',
     );
     expect(relatorioAlunoCheckinChip(), 'Pedir check-in');
     expect(relatorioDetalheSecoes, hasLength(2));

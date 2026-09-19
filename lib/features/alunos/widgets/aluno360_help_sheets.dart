@@ -215,7 +215,7 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Barras da semana',
-        'Verde = check-in concluído; vermelho = dia sem registro; anel = hoje.',
+        'Verde = check-in concluído; laranja = dia sem registro; anel = hoje.',
         icon: 'calendar',
       ),
     ],

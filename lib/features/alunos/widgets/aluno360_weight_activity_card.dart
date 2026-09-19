@@ -41,6 +41,10 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
   final bool hasRadarP0;
   final bool suppressRadarHint;
 
+  void _openEvolucao(BuildContext context) {
+    context.push('/alunos/$alunoId/evolucao', extra: aluno.nome);
+  }
+
   void _openComparativo(BuildContext context) {
     context.push('/alunos/$alunoId/evolucao-comparativo', extra: aluno.nome);
   }
@@ -98,7 +102,8 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Tentar histórico',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => _openComparativo(context),
+                    onPressed:
+                        () => ref.invalidate(alunoPesoHistoricoProvider(alunoId)),
                   ),
                 ),
             data: (series) {
@@ -113,7 +118,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     label: 'Registrar primeira medida',
                     accent: primary,
                     isDark: isDark,
-                    onPressed: () => _openComparativo(context),
+                    onPressed: () => _openEvolucao(context),
                   ),
                 );
               }
@@ -151,7 +156,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                         label: 'Registrar medida',
                         accent: primary,
                         isDark: isDark,
-                        onPressed: () => _openComparativo(context),
+                        onPressed: () => _openEvolucao(context),
                       ),
                       if (showRadarHint)
                         DashboardHomeActionChip(

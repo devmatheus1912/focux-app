@@ -144,7 +144,7 @@ class _Aluno360CopilotActionRowState
   @override
   Widget build(BuildContext context) {
     final hasTask = widget.existingTask != null || widget.openTaskHint;
-    // Criar tarefa / Abrir chat vivem no sticky secondary ou Mais (#10).
+    // Criar tarefa / Abrir chat vivem em Mais ações (#5).
     final hidePrimary = widget.hidePrimaryCta && hasTask;
     if (hidePrimary || !hasTask) {
       return const SizedBox.shrink();

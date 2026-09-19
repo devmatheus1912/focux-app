@@ -9,11 +9,10 @@ import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
-import '../utils/aluno360_copilot_task_actions.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
-/// Chip flutuante — paridade Perfil/Home (`DashboardHomeActionChip`).
+/// Sticky da Operação — CTA primária; Chat/Criar tarefa ficam em Mais ações.
 class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
   const Aluno360OperacaoStickyCtaBar({
     super.key,
@@ -42,7 +41,6 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     final sticky = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
     final hasOpenTask = hasOpenCopilotTask360;
-    final followUpDue = isAlunoFollowUpDue(aluno);
 
     void openOutreach() {
       showAlunoOutreachMessageSheet(
@@ -96,44 +94,12 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       }
     }
 
+    // Só atalho da fila aberta — Criar tarefa / Chat estão em Mais ações.
     final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
       sticky: sticky,
       hasOpenTask: hasOpenTask,
     );
-    final showSecondaryChat = shouldShowStickySecondaryChat(
-      sticky: sticky,
-      hasOpenTask: hasOpenTask,
-      followUpDue: followUpDue,
-      proximaAcaoText: effectiveProxima?.acao,
-    );
-    // Sem floaters no card: Criar tarefa / Chat sobem para o sticky (#10).
-    final showSecondaryCreateTask =
-        !hasOpenTask &&
-        !operacao.hideCopilotTaskRow &&
-        (effectiveProxima?.acao.trim().isNotEmpty ?? false);
-    final showSecondaryChatMais =
-        showSecondaryChat ||
-        (!hasOpenTask &&
-            !operacao.hideCopilotChatRow &&
-            !sticky.isChatAction);
     final stickyDisplayLabel = operacao.stickyDisplayLabel;
-
-    Future<void> createTask() async {
-      final acao = effectiveProxima?.acao.trim() ?? '';
-      if (acao.isEmpty) return;
-      HapticFeedback.lightImpact();
-      ref.read(alunoCopilotCreatingProvider(alunoId).notifier).state = true;
-      try {
-        await criarTarefaCopilotoFromAluno360(
-          context: context,
-          ref: ref,
-          aluno: aluno,
-          acao: acao,
-        );
-      } finally {
-        ref.read(alunoCopilotCreatingProvider(alunoId).notifier).state = false;
-      }
-    }
 
     return SafeArea(
       top: false,
@@ -152,38 +118,17 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (showSecondaryCommandCenter ||
-                  showSecondaryChatMais ||
-                  showSecondaryCreateTask)
+              if (showSecondaryCommandCenter)
                 Padding(
                   padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                  child: Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if (showSecondaryCreateTask)
-                        DashboardHomeActionChip(
-                          label: 'Criar tarefa',
-                          accent: primary,
-                          isDark: isDark,
-                          enabled: !creating,
-                          onPressed: createTask,
-                        ),
-                      if (showSecondaryCommandCenter)
-                        DashboardHomeActionChip(
-                          label: 'Tarefa',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: openCommandCenter,
-                        ),
-                      if (showSecondaryChatMais)
-                        DashboardHomeActionChip(
-                          label: 'Chat',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => openChat(acao: effectiveProxima?.acao),
-                        ),
-                    ],
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: 'Tarefa',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: openCommandCenter,
+                    ),
                   ),
                 ),
               Semantics(

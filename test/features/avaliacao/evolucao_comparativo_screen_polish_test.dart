@@ -26,9 +26,10 @@ void main() {
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
-    expect(screen, contains("label: 'Lista'"));
+    expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
     expect(screen, contains("label: 'Evolução'"));
+    expect(screen, contains("label: 'Fotos'"));
+    expect(screen, isNot(contains("label: 'Lista'")));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('percGordura'));
     expect(screen, contains('circCintura'));

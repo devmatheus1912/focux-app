@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api/api_error.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -70,23 +71,28 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
       final message = mapMfaVerifyError(error);
-      if (_isMfaTokenExpired(error, message)) {
+      // Token da challenge expirou/inválido → login. Código errado → fica na tela.
+      if (_isMfaChallengeGone(error, message)) {
         ref.read(mfaChallengeProvider.notifier).state = null;
         context.go('/login');
         return;
       }
+      _codeController.clear();
       setState(() => _error = message);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  bool _isMfaTokenExpired(Object error, String message) {
+  /// Só volta ao login quando a challenge em si morreu — não quando o TOTP errou.
+  bool _isMfaChallengeGone(Object error, String message) {
+    final codigo = ApiError.from(error)?.codigo;
+    if (codigo == 'MFA_TOKEN_INVALIDO') return true;
+    if (codigo == 'MFA_CODIGO_INVALIDO') return false;
     final lower = message.toLowerCase();
     if (lower.contains('expirou') || lower.contains('expirado')) return true;
     if (error is DioException) {
-      final status = error.response?.statusCode;
-      return status == 401 || status == 410;
+      return error.response?.statusCode == 410;
     }
     return false;
   }

@@ -1,12 +1,29 @@
 /// Title-cases a person name for display ("thales silva" → "Thales Silva").
+/// Siglas de produto (IA, PIX, MFA…) ficam em caixa alta.
 String fxTitleCaseName(String value) {
   final trimmed = value.trim();
   if (trimmed.isEmpty) return 'Aluno';
+
+  const keepUpper = {
+    'ia',
+    'pix',
+    'mfa',
+    'api',
+    'bff',
+    'fcm',
+    'crm',
+    'rpe',
+    'lgpd',
+    'sms',
+    'otp',
+  };
 
   return trimmed
       .split(RegExp(r'\s+'))
       .map((part) {
         if (part.isEmpty) return part;
+        final lower = part.toLowerCase();
+        if (keepUpper.contains(lower)) return lower.toUpperCase();
         return part[0].toUpperCase() + part.substring(1).toLowerCase();
       })
       .join(' ');

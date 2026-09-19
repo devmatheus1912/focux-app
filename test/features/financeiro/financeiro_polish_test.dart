@@ -31,7 +31,7 @@ void main() {
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('FxSatelliteListTile'));
     expect(tab, contains('ListView.builder'));
-    expect(tab, contains('FxLiquidPrimaryButton'));
+    expect(tab, contains('DashboardHomeActionChip'));
     expect(tab, contains('loadingLabel:'));
     expect(tab, isNot(contains("'Lançando…' : 'Confirmar'")));
     expect(tab, contains('showFxConfirmSheet'));
@@ -72,14 +72,16 @@ void main() {
     );
     expect(dashboard, contains('FinanceiroResumoScreen'));
     expect(dashboard, contains('financeiroPanoramaExtras'));
-    expect(dashboard, contains("'Mais'"));
+    expect(dashboard, contains("'Mais no panorama'"));
     expect(dashboard, contains('SmartPricingCard'));
     expect(resumo, contains('emphasize: true'));
-    expect(resumo, contains('Ver mensalidades'));
+    expect(
+      resumo,
+      anyOf(contains('Ver mensalidades'), contains('Abrir atrasadas')),
+    );
     expect(resumo, contains('FxStripCard'));
     expect(resumo, isNot(contains('PieChart')));
     expect(resumo, isNot(contains('_DonutChartCard')));
-    expect(tab, contains('DashboardHomeActionChip'));
     expect(tab, contains('FxKeyboardPopScope'));
     expect(tab, contains('FxKeyboardDismissScope'));
   });

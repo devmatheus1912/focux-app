@@ -89,25 +89,10 @@ class _FinanceiroDashboardScreenState
         },
         child: ListView(
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.only(bottom: 110),
+          padding: const EdgeInsets.only(bottom: TokensStrip.s6),
           children: [
             const FinanceiroResumoScreen(),
-            if (zeroData) ...[
-              const SizedBox(height: FxSettingsLayout.groupGap),
-              FxEmptyState(
-                icon: 'coin',
-                title: 'Sem dados financeiros',
-                // Nunca ecoar BE zeroCta "Abrir financeiro" aqui — já estamos no hub.
-                subtitle: 'Lance a primeira mensalidade para ver o dashboard.',
-                action: FxEmptyAction(
-                  label: 'Nova mensalidade',
-                  onTap:
-                      () => FinanceiroHubScope.maybeOf(
-                        context,
-                      )?.openNovaMensalidade(source: 'empty_resumo'),
-                ),
-              ),
-            ] else ...[
+            if (!zeroData) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
@@ -118,7 +103,7 @@ class _FinanceiroDashboardScreenState
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: DashboardHomeActionChip(
-                    label: 'Mais',
+                    label: 'Mais no panorama',
                     accent: primary,
                     isDark: isDark,
                     onPressed: _abrirMaisExtras,
@@ -127,6 +112,7 @@ class _FinanceiroDashboardScreenState
               ),
               if (d.vencimentosProximos.isNotEmpty) ...[
                 const SizedBox(height: FxSettingsLayout.groupGap),
+
                 _FinanceiroVencimentosGroup(items: d.vencimentosProximos),
               ],
               if (_extraAberto == FinanceiroPanoramaExtraId.evolucao) ...[

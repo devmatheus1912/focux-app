@@ -12,9 +12,9 @@ String relatorioAderenciaPercentLabel(int concluidos, int total) {
 }
 
 String relatorioTreinosSubtitle(int concluidos, int total) {
-  if (total <= 0) return 'Ainda sem treinos';
-  if (concluidos == 1 && total == 1) return '1 de 1 treino concluído';
-  return '$concluidos de $total treinos concluídos';
+  if (total <= 0) return 'Ainda sem dias com check-in';
+  if (concluidos == 1 && total == 1) return '1 de 1 dia com check-in';
+  return '$concluidos de $total dias com check-in';
 }
 
 double relatorioAderenciaPct(int concluidos, int total) {
@@ -39,7 +39,7 @@ List<ResumoAluno> relatorioCatalogoMais(ResumoGlobal dados) {
 
 List<ResumoAluno> relatorioCatalogoMenos(ResumoGlobal dados) {
   final source = dados.itens.isNotEmpty ? dados.itens : dados.menosComprometidos;
-  final copy = List<ResumoAluno>.of(source);
+  final copy = List<ResumoAluno>.of(source).where(relatorioPrecisaAtencao).toList();
   copy.sort(
     (a, b) => relatorioAderenciaPct(
       a.treinosConcluidos,
@@ -47,6 +47,11 @@ List<ResumoAluno> relatorioCatalogoMenos(ResumoGlobal dados) {
     ).compareTo(relatorioAderenciaPct(b.treinosConcluidos, b.totalTreinos)),
   );
   return copy;
+}
+
+bool relatorioPrecisaAtencao(ResumoAluno a) {
+  if (a.treinosConcluidos <= 0) return true;
+  return relatorioAderenciaPct(a.treinosConcluidos, a.totalTreinos) < 70;
 }
 
 List<T> relatorioRankingSearch<T>(
@@ -65,7 +70,9 @@ T? firstRelatorioAtencao<T>(List<T> menosComprometidos) =>
     menosComprometidos.isEmpty ? null : menosComprometidos.first;
 
 const relatorioComoCalculamos =
-    'Média de aderência de todos os alunos da base, não só do ranking.';
+    'Aderência = dias únicos com check-in concluído / 30. '
+    'Dois treinos no mesmo dia contam 1. '
+    'Média só entre quem treinou. Atenção = 0 dias ou abaixo de 70%.';
 
 String relatorioUltimoTreinoLabel(String? raw) {
   final value = raw?.trim() ?? '';
