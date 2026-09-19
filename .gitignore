@@ -123,3 +123,7 @@ coverage/
 # QA gap screenshots / local dumps (never public)
 .tmp-gaps/
 .tmp-*/
+
+# Strix local runs (never public)
+strix_runs/
+.strix/
