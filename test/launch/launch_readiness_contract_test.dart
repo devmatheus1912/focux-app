@@ -86,6 +86,7 @@ void main() {
     expect(mainDart, contains("locale: const Locale('pt')"));
     expect(mainDart, contains('S.supportedLocales'));
     expect(indexHtml, contains('Focux Personal'));
+    expect(indexHtml, contains('Content-Security-Policy'));
     expect(manifest, contains('Focux Personal'));
     expect(File('deploy.bat').existsSync(), isTrue);
     expect(File('scripts/deploy-vercel.ps1').existsSync(), isTrue);
