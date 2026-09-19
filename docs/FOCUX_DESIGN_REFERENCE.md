@@ -1310,7 +1310,7 @@ Dos 86 endpoints com flag `L`, **61 têm consumidor de produto e 25 não**. Não
 
 **Bucket A:** `/api/alunos`, `/api/leads`, `/api/feed`, `/api/feed/aluno`, `/api/feed/{postId}/comentarios`, `/api/checkin/historico`, `/api/feedback-videos`, `/api/feedback-videos/me`, `/api/feedback-videos/aluno/{alunoId}`, `/api/alunos/{alunoId}/fotos`, `/api/alunos/{alunoId}/medidas`, `/api/alunos/{alunoId}/avaliacoes`, `/api/alunos/{alunoId}/recordes`, `/api/alunos/{id}/historico-mensalidades`, `/api/chat/inbox/archived`, `/api/broadcasts`, `/api/captura`, `/api/retencao/base`, `/api/ranking`.
 
-**Bucket B:** `/api/agenda/aluno/meus`, `/api/aluno/medidas`, `/api/automacoes/{fluxoId}/logs`, `/api/coach-proativo/mensagens`, `/api/depoimentos`, `/api/personal/depoimentos`, `/api/habitos/compliance`, `/api/habitos/me`, `/api/leads/{id}/interacoes`, `/api/loja/pedidos`, `/api/personal/gallery`, `/api/suporte/tickets/meus`, `/api/trilhas/aluno/{alunoId}`, `/api/winback/log`.
+**Bucket B:** `/api/agenda/aluno/meus`, `/api/aluno/medidas`, `/api/automacoes/{fluxoId}/logs`, `/api/coach-proativo/mensagens`, `/api/depoimentos`, `/api/personal/depoimentos`, `/api/habitos/compliance`, `/api/habitos/me`, `/api/leads/{id}/interacoes`, `/api/loja/pedidos`, `/api/personal/gallery`, `/api/suporte/analisar-erro`, `/api/trilhas/aluno/{alunoId}`, `/api/winback/log`.
 
 **Bucket D:** `/api/chat/aluno/historico` e `/api/chat/historico/{alunoId}`. **Resolvido do lado do app:** `historico()` não tinha chamador nenhum e saiu; `historicoAluno()` tinha um só, um fallback em `ia_aluno_screen` que baixava o histórico inteiro para ler um `alunoId`, e agora usa `historicoAlunoPage(limit: 1)`. Os dois endpoints crus passaram a órfãos no cruzamento e o backend está livre para apagá-los.
 
