@@ -8,6 +8,9 @@
 2. **JWT:** secret forte; type gate; MFA confirmação revoga refresh.
 3. **Tenant/RLS lógico:** sempre filtrar por ownership; alunoId antes de personalId em paths dual-role.
 4. **Secrets:** só env/Railway — nunca no app tree (só client ids públicos).
+   Firebase `google-services.json` / `GoogleService-Info.plist` reais fora do git
+   (`*.example` + gitignore). Key Android vazada → rotacionar/restringir no GCP e
+   fechar o alerta GitHub como **revoked** (ver README → Segurança).
 5. **App release:** `API_CERT_PINS` obrigatório; cleartext bloqueado; Keystore/Keychain.
 6. **OwnerGuard** em billing, LGPD, backup, white-label, wallet, IAP, identidade.
 7. **AdminInitializer** opt-in + senha fraca bloqueada.

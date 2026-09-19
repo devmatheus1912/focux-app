@@ -4,8 +4,15 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("com.google.gms.google-services")
     id("dev.flutter.flutter-gradle-plugin")
+    // Applied below only when google-services.json is present (gitignored; copy from *.example).
+    id("com.google.gms.google-services") apply false
+}
+
+// Real Firebase config stays out of git. Local/CI provide the file via *.example copy or secrets.
+val googleServicesJson = file("google-services.json")
+if (googleServicesJson.exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 // Release signing uses android/key.properties only. Never fall back to debug keys.
