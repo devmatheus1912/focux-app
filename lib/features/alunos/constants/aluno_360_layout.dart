@@ -17,12 +17,11 @@ abstract final class Aluno360Layout {
   static const double insetCardRadius = TokensStrip.rCard;
   static const double tabBarHeight = 52;
   static const double tabContentGap = TokensStrip.s4;
-  /// Chip overlay (paridade Perfil/Home) — uma linha de chips alinhados à direita.
+  /// Chip overlay (paridade Perfil/Home) — CTA primária sticky.
   static const double stickyBarContentHeight = 64;
 
-  /// Linha opcional de chips secundários (Tarefa/Chat) acima da primária:
-  /// chip 48 + gap s2. Sempre reservada para o conteúdo nunca ficar clipado.
-  static const double stickyBarSecondaryRowHeight = 48 + TokensStrip.s2;
+  /// Reserva opcional quando a fila aberta mostra o chip "Tarefa".
+  static const double stickyBarSecondaryRowHeight = 0;
   static const double stickyBarScrimHeight = 28;
   static const double snackbarStickyReserve = 76;
   static const double operacaoTopSnackHeight = 52;

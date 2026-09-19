@@ -38,21 +38,20 @@ void main() {
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FinanceiroResumoScreen'));
     expect(screen, contains('financeiroPanoramaExtras'));
-    expect(screen, contains("'Mais'"));
+    expect(screen, contains("'Mais no panorama'"));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('FxEmptyAction'));
-    expect(screen, contains("'Nova mensalidade'"));
-    expect(screen, contains('openNovaMensalidade'));
+    expect(screen, contains('FinanceiroResumoScreen'));
+    expect(screen, contains('take(3)'));
     expect(screen, isNot(contains('d.zeroCta')));
     expect(screen, isNot(contains("'Abrir mensalidades'")));
-    expect(screen, contains('take(3)'));
     expect(screen, isNot(contains('_FinanceiroKpiGroup')));
     expect(screen, isNot(contains('ExpansionTile')));
     expect(screen, isNot(contains('PieChart')));
+    expect(screen, isNot(contains('bottom: 110')));
   });
 }

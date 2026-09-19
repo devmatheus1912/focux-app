@@ -13,42 +13,32 @@ void main() {
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(
-      screen,
-      anyOf(
-        contains('FxContentWidthLimiter'),
-        isNot(contains('constrainWidth: false')),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
+    expect(screen, contains('FxContentWidthLimiter'));
+    expect(screen, contains('friendlyError'));
     expect(screen, contains('SkeletonList'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('FxHubHeader'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxHelpSheet'));
+    expect(screen, contains('equipamentosCountLabel'));
+    expect(screen, contains('equipamentoFxIcon'));
+    expect(screen, contains('Icons.check_rounded'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
+    expect(screen, contains('_dirty'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, isNot(contains("icon: 'circle-check'")));
+    expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, isNot(contains('OutlinedButton')));
-    expect(screen, isNot(contains('Icons.check_rounded')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains('DashboardSectionHeader')));
   });
 }

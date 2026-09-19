@@ -30,9 +30,9 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
         : 'Canal direto com seu personal';
   }
 
-  String? _avatarImage(PersonalBrand? brand) {
+  String? _avatarImage(PersonalBrand? brand, {String? alunoFotoUrl}) {
     if (_isPersonalMode) {
-      return null;
+      return alunoFotoUrl;
     }
     return brand?.logoUrl;
   }

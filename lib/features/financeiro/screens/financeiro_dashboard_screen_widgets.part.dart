@@ -24,7 +24,12 @@ class _EvolucaoChart extends StatelessWidget {
         horizontal: FxSettingsLayout.pageInset,
       ),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 18, 16, 14),
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s4,
+          TokensStrip.s4,
+          TokensStrip.s3,
+        ),
         decoration: fxListCardDecoration(
           context,
           accent: primary,
@@ -125,8 +130,7 @@ class _EvolucaoChart extends StatelessWidget {
                                       color:
                                           !isLast
                                               ? (isDark
-                                                  ? dashboardHeroMutedOnTeal()
-                                                      .withValues(alpha: 0.08)
+                                                  ? mute.withValues(alpha: 0.22)
                                                   : primarySoft)
                                               : null,
                                     ),
@@ -134,15 +138,11 @@ class _EvolucaoChart extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: TokensStrip.s1),
                             Text(
                               label,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: isLast ? ink : mute,
-                                fontWeight:
-                                    isLast ? FontWeight.w600 : FontWeight.w500,
-                                letterSpacing: 0.4,
+                              style: FocuxHubTypography.chip(
+                                isLast ? ink : mute,
                               ),
                             ),
                           ],

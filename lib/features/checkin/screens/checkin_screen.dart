@@ -34,10 +34,6 @@ import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_timer_widgets.dart';
 import '../utils/checkin_exercise_tips.dart';
-import '../../auth/providers/auth_provider.dart';
-import '../../planos/providers/plano_features_provider.dart';
-import '../../dashboard/utils/dashboard_home_client_cache.dart';
-import '../../planos/utils/plano_capability.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
   final int treinoId;
@@ -461,14 +457,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     );
   }
 
-  bool get _poseCoachDisponivel {
-    final features =
-        ref.read(planoFeaturesProvider).valueOrNull ??
-        DashboardHomeClientCache.getIfFresh()?.planoFeatures;
-    if (features == null) return false;
-    return PlanoCapability.has(features.normalizeForTier(), 'poseCoach');
-  }
-
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
@@ -476,8 +464,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     final primary = Theme.of(context).colorScheme.primary;
     final brand = dark ? BrandPalette.accent(primary) : primary;
     final mute = chrome.mute;
-    final isAluno = ref.watch(userRoleProvider) == UserRole.aluno;
-    final showCoach = !isAluno || _poseCoachDisponivel;
 
     if (_loading) {
       return _executionShell(
@@ -624,14 +610,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                           ? () => _marcar(
                                             current,
                                             current.seriesFeitas - 1,
-                                          )
-                                          : null,
-                                  onOpenCoach:
-                                      showCoach
-                                          ? () => showCheckinCoachSheet(
-                                            context,
-                                            ee: current,
-                                            forAluno: isAluno,
                                           )
                                           : null,
                                   onOpenDemo: null,

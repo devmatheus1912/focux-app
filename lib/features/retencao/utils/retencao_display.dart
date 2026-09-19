@@ -10,16 +10,28 @@ String retencaoRiscoLabel(String risco) => switch (risco.trim().toUpperCase()) {
 bool retencaoRiscoAlto(String risco) => risco.trim().toUpperCase() == 'ALTO';
 
 const retencaoComoCalculamos =
-    'Score 0–100: alto abaixo de 40, médio 40–69, saudável 70 ou mais. '
-    'Contagens e top consideram só alunos ATIVOS com nome (BE). '
-    'O catálogo pagina a base e busca pelo nome.';
+    'Score 0–100 por dias únicos com check-in concluído (dois treinos no '
+    'mesmo dia contam 1): alto abaixo de 40, médio 40–69, saudável 70+. '
+    'A leitura atualiza ao abrir (e o job de domingo reforça). '
+    'Contagens e top consideram só alunos ATIVOS com nome.';
 
 const retencaoFiltroAlto = 'alto';
 
 const retencaoEmptyTitle = 'Ainda sem leitura desta base';
 
 const retencaoEmptySubtitle =
-    'O cálculo roda no domingo. Cadastre alunos ativos ou fale no win-back com quem já sumiu.';
+    'Cadastre alunos ativos. Ao abrir de novo, o score recalcula com os '
+    'check-ins concluídos (dias únicos, sem duplicar o mesmo dia).';
+
+/// Labels da faixa de métricas do fold (S1).
+String retencaoMetricAltoLabel(int n) =>
+    n == 1 ? '1 alto' : '$n altos';
+
+String retencaoMetricMedioLabel(int n) =>
+    n == 1 ? '1 médio' : '$n médios';
+
+String retencaoMetricSaudavelLabel(int n) =>
+    n == 1 ? '1 saudável' : '$n saudáveis';
 
 bool retencaoNomeExibivel(String nome) {
   final t = nome.trim();

@@ -339,13 +339,13 @@ class _FinanceiroMensalidadesTabState
                     )
                     : Column(
                       children: [
-                        if (_items.isNotEmpty && _modoSelecao)
+                        if (_items.isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(
                               FxSettingsLayout.pageInset,
-                              8,
+                              TokensStrip.s2,
                               FxSettingsLayout.pageInset,
-                              8,
+                              TokensStrip.s2,
                             ),
                             child: Builder(
                               builder: (context) {
@@ -404,7 +404,7 @@ class _FinanceiroMensalidadesTabState
                                           modoSelecao: _modoSelecao,
                                           selecionados: _selecionados.length,
                                         ),
-                                        accent: EagleTokens.moneyGreen,
+                                        accent: primary,
                                         isDark: chrome.isDark,
                                         onPressed: () =>
                                             runTool(tools.foldChip!),
@@ -556,12 +556,17 @@ class _FinanceiroMensalidadesTabState
                                 TokensStrip.s3 +
                                     MediaQuery.viewInsetsOf(context).bottom,
                               ),
-                              child: FxLiquidPrimaryButton(
-                                label: 'Nova mensalidade',
-                                onPressed: () {
-                                  FxKeyboardDismissScope.dismiss();
-                                  _abrirFormularioNovaMensalidade();
-                                },
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: DashboardHomeActionChip(
+                                  label: 'Nova mensalidade',
+                                  accent: primary,
+                                  isDark: chrome.isDark,
+                                  onPressed: () {
+                                    FxKeyboardDismissScope.dismiss();
+                                    _abrirFormularioNovaMensalidade();
+                                  },
+                                ),
                               ),
                             ),
                           ),

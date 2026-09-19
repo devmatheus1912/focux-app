@@ -8,6 +8,12 @@ void main() {
       expect(fxTitleCaseName('matheus silva'), 'Matheus Silva');
       expect(fxTitleCaseName('  '), 'Aluno');
     });
+
+    test('keeps product acronyms uppercase', () {
+      expect(fxTitleCaseName('Tarefas IA'), 'Tarefas IA');
+      expect(fxTitleCaseName('tarefas ia'), 'Tarefas IA');
+      expect(fxTitleCaseName('pagar pix'), 'Pagar PIX');
+    });
   });
 
   group('fxDateFull', () {

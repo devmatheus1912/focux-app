@@ -25,7 +25,6 @@ class CheckinSerieCard extends StatelessWidget {
   final int total;
   final VoidCallback onRegistrar;
   final VoidCallback? onDesfazer;
-  final VoidCallback? onOpenCoach;
   final VoidCallback? onOpenDemo;
   final VoidCallback? onAjustar;
   final VoidCallback? onConfirmarRestante;
@@ -44,7 +43,6 @@ class CheckinSerieCard extends StatelessWidget {
     required this.total,
     required this.onRegistrar,
     this.onDesfazer,
-    this.onOpenCoach,
     this.onOpenDemo,
     this.onAjustar,
     this.onConfirmarRestante,
@@ -199,7 +197,6 @@ class CheckinSerieCard extends StatelessWidget {
             if (onAjustar != null ||
                 onConfirmarRestante != null ||
                 onDesfazer != null ||
-                onOpenCoach != null ||
                 (onOpenDemo != null && !hasDemo)) ...[
               const SizedBox(height: TokensStrip.s1),
               TextButton(
@@ -233,13 +230,6 @@ class CheckinSerieCard extends StatelessWidget {
                         label: checkinDesfazerLabel(),
                         subtitle: 'Remove a última série',
                         icon: Icons.undo_rounded,
-                      ),
-                    if (onOpenCoach != null)
-                      (
-                        id: 'postura',
-                        label: 'Postura',
-                        subtitle: 'Dicas de execução',
-                        icon: Icons.accessibility_new_rounded,
                       ),
                     if (onOpenDemo != null && !hasDemo)
                       (
@@ -307,8 +297,6 @@ class CheckinSerieCard extends StatelessWidget {
                       onConfirmarRestante?.call();
                     case 'desfazer':
                       onDesfazer?.call();
-                    case 'postura':
-                      onOpenCoach?.call();
                     case 'demo':
                       onOpenDemo?.call();
                   }

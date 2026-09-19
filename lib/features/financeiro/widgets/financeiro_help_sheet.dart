@@ -11,13 +11,14 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Mensalidades',
-        'Lance, marque paga, PIX e cobre no chat. Toque na linha para o detalhe.',
+        'Lance, marque paga, PIX e cobre no chat. Toque na linha para o detalhe. '
+        'Atualizar atrasos fica no chip do topo; lote pago é por long-press.',
         icon: 'coin',
       ),
       FxHelpTip(
         'Panorama',
         'Troque o mês, veja recebido e inadimplentes. Abra em Mais → Panorama.',
-        icon: 'dollar-sign',
+        icon: 'trend',
       ),
       FxHelpTip(
         'Como calculamos',

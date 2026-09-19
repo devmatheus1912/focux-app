@@ -1,64 +1,61 @@
 part of 'conversation_screen.dart';
 
 extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
-  void _showChatMenu() {
-    final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    showFxHomeSheet<void>(
+  Future<void> _showChatMenu() async {
+    final items = <FxInsetPickerSheetItem<String>>[
+      if (_isPersonalMode)
+        const FxInsetPickerSheetItem(
+          value: 'perfil',
+          label: 'Ver perfil do aluno',
+          subtitle: 'Abrir o Aluno 360',
+          icon: Icons.person_outline_rounded,
+        ),
+      const FxInsetPickerSheetItem(
+        value: 'buscar',
+        label: 'Buscar conversa',
+        subtitle: 'Encontrar mensagem na thread',
+        icon: Icons.search_rounded,
+      ),
+      const FxInsetPickerSheetItem(
+        value: 'midias',
+        label: 'Mídias da conversa',
+        subtitle: 'Fotos, vídeos e áudios',
+        icon: Icons.perm_media_outlined,
+      ),
+      const FxInsetPickerSheetItem(
+        value: 'atualizar',
+        label: 'Atualizar conversa',
+        subtitle: 'Recarregar mensagens',
+        icon: Icons.refresh_rounded,
+      ),
+      const FxInsetPickerSheetItem(
+        value: 'emoji',
+        label: 'Adicionar emoji',
+        subtitle: 'Inserir no campo de mensagem',
+        icon: Icons.emoji_emotions_outlined,
+      ),
+    ];
+    final chosen = await showFxInsetPickerSheet<String>(
       context,
-      builder:
-          (sheetContext) => FxHomeSheetSurface(
-            isDark: isDark,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FxHomeSheetHandle(isDark: isDark),
-                SizedBox(height: TokensStrip.s4),
-                if (_isPersonalMode)
-                  ListTile(
-                    leading: Icon(Icons.person_outline, color: primary),
-                    title: const Text('Ver perfil do aluno'),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.push('/alunos/${widget.alunoId}');
-                    },
-                  ),
-                ListTile(
-                  leading: Icon(Icons.search_rounded, color: primary),
-                  title: const Text('Buscar conversa'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _showSearchSheet();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.perm_media_outlined, color: primary),
-                  title: const Text('Midias da conversa'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _showMediaGallerySheet();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.refresh, color: primary),
-                  title: const Text('Atualizar conversa'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _loadHistorico();
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.emoji_emotions_outlined, color: primary),
-                  title: const Text('Adicionar emoji'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _showEmojiSheet();
-                  },
-                ),
-              ],
-            ),
-          ),
+      title: 'Conversa',
+      headerIcon: Icons.more_horiz_rounded,
+      selected: null,
+      items: items,
     );
+    if (chosen == null || !mounted) return;
+    HapticFeedback.selectionClick();
+    switch (chosen) {
+      case 'perfil':
+        context.push('/alunos/${widget.alunoId}');
+      case 'buscar':
+        _showSearchSheet();
+      case 'midias':
+        _showMediaGallerySheet();
+      case 'atualizar':
+        _loadHistorico();
+      case 'emoji':
+        _showEmojiSheet();
+    }
   }
 
   void _showMediaGallerySheet() {

@@ -15,6 +15,7 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('Ver mensalidades'));
+    expect(screen, contains('Abrir atrasadas'));
     expect(screen, contains('FxHubFreshness'));
     expect(screen, isNot(contains('PieChart')));
     expect(screen, isNot(contains('_DonutChartCard')));

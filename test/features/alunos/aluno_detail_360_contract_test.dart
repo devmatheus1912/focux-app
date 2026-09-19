@@ -178,8 +178,20 @@ void main() {
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains("'Criar tarefa'"));
     expect(screen, contains('TextButton'));
-    // Criar tarefa vive no sticky / Mais (#10), não floater TextButton do card.
+    // Criar tarefa / Chat ficam em Mais ações (#5), não no sticky secundário.
     expect(screen, contains("label: 'Criar tarefa'"));
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
+      ).readAsStringSync(),
+      isNot(contains("label: 'Criar tarefa'")),
+    );
+    expect(
+      File(
+        'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
+      ).readAsStringSync(),
+      isNot(contains("label: 'Chat'")),
+    );
     expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, contains("'Copiar mensagem'"));
     expect(screen, contains("'Mensagem sugerida'"));

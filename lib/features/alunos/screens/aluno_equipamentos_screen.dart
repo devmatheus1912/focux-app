@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -13,14 +12,17 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_hub_header.dart';
+import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
+import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/equipamento_aluno_display.dart';
 import '../utils/satellite_screen_utils.dart';
@@ -56,6 +58,7 @@ class _AlunoEquipamentosScreenState
   }
 
   void _toggle(Equipamento equipamento) {
+    HapticFeedback.selectionClick();
     final current = {...(_selected ?? <Equipamento>{})};
     if (current.contains(equipamento)) {
       current.remove(equipamento);
@@ -63,6 +66,36 @@ class _AlunoEquipamentosScreenState
       current.add(equipamento);
     }
     setState(() => _selected = current);
+  }
+
+  void _clearRestriction() {
+    HapticFeedback.selectionClick();
+    setState(() => _selected = {});
+  }
+
+  void _showHelp() {
+    showFxHelpSheet(
+      context,
+      title: 'Equipamentos',
+      subtitle: 'O que o aluno tem disponível no treino.',
+      tips: const [
+        FxHelpTip(
+          'Restrição',
+          'Marque só o que dá para usar. Substituições do copiloto respeitam essa lista.',
+          icon: 'dumbbell',
+        ),
+        FxHelpTip(
+          'Sem restrição',
+          'Lista vazia = sem filtro. Qualquer equipamento pode entrar nas sugestões.',
+          icon: 'spark',
+        ),
+        FxHelpTip(
+          'Salvar',
+          'O botão Salvar só aparece depois que você muda alguma opção.',
+          icon: 'target',
+        ),
+      ],
+    );
   }
 
   Future<void> _cancel() async {
@@ -81,7 +114,7 @@ class _AlunoEquipamentosScreenState
 
   Future<void> _save() async {
     final selected = _selected;
-    if (selected == null || _saving) return;
+    if (selected == null || _saving || !_dirty) return;
     HapticFeedback.mediumImpact();
     setState(() => _saving = true);
     try {
@@ -89,9 +122,10 @@ class _AlunoEquipamentosScreenState
           .read(alunoRepositoryProvider)
           .atualizarEquipamentos(widget.alunoId, selected);
       ref.invalidate(alunoProvider(widget.alunoId));
+      await invalidateAluno360Providers(ref, widget.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, equipamentosSaveSuccess());
-      Navigator.pop(context, true);
+      safePopOrGo(context, '/alunos/${widget.alunoId}');
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
@@ -126,20 +160,30 @@ class _AlunoEquipamentosScreenState
               ),
               child: const Text('Cancelar'),
             ),
-          ),
-          bottomNavigationBar: FxFormStickyBar(
-            child: Semantics(
-              button: true,
-              enabled: !_saving,
-              label: _saving ? 'Salvando equipamentos' : 'Salvar',
-              child: FxLiquidPrimaryButton(
-                label: 'Salvar',
-                loading: _saving,
-                loadingLabel: 'Salvando…',
-                onPressed: _saving ? null : _save,
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como usar equipamentos',
+                onTap: _showHelp,
               ),
-            ),
+            ],
           ),
+          bottomNavigationBar:
+              _dirty
+                  ? FxFormStickyBar(
+                    child: Semantics(
+                      button: true,
+                      enabled: !_saving,
+                      label:
+                          _saving ? 'Salvando equipamentos' : 'Salvar',
+                      child: FxLiquidPrimaryButton(
+                        label: 'Salvar',
+                        loading: _saving,
+                        loadingLabel: 'Salvando…',
+                        onPressed: _saving ? null : _save,
+                      ),
+                    ),
+                  )
+                  : null,
           body: alunoAsync.when(
             loading:
                 () => const Padding(
@@ -157,6 +201,7 @@ class _AlunoEquipamentosScreenState
             data: (aluno) {
               _hydrate(aluno.equipamentosDisponiveis);
               final current = _selected ?? {};
+              final noneSelected = current.isEmpty;
               return RefreshIndicator(
                 onRefresh: () async {
                   ref.invalidate(alunoProvider(widget.alunoId));
@@ -169,59 +214,96 @@ class _AlunoEquipamentosScreenState
                     _selected = {...fresh.equipamentosDisponiveis};
                   });
                 },
-                child: FxContentWidthLimiter(
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3,
-                      FxSettingsLayout.pageInset,
-                      24,
-                    ),
-                    itemCount: Equipamento.values.length + 2,
-                    itemBuilder: (context, i) {
-                      if (i == 0) {
-                        return const Padding(
-                          padding: EdgeInsets.only(bottom: TokensStrip.s3),
-                          child: DashboardSectionHeader(title: 'Disponíveis'),
-                        );
-                      }
-                      if (i == Equipamento.values.length + 1) {
-                        return FxSatelliteListTile(
-                          title: 'Sem restrição',
-                          subtitle: const Text(
-                            'Não filtrar substituições por equipamento.',
-                          ),
-                          onTap: _saving
-                              ? null
-                              : () => setState(() => _selected = {}),
-                        );
-                      }
-                      final equipamento = Equipamento.values[i - 1];
-                      final selected = current.contains(equipamento);
-                      final primary =
-                          Theme.of(context).colorScheme.primary;
-                      return FxSatelliteListTile(
-                        title:
+                child: FxKeyboardDismissScope(
+                  child: FxContentWidthLimiter(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s3,
+                        FxSettingsLayout.pageInset,
+                        24,
+                      ),
+                      itemCount: Equipamento.values.length + 2,
+                      itemBuilder: (context, i) {
+                        if (i == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: TokensStrip.s3,
+                            ),
+                            child: FxHubHeader(
+                              title: 'Disponíveis',
+                              subtitle: equipamentosCountLabel(current.length),
+                            ),
+                          );
+                        }
+                        if (i == Equipamento.values.length + 1) {
+                          return Semantics(
+                            selected: noneSelected,
+                            button: true,
+                            label: 'Sem restrição',
+                            child: FxSatelliteListTile(
+                              title: 'Sem restrição',
+                              subtitle: const Text(
+                                'Não filtrar substituições por equipamento.',
+                              ),
+                              leading: FxIcon(
+                                name: 'spark',
+                                size: FxSettingsLayout.iconSize,
+                                color:
+                                    noneSelected
+                                        ? primary
+                                        : fxScreenMute(context),
+                              ),
+                              trailing:
+                                  noneSelected
+                                      ? Icon(
+                                        Icons.check_rounded,
+                                        color: primary,
+                                        size: FxSettingsLayout.iconSize,
+                                      )
+                                      : null,
+                              accent: noneSelected ? primary : null,
+                              onTap: _saving ? null : _clearRestriction,
+                            ),
+                          );
+                        }
+                        final equipamento = Equipamento.values[i - 1];
+                        final selected = current.contains(equipamento);
+                        final label =
                             TaxonomyLabels.equipamento[equipamento] ??
-                            equipamento.backendName,
-                        trailing: Text(
-                          equipamentoChoiceValue(selected),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: selected
-                                ? primary
-                                : fxScreenMute(context),
-                            fontWeight: FontWeight.w700,
+                            equipamento.backendName;
+                        return Semantics(
+                          selected: selected,
+                          button: true,
+                          label: label,
+                          child: FxSatelliteListTile(
+                            title: label,
+                            leading: FxIcon(
+                              name: equipamentoFxIcon(equipamento),
+                              size: FxSettingsLayout.iconSize,
+                              color:
+                                  selected
+                                      ? primary
+                                      : fxScreenMute(context),
+                            ),
+                            trailing:
+                                selected
+                                    ? Icon(
+                                      Icons.check_rounded,
+                                      color: primary,
+                                      size: FxSettingsLayout.iconSize,
+                                    )
+                                    : null,
+                            accent: selected ? primary : null,
+                            onTap:
+                                _saving ? null : () => _toggle(equipamento),
                           ),
-                        ),
-                        accent: selected ? primary : null,
-                        onTap: _saving
-                            ? null
-                            : () => _toggle(equipamento),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               );

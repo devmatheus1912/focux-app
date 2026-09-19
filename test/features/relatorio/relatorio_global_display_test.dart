@@ -14,9 +14,9 @@ void main() {
   });
 
   test('relatorioTreinosSubtitle pluraliza', () {
-    expect(relatorioTreinosSubtitle(0, 0), 'Ainda sem treinos');
-    expect(relatorioTreinosSubtitle(1, 1), '1 de 1 treino concluído');
-    expect(relatorioTreinosSubtitle(3, 8), '3 de 8 treinos concluídos');
+    expect(relatorioTreinosSubtitle(0, 0), 'Ainda sem dias com check-in');
+    expect(relatorioTreinosSubtitle(1, 1), '1 de 1 dia com check-in');
+    expect(relatorioTreinosSubtitle(3, 8), '3 de 8 dias com check-in');
   });
 
   test('relatorioUltimoTreinoLabel formata data BR e vazio', () {

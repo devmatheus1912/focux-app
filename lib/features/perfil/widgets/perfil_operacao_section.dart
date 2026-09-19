@@ -44,16 +44,8 @@ class PerfilOperacaoSection extends StatelessWidget {
           value: 'Link de cadastro',
           mute: mute,
           line: line,
-          onTap: () => context.push('/convites'),
-        ),
-        FxSettingsTile(
-          icon: Icons.apps_outlined,
-          label: 'Mais ferramentas',
-          value: 'Crescimento e loja',
-          mute: mute,
-          line: line,
           showDivider: false,
-          onTap: () => context.push('/perfil/ferramentas'),
+          onTap: () => context.push('/convites'),
         ),
       ],
     );

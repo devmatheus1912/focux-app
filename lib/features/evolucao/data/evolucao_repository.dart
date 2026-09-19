@@ -17,14 +17,33 @@ class MedidaCorporal {
     this.fotoUrl,
   });
   factory MedidaCorporal.fromJson(Map<String, dynamic> j) => MedidaCorporal(
-    id: j['id'] as int,
-    data: j['data'] as String,
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    data: _medidaDataString(j['data']),
     peso: (j['peso'] as num?)?.toDouble(),
     cintura: (j['cintura'] as num?)?.toDouble(),
     quadril: (j['quadril'] as num?)?.toDouble(),
     braco: (j['braco'] as num?)?.toDouble(),
     fotoUrl: j['fotoUrl'] as String?,
   );
+}
+
+String _medidaDataString(Object? raw) {
+  if (raw is String) return raw;
+  if (raw is List && raw.length >= 3) {
+    final y = raw[0];
+    final m = raw[1];
+    final d = raw[2];
+    return '$y-${m.toString().padLeft(2, '0')}-${d.toString().padLeft(2, '0')}';
+  }
+  if (raw is Map) {
+    final y = raw['year'];
+    final m = raw['month'];
+    final d = raw['day'];
+    if (y != null && m != null && d != null) {
+      return '$y-${m.toString().padLeft(2, '0')}-${d.toString().padLeft(2, '0')}';
+    }
+  }
+  return raw?.toString() ?? '';
 }
 
 class RecordePessoal {
@@ -43,12 +62,12 @@ class RecordePessoal {
     this.repeticoes,
   });
   factory RecordePessoal.fromJson(Map<String, dynamic> j) => RecordePessoal(
-    id: j['id'] as int,
-    exercicioId: j['exercicioId'] as int,
-    exercicioNome: j['exercicioNome'] as String,
-    data: j['data'] as String,
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    exercicioId: (j['exercicioId'] as num?)?.toInt() ?? 0,
+    exercicioNome: j['exercicioNome'] as String? ?? '',
+    data: _medidaDataString(j['data']),
     cargaKg: (j['cargaKg'] as num?)?.toDouble(),
-    repeticoes: j['repeticoes'] as int?,
+    repeticoes: (j['repeticoes'] as num?)?.toInt(),
   );
 }
 
@@ -79,11 +98,19 @@ class EvolucaoHomeBundle {
     return EvolucaoHomeBundle(
       medidas:
           ((j['medidas'] as List?) ?? const [])
-              .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
+              .map(
+                (e) => MedidaCorporal.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ),
+              )
               .toList(),
       recordes:
           ((j['recordes'] as List?) ?? const [])
-              .map((e) => RecordePessoal.fromJson(e as Map<String, dynamic>))
+              .map(
+                (e) => RecordePessoal.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ),
+              )
               .toList(),
     );
   }
@@ -134,37 +161,65 @@ class EvolucaoRepository {
     double? quadril,
     double? braco,
   }) async {
+    final payloadData =
+        data ?? DateTime.now().toIso8601String().substring(0, 10);
     final r = await _dio.post(
       '/api/alunos/$alunoId/medidas',
       data: {
-        'data': data ?? DateTime.now().toIso8601String().substring(0, 10),
+        'data': payloadData,
         if (peso != null) 'peso': peso,
         if (cintura != null) 'cintura': cintura,
         if (quadril != null) 'quadril': quadril,
         if (braco != null) 'braco': braco,
       },
     );
-    return MedidaCorporal.fromJson(r.data);
+    final raw = r.data;
+    if (raw is Map) {
+      try {
+        return MedidaCorporal.fromJson(Map<String, dynamic>.from(raw));
+      } catch (_) {
+        // POST já persistiu — shape da resposta não pode mascarar sucesso.
+      }
+    }
+    return MedidaCorporal(
+      id: 0,
+      data: payloadData,
+      peso: peso,
+      cintura: cintura,
+      quadril: quadril,
+      braco: braco,
+    );
   }
 
   Future<RecordePessoal> adicionarRecorde(
     int alunoId, {
     required String exercicioNome,
     double? carga,
-    String? unidade,
-    String? observacao,
+    int? repeticoes,
   }) async {
     final r = await _dio.post(
       '/api/alunos/$alunoId/recordes',
       data: {
         'exercicioNome': exercicioNome,
-        if (carga != null) 'carga': carga,
-        if (unidade != null) 'unidade': unidade,
-        if (observacao != null && observacao.isNotEmpty)
-          'observacao': observacao,
+        'data': DateTime.now().toIso8601String().substring(0, 10),
+        if (carga != null) 'cargaKg': carga,
+        if (repeticoes != null) 'repeticoes': repeticoes,
       },
     );
-    return RecordePessoal.fromJson(r.data);
+    final raw = r.data;
+    if (raw is Map) {
+      try {
+        return RecordePessoal.fromJson(Map<String, dynamic>.from(raw));
+      } catch (_) {}
+    }
+    return RecordePessoal(
+      id: 0,
+      exercicioId: 0,
+      exercicioNome: exercicioNome,
+      data: DateTime.now().toIso8601String().substring(0, 10),
+      cargaKg: carga,
+      repeticoes: repeticoes,
+    );
   }
 
   Future<List<EventoEngajamento>> engajamento(

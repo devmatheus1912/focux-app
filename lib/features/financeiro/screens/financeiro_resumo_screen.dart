@@ -194,7 +194,6 @@ class _FinanceiroResumoScreenState
             _buildContent(
               isDark,
               primary,
-              freshnessLabel,
               mesLabel,
               resumo,
             ),
@@ -206,11 +205,12 @@ class _FinanceiroResumoScreenState
   Widget _buildContent(
     bool isDark,
     Color primary,
-    String? freshnessLabel,
     String mesLabel,
     ResumoMensal r,
   ) {
     final mute = fxScreenMute(context);
+    final p0Label =
+        r.inadimplentes > 0 ? 'Abrir atrasadas' : 'Ver mensalidades';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -239,22 +239,12 @@ class _FinanceiroResumoScreenState
                 ),
               ),
             ),
-            if (freshnessLabel != null) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                freshnessLabel,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
             const SizedBox(height: TokensStrip.s3),
             OperationalMetricTile(
               label: 'Recebido',
               value: r.totalRecebido.format(showDecimals: false),
               hint: 'Previsto ${r.totalPrevisto.format(showDecimals: false)}',
-              color: EagleTokens.moneyGreen,
+              color: primary,
               isDark: isDark,
             ),
             const SizedBox(height: TokensStrip.s2),
@@ -270,8 +260,8 @@ class _FinanceiroResumoScreenState
             ),
             const SizedBox(height: TokensStrip.s3),
             DashboardHomeActionChip(
-              label: 'Ver mensalidades',
-              accent: EagleTokens.moneyGreen,
+              label: p0Label,
+              accent: r.inadimplentes > 0 ? EagleTokens.bad : primary,
               isDark: isDark,
               onPressed: () => FinanceiroHubScope.maybeOf(
                 context,

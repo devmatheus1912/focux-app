@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -7,7 +8,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 
 /// Conta e segurança — grupo + sair em card separado (ChatGPT).
 ///
-/// Termos/privacidade ficam em Consentimentos (aceite LGPD + leitura).
+/// Ajuda: Central no app + site público. Termos/privacidade em Consentimentos.
 class PerfilContaSegurancaSection extends StatelessWidget {
   const PerfilContaSegurancaSection({
     super.key,
@@ -33,6 +34,29 @@ class PerfilContaSegurancaSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        FxSettingsGroup(
+          header: 'Ajuda',
+          children: [
+            FxSettingsTile(
+              icon: Icons.support_agent_outlined,
+              label: 'Ajuda e suporte',
+              value: 'Central no app',
+              mute: mute,
+              line: line,
+              onTap: () => context.push('/suporte'),
+            ),
+            FxSettingsTile(
+              icon: Icons.public_outlined,
+              label: 'Site de suporte',
+              value: 'focuxpersonal.com',
+              mute: mute,
+              line: line,
+              showDivider: false,
+              onTap: () => FocuxLegal.openSupport(),
+            ),
+          ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
         FxSettingsGroup(
           header: 'Conta e segurança',
           children: [

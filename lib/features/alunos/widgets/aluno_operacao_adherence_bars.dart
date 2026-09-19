@@ -12,18 +12,14 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
     super.key,
     required this.points,
     required this.activeColor,
-    required this.idleColor,
     required this.missColor,
     required this.todayRingColor,
-    this.emptyWeek = false,
   });
 
   final List<AderenciaWeekPoint> points;
   final Color activeColor;
-  final Color idleColor;
   final Color missColor;
   final Color todayRingColor;
-  final bool emptyWeek;
 
   static const _cellHeight = 40.0;
   static const _gap = 4.0;
@@ -31,14 +27,6 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (points.isEmpty) return const SizedBox.shrink();
-
-    final ink = fxScreenInk(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = fxScreenMute(context);
-    final labelColor =
-        emptyWeek
-            ? Color.lerp(mute, ink, isDark ? 0.78 : 0.80)!
-            : mute;
 
     return Semantics(
       container: true,
@@ -51,9 +39,8 @@ class AlunoOperacaoAdherenceBars extends StatelessWidget {
               child: _AdherenceWeekCell(
                 point: points[i],
                 activeColor: activeColor,
-                idleColor: idleColor,
+                missColor: missColor,
                 todayRingColor: todayRingColor,
-                labelColor: labelColor,
                 cellHeight: _cellHeight,
               ),
             ),
@@ -68,17 +55,15 @@ class _AdherenceWeekCell extends StatelessWidget {
   const _AdherenceWeekCell({
     required this.point,
     required this.activeColor,
-    required this.idleColor,
+    required this.missColor,
     required this.todayRingColor,
-    required this.labelColor,
     required this.cellHeight,
   });
 
   final AderenciaWeekPoint point;
   final Color activeColor;
-  final Color idleColor;
+  final Color missColor;
   final Color todayRingColor;
-  final Color labelColor;
   final double cellHeight;
 
   @override
@@ -93,22 +78,25 @@ class _AdherenceWeekCell extends StatelessWidget {
             ? semanticsValue
             : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}';
 
+    // Sem check-in → missColor (legenda laranja), não idle cinza.
+    final emptyFill = missColor.withValues(alpha: 0.14);
+    final emptyBorder = missColor.withValues(alpha: 0.55);
     final fill =
         hasActivity
             ? activeColor.withValues(alpha: 0.18)
-            : idleColor;
+            : emptyFill;
     final borderColor =
         isToday
             ? todayRingColor
             : hasActivity
             ? activeColor.withValues(alpha: 0.42)
-            : idleColor;
+            : emptyBorder;
     final numberColor =
         isToday
             ? todayRingColor
             : hasActivity
             ? activeColor
-            : labelColor;
+            : missColor;
 
     return Semantics(
       label:
