@@ -2147,7 +2147,7 @@ Para cada linha: o Ruflo, ao tocar qualquer tela do domínio, fecha o **mínimo*
 | **Analytics / relatórios / qualidade** | `/analytics`, `/relatorios/global`, `/relatorio/business`, `/dashboard/qualidade` | S1 | Ler o que o BE já agrega. **Emitir** eventos de produto se o contrato `/api/analytics/evento` existe e o app hoje não produz — propor no scorecard (pilar 77: não inventar funil paralelo; **usar** o que já há). |
 | **Automações** | `/automacoes` | S2/S5 | Ligar/desligar fluxos existentes. Automação sem trigger visível é A21. |
 | **RBAC admin** | `/admin/rbac` | S2 | Só para quem o BE autoriza. Não ampliar superfície enquanto P0 de concessão arbitrária estiver aberto — descrever, esperar. |
-| **Suporte** | `/suporte` | S4/S7 | Abrir ticket, listar, detalhe. Sheet de ticket no chrome S7 + teclado. |
+| **Suporte** | `/suporte` | redirect | Abre o site (`focuxpersonal.com/suporte`). Sem ticket/chat no app no pré-lançamento. |
 | **QA interno** | `/qa/smoke`, `/qa/tokens-strip` | — | Fora da loja. Não entra no freeze do usuário final. |
 
 ### 37.5 Shell do aluno

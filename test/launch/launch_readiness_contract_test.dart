@@ -20,7 +20,6 @@ void main() {
     'perfil': '/perfil',
     'planos': '/planos',
     'assinatura': '/assinatura',
-    'suporte': '/suporte',
     'onboarding': '/onboarding',
     'agenda': '/agenda',
     'notificacoes': '/notificacoes',
@@ -59,6 +58,24 @@ void main() {
         File('lib/features/perfil/data/white_label_repository.dart');
     expect(perfilRepo.existsSync(), isTrue);
     expect(routes, contains("path: '/white-label'"));
+  });
+
+  test('suporte pré-lançamento redireciona ao site', () {
+    final routes = readRouterSourceBundle();
+    expect(routes, contains("path: '/suporte'"));
+    expect(routes, contains('SuporteWebRedirectScreen'));
+    final redirect = File(
+      'lib/features/suporte/screens/suporte_web_redirect_screen.dart',
+    );
+    expect(redirect.existsSync(), isTrue);
+    expect(redirect.readAsStringSync(), contains('FocuxLegal.openSupport'));
+    expect(
+      Directory('lib/features/suporte')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .any((f) => f.path.contains('_repository.dart')),
+      isFalse,
+    );
   });
 
   test('PT-only launch surfaces exist', () {

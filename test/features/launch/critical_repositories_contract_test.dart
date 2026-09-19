@@ -15,7 +15,6 @@ void main() {
       'lib/features/captura/data/captura_repository.dart': '/api/captura',
       'lib/features/financeiro/data/financeiro_repository.dart':
           '/api/financeiro',
-      'lib/features/suporte/data/suporte_repository.dart': '/api/suporte',
       'lib/features/onboarding/data/onboarding_repository.dart':
           '/api/onboarding/status',
       'lib/features/notificacoes/data/notificacoes_repository.dart':
