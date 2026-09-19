@@ -32,7 +32,8 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('_dirty'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains('onBack: _cancel'));
+    expect(screen, isNot(contains("child: const Text('Cancelar')")));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('FxKeyboardDismissScope'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));

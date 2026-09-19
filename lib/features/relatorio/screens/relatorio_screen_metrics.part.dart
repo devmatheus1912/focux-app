@@ -61,7 +61,7 @@ extension on _RelatorioScreenState {
           color:
               relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
                   ? EagleTokens.bad
-                  : EagleTokens.moneyGreen,
+                  : primary,
           isDark: isDark,
           emphasis:
               relatorioAlunoAderenciaBaixa(dados.taxaAderenciaPercent)
@@ -70,7 +70,7 @@ extension on _RelatorioScreenState {
         ),
       ),
       OperationalMetricTile(
-        label: 'Treinos',
+        label: 'Dias',
         value: '${dados.treinosConcluidos} / ${dados.treinosTotal}',
         hint: relatorioTreinosSubtitle(
           dados.treinosConcluidos,

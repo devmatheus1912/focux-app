@@ -262,6 +262,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
           },
           child: FxShellScaffold(
           useMesh: true,
+          constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Relatório',
             subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),

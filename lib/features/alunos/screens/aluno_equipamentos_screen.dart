@@ -150,16 +150,7 @@ class _AlunoEquipamentosScreenState
           appBar: FxShellAppBar(
             title: 'Equipamentos',
             subtitle: satelliteFirstName(alunoAsync.valueOrNull?.nome),
-            leadingWidth: 92,
-            leading: TextButton(
-              onPressed: _cancel,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text('Cancelar'),
-            ),
+            onBack: _cancel,
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como usar equipamentos',
@@ -224,7 +215,7 @@ class _AlunoEquipamentosScreenState
                         FxSettingsLayout.pageInset,
                         TokensStrip.s3,
                         FxSettingsLayout.pageInset,
-                        24,
+                        TokensStrip.s6,
                       ),
                       itemCount: Equipamento.values.length + 2,
                       itemBuilder: (context, i) {

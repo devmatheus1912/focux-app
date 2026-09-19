@@ -75,7 +75,15 @@ void main() {
     expect(relatorioAlunoStickyEmpty(), 'Ver evolução');
     expect(
       relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 30),
-      'Ana · 30 dias',
+      'Recorte de 30 dias',
+    );
+    expect(
+      relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 1),
+      'Recorte de 1 dia',
+    );
+    expect(
+      relatorioAlunoHubSubtitle(alunoNome: 'Ana', diasAnalisados: 0),
+      'Aderência do aluno',
     );
     expect(relatorioAlunoPeriodoMetricValue(30), '30 dias');
     expect(relatorioAlunoCheckinsMetricValue(null), '—');

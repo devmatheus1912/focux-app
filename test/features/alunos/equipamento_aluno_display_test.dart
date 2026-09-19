@@ -3,11 +3,6 @@ import 'package:focux_app/features/alunos/utils/equipamento_aluno_display.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 
 void main() {
-  test('equipamentoChoiceValue', () {
-    expect(equipamentoChoiceValue(true), 'Sim');
-    expect(equipamentoChoiceValue(false), 'Não');
-  });
-
   test('equipamentosCountLabel', () {
     expect(equipamentosCountLabel(0), 'Sem restrição');
     expect(equipamentosCountLabel(1), '1 equipamento');

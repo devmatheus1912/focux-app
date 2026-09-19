@@ -98,7 +98,7 @@ class _FxConfirmSheet extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 20),
+          const SizedBox(height: TokensStrip.s4),
           SizedBox(
             height: 52,
             child: ElevatedButton.icon(
@@ -115,13 +115,13 @@ class _FxConfirmSheet extends StatelessWidget {
                 backgroundColor: accent,
                 foregroundColor: onAccent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
                 ),
                 elevation: 0,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: TokensStrip.s2),
           SizedBox(
             height: 48,
             child: TextButton(

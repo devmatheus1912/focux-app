@@ -194,10 +194,10 @@ class _HistoricoCheckinScreenState
         body: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
                 TokensStrip.s2,
-                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
                 TokensStrip.s2,
               ),
               child: DecoratedBox(
@@ -217,9 +217,9 @@ class _HistoricoCheckinScreenState
                     isDense: true,
                     hintText: 'Buscar treino',
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: TokensStrip.s3,
+                      vertical: TokensStrip.s3,
                     ),
                     prefixIcon: Icon(
                       Icons.search_rounded,
@@ -248,10 +248,10 @@ class _HistoricoCheckinScreenState
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TokensStrip.s4,
+              padding: EdgeInsets.fromLTRB(
+                FxSettingsLayout.pageInset,
                 0,
-                TokensStrip.s4,
+                FxSettingsLayout.pageInset,
                 TokensStrip.s2,
               ),
               child: Wrap(
