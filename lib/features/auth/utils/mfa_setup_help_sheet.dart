@@ -27,8 +27,13 @@ Future<void> showMfaSetupHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Desativar',
-        'Em Conta e segurança: senha + código do autenticador (ou recovery).',
+        'Precisa do autenticador + senha, ou autenticador + código por e-mail (contas Apple sem senha).',
         icon: 'settings',
+      ),
+      FxHelpTip(
+        'E-mail oculto (Apple)',
+        'Se o e-mail for @privaterelay.appleid.com, o código chega no Mail da conta Apple — não no Gmail.',
+        icon: 'mail',
       ),
     ],
     footer: 'Em dúvida, ative só quando tiver o autenticador à mão.',

@@ -263,24 +263,31 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               OperationalMetricTile(
-                                  label: 'Sinal de evolução',
-                                  value: sinalLabel(ev.sinal),
-                                  hint: ev.resumo,
-                                  color: sigColor,
-                                  isDark: isDark,
-                                  emphasis:
-                                      ev.sinal == 'QUEDA' ||
-                                              ev.sinal == 'PLATÔ'
-                                          ? OperationalMetricEmphasis.alert
-                                          : OperationalMetricEmphasis.normal,
-                                ),
+                                label: 'Sinal de evolução',
+                                value: sinalLabel(ev.sinal),
+                                hint:
+                                    Aluno360EvolucaoInteligenteLogic
+                                        .composeSinalHint(
+                                          resumo: ev.resumo,
+                                          tendenciaPct: ev.tendenciaVolumePct,
+                                        ) ??
+                                    ev.resumo,
+                                color: sigColor,
+                                isDark: isDark,
+                                dense: true,
+                                emphasis:
+                                    ev.sinal == 'QUEDA' ||
+                                            ev.sinal == 'PLATÔ'
+                                        ? OperationalMetricEmphasis.alert
+                                        : OperationalMetricEmphasis.normal,
+                              ),
                               if (sparklineData.isNotEmpty) ...[
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(
                                     0,
                                     4,
                                     0,
-                                    8,
+                                    6,
                                   ),
                                   child: _VolumeSparklineRow(
                                     data: sparklineData,
@@ -291,59 +298,50 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 ),
                               ],
                               const SizedBox(height: TokensStrip.s2),
-                              OperationalMetricTile(
-                                  label:
-                                      hideMonthlyVolume
-                                          ? 'Volume'
-                                          : 'Volume da semana',
-                                  value: formatAlunoVolumeKg(ev.volumeSemanal),
-                                  hint:
-                                      hideMonthlyVolume
-                                          ? (singleWeek
-                                              ? 'Primeira semana com volume (carga × reps)'
-                                              : 'Soma de carga × reps (semana ≈ mês)')
-                                          : 'Soma de carga × reps nos check-ins',
-                                  color: primary,
-                                  isDark: isDark,
-                                ),
-                              if (!hideMonthlyVolume) ...[
-                                const SizedBox(height: TokensStrip.s2),
-                                OperationalMetricTile(
-                                  label: 'Volume do mês',
-                                  value: formatAlunoVolumeKg(ev.volumeMensal),
-                                  hint: 'Mesma conta nos últimos 30 dias',
-                                  color: primary,
-                                  isDark: isDark,
-                                ),
-                              ],
-                              if (_ultimoPrValue(ev) != null) ...[
-                                const SizedBox(height: TokensStrip.s2),
-                                OperationalMetricTile(
-                                    label: 'Volume Último PR',
-                                    value: _ultimoPrValue(ev)!,
-                                    hint:
-                                        ev.ultimoPrExercicio?.trim().isNotEmpty ==
-                                                true
-                                            ? ev.ultimoPrExercicio!
-                                            : 'Recorde de carga',
-                                    color: EagleTokens.good,
-                                    isDark: isDark,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: OperationalMetricTile(
+                                      label:
+                                          hideMonthlyVolume
+                                              ? 'Volume'
+                                              : 'Volume semana',
+                                      value: formatAlunoVolumeKg(
+                                        ev.volumeSemanal,
+                                      ),
+                                      hint:
+                                          hideMonthlyVolume
+                                              ? (singleWeek
+                                                  ? 'Primeira semana com volume'
+                                                  : 'Carga × reps')
+                                              : 'Mês ${formatAlunoVolumeKg(ev.volumeMensal)}',
+                                      color: primary,
+                                      isDark: isDark,
+                                      dense: true,
+                                    ),
                                   ),
-                              ],
-                              if (ev.tendenciaVolumePct != null) ...[
-                                const SizedBox(height: TokensStrip.s2),
-                                OperationalMetricTile(
-                                    label: 'Tendência de volume',
-                                    value:
-                                        '${ev.tendenciaVolumePct! > 0 ? '+' : ''}${ev.tendenciaVolumePct}%',
-                                    hint: 'Variação recente',
-                                    color:
-                                        ev.tendenciaVolumePct! >= 0
-                                            ? EagleTokens.good
-                                            : EagleTokens.bad,
-                                    isDark: isDark,
-                                  ),
-                              ],
+                                  if (_ultimoPrValue(ev) != null) ...[
+                                    const SizedBox(width: TokensStrip.s2),
+                                    Expanded(
+                                      child: OperationalMetricTile(
+                                        label: 'Último PR',
+                                        value: _ultimoPrValue(ev)!,
+                                        hint:
+                                            ev.ultimoPrExercicio
+                                                        ?.trim()
+                                                        .isNotEmpty ==
+                                                    true
+                                                ? ev.ultimoPrExercicio!
+                                                : 'Recorde de carga',
+                                        color: EagleTokens.good,
+                                        isDark: isDark,
+                                        dense: true,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
                               if (ev.proximaAcao.trim().isNotEmpty) ...[
                                 const SizedBox(height: TokensStrip.s3),
                                 Text(

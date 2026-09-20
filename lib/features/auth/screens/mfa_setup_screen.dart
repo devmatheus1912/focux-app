@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/mfa_disable_otp_copy.dart';
 import '../utils/mfa_setup_help_sheet.dart';
 
 /// Setup / status / disable MFA TOTP do Personal.
@@ -149,11 +150,9 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
         _busy = false;
         _emailOtpSent = true;
       });
-      final destino =
-          masked.trim().isEmpty ? 'o e-mail da conta' : masked.trim();
       FeedbackHelper.showSuccess(
         context,
-        'Código enviado para $destino. Confira também spam/lixo eletrônico.',
+        mfaDisableOtpSentMessage(masked),
       );
     } catch (error) {
       if (!mounted) return;

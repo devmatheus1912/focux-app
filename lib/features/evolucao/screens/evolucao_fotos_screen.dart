@@ -246,7 +246,7 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                             : _content(chrome, primary),
                       ),
               ),
-              if (!_loading && _erro == null)
+              if (!_loading && _erro == null && _fotos.isNotEmpty)
                 SafeArea(
                   top: false,
                   child: Padding(

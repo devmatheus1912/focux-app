@@ -41,6 +41,7 @@ class OperationalMetricTile extends StatelessWidget {
     this.semanticsLabel,
     this.leadingIcon,
     this.emphasis = OperationalMetricEmphasis.normal,
+    this.dense = false,
   });
 
   final String label;
@@ -51,6 +52,7 @@ class OperationalMetricTile extends StatelessWidget {
   final String? semanticsLabel;
   final IconData? leadingIcon;
   final OperationalMetricEmphasis emphasis;
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +63,10 @@ class OperationalMetricTile extends StatelessWidget {
     // Alert = warn fill/borda mais fortes; sem rail lateral (alinha o stack
     // de métricas na Home — §11 secundário não compete com P0).
     final tile = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: EdgeInsets.symmetric(
+        horizontal: dense ? 10 : 12,
+        vertical: dense ? 7 : 10,
+      ),
       decoration: operationalMetricDecoration(
         accent: color,
         isDark: isDark,
@@ -74,21 +79,24 @@ class OperationalMetricTile extends StatelessWidget {
             label.toUpperCase(),
             style: FocuxHubTypography.chip(labelColor).copyWith(
               letterSpacing: 0.4,
+              fontSize: dense ? 10 : null,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: dense ? 2 : 4),
           Row(
             children: [
               if (leadingIcon != null) ...[
-                Icon(leadingIcon, size: 17, color: color),
+                Icon(leadingIcon, size: dense ? 15 : 17, color: color),
                 const SizedBox(width: 5),
               ],
               Flexible(
                 child: Text(
                   value,
+                  maxLines: dense ? 1 : 2,
+                  overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.kpi(
                     color: ink,
-                    fontSize: FocuxHubTypography.metricMd,
+                    fontSize: dense ? FocuxHubTypography.metricEm : FocuxHubTypography.metricMd,
                   ).copyWith(letterSpacing: 0.2),
                 ),
               ),
@@ -96,11 +104,13 @@ class OperationalMetricTile extends StatelessWidget {
           ),
           Text(
             hint,
+            maxLines: dense ? 2 : 3,
+            overflow: TextOverflow.ellipsis,
             style: FocuxHubTypography.bodyMuted(
               color: hintColor,
               fontWeight: FontWeight.w600,
               height: 1.2,
-            ),
+            ).copyWith(fontSize: dense ? 11.5 : null),
           ),
         ],
       ),

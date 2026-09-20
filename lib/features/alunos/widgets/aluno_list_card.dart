@@ -180,7 +180,9 @@ class AlunoListCard extends ConsumerWidget {
           ),
           decoration: fxListCardDecoration(
             context,
-            accent: primary,
+            accent: aluno.emRisco
+                ? (isDark ? EagleTokens.bad : EagleTokens.bad)
+                : primary,
             radius: FxSettingsLayout.groupRadius,
           ),
           child: Column(
@@ -290,30 +292,6 @@ class AlunoListCard extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 5),
-                              if (!compact &&
-                                  meaningfulPercent &&
-                                  opsIsDays) ...[
-                                Text(
-                                  '$aderenciaPercent%',
-                                  style: AppTypography.mono(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: aderColor,
-                                    height: 1.1,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                  ),
-                                  child: Text(
-                                    '·',
-                                    style: FocuxHubTypography.chip(
-                                      secondaryInk.withValues(alpha: 0.85),
-                                    ).copyWith(height: 1.1),
-                                  ),
-                                ),
-                              ],
                               Flexible(
                                 child: Text(
                                   opsText,
