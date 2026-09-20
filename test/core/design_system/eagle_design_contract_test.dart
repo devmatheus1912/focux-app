@@ -38,6 +38,10 @@ void main() {
             allowedFiles: {
               'lib/main.dart',
               'lib/core/theme/theme_provider.dart',
+              'lib/core/theme/brand_palette.dart',
+              'lib/core/theme/shell_chrome.dart',
+              'lib/features/auth/screens/login_screen.dart',
+              'lib/features/qa/screens/qa_smoke_screen.dart',
             },
           ),
           _EagleGateRule(

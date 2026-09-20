@@ -11,7 +11,7 @@ void main() {
   });
 
   test('typed boundary modules exist', () {
-    expect(FocuxCleanCode.coreSources, hasLength(9));
+    expect(FocuxCleanCode.coreSources, hasLength(8));
     expect(
       FocuxCleanCode.coreSources,
       contains('lib/features/ia/models/ia_copilot_proxima_acao.dart'),

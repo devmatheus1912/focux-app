@@ -20,11 +20,12 @@ void main() {
     expect(screen, contains('BoxConstraints(maxWidth: 132)'));
     expect(screen, contains('class _AlunoAppBarProfileMenu'));
     expect(screen, contains("label: 'Perfil do aluno'"));
-    expect(screen, contains('class _WorkoutMetricPill'));
+    expect(screen, contains('class _WorkoutInsightPill'));
     expect(screen, contains('class _WorkoutInsightPill'));
     expect(screen, contains('buildAlunoHomeExperience'));
     expect(screen, contains('class _HomeNarrativeRail'));
-    expect(screen, contains('Focux \${score.value}'));
+    expect(screen, contains('Seu score Focux'));
+    expect(screen, contains('score: score.value'));
     expect(screen, contains('score.rhythmLabel'));
     expect(screen, contains('score.riskLabel'));
     expect(screen, contains('brand.nomePersonal'));

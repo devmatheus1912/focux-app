@@ -72,7 +72,7 @@ void main() {
       }
       if (path.endsWith('financeiro_screen.dart')) {
         for (final tab in financeiroTabs) {
-          source += File(tab).readAsStringSync();
+          source += readScreenSourceBundle(tab);
         }
       }
 
@@ -98,7 +98,7 @@ void main() {
     expect(alunoLogic, contains('resolveVolumeSparklineData'));
   });
 
-  test('financeiro hub exposes bar and donut charts', () {
+  test('financeiro hub exposes bar chart and resumo metric tiles', () {
     final dashboard = readScreenSourceBundle(
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
     );
@@ -107,7 +107,7 @@ void main() {
     final resumo =
         File('lib/features/financeiro/screens/financeiro_resumo_screen.dart')
             .readAsStringSync();
-    expect(resumo, contains('PieChart'));
+    expect(resumo, contains('OperationalMetricTile'));
   });
 
   test('ia hub loads insights with async when', () {

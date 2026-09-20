@@ -80,10 +80,14 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     );
+    final evolutionLogic =
+        File(
+          'lib/features/dashboard/utils/aluno_performance_evolution.dart',
+        ).readAsStringSync();
 
-    expect(screen, contains('Evolução real'));
+    expect(screen, contains('Evolução do treino'));
     expect(screen, contains('Volume semana'));
     expect(screen, contains('Volume mês'));
-    expect(screen, contains('evolucoesPerformance'));
+    expect(evolutionLogic, contains('evolucoesPerformance'));
   });
 }

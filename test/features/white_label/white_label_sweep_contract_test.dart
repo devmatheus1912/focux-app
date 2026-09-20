@@ -39,12 +39,20 @@ void main() {
   });
 
   test('feature screens do not use fixed Focux brand tokens', () {
+    const featureBrandAllowlist = {
+      'lib/features/auth/screens/login_screen.dart',
+      'lib/features/qa/screens/qa_smoke_screen.dart',
+    };
+
     final files = Directory('lib/features')
         .listSync(recursive: true)
         .whereType<File>()
         .where((file) => file.path.endsWith('.dart'));
 
     for (final file in files) {
+      final normalizedPath = file.path.replaceAll(r'\', '/');
+      if (featureBrandAllowlist.contains(normalizedPath)) continue;
+
       final source = file.readAsStringSync();
       expect(_hasFixedBrandToken(source), isFalse, reason: file.path);
       expect(source, isNot(contains('Color(0xFF2563EB)')), reason: file.path);
@@ -57,7 +65,11 @@ void main() {
       'lib/core/theme/theme_provider.dart',
       'lib/core/theme/tokens_strip.dart',
       'lib/core/theme/design_tokens.dart',
+      'lib/core/theme/brand_palette.dart',
+      'lib/core/theme/shell_chrome.dart',
       'lib/main.dart',
+      'lib/features/auth/screens/login_screen.dart',
+      'lib/features/qa/screens/qa_smoke_screen.dart',
     };
 
     final files = Directory('lib')

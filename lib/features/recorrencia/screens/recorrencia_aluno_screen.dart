@@ -164,6 +164,12 @@ class _RecorrenciaAlunoScreenState
       runSpacing: TokensStrip.s2,
       children: [
         DashboardHomeActionChip(
+          label: 'Hoje',
+          accent: primary,
+          isDark: isDark,
+          onPressed: () => context.go('/dashboard/aluno'),
+        ),
+        DashboardHomeActionChip(
           label: 'Financeiro',
           accent: primary,
           isDark: isDark,

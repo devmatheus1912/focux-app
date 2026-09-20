@@ -5,10 +5,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -104,11 +107,33 @@ class _BrandPublicIdentityScreenState
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(perfilProvider);
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+
     if (widget.perfil == null && async.isLoading) {
-      return const FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(title: 'Seu link público'),
-        body: Center(child: CircularProgressIndicator()),
+      return fxScreenA11yScope(
+        label: 'Nome e link público',
+        child: const FxShellScaffold(
+          useMesh: true,
+          appBar: FxShellAppBar(title: 'Seu link público'),
+          body: Center(child: FxLoading()),
+        ),
+      );
+    }
+    if (widget.perfil == null && async.hasError) {
+      return fxScreenA11yScope(
+        label: 'Nome e link público',
+        child: FxShellScaffold(
+          useMesh: true,
+          appBar: const FxShellAppBar(title: 'Seu link público'),
+          body: FxErrorState(
+            chromeOnDark: chrome.isDark,
+            primary: primary,
+            title: 'Não carregou seu perfil',
+            message: friendlyError(async.error!),
+            onRetry: () => ref.invalidate(perfilProvider),
+          ),
+        ),
       );
     }
     final live = widget.perfil ?? async.valueOrNull;

@@ -165,20 +165,9 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
               onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
-            SizedBox(
-              height: 52,
-              child: ElevatedButton(
-                onPressed: widget.onExcluir,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: EagleTokens.bad,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text('Excluir selecionados'),
-              ),
+            _DestructiveSheetButton(
+              label: 'Excluir selecionados',
+              onPressed: widget.onExcluir,
             ),
           ],
         ),
@@ -190,6 +179,41 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
 // ──────────────────────────────────────────────
 // Premium delete confirmation bottom sheet
 // ──────────────────────────────────────────────
+class _DestructiveSheetButton extends StatelessWidget {
+  const _DestructiveSheetButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: Material(
+        color: EagleTokens.bad,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ExcluirAlunosSheet extends StatelessWidget {
   final int count;
   final bool isDark;
@@ -232,25 +256,12 @@ class _ExcluirAlunosSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          SizedBox(
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () {
-                HapticFeedback.heavyImpact();
-                Navigator.of(context).pop(true);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: EagleTokens.bad,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: Text(
-                'Excluir $count ${count == 1 ? 'aluno' : 'alunos'}',
-              ),
-            ),
+          _DestructiveSheetButton(
+            label: 'Excluir $count ${count == 1 ? 'aluno' : 'alunos'}',
+            onPressed: () {
+              HapticFeedback.heavyImpact();
+              Navigator.of(context).pop(true);
+            },
           ),
           const SizedBox(height: 10),
           TextButton(

@@ -619,6 +619,28 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
           color: brand,
           size: FxSettingsLayout.iconSize,
         ),
+        trailing:
+            widget.canPop
+                ? null
+                : IconButton(
+                  tooltip: 'Fechar',
+                  onPressed: null,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(
+                      FxHomeSheetChrome.touchTarget,
+                      FxHomeSheetChrome.touchTarget,
+                    ),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: FxSettingsLayout.iconSize,
+                    color:
+                        widget.isDark
+                            ? EagleTokens.darkInkMute
+                            : TokensStrip.textSecondary,
+                  ),
+                ),
       ),
       const SizedBox(height: TokensStrip.s3),
     ];

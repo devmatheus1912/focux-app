@@ -101,8 +101,9 @@ void main() {
     expect(find.text('Massa magra'), findsOneWidget);
     expect(find.text('Anamnese'), findsOneWidget);
     expect(find.text('Composição corporal'), findsOneWidget);
-    expect(find.text('Treinos'), findsOneWidget);
     expect(find.text('Mais ferramentas'), findsOneWidget);
+    expect(find.text('Treinos'), findsNothing);
+    expect(find.text('IA Progresso'), findsNothing);
     expect(find.text('Aderência'), findsNothing);
 
     expect(tester.takeException(), isNull);

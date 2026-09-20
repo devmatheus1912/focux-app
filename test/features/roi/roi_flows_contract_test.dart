@@ -41,6 +41,7 @@ void main() {
       'nomeMarca': 'Marina Costa',
       'nicho': 'Hipertrofia online',
       'promessa': 'Método claro em 12 semanas',
+      'ofertaNome': 'Programa 12 semanas',
       'cta': 'Quero minha avaliação',
       'duvidas': ['Serve para iniciante?', '', 'Como funciona?'],
       'whatsapp': '11999999999',

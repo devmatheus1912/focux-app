@@ -30,10 +30,12 @@ void main() {
       });
 
       final screenExempt = {'planos', 'pricing', 'pql', 'subscription'};
+      // Redirect-only ou shell fino — sem repository dedicado no módulo.
+      final dataExempt = {...screenExempt, 'suporte'};
       if (!hasScreen && !screenExempt.contains(name)) {
         failures.add('$name: sem tela');
       }
-      if (!hasData) {
+      if (!hasData && !dataExempt.contains(name)) {
         failures.add('$name: sem camada data/repository');
       }
     }

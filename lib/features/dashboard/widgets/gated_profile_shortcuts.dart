@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ferramentas/data/ferramentas_catalogo_models.dart';
-import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
-import '../../ferramentas/utils/ferramentas_icons.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 
-/// Atalhos de crescimento no Perfil — espelha o catálogo (atalhosHome + seed).
+/// Atalhos de crescimento no Perfil — lista fixa (sem BFF de catálogo).
 class GatedProfileShortcuts extends ConsumerWidget {
   const GatedProfileShortcuts({super.key, required this.tileBuilder});
 
@@ -64,139 +62,40 @@ class GatedProfileShortcuts extends ConsumerWidget {
       featureGate: 'COMUNIDADE_GRUPOS',
       legacyIds: ['desafios'],
     ),
-    _ProfileToolEntry(
-      icon: Icons.campaign_outlined,
-      label: 'Broadcast',
-      value: 'Base inteira',
-      rotaApp: '/broadcasts',
-      featureGate: 'BROADCAST',
-      legacyIds: ['broadcast', 'broadcasts'],
-    ),
-    _ProfileToolEntry(
-      icon: Icons.person_search_outlined,
-      label: 'Leads',
-      value: 'Captura',
-      rotaApp: '/leads',
-      featureGate: 'LEADS',
-      legacyIds: ['leads'],
-    ),
-    _ProfileToolEntry(
-      icon: Icons.favorite_outline,
-      label: 'Saúde da base',
-      value: 'Retenção',
-      rotaApp: '/retencao',
-      featureGate: 'RETENCAO',
-      legacyIds: ['recuperacao', 'retencao'],
-    ),
-    _ProfileToolEntry(
-      icon: Icons.receipt_long_outlined,
-      label: 'Cobrança auto',
-      value: 'Dunning',
-      rotaApp: '/dunning',
-      featureGate: 'FINANCEIRO',
-      legacyIds: ['cobranca-auto', 'dunning'],
-    ),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final features = effectivePlanoFeatures(ref);
-    final catalogo = ref.watch(ferramentasCatalogoProvider).valueOrNull;
-
-    final resolved = <({CatalogoEntrada entrada, IconData icon, String value})>[];
-    final seen = <String>{};
-
-    void addEntrada(CatalogoEntrada entrada, {IconData? icon, String? value}) {
-      final key = (entrada.rotaApp ?? entrada.id).trim().toLowerCase();
-      if (key.isEmpty || !seen.add(key)) return;
-      if ((entrada.rotaApp ?? '').trim().isEmpty) return;
-      resolved.add((
-        entrada: entrada,
-        icon: icon ?? _iconFor(entrada),
-        value: value ?? (entrada.papel ?? 'Ferramenta'),
-      ));
-    }
-
-    if (catalogo != null) {
-      for (final atalho in catalogo.atalhosHome) {
-        addEntrada(atalho);
-      }
-      for (final entry in _seed) {
-        CatalogoEntrada? fromCatalog;
-        for (final id in entry.legacyIds) {
-          fromCatalog = catalogo.findByLegacyId(id);
-          if (fromCatalog != null) break;
-        }
-        addEntrada(
-          fromCatalog ??
-              CatalogoEntrada(
-                id: entry.legacyIds.first,
-                titulo: entry.label,
-                rotaApp: entry.rotaApp,
-                featureGate: entry.featureGate,
-                unlocked: true,
-                legacyIds: entry.legacyIds,
-              ),
-          icon: entry.icon,
-          value: entry.value,
-        );
-      }
-    } else {
-      for (final entry in _seed) {
-        addEntrada(
-          CatalogoEntrada(
-            id: entry.legacyIds.first,
-            titulo: entry.label,
-            rotaApp: entry.rotaApp,
-            featureGate: entry.featureGate,
-            unlocked: true,
-            legacyIds: entry.legacyIds,
-          ),
-          icon: entry.icon,
-          value: entry.value,
-        );
-      }
-    }
 
     return Column(
       children: [
-        for (var i = 0; i < resolved.length; i++)
+        for (var i = 0; i < _seed.length; i++)
           () {
-            final item = resolved[i];
-            final shortcut = DashboardToolShortcut.fromEntrada(item.entrada);
+            final entry = _seed[i];
+            final entrada = CatalogoEntrada(
+              id: entry.legacyIds.first,
+              titulo: entry.label,
+              rotaApp: entry.rotaApp,
+              featureGate: entry.featureGate,
+              unlocked: true,
+              legacyIds: entry.legacyIds,
+            );
+            final shortcut = DashboardToolShortcut.fromEntrada(entrada);
             final locked = !shortcut.isUnlocked(features);
             final tier = locked ? shortcut.tierBadgeLabel() : null;
             return tileBuilder(
-              icon: item.icon,
-              label:
-                  item.entrada.titulo.isNotEmpty
-                      ? item.entrada.titulo
-                      : item.entrada.id,
-              value: locked ? 'Plano $tier' : item.value,
+              icon: entry.icon,
+              label: entry.label,
+              value: locked ? 'Plano $tier' : entry.value,
               locked: locked,
-              showDivider: i != resolved.length - 1,
+              showDivider: i != _seed.length - 1,
               upgradeTierLabel: tier,
               onTap: () => openDashboardShortcut(context, ref, shortcut),
             );
           }(),
       ],
     );
-  }
-
-  static IconData _iconFor(CatalogoEntrada entrada) {
-    final name = ferramentasIconFor(entrada);
-    return switch (name) {
-      'robot' || 'bot' || 'spark' => Icons.smart_toy_outlined,
-      'store' || 'shop' => Icons.storefront_outlined,
-      'users' || 'team' => Icons.groups_outlined,
-      'target' || 'habit' => Icons.track_changes_outlined,
-      'flag' => Icons.flag_outlined,
-      'megaphone' || 'broadcast' => Icons.campaign_outlined,
-      'user-search' || 'leads' => Icons.person_search_outlined,
-      'heart' => Icons.favorite_outline,
-      'receipt' || 'coin' => Icons.receipt_long_outlined,
-      _ => Icons.extension_outlined,
-    };
   }
 }
 

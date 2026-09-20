@@ -313,7 +313,7 @@ class _MotivoTile extends StatelessWidget {
       isDark: isDark,
     );
     // cardBg is always white; dark mode needs an opaque shell card (ink is light).
-    final palette = ShellChrome.forBrightness(context, isDark);
+    final palette = ShellChrome.forDark(isDark);
     // Opaque sheet in dark — translucent glass still washed out over mesh.
     final cardFill = isDark ? palette.sheetFill : TokensStrip.cardBg;
 

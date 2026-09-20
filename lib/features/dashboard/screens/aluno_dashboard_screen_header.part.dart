@@ -514,7 +514,10 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                         Text(
                           '${view.score} · ${view.scoreLabel}',
                           style: FocuxHubTypography.cardTitle(color: ink)
-                              .copyWith(fontSize: 18, fontWeight: FontWeight.w900),
+                              .copyWith(
+                                fontSize: FocuxHubTypography.metricEm,
+                                fontWeight: FontWeight.w900,
+                              ),
                         ),
                         const SizedBox(height: 6),
                         Text(

@@ -25,6 +25,7 @@ abstract final class FocuxDataViz {
     'dashboard_sparkline_helpers',
     '_EvolucaoChart',
     'PieChart',
+    'OperationalMetricTile',
     'insightsProvider',
     'resolveVolumeSparklineData',
   ];

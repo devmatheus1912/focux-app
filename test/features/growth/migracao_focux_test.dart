@@ -67,7 +67,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Subir foto ou print'), findsOneWidget);
+    expect(find.text('Foto ou print'), findsOneWidget);
     expect(find.textContaining('OCR gratuito'), findsOneWidget);
     expect(find.textContaining('Fotos este mês'), findsOneWidget);
   });

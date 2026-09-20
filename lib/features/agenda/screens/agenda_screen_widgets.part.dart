@@ -146,7 +146,7 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
       if (widget.onConfirm != null)
         FxSettingsTile(
           icon: Icons.verified_outlined,
-          label: agendaHorarioConfirmLabel(),
+          label: 'Confirmar horário',
           value: '',
           showDivider: widget.onReschedule != null ||
               (!completePrimary && widget.onComplete != null),

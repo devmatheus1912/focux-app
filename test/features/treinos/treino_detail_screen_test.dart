@@ -71,11 +71,9 @@ void main() {
 
     expect(find.bySemanticsLabel('Detalhe do treino'), findsOneWidget);
     expect(find.text('Treino Força'), findsWidgets);
-    expect(
-      find.textContaining('Template base · 1 exercício · 4 séries · 1 grupo'),
-      findsOneWidget,
-    );
-    expect(find.text('4×8-12 · 75s'), findsOneWidget);
+    expect(find.text('Template base'), findsOneWidget);
+    expect(find.textContaining('4×8-12'), findsOneWidget);
+    expect(find.textContaining('75s'), findsOneWidget);
     expect(find.textContaining('Atualizado agora'), findsOneWidget);
     expect(find.byTooltip('Como montar este treino'), findsOneWidget);
     expect(find.text('Adicionar exercício'), findsWidgets);

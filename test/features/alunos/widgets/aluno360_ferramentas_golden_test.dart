@@ -113,7 +113,8 @@ void main() {
 
     expect(find.text('Medidas'), findsOneWidget);
     expect(find.text('Idade'), findsOneWidget);
-    expect(find.text('IA Progresso'), findsOneWidget);
+    expect(find.text('Mais ferramentas'), findsOneWidget);
+    expect(find.text('IA Progresso'), findsNothing);
     expect(find.text('Gordura'), findsNothing);
     expect(tester.takeException(), isNull);
 
@@ -139,7 +140,8 @@ void main() {
     await tester.pumpWidget(ferramentasTab(isDark: false, textScale: 1.3));
     await tester.pumpAndSettle();
 
-    expect(find.text('IA Progresso'), findsOneWidget);
+    expect(find.text('Mais ferramentas'), findsOneWidget);
+    expect(find.text('IA Progresso'), findsNothing);
     expect(tester.takeException(), isNull);
 
     await expectLater(

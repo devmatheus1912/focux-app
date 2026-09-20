@@ -56,7 +56,8 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final listBottomGap = AlunosLayout.listBottomGap(context);
               final tail = ref.watch(alunosHomeTailProvider);
 
-              return Column(
+              return FxContentWidthLimiter(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildAlunosListHeader(
@@ -302,6 +303,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                         ),
                       ),
                   ],
+                ),
               );
   }
 }

@@ -16,7 +16,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+        try {
+          ref.read(planoFeaturesProvider.notifier).seedFromHome(planoFromHome);
+        } on StateError catch (e) {
+          // QA route cycling can dispose the element before this frame runs.
+          if (!e.message.contains('ref')) rethrow;
+        }
       });
     }
     final quotaLabel = _quotaHeaderLabel(planoFromHome);

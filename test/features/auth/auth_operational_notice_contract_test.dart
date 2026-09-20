@@ -31,9 +31,13 @@ void main() {
 
     expect(recovery, contains('AuthOperationalNotice'));
     expect(recovery, contains("firstIssueFor('password_reset')"));
-    expect(recovery, contains('_resetEnvironmentTitle'));
-    expect(recovery, contains('_resetEnvironmentAction'));
-    expect(recovery, contains('Configurar SMTP no ambiente real'));
+    expect(recovery, contains('esqueciEnvironmentTitle'));
+    expect(recovery, contains('esqueciEnvironmentAction'));
+    expect(
+      File('lib/features/auth/utils/esqueci_senha_display.dart')
+          .readAsStringSync(),
+      contains('Configurar SMTP no ambiente real'),
+    );
   });
 
   test('operational notice has title detail and action slots', () {

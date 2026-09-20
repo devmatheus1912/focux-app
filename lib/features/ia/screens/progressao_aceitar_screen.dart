@@ -55,7 +55,6 @@ class _ProgressaoAceitarScreenState
       label: 'Sugestões pendentes de progressão',
       child: FxShellScaffold(
         useMesh: true,
-        constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Sugestões pendentes',
           subtitle: args.alunoNome,
