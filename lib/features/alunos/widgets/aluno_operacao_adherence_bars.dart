@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/motion_preferences.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
