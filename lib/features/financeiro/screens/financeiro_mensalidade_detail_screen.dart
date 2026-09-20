@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -273,7 +274,7 @@ class _DetailBody extends StatelessWidget {
     final actions = mensalidadeDetailMaisActions(pending: pending);
     final chosen = await showFxInsetPickerSheet<MensalidadeDetailActionId>(
       context,
-      title: 'Mais ações',
+      title: mensalidadeDetailMaisSheetTitle(),
       items: [
         for (final id in actions)
           FxInsetPickerSheetItem(
@@ -305,11 +306,11 @@ class _DetailBody extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final overdue = mensalidade.status == 'ATRASADO';
     final statusColor = overdue ? EagleTokens.bad : primary;
-    final mes = financeiroMensalidadeVencimentoLabel(
+    final status = financeiroMensalidadeStatusLabel(mensalidade.status);
+    final vencimento = financeiroMensalidadeVencimentoLabel(
       mesReferencia: mensalidade.mesReferencia,
       vencimento: mensalidade.vencimento,
     );
-    final status = financeiroMensalidadeStatusLabel(mensalidade.status);
 
     return Column(
       children: [
@@ -321,21 +322,28 @@ class _DetailBody extends StatelessWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
+                  TokensStrip.s3,
                   FxSettingsLayout.pageInset,
                   24,
                 ),
                 children: [
                   FxHubHeader(
                     title: mensalidade.alunoNome,
-                    subtitle: financeiroMensalidadeHubSubtitle(mes: mes),
+                    subtitle: financeiroMensalidadeHubSubtitle(
+                      mes: financeiroMensalidadeMesPorExtenso(
+                        mensalidade.mesReferencia,
+                      ),
+                    ),
                     onTitleTap: onOpenAluno,
                   ),
-                  const SizedBox(height: TokensStrip.s4),
-                  OperationalMetricTile(
+                  const SizedBox(height: TokensStrip.s3),
+                  _ValorMetricTile(
                     label: status,
                     value: mensalidade.valor.format(showDecimals: false),
-                    hint: mes,
+                    hint: financeiroMensalidadeDetailValorHint(
+                      overdue: overdue,
+                      pending: pending,
+                    ),
                     color: statusColor,
                     isDark: isDark,
                     emphasis:
@@ -346,13 +354,14 @@ class _DetailBody extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s2),
                   OperationalMetricTile(
                     label: pending ? 'Referência' : 'Pago em',
-                    value:
-                        pending
-                            ? mes
-                            : financeiroMensalidadePagoEmLabel(
-                              mensalidade.pagoEm,
-                            ),
-                    hint: pending ? 'Mês desta cobrança' : mes,
+                    value: financeiroMensalidadeDetailReferenciaValue(
+                      pending: pending,
+                      mesReferencia: mensalidade.mesReferencia,
+                      pagoEm: mensalidade.pagoEm,
+                    ),
+                    hint: financeiroMensalidadeDetailReferenciaHint(
+                      pending: pending,
+                    ),
                     color: primary,
                     isDark: isDark,
                   ),
@@ -370,10 +379,7 @@ class _DetailBody extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s2),
                   OperationalMetricTile(
                     label: 'Vencimento',
-                    value: financeiroMensalidadeVencimentoLabel(
-                      mesReferencia: mensalidade.mesReferencia,
-                      vencimento: mensalidade.vencimento,
-                    ),
+                    value: vencimento,
                     hint: overdue ? 'Em atraso' : status,
                     color: statusColor,
                     isDark: isDark,
@@ -382,7 +388,7 @@ class _DetailBody extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: DashboardHomeActionChip(
-                      label: 'Mais ações',
+                      label: mensalidadeDetailMaisChipLabel(),
                       accent: primary,
                       isDark: isDark,
                       onPressed: () => _openMais(context),
@@ -429,6 +435,72 @@ class _DetailBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Valor da cobrança — tabular figures / letterSpacing 0 (money).
+class _ValorMetricTile extends StatelessWidget {
+  const _ValorMetricTile({
+    required this.label,
+    required this.value,
+    required this.hint,
+    required this.color,
+    required this.isDark,
+    this.emphasis = OperationalMetricEmphasis.normal,
+  });
+
+  final String label;
+  final String value;
+  final String hint;
+  final Color color;
+  final bool isDark;
+  final OperationalMetricEmphasis emphasis;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = fxScreenInk(context);
+    final mute = fxScreenMute(context);
+    final labelColor = Color.lerp(ink, color, isDark ? 0.22 : 0.18)!;
+    final hintColor = Color.lerp(mute, ink, isDark ? 0.55 : 0.72)!;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: operationalMetricDecoration(
+        accent: color,
+        isDark: isDark,
+        emphasis: emphasis,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: FocuxHubTypography.chip(labelColor).copyWith(
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: FocuxHubTypography.kpi(
+              color: ink,
+              fontSize: FocuxHubTypography.metricMd,
+            ).copyWith(
+              letterSpacing: 0,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+          Text(
+            hint,
+            style: FocuxHubTypography.bodyMuted(
+              color: hintColor,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

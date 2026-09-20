@@ -65,7 +65,7 @@ abstract final class Aluno360FerramentasLogic {
       'Cadastro, financeiro e comunicação.';
 
   /// Máximo de módulos no first paint (sem contar "Mais ferramentas").
-  static const int foldModuleLimit = 5;
+  static const int foldModuleLimit = 3;
 
   /// Duplicados do fold (já cobertos em Operação/Evolução/sticky) — só em Mais.
   static const Set<Aluno360FerramentasModule> foldOverflowOnly = {

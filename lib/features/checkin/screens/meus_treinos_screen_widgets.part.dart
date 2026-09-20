@@ -290,7 +290,7 @@ class _TrainingPlanCard extends StatelessWidget {
               if (!concluido) ...[
                 Text(
                   done == 0
-                      ? 'Iniciar registra carga e reps. Fiz o treino confirma o plano de uma vez.'
+                      ? 'Iniciar abre carga e reps. Confirmar o plano fica no atalho abaixo.'
                       : '$done de ${treino.exercicios.length} exercícios já marcados.',
                   style: TextStyle(
                     color: mute,
@@ -318,10 +318,21 @@ class _TrainingPlanCard extends StatelessWidget {
                   !concluido &&
                   canStart &&
                   onConfirmPlano != null) ...[
-                const SizedBox(height: 8),
-                FxLiquidSecondaryButton(
-                  label: confirming ? 'Registrando…' : 'Fiz o treino',
-                  onPressed: confirming || starting ? null : onConfirmPlano,
+                const SizedBox(height: TokensStrip.s1),
+                Center(
+                  child: TextButton(
+                    onPressed: confirming || starting ? null : onConfirmPlano,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 44),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: TokensStrip.s3,
+                      ),
+                    ),
+                    child: Text(
+                      confirming ? 'Registrando…' : 'Fiz o treino',
+                      style: FocuxHubTypography.chip(primary),
+                    ),
+                  ),
                 ),
               ],
             ],

@@ -103,7 +103,10 @@ class _FinanceiroDashboardScreenState
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: DashboardHomeActionChip(
-                    label: 'Mais no panorama',
+                    label:
+                        _extraAberto == null
+                            ? 'Abrir extras do panorama'
+                            : 'Trocar · ${financeiroPanoramaExtraLabel(_extraAberto!)}',
                     accent: primary,
                     isDark: isDark,
                     onPressed: _abrirMaisExtras,

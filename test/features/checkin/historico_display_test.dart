@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/checkin/data/checkin_repository.dart';
 import 'package:focux_app/features/checkin/utils/historico_display.dart';
 
 void main() {
@@ -79,5 +80,37 @@ void main() {
       historicoPrLine(exercicioNome: 'Supino', mensagem: 'Carga nova'),
       'Supino · Carga nova',
     );
+  });
+
+  test('historicoGroupByStatus separa em andamento e concluídos', () {
+    final items = [
+      ExecucaoTreino(
+        id: 1,
+        treinoId: 10,
+        treinoNome: 'A',
+        status: 'EM_ANDAMENTO',
+        iniciadoEm: '2026-09-18T10:00:00',
+        exercicios: const [],
+      ),
+      ExecucaoTreino(
+        id: 2,
+        treinoId: 11,
+        treinoNome: 'B',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-17T10:00:00',
+        exercicios: const [],
+      ),
+      ExecucaoTreino(
+        id: 3,
+        treinoId: 12,
+        treinoNome: 'C',
+        status: 'EM_ANDAMENTO',
+        iniciadoEm: '2026-09-16T10:00:00',
+        exercicios: const [],
+      ),
+    ];
+    final grouped = historicoGroupByStatus(items);
+    expect(grouped.andamento.map((e) => e.id), [1, 3]);
+    expect(grouped.concluidos.map((e) => e.id), [2]);
   });
 }

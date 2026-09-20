@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../data/checkin_repository.dart';
 
 enum HistoricoStatusChip { todos, concluido, andamento }
 
@@ -12,6 +13,21 @@ bool historicoConcluido(String status) =>
 
 String historicoStatusLabel(String status) =>
     historicoConcluido(status) ? 'Concluído' : 'Em andamento';
+
+/// Agrupa "Todos" em Em andamento → Concluído (ordem de lista).
+({List<ExecucaoTreino> andamento, List<ExecucaoTreino> concluidos})
+historicoGroupByStatus(List<ExecucaoTreino> items) {
+  final andamento = <ExecucaoTreino>[];
+  final concluidos = <ExecucaoTreino>[];
+  for (final item in items) {
+    if (historicoConcluido(item.status)) {
+      concluidos.add(item);
+    } else {
+      andamento.add(item);
+    }
+  }
+  return (andamento: andamento, concluidos: concluidos);
+}
 
 String? historicoStatusQuery(HistoricoStatusChip chip) {
   switch (chip) {

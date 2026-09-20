@@ -74,6 +74,19 @@ void main() {
     );
     expect(leadCardSubtitle(objetivo: '  ', origem: 'Google'), 'Google');
     expect(leadCardSubtitle(origem: null), 'Não informada');
+    expect(leadTelefoneDisplay('11999998888'), '(11) 99999-8888');
+    expect(leadTelefoneDisplay('63356775'), contains('('));
+    expect(leadTelefoneDisplay(''), 'Sem telefone');
+    expect(leadKanbanTitle('Matheus'), 'Matheus');
+    expect(leadKanbanTitle('63356775'), contains('('));
+    expect(
+      leadKanbanAgeLabel('2026-09-18', now: DateTime(2026, 9, 20)),
+      '2d',
+    );
+    expect(
+      leadKanbanAgeLabel('2026-09-20', now: DateTime(2026, 9, 20)),
+      'hoje',
+    );
     expect(leadLimitLabel(5, 5), 'Limite de 5 leads atingido.');
     expect(leadLimitLabel(4, 5), '4/5 leads neste plano.');
     expect(leadShowsLimitBanner(4, limiteLeads: 5), isTrue);

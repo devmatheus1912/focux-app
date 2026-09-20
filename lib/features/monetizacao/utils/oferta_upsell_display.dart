@@ -40,3 +40,21 @@ String ofertaStatusLabel({required bool ativo}) => ativo ? 'Ativa' : 'Pausada';
 
 String ofertaSectionTitle({required bool ativo}) =>
     ativo ? 'Ativas' : 'Pausadas';
+
+String ofertaStickyCtaLabel() => 'Nova oferta';
+
+/// Hint sob a lista quando há poucas ofertas (evita vazio flutuando).
+String? ofertaSparseHint({required int count}) {
+  if (count <= 0) return null;
+  if (count == 1) {
+    return 'Só uma ativa. Crie outra para check-in ou trilha e preencha o espaço.';
+  }
+  if (count < 3) {
+    return 'Poucas ofertas. Novas cobrem mais gatilhos na jornada do aluno.';
+  }
+  return null;
+}
+
+/// Folga inferior da lista quando o sticky CTA está fora do scroll.
+double ofertaListBottomPad({required bool stickyVisible}) =>
+    stickyVisible ? 8 : 24;

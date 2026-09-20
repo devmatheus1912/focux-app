@@ -111,6 +111,40 @@ String mensalidadeDetailActionLabel(MensalidadeDetailActionId id) =>
       MensalidadeDetailActionId.contato => 'Registrar contato',
     };
 
+/// Sheet secundário — distinto do sticky P0 (pagar / abrir aluno).
+String mensalidadeDetailMaisSheetTitle() => 'Outras ações';
+
+String mensalidadeDetailMaisChipLabel() => 'Mais ações';
+
+/// Hub do detalhe: mês por extenso (não repete dd/mm do vencimento).
+String financeiroMensalidadeDetailHubSubtitle({
+  required String mesReferencia,
+}) =>
+    financeiroMensalidadeHubSubtitle(
+      mes: financeiroMensalidadeMesPorExtenso(mesReferencia),
+    );
+
+String financeiroMensalidadeDetailValorHint({
+  required bool overdue,
+  required bool pending,
+}) {
+  if (overdue) return 'Em atraso';
+  if (pending) return 'Valor desta cobrança';
+  return 'Valor pago';
+}
+
+String financeiroMensalidadeDetailReferenciaValue({
+  required bool pending,
+  required String mesReferencia,
+  String? pagoEm,
+}) =>
+    pending
+        ? financeiroMensalidadeMesPorExtenso(mesReferencia)
+        : financeiroMensalidadePagoEmLabel(pagoEm);
+
+String financeiroMensalidadeDetailReferenciaHint({required bool pending}) =>
+    pending ? 'Mês desta cobrança' : 'Data do pagamento';
+
 String financeiroMensalidadeVencimentoLabel({
   required String mesReferencia,
   String? vencimento,

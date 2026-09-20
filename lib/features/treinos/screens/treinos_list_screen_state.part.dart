@@ -510,8 +510,25 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   widget.alunoId == null
                       ? (uiHints?.createCtaLabel ?? 'Criar treino')
                       : 'Criar treino';
+              final pinCreateInScroll =
+                  !_selectionMode &&
+                  filteredTreinos.isNotEmpty &&
+                  filteredTreinos.length <= 5 &&
+                  !tail.hasNext;
               final showStickyCreate =
-                  !_selectionMode && loadedTreinos.isNotEmpty;
+                  !_selectionMode &&
+                  (loadedTreinos.isEmpty ||
+                      (loadedTreinos.isNotEmpty && !pinCreateInScroll));
+              final sparseHint =
+                  pinCreateInScroll
+                      ? null
+                      : treinosSparseHint(count: filteredTreinos.length);
+              final listBottom = treinosListBottomPad(
+                context: context,
+                stickyVisible: showStickyCreate,
+              );
+              final mute =
+                  isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
               return Column(
                 children: [
@@ -562,10 +579,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   TreinosLayout.screenPadding,
                                   8,
                                   TreinosLayout.screenPadding,
-                                  32,
+                                  8,
                                 ),
-                                child: Align(
-                                  alignment: Alignment.topCenter,
+                                child: Center(
                                   child: FxEmptyState(
                                     icon: 'dumbbell',
                                     title:
@@ -586,10 +602,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                             : TreinosListLabels.emptySubtitle(
                                               alunoNome: widget.alunoNome,
                                             ),
-                                    action: FxEmptyAction(
-                                      label: createLabel,
-                                      onTap: createWorkout,
-                                    ),
                                   ),
                                 ),
                               ),
@@ -696,51 +708,104 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                 ),
                               )
                             else
-                              SliverPadding(
-                                padding: EdgeInsets.fromLTRB(
-                                  TreinosLayout.screenPadding,
-                                  _selectionMode ? 4 : 0,
-                                  TreinosLayout.screenPadding,
-                                  TreinosLayout.listBottomGap(context),
-                                ),
-                                sliver: SliverList.separated(
-                                  itemCount:
-                                      filteredTreinos.length +
-                                      (tail.hasNext ? 1 : 0),
-                                  separatorBuilder:
-                                      (_, __) => SizedBox(
-                                        height: TreinosLayout.listItemGap,
-                                      ),
-                                  itemBuilder: (context, i) {
-                                    if (i >= filteredTreinos.length) {
-                                      return const SizedBox(height: 48);
-                                    }
-                                    return _TreinoCard(
-                                        treino: filteredTreinos[i],
-                                        isDark: isDark,
-                                        primary: primary,
-                                        alunoId: widget.alunoId,
-                                        alunoNome: widget.alunoNome,
-                                        selectionMode: _selectionMode,
-                                        selected: _selectedIds.contains(
-                                          filteredTreinos[i].id,
+                              ...[
+                                SliverPadding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    TreinosLayout.screenPadding,
+                                    _selectionMode ? 4 : 0,
+                                    TreinosLayout.screenPadding,
+                                    sparseHint == null ? listBottom : TokensStrip.s2,
+                                  ),
+                                  sliver: SliverList.separated(
+                                    itemCount:
+                                        filteredTreinos.length +
+                                        (tail.hasNext ? 1 : 0),
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(
+                                          height: TokensStrip.s2,
                                         ),
-                                        onToggleSelection:
-                                            () => _toggleSelection(
-                                              filteredTreinos[i].id,
-                                            ),
-                                        onStartSelection:
-                                            () => _startSelection(
-                                              filteredTreinos[i].id,
-                                            ),
-                                        onActions:
-                                            () => _openTreinoActions(
-                                              filteredTreinos[i],
-                                            ),
-                                    );
-                                  },
+                                    itemBuilder: (context, i) {
+                                      if (i >= filteredTreinos.length) {
+                                        return const SizedBox(height: 48);
+                                      }
+                                      return _TreinoCard(
+                                          treino: filteredTreinos[i],
+                                          isDark: isDark,
+                                          primary: primary,
+                                          alunoId: widget.alunoId,
+                                          alunoNome: widget.alunoNome,
+                                          selectionMode: _selectionMode,
+                                          selected: _selectedIds.contains(
+                                            filteredTreinos[i].id,
+                                          ),
+                                          onToggleSelection:
+                                              () => _toggleSelection(
+                                                filteredTreinos[i].id,
+                                              ),
+                                          onStartSelection:
+                                              () => _startSelection(
+                                                filteredTreinos[i].id,
+                                              ),
+                                          onActions:
+                                              () => _openTreinoActions(
+                                                filteredTreinos[i],
+                                              ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
+                                if (sparseHint != null)
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        TreinosLayout.screenPadding,
+                                        TokensStrip.s2,
+                                        TreinosLayout.screenPadding,
+                                        listBottom,
+                                      ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.lightbulb_outline_rounded,
+                                            size: 16,
+                                            color: mute,
+                                          ),
+                                          const SizedBox(
+                                            width: TokensStrip.s2,
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              sparseHint,
+                                              style:
+                                                  FocuxHubTypography.bodyMuted(
+                                                    color: mute,
+                                                    fontWeight: FontWeight.w600,
+                                                    height: 1.35,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                if (pinCreateInScroll)
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        TreinosLayout.screenPadding,
+                                        TokensStrip.s2,
+                                        TreinosLayout.screenPadding,
+                                        listBottom,
+                                      ),
+                                      child: FxLiquidPrimaryButton(
+                                        label: createLabel,
+                                        onPressed: createWorkout,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                           ],
                         ],
                       ),
@@ -787,7 +852,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                           TreinosLayout.screenPadding,
                           TokensStrip.s2,
                           TreinosLayout.screenPadding,
-                          TokensStrip.s3 +
+                          TokensStrip.s2 +
                               MediaQuery.viewInsetsOf(context).bottom,
                         ),
                         child: FxLiquidPrimaryButton(

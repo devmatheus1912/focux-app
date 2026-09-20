@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/tokens_strip.dart';
 import '../../../../core/widgets/fx_empty_state.dart';
 import '../../../../core/widgets/fx_loading.dart';
 import '../../data/exercicio_repository.dart';
@@ -49,16 +50,16 @@ class ExerciciosListView extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.fromLTRB(
-        16,
+        TokensStrip.s4,
         0,
-        16,
-        100 + MediaQuery.viewInsetsOf(context).bottom,
+        TokensStrip.s4,
+        TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       itemCount: exercicios.length + extra,
       itemBuilder: (context, i) {
         if (i >= exercicios.length) {
           return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: TokensStrip.s3),
             child: Center(child: FxLoading(size: 22)),
           );
         }

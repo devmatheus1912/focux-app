@@ -26,9 +26,9 @@ abstract final class FxHomeSheetChrome {
 
   static double glow(bool isDark) => isDark ? 0.14 : 0.16;
 
-  /// Scrim mais fechado no dark — sheet não “vaza” a tela de baixo.
+  /// Scrim mais fechado — sheet não “vaza” a tela de baixo (print Mais ferramentas).
   static Color barrier([bool isDark = false]) =>
-      heroScrim(isDark ? 0.58 : 0.28);
+      heroScrim(isDark ? 0.62 : 0.42);
 
   static void dismissAndPop<T extends Object?>(BuildContext context, [T? result]) {
     FxKeyboardDismissScope.dismiss();

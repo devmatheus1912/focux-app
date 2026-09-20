@@ -153,7 +153,7 @@ String formatBrlCurrency(Object value, {bool showDecimals = true}) {
   final decimals =
       showDecimals && parts.length > 1 ? ',${parts[1]}' : '';
   final prefix = negative ? '-' : '';
-  return '$prefix R\$ ${buffer.toString()}$decimals'.replaceFirst(' ', '');
+  return '${prefix}R\$ ${buffer.toString()}$decimals';
 }
 
 /// Contagem com singular/plural PT-BR (ex.: 1 curtida / 3 curtidas).

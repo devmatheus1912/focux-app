@@ -40,13 +40,22 @@ String whiteLabelCnameHint(
 }) {
   final host = domainDraft.trim().toLowerCase();
   if (host.isEmpty) {
-    return 'CNAME do subdomínio → cname.focux.app · depois TXT _focux com o token.';
+    return 'CNAME → cname.focux.app · depois TXT _focux.';
   }
   final token = (verificacaoToken ?? '').trim();
   if (token.isEmpty) {
-    return 'CNAME $host → cname.focux.app · salve para gerar o TXT _focux.$host.';
+    return 'CNAME $host → cname.focux.app · salve p/ TXT.';
   }
-  return 'CNAME $host → cname.focux.app · TXT _focux.$host → $token';
+  final shortTok =
+      token.length > 12 ? '${token.substring(0, 10)}…' : token;
+  return 'CNAME $host → cname.focux.app · TXT _focux → $shortTok';
+}
+
+/// Encurta passo DNS denso do BE para o footer.
+String whiteLabelDnsStepShort(String step, {int maxChars = 88}) {
+  final t = step.trim().replaceAll(RegExp(r'\s+'), ' ');
+  if (t.length <= maxChars) return t;
+  return '${t.substring(0, maxChars - 1)}…';
 }
 
 String whiteLabelChecklistValue(bool done) => done ? 'Pronto' : 'Pendente';

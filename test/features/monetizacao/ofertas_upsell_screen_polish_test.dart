@@ -35,7 +35,13 @@ void main() {
     expect(screen, contains('ofertaGatilhoValues'));
     expect(screen, contains('ofertaSectionTitle'));
     expect(screen, contains('ofertaStatusLabel'));
+    expect(screen, contains('ofertaStickyCtaLabel'));
+    expect(screen, contains('ofertaSparseHint'));
+    expect(screen, contains('ofertaListBottomPad'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FontFeature.tabularFigures'));
     expect(screen, contains('Nenhuma oferta ainda'));
+    expect(screen, contains('lightbulb_outline_rounded'));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

@@ -12,6 +12,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
@@ -124,6 +125,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final showSticky = !_loading && _erro == null;
 
     return fxScreenA11yScope(
       label: 'Ofertas para alunos',
@@ -136,7 +138,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           actions: [
             ShellHeaderIconButton(
               icon: 'plus',
-              tooltip: 'Nova oferta',
+              tooltip: ofertaStickyCtaLabel(),
               onTap: () => _abrirEditor(),
             ),
           ],
@@ -155,14 +157,44 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                   onRetry: _load,
                   title: 'Não carregamos as ofertas',
                 )
-                : FxContentWidthLimiter(child: _buildBody()),
+                : Column(
+                  children: [
+                    Expanded(
+                      child: FxContentWidthLimiter(
+                        child: _buildBody(stickyVisible: showSticky),
+                      ),
+                    ),
+                    if (showSticky)
+                      SafeArea(
+                        top: false,
+                        child: FxContentWidthLimiter(
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2,
+                              FxSettingsLayout.pageInset,
+                              TokensStrip.s2 +
+                                  MediaQuery.viewInsetsOf(context).bottom,
+                            ),
+                            child: FxLiquidPrimaryButton(
+                              label: ofertaStickyCtaLabel(),
+                              onPressed: () => _abrirEditor(),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody({required bool stickyVisible}) {
     final ativas = _ofertas.where((o) => o.ativo).toList();
     final pausadas = _ofertas.where((o) => !o.ativo).toList();
+    final sparseHint = ofertaSparseHint(count: _ofertas.length);
+    final bottomPad = ofertaListBottomPad(stickyVisible: stickyVisible);
+    final mute = fxScreenMute(context);
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -172,11 +204,11 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
-                  8,
+                  TokensStrip.s2,
                   FxSettingsLayout.pageInset,
-                  32,
+                  bottomPad,
                 ),
                 children: [
                   FxEmptyState(
@@ -184,10 +216,6 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                     title: 'Nenhuma oferta ainda',
                     subtitle:
                         'Crie a primeira oferta. Ela aparece para o aluno no gatilho escolhido (manual, check-in ou trilha).',
-                    action: FxEmptyAction(
-                      label: 'Nova oferta',
-                      onTap: () => _abrirEditor(),
-                    ),
                   ),
                 ],
               )
@@ -195,16 +223,16 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
+                  TokensStrip.s2,
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s6,
+                  bottomPad,
                 ),
                 children: [
                   if (ativas.isNotEmpty) ...[
                     Padding(
-                      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
                       child: DashboardSectionHeader(
                         title: ofertaSectionTitle(ativo: true),
                       ),
@@ -214,14 +242,38 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
                   if (pausadas.isNotEmpty) ...[
                     Padding(
                       padding: EdgeInsets.only(
-                        top: ativas.isEmpty ? 0 : TokensStrip.s4,
-                        bottom: TokensStrip.s3,
+                        top: ativas.isEmpty ? 0 : TokensStrip.s3,
+                        bottom: TokensStrip.s2,
                       ),
                       child: DashboardSectionHeader(
                         title: ofertaSectionTitle(ativo: false),
                       ),
                     ),
                     for (final oferta in pausadas) _tile(oferta),
+                  ],
+                  if (sparseHint != null) ...[
+                    const SizedBox(height: TokensStrip.s3),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline_rounded,
+                          size: 16,
+                          color: mute,
+                        ),
+                        const SizedBox(width: TokensStrip.s2),
+                        Expanded(
+                          child: Text(
+                            sparseHint,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: mute,
+                              fontWeight: FontWeight.w600,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ],
               ),
@@ -230,6 +282,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
 
   Widget _tile(OfertaUpsell oferta) {
     return FxSatelliteListTile(
+      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
       title: oferta.titulo,
       subtitle: Text(
         ofertaSubtitle(
@@ -245,6 +298,9 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
             style: FocuxHubTypography.bodyMuted(
               color: fxScreenMute(context),
               fontWeight: FontWeight.w700,
+            ).copyWith(
+              letterSpacing: 0,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
           const SizedBox(width: TokensStrip.s2),

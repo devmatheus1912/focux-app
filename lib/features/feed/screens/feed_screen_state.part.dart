@@ -213,49 +213,91 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: searching ? 'search' : 'rss',
-              title:
-                  searching
-                      ? 'Nada encontrado'
-                      : 'Nenhuma publicação ainda',
-              subtitle:
-                  searching
-                      ? 'Ajuste a busca para achar outra publicação.'
-                      : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
-              action: FxEmptyAction(
-                label: searching ? 'Limpar filtros' : 'Criar publicação',
-                onTap: searching ? _clearFilters : _abrirFormulario,
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.zero,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: FxEmptyState(
+                      icon: searching ? 'search' : 'rss',
+                      title:
+                          searching
+                              ? 'Nada encontrado'
+                              : 'Nenhuma publicação ainda',
+                      subtitle:
+                          searching
+                              ? 'Ajuste a busca para achar outra publicação.'
+                              : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
+                      action: FxEmptyAction(
+                        label: searching ? 'Limpar filtros' : 'Criar publicação',
+                        onTap: searching ? _clearFilters : _abrirFormulario,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
     }
 
     final showMore = _hasMore;
+    final sparseHint = feedSparseHint(count: visible.length);
+    final stickyVisible = true;
+    final bottomPad = feedListBottomPad(stickyVisible: stickyVisible);
+    final mute = ShellChrome.of(context).mute;
+    final extra = (showMore ? 1 : 0) + (sparseHint != null ? 1 : 0);
+
     return RefreshIndicator(
       color: primary,
       onRefresh: _load,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.fromLTRB(
+        padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
-          8,
+          TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          32,
+          bottomPad,
         ),
-        itemCount: visible.length + (showMore ? 1 : 0),
+        itemCount: visible.length + extra,
         itemBuilder: (_, i) {
           if (showMore && i == visible.length) {
             return FxSatelliteListTile(
               title: _loadingMore ? 'Carregando…' : 'Carregar mais',
               onTap: _loadingMore ? null : _carregarMais,
+            );
+          }
+          if (sparseHint != null && i == visible.length + (showMore ? 1 : 0)) {
+            return Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline_rounded,
+                    size: 16,
+                    color: mute,
+                  ),
+                  const SizedBox(width: TokensStrip.s2),
+                  Expanded(
+                    child: Text(
+                      sparseHint,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: mute,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
           final p = visible[i];
@@ -429,7 +471,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                               FxSettingsLayout.pageInset,
                               TokensStrip.s2,
                               FxSettingsLayout.pageInset,
-                              TokensStrip.s3 +
+                              TokensStrip.s2 +
                                   MediaQuery.viewInsetsOf(context).bottom,
                             ),
                             child: FxLiquidPrimaryButton(

@@ -1,4 +1,5 @@
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/fx_utils.dart';
 
 const leadOrigemValues = [
@@ -216,6 +217,35 @@ String leadCardSubtitle({String? objetivo, String? origem}) {
   final obj = objetivo?.trim();
   if (obj != null && obj.isNotEmpty) return obj;
   return leadOrigemLabel(origem);
+}
+
+/// Telefone legível no kanban/lista (evita ID cru / dígitos sem máscara).
+String leadTelefoneDisplay(String? telefone) {
+  final raw = telefone?.trim();
+  if (raw == null || raw.isEmpty) return 'Sem telefone';
+  final formatted = BrPhone.formatDisplay(raw);
+  return formatted.isNotEmpty ? formatted : raw;
+}
+
+/// Título do card no funil: nome; se o "nome" for só número, mascara.
+String leadKanbanTitle(String? nome, {String? telefone}) {
+  final n = (nome ?? '').trim();
+  if (n.isEmpty) return leadTelefoneDisplay(telefone);
+  final digits = n.replaceAll(RegExp(r'\D'), '');
+  final digitsOnly =
+      digits.length >= 8 && digits.length == n.replaceAll(RegExp(r'[\s()+-]'), '').length;
+  if (digitsOnly) return leadTelefoneDisplay(n);
+  return n;
+}
+
+/// Idade relativa curta no card (ex.: `2d`, `hoje`).
+String leadKanbanAgeLabel(String criadoEm, {DateTime? now}) {
+  final date = DateTime.tryParse(criadoEm.trim());
+  if (date == null) return '';
+  final days =
+      _dateOnly(now ?? DateTime.now()).difference(_dateOnly(date)).inDays;
+  if (days <= 0) return 'hoje';
+  return '${days}d';
 }
 
 const leadFreeCap = 5;

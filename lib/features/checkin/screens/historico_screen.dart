@@ -341,10 +341,60 @@ class _HistoricoCheckinScreenState
     }
 
     final showMore = _hasNext;
+    final groupTodos = _chip == HistoricoStatusChip.todos;
+    final grouped = groupTodos ? historicoGroupByStatus(visible) : null;
+
+    final rows = <Widget>[];
+    if (grouped != null) {
+      if (grouped.andamento.isNotEmpty) {
+        rows.add(
+          const Padding(
+            padding: EdgeInsets.only(bottom: TokensStrip.s2),
+            child: _HistoricoSectionLabel(label: 'Em andamento'),
+          ),
+        );
+        for (final entry in grouped.andamento) {
+          rows.add(
+            _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+          );
+        }
+      }
+      if (grouped.concluidos.isNotEmpty) {
+        rows.add(
+          Padding(
+            padding: EdgeInsets.only(
+              top: grouped.andamento.isEmpty ? 0 : TokensStrip.s3,
+              bottom: TokensStrip.s2,
+            ),
+            child: const _HistoricoSectionLabel(label: 'Concluído'),
+          ),
+        );
+        for (final entry in grouped.concluidos) {
+          rows.add(
+            _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+          );
+        }
+      }
+    } else {
+      for (final entry in visible) {
+        rows.add(
+          _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+        );
+      }
+    }
+    if (showMore) {
+      rows.add(
+        FxSatelliteListTile(
+          title: _loadingMore ? 'Carregando…' : 'Carregar mais',
+          onTap: _loadingMore ? null : () => _load(reset: false),
+        ),
+      );
+    }
+
     return RefreshIndicator(
       color: primary,
       onRefresh: () => _load(reset: true),
-      child: ListView.builder(
+      child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
@@ -353,20 +403,23 @@ class _HistoricoCheckinScreenState
           FxSettingsLayout.pageInset,
           32,
         ),
-        itemCount: visible.length + (showMore ? 1 : 0),
-        itemBuilder: (context, i) {
-          if (showMore && i == visible.length) {
-            return FxSatelliteListTile(
-              title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-              onTap: _loadingMore ? null : () => _load(reset: false),
-            );
-          }
-          return _HistoricoTile(
-            entry: visible[i],
-            onTap: () => _abrirItem(visible[i]),
-          );
-        },
+        children: rows,
       ),
+    );
+  }
+}
+
+class _HistoricoSectionLabel extends StatelessWidget {
+  const _HistoricoSectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    return Text(
+      label.toUpperCase(),
+      style: FxSettingsLayout.sectionHeader(color: mute),
     );
   }
 }
@@ -381,19 +434,53 @@ class _HistoricoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final concluido = historicoConcluido(entry.status);
     final dateLabel = historicoDateLabel(entry.iniciadoEm);
+    final statusColor = concluido ? EagleTokens.good : EagleTokens.warn;
     return FxSatelliteListTile(
       title: entry.treinoNome,
       subtitle:
           dateLabel.isEmpty
-              ? Text(historicoStatusLabel(entry.status))
-              : Text('$dateLabel · ${historicoStatusLabel(entry.status)}'),
+              ? null
+              : Text(dateLabel),
       leading: FxIcon(
         name: concluido ? 'circle-check' : 'calendar',
         size: 22,
-        color: concluido ? EagleTokens.good : EagleTokens.warn,
+        color: statusColor,
       ),
       accent: concluido ? null : EagleTokens.warn,
+      trailing: _HistoricoStatusChip(
+        label: historicoStatusLabel(entry.status),
+        color: statusColor,
+      ),
       onTap: entry.id == null ? null : onTap,
+    );
+  }
+}
+
+class _HistoricoStatusChip extends StatelessWidget {
+  const _HistoricoStatusChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.22 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.42)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.1,
+        ),
+      ),
     );
   }
 }

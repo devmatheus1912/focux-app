@@ -21,7 +21,7 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
         TokensStrip.s4,
         TokensStrip.s2,
         TokensStrip.s4,
-        140 + MediaQuery.viewInsetsOf(context).bottom,
+        96 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       children: [
         DecoratedBox(
@@ -176,14 +176,16 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                     TextFormField(
                       controller: state._heroTitle,
                       textCapitalization: TextCapitalization.sentences,
-                      maxLines: 2,
+                      minLines: 2,
+                      maxLines: 6,
                       decoration: FxInputDeco.build(context, 'Título'),
                     ),
                     const SizedBox(height: TokensStrip.s3),
                     TextFormField(
                       controller: state._heroSubtitle,
                       textCapitalization: TextCapitalization.sentences,
-                      maxLines: 3,
+                      minLines: 2,
+                      maxLines: 5,
                       decoration: FxInputDeco.build(context, 'Subtítulo'),
                     ),
                     const SizedBox(height: TokensStrip.s3),
@@ -196,14 +198,16 @@ class _LandingStudioRevisaoBody extends StatelessWidget {
                     TextFormField(
                       controller: state._bio,
                       textCapitalization: TextCapitalization.sentences,
-                      maxLines: 4,
+                      minLines: 3,
+                      maxLines: 10,
                       decoration: FxInputDeco.build(context, 'Bio'),
                     ),
                     const SizedBox(height: TokensStrip.s3),
                     TextFormField(
                       controller: state._fechamento,
                       textCapitalization: TextCapitalization.sentences,
-                      maxLines: 3,
+                      minLines: 2,
+                      maxLines: 8,
                       decoration: FxInputDeco.build(context, 'Fechamento'),
                     ),
                   ],

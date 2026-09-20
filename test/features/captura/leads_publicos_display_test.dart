@@ -15,9 +15,25 @@ void main() {
         email: 'a@b.com',
         objetivo: 'Emagrecer',
       ),
-      '11999999999 · a@b.com · Emagrecer',
+      '(11) 99999-9999 · a@b.com · Emagrecer',
     );
     expect(leadPublicoSubtitle(), 'Sem contato extra');
+  });
+
+  test('sticky e filtro ativo', () {
+    expect(leadPublicoStickyLabel(), 'Abrir página pública');
+    expect(
+      leadPublicoHasActiveFilter(query: '', chip: LeadPublicoChip.todos),
+      isFalse,
+    );
+    expect(
+      leadPublicoHasActiveFilter(query: 'ana', chip: LeadPublicoChip.todos),
+      isTrue,
+    );
+    expect(
+      leadPublicoHasActiveFilter(query: '', chip: LeadPublicoChip.novos),
+      isTrue,
+    );
   });
 
   test('leadPublico status e criar aluno', () {

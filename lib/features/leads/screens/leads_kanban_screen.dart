@@ -17,6 +17,7 @@ import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../utils/lead_display.dart';
 
 const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
 const _kLabels = {
@@ -520,16 +521,20 @@ class _LeadCard extends StatelessWidget {
     final brand = Theme.of(context).colorScheme.primary;
     final brandSoft = BrandPalette.soft(brand, dark: isDark);
     final brandDeep = BrandPalette.deep(brand);
+    final title = leadKanbanTitle(lead.nome, telefone: lead.telefone);
+    final phoneLine = lead.telefone?.trim().isNotEmpty == true
+        ? leadTelefoneDisplay(lead.telefone)
+        : leadOrigemLabel(lead.origem);
+    final dias = leadKanbanAgeLabel(lead.criadoEm);
 
-    // Simulate tag/origem/tempo since the API model doesn't strictly have them all
     final tag =
         lead.status == 'LEAD'
             ? 'novo'
             : (lead.status == 'TESTE' ? 'urgente' : null);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
       decoration: fxListCardDecoration(context, accent: cColor),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -537,18 +542,18 @@ class _LeadCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   color: isDark ? brandDeep : brand,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  lead.nome.isNotEmpty ? lead.nome[0].toUpperCase() : '?',
+                  title.isNotEmpty ? title[0].toUpperCase() : '?',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -556,12 +561,13 @@ class _LeadCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  lead.nome,
+                  title,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: ink,
                   ),
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -582,26 +588,29 @@ class _LeadCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                lead.telefone?.isNotEmpty == true ? lead.telefone! : 'Orgânico',
-                style: FocuxHubTypography.bodyMuted(color: mute),
+              Flexible(
+                child: Text(
+                  phoneLine,
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               Text(
-                '2d',
+                dias,
                 style: FocuxHubTypography.chip(mute),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: Container(
-                  height: 30,
+                  height: 26,
                   decoration: BoxDecoration(
                     color:
                         isDark
@@ -629,8 +638,8 @@ class _LeadCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Container(
-                width: 30,
-                height: 30,
+                width: 26,
+                height: 26,
                 decoration: BoxDecoration(
                   color:
                       isDark

@@ -20,6 +20,7 @@ void main() {
     expect(screen, isNot(contains('FilterChip')));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('viewInsetsOf'));
+    expect(screen, contains('TokensStrip.s2 + MediaQuery.viewInsetsOf'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('safePopOrGo(context, \'/treinos\')'));
@@ -33,6 +34,17 @@ void main() {
     expect(list, contains('keyboardDismissBehavior'));
     expect(list, isNot(contains('FxSettingsGroup')));
     expect(list, contains('ExercicioCard'));
+    expect(list, contains('TokensStrip.s2'));
+    expect(list, isNot(contains('100 + MediaQuery')));
+  });
+
+  test('exercicio card fica denso no hub', () {
+    final card = readScreenSourceBundle(
+      'lib/features/exercicios/screens/widgets/exercicio_card.dart',
+    );
+    expect(card, contains('margin: const EdgeInsets.only(bottom: 6)'));
+    expect(card, contains('size: 20'));
+    expect(card, contains('size: 28'));
   });
 
   test('exercicios filter bar segue pele do Perfil', () {

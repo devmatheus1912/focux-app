@@ -403,6 +403,9 @@ class FxSatelliteListTile extends StatelessWidget {
         trailing: trailing,
         title: Text(
           displayTitle,
+          maxLines: isThreeLine ? 2 : 1,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
           style: FocuxHubTypography.body(
             color: ink,
           ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15),

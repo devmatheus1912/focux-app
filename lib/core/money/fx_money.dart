@@ -102,5 +102,5 @@ String formatBrlCents(int cents, {bool showDecimals = true}) {
   }
   final decimals = showDecimals ? ',${frac.toString().padLeft(2, '0')}' : '';
   final prefix = negative ? '-' : '';
-  return '$prefix R\$ ${buffer.toString()}$decimals'.replaceFirst(' ', '');
+  return '${prefix}R\$ ${buffer.toString()}$decimals';
 }

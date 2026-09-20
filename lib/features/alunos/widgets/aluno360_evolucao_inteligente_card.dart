@@ -160,6 +160,12 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
         final singleWeek = Aluno360EvolucaoInteligenteLogic.isSingleWeekVolume(
           ev.volumePorSemana,
         );
+        final hideMonthlyVolume =
+            Aluno360EvolucaoInteligenteLogic.isRedundantWeeklyMonthlyVolume(
+              volumeSemanal: ev.volumeSemanal,
+              volumeMensal: ev.volumeMensal,
+              singleWeek: singleWeek,
+            );
 
         return Semantics(
           container: true,
@@ -286,20 +292,30 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                               ],
                               const SizedBox(height: TokensStrip.s2),
                               OperationalMetricTile(
-                                  label: 'Volume da semana',
+                                  label:
+                                      hideMonthlyVolume
+                                          ? 'Volume'
+                                          : 'Volume da semana',
                                   value: formatAlunoVolumeKg(ev.volumeSemanal),
-                                  hint: 'Soma de carga × reps nos check-ins',
+                                  hint:
+                                      hideMonthlyVolume
+                                          ? (singleWeek
+                                              ? 'Primeira semana com volume (carga × reps)'
+                                              : 'Soma de carga × reps (semana ≈ mês)')
+                                          : 'Soma de carga × reps nos check-ins',
                                   color: primary,
                                   isDark: isDark,
                                 ),
-                              const SizedBox(height: TokensStrip.s2),
-                              OperationalMetricTile(
+                              if (!hideMonthlyVolume) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                OperationalMetricTile(
                                   label: 'Volume do mês',
                                   value: formatAlunoVolumeKg(ev.volumeMensal),
                                   hint: 'Mesma conta nos últimos 30 dias',
                                   color: primary,
                                   isDark: isDark,
                                 ),
+                              ],
                               if (_ultimoPrValue(ev) != null) ...[
                                 const SizedBox(height: TokensStrip.s2),
                                 OperationalMetricTile(
@@ -402,7 +418,7 @@ class _VolumeSparklineRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Volume da semana',
+                  singleWeek ? 'Tendência' : 'Volume da semana',
                   style: Aluno360Layout.metaStyle(context).copyWith(
                     color: mute,
                     letterSpacing: 0.4,
@@ -411,7 +427,7 @@ class _VolumeSparklineRow extends StatelessWidget {
                 if (singleWeek) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Primeira semana com volume (carga × reps)',
+                    'Primeira semana com volume',
                     style: Aluno360Layout.captionStyle(context).copyWith(
                       color: mute,
                     ),

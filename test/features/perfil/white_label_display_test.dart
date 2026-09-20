@@ -66,6 +66,14 @@ void main() {
       whiteLabelCnameHint('treino.x.com', verificacaoToken: 'tok-1'),
       contains('tok-1'),
     );
+    expect(
+      whiteLabelCnameHint(''),
+      'CNAME → cname.focux.app · depois TXT _focux.',
+    );
+    expect(
+      whiteLabelDnsStepShort('a' * 100, maxChars: 20).endsWith('…'),
+      isTrue,
+    );
     expect(whiteLabelLandingCaption('CAPTURA'), contains('captura'));
     expect(whiteLabelChecklistValue(true), 'Pronto');
   });

@@ -68,7 +68,7 @@ class _TreinoCard extends StatelessWidget {
         onLongPress: onStartSelection,
         borderRadius: BorderRadius.circular(TokensStrip.rCard),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 12, 6, 12),
+          padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
           decoration: fxListCardDecoration(
             context,
             accent: primary,
@@ -95,8 +95,8 @@ class _TreinoCard extends StatelessWidget {
                 const SizedBox(width: 10),
               ],
               Container(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: BrandPalette.soft(primary, dark: isDark),
                   borderRadius: BorderRadius.circular(14),
@@ -143,7 +143,7 @@ class _TreinoCard extends StatelessWidget {
                         color: mute,
                       ).copyWith(fontSize: TokensStrip.fontBodySm),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Container(

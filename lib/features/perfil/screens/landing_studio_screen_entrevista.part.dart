@@ -23,7 +23,7 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
         TokensStrip.s4,
         TokensStrip.s2,
         TokensStrip.s4,
-        TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+        100 + MediaQuery.viewInsetsOf(context).bottom,
       ),
       children: [
         Text(
@@ -116,7 +116,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                       decoration: FxInputDeco.build(
                         context,
                         'Pra quem NÃO é',
-                        hint: 'Quem busca milagre sem treinar',
+                        hint: 'Ex.: quem busca milagre sem treinar',
+                      ).copyWith(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
                     ),
                   ],
@@ -153,7 +155,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                   decoration: FxInputDeco.build(
                     context,
                     'Prova social',
-                    hint: 'CREF · anos · alunos · resultado',
+                    hint: 'Ex.: CREF · anos · alunos · resultado',
+                  ).copyWith(
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                 ),
               ),
@@ -211,7 +215,9 @@ class _LandingStudioEntrevistaBody extends StatelessWidget {
                       decoration: FxInputDeco.build(
                         context,
                         'Preço',
-                        hint: 'R\$ 297/mês',
+                        hint: 'Ex.: R\$ 297/mês',
+                      ).copyWith(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s3),

@@ -201,6 +201,9 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
                           ? EagleTokens.bad
                           : fxScreenMute(context),
                   fontWeight: FontWeight.w700,
+                ).copyWith(
+                  letterSpacing: 0,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               accent: item.status == 'ATRASADO' ? EagleTokens.bad : null,

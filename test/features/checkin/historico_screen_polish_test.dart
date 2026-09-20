@@ -20,10 +20,13 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showBack: true'));
     expect(screen, contains("fallbackLocation: '/checkin/treinos'"));
-    expect(screen, contains('ListView.builder'));
+    expect(screen, contains('ListView('));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('historicoDetalhePath'));
     expect(screen, contains('historicoStatusQuery'));
+    expect(screen, contains('historicoGroupByStatus'));
+    expect(screen, contains('_HistoricoStatusChip'));
+    expect(screen, contains('_HistoricoSectionLabel'));
     expect(screen, contains('q: _query'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains('viewInsetsOf'));

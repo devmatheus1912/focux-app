@@ -557,7 +557,7 @@ class _FinanceiroMensalidadesTabState
                                     MediaQuery.viewInsetsOf(context).bottom,
                               ),
                               child: Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: Alignment.center,
                                 child: DashboardHomeActionChip(
                                   label: 'Nova mensalidade',
                                   accent: primary,

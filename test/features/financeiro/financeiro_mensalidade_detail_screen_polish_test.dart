@@ -29,7 +29,14 @@ void main() {
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('mensalidadeDetailMaisActions'));
-    expect(screen, contains('Mais ações'));
+    expect(screen, contains('mensalidadeDetailMaisSheetTitle'));
+    expect(screen, contains('mensalidadeDetailMaisChipLabel'));
+    expect(screen, contains('financeiroMensalidadeHubSubtitle'));
+    expect(screen, contains('financeiroMensalidadeMesPorExtenso'));
+    expect(screen, contains('financeiroMensalidadeDetailValorHint'));
+    expect(screen, contains('_ValorMetricTile'));
+    expect(screen, contains('FontFeature.tabularFigures'));
+    expect(screen, contains('letterSpacing: 0'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains("safePopOrGo("));
     expect(screen, contains("'/financeiro'"));

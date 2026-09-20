@@ -25,6 +25,35 @@ double relatorioAderenciaPct(int concluidos, int total) {
 List<T> relatorioRankingPreview<T>(List<T> items) =>
     items.take(3).toList(growable: false);
 
+List<ResumoAluno> relatorioRankingMaisPreview(ResumoGlobal dados) {
+  final atencaoIds =
+      relatorioCatalogoMenos(dados).map((a) => a.alunoId).toSet();
+  final mais = relatorioCatalogoMais(
+    dados,
+  ).where((a) => !atencaoIds.contains(a.alunoId)).toList(growable: false);
+  // Base pequena: se sobrar vazio, mostra o top sem duplicar na atenção.
+  if (mais.isEmpty) {
+    return relatorioRankingPreview(relatorioCatalogoMais(dados));
+  }
+  return relatorioRankingPreview(mais);
+}
+
+List<ResumoAluno> relatorioRankingMenosPreview(ResumoGlobal dados) {
+  final maisPreviewIds =
+      relatorioRankingMaisPreview(dados).map((a) => a.alunoId).toSet();
+  final menos = relatorioCatalogoMenos(
+    dados,
+  ).where((a) => !maisPreviewIds.contains(a.alunoId)).toList(growable: false);
+  if (menos.isEmpty) {
+    // Um único aluno: prioriza "atenção" se a média pede; senão lista só em comprometidos.
+    if (dados.totalAlunos <= 1) {
+      return const [];
+    }
+    return relatorioRankingPreview(relatorioCatalogoMenos(dados));
+  }
+  return relatorioRankingPreview(menos);
+}
+
 List<ResumoAluno> relatorioCatalogoMais(ResumoGlobal dados) {
   final source = dados.itens.isNotEmpty ? dados.itens : dados.maisComprometidos;
   final copy = List<ResumoAluno>.of(source);

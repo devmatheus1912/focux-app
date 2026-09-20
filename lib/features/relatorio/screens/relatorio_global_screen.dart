@@ -250,7 +250,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           ..._rankingTiles(
-                            relatorioRankingPreview(dados.maisComprometidos),
+                            relatorioRankingMaisPreview(dados),
                             emptyLabel: 'Ainda não há treinos concluídos',
                             attention: false,
                           ),
@@ -270,7 +270,7 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           ..._rankingTiles(
-                            relatorioRankingPreview(dados.menosComprometidos),
+                            relatorioRankingMenosPreview(dados),
                             emptyLabel: 'Ninguém precisa de atenção extra',
                             attention: true,
                           ),

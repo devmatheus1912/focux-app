@@ -245,7 +245,7 @@ class _WhiteLabelSettingsScreenState
                           FxSettingsLayout.pageInset,
                           TokensStrip.s2,
                           FxSettingsLayout.pageInset,
-                          88,
+                          120,
                         ),
                         children: [
                           FxSettingsGroup(
@@ -309,11 +309,11 @@ class _WhiteLabelSettingsScreenState
                                                 bottom: 4,
                                               ),
                                               child: Text(
-                                                '• $step',
+                                                '• ${whiteLabelDnsStepShort(step)}',
                                                 style:
                                                     FocuxHubTypography.bodyMuted(
                                                       color: chrome.mute,
-                                                      height: 1.35,
+                                                      height: 1.3,
                                                     ),
                                               ),
                                             ),
@@ -447,6 +447,9 @@ class _WhiteLabelSettingsScreenState
                             ).copyWith(dividerColor: Colors.transparent),
                             child: ExpansionTile(
                               tilePadding: EdgeInsets.zero,
+                              childrenPadding: const EdgeInsets.only(
+                                bottom: TokensStrip.s2,
+                              ),
                               title: Text(
                                 'Checklist (${config.checklistScore}/${config.checklist.length})',
                                 style: FocuxHubTypography.body(
@@ -499,6 +502,7 @@ class _WhiteLabelSettingsScreenState
                               ],
                             ),
                           ),
+                          const SizedBox(height: TokensStrip.s4),
                         ],
                       ),
             ),

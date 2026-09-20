@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_home_sheet.dart';
-import 'package:focux_app/core/widgets/fx_settings_tile.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 import 'package:focux_app/core/theme/brand_palette.dart';
 
@@ -122,7 +121,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Histórico 360'), findsNothing);
 
-    await tester.tap(find.byType(FxSettingsTile));
+    await tester.tap(find.byType(Timeline360Tile));
     await tester.pumpAndSettle();
 
     expect(find.byType(DraggableScrollableSheet), findsNothing);

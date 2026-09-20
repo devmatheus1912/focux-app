@@ -54,8 +54,30 @@ void main() {
       contains('retenção'),
     );
     expect(
+      qualidadeRecomendacaoDisplay(data(ticket: 0, retencao: 80)),
+      contains('Cadastre mensalidades'),
+    );
+    expect(
       qualidadeRecomendacaoDisplay(data()),
       'ok',
+    );
+  });
+
+  test('ticket zero não compete com mercado', () {
+    expect(qualidadeTicketUnavailable(0), isTrue);
+    expect(qualidadeTicketValueLabel(0), 'Sem ticket');
+    expect(
+      qualidadeTicketHint(ticketPessoal: 0, ticketMercado: 250),
+      'Indisponível · referência R\$ 250',
+    );
+    expect(qualidadeTicketValueLabel(300), 'R\$ 300');
+    expect(
+      qualidadeTicketHint(ticketPessoal: 300, ticketMercado: 250),
+      'Acima do mercado R\$ 250',
+    );
+    expect(
+      qualidadeTicketHint(ticketPessoal: 200, ticketMercado: 250),
+      'Mercado R\$ 250',
     );
   });
 }

@@ -77,7 +77,7 @@ class ExercicioCard extends ConsumerWidget {
       leading: Icon(
         Icons.fitness_center_rounded,
         color: primary,
-        size: 22,
+        size: 20,
       ),
       subtitle: Text(subtitle),
       trailing: Row(
@@ -85,16 +85,17 @@ class ExercicioCard extends ConsumerWidget {
         children: [
           if (exercicio.hasPlayableMedia)
             Padding(
-              padding: const EdgeInsets.only(right: 4),
+              padding: const EdgeInsets.only(right: 2),
               child: ExerciseMediaThumb.fromExercicio(
                 exercicio,
-                size: 32,
+                size: 28,
               ),
             ),
           IconButton(
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+            iconSize: 20,
             icon: Icon(
               exercicio.favoritado ? Icons.star : Icons.star_border,
               color:
@@ -111,6 +112,11 @@ class ExercicioCard extends ConsumerWidget {
           else
             PopupMenuButton<String>(
               tooltip: 'Acoes do exercicio',
+              padding: EdgeInsets.zero,
+              splashRadius: 18,
+              offset: const Offset(0, 36),
+              position: PopupMenuPosition.under,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
               icon: Icon(Icons.more_vert_rounded, color: mute, size: 20),
               onSelected: (value) {
                 if (value == 'video') onUploadVideo();
@@ -157,6 +163,7 @@ class ExercicioCard extends ConsumerWidget {
             ),
         ],
       ),
+      margin: const EdgeInsets.only(bottom: 6),
       ),
     );
   }

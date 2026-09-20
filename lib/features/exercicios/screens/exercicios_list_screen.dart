@@ -408,7 +408,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                       TokensStrip.s4,
                       TokensStrip.s2,
                       TokensStrip.s4,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                      TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: FxLiquidPrimaryButton(
                       label: 'Novo exercício',

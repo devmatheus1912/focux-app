@@ -11,7 +11,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -206,7 +205,7 @@ class _QualidadeOperacionalScreenState
                     TokensStrip.s4,
                     TokensStrip.s2,
                     TokensStrip.s4,
-                    40,
+                    TokensStrip.s6,
                   ),
                   children: [_QualidadeBody(data: data, isDark: isDark)],
                 ),
@@ -235,7 +234,9 @@ class _QualidadeBody extends StatelessWidget {
       QualidadeScoreBand.good => EagleTokens.warn,
       QualidadeScoreBand.attention => EagleTokens.bad,
     };
-    final ticketAbove = data.ticketPessoal >= data.ticketMercado;
+    final ticketUnavailable = qualidadeTicketUnavailable(data.ticketPessoal);
+    final ticketAbove =
+        !ticketUnavailable && data.ticketPessoal >= data.ticketMercado;
     final retencaoAbove = data.retencaoPessoal >= data.retencaoMercado;
 
     return Column(
@@ -249,7 +250,7 @@ class _QualidadeBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Índice Focux', style: FocuxHubTypography.chip(chrome.mute)),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
                 '${data.score}',
                 style: FocuxHubTypography.kpi(
@@ -257,19 +258,19 @@ class _QualidadeBody extends StatelessWidget {
                   fontSize: FocuxHubTypography.metricLg,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 2),
               Text(
                 qualidadeScoreLabel(data.score),
                 style: FocuxHubTypography.body(
                   color: chrome.ink,
                 ).copyWith(fontWeight: FontWeight.w700),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 qualidadeRecomendacaoDisplay(data),
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
-              const SizedBox(height: TokensStrip.s3),
+              const SizedBox(height: TokensStrip.s2),
               Align(
                 alignment: Alignment.centerLeft,
                 child: DashboardHomeActionChip(
@@ -288,21 +289,28 @@ class _QualidadeBody extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: TokensStrip.s4),
-        const DashboardSectionHeader(title: 'Comparado ao mercado'),
         const SizedBox(height: TokensStrip.s3),
+        const DashboardSectionHeader(title: 'Comparado ao mercado'),
+        const SizedBox(height: TokensStrip.s2),
         InkWell(
           onTap: () => context.push('/financeiro'),
           borderRadius: BorderRadius.circular(12),
           child: OperationalMetricTile(
             label: 'Ticket médio',
-            value: formatBrlCurrency(data.ticketPessoal, showDecimals: false),
-            hint:
-                ticketAbove
-                    ? 'Acima do mercado ${formatBrlCurrency(data.ticketMercado, showDecimals: false)}'
-                    : 'Mercado ${formatBrlCurrency(data.ticketMercado, showDecimals: false)}',
-            color: ticketAbove ? EagleTokens.good : EagleTokens.warn,
+            value: qualidadeTicketValueLabel(data.ticketPessoal),
+            hint: qualidadeTicketHint(
+              ticketPessoal: data.ticketPessoal,
+              ticketMercado: data.ticketMercado,
+            ),
+            color:
+                ticketUnavailable
+                    ? EagleTokens.warn
+                    : (ticketAbove ? EagleTokens.good : EagleTokens.warn),
             isDark: isDark,
+            emphasis:
+                ticketUnavailable
+                    ? OperationalMetricEmphasis.muted
+                    : OperationalMetricEmphasis.normal,
           ),
         ),
         const SizedBox(height: TokensStrip.s2),

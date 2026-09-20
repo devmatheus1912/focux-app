@@ -48,7 +48,9 @@ void main() {
     expect(screen, contains('startableCount'));
     expect(screen, contains('hasStartable'));
     expect(screen, contains('Fiz o treino'));
-    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, contains('TextButton'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, contains('Pronto para treinar'));
     expect(screen, contains('confirmarPlano'));
     expect(screen, contains('alunoDashboardHomeProvider'));

@@ -50,10 +50,27 @@ class _TabMedidas extends StatelessWidget {
             ),
           );
         }
-        final ordenada =
-            [...lista.where(evolucaoMedidaTemConteudo)]
-              ..sort((a, b) => b.data.compareTo(a.data));
+        final ordenada = evolucaoMedidasComConteudo(lista);
         final weightData = evolucaoPesosOrdenados(lista);
+        if (ordenada.isEmpty && weightData.isEmpty) {
+          final first = satelliteFirstName(alunoNome);
+          return RefreshIndicator(
+            onRefresh: () async => onRetry(),
+            child: satelliteEmptyBody(
+              child: FxEmptyState(
+                key: const ValueKey('evolucao_medidas_empty'),
+                icon: 'trend',
+                title: 'Nenhuma medida registrada',
+                subtitle:
+                    'Registre peso e circunferências de $first para acompanhar a evolução.',
+                action: FxEmptyAction(
+                  label: 'Registrar medida',
+                  onTap: onRegister,
+                ),
+              ),
+            ),
+          );
+        }
         return RefreshIndicator(
           onRefresh: () async => onRetry(),
           child: ListView(
@@ -79,44 +96,37 @@ class _TabMedidas extends StatelessWidget {
                 ),
                 const SizedBox(height: TokensStrip.s3),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TokensStrip.s3,
+                    vertical: TokensStrip.s3,
+                  ),
                   decoration: fxListCardDecoration(context),
-                  child: FxSparkline(
-                    data:
-                        weightData.length == 1
-                            ? [weightData.first, weightData.first]
-                            : weightData,
-                    width: 320,
-                    height: 72,
-                    color: EagleTokens.good,
-                    fill: true,
+                  child: Center(
+                    child: FxSparkline(
+                      data: weightData,
+                      width: 320,
+                      height: 72,
+                      color: EagleTokens.good,
+                      fill: weightData.length > 1,
+                    ),
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s5),
               ],
               const DashboardSectionHeader(title: 'Medidas'),
               const SizedBox(height: TokensStrip.s3),
-              if (ordenada.isEmpty)
-                Text(
-                  'Nenhuma circunferência ainda — o peso aparece no gráfico acima.',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
-              else
-                for (final medida in ordenada)
-                  FxSatelliteListTile(
-                    title: evolucaoMedidaLabel(medida),
-                    subtitle: Text(evolucaoMedidaSubtitle(medida)),
-                    trailing: Text(
-                      evolucaoMedidaValue(medida),
-                      style: FocuxHubTypography.bodyMuted(
-                        color: fxScreenMute(context),
-                        fontWeight: FontWeight.w700,
-                      ),
+              for (final medida in ordenada)
+                FxSatelliteListTile(
+                  title: evolucaoMedidaLabel(medida),
+                  subtitle: Text(evolucaoMedidaSubtitle(medida)),
+                  trailing: Text(
+                    evolucaoMedidaValue(medida),
+                    style: FocuxHubTypography.bodyMuted(
+                      color: fxScreenMute(context),
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
+                ),
             ],
           ),
         );

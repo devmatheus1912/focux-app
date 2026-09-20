@@ -86,6 +86,9 @@ void main() {
     expect(screen, contains('ProductEvents.treinosSearchUsed'));
     expect(screen, contains('ProductEvents.treinosHelpOpened'));
     expect(screen, contains('ProductEvents.treinosCreateTapped'));
+    expect(screen, contains('treinosSparseHint'));
+    expect(screen, contains('treinosListBottomPad'));
+    expect(screen, contains('lightbulb_outline_rounded'));
     expect(screen, contains('ProductEvents.treinosActionOpened'));
     expect(screen, contains('ProductEvents.treinosAssigned'));
     expect(screen, contains('ProductEvents.treinosCloned'));

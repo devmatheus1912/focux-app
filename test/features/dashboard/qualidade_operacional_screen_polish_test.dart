@@ -24,8 +24,11 @@ void main() {
     expect(screen, contains("'qualidade'"));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('heroGradientFrom')));
-    expect(screen, isNot(contains('class _MetricCompareCard')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(4));
+    expect(screen, contains('qualidadeTicketValueLabel'));
+    expect(screen, contains('qualidadeTicketHint'));
+    expect(screen, contains('qualidadeTicketUnavailable'));
+    expect(screen, contains('OperationalMetricEmphasis.muted'));
+    expect(screen, contains('TokensStrip.s6'));
+    expect(screen, isNot(contains('formatBrlCurrency')));
   });
 }

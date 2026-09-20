@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -295,9 +296,12 @@ class Aluno360TimelineCard extends StatelessWidget {
                 index: i,
                 child: FxSatelliteListTile(
                   title: _timelineTileLabel(visibleItems[i]),
+                  titleCase: false,
+                  isThreeLine: true,
                   subtitle: Text(
                     _timelineTileSubtitle(visibleItems[i]),
                     maxLines: 2,
+                    softWrap: true,
                     overflow: TextOverflow.ellipsis,
                   ),
                   accent: visibleItems[i].color,
@@ -534,20 +538,111 @@ class Timeline360Tile extends StatelessWidget {
 
     final hasRoute = item.deepLink != null && item.deepLink!.isNotEmpty;
     final interactive = expandable || hasRoute;
+    final chrome = ShellChrome.of(context);
+    final mute = chrome.mute;
+    final ink = chrome.ink;
+    final date = formatTimeline360Date(item.at);
+    final spoken =
+        expandable
+            ? '$label. ${timeline360ExpandLinkLabel(kind: item.kind)}'
+            : (previewBody.isEmpty ? label : '$label. $previewBody');
 
-    return FxSettingsTile(
-      icon: item.icon,
-      accent: item.color,
-      label: label,
-      subtitle: previewBody,
-      value: formatTimeline360Date(item.at),
-      onTap: interactive ? onTap : null,
-      disclosure: expandable,
-      showDivider: showSpineBelow,
-      semanticsLabel:
-          expandable
-              ? '$label. ${timeline360ExpandLinkLabel(kind: item.kind)}'
-              : null,
+    return Semantics(
+      button: interactive,
+      label: date.isEmpty ? spoken : '$spoken. $date',
+      hint: expandable ? 'Mostra o conteúdo completo' : null,
+      child: InkWell(
+        onTap:
+            !interactive
+                ? null
+                : () {
+                  HapticFeedback.selectionClick();
+                  onTap();
+                },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border:
+                showSpineBelow
+                    ? Border(
+                      bottom: BorderSide(
+                        color: chrome.line,
+                        width: 1,
+                      ),
+                    )
+                    : null,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s3,
+              vertical: TokensStrip.s3,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(item.icon, size: 20, color: item.color),
+                const SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        maxLines: 2,
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
+                        style: Aluno360Layout.captionStyle(context).copyWith(
+                          color: ink,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          height: 1.25,
+                        ),
+                      ),
+                      if (previewBody.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          previewBody,
+                          maxLines: 2,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: Aluno360Layout.metaStyle(context).copyWith(
+                            color: mute,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (date.isNotEmpty) ...[
+                  const SizedBox(width: TokensStrip.s2),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 88),
+                    child: Text(
+                      date,
+                      maxLines: 2,
+                      softWrap: true,
+                      textAlign: TextAlign.end,
+                      style: Aluno360Layout.metaStyle(context).copyWith(
+                        color: mute,
+                      ),
+                    ),
+                  ),
+                ],
+                if (interactive) ...[
+                  const SizedBox(width: TokensStrip.s1),
+                  Icon(
+                    expandable
+                        ? Icons.expand_more
+                        : Icons.chevron_right,
+                    size: 18,
+                    color: mute,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

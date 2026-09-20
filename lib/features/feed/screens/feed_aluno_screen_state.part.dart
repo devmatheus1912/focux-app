@@ -169,26 +169,36 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
       return RefreshIndicator(
         color: primary,
         onRefresh: _load,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            FxEmptyState(
-              icon: searching ? 'search' : 'rss',
-              title: searching
-                  ? 'Nada encontrado'
-                  : 'Nenhuma publicação ainda',
-              subtitle: searching
-                  ? 'Ajuste a busca ou o filtro para achar outra publicação.'
-                  : 'Quando seu personal publicar no feed, as novidades aparecem aqui.',
-              action: searching
-                  ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
-                  : FxEmptyAction(
-                      label: 'Voltar ao início',
-                      onTap: _leave,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.zero,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: FxEmptyState(
+                      icon: searching ? 'search' : 'rss',
+                      title: searching
+                          ? 'Nada encontrado'
+                          : 'Nenhuma publicação ainda',
+                      subtitle: searching
+                          ? 'Ajuste a busca ou o filtro para achar outra publicação.'
+                          : 'Quando seu personal publicar no feed, as novidades aparecem aqui.',
+                      action: searching
+                          ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
+                          : FxEmptyAction(
+                              label: 'Voltar ao início',
+                              onTap: _leave,
+                            ),
                     ),
-            ),
-          ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
     }
@@ -202,7 +212,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
           FxSettingsLayout.pageInset,
           TokensStrip.s2,
           FxSettingsLayout.pageInset,
-          TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+          TokensStrip.s4 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         itemCount: _posts.length + (_hasMore ? 1 : 0),
         itemBuilder: (_, i) {

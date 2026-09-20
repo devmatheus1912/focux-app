@@ -218,11 +218,15 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   child: OperationalMetricTile(
                                     label: 'Medidas',
                                     value: evolucaoCountLabel(
-                                      medidas?.length ?? 0,
+                                      evolucaoMedidasComConteudoCount(
+                                        medidas ?? const [],
+                                      ),
                                       recordes: false,
                                     ),
                                     hint: evolucaoMedidasHint(
-                                      medidas?.length ?? 0,
+                                      evolucaoMedidasComConteudoCount(
+                                        medidas ?? const [],
+                                      ),
                                     ),
                                     color: primary,
                                     isDark: chrome.isDark,

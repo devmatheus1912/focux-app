@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/relatorio/data/relatorio_repository.dart';
 import 'package:focux_app/features/relatorio/utils/relatorio_global_display.dart';
 
 void main() {
@@ -37,5 +38,36 @@ void main() {
     expect(firstRelatorioAtencao(['Ana', 'Bia']), 'Ana');
     expect(firstRelatorioAtencao(<String>[]), isNull);
     expect(relatorioComoCalculamos, contains('Média'));
+  });
+
+  test('ranking preview não duplica aluno em mais e atenção', () {
+    final ana = ResumoAluno(
+      alunoId: 1,
+      alunoNome: 'Ana',
+      totalTreinos: 10,
+      treinosConcluidos: 2,
+    );
+    final bia = ResumoAluno(
+      alunoId: 2,
+      alunoNome: 'Bia',
+      totalTreinos: 10,
+      treinosConcluidos: 9,
+    );
+    final dados = ResumoGlobal(
+      aderenciaMediaGeral: 50,
+      totalAlunos: 2,
+      itens: [ana, bia],
+      maisComprometidos: [bia, ana],
+      menosComprometidos: [ana],
+    );
+    final mais = relatorioRankingMaisPreview(dados);
+    final menos = relatorioRankingMenosPreview(dados);
+    final overlap = mais
+        .map((a) => a.alunoId)
+        .toSet()
+        .intersection(menos.map((a) => a.alunoId).toSet());
+    expect(overlap, isEmpty);
+    expect(mais.map((a) => a.alunoNome), contains('Bia'));
+    expect(menos.map((a) => a.alunoNome), contains('Ana'));
   });
 }

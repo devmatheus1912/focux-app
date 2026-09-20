@@ -317,10 +317,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                           restoringPurchases: _restoringPurchases,
                           onBillingDetails:
                               ctaMode == _AssinaturaCtaMode.manageStore
-                                  ? () =>
-                                      PaywallUpgradeLegalCompact.showBillingSheet(
+                                  ? () => _showAssinaturaTermosSheet(
                                         context,
-                                        ink: ink,
                                         mute: mute,
                                         primary: primary,
                                         showStoreBillingNote:

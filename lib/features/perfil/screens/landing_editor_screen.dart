@@ -217,33 +217,40 @@ class _LandingEditorScreenState extends ConsumerState<LandingEditorScreen> {
             bottomNavigationBar: _loading
                 ? null
                 : FxFormStickyBar(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_step == 1) ...[
-                          FxLiquidSecondaryButton(
-                            label: 'Voltar à entrevista',
-                            onPressed: _busy
-                                ? null
-                                : () => setState(() => _step = 0),
+                    child: _step == 1
+                        ? Row(
+                            children: [
+                              Expanded(
+                                child: FxLiquidSecondaryButton(
+                                  label: 'Entrevista',
+                                  onPressed: _busy
+                                      ? null
+                                      : () => setState(() => _step = 0),
+                                ),
+                              ),
+                              const SizedBox(width: TokensStrip.s2),
+                              Expanded(
+                                flex: 2,
+                                child: FxLiquidPrimaryButton(
+                                  label: _busy
+                                      ? 'Publicando…'
+                                      : (_publicado
+                                          ? 'Republicar'
+                                          : 'Publicar'),
+                                  loading: _busy,
+                                  loadingLabel: 'Publicando…',
+                                  onPressed:
+                                      _canPublish ? _publicar : null,
+                                ),
+                              ),
+                            ],
+                          )
+                        : FxLiquidPrimaryButton(
+                            label: _busy ? 'Gerando…' : 'Gerar página',
+                            loading: _busy,
+                            loadingLabel: 'Gerando…',
+                            onPressed: _canGenerate ? _gerar : null,
                           ),
-                          const SizedBox(height: TokensStrip.s2),
-                        ],
-                        FxLiquidPrimaryButton(
-                          label: _busy
-                              ? (_step == 0 ? 'Gerando…' : 'Publicando…')
-                              : (_step == 0
-                                  ? 'Gerar página'
-                                  : (_publicado ? 'Republicar' : 'Publicar')),
-                          loading: _busy,
-                          loadingLabel:
-                              _step == 0 ? 'Gerando…' : 'Publicando…',
-                          onPressed: _step == 0
-                              ? (_canGenerate ? _gerar : null)
-                              : (_canPublish ? _publicar : null),
-                        ),
-                      ],
-                    ),
                   ),
             body: SafeArea(
               bottom: false,

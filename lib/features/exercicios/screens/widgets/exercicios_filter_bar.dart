@@ -91,7 +91,7 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
         FxSettingsLayout.pageInset,
         0,
         FxSettingsLayout.pageInset,
-        FxSettingsLayout.groupGap,
+        TokensStrip.s3,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,7 +113,7 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
               fillColor: chrome.cardFill,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: 12,
+                vertical: 10,
               ),
               border: FxInputDeco.outlineBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -130,7 +130,7 @@ class _ExerciciosFilterBarState extends State<ExerciciosFilterBar> {
               isDense: true,
             ),
           ),
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,

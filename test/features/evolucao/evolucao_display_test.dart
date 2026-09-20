@@ -78,4 +78,23 @@ void main() {
     expect(evolucaoHubViewFromSecao('recordes'), EvolucaoHubView.recordes);
     expect(evolucaoDetalheSecoes, hasLength(2));
   });
+
+  test('KPI de medidas conta só registros com conteúdo', () {
+    final lista = [
+      MedidaCorporal(id: 1, data: '2026-09-01', peso: 60),
+      MedidaCorporal(id: 2, data: '2026-09-02'),
+      MedidaCorporal(id: 3, data: '2026-09-03', cintura: 70),
+    ];
+    expect(evolucaoMedidasComConteudoCount(lista), 2);
+    expect(evolucaoMedidasComConteudo(lista), hasLength(2));
+    expect(
+      evolucaoMedidaSubtitle(MedidaCorporal(id: 1, data: '2026-09-01', peso: 60)),
+      '60.0 kg',
+    );
+    expect(
+      evolucaoMedidaSubtitle(MedidaCorporal(id: 9, data: '2026-09-01')),
+      'Registro sem valores',
+    );
+    expect(evolucaoPesosOrdenados(lista), [60.0]);
+  });
 }

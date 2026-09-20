@@ -103,6 +103,38 @@ void main() {
     expect(financeiroMensalidadeHubSubtitle(mes: '  '), 'Mensalidade');
   });
 
+  test('detalhe mensalidade — labels sem repetir vencimento', () {
+    expect(
+      financeiroMensalidadeDetailHubSubtitle(mesReferencia: '2026-09-01'),
+      'Setembro 2026',
+    );
+    expect(
+      financeiroMensalidadeDetailValorHint(overdue: true, pending: true),
+      'Em atraso',
+    );
+    expect(
+      financeiroMensalidadeDetailValorHint(overdue: false, pending: true),
+      'Valor desta cobrança',
+    );
+    expect(
+      financeiroMensalidadeDetailValorHint(overdue: false, pending: false),
+      'Valor pago',
+    );
+    expect(
+      financeiroMensalidadeDetailReferenciaValue(
+        pending: true,
+        mesReferencia: '2026-09-01',
+      ),
+      'Setembro 2026',
+    );
+    expect(
+      financeiroMensalidadeDetailReferenciaHint(pending: true),
+      'Mês desta cobrança',
+    );
+    expect(mensalidadeDetailMaisSheetTitle(), 'Outras ações');
+    expect(mensalidadeDetailMaisChipLabel(), 'Mais ações');
+  });
+
   test('financeiroMensalidadeMesPorExtenso e tipo de contato', () {
     expect(
       financeiroMensalidadeMesPorExtenso('2026-09-01'),

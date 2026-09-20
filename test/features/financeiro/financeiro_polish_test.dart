@@ -125,12 +125,12 @@ void main() {
     expect(detail, contains('financeiroMensalidadeHubSubtitle'));
     expect(detail, contains('Abrir aluno'));
     expect(detail, contains("'/financeiro'"));
-    expect(detail, contains('financeiroMensalidadePagoEmLabel'));
+    expect(detail, contains('financeiroMensalidadeDetailReferenciaValue'));
     expect(detail, contains("label: 'Vencimento'"));
     expect(detail, isNot(contains('freshness: freshnessLabel')));
     expect(detail, contains('financeiroMensalidadeVencimentoLabel'));
     expect(detail, contains('mensalidadeDetailMaisActions'));
-    expect(detail, contains('Mais ações'));
+    expect(detail, contains('mensalidadeDetailMaisChipLabel'));
     expect(detail, contains('listarContatos'));
     expect(detail, contains('loaded.contatos'));
     expect(detail, isNot(contains('AlunoSegmentedChoice')));

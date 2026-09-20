@@ -31,6 +31,16 @@ String evolucaoMedidasHint(int count) {
   return '$count registros';
 }
 
+/// Conta só registros com peso ou circunferência — alinha KPI e lista.
+int evolucaoMedidasComConteudoCount(List<MedidaCorporal> medidas) =>
+    medidas.where(evolucaoMedidaTemConteudo).length;
+
+List<MedidaCorporal> evolucaoMedidasComConteudo(List<MedidaCorporal> medidas) {
+  final ordenada = [...medidas.where(evolucaoMedidaTemConteudo)]
+    ..sort((a, b) => b.data.compareTo(a.data));
+  return ordenada;
+}
+
 String evolucaoRecordesHint(int count) {
   if (count <= 0) return 'Nenhuma marca ainda';
   if (count == 1) return '1 marca pessoal';
@@ -109,7 +119,9 @@ String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   if (medida.braco != null) {
     parts.add('Braço ${medida.braco!.toStringAsFixed(1)} cm');
   }
-  return parts.isEmpty ? 'Sem circunferências' : parts.join(' · ');
+  if (parts.isNotEmpty) return parts.join(' · ');
+  // Só chega aqui se a lista não filtrou por [evolucaoMedidaTemConteudo].
+  return 'Registro sem valores';
 }
 
 String evolucaoMedidaValue(MedidaCorporal medida) {

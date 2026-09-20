@@ -32,6 +32,8 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     this.anamneseLoading = false,
   });
 
+  static const EdgeInsets _moduleMargin = EdgeInsets.only(bottom: 6);
+
   final Aluno aluno;
   final int alunoId;
   final Color primary;
@@ -86,79 +88,110 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               Aluno360FerramentasModuleGroup.perfil,
         )
         .toList(growable: false);
+    final fill = isDark ? EagleTokens.darkBg : Colors.white;
 
     await showFxHomeSheet<void>(
       context,
       builder: (ctx) {
-        return FxHomeSheetSurface(
-          isDark: isDark,
-          maxHeight:
-              MediaQuery.sizeOf(context).height *
-              FxHomeSheetChrome.maxHeightFactor,
-          padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              FxHomeSheetHandle(isDark: isDark),
-              const SizedBox(height: 8),
-              FxHomeSheetHeader(
-                isDark: isDark,
-                title: 'Mais ferramentas',
-                subtitle: 'Catálogo completo deste aluno',
-                leading: Icon(Icons.apps_outlined, color: primary, size: 20),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              Flexible(
-                child: SingleChildScrollView(
+        final maxHeight =
+            MediaQuery.sizeOf(context).height *
+            FxHomeSheetChrome.maxHeightFactor;
+        return Padding(
+          padding: FxHomeSheetChrome.paddingOf(ctx),
+          child: Material(
+            color: fill,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(FxHomeSheetChrome.radius),
+            clipBehavior: Clip.antiAlias,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: BorderRadius.circular(FxHomeSheetChrome.radius),
+                  border: Border.all(
+                    color: primary.withValues(alpha: isDark ? 0.34 : 0.16),
+                    width: 1.2,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (treino.isNotEmpty) ...[
-                        Text(
-                          'Treino & evolução',
-                          style: Aluno360Layout.metaStyle(ctx).copyWith(
-                            fontWeight: FontWeight.w700,
+                      FxHomeSheetHandle(isDark: isDark),
+                      const SizedBox(height: 8),
+                      ColoredBox(
+                        color: fill,
+                        child: FxHomeSheetHeader(
+                          isDark: isDark,
+                          title: 'Mais ferramentas',
+                          subtitle: 'Catálogo completo deste aluno',
+                          leading: Icon(
+                            Icons.apps_outlined,
+                            color: primary,
+                            size: 20,
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        for (final module in treino)
-                          _moduleTile(
-                            context,
-                            sheetContext: ctx,
-                            module: module,
-                            iaLocked: iaLocked,
-                            feedbackLocked: feedbackLocked,
-                            iaPlan: iaPlan,
-                            feedbackPlan: feedbackPlan,
-                          ),
-                      ],
-                      if (perfil.isNotEmpty) ...[
-                        if (treino.isNotEmpty)
-                          const SizedBox(height: TokensStrip.s4),
-                        Text(
-                          'Perfil & gestão',
-                          style: Aluno360Layout.metaStyle(ctx).copyWith(
-                            fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(height: TokensStrip.s3),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (treino.isNotEmpty) ...[
+                                Text(
+                                  'Treino & evolução',
+                                  style: Aluno360Layout.metaStyle(ctx).copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                for (final module in treino)
+                                  _moduleTile(
+                                    context,
+                                    sheetContext: ctx,
+                                    module: module,
+                                    iaLocked: iaLocked,
+                                    feedbackLocked: feedbackLocked,
+                                    iaPlan: iaPlan,
+                                    feedbackPlan: feedbackPlan,
+                                  ),
+                              ],
+                              if (perfil.isNotEmpty) ...[
+                                if (treino.isNotEmpty)
+                                  const SizedBox(height: TokensStrip.s4),
+                                Text(
+                                  'Perfil & gestão',
+                                  style: Aluno360Layout.metaStyle(ctx).copyWith(
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                for (final module in perfil)
+                                  _moduleTile(
+                                    context,
+                                    sheetContext: ctx,
+                                    module: module,
+                                    iaLocked: iaLocked,
+                                    feedbackLocked: feedbackLocked,
+                                    iaPlan: iaPlan,
+                                    feedbackPlan: feedbackPlan,
+                                  ),
+                              ],
+                            ],
                           ),
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        for (final module in perfil)
-                          _moduleTile(
-                            context,
-                            sheetContext: ctx,
-                            module: module,
-                            iaLocked: iaLocked,
-                            feedbackLocked: feedbackLocked,
-                            iaPlan: iaPlan,
-                            feedbackPlan: feedbackPlan,
-                          ),
-                      ],
+                      ),
                     ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         );
       },
@@ -207,6 +240,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
 
     return switch (module) {
       Aluno360FerramentasModule.treinos => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Treinos',
         subtitle: Text(
@@ -226,6 +260,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.equipamentos => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Equipamentos',
         subtitle: Text(
@@ -237,6 +272,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         onTap: () => go(() => host.push('/alunos/$alunoId/equipamentos')),
       ),
       Aluno360FerramentasModule.iaProgresso => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'IA Progresso',
         subtitle: Text(
@@ -263,6 +299,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.composicao => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Composição corporal',
         subtitle: Text(
@@ -283,6 +320,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.aderencia => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Aderência',
         subtitle: Text(
@@ -315,6 +353,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.planoSucesso => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Plano de sucesso',
         subtitle: const Text('Metas e marcos do aluno'),
@@ -328,6 +367,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.trilhas => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Trilhas',
         subtitle: const Text('Metas com etapas e progresso'),
@@ -341,6 +381,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.engajamento => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Engajamento',
         subtitle: const Text('Treinos, medidas e mensagens'),
@@ -354,6 +395,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.anamnese => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Anamnese',
         subtitle: Text(
@@ -377,6 +419,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         onTap: () => go(() => host.push('/alunos/$alunoId/anamnese')),
       ),
       Aluno360FerramentasModule.mensalidades => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Mensalidades',
         subtitle: Text(
@@ -394,6 +437,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         onTap: () => go(() => host.push('/financeiro?alunoId=$alunoId')),
       ),
       Aluno360FerramentasModule.chat => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Chat',
         subtitle: const Text('Conversa direta com o aluno'),
@@ -407,6 +451,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
       ),
       Aluno360FerramentasModule.feedbackVideo => FxSatelliteListTile(
+        margin: _moduleMargin,
         titleCase: false,
         title: 'Feedback em vídeo',
         subtitle: Text(
@@ -489,8 +534,8 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             ),
           if (split.overflow.isNotEmpty) ...[
             const SizedBox(height: TokensStrip.s3),
-            Align(
-              alignment: Alignment.centerLeft,
+            SizedBox(
+              width: double.infinity,
               child: DashboardHomeActionChip(
                 label: 'Mais ferramentas',
                 accent: primary,

@@ -39,5 +39,32 @@ void main() {
         isFalse,
       );
     });
+
+    test('hides redundant weekly/monthly volume tiles', () {
+      expect(
+        Aluno360EvolucaoInteligenteLogic.isRedundantWeeklyMonthlyVolume(
+          volumeSemanal: 4000,
+          volumeMensal: 4000,
+          singleWeek: false,
+        ),
+        isTrue,
+      );
+      expect(
+        Aluno360EvolucaoInteligenteLogic.isRedundantWeeklyMonthlyVolume(
+          volumeSemanal: 4000,
+          volumeMensal: 12000,
+          singleWeek: false,
+        ),
+        isFalse,
+      );
+      expect(
+        Aluno360EvolucaoInteligenteLogic.isRedundantWeeklyMonthlyVolume(
+          volumeSemanal: 4000,
+          volumeMensal: 12000,
+          singleWeek: true,
+        ),
+        isTrue,
+      );
+    });
   });
 }

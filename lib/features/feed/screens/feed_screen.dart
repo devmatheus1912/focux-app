@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -38,3 +39,19 @@ class FeedScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
 }
+
+/// Hint sob a lista curta — preenche o vão acima do sticky CTA.
+String? feedSparseHint({required int count}) {
+  if (count <= 0) return null;
+  if (count == 1) {
+    return 'Só uma publicação. Publique de novo para manter o feed vivo.';
+  }
+  if (count < 3) {
+    return 'Poucas publicações. Um post a mais preenche melhor o dia do aluno.';
+  }
+  return null;
+}
+
+/// Folga inferior da lista com sticky CTA fora do scroll.
+double feedListBottomPad({required bool stickyVisible}) =>
+    stickyVisible ? TokensStrip.s2 : TokensStrip.s5;

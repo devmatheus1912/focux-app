@@ -1,7 +1,33 @@
+import '../../../core/money/fx_money.dart';
 import '../data/qualidade_operacional.dart';
 
 const qualidadeComoCalculamos =
     'Índice 0–100: metade ticket vs um recorte de mercado configurado, metade retenção (ativos / ativos+inativos) vs o mesmo recorte.';
+
+/// Ticket médio ausente (sem mensalidades / base zerada) — não compete com mercado.
+bool qualidadeTicketUnavailable(double ticketPessoal) => ticketPessoal <= 0;
+
+String _qualidadeMoneyLabel(double reais) =>
+    formatBrlCents((reais * 100).round(), showDecimals: false);
+
+String qualidadeTicketValueLabel(double ticketPessoal) {
+  if (qualidadeTicketUnavailable(ticketPessoal)) return 'Sem ticket';
+  return _qualidadeMoneyLabel(ticketPessoal);
+}
+
+String qualidadeTicketHint({
+  required double ticketPessoal,
+  required double ticketMercado,
+}) {
+  final mercado = _qualidadeMoneyLabel(ticketMercado);
+  if (qualidadeTicketUnavailable(ticketPessoal)) {
+    return 'Indisponível · referência $mercado';
+  }
+  if (ticketPessoal >= ticketMercado) {
+    return 'Acima do mercado $mercado';
+  }
+  return 'Mercado $mercado';
+}
 
 enum QualidadeScoreBand { excellent, good, attention }
 
@@ -55,6 +81,9 @@ QualidadeNextAction qualidadeNextAction(QualidadeOperacionalData data) {
 String qualidadeRecomendacaoDisplay(QualidadeOperacionalData data) {
   final retencaoOk = data.retencaoPessoal >= data.retencaoMercado;
   final ticketOk = data.ticketPessoal >= data.ticketMercado;
+  if (data.ticketPessoal <= 0 && retencaoOk) {
+    return 'Retenção forte. Cadastre mensalidades para medir o ticket.';
+  }
   if (retencaoOk && !ticketOk) {
     return 'Retenção forte. Foque em precificação e ticket médio.';
   }

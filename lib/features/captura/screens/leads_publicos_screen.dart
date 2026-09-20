@@ -94,6 +94,18 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
     _carregar();
   }
 
+  void _clearFiltros() {
+    _searchDebounce?.cancel();
+    _searchCtrl.clear();
+    final hadFilter = leadPublicoHasActiveFilter(query: _query, chip: _chip);
+    if (!hadFilter) return;
+    setState(() {
+      _query = '';
+      _chip = LeadPublicoChip.todos;
+    });
+    _carregar();
+  }
+
   Future<void> _carregar() async {
     setState(() {
       _loading = true;
@@ -338,7 +350,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                       )
                     : FxContentWidthLimiter(child: _buildBody()),
               ),
-              if (!_loading && _erro == null && _leads.isNotEmpty)
+              if (!_loading && _erro == null)
                 SafeArea(
                   top: false,
                   child: Padding(
@@ -350,7 +362,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                           MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: FxLiquidPrimaryButton(
-                      label: 'Abrir página pública',
+                      label: leadPublicoStickyLabel(),
                       onPressed: () => context.push('/perfil/landing-editor'),
                     ),
                   ),
@@ -364,8 +376,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
 
   Widget _buildBody() {
     final primary = Theme.of(context).colorScheme.primary;
-    final filtered =
-        _query.trim().isNotEmpty || _chip != LeadPublicoChip.todos;
+    final filtered = leadPublicoHasActiveFilter(query: _query, chip: _chip);
     return RefreshIndicator(
       color: primary,
       onRefresh: _carregar,
@@ -373,6 +384,12 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
           ? ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: EdgeInsets.fromLTRB(
+                0,
+                0,
+                0,
+                TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
               children: [
                 FxEmptyState(
                   icon: filtered ? 'search' : 'users',
@@ -385,10 +402,10 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                   action: filtered
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
-                          onTap: _clearQuery,
+                          onTap: _clearFiltros,
                         )
                       : FxEmptyAction(
-                          label: 'Abrir página pública',
+                          label: leadPublicoStickyLabel(),
                           onTap: () => context.push('/perfil/landing-editor'),
                         ),
                 ),

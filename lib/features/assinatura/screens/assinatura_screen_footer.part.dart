@@ -223,42 +223,32 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             ),
           ),
         ],
-        if (onBillingDetails != null || onRestore != null) ...[
+        if (onRestore != null) ...[
+          const SizedBox(height: TokensStrip.s2),
+          Semantics(
+            button: true,
+            label:
+                restoringPurchases ? 'Restaurando compras' : 'Restaurar compras',
+            child: FxLiquidSecondaryButton(
+              label:
+                  restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
+              icon: Icons.restore_rounded,
+              onPressed: restoringPurchases ? null : onRestore,
+            ),
+          ),
+        ],
+        if (onBillingDetails != null) ...[
           const SizedBox(height: TokensStrip.s1),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: TokensStrip.s1,
-            runSpacing: 0,
-            children: [
-              if (onBillingDetails != null)
-                TextButton(
-                  onPressed: onBillingDetails,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s2,
-                    ),
-                  ),
-                  child: Text(
-                    'Cobrança e termos',
-                    style: FocuxHubTypography.chip(tierAccent ?? primary),
-                  ),
-                ),
-              if (onRestore != null)
-                TextButton(
-                  onPressed: restoringPurchases ? null : onRestore,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s2,
-                    ),
-                  ),
-                  child: Text(
-                    restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
-                    style: FocuxHubTypography.chip(tierAccent ?? primary),
-                  ),
-                ),
-            ],
+          TextButton(
+            onPressed: onBillingDetails,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
+            ),
+            child: Text(
+              'Termos e cobrança',
+              style: FocuxHubTypography.chip(tierAccent ?? primary),
+            ),
           ),
         ],
         if (showLegalConsent) ...[
@@ -273,6 +263,80 @@ class _AssinaturaStickyFooter extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Sheet S7 de termos — separado do fold de planos; restore com affordance de botão.
+Future<void> _showAssinaturaTermosSheet(
+  BuildContext context, {
+  required Color mute,
+  required Color primary,
+  required bool showStoreBillingNote,
+  required bool restoring,
+  VoidCallback? onRestore,
+}) {
+  return showFxHomeSheet<void>(
+    context,
+    builder: (ctx) {
+      final isDark = Theme.of(ctx).brightness == Brightness.dark;
+      final maxHeight =
+          MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor;
+      return FxHomeSheetSurface(
+        isDark: isDark,
+        maxHeight: maxHeight,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxHomeSheetHandle(isDark: isDark),
+            SizedBox(height: TokensStrip.s4),
+            FxHomeSheetHeader(
+              isDark: isDark,
+              title: 'Termos e cobrança',
+              subtitle: 'Legal e loja — fora do plano na tela',
+              leading: Icon(Icons.policy_outlined, color: primary, size: 18),
+            ),
+            SizedBox(height: TokensStrip.s3),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    PaywallTrustFooter(mute: mute, primary: primary),
+                    if (onRestore != null) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      Semantics(
+                        button: true,
+                        label:
+                            restoring
+                                ? 'Restaurando compras'
+                                : 'Restaurar compras',
+                        child: FxLiquidSecondaryButton(
+                          label:
+                              restoring
+                                  ? 'Restaurando…'
+                                  : 'Restaurar compras',
+                          icon: Icons.restore_rounded,
+                          onPressed: restoring ? null : onRestore,
+                        ),
+                      ),
+                    ],
+                    if (showStoreBillingNote) ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      Text(
+                        'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. '
+                        'Cancele quando quiser nas configurações do dispositivo.',
+                        textAlign: TextAlign.center,
+                        style: TokensStrip.bodyMuted(color: mute),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

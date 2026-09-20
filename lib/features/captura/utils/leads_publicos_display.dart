@@ -1,3 +1,4 @@
+import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/fx_utils.dart';
 
 enum LeadPublicoChip { todos, novos, convertidos }
@@ -33,7 +34,10 @@ String leadPublicoSubtitle({
 }) {
   final parts = <String>[];
   final tel = telefone?.trim();
-  if (tel != null && tel.isNotEmpty) parts.add(tel);
+  if (tel != null && tel.isNotEmpty) {
+    final formatted = BrPhone.formatDisplay(tel);
+    parts.add(formatted.isNotEmpty ? formatted : tel);
+  }
   final mail = email?.trim();
   if (mail != null && mail.isNotEmpty) parts.add(mail);
   final obj = objetivo?.trim();
@@ -41,6 +45,15 @@ String leadPublicoSubtitle({
   if (parts.isEmpty) return 'Sem contato extra';
   return parts.join(' · ');
 }
+
+/// Sticky da Captação: job = página pública (nunca "Criar aluno").
+String leadPublicoStickyLabel() => 'Abrir página pública';
+
+bool leadPublicoHasActiveFilter({
+  required String query,
+  required LeadPublicoChip chip,
+}) =>
+    query.trim().isNotEmpty || chip != LeadPublicoChip.todos;
 
 String leadPublicoValue(bool convertido) =>
     convertido ? 'Convertido' : 'Novo';

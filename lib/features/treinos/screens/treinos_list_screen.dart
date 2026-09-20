@@ -54,6 +54,27 @@ class TreinosListScreen extends ConsumerWidget {
   }
 }
 
+/// Hint sob a biblioteca curta — preenche o vão acima do sticky CTA.
+String? treinosSparseHint({required int count}) {
+  if (count <= 0) return null;
+  if (count == 1) {
+    return 'Só um treino. Crie outro plano base para variar a semana do aluno.';
+  }
+  if (count < 3) {
+    return 'Biblioteca enxuta. Mais um plano preenche o espaço e acelera a atribuição.';
+  }
+  return null;
+}
+
+/// Folga inferior da lista com sticky CTA fora do scroll.
+double treinosListBottomPad({
+  required BuildContext context,
+  required bool stickyVisible,
+}) {
+  if (stickyVisible) return TokensStrip.s2;
+  return TreinosLayout.listBottomGap(context);
+}
+
 class _TreinosListView extends ConsumerStatefulWidget {
   final int? alunoId;
   final String? alunoNome;

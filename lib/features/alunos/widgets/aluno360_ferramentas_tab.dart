@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -166,7 +165,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             measurements,
-            const SizedBox(height: FxSettingsLayout.groupGap),
+            const SizedBox(height: TokensStrip.s4),
             modules,
           ],
         ),

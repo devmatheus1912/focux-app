@@ -159,5 +159,15 @@ void main() {
     expect(build, isNot(contains('— \$selectedLabel')));
     expect(body, isNot(contains('_EnterprisePreviewCard')));
     expect(body, isNot(contains('priceLabel:')));
+
+    final footer = File(
+      'lib/features/assinatura/screens/assinatura_screen_footer.part.dart',
+    ).readAsStringSync();
+    expect(footer, contains('_showAssinaturaTermosSheet'));
+    expect(footer, contains('FxLiquidSecondaryButton'));
+    expect(footer, contains('Restaurar compras'));
+    expect(footer, contains('Termos e cobrança'));
+    expect(build, contains('_showAssinaturaTermosSheet'));
+    expect(build, isNot(contains('PaywallUpgradeLegalCompact.showBillingSheet')));
   });
 }
