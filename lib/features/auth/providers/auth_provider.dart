@@ -5,8 +5,11 @@ import '../../../core/auth/session_invalidator.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../data/auth_repository.dart';
 
-final apiClientProvider = Provider<ApiClient>((ref) {
-  final client = ApiClient();
+final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
+
+/// Liga funil de analytics ao Dio. Só no boot do app — nunca no provider
+/// (widget tests leem `apiClientProvider` e o POST pendente trava o isolate).
+void bindAnalyticsFunnelPoster(ApiClient client) {
   AnalyticsService.instance.funnelPoster = (tipoEvento, alunoId) async {
     await client.dio.post(
       '/api/analytics/evento',
@@ -17,8 +20,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
       },
     );
   };
-  return client;
-});
+}
 
 final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(ref.read(apiClientProvider)),

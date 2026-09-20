@@ -162,6 +162,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      bindAnalyticsFunnelPoster(ref.read(apiClientProvider));
       PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
       _loadCustomTheme();
       if (!kIsWeb) {

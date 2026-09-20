@@ -29,7 +29,7 @@ jobs:
   dart:
     name: Dart analyze (fatal warnings)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -49,6 +49,8 @@ jobs:
 
       # Unit tests são o maior custo (~15+ min / 500+ specs).
       # Em PR ficam de fora; rodam em push main/develop ou manual.
+      # concurrency=2: 4 workers no runner estourava RAM/CPU e cancelava o step.
       - name: Unit tests
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        run: flutter test --concurrency=4
+        timeout-minutes: 35
+        run: flutter test --concurrency=2

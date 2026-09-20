@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/analytics/analytics_service.dart';
 import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
@@ -289,6 +290,11 @@ void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
+    AnalyticsService.instance.funnelPoster = null;
+  });
+
+  tearDown(() {
+    AnalyticsService.instance.funnelPoster = null;
   });
 
   for (final scale in [1.0, 1.25]) {
