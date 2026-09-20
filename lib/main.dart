@@ -197,10 +197,24 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     if (!mounted) return;
     final client = ref.read(apiClientProvider);
     client.resetAfterAppResume(away);
-    // Só revalida após pausa longa — evita stampede em switches rápidos.
-    if (away < const Duration(minutes: 2)) return;
+    // Warm-up de JWT: away ≥ 1 min ou access perto do exp — antes do soft reload.
+    unawaited(_warmSessionThenSoftReload(client, away));
+  }
+
+  Future<void> _warmSessionThenSoftReload(
+    ApiClient client,
+    Duration away,
+  ) async {
+    if (!mounted) return;
     if (ref.read(authProvider) != AuthStatus.authenticated) return;
-    // Soft reload: não zera todos os caches de tenant (isso deixava telas frias).
+
+    final force = away >= const Duration(minutes: 1);
+    await client.warmSession(force: force);
+    if (!mounted) return;
+    if (ref.read(authProvider) != AuthStatus.authenticated) return;
+
+    // Soft reload só após pausa ≥ 2 min — evita stampede em switches rápidos.
+    if (away < const Duration(minutes: 2)) return;
     if (away > DashboardHomeClientCache.ttl) {
       DashboardHomeClientCache.clear();
     }

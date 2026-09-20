@@ -22,8 +22,9 @@ void configureHttpConnectionPool(Dio dio) {
   };
 }
 
-/// Resume só recicla após background longo. Sheet Apple facilmente passa de 5s.
-const kHttpPoolResumeRecycleMinAway = Duration(seconds: 30);
+/// Resume recicla após background curto. Sheet Apple (~5s) usa Dio detached —
+/// o pool principal pode renovar a partir de ~8s sem matar login social.
+const kHttpPoolResumeRecycleMinAway = Duration(seconds: 8);
 
 /// Troca o adapter para Dio criar HttpClient novo (sockets idle mortos).
 ///

@@ -3,11 +3,14 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../auth/session_refresh_coordinator.dart';
 import '../config/env.dart';
 import '../storage/secure_storage.dart';
 import 'tls_certificate_pinning.dart';
 
-/// Cliente HTTP dedicado a `/api/iap/*` e `/api/pagamentos/*` (pinning opcional).
+/// Cliente HTTP dedicado a `/api/iap/*` e `/api/pagamentos/*`.
+///
+/// Compartilha [SessionRefreshCoordinator] com [ApiClient] — 401 não órfão.
 class PaymentApiClient {
   PaymentApiClient() {
     dio = Dio(
@@ -31,6 +34,25 @@ class PaymentApiClient {
             options.headers['Idempotency-Key'] = _newIdempotencyKey();
           }
           handler.next(options);
+        },
+        onError: (e, handler) async {
+          if (e.response?.statusCode == 401 &&
+              e.requestOptions.extra['fxAuthRetried'] != true) {
+            final outcome =
+                await SessionRefreshCoordinator.ensureFreshAccess(force: true);
+            if (SessionRefreshCoordinator.shouldRetryRequest(outcome)) {
+              final token = await SecureStorage.getToken();
+              if (token != null) {
+                e.requestOptions.headers['Authorization'] = 'Bearer $token';
+                e.requestOptions.extra['fxAuthRetried'] = true;
+                try {
+                  final retryResp = await dio.fetch(e.requestOptions);
+                  return handler.resolve(retryResp);
+                } catch (_) {}
+              }
+            }
+          }
+          handler.next(e);
         },
       ),
     );
@@ -56,7 +78,8 @@ class PaymentApiClient {
   }
 
   static String _newIdempotencyKey() {
-    final bytes = List<int>.generate(16, (_) => _idempotencyRandom.nextInt(256));
+    final bytes =
+        List<int>.generate(16, (_) => _idempotencyRandom.nextInt(256));
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 }

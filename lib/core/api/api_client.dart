@@ -4,7 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'api_client_connection_pool.dart';
 import 'api_etag_store.dart';
+import 'api_transport_circuit.dart';
 import '../auth/session_invalidator.dart';
+import '../auth/session_refresh_coordinator.dart';
 import '../config/env.dart';
 import '../planos/plano_cache_policy.dart';
 import '../storage/secure_storage.dart';
@@ -16,7 +18,6 @@ class ApiClient {
   static final Random _idempotencyRandom = Random.secure();
 
   late final Dio _dio;
-  bool _isRefreshing = false;
 
   ApiClient() {
     _dio = Dio(
@@ -26,7 +27,8 @@ class ApiClient {
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
         // 304 Not Modified = sucesso (ETag / If-None-Match).
-        validateStatus: (status) => status != null && status >= 200 && status < 400,
+        validateStatus: (status) =>
+            status != null && status >= 200 && status < 400,
       ),
     );
 
@@ -70,6 +72,7 @@ class ApiClient {
           handler.next(options);
         },
         onResponse: (response, handler) {
+          ApiTransportCircuit.recordSuccess();
           final method = response.requestOptions.method.toUpperCase();
           if (method == 'GET') {
             final etag = response.headers.value('etag');
@@ -96,12 +99,19 @@ class ApiClient {
           handler.next(response);
         },
         onError: (DioException e, handler) async {
+          if (_isTransportFailure(e)) {
+            ApiTransportCircuit.recordTransportFailure();
+          }
+
           if (_shouldRetry(e)) {
             final attempt =
                 (e.requestOptions.extra['fxRetryAttempt'] as int?) ?? 0;
             if (attempt < 2) {
               e.requestOptions.extra['fxRetryAttempt'] = attempt + 1;
-              await Future.delayed(Duration(milliseconds: 700 * (attempt + 1)));
+              final jitter = _idempotencyRandom.nextInt(200);
+              await Future.delayed(
+                Duration(milliseconds: 700 * (attempt + 1) + jitter),
+              );
               try {
                 final retryResp = await _dio.fetch(e.requestOptions);
                 return handler.resolve(retryResp);
@@ -152,66 +162,48 @@ class ApiClient {
             }
           }
 
-          // ── Auto Refresh Token on 401 ─────────────────────────
+          // ── Auto Refresh Token on 401 (single-flight) ───────────
           if (e.response?.statusCode == 401 &&
               !_isAuthPath(e.requestOptions.path) &&
-              !_isRefreshing) {
-            _isRefreshing = true;
-            try {
-              final refreshToken = await SecureStorage.getRefreshToken();
-              if (refreshToken != null) {
-                final refreshDio = Dio(
-                  BaseOptions(
-                    baseUrl: _baseUrl,
-                    connectTimeout: const Duration(seconds: 10),
-                    receiveTimeout: const Duration(seconds: 10),
-                    sendTimeout: const Duration(seconds: 10),
-                  ),
-                );
-                TlsCertificatePinning.apply(refreshDio);
-                final resp = await refreshDio.post(
-                  '/api/auth/refresh',
-                  data: {'refreshToken': refreshToken},
-                );
-                final newToken = resp.data['token'] as String;
-                final newRefreshToken = resp.data['refreshToken'] as String?;
-                await SecureStorage.saveToken(newToken);
-                if (newRefreshToken != null && newRefreshToken.isNotEmpty) {
-                  await SecureStorage.saveRefreshToken(newRefreshToken);
+              e.requestOptions.extra['fxAuthRetried'] != true) {
+            final outcome =
+                await SessionRefreshCoordinator.ensureFreshAccess(force: true);
+            if (SessionRefreshCoordinator.shouldRetryRequest(outcome)) {
+              final token = await SecureStorage.getToken();
+              if (token != null) {
+                e.requestOptions.headers['Authorization'] = 'Bearer $token';
+                e.requestOptions.extra['fxAuthRetried'] = true;
+                try {
+                  final retryResp = await _dio.fetch(e.requestOptions);
+                  return handler.resolve(retryResp);
+                } catch (_) {
+                  // fall through to invalidate if still 401
                 }
-
-                // Retry original request with new token
-                e.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-                final retryResp = await _dio.fetch(e.requestOptions);
-                return handler.resolve(retryResp);
               }
-            } catch (refreshErr) {
-              if (kDebugMode) {
-                final status = refreshErr is DioException
-                    ? refreshErr.response?.statusCode
-                    : null;
-                debugPrint(
-                  '[ApiClient] Refresh failed${status != null ? ' status=$status' : ''}',
-                );
-              }
-            } finally {
-              _isRefreshing = false;
+            }
+            if (outcome == SessionRefreshOutcome.failedFatal ||
+                outcome == SessionRefreshOutcome.failedRetryable) {
+              // fatal já invalidou; retryable não derruba.
+              handler.next(e);
+              return;
             }
           }
 
-          if (!_isRefreshing &&
-              _shouldInvalidateSession(e) &&
+          if (_shouldInvalidateSession(e) &&
               e.requestOptions.extra['fxNoInvalidate'] != true) {
-            resetIdempotencyScopes();
-            await SessionInvalidator.invalidate(
-              reason:
-                  'API ${e.response?.statusCode} em ${e.requestOptions.path}',
-            );
+            // 401: só invalida se já tentou refresh e ainda falhou.
+            final status = e.response?.statusCode;
+            final retried = e.requestOptions.extra['fxAuthRetried'] == true;
+            if (status == 403 || (status == 401 && retried)) {
+              resetIdempotencyScopes();
+              await SessionInvalidator.invalidate(
+                reason:
+                    'API $status em ${e.requestOptions.path}',
+              );
+            }
           }
 
           // ── Error Reporter (best-effort, gated) ────────────────
-          // Never await: concurrent failures would stampede the BE.
-          // Gate is sync so 500 parallel onError calls can't all pass.
           if (_tryReserveErrorReportSlot(e)) {
             // ignore: unawaited_futures
             _sendErrorReport(e);
@@ -221,7 +213,6 @@ class ApiClient {
       ),
     );
 
-    // Tenta sincronizar a fila quando a api client for instanciada
     Future.microtask(() => OfflineSyncService.syncPendingRequests(_dio));
   }
 
@@ -249,12 +240,23 @@ class ApiClient {
     return d;
   }
 
-  /// Após background longo: destrava refresh. Recicla só se [away] ≥ 30s
-  /// (sheet Apple costuma passar de 5s — não mexer no pool no dismiss).
+  /// Após background: destrava refresh órfão. Recicla pool se [away] ≥ mínimo.
   void resetAfterAppResume([Duration away = Duration.zero]) {
-    _isRefreshing = false;
+    SessionRefreshCoordinator.resetStuckLock();
     if (away < kHttpPoolResumeRecycleMinAway) return;
     recycleHttpConnectionPool(_dio);
+  }
+
+  /// Warm-up de sessão no resume / volta online. Não derruba em falha de rede.
+  Future<SessionRefreshOutcome> warmSession({bool force = false}) {
+    return SessionRefreshCoordinator.ensureFreshAccess(force: force);
+  }
+
+  static bool _isTransportFailure(DioException e) {
+    return e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout;
   }
 
   static bool _shouldUseIdempotency(RequestOptions options) {
@@ -298,25 +300,12 @@ class ApiClient {
 
   /// Declara que a requisição representa uma operação identificável, para que
   /// duas submissões dela compartilhem a mesma `Idempotency-Key`.
-  ///
-  /// Sem isso a chave é nova a cada tentativa, e aí a idempotência do servidor
-  /// só protege reenvio de transporte — dois toques no mesmo botão chegam como
-  /// duas mutações legítimas e distintas. O [scope] deve identificar a
-  /// operação e o alvo, não o instante: `'mensalidade-pagar-42'`, não
-  /// `'pagar-$now'`.
   static Options idempotent(String scope, {Map<String, dynamic>? extra}) {
     return Options(extra: {...?extra, _idempotencyScopeKey: scope});
   }
 
   static const _idempotencyScopeKey = 'fxIdempotencyScope';
 
-  /// Janela em que o mesmo escopo reaproveita a chave já emitida. Cobre toque
-  /// duplo e "tentar de novo" impaciente, e ainda deixa a mesma operação ser
-  /// repetida de propósito depois.
-  ///
-  /// É reaproveitamento por escopo em memória, não bucket de tempo, de
-  /// propósito: bucket tem borda, e duas submissões em lados opostos dela
-  /// receberiam chaves diferentes justamente no caso que precisa colapsar.
   static const _idempotencyScopeTtl = Duration(minutes: 10);
   static final Map<String, _ScopedIdempotencyKey> _scopedKeys = {};
 
@@ -332,10 +321,8 @@ class ApiClient {
     return key;
   }
 
-  /// Limpa chaves em memória no logout / invalidate de sessão.
   static void resetIdempotencyScopes() => _scopedKeys.clear();
 
-  /// Catálogo não-PII apenas (planos). Dashboard/hoje/treinos ficam fora do disco.
   static bool _shouldCachePath(String path) {
     if (_isSensitiveDiskCachePath(path)) return false;
     const cacheable = [
@@ -351,7 +338,6 @@ class ApiClient {
     return false;
   }
 
-  /// Nunca gravar em SharedPreferences (PII / saúde / operação).
   static bool _isSensitiveDiskCachePath(String path) {
     const blocked = [
       '/api/alunos',
@@ -399,8 +385,6 @@ class ApiClient {
         e.type == DioExceptionType.unknown;
   }
 
-  /// Cap client→`/api/suporte/analisar-erro` so a failing screen can't DDoS
-  /// the tenant rate-limit bucket (BE allows 10/min; we stay well under).
   static const int _errorReportMaxPerWindow = 5;
   static const Duration _errorReportWindow = Duration(seconds: 60);
   static final List<DateTime> _errorReportAt = <DateTime>[];
@@ -408,7 +392,6 @@ class ApiClient {
   static DateTime? _errorReportFingerprintWindowStart;
   static Dio? _errorReporterDio;
 
-  /// Sync reservation: returns false if this error must not hit the BE.
   @visibleForTesting
   static bool tryReserveErrorReportSlotForTest(DioException e) =>
       _tryReserveErrorReportSlot(e);
@@ -448,7 +431,6 @@ class ApiClient {
     if (path == '/api/suporte/analisar-erro') return false;
     if (_isAuthPath(path)) return false;
     final status = e.response?.statusCode;
-    // Auth / rate-limit / client validation are noise for the ticket pipeline.
     if (status == 401 || status == 403 || status == 429) return false;
     if (status != null && status >= 400 && status < 500) return false;
     return true;

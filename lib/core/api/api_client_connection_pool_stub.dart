@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-const kHttpPoolResumeRecycleMinAway = Duration(seconds: 30);
+const kHttpPoolResumeRecycleMinAway = Duration(seconds: 8);
 
 void configureHttpConnectionPool(Dio dio) {}
 

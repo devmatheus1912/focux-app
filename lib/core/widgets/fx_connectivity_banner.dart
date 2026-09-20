@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
+import '../api/api_transport_circuit.dart';
 import '../api/offline_sync_service.dart';
+import '../auth/session_refresh_coordinator.dart';
 import '../theme/design_tokens.dart';
 
 /// Shows offline/sync status and flushes the offline queue when back online.
@@ -23,8 +25,10 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _offline = false;
+  bool _circuitOpen = false;
   int _pending = 0;
   int _dropped = 0;
+  var _wasOffline = false;
 
   @override
   void initState() {
@@ -39,11 +43,22 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
     final results = await _connectivity.checkConnectivity();
     final offline = results.every((r) => r == ConnectivityResult.none);
     final pending = await OfflineSyncService.getPendingCount();
+    final circuitOpen = ApiTransportCircuit.isOpen;
     if (!mounted) return;
     setState(() {
       _offline = offline;
       _pending = pending;
+      _circuitOpen = circuitOpen;
     });
+
+    // Volta online: warm JWT (se perto do exp) + drena outbox.
+    if (_wasOffline && !offline) {
+      if (ref.read(authProvider) == AuthStatus.authenticated) {
+        await SessionRefreshCoordinator.ensureFreshAccess(force: false);
+      }
+    }
+    _wasOffline = offline;
+
     if (!offline && pending > 0) {
       await OfflineSyncService.syncPendingRequests(
         ref.read(apiClientProvider).dio,
@@ -70,7 +85,8 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
 
   @override
   Widget build(BuildContext context) {
-    final showBanner = _offline || _dropped > 0 || _pending > 0;
+    final showBanner =
+        _offline || _dropped > 0 || _pending > 0 || _circuitOpen;
     return Column(
       children: [
         AnimatedSize(
@@ -130,12 +146,14 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
   Color _bannerColor(BuildContext context) {
     if (_offline) return EagleTokens.bad.withValues(alpha: 0.92);
     if (_dropped > 0) return EagleTokens.warn.withValues(alpha: 0.94);
+    if (_circuitOpen) return EagleTokens.warn.withValues(alpha: 0.92);
     return Theme.of(context).colorScheme.primary.withValues(alpha: 0.92);
   }
 
   IconData _bannerIcon() {
     if (_offline) return Icons.wifi_off_rounded;
     if (_dropped > 0) return Icons.error_outline_rounded;
+    if (_circuitOpen) return Icons.cloud_off_rounded;
     return Icons.sync;
   }
 
@@ -147,6 +165,9 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
       return _dropped == 1
           ? 'Uma alteracao nao pode ser salva. Refaca a acao.'
           : '$_dropped alteracoes nao puderam ser salvas. Refaca as acoes.';
+    }
+    if (_circuitOpen) {
+      return 'Servidor instavel — aguarde alguns segundos e tente de novo.';
     }
     return 'Sincronizando $_pending acao(oes) pendente(s)...';
   }

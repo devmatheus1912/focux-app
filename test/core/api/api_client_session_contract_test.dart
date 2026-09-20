@@ -7,23 +7,38 @@ void main() {
     final apiClient = File('lib/core/api/api_client.dart').readAsStringSync();
     final invalidator =
         File('lib/core/auth/session_invalidator.dart').readAsStringSync();
+    final coordinator = File(
+      'lib/core/auth/session_refresh_coordinator.dart',
+    ).readAsStringSync();
+    final payment =
+        File('lib/core/api/payment_api_client.dart').readAsStringSync();
+    final mainSrc = File('lib/main.dart').readAsStringSync();
 
     expect(apiClient, contains('SessionInvalidator.invalidate'));
+    expect(apiClient, contains('SessionRefreshCoordinator.ensureFreshAccess'));
+    expect(apiClient, contains('fxAuthRetried'));
     expect(apiClient, contains('if (queued)'));
     expect(apiClient, contains('OfflineSyncService.isSensitivePath'));
-    expect(
-      apiClient,
-      matches(RegExp(r'!_isRefreshing\s*&&\s*_shouldInvalidateSession\(e\)')),
-    );
     expect(apiClient, contains("!_isAuthPath(e.requestOptions.path)"));
     expect(apiClient, contains('newDetachedAuthDio'));
     expect(apiClient, contains('kHttpPoolResumeRecycleMinAway'));
     expect(apiClient, contains('resetAfterAppResume(['));
+    expect(apiClient, contains('warmSession'));
+    expect(apiClient, contains('ApiTransportCircuit'));
     expect(apiClient, contains('e.response?.statusCode == 401'));
-    expect(apiClient, contains('status == 401'));
-    expect(apiClient, contains('status == 403'));
     expect(apiClient, contains('_isLikelySessionAuthFailure'));
     expect(apiClient, isNot(contains('await SecureStorage.clearAll();')));
+
+    expect(coordinator, contains('Single-flight'));
+    expect(coordinator, contains('failedRetryable'));
+    expect(coordinator, contains('failedFatal'));
+    expect(coordinator, contains("'/api/auth/refresh'"));
+
+    expect(payment, contains('SessionRefreshCoordinator.ensureFreshAccess'));
+    expect(payment, contains('fxAuthRetried'));
+
+    expect(mainSrc, contains('warmSession'));
+    expect(mainSrc, contains('_warmSessionThenSoftReload'));
 
     expect(invalidator, contains('ValueNotifier<int>'));
     expect(invalidator, contains('SecureStorage.clearAll()'));
