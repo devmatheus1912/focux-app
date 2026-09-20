@@ -24,11 +24,16 @@ cd ../../focux-backend
 ```
 
 ```bash
-# Terminal 2 — flutter web
+# Terminal 2 — flutter web (CanvasKit local = mesma origem, CSP ok)
 cd ..
-flutter run -d chrome --web-port 60791 --web-renderer html
-# espera servidor estabilizar em http://localhost:60791
+flutter build web --release --no-web-resources-cdn
+npx --yes http-server build/web -p 61791 -s -c-1
+# ou: flutter run -d web-server --web-port 61791 --no-web-resources-cdn
 ```
+
+> CI (`e2e.yml`) sempre usa `--no-web-resources-cdn`. Sem isso o Chromium
+> bloqueia `gstatic.com/canvaskit` pela CSP do `web/index.html` e o Flutter
+> não sobe — todos os `@p0` falham.
 
 ## Rodar
 

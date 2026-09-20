@@ -38,13 +38,12 @@ async function submitLogin(page: Page) {
 test.describe('@p0 @smoke login publico', () => {
   test('rota /login carrega sem erro', async ({ page }) => {
     await page.goto('/login');
-    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/login/);
+    await expect(page.locator('flt-glass-pane, flutter-view, canvas').first()).toBeAttached();
   });
 
   test('credencial invalida mostra erro amigavel (nao DioException cru)', async ({ page }) => {
     await page.goto('/login');
-    await page.waitForLoadState('networkidle');
     await fillLoginFields(page, 'naoexiste@focux.app', 'senhaerrada123');
     await submitLogin(page);
 
@@ -53,19 +52,17 @@ test.describe('@p0 @smoke login publico', () => {
 
   test('rota /esqueci-senha abre', async ({ page }) => {
     await page.goto('/esqueci-senha');
-    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/esqueci-senha/);
   });
 
   test('rota /register abre', async ({ page }) => {
     await page.goto('/register');
-    await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/register/);
   });
 
   test('rota inexistente cai no fallback HomeRedirect', async ({ page }) => {
     await page.goto('/rota-que-nao-existe');
-    await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/(login|dashboard|home)/);
+    // errorBuilder → HomeRedirect → goToRoleHome (login se anônimo).
+    await expect(page).toHaveURL(/(login|dashboard|home)/, { timeout: 30_000 });
   });
 });

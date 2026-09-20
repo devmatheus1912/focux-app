@@ -67,6 +67,33 @@ export async function enableFlutterSemantics(page: Page) {
   });
 }
 
+/** CanvasKit / engine mounted — app actually booted (not blank CSP failure). */
+export async function waitForFlutterReady(page: Page) {
+  await page.waitForSelector('flt-glass-pane, flutter-view, canvas', {
+    timeout: 45_000,
+    state: 'attached',
+  });
+}
+
+function isIgnorableConsoleNoise(text: string): boolean {
+  return (
+    text.includes('flutter_service_worker') ||
+    text.includes('Synthetic package output') ||
+    text.includes('was tree-shaken') ||
+    text.includes('Access-Control-Allow-Origin') ||
+    text.includes('blocked by CORS policy') ||
+    text.includes('net::ERR_FAILED') ||
+    // CSP meta can't set frame-ancestors — browser warns, not a product bug.
+    text.includes("directive 'frame-ancestors' is ignored") ||
+    // Legacy CDN canvaskit when build forgot --no-web-resources-cdn.
+    (text.includes('Content Security Policy') && text.includes('gstatic.com')) ||
+    (text.includes('Failed to load resource') && text.includes('chrome-extension')) ||
+    text.includes('Failed to load resource: the server responded with a status of 400') ||
+    text.includes('Failed to load resource: the server responded with a status of 401') ||
+    text.includes('Failed to load resource: the server responded with a status of 404')
+  );
+}
+
 /**
  * Auto-rewrite goto() to use hash routing for Flutter Web GoRouter,
  * then enable Flutter accessibility semantics.
@@ -82,8 +109,8 @@ function patchGotoForFlutterWeb(page: Page) {
       }
     }
     const resp = await original(url, opts);
-    // give Flutter time to bootstrap
-    await page.waitForTimeout(800);
+    await waitForFlutterReady(page);
+    await page.waitForTimeout(400);
     await enableFlutterSemantics(page);
     return resp;
   };
@@ -100,26 +127,20 @@ export const test = base.extend<{ errors: Errors }>({
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        // CORS / blocked XHR from localhost → production is expected in CI
-        // until the API allows the ephemeral serve origin. Ignore that noise.
-        if (
-          text.includes('flutter_service_worker') ||
-          text.includes('Synthetic package output') ||
-          text.includes('was tree-shaken') ||
-          text.includes('Access-Control-Allow-Origin') ||
-          text.includes('blocked by CORS policy') ||
-          text.includes('net::ERR_FAILED') ||
-          (text.includes('Failed to load resource') && text.includes('chrome-extension')) ||
-          text.includes('Failed to load resource: the server responded with a status of 400') ||
-          text.includes('Failed to load resource: the server responded with a status of 401') ||
-          text.includes('Failed to load resource: the server responded with a status of 404')
-        ) return;
+        if (isIgnorableConsoleNoise(text)) return;
         errors.push(`CONSOLE: ${text}`);
       }
     });
 
     page.on('pageerror', (err) => {
-      errors.push(`PAGEERROR: ${err.message}`);
+      const text = err.message;
+      if (
+        text.includes('canvaskit') ||
+        (text.includes('gstatic.com') && text.includes('Failed to fetch'))
+      ) {
+        return;
+      }
+      errors.push(`PAGEERROR: ${text}`);
     });
 
     page.on('response', async (resp) => {

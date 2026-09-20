@@ -47,7 +47,11 @@ jobs:
         env:
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: |
+          # --no-web-resources-cdn: CanvasKit em /canvaskit/ (same-origin).
+          # Sem isso o Chromium no CI bloqueia gstatic via CSP do index.html
+          # e o Flutter Web nem sobe — todos os @p0 quebram.
           flutter build web --release \
+            --no-web-resources-cdn \
             --dart-define=GOOGLE_WEB_CLIENT_ID=$GOOGLE_WEB_CLIENT_ID
 
       - name: Serve flutter web
