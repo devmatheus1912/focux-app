@@ -50,7 +50,9 @@ class _TabMedidas extends StatelessWidget {
             ),
           );
         }
-        final ordenada = [...lista]..sort((a, b) => b.data.compareTo(a.data));
+        final ordenada =
+            [...lista.where(evolucaoMedidaTemConteudo)]
+              ..sort((a, b) => b.data.compareTo(a.data));
         final weightData = evolucaoPesosOrdenados(lista);
         return RefreshIndicator(
           onRefresh: () async => onRetry(),
@@ -60,14 +62,16 @@ class _TabMedidas extends StatelessWidget {
               FxSettingsLayout.pageInset,
               8,
               FxSettingsLayout.pageInset,
-              32,
+              96,
             ),
             children: [
-              if (weightData.length > 1) ...[
+              if (weightData.isNotEmpty) ...[
                 const DashboardSectionHeader(title: 'Peso'),
                 const SizedBox(height: TokensStrip.s2),
                 Text(
-                  'Últimas medidas com peso.',
+                  weightData.length < 2
+                      ? 'Primeiro ponto de peso — registre outra medida para ver tendência.'
+                      : 'Últimas medidas com peso.',
                   style: FocuxHubTypography.bodyMuted(
                     color: fxScreenMute(context),
                     fontWeight: FontWeight.w600,
@@ -78,7 +82,10 @@ class _TabMedidas extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   decoration: fxListCardDecoration(context),
                   child: FxSparkline(
-                    data: weightData,
+                    data:
+                        weightData.length == 1
+                            ? [weightData.first, weightData.first]
+                            : weightData,
                     width: 320,
                     height: 72,
                     color: EagleTokens.good,
@@ -89,18 +96,27 @@ class _TabMedidas extends StatelessWidget {
               ],
               const DashboardSectionHeader(title: 'Medidas'),
               const SizedBox(height: TokensStrip.s3),
-              for (final medida in ordenada)
-                FxSatelliteListTile(
-                  title: evolucaoMedidaLabel(medida),
-                  subtitle: Text(evolucaoMedidaSubtitle(medida)),
-                  trailing: Text(
-                    evolucaoMedidaValue(medida),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: fxScreenMute(context),
-                      fontWeight: FontWeight.w700,
+              if (ordenada.isEmpty)
+                Text(
+                  'Nenhuma circunferência ainda — o peso aparece no gráfico acima.',
+                  style: FocuxHubTypography.bodyMuted(
+                    color: fxScreenMute(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              else
+                for (final medida in ordenada)
+                  FxSatelliteListTile(
+                    title: evolucaoMedidaLabel(medida),
+                    subtitle: Text(evolucaoMedidaSubtitle(medida)),
+                    trailing: Text(
+                      evolucaoMedidaValue(medida),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: fxScreenMute(context),
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
             ],
           ),
         );

@@ -26,52 +26,57 @@ class IaCopilotResultActionBar extends StatelessWidget {
   final VoidCallback onPrimary;
   final VoidCallback onMore;
 
-  /// Folga de scroll quando o overlay está visível (chip + link + padding).
-  static const double scrollReserve = 96;
+  /// Folga de scroll quando o overlay está visível (chip + link + padding + nav).
+  static const double scrollReserve = 148;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final moreLabel = iaCopilotoMaisAcoesLabel();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        10,
+    return Material(
+      color: (isDark ? EagleTokens.darkBg : TokensStrip.pageBg).withValues(
+        alpha: isDark ? 0.92 : 0.94,
       ),
-      child: Align(
-        alignment: AlignmentDirectional.bottomStart,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DashboardHomeActionChip(
-              label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
-              accent: brand,
-              isDark: isDark,
-              onPressed: onPrimary,
-            ),
-            Semantics(
-              button: true,
-              label: moreLabel,
-              child: InkWell(
-                onTap: onMore,
-                borderRadius: BorderRadius.circular(TokensStrip.rSm),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(4, 10, 12, 4),
-                  child: Text(
-                    moreLabel,
-                    style: TextStyle(
-                      color: brand,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          TokensStrip.s4,
+          TokensStrip.s2,
+          TokensStrip.s4,
+          TokensStrip.s2 + MediaQuery.paddingOf(context).bottom,
+        ),
+        child: Align(
+          alignment: AlignmentDirectional.bottomStart,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DashboardHomeActionChip(
+                label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
+                accent: brand,
+                isDark: isDark,
+                onPressed: onPrimary,
+              ),
+              Semantics(
+                button: true,
+                label: moreLabel,
+                child: InkWell(
+                  onTap: onMore,
+                  borderRadius: BorderRadius.circular(TokensStrip.rSm),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 10, 12, 4),
+                    child: Text(
+                      moreLabel,
+                      style: TextStyle(
+                        color: brand,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

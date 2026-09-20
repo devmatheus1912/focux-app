@@ -60,21 +60,10 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
     await _run(widget.onComplete);
   }
 
-  Widget _command({required String label, required VoidCallback? onPressed}) {
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        minimumSize: const Size(
-          DashboardLayout.touchTarget,
-          DashboardLayout.touchTarget,
-        ),
-        alignment: Alignment.centerLeft,
-      ),
-      child: Text(_busy ? '…' : label),
-    );
-  }
-
-  Widget _danger({required String label, required VoidCallback? onPressed}) {
+  Widget _dangerPrimary({
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
     return SizedBox(
       height: 52,
       child: ElevatedButton(
@@ -83,6 +72,26 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
           backgroundColor: EagleTokens.bad,
           foregroundColor: Colors.white,
           elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: Text(label),
+      ),
+    );
+  }
+
+  Widget _dangerSecondary({
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: EagleTokens.bad,
+          side: BorderSide(color: EagleTokens.bad.withValues(alpha: 0.55)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -106,11 +115,16 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
           onTap: _busy ? null : () => _run(widget.onOpenAluno),
         ),
     ];
-    final commands = <Widget>[
+    final commandTiles = <FxSettingsTile>[
       if (completePrimary)
-        _command(
+        FxSettingsTile(
+          icon: Icons.check_rounded,
           label: agendaEventPrimaryLabel(completePrimary: true),
-          onPressed:
+          value: '',
+          showDivider: widget.onWhatsapp != null ||
+              widget.onConfirm != null ||
+              widget.onReschedule != null,
+          onTap:
               _busy
                   ? null
                   : () => _confirmComplete(
@@ -120,36 +134,51 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
                   ),
         ),
       if (widget.onWhatsapp != null)
-        _command(
+        FxSettingsTile(
+          fxIcon: 'message-circle',
           label: 'WhatsApp',
-          onPressed: _busy ? null : () => _run(widget.onWhatsapp),
+          value: '',
+          showDivider: widget.onConfirm != null ||
+              widget.onReschedule != null ||
+              (!completePrimary && widget.onComplete != null),
+          onTap: _busy ? null : () => _run(widget.onWhatsapp),
         ),
       if (widget.onConfirm != null)
-        _command(
-          label: 'Confirmado',
-          onPressed: _busy ? null : () => _run(widget.onConfirm),
+        FxSettingsTile(
+          icon: Icons.verified_outlined,
+          label: agendaHorarioConfirmLabel(),
+          value: '',
+          showDivider: widget.onReschedule != null ||
+              (!completePrimary && widget.onComplete != null),
+          onTap: _busy ? null : () => _run(widget.onConfirm),
         ),
       if (widget.onReschedule != null)
-        _command(
+        FxSettingsTile(
+          fxIcon: 'calendar',
           label: 'Remarcar',
-          onPressed: _busy ? null : () => _run(widget.onReschedule),
+          value: '',
+          showDivider: !completePrimary && widget.onComplete != null,
+          onTap: _busy ? null : () => _run(widget.onReschedule),
         ),
       if (!completePrimary && widget.onComplete != null)
-        _command(
-          label: 'Concluído',
-          onPressed:
+        FxSettingsTile(
+          icon: Icons.check_circle_outline,
+          label: 'Marcar concluído',
+          value: '',
+          showDivider: false,
+          onTap:
               _busy
                   ? null
-                  : () => _confirmComplete(confirmLabel: 'Concluído'),
+                  : () => _confirmComplete(confirmLabel: 'Marcar concluído'),
         ),
     ];
     final dangers = <Widget>[
       if (widget.onCancel != null)
-        _danger(
+        _dangerSecondary(
           label: 'Cancelar horário',
           onPressed: _busy ? null : () => _run(widget.onCancel),
         ),
-      _danger(
+      _dangerPrimary(
         label: 'Excluir agendamento',
         onPressed: _busy ? null : () => _run(widget.onDelete),
       ),
@@ -157,9 +186,9 @@ class _AgendaEventSheetState extends State<_AgendaEventSheet> {
 
     return [
       if (nav.isNotEmpty) FxSettingsGroup(children: nav),
-      for (final command in commands) ...[
+      if (commandTiles.isNotEmpty) ...[
         const SizedBox(height: FxSettingsLayout.groupGap),
-        command,
+        FxSettingsGroup(children: commandTiles),
       ],
       for (final danger in dangers) ...[
         const SizedBox(height: FxSettingsLayout.groupGap),

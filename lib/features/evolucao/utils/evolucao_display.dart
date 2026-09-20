@@ -88,6 +88,13 @@ String evolucaoMedidaLabel(MedidaCorporal medida) {
   }
 }
 
+bool evolucaoMedidaTemConteudo(MedidaCorporal medida) {
+  return medida.peso != null ||
+      medida.cintura != null ||
+      medida.quadril != null ||
+      medida.braco != null;
+}
+
 String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   final parts = <String>[];
   if (medida.peso != null) {
@@ -102,7 +109,7 @@ String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   if (medida.braco != null) {
     parts.add('Braço ${medida.braco!.toStringAsFixed(1)} cm');
   }
-  return parts.isEmpty ? 'Sem medidas' : parts.join(' · ');
+  return parts.isEmpty ? 'Sem circunferências' : parts.join(' · ');
 }
 
 String evolucaoMedidaValue(MedidaCorporal medida) {

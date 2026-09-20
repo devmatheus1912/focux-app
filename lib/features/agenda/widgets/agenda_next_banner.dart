@@ -73,13 +73,6 @@ class AgendaNextBanner extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              time,
-              style: FocuxHubTypography.body(
-                color: chrome.ink,
-              ).copyWith(fontWeight: FontWeight.w800),
-            ),
           ],
         ),
       ),

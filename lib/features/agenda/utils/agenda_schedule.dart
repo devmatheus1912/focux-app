@@ -53,7 +53,8 @@ String agendaEventSheetSubtitle({
       fim.isAfter(inicio)
           ? '${agendaHm(inicio)}–${agendaHm(fim)}'
           : agendaHm(inicio);
-  return '$time · $statusLabel';
+  // Status fica só no meta strip — evita "Confirmado" duplicado no header.
+  return time;
 }
 
 String agendaIsoDate(DateTime d) {

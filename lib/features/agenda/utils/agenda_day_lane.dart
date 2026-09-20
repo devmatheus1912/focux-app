@@ -44,18 +44,26 @@ List<Agendamento> agendaVisibleEvents(List<Agendamento> events) {
   return visible;
 }
 
+/// Monta a lane do dia. Com [excludeNextFromLane], o evento do banner
+/// "Próximo" não se repete como card "Confirmado" abaixo.
 List<AgendaLaneItem> agendaBuildDayLane(
   List<Agendamento> events, {
   DateTime? now,
   int minGapMinutes = 20,
+  bool excludeNextFromLane = false,
 }) {
   final visible = agendaVisibleEvents(events);
   final next = agendaNextOpen(visible, now: now);
+  final laneEvents =
+      excludeNextFromLane && next != null
+          ? visible.where((e) => e.id != next.id).toList(growable: false)
+          : visible;
+  final markNext = excludeNextFromLane ? null : next;
   final items = <AgendaLaneItem>[];
-  for (var i = 0; i < visible.length; i++) {
+  for (var i = 0; i < laneEvents.length; i++) {
     if (i > 0) {
-      final prevEnd = visible[i - 1].fim;
-      final start = visible[i].inicio;
+      final prevEnd = laneEvents[i - 1].fim;
+      final start = laneEvents[i].inicio;
       if (start.isAfter(prevEnd) &&
           start.difference(prevEnd).inMinutes >= minGapMinutes) {
         items.add(AgendaLaneGap(from: prevEnd, to: start));
@@ -63,8 +71,8 @@ List<AgendaLaneItem> agendaBuildDayLane(
     }
     items.add(
       AgendaLaneEvent(
-        agendamento: visible[i],
-        next: next?.id == visible[i].id,
+        agendamento: laneEvents[i],
+        next: markNext?.id == laneEvents[i].id,
       ),
     );
   }

@@ -284,6 +284,27 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                         ),
                       ),
                     ] else if (_gerado) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          FxSettingsLayout.pageInset,
+                          0,
+                          FxSettingsLayout.pageInset,
+                          TokensStrip.s3,
+                        ),
+                        child: Text(
+                          [
+                            if (freshnessLabel != null &&
+                                freshnessLabel.trim().isNotEmpty)
+                              freshnessLabel,
+                            _resultNote,
+                          ].where((s) => s.trim().isNotEmpty).join(' · '),
+                          style: TextStyle(
+                            color: mute,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                       Consumer(
                         builder: (context, ref, _) {
                           final query = InsightsQuery(
@@ -391,27 +412,6 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                             },
                           );
                         },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          FxSettingsLayout.pageInset,
-                          0,
-                          FxSettingsLayout.pageInset,
-                          12,
-                        ),
-                        child: Text(
-                          [
-                            if (freshnessLabel != null &&
-                                freshnessLabel.trim().isNotEmpty)
-                              freshnessLabel,
-                            _resultNote,
-                          ].where((s) => s.trim().isNotEmpty).join(' · '),
-                          style: TextStyle(
-                            color: mute,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       ),
                       if (_tarefaCriada && _proximaAcao != null)
                         Padding(

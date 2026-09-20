@@ -204,7 +204,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       ..sort((a, b) => a.inicio.compareTo(b.inicio));
     final visible = agendaVisibleEvents(dailyEvents);
     final nextOpen = agendaNextOpen(visible);
-    final lane = agendaBuildDayLane(dailyEvents);
+    final showNextBanner = nextOpen != null && _isTodayVisible;
+    final lane = agendaBuildDayLane(
+      dailyEvents,
+      excludeNextFromLane: showNextBanner,
+    );
     final cancelled = agendaCancelledCount(dailyEvents);
     final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
