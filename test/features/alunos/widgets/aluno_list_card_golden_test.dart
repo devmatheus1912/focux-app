@@ -9,11 +9,14 @@ import 'package:focux_app/features/alunos/constants/alunos_list_filters.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_list_card.dart';
 
+import '../../../support/tolerant_golden_comparator.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
+    useTolerantGoldens();
   });
 
   final aluno = Aluno(

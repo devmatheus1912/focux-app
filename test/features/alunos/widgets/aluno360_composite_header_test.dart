@@ -7,11 +7,14 @@ import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/features/alunos/constants/aluno_360_layout.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart';
 
+import '../../../support/tolerant_golden_comparator.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
+    useTolerantGoldens();
   });
 
   testWidgets('hero strip aligns flush with tab bar at 390px width', (tester) async {

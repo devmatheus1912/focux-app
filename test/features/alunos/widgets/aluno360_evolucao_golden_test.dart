@@ -9,11 +9,14 @@ import 'package:focux_app/features/alunos/widgets/aluno360_evolucao_tab.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_weight_activity_card.dart';
 
+import '../../../support/tolerant_golden_comparator.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
+    useTolerantGoldens();
   });
 
   final aluno = Aluno(

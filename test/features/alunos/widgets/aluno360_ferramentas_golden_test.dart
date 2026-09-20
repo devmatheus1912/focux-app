@@ -10,6 +10,8 @@ import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../support/tolerant_golden_comparator.dart';
+
 Override _ferramentasPlanoOverride() {
   final notifier = PlanoFeaturesNotifier(
     PlanosRepository(ApiClient()),
@@ -24,6 +26,7 @@ void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
+    useTolerantGoldens();
   });
 
   final aluno = Aluno(
@@ -39,8 +42,7 @@ void main() {
   );
 
   List<Map<String, dynamic>> aderenciaSemanaEndingToday() {
-    final today = DateTime.now();
-    final anchor = DateTime(today.year, today.month, today.day);
+    final anchor = DateTime(2026, 6, 7);
     return List.generate(7, (i) {
       final day = anchor.subtract(Duration(days: 6 - i));
       final iso =

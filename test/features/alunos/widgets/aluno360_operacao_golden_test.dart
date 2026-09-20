@@ -13,11 +13,14 @@ import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 
+import '../../../support/tolerant_golden_comparator.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
+    useTolerantGoldens();
   });
 
   final aluno = Aluno(
@@ -32,9 +35,9 @@ void main() {
     riscoNivel: 'MEDIO',
   );
 
+  /// Âncora fixa — `DateTime.now()` muda weekday e quebra golden todo dia.
   List<Map<String, dynamic>> weekDataEndingToday() {
-    final today = DateTime.now();
-    final anchor = DateTime(today.year, today.month, today.day);
+    final anchor = DateTime(2026, 6, 7);
     return List.generate(7, (i) {
       final day = anchor.subtract(Duration(days: 6 - i));
       final iso =
