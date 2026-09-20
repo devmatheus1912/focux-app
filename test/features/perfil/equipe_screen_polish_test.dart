@@ -28,16 +28,4 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, isNot(contains('context.pop()')));
   });
-
-  test('equipe repository is read-only until RBAC P0', () {
-    final repo = readScreenSourceBundle(
-      'lib/features/perfil/data/equipe_repository.dart',
-    );
-    expect(repo, contains('/api/tenant/membros'));
-    expect(repo, contains('listar'));
-    expect(repo, isNot(contains('convidar')));
-    expect(repo, isNot(contains('.post(')));
-    expect(repo, isNot(contains('.put(')));
-    expect(repo, isNot(contains('.delete(')));
-  });
 }

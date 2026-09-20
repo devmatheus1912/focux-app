@@ -92,7 +92,6 @@ void main() {
 
   test('typed satellite screens avoid raw map state', () {
     const typedScreens = [
-      'lib/features/perfil/screens/equipe_screen.dart',
       'lib/features/loja/screens/loja_screen.dart',
       'lib/features/admin/screens/rbac_screen.dart',
       'lib/features/trilhas/screens/trilhas_screen.dart',

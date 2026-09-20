@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_timer_widgets.dart';
@@ -249,24 +251,20 @@ void main() {
     expect(screen, contains('treinoExercicioId'));
   });
 
-  test('postura camera (módulo residual) abre full-screen', () {
-    final camera = readScreenSourceBundle(
-      'lib/features/checkin/widgets/pose_coach_camera_mobile.dart',
-    );
-    expect(camera, contains('fullscreenDialog: true'));
-    expect(camera, contains('rootNavigator: true'));
-    expect(camera, contains('_CameraCoachPage'));
-    expect(camera, contains('_safeDisposeController'));
-    expect(camera, contains('_isPermissionDenied'));
-    expect(camera, contains('_disposing'));
-    expect(camera, contains('stopImageStream'));
-    expect(camera, contains('ImageFormatGroup.bgra8888'));
-    expect(camera, isNot(contains('showFxHomeSheet')));
+  test('execução não embute Pose Coach gated no mid-workout', () {
     final sheet = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
     );
     expect(sheet, isNot(contains('showCheckinCoachSheet')));
     expect(sheet, isNot(contains('GatedPoseCoachPanel')));
     expect(sheet, contains('showCheckinDemoSheet'));
+    expect(
+      File('lib/features/checkin/widgets/gated_pose_coach_panel.dart').existsSync(),
+      isFalse,
+    );
+    expect(
+      File('lib/features/checkin/widgets/pose_coach_panel.dart').existsSync(),
+      isFalse,
+    );
   });
 }
