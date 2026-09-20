@@ -121,6 +121,7 @@ coverage/
 *.lcov
 
 # QA gap screenshots / local dumps (never public)
+.tmp/
 .tmp-gaps/
 .tmp-*/
 

@@ -39,6 +39,7 @@ import '../../checkin/data/meus_treinos_mem_cache.dart';
 import '../../coach/widgets/coach_proativo_card.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
+import '../../health/widgets/recovery_score_ring.dart';
 import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
@@ -47,6 +48,7 @@ import '../data/aluno_onboarding_prefs.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
 import '../utils/aluno_home_display.dart';
+import '../utils/aluno_performance_evolution.dart';
 import '../utils/aluno_volume_format.dart';
 import 'progresso_semanal_widget.dart';
 
@@ -230,7 +232,10 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                         historicoAsync: AsyncValue.data(home.historico),
                         volumeSemanaKg: home.volumeSemanaKg,
                         volumeMesKg: home.volumeMesKg,
+                        volumePorSemana: home.volumePorSemana,
+                        forcaPorSemana: home.forcaPorSemana,
                         recordes: home.recordes,
+                        score: experience.score,
                         isDark: isDark,
                       ),
                       const SizedBox(height: TokensStrip.s4),

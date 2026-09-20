@@ -406,8 +406,13 @@ class AuthRepository {
     );
   }
 
-  Future<void> mfaDisableRequestEmailOtp() async {
-    await _dio.post('/api/auth/mfa/disable/request-email-otp');
+  Future<String> mfaDisableRequestEmailOtp() async {
+    final response = await _dio.post('/api/auth/mfa/disable/request-email-otp');
+    final data = response.data;
+    if (data is Map && data['emailMascarado'] is String) {
+      return data['emailMascarado'] as String;
+    }
+    return '';
   }
 
   /// Interpreta AuthResponse: MFA challenge (sem persistir) ou sessão completa.

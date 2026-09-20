@@ -13,6 +13,7 @@ import '../../monetizacao/data/upsell_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
+import '../utils/aluno_performance_evolution.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_client_cache.dart';
 import 'command_center_data.dart';
@@ -371,6 +372,8 @@ class AlunoDashboardHomeBundle {
   final int streakAtual;
   final double volumeSemanaKg;
   final double volumeMesKg;
+  final List<double> volumePorSemana;
+  final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
   final DateTime fetchedAt;
 
@@ -390,6 +393,8 @@ class AlunoDashboardHomeBundle {
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
     this.volumeMesKg = 0,
+    this.volumePorSemana = const [],
+    this.forcaPorSemana = const [],
     this.recordes = const [],
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
@@ -502,6 +507,8 @@ class AlunoDashboardHomeBundle {
       streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
       volumeSemanaKg: (json['volumeSemanaKg'] as num?)?.toDouble() ?? 0,
       volumeMesKg: (json['volumeMesKg'] as num?)?.toDouble() ?? 0,
+      volumePorSemana: parseAlunoHomeSeries(json['volumePorSemana']),
+      forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),
     );
   }

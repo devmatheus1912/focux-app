@@ -338,7 +338,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                       )
                     : FxContentWidthLimiter(child: _buildBody()),
               ),
-              if (!_loading && _erro == null)
+              if (!_loading && _erro == null && _leads.isNotEmpty)
                 SafeArea(
                   top: false,
                   child: Padding(
@@ -350,8 +350,8 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                           MediaQuery.viewInsetsOf(context).bottom,
                     ),
                     child: FxLiquidPrimaryButton(
-                      label: 'Criar aluno',
-                      onPressed: () => _abrirNovoAluno(),
+                      label: 'Abrir página pública',
+                      onPressed: () => context.push('/perfil/landing-editor'),
                     ),
                   ),
                 ),
@@ -381,13 +381,16 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                       : 'Nenhum lead ainda',
                   subtitle: filtered
                       ? 'Ajuste a busca ou o filtro.'
-                      : 'Compartilhe o link do seu storefront para começar a captar contatos.',
+                      : 'Compartilhe o link da página pública. Para virar aluno, toque no lead e escolha Converter.',
                   action: filtered
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
                           onTap: _clearQuery,
                         )
-                      : null,
+                      : FxEmptyAction(
+                          label: 'Abrir página pública',
+                          onTap: () => context.push('/perfil/landing-editor'),
+                        ),
                 ),
               ],
             )

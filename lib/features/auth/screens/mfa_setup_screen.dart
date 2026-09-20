@@ -142,13 +142,19 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       _error = null;
     });
     try {
-      await ref.read(authProvider.notifier).mfaDisableRequestEmailOtp();
+      final masked =
+          await ref.read(authProvider.notifier).mfaDisableRequestEmailOtp();
       if (!mounted) return;
       setState(() {
         _busy = false;
         _emailOtpSent = true;
       });
-      FeedbackHelper.showSuccess(context, 'Código enviado ao e-mail da conta.');
+      final destino =
+          masked.trim().isEmpty ? 'o e-mail da conta' : masked.trim();
+      FeedbackHelper.showSuccess(
+        context,
+        'Código enviado para $destino. Confira também spam/lixo eletrônico.',
+      );
     } catch (error) {
       if (!mounted) return;
       setState(() {

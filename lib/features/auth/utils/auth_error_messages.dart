@@ -623,7 +623,12 @@ String mapMfaSetupError(Object error) {
           'MFA já está configurado. Desative antes de gerar um novo.';
     }
     if (statusCode == 503) {
-      return 'MFA ainda não está disponível neste ambiente.';
+      return _backendMessage(error) ??
+          'Não foi possível enviar o e-mail agora. Tente de novo em instantes.';
+    }
+    if (statusCode == 429) {
+      return _backendMessage(error) ??
+          'Muitos pedidos de código. Aguarde um minuto e tente de novo.';
     }
     if (statusCode == 502 || statusCode == 504) {
       return _backendMessage(error) ?? _unavailableCopy;

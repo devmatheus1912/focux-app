@@ -475,13 +475,19 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   final AsyncValue<List<ExecucaoTreino>> historicoAsync;
   final double volumeSemanaKg;
   final double volumeMesKg;
+  final List<double> volumePorSemana;
+  final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
+  final FocuxScore score;
   final bool isDark;
 
   const _PerformanceEvolutionCard({
     required this.historicoAsync,
     required this.volumeSemanaKg,
     required this.volumeMesKg,
+    required this.volumePorSemana,
+    required this.forcaPorSemana,
+    required this.score,
     required this.isDark,
     this.recordes = const [],
   });
@@ -489,168 +495,159 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: historicoAsync.when(
-        loading: () => const SizedBox(height: 96, child: FxLoading()),
+        loading: () => const SizedBox(height: 120, child: FxLoading()),
         error:
             (_, __) => Text(
               'Sua evolução de performance vai aparecer aqui assim que o histórico carregar.',
-              style: TextStyle(color: mute, height: 1.45),
+              style: FocuxHubTypography.bodyMuted(color: mute),
             ),
         data: (historico) {
-          final treinosConcluidos =
-              historico
-                  .where((treino) => treino.status == 'CONCLUIDO')
-                  .toList();
-          final ultimaEvolucao = _ultimaEvolucao(treinosConcluidos);
           final ultimoRecorde = recordes.isEmpty ? null : recordes.first;
-          final volumeSemana = volumeSemanaKg;
-          final volumeMes = volumeMesKg;
-          final ultimoPrLabel =
-              ultimaEvolucao != null
-                  ? _labelEvolucao(ultimaEvolucao.tipo)
-                  : ultimoRecorde == null
-                  ? '--'
-                  : _fmtRecorde(ultimoRecorde);
+          final view = buildAlunoPerformanceEvolutionView(
+            score: score,
+            historico: historico,
+            volumeSemanaKg: volumeSemanaKg,
+            volumeMesKg: volumeMesKg,
+            volumePorSemana: volumePorSemana,
+            forcaPorSemana: forcaPorSemana,
+            ultimoRecordeLabel:
+                ultimoRecorde == null ? null : _fmtRecorde(ultimoRecorde),
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: BrandPalette.soft(primary, dark: isDark),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Icon(Icons.emoji_events_outlined, color: primary),
+                  RecoveryScoreRing(
+                    score: view.score,
+                    color: primary,
+                    size: 64,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: TokensStrip.s3),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Evolução real',
-                          style: TextStyle(
-                            color: ink,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          'Seu score',
+                          style: FocuxHubTypography.chip(mute),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          ultimaEvolucao == null && ultimoRecorde == null
-                              ? 'Registre as séries para o app enxergar carga, repetições e volume.'
-                              : ultimaEvolucao?.mensagem ??
-                                  '${ultimoRecorde!.exercicioNome}: ${_fmtRecorde(ultimoRecorde)}',
-                          style: TextStyle(color: mute, height: 1.45),
+                          view.scoreLabel,
+                          style: FocuxHubTypography.cardTitle(color: ink),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          view.insight,
+                          style: FocuxHubTypography.bodyMuted(color: mute),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              if (view.hasChart) ...[
+                const SizedBox(height: TokensStrip.s4),
+                Text(
+                  'Evolução do treino',
+                  style: FocuxHubTypography.chip(mute),
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                _DualTrendChart(
+                  volume: view.volumePorSemana,
+                  forca: view.forcaPorSemana,
+                  volumeColor: primary,
+                  forcaColor: EagleTokens.good,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                Row(
+                  children: [
+                    _LegendDot(color: primary, label: 'Volume'),
+                    const SizedBox(width: TokensStrip.s3),
+                    _LegendDot(color: EagleTokens.good, label: 'Força'),
+                  ],
+                ),
+              ],
+              const SizedBox(height: TokensStrip.s4),
               Row(
                 children: [
                   Expanded(
                     child: _MiniMetricCard(
                       label: 'Último PR',
-                      value: ultimoPrLabel,
+                      value: view.ultimoPrLabel,
                       isDark: isDark,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume da semana',
-                      value: _fmtVolume(volumeSemana),
+                      label: 'Volume semana',
+                      value: formatAlunoVolumeKg(view.volumeSemanaKg),
                       isDark: isDark,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume do mês',
-                      value: _fmtVolume(volumeMes),
+                      label: 'Volume mês',
+                      value: formatAlunoVolumeKg(view.volumeMesKg),
                       isDark: isDark,
                     ),
                   ),
                 ],
               ),
-              if (ultimaEvolucao != null) ...[
-                const SizedBox(height: 14),
+              if (view.ultimaEvolucao != null) ...[
+                const SizedBox(height: TokensStrip.s3),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(TokensStrip.s3),
                   decoration: BoxDecoration(
                     color:
                         isDark
                             ? Colors.white.withValues(alpha: 0.04)
                             : BrandPalette.softer(primary),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(TokensStrip.rMd),
                   ),
                   child: Text(
-                    '${ultimaEvolucao.exercicioNome}: ${_fmtValor(ultimaEvolucao.valorAnterior, ultimaEvolucao.unidade)} -> ${_fmtValor(ultimaEvolucao.valorAtual, ultimaEvolucao.unidade)}'
-                    '${ultimaEvolucao.percentual == null ? '' : ' (+${ultimaEvolucao.percentual}%)'}',
-                    style: TextStyle(
+                    '${view.ultimaEvolucao!.exercicioNome}: '
+                    '${_fmtValor(view.ultimaEvolucao!.valorAnterior, view.ultimaEvolucao!.unidade)}'
+                    ' → ${_fmtValor(view.ultimaEvolucao!.valorAtual, view.ultimaEvolucao!.unidade)}'
+                    '${view.ultimaEvolucao!.percentual == null ? '' : ' (+${view.ultimaEvolucao!.percentual}%)'}',
+                    style: FocuxHubTypography.body(
                       color: ink,
-                      fontWeight: FontWeight.w700,
-                      height: 1.35,
-                    ),
+                    ).copyWith(fontWeight: FontWeight.w700, height: 1.35),
                   ),
                 ),
               ],
+              const SizedBox(height: TokensStrip.s3),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: DashboardHomeActionChip(
+                  label: 'Iniciar treino',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: () => context.push('/checkin/treinos'),
+                ),
+              ),
             ],
           );
         },
       ),
     );
   }
-
-  EvolucaoPerformance? _ultimaEvolucao(List<ExecucaoTreino> historico) {
-    for (final treino in historico) {
-      if (treino.evolucoesPerformance.isNotEmpty) {
-        return treino.evolucoesPerformance.first;
-      }
-      if (treino.evolucoesCarga.isNotEmpty) {
-        final item = treino.evolucoesCarga.first;
-        return EvolucaoPerformance(
-          tipo: 'CARGA',
-          exercicioId: item.exercicioId,
-          exercicioNome: item.exercicioNome,
-          valorAnterior: item.cargaAnteriorKg,
-          valorAtual: item.cargaAtualKg,
-          diferenca: item.diferencaKg,
-          percentual: item.percentual,
-          unidade: 'kg',
-          mensagem: item.mensagem,
-        );
-      }
-    }
-    return null;
-  }
-
-  String _labelEvolucao(String tipo) {
-    switch (tipo) {
-      case 'REPETICOES':
-        return 'Repetições';
-      case 'VOLUME':
-        return 'Volume';
-      default:
-        return 'Carga';
-    }
-  }
-
-  String _fmtVolume(double value) => formatAlunoVolumeKg(value);
 
   String _fmtRecorde(RecordePessoal recorde) {
     final carga = recorde.cargaKg;
@@ -669,5 +666,121 @@ class _PerformanceEvolutionCard extends StatelessWidget {
             : value.toStringAsFixed(1);
     if (unidade.isEmpty) return formatted;
     return '$formatted $unidade';
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendDot({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: FocuxHubTypography.chip(mute)),
+      ],
+    );
+  }
+}
+
+class _DualTrendChart extends StatelessWidget {
+  final List<double> volume;
+  final List<double> forca;
+  final Color volumeColor;
+  final Color forcaColor;
+
+  const _DualTrendChart({
+    required this.volume,
+    required this.forca,
+    required this.volumeColor,
+    required this.forcaColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 88,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _DualTrendPainter(
+          volume: volume,
+          forca: forca,
+          volumeColor: volumeColor,
+          forcaColor: forcaColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _DualTrendPainter extends CustomPainter {
+  final List<double> volume;
+  final List<double> forca;
+  final Color volumeColor;
+  final Color forcaColor;
+
+  _DualTrendPainter({
+    required this.volume,
+    required this.forca,
+    required this.volumeColor,
+    required this.forcaColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    _paintSeries(canvas, size, forca, forcaColor, strokeWidth: 2);
+    _paintSeries(canvas, size, volume, volumeColor, strokeWidth: 2.4);
+  }
+
+  void _paintSeries(
+    Canvas canvas,
+    Size size,
+    List<double> data,
+    Color color, {
+    required double strokeWidth,
+  }) {
+    if (data.isEmpty || data.every((v) => v <= 0)) return;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+    final maxVal = data.reduce((a, b) => a > b ? a : b);
+    final minVal = data.reduce((a, b) => a < b ? a : b);
+    final span = (maxVal - minVal).abs() < 0.001 ? 1.0 : (maxVal - minVal);
+    final path = Path();
+    for (var i = 0; i < data.length; i++) {
+      final x = data.length == 1
+          ? size.width / 2
+          : i * size.width / (data.length - 1);
+      final norm = (data[i] - minVal) / span;
+      final y = size.height - (norm * (size.height - 8)) - 4;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _DualTrendPainter oldDelegate) {
+    return oldDelegate.volume != volume ||
+        oldDelegate.forca != forca ||
+        oldDelegate.volumeColor != volumeColor ||
+        oldDelegate.forcaColor != forcaColor;
   }
 }

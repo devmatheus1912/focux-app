@@ -231,20 +231,23 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                             '/alunos/$alunoId/evolucao-comparativo',
                                             extra: alunoNome,
                                           ),
-                                    )
-                                  else
-                                    DashboardHomeActionChip(
-                                      label: 'Abrir chat',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push(
-                                            '/alunos/$alunoId/chat',
-                                            extra: alunoNome,
-                                          ),
                                     ),
                                 ],
                               ),
+                              if (!(hasRadarP0 && !timelineHasSignals)) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: TextButton(
+                                    onPressed:
+                                        () => context.push(
+                                          '/alunos/$alunoId/chat',
+                                          extra: alunoNome,
+                                        ),
+                                    child: const Text('Abrir chat'),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         )
@@ -344,16 +347,19 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                     isDark: isDark,
                                     onPressed: () => _openTreinos(context),
                                   ),
-                                  if (ev.sugerirCopiloto &&
-                                      onOpenCopilot != null)
-                                    DashboardHomeActionChip(
-                                      label: 'Abrir Copiloto',
-                                      accent: primary,
-                                      isDark: isDark,
-                                      onPressed: onOpenCopilot!,
-                                    ),
                                 ],
                               ),
+                              if (ev.sugerirCopiloto &&
+                                  onOpenCopilot != null) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: TextButton(
+                                    onPressed: onOpenCopilot,
+                                    child: const Text('Abrir Copiloto'),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

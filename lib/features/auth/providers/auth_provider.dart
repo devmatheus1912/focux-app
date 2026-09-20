@@ -179,7 +179,8 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     return _repo.mfaDisable(senha: senha, emailOtp: emailOtp, code: code);
   }
 
-  Future<void> mfaDisableRequestEmailOtp() => _repo.mfaDisableRequestEmailOtp();
+  Future<String> mfaDisableRequestEmailOtp() =>
+      _repo.mfaDisableRequestEmailOtp();
 
   Future<void> registerAluno(
     String nome,
