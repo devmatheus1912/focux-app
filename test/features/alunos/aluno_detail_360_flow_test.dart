@@ -62,18 +62,24 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          home: Scaffold(
-            body: Aluno360TimelineFullSheet(
-              aluno: _alunoFixture,
-              isDark: false,
-              primary: const Color(0xFF2563EB),
+          home: MediaQuery(
+            // Sem stagger delay — evita "Timer still pending" no tearDown.
+            data: const MediaQueryData(
+              size: Size(390, 800),
+              disableAnimations: true,
+            ),
+            child: Scaffold(
+              body: Aluno360TimelineFullSheet(
+                aluno: _alunoFixture,
+                isDark: false,
+                primary: const Color(0xFF2563EB),
+              ),
             ),
           ),
         ),
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Histórico 360'), findsOneWidget);
     expect(find.text('12 sinais'), findsOneWidget);

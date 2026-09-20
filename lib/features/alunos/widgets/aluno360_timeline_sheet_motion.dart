@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/motion_preferences.dart';
@@ -25,6 +27,7 @@ class _Aluno360TimelineTileEntranceState
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
   var _played = false;
+  Timer? _startTimer;
 
   @override
   void initState() {
@@ -54,13 +57,14 @@ class _Aluno360TimelineTileEntranceState
       return;
     }
     final delay = Duration(milliseconds: 36 * widget.index.clamp(0, 8));
-    Future<void>.delayed(delay, () {
+    _startTimer = Timer(delay, () {
       if (mounted) _controller.forward();
     });
   }
 
   @override
   void dispose() {
+    _startTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
