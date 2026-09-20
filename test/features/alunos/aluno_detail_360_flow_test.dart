@@ -77,7 +77,9 @@ void main() {
 
     expect(find.text('Histórico 360'), findsOneWidget);
     expect(find.text('12 sinais'), findsOneWidget);
-    expect(find.text('Check-in 1'), findsWidgets);
+    // Label de lista para CHECKIN é canônico — não o título cru do fixture.
+    expect(find.text('Check-in concluído'), findsWidgets);
+    expect(find.text('Treino concluído'), findsWidgets);
     expect(tester.takeException(), isNull);
 
     await tester.pumpWidget(const SizedBox.shrink());
