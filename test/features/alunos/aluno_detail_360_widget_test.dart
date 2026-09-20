@@ -8,6 +8,8 @@ import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
+import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
@@ -131,33 +133,10 @@ List<Override> _beatrizOverrides() {
     ),
     alunoCopilotoActionProvider(_contactPriorityAlunoId)
         .overrideWith((ref) async => IaCopilotProximaAcao.empty),
+    evolucaoHomeProvider(_contactPriorityAlunoId).overrideWith(
+      (ref) async => const EvolucaoHomeBundle(medidas: [], recordes: []),
+    ),
   ];
-}
-
-Widget _wrapBeatrizDetail() {
-  final router = GoRouter(
-    initialLocation: '/alunos/$_contactPriorityAlunoId',
-    routes: [
-      GoRoute(
-        path: '/alunos',
-        builder: (_, __) => const SizedBox(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            builder:
-                (_, state) => AlunoDetailScreen(
-                  alunoId: int.parse(state.pathParameters['id']!),
-                ),
-          ),
-        ],
-      ),
-    ],
-  );
-
-  return ProviderScope(
-    overrides: _beatrizOverrides(),
-    child: MaterialApp.router(routerConfig: router),
-  );
 }
 
 
@@ -233,12 +212,18 @@ List<Override> _aluno360Overrides() {
     ),
     alunoCopilotoActionProvider(_alunoId)
         .overrideWith((ref) async => IaCopilotProximaAcao.empty),
+    evolucaoHomeProvider(_alunoId).overrideWith(
+      (ref) async => const EvolucaoHomeBundle(medidas: [], recordes: []),
+    ),
   ];
 }
 
-Widget _wrapAlunoDetail({
-  required double textScaleFactor,
-}) {
+Future<void> _pumpAlunoDetail(WidgetTester tester, {double textScale = 1.0}) async {
+  tester.view.physicalSize = const Size(390, 1200);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
   final router = GoRouter(
     initialLocation: '/alunos/$_alunoId',
     routes: [
@@ -257,30 +242,29 @@ Widget _wrapAlunoDetail({
       ),
     ],
   );
+  // LIFO: unmount before dispose — evita "Cannot add event while adding stream".
+  addTearDown(router.dispose);
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
 
-  return ProviderScope(
-    overrides: _aluno360Overrides(),
-    child: MaterialApp.router(
-      routerConfig: router,
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(textScaleFactor),
-          ),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: _aluno360Overrides(),
+      child: MaterialApp.router(
+        routerConfig: router,
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(textScale),
+            ),
+            child: child ?? const SizedBox.shrink(),
+          );
+        },
+      ),
     ),
   );
-}
-
-Future<void> _pumpAlunoDetail(WidgetTester tester, {double textScale = 1.0}) async {
-  tester.view.physicalSize = const Size(390, 1200);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.resetPhysicalSize);
-  addTearDown(tester.view.resetDevicePixelRatio);
-
-  await tester.pumpWidget(_wrapAlunoDetail(textScaleFactor: textScale));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 600));
 }
@@ -331,7 +315,36 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(_wrapBeatrizDetail());
+    final router = GoRouter(
+      initialLocation: '/alunos/$_contactPriorityAlunoId',
+      routes: [
+        GoRoute(
+          path: '/alunos',
+          builder: (_, __) => const SizedBox(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder:
+                  (_, state) => AlunoDetailScreen(
+                    alunoId: int.parse(state.pathParameters['id']!),
+                  ),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _beatrizOverrides(),
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
     await tester.pump();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -340,8 +353,6 @@ void main() {
     expect(find.byKey(const ValueKey('aluno360_operacao_status')), findsOneWidget);
     expect(find.text('Status operacional'), findsOneWidget);
     expect(find.text('Gerar com IA'), findsOneWidget);
-
-    await tester.pump(const Duration(milliseconds: 300));
   });
 
   testWidgets('Evolução tab empty state shows actionable CTAs', (tester) async {

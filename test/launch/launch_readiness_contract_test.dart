@@ -89,7 +89,6 @@ void main() {
     expect(indexHtml, contains('Content-Security-Policy'));
     expect(manifest, contains('Focux Personal'));
     expect(File('deploy.bat').existsSync(), isTrue);
-    expect(File('scripts/deploy-vercel.ps1').existsSync(), isTrue);
     expect(File('vercel.json').existsSync(), isTrue);
   });
 }

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
@@ -30,6 +31,7 @@ class AnalyticsService {
   Future<void> setUser({required String id, String? role, String? plan}) async {
     if (_userIdSet) return;
     _userIdSet = true;
+    if (!_crashlyticsReady) return;
     try {
       await FirebaseCrashlytics.instance.setUserIdentifier(id);
       if (role != null) {
@@ -48,12 +50,16 @@ class AnalyticsService {
   Future<void> track(String event, {Map<String, Object?>? props}) async {
     final payload = <String, Object?>{'event': event, ...?props};
     if (kDebugMode) debugPrint('[Analytics] $payload');
-    try {
-      await FirebaseCrashlytics.instance.log(
-        'event=$event '
-        '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}',
-      );
-    } catch (_) {}
+    // Sem Firebase.initializeApp (widget tests / early boot) o log do
+    // Crashlytics pode travar o isolate — nunca chamar nesse caminho.
+    if (_crashlyticsReady) {
+      try {
+        await FirebaseCrashlytics.instance.log(
+          'event=$event '
+          '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}',
+        );
+      } catch (_) {}
+    }
     final tipo = productEventToFunnelTipo(event);
     final alunoId = funnelAlunoIdFromProps(props);
     final poster = funnelPoster;
@@ -70,6 +76,7 @@ class AnalyticsService {
     StackTrace? stack, {
     String? reason,
   }) async {
+    if (!_crashlyticsReady) return;
     try {
       await FirebaseCrashlytics.instance.recordError(
         error,
@@ -80,6 +87,8 @@ class AnalyticsService {
       if (kDebugMode) debugPrint('[Analytics] recordError failed: $e');
     }
   }
+
+  static bool get _crashlyticsReady => Firebase.apps.isNotEmpty;
 }
 
 /// Eventos canônicos de produto. Mantenha esta enumeração como

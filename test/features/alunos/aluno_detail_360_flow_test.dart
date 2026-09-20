@@ -6,7 +6,10 @@ import 'package:focux_app/features/ia/models/ia_copilot_proxima_acao.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/features/alunos/screens/aluno_detail_screen.dart';
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
+import 'package:focux_app/features/evolucao/providers/evolucao_home_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _alunoId = 42;
@@ -109,35 +112,11 @@ List<Override> _flowOverrides() {
     alunoCopilotoActionProvider(
       _alunoId,
     ).overrideWith((ref) async => IaCopilotProximaAcao.empty),
+    evolucaoHomeProvider(_alunoId).overrideWith(
+      (ref) async => const EvolucaoHomeBundle(medidas: [], recordes: []),
+    ),
   ];
 }
-
-Widget _wrapFlowDetail() {
-  final router = GoRouter(
-    initialLocation: '/alunos/$_alunoId',
-    routes: [
-      GoRoute(
-        path: '/alunos',
-        builder: (_, __) => const SizedBox(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            builder:
-                (_, state) => AlunoDetailScreen(
-                  alunoId: int.parse(state.pathParameters['id']!),
-                ),
-          ),
-        ],
-      ),
-    ],
-  );
-
-  return ProviderScope(
-    overrides: _flowOverrides(),
-    child: MaterialApp.router(routerConfig: router),
-  );
-}
-
 
 final _operacaoFixture = Aluno360Operacao(
   aluno: _aluno360Fixture.aluno,
@@ -155,6 +134,10 @@ final _operacaoFixture = Aluno360Operacao(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
   testWidgets('coach flow: evolução timeline → histórico 360 paginado', (
     tester,
   ) async {
@@ -164,17 +147,49 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(_wrapFlowDetail());
+    final router = GoRouter(
+      initialLocation: '/alunos/$_alunoId',
+      routes: [
+        GoRoute(
+          path: '/alunos',
+          builder: (_, __) => const SizedBox(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder:
+                  (_, state) => AlunoDetailScreen(
+                    alunoId: int.parse(state.pathParameters['id']!),
+                  ),
+            ),
+          ],
+        ),
+      ],
+    );
+    // LIFO: unmount before dispose — evita "Cannot add event while adding stream".
+    addTearDown(router.dispose);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _flowOverrides(),
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
     await tester.tap(find.text('Evolução'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Ver todos os 5 sinais'), findsOneWidget);
 
     await tester.tap(find.text('Ver todos os 5 sinais'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
 
     expect(find.text('Histórico 360'), findsOneWidget);
     expect(find.text('12 sinais'), findsOneWidget);

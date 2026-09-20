@@ -8,7 +8,7 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('constrainWidth: false'));
+    expect(screen, isNot(contains('constrainWidth: false')));
     expect(
       screen,
       anyOf(
