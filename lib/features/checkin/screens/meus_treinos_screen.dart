@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/data/aluno_autonomy_plan.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../data/checkin_repository.dart';
 import '../data/meus_treinos_mem_cache.dart';

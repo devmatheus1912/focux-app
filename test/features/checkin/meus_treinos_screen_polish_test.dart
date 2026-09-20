@@ -54,6 +54,9 @@ void main() {
     expect(screen, contains('Pronto para treinar'));
     expect(screen, contains('confirmarPlano'));
     expect(screen, contains('alunoDashboardHomeProvider'));
+    expect(screen, contains('buildAlunoHomeExperience'));
+    expect(screen, contains('scoreValue'));
+    expect(screen, contains('streakAtual'));
     expect(screen, contains('historicoCheckinProvider'));
     expect(screen, contains('MeusTreinosMemCache.clear'));
     expect(screen, contains('starting || confirming'));

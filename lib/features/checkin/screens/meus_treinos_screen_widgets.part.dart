@@ -29,6 +29,9 @@ class _TrainingHero extends StatelessWidget {
   final int totalExercicios;
   final int totalConcluidos;
   final bool isDark;
+  final int? scoreValue;
+  final int? streakAtual;
+  final String? scoreNudge;
 
   const _TrainingHero({
     required this.ativos,
@@ -37,6 +40,9 @@ class _TrainingHero extends StatelessWidget {
     required this.totalExercicios,
     required this.totalConcluidos,
     required this.isDark,
+    this.scoreValue,
+    this.streakAtual,
+    this.scoreNudge,
   });
 
   @override
@@ -54,8 +60,8 @@ class _TrainingHero extends StatelessWidget {
     if (hasStartable) {
       headline =
           startableCount == 1
-              ? '1 treino pronto para iniciar'
-              : '$startableCount treinos prontos para iniciar';
+              ? '1 treino pronto — começa agora'
+              : '$startableCount treinos prontos — escolhe um';
       subtitle =
           hasExercises
               ? '$total no plano · $totalConcluidos/$totalExercicios exercícios'
@@ -69,6 +75,8 @@ class _TrainingHero extends StatelessWidget {
       headline = 'Plano em montagem';
       subtitle = '$total treino${total == 1 ? '' : 's'} no plano atual';
     }
+    final showScore = scoreValue != null;
+    final showStreak = streakAtual != null && streakAtual! > 0;
 
     return FxStripCard(
       emphasize: true,
@@ -76,43 +84,184 @@ class _TrainingHero extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            headline,
-            style: FocuxHubTypography.sectionTitle(
-              context,
-              color: ink,
-            ).copyWith(fontSize: 17, fontWeight: FontWeight.w800),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      headline,
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
+                        color: ink,
+                      ).copyWith(fontSize: 16, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: FocuxHubTypography.bodyMuted(
+                        color: mute,
+                        fontWeight: FontWeight.w600,
+                      ).copyWith(fontSize: 12.5),
+                    ),
+                  ],
+                ),
+              ),
+              if (showScore) ...[
+                const SizedBox(width: 10),
+                _TrainingScoreBadge(
+                  score: scoreValue!,
+                  primary: primary,
+                  ink: ink,
+                  mute: mute,
+                  isDark: isDark,
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: FocuxHubTypography.bodyMuted(
-              color: mute,
-              fontWeight: FontWeight.w600,
+          if (showStreak || (scoreNudge != null && scoreNudge!.isNotEmpty)) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [
+                if (showStreak)
+                  _TrainingEngageChip(
+                    icon: Icons.local_fire_department_rounded,
+                    label:
+                        streakAtual == 1
+                            ? '1 dia de sequência'
+                            : '$streakAtual dias de sequência',
+                    color: EagleTokens.warn,
+                  ),
+                if (scoreNudge != null && scoreNudge!.isNotEmpty)
+                  _TrainingEngageChip(
+                    icon: Icons.bolt_rounded,
+                    label: scoreNudge!,
+                    color: primary,
+                  ),
+              ],
             ),
-          ),
+          ],
           if (hasExercises) ...[
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
               child: LinearProgressIndicator(
                 value: progresso,
-                minHeight: 6,
+                minHeight: 4,
                 backgroundColor:
                     isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                 valueColor: AlwaysStoppedAnimation(primary),
               ),
             ),
           ] else if (!hasStartable) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
-              'A sessão já está no radar. Os exercícios aparecem quando forem liberados.',
+              'Exercícios aparecem quando o personal liberar.',
               style: FocuxHubTypography.bodyMuted(
                 color: mute,
                 fontWeight: FontWeight.w600,
-              ).copyWith(fontSize: 12.5, height: 1.35),
+              ).copyWith(fontSize: 12, height: 1.3),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _TrainingScoreBadge extends StatelessWidget {
+  final int score;
+  final Color primary;
+  final Color ink;
+  final Color mute;
+  final bool isDark;
+
+  const _TrainingScoreBadge({
+    required this.score,
+    required this.primary,
+    required this.ink,
+    required this.mute,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 52,
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(primary, dark: isDark),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: primary.withValues(alpha: 0.22)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '$score',
+            style: TextStyle(
+              color: ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'score',
+            style: TextStyle(
+              color: mute,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrainingEngageChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  const _TrainingEngageChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 4),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 220),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -171,9 +320,11 @@ class _TrainingPlanCard extends StatelessWidget {
       onTap: handleAction,
       borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: TokensStrip.s4,
-          vertical: TokensStrip.s3,
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s3,
+          TokensStrip.s2,
         ),
         decoration: chrome.listCard(
           primary: concluido ? EagleTokens.good : primary,
@@ -184,21 +335,21 @@ class _TrainingPlanCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
                     color:
                         concluido
                             ? EagleTokens.good.withValues(alpha: 0.12)
                             : BrandPalette.soft(primary, dark: isDark),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     concluido
                         ? Icons.check_rounded
                         : Icons.fitness_center_rounded,
                     color: concluido ? EagleTokens.good : primary,
-                    size: 22,
+                    size: 18,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -212,52 +363,46 @@ class _TrainingPlanCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: ink,
-                          fontSize: 15,
+                          fontSize: 14.5,
                           fontWeight: FontWeight.w800,
+                          height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          _PlanMeta(
-                            icon: Icons.list_alt_rounded,
-                            text:
-                                aguardando
-                                    ? 'em preparação'
-                                    : hasExercises
-                                    ? '${treino.exercicios.length} exercícios'
-                                    : 'Pronto para treinar',
-                            color: mute,
-                          ),
-                          if (mediaCount > 0)
-                            _PlanMeta(
-                              icon: Icons.play_circle_outline_rounded,
-                              text: '$mediaCount videos',
-                              color: mute,
-                            ),
+                      const SizedBox(height: 3),
+                      Text(
+                        [
+                          if (aguardando)
+                            'em preparação'
+                          else if (hasExercises)
+                            '${treino.exercicios.length} exercícios'
+                          else
+                            'Pronto para treinar',
+                          if (mediaCount > 0) '$mediaCount vídeos',
                           if (hasExercises)
-                            _PlanMeta(
-                              icon: Icons.timer_outlined,
-                              text:
-                                  '~${(treino.exercicios.length * 4).clamp(8, 90)}min',
-                              color: mute,
-                            ),
-                        ],
+                            '~${(treino.exercicios.length * 4).clamp(8, 90)}min',
+                          if (hasExercises && done > 0 && !concluido)
+                            '$done feitos',
+                        ].join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            if (hasExercises) ...[
-              const SizedBox(height: 10),
+            if (hasExercises && (done > 0 || concluido)) ...[
+              const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(999),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 6,
+                  minHeight: 4,
                   backgroundColor:
                       isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
                   valueColor: AlwaysStoppedAnimation(
@@ -266,10 +411,10 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 8),
             if (aguardando) ...[
+              const SizedBox(height: 8),
               Text(
-                'Treino reservado. A ficha abre assim que o personal liberar os exercícios.',
+                'Ficha abre quando o personal liberar os exercícios.',
                 style: TextStyle(
                   color: mute,
                   fontSize: 12,
@@ -281,60 +426,44 @@ class _TrainingPlanCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FxLiquidPrimaryButton(
-                  label: 'Ver status do treino',
+                  label: 'Ver status',
                   icon: Icons.info_outline_rounded,
                   onPressed: handleAction,
                 ),
               ),
             ] else ...[
-              if (!concluido) ...[
-                Text(
-                  done == 0
-                      ? 'Iniciar abre carga e reps. Confirmar o plano fica no atalho abaixo.'
-                      : '$done de ${treino.exercicios.length} exercícios já marcados.',
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    height: 1.3,
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: FxLiquidPrimaryButton(
+                      label: concluido ? 'Rever' : 'Iniciar',
+                      icon:
+                          concluido
+                              ? Icons.replay_rounded
+                              : Icons.play_arrow_rounded,
+                      onPressed: starting || confirming ? null : handleAction,
+                      loading: starting,
+                      loadingLabel: 'Abrindo…',
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-              ],
-              SizedBox(
-                width: double.infinity,
-                child: FxLiquidPrimaryButton(
-                  label: concluido ? 'Rever' : 'Iniciar',
-                  icon:
-                      concluido
-                          ? Icons.replay_rounded
-                          : Icons.play_arrow_rounded,
-                  onPressed: starting || confirming ? null : handleAction,
-                  loading: starting,
-                  loadingLabel: 'Abrindo…',
-                ),
-              ),
-              if (!aguardando &&
-                  !concluido &&
-                  canStart &&
-                  onConfirmPlano != null) ...[
-                const SizedBox(height: TokensStrip.s1),
-                Center(
-                  child: TextButton(
-                    onPressed: confirming || starting ? null : onConfirmPlano,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 44),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: TokensStrip.s3,
+                  if (!concluido && canStart && onConfirmPlano != null) ...[
+                    const SizedBox(width: 4),
+                    TextButton(
+                      onPressed: confirming || starting ? null : onConfirmPlano,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(48, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        confirming ? '…' : 'Fiz o treino',
+                        style: FocuxHubTypography.chip(primary),
                       ),
                     ),
-                    child: Text(
-                      confirming ? 'Registrando…' : 'Fiz o treino',
-                      style: FocuxHubTypography.chip(primary),
-                    ),
-                  ),
-                ),
-              ],
+                  ],
+                ],
+              ),
             ],
           ],
         ),
@@ -642,37 +771,6 @@ class _ReadinessPill extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PlanMeta extends StatelessWidget {
-  final IconData icon;
-  final String text;
-  final Color color;
-
-  const _PlanMeta({
-    required this.icon,
-    required this.text,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: color),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(
-            color: color,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

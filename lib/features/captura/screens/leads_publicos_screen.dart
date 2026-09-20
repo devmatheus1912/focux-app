@@ -399,15 +399,13 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                   subtitle: filtered
                       ? 'Ajuste a busca ou o filtro.'
                       : 'Compartilhe o link da página pública. Para virar aluno, toque no lead e escolha Converter.',
+                  // Sticky já oferece Abrir página pública — evita CTA duplicado.
                   action: filtered
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
                           onTap: _clearFiltros,
                         )
-                      : FxEmptyAction(
-                          label: leadPublicoStickyLabel(),
-                          onTap: () => context.push('/perfil/landing-editor'),
-                        ),
+                      : null,
                 ),
               ],
             )

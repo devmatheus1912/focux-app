@@ -26,6 +26,11 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('leadPublicoStickyLabel'));
     expect(screen, contains('_clearFiltros'));
+    expect(
+      screen,
+      contains("action: filtered"),
+      reason: 'empty sem filtro não duplica Abrir página pública (sticky cobre)',
+    );
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('.meus('));
     expect(screen, isNot(contains('FxSettingsGroup')));

@@ -56,6 +56,9 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('RecoveryScoreRing'));
+    expect(screen, contains('Treinar agora e subir o score'));
+    expect(screen, contains('Seu score Focux'));
     expect(screen, contains('Ver catálogo'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('FxSettingsGroup'));

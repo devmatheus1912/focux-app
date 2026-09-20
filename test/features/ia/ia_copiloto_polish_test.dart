@@ -73,6 +73,9 @@ void main() {
     expect(screen, isNot(contains('rascunho editável')));
     expect(insightWidgets, contains('IaCopilotInsight'));
     expect(insightWidgets, contains('insight.detalhe'));
+    expect(insightWidgets, contains('_previewChars'));
+    expect(insightWidgets, contains('IaCopilotTinyTypeChip'));
+    expect(insightWidgets, isNot(contains('Mais importante ·')));
     expect(screen, isNot(contains('Ações do rascunho')));
     expect(screen, contains('Ações das recomendações'));
     expect(screen, contains('showCopilotExecutarConfirmSheet'));

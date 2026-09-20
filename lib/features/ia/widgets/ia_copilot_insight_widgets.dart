@@ -31,33 +31,99 @@ class IaCopilotInsightItem extends StatefulWidget {
 class _IaCopilotInsightItemState extends State<IaCopilotInsightItem> {
   bool _expanded = false;
 
+  static const _previewChars = 110;
+
   @override
   Widget build(BuildContext context) {
     final titulo = widget.insight.titulo;
     final detalhe = widget.insight.detalhe;
     final tipo = widget.insight.tipo;
-
-    final shown = _expanded || detalhe.length <= 150
+    final ink = fxScreenInk(context);
+    final canExpand = detalhe.length > _previewChars;
+    final shown = !canExpand || _expanded
         ? detalhe
-        : '${detalhe.substring(0, 150).trim()}…';
+        : '${detalhe.substring(0, _previewChars).trim()}…';
+    final typeLabel = tipo.isNotEmpty ? tipo : '${widget.index + 1}';
+
     return Semantics(
-      button: detalhe.length > 150,
+      button: canExpand,
       label: '$titulo. $tipo. $detalhe',
-      child: FxSatelliteListTile(
-        title: widget.highlighted ? 'Mais importante · $titulo' : titulo,
-        subtitle: shown.isEmpty ? null : Text(shown),
-        trailing: Text(
-          tipo.isNotEmpty ? tipo : '${widget.index + 1}',
-          style: TextStyle(
-            color: widget.mute,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 6),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: canExpand
+                ? () => setState(() => _expanded = !_expanded)
+                : null,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            child: Ink(
+              decoration: fxListCardDecoration(
+                context,
+                accent: widget.highlighted ? widget.brand : null,
+              ),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (widget.highlighted) ...[
+                        IaCopilotTinyTypeChip(
+                          label: 'Prioridade',
+                          color: widget.brand,
+                          background: widget.brand.withValues(alpha: 0.12),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      IaCopilotTinyTypeChip(
+                        label: typeLabel.toUpperCase(),
+                        color: widget.mute,
+                        background: widget.mute.withValues(alpha: 0.1),
+                      ),
+                      const Spacer(),
+                      if (canExpand)
+                        Icon(
+                          _expanded
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          size: 18,
+                          color: widget.mute,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    titulo,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.15,
+                      height: 1.25,
+                    ),
+                  ),
+                  if (shown.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      shown,
+                      maxLines: _expanded ? 12 : 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: widget.mute,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
-        accent: widget.highlighted ? widget.brand : null,
-        onTap: detalhe.length > 150
-            ? () => setState(() => _expanded = !_expanded)
-            : null,
       ),
     );
   }

@@ -96,6 +96,18 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final homeAsync = ref.watch(alunoDashboardHomeProvider);
+    final home = homeAsync.valueOrNull;
+    final experience =
+        home == null
+            ? null
+            : buildAlunoHomeExperience(
+              aluno: home.aluno,
+              medidas: home.medidas,
+              treinos: home.treinos,
+              historico: home.historico,
+              mensagens: home.chat.toSyntheticMessages(),
+            );
 
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final base = treinosAsync.valueOrNull?.content ?? const <ExecucaoTreino>[];
@@ -197,6 +209,9 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                               totalExercicios: totalExercicios,
                               totalConcluidos: totalConcluidos,
                               isDark: isDark,
+                              scoreValue: experience?.score.value,
+                              streakAtual: home?.streakAtual,
+                              scoreNudge: experience?.score.nextSignal,
                             ),
                           ),
                         ),

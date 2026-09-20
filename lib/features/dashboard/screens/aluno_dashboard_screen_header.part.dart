@@ -223,52 +223,51 @@ class _TodayFocusCard extends StatelessWidget {
 
     return FxStripCard(
       emphasize: true,
-      glowStrength: 0.06,
-      semanticsLabel: '${action.title}. ${action.description}. ${action.cta}',
+      glowStrength: 0.08,
+      semanticsLabel:
+          '${action.title}. Score ${score.value}. ${action.description}. ${action.cta}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(action.eyebrow, style: FocuxHubTypography.chip(mute)),
-              const Spacer(),
-              Icon(Icons.verified_outlined, color: mute, size: 18),
-              const SizedBox(width: 6),
-              Text(
-                'Focux ${score.value}',
-                style: FocuxHubTypography.chip(mute),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(action.eyebrow, style: FocuxHubTypography.chip(mute)),
+                    const SizedBox(height: 8),
+                    Text(
+                      action.title,
+                      style: FocuxHubTypography.pageTitle(context, color: ink),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      action.description,
+                      style: FocuxHubTypography.bodyMuted(color: mute),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            action.title,
-            style: FocuxHubTypography.pageTitle(context, color: ink),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 7),
-          Text(
-            action.description,
-            style: FocuxHubTypography.bodyMuted(color: mute),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              DashboardHomeActionChip(
-                label: action.cta,
-                accent: primary,
-                isDark: isDark,
-                onPressed:
-                    () => context.push(action.route, extra: action.routeExtra),
-              ),
-              const Spacer(),
-              _WorkoutMetricPill(
-                value: '${score.value}',
-                label: 'score',
-                onPrimary: ink,
+              const SizedBox(width: 12),
+              Column(
+                children: [
+                  RecoveryScoreRing(
+                    score: score.value,
+                    color: primary,
+                    size: 72,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Seu score',
+                    style: FocuxHubTypography.chip(mute).copyWith(fontSize: 10),
+                  ),
+                ],
               ),
             ],
           ),
@@ -287,7 +286,21 @@ class _TodayFocusCard extends StatelessWidget {
                 label: score.riskLabel,
                 onPrimary: mute,
               ),
+              if (score.nextSignal.trim().isNotEmpty)
+                _WorkoutInsightPill(
+                  icon: Icons.bolt_rounded,
+                  label: score.nextSignal,
+                  onPrimary: primary,
+                ),
             ],
+          ),
+          const SizedBox(height: 12),
+          DashboardHomeActionChip(
+            label: action.cta,
+            accent: primary,
+            isDark: isDark,
+            onPressed:
+                () => context.push(action.route, extra: action.routeExtra),
           ),
           const SizedBox(height: 10),
           _HomeNarrativeRail(items: experience.narratives, onPrimary: mute),
@@ -341,51 +354,6 @@ class _HomeNarrativeRail extends StatelessWidget {
           if (i != visibleItems.length - 1) const SizedBox(height: 5),
         ],
       ],
-    );
-  }
-}
-
-class _WorkoutMetricPill extends StatelessWidget {
-  final String value;
-  final String label;
-  final Color onPrimary;
-
-  const _WorkoutMetricPill({
-    required this.value,
-    required this.label,
-    required this.onPrimary,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 68,
-      height: 44,
-      decoration: BoxDecoration(
-        color: onPrimary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: onPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: onPrimary.withValues(alpha: 0.68),
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -531,7 +499,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   RecoveryScoreRing(
                     score: view.score,
                     color: primary,
-                    size: 64,
+                    size: 80,
                   ),
                   const SizedBox(width: TokensStrip.s3),
                   Expanded(
@@ -539,13 +507,14 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Seu score',
+                          'Seu score Focux',
                           style: FocuxHubTypography.chip(mute),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          view.scoreLabel,
-                          style: FocuxHubTypography.cardTitle(color: ink),
+                          '${view.score} · ${view.scoreLabel}',
+                          style: FocuxHubTypography.cardTitle(color: ink)
+                              .copyWith(fontSize: 18, fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -554,6 +523,18 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        if (score.nextSignal.trim().isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            score.nextSignal,
+                            style: FocuxHubTypography.bodyMuted(
+                              color: primary,
+                              fontWeight: FontWeight.w700,
+                            ).copyWith(fontSize: 12.5),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -636,7 +617,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: DashboardHomeActionChip(
-                  label: 'Iniciar treino',
+                  label: 'Treinar agora e subir o score',
                   accent: primary,
                   isDark: isDark,
                   onPressed: () => context.push('/checkin/treinos'),
