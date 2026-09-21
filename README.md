@@ -119,43 +119,6 @@ CI: analyze, testes e varredura de secrets — ver `.github/workflows/`.
 
 Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 
-## Segurança (repo público)
-
-| Área | Postura |
-|---|---|
-| Sessão | JWT com refresh; logout limpa cliente e servidor |
-| Dados no device | Tokens em storage seguro no mobile |
-| Release | Hardening nos builds de loja |
-| Privacidade | LGPD e PII tratados no backend |
-| CI | Secrets só via GitHub Actions `secrets.*` |
-| Firebase client | `google-services.json` / `GoogleService-Info.plist` **fora do git**; só `*.example` |
-
-**Nunca versionar**
-
-- `.env`, `.env.local`, `e2e/.env`
-- `android/key.properties`, `*.jks`, `*.keystore`, `*.p12`, `*.pem`
-- `android/app/google-services.json` e `ios/Runner/GoogleService-Info.plist` **reais**
-- service accounts, dumps de banco, senhas, PII de QA
-
-### Alert GitHub: Google API Key em `google-services.json`
-
-O arquivo real já está no `.gitignore` e **não** deve voltar ao índice. Helper local (SHA-1 + validação + base64):
-
-```powershell
-powershell -File tools/rotate_firebase_android_api_key.ps1
-# depois de baixar o JSON novo:
-powershell -File tools/rotate_firebase_android_api_key.ps1 -ExpectKeyPrefix API_KEY_PREFIX -EncodeForCi
-```
-
-Checklist manual (Console Google / GitHub):
-
-1. [Credentials](https://console.cloud.google.com/apis/credentials) no mesmo Project ID do Firebase → **Create credentials → API key** (não regenere a antiga ainda).
-2. Edite a key nova → Application restrictions = **Android apps**, package `com.focux.focux_app` + cada SHA-1 (debug, release, Play App Signing). API restrictions = só APIs Firebase (sem Gemini/Maps). Save.
-3. Firebase Console → Project settings → app Android → **Download `google-services.json`** → salve em `android/app/google-services.json` (só local). Confirme que `current_key` mudou.
-4. Apague (ou regenere) a **key antiga** vazada. Só então feche o alerta do GitHub como **revoked**.
-5. Gate: `flutter test test/core/security/firebase_config_secrets_test.dart`.
-
-Erros de UI não devem expor detalhes técnicos internos. Em dúvida: não commitar.
 
 ## Licença
 
