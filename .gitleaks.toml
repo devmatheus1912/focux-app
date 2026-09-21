@@ -1,0 +1,13 @@
+title = "Focux app gitleaks"
+
+[allowlist]
+paths = [
+  '''^.*\.example$''',
+  '''^.*SECURITY\.md$''',
+  '''^.*README\.md$''',
+  '''^.*\.gitleaks\.toml$'''
+]
+regexes = [
+  '''AIzaSyDN''',
+  '''API_KEY_PREFIX'''
+]
