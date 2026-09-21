@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/growth/models/migracao_importacao_resumo.dart';
 import 'package:focux_app/features/growth/utils/migracao_vagas_logic.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
   group('MigracaoVagasSnapshot', () {
@@ -46,6 +47,20 @@ void main() {
     });
   });
 
+  group('upgradePlanoParaMaisVagas', () {
+    test('Free → Pro; Pro → Enterprise', () {
+      expect(
+        upgradePlanoParaMaisVagas(SubscriptionPlan.FREE),
+        SubscriptionPlan.PRO,
+      );
+      expect(
+        upgradePlanoParaMaisVagas(SubscriptionPlan.PRO),
+        SubscriptionPlan.ENTERPRISE,
+      );
+      expect(upgradePlanoParaMaisVagas(SubscriptionPlan.ENTERPRISE), isNull);
+    });
+  });
+
   group('migracaoVagasHint', () {
     test('mostra vagas restantes quando cabe', () {
       final hint = migracaoVagasHint(
@@ -57,13 +72,24 @@ void main() {
       expect(hint, contains('3'));
     });
 
-    test('pede upgrade quando estoura', () {
+    test('Free estourado aponta Pro', () {
       final hint = migracaoVagasHint(
         limiteAlunos: 3,
         alunosAtuais: 2,
         novosParaImportar: 3,
+        planoAtual: SubscriptionPlan.FREE,
       );
-      expect(hint, contains('upgrade'));
+      expect(hint, contains('Pro'));
+    });
+
+    test('Pro estourado aponta Enterprise', () {
+      final hint = migracaoVagasHint(
+        limiteAlunos: 30,
+        alunosAtuais: 30,
+        novosParaImportar: 1,
+        planoAtual: SubscriptionPlan.PRO,
+      );
+      expect(hint, contains('Enterprise'));
     });
   });
 

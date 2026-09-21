@@ -1,3 +1,5 @@
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+
 /// Regras puras de vagas na migração mágica (FREE 3 / PRO 30 / Enterprise null).
 class MigracaoVagasSnapshot {
   const MigracaoVagasSnapshot({
@@ -29,10 +31,24 @@ class MigracaoVagasSnapshot {
   }
 }
 
+/// Free estoura → Pro. Pro em 30 → Enterprise. Enterprise não paywall de vagas.
+SubscriptionPlan? upgradePlanoParaMaisVagas(SubscriptionPlan? planoAtual) {
+  switch (planoAtual) {
+    case SubscriptionPlan.FREE:
+    case null:
+      return SubscriptionPlan.PRO;
+    case SubscriptionPlan.PRO:
+      return SubscriptionPlan.ENTERPRISE;
+    case SubscriptionPlan.ENTERPRISE:
+      return null;
+  }
+}
+
 String migracaoVagasHint({
   required int? limiteAlunos,
   required int alunosAtuais,
   required int novosParaImportar,
+  SubscriptionPlan? planoAtual,
 }) {
   final snap = MigracaoVagasSnapshot(
     alunosAtuais: alunosAtuais,
@@ -46,6 +62,12 @@ String migracaoVagasHint({
   if (snap.cabeNoPlano) {
     return 'Cabem $rest de ${snap.limiteAlunos} vagas. Importando $novosParaImportar.';
   }
+  final alvo = upgradePlanoParaMaisVagas(planoAtual);
+  final alvoLabel = switch (alvo) {
+    SubscriptionPlan.ENTERPRISE => 'Enterprise',
+    SubscriptionPlan.PRO => 'Pro',
+    _ => 'um plano superior',
+  };
   return 'Só cabem $rest vagas no plano (${snap.limiteAlunos}). '
-      'Remova ${snap.excedentes} ou faça upgrade.';
+      'Remova ${snap.excedentes} ou faça upgrade para $alvoLabel.';
 }

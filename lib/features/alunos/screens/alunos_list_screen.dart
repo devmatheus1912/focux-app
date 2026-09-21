@@ -37,6 +37,7 @@ import '../utils/alunos_microcopy.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
+import '../../growth/utils/migracao_vagas_logic.dart';
 import '../widgets/alunos_list_help_sheet.dart';
 import '../widgets/alunos_loading_scaffold.dart';
 import '../../../core/widgets/fx_empty_state.dart';

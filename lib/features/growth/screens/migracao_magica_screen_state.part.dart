@@ -504,6 +504,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                         limiteAlunos: plano?.limiteAlunos,
                         alunosAtuais: atuais,
                         novosParaImportar: novos,
+                        planoAtual: plano?.plano,
                       );
                       final snap = MigracaoVagasSnapshot(
                         alunosAtuais: atuais,

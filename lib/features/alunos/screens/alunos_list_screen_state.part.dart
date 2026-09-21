@@ -135,10 +135,13 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     final limite = plano?.limiteAlunos;
     final total = home?.stats.total ?? 0;
     if (limite != null && limite > 0 && total >= limite) {
+      final upgrade = upgradePlanoParaMaisVagas(plano?.plano);
       await UpgradePromptSheet.show(
         context: context,
         featureName: 'Mais vagas de alunos',
         capability: 'alunos',
+        requiredPlan: upgrade,
+        upgradePlano: upgrade,
         source: source,
       );
       return false;

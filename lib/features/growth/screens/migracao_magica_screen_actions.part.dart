@@ -375,10 +375,13 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       novosParaImportar: toSave.length,
     );
     if (!snap.cabeNoPlano) {
+      final upgrade = upgradePlanoParaMaisVagas(plano?.plano);
       await UpgradePromptSheet.show(
         context: context,
         featureName: 'Mais vagas de alunos',
         capability: 'alunos',
+        requiredPlan: upgrade,
+        upgradePlano: upgrade,
         source: 'migracao_limite',
       );
       return;
