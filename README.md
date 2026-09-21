@@ -19,7 +19,7 @@ Autenticação JWT, rotas por perfil (GoRouter) e design system próprio (Tokens
 
 | | |
 |---|---|
-| Versão | `1.2.1+67` (ver `pubspec.yaml`) |
+| Versão | `1.2.1+92` (ver `pubspec.yaml`) |
 | Flutter / Dart | SDK `^3.7` |
 | Branch | `main` |
 | Site | [focuxpersonal.com](https://focuxpersonal.com) |
@@ -50,7 +50,7 @@ Hubs principais usam BFF `GET …/home` (first paint em um request). Rotas: `lib
 
 ## Escopo funcional (resumo)
 
-**Personal** — Command Center e Focux Score · Aluno 360 · treinos e biblioteca · IA copiloto · financeiro e PIX · agenda · chat, feed e broadcasts · leads, landing e identidade visual · alertas, analytics e planos.
+**Personal** — Command Center e Focux Score · Aluno 360 · treinos e biblioteca · IA copiloto · financeiro e PIX · agenda · chat, feed e broadcasts · leads, landing e identidade visual · [...]
 
 **Aluno** — dashboard · execução de treino · evolução e fotos · saúde/recovery · chat e feed · financeiro · IA e gamificação.
 
@@ -73,7 +73,7 @@ cp android/app/google-services.json.example android/app/google-services.json
 cp ios/Runner/GoogleService-Info.plist.example ios/Runner/GoogleService-Info.plist
 ```
 
-Configuração de runtime via `--dart-define` (ver `lib/core/config/env.dart`).  
+Configuração de runtime via `--dart-define` (ver `lib/core/config/env.dart`).
 Modelos seguros: `.env.local.example`, `android/key.properties.example`, `*.google-services*.example`.
 
 ### Rodar (local)
@@ -112,7 +112,7 @@ dart analyze --fatal-warnings --fatal-infos
 flutter test
 ```
 
-E2E web (opcional): `cd e2e && npm install && npx playwright test`  
+E2E web (opcional): `cd e2e && npm install && npx playwright test`
 CI: analyze, testes e varredura de secrets — ver `.github/workflows/`.
 
 ### i18n
@@ -150,7 +150,7 @@ powershell -File tools/rotate_firebase_android_api_key.ps1 -ExpectKeyPrefix API_
 Checklist manual (Console Google / GitHub):
 
 1. [Credentials](https://console.cloud.google.com/apis/credentials) no mesmo Project ID do Firebase → **Create credentials → API key** (não regenere a antiga ainda).
-2. Edite a key nova → Application restrictions = **Android apps**, package `com.focux.focux_app` + cada SHA-1 (debug, release, Play App Signing). API restrictions = só APIs Firebase (sem Gemini/Maps). **Save**.
+2. Edite a key nova → Application restrictions = **Android apps**, package `com.focux.focux_app` + cada SHA-1 (debug, release, Play App Signing). API restrictions = só APIs Firebase (sem Gemini/Maps). Save.
 3. Firebase Console → Project settings → app Android → **Download `google-services.json`** → salve em `android/app/google-services.json` (só local). Confirme que `current_key` mudou.
 4. Apague (ou regenere) a **key antiga** vazada. Só então feche o alerta do GitHub como **revoked**.
 5. Gate: `flutter test test/core/security/firebase_config_secrets_test.dart`.
