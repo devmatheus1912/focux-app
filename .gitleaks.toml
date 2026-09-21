@@ -1,13 +1,4 @@
 title = "Focux app gitleaks"
 
-[allowlist]
-paths = [
-  '''^.*\.example$''',
-  '''^.*SECURITY\.md$''',
-  '''^.*README\.md$''',
-  '''^.*\.gitleaks\.toml$'''
-]
-regexes = [
-  '''AIzaSyDN''',
-  '''API_KEY_PREFIX'''
-]
+# Do not allowlist README files, security policy files, or broad patterns.
+# Public examples must contain placeholders only and should still be scanned.
