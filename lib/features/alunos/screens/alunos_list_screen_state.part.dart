@@ -97,6 +97,38 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   Future<void> _adicionarAluno() async {
     HapticFeedback.selectionClick();
+    if (!await _ensureAlunoVagaDisponivel()) return;
+    if (!mounted) return;
+    AnalyticsService.instance.track(
+      ProductEvents.alunosAddTapped,
+      props: {'feature': 'alunos'},
+    );
+    final criado = await context.push<bool>('/alunos/novo');
+    if (criado == true) {
+      invalidateAlunosCaches(ref);
+    }
+  }
+
+  /// Importação em lote — secundário ao “Novo aluno”.
+  Future<void> _importarVarios() async {
+    HapticFeedback.selectionClick();
+    if (!await _ensureAlunoVagaDisponivel(source: 'alunos_list_import')) {
+      return;
+    }
+    if (!mounted) return;
+    AnalyticsService.instance.track(
+      ProductEvents.alunosImportTapped,
+      props: {'source': 'alunos_list'},
+    );
+    final result = await context.push<bool>('/growth/migracao');
+    if (result == true) {
+      invalidateAlunosCaches(ref);
+    }
+  }
+
+  Future<bool> _ensureAlunoVagaDisponivel({
+    String source = 'alunos_list',
+  }) async {
     final home = ref.read(alunosHomeProvider).valueOrNull;
     final plano =
         home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull;
@@ -107,17 +139,11 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         context: context,
         featureName: 'Mais vagas de alunos',
         capability: 'alunos',
+        source: source,
       );
-      return;
+      return false;
     }
-    AnalyticsService.instance.track(
-      ProductEvents.alunosAddTapped,
-      props: {'feature': 'alunos'},
-    );
-    final criado = await context.push<bool>('/alunos/novo');
-    if (criado == true) {
-      invalidateAlunosCaches(ref);
-    }
+    return true;
   }
 
   void _setFiltro(AlunoFiltro filtro, {bool track = true}) {

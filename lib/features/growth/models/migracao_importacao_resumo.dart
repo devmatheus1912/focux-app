@@ -14,6 +14,15 @@ class MigracaoImportacaoResumo {
   final String mensagem;
   final List<MigracaoImportacaoDetalhe> detalhes;
 
+  List<MigracaoImportacaoDetalhe> get importadosComAcesso =>
+      detalhes
+          .where(
+            (d) =>
+                d.status == 'IMPORTADO' &&
+                (d.senhaProvisoria?.isNotEmpty ?? false),
+          )
+          .toList(growable: false);
+
   factory MigracaoImportacaoResumo.fromJson(Map<String, dynamic> json) {
     final detalhesRaw = json['detalhes'];
     final detalhes =
@@ -46,17 +55,34 @@ class MigracaoImportacaoDetalhe {
     required this.nome,
     required this.status,
     this.motivo = '',
+    this.alunoId,
+    this.email,
+    this.telefone,
+    this.senhaProvisoria,
   });
 
   final String nome;
   final String status;
   final String motivo;
+  final int? alunoId;
+  final String? email;
+  final String? telefone;
+  final String? senhaProvisoria;
 
   factory MigracaoImportacaoDetalhe.fromJson(Map<String, dynamic> json) {
+    int? asId(dynamic value) {
+      if (value is int) return value;
+      return int.tryParse('$value');
+    }
+
     return MigracaoImportacaoDetalhe(
       nome: (json['nome'] ?? 'Aluno').toString(),
       status: (json['status'] ?? '').toString(),
       motivo: (json['motivo'] ?? '').toString(),
+      alunoId: asId(json['alunoId']),
+      email: json['email']?.toString(),
+      telefone: json['telefone']?.toString(),
+      senhaProvisoria: json['senhaProvisoria']?.toString(),
     );
   }
 }

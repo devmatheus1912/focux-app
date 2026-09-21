@@ -8,14 +8,15 @@ String migracaoIniciarConfirmMessage() =>
     'Estrutura os alunos localmente. Nada é salvo ainda.';
 
 String migracaoSalvarLabel(int count) =>
-    'Confirmar e salvar $count alunos';
+    count == 1 ? 'Confirmar 1 aluno' : 'Confirmar e salvar $count';
 
 String migracaoSalvandoLabel() => 'Salvando alunos...';
 
-String migracaoSalvarConfirmTitle(int count) => 'Salvar $count alunos?';
+String migracaoSalvarConfirmTitle(int count) =>
+    count == 1 ? 'Salvar 1 aluno?' : 'Salvar $count alunos?';
 
 String migracaoSalvarConfirmMessage() =>
-    'Cria as fichas agora. Duplicados são ignorados.';
+    'Cria as fichas agora. Depois você envia o acesso um a um.';
 
 String migracaoPlanilhaLabel() => 'Planilha';
 
@@ -38,18 +39,34 @@ String migracaoDiscardCancelLabel() => 'Continuar migração';
 
 enum MigracaoFonte { planilha, texto, foto }
 
-String migracaoEtapaLabel({required bool reviewing}) =>
-    reviewing ? 'Etapa 2 de 2' : 'Etapa 1 de 2';
+enum MigracaoEtapa { captura, revisao, acesso }
 
-String migracaoQuestionTitle({required bool reviewing}) =>
-    reviewing
-        ? 'Confirmar estes alunos?'
-        : 'Como você quer trazer os alunos?';
+String migracaoEtapaLabel(MigracaoEtapa etapa) => switch (etapa) {
+  MigracaoEtapa.captura => 'Etapa 1 de 3',
+  MigracaoEtapa.revisao => 'Etapa 2 de 3',
+  MigracaoEtapa.acesso => 'Etapa 3 de 3',
+};
 
-String migracaoQuestionCaption({required bool reviewing}) =>
-    reviewing
-        ? 'Toque para editar. Remova duplicados antes de salvar.'
-        : 'Uma fonte por vez. Você revisa antes de gravar fichas.';
+int migracaoEtapaIndex(MigracaoEtapa etapa) => switch (etapa) {
+  MigracaoEtapa.captura => 1,
+  MigracaoEtapa.revisao => 2,
+  MigracaoEtapa.acesso => 3,
+};
+
+String migracaoQuestionTitle(MigracaoEtapa etapa) => switch (etapa) {
+  MigracaoEtapa.captura => 'Como você quer trazer os alunos?',
+  MigracaoEtapa.revisao => 'Confirmar estes alunos?',
+  MigracaoEtapa.acesso => 'Enviar acesso',
+};
+
+String migracaoQuestionCaption(MigracaoEtapa etapa) => switch (etapa) {
+  MigracaoEtapa.captura =>
+    'Uma fonte por vez. Você revisa antes de gravar fichas.',
+  MigracaoEtapa.revisao =>
+    'Toque para editar. Remova duplicados antes de salvar.',
+  MigracaoEtapa.acesso =>
+    'Copie ou mande no WhatsApp um aluno por vez. Eles trocam a senha no primeiro acesso.',
+};
 
 String migracaoFonteLabel(MigracaoFonte fonte) {
   return switch (fonte) {
@@ -78,3 +95,9 @@ String migracaoContinueCaptureLabel({
 }
 
 String migracaoVoltarLabel() => 'Voltar';
+
+String migracaoIrParaListaLabel() => 'Ir para lista';
+
+String migracaoCopiarConviteLabel() => 'Copiar convite';
+
+String migracaoWhatsAppLabel() => 'WhatsApp';

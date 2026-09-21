@@ -175,6 +175,7 @@ class ProductEvents {
   static const homeHelpOpened = 'home_help_opened';
 
   static const alunosAddTapped = 'alunos_add_tapped';
+  static const alunosImportTapped = 'alunos_import_tapped';
   static const alunosViewed = 'alunos_viewed';
   static const alunosFilterChanged = 'alunos_filter_changed';
   static const alunosSearchUsed = 'alunos_search_used';

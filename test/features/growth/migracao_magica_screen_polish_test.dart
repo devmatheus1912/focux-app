@@ -10,7 +10,6 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('showFxNoticeSheet'));
     expect(screen, contains('UpgradePromptSheet'));
     expect(screen, isNot(contains('showDialog')));
     expect(screen, contains('FxHelpIconButton'));
@@ -22,8 +21,10 @@ void main() {
     expect(screen, contains('FxWizardStepDots'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('MigracaoMagicaDraftCache'));
+    expect(screen, contains('MigracaoEtapa.acesso'));
+    expect(screen, contains('migracaoVagasHint'));
     expect(screen, isNot(contains('FxSettingsTile')));
-    expect(screen, isNot(contains('OutlinedButton')));
+    expect(screen, isNot(contains('FeatureGate')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

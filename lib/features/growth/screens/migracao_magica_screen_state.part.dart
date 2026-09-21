@@ -11,9 +11,20 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   List<MigracaoAlunoLinha>? _alunosEncontrados;
   bool _emptyResult = false;
   MigracaoFonte _fonte = MigracaoFonte.texto;
+  MigracaoImportacaoResumo? _importResumo;
 
   bool get _isReviewing =>
-      _alunosEncontrados != null && _alunosEncontrados!.isNotEmpty;
+      _importResumo == null &&
+      _alunosEncontrados != null &&
+      _alunosEncontrados!.isNotEmpty;
+
+  bool get _isAcesso => _importResumo != null;
+
+  MigracaoEtapa get _etapa {
+    if (_isAcesso) return MigracaoEtapa.acesso;
+    if (_isReviewing) return MigracaoEtapa.revisao;
+    return MigracaoEtapa.captura;
+  }
 
   bool get _captureBusy => _isLoading || _isImportingFile;
 
@@ -56,6 +67,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     setState(() {
       _alunosEncontrados = null;
       _emptyResult = false;
+      _importResumo = null;
     });
   }
 
@@ -77,12 +89,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   Widget build(BuildContext context) {
     return fxScreenA11yScope(
       label: 'Migração Focux — importar alunos',
-      child: FeatureGate(
-        featureName: 'Migração Focux',
-        requiredPlan: SubscriptionPlan.PRO,
-        capability: 'iaCopiloto',
-        child: _buildContent(context),
-      ),
+      child: _buildContent(context),
     );
   }
 
@@ -120,13 +127,13 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
     final alunos = _alunosEncontrados;
 
     return FxFormPopGuard(
-      dirty: _hasUnsavedWork,
+      dirty: _hasUnsavedWork && !_isAcesso,
       onCancel: _handleBack,
       child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Migração Focux',
-            subtitle: migracaoEtapaLabel(reviewing: _isReviewing),
+            subtitle: migracaoEtapaLabel(_etapa),
             onBack: _handleBack,
             actions: [
               FxHelpIconButton(
@@ -144,6 +151,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       'Confirmar',
                       'Só a confirmação grava alunos. Duplicados são ignorados.',
                     ),
+                    FxHelpTip(
+                      'Acesso',
+                      'Depois do save, envie o convite um a um (copiar ou WhatsApp).',
+                    ),
                   ],
                 ),
               ),
@@ -159,7 +170,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     : null,
             primary: FxLiquidPrimaryButton(
               label:
-                  _isReviewing
+                  _isAcesso
+                      ? migracaoIrParaListaLabel()
+                      : _isReviewing
                       ? (_isSaving
                           ? migracaoSalvandoLabel()
                           : migracaoSalvarLabel(
@@ -173,7 +186,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
               loading: _isReviewing ? _isSaving : _captureBusy,
               onPressed:
-                  _isReviewing
+                  _isAcesso
+                      ? _irParaListaAlunos
+                      : _isReviewing
                       ? (_isSaving ? null : _salvarAlunos)
                       : (_captureBusy
                           ? null
@@ -194,21 +209,28 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
               FxWizardStepDots(
-                current: _isReviewing ? 2 : 1,
-                total: 2,
+                current: migracaoEtapaIndex(_etapa),
+                total: 3,
                 color: brand,
               ),
               const SizedBox(height: TokensStrip.s4),
               Text(
-                migracaoQuestionTitle(reviewing: _isReviewing),
+                migracaoQuestionTitle(_etapa),
                 style: FocuxHubTypography.sectionTitle(context, color: ink),
               ),
               const SizedBox(height: TokensStrip.s2),
               Text(
-                migracaoQuestionCaption(reviewing: _isReviewing),
+                migracaoQuestionCaption(_etapa),
                 style: FocuxHubTypography.bodyMuted(color: mute),
               ),
-              if (!_isReviewing) ...[
+              if (_isAcesso) ...[
+                const SizedBox(height: TokensStrip.s4),
+                _MigracaoImportacaoResumoBody(
+                  data: _importResumo!,
+                  personalSlug:
+                      ref.watch(perfilProvider).valueOrNull?.slug,
+                ),
+              ] else if (!_isReviewing) ...[
               const SizedBox(height: FxSettingsLayout.headerToGroup),
               Wrap(
                 spacing: TokensStrip.s2,
@@ -391,20 +413,21 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               ),
               ],
-              AnimatedSwitcher(
-                duration: _motionDuration(context),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                child: _buildResultsSection(
-                  key: ValueKey('${alunos?.length ?? 0}-$_emptyResult'),
-                  isDark: isDark,
-                  ink: ink,
-                  mute: mute,
-                  brand: brand,
-                  brandDeep: brandDeep,
-                  alunos: alunos,
+              if (!_isAcesso)
+                AnimatedSwitcher(
+                  duration: _motionDuration(context),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  child: _buildResultsSection(
+                    key: ValueKey('${alunos?.length ?? 0}-$_emptyResult'),
+                    isDark: isDark,
+                    ink: ink,
+                    mute: mute,
+                    brand: brand,
+                    brandDeep: brandDeep,
+                    alunos: alunos,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -469,6 +492,37 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   Text(
                     'Toque para editar · remova duplicados antes de salvar',
                     style: FocuxHubTypography.bodyMuted(color: mute),
+                  ),
+                  const SizedBox(height: TokensStrip.s2),
+                  Builder(
+                    builder: (context) {
+                      final plano = ref.watch(planoFeaturesProvider).value;
+                      final novos =
+                          alunos.where((a) => !a.duplicado).length;
+                      final atuais = plano?.alunosAtivos ?? 0;
+                      final hint = migracaoVagasHint(
+                        limiteAlunos: plano?.limiteAlunos,
+                        alunosAtuais: atuais,
+                        novosParaImportar: novos,
+                      );
+                      final snap = MigracaoVagasSnapshot(
+                        alunosAtuais: atuais,
+                        limiteAlunos: plano?.limiteAlunos,
+                        novosParaImportar: novos,
+                      );
+                      return Text(
+                        hint,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.35,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              snap.cabeNoPlano
+                                  ? brand
+                                  : EagleTokens.warn,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

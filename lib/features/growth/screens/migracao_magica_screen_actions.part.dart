@@ -367,6 +367,23 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       return;
     }
 
+    final plano = _plano ?? ref.read(planoFeaturesProvider).valueOrNull;
+    final atuais = plano?.alunosAtivos ?? 0;
+    final snap = MigracaoVagasSnapshot(
+      alunosAtuais: atuais,
+      limiteAlunos: plano?.limiteAlunos,
+      novosParaImportar: toSave.length,
+    );
+    if (!snap.cabeNoPlano) {
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'Mais vagas de alunos',
+        capability: 'alunos',
+        source: 'migracao_limite',
+      );
+      return;
+    }
+
     final ok = await showFxConfirmSheet(
       context,
       title: migracaoSalvarConfirmTitle(toSave.length),
@@ -385,20 +402,29 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       );
 
       if (!mounted) return;
-      await _mostrarResumoImportacao(
-        MigracaoImportacaoResumo.fromJson(
-          Map<String, dynamic>.from(response.data as Map),
-        ),
+      final resumo = MigracaoImportacaoResumo.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
       );
       setState(() {
+        _importResumo = resumo;
         _alunosEncontrados = null;
         _emptyResult = false;
         _limparImportacaoVisual();
         _controller.clear();
       });
       await MigracaoMagicaDraftCache.clear();
+      invalidateAlunosCaches(ref);
+      await ref.read(planoFeaturesProvider.notifier).refresh();
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      final paywalled = await UpgradePromptSheet.showFromError(
+        context,
+        e,
+        fallbackFeatureName: 'Mais vagas de alunos',
+        fallbackCapability: 'alunos',
+        source: 'migracao_confirmar',
+      );
+      if (!paywalled && mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
       }
     } finally {
@@ -406,15 +432,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
-  Future<void> _mostrarResumoImportacao(MigracaoImportacaoResumo data) {
-    return showFxNoticeSheet(
-      context,
-      title: 'Importação concluída',
-      message: data.mensagem.isEmpty ? null : data.mensagem,
-      actionLabel: 'Fechar',
-      icon: Icons.check_circle_rounded,
-      body: _MigracaoImportacaoResumoBody(data: data),
-    );
+  void _irParaListaAlunos() {
+    if (context.canPop()) {
+      context.pop(true);
+    } else {
+      context.go('/alunos');
+    }
   }
 
   void _removerAluno(int index) {
@@ -559,12 +582,16 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   }
 
   Future<void> _handleBack() async {
+    if (_isAcesso) {
+      _irParaListaAlunos();
+      return;
+    }
     _persistDraft();
     if (!_hasUnsavedWork) {
-      safePopOrGo(context, '/perfil');
+      safePopOrGo(context, '/alunos');
       return;
     }
     final leave = await _confirmDiscard();
-    if (leave && mounted) safePopOrGo(context, '/perfil');
+    if (leave && mounted) safePopOrGo(context, '/alunos');
   }
 }

@@ -296,9 +296,20 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                             TokensStrip.s3 +
                                 MediaQuery.viewInsetsOf(context).bottom,
                           ),
-                          child: FxLiquidPrimaryButton(
-                            label: 'Novo aluno',
-                            onPressed: _adicionarAluno,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              FxLiquidPrimaryButton(
+                                label: 'Novo aluno',
+                                onPressed: _adicionarAluno,
+                              ),
+                              const SizedBox(height: TokensStrip.s2),
+                              TextButton(
+                                onPressed: _importarVarios,
+                                child: const Text('Importar vários'),
+                              ),
+                            ],
                           ),
                         ),
                       ),
