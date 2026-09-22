@@ -117,3 +117,11 @@ final alunoHomeNotificacoesSelectProvider = Provider<int>((ref) {
     ),
   );
 });
+
+final alunoHomeChatUnreadSelectProvider = Provider<int>((ref) {
+  return ref.watch(
+    alunoDashboardHomeProvider.select(
+      (async) => async.valueOrNull?.chat.naoLidasDoPersonal ?? 0,
+    ),
+  );
+});

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -11,10 +12,12 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_outreach_display.dart';
 
@@ -62,7 +65,7 @@ Future<void> showAlunoCheckinMessageSheet(
   );
 }
 
-class _AlunoOutreachMessageSheet extends StatelessWidget {
+class _AlunoOutreachMessageSheet extends ConsumerWidget {
   const _AlunoOutreachMessageSheet({
     required this.alunoId,
     required this.alunoNome,
@@ -79,14 +82,53 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
   final String subtitle;
   final IconData icon;
 
+  Future<void> _ackContact(WidgetRef ref) async {
+    await ref.read(alunoFollowUpActionsProvider).markContactDone(alunoId);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final displayName = fxTitleCaseName(alunoNome);
     final firstName = alunoPrimeiroNome(alunoNome);
     final checkin = icon == Icons.fact_check_outlined;
+
+    Future<void> openChatWithDraft() async {
+      unawaited(
+        AnalyticsService.instance.track(
+          ProductEvents.aluno360OutreachChatOpened,
+          props: {'aluno_id': alunoId},
+        ),
+      );
+      try {
+        await _ackContact(ref);
+      } catch (_) {
+        // Chat still opens; follow-up sync can retry on 360 refresh.
+      }
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+      context.push(
+        '/alunos/$alunoId/chat',
+        extra: alunoChatRouteExtra(
+          nome: alunoNome,
+          draft: message,
+        ),
+      );
+    }
+
+    Future<void> markContactDone() async {
+      try {
+        await _ackContact(ref);
+        if (!context.mounted) return;
+        Navigator.of(context).pop();
+        FeedbackHelper.showSuccess(context, 'Contato registrado');
+      } catch (e) {
+        if (!context.mounted) return;
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+    }
 
     return FxHomeSheetScaffold(
       isDark: isDark,
@@ -106,22 +148,7 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s4),
           FxLiquidPrimaryButton(
             label: alunoOutreachOpenChatLabel(),
-            onPressed: () {
-              unawaited(
-                AnalyticsService.instance.track(
-                  ProductEvents.aluno360OutreachChatOpened,
-                  props: {'aluno_id': alunoId},
-                ),
-              );
-              Navigator.of(context).pop();
-              context.push(
-                '/alunos/$alunoId/chat',
-                extra: alunoChatRouteExtra(
-                  nome: alunoNome,
-                  draft: message,
-                ),
-              );
-            },
+            onPressed: openChatWithDraft,
           ),
           TextButton(
             onPressed: () async {
@@ -134,6 +161,10 @@ class _AlunoOutreachMessageSheet extends StatelessWidget {
               );
             },
             child: Text(alunoOutreachCopyLabel()),
+          ),
+          TextButton(
+            onPressed: markContactDone,
+            child: const Text('Contato feito'),
           ),
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s3),

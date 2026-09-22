@@ -208,9 +208,14 @@ class _HeroPill extends StatelessWidget {
 
 class _TodayFocusCard extends StatelessWidget {
   final AlunoHomeExperience experience;
+  final int streakAtual;
   final bool isDark;
 
-  const _TodayFocusCard({required this.experience, required this.isDark});
+  const _TodayFocusCard({
+    required this.experience,
+    required this.streakAtual,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,12 +225,19 @@ class _TodayFocusCard extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final ink = chrome.ink;
     final mute = chrome.mute;
+    final streakWeeks = streakAtual < 0 ? 0 : streakAtual;
+    final streakLabel =
+        streakWeeks == 0
+            ? 'Sem sequência'
+            : streakWeeks == 1
+            ? '1 semana'
+            : '$streakWeeks semanas';
 
     return FxStripCard(
       emphasize: true,
       glowStrength: 0.08,
       semanticsLabel:
-          '${action.title}. Score ${score.value}. ${action.description}. ${action.cta}',
+          '${action.title}. Sequência $streakLabel. ${action.description}. ${action.cta}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -255,19 +267,11 @@ class _TodayFocusCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Column(
-                children: [
-                  RecoveryScoreRing(
-                    score: score.value,
-                    color: primary,
-                    size: 72,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Seu score',
-                    style: FocuxHubTypography.chip(mute).copyWith(fontSize: 10),
-                  ),
-                ],
+              _StreakFoldBadge(
+                label: streakLabel,
+                primary: primary,
+                mute: mute,
+                isDark: isDark,
               ),
             ],
           ),
@@ -354,6 +358,49 @@ class _HomeNarrativeRail extends StatelessWidget {
           if (i != visibleItems.length - 1) const SizedBox(height: 5),
         ],
       ],
+    );
+  }
+}
+
+class _StreakFoldBadge extends StatelessWidget {
+  final String label;
+  final Color primary;
+  final Color mute;
+  final bool isDark;
+
+  const _StreakFoldBadge({
+    required this.label,
+    required this.primary,
+    required this.mute,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: BrandPalette.soft(primary, dark: isDark),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.local_fire_department_rounded, color: primary, size: 28),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: FocuxHubTypography.chip(primary).copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            'Sequência',
+            style: FocuxHubTypography.chip(mute).copyWith(fontSize: 9),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -493,56 +540,37 @@ class _PerformanceEvolutionCard extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RecoveryScoreRing(
-                    score: view.score,
-                    color: primary,
-                    size: 80,
-                  ),
-                  const SizedBox(width: TokensStrip.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Seu score Focux',
-                          style: FocuxHubTypography.chip(mute),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${view.score} · ${view.scoreLabel}',
-                          style: FocuxHubTypography.cardTitle(color: ink)
-                              .copyWith(
-                                fontSize: FocuxHubTypography.metricEm,
-                                fontWeight: FontWeight.w900,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          view.insight,
-                          style: FocuxHubTypography.bodyMuted(color: mute),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (score.nextSignal.trim().isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            score.nextSignal,
-                            style: FocuxHubTypography.bodyMuted(
-                              color: primary,
-                              fontWeight: FontWeight.w700,
-                            ).copyWith(fontSize: 12.5),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
+              Text(
+                'Seu score Focux',
+                style: FocuxHubTypography.chip(mute),
               ),
+              const SizedBox(height: 4),
+              Text(
+                '${view.score} · ${view.scoreLabel}',
+                style: FocuxHubTypography.cardTitle(color: ink).copyWith(
+                  fontSize: FocuxHubTypography.metricEm,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                view.insight,
+                style: FocuxHubTypography.bodyMuted(color: mute),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (score.nextSignal.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  score.nextSignal,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
+                  ).copyWith(fontSize: 12.5),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
               if (view.hasChart) ...[
                 const SizedBox(height: TokensStrip.s4),
                 Text(
@@ -620,7 +648,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: DashboardHomeActionChip(
-                  label: 'Treinar agora e subir o score',
+                  label: 'Treinar agora',
                   accent: primary,
                   isDark: isDark,
                   onPressed: () => context.push('/checkin/treinos'),

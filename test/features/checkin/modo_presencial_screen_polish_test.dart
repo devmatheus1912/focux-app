@@ -9,7 +9,7 @@ void main() {
     );
     expect(screen, contains('FxExecutionKeepAwake'));
     expect(screen, contains('FxExecutionPopGuard'));
-    expect(screen, contains('fxConfirmLeaveExecution'));
+    expect(screen, contains('showFxExecutionLeaveSheet'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('/treinos/'));
     expect(screen, contains('useMesh: false'));

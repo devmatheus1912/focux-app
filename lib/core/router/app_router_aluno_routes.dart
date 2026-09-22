@@ -7,6 +7,7 @@ import '../../features/dashboard/screens/perfil_aluno_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
 import '../../features/health/screens/health_dashboard_screen.dart';
+import '../../features/chat/screens/chat_aluno_screen.dart';
 import '../../features/habitos/screens/habitos_aluno_screen.dart';
 import '../../features/habitos/screens/habito_detail_screen.dart';
 import '../../features/habitos/data/habito_repository.dart';
@@ -50,6 +51,14 @@ List<RouteBase> buildAlunoRoutes() {
               GoRoute(
                 path: '/saude',
                 builder: (context, state) => const HealthDashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/chat/aluno',
+                builder: (context, state) => const ChatAlunoScreen(),
               ),
             ],
           ),

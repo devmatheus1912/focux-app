@@ -21,6 +21,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     this.isIaSuggestion = false,
     this.onPrepareMessage,
     this.showTitle = true,
+    this.showAction = true,
   });
 
   final String title;
@@ -31,6 +32,7 @@ class Aluno360CopilotPrescription extends StatefulWidget {
   final bool isIaSuggestion;
   final VoidCallback? onPrepareMessage;
   final bool showTitle;
+  final bool showAction;
 
   @override
   State<Aluno360CopilotPrescription> createState() =>
@@ -241,8 +243,9 @@ class _Aluno360CopilotPrescriptionState
 
         return Semantics(
           label:
-              '${widget.showTitle ? '${widget.title}. ' : ''}$expandedActionText. $reason'
-              '${showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
+              '${widget.showTitle ? '${widget.title}. ' : ''}'
+              '${widget.showAction ? '$expandedActionText. ' : ''}$reason'
+              '${widget.showAction && showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
               '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,62 +274,64 @@ class _Aluno360CopilotPrescriptionState
                 ),
                 const SizedBox(height: 8),
               ],
-              GestureDetector(
-                onTap: showExpandAction ? _toggleExpandedAction : null,
-                behavior: HitTestBehavior.opaque,
-                child: Text(
-                  _expandedAction ? expandedActionText : widget.action,
-                  maxLines: _expandedAction ? null : _collapsedLines,
-                  overflow: _expandedAction ? null : TextOverflow.ellipsis,
-                  style: actionStyle,
+              if (widget.showAction) ...[
+                GestureDetector(
+                  onTap: showExpandAction ? _toggleExpandedAction : null,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    _expandedAction ? expandedActionText : widget.action,
+                    maxLines: _expandedAction ? null : _collapsedLines,
+                    overflow: _expandedAction ? null : TextOverflow.ellipsis,
+                    style: actionStyle,
+                  ),
                 ),
-              ),
-              if (showExpandAction && !_expandedAction)
-                _buildExpandLink(
-                  label: 'Ver ação completa',
-                  semanticsLabel: 'Ver ação completa da sugestão',
-                  onTap: _toggleExpandedAction,
-                  active: false,
-                ),
-              if (showExpandAction && _expandedAction)
-                _buildExpandLink(
-                  label: 'Ocultar',
-                  semanticsLabel: 'Ocultar ação completa da sugestão',
-                  onTap: _toggleExpandedAction,
-                  active: true,
-                ),
-              if (widget.onPrepareMessage != null) ...[
-                SizedBox(height: showExpandAction ? 16 : 12),
-                Semantics(
-                  button: true,
-                  label: 'Preparar mensagem para o aluno',
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 44,
-                    child: OutlinedButton.icon(
-                      onPressed: widget.onPrepareMessage,
-                      icon: Icon(Icons.chat_bubble_outline_rounded, size: 17),
-                      label: const Text('Preparar mensagem'),
-                      style: Aluno360Layout.operacaoOutlinedButtonStyle(
-                        context,
-                        widget.color,
-                      ).copyWith(
-                        textStyle: WidgetStateProperty.all(
-                          Aluno360Layout.chipLabelStyle(context).copyWith(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Aluno360Layout.operacaoOutlinedForeground(
-                              widget.color,
-                              isDark:
-                                  Theme.of(context).brightness ==
-                                  Brightness.dark,
+                if (showExpandAction && !_expandedAction)
+                  _buildExpandLink(
+                    label: 'Ver ação completa',
+                    semanticsLabel: 'Ver ação completa da sugestão',
+                    onTap: _toggleExpandedAction,
+                    active: false,
+                  ),
+                if (showExpandAction && _expandedAction)
+                  _buildExpandLink(
+                    label: 'Ocultar',
+                    semanticsLabel: 'Ocultar ação completa da sugestão',
+                    onTap: _toggleExpandedAction,
+                    active: true,
+                  ),
+                if (widget.onPrepareMessage != null) ...[
+                  SizedBox(height: showExpandAction ? 16 : 12),
+                  Semantics(
+                    button: true,
+                    label: 'Preparar mensagem para o aluno',
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: OutlinedButton.icon(
+                        onPressed: widget.onPrepareMessage,
+                        icon: Icon(Icons.chat_bubble_outline_rounded, size: 17),
+                        label: const Text('Preparar mensagem'),
+                        style: Aluno360Layout.operacaoOutlinedButtonStyle(
+                          context,
+                          widget.color,
+                        ).copyWith(
+                          textStyle: WidgetStateProperty.all(
+                            Aluno360Layout.chipLabelStyle(context).copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: Aluno360Layout.operacaoOutlinedForeground(
+                                widget.color,
+                                isDark:
+                                    Theme.of(context).brightness ==
+                                    Brightness.dark,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
               if (reason.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -418,6 +423,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     this.contactPriority = false,
     this.statusMetricsVisible = false,
     this.hideMetricFooter = false,
+    this.hideDuplicateContactAction = false,
   });
 
   final Aluno aluno;
@@ -435,6 +441,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
   final bool contactPriority;
   final bool statusMetricsVisible;
   final bool hideMetricFooter;
+  final bool hideDuplicateContactAction;
 
   @override
   Widget build(BuildContext context) {
@@ -545,8 +552,9 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
       reason: content.reason,
       color: primary,
       isIaSuggestion: isIaSuggestion,
-      onPrepareMessage: onPrepareMessage,
+      onPrepareMessage: hideDuplicateContactAction ? null : onPrepareMessage,
       showTitle: !contactPriority,
+      showAction: !hideDuplicateContactAction,
     );
   }
 }

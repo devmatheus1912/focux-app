@@ -77,13 +77,15 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
             ? 'Contato e retenção dos alunos em risco.'
             : 'Extra além do que já está na Home.';
 
+    final sheetHeight = MediaQuery.sizeOf(widget.sheetContext).height;
+    final listMaxHeight = sheetHeight * FxHomeSheetChrome.maxHeightFactor - 120;
+
     return FxHomeSheetSurface(
       isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(widget.sheetContext).height *
-          FxHomeSheetChrome.maxHeightFactor,
-      expand: true,
+      maxHeight: sheetHeight * FxHomeSheetChrome.maxHeightFactor,
+      expand: false,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -95,9 +97,13 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
           const SizedBox(height: 14),
-          Expanded(
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: listMaxHeight.clamp(120.0, sheetHeight * 0.65),
+            ),
             child: ListView(
               padding: EdgeInsets.zero,
+              shrinkWrap: true,
               physics: const BouncingScrollPhysics(),
               children: [
                 if (impactActions.isNotEmpty)

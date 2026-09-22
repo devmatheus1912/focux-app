@@ -39,7 +39,6 @@ import '../../checkin/data/meus_treinos_mem_cache.dart';
 import '../../coach/widgets/coach_proativo_card.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
-import '../../health/widgets/recovery_score_ring.dart';
 import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
@@ -188,7 +187,11 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _TodayFocusCard(experience: experience, isDark: isDark),
+                      _TodayFocusCard(
+                        experience: experience,
+                        streakAtual: home.streakAtual,
+                        isDark: isDark,
+                      ),
                       const SizedBox(height: 12),
                       _AlunoAnamneseCta(),
                       AlunoRecoveryCard(

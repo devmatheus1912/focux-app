@@ -802,18 +802,51 @@ void main() {
       status: 'ATIVO',
     );
 
-    test('maps TREINO to REDUZIR_CARGA', () {
-      expect(copilotExecutarBackendTipo('TREINO'), 'REDUZIR_CARGA');
+    test('maps TREINO to ENVIAR_PUSH (check-in), not carga', () {
+      expect(copilotExecutarBackendTipo('TREINO'), 'ENVIAR_PUSH');
       final spec = resolveCopilotExecutarAcao(
         tipoAcao: 'TREINO',
         aluno: aluno,
+        proxima: const ProximaAcaoResumo(
+          acao: 'Pedir check-in esta semana',
+          motivo: 'Sem treinos',
+          fonte: 'RADAR',
+          prioridade: 'P1',
+          mensagemSugerida: 'Oi, Beatriz. Como foi o treino?',
+        ),
       );
-      expect(spec?.backendTipo, 'REDUZIR_CARGA');
+      expect(spec?.backendTipo, 'ENVIAR_PUSH');
+      expect(spec?.label, contains('check-in'));
       expect(
-        shouldShowCopilotExecutarAcao(tipoAcao: 'TREINO', aluno: aluno),
+        shouldShowCopilotExecutarAcao(
+          tipoAcao: 'TREINO',
+          aluno: aluno,
+          proxima: const ProximaAcaoResumo(
+            acao: 'Pedir check-in',
+            motivo: 'x',
+            fonte: 'RADAR',
+            prioridade: 'P1',
+            mensagemSugerida: 'Oi',
+          ),
+        ),
         isTrue,
       );
-      expect(copilotExecutarAcaoLabel('TREINO'), contains('15%'));
+      expect(copilotExecutarAcaoLabel('TREINO'), contains('check-in'));
+    });
+
+    test('maps carga text to REDUZIR_CARGA', () {
+      final spec = resolveCopilotExecutarAcao(
+        tipoAcao: 'TREINO',
+        aluno: aluno,
+        proxima: const ProximaAcaoResumo(
+          acao: 'Aplicar ajuste de carga no plano',
+          motivo: 'Volume alto',
+          fonte: 'EVOLUCAO',
+          prioridade: 'P2',
+        ),
+      );
+      expect(spec?.backendTipo, 'REDUZIR_CARGA');
+      expect(copilotExecutarBackendTipo('TREINO', acao: 'Reduzir carga'), 'REDUZIR_CARGA');
     });
 
     test('maps CONTATO with mensagem to ENVIAR_PUSH', () {

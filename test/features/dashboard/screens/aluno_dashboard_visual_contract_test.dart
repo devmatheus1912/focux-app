@@ -25,7 +25,8 @@ void main() {
     expect(screen, contains('buildAlunoHomeExperience'));
     expect(screen, contains('class _HomeNarrativeRail'));
     expect(screen, contains('Seu score Focux'));
-    expect(screen, contains('score: score.value'));
+    expect(screen, contains('streakAtual'));
+    expect(screen, contains('_StreakFoldBadge'));
     expect(screen, contains('score.rhythmLabel'));
     expect(screen, contains('score.riskLabel'));
     expect(screen, contains('brand.nomePersonal'));
@@ -44,13 +45,13 @@ void main() {
 
     expect(screen, contains('BrandPalette.deep(cs.primary)'));
     expect(screen, contains("'Consistência'"));
-    expect(screen, contains("'Treinos concluídos nesta semana'"));
+    expect(screen, contains('descanso não zera'));
     expect(screen, contains('TokensStrip.rCard'));
     expect(screen, contains('countUniqueCompletedDaysThisWeek'));
     expect(screen, contains('FocuxHubTypography.sectionTitle'));
     expect(screen, contains('FocuxHubTypography.chip'));
     expect(screen, contains('FocuxHubTypography.bodyMuted'));
-    expect(screen, contains('FocuxHubTypography.cardSubtitle'));
+    expect(screen, contains('descanso não zera'));
     expect(screen, contains('FocuxHubTypography.metric'));
     expect(screen, isNot(contains('fontSize: 12')));
     expect(screen, isNot(contains('TextStyle(')));

@@ -527,6 +527,13 @@ class CheckinRepository {
     );
   }
 
+  Future<ExecucaoTreino> descartar(int execucaoId) async {
+    final r = await _dio.put('/api/checkin/$execucaoId/descartar');
+    return ExecucaoTreino.fromJson(
+      _requireJsonMap(r.data, 'PUT /api/checkin/{id}/descartar'),
+    );
+  }
+
   Future<ExecucaoTreino> concluir(
     int execucaoId, {
     int? presencialAlunoId,

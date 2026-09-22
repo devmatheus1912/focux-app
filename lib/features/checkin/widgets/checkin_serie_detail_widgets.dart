@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -530,6 +531,109 @@ class CheckinTinyMetric extends StatelessWidget {
               color: ink,
               fontSize: 11.5,
               fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// RPE rápido quando o personal definiu [rpeAlvo] na ficha.
+Future<int?> showCheckinRpeAlvoPrompt(
+  BuildContext context, {
+  required int rpeAlvo,
+}) {
+  return showFxHomeSheet<int>(
+    context,
+    builder: (ctx) => _CheckinRpeAlvoPromptSheet(rpeAlvo: rpeAlvo),
+  );
+}
+
+class _CheckinRpeAlvoPromptSheet extends StatefulWidget {
+  const _CheckinRpeAlvoPromptSheet({required this.rpeAlvo});
+
+  final int rpeAlvo;
+
+  @override
+  State<_CheckinRpeAlvoPromptSheet> createState() =>
+      _CheckinRpeAlvoPromptSheetState();
+}
+
+class _CheckinRpeAlvoPromptSheetState extends State<_CheckinRpeAlvoPromptSheet> {
+  late int _rpe;
+
+  @override
+  void initState() {
+    super.initState();
+    _rpe = widget.rpeAlvo.clamp(1, 10);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final primary = theme.colorScheme.primary;
+    final brand = isDark ? BrandPalette.accent(primary) : primary;
+
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          const SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: checkinRpeSectionTitle,
+            subtitle: checkinRpeAlvoHint(widget.rpeAlvo),
+            leading: Icon(Icons.speed_rounded, color: brand, size: 18),
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Text(
+            checkinRpeValueLine(_rpe),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: brand,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Slider(
+            value: _rpe.toDouble(),
+            min: 1,
+            max: 10,
+            divisions: 9,
+            activeColor: brand,
+            label: checkinRpeValueLine(_rpe),
+            onChanged: (v) => setState(() => _rpe = v.round()),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, _rpe),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: brand,
+                foregroundColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                ),
+              ),
+              child: const Text('Registrar série'),
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancelar',
+              style: FocuxHubTypography.bodyMuted(
+                color: mute,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

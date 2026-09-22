@@ -236,11 +236,32 @@ class _State extends ConsumerState<ModoPresencialScreen>
   Future<void> _sair() async {
     final doneSeries =
         _exec?.exercicios.fold<int>(0, (sum, e) => sum + e.seriesFeitas) ?? 0;
-    final ok = await fxConfirmLeaveExecution(
+    final choice = await showFxExecutionLeaveSheet(
       context,
       hasProgress: doneSeries > 0 || _elapsed.inSeconds > 30,
     );
-    if (!ok || !mounted) return;
+    if (choice == null || !mounted) return;
+    switch (choice) {
+      case FxExecutionLeaveChoice.encerrarAgora:
+        await _concluirSessao();
+        return;
+      case FxExecutionLeaveChoice.descartar:
+        final id = _exec?.id;
+        if (id != null) {
+          try {
+            await ref.read(checkinRepositoryProvider).descartar(id);
+          } catch (e) {
+            if (mounted) {
+              FeedbackHelper.showError(context, friendlyError(e));
+            }
+            return;
+          }
+        }
+        break;
+      case FxExecutionLeaveChoice.continuarDepois:
+        break;
+    }
+    if (!mounted) return;
     safePopOrGo(context, _parent);
   }
 

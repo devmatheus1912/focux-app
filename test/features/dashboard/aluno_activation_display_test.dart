@@ -12,7 +12,7 @@ void main() {
 
     expect(progress.doneCount, 1);
     expect(progress.current.title, 'Registrar a primeira medida');
-    expect(progress.etapaLabel, 'Etapa 2 de 4');
+    expect(progress.etapaLabel, 'Etapa 2 de 3');
     expect(progress.allDone, isFalse);
   });
 
@@ -25,7 +25,19 @@ void main() {
     );
 
     expect(progress.allDone, isTrue);
-    expect(progress.etapaLabel, 'Etapa 4 de 4');
+    expect(progress.etapaLabel, 'Etapa 3 de 3');
+  });
+
+  test('chat opcional não bloqueia conclusão', () {
+    final progress = alunoActivationProgress(
+      profileCompletion: 100,
+      hasMedidas: true,
+      hasTreinoConcluido: true,
+      hasChat: false,
+    );
+
+    expect(progress.allDone, isTrue);
+    expect(progress.etapaLabel, 'Etapa 3 de 3');
     expect(alunoActivationQuestion(allDone: false), 'Próximo passo');
   });
 

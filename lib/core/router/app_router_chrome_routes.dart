@@ -325,8 +325,12 @@ RouteBase buildChromeShellRoute() {
                     intPathParam(state, 'id') == null ? '/alunos' : null,
             builder: (context, state) {
               final id = intPathParam(state, 'id')!;
-              final nome = stringRouteExtra(state) ?? 'Aluno';
-              return EngajamentoScreen(alunoId: id, alunoNome: nome);
+              final args = engajamentoScreenRouteArgs(state);
+              return EngajamentoScreen(
+                alunoId: id,
+                alunoNome: args.alunoNome,
+                initialSection: args.section,
+              );
             },
           ),
           GoRoute(

@@ -25,6 +25,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/checkin_repository.dart';
+import '../data/historico_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/historico_display.dart';
@@ -50,12 +51,18 @@ class _HistoricoDetalheScreenState
   @override
   void initState() {
     super.initState();
+    final cached = HistoricoDetalheMemCache.loadIfFresh(widget.execucaoId);
+    if (cached != null) {
+      _execucao = cached;
+      _loading = false;
+      _fetchedAt = DateTime.now();
+    }
     _carregar();
   }
 
   Future<void> _carregar() async {
     setState(() {
-      _loading = true;
+      _loading = _execucao == null;
       _erro = null;
     });
     try {
@@ -68,6 +75,7 @@ class _HistoricoDetalheScreenState
         _loading = false;
         _fetchedAt = DateTime.now();
       });
+      HistoricoDetalheMemCache.save(loaded);
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -134,7 +142,7 @@ class _HistoricoDetalheScreenState
               _loading && execucao == null
                   ? const Padding(
                     padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 4),
+                    child: SkeletonList(count: 3),
                   )
                   : _erro != null && execucao == null
                   ? FxContentWidthLimiter(
@@ -227,63 +235,84 @@ class _DetalheBody extends StatelessWidget {
                       iniciadoEm: execucao.iniciadoEm,
                     ),
                   ),
-                  const SizedBox(height: TokensStrip.s4),
+                  const SizedBox(height: TokensStrip.s3),
                   FxStripCard(
                     emphasize: false,
                     accent: primary,
+                    padding: const EdgeInsets.all(TokensStrip.s3),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Status',
-                          style: FocuxHubTypography.chip(
-                            fxScreenMute(context),
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    historicoStatusLabel(execucao.status),
+                                    style: FocuxHubTypography.kpi(
+                                      color: fxScreenInk(context),
+                                      fontSize: FocuxHubTypography.metricLg,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    historicoDateLabel(execucao.iniciadoEm)
+                                            .isEmpty
+                                        ? 'Nesta sessão'
+                                        : historicoDateLabel(
+                                          execucao.iniciadoEm,
+                                        ),
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: fxScreenMute(context),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              duracao ?? '—',
+                              style: FocuxHubTypography.kpi(
+                                color: primary,
+                                fontSize: FocuxHubTypography.metricMd,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          historicoStatusLabel(execucao.status),
-                          style: FocuxHubTypography.kpi(
-                            color: fxScreenInk(context),
-                            fontSize: FocuxHubTypography.metricLg,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          historicoDateLabel(execucao.iniciadoEm).isEmpty
-                              ? 'Nesta sessão'
-                              : historicoDateLabel(execucao.iniciadoEm),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        const SizedBox(height: TokensStrip.s2),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OperationalMetricTile(
+                                label: 'Exerc.',
+                                value: historicoExerciciosMetric(
+                                  done: done,
+                                  total: total,
+                                ),
+                                hint: historicoCountLabel(total),
+                                color: primary,
+                                isDark: isDark,
+                                emphasis: OperationalMetricEmphasis.muted,
+                              ),
+                            ),
+                            const SizedBox(width: TokensStrip.s2),
+                            Expanded(
+                              child: OperationalMetricTile(
+                                label: 'Recordes',
+                                value: historicoPrMetric(recordes),
+                                hint: historicoPrHint(recordes),
+                                color: primary,
+                                isDark: isDark,
+                                emphasis: OperationalMetricEmphasis.muted,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  OperationalMetricTile(
-                    label: 'Exercícios',
-                    value: historicoExerciciosMetric(done: done, total: total),
-                    hint: historicoCountLabel(total),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Duração',
-                    value: duracao ?? '—',
-                    hint: concluido ? 'Sessão fechada' : 'Em andamento',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Recordes',
-                    value: historicoPrMetric(recordes),
-                    hint: historicoPrHint(recordes),
-                    color: primary,
-                    isDark: isDark,
                   ),
                   const SizedBox(height: TokensStrip.s3),
                   Wrap(
@@ -304,14 +333,14 @@ class _DetalheBody extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: TokensStrip.s4),
+                  const SizedBox(height: TokensStrip.s3),
                   AlunoSegmentedChoice(
                     options: historicoDetalheSecoes,
                     selected: secao,
                     isDark: isDark,
                     onSelect: onSecao,
                   ),
-                  const SizedBox(height: TokensStrip.s4),
+                  const SizedBox(height: TokensStrip.s3),
                   if (secao == historicoSecaoRecordes)
                     ..._recordes(prs, cargas)
                   else if (secao == historicoSecaoNotas)

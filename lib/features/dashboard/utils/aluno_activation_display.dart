@@ -5,6 +5,7 @@ class AlunoActivationStep {
     required this.done,
     required this.cta,
     required this.route,
+    this.optional = false,
   });
 
   final String title;
@@ -12,6 +13,7 @@ class AlunoActivationStep {
   final bool done;
   final String cta;
   final String route;
+  final bool optional;
 }
 
 class AlunoActivationProgress {
@@ -23,14 +25,20 @@ class AlunoActivationProgress {
   final List<AlunoActivationStep> steps;
   final AlunoActivationStep current;
 
-  int get doneCount => steps.where((step) => step.done).length;
+  List<AlunoActivationStep> get _requiredSteps =>
+      steps.where((step) => !step.optional).toList(growable: false);
 
-  int get totalCount => steps.length;
+  int get doneCount =>
+      _requiredSteps.where((step) => step.done).length;
 
-  bool get allDone => doneCount == totalCount && steps.isNotEmpty;
+  int get totalCount => _requiredSteps.isEmpty ? 1 : _requiredSteps.length;
+
+  bool get allDone =>
+      _requiredSteps.isNotEmpty &&
+      _requiredSteps.every((step) => step.done);
 
   String get etapaLabel {
-    final total = totalCount <= 0 ? 1 : totalCount;
+    final total = totalCount;
     final currentEtapa = allDone ? total : (doneCount + 1).clamp(1, total);
     return 'Etapa $currentEtapa de $total';
   }
@@ -90,17 +98,18 @@ AlunoActivationProgress alunoActivationProgress({
       route: '/checkin/treinos',
     ),
     AlunoActivationStep(
-      title: 'Abrir seu chat com o personal',
+      title: 'Falar com seu personal',
       description:
-          'Dúvidas, feedback e alinhamento precisam acontecer no mesmo lugar do treino.',
+          'Dúvidas e feedback podem ficar no chat — quando quiser.',
       done: hasChat,
       cta: 'Abrir chat',
       route: '/chat/aluno',
+      optional: true,
     ),
   ];
   final current = steps.firstWhere(
-    (step) => !step.done,
-    orElse: () => steps.last,
+    (step) => !step.optional && !step.done,
+    orElse: () => steps.firstWhere((step) => !step.optional, orElse: () => steps.last),
   );
   return AlunoActivationProgress(steps: steps, current: current);
 }
@@ -111,6 +120,8 @@ String alunoActivationLeaveMessage() =>
     'O progresso já feito continua salvo. Você pode voltar depois.';
 
 String alunoActivationLeaveConfirm() => 'Pular';
+
+String alunoActivationChatSkipLabel() => 'Falar depois';
 
 String alunoActivationQuestion({required bool allDone}) =>
     allDone ? 'Tudo pronto para evoluir' : 'Próximo passo';

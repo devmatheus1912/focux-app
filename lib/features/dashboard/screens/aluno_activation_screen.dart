@@ -130,11 +130,24 @@ class AlunoActivationScreen extends ConsumerWidget {
                 ),
               ),
               bottomNavigationBar: FxWizardStickyBar(
+                secondary:
+                    progress.allDone && !home.chat.possuiMensagemDoAluno
+                        ? TextButton(
+                          onPressed: () async {
+                            await _markSeen(aluno.id);
+                            if (!context.mounted) return;
+                            context.go('/chat/aluno');
+                          },
+                          child: Text(step.cta),
+                        )
+                        : null,
                 primary: FxLiquidPrimaryButton(
                   icon: Icons.arrow_forward,
                   label:
                       progress.allDone
-                          ? 'Entrar no app'
+                          ? (home.chat.possuiMensagemDoAluno
+                              ? 'Entrar no app'
+                              : alunoActivationChatSkipLabel())
                           : step.cta,
                   onPressed: () async {
                     await _markSeen(aluno.id);

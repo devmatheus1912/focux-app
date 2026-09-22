@@ -46,6 +46,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     BuildContext context, {
     required OperacaoStatusCardDestination dest,
     required Aluno360OperacaoSnapshot? operacao,
+    OperacaoStatusCardKind? statusKind,
   }) {
     if (dest == OperacaoStatusCardDestination.noop) return;
 
@@ -54,7 +55,16 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
       case OperacaoStatusCardDestination.chat:
         _openChat(context, operacao: operacao);
       case OperacaoStatusCardDestination.engajamento:
-        context.push('/alunos/$alunoId/engajamento', extra: aluno.nome);
+        context.push(
+          '/alunos/$alunoId/engajamento',
+          extra: operacaoEngajamentoRouteExtra(
+            aluno.nome,
+            section:
+                statusKind == null
+                    ? null
+                    : operacaoEngajamentoSectionForStatusKind(statusKind),
+          ),
+        );
       case OperacaoStatusCardDestination.treinos:
         context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
       case OperacaoStatusCardDestination.noop:
@@ -192,6 +202,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
                         context,
                         dest: dest,
                         operacao: operacao,
+                        statusKind: kind,
                       ),
                   borderRadius: BorderRadius.circular(12),
                   child: tile,

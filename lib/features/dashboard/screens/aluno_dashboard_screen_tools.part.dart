@@ -78,7 +78,6 @@ class _StudentToolsSection extends StatelessWidget {
       subtitle: 'Chat direto',
       route: '/chat/aluno',
       group: _StudentToolGroup.relacao,
-      featured: true,
     ),
     _StudentToolAction(
       icon: Icons.dynamic_feed_outlined,

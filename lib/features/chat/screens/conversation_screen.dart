@@ -20,7 +20,6 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
@@ -40,9 +39,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../widgets/conversation_message_widgets.dart';
@@ -160,10 +157,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _composerFocus.dispose();
     _scroll.dispose();
     super.dispose();
-  }
-
-  void _focusComposer() {
-    _composerFocus.requestFocus();
   }
 
   void _handleComposerChange() {
@@ -469,59 +462,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                           )
                           : _msgs.isEmpty
                           ? _isAlunoMode
-                              ? Center(
+                              ? const Center(
                                 child: Padding(
-                                  padding: const EdgeInsets.all(
-                                    TokensStrip.s4,
-                                  ),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      FxStripCard(
-                                        emphasize: true,
-                                        accent: primary,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Fale com seu personal',
-                                              style: FocuxHubTypography
-                                                  .sectionTitle(
-                                                context,
-                                                color: chrome.ink,
-                                              ).copyWith(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: TokensStrip.s3,
-                                            ),
-                                            DashboardHomeActionChip(
-                                              label: 'Escrever',
-                                              accent: primary,
-                                              isDark: isDark,
-                                              onPressed: _focusComposer,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: TokensStrip.s4,
-                                      ),
-                                      const FxEmptyState(
-                                        icon: 'message-circle',
-                                        title: 'Comece uma conversa',
-                                        subtitle:
-                                            'Fotos, vídeos e ajustes do treino aparecem aqui.',
-                                      ),
-                                    ],
+                                  padding: EdgeInsets.all(TokensStrip.s4),
+                                  child: FxEmptyState(
+                                    icon: 'message-circle',
+                                    title: 'Comece uma conversa',
+                                    subtitle:
+                                        'Fotos, vídeos e ajustes do treino aparecem aqui.',
                                   ),
                                 ),
                               )
-                              // Composer sticky já é o affordance (§10) —
-                              // empty sem CTA duplicado.
                               : const FxEmptyState(
                                 icon: 'message-circle',
                                 title: 'Comece uma conversa',

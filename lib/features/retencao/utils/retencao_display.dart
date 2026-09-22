@@ -110,7 +110,7 @@ retencaoFocusActions({required bool hasAlto}) {
 String retencaoFocusActionLabel(RetencaoFocusActionId id) => switch (id) {
   RetencaoFocusActionId.chat => 'Escrever',
   RetencaoFocusActionId.cobrar => 'Cobrar',
-  RetencaoFocusActionId.aluno360 => 'Abrir 360',
+  RetencaoFocusActionId.aluno360 => 'Abrir aluno',
   RetencaoFocusActionId.verAlunos => 'Ver alunos',
 };
 

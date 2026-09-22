@@ -37,6 +37,15 @@ bool isTreinoDisponivelParaIniciar(ExecucaoTreino treino) {
 List<ExecucaoTreino> treinosProntosParaIniciar(List<ExecucaoTreino> treinos) =>
     treinos.where(isTreinoDisponivelParaIniciar).toList(growable: false);
 
+ExecucaoTreino? treinoSessaoEmAndamento(List<ExecucaoTreino> treinos) {
+  for (final t in treinos) {
+    if (normalizeTreinoStatus(t.status) == treinoStatusEmAndamento) {
+      return t;
+    }
+  }
+  return null;
+}
+
 /// Próximo treino do dia: retoma EM_ANDAMENTO; senão gira após o último concluído.
 ExecucaoTreino? proximoTreinoParaHoje({
   required List<ExecucaoTreino> treinos,

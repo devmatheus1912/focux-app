@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../perfil/providers/perfil_provider.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
+import '../../dashboard/utils/aluno_dashboard_home_prefetch.dart';
 import '../../dashboard/utils/dashboard_home_prefetch.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
@@ -103,8 +106,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return prefs.getBool('onboarding_done_v3') ?? false;
   }
 
+  static const _resolveNavigationTimeout = Duration(seconds: 8);
+
   Future<void> _bootstrap(SplashMotionBudget budget) async {
-    final bootstrapFuture = _resolveNavigationTarget(budget);
+    final bootstrapFuture = _resolveNavigationTarget(budget).timeout(
+      _resolveNavigationTimeout,
+      onTimeout: () => _fallbackNavigationTarget(),
+    );
     final progressFuture =
         budget.progress == Duration.zero
             ? _progressCtrl.animateTo(0.92, duration: Duration.zero)
@@ -128,19 +136,47 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     context.go(target);
   }
 
+  Future<void> _awaitAuthSettled() async {
+    if (ref.read(authProvider) != AuthStatus.unknown) return;
+    final deadline = DateTime.now().add(_resolveNavigationTimeout);
+    while (DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      if (!mounted) return;
+      if (ref.read(authProvider) != AuthStatus.unknown) return;
+    }
+  }
+
+  Future<String> _fallbackNavigationTarget() async {
+    final authStatus = ref.read(authProvider);
+    if (authStatus == AuthStatus.authenticated) {
+      final role = ref.read(userRoleProvider);
+      if (role == UserRole.aluno) return '/dashboard/aluno';
+      return '/dashboard/personal';
+    }
+    if (authStatus == AuthStatus.unauthenticated) {
+      return _unauthenticatedTarget();
+    }
+    return splashGuestTarget(onboardingDone: false);
+  }
+
   Future<String> _resolveNavigationTarget(SplashMotionBudget budget) async {
     await Future<void>.delayed(budget.resolveDelay);
+    await _awaitAuthSettled();
 
     final authStatus = ref.read(authProvider);
     if (authStatus == AuthStatus.authenticated) {
       return _authenticatedTarget();
     }
-    return _unauthenticatedTarget();
+    if (authStatus == AuthStatus.unauthenticated) {
+      return _unauthenticatedTarget();
+    }
+    return await _fallbackNavigationTarget();
   }
 
   Future<String> _authenticatedTarget() async {
     final role = ref.read(userRoleProvider);
     if (role == UserRole.aluno) {
+      unawaited(prefetchAlunoDashboardHome(ref));
       final requiresPasswordChange = ref.read(requiresPasswordChangeProvider);
       if (requiresPasswordChange) {
         return splashAlunoTarget(
@@ -150,7 +186,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
 
       try {
-        final aluno = await ref.read(alunoMeProvider.future);
+        final aluno = await ref
+            .read(alunoMeProvider.future)
+            .timeout(_resolveNavigationTimeout);
         final prefs = await SharedPreferences.getInstance();
         final onboardingSeen =
             prefs.getBool('aluno_activation_seen_${aluno.id}') ?? false;

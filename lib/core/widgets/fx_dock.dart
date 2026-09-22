@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
@@ -9,8 +10,13 @@ import 'fx_icon.dart';
 class FxDockItem {
   final String icon;
   final String label;
+  final int badgeCount;
 
-  const FxDockItem({required this.icon, required this.label});
+  const FxDockItem({
+    required this.icon,
+    required this.label,
+    this.badgeCount = 0,
+  });
 }
 
 class FxDockItems {
@@ -22,11 +28,16 @@ class FxDockItems {
     FxDockItem(icon: 'spark', label: 'IA'),
   ];
 
-  static const aluno = [
-    FxDockItem(icon: 'home', label: 'Hoje'),
-    FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    FxDockItem(icon: 'trend', label: 'Saúde'),
-    FxDockItem(icon: 'users', label: 'Perfil'),
+  static List<FxDockItem> aluno({int chatUnread = 0}) => [
+    const FxDockItem(icon: 'home', label: 'Hoje'),
+    const FxDockItem(icon: 'dumbbell', label: 'Treinos'),
+    const FxDockItem(icon: 'trend', label: 'Saúde'),
+    FxDockItem(
+      icon: 'chat',
+      label: 'Chat',
+      badgeCount: chatUnread,
+    ),
+    const FxDockItem(icon: 'users', label: 'Perfil'),
   ];
 }
 
@@ -180,11 +191,44 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    FxIcon(
-                      name: widget.item.icon,
-                      size: FxSettingsLayout.iconSize,
-                      color: color,
-                      strokeWidth: widget.active ? 2.0 : 1.7,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        FxIcon(
+                          name: widget.item.icon,
+                          size: FxSettingsLayout.iconSize,
+                          color: color,
+                          strokeWidth: widget.active ? 2.0 : 1.7,
+                        ),
+                        if (widget.item.badgeCount > 0)
+                          Positioned(
+                            right: -6,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 1,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 14),
+                              decoration: BoxDecoration(
+                                color: EagleTokens.bad,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                widget.item.badgeCount > 9
+                                    ? '9+'
+                                    : '${widget.item.badgeCount}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.1,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Text(

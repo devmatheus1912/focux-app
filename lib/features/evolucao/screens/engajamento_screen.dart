@@ -10,6 +10,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/utils/motion_preferences.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -33,10 +34,12 @@ import '../widgets/engajamento_help_sheet.dart';
 class EngajamentoScreen extends ConsumerStatefulWidget {
   final int alunoId;
   final String alunoNome;
+  final String? initialSection;
   const EngajamentoScreen({
     super.key,
     required this.alunoId,
     required this.alunoNome,
+    this.initialSection,
   });
 
   @override
@@ -49,6 +52,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
   bool _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
+  final _checkinsSectionKey = GlobalKey();
 
   @override
   void initState() {
@@ -70,6 +74,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           _loading = false;
           _fetchedAt = DateTime.now();
         });
+        _scrollToInitialSectionIfNeeded();
       }
     } catch (e) {
       if (mounted) {
@@ -119,6 +124,21 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       '/alunos/${widget.alunoId}/chat',
       extra: widget.alunoNome,
     );
+  }
+
+  void _scrollToInitialSectionIfNeeded() {
+    if (widget.initialSection != 'checkins') return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final target = _checkinsSectionKey.currentContext;
+      if (target == null) return;
+      Scrollable.ensureVisible(
+        target,
+        alignment: 0.08,
+        duration: Duration(milliseconds: fxMotionDurationMs(context)),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   void _abrirEvento(EventoEngajamento evento) {
@@ -222,6 +242,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
           ),
           const SizedBox(height: TokensStrip.s2),
           OperationalMetricTile(
+            key: _checkinsSectionKey,
             label: 'Treinos',
             value: '${engajamentoTreinosCount(_eventos)}',
             hint: 'Check-ins e treinos na janela',

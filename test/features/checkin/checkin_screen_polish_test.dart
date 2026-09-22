@@ -39,7 +39,7 @@ void main() {
         contains('_loading'),
       ),
     );
-    expect(screen, contains('fxConfirmLeaveExecution'));
+    expect(screen, contains('showFxExecutionLeaveSheet'));
     expect(screen, contains('FxExecutionKeepAwake'));
     expect(screen, contains('FxExecutionPopGuard'));
     expect(screen, contains('_sair'));

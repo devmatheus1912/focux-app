@@ -19,6 +19,8 @@ void main() {
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('OperationalMetricTile'));
+    expect(screen, contains("label: 'Clínico'"));
+    expect(screen, contains('anamneseClinicoResumoValue'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('RefreshIndicator'));

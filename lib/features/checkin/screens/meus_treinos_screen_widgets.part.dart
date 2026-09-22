@@ -22,6 +22,60 @@ class _TrainingSkeleton extends StatelessWidget {
   }
 }
 
+class _RetomarTreinoBanner extends StatelessWidget {
+  final ExecucaoTreino treino;
+  final bool isDark;
+  final VoidCallback onRetomar;
+
+  const _RetomarTreinoBanner({
+    required this.treino,
+    required this.isDark,
+    required this.onRetomar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return FxStripCard(
+      emphasize: true,
+      accent: primary,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Retomar treino',
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ).copyWith(fontSize: 15),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  treino.treinoNome,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton(
+            onPressed: onRetomar,
+            child: const Text('Retomar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TrainingHero extends StatelessWidget {
   final int ativos;
   final int startableCount;
@@ -29,7 +83,6 @@ class _TrainingHero extends StatelessWidget {
   final int totalExercicios;
   final int totalConcluidos;
   final bool isDark;
-  final int? scoreValue;
   final int? streakAtual;
   final String? scoreNudge;
 
@@ -40,7 +93,6 @@ class _TrainingHero extends StatelessWidget {
     required this.totalExercicios,
     required this.totalConcluidos,
     required this.isDark,
-    this.scoreValue,
     this.streakAtual,
     this.scoreNudge,
   });
@@ -75,7 +127,6 @@ class _TrainingHero extends StatelessWidget {
       headline = 'Plano em montagem';
       subtitle = '$total treino${total == 1 ? '' : 's'} no plano atual';
     }
-    final showScore = scoreValue != null;
     final showStreak = streakAtual != null && streakAtual! > 0;
 
     return FxStripCard(
@@ -109,16 +160,6 @@ class _TrainingHero extends StatelessWidget {
                   ],
                 ),
               ),
-              if (showScore) ...[
-                const SizedBox(width: 10),
-                _TrainingScoreBadge(
-                  score: scoreValue!,
-                  primary: primary,
-                  ink: ink,
-                  mute: mute,
-                  isDark: isDark,
-                ),
-              ],
             ],
           ),
           if (showStreak || (scoreNudge != null && scoreNudge!.isNotEmpty)) ...[
@@ -167,58 +208,6 @@ class _TrainingHero extends StatelessWidget {
               ).copyWith(fontSize: 12, height: 1.3),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _TrainingScoreBadge extends StatelessWidget {
-  final int score;
-  final Color primary;
-  final Color ink;
-  final Color mute;
-  final bool isDark;
-
-  const _TrainingScoreBadge({
-    required this.score,
-    required this.primary,
-    required this.ink,
-    required this.mute,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: BrandPalette.soft(primary, dark: isDark),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: primary.withValues(alpha: 0.22)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '$score',
-            style: TextStyle(
-              color: ink,
-              fontSize: 18,
-              fontWeight: FontWeight.w900,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'score',
-            style: TextStyle(
-              color: mute,
-              fontSize: 9.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.2,
-            ),
-          ),
         ],
       ),
     );

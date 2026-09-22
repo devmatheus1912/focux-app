@@ -24,9 +24,8 @@ CheckinFocusAction checkinFocusAction(CheckinPersonalHomeBundle home) {
   if (focus == null) {
     return const CheckinFocusAction(label: 'Ver alunos');
   }
-  final nome = checkinPrimeiroNome(focus.alunoNome);
   return CheckinFocusAction(
-    label: nome.isEmpty ? 'Abrir aluno' : 'Abrir $nome',
+    label: 'Ver aluno',
     alunoId: focus.alunoId,
   );
 }

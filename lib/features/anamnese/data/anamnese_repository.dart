@@ -50,7 +50,7 @@ class Anamnese {
   final String? medicamentos;
   final String? alergias;
   final String? gestacaoPosParto;
-  final String? historicoFamiliarCv;
+  final bool? historicoFamiliarCv;
   final String? sintomasCv;
 
   // Hábitos
@@ -167,7 +167,7 @@ class Anamnese {
     medicamentos: j['medicamentos'] as String?,
     alergias: j['alergias'] as String?,
     gestacaoPosParto: j['gestacaoPosParto'] as String?,
-    historicoFamiliarCv: j['historicoFamiliarCv'] as String?,
+    historicoFamiliarCv: _parseBoolLoose(j['historicoFamiliarCv']),
     sintomasCv: j['sintomasCv'] as String?,
     sonoHoras: _parseSonoHoras(j['sonoHoras']),
     qualidadeSono: j['qualidadeSono'] as String?,
@@ -264,6 +264,26 @@ double? _parseSonoHoras(dynamic raw) {
     final trimmed = raw.trim().replaceAll(',', '.');
     if (trimmed.isEmpty) return null;
     return double.tryParse(trimmed);
+  }
+  return null;
+}
+
+/// Aceita bool nativo ou strings legadas ("sim"/"não"/"true"/…).
+bool? _parseBoolLoose(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is bool) return raw;
+  if (raw is num) {
+    if (raw == 1) return true;
+    if (raw == 0) return false;
+    return null;
+  }
+  if (raw is String) {
+    final t = raw.trim().toLowerCase();
+    if (t.isEmpty) return null;
+    if (t == 'true' || t == 'sim' || t == '1' || t == 'yes') return true;
+    if (t == 'false' || t == 'nao' || t == 'não' || t == '0' || t == 'no') {
+      return false;
+    }
   }
   return null;
 }

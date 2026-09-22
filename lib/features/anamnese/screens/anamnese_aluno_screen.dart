@@ -53,7 +53,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   final _medicCtrl = TextEditingController();
   final _alergiasCtrl = TextEditingController();
   final _gestacaoCtrl = TextEditingController();
-  final _historicoFamiliarCtrl = TextEditingController();
+  bool? _historicoFamiliarCv;
   final _sintomasCvCtrl = TextEditingController();
 
   // Hábitos
@@ -96,7 +96,6 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     _medicCtrl,
     _alergiasCtrl,
     _gestacaoCtrl,
-    _historicoFamiliarCtrl,
     _sintomasCvCtrl,
     _qualidadeSonoCtrl,
     _estresseCtrl,
@@ -204,7 +203,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     _medicCtrl.text = a.medicamentos ?? '';
     _alergiasCtrl.text = a.alergias ?? '';
     _gestacaoCtrl.text = a.gestacaoPosParto ?? '';
-    _historicoFamiliarCtrl.text = a.historicoFamiliarCv ?? '';
+    _historicoFamiliarCv = a.historicoFamiliarCv;
     _sintomasCvCtrl.text = a.sintomasCv ?? '';
     _sonoHoras = a.sonoHoras;
     _qualidadeSonoCtrl.text = a.qualidadeSono ?? '';
@@ -270,7 +269,8 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
     'medicamentos': _medicCtrl.text.trim(),
     'alergias': _alergiasCtrl.text.trim(),
     'gestacaoPosParto': _gestacaoCtrl.text.trim(),
-    'historicoFamiliarCv': _historicoFamiliarCtrl.text.trim(),
+    if (_historicoFamiliarCv != null)
+      'historicoFamiliarCv': _historicoFamiliarCv,
     'sintomasCv': _sintomasCvCtrl.text.trim(),
     if (_sonoHoras != null) 'sonoHoras': _sonoHoras,
     'qualidadeSono': _qualidadeSonoCtrl.text.trim(),
@@ -507,12 +507,24 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         icon: Icons.pregnant_woman_outlined,
                         maxLines: 2,
                       ),
-                      AlunoInsetFormField(
-                        controller: _historicoFamiliarCtrl,
+                      AlunoChoiceSection(
                         label: 'Histórico familiar cardiovascular',
-                        hint: 'Pais, irmãos — infarto, AVC, etc.',
-                        icon: Icons.family_restroom_outlined,
-                        maxLines: 2,
+                        isDark: isDark,
+                        showDividerAbove: true,
+                        child: AlunoSegmentedChoice(
+                          options: const [
+                            (value: 'true', label: 'Sim'),
+                            (value: 'false', label: 'Não'),
+                          ],
+                          selected: _historicoFamiliarCv == null
+                              ? null
+                              : (_historicoFamiliarCv! ? 'true' : 'false'),
+                          isDark: isDark,
+                          onSelect: (v) {
+                            setState(() => _historicoFamiliarCv = v == 'true');
+                            _markDirty();
+                          },
+                        ),
                       ),
                       AlunoInsetFormField(
                         controller: _sintomasCvCtrl,

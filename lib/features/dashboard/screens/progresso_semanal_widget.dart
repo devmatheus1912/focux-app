@@ -39,7 +39,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
     ).subtract(Duration(days: now.weekday - 1));
 
     return Container(
-      padding: const EdgeInsets.all(TokensStrip.s4),
+      padding: const EdgeInsets.all(TokensStrip.s3),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [cs.primary, BrandPalette.deep(cs.primary)],
@@ -87,15 +87,10 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: TokensStrip.s3),
           Text(
-            'Treinos concluídos nesta semana',
+            'Treinos concluídos nesta semana · descanso não zera',
             style: FocuxHubTypography.bodyMuted(color: Colors.white70),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            'Semana com pelo menos um treino. Dia de descanso não zera.',
-            style: FocuxHubTypography.cardSubtitle(color: Colors.white70),
           ),
           const SizedBox(height: TokensStrip.s2),
           Row(

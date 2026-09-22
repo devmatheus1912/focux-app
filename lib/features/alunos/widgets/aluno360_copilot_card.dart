@@ -195,6 +195,8 @@ class Aluno360CopilotCard extends ConsumerWidget {
       fallback: fallback,
     );
     final showPrepareInPrescription = operacao.showPrepareMessage;
+    final hideDuplicateContactAction =
+        operacao.contactPriority && stickyAction.isChatAction;
     final wearableRelevant =
         effectiveProxima?.wearableRelevant ??
         bundle?.hasWearableHistory ??
@@ -326,6 +328,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 contactPriority: operacao.contactPriority,
                 statusMetricsVisible: true,
                 hideMetricFooter: false,
+                hideDuplicateContactAction: hideDuplicateContactAction,
                 onPrepareMessage:
                     showPrepareInPrescription
                         ? () => _prepararMensagem(
@@ -352,6 +355,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
             if (!hasOpenTask && openActionsAsync.isLoading)
               const SizedBox(height: 10),
             if (!hasOpenTask &&
+                !shouldHideCopilotExecutarWhenStickyChat(sticky: stickyAction) &&
                 shouldShowCopilotExecutarAcao(
                   tipoAcao: effectiveProxima?.tipoAcao,
                   aluno: aluno,

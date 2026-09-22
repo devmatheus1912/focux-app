@@ -337,7 +337,10 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   ))
                                     _RetencaoTile(
                                       score: score,
-                                      onTap: () => _abrirAcoes(score),
+                                      isDark: isDark,
+                                      onChat: () => _abrirChat(score),
+                                      onAluno: () => _abrirAluno(score),
+                                      onMais: () => _abrirAcoes(score),
                                     ),
                               ],
                             ),
@@ -364,52 +367,49 @@ class _RetencaoMetricStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Row(
       children: [
-        InkWell(
-          onTap: home.alto > 0 ? onFiltrarAlto : null,
-          borderRadius: BorderRadius.circular(12),
-          child: OperationalMetricTile(
-            label: 'Risco alto',
-            value: '${home.alto}',
-            hint: retencaoMetricAltoLabel(home.alto),
-            color: home.alto > 0 ? EagleTokens.bad : primary,
-            isDark: isDark,
-            emphasis:
-                home.alto > 0
-                    ? OperationalMetricEmphasis.alert
-                    : OperationalMetricEmphasis.normal,
-            semanticsLabel: '${home.alto} em risco alto',
+        Expanded(
+          child: InkWell(
+            onTap: home.alto > 0 ? onFiltrarAlto : null,
+            borderRadius: BorderRadius.circular(12),
+            child: OperationalMetricTile(
+              label: 'Alto',
+              value: '${home.alto}',
+              hint: retencaoMetricAltoLabel(home.alto),
+              color: home.alto > 0 ? EagleTokens.bad : primary,
+              isDark: isDark,
+              emphasis:
+                  home.alto > 0
+                      ? OperationalMetricEmphasis.alert
+                      : OperationalMetricEmphasis.normal,
+              semanticsLabel: '${home.alto} em risco alto',
+            ),
           ),
         ),
-        const SizedBox(height: TokensStrip.s2),
-        Row(
-          children: [
-            Expanded(
-              child: OperationalMetricTile(
-                label: 'Médio',
-                value: '${home.medio}',
-                hint: retencaoMetricMedioLabel(home.medio),
-                color: EagleTokens.warn,
-                isDark: isDark,
-                emphasis: OperationalMetricEmphasis.muted,
-                semanticsLabel: '${home.medio} risco médio',
-              ),
-            ),
-            const SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: OperationalMetricTile(
-                label: 'Saudável',
-                value: '${home.saudavel}',
-                hint: retencaoMetricSaudavelLabel(home.saudavel),
-                color: primary,
-                isDark: isDark,
-                emphasis: OperationalMetricEmphasis.muted,
-                semanticsLabel: '${home.saudavel} saudáveis',
-              ),
-            ),
-          ],
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
+          child: OperationalMetricTile(
+            label: 'Médio',
+            value: '${home.medio}',
+            hint: retencaoMetricMedioLabel(home.medio),
+            color: EagleTokens.warn,
+            isDark: isDark,
+            emphasis: OperationalMetricEmphasis.muted,
+            semanticsLabel: '${home.medio} risco médio',
+          ),
+        ),
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
+          child: OperationalMetricTile(
+            label: 'Saudável',
+            value: '${home.saudavel}',
+            hint: retencaoMetricSaudavelLabel(home.saudavel),
+            color: primary,
+            isDark: isDark,
+            emphasis: OperationalMetricEmphasis.muted,
+            semanticsLabel: '${home.saudavel} saudáveis',
+          ),
         ),
       ],
     );
@@ -529,7 +529,18 @@ class _RetencaoFocusCard extends StatelessWidget {
                 isDark: isDark,
                 onPressed: run(split.primary),
               ),
-              if (split.secondary.isNotEmpty)
+              if (firstAlto != null)
+                DashboardHomeActionChip(
+                  label: retencaoFocusActionLabel(
+                    RetencaoFocusActionId.aluno360,
+                  ),
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: () => onAluno(firstAlto),
+                ),
+              if (split.secondary.any(
+                (id) => id != RetencaoFocusActionId.aluno360,
+              ))
                 DashboardHomeActionChip(
                   label: 'Mais ações',
                   accent: chrome.mute,
@@ -545,20 +556,69 @@ class _RetencaoFocusCard extends StatelessWidget {
 }
 
 class _RetencaoTile extends StatelessWidget {
-  const _RetencaoTile({required this.score, required this.onTap});
+  const _RetencaoTile({
+    required this.score,
+    required this.isDark,
+    required this.onChat,
+    required this.onAluno,
+    required this.onMais,
+  });
 
   final RetencaoAlunoScore score;
-  final VoidCallback onTap;
+  final bool isDark;
+  final VoidCallback onChat;
+  final VoidCallback onAluno;
+  final VoidCallback onMais;
 
   @override
   Widget build(BuildContext context) {
     final alto = retencaoRiscoAlto(score.riscoChurn);
-    return FxSatelliteListTile(
-      title: score.alunoNome,
-      subtitle: Text(retencaoPorque(score)),
-      accent: alto ? EagleTokens.bad : null,
-      margin: const EdgeInsets.only(bottom: TokensStrip.s2),
-      onTap: onTap,
+    final primary = Theme.of(context).colorScheme.primary;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxSatelliteListTile(
+            title: score.alunoNome,
+            subtitle: Text(retencaoPorque(score)),
+            accent: alto ? EagleTokens.bad : null,
+            onTap: onAluno,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: TokensStrip.s2,
+              top: TokensStrip.s1,
+            ),
+            child: Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                DashboardHomeActionChip(
+                  label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
+                  accent: alto ? EagleTokens.bad : primary,
+                  isDark: isDark,
+                  onPressed: onChat,
+                ),
+                DashboardHomeActionChip(
+                  label: retencaoFocusActionLabel(
+                    RetencaoFocusActionId.aluno360,
+                  ),
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed: onAluno,
+                ),
+                DashboardHomeActionChip(
+                  label: 'Mais',
+                  accent: ShellChrome.of(context).mute,
+                  isDark: isDark,
+                  onPressed: onMais,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

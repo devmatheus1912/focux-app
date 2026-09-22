@@ -14,15 +14,18 @@ Color alunoListSecondaryInk(bool isDark) =>
         ? (EagleTokens.warnAccentSoft, EagleTokens.warnSurfaceDark)
         : (EagleTokens.warnDeep, EagleTokens.warnSoft);
 
+/// Badge «Risco médio» — menos alarme que alto.
+(Color, Color) alunoRiscoMedioBadgeColors(bool isDark) =>
+    isDark
+        ? (EagleTokens.warmPeachSoft, EagleTokens.warnSurfaceDarkAlt)
+        : (EagleTokens.warnDeepDark, EagleTokens.warnSoft);
+
 /// Hero metric chip — mesma família cromática da lista, por nível.
 (Color, Color) alunoHeroRiscoMetricBadgeColors(bool isDark, String nivel) {
   final upper = nivel.trim().toUpperCase();
   return switch (upper) {
     'ALTO' => alunoRiscoAltoBadgeColors(isDark),
-    'MÉDIO' || 'MEDIO' =>
-      isDark
-          ? (EagleTokens.warmPeachSoft, EagleTokens.warnSurfaceDarkAlt)
-          : (EagleTokens.warnDeepDark, EagleTokens.warnSoft),
+    'MÉDIO' || 'MEDIO' => alunoRiscoMedioBadgeColors(isDark),
     'BAIXO' =>
       isDark
           ? (EagleTokens.goodAccent, EagleTokens.goodSurfaceDark)
@@ -162,9 +165,13 @@ bool shouldShowAlunoListOpsLine({
     );
   }
   if (aluno.emRisco) {
-    final riscoColors = alunoRiscoAltoBadgeColors(isDark);
+    final nivel = (aluno.riscoNivel ?? '').toUpperCase();
+    final isAlto = nivel == 'ALTO';
+    final riscoColors = isAlto
+        ? alunoRiscoAltoBadgeColors(isDark)
+        : alunoRiscoMedioBadgeColors(isDark);
     return (
-      label: 'Risco alto',
+      label: isAlto ? 'Risco alto' : 'Risco médio',
       fill: riscoColors.$2,
       foreground: riscoColors.$1,
     );

@@ -35,6 +35,16 @@ String copilotExecutarConfirmBody(String backendTipo) {
   };
 }
 
+bool _acaoSugereAjusteCarga(String? acao) {
+  final lower = (acao ?? '').toLowerCase();
+  if (lower.isEmpty) return false;
+  return lower.contains('carga') ||
+      lower.contains('progress') ||
+      lower.contains('reduzir') ||
+      lower.contains('aumentar volume') ||
+      lower.contains('ajuste de');
+}
+
 CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
   required String? tipoAcao,
   required Aluno aluno,
@@ -42,7 +52,10 @@ CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
   String? outreachMessage,
 }) {
   final tipo = tipoAcao?.toUpperCase();
-  if (tipo == 'TREINO') {
+  final acao = proxima?.acao;
+
+  // Ajuste de carga só quando a ação fala explicitamente de carga/progressão.
+  if (_acaoSugereAjusteCarga(acao) || tipo == 'CARGA') {
     return const CopilotExecutarAcaoSpec(
       backendTipo: 'REDUZIR_CARGA',
       label: 'Aplicar ajuste de carga (−15%)',
@@ -56,8 +69,23 @@ CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
     proxima: proxima,
     outreachMessage: outreachMessage,
     aluno: aluno,
-    acao: proxima?.acao,
+    acao: acao,
   );
+
+  // TREINO / check-in → notificar ou abrir fluxo de contato — nunca carga.
+  if (tipo == 'TREINO') {
+    if (pushMessage != null) {
+      return CopilotExecutarAcaoSpec(
+        backendTipo: 'ENVIAR_PUSH',
+        parametros: pushMessage,
+        label: 'Pedir check-in ao aluno',
+        icon: Icons.notifications_active_outlined,
+        executingLabel: 'Enviando…',
+        executingSemantics: 'Enviando pedido de check-in',
+      );
+    }
+    return null;
+  }
 
   if (tipo == 'CONTATO' || tipo == 'WEARABLE') {
     if (pushMessage != null) {
@@ -111,10 +139,12 @@ String? _copilotExecutarPushMessage({
   return null;
 }
 
-String? copilotExecutarBackendTipo(String? tipoAcao) {
+String? copilotExecutarBackendTipo(String? tipoAcao, {String? acao}) {
+  if (_acaoSugereAjusteCarga(acao) || tipoAcao?.toUpperCase() == 'CARGA') {
+    return 'REDUZIR_CARGA';
+  }
   switch (tipoAcao?.toUpperCase()) {
     case 'TREINO':
-      return 'REDUZIR_CARGA';
     case 'CONTATO':
     case 'WEARABLE':
       return 'ENVIAR_PUSH';
@@ -137,14 +167,17 @@ bool shouldShowCopilotExecutarAcao({
     ) !=
     null;
 
-String copilotExecutarAcaoLabel(String? tipoAcao) {
+String copilotExecutarAcaoLabel(String? tipoAcao, {String? acao}) {
+  if (_acaoSugereAjusteCarga(acao) || tipoAcao?.toUpperCase() == 'CARGA') {
+    return 'Aplicar ajuste de carga (−15%)';
+  }
   switch (tipoAcao?.toUpperCase()) {
     case 'TREINO':
-      return 'Aplicar ajuste de carga (−15%)';
+      return 'Pedir check-in ao aluno';
     case 'CONTATO':
     case 'WEARABLE':
       return 'Enviar notificação ao aluno';
     default:
-      return 'Aplicar ajuste';
+      return 'Aplicar ação';
   }
 }

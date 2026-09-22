@@ -157,7 +157,7 @@ class _AnamneseFicha extends StatelessWidget {
         ('Medicamentos', anamneseTextOrDash(a.medicamentos)),
         ('Alergias', anamneseTextOrDash(a.alergias)),
         ('Gestação / pós-parto', anamneseTextOrDash(a.gestacaoPosParto)),
-        ('Histórico familiar CV', anamneseTextOrDash(a.historicoFamiliarCv)),
+        ('Histórico familiar CV', anamneseBoolLabel(a.historicoFamiliarCv)),
         ('Sintomas CV', anamneseTextOrDash(a.sintomasCv)),
       ],
       anamneseSecaoHabitos => [

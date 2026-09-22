@@ -24,6 +24,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/checkin_repository.dart';
+import '../data/historico_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/historico_display.dart';
 
@@ -53,7 +54,13 @@ class _HistoricoCheckinScreenState
   @override
   void initState() {
     super.initState();
-    _load(reset: true);
+    final cached = HistoricoMemCache.loadIfFresh();
+    if (cached != null && cached.isNotEmpty) {
+      _items.addAll(cached);
+      _loading = false;
+      _fetchedAt = DateTime.now();
+    }
+    _load(reset: true, keepStale: cached != null && cached.isNotEmpty);
   }
 
   @override
@@ -72,14 +79,16 @@ class _HistoricoCheckinScreenState
     });
   }
 
-  Future<void> _load({required bool reset}) async {
+  Future<void> _load({required bool reset, bool keepStale = false}) async {
     if (reset) {
       setState(() {
-        _loading = true;
+        _loading = _items.isEmpty;
         _erro = null;
-        _items.clear();
-        _nextCursor = null;
-        _hasNext = false;
+        if (!keepStale) {
+          _items.clear();
+          _nextCursor = null;
+          _hasNext = false;
+        }
       });
     } else {
       if (_loadingMore || !_hasNext) return;
@@ -93,13 +102,20 @@ class _HistoricoCheckinScreenState
       );
       if (!mounted) return;
       setState(() {
-        _items.addAll(pagina.content);
+        if (reset) {
+          _items
+            ..clear()
+            ..addAll(pagina.content);
+        } else {
+          _items.addAll(pagina.content);
+        }
         _hasNext = pagina.hasNext;
         _nextCursor = pagina.nextCursor;
         _loading = false;
         _loadingMore = false;
         if (reset) {
           _fetchedAt = DateTime.now();
+          HistoricoMemCache.save(_items);
           ref.invalidate(historicoCheckinProvider);
         }
       });
@@ -273,10 +289,10 @@ class _HistoricoCheckinScreenState
             ),
             Expanded(
               child:
-                  _loading
+                  _loading && visible.isEmpty
                       ? const Padding(
                         padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                        child: SkeletonList(count: 6),
+                        child: SkeletonList(count: 5),
                       )
                       : _erro != null
                       ? FxErrorState(
@@ -302,7 +318,7 @@ class _HistoricoCheckinScreenState
           _query.trim().isNotEmpty || _chip != HistoricoStatusChip.todos;
       return RefreshIndicator(
         color: primary,
-        onRefresh: () => _load(reset: true),
+        onRefresh: () => _load(reset: true, keepStale: true),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -393,7 +409,7 @@ class _HistoricoCheckinScreenState
 
     return RefreshIndicator(
       color: primary,
-      onRefresh: () => _load(reset: true),
+      onRefresh: () => _load(reset: true, keepStale: true),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,

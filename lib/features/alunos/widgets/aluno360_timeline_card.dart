@@ -297,11 +297,10 @@ class Aluno360TimelineCard extends StatelessWidget {
                 child: FxSatelliteListTile(
                   title: _timelineTileLabel(visibleItems[i]),
                   titleCase: false,
-                  isThreeLine: true,
+                  isThreeLine: false,
                   subtitle: Text(
                     _timelineTileSubtitle(visibleItems[i]),
-                    maxLines: 2,
-                    softWrap: true,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   accent: visibleItems[i].color,

@@ -196,6 +196,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     if (_execucao == null) return;
     final numero = (ee.seriesFeitas + 1).clamp(1, ee.series ?? 999);
     final draft = _draftFor(ee);
+    int? rpe;
+    if (ee.rpeAlvo != null) {
+      rpe = await showCheckinRpeAlvoPrompt(context, rpeAlvo: ee.rpeAlvo!);
+      if (rpe == null || !mounted) return;
+    }
     try {
       HapticFeedback.selectionClick();
       final updated = await ref
@@ -206,6 +211,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
             numero: numero,
             cargaKg: draft.cargaKg,
             repeticoes: draft.reps == null ? null : '${draft.reps}',
+            rpe: rpe,
           );
       if (!mounted) return;
       _applyUpdated(updated);
@@ -416,11 +422,38 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       0,
       (sum, e) => sum + e.seriesFeitas,
     );
-    final ok = await fxConfirmLeaveExecution(
+    final choice = await showFxExecutionLeaveSheet(
       context,
       hasProgress: doneSeries > 0 || _duration.inSeconds > 30,
     );
-    if (!ok || !mounted) return;
+    if (choice == null || !mounted) return;
+    switch (choice) {
+      case FxExecutionLeaveChoice.encerrarAgora:
+        await _concluir();
+        return;
+      case FxExecutionLeaveChoice.descartar:
+        final id = _execucao?.id;
+        if (id != null) {
+          try {
+            await ref.read(checkinRepositoryProvider).descartar(id);
+            MeusTreinosMemCache.clear();
+            EvolucaoHomeClientCache.clear();
+            Aluno360ClientCache.clear();
+            ref.invalidate(historicoCheckinProvider);
+            ref.invalidate(meusTreinosProvider);
+            ref.invalidate(alunoDashboardHomeProvider);
+          } catch (e) {
+            if (mounted) {
+              FeedbackHelper.showError(context, friendlyError(e));
+            }
+            return;
+          }
+        }
+        break;
+      case FxExecutionLeaveChoice.continuarDepois:
+        break;
+    }
+    if (!mounted) return;
     safePopOrGo(context, '/checkin/treinos');
   }
 

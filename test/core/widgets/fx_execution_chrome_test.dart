@@ -10,7 +10,9 @@ void main() {
     expect(src, contains('WakelockPlus.enable()'));
     expect(src, contains('class FxExecutionPopGuard'));
     expect(src, contains('canPop: false'));
+    expect(src, contains('showFxExecutionLeaveSheet'));
+    expect(src, contains('FxExecutionLeaveChoice'));
+    expect(src, contains('Continuar depois'));
     expect(src, contains('fxConfirmLeaveExecution'));
-    expect(src, contains('showFxConfirmSheet'));
   });
 }

@@ -425,7 +425,7 @@ class _VolumeSparklineRow extends StatelessWidget {
                 if (singleWeek) ...[
                   const SizedBox(height: 2),
                   Text(
-                    'Primeira semana com volume',
+                    'Tendência · 1 semana',
                     style: Aluno360Layout.captionStyle(context).copyWith(
                       color: mute,
                     ),

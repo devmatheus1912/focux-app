@@ -68,7 +68,7 @@ void main() {
       expect(badge.label, 'Inadimplente');
     });
 
-    test('marca risco alto', () {
+    test('marca risco alto só com nivel ALTO', () {
       final badge = alunoListStatusBadge(
         Aluno(
           id: 2,
@@ -76,10 +76,26 @@ void main() {
           email: 'b@test.com',
           status: 'ATIVO',
           emRisco: true,
+          riscoNivel: 'ALTO',
         ),
         true,
       );
       expect(badge.label, 'Risco alto');
+    });
+
+    test('marca risco medio quando emRisco sem ALTO', () {
+      final badge = alunoListStatusBadge(
+        Aluno(
+          id: 3,
+          nome: 'Carla',
+          email: 'c@test.com',
+          status: 'ATIVO',
+          emRisco: true,
+          riscoNivel: 'MEDIO',
+        ),
+        true,
+      );
+      expect(badge.label, 'Risco médio');
     });
   });
 

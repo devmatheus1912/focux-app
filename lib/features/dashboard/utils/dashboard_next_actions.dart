@@ -122,10 +122,13 @@ List<CommandActionItem> buildDashboardNextActions({
     if (copilotAcoes.isNotEmpty)
       CommandActionItem(
         icon: 'zap',
-        title: dashboardFormatActionCopy(
-          copilotAcoes.first.titulo.isNotEmpty
-              ? copilotAcoes.first.titulo
-              : 'Revisar tarefa IA',
+        title: dashboardClampActionCopy(
+          dashboardFormatActionCopy(
+            copilotAcoes.first.titulo.isNotEmpty
+                ? copilotAcoes.first.titulo
+                : 'Revisar tarefa IA',
+          ),
+          maxChars: 48,
         ),
         subtitle: dashboardClampActionCopy(copilotAcoes.first.descricao),
         route: '/dashboard/command-center/copiloto',
@@ -169,7 +172,12 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
   );
   return CommandActionItem(
     icon: 'zap',
-    title: radarName ?? dashboardFormatActionCopy(rawTitle),
+    title:
+        radarName ??
+        dashboardClampActionCopy(
+          dashboardFormatActionCopy(rawTitle),
+          maxChars: 48,
+        ),
     subtitle: dashboardClampActionCopy(action.descricao),
     route:
         action.acaoUrl.startsWith('/') ? action.acaoUrl : '/dashboard/personal',

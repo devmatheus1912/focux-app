@@ -56,6 +56,7 @@ class AlunoFollowUpActions {
     invalidateAlunosCachesRef(_ref);
     _ref.invalidate(alunoProvider(alunoId));
     _ref.invalidate(aluno360Provider(alunoId));
+    _ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
   }
 }
 

@@ -117,6 +117,24 @@ void main() {
       );
     });
 
+    test('treinoSessaoEmAndamento retorna ficha aberta', () {
+      final treinos = [
+        ExecucaoTreino(
+          treinoId: 1,
+          treinoNome: 'A',
+          status: 'CONCLUIDO',
+          exercicios: const [],
+        ),
+        ExecucaoTreino(
+          treinoId: 2,
+          treinoNome: 'B',
+          status: 'EM_ANDAMENTO',
+          exercicios: const [],
+        ),
+      ];
+      expect(treinoSessaoEmAndamento(treinos)?.treinoId, 2);
+    });
+
     test('consistencia conta dias unicos e nao N execucoes', () {
       final historico = [
         ExecucaoTreino(

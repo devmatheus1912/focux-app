@@ -29,7 +29,7 @@ void main() {
         semana: const [],
       ),
     );
-    expect(hoje.label, 'Abrir Ana');
+    expect(hoje.label, 'Ver aluno');
     expect(hoje.alunoId, 3);
 
     final semana = checkinFocusAction(
@@ -39,7 +39,7 @@ void main() {
         semana: [item(alunoId: 8, nome: 'Bia')],
       ),
     );
-    expect(semana.label, 'Abrir Bia');
+    expect(semana.label, 'Ver aluno');
     expect(semana.alunoId, 8);
   });
 }

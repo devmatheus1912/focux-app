@@ -52,7 +52,10 @@ Future<void> exportAnamnesePdf(AnamnesePdfSnapshot s) async {
             _campo('Medicamentos', a.medicamentos ?? ''),
             _campo('Alergias', a.alergias ?? ''),
             _campo('Gestação / pós-parto', a.gestacaoPosParto ?? ''),
-            _campo('Histórico familiar CV', a.historicoFamiliarCv ?? ''),
+            _campo(
+              'Histórico familiar CV',
+              anamneseBoolLabel(a.historicoFamiliarCv),
+            ),
             _campo('Sintomas CV', a.sintomasCv ?? ''),
             pw.SizedBox(height: 12),
             _secao('Hábitos'),

@@ -37,7 +37,7 @@ void main() {
         ),
         home: Scaffold(
           body: FxDock(
-            items: FxDockItems.aluno,
+            items: FxDockItems.aluno(chatUnread: 2),
             currentIndex: 0,
             onTap: (_) {},
             isDark: false,
@@ -48,7 +48,10 @@ void main() {
 
     expect(find.text('Hoje'), findsOneWidget);
     expect(find.text('Treinos'), findsOneWidget);
+    expect(find.text('Chat'), findsOneWidget);
     expect(find.text('Perfil'), findsOneWidget);
+    expect(find.text('9+'), findsNothing);
+    expect(find.text('2'), findsOneWidget);
     expect(find.text('Alunos'), findsNothing);
   });
 

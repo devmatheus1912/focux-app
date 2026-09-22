@@ -121,6 +121,30 @@ String anamneseDispMetricValue(Anamnese a) {
   return anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!);
 }
 
+/// Fold compacto (1–2 tiles) — PAR-Q+ e alertas.
+String anamneseClinicoResumoValue(Anamnese a) {
+  final parq = anamneseParqMetricValue(a);
+  final n = a.alertas.length;
+  if (n == 0) return parq;
+  return '$parq · $n alerta${n == 1 ? '' : 's'}';
+}
+
+String anamneseClinicoResumoHint(Anamnese a) {
+  if (a.alertas.isNotEmpty) return anamneseAlertasMetricHint(a);
+  return anamneseParqMetricHint(a);
+}
+
+String anamneseOperacaoResumoValue(Anamnese a) =>
+    anamneseDispMetricValue(a);
+
+String anamneseOperacaoResumoHint(Anamnese a) {
+  final obj = a.objetivo?.trim();
+  if (obj != null && obj.isNotEmpty) {
+    return obj.length > 48 ? '${obj.substring(0, 48)}…' : obj;
+  }
+  return 'Disponibilidade e objetivo';
+}
+
 String anamneseSonoHorasLabel(num? horas) {
   if (horas == null) return '—';
   final value = horas.toDouble();

@@ -80,6 +80,20 @@ OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
   }
 }
 
+/// `go_router` extra for engajamento — nome alone or `{nome, section}`.
+Object operacaoEngajamentoRouteExtra(
+  String alunoNome, {
+  String? section,
+}) {
+  if (section == null || section.isEmpty) return alunoNome;
+  return <String, String>{'nome': alunoNome, 'section': section};
+}
+
+String? operacaoEngajamentoSectionForStatusKind(OperacaoStatusCardKind kind) {
+  if (kind == OperacaoStatusCardKind.checkins7d) return 'checkins';
+  return null;
+}
+
 OperacaoStatusCardDestination _focoDoDiaDestination({
   required bool contactPriority,
   ProximaAcaoResumo? proximaAcao,
@@ -666,6 +680,12 @@ bool shouldHideCopilotPrescriptionWhenMatchesSticky({
   if (raw.isEmpty) return false;
   return sticky.label == copilotStickyLabel(aluno, raw);
 }
+
+/// Sticky chat already owns contact — hide push / marcar-risco executar row.
+bool shouldHideCopilotExecutarWhenStickyChat({
+  required OperacaoStickyAction sticky,
+}) =>
+    sticky.isChatAction;
 
 /// Hide copilot primary CTA when sticky already covers Command Center action.
 bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({

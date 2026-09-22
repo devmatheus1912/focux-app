@@ -114,7 +114,13 @@ String dashboardClampActionCopy(
   String raw, {
   int maxChars = kDashboardActionCopyMaxChars,
 }) {
-  final text = dashboardFormatCountCopy(raw).trim();
+  var text = dashboardFormatCountCopy(raw).trim();
+  text = text
+      .replaceFirst(
+        RegExp(r'\s*[·—–-]\s*Pr[oó]xima a[cç][aã]o:.*$', caseSensitive: false),
+        '',
+      )
+      .trim();
   if (text.length <= maxChars) return text;
   var cut = text.lastIndexOf(' ', maxChars);
   if (cut < (maxChars / 2)) cut = maxChars;

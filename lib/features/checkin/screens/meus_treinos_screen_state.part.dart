@@ -136,6 +136,16 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
             ),
             showBack: false,
             actions: [
+              TextButton(
+                onPressed: () => context.push('/checkin/historico'),
+                child: Text(
+                  'Histórico',
+                  style: TextStyle(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
               IconButton(
                 onPressed: () => ref.invalidate(meusTreinosProvider),
                 icon: Icon(Icons.refresh_rounded, color: chrome.mute),
@@ -184,6 +194,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                   final itemCount =
                       ordered.length +
                       (_hasMore || _loadMoreError != null ? 1 : 0);
+                  final sessaoAberta = treinoSessaoEmAndamento(ordered);
 
                   return RefreshIndicator(
                     color: primary,
@@ -194,6 +205,25 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                           ScrollViewKeyboardDismissBehavior.onDrag,
                       slivers: [
                         const SliverToBoxAdapter(child: SizedBox(height: 6)),
+                        if (sessaoAberta != null)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s5,
+                                0,
+                                20,
+                                8,
+                              ),
+                              child: _RetomarTreinoBanner(
+                                treino: sessaoAberta,
+                                isDark: isDark,
+                                onRetomar: () => context.push(
+                                  '/checkin/executar',
+                                  extra: sessaoAberta.treinoId,
+                                ),
+                              ),
+                            ),
+                          ),
                         SliverToBoxAdapter(
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(
@@ -209,7 +239,6 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                               totalExercicios: totalExercicios,
                               totalConcluidos: totalConcluidos,
                               isDark: isDark,
-                              scoreValue: experience?.score.value,
                               streakAtual: home?.streakAtual,
                               scoreNudge: experience?.score.nextSignal,
                             ),
@@ -258,6 +287,17 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                   final treino = ordered[index];
                                   if (_startingTreinoId != null ||
                                       _confirmingTreinoId != null) {
+                                    return;
+                                  }
+                                  final aberta = treinoSessaoEmAndamento(
+                                    ordered,
+                                  );
+                                  if (aberta != null &&
+                                      aberta.treinoId != treino.treinoId) {
+                                    FeedbackHelper.showInfo(
+                                      context,
+                                      'Retome "${aberta.treinoNome}" ou descarte a sessão antes de iniciar outro treino.',
+                                    );
                                     return;
                                   }
                                   setState(

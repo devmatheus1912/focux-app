@@ -55,6 +55,14 @@ class _CheckinPersonalHubScreenState
           .cobrarTreino(pendente.alunoId, treinoId: pendente.treinoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Lembrete enviado');
+      final nome = checkinPrimeiroNome(pendente.alunoNome);
+      final saudacao = nome.isEmpty ? 'Oi!' : 'Oi $nome!';
+      final draft =
+          '$saudacao Passando para lembrar do treino "${pendente.treinoNome}" de hoje.';
+      context.push(
+        '/alunos/${pendente.alunoId}/chat',
+        extra: {'nome': pendente.alunoNome, 'draft': draft},
+      );
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));

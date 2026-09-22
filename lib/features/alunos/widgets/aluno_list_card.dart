@@ -180,9 +180,7 @@ class AlunoListCard extends ConsumerWidget {
           ),
           decoration: fxListCardDecoration(
             context,
-            accent: aluno.emRisco
-                ? (isDark ? EagleTokens.bad : EagleTokens.bad)
-                : primary,
+            accent: primary,
             radius: FxSettingsLayout.groupRadius,
           ),
           child: Column(

@@ -214,6 +214,26 @@ String? stringRouteExtra(GoRouterState state) {
   return extra is String && extra.trim().isNotEmpty ? extra : null;
 }
 
+/// Parses engajamento route extra (String nome or `{nome, section}`).
+({String alunoNome, String? section}) engajamentoScreenRouteArgs(
+  GoRouterState state,
+) {
+  final extra = state.extra;
+  if (extra is Map) {
+    final nome = extra['nome'];
+    final section = extra['section'];
+    return (
+      alunoNome:
+          nome is String && nome.trim().isNotEmpty ? nome.trim() : 'Aluno',
+      section: section is String && section.trim().isNotEmpty
+          ? section.trim()
+          : null,
+    );
+  }
+  final nome = stringRouteExtra(state);
+  return (alunoNome: nome ?? 'Aluno', section: null);
+}
+
 String? chatAlunoNomeExtra(GoRouterState state) {
   final extra = state.extra;
   if (extra is String && extra.trim().isNotEmpty) return extra;
