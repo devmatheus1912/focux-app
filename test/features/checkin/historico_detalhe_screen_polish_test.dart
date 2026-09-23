@@ -27,6 +27,8 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('historicoSeriesFeitasEfetivas'));
     expect(screen, contains('historicoEmptySeriesFromExercicios'));
+    expect(screen, contains('historicoVolumeHint'));
+    expect(screen, isNot(contains('EagleTokens.warn')));
     expect(screen, contains('historicoStatusDisplayLabel'));
     expect(screen, contains('historicoSessaoMetricsFromExecucao'));
     expect(screen, contains('evolucaoSessao'));

@@ -9,6 +9,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../utils/chat_system_event.dart';
 import 'conversation_media_widgets.dart';
 
 class ConversationDateDivider extends StatelessWidget {
@@ -227,6 +228,7 @@ class _ConversationSwipeReplyWrapperState
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.86,
       child: Stack(
+        clipBehavior: Clip.none,
         alignment:
             widget.alignRight ? Alignment.centerRight : Alignment.centerLeft,
         children: [
@@ -271,10 +273,54 @@ class ConversationChatBackdrop extends StatelessWidget {
   }
 }
 
+class ConversationSystemEvent extends StatelessWidget {
+  final ChatMsg msg;
+
+  const ConversationSystemEvent({super.key, required this.msg});
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final view = formatChatSystemEvent(msg.conteudo);
+    final time = _conversationTimeLabel(msg.enviadoEm);
+    return Semantics(
+      label: '${view.threadLabel}, $time',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s4,
+          vertical: TokensStrip.s3,
+        ),
+        child: Column(
+          children: [
+            Text(
+              view.title,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+                fontWeight: FontWeight.w700,
+                height: 1.35,
+                letterSpacing: 0.15,
+              ),
+            ),
+            if (view.detail != null) ...[
+              const SizedBox(height: TokensStrip.s1),
+              Text(
+                view.detail!,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            ],
+            const SizedBox(height: TokensStrip.s1),
+            Text(time, style: FocuxHubTypography.chip(chrome.mute)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class ConversationBubble extends StatelessWidget {
   final ChatMsg msg;
   final bool mine;
-  final bool system;
   final bool isDark;
   final Color accentColor;
   final bool highlighted;
@@ -287,7 +333,6 @@ class ConversationBubble extends StatelessWidget {
     super.key,
     required this.msg,
     required this.mine,
-    this.system = false,
     required this.isDark,
     required this.accentColor,
     required this.highlighted,
@@ -309,13 +354,7 @@ class ConversationBubble extends StatelessWidget {
       520.0,
     );
     final fill =
-        system
-            ? (isDark
-                ? EagleTokens.darkCardHi.withValues(alpha: 0.72)
-                : TokensStrip.pageBg)
-            : mine
-            ? BrandPalette.soft(accentColor, dark: isDark)
-            : chrome.cardFill;
+        mine ? BrandPalette.soft(accentColor, dark: isDark) : chrome.cardFill;
     final line =
         highlighted
             ? accentColor
@@ -324,10 +363,7 @@ class ConversationBubble extends StatelessWidget {
                 : chrome.line);
 
     return Align(
-      alignment:
-          system
-              ? Alignment.centerLeft
-              : (mine ? Alignment.centerRight : Alignment.centerLeft),
+      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: GestureDetector(
         onLongPress: onLongPress,
         child: AnimatedContainer(
@@ -348,14 +384,6 @@ class ConversationBubble extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (system)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: TokensStrip.s1),
-                  child: Text(
-                    'Sistema',
-                    style: FocuxHubTypography.chip(metaColor),
-                  ),
-                ),
               if (!deleted && msg.replyToMessageId != null)
                 ConversationReplySnippet(
                   isDark: isDark,
@@ -364,7 +392,7 @@ class ConversationBubble extends StatelessWidget {
                   preview:
                       msg.replyToConteudo?.trim().isNotEmpty == true
                           ? msg.replyToConteudo!.trim()
-                          : 'Midia',
+                          : 'Mídia',
                   onTap: onReplyTap,
                 ),
               if (!deleted)
@@ -385,7 +413,10 @@ class ConversationBubble extends StatelessWidget {
                   !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo))
                 Text(
                   displayText,
-                  style: FocuxHubTypography.body(color: textColor),
+                  style: FocuxHubTypography.body(color: textColor).copyWith(
+                    height: TokensStrip.leadingBody,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               if (msg.reactions.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -432,7 +463,7 @@ class ConversationBubble extends StatelessWidget {
                     const SizedBox(width: TokensStrip.s1),
                   ],
                   Text(
-                    _timeLabel(msg.enviadoEm),
+                    _conversationTimeLabel(msg.enviadoEm),
                     style: FocuxHubTypography.chip(metaColor),
                   ),
                   if (mine) ...[
@@ -453,10 +484,11 @@ class ConversationBubble extends StatelessWidget {
     return ['IMAGE', 'IMAGEM', 'VIDEO', 'AUDIO'].contains(tipoMidia);
   }
 
-  String _timeLabel(DateTime dt) {
-    final local = dt.toLocal();
-    return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-  }
+}
+
+String _conversationTimeLabel(DateTime dt) {
+  final local = dt.toLocal();
+  return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
 }
 
 class ConversationReplySnippet extends StatelessWidget {

@@ -295,18 +295,17 @@ class _DetalheBody extends StatelessWidget {
                                   status: execucao.status,
                                   seriesFeitas: metrics.seriesFeitas,
                                 ),
-                                style: FocuxHubTypography.kpi(
+                                style: FocuxHubTypography.sectionTitle(
+                                  context,
                                   color: fxScreenInk(context),
-                                  fontSize: FocuxHubTypography.metricMd,
                                 ),
                               ),
                             ),
                             const SizedBox(width: TokensStrip.s2),
                             Text(
                               duracao ?? '—',
-                              style: FocuxHubTypography.kpi(
-                                color: primary,
-                                fontSize: FocuxHubTypography.metricEm,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
                               ),
                             ),
                           ],
@@ -328,11 +327,10 @@ class _DetalheBody extends StatelessWidget {
                               child: OperationalMetricTile(
                                 label: 'Volume',
                                 value: metrics.volumeLabel,
-                                hint: metrics.volumeAnteriorKg != null
-                                    ? 'antes ${historicoVolumeLabel(metrics.volumeAnteriorKg!)}'
-                                    : (metrics.volumeKg == null
-                                        ? 'sem cargas'
-                                        : 'nesta sessão'),
+                                hint: historicoVolumeHint(
+                                  volumeKg: metrics.volumeKg,
+                                  volumeAnteriorKg: metrics.volumeAnteriorKg,
+                                ),
                                 color: primary,
                                 isDark: isDark,
                                 dense: true,
@@ -464,9 +462,8 @@ class _DetalheBody extends StatelessWidget {
                               color:
                                   feito
                                       ? EagleTokens.good
-                                      : EagleTokens.warn,
+                                      : fxScreenMute(context),
                             ),
-                            accent: feito ? null : EagleTokens.warn,
                             trailing: spark.length >= 2
                                 ? FxSparkline(
                                   data: spark,

@@ -23,11 +23,11 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
 
   String _subtitle(PersonalBrand? brand) {
     if (_isPersonalMode) {
-      return 'Treino, ajustes e feedback em um só lugar';
+      return 'Treino e ajustes';
     }
     return brand?.slogan?.trim().isNotEmpty == true
         ? brand!.slogan!
-        : 'Canal direto com seu personal';
+        : 'Mensagens do treino';
   }
 
   String? _avatarImage(PersonalBrand? brand, {String? alunoFotoUrl}) {
@@ -43,6 +43,9 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
 
   String _previewText(ChatMsg msg) {
     if (msg.deletedAt != null) return 'Mensagem apagada';
+    if (chatIsSistema(msg.remetente, msg.tipoMidia)) {
+      return formatChatSystemEvent(msg.conteudo).threadLabel;
+    }
     final displayText = formatChatTextForDisplay(msg.conteudo);
     if (displayText.isNotEmpty &&
         !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo)) {

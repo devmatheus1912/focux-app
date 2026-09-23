@@ -125,3 +125,38 @@ String checkinDesfazerLabel() => 'Desfazer série';
 String checkinFinalizarLabel() => 'Finalizar treino';
 
 String checkinPularDescansoLabel() => 'Pular descanso';
+
+/// Anel do lockup de descanso — 3× o alvo S8, sem literal solto.
+const double checkinRestRingSize = checkinExecutionControlMin * 3;
+
+String checkinRestCountdownLabel(int seconds) {
+  final safe = seconds < 0 ? 0 : seconds;
+  final mm = safe ~/ 60;
+  final ss = (safe % 60).toString().padLeft(2, '0');
+  return '$mm:$ss';
+}
+
+String checkinRestContextLine({
+  required String exerciseName,
+  required int seriesFeitas,
+  int? series,
+}) {
+  final next = seriesFeitas + 1;
+  final seriesPart =
+      series == null || series <= 0
+          ? 'Próxima série'
+          : 'Série $next de $series';
+  final name = exerciseName.trim();
+  if (name.isEmpty) return seriesPart;
+  return '$seriesPart · $name';
+}
+
+String checkinRestSemanticsLabel({
+  required int seconds,
+  String? contextLine,
+}) {
+  final time = checkinRestCountdownLabel(seconds);
+  final ctx = contextLine?.trim();
+  if (ctx == null || ctx.isEmpty) return 'Descanso $time';
+  return 'Descanso $time. $ctx';
+}

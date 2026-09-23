@@ -1,3 +1,6 @@
+import '../data/chat_text_formatter.dart';
+import 'chat_system_event.dart';
+
 bool chatIsSistema(String? remetente, [String? tipoMidia]) {
   final r = (remetente ?? '').trim().toUpperCase();
   final tipo = (tipoMidia ?? '').trim().toUpperCase();
@@ -21,9 +24,12 @@ String chatInboxPreview({
   required String mensagem,
   String? tipoMidia,
 }) {
-  if (chatIsSistema(remetente, tipoMidia)) return 'Sistema: $mensagem';
-  if (remetente.trim().toUpperCase() == 'PERSONAL') {
-    return 'Você: $mensagem';
+  if (chatIsSistema(remetente, tipoMidia)) {
+    return formatChatSystemEvent(mensagem).threadLabel;
   }
-  return mensagem;
+  final display = formatChatTextForDisplay(mensagem);
+  if (remetente.trim().toUpperCase() == 'PERSONAL') {
+    return 'Você: $display';
+  }
+  return display;
 }

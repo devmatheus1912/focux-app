@@ -38,8 +38,8 @@ String alunoPerformanceScoreLabel(int score) {
 
 String alunoPerformanceForcaDeltaInsight({
   required List<double> forcaPorSemana,
+  List<double> volumePorSemana = const [],
   EvolucaoPerformance? ultimaEvolucao,
-  required String nextSignal,
 }) {
   if (ultimaEvolucao?.percentual != null && ultimaEvolucao!.percentual! != 0) {
     final pct = ultimaEvolucao.percentual!;
@@ -58,9 +58,10 @@ String alunoPerformanceForcaDeltaInsight({
       }
     }
   }
-  final signal = nextSignal.trim();
-  if (signal.isNotEmpty) return signal;
-  return 'Registre as séries para o app enxergar carga, repetições e volume.';
+  final hasSeries =
+      volumePorSemana.any((v) => v > 0) || forcaPorSemana.any((v) => v > 0);
+  if (hasSeries) return 'Volume e força nas últimas semanas';
+  return 'Registre as séries para ver carga e volume.';
 }
 
 EvolucaoPerformance? alunoUltimaEvolucaoPerformance(
@@ -102,20 +103,21 @@ AlunoPerformanceEvolutionView buildAlunoPerformanceEvolutionView({
   final forca = forcaPorSemana;
   final hasChart =
       volume.any((v) => v > 0) || forca.any((v) => v > 0);
+  final recorde = ultimoRecordeLabel?.trim();
   final prLabel =
-      ultima != null
-          ? _labelEvolucaoTipo(ultima.tipo)
-          : (ultimoRecordeLabel == null || ultimoRecordeLabel.isEmpty)
-          ? '--'
-          : ultimoRecordeLabel;
+      recorde != null && recorde.isNotEmpty
+          ? recorde
+          : ultima == null
+          ? '—'
+          : '${_fmtNumero(ultima.valorAtual)} ${ultima.unidade}'.trim();
 
   return AlunoPerformanceEvolutionView(
     score: score.value,
     scoreLabel: alunoPerformanceScoreLabel(score.value),
     insight: alunoPerformanceForcaDeltaInsight(
       forcaPorSemana: forca,
+      volumePorSemana: volume,
       ultimaEvolucao: ultima,
-      nextSignal: score.nextSignal,
     ),
     volumePorSemana: volume,
     forcaPorSemana: forca,
@@ -127,15 +129,10 @@ AlunoPerformanceEvolutionView buildAlunoPerformanceEvolutionView({
   );
 }
 
-String _labelEvolucaoTipo(String tipo) {
-  switch (tipo) {
-    case 'REPETICOES':
-      return 'Repetições';
-    case 'VOLUME':
-      return 'Volume';
-    default:
-      return 'Carga';
-  }
+String _fmtNumero(double value) {
+  return value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1).replaceAll('.', ',');
 }
 
 List<double> parseAlunoHomeSeries(dynamic raw) {
