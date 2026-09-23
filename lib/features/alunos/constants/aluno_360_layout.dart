@@ -20,7 +20,7 @@ abstract final class Aluno360Layout {
   /// Chip overlay (paridade Perfil/Home) — CTA primária sticky.
   static const double stickyBarContentHeight = 64;
 
-  /// Reserva opcional quando a fila aberta mostra o chip "Tarefa".
+  /// Reserva da segunda linha do sticky — desligada (tarefa vive em Mais ações).
   static const double stickyBarSecondaryRowHeight = 0;
   static const double stickyBarScrimHeight = 28;
   static const double snackbarStickyReserve = 76;
@@ -321,6 +321,18 @@ abstract final class Aluno360Layout {
     required bool isDark,
   }) {
     return isDark ? primary : Color.lerp(primary, Colors.black, 0.32)!;
+  }
+
+  /// Link secundário 48dp — não usa o TextButton cru do Material.
+  static ButtonStyle secondaryTextLinkStyle(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return TextButton.styleFrom(
+      foregroundColor: primary,
+      minimumSize: const Size(48, 48),
+      tapTargetSize: MaterialTapTargetSize.padded,
+      padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
+      alignment: Alignment.centerLeft,
+    );
   }
 
   static ButtonStyle operacaoOutlinedButtonStyle(

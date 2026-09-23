@@ -148,24 +148,14 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s2),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      DashboardHomeActionChip(
-                        label: 'Registrar medida',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: () => _openEvolucao(context),
-                      ),
-                      if (showRadarHint)
-                        DashboardHomeActionChip(
-                          label: 'Radar corporal',
-                          accent: EagleTokens.warn,
-                          isDark: isDark,
-                          onPressed: () => _openComparativo(context),
-                        ),
-                    ],
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: DashboardHomeActionChip(
+                      label: 'Registrar medida',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => _openEvolucao(context),
+                    ),
                   ),
                 ],
               );

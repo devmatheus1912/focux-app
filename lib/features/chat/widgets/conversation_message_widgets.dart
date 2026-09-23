@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../data/chat_repository.dart';
@@ -27,28 +29,13 @@ class ConversationDateDivider extends StatelessWidget {
             : value == yesterday
             ? 'Ontem'
             : '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color:
-                isDark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isDark ? EagleTokens.slate400 : TokensStrip.textSecondary,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+        child: Text(
+          label,
+          style: FocuxHubTypography.chip(chrome.mute),
         ),
       ),
     );
@@ -67,40 +54,22 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: InkWell(
-          onTap: loading ? null : onTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child:
-                loading
-                    ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: FxLoading(strokeWidth: 2, color: primary),
-                    )
-                    : Text(
-                      'Carregar mensagens antigas',
-                      style: TextStyle(
-                        color: primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-          ),
-        ),
+      child: TextButton(
+        onPressed: loading ? null : onTap,
+        style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+        child:
+            loading
+                ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: FxLoading(strokeWidth: 2, color: primary),
+                )
+                : Text(
+                  'Carregar mensagens antigas',
+                  style: FocuxHubTypography.chip(primary),
+                ),
       ),
     );
   }
@@ -120,22 +89,15 @@ class ConversationDeliveryStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final read = msg.readAt != null;
     final delivered = msg.deliveredAt != null;
-    final iconColor = read ? EagleTokens.chatRead : color;
-
     final label =
         read
             ? 'Lido'
             : delivered
             ? 'Entregue'
             : 'Enviado';
-    return Tooltip(
-      message: label,
-      child: Icon(
-        delivered ? Icons.done_all_rounded : Icons.check_rounded,
-        size: 14,
-        color: iconColor,
-        semanticLabel: label,
-      ),
+    return Text(
+      label,
+      style: FocuxHubTypography.chip(color),
     );
   }
 }
@@ -177,20 +139,16 @@ class _ConversationTypingIndicatorState
 
   @override
   Widget build(BuildContext context) {
-    final bg = widget.isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg;
-    final border =
-        widget.isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
+    final chrome = ShellChrome.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s3,
+      ),
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(18),
-          topRight: Radius.circular(18),
-          bottomLeft: Radius.circular(4),
-          bottomRight: Radius.circular(18),
-        ),
-        border: Border.all(color: border),
+        color: chrome.cardFill,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        border: Border.all(color: chrome.line),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -302,94 +260,14 @@ class _ConversationSwipeReplyWrapperState
 }
 
 class ConversationChatBackdrop extends StatelessWidget {
-  final bool isDark;
-  final Color accentColor;
-
-  const ConversationChatBackdrop({
-    super.key,
-    required this.isDark,
-    required this.accentColor,
-  });
+  const ConversationChatBackdrop({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors:
-              isDark
-                  ? [
-                    EagleTokens.darkBg,
-                    EagleTokens.darkCard,
-                    EagleTokens.darkCardHi,
-                  ]
-                  : [
-                    EagleTokens.paperSubtle,
-                    EagleTokens.paper,
-                    EagleTokens.brandSofter,
-                  ],
-        ),
-      ),
-      child: CustomPaint(
-        painter: ConversationChatBackdropPainter(
-          isDark: isDark,
-          accentColor: accentColor,
-        ),
-        child: const SizedBox.expand(),
-      ),
+    final chrome = ShellChrome.of(context);
+    return ColoredBox(
+      color: chrome.isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
     );
-  }
-}
-
-class ConversationChatBackdropPainter extends CustomPainter {
-  final bool isDark;
-  final Color accentColor;
-
-  const ConversationChatBackdropPainter({
-    required this.isDark,
-    required this.accentColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final glowPaint =
-        Paint()
-          ..color = accentColor.withValues(alpha: isDark ? 0.08 : 0.06)
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 64);
-    final softPaint =
-        Paint()
-          ..color = (isDark ? Colors.white : Colors.white).withValues(
-            alpha: 0.22,
-          )
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
-    canvas.drawCircle(
-      Offset(size.width * 0.82, size.height * 0.18),
-      118,
-      glowPaint,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.10, size.height * 0.82),
-      100,
-      glowPaint,
-    );
-    if (!isDark) {
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: Offset(size.width * 0.52, size.height * 0.48),
-          width: size.width * 0.85,
-          height: size.height * 0.42,
-        ),
-        softPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant ConversationChatBackdropPainter oldDelegate) {
-    return oldDelegate.isDark != isDark ||
-        oldDelegate.accentColor != accentColor;
   }
 }
 
@@ -421,20 +299,29 @@ class ConversationBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        mine
-            ? Colors.white
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
-    final metaColor =
-        mine
-            ? Colors.white.withValues(alpha: 0.75)
-            : (isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary);
+    final chrome = ShellChrome.of(context);
+    final textColor = chrome.ink;
+    final metaColor = chrome.mute;
     final deleted = msg.deletedAt != null;
     final displayText = formatChatTextForDisplay(msg.conteudo);
     final bubbleMaxWidth = (MediaQuery.sizeOf(context).width - 56).clamp(
       220.0,
       520.0,
     );
+    final fill =
+        system
+            ? (isDark
+                ? EagleTokens.darkCardHi.withValues(alpha: 0.72)
+                : TokensStrip.pageBg)
+            : mine
+            ? BrandPalette.soft(accentColor, dark: isDark)
+            : chrome.cardFill;
+    final line =
+        highlighted
+            ? accentColor
+            : (mine
+                ? accentColor.withValues(alpha: isDark ? 0.28 : 0.18)
+                : chrome.line);
 
     return Align(
       alignment:
@@ -445,76 +332,32 @@ class ConversationBubble extends StatelessWidget {
         onLongPress: onLongPress,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+          margin: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s3,
+            TokensStrip.s3,
+            TokensStrip.s3,
+            TokensStrip.s2,
+          ),
           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
           decoration: BoxDecoration(
-            gradient:
-                mine
-                    ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [accentColor, BrandPalette.deep(accentColor)],
-                    )
-                    : null,
-            color:
-                mine
-                    ? null
-                    : system
-                    ? (isDark
-                        ? EagleTokens.darkCardHi.withValues(alpha: 0.72)
-                        : TokensStrip.pageBg)
-                    : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(system ? TokensStrip.rCard : 18),
-              topRight: Radius.circular(system ? TokensStrip.rCard : 18),
-              bottomLeft: Radius.circular(
-                system ? TokensStrip.rCard : (mine ? 18 : 4),
-              ),
-              bottomRight: Radius.circular(
-                system ? TokensStrip.rCard : (mine ? 4 : 18),
-              ),
-            ),
-            border: Border.all(
-              color:
-                  highlighted
-                      ? accentColor
-                      : mine
-                      ? Colors.transparent
-                      : (isDark
-                          ? EagleTokens.darkLine
-                          : TokensStrip.borderDefault),
-              width: highlighted ? 1.6 : 1,
-            ),
-            boxShadow:
-                highlighted
-                    ? [
-                      BoxShadow(
-                        color: accentColor.withValues(alpha: 0.16),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ]
-                    : null,
+            color: fill,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            border: Border.all(color: line, width: highlighted ? 1.6 : 1),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (system)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: TokensStrip.s1),
                   child: Text(
                     'Sistema',
-                    style: TextStyle(
-                      color: metaColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: FocuxHubTypography.chip(metaColor),
                   ),
                 ),
               if (!deleted && msg.replyToMessageId != null)
                 ConversationReplySnippet(
-                  mine: mine,
                   isDark: isDark,
                   accentColor: accentColor,
                   sender: replyLabelBuilder(msg.replyToRemetente ?? ''),
@@ -534,22 +377,15 @@ class ConversationBubble extends StatelessWidget {
               if (deleted)
                 Text(
                   'Mensagem apagada',
-                  style: TextStyle(
+                  style: FocuxHubTypography.body(
                     color: textColor.withValues(alpha: 0.72),
-                    fontSize: 14,
-                    height: 1.35,
-                    fontStyle: FontStyle.italic,
-                  ),
+                  ).copyWith(fontStyle: FontStyle.italic),
                 )
               else if (displayText.isNotEmpty &&
                   !_isMediaLabelOnly(msg.primaryMediaType, msg.conteudo))
                 Text(
                   displayText,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    height: 1.35,
-                  ),
+                  style: FocuxHubTypography.body(color: textColor),
                 ),
               if (msg.reactions.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -566,32 +402,19 @@ class ConversationBubble extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               reaction.mine
-                                  ? (mine
-                                      ? Colors.white.withValues(alpha: 0.18)
-                                      : accentColor.withValues(alpha: 0.12))
-                                  : (mine
-                                      ? Colors.white.withValues(alpha: 0.10)
-                                      : (isDark
-                                          ? EagleTokens.darkBg
-                                          : TokensStrip.pageBg)),
-                          borderRadius: BorderRadius.circular(999),
+                                  ? accentColor.withValues(alpha: 0.14)
+                                  : chrome.sheetFill,
+                          borderRadius: BorderRadius.circular(TokensStrip.rPill),
                           border: Border.all(
                             color:
                                 reaction.mine
-                                    ? accentColor.withValues(alpha: 0.5)
-                                    : Colors.transparent,
+                                    ? accentColor.withValues(alpha: 0.4)
+                                    : chrome.line,
                           ),
                         ),
                         child: Text(
                           '${reaction.emoji} ${reaction.total}',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 12,
-                            fontWeight:
-                                reaction.mine
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                          ),
+                          style: FocuxHubTypography.chip(textColor),
                         ),
                       ),
                   ],
@@ -604,13 +427,13 @@ class ConversationBubble extends StatelessWidget {
                   if (!deleted && msg.editedAt != null) ...[
                     Text(
                       'editada',
-                      style: TextStyle(color: metaColor, fontSize: 11),
+                      style: FocuxHubTypography.chip(metaColor),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: TokensStrip.s1),
                   ],
                   Text(
                     _timeLabel(msg.enviadoEm),
-                    style: TextStyle(color: metaColor, fontSize: 11),
+                    style: FocuxHubTypography.chip(metaColor),
                   ),
                   if (mine) ...[
                     const SizedBox(width: 6),
@@ -637,7 +460,6 @@ class ConversationBubble extends StatelessWidget {
 }
 
 class ConversationReplySnippet extends StatelessWidget {
-  final bool mine;
   final bool isDark;
   final Color accentColor;
   final String sender;
@@ -646,7 +468,6 @@ class ConversationReplySnippet extends StatelessWidget {
 
   const ConversationReplySnippet({
     super.key,
-    required this.mine,
     required this.isDark,
     required this.accentColor,
     required this.sender,
@@ -656,44 +477,31 @@ class ConversationReplySnippet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        mine
-            ? Colors.white
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final chrome = ShellChrome.of(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(TokensStrip.rCard),
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        margin: const EdgeInsets.only(bottom: TokensStrip.s2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s3,
+          vertical: TokensStrip.s2,
+        ),
         decoration: BoxDecoration(
-          color:
-              mine
-                  ? Colors.white.withValues(alpha: 0.14)
-                  : accentColor.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
+          color: accentColor.withValues(alpha: isDark ? 0.16 : 0.08),
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              sender,
-              style: TextStyle(
-                color: textColor.withValues(alpha: 0.88),
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            Text(sender, style: FocuxHubTypography.chip(accentColor)),
             const SizedBox(height: 2),
             Text(
               preview,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: textColor.withValues(alpha: 0.82),
-                fontSize: 12.5,
-              ),
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
           ],
         ),

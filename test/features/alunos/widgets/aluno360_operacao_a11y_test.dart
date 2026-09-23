@@ -61,7 +61,6 @@ void main() {
                   mensagemSugerida: 'Oi, Beatriz.',
                 ),
                 hasOpenCopilotTask360: false,
-                isDark: false,
               ),
             ),
           ),

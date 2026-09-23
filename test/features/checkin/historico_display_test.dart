@@ -165,11 +165,19 @@ void main() {
         iniciadoEm: '2026-09-16T10:00:00',
         exercicios: const [],
       ),
+      ExecucaoTreino(
+        id: 4,
+        treinoId: 10,
+        treinoNome: 'Full Body',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-15T10:00:00',
+        exercicios: const [],
+      ),
     ];
     final clusters = historicoCollapseSamePlan(items);
     expect(clusters, hasLength(2));
     expect(clusters.first.newest.id, 1);
-    expect(clusters.first.count, 2);
+    expect(clusters.first.count, 3);
     expect(clusters.last.newest.id, 3);
     expect(historicoClusterSubtitle(dateLabel: '18 set', count: 2), '2 sessões · 18 set');
     expect(historicoStatusDisplayLabel(status: 'CONCLUIDO', seriesFeitas: 0), 'Concluído sem séries');

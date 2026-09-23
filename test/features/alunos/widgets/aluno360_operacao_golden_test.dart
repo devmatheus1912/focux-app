@@ -352,7 +352,6 @@ void main() {
                   stickyLabelCompact: 'Contato',
                 ),
                 hasOpenCopilotTask360: true,
-                isDark: false,
               ),
             ),
           ),

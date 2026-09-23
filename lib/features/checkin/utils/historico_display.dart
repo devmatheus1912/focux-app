@@ -64,23 +64,26 @@ class HistoricoListCluster {
   final int count;
 }
 
-/// Agrupa sessões consecutivas do mesmo plano e status (§12.1).
+/// Agrupa o mesmo plano + status em toda a lista (§12.1), não só o run.
 List<HistoricoListCluster> historicoCollapseSamePlan(
   List<ExecucaoTreino> items,
 ) {
-  final out = <HistoricoListCluster>[];
+  final clusters = <String, HistoricoListCluster>{};
+  final order = <String>[];
   for (final item in items) {
-    if (out.isNotEmpty &&
-        out.last.newest.treinoNome == item.treinoNome &&
-        historicoConcluido(out.last.newest.status) ==
-            historicoConcluido(item.status)) {
-      final last = out.removeLast();
-      out.add(HistoricoListCluster(newest: last.newest, count: last.count + 1));
+    final key = '${item.treinoNome}|${historicoConcluido(item.status)}';
+    final existing = clusters[key];
+    if (existing == null) {
+      clusters[key] = HistoricoListCluster(newest: item, count: 1);
+      order.add(key);
     } else {
-      out.add(HistoricoListCluster(newest: item, count: 1));
+      clusters[key] = HistoricoListCluster(
+        newest: existing.newest,
+        count: existing.count + 1,
+      );
     }
   }
-  return out;
+  return [for (final key in order) clusters[key]!];
 }
 
 String historicoClusterSubtitle({

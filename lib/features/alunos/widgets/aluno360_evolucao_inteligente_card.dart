@@ -321,16 +321,21 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 alignment: Alignment.centerLeft,
                                 child: TextButton(
                                   onPressed: () => _openTreinos(context),
+                                  style: Aluno360Layout.secondaryTextLinkStyle(
+                                    context,
+                                  ),
                                   child: const Text('Ajustar treino'),
                                 ),
                               ),
                               if (ev.sugerirCopiloto &&
                                   onOpenCopilot != null) ...[
-                                const SizedBox(height: TokensStrip.s2),
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: TextButton(
                                     onPressed: onOpenCopilot,
+                                    style: Aluno360Layout.secondaryTextLinkStyle(
+                                      context,
+                                    ),
                                     child: const Text('Abrir Copiloto'),
                                   ),
                                 ),

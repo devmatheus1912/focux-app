@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
 import '../../../core/utils/friendly_error.dart';
 
 import 'package:flutter/foundation.dart';
@@ -30,6 +29,7 @@ import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_remetente.dart';
 import 'chat_inbox_screen.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -401,10 +401,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           child: Stack(
           children: [
             Positioned.fill(
-              child: ConversationChatBackdrop(
-                isDark: isDark,
-                accentColor: primary,
-              ),
+              child: const ConversationChatBackdrop(),
             ),
             Column(
               children: [
@@ -504,8 +501,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     key: _messageKey(msg),
                                     child: ConversationSwipeReplyWrapper(
                                       alignRight: _isMine(msg),
-                                      accentColor:
-                                          _isMine(msg) ? Colors.white : primary,
+                                      accentColor: primary,
                                       onReply: () => _setReply(msg),
                                       child: ConversationBubble(
                                         msg: msg,
@@ -564,15 +560,18 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                       IconButton(
                         onPressed:
                             _uploading ? null : _showAttachmentSheet,
-                        icon: const Icon(Icons.add_circle),
+                        icon: const Icon(Icons.add_rounded),
                         color: TokensStrip.textSecondary,
+                        style: IconButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                        ),
                       ),
                       Expanded(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(28),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                            child: Container(
+                          borderRadius: BorderRadius.circular(
+                            TokensStrip.rCard,
+                          ),
+                          child: Container(
                               decoration: fxListCardDecoration(context),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -608,27 +607,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         child: TextField(
                                           controller: _ctrl,
                                           focusNode: _composerFocus,
-                                          style: TextStyle(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.darkInk
-                                                    : TokensStrip.textPrimary,
-                                            fontSize: 15,
+                                          style: FocuxHubTypography.body(
+                                            color: chrome.ink,
                                           ),
                                           cursorColor: primary,
                                           decoration: InputDecoration(
-                                            hintText: 'Digite sua mensagem…',
-                                            hintStyle: TextStyle(
-                                              color:
-                                                  isDark
-                                                      ? EagleTokens.darkInkMute
-                                                      : TokensStrip
-                                                          .textSecondary,
+                                            hintText: 'Mensagem',
+                                            hintStyle:
+                                                FocuxHubTypography.bodyMuted(
+                                              color: chrome.mute,
                                             ),
                                             contentPadding:
                                                 const EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 12,
+                                                  horizontal: TokensStrip.s3,
+                                                  vertical: TokensStrip.s3,
                                                 ),
                                             border: InputBorder.none,
                                             enabledBorder: InputBorder.none,
@@ -652,28 +644,39 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                         onPressed: _showEmojiSheet,
                                         icon: const Icon(Icons.auto_awesome),
                                         color: TokensStrip.textSecondary,
+                                        style: IconButton.styleFrom(
+                                          minimumSize: const Size(48, 48),
+                                        ),
                                       ),
                                       if (_composerHasText)
                                         Padding(
                                           padding: const EdgeInsets.only(
-                                            right: 6,
-                                            bottom: 6,
+                                            right: TokensStrip.s1,
+                                            bottom: TokensStrip.s1,
                                           ),
-                                          child: Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
+                                          child: SizedBox(
+                                            width: 48,
+                                            height: 48,
+                                            child: Material(
                                               color: primary,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: IconButton(
-                                              padding: EdgeInsets.zero,
-                                              onPressed:
-                                                  _uploading ? null : _sendText,
-                                              icon: const Icon(
-                                                Icons.arrow_upward,
-                                                color: Colors.white,
-                                                size: 18,
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                TokensStrip.rButton,
+                                              ),
+                                              child: IconButton(
+                                                padding: EdgeInsets.zero,
+                                                onPressed:
+                                                    _uploading
+                                                        ? null
+                                                        : _sendText,
+                                                icon: Icon(
+                                                  Icons.arrow_upward_rounded,
+                                                  color:
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary,
+                                                  size: 20,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -681,40 +684,46 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                       if (!_composerHasText)
                                         Padding(
                                           padding: const EdgeInsets.only(
-                                            right: 6,
-                                            bottom: 6,
+                                            right: TokensStrip.s1,
+                                            bottom: TokensStrip.s1,
                                           ),
-                                          child: Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
+                                          child: SizedBox(
+                                            width: 48,
+                                            height: 48,
+                                            child: Material(
                                               color:
                                                   _recordingAudio
                                                       ? EagleTokens.bad
                                                       : primary,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: IconButton(
-                                              padding: EdgeInsets.zero,
-                                              tooltip:
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                TokensStrip.rButton,
+                                              ),
+                                              child: IconButton(
+                                                padding: EdgeInsets.zero,
+                                                tooltip:
+                                                    _recordingAudio
+                                                        ? 'Enviar áudio'
+                                                        : 'Gravar áudio',
+                                                onPressed:
+                                                    _uploading
+                                                        ? null
+                                                        : _recordingAudio
+                                                        ? () =>
+                                                            _stopAudioRecording(
+                                                              send: true,
+                                                            )
+                                                        : _startAudioRecording,
+                                                icon: Icon(
                                                   _recordingAudio
-                                                      ? 'Enviar audio'
-                                                      : 'Gravar audio',
-                                              onPressed:
-                                                  _uploading
-                                                      ? null
-                                                      : _recordingAudio
-                                                      ? () =>
-                                                          _stopAudioRecording(
-                                                            send: true,
-                                                          )
-                                                      : _startAudioRecording,
-                                              icon: Icon(
-                                                _recordingAudio
-                                                    ? Icons.stop_rounded
-                                                    : Icons.mic_rounded,
-                                                color: Colors.white,
-                                                size: 18,
+                                                      ? Icons.stop_rounded
+                                                      : Icons.mic_rounded,
+                                                  color:
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary,
+                                                  size: 20,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -726,7 +735,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),

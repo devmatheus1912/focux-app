@@ -292,6 +292,7 @@ class Aluno360TimelineCard extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed: () => _showFullTimeline(context, primary),
+                style: Aluno360Layout.secondaryTextLinkStyle(context),
                 child: Text('Ver todos os ${allItems.length} sinais'),
               ),
             ),
