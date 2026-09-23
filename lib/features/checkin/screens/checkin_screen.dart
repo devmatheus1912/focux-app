@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -224,7 +225,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       if (!mounted) return;
       _applyUpdated(updated);
       if (numero > ee.seriesFeitas) {
-        _startRestTimer(ee.descansoSegundos ?? 60);
+        _startRestTimer(
+          ee.descansoSegundos ?? 60,
+          contextLine: checkinRestContextLine(
+            exerciseName: ee.exercicioNome,
+            seriesFeitas: ee.seriesFeitas,
+            series: ee.series,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -297,7 +305,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       if (!mounted) return;
       _applyUpdated(updated);
       if (safeNumero > ee.seriesFeitas) {
-        _startRestTimer(ee.descansoSegundos ?? 60);
+        _startRestTimer(
+          ee.descansoSegundos ?? 60,
+          contextLine: checkinRestContextLine(
+            exerciseName: ee.exercicioNome,
+            seriesFeitas: ee.seriesFeitas,
+            series: ee.series,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -306,7 +321,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     }
   }
 
-  void _startRestTimer(int seconds) {
+  void _startRestTimer(int seconds, {String? contextLine}) {
     _restTimer?.cancel();
     final clamped = seconds.clamp(15, 600).toInt();
     setState(() {
@@ -314,6 +329,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       _restEndsAt = DateTime.now().add(Duration(seconds: clamped));
       _restSeconds = clamped;
       _restTotalSeconds = clamped;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = contextLine?.trim();
+      fxAnnounce(
+        context,
+        ctx == null || ctx.isEmpty ? 'Descanso' : 'Descanso. $ctx',
+      );
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _restEndsAt == null) return;
@@ -574,11 +597,14 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                 children: [
                   CheckinWorkoutHeader(
                     treinoNome: _execucao?.treinoNome ?? 'Treino',
-                    contextLine: checkinChromeContextLine(
-                      duration: checkinDurationLabel(_duration),
-                      current: currentIndex,
-                      total: exercicios.length,
-                    ),
+                    contextLine:
+                        _showRestTimer
+                            ? 'Descanso'
+                            : checkinChromeContextLine(
+                              duration: checkinDurationLabel(_duration),
+                              current: currentIndex,
+                              total: exercicios.length,
+                            ),
                     onBack: _sair,
                     onHelp:
                         current != null && checkinExerciseHasTips(current)
@@ -669,7 +695,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                               ),
                             ),
                   ),
-                  if (exercicios.isNotEmpty)
+                  if (exercicios.isNotEmpty && !_showRestTimer)
                     SafeArea(
                       top: false,
                       child: Padding(

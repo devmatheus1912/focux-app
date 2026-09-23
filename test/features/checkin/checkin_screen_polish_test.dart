@@ -67,7 +67,11 @@ void main() {
         contains('this.contextLine'),
       ),
     );
+    expect(timers, contains('checkinRestSemanticsLabel'));
+    expect(timers, contains('BrandPalette.accent'));
+    expect(timers, contains('ExcludeSemantics'));
     expect(timers, isNot(contains('class CheckinRestBanner')));
+    expect(timers, isNot(contains('FxLoading')));
     expect(timers, isNot(contains('FxLiquidPrimaryButton')));
     expect(timers, contains('TextButton('));
     expect(timers, isNot(contains('FilledButton')));
@@ -182,6 +186,8 @@ void main() {
     expect(screen, contains('CheckinRestFocusView('));
     expect(screen, contains('totalSeconds: _restTotalSeconds'));
     expect(screen, contains('checkinRestContextLine'));
+    expect(screen, contains('fxAnnounce'));
+    expect(screen, contains('!_showRestTimer'));
     final timers = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_timer_widgets.dart',
     );
