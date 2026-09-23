@@ -33,5 +33,24 @@ void main() {
       expect(view.insight, contains('Força'));
       expect(view.insight, contains('%'));
     });
+
+    test('insight não usa jargão de sinal verde', () {
+      final view = buildAlunoPerformanceEvolutionView(
+        score: const FocuxScore(
+          value: 40,
+          rhythmLabel: 'Ritmo construindo',
+          riskLabel: 'Baixo risco',
+          nextSignal: 'Sinal verde para evolução',
+        ),
+        historico: const [],
+        volumeSemanaKg: 0,
+        volumeMesKg: 0,
+        volumePorSemana: const [],
+        forcaPorSemana: const [],
+      );
+      expect(view.insight, 'Registre as séries para ver carga e volume.');
+      expect(view.insight, isNot(contains('Sinal verde')));
+      expect(view.ultimoPrLabel, '—');
+    });
   });
 }

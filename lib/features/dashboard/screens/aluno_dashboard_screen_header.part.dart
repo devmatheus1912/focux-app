@@ -446,7 +446,7 @@ class _MiniMetricCard extends StatelessWidget {
             value,
             style: FocuxHubTypography.metric(
               color: chrome.ink,
-              fontSize: FocuxHubTypography.metricEm,
+              fontSize: TokensStrip.fontBody,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -520,12 +520,12 @@ class _PerformanceEvolutionCard extends StatelessWidget {
             children: [
               Text(
                 'Evolução do treino',
-                style: FocuxHubTypography.eyebrow(context, color: mute),
+                style: FocuxHubTypography.sectionTitle(context, color: ink),
               ),
               const SizedBox(height: TokensStrip.s1),
               Text(
                 view.insight,
-                style: FocuxHubTypography.sectionTitle(context, color: ink),
+                style: FocuxHubTypography.bodyMuted(color: mute),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -558,15 +558,21 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   const SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume semana',
-                      value: formatAlunoVolumeKg(view.volumeSemanaKg),
+                      label: 'Na semana',
+                      value: formatAlunoVolumeKg(
+                        view.volumeSemanaKg,
+                        compact: true,
+                      ),
                     ),
                   ),
                   const SizedBox(width: TokensStrip.s2),
                   Expanded(
                     child: _MiniMetricCard(
-                      label: 'Volume mês',
-                      value: formatAlunoVolumeKg(view.volumeMesKg),
+                      label: 'No mês',
+                      value: formatAlunoVolumeKg(
+                        view.volumeMesKg,
+                        compact: true,
+                      ),
                     ),
                   ),
                 ],
