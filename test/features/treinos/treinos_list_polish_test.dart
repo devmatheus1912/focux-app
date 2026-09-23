@@ -20,10 +20,13 @@ void main() {
       File(
         'lib/features/treinos/utils/treinos_list_labels.dart',
       ).readAsStringSync(),
+      File(
+        'lib/features/treinos/widgets/treino_assign_sheet.dart',
+      ).readAsStringSync(),
     ].join('\n');
 
     expect(screen, contains('showFxHomeSheet'));
-    expect(screen, contains('ListView.separated'));
+    expect(screen, contains('SliverList.separated'));
     expect(screen, contains('maxHeight: maxHeight'));
     expect(screen, contains('Atribuir a um aluno'));
     expect(
@@ -60,8 +63,9 @@ void main() {
     expect(screen, contains('TreinosListLabels.deleteTitle'));
     expect(screen, contains('Ações do treino'));
     expect(screen, contains('TreinoHomeSheetSurface'));
-    expect(screen, contains('TreinoSheetChromeHeader'));
-    expect(screen, contains('treino_home_sheet.dart'));
+    expect(screen, contains('TreinoAssignSheet'));
+    expect(screen, contains('includePrazo: true'));
+    expect(screen, contains('treino_assign_sheet.dart'));
     expect(screen, contains('ConstrainedBox('));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('keyboardDismissBehavior'));

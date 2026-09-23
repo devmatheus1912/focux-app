@@ -60,8 +60,15 @@ void main() {
     expect(screen, contains('Montar por modelo'));
     expect(screen, contains('openMontarPorModelo'));
     expect(screen, contains('TreinosLayout.touchTarget'));
-    expect(screen, contains('TreinoHomeSheetSurface'));
-    expect(screen, contains('treino_home_sheet.dart'));
+    expect(screen, contains('TreinoAssignSheet'));
+    expect(screen, contains('includePrazo: true'));
+    expect(screen, contains('treino_assign_sheet.dart'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_assign_sheet.dart',
+      ).readAsStringSync(),
+      contains('TreinoHomeSheetSurface'),
+    );
     final editor =
         File(
           'lib/features/treinos/widgets/prescription_editor_sheet.dart',
@@ -95,7 +102,12 @@ void main() {
     expect(screen, contains('treino_detail_grouping.dart'));
     expect(screen, isNot(contains('treinoDetailMetaLine')));
     expect(screen, contains('treinoDetailExerciseLine'));
-    expect(screen, contains('FxSettingsGroup'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_assign_sheet.dart',
+      ).readAsStringSync(),
+      contains('FxSettingsGroup'),
+    );
     expect(screen, contains('treino_inset_sheet.dart'));
     expect(screen, contains('TreinoInsetActionSheet'));
     final inset = File(
@@ -111,7 +123,12 @@ void main() {
     expect(screen, isNot(contains('_DetailActionTile')));
     expect(screen, isNot(contains('_TreinoHeroActions')));
     expect(screen, contains('FxEmptyState'));
-    expect(screen, contains('FxHomeSheetHandle'));
+    expect(
+      File(
+        'lib/features/treinos/widgets/treino_assign_sheet.dart',
+      ).readAsStringSync(),
+      contains('FxHomeSheetHandle'),
+    );
     expect(screen, contains('expand: true'));
     expect(screen, contains('TreinoPrescriptionVideoBlock'));
     expect(screen, contains('treino_prescription_video_block.dart'));
