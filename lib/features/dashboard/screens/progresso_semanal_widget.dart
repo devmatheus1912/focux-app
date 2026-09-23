@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
+import '../utils/aluno_consistencia_display.dart';
 import '../utils/aluno_volume_format.dart';
 
 class ProgressoSemanalWidget extends StatelessWidget {
@@ -16,6 +17,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
     this.aderenciaPercent,
     this.volumeSemanaKg,
     this.insight,
+    this.frequenciaDias,
   });
 
   final List<ExecucaoTreino> treinos;
@@ -30,18 +32,18 @@ class ProgressoSemanalWidget extends StatelessWidget {
   /// Uma linha de insight (ritmo), sem KPI numérico.
   final String? insight;
 
+  /// Dias/semana declarados no plano. Sem isso, não inventa meta.
+  final int? frequenciaDias;
+
   static const _weekdayLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
-    final weeklyGoal = treinos.isEmpty ? 3 : treinos.length.clamp(3, 6);
+    final weeklyGoal = alunoWeeklyDayGoal(frequenciaDias: frequenciaDias);
     final completedThisWeek = countUniqueCompletedDaysThisWeek(historico);
-    final progressValue =
-        weeklyGoal == 0
-            ? 0.0
-            : (completedThisWeek / weeklyGoal).clamp(0.0, 1.0);
+    final caption = alunoConsistenciaCaption(completedThisWeek);
     final now = DateTime.now();
     final startOfWeek = DateTime(
       now.year,
@@ -53,57 +55,33 @@ class ProgressoSemanalWidget extends StatelessWidget {
     final hasInsight = insightLine != null && insightLine.isNotEmpty;
 
     return FxStripCard(
-      glowStrength: 0.04,
+      glowStrength: 0,
       padding: const EdgeInsets.all(TokensStrip.s3),
       semanticsLabel:
-          'Consistência semanal. $completedThisWeek dias esta semana, '
-          'meta $weeklyGoal.'
+          'Consistência semanal. $caption'
+          '${weeklyGoal != null ? ', meta $weeklyGoal' : ''}'
+          '${treinos.isNotEmpty ? ', ${treinos.length} no plano' : ''}.'
           '${aderenciaPercent != null ? ' Aderência $aderenciaPercent por cento.' : ''}'
           '${hasInsight ? ' $insightLine.' : ''}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  'Consistência',
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: chrome.ink,
-                  ),
-                ),
-              ),
-              Text(
-                completedThisWeek == 1
-                    ? '1 dia esta semana'
-                    : '$completedThisWeek dias esta semana',
-                style: FocuxHubTypography.metric(
-                  color: primary,
-                  fontSize: FocuxHubTypography.metricMd,
-                ),
-              ),
-            ],
+          Text(
+            'Consistência',
+            style: FocuxHubTypography.sectionTitle(
+              context,
+              color: chrome.ink,
+            ),
           ),
-          if (hasInsight) ...[
-            const SizedBox(height: TokensStrip.s1),
-            Text(
-              insightLine,
-              style: FocuxHubTypography.bodyMuted(
-                color: chrome.mute,
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ] else ...[
-            const SizedBox(height: TokensStrip.s2),
-            Text(
-              'Treinos concluídos nesta semana · descanso não zera',
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-          ],
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            hasInsight
+                ? insightLine
+                : 'Dias com treino concluído · descanso não zera',
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (engagementChips.isNotEmpty) ...[
             const SizedBox(height: TokensStrip.s2),
             Wrap(
@@ -161,28 +139,10 @@ class ProgressoSemanalWidget extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: TokensStrip.s3),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: progressValue,
-                  backgroundColor: chrome.line.withValues(alpha: 0.55),
-                  color: primary,
-                  minHeight: TokensStrip.s2,
-                  borderRadius: BorderRadius.circular(TokensStrip.rInput),
-                ),
-              ),
-              const SizedBox(width: TokensStrip.s3),
-              Text(
-                '$completedThisWeek de $weeklyGoal dias',
-                style: FocuxHubTypography.metric(
-                  color: chrome.ink,
-                  fontSize: FocuxHubTypography.metricEm,
-                ),
-              ),
-            ],
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            caption,
+            style: FocuxHubTypography.chip(chrome.mute),
           ),
         ],
       ),

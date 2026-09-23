@@ -29,18 +29,23 @@ void main() {
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('showDialog')));
     expect(screen, contains('_showImageViewer'));
+    expect(screen, contains('ConversationSystemEvent'));
+    expect(screen, contains('Mensagens do treino'));
+    expect(screen, isNot(contains('Canal direto com seu personal')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 
-  test('bolha de sistema tem peso próprio, sem cantos de chat humano', () {
+  test('evento de sistema é log, sem bolha nem rótulo Sistema', () {
     final widgets = readScreenSourceBundle(
       'lib/features/chat/widgets/conversation_message_widgets.dart',
     );
-    expect(widgets, contains('this.system = false'));
+    expect(widgets, contains('class ConversationSystemEvent'));
+    expect(widgets, contains('formatChatSystemEvent'));
     expect(widgets, contains('TokensStrip.rCard'));
-    expect(widgets, contains("'Sistema'"));
     expect(widgets, contains('TokensStrip.pageBg'));
     expect(widgets, contains('FocuxHubTypography'));
+    expect(widgets, isNot(contains("'Sistema'")));
+    expect(widgets, isNot(contains('this.system = false')));
     expect(widgets, isNot(contains('ConversationChatBackdropPainter')));
     expect(widgets, isNot(contains('Icons.done_all_rounded')));
     expect(widgets, isNot(contains('BorderRadius.only')));

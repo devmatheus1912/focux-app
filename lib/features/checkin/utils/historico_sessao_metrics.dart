@@ -134,6 +134,18 @@ String historicoVolumeLabel(double kg) {
   return '${kg.toStringAsFixed(1)} kg';
 }
 
+/// Sem séries nesta sessão, o volume anterior não entra — não compara vazio.
+String historicoVolumeHint({
+  required double? volumeKg,
+  required double? volumeAnteriorKg,
+}) {
+  if (volumeKg == null) return 'sem cargas';
+  if (volumeAnteriorKg != null) {
+    return 'antes ${historicoVolumeLabel(volumeAnteriorKg)}';
+  }
+  return 'nesta sessão';
+}
+
 String? historicoCargaDeltaLabel({
   required double? cargaAtual,
   required double? cargaAnterior,

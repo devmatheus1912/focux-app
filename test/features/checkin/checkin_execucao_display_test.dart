@@ -76,6 +76,23 @@ void main() {
     expect(checkinCargaLabel(7.5), '7,5 kg');
     expect(checkinRegistrarLabel(first: true), 'Registrar série');
     expect(checkinPularDescansoLabel(), 'Pular descanso');
+    expect(checkinRestCountdownLabel(45), '0:45');
+    expect(checkinRestCountdownLabel(69), '1:09');
+    expect(
+      checkinRestContextLine(
+        exerciseName: 'Supino reto',
+        seriesFeitas: 1,
+        series: 4,
+      ),
+      'Série 2 de 4 · Supino reto',
+    );
+    expect(
+      checkinRestSemanticsLabel(
+        seconds: 69,
+        contextLine: 'Série 2 de 4 · Supino reto',
+      ),
+      'Descanso 1:09. Série 2 de 4 · Supino reto',
+    );
   });
 
   test('trocar exercício honra o foco mesmo se o item já foi concluído', () {

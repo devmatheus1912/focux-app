@@ -357,6 +357,11 @@ class _State extends ConsumerState<ModoPresencialScreen>
                     ? CheckinRestFocusView(
                       seconds: _restSecs,
                       totalSeconds: _restTotalSecs,
+                      contextLine: checkinRestContextLine(
+                        exerciseName: ex.exercicioNome,
+                        seriesFeitas: ex.seriesFeitas,
+                        series: ex.series,
+                      ),
                       onSkip: () {
                         _restTimer?.cancel();
                         setState(() => _resting = false);

@@ -396,7 +396,7 @@ class ChatRepository {
     return ChatMsg.fromJson(r.data);
   }
 
-  // ── Fase 2: WhatsApp-level conversation management ─────────────────────────
+  // ── Fase 2: gestão da conversa (fixar, arquivar, silenciar) ──────────────
 
   /// Pin, unpin, archive, unarchive, mute, unmute, or clear a conversation
   Future<Map<String, dynamic>> conversationAction(

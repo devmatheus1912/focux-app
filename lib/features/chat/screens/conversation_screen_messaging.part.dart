@@ -90,7 +90,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       _ctrl.clear();
       _composerHasText = false;
     });
-    FeedbackHelper.showSuccess(context, 'Mensagem recente ja existe no chat.');
+    FeedbackHelper.showSuccess(context, 'Mensagem recente já existe no chat.');
   }
 
   bool _isDuplicateOutgoing(String text) {

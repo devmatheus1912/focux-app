@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -85,7 +84,7 @@ class CheckinSerieCard extends StatelessWidget {
           // S8: um alvo dominante — nome + KPI + receita, agrupados.
           FxStripCard(
             accent: brand,
-            glowStrength: 0.08,
+            glowStrength: resting ? 0 : 0.04,
             padding: const EdgeInsets.fromLTRB(
               TokensStrip.s4,
               TokensStrip.s4,
@@ -120,7 +119,10 @@ class CheckinSerieCard extends StatelessWidget {
                   Text(
                     checkinTrocarExercicioHint(index: index, total: total),
                     textAlign: TextAlign.center,
-                    style: FocuxTypography.bodySmall(color: brand),
+                    style: FocuxHubTypography.bodyMuted(
+                    color: brand,
+                    fontWeight: FontWeight.w600,
+                  ),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
@@ -140,14 +142,14 @@ class CheckinSerieCard extends StatelessWidget {
                 Text(
                   contextLine,
                   textAlign: TextAlign.center,
-                  style: FocuxTypography.bodySmall(color: chrome.mute),
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
                 if (previous != null) ...[
                   const SizedBox(height: TokensStrip.s1),
                   Text(
                     previous,
                     textAlign: TextAlign.center,
-                    style: FocuxTypography.bodySmall(color: chrome.mute),
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 ],
               ],
@@ -156,8 +158,7 @@ class CheckinSerieCard extends StatelessWidget {
           if (hasDemo) ...[
             const SizedBox(height: TokensStrip.s3),
             FxStripCard(
-              emphasize: true,
-              glowStrength: 0.14,
+              glowStrength: 0.04,
               accent: brand,
               padding: EdgeInsets.zero,
               child: ClipRRect(
@@ -174,7 +175,7 @@ class CheckinSerieCard extends StatelessWidget {
           if (!done) ...[
             FxStripCard(
               accent: brand,
-              glowStrength: 0.06,
+              glowStrength: 0,
               padding: const EdgeInsets.symmetric(
                 horizontal: TokensStrip.s3,
                 vertical: TokensStrip.s3,
@@ -307,7 +308,10 @@ class CheckinSerieCard extends StatelessWidget {
                 style: TextButton.styleFrom(
                   minimumSize: const Size(64, checkinExecutionControlMin),
                 ),
-                child: Text('Mais', style: TextStyle(color: chrome.mute)),
+                child: Text(
+                  'Mais',
+                  style: FocuxHubTypography.chip(chrome.mute),
+                ),
               ),
             ],
           ] else

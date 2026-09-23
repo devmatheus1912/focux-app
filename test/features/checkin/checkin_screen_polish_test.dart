@@ -51,24 +51,29 @@ void main() {
     expect(screen, contains('ColoredBox'));
     expect(screen, contains('checkinSerieRepsSeed'));
     expect(screen, contains('Preparando seu treino'));
-    expect(screen, contains('CheckinRestBanner'));
-    expect(screen, isNot(contains('CheckinRestFocusView')));
+    expect(screen, contains('CheckinRestFocusView'));
+    expect(screen, isNot(contains('CheckinRestBanner')));
     final timers = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_timer_widgets.dart',
     );
     expect(
       timers,
       allOf(
-        contains('class CheckinRestBanner'),
-        contains('SafeArea('),
-        contains('top: false'),
-        contains('bottom: false'),
-        contains('TokensStrip.fontH2'),
+        contains('class CheckinRestFocusView'),
+        contains('checkinRestRingSize'),
+        contains('TokensStrip.fontH1'),
         contains('checkinExecutionControlMin + 8'),
+        contains('this.onTrocar'),
+        contains('this.contextLine'),
       ),
     );
-    expect(timers, contains('FxLiquidPrimaryButton'));
-    expect(timers, contains('expand: false'));
+    expect(timers, contains('checkinRestSemanticsLabel'));
+    expect(timers, contains('BrandPalette.accent'));
+    expect(timers, contains('ExcludeSemantics'));
+    expect(timers, isNot(contains('class CheckinRestBanner')));
+    expect(timers, isNot(contains('FxLoading')));
+    expect(timers, isNot(contains('FxLiquidPrimaryButton')));
+    expect(timers, contains('TextButton('));
     expect(timers, isNot(contains('FilledButton')));
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
@@ -136,8 +141,8 @@ void main() {
     expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
-    expect(card, contains('glowStrength: 0.08'));
-    expect(card, contains('glowStrength: 0.06'));
+    expect(card, contains('glowStrength: resting ? 0 : 0.04'));
+    expect(card, contains('glowStrength: 0'));
     expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('_CheckinPosturaHelp')));
     expect(card, contains('ValueKey'));
@@ -172,17 +177,17 @@ void main() {
     expect(screen, contains('resting: _showRestTimer'));
   });
 
-  test('faixa de descanso não cobre o toque para trocar', () {
+  test('descanso substitui o card e deixa Trocar em texto', () {
     final screen = readScreenSourceBundle(
       'lib/features/checkin/screens/checkin_screen.dart',
     );
     expect(screen, isNot(contains('Positioned(')));
-    expect(screen, isNot(contains('Stack(')));
-    expect(screen, contains('if (_showRestTimer)'));
-    expect(
-      screen.indexOf('CheckinRestBanner('),
-      lessThan(screen.indexOf('CheckinSerieCard(')),
-    );
+    expect(screen, contains('_showRestTimer'));
+    expect(screen, contains('CheckinRestFocusView('));
+    expect(screen, contains('totalSeconds: _restTotalSeconds'));
+    expect(screen, contains('checkinRestContextLine'));
+    expect(screen, contains('fxAnnounce'));
+    expect(screen, contains('!_showRestTimer'));
     final timers = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_timer_widgets.dart',
     );
@@ -190,40 +195,32 @@ void main() {
     expect(timers, contains("child: const Text('Trocar')"));
   });
 
-  testWidgets('Trocar e o título ficam tocáveis durante o descanso', (
+  testWidgets('Pular e Trocar ficam tocáveis no lockup de descanso', (
     tester,
   ) async {
     var trocarTaps = 0;
-    var titleTaps = 0;
+    var skipTaps = 0;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Column(
-            children: [
-              CheckinRestBanner(
-                seconds: 45,
-                onSkip: () {},
-                onTrocar: () => trocarTaps++,
-              ),
-              GestureDetector(
-                onTap: () => titleTaps++,
-                behavior: HitTestBehavior.opaque,
-                child: const SizedBox(
-                  width: double.infinity,
-                  height: 80,
-                  child: Center(child: Text('Supino reto')),
-                ),
-              ),
-            ],
+          body: CheckinRestFocusView(
+            seconds: 69,
+            totalSeconds: 75,
+            contextLine: 'Série 2 de 4 · Supino reto',
+            onSkip: () => skipTaps++,
+            onTrocar: () => trocarTaps++,
           ),
         ),
       ),
     );
 
+    expect(find.text('1:09'), findsOneWidget);
+    expect(find.text('Série 2 de 4 · Supino reto'), findsOneWidget);
     await tester.tap(find.text('Trocar'));
-    await tester.tap(find.text('Supino reto'));
+    await tester.tap(find.text('Pular descanso'));
     expect(trocarTaps, 1);
-    expect(titleTaps, 1);
+    expect(skipTaps, 1);
+    expect(find.byType(TextButton), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 

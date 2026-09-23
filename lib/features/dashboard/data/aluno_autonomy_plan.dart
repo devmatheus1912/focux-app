@@ -543,8 +543,8 @@ FocuxScore _buildFocuxScore({
           : 'Ritmo em retomada';
   final nextSignal =
       plan.nextTask == null
-          ? 'Sinal verde para evolução'
-          : 'Próxima ação: ${plan.nextTask!.title.toLowerCase()}';
+          ? 'Pode treinar hoje'
+          : plan.nextTask!.title;
 
   return FocuxScore(
     value: value,
