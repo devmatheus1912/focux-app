@@ -245,7 +245,7 @@ class _Aluno360CopilotPrescriptionState
           label:
               '${widget.showTitle ? '${widget.title}. ' : ''}'
               '${widget.showAction ? '$expandedActionText. ' : ''}$reason'
-              '${widget.showAction && showExpandAction && !_expandedAction ? '. Toque para ver ação completa' : ''}'
+              '${widget.showAction && showExpandAction && !_expandedAction ? '. Toque para ver texto completo' : ''}'
               '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,15 +287,15 @@ class _Aluno360CopilotPrescriptionState
                 ),
                 if (showExpandAction && !_expandedAction)
                   _buildExpandLink(
-                    label: 'Ver ação completa',
-                    semanticsLabel: 'Ver ação completa da sugestão',
+                    label: 'Texto completo',
+                    semanticsLabel: 'Ver texto completo da sugestão',
                     onTap: _toggleExpandedAction,
                     active: false,
                   ),
                 if (showExpandAction && _expandedAction)
                   _buildExpandLink(
                     label: 'Ocultar',
-                    semanticsLabel: 'Ocultar ação completa da sugestão',
+                    semanticsLabel: 'Ocultar texto completo da sugestão',
                     onTap: _toggleExpandedAction,
                     active: true,
                   ),

@@ -11,7 +11,14 @@ void main() {
 
   test('caption de consistência é quieto e pluraliza', () {
     expect(alunoConsistenciaCaption(0), 'Nenhum treino esta semana');
-    expect(alunoConsistenciaCaption(1), '1 dia esta semana');
-    expect(alunoConsistenciaCaption(3), '3 dias esta semana');
+    expect(alunoConsistenciaCaption(1), 'Você treinou 1 dia esta semana');
+    expect(
+      alunoConsistenciaCaption(3),
+      'Você treinou 3 dias esta semana',
+    );
+    expect(
+      alunoConsistenciaCaption(2, weeklyGoal: 4),
+      'Você treinou 2 dias esta semana · meta 4',
+    );
   });
 }

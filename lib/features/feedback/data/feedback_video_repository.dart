@@ -142,7 +142,16 @@ class FeedbackVideoRepository {
 
   Future<List<ExercicioOpcao>> exerciciosDisponiveis() async {
     final r = await _dio.get('/api/feedback-videos/me/exercicios-disponiveis');
-    return (r.data as List)
+    return _parseExercicioOpcoes(r.data);
+  }
+
+  Future<List<ExercicioOpcao>> exerciciosDisponiveisParaAluno(int alunoId) async {
+    final r = await _dio.get('/api/feedback-videos/aluno/$alunoId/exercicios');
+    return _parseExercicioOpcoes(r.data);
+  }
+
+  List<ExercicioOpcao> _parseExercicioOpcoes(Object? data) {
+    return (data as List)
         .map((e) => ExercicioOpcao.fromJson(e as Map<String, dynamic>))
         .toList();
   }

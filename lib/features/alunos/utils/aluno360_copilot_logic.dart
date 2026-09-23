@@ -637,24 +637,13 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
     rawAcao,
     wearableRelevant: wearableRelevant,
   );
-  final fullActionRaw = copilotPrescriptionFullAction(aluno, sanitizedAcao);
   final displayAction = copilotPrescriptionDisplayAction(
     aluno,
     sanitizedAcao,
     wearableRelevant: wearableRelevant,
   );
-  final String? fullAction;
-  if (isRoboticCopilotContactCopy(fullActionRaw) &&
-      !(wearableRelevant && copilotAcaoMencionaWearable(fullActionRaw))) {
-    fullAction = null;
-  } else if (copilotPrescriptionActionsEquivalent(
-    fullActionRaw,
-    displayAction,
-  )) {
-    fullAction = null;
-  } else {
-    fullAction = fullActionRaw;
-  }
+  // Expand = mesmo texto via maxLines (não trocar pelo raw da IA).
+  const String? fullAction = null;
   final reason = sanitizeCopilotPrescriptionReason(
     isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
     statusMetricsVisible: statusMetricsVisible,

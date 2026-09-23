@@ -39,9 +39,12 @@ class AlunoShell extends ConsumerWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(bottom: dockClearance),
-                  child: navigationShell,
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: dockClearance),
+                    child: navigationShell,
+                  ),
                 ),
                 Positioned(
                   bottom: bottomInset + FxDock.floatGap,

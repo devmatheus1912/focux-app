@@ -8,6 +8,7 @@ class CommandActionItem {
   final CommandActionTone tone;
   final bool isRadarStudent;
   final String? priorityBadge;
+  final int? alunoId;
 
   const CommandActionItem({
     required this.icon,
@@ -17,5 +18,6 @@ class CommandActionItem {
     required this.tone,
     this.isRadarStudent = false,
     this.priorityBadge,
+    this.alunoId,
   });
 }

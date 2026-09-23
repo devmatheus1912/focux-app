@@ -369,9 +369,16 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final backFallback =
         _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal';
 
+    final composerBottomPad =
+        _isAlunoMode
+            ? TokensStrip.s2
+            : TokensStrip.s2 +
+                (keyboardOpen ? 0 : MediaQuery.of(context).padding.bottom);
+
     final scaffold = FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
+        safeAreaBottom: !_isAlunoMode,
         appBar: FxShellAppBar(
           title: title,
           subtitle: subtitle,
@@ -548,10 +555,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                     TokensStrip.s3,
                     TokensStrip.s2,
                     TokensStrip.s3,
-                    TokensStrip.s2 +
-                        (MediaQuery.of(context).viewInsets.bottom > 0
-                            ? 0
-                            : MediaQuery.of(context).padding.bottom),
+                    composerBottomPad,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.transparent,

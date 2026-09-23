@@ -24,7 +24,11 @@ import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../planos/providers/plano_features_provider.dart';
+import '../../planos/utils/plano_capability.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
@@ -218,6 +222,17 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
               FxKeyboardDismissScope.dismiss();
               safePopOrGo(context, _parentRoute);
             },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Ajuda — feedback de vídeo',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Feedback de vídeo',
+                      subtitle: feedbackVideoHelpTip,
+                    ),
+              ),
+            ],
           ),
           body: Column(
             children: [

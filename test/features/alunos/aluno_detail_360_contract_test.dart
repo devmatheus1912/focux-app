@@ -698,7 +698,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('DashboardSectionHeader'),
-        contains('FxSatelliteListTile'),
+        contains('Timeline360Tile'),
         contains('Ver todos os'),
       ),
     );

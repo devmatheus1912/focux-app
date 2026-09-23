@@ -9,6 +9,8 @@ FilaAcaoResumo _fila({
   String descricao = 'Pendência',
   String acaoUrl = '/financeiro',
   String prioridade = 'P1',
+  int? alunoId,
+  String ctaLabel = 'Cobrar',
 }) {
   return FilaAcaoResumo(
     tipo: tipo,
@@ -21,8 +23,9 @@ FilaAcaoResumo _fila({
     responsavel: 'Personal',
     sla: 'Hoje',
     status: 'ABERTO',
-    ctaLabel: 'Cobrar',
+    ctaLabel: ctaLabel,
     iaSugerida: false,
+    alunoId: alunoId,
   );
 }
 
@@ -114,6 +117,37 @@ void main() {
       expect(actions.where((a) => a.priorityBadge == 'P0'), hasLength(1));
       expect(actions.first.title, 'Abrir fila de retenção');
       expect(actions.any((a) => a.title == 'Executar próxima ação'), isFalse);
+    });
+
+    test('usa titulo real da fila e rota de chat para chat-contexto', () {
+      final actions = buildDashboardNextActions(
+        filaAcoes: [
+          _fila(
+            actionKey: 'STUDENT_AUTONOMY_RECURRING_9_chat-contexto',
+            tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+            titulo: 'Gargalo recorrente: Enviar contexto no chat',
+            descricao: 'Matheus clicou 2 vezes em contexto',
+            acaoUrl: '/alunos/9',
+            prioridade: 'P2',
+            alunoId: 9,
+            ctaLabel: 'Abrir chat',
+          ),
+        ],
+        unreadCount: 0,
+        alunosRisco: 0,
+        cobrancasPendentes: 0,
+        agendaHoje: 0,
+        hideRiskSummary: false,
+        isCommandPreparing: false,
+      );
+
+      expect(actions.any((a) => a.title == 'Executar próxima ação'), isFalse);
+      expect(
+        actions.first.title,
+        contains('Gargalo recorrente'),
+      );
+      expect(actions.first.route, '/alunos/9/chat');
+      expect(actions.first.subtitle, 'Abrir chat');
     });
 
     test('falls back to create opportunity when empty', () {
@@ -260,6 +294,72 @@ void main() {
       expect(sheet.any((a) => a.isRadarStudent && a.title == 'Ana'), isTrue);
     });
 
+    test('colapsa por alunoId distinto e lista afetados no sheet', () {
+      final sheet = buildDashboardSheetActions(
+        curated: const [],
+        filaAcoes: [
+          _fila(
+            actionKey: 'STUDENT_AUTONOMY_RECURRING_1_chat-contexto',
+            tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+            titulo: 'Gargalo recorrente: Enviar contexto no chat',
+            descricao: 'Ana clicou 2 vezes em contexto',
+            acaoUrl: '/alunos/1/chat',
+            prioridade: 'P2',
+            alunoId: 1,
+          ),
+          _fila(
+            actionKey: 'STUDENT_AUTONOMY_RECURRING_1_chat-contexto-b',
+            tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+            titulo: 'Gargalo recorrente: Enviar contexto no chat',
+            descricao: 'Ana clicou 3 vezes em contexto',
+            acaoUrl: '/alunos/1/chat',
+            prioridade: 'P2',
+            alunoId: 1,
+          ),
+          _fila(
+            actionKey: 'STUDENT_AUTONOMY_RECURRING_2_chat-contexto',
+            tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+            titulo: 'Gargalo recorrente: Enviar contexto no chat',
+            descricao: 'Bruno clicou 2 vezes em contexto',
+            acaoUrl: '/alunos/2/chat',
+            prioridade: 'P2',
+            alunoId: 2,
+          ),
+        ],
+      );
+
+      final impact = sheet.where((a) => !a.isRadarStudent).toList();
+      expect(impact.first.title, 'Gargalo recorrente · 2');
+      expect(impact.first.subtitle, 'Mesmo gargalo em 2 alunos');
+      expect(impact.where((a) => a.alunoId != null).map((a) => a.title), [
+        'Ana',
+        'Bruno',
+      ]);
+    });
+
+    test('nao colapsa quando so 1 aluno tem 3 linhas', () {
+      final sheet = buildDashboardSheetActions(
+        curated: const [],
+        filaAcoes: [
+          for (var i = 0; i < 3; i++)
+            _fila(
+              actionKey: 'STUDENT_AUTONOMY_RECURRING_1_$i',
+              tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+              titulo: 'Gargalo recorrente: Enviar contexto no chat',
+              descricao: 'Ana clicou ${i + 1} vezes',
+              acaoUrl: '/alunos/1/chat',
+              prioridade: 'P2',
+              alunoId: 1,
+            ),
+        ],
+      );
+
+      expect(
+        sheet.where((a) => a.title.startsWith('Gargalo recorrente ·')),
+        isEmpty,
+      );
+    });
+
     test('colapsa 3+ impactos com o mesmo prefixo e só o lead leva P0', () {
       final sheet = buildDashboardSheetActions(
         curated: const [],
@@ -271,6 +371,7 @@ void main() {
             descricao: 'Mesmo bloqueio',
             acaoUrl: '/alunos/1',
             prioridade: 'P2',
+            alunoId: 1,
           ),
           _fila(
             actionKey: 'PLAN_REVIEW',
@@ -279,6 +380,7 @@ void main() {
             descricao: 'Mesmo bloqueio',
             acaoUrl: '/alunos/2',
             prioridade: 'P2',
+            alunoId: 2,
           ),
           _fila(
             actionKey: 'PLAN_REVIEW',
@@ -287,6 +389,7 @@ void main() {
             descricao: 'Mesmo bloqueio',
             acaoUrl: '/alunos/3',
             prioridade: 'P2',
+            alunoId: 3,
           ),
         ],
         riskStudents: [
@@ -296,8 +399,8 @@ void main() {
       );
 
       expect(
-        sheet.where((a) => !a.isRadarStudent).map((a) => a.title),
-        ['Gargalo recorrente · 3'],
+        sheet.where((a) => a.title == 'Gargalo recorrente · 3'),
+        hasLength(1),
       );
       expect(sheet.where((a) => a.priorityBadge == 'P0'), hasLength(1));
       expect(sheet.firstWhere((a) => a.isRadarStudent).title, 'Ana');

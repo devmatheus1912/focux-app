@@ -163,23 +163,6 @@ class Aluno360TimelineCard extends StatelessWidget {
     }
   }
 
-  String _timelineTileLabel(Timeline360Item item) {
-    return timeline360ListLabel(
-      kind: item.kind,
-      title: item.title,
-      meta: item.meta,
-    );
-  }
-
-  String _timelineTileSubtitle(Timeline360Item item) {
-    return timeline360ListSubtitle(
-      kind: item.kind,
-      title: item.title,
-      body: item.body,
-      alunoFirstName: aluno.nome.split(' ').first,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
@@ -270,21 +253,14 @@ class Aluno360TimelineCard extends StatelessWidget {
             for (var i = 0; i < visibleItems.length; i++)
               Aluno360TimelineTileEntrance(
                 index: i,
-                child: FxSatelliteListTile(
-                  title: _timelineTileLabel(visibleItems[i]),
-                  titleCase: false,
-                  isThreeLine: false,
-                  subtitle: Text(
-                    _timelineTileSubtitle(visibleItems[i]),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                child: Timeline360Tile(
+                  item: visibleItems[i],
+                  isDark: isDark,
                   accent: visibleItems[i].color,
-                  onTap: () => _onTimelineItemTap(context, visibleItems[i]),
-                  trailing: Text(
-                    formatTimeline360Date(visibleItems[i].at),
-                    style: Aluno360Layout.metaStyle(context),
-                  ),
+                  alunoFirstName: aluno.nome.split(' ').first,
+                  showSpineBelow: i < visibleItems.length - 1,
+                  onExpandableTap: (_, item) => _onTimelineItemTap(context, item),
+                  onRouteTap: (_, item) => _onTimelineItemTap(context, item),
                 ),
               ),
           if (!loading && !error && allItems.isNotEmpty && hasMore)

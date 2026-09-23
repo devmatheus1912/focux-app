@@ -43,7 +43,10 @@ class ProgressoSemanalWidget extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final weeklyGoal = alunoWeeklyDayGoal(frequenciaDias: frequenciaDias);
     final completedThisWeek = countUniqueCompletedDaysThisWeek(historico);
-    final caption = alunoConsistenciaCaption(completedThisWeek);
+    final caption = alunoConsistenciaCaption(
+      completedThisWeek,
+      weeklyGoal: weeklyGoal,
+    );
     final now = DateTime.now();
     final startOfWeek = DateTime(
       now.year,

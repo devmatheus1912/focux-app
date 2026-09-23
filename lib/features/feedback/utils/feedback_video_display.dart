@@ -37,6 +37,9 @@ String feedbackVideoCountLabel(int count) {
   return '$count feedbacks';
 }
 
+const feedbackVideoHelpTip =
+    'Feedback de vídeo usa Pose Coach (Enterprise). Escolha o exercício do treino ativo do aluno e cole a URL do vídeo.';
+
 bool feedbackVideoMatchesQuery({
   required String comentario,
   required String query,

@@ -27,6 +27,7 @@ class FxShellScaffold extends StatelessWidget {
     this.extendBody = false,
     this.useMesh = false,
     this.safeArea = true,
+    this.safeAreaBottom,
     this.constrainWidth = true,
     this.dismissKeyboard,
   });
@@ -38,6 +39,10 @@ class FxShellScaffold extends StatelessWidget {
   final bool extendBody;
   final bool useMesh;
   final bool safeArea;
+
+  /// Quando [safeArea] é true, controla só o inset inferior. `null` = inferir
+  /// (false se houver [bottomNavigationBar]).
+  final bool? safeAreaBottom;
 
   /// Tier S+: limita largura do body em telas satélite (hubs full-bleed usam false).
   final bool constrainWidth;
@@ -60,7 +65,8 @@ class FxShellScaffold extends StatelessWidget {
 
     Widget content = inner;
     if (safeArea) {
-      content = SafeArea(bottom: bottomNavigationBar == null, child: inner);
+      final bottomInset = safeAreaBottom ?? bottomNavigationBar == null;
+      content = SafeArea(bottom: bottomInset, child: inner);
     }
     if (bottomNavigationBar != null) {
       content = SizedBox.expand(child: content);

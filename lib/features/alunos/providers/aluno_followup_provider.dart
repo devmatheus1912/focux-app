@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
@@ -67,6 +68,7 @@ class AlunoFollowUpActions {
     _ref.invalidate(alunoProvider(alunoId));
     _ref.invalidate(aluno360Provider(alunoId));
     _ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
+    _ref.invalidate(dashboardHomeProvider);
   }
 }
 

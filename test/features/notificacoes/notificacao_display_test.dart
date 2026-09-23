@@ -32,6 +32,8 @@ void main() {
     expect(notificacaoCountLabel(0), 'Nenhuma');
     expect(notificacaoCountLabel(1), '1 aviso');
     expect(notificacaoCountLabel(4), '4 avisos');
+    expect(notificacaoComoCalculamos, contains('inbox de chat'));
+    expect(notificacaoComoCalculamos, isNot(contains('chat e Radar')));
     expect(notificacaoComoCalculamos, contains('Radar'));
     expect(notificacaoSearchEmptyTitle(''), 'Tudo em ordem');
     expect(notificacaoSearchEmptyTitle('treino'), 'Nenhum aviso encontrado');

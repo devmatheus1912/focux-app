@@ -381,7 +381,7 @@ void main() {
       );
     });
 
-    test('resolveCopilotPrescriptionFromAction keeps full IA text for expand', () {
+    test('resolveCopilotPrescriptionFromAction expand usa o mesmo texto', () {
       final aluno = _aluno();
       const raw =
           'Entre em contato com Beatriz Carvalho para reavivar o interesse no treinamento e solicitar a sincronização dos dados do wearable.';
@@ -394,7 +394,7 @@ void main() {
         'fallback',
       );
       expect(content.action, 'Retomar contato e pedir sync do wearable.');
-      expect(content.fullAction, contains('sincronização'));
+      expect(content.fullAction, isNull);
     });
 
     test('drops fullAction when only name or punctuation differs', () {

@@ -61,15 +61,18 @@ List<CommandActionItem> buildDashboardNextActions({
               ? null
               : CommandActionItem(
                 icon: 'zap',
-                title: 'Executar próxima ação',
-                subtitle: dashboardClampActionCopy(
-                  queueCandidates.first.descricao,
+                title: dashboardClampActionCopy(
+                  dashboardFormatActionCopy(
+                    queueCandidates.first.titulo.isNotEmpty
+                        ? queueCandidates.first.titulo
+                        : 'Prioridade',
+                  ),
+                  maxChars: 48,
                 ),
-                route:
-                    queueCandidates.first.acaoUrl.startsWith('/')
-                        ? queueCandidates.first.acaoUrl
-                        : '/dashboard/personal',
+                subtitle: _queueActionSubtitle(queueCandidates.first),
+                route: dashboardFilaActionRoute(queueCandidates.first),
                 tone: CommandActionTone.primary,
+                alunoId: queueCandidates.first.alunoId,
               ));
 
   final nextActions = <CommandActionItem>[
@@ -188,12 +191,40 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
           maxChars: 48,
         ),
     subtitle: dashboardClampActionCopy(action.descricao),
-    route:
-        action.acaoUrl.startsWith('/') ? action.acaoUrl : '/dashboard/personal',
+    route: dashboardFilaActionRoute(action),
     tone: CommandActionTone.primary,
     isRadarStudent: isRadar,
     priorityBadge: badge,
+    alunoId: action.alunoId,
   );
+}
+
+/// Deep link honesto: chat-contexto → conversa; resto respeita [acaoUrl].
+String dashboardFilaActionRoute(FilaAcaoResumo action) {
+  final alunoId = action.alunoId;
+  if (alunoId != null && _isChatContextoAction(action)) {
+    return '/alunos/$alunoId/chat';
+  }
+  final url = action.acaoUrl;
+  if (url.startsWith('/')) return url;
+  return '/dashboard/personal';
+}
+
+String _queueActionSubtitle(FilaAcaoResumo action) {
+  final cta = action.ctaLabel.trim();
+  if (cta.isNotEmpty) {
+    return dashboardClampActionCopy(cta, maxChars: 42);
+  }
+  return dashboardClampActionCopy(action.descricao);
+}
+
+bool _isChatContextoAction(FilaAcaoResumo action) {
+  final key = action.actionKey.toLowerCase();
+  if (key.contains('chat-contexto')) return true;
+  final url = action.acaoUrl.toLowerCase();
+  if (url.contains('/chat')) return true;
+  final title = action.titulo.toLowerCase();
+  return title.contains('contexto') && title.contains('chat');
 }
 
 bool _isFilaRisk(FilaAcaoResumo action) {
@@ -332,18 +363,24 @@ String _impactTitlePrefix(String title) {
 }
 
 List<CommandActionItem> _collapseRepeatedImpact(List<CommandActionItem> items) {
-  if (items.length < 3) return items;
-  final counts = <String, int>{};
+  if (items.length < 2) return items;
+  final byPrefix = <String, List<CommandActionItem>>{};
   for (final item in items) {
     final key = _impactTitlePrefix(item.title);
-    counts[key] = (counts[key] ?? 0) + 1;
+    byPrefix.putIfAbsent(key, () => []).add(item);
   }
   final seen = <String>{};
   final out = <CommandActionItem>[];
   for (final item in items) {
     final key = _impactTitlePrefix(item.title);
-    final n = counts[key] ?? 1;
-    if (n < 3) {
+    final group = byPrefix[key] ?? const <CommandActionItem>[];
+    final uniqueAlunoIds = <int>{
+      for (final g in group)
+        if (g.alunoId != null) g.alunoId!,
+    };
+    // Colapsa só com 2+ alunos distintos (não conta linhas do mesmo aluno).
+    final uniqueCount = uniqueAlunoIds.isEmpty ? group.length : uniqueAlunoIds.length;
+    if (uniqueCount < 2) {
       out.add(item);
       continue;
     }
@@ -352,13 +389,57 @@ List<CommandActionItem> _collapseRepeatedImpact(List<CommandActionItem> items) {
     out.add(
       CommandActionItem(
         icon: item.icon,
-        title: '$key · $n',
-        subtitle: 'Mesmo gargalo em $n alunos',
-        route: item.route,
+        title: '$key · $uniqueCount',
+        subtitle: 'Mesmo gargalo em $uniqueCount alunos',
+        route: '/alunos',
         tone: item.tone,
         priorityBadge: item.priorityBadge,
       ),
     );
+    // Sheet: alunos afetados como linhas quietas (rota por aluno).
+    final emittedAlunos = <int>{};
+    for (final g in group) {
+      final id = g.alunoId;
+      if (id == null || !emittedAlunos.add(id)) continue;
+      out.add(
+        CommandActionItem(
+          icon: 'users',
+          title: _collapsedStudentLabel(g),
+          subtitle: 'Abrir conversa',
+          route: g.route,
+          tone: g.tone,
+          alunoId: id,
+        ),
+      );
+    }
   }
   return out;
+}
+
+String _collapsedStudentLabel(CommandActionItem item) {
+  final afterColon = item.title.contains(':')
+      ? item.title.split(':').skip(1).join(':').trim()
+      : '';
+  // Título estilo "Gargalo: Ana" — usa o nome curto.
+  if (afterColon.isNotEmpty &&
+      afterColon.length <= 40 &&
+      !afterColon.contains(' ')) {
+    return afterColon;
+  }
+  // Descrição BE crua: "{Nome} clicou N vezes…"
+  final sub = item.subtitle.trim();
+  final cut = sub.toLowerCase().indexOf(' clicou');
+  if (cut > 0) {
+    return fxTitleCaseName(sub.substring(0, cut).trim());
+  }
+  // Após clamp (remove "clicou N vezes em"): sobra "{Nome} …"
+  if (afterColon.contains(' ')) {
+    final first = sub.split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    if (first.isNotEmpty) {
+      final name = first.first.replaceAll(RegExp(r'[.…]+$'), '');
+      if (name.length >= 2) return fxTitleCaseName(name);
+    }
+  }
+  if (afterColon.isNotEmpty) return afterColon;
+  return item.title;
 }

@@ -1,5 +1,5 @@
 const notificacaoComoCalculamos =
-    'Tudo que pediu ação: alerta, chat e Radar. Não é o sino do inbox.';
+    'Avisos operacionais do estúdio: mensalidade, feed, trial e Radar. Mensagens de chat ficam só na inbox de chat.';
 
 String notificacaoCountLabel(int count) {
   if (count <= 0) return 'Nenhuma';
@@ -11,7 +11,7 @@ String notificacaoSearchEmptyTitle(String query) =>
     query.trim().isEmpty ? 'Tudo em ordem' : 'Nenhum aviso encontrado';
 
 String notificacaoSearchEmptySubtitle(String query) => query.trim().isEmpty
-    ? 'Alertas, mensagens e o Radar Focux aparecem aqui quando pedem ação.'
+    ? 'Alertas financeiros, novidades do feed e sinais do Radar aparecem aqui.'
     : 'Nada com esse texto nesta caixa.';
 
 const _nameParticles = {'de', 'da', 'do', 'dos', 'das', 'e'};

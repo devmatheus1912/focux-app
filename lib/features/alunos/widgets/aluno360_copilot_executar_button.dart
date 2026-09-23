@@ -89,6 +89,8 @@ class _Aluno360CopilotExecutarAcaoButtonState
         if (!mounted) return;
         // ignore: use_build_context_synchronously
         context.push('/alunos/${widget.alunoId}/treinos-list');
+      } else if (resp.status.toUpperCase() == 'SEM_TOKEN') {
+        FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
       } else {
         FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
       }

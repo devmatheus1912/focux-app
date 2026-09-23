@@ -6,7 +6,7 @@ import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.
 import 'package:focux_app/core/theme/brand_palette.dart';
 
 void main() {
-  testWidgets('Ver ação completa expands truncated prescription', (tester) async {
+  testWidgets('Texto completo expands truncated prescription', (tester) async {
     const longAction =
         'Retomar contato com Beatriz e checar como está o treino, '
         'alinhar expectativas da semana e revisar aderência nos últimos dias.';
@@ -30,14 +30,14 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.text('Ver ação completa'), findsOneWidget);
+    expect(find.text('Texto completo'), findsOneWidget);
 
-    await tester.tap(find.text('Ver ação completa'));
+    await tester.tap(find.text('Texto completo'));
     await tester.pump();
 
     expect(find.text('Ocultar'), findsOneWidget);
     expect(find.text(longAction), findsOneWidget);
-    expect(find.text('Ver ação completa'), findsNothing);
+    expect(find.text('Texto completo'), findsNothing);
   });
 
   testWidgets('reason footer stacks segments on narrow width', (tester) async {

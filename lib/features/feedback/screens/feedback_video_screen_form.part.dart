@@ -3,6 +3,16 @@ part of 'feedback_video_screen.dart';
 extension on _FeedbackVideoScreenState {
   Future<void> _novoFeedback() async {
     HapticFeedback.selectionClick();
+    final features = ref.read(planoFeaturesProvider).valueOrNull;
+    if (features == null || !PlanoCapability.has(features, 'poseCoach')) {
+      if (!mounted) return;
+      await UpgradePromptSheet.show(
+        context: context,
+        featureName: 'Pose Coach — feedback de vídeo',
+        capability: 'poseCoach',
+      );
+      return;
+    }
     var alunoId = widget.alunoId;
     var alunoNome = widget.alunoNome?.trim() ?? '';
     if (alunoId == null) {
@@ -48,13 +58,22 @@ extension on _FeedbackVideoScreenState {
     try {
       final pickedEx = await showFxHomeSheet<_FeedbackExercicioPick>(
         context,
-        builder: (ctx) => const _FeedbackExercicioPickerSheet(),
+        builder:
+            (ctx) => _FeedbackExercicioPickerSheet(alunoId: selectedAlunoId),
       );
       if (pickedEx == null || !mounted) return;
       selectedExercicioId = pickedEx.id;
       exercicioNome = pickedEx.nome;
     } catch (e) {
       if (!mounted) return;
+      if (isPlanGateError(e)) {
+        await UpgradePromptSheet.show(
+          context: context,
+          featureName: 'Pose Coach — feedback de vídeo',
+          capability: 'poseCoach',
+        );
+        return;
+      }
       FeedbackHelper.showError(context, friendlyError(e));
       return;
     }
@@ -109,9 +128,16 @@ extension on _FeedbackVideoScreenState {
       );
       created = true;
     } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
+      if (!mounted) return;
+      if (isPlanGateError(e)) {
+        await UpgradePromptSheet.show(
+          context: context,
+          featureName: 'Pose Coach — feedback de vídeo',
+          capability: 'poseCoach',
+        );
+        return;
       }
+      FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       videoUrlCtrl.dispose();
       comentarioCtrl.dispose();
@@ -123,7 +149,9 @@ extension on _FeedbackVideoScreenState {
 typedef _FeedbackExercicioPick = ({int id, String nome});
 
 class _FeedbackExercicioPickerSheet extends ConsumerStatefulWidget {
-  const _FeedbackExercicioPickerSheet();
+  const _FeedbackExercicioPickerSheet({required this.alunoId});
+
+  final int alunoId;
 
   @override
   ConsumerState<_FeedbackExercicioPickerSheet> createState() =>
@@ -176,9 +204,8 @@ class _FeedbackExercicioPickerSheetState
       setState(() => _loadingMore = true);
     }
     try {
-      final all = await FeedbackVideoRepository(
-        ref.read(apiClientProvider),
-      ).exerciciosDisponiveis();
+      final repo = FeedbackVideoRepository(ref.read(apiClientProvider));
+      final all = await repo.exerciciosDisponiveisParaAluno(widget.alunoId);
       final q = _query.toLowerCase();
       final filtered =
           q.isEmpty
