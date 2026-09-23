@@ -64,10 +64,14 @@ class CheckinRestBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(
-                height: checkinExecutionControlMin + 8,
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: checkinExecutionControlMin + 8,
+                  maxWidth: 168,
+                ),
                 child: FxLiquidPrimaryButton(
                   label: checkinPularDescansoLabel(),
+                  expand: false,
                   onPressed: onSkip,
                 ),
               ),

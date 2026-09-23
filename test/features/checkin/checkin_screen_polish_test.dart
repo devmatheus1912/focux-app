@@ -68,6 +68,7 @@ void main() {
       ),
     );
     expect(timers, contains('FxLiquidPrimaryButton'));
+    expect(timers, contains('expand: false'));
     expect(timers, isNot(contains('FilledButton')));
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
