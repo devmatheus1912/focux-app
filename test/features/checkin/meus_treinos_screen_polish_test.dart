@@ -51,6 +51,9 @@ void main() {
     expect(screen, contains('Fiz o treino'));
     expect(screen, contains('TextButton'));
     expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('primaryStart'));
+    expect(screen, contains("label: 'Iniciar'"));
+    expect(screen, contains("child: const Text('Ver status')"));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
     expect(screen, contains('Pronto para treinar'));
     expect(screen, contains('confirmarPlano'));

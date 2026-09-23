@@ -48,10 +48,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
       now.month,
       now.day,
     ).subtract(Duration(days: now.weekday - 1));
-    final engagementChips = _engagementChips(
-      completedThisWeek: completedThisWeek,
-      weeklyGoal: weeklyGoal,
-    );
+    final engagementChips = _engagementChips();
     final insightLine = insight?.trim();
     final hasInsight = insightLine != null && insightLine.isNotEmpty;
 
@@ -179,7 +176,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
               const SizedBox(width: TokensStrip.s3),
               Text(
-                '$completedThisWeek de $weeklyGoal',
+                '$completedThisWeek de $weeklyGoal dias',
                 style: FocuxHubTypography.metric(
                   color: chrome.ink,
                   fontSize: FocuxHubTypography.metricEm,
@@ -192,10 +189,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
     );
   }
 
-  List<String> _engagementChips({
-    required int completedThisWeek,
-    required int weeklyGoal,
-  }) {
+  List<String> _engagementChips() {
     final ader = aderenciaPercent;
     final hasAder = ader != null && ader > 0;
     final vol = volumeSemanaKg;
@@ -204,7 +198,6 @@ class ProgressoSemanalWidget extends StatelessWidget {
     if (!hasAder && !hasVol) return const [];
     final chips = <String>[];
     if (hasAder) chips.add('Aderência $ader%');
-    chips.add('Frequência $completedThisWeek/$weeklyGoal');
     if (hasVol) chips.add('Volume ${formatAlunoVolumeKg(vol)}');
     return chips;
   }
@@ -254,10 +247,7 @@ class _QuietMetricChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: FocuxHubTypography.chip(ink).copyWith(
-          fontWeight: FontWeight.w700,
-          fontSize: 11,
-        ),
+        style: FocuxHubTypography.chip(ink),
       ),
     );
   }

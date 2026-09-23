@@ -53,10 +53,11 @@ void main() {
     expect(screen, contains('Preparando seu treino'));
     expect(screen, contains('CheckinRestBanner'));
     expect(screen, isNot(contains('CheckinRestFocusView')));
+    final timers = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_timer_widgets.dart',
+    );
     expect(
-      readScreenSourceBundle(
-        'lib/features/checkin/widgets/checkin_timer_widgets.dart',
-      ),
+      timers,
       allOf(
         contains('class CheckinRestBanner'),
         contains('SafeArea('),
@@ -66,6 +67,9 @@ void main() {
         contains('checkinExecutionControlMin + 8'),
       ),
     );
+    expect(timers, contains('FxLiquidPrimaryButton'));
+    expect(timers, contains('expand: false'));
+    expect(timers, isNot(contains('FilledButton')));
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
     expect(screen, contains('onConfirmarRestante:'));
@@ -111,6 +115,8 @@ void main() {
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
     );
     expect(card, contains('checkinExecutionControlMin'));
+    expect(card, contains('this.resting'));
+    expect(card, contains('if (!resting)'));
     expect(card, contains('FxLiquidPrimaryButton'));
     expect(card, contains("'Ajustar'"));
     expect(card, contains("'Mais'"));
@@ -163,6 +169,7 @@ void main() {
     expect(screen, contains('showCheckinExerciseTipsSheet'));
     expect(screen, isNot(contains('onOpenTips:')));
     expect(screen, contains('CheckinSerieCard'));
+    expect(screen, contains('resting: _showRestTimer'));
   });
 
   test('faixa de descanso não cobre o toque para trocar', () {

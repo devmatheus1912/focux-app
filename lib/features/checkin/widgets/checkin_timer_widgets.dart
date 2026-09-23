@@ -22,7 +22,6 @@ class CheckinRestBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
     final mm = (seconds ~/ 60).toString().padLeft(1, '0');
     final ss = (seconds % 60).toString().padLeft(2, '0');
     final countdown = seconds >= 60 ? '$mm:$ss' : '$seconds';
@@ -65,25 +64,15 @@ class CheckinRestBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(
-                height: checkinExecutionControlMin + 8,
-                child: FilledButton(
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: checkinExecutionControlMin + 8,
+                  maxWidth: 168,
+                ),
+                child: FxLiquidPrimaryButton(
+                  label: checkinPularDescansoLabel(),
+                  expand: false,
                   onPressed: onSkip,
-                  style: FilledButton.styleFrom(
-                    minimumSize: Size(
-                      120,
-                      checkinExecutionControlMin + 8,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: TokensStrip.s3,
-                    ),
-                    backgroundColor: primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Text(
-                    checkinPularDescansoLabel(),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
                 ),
               ),
               if (onTrocar != null) ...[

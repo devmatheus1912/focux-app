@@ -570,7 +570,7 @@ List<Aluno360CopilotSignal> resolveCopilotSignals({
               : '${(resumo.concluidos / (resumo.cliques == 0 ? 1 : resumo.cliques) * 100).clamp(0, 100).round()}%',
       detail:
           hasAutonomyFriction
-              ? 'clicou e ainda não fechou'
+              ? 'abriu e ainda não concluiu'
               : 'sem gargalo aberto forte',
       color: hasAutonomyFriction ? EagleTokens.warn : primary,
     ),

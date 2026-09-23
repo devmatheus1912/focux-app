@@ -26,6 +26,8 @@ void main() {
     expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('historicoSeriesFeitasEfetivas'));
+    expect(screen, contains('historicoEmptySeriesFromExercicios'));
+    expect(screen, contains('historicoStatusDisplayLabel'));
     expect(screen, contains('historicoSessaoMetricsFromExecucao'));
     expect(screen, contains('evolucaoSessao'));
     expect(screen, contains("label: 'Volume'"));

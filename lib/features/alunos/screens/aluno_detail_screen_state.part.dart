@@ -492,7 +492,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     proximaAcao360: proximaAcao360,
                     hasOpenCopilotTask360:
                         operacaoAsync.valueOrNull?.hasOpenCopilotTask ?? false,
-                    isDark: isDark,
                   ),
                 ),
               ),

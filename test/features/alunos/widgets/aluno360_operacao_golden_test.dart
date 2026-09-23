@@ -257,8 +257,6 @@ void main() {
               padding: const EdgeInsets.all(16),
               child: Aluno360StudentQuickActions(
                 aluno: aluno,
-                isDark: false,
-                primary: const Color(0xFF12A3A3),
                 onPassword: () {},
                 onEdit: () {},
                 onEvolve: () {},
@@ -354,7 +352,6 @@ void main() {
                   stickyLabelCompact: 'Contato',
                 ),
                 hasOpenCopilotTask360: true,
-                isDark: false,
               ),
             ),
           ),

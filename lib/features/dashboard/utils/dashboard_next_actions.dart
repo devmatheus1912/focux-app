@@ -34,6 +34,7 @@ List<CommandActionItem> buildDashboardNextActions({
   required bool hideRiskSummary,
   required bool isCommandPreparing,
   bool riskOwnedByDayFocus = false,
+  DashboardRiskStudentRef? leadRiskStudent,
   int maxItems = 6,
 }) {
   final copilotAcoes = filaAcoes.where((a) => a.tipo == 'IA_COPILOTO').toList();
@@ -75,25 +76,33 @@ List<CommandActionItem> buildDashboardNextActions({
     if (showRiskP0)
       CommandActionItem(
         icon:
-            riskOwnedByDayFocus
+            leadRiskStudent != null
+                ? 'users'
+                : riskOwnedByDayFocus
                 ? 'route'
                 : hideRiskSummary
                 ? 'zap'
                 : 'alert-triangle',
         title:
-            riskOwnedByDayFocus
+            leadRiskStudent != null
+                ? fxTitleCaseName(leadRiskStudent.nome)
+                : riskOwnedByDayFocus
                 ? 'Abrir fila de retenção'
                 : hideRiskSummary
                 ? 'Recuperar alunos em risco'
                 : 'Contato hoje',
         subtitle:
-            riskOwnedByDayFocus
+            leadRiskStudent != null
+                ? 'Contato agora'
+                : riskOwnedByDayFocus
                 ? 'Começar agora'
                 : hideRiskSummary
                 ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} com risco de abandono'
                 : '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
         route:
-            (riskOwnedByDayFocus || hideRiskSummary)
+            leadRiskStudent != null
+                ? '/alunos/${leadRiskStudent.id}'
+                : (riskOwnedByDayFocus || hideRiskSummary)
                 ? '/retencao'
                 : '/alunos?filtro=contato',
         tone: CommandActionTone.hot,
@@ -134,7 +143,7 @@ List<CommandActionItem> buildDashboardNextActions({
         route: '/dashboard/command-center/copiloto',
         tone: CommandActionTone.primary,
       ),
-    if (queueAction != null) queueAction,
+    if (queueAction != null && !showRiskP0) queueAction,
     if (agendaHoje > 0)
       CommandActionItem(
         icon: 'calendar',
@@ -307,12 +316,49 @@ List<CommandActionItem> buildDashboardSheetActions({
         route: route,
         tone: CommandActionTone.hot,
         isRadarStudent: true,
-        priorityBadge: 'P0',
+        priorityBadge: isLead ? 'P0' : null,
       ),
     );
     radarIndex++;
   }
   // Mantém ordem de risco do BFF (1º = lead). Não ordenar A–Z.
 
-  return [...impact.take(6), ...radar];
+  return [..._collapseRepeatedImpact(impact.take(6).toList()), ...radar];
+}
+
+String _impactTitlePrefix(String title) {
+  final cut = title.indexOf(':');
+  return cut > 0 ? title.substring(0, cut).trim() : title.trim();
+}
+
+List<CommandActionItem> _collapseRepeatedImpact(List<CommandActionItem> items) {
+  if (items.length < 3) return items;
+  final counts = <String, int>{};
+  for (final item in items) {
+    final key = _impactTitlePrefix(item.title);
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  final seen = <String>{};
+  final out = <CommandActionItem>[];
+  for (final item in items) {
+    final key = _impactTitlePrefix(item.title);
+    final n = counts[key] ?? 1;
+    if (n < 3) {
+      out.add(item);
+      continue;
+    }
+    if (seen.contains(key)) continue;
+    seen.add(key);
+    out.add(
+      CommandActionItem(
+        icon: item.icon,
+        title: '$key · $n',
+        subtitle: 'Mesmo gargalo em $n alunos',
+        route: item.route,
+        tone: item.tone,
+        priorityBadge: item.priorityBadge,
+      ),
+    );
+  }
+  return out;
 }

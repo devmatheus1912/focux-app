@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
@@ -252,32 +253,23 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
-                                  DashboardHomeActionChip(
+                                  _EvolucaoMetricChip(
                                     label: sinalLabel(ev.sinal),
-                                    accent: sigColor,
-                                    isDark: isDark,
-                                    onPressed: () =>
-                                        showAluno360EvolucaoInteligenteHelpSheet(
-                                          context,
-                                        ),
+                                    color: sigColor,
                                   ),
-                                  DashboardHomeActionChip(
+                                  _EvolucaoMetricChip(
                                     label:
                                         hideMonthlyVolume
                                             ? formatAlunoVolumeKg(
                                               ev.volumeSemanal,
                                             )
                                             : '${formatAlunoVolumeKg(ev.volumeSemanal)} sem.',
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed: () => _openTreinos(context),
+                                    color: primary,
                                   ),
                                   if (_ultimoPrValue(ev) != null)
-                                    DashboardHomeActionChip(
+                                    _EvolucaoMetricChip(
                                       label: 'PR ${_ultimoPrValue(ev)!}',
-                                      accent: EagleTokens.good,
-                                      isDark: isDark,
-                                      onPressed: () => _openTreinos(context),
+                                      color: primary,
                                     ),
                                 ],
                               ),
@@ -325,25 +317,25 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 ),
                               ],
                               const SizedBox(height: TokensStrip.s3),
-                              Wrap(
-                                spacing: TokensStrip.s2,
-                                runSpacing: TokensStrip.s2,
-                                children: [
-                                  DashboardHomeActionChip(
-                                    label: 'Ajustar treino',
-                                    accent: primary,
-                                    isDark: isDark,
-                                    onPressed: () => _openTreinos(context),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: TextButton(
+                                  onPressed: () => _openTreinos(context),
+                                  style: Aluno360Layout.secondaryTextLinkStyle(
+                                    context,
                                   ),
-                                ],
+                                  child: const Text('Ajustar treino'),
+                                ),
                               ),
                               if (ev.sugerirCopiloto &&
                                   onOpenCopilot != null) ...[
-                                const SizedBox(height: TokensStrip.s2),
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: TextButton(
                                     onPressed: onOpenCopilot,
+                                    style: Aluno360Layout.secondaryTextLinkStyle(
+                                      context,
+                                    ),
                                     child: const Text('Abrir Copiloto'),
                                   ),
                                 ),
@@ -356,6 +348,28 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _EvolucaoMetricChip extends StatelessWidget {
+  const _EvolucaoMetricChip({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s2,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+      ),
+      child: Text(label, style: FocuxHubTypography.chip(color)),
     );
   }
 }

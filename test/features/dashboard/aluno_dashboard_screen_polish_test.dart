@@ -59,7 +59,10 @@ void main() {
     expect(screen, contains('_StreakFoldBadge'));
     expect(screen, contains('Sequência'));
     expect(screen, contains('Treinar agora'));
+    expect(screen, isNot(contains("label: 'Treinar agora'")));
     expect(screen, contains('Evolução do treino'));
+    expect(screen, contains('Ver plano completo'));
+    expect(screen, isNot(contains("label: 'Ver plano completo'")));
     expect(screen, isNot(contains('Seu score Focux')));
     expect(screen, isNot(contains('RecoveryScoreRing')));
     expect(screen, contains('Ver catálogo'));

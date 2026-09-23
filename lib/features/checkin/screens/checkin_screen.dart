@@ -620,6 +620,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                                 child: CheckinSerieCard(
                                   key: ValueKey(current.treinoExercicioId),
                                   ee: current,
+                                  resting: _showRestTimer,
                                   index: currentIndex,
                                   total: exercicios.length,
                                   draftCargaKg: _draftFor(current).cargaKg,

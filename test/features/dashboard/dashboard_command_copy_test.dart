@@ -17,12 +17,8 @@ void main() {
       'P0',
     );
     expect(
-      dashboardRadarSheetSubtitle(
-        descricao: 'Completar mapa corporal',
-        prioridade: 'P1',
-        sla: 'Hoje',
-      ),
-      contains('mapa corporal'),
+      dashboardClampActionCopy('`Nathalia` clicou 3 vezes em mapa corporal'),
+      'Nathalia mapa corporal',
     );
     expect(
       dashboardFormatCountCopy('1 cobranças pendentes'),

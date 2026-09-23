@@ -32,9 +32,9 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute =
-        widget.isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
     final historico =
@@ -59,7 +59,7 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(TokensStrip.s4),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,73 +72,70 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                   children: [
                     Text(
                       'Central do aluno',
-                      style: TextStyle(
+                      style: FocuxHubTypography.sectionTitle(
+                        context,
                         color: ink,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: TokensStrip.s2),
                     Text(
                       'Pendências e próximos passos para você evoluir sem depender de cobrança do personal.',
-                      style: TextStyle(color: mute, height: 1.45),
+                      style: FocuxHubTypography.bodyMuted(
+                        color: mute,
+                        height: 1.45,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: TokensStrip.s3),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+                  horizontal: TokensStrip.s3,
+                  vertical: TokensStrip.s2,
                 ),
                 decoration: BoxDecoration(
                   color: BrandPalette.soft(primary, dark: widget.isDark),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(TokensStrip.rXl),
                 ),
                 child: Text(
                   '${plan.progress}%',
-                  style: TextStyle(
+                  style: FocuxHubTypography.metric(
                     color: primary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+                    fontSize: FocuxHubTypography.metricEm,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: TokensStrip.s3),
           ClipRRect(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(TokensStrip.rPill),
             child: LinearProgressIndicator(
               value:
                   plan.tasks.isEmpty ? 1 : plan.doneCount / plan.tasks.length,
-              minHeight: 9,
+              minHeight: TokensStrip.s2,
               backgroundColor: BrandPalette.soft(primary, dark: widget.isDark),
               valueColor: AlwaysStoppedAnimation(primary),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: TokensStrip.s2),
           Text(
             plan.progress >= 100
                 ? '${plan.doneCount} de ${plan.tasks.length} pendências fechadas.'
                 : '${plan.doneCount} de ${plan.tasks.length} pendências fechadas. Perfil ${plan.profileCompletion}%.',
-            style: TextStyle(
+            style: FocuxHubTypography.bodyMuted(
               color: mute,
-              fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(TokensStrip.s3),
             decoration: BoxDecoration(
-              color:
-                  widget.isDark
-                      ? Colors.white.withValues(alpha: 0.04)
-                      : BrandPalette.softer(primary),
-              borderRadius: BorderRadius.circular(16),
+              color: BrandPalette.softer(primary, dark: widget.isDark),
+              borderRadius: BorderRadius.circular(TokensStrip.rXl),
             ),
             child: _NextBestTaskPanel(
               task: nextTask,
@@ -146,16 +143,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
               onTap: nextTask == null ? null : () => _openTask(nextTask),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: TokensStrip.s3),
           Align(
             alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
-              label:
-                  plan.tasks.isEmpty
-                      ? 'Ver plano completo'
-                      : 'Ver plano completo (${plan.tasks.length})',
-              accent: primary,
-              isDark: widget.isDark,
+            child: TextButton(
               onPressed:
                   () => _showAlunoPlanSheet(
                     context,
@@ -164,6 +155,14 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
                     plan: plan,
                     onOpenTask: _openTask,
                   ),
+              child: Text(
+                plan.tasks.isEmpty
+                    ? 'Ver plano completo'
+                    : 'Ver plano completo (${plan.tasks.length})',
+                style: FocuxHubTypography.chip(
+                  BrandPalette.sectionLink(primary, dark: widget.isDark),
+                ),
+              ),
             ),
           ),
         ],
@@ -316,14 +315,15 @@ class _NextBestTaskPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
     final icon = Container(
       width: 42,
       height: 42,
       decoration: BoxDecoration(
         color: BrandPalette.soft(primary, dark: isDark),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(TokensStrip.rXl),
       ),
       child: Icon(_alunoTaskIcon(task?.kind), color: primary),
     );
@@ -332,33 +332,24 @@ class _NextBestTaskPanel extends StatelessWidget {
       children: [
         Text(
           task == null ? 'Tudo em dia' : 'Próximo melhor passo',
-          style: TextStyle(
-            color: mute,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w700,
-          ),
+          style: FocuxHubTypography.eyebrow(context, color: mute),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: TokensStrip.s1),
         Text(
           task == null
               ? 'Sua rotina está organizada. Continue acompanhando treino, medidas e agenda.'
               : task!.title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ink,
-            fontSize: 13.5,
-            fontWeight: FontWeight.w700,
-            height: 1.35,
-          ),
+          style: FocuxHubTypography.cardTitle(color: ink),
         ),
         if (task != null) ...[
-          const SizedBox(height: 5),
+          const SizedBox(height: TokensStrip.s1),
           Text(
             task!.description,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, fontSize: 12, height: 1.3),
+            style: FocuxHubTypography.bodyMuted(color: mute),
           ),
         ],
       ],
@@ -366,7 +357,7 @@ class _NextBestTaskPanel extends StatelessWidget {
     final action =
         task == null
             ? null
-            : FilledButton.tonal(
+            : TextButton(
               onPressed: onTap,
               child: Text(task!.cta, overflow: TextOverflow.ellipsis),
             );
@@ -448,8 +439,9 @@ class _AutonomyTaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     final icon = Container(
       width: 38,
@@ -474,18 +466,14 @@ class _AutonomyTaskTile extends StatelessWidget {
           task.title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ink,
-            fontSize: 13.5,
-            fontWeight: FontWeight.w700,
-          ),
+          style: FocuxHubTypography.cardTitle(color: ink),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: TokensStrip.s1),
         Text(
           task.description,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: mute, fontSize: 12.5, height: 1.4),
+          style: FocuxHubTypography.bodyMuted(color: mute, height: 1.4),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -512,13 +500,9 @@ class _AutonomyTaskTile extends StatelessWidget {
                 color: EagleTokens.good.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(999),
               ),
-              child: const Text(
+              child: Text(
                 'Feito',
-                style: TextStyle(
-                  color: EagleTokens.good,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: FocuxHubTypography.chip(EagleTokens.good),
               ),
             )
             : TextButton(
@@ -590,11 +574,7 @@ class _AutonomyTaskPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-        ),
+        style: FocuxHubTypography.chip(color),
       ),
     );
   }

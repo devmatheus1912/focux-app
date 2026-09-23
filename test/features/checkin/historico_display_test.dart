@@ -138,4 +138,49 @@ void main() {
     expect(grouped.andamento.map((e) => e.id), [1, 3]);
     expect(grouped.concluidos.map((e) => e.id), [2]);
   });
+
+  test('historicoCollapseSamePlan agrupa plano e status iguais', () {
+    final items = [
+      ExecucaoTreino(
+        id: 1,
+        treinoId: 10,
+        treinoNome: 'Full Body',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-18T10:00:00',
+        exercicios: const [],
+      ),
+      ExecucaoTreino(
+        id: 2,
+        treinoId: 10,
+        treinoNome: 'Full Body',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-17T10:00:00',
+        exercicios: const [],
+      ),
+      ExecucaoTreino(
+        id: 3,
+        treinoId: 11,
+        treinoNome: 'Push',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-16T10:00:00',
+        exercicios: const [],
+      ),
+      ExecucaoTreino(
+        id: 4,
+        treinoId: 10,
+        treinoNome: 'Full Body',
+        status: 'CONCLUIDO',
+        iniciadoEm: '2026-09-15T10:00:00',
+        exercicios: const [],
+      ),
+    ];
+    final clusters = historicoCollapseSamePlan(items);
+    expect(clusters, hasLength(2));
+    expect(clusters.first.newest.id, 1);
+    expect(clusters.first.count, 3);
+    expect(clusters.last.newest.id, 3);
+    expect(historicoClusterSubtitle(dateLabel: '18 set', count: 2), '2 sessões · 18 set');
+    expect(historicoStatusDisplayLabel(status: 'CONCLUIDO', seriesFeitas: 0), 'Concluído sem séries');
+    expect(historicoEmptySeriesSummary(3), '3 exercícios sem séries');
+  });
 }

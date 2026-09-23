@@ -46,7 +46,7 @@ void main() {
       expect(actions[1].title, 'Cobrar pendências');
     });
 
-    test('risk owned by day focus opens retention queue without repeating count', () {
+    test('risk owned by day focus opens named student without repeating count', () {
       final actions = buildDashboardNextActions(
         filaAcoes: const [],
         unreadCount: 0,
@@ -55,14 +55,21 @@ void main() {
         agendaHoje: 0,
         hideRiskSummary: true,
         riskOwnedByDayFocus: true,
+        leadRiskStudent: (
+          id: 9,
+          nome: 'Nathalia Abrantes',
+          motivo: null,
+          nivelRisco: 'ALTO',
+          proximaAcao: null,
+        ),
         isCommandPreparing: false,
         maxItems: 2,
       );
 
-      expect(actions.first.title, 'Abrir fila de retenção');
-      expect(actions.first.subtitle, 'Começar agora');
+      expect(actions.first.title, 'Nathalia Abrantes');
+      expect(actions.first.subtitle, 'Contato agora');
       expect(actions.first.subtitle, isNot(contains('5')));
-      expect(actions.first.route, '/retencao');
+      expect(actions.first.route, '/alunos/9');
       expect(actions.first.priorityBadge, 'P0');
     });
 
@@ -251,6 +258,49 @@ void main() {
       );
       expect(sheet.any((a) => a.title == 'Revisar planos'), isTrue);
       expect(sheet.any((a) => a.isRadarStudent && a.title == 'Ana'), isTrue);
+    });
+
+    test('colapsa 3+ impactos com o mesmo prefixo e só o lead leva P0', () {
+      final sheet = buildDashboardSheetActions(
+        curated: const [],
+        filaAcoes: [
+          _fila(
+            actionKey: 'PLAN_REVIEW',
+            tipo: 'OPERACAO',
+            titulo: 'Gargalo recorrente: Ana',
+            descricao: 'Mesmo bloqueio',
+            acaoUrl: '/alunos/1',
+            prioridade: 'P2',
+          ),
+          _fila(
+            actionKey: 'PLAN_REVIEW',
+            tipo: 'OPERACAO',
+            titulo: 'Gargalo recorrente: Bruno',
+            descricao: 'Mesmo bloqueio',
+            acaoUrl: '/alunos/2',
+            prioridade: 'P2',
+          ),
+          _fila(
+            actionKey: 'PLAN_REVIEW',
+            tipo: 'OPERACAO',
+            titulo: 'Gargalo recorrente: Caio',
+            descricao: 'Mesmo bloqueio',
+            acaoUrl: '/alunos/3',
+            prioridade: 'P2',
+          ),
+        ],
+        riskStudents: [
+          (id: 1, nome: 'Ana', motivo: null, nivelRisco: 'ALTO', proximaAcao: null),
+          (id: 2, nome: 'Bruno', motivo: null, nivelRisco: 'MEDIO', proximaAcao: null),
+        ],
+      );
+
+      expect(
+        sheet.where((a) => !a.isRadarStudent).map((a) => a.title),
+        ['Gargalo recorrente · 3'],
+      );
+      expect(sheet.where((a) => a.priorityBadge == 'P0'), hasLength(1));
+      expect(sheet.firstWhere((a) => a.isRadarStudent).title, 'Ana');
     });
   });
 }

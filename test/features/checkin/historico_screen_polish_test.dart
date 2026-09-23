@@ -25,6 +25,8 @@ void main() {
     expect(screen, contains('historicoDetalhePath'));
     expect(screen, contains('historicoStatusQuery'));
     expect(screen, contains('historicoGroupByStatus'));
+    expect(screen, contains('historicoCollapseSamePlan'));
+    expect(screen, contains('historicoClusterSubtitle'));
     expect(screen, contains('_HistoricoStatusChip'));
     expect(screen, contains('_HistoricoSectionLabel'));
     expect(screen, contains('q: _query'));

@@ -57,6 +57,65 @@ String? historicoStatusQuery(HistoricoStatusChip chip) {
   }
 }
 
+class HistoricoListCluster {
+  const HistoricoListCluster({required this.newest, required this.count});
+
+  final ExecucaoTreino newest;
+  final int count;
+}
+
+/// Agrupa o mesmo plano + status em toda a lista (§12.1), não só o run.
+List<HistoricoListCluster> historicoCollapseSamePlan(
+  List<ExecucaoTreino> items,
+) {
+  final clusters = <String, HistoricoListCluster>{};
+  final order = <String>[];
+  for (final item in items) {
+    final key = '${item.treinoNome}|${historicoConcluido(item.status)}';
+    final existing = clusters[key];
+    if (existing == null) {
+      clusters[key] = HistoricoListCluster(newest: item, count: 1);
+      order.add(key);
+    } else {
+      clusters[key] = HistoricoListCluster(
+        newest: existing.newest,
+        count: existing.count + 1,
+      );
+    }
+  }
+  return [for (final key in order) clusters[key]!];
+}
+
+String historicoClusterSubtitle({
+  required String dateLabel,
+  required int count,
+}) {
+  if (count <= 1) return dateLabel;
+  if (dateLabel.isEmpty) {
+    return count == 1 ? '1 sessão' : '$count sessões';
+  }
+  return '$count sessões · $dateLabel';
+}
+
+int historicoEmptySeriesCount(Iterable<int> seriesFeitas) =>
+    seriesFeitas.where((n) => n <= 0).length;
+
+int historicoEmptySeriesFromExercicios(Iterable<ExecucaoExercicio> items) {
+  return historicoEmptySeriesCount(
+    items.map(
+      (item) => historicoSeriesFeitasEfetivas(
+        seriesFeitas: item.seriesFeitas,
+        seriesDetalhesCount: item.seriesDetalhes.length,
+      ),
+    ),
+  );
+}
+
+String historicoEmptySeriesSummary(int count) {
+  if (count == 1) return '1 exercício sem séries';
+  return '$count exercícios sem séries';
+}
+
 String historicoChipLabel(HistoricoStatusChip chip) {
   switch (chip) {
     case HistoricoStatusChip.todos:

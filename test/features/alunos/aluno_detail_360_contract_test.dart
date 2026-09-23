@@ -593,7 +593,11 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_student_quick_actions.dart',
       ).readAsStringSync(),
-      contains('DashboardHomeActionChip'),
+      allOf(
+        contains('Mais ações'),
+        contains('TextButton'),
+        contains('secondaryTextLinkStyle'),
+      ),
     );
     expect(
       File(
@@ -615,7 +619,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('FxLiquidPrimaryButton'),
-        contains('DashboardHomeActionChip'),
+        isNot(contains('DashboardHomeActionChip')),
         contains('Ações rápidas da aba operação'),
       ),
     );
@@ -672,7 +676,10 @@ void main() {
       allOf(
         contains('DashboardSectionHeader'),
         contains('DashboardHomeActionChip'),
+        contains('_EvolucaoMetricChip'),
         contains('_VolumeSparklineRow'),
+        contains("child: const Text('Ajustar treino')"),
+        contains('secondaryTextLinkStyle'),
       ),
     );
     expect(
@@ -682,7 +689,7 @@ void main() {
       allOf(
         contains('DashboardSectionHeader'),
         contains('FxSatelliteListTile'),
-        contains('DashboardHomeActionChip'),
+        contains('Ver todos os'),
       ),
     );
     expect(

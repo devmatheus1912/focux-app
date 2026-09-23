@@ -26,7 +26,7 @@ class HistoricoSessaoMetrics {
   final double? destaqueDeltaKg;
 
   String get volumeLabel {
-    if (volumeKg == null) return '—';
+    if (seriesFeitas <= 0 || volumeKg == null) return '—';
     return historicoVolumeLabel(volumeKg!);
   }
 

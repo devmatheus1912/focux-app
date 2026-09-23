@@ -251,6 +251,7 @@ class _DetalheBody extends StatelessWidget {
     final recordes = metrics.recordes > 0
         ? metrics.recordes
         : historicoRecordesCount(prs: prs.length, cargas: cargas.length);
+    final emptySeries = historicoEmptySeriesFromExercicios(execucao.exercicios);
 
     return Column(
       children: [
@@ -402,7 +403,18 @@ class _DetalheBody extends StatelessWidget {
                         ),
                       ),
                     )
-                  else
+                  else ...[
+                    if (emptySeries >= 3)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                        child: Text(
+                          historicoEmptySeriesSummary(emptySeries),
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     for (final item in execucao.exercicios)
                       Builder(
                         builder: (context) {
@@ -447,7 +459,7 @@ class _DetalheBody extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             leading: FxIcon(
-                              name: feito ? 'circle-check' : 'calendar',
+                              name: feito ? 'circle-check' : 'target',
                               size: 18,
                               color:
                                   feito
@@ -467,6 +479,7 @@ class _DetalheBody extends StatelessWidget {
                           );
                         },
                       ),
+                  ],
                 ],
               ),
             ),

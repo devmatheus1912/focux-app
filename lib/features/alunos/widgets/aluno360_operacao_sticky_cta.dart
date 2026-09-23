@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -20,18 +19,15 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     required this.alunoId,
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
-    required this.isDark,
   });
 
   final Aluno aluno;
   final int alunoId;
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final primary = Theme.of(context).colorScheme.primary;
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
     // Bundle/snapshot only — never sidecar GET /ia on Operação critical path.
     final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
@@ -40,7 +36,6 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     }
     final sticky = operacao.stickyAction;
     final effectiveProxima = operacao.effectiveProxima;
-    final hasOpenTask = hasOpenCopilotTask360;
 
     void openOutreach() {
       showAlunoOutreachMessageSheet(
@@ -94,18 +89,16 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       }
     }
 
-    // Só atalho da fila aberta — Criar tarefa / Chat estão em Mais ações.
-    final showSecondaryCommandCenter = shouldShowStickySecondaryCommandCenter(
-      sticky: sticky,
-      hasOpenTask: hasOpenTask,
-    );
     final stickyDisplayLabel = operacao.stickyDisplayLabel;
 
     return SafeArea(
       top: false,
       child: Semantics(
         container: true,
-        label: 'Ações rápidas da aba operação',
+        label:
+            hasOpenCopilotTask360
+                ? 'Ações rápidas da aba operação, com tarefa aberta'
+                : 'Ações rápidas da aba operação',
         child: Padding(
           key: const ValueKey('aluno360_operacao_sticky_cta'),
           padding: EdgeInsets.fromLTRB(
@@ -118,19 +111,6 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (showSecondaryCommandCenter)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: DashboardHomeActionChip(
-                      label: 'Tarefa',
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: openCommandCenter,
-                    ),
-                  ),
-                ),
               Semantics(
                 button: true,
                 label: stickyDisplayLabel,

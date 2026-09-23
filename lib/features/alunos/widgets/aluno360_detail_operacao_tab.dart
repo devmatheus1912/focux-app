@@ -103,8 +103,6 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
               : null,
       quickActions: Aluno360StudentQuickActions(
         aluno: aluno,
-        isDark: isDark,
-        primary: primary,
         onPassword: onPassword,
         onEdit: onEdit,
         onEvolve: onEvolve,

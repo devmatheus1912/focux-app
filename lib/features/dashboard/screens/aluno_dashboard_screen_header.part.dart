@@ -26,7 +26,7 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
     final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.trim().isNotEmpty;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.only(right: TokensStrip.s3),
       child: Semantics(
         button: true,
         label: 'Perfil do aluno',
@@ -48,11 +48,7 @@ class _AlunoAppBarProfileMenu extends StatelessWidget {
                     ? null
                     : Text(
                       _initials(aluno.nome),
-                      style: TextStyle(
-                        color: primary,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: FocuxHubTypography.chip(primary),
                     ),
           ),
         ),
@@ -81,11 +77,12 @@ class _AlunoHeroCard extends StatelessWidget {
             ? brand.slogan!
             : 'Seu treino organizado para hoje.';
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+    final chrome = ShellChrome.of(context);
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(TokensStrip.s3),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Row(
         children: [
@@ -105,39 +102,32 @@ class _AlunoHeroCard extends StatelessWidget {
                       brand.nomePersonal.isNotEmpty
                           ? brand.nomePersonal[0].toUpperCase()
                           : 'P',
-                      style: TextStyle(
-                        color: primary,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      style: FocuxHubTypography.chip(primary),
                     )
                     : null,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: TokensStrip.s3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   brand.nomePersonal,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 13.8,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: FocuxHubTypography.cardTitle(color: ink),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: TokensStrip.s1),
                 Text(
                   slogan,
-                  style: TextStyle(color: mute, fontSize: 11.4, height: 1.2),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: TokensStrip.s2),
           Flexible(
             child: Wrap(
               alignment: WrapAlignment.end,
@@ -192,10 +182,8 @@ class _HeroPill extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             value,
-            style: TextStyle(
-              color: isDark ? EagleTokens.darkInk : TokensStrip.textPrimary,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
+            style: FocuxHubTypography.chip(
+              ShellChrome.of(context).ink,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -248,15 +236,21 @@ class _TodayFocusCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(action.eyebrow, style: FocuxHubTypography.chip(mute)),
-                    const SizedBox(height: 8),
+                    Text(
+                      action.eyebrow,
+                      style: FocuxHubTypography.eyebrow(
+                        context,
+                        color: mute,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
                     Text(
                       action.title,
                       style: FocuxHubTypography.pageTitle(context, color: ink),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: TokensStrip.s2),
                     Text(
                       action.description,
                       style: FocuxHubTypography.bodyMuted(color: mute),
@@ -266,7 +260,7 @@ class _TodayFocusCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: TokensStrip.s3),
               _StreakFoldBadge(
                 label: streakLabel,
                 primary: primary,
@@ -275,26 +269,19 @@ class _TodayFocusCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: TokensStrip.s3),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: TokensStrip.s2,
+            runSpacing: TokensStrip.s2,
             children: [
               _WorkoutInsightPill(
                 icon: Icons.trending_up_rounded,
                 label: score.rhythmLabel,
                 onPrimary: mute,
               ),
-              // ≤2 chips no fold — aderência/frequência no ProgressoSemanal.
-              if (score.nextSignal.trim().isNotEmpty)
-                _WorkoutInsightPill(
-                  icon: Icons.bolt_rounded,
-                  label: score.nextSignal,
-                  onPrimary: primary,
-                ),
-            ].take(2).toList(),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: TokensStrip.s3),
           DashboardHomeActionChip(
             label: action.cta,
             accent: primary,
@@ -302,7 +289,7 @@ class _TodayFocusCard extends StatelessWidget {
             onPressed:
                 () => context.push(action.route, extra: action.routeExtra),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: TokensStrip.s2),
           _HomeNarrativeRail(items: experience.narratives, onPrimary: mute),
         ],
       ),
@@ -319,7 +306,7 @@ class _HomeNarrativeRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
-    final visibleItems = items.take(3).toList(growable: false);
+    final visibleItems = items.take(2).toList(growable: false);
     return Column(
       children: [
         for (var i = 0; i < visibleItems.length; i++) ...[
@@ -327,22 +314,20 @@ class _HomeNarrativeRail extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 6,
-                height: 6,
-                margin: const EdgeInsets.only(top: 6),
+                width: TokensStrip.s2,
+                height: TokensStrip.s2,
+                margin: const EdgeInsets.only(top: TokensStrip.s2),
                 decoration: BoxDecoration(
                   color: onPrimary.withValues(alpha: 0.72),
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: TokensStrip.s2),
               Expanded(
                 child: Text(
                   visibleItems[i],
-                  style: TextStyle(
-                    color: onPrimary.withValues(alpha: 0.78),
-                    fontSize: 11,
-                    height: 1.25,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: onPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -351,7 +336,8 @@ class _HomeNarrativeRail extends StatelessWidget {
               ),
             ],
           ),
-          if (i != visibleItems.length - 1) const SizedBox(height: 5),
+          if (i != visibleItems.length - 1)
+            const SizedBox(height: TokensStrip.s1),
         ],
       ],
     );
@@ -374,26 +360,26 @@ class _StreakFoldBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s2,
+      ),
       decoration: BoxDecoration(
         color: BrandPalette.soft(primary, dark: isDark),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(TokensStrip.rXl),
       ),
       child: Column(
         children: [
           Icon(Icons.local_fire_department_rounded, color: primary, size: 28),
-          const SizedBox(height: 4),
+          const SizedBox(height: TokensStrip.s1),
           Text(
             label,
-            style: FocuxHubTypography.chip(primary).copyWith(
-              fontWeight: FontWeight.w800,
-              fontSize: 11,
-            ),
+            style: FocuxHubTypography.chip(primary),
             textAlign: TextAlign.center,
           ),
           Text(
             'Sequência',
-            style: FocuxHubTypography.chip(mute).copyWith(fontSize: 9),
+            style: FocuxHubTypography.chip(mute),
           ),
         ],
       ),
@@ -427,10 +413,8 @@ class _WorkoutInsightPill extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              color: onPrimary.withValues(alpha: 0.82),
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+            style: FocuxHubTypography.chip(
+              onPrimary.withValues(alpha: 0.82),
             ),
           ),
         ],
@@ -442,37 +426,35 @@ class _WorkoutInsightPill extends StatelessWidget {
 class _MiniMetricCard extends StatelessWidget {
   final String label;
   final String value;
-  final bool isDark;
 
   const _MiniMetricCard({
     required this.label,
     required this.value,
-    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(TokensStrip.s3),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             value,
-            style: FocuxHubTypography.cardTitle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ).copyWith(height: 1.05),
+            style: FocuxHubTypography.metric(
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricEm,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: TokensStrip.s1),
           Text(
             label,
-            style: FocuxHubTypography.chip(
-              Theme.of(context).colorScheme.onSurfaceVariant,
-            ).copyWith(height: 1.15),
+            style: FocuxHubTypography.chip(chrome.mute),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -538,16 +520,12 @@ class _PerformanceEvolutionCard extends StatelessWidget {
             children: [
               Text(
                 'Evolução do treino',
-                style: FocuxHubTypography.chip(mute),
+                style: FocuxHubTypography.eyebrow(context, color: mute),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: TokensStrip.s1),
               Text(
                 view.insight,
-                style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  height: 1.25,
-                ),
+                style: FocuxHubTypography.sectionTitle(context, color: ink),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -575,7 +553,6 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                     child: _MiniMetricCard(
                       label: 'Último PR',
                       value: view.ultimoPrLabel,
-                      isDark: isDark,
                     ),
                   ),
                   const SizedBox(width: TokensStrip.s2),
@@ -583,7 +560,6 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                     child: _MiniMetricCard(
                       label: 'Volume semana',
                       value: formatAlunoVolumeKg(view.volumeSemanaKg),
-                      isDark: isDark,
                     ),
                   ),
                   const SizedBox(width: TokensStrip.s2),
@@ -591,7 +567,6 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                     child: _MiniMetricCard(
                       label: 'Volume mês',
                       value: formatAlunoVolumeKg(view.volumeMesKg),
-                      isDark: isDark,
                     ),
                   ),
                 ],
@@ -602,10 +577,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(TokensStrip.s3),
                   decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : BrandPalette.softer(primary),
+                    color: BrandPalette.softer(primary, dark: isDark),
                     borderRadius: BorderRadius.circular(TokensStrip.rMd),
                   ),
                   child: Text(
@@ -622,11 +594,14 @@ class _PerformanceEvolutionCard extends StatelessWidget {
               const SizedBox(height: TokensStrip.s3),
               Align(
                 alignment: Alignment.centerLeft,
-                child: DashboardHomeActionChip(
-                  label: 'Treinar agora',
-                  accent: primary,
-                  isDark: isDark,
+                child: TextButton(
                   onPressed: () => context.push('/checkin/treinos'),
+                  child: Text(
+                    'Treinar agora',
+                    style: FocuxHubTypography.chip(
+                      BrandPalette.sectionLink(primary, dark: isDark),
+                    ),
+                  ),
                 ),
               ),
             ],

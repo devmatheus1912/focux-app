@@ -192,27 +192,27 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                         streakAtual: home.streakAtual,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: TokensStrip.s3),
                       _AlunoAnamneseCta(),
                       AlunoRecoveryCard(
                         isDark: isDark,
                         snapshot: home.recovery,
                         hasWearableHistory: home.hasWearableHistory,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: TokensStrip.s3),
                       CoachProativoCard(
                         isDark: isDark,
                         mensagens: home.coachMensagens,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: TokensStrip.s3),
                       AlunoUpsellCarousel(ofertas: home.upsellPendentes),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: TokensStrip.s3),
                       _AlunoHeroCard(
                         aluno: home.aluno,
                         brand: home.personalBrand,
                         isDark: isDark,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: TokensStrip.s3),
                       if (home.treinos.isEmpty && home.historico.isEmpty)
                         FxEmptyState(
                           icon: 'dumbbell',

@@ -176,6 +176,10 @@ void main() {
       );
       expect(signals, hasLength(4));
       expect(signals.first.label, 'Perfil');
+      expect(
+        signals.any((s) => s.detail.contains('clicou e ainda')),
+        isFalse,
+      );
     });
   });
 
