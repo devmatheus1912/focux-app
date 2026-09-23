@@ -163,7 +163,8 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
 
     final proximaAcao360 = operacaoAsync.valueOrNull?.proximaAcao;
     final showOperacaoSticky =
-        _tabController.index == 0 && resolvedAlunoAsync.hasValue;
+        (_tabController.index == 0 || _tabController.index == 1) &&
+        resolvedAlunoAsync.hasValue;
     final showErrorChrome =
         !loadingPrimary &&
         !loadingFallback &&
@@ -489,6 +490,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                   child: Aluno360OperacaoStickyCtaBar(
                     aluno: resolvedAlunoAsync.value!,
                     alunoId: alunoId,
+                    tabIndex: _tabController.index,
                     proximaAcao360: proximaAcao360,
                     hasOpenCopilotTask360:
                         operacaoAsync.valueOrNull?.hasOpenCopilotTask ?? false,

@@ -213,6 +213,16 @@ void main() {
         'Você sumiu do radar — me responde por aqui que eu ajusto o plano.',
       );
     });
+
+    test('compacta treino registrado sem CTA de responder', () {
+      expect(
+        timeline360ChatPreviewBody(
+          'Treino registrado: Costa e Braceta. 0/28 series. '
+          'Responda no chat se quiser ajustar a próxima sessão.',
+        ),
+        'Costa e Braceta · 0 de 28 séries',
+      );
+    });
   });
 
   group('formatTimeline360Date', () {

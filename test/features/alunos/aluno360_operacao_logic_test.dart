@@ -383,10 +383,17 @@ void main() {
       );
     });
 
-    test('hides when contact priority owns outreach', () {
+    test('hides when sticky snapshot already owns P0', () {
       expect(
         shouldShowOperacaoCheckinCta(
           operacao: contactSnapshot(chatSticky: true),
+          weekHasAnyCheckin: false,
+        ),
+        isFalse,
+      );
+      expect(
+        shouldShowOperacaoCheckinCta(
+          operacao: contactSnapshot(chatSticky: false),
           weekHasAnyCheckin: false,
         ),
         isFalse,
@@ -672,7 +679,7 @@ void main() {
   });
 
   group('shouldShowCopilotPrescriptionBlock', () {
-    test('shows prescription during IA refresh even when sticky matches 360', () {
+    test('hides clone even after IA refresh when sticky already owns the action', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
@@ -681,16 +688,15 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: true,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Completar mapa corporal no radar',
         ),
-        isTrue,
+        isFalse,
       );
     });
 
-    test('hides duplicate when not forcing IA', () {
+    test('hides duplicate when sticky matches 360', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
@@ -699,7 +705,6 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: false,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Completar mapa corporal no radar',
@@ -717,7 +722,6 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: false,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Retomar contato com Thales e checar o treino.',
@@ -780,6 +784,31 @@ void main() {
         followUpDue: false,
       );
       expect(sticky.destination, OperacaoStickyDestination.commandCenter);
+      expect(
+        shouldHideCopilotPrimaryCtaWhenMatchesSticky(
+          sticky: sticky,
+          aluno: aluno,
+          proximaAcaoRaw: acao,
+        ),
+        isTrue,
+      );
+    });
+
+    test('hides when sticky commitment matches sono acao', () {
+      final aluno = _aluno();
+      const acao = 'Combinar sono desta semana';
+      final sticky = resolveOperacaoStickyAction(
+        aluno: aluno,
+        proximaAcao: const ProximaAcaoResumo(
+          acao: acao,
+          motivo: 'teste',
+          fonte: 'PADRAO',
+          prioridade: 'MEDIA',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(sticky.destination, OperacaoStickyDestination.commitment);
       expect(
         shouldHideCopilotPrimaryCtaWhenMatchesSticky(
           sticky: sticky,
@@ -1308,7 +1337,7 @@ void main() {
       expect(kinds.length, lessThanOrEqualTo(4));
       expect(kinds.first, OperacaoStatusCardKind.aderencia);
       expect(kinds, contains(OperacaoStatusCardKind.ultimoTreino));
-      expect(kinds, contains(OperacaoStatusCardKind.checkins7d));
+      expect(kinds, isNot(contains(OperacaoStatusCardKind.checkins7d)));
       expect(kinds, isNot(contains(OperacaoStatusCardKind.prontidao)));
       expect(kinds, isNot(contains(OperacaoStatusCardKind.risco)));
     });
@@ -1321,11 +1350,10 @@ void main() {
       expect(kinds, [
         OperacaoStatusCardKind.aderencia,
         OperacaoStatusCardKind.ultimoTreino,
-        OperacaoStatusCardKind.checkins7d,
       ]);
     });
 
-    test('prontidão dominante ainda cabe em 4', () {
+    test('prontidão dominante ainda cabe em 4 sem KPI de check-ins', () {
       final kinds = resolveOperacaoStatusMetricKinds(
         heroShowsRisco: false,
         dominantKind: OperacaoDominantMetricKind.prontidao,
@@ -1334,8 +1362,28 @@ void main() {
         OperacaoStatusCardKind.prontidao,
         OperacaoStatusCardKind.aderencia,
         OperacaoStatusCardKind.ultimoTreino,
-        OperacaoStatusCardKind.checkins7d,
       ]);
+    });
+  });
+
+  group('acaoSugereCommitment', () {
+    test('maps sleep wording to commitment destination', () {
+      expect(acaoSugereCommitment('Combinar sono com o aluno'), isTrue);
+      expect(acaoSugereCommitment('Ajustar horário da noite'), isTrue);
+      expect(acaoSugereCommitment('Retomar contato'), isFalse);
+      final action = resolveOperacaoStickyAction(
+        aluno: _aluno(),
+        proximaAcao: const ProximaAcaoResumo(
+          acao: 'Combinar sono desta semana',
+          motivo: 'Wearable',
+          fonte: 'IA',
+          prioridade: 'P2',
+        ),
+        hasOpenTask: false,
+        followUpDue: false,
+      );
+      expect(action.label, 'Combinar sono');
+      expect(action.destination, OperacaoStickyDestination.commitment);
     });
   });
 }

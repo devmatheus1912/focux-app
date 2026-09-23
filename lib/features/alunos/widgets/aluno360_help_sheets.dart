@@ -35,22 +35,22 @@ Future<void> showAluno360OperacaoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Próximo contato',
-        'Lembrete de follow-up. Toque para agendar depois de falar com o aluno.',
+        'Linha de status. Toque em Agendar para marcar feito, data ou adiar — sem competir com o botão da base.',
         icon: 'calendar',
       ),
       FxHelpTip(
         'Status operacional',
-        'Prontidão, aderência, dias sem treino e check-ins da semana. Verde = estável; laranja = pede ação.',
+        'Aderência e dias sem treino. A faixa de 7 dias é o detalhe da semana, não um segundo calendário.',
         icon: 'trend',
       ),
       FxHelpTip(
         'Prioridade do dia',
-        'Sugestão do Copiloto com base no perfil, financeiro e autonomia. Use o olho para focar só nela.',
+        'Uma linha de contexto. Atualizar regenera a sugestão e troca o botão de baixo — sem segundo card.',
         icon: 'spark',
       ),
       FxHelpTip(
-        'Chip flutuante',
-        'Ação principal do dia (contato, tarefa ou treino). Secundários aparecem quando faz sentido.',
+        'Botão da base',
+        'Ação principal do dia (contato, tarefa, sono ou treino). Um só por aba.',
         icon: 'target',
       ),
     ],
@@ -175,12 +175,12 @@ Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Atalhos do aluno',
-        'Só o que precisa de atenção agora — treinos, anamnese, composição, chat.',
+        'Só o que precisa de atenção agora. Duplicados do sticky ficam em Mais.',
         icon: 'dumbbell',
       ),
       FxHelpTip(
         'Mais ferramentas',
-        'Equipamentos, trilhas, engajamento, feedback e o restante do catálogo.',
+        'Catálogo completo em uma linha — não é o botão da base.',
         icon: 'people',
       ),
     ],
@@ -204,19 +204,14 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
         icon: 'trend',
       ),
       FxHelpTip(
-        'Check-ins · 7 dias',
-        'Quantos dias da semana tiveram pelo menos um check-in concluído (data de conclusão).',
+        'Faixa da semana',
+        'Detalhe da aderência: verde = check-in; laranja = sem registro; anel = hoje. Pedir check-in some quando o botão da base já é o P0.',
         icon: 'calendar',
       ),
       FxHelpTip(
         'Sem treino',
         'Dias parados desde o último registro — alerta quando passa do limite da sua config.',
         icon: 'alert-triangle',
-      ),
-      FxHelpTip(
-        'Barras da semana',
-        'Verde = check-in concluído; laranja = dia sem registro; anel = hoje.',
-        icon: 'calendar',
       ),
     ],
   );

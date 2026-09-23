@@ -7,7 +7,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -532,27 +531,25 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               iaPlan: iaPlan,
               feedbackPlan: feedbackPlan,
             ),
-          if (split.overflow.isNotEmpty) ...[
-            const SizedBox(height: TokensStrip.s3),
-            SizedBox(
-              width: double.infinity,
-              child: DashboardHomeActionChip(
-                label: 'Mais ferramentas',
-                accent: primary,
-                isDark: isDark,
-                onPressed:
-                    () => _openMaisFerramentas(
-                      context,
-                      overflow: split.overflow,
-                      isDark: isDark,
-                      iaLocked: iaLocked,
-                      feedbackLocked: feedbackLocked,
-                      iaPlan: iaPlan,
-                      feedbackPlan: feedbackPlan,
-                    ),
+          if (split.overflow.isNotEmpty)
+            FxSatelliteListTile(
+              title: 'Mais ferramentas',
+              titleCase: false,
+              subtitle: Text(
+                '${split.overflow.length} no catálogo · sem repetir o sticky',
               ),
+              accent: primary,
+              onTap:
+                  () => _openMaisFerramentas(
+                    context,
+                    overflow: split.overflow,
+                    isDark: isDark,
+                    iaLocked: iaLocked,
+                    feedbackLocked: feedbackLocked,
+                    iaPlan: iaPlan,
+                    feedbackPlan: feedbackPlan,
+                  ),
             ),
-          ],
         ],
       ),
     );

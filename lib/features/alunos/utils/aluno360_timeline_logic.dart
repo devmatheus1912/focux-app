@@ -351,10 +351,19 @@ List<T> dedupeAutonomiaTimelineByTask<T>(
   return out;
 }
 
+final _treinoRegistradoPreview = RegExp(
+  r'treino\s+registrado:\s*(.+?)\.\s*(\d+)\s*/\s*(\d+)\s*s[eé]ries?',
+  caseSensitive: false,
+);
+
 /// Preview body for chat rows — drops redundant "Oi, {nome}." after kind header.
 String timeline360ChatPreviewBody(String body, {String? alunoFirstName}) {
   var text = body.trim();
   if (text.isEmpty) return text;
+  final treino = _treinoRegistradoPreview.firstMatch(text);
+  if (treino != null) {
+    return '${treino.group(1)!.trim()} · ${treino.group(2)} de ${treino.group(3)} séries';
+  }
   if (text.length <= 4 &&
       RegExp(r'^oi[!?.]*$', caseSensitive: false).hasMatch(text)) {
     return 'Saudação no chat';

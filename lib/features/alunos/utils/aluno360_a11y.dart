@@ -4,7 +4,7 @@ String aluno360FollowUpSemantics({
   required bool expanded,
 }) {
   final base = 'Próximo contato. $subtitle';
-  if (!expanded) return '$base. Toque para expandir ações';
+  if (!expanded) return '$base. Toque para abrir o agendamento';
   return '$base. Toque para recolher ações';
 }
 

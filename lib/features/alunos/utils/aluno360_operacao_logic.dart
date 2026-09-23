@@ -15,6 +15,7 @@ enum OperacaoStickyDestination {
   editAluno,
   financeiro,
   treino,
+  commitment,
 }
 
 /// Sticky bar action resolved from 360 payload and queue state.
@@ -30,6 +31,9 @@ class OperacaoStickyAction {
   final OperacaoStickyDestination destination;
 
   bool get isChatAction => destination == OperacaoStickyDestination.chat;
+
+  bool get isCommitmentAction =>
+      destination == OperacaoStickyDestination.commitment;
 }
 
 enum OperacaoDominantMetricKind { risco, aderencia, prontidao }
@@ -273,6 +277,9 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
       lower.contains('lacuna')) {
     return OperacaoStickyDestination.editAluno;
   }
+  if (acaoSugereCommitment(acao)) {
+    return OperacaoStickyDestination.commitment;
+  }
   if (lower.contains('evolu') ||
       lower.contains('planejar') ||
       lower.contains('radar') ||
@@ -283,6 +290,18 @@ OperacaoStickyDestination resolveOperacaoStickyDestination(
   return OperacaoStickyDestination.commandCenter;
 }
 
+/// Sono / horário da noite — compromisso no 360, sem endpoint novo.
+bool acaoSugereCommitment(String acao) {
+  final lower = cleanCopilotText(acao).toLowerCase();
+  final mentionsHour =
+      lower.contains('hora') ||
+      lower.contains('horár') ||
+      lower.contains('horar');
+  return lower.contains('sono') ||
+      lower.contains('durm') ||
+      (mentionsHour && lower.contains('noite'));
+}
+
 IconData stickyIconForDestination(OperacaoStickyDestination destination) {
   return switch (destination) {
     OperacaoStickyDestination.chat => Icons.chat_bubble_outline_rounded,
@@ -291,6 +310,7 @@ IconData stickyIconForDestination(OperacaoStickyDestination destination) {
     OperacaoStickyDestination.commandCenter => Icons.dashboard_outlined,
     OperacaoStickyDestination.financeiro => Icons.payments_outlined,
     OperacaoStickyDestination.treino => Icons.fitness_center_outlined,
+    OperacaoStickyDestination.commitment => Icons.bedtime_outlined,
   };
 }
 
@@ -338,10 +358,18 @@ OperacaoStickyAction resolveOperacaoStickyAction({
     followUpDue: followUpDue,
   );
   final backendLabel = proximaAcao?.stickyLabel?.trim();
+  final derived = copilotStickyLabel(
+    aluno,
+    acao,
+    wearableRelevant: wearableRelevant,
+  );
   final label =
-      backendLabel != null && backendLabel.isNotEmpty
+      backendLabel != null &&
+              backendLabel.isNotEmpty &&
+              backendLabel.length <= 32 &&
+              !backendLabel.contains('. ')
           ? backendLabel
-          : copilotStickyLabel(aluno, acao, wearableRelevant: wearableRelevant);
+          : derived;
   return OperacaoStickyAction(
     label: label,
     icon: stickyIconForDestination(destination),
@@ -655,13 +683,12 @@ bool shouldShowCopilotProfileGapsButton(
 /// Contact priority keeps the prescription body (motivo);
 /// sticky chat já cobre "Preparar mensagem" / Retomar contato.
 bool shouldShowCopilotPrescriptionBlock({
-  required bool forceIa,
   required OperacaoStickyAction sticky,
   required Aluno aluno,
   String? proximaAcaoRaw,
   bool contactPriority = false,
 }) {
-  if (forceIa) return true;
+  // Atualizar reescreve o sticky — não clona a mesma ação num segundo card.
   if (contactPriority) return true;
   return !shouldHideCopilotPrescriptionWhenMatchesSticky(
     sticky: sticky,
@@ -687,13 +714,14 @@ bool shouldHideCopilotExecutarWhenStickyChat({
 }) =>
     sticky.isChatAction;
 
-/// Hide copilot primary CTA when sticky already covers Command Center action.
+/// Hide copilot primary CTA when sticky already covers the same command/commitment.
 bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({
   required OperacaoStickyAction sticky,
   required Aluno aluno,
   String? proximaAcaoRaw,
 }) {
-  if (sticky.destination != OperacaoStickyDestination.commandCenter) {
+  if (sticky.destination != OperacaoStickyDestination.commandCenter &&
+      !sticky.isCommitmentAction) {
     return false;
   }
   return shouldHideCopilotPrescriptionWhenMatchesSticky(
@@ -733,18 +761,15 @@ bool shouldShowCopilotContactBadge({
   return !sticky.isChatAction;
 }
 
-/// Hide check-in CTA when copilot/sticky already owns contact outreach.
+/// Hide check-in chip when the week has data or S3 sticky already owns P0.
 bool shouldShowOperacaoCheckinCta({
   required Aluno360OperacaoSnapshot? operacao,
   required bool weekHasAnyCheckin,
 }) {
   if (weekHasAnyCheckin) return false;
   if (operacao == null) return true;
-  if (operacao.showPrepareMessage) return false;
-  if (operacao.contactPriority && operacao.stickyAction.isChatAction) {
-    return false;
-  }
-  return true;
+  // Snapshot = sticky resolvido. Pedir check-in no muro compete com o P0.
+  return false;
 }
 
 /// Sticky primary opens chat — hide duplicate chat CTA in copilot card.
@@ -828,6 +853,7 @@ String stickyLabelCompactFallback(String label) {
   if (lower.contains('treino')) return 'Treino';
   if (lower.contains('financeir')) return 'Financeiro';
   if (lower.contains('perfil')) return 'Perfil';
+  if (lower.contains('sono') || lower.contains('durm')) return 'Sono';
   if (label.length <= 14) return label;
   return truncateStickyLabel(label);
 }
@@ -1019,8 +1045,8 @@ Aluno360OperacaoSnapshot resolveAluno360OperacaoSnapshot({
   );
 }
 
-/// §9 S3: faixa de 2–4 métricas. Risco no hero → sem duplicar foco; drop
-/// prontidão/risco extras que empurravam a strip para 5–6 tiles.
+/// §9 S3: faixa de 2–4 métricas. Check-ins da semana não viram KPI extra —
+/// a strip de 7 dias é o detalhe da aderência.
 List<OperacaoStatusCardKind> resolveOperacaoStatusMetricKinds({
   required bool heroShowsRisco,
   required OperacaoDominantMetricKind dominantKind,
@@ -1041,9 +1067,6 @@ List<OperacaoStatusCardKind> resolveOperacaoStatusMetricKinds({
     if (dominantKind != OperacaoDominantMetricKind.risco) {
       kinds.add(OperacaoStatusCardKind.ultimoTreino);
     }
-  }
-  if (kinds.length < 4) {
-    kinds.add(OperacaoStatusCardKind.checkins7d);
   }
   return kinds.take(4).toList(growable: false);
 }

@@ -9,6 +9,7 @@ import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../widgets/aluno360_commitment_sheet.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 /// Sticky da Operação — CTA primária; Chat/Criar tarefa ficam em Mais ações.
@@ -17,12 +18,14 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     super.key,
     required this.aluno,
     required this.alunoId,
+    this.tabIndex = 0,
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
   });
 
   final Aluno aluno;
   final int alunoId;
+  final int tabIndex;
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
 
@@ -71,8 +74,15 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       context.push('/alunos/$alunoId/editar', extra: aluno);
     }
 
+    final stickyDisplayLabel =
+        tabIndex == 1 ? 'Ajustar treino' : operacao.stickyDisplayLabel;
+
     void onPrimary() {
       HapticFeedback.lightImpact();
+      if (tabIndex == 1) {
+        context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+        return;
+      }
       switch (sticky.destination) {
         case OperacaoStickyDestination.chat:
           openChat(acao: effectiveProxima?.acao);
@@ -86,17 +96,23 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
           context.push('/financeiro?alunoId=$alunoId');
         case OperacaoStickyDestination.treino:
           context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+        case OperacaoStickyDestination.commitment:
+          showAluno360CommitmentSheet(
+            context,
+            aluno: aluno,
+            kind: Aluno360CommitmentKind.sleep,
+          );
       }
     }
-
-    final stickyDisplayLabel = operacao.stickyDisplayLabel;
 
     return SafeArea(
       top: false,
       child: Semantics(
         container: true,
         label:
-            hasOpenCopilotTask360
+            tabIndex == 1
+                ? 'Ajustar treino deste aluno'
+                : hasOpenCopilotTask360
                 ? 'Ações rápidas da aba operação, com tarefa aberta'
                 : 'Ações rápidas da aba operação',
         child: Padding(

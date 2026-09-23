@@ -82,10 +82,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     );
   }
 
-  void _openTreinos(BuildContext context) {
-    context.push('/alunos/$alunoId/treinos-list', extra: alunoNome);
-  }
-
   static String? _ultimoPrValue(EvolucaoInteligente ev) {
     final label = ev.ultimoPrLabel?.trim();
     if (label != null && label.isNotEmpty) return label;
@@ -94,8 +90,8 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
     final formatted =
         carga == carga.roundToDouble()
             ? carga.toStringAsFixed(0)
-            : carga.toStringAsFixed(1);
-    return '${formatted}kg';
+            : carga.toStringAsFixed(1).replaceAll('.', ',');
+    return '$formatted kg';
   }
 
   @override
@@ -316,17 +312,6 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                       .copyWith(color: mute),
                                 ),
                               ],
-                              const SizedBox(height: TokensStrip.s3),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: TextButton(
-                                  onPressed: () => _openTreinos(context),
-                                  style: Aluno360Layout.secondaryTextLinkStyle(
-                                    context,
-                                  ),
-                                  child: const Text('Ajustar treino'),
-                                ),
-                              ),
                               if (ev.sugerirCopiloto &&
                                   onOpenCopilot != null) ...[
                                 Align(
