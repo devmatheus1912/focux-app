@@ -31,4 +31,14 @@ void main() {
     expect(screen, contains('_showImageViewer'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
+
+  test('bolha de sistema tem peso próprio, sem cantos de chat humano', () {
+    final widgets = readScreenSourceBundle(
+      'lib/features/chat/widgets/conversation_message_widgets.dart',
+    );
+    expect(widgets, contains('this.system = false'));
+    expect(widgets, contains('TokensStrip.rCard'));
+    expect(widgets, contains("'Sistema'"));
+    expect(widgets, contains('TokensStrip.pageBg'));
+  });
 }

@@ -27,45 +27,47 @@ class DashboardHomeActionChip extends StatelessWidget {
     final fg = dashboardPrioritiesChipForeground(accent, isDark: isDark);
     final bg = dashboardPrioritiesChipBackground(accent, isDark: isDark);
 
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: Opacity(
-        opacity: enabled ? 1 : 0.42,
-        child: Material(
-          color: bg,
-          elevation: enabled ? (isDark ? 4 : 2) : 0,
-          shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
-          shape: const StadiumBorder(),
-          child: InkWell(
-            onTap:
-                enabled
-                    ? () {
-                      HapticFeedback.selectionClick();
-                      onPressed();
-                    }
-                    : null,
-            customBorder: const StadiumBorder(),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 48,
-                minWidth: 48,
-                maxWidth: double.infinity,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TokensStrip.s4,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: label,
+        child: Opacity(
+          opacity: enabled ? 1 : 0.42,
+          child: Material(
+            color: bg,
+            elevation: enabled ? (isDark ? 4 : 2) : 0,
+            shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
+            shape: const StadiumBorder(),
+            child: InkWell(
+              onTap:
+                  enabled
+                      ? () {
+                        HapticFeedback.selectionClick();
+                        onPressed();
+                      }
+                      : null,
+              customBorder: const StadiumBorder(),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 48,
+                  minWidth: 48,
                 ),
-                child: Center(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: dashboardChipLabelStyle(fg).copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TokensStrip.s4,
+                  ),
+                  child: Center(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: dashboardChipLabelStyle(fg).copyWith(
+                        fontWeight: FontWeight.w800,
+                        height: 1.0,
+                      ),
                     ),
                   ),
                 ),

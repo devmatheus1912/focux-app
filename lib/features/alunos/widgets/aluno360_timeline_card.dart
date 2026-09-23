@@ -290,11 +290,9 @@ class Aluno360TimelineCard extends StatelessWidget {
           if (!loading && !error && allItems.isNotEmpty && hasMore)
             Align(
               alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
-                label: 'Ver todos os ${allItems.length} sinais',
-                accent: primary,
-                isDark: isDark,
+              child: TextButton(
                 onPressed: () => _showFullTimeline(context, primary),
+                child: Text('Ver todos os ${allItems.length} sinais'),
               ),
             ),
         ],

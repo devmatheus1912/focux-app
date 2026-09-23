@@ -59,23 +59,6 @@ String? dashboardPriorityBadgeLabel({
   return null;
 }
 
-/// Subtítulo do radar no sheet: badge + descrição sem repetir o nome.
-String dashboardRadarSheetSubtitle({
-  required String descricao,
-  String? prioridade,
-  String? sla,
-  String? ctaLabel,
-}) {
-  final badge = dashboardPriorityBadgeLabel(
-    prioridade: prioridade ?? '',
-    sla: sla,
-    ctaLabel: ctaLabel,
-  );
-  final body = dashboardFormatActionCopy(descricao);
-  if (badge == null || badge.isEmpty) return body;
-  return '$badge · $body';
-}
-
 /// Rótulo com contagem e plural correto em PT (ex.: 1 cobrança pendente / 3 cobranças pendentes).
 String dashboardCountLabel(int count, String singular, String plural) {
   if (count <= 0) return plural;
@@ -115,6 +98,11 @@ String dashboardClampActionCopy(
   int maxChars = kDashboardActionCopyMaxChars,
 }) {
   var text = dashboardFormatCountCopy(raw).trim();
+  text = text.replaceAll('`', '');
+  text = text.replaceFirst(
+    RegExp(r'clicou\s+\d+\s+vezes?\s+em\s+', caseSensitive: false),
+    '',
+  );
   text = text
       .replaceFirst(
         RegExp(r'\s*[·—–-]\s*Pr[oó]xima a[cç][aã]o:.*$', caseSensitive: false),

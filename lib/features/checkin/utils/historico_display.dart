@@ -57,6 +57,62 @@ String? historicoStatusQuery(HistoricoStatusChip chip) {
   }
 }
 
+class HistoricoListCluster {
+  const HistoricoListCluster({required this.newest, required this.count});
+
+  final ExecucaoTreino newest;
+  final int count;
+}
+
+/// Agrupa sessões consecutivas do mesmo plano e status (§12.1).
+List<HistoricoListCluster> historicoCollapseSamePlan(
+  List<ExecucaoTreino> items,
+) {
+  final out = <HistoricoListCluster>[];
+  for (final item in items) {
+    if (out.isNotEmpty &&
+        out.last.newest.treinoNome == item.treinoNome &&
+        historicoConcluido(out.last.newest.status) ==
+            historicoConcluido(item.status)) {
+      final last = out.removeLast();
+      out.add(HistoricoListCluster(newest: last.newest, count: last.count + 1));
+    } else {
+      out.add(HistoricoListCluster(newest: item, count: 1));
+    }
+  }
+  return out;
+}
+
+String historicoClusterSubtitle({
+  required String dateLabel,
+  required int count,
+}) {
+  if (count <= 1) return dateLabel;
+  if (dateLabel.isEmpty) {
+    return count == 1 ? '1 sessão' : '$count sessões';
+  }
+  return '$count sessões · $dateLabel';
+}
+
+int historicoEmptySeriesCount(Iterable<int> seriesFeitas) =>
+    seriesFeitas.where((n) => n <= 0).length;
+
+int historicoEmptySeriesFromExercicios(Iterable<ExecucaoExercicio> items) {
+  return historicoEmptySeriesCount(
+    items.map(
+      (item) => historicoSeriesFeitasEfetivas(
+        seriesFeitas: item.seriesFeitas,
+        seriesDetalhesCount: item.seriesDetalhes.length,
+      ),
+    ),
+  );
+}
+
+String historicoEmptySeriesSummary(int count) {
+  if (count == 1) return '1 exercício sem séries';
+  return '$count exercícios sem séries';
+}
+
 String historicoChipLabel(HistoricoStatusChip chip) {
   switch (chip) {
     case HistoricoStatusChip.todos:

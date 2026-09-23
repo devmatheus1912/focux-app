@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -16,8 +15,6 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
   const Aluno360StudentQuickActions({
     super.key,
     required this.aluno,
-    required this.isDark,
-    required this.primary,
     required this.onPassword,
     required this.onEdit,
     required this.onEvolve,
@@ -25,8 +22,6 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
   });
 
   final Aluno aluno;
-  final bool isDark;
-  final Color primary;
   final VoidCallback onPassword;
   final VoidCallback onEdit;
   final VoidCallback onEvolve;
@@ -134,11 +129,9 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
       label: 'Mais ações da operação para $firstName',
       child: Align(
         alignment: Alignment.centerLeft,
-        child: DashboardHomeActionChip(
-          label: 'Mais ações',
-          accent: primary,
-          isDark: isDark,
+        child: TextButton(
           onPressed: () => _openMaisAcoes(context, ref),
+          child: const Text('Mais ações'),
         ),
       ),
     );

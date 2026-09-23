@@ -135,7 +135,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
                       onTap: () => _openComparativo(context),
-                      child:               Aluno360WeightTrendSparkline(
+                      child: Aluno360WeightTrendSparkline(
                         values: weightSeries,
                         deltaKg: delta,
                         color: primary,

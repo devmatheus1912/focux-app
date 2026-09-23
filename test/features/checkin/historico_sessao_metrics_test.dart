@@ -47,6 +47,28 @@ void main() {
     expect(m.volumeLabel, '800 kg');
   });
 
+  test('volume some quando a sessão não tem séries', () {
+    final exec = ExecucaoTreino(
+      id: 10,
+      treinoId: 1,
+      treinoNome: 'Full',
+      status: 'CONCLUIDO',
+      exercicios: [
+        ExecucaoExercicio(
+          id: 1,
+          treinoExercicioId: 1,
+          exercicioNome: 'Supino',
+          series: 4,
+          seriesFeitas: 0,
+          concluido: true,
+        ),
+      ],
+    );
+    final m = historicoSessaoMetricsFromExecucao(exec);
+    expect(m.seriesFeitas, 0);
+    expect(m.volumeLabel, '—');
+  });
+
   test('dto BFF mapeia sinal', () {
     final m = historicoSessaoMetricsFromDto(
       const SessaoEvolucaoDto(

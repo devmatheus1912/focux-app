@@ -388,9 +388,13 @@ class _HistoricoCheckinScreenState
             child: _HistoricoSectionLabel(label: 'Em andamento'),
           ),
         );
-        for (final entry in grouped.andamento) {
+        for (final cluster in historicoCollapseSamePlan(grouped.andamento)) {
           rows.add(
-            _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+            _HistoricoTile(
+              entry: cluster.newest,
+              count: cluster.count,
+              onTap: () => _abrirItem(cluster.newest),
+            ),
           );
         }
       }
@@ -404,16 +408,24 @@ class _HistoricoCheckinScreenState
             child: const _HistoricoSectionLabel(label: 'Concluído'),
           ),
         );
-        for (final entry in grouped.concluidos) {
+        for (final cluster in historicoCollapseSamePlan(grouped.concluidos)) {
           rows.add(
-            _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+            _HistoricoTile(
+              entry: cluster.newest,
+              count: cluster.count,
+              onTap: () => _abrirItem(cluster.newest),
+            ),
           );
         }
       }
     } else {
-      for (final entry in visible) {
+      for (final cluster in historicoCollapseSamePlan(visible)) {
         rows.add(
-          _HistoricoTile(entry: entry, onTap: () => _abrirItem(entry)),
+          _HistoricoTile(
+            entry: cluster.newest,
+            count: cluster.count,
+            onTap: () => _abrirItem(cluster.newest),
+          ),
         );
       }
     }
@@ -460,22 +472,28 @@ class _HistoricoSectionLabel extends StatelessWidget {
 }
 
 class _HistoricoTile extends StatelessWidget {
-  const _HistoricoTile({required this.entry, required this.onTap});
+  const _HistoricoTile({
+    required this.entry,
+    required this.onTap,
+    this.count = 1,
+  });
 
   final ExecucaoTreino entry;
   final VoidCallback onTap;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
     final concluido = historicoConcluido(entry.status);
     final dateLabel = historicoDateLabel(entry.iniciadoEm);
+    final subtitle = historicoClusterSubtitle(
+      dateLabel: dateLabel,
+      count: count,
+    );
     final statusColor = concluido ? EagleTokens.good : EagleTokens.warn;
     return FxSatelliteListTile(
       title: entry.treinoNome,
-      subtitle:
-          dateLabel.isEmpty
-              ? null
-              : Text(dateLabel),
+      subtitle: subtitle.isEmpty ? null : Text(subtitle),
       leading: FxIcon(
         name: concluido ? 'circle-check' : 'calendar',
         size: 22,

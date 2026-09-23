@@ -460,12 +460,20 @@ class ConversationBubble extends StatelessWidget {
             color:
                 mine
                     ? null
+                    : system
+                    ? (isDark
+                        ? EagleTokens.darkCardHi.withValues(alpha: 0.72)
+                        : TokensStrip.pageBg)
                     : (isDark ? EagleTokens.darkCardHi : TokensStrip.cardBg),
             borderRadius: BorderRadius.only(
-              topLeft: const Radius.circular(18),
-              topRight: const Radius.circular(18),
-              bottomLeft: Radius.circular(mine ? 18 : 4),
-              bottomRight: Radius.circular(mine ? 4 : 18),
+              topLeft: Radius.circular(system ? TokensStrip.rCard : 18),
+              topRight: Radius.circular(system ? TokensStrip.rCard : 18),
+              bottomLeft: Radius.circular(
+                system ? TokensStrip.rCard : (mine ? 18 : 4),
+              ),
+              bottomRight: Radius.circular(
+                system ? TokensStrip.rCard : (mine ? 4 : 18),
+              ),
             ),
             border: Border.all(
               color:

@@ -211,6 +211,8 @@ class DashboardHomeSnapshot {
       agendaHoje: agendaHoje,
       hideRiskSummary: alunosEmRisco.isNotEmpty,
       riskOwnedByDayFocus: dayFocusCoversRetention,
+      leadRiskStudent:
+          riskStudentsForSheet.isEmpty ? null : riskStudentsForSheet.first,
       isCommandPreparing: isCommandPreparing,
       maxItems: focusRules.maxVisibleNextActions,
     );

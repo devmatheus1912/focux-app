@@ -145,6 +145,7 @@ class _TrainingPlanCard extends StatelessWidget {
   final bool isDark;
   final bool starting;
   final bool confirming;
+  final bool primaryStart;
   final VoidCallback onStart;
   final VoidCallback? onConfirmPlano;
 
@@ -155,6 +156,7 @@ class _TrainingPlanCard extends StatelessWidget {
     this.onConfirmPlano,
     this.starting = false,
     this.confirming = false,
+    this.primaryStart = false,
   });
 
   @override
@@ -300,12 +302,11 @@ class _TrainingPlanCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: FxLiquidPrimaryButton(
-                  label: 'Ver status',
-                  icon: Icons.info_outline_rounded,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
                   onPressed: handleAction,
+                  child: const Text('Ver status'),
                 ),
               ),
             ] else ...[
@@ -313,16 +314,21 @@ class _TrainingPlanCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: FxLiquidPrimaryButton(
-                      label: concluido ? 'Rever' : 'Iniciar',
-                      icon:
-                          concluido
-                              ? Icons.replay_rounded
-                              : Icons.play_arrow_rounded,
-                      onPressed: starting || confirming ? null : handleAction,
-                      loading: starting,
-                      loadingLabel: 'Abrindo…',
-                    ),
+                    child:
+                        primaryStart && !concluido
+                            ? FxLiquidPrimaryButton(
+                              label: 'Iniciar',
+                              icon: Icons.play_arrow_rounded,
+                              onPressed:
+                                  starting || confirming ? null : handleAction,
+                              loading: starting,
+                              loadingLabel: 'Abrindo…',
+                            )
+                            : TextButton(
+                              onPressed:
+                                  starting || confirming ? null : handleAction,
+                              child: Text(concluido ? 'Rever' : 'Iniciar'),
+                            ),
                   ),
                   if (!concluido && canStart && onConfirmPlano != null) ...[
                     const SizedBox(width: TokensStrip.s2),

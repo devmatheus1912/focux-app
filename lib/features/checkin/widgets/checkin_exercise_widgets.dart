@@ -35,6 +35,7 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onMinusCarga;
   final VoidCallback? onPlusReps;
   final VoidCallback? onMinusReps;
+  final bool resting;
 
   const CheckinSerieCard({
     super.key,
@@ -53,6 +54,7 @@ class CheckinSerieCard extends StatelessWidget {
     this.onMinusCarga,
     this.onPlusReps,
     this.onMinusReps,
+    this.resting = false,
   });
 
   @override
@@ -187,13 +189,14 @@ class CheckinSerieCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
-            SizedBox(
-              height: checkinExecutionControlMin,
-              child: FxLiquidPrimaryButton(
-                label: checkinRegistrarLabel(first: ee.seriesFeitas <= 0),
-                onPressed: onRegistrar,
+            if (!resting)
+              SizedBox(
+                height: checkinExecutionControlMin,
+                child: FxLiquidPrimaryButton(
+                  label: checkinRegistrarLabel(first: ee.seriesFeitas <= 0),
+                  onPressed: onRegistrar,
+                ),
               ),
-            ),
             if (onAjustar != null ||
                 onConfirmarRestante != null ||
                 onDesfazer != null ||
