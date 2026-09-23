@@ -98,7 +98,9 @@ void main() {
       expect(snap.focusRules.omitSecondarySections, isTrue);
       expect(snap.riscoAlto, 1);
       expect(snap.dashboardNextActions.first.priorityBadge, 'P0');
-      expect(snap.dashboardNextActions.first.route, '/retencao');
+      expect(snap.dashboardNextActions.first.title, 'Ana');
+      expect(snap.dashboardNextActions.first.subtitle, 'Contato agora');
+      expect(snap.dashboardNextActions.first.route, '/alunos/42');
     });
 
     test('throws when BFF omits dayFocus', () {
