@@ -137,16 +137,35 @@ String historicoExercicioSubtitle({
   final statusLabel = concluido
       ? 'Feito'
       : sessaoConcluida
-          ? (seriesFeitas > 0 ? 'Parcial' : 'Não feito')
+          ? (seriesFeitas > 0 ? 'Parcial' : 'Sem séries')
           : 'Pendente';
   final parts = <String>[
-    seriesLabel,
     if ((carga ?? '').trim().isNotEmpty) carga!.trim(),
+    seriesLabel,
     if (rpe != null) 'RPE $rpe',
     if (dor) 'Dor',
     statusLabel,
   ];
   return parts.join(' · ');
+}
+
+/// Preferência: `seriesFeitas`; se 0, conta detalhes persistidos (anti-drift).
+int historicoSeriesFeitasEfetivas({
+  required int seriesFeitas,
+  required int seriesDetalhesCount,
+}) {
+  if (seriesFeitas > 0) return seriesFeitas;
+  return seriesDetalhesCount;
+}
+
+bool historicoExercicioConcluidoEfetivo({
+  required bool concluido,
+  required int seriesFeitas,
+  int? series,
+}) {
+  if (concluido) return true;
+  if (series == null || series <= 0) return seriesFeitas > 0;
+  return seriesFeitas >= series;
 }
 
 const historicoSecaoExercicios = 'exercicios';

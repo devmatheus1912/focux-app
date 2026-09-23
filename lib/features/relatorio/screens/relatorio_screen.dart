@@ -360,7 +360,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                 diasAnalisados: dados?.diasAnalisados ?? 0,
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
+            const SizedBox(height: TokensStrip.s2),
             Wrap(
               spacing: TokensStrip.s2,
               runSpacing: TokensStrip.s2,

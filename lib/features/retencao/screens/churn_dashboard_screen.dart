@@ -379,6 +379,7 @@ class _RetencaoMetricStrip extends StatelessWidget {
               hint: retencaoMetricAltoLabel(home.alto),
               color: primary,
               isDark: isDark,
+              dense: true,
               emphasis:
                   home.alto > 0
                       ? OperationalMetricEmphasis.normal
@@ -395,6 +396,7 @@ class _RetencaoMetricStrip extends StatelessWidget {
             hint: retencaoMetricMedioLabel(home.medio),
             color: EagleTokens.warn,
             isDark: isDark,
+            dense: true,
             emphasis: OperationalMetricEmphasis.muted,
             semanticsLabel: '${home.medio} risco médio',
           ),
@@ -407,6 +409,7 @@ class _RetencaoMetricStrip extends StatelessWidget {
             hint: retencaoMetricSaudavelLabel(home.saudavel),
             color: primary,
             isDark: isDark,
+            dense: true,
             emphasis: OperationalMetricEmphasis.muted,
             semanticsLabel: '${home.saudavel} saudáveis',
           ),
@@ -498,7 +501,7 @@ class _RetencaoFocusCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            firstAlto != null ? 'Próximo contato' : 'Risco alto · $alto',
+            firstAlto != null ? 'Próximo contato' : 'Risco na base',
             style: FocuxHubTypography.chip(chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -510,10 +513,12 @@ class _RetencaoFocusCard extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             focusSubtitle,
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: TokensStrip.s2),
           Wrap(
@@ -526,18 +531,7 @@ class _RetencaoFocusCard extends StatelessWidget {
                 isDark: isDark,
                 onPressed: run(split.primary),
               ),
-              if (firstAlto != null)
-                DashboardHomeActionChip(
-                  label: retencaoFocusActionLabel(
-                    RetencaoFocusActionId.aluno360,
-                  ),
-                  accent: chrome.mute,
-                  isDark: isDark,
-                  onPressed: () => onAluno(firstAlto),
-                ),
-              if (split.secondary.any(
-                (id) => id != RetencaoFocusActionId.aluno360,
-              ))
+              if (split.secondary.isNotEmpty)
                 DashboardHomeActionChip(
                   label: 'Mais ações',
                   accent: chrome.mute,

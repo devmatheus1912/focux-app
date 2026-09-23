@@ -217,13 +217,11 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                     ? ProgressoSemanalWidget(
                                       treinos: home.treinos,
                                       historico: home.historico,
-                                      streakAtual: home.streakAtual,
                                     )
                                     : _WeekProgressStrip(
                                       ativos: ativos,
                                       startableCount: startableCount,
                                       total: ordered.length,
-                                      streakAtual: home?.streakAtual,
                                       isDark: isDark,
                                     ),
                           ),

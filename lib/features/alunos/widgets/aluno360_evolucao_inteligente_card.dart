@@ -9,7 +9,6 @@ import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/utils/aluno_volume_format.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -249,86 +248,74 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              OperationalMetricTile(
-                                label: 'Sinal de evolução',
-                                value: sinalLabel(ev.sinal),
-                                hint:
-                                    Aluno360EvolucaoInteligenteLogic
-                                        .composeSinalHint(
-                                          resumo: ev.resumo,
-                                          tendenciaPct: ev.tendenciaVolumePct,
-                                        ) ??
-                                    ev.resumo,
-                                color: sigColor,
-                                isDark: isDark,
-                                dense: true,
-                                emphasis:
-                                    ev.sinal == 'QUEDA' ||
-                                            ev.sinal == 'PLATÔ'
-                                        ? OperationalMetricEmphasis.alert
-                                        : OperationalMetricEmphasis.normal,
-                              ),
-                              if (sparklineData.isNotEmpty) ...[
-                                Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    0,
-                                    4,
-                                    0,
-                                    6,
+                              Wrap(
+                                spacing: TokensStrip.s2,
+                                runSpacing: TokensStrip.s2,
+                                children: [
+                                  DashboardHomeActionChip(
+                                    label: sinalLabel(ev.sinal),
+                                    accent: sigColor,
+                                    isDark: isDark,
+                                    onPressed: () =>
+                                        showAluno360EvolucaoInteligenteHelpSheet(
+                                          context,
+                                        ),
                                   ),
-                                  child: _VolumeSparklineRow(
-                                    data: sparklineData,
-                                    color: sigColor,
-                                    singleWeek: singleWeek,
-                                    mute: mute,
+                                  DashboardHomeActionChip(
+                                    label:
+                                        hideMonthlyVolume
+                                            ? formatAlunoVolumeKg(
+                                              ev.volumeSemanal,
+                                            )
+                                            : '${formatAlunoVolumeKg(ev.volumeSemanal)} sem.',
+                                    accent: primary,
+                                    isDark: isDark,
+                                    onPressed: () => _openTreinos(context),
+                                  ),
+                                  if (_ultimoPrValue(ev) != null)
+                                    DashboardHomeActionChip(
+                                      label: 'PR ${_ultimoPrValue(ev)!}',
+                                      accent: EagleTokens.good,
+                                      isDark: isDark,
+                                      onPressed: () => _openTreinos(context),
+                                    ),
+                                ],
+                              ),
+                              if (Aluno360EvolucaoInteligenteLogic.composeSinalHint(
+                                    resumo: ev.resumo,
+                                    tendenciaPct: ev.tendenciaVolumePct,
+                                  )
+                                  case final hint?) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                Text(
+                                  hint,
+                                  style: Aluno360Layout.metaStyle(context)
+                                      .copyWith(color: mute),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ] else if (ev.resumo.trim().isNotEmpty) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                Text(
+                                  ev.resumo,
+                                  style: Aluno360Layout.metaStyle(context)
+                                      .copyWith(color: mute),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                              if (sparklineData.isNotEmpty) ...[
+                                const SizedBox(height: TokensStrip.s2),
+                                _VolumeSparklineRow(
+                                  data: sparklineData,
+                                  color: sigColor,
+                                  singleWeek: singleWeek,
+                                  mute: mute,
+                                  volumeLabel: formatAlunoVolumeKg(
+                                    ev.volumeSemanal,
                                   ),
                                 ),
                               ],
-                              const SizedBox(height: TokensStrip.s2),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: OperationalMetricTile(
-                                      label:
-                                          hideMonthlyVolume
-                                              ? 'Volume'
-                                              : 'Volume semana',
-                                      value: formatAlunoVolumeKg(
-                                        ev.volumeSemanal,
-                                      ),
-                                      hint:
-                                          hideMonthlyVolume
-                                              ? (singleWeek
-                                                  ? ''
-                                                  : 'Carga × reps')
-                                              : 'Mês ${formatAlunoVolumeKg(ev.volumeMensal)}',
-                                      color: primary,
-                                      isDark: isDark,
-                                      dense: true,
-                                    ),
-                                  ),
-                                  if (_ultimoPrValue(ev) != null) ...[
-                                    const SizedBox(width: TokensStrip.s2),
-                                    Expanded(
-                                      child: OperationalMetricTile(
-                                        label: 'Último PR',
-                                        value: _ultimoPrValue(ev)!,
-                                        hint:
-                                            ev.ultimoPrExercicio
-                                                        ?.trim()
-                                                        .isNotEmpty ==
-                                                    true
-                                                ? ev.ultimoPrExercicio!
-                                                : 'Recorde de carga',
-                                        color: EagleTokens.good,
-                                        isDark: isDark,
-                                        dense: true,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
                               if (ev.proximaAcao.trim().isNotEmpty) ...[
                                 const SizedBox(height: TokensStrip.s3),
                                 Text(
@@ -379,12 +366,14 @@ class _VolumeSparklineRow extends StatelessWidget {
     required this.color,
     required this.singleWeek,
     required this.mute,
+    this.volumeLabel,
   });
 
   final List<double> data;
   final Color color;
   final bool singleWeek;
   final Color mute;
+  final String? volumeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -400,18 +389,23 @@ class _VolumeSparklineRow extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              singleWeek ? 'Primeira semana' : 'Volume · semanas',
+              singleWeek
+                  ? '${volumeLabel ?? 'Volume'} · 1ª sem'
+                  : 'Volume · semanas',
               style: Aluno360Layout.metaStyle(context).copyWith(
                 color: mute,
-                letterSpacing: 0.4,
+                letterSpacing: 0.2,
+                fontSize: 11.5,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           FxSparkline(
             data: data,
             color: color,
-            width: 88,
-            height: 28,
+            width: 72,
+            height: 24,
           ),
         ],
       ),

@@ -45,7 +45,7 @@ void main() {
         rpe: 8,
         dor: true,
       ),
-      '3/4 séries · 80 kg · RPE 8 · Dor · Feito',
+      '80 kg · 3/4 séries · RPE 8 · Dor · Feito',
     );
     expect(historicoRecordesCount(prs: 2, cargas: 1), 3);
     expect(historicoRecordesEmpty(), 'Nenhum recorde nesta sessão');
@@ -75,6 +75,31 @@ void main() {
         sessaoConcluida: true,
       ),
       '1/4 séries · Parcial',
+    );
+    expect(
+      historicoExercicioSubtitle(
+        seriesFeitas: 0,
+        series: 4,
+        concluido: false,
+        sessaoConcluida: true,
+      ),
+      '0/4 séries · Sem séries',
+    );
+    expect(
+      historicoSeriesFeitasEfetivas(seriesFeitas: 0, seriesDetalhesCount: 3),
+      3,
+    );
+    expect(
+      historicoSeriesFeitasEfetivas(seriesFeitas: 4, seriesDetalhesCount: 2),
+      4,
+    );
+    expect(
+      historicoExercicioConcluidoEfetivo(
+        concluido: false,
+        seriesFeitas: 4,
+        series: 4,
+      ),
+      isTrue,
     );
     expect(
       historicoPrLine(exercicioNome: 'Supino', mensagem: 'Carga nova'),

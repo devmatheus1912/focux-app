@@ -10,7 +10,7 @@ void main() {
     expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('FxHubHeader'));
+    expect(screen, isNot(contains('FxHubHeader')));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: false'));
     expect(screen, isNot(contains('emphasize: true')));
@@ -25,6 +25,7 @@ void main() {
     expect(screen, contains('HistoricoDetalheMemCache'));
     expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
+    expect(screen, contains('historicoSeriesFeitasEfetivas'));
     expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('historicoDuracaoLabel'));
     expect(screen, contains('viewInsetsOf'));

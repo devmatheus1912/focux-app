@@ -80,7 +80,6 @@ class _WeekProgressStrip extends StatelessWidget {
   final int ativos;
   final int startableCount;
   final int total;
-  final int? streakAtual;
   final bool isDark;
 
   const _WeekProgressStrip({
@@ -88,23 +87,16 @@ class _WeekProgressStrip extends StatelessWidget {
     required this.startableCount,
     required this.total,
     required this.isDark,
-    this.streakAtual,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final streak =
-        streakAtual != null && streakAtual! > 0
-            ? (streakAtual == 1
-                ? ' · 1 sem. de sequência'
-                : ' · $streakAtual sem. de sequência')
-            : '';
     final line =
         startableCount > 0
-            ? '$startableCount prontos · $total no plano$streak'
-            : '$ativos ativos · $total no plano$streak';
+            ? '$startableCount prontos · $total no plano'
+            : '$ativos ativos · $total no plano';
     return FxStripCard(
       glowStrength: 0.04,
       padding: const EdgeInsets.symmetric(
@@ -304,7 +296,7 @@ class _TrainingPlanCard extends StatelessWidget {
                     ),
                   ),
                   if (!concluido && canStart && onConfirmPlano != null) ...[
-                    const SizedBox(width: 4),
+                    const SizedBox(width: TokensStrip.s2),
                     TextButton(
                       onPressed: confirming || starting ? null : onConfirmPlano,
                       style: TextButton.styleFrom(

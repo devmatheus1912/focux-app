@@ -671,8 +671,8 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('DashboardSectionHeader'),
-        contains('OperationalMetricTile'),
         contains('DashboardHomeActionChip'),
+        contains('_VolumeSparklineRow'),
       ),
     );
     expect(

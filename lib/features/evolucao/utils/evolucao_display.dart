@@ -51,15 +51,15 @@ String evolucaoHubSubtitle() => 'Peso, medidas e recordes';
 
 String evolucaoVariacaoValue(List<MedidaCorporal> medidas) {
   final stamp = evolucaoVariacaoPeso(medidas).trim();
-  if (stamp.isEmpty) return '—';
+  if (stamp.isEmpty) return 'Sem base';
   return stamp.replaceAll(' desde o início', '');
 }
 
 String evolucaoVariacaoHint(List<MedidaCorporal> medidas) {
   if (evolucaoVariacaoPeso(medidas).isEmpty) {
-    return 'Registre duas medidas para ver o delta';
+    return '2ª medida libera o delta';
   }
-  return 'Desde a primeira medida';
+  return 'Desde a 1ª medida';
 }
 
 String evolucaoUltimaMedidaHint(List<MedidaCorporal> medidas) {

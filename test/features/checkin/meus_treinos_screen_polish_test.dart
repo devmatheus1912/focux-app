@@ -59,7 +59,7 @@ void main() {
     expect(screen, contains('_WeekProgressStrip'));
     expect(screen, contains('_RetomarTreinoBanner'));
     expect(screen, contains('treinoSessaoEmAndamento'));
-    expect(screen, contains('streakAtual'));
+    expect(screen, isNot(contains('sem. de sequência')));
     expect(screen, contains('historicoCheckinProvider'));
     expect(screen, contains('MeusTreinosMemCache.clear'));
     expect(screen, contains('starting || confirming'));

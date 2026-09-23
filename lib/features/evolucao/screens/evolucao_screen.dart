@@ -266,15 +266,16 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                   isDark: chrome.isDark,
                                   onPressed: _abrirComparativo,
                                 ),
-                                DashboardHomeActionChip(
-                                  label: 'Enviar no chat',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: _compartilharNoChat,
-                                ),
                               ],
                             ),
-                            const SizedBox(height: TokensStrip.s3),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: _compartilharNoChat,
+                                child: const Text('Enviar no chat'),
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
                             AlunoSegmentedChoice(
                               options: evolucaoDetalheSecoes,
                               selected: _view.name,
@@ -324,13 +325,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                     ),
               ),
             ),
-            if (homeAsync.hasValue &&
-                !(
-                  (_view == EvolucaoHubView.medidas &&
-                      (medidasAsync.asData?.value.isEmpty ?? false)) ||
-                  (_view == EvolucaoHubView.recordes &&
-                      (recordesAsync.asData?.value.isEmpty ?? false))
-                ))
+            if (homeAsync.hasValue)
               SafeArea(
                 top: false,
                 child: Padding(

@@ -117,6 +117,7 @@ class _HistoricoCheckinScreenState
           _fetchedAt = DateTime.now();
           HistoricoMemCache.save(_items);
           ref.invalidate(historicoCheckinProvider);
+          _prefetchTopDetalhes(_items);
         }
       });
     } catch (e) {
@@ -148,7 +149,25 @@ class _HistoricoCheckinScreenState
   void _abrirItem(ExecucaoTreino entry) {
     final id = entry.id;
     if (id == null) return;
+    // Prefetch em paralelo ao push — detalhe usa MemCache se chegar primeiro.
+    unawaited(_prefetchDetalhe(id));
     context.push(historicoDetalhePath(id));
+  }
+
+  Future<void> _prefetchDetalhe(int id) async {
+    if (HistoricoDetalheMemCache.loadIfFresh(id) != null) return;
+    try {
+      final loaded = await ref.read(checkinRepositoryProvider).detalhe(id);
+      HistoricoDetalheMemCache.save(loaded);
+    } catch (_) {}
+  }
+
+  void _prefetchTopDetalhes(List<ExecucaoTreino> items) {
+    for (final entry in items.take(3)) {
+      final id = entry.id;
+      if (id == null) continue;
+      unawaited(_prefetchDetalhe(id));
+    }
   }
 
   @override

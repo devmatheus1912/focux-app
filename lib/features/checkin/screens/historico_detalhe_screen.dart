@@ -14,7 +14,6 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -112,7 +111,11 @@ class _HistoricoDetalheScreenState
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: execucao?.treinoNome ?? 'Treino',
-            subtitle: freshness,
+            subtitle:
+                execucao != null &&
+                        historicoDateLabel(execucao.iniciadoEm).isNotEmpty
+                    ? historicoDateLabel(execucao.iniciadoEm)
+                    : freshness,
             onBack: _leave,
             actions: [
               FxHelpIconButton(
@@ -201,7 +204,17 @@ class _DetalheBody extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final done = historicoExerciciosConcluidos(
-      execucao.exercicios.map((item) => item.concluido),
+      execucao.exercicios.map((item) {
+        final feitas = historicoSeriesFeitasEfetivas(
+          seriesFeitas: item.seriesFeitas,
+          seriesDetalhesCount: item.seriesDetalhes.length,
+        );
+        return historicoExercicioConcluidoEfetivo(
+          concluido: item.concluido,
+          seriesFeitas: feitas,
+          series: item.series,
+        );
+      }),
     );
     final total = execucao.exercicios.length;
     final concluido = historicoConcluido(execucao.status);
@@ -230,14 +243,6 @@ class _DetalheBody extends StatelessWidget {
                   24,
                 ),
                 children: [
-                  FxHubHeader(
-                    title: execucao.treinoNome,
-                    subtitle: historicoDetalheSubtitle(
-                      status: execucao.status,
-                      iniciadoEm: execucao.iniciadoEm,
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
                   FxStripCard(
                     emphasize: false,
                     accent: primary,
@@ -246,33 +251,14 @@ class _DetalheBody extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    historicoStatusLabel(execucao.status),
-                                    style: FocuxHubTypography.kpi(
-                                      color: fxScreenInk(context),
-                                      fontSize: FocuxHubTypography.metricMd,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    historicoDateLabel(execucao.iniciadoEm)
-                                            .isEmpty
-                                        ? 'Nesta sessão'
-                                        : historicoDateLabel(
-                                          execucao.iniciadoEm,
-                                        ),
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: fxScreenMute(context),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                historicoStatusLabel(execucao.status),
+                                style: FocuxHubTypography.kpi(
+                                  color: fxScreenInk(context),
+                                  fontSize: FocuxHubTypography.metricMd,
+                                ),
                               ),
                             ),
                             Text(
@@ -294,7 +280,7 @@ class _DetalheBody extends StatelessWidget {
                                   done: done,
                                   total: total,
                                 ),
-                                hint: historicoCountLabel(total),
+                                hint: '$done feitos · $total no plano',
                                 color: primary,
                                 isDark: isDark,
                                 dense: true,
@@ -342,29 +328,45 @@ class _DetalheBody extends StatelessWidget {
                     )
                   else
                     for (final item in execucao.exercicios)
-                      FxSatelliteListTile(
-                        title: item.exercicioNome,
-                        subtitle: Text(
-                          historicoExercicioSubtitle(
+                      Builder(
+                        builder: (context) {
+                          final feitas = historicoSeriesFeitasEfetivas(
                             seriesFeitas: item.seriesFeitas,
-                            series: item.series,
+                            seriesDetalhesCount: item.seriesDetalhes.length,
+                          );
+                          final feito = historicoExercicioConcluidoEfetivo(
                             concluido: item.concluido,
-                            sessaoConcluida: concluido,
-                            carga: _carga(item),
-                            rpe: _rpe(item),
-                            dor: item.dor ||
-                                item.seriesDetalhes.any((serie) => serie.dor),
-                          ),
-                        ),
-                        leading: FxIcon(
-                          name: item.concluido ? 'circle-check' : 'calendar',
-                          size: 20,
-                          color:
-                              item.concluido
-                                  ? EagleTokens.good
-                                  : EagleTokens.warn,
-                        ),
-                        accent: item.concluido ? null : EagleTokens.warn,
+                            seriesFeitas: feitas,
+                            series: item.series,
+                          );
+                          return FxSatelliteListTile(
+                            title: item.exercicioNome,
+                            margin: const EdgeInsets.only(bottom: 4),
+                            subtitle: Text(
+                              historicoExercicioSubtitle(
+                                seriesFeitas: feitas,
+                                series: item.series,
+                                concluido: feito,
+                                sessaoConcluida: concluido,
+                                carga: _carga(item),
+                                rpe: _rpe(item),
+                                dor: item.dor ||
+                                    item.seriesDetalhes.any((serie) => serie.dor),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            leading: FxIcon(
+                              name: feito ? 'circle-check' : 'calendar',
+                              size: 20,
+                              color:
+                                  feito
+                                      ? EagleTokens.good
+                                      : EagleTokens.warn,
+                            ),
+                            accent: feito ? null : EagleTokens.warn,
+                          );
+                        },
                       ),
                 ],
               ),

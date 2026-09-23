@@ -12,14 +12,10 @@ class ProgressoSemanalWidget extends StatelessWidget {
     super.key,
     required this.treinos,
     required this.historico,
-    required this.streakAtual,
   });
 
   final List<ExecucaoTreino> treinos;
   final List<ExecucaoTreino> historico;
-
-  /// Mantido no contrato do caller; streak vive no fold (_StreakFoldBadge).
-  final int streakAtual;
 
   static const _weekdayLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 
@@ -49,6 +45,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Text(
@@ -59,18 +56,18 @@ class ProgressoSemanalWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              if (completedThisWeek > 0)
-                Text(
-                  '$completedThisWeek dia${completedThisWeek == 1 ? '' : 's'} esta semana',
-                  style: FocuxHubTypography.chip(primary).copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              Text(
+                '$completedThisWeek de $weeklyGoal',
+                style: FocuxHubTypography.metric(
+                  color: primary,
+                  fontSize: FocuxHubTypography.metricMd,
                 ),
+              ),
             ],
           ),
           const SizedBox(height: TokensStrip.s2),
           Text(
-            'Treinos concluídos nesta semana · descanso não zera',
+            'Dias com treino nesta semana · descanso não zera a sequência',
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
