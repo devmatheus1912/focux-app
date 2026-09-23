@@ -110,17 +110,26 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     try {
       final alunos = await ref.read(alunosProvider.future);
       if (!mounted) return;
-      final selected = await showFxHomeSheet<int>(
+      final selected = await showFxHomeSheet<TreinoAtribuicaoResult>(
         context,
-        builder: (_) => _AssignWorkoutSheet(alunos: alunos),
+        builder:
+            (_) => TreinoAssignSheet(
+              alunos: alunos,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+              includePrazo: true,
+            ),
       );
       if (selected == null) return;
 
       await ref
           .read(treinoRepositoryProvider)
-          .atribuirAluno(treino.id, selected);
+          .atribuirAluno(
+            treino.id,
+            selected.alunoId,
+            dataFim: selected.dataFim,
+          );
       invalidateTreinosCaches(ref);
-      invalidateTreinosDoAluno(ref, selected);
+      invalidateTreinosDoAluno(ref, selected.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
       AnalyticsService.instance.track(
@@ -159,17 +168,24 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     try {
       final alunos = await ref.read(alunosProvider.future);
       if (!mounted) return;
-      final selected = await showFxHomeSheet<int>(
+      final selected = await showFxHomeSheet<TreinoAtribuicaoResult>(
         context,
-        builder: (_) => _AssignWorkoutSheet(alunos: alunos),
+        builder:
+            (_) => TreinoAssignSheet(
+              alunos: alunos,
+              isDark: Theme.of(context).brightness == Brightness.dark,
+              title: 'Cópia para aluno',
+              subtitleWhenReady: 'Escolha quem recebe a cópia dedicada.',
+              confirmLabel: 'Criar cópia',
+            ),
       );
       if (selected == null) return;
 
       await ref
           .read(treinoRepositoryProvider)
-          .clonarParaAluno(treino.id, selected);
+          .clonarParaAluno(treino.id, selected.alunoId);
       invalidateTreinosCaches(ref);
-      invalidateTreinosDoAluno(ref, selected);
+      invalidateTreinosDoAluno(ref, selected.alunoId);
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,

@@ -48,12 +48,18 @@ Future<void> _dispatchTreinoDetailAction({
         try {
           final alunos = await ref.read(alunosProvider.future);
           if (!context.mounted) return;
-          aid = await _showTreinoSheet<int>(
+          final picked = await _showTreinoSheet<TreinoAtribuicaoResult>(
             context: context,
             builder:
-                (dialogContext) =>
-                    _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
+                (dialogContext) => TreinoAssignSheet(
+                  alunos: alunos,
+                  isDark: isDark,
+                  title: 'Modo presencial',
+                  subtitleWhenReady: 'Escolha o aluno desta sessão.',
+                  confirmLabel: 'Continuar',
+                ),
           );
+          aid = picked?.alunoId;
         } catch (e) {
           if (context.mounted) {
             FeedbackHelper.showError(context, friendlyError(e));
@@ -71,21 +77,28 @@ Future<void> _dispatchTreinoDetailAction({
       try {
         final alunos = await ref.read(alunosProvider.future);
         if (!context.mounted) return;
-        final selected = await _showTreinoSheet<int>(
+        final selected = await _showTreinoSheet<TreinoAtribuicaoResult>(
           context: context,
           builder:
-              (dialogContext) =>
-                  _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
+              (dialogContext) => TreinoAssignSheet(
+                alunos: alunos,
+                isDark: isDark,
+                includePrazo: true,
+              ),
         );
         if (selected == null) return;
-        await repo.atribuirAluno(treinoId, selected);
+        await repo.atribuirAluno(
+          treinoId,
+          selected.alunoId,
+          dataFim: selected.dataFim,
+        );
         AnalyticsService.instance.track(
           ProductEvents.treinosAssigned,
           props: {'source': 'detail', 'id': treinoId},
         );
         ref.invalidate(treinoProvider(treinoId));
         invalidateTreinosCaches(ref);
-        invalidateTreinosDoAluno(ref, selected);
+        invalidateTreinosDoAluno(ref, selected.alunoId);
         if (context.mounted) {
           FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
         }
@@ -99,20 +112,25 @@ Future<void> _dispatchTreinoDetailAction({
       try {
         final alunos = await ref.read(alunosProvider.future);
         if (!context.mounted) return;
-        final selected = await _showTreinoSheet<int>(
+        final selected = await _showTreinoSheet<TreinoAtribuicaoResult>(
           context: context,
           builder:
-              (dialogContext) =>
-                  _AssignWorkoutSheet(alunos: alunos, isDark: isDark),
+              (dialogContext) => TreinoAssignSheet(
+                alunos: alunos,
+                isDark: isDark,
+                title: 'Cópia para aluno',
+                subtitleWhenReady: 'Escolha quem recebe a cópia dedicada.',
+                confirmLabel: 'Criar cópia',
+              ),
         );
         if (selected == null) return;
-        await repo.clonarParaAluno(treinoId, selected);
+        await repo.clonarParaAluno(treinoId, selected.alunoId);
         AnalyticsService.instance.track(
           ProductEvents.treinosCloned,
           props: {'source': 'detail', 'id': treinoId},
         );
         invalidateTreinosCaches(ref);
-        invalidateTreinosDoAluno(ref, selected);
+        invalidateTreinosDoAluno(ref, selected.alunoId);
         if (context.mounted) {
           FeedbackHelper.showSuccess(
             context,

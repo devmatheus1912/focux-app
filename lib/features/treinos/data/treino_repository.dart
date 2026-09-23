@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../utils/treino_atribuicao_prazo.dart';
 import '../utils/treinos_list_labels.dart';
 
 class TreinoExercicioItem {
@@ -410,8 +411,18 @@ class TreinoRepository {
     );
   }
 
-  Future<void> atribuirAluno(int treinoId, int alunoId) async {
-    await _dio.post('/api/treinos/$treinoId/alunos/$alunoId');
+  Future<void> atribuirAluno(
+    int treinoId,
+    int alunoId, {
+    DateTime? dataFim,
+  }) async {
+    await _dio.post(
+      '/api/treinos/$treinoId/alunos/$alunoId',
+      data: {
+        'dataFim':
+            dataFim == null ? null : TreinoAtribuicaoPrazo.toIsoDate(dataFim),
+      },
+    );
   }
 
   Future<TreinosAlunoPage> listarTreinosDoAlunoPagina(

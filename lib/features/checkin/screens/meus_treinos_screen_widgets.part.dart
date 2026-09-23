@@ -149,6 +149,9 @@ class _TrainingPlanCard extends StatelessWidget {
     final status = normalizeTreinoStatus(treino.status);
     final concluido = status == treinoStatusConcluido;
     final canStart = isTreinoDisponivelParaIniciar(treino) || concluido;
+    final prazoFim = TreinoAtribuicaoPrazo.parseIsoDate(treino.dataFim);
+    final prazoLabel = TreinoAtribuicaoPrazo.chipLabel(prazoFim);
+    final prazoAtrasado = TreinoAtribuicaoPrazo.isAtrasado(prazoFim);
     void handleAction() {
       if (starting || confirming) return;
       if (aguardando) {
@@ -239,6 +242,19 @@ class _TrainingPlanCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
+                      if (prazoLabel != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          prazoLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: prazoAtrasado ? EagleTokens.warn : mute,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -229,6 +229,10 @@ class ExecucaoTreino {
   final String status;
   final String? iniciadoEm;
   final String? concluidoEm;
+  /// Vigência da atribuição (meus-treinos); ISO date.
+  final String? dataInicio;
+  /// Prazo soft — orientação; nunca bloqueia check-in.
+  final String? dataFim;
   final List<ExecucaoExercicio> exercicios;
   final List<EvolucaoCarga> evolucoesCarga;
   final List<EvolucaoPerformance> evolucoesPerformance;
@@ -240,6 +244,8 @@ class ExecucaoTreino {
     required this.status,
     this.iniciadoEm,
     this.concluidoEm,
+    this.dataInicio,
+    this.dataFim,
     required this.exercicios,
     this.evolucoesCarga = const [],
     this.evolucoesPerformance = const [],
@@ -252,6 +258,8 @@ class ExecucaoTreino {
     status: checkinJsonStringOr(j['status'], 'PENDENTE'),
     iniciadoEm: checkinJsonString(j['iniciadoEm']),
     concluidoEm: checkinJsonString(j['concluidoEm']),
+    dataInicio: checkinJsonString(j['dataInicio']),
+    dataFim: checkinJsonString(j['dataFim']),
     exercicios:
         checkinJsonMapList(
           j['exercicios'],
@@ -286,6 +294,8 @@ class ExecucaoTreino {
     'status': status,
     'iniciadoEm': iniciadoEm,
     'concluidoEm': concluidoEm,
+    'dataInicio': dataInicio,
+    'dataFim': dataFim,
     'exercicios': exercicios.map((e) => e.toJson()).toList(),
     'evolucoesCarga': [],
     'evolucoesPerformance': [],
