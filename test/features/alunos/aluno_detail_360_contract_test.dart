@@ -162,6 +162,12 @@ void main() {
     expect(screen, contains('class Aluno360CopilotSignalTile'));
     expect(
       File(
+        'lib/features/alunos/widgets/aluno360_copilot_card.dart',
+      ).readAsStringSync(),
+      isNot(contains('Aluno360CopilotSignalsGrid')),
+    );
+    expect(
+      File(
         'lib/features/alunos/widgets/aluno360_copilot_prescription.dart',
       ).readAsStringSync(),
       contains('class Aluno360CopilotPrescription'),
@@ -621,6 +627,7 @@ void main() {
         contains('FxLiquidPrimaryButton'),
         isNot(contains('DashboardHomeActionChip')),
         contains('Ações rápidas da aba operação'),
+        contains("tabIndex == 1 ? 'Ajustar treino'"),
       ),
     );
     expect(
@@ -678,7 +685,7 @@ void main() {
         contains('DashboardHomeActionChip'),
         contains('_EvolucaoMetricChip'),
         contains('_VolumeSparklineRow'),
-        contains("child: const Text('Ajustar treino')"),
+        contains('formatAlunoVolumeKg'),
         contains('secondaryTextLinkStyle'),
       ),
     );

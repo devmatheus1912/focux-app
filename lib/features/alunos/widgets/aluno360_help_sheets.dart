@@ -45,12 +45,12 @@ Future<void> showAluno360OperacaoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Prioridade do dia',
-        'Sugestão do Copiloto com base no perfil, financeiro e autonomia. Use o olho para focar só nela.',
+        'Uma linha de contexto. Atualizar regenera a sugestão e troca o botão de baixo — sem segundo card.',
         icon: 'spark',
       ),
       FxHelpTip(
-        'Chip flutuante',
-        'Ação principal do dia (contato, tarefa ou treino). Secundários aparecem quando faz sentido.',
+        'Botão da base',
+        'Ação principal do dia (contato, tarefa, sono ou treino). Um só por aba.',
         icon: 'target',
       ),
     ],

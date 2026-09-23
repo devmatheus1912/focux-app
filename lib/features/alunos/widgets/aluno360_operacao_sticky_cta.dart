@@ -17,12 +17,14 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     super.key,
     required this.aluno,
     required this.alunoId,
+    this.tabIndex = 0,
     required this.proximaAcao360,
     required this.hasOpenCopilotTask360,
   });
 
   final Aluno aluno;
   final int alunoId;
+  final int tabIndex;
   final ProximaAcaoResumo? proximaAcao360;
   final bool hasOpenCopilotTask360;
 
@@ -71,8 +73,15 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       context.push('/alunos/$alunoId/editar', extra: aluno);
     }
 
+    final stickyDisplayLabel =
+        tabIndex == 1 ? 'Ajustar treino' : operacao.stickyDisplayLabel;
+
     void onPrimary() {
       HapticFeedback.lightImpact();
+      if (tabIndex == 1) {
+        context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+        return;
+      }
       switch (sticky.destination) {
         case OperacaoStickyDestination.chat:
           openChat(acao: effectiveProxima?.acao);
@@ -89,14 +98,14 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
       }
     }
 
-    final stickyDisplayLabel = operacao.stickyDisplayLabel;
-
     return SafeArea(
       top: false,
       child: Semantics(
         container: true,
         label:
-            hasOpenCopilotTask360
+            tabIndex == 1
+                ? 'Ajustar treino deste aluno'
+                : hasOpenCopilotTask360
                 ? 'Ações rápidas da aba operação, com tarefa aberta'
                 : 'Ações rápidas da aba operação',
         child: Padding(

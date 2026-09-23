@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/data/command_action_item.dart';
@@ -164,11 +165,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
 
     final resumo = resumoAsync.valueOrNull;
     final profileCompletion = copilotProfileCompletion(aluno);
-    final signals = resolveCopilotSignals(
-      aluno: aluno,
-      resumo: resumo,
-      primary: primary,
-    );
     final fallback = copilotFallbackAction(aluno, resumo);
     final seed360 =
         proximaAcao360 != null ? copilotActionFrom360(proximaAcao360!) : null;
@@ -176,7 +172,6 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final effectiveProxima = operacao.effectiveProxima;
     final hideCopilotChat = operacao.hideCopilotChatRow;
     final showCopilotPrescription = shouldShowCopilotPrescriptionBlock(
-      forceIa: forceIa,
       sticky: stickyAction,
       aluno: aluno,
       proximaAcaoRaw: proximaAcao360?.acao,
@@ -244,12 +239,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   caption,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    height: 1.35,
-                  ),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
               ),
               const SizedBox(width: 4),
@@ -269,14 +259,9 @@ class Aluno360CopilotCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'A IA está montando a sugestão do dia com base no '
-                    'perfil, financeiro e autonomia deste aluno.',
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      height: 1.35,
-                    ),
+                    'Montando a prioridade do dia. O botão de baixo '
+                    'atualiza quando a sugestão chegar.',
+                    style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
                   const SizedBox(height: 8),
                   ClipRRect(
@@ -292,12 +277,17 @@ class Aluno360CopilotCard extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
           ],
-            if (!hasOpenTask && !operacao.contactPriority) ...[
-              const SizedBox(height: 10),
-              Aluno360CopilotSignalsGrid(signals: signals),
+            if (resolvedAcao.trim().isNotEmpty &&
+                !iaLoading &&
+                !showCopilotPrescription) ...[
+              const SizedBox(height: TokensStrip.s3),
+              Text(
+                resolvedAcao,
+                style: FocuxHubTypography.bodyMuted(color: mute),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
-            if (!hasOpenTask && !operacao.contactPriority)
-              const SizedBox(height: 10),
             if (shouldShowCopilotProfileGapsButton(
               aluno,
               profileCompletion,

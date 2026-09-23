@@ -672,7 +672,7 @@ void main() {
   });
 
   group('shouldShowCopilotPrescriptionBlock', () {
-    test('shows prescription during IA refresh even when sticky matches 360', () {
+    test('hides clone even after IA refresh when sticky already owns the action', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
@@ -681,16 +681,15 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: true,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Completar mapa corporal no radar',
         ),
-        isTrue,
+        isFalse,
       );
     });
 
-    test('hides duplicate when not forcing IA', () {
+    test('hides duplicate when sticky matches 360', () {
       final aluno = _aluno();
       const sticky = OperacaoStickyAction(
         label: 'Completar mapa corporal',
@@ -699,7 +698,6 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: false,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Completar mapa corporal no radar',
@@ -717,7 +715,6 @@ void main() {
       );
       expect(
         shouldShowCopilotPrescriptionBlock(
-          forceIa: false,
           sticky: sticky,
           aluno: aluno,
           proximaAcaoRaw: 'Retomar contato com Thales e checar o treino.',

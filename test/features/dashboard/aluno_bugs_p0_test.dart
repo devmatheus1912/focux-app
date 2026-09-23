@@ -15,10 +15,10 @@ void main() {
     });
 
     test('volume kg não usa t enganoso', () {
-      expect(formatAlunoVolumeKg(4400), '4.4 mil kg');
+      expect(formatAlunoVolumeKg(4400), '4,4 mil kg');
       expect(formatAlunoVolumeKg(4000), '4 mil kg');
       expect(formatAlunoVolumeKg(240), '240 kg');
-      expect(formatAlunoVolumeKg(0), '--');
+      expect(formatAlunoVolumeKg(0), '—');
       expect(formatAlunoVolumeKg(4400), isNot(contains('t')));
     });
 

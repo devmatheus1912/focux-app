@@ -338,10 +338,18 @@ OperacaoStickyAction resolveOperacaoStickyAction({
     followUpDue: followUpDue,
   );
   final backendLabel = proximaAcao?.stickyLabel?.trim();
+  final derived = copilotStickyLabel(
+    aluno,
+    acao,
+    wearableRelevant: wearableRelevant,
+  );
   final label =
-      backendLabel != null && backendLabel.isNotEmpty
+      backendLabel != null &&
+              backendLabel.isNotEmpty &&
+              backendLabel.length <= 32 &&
+              !backendLabel.contains('. ')
           ? backendLabel
-          : copilotStickyLabel(aluno, acao, wearableRelevant: wearableRelevant);
+          : derived;
   return OperacaoStickyAction(
     label: label,
     icon: stickyIconForDestination(destination),
@@ -655,13 +663,12 @@ bool shouldShowCopilotProfileGapsButton(
 /// Contact priority keeps the prescription body (motivo);
 /// sticky chat já cobre "Preparar mensagem" / Retomar contato.
 bool shouldShowCopilotPrescriptionBlock({
-  required bool forceIa,
   required OperacaoStickyAction sticky,
   required Aluno aluno,
   String? proximaAcaoRaw,
   bool contactPriority = false,
 }) {
-  if (forceIa) return true;
+  // Atualizar reescreve o sticky — não clona a mesma ação num segundo card.
   if (contactPriority) return true;
   return !shouldHideCopilotPrescriptionWhenMatchesSticky(
     sticky: sticky,
@@ -828,6 +835,7 @@ String stickyLabelCompactFallback(String label) {
   if (lower.contains('treino')) return 'Treino';
   if (lower.contains('financeir')) return 'Financeiro';
   if (lower.contains('perfil')) return 'Perfil';
+  if (lower.contains('sono') || lower.contains('durm')) return 'Sono';
   if (label.length <= 14) return label;
   return truncateStickyLabel(label);
 }

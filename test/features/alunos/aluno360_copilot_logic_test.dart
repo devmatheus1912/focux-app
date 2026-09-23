@@ -559,6 +559,16 @@ void main() {
         'Retomar contato',
       );
     });
+
+    test('maps sleep habit to Combinar sono', () {
+      expect(
+        copilotStickyLabel(
+          _aluno(),
+          'Durma pelo menos 8 horas na noite de hoje.',
+        ),
+        'Combinar sono',
+      );
+    });
   });
 
   group('sanitizeProximaAcaoWearable', () {

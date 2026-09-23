@@ -455,6 +455,11 @@ String copilotStickyLabel(
   if (lower.contains('perfil') || lower.contains('lacuna')) {
     return 'Completar perfil';
   }
+  if (lower.contains('durm') ||
+      lower.contains('sono') ||
+      (lower.contains('hora') && lower.contains('noite'))) {
+    return 'Combinar sono';
+  }
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));
 }
 
