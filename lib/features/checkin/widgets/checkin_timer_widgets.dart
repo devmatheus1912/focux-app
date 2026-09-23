@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../utils/checkin_execucao_display.dart';
 
@@ -153,15 +154,12 @@ class CheckinRestFocusView extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  SizedBox(
-                    width: 168,
-                    height: 168,
-                    child: CircularProgressIndicator(
-                      value: progress,
-                      strokeWidth: 6,
-                      color: Theme.of(context).colorScheme.primary,
-                      backgroundColor: chrome.mute.withValues(alpha: 0.15),
-                    ),
+                  FxLoading(
+                    size: 168,
+                    strokeWidth: 6,
+                    value: progress,
+                    color: Theme.of(context).colorScheme.primary,
+                    backgroundColor: chrome.mute.withValues(alpha: 0.15),
                   ),
                   Text(
                     countdown,
