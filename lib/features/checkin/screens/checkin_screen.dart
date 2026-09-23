@@ -54,6 +54,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   Duration _duration = Duration.zero;
   bool _showRestTimer = false;
   int _restSeconds = 60;
+  int _restTotalSeconds = 60;
   DateTime? _restEndsAt;
   Timer? _restTimer;
   int? _focoTreinoExercicioId;
@@ -312,6 +313,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       _showRestTimer = true;
       _restEndsAt = DateTime.now().add(Duration(seconds: clamped));
       _restSeconds = clamped;
+      _restTotalSeconds = clamped;
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _restEndsAt == null) return;
@@ -586,21 +588,30 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                             )
                             : null,
                   ),
-                  if (_showRestTimer)
-                    CheckinRestBanner(
-                      seconds: _restSeconds,
-                      onSkip: () {
-                        _restTimer?.cancel();
-                        setState(() => _showRestTimer = false);
-                      },
-                      onTrocar:
-                          exercicios.length > 1
-                              ? () => _abrirFila(exercicios)
-                              : null,
-                    ),
                   Expanded(
                     child:
-                        exercicios.isEmpty
+                        _showRestTimer
+                            ? CheckinRestFocusView(
+                              seconds: _restSeconds,
+                              totalSeconds: _restTotalSeconds,
+                              contextLine:
+                                  current == null
+                                      ? null
+                                      : checkinRestContextLine(
+                                        exerciseName: current.exercicioNome,
+                                        seriesFeitas: current.seriesFeitas,
+                                        series: current.series,
+                                      ),
+                              onSkip: () {
+                                _restTimer?.cancel();
+                                setState(() => _showRestTimer = false);
+                              },
+                              onTrocar:
+                                  exercicios.length > 1
+                                      ? () => _abrirFila(exercicios)
+                                      : null,
+                            )
+                            : exercicios.isEmpty
                             ? const FxEmptyState(
                               icon: 'dumbbell',
                               title: 'Treino sem exercícios',
