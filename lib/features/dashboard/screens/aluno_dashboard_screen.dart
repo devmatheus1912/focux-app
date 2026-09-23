@@ -166,6 +166,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
               historico: home.historico,
               mensagens: home.chat.toSyntheticMessages(),
               agendaReviewed: _agendaReviewed,
+              frequenciaDias: home.frequenciaDias,
             );
 
             return RefreshIndicator(
@@ -234,6 +235,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                                   ? home.volumeSemanaKg
                                   : null,
                           insight: experience.score.rhythmLabel,
+                          frequenciaDias: home.frequenciaDias,
                         ),
                       const SizedBox(height: TokensStrip.s4),
                       _PerformanceEvolutionCard(

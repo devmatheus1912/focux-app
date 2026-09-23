@@ -67,6 +67,7 @@ Map<String, dynamic> _payload() => {
   'streakAtual': 12,
   'volumeSemanaKg': 240.0,
   'volumeMesKg': 1800.0,
+  'frequenciaDias': 4,
   'hasWearableHistory': true,
   'recovery': {
     'dataReferencia': '2026-08-16',
@@ -106,6 +107,7 @@ void main() {
       expect(bundle.streakAtual, 12);
       expect(bundle.volumeSemanaKg, 240);
       expect(bundle.volumeMesKg, 1800);
+      expect(bundle.frequenciaDias, 4);
     });
 
     test('tolerates missing optional blocks', () {
@@ -122,7 +124,8 @@ void main() {
         ..remove('recovery')
         ..remove('streakAtual')
         ..remove('volumeSemanaKg')
-        ..remove('volumeMesKg');
+        ..remove('volumeMesKg')
+        ..remove('frequenciaDias');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -139,6 +142,7 @@ void main() {
       expect(bundle.streakAtual, 0);
       expect(bundle.volumeSemanaKg, 0);
       expect(bundle.volumeMesKg, 0);
+      expect(bundle.frequenciaDias, isNull);
     });
   });
 

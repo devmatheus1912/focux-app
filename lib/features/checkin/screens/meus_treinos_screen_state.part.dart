@@ -10,9 +10,16 @@ String meusTreinosCountLabel(int count) {
 String _treinosInsightLine({
   required List<ExecucaoTreino> historico,
   required int startableCount,
+  int? frequenciaDias,
 }) {
   final days = countUniqueCompletedDaysThisWeek(historico);
-  if (days >= 3) return 'Ritmo forte · mantenha o volume';
+  final goal = alunoWeeklyDayGoal(frequenciaDias: frequenciaDias);
+  if (goal != null) {
+    if (days >= goal) return 'Ritmo forte · meta da semana ok';
+    if (days >= 1) return 'Ritmo construindo · $days/$goal dias';
+    if (startableCount > 0) return 'Hora de treinar · plano pronto';
+    return 'Consistência em retomada';
+  }
   if (days >= 1) return 'Ritmo construindo · complete a semana';
   if (startableCount > 0) return 'Hora de treinar · plano pronto';
   return 'Consistência em retomada';
@@ -238,7 +245,9 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                       insight: _treinosInsightLine(
                                         historico: home.historico,
                                         startableCount: startableCount,
+                                        frequenciaDias: home.frequenciaDias,
                                       ),
+                                      frequenciaDias: home.frequenciaDias,
                                     )
                                     : _WeekProgressStrip(
                                       ativos: ativos,

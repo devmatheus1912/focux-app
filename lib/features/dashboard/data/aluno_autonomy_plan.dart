@@ -4,6 +4,7 @@ import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
+import '../utils/aluno_consistencia_display.dart';
 
 enum AlunoTaskPriority { alta, media, baixa }
 
@@ -144,6 +145,7 @@ AlunoHomeExperience buildAlunoHomeExperience({
   required List<ChatMsg> mensagens,
   DateTime? now,
   bool agendaReviewed = false,
+  int? frequenciaDias,
 }) {
   final today = now ?? DateTime.now();
   final plan = buildAlunoAutonomyPlan(
@@ -162,6 +164,7 @@ AlunoHomeExperience buildAlunoHomeExperience({
     historico: historico,
     mensagens: mensagens,
     now: today,
+    frequenciaDias: frequenciaDias,
   );
   final lens = _objectiveLens(aluno.objetivo);
   final action = _mainHomeAction(
@@ -495,12 +498,16 @@ FocuxScore _buildFocuxScore({
   required List<ExecucaoTreino> historico,
   required List<ChatMsg> mensagens,
   required DateTime now,
+  int? frequenciaDias,
 }) {
   final completed7 = _completedSince(
     historico,
     now.subtract(const Duration(days: 7)),
   );
-  final consistency = (completed7 / 3).clamp(0.0, 1.0);
+  final weeklyGoal = alunoWeeklyDayGoal(frequenciaDias: frequenciaDias);
+  final denominator = weeklyGoal ??
+      (completed7 <= 0 ? 3 : completed7.clamp(3, 7));
+  final consistency = (completed7 / denominator).clamp(0.0, 1.0);
   final hasEvolution = _latestEvolution(historico) != null;
   final hasRecentMeasure =
       _latestMeasureDate(

@@ -26,6 +26,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/screens/progresso_semanal_widget.dart';
+import '../../dashboard/utils/aluno_consistencia_display.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import '../../treinos/widgets/treino_prazo_badge.dart';

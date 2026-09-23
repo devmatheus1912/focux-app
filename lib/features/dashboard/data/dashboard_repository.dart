@@ -375,6 +375,8 @@ class AlunoDashboardHomeBundle {
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
+  /// Meta semanal (dias) da prescrição ativa — SSOT do BFF.
+  final int? frequenciaDias;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -396,6 +398,7 @@ class AlunoDashboardHomeBundle {
     this.volumePorSemana = const [],
     this.forcaPorSemana = const [],
     this.recordes = const [],
+    this.frequenciaDias,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -510,6 +513,7 @@ class AlunoDashboardHomeBundle {
       volumePorSemana: parseAlunoHomeSeries(json['volumePorSemana']),
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),
+      frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
     );
   }
 }
