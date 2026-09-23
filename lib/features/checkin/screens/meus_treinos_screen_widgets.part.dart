@@ -50,7 +50,7 @@ class _RetomarTreinoBanner extends StatelessWidget {
                   style: FocuxHubTypography.sectionTitle(
                     context,
                     color: Theme.of(context).colorScheme.onSurface,
-                  ).copyWith(fontSize: 15),
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -117,10 +117,7 @@ class _WeekProgressStrip extends StatelessWidget {
           const SizedBox(height: TokensStrip.s1),
           Text(
             insight,
-            style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-              fontWeight: FontWeight.w800,
-              height: 1.25,
-            ),
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -236,12 +233,7 @@ class _TrainingPlanCard extends StatelessWidget {
                         treino.treinoNome,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
-                        ),
+                        style: FocuxHubTypography.cardTitle(color: ink),
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -260,9 +252,8 @@ class _TrainingPlanCard extends StatelessWidget {
                         ].join(' · '),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: FocuxHubTypography.bodyMuted(
                           color: mute,
-                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -294,11 +285,10 @@ class _TrainingPlanCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Ficha abre quando o personal liberar os exercícios.',
-                style: TextStyle(
+                style: FocuxHubTypography.bodyMuted(
                   color: mute,
-                  fontSize: 12,
-                  height: 1.3,
                   fontWeight: FontWeight.w600,
+                  height: 1.3,
                 ),
               ),
               const SizedBox(height: 8),
@@ -396,11 +386,10 @@ void _showTrainingPendingSheet({
                 decoration: chrome.panel(accent: primary),
                 child: Text(
                   'Seu personal ja reservou este treino. Assim que os exercicios forem liberados, o botao Iniciar aparece com registro de series, videos e feedback.',
-                  style: TextStyle(
+                  style: FocuxHubTypography.bodyMuted(
                     color: ink,
-                    fontSize: 13,
-                    height: 1.42,
                     fontWeight: FontWeight.w600,
+                    height: 1.42,
                   ),
                 ),
               ),

@@ -4,7 +4,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../utils/checkin_execucao_display.dart';
 
 class CheckinRestBanner extends StatelessWidget {
@@ -54,7 +53,7 @@ class CheckinRestBanner extends StatelessWidget {
                       countdown,
                       style: FocuxHubTypography.kpi(
                         color: chrome.ink,
-                        fontSize: TokensStrip.fontH2,
+                        fontSize: TokensStrip.fontH1,
                         fontWeight: FontWeight.w700,
                       ).copyWith(
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -64,33 +63,27 @@ class CheckinRestBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: checkinExecutionControlMin + 8,
-                  maxWidth: 168,
-                ),
-                child: FxLiquidPrimaryButton(
-                  label: checkinPularDescansoLabel(),
-                  expand: false,
-                  onPressed: onSkip,
-                ),
-              ),
-              if (onTrocar != null) ...[
-                const SizedBox(width: TokensStrip.s2),
-                SizedBox(
-                  height: checkinExecutionControlMin + 8,
-                  child: TextButton(
-                    onPressed: onTrocar,
-                    style: TextButton.styleFrom(
-                      minimumSize: Size(
-                        72,
-                        checkinExecutionControlMin + 8,
-                      ),
-                    ),
-                    child: const Text('Trocar'),
+              TextButton(
+                onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  minimumSize: Size(
+                    72,
+                    checkinExecutionControlMin + 8,
                   ),
                 ),
-              ],
+                child: Text(checkinPularDescansoLabel()),
+              ),
+              if (onTrocar != null)
+                TextButton(
+                  onPressed: onTrocar,
+                  style: TextButton.styleFrom(
+                    minimumSize: Size(
+                      72,
+                      checkinExecutionControlMin + 8,
+                    ),
+                  ),
+                  child: const Text('Trocar'),
+                ),
             ],
           ),
         ),
@@ -172,9 +165,15 @@ class CheckinRestFocusView extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: checkinExecutionControlMin + 8,
-              child: FxLiquidPrimaryButton(
-                label: checkinPularDescansoLabel(),
+              child: TextButton(
                 onPressed: onSkip,
+                style: TextButton.styleFrom(
+                  minimumSize: Size(
+                    72,
+                    checkinExecutionControlMin + 8,
+                  ),
+                ),
+                child: Text(checkinPularDescansoLabel()),
               ),
             ),
           ],

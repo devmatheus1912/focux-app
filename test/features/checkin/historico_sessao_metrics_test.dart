@@ -84,4 +84,19 @@ void main() {
     expect(m.sinal, 'MELHOROU');
     expect(m.volumeAnteriorKg, 5200);
   });
+
+  test('volume hint some comparação quando a sessão não tem carga', () {
+    expect(
+      historicoVolumeHint(volumeKg: null, volumeAnteriorKg: 1400),
+      'sem cargas',
+    );
+    expect(
+      historicoVolumeHint(volumeKg: 1800, volumeAnteriorKg: 1400),
+      'antes 1.4 mil kg',
+    );
+    expect(
+      historicoVolumeHint(volumeKg: 800, volumeAnteriorKg: null),
+      'nesta sessão',
+    );
+  });
 }

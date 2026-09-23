@@ -63,12 +63,12 @@ void main() {
         contains('SafeArea('),
         contains('top: false'),
         contains('bottom: false'),
-        contains('TokensStrip.fontH2'),
+        contains('TokensStrip.fontH1'),
         contains('checkinExecutionControlMin + 8'),
       ),
     );
-    expect(timers, contains('FxLiquidPrimaryButton'));
-    expect(timers, contains('expand: false'));
+    expect(timers, isNot(contains('FxLiquidPrimaryButton')));
+    expect(timers, contains('TextButton('));
     expect(timers, isNot(contains('FilledButton')));
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
@@ -136,8 +136,8 @@ void main() {
     expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
-    expect(card, contains('glowStrength: 0.08'));
-    expect(card, contains('glowStrength: 0.06'));
+    expect(card, contains('glowStrength: resting ? 0 : 0.04'));
+    expect(card, contains('glowStrength: 0'));
     expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('_CheckinPosturaHelp')));
     expect(card, contains('ValueKey'));
@@ -221,9 +221,11 @@ void main() {
     );
 
     await tester.tap(find.text('Trocar'));
+    await tester.tap(find.text('Pular descanso'));
     await tester.tap(find.text('Supino reto'));
     expect(trocarTaps, 1);
     expect(titleTaps, 1);
+    expect(find.byType(TextButton), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
