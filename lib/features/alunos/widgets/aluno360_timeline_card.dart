@@ -250,44 +250,20 @@ class Aluno360TimelineCard extends StatelessWidget {
           else if (allItems.isEmpty)
             KeyedSubtree(
               key: const ValueKey('aluno360_timeline_empty'),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      if (!compactEmpty)
-                        DashboardHomeActionChip(
-                          label: 'Pedir check-in',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => _openTimelineCheckin(context),
-                        ),
-                      DashboardHomeActionChip(
-                        label: 'Abrir chat',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed:
-                            () => context.push(
-                              '/alunos/${aluno.id}/chat',
-                              extra: aluno.nome,
-                            ),
-                      ),
-                      if (!compactEmpty)
-                        DashboardHomeActionChip(
-                          label: 'Ver treinos',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed:
-                              () => context.push(
-                                '/alunos/${aluno.id}/treinos-list',
-                                extra: aluno.nome,
-                              ),
-                        ),
-                    ],
-                  ),
-                ],
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: DashboardHomeActionChip(
+                  label: compactEmpty ? 'Abrir chat' : 'Pedir check-in',
+                  accent: primary,
+                  isDark: isDark,
+                  onPressed:
+                      compactEmpty
+                          ? () => context.push(
+                            '/alunos/${aluno.id}/chat',
+                            extra: aluno.nome,
+                          )
+                          : () => _openTimelineCheckin(context),
+                ),
               ),
             )
           else

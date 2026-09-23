@@ -44,16 +44,16 @@ void main() {
           'lib/features/dashboard/screens/progresso_semanal_widget.dart',
         ).readAsStringSync();
 
-    expect(screen, contains('BrandPalette.deep(cs.primary)'));
+    expect(screen, contains('FxStripCard'));
     expect(screen, contains("'Consistência'"));
     expect(screen, contains('descanso não zera'));
-    expect(screen, contains('TokensStrip.rCard'));
     expect(screen, contains('countUniqueCompletedDaysThisWeek'));
     expect(screen, contains('FocuxHubTypography.sectionTitle'));
-    expect(screen, contains('FocuxHubTypography.chip'));
     expect(screen, contains('FocuxHubTypography.bodyMuted'));
-    expect(screen, contains('descanso não zera'));
     expect(screen, contains('FocuxHubTypography.metric'));
+    expect(screen, isNot(contains('local_fire_department')));
+    expect(screen, isNot(contains('BrandPalette.deep')));
+    expect(screen, isNot(contains('LinearGradient')));
     expect(screen, isNot(contains('fontSize: 12')));
     expect(screen, isNot(contains('TextStyle(')));
     expect(screen, isNot(contains('cs.tertiary')));

@@ -78,17 +78,27 @@ class _AnamneseBody extends StatelessWidget {
             ),
           ],
         ),
-        if (a.alertas.isNotEmpty) ...[
+        if (a.alertas.isNotEmpty || a.parqPositivo == true) ...[
           const SizedBox(height: TokensStrip.s3),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              for (final alerta in a.alertas)
-                _AlertaChip(label: alerta, isDark: isDark, warn: true),
               if (a.parqPositivo == true)
                 _AlertaChip(
                   label: 'PAR-Q+ positivo',
+                  isDark: isDark,
+                  warn: true,
+                ),
+              if (a.alertas.length == 1)
+                _AlertaChip(
+                  label: a.alertas.first,
+                  isDark: isDark,
+                  warn: true,
+                )
+              else if (a.alertas.length > 1)
+                _AlertaChip(
+                  label: '${a.alertas.length} alertas clínicos',
                   isDark: isDark,
                   warn: true,
                 ),

@@ -251,7 +251,6 @@ void main() {
 
     expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
     expect(find.text('Pedir check-in'), findsWidgets);
-    expect(find.text('Abrir chat'), findsWidgets);
     expect(find.byKey(const ValueKey('aluno360_timeline_empty')), findsOneWidget);
   });
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_strip_card.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 
@@ -16,17 +17,18 @@ class ProgressoSemanalWidget extends StatelessWidget {
 
   final List<ExecucaoTreino> treinos;
   final List<ExecucaoTreino> historico;
+
+  /// Mantido no contrato do caller; streak vive no fold (_StreakFoldBadge).
   final int streakAtual;
 
   static const _weekdayLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
     final weeklyGoal = treinos.isEmpty ? 3 : treinos.length.clamp(3, 6);
-    // Dias com ≥1 CONCLUIDO — não contar N execuções do mesmo dia como N/meta.
     final completedThisWeek = countUniqueCompletedDaysThisWeek(historico);
-    final streakDays = streakAtual < 0 ? 0 : streakAtual;
     final progressValue =
         weeklyGoal == 0
             ? 0.0
@@ -38,61 +40,27 @@ class ProgressoSemanalWidget extends StatelessWidget {
       now.day,
     ).subtract(Duration(days: now.weekday - 1));
 
-    return Container(
+    return FxStripCard(
+      glowStrength: 0.08,
       padding: const EdgeInsets.all(TokensStrip.s3),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [cs.primary, BrandPalette.deep(cs.primary)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-      ),
+      semanticsLabel:
+          'Consistência semanal. $completedThisWeek de $weeklyGoal treinos.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Consistência',
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: Colors.white,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TokensStrip.s3,
-                  vertical: TokensStrip.s1,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(TokensStrip.rPill),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_fire_department,
-                      color: Colors.white,
-                      size: TokensStrip.fontBodySm + 3,
-                    ),
-                    const SizedBox(width: TokensStrip.s1),
-                    Text(
-                      streakDays == 1 ? '1 semana' : '$streakDays semanas',
-                      style: FocuxHubTypography.chip(Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s3),
           Text(
-            'Treinos concluídos nesta semana · descanso não zera',
-            style: FocuxHubTypography.bodyMuted(color: Colors.white70),
+            'Consistência',
+            style: FocuxHubTypography.sectionTitle(
+              context,
+              color: chrome.ink,
+            ),
           ),
           const SizedBox(height: TokensStrip.s2),
+          Text(
+            'Treinos concluídos nesta semana · descanso não zera',
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s3),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
@@ -111,35 +79,37 @@ class ProgressoSemanalWidget extends StatelessWidget {
                   shape: BoxShape.circle,
                   color:
                       done
-                          ? Colors.white.withValues(alpha: 0.9)
-                          : (isToday ? Colors.white30 : Colors.white10),
+                          ? primary.withValues(alpha: 0.18)
+                          : (isToday
+                              ? primary.withValues(alpha: 0.08)
+                              : chrome.line.withValues(alpha: 0.45)),
                   border:
                       isToday
-                          ? Border.all(color: Colors.white, width: 2)
+                          ? Border.all(color: primary, width: 1.5)
                           : null,
                 ),
                 child: Center(
                   child:
                       done
-                          ? Icon(Icons.check, color: cs.primary, size: 16)
+                          ? Icon(Icons.check, color: primary, size: 16)
                           : Text(
                             _weekdayLetters[index],
                             style: FocuxHubTypography.chip(
-                              isToday ? Colors.white : Colors.white54,
+                              isToday ? primary : chrome.mute,
                             ),
                           ),
                 ),
               );
             }),
           ),
-          const SizedBox(height: TokensStrip.s4),
+          const SizedBox(height: TokensStrip.s3),
           Row(
             children: [
               Expanded(
                 child: LinearProgressIndicator(
                   value: progressValue,
-                  backgroundColor: Colors.white24,
-                  color: Colors.white,
+                  backgroundColor: chrome.line.withValues(alpha: 0.55),
+                  color: primary,
                   minHeight: TokensStrip.s2,
                   borderRadius: BorderRadius.circular(TokensStrip.rInput),
                 ),
@@ -148,7 +118,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
               Text(
                 '$completedThisWeek/$weeklyGoal',
                 style: FocuxHubTypography.metric(
-                  color: Colors.white,
+                  color: chrome.ink,
                   fontSize: FocuxHubTypography.metricEm,
                 ),
               ),
@@ -159,7 +129,6 @@ class ProgressoSemanalWidget extends StatelessWidget {
     );
   }
 
-  /// Alinha com [countUniqueCompletedDaysThisWeek]: só CONCLUIDO, dia local.
   static bool _dayHasCompletedWorkout(
     List<ExecucaoTreino> historico,
     DateTime day,

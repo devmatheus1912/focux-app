@@ -377,12 +377,12 @@ class _RetencaoMetricStrip extends StatelessWidget {
               label: 'Alto',
               value: '${home.alto}',
               hint: retencaoMetricAltoLabel(home.alto),
-              color: home.alto > 0 ? EagleTokens.bad : primary,
+              color: primary,
               isDark: isDark,
               emphasis:
                   home.alto > 0
-                      ? OperationalMetricEmphasis.alert
-                      : OperationalMetricEmphasis.normal,
+                      ? OperationalMetricEmphasis.normal
+                      : OperationalMetricEmphasis.muted,
               semanticsLabel: '${home.alto} em risco alto',
             ),
           ),
@@ -571,50 +571,33 @@ class _RetencaoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final alto = retencaoRiscoAlto(score.riscoChurn);
     final primary = Theme.of(context).colorScheme.primary;
+    final mute = ShellChrome.of(context).mute;
     return Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxSatelliteListTile(
-            title: score.alunoNome,
-            subtitle: Text(retencaoPorque(score)),
-            accent: alto ? EagleTokens.bad : null,
-            onTap: onAluno,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: TokensStrip.s2,
-              top: TokensStrip.s1,
+      child: FxSatelliteListTile(
+        title: score.alunoNome,
+        subtitle: Text(retencaoPorque(score)),
+        accent: alto ? primary : null,
+        onTap: onAluno,
+        onLongPress: onMais,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DashboardHomeActionChip(
+              label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
+              accent: primary,
+              isDark: isDark,
+              onPressed: onChat,
             ),
-            child: Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
-              children: [
-                DashboardHomeActionChip(
-                  label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
-                  accent: alto ? EagleTokens.bad : primary,
-                  isDark: isDark,
-                  onPressed: onChat,
-                ),
-                DashboardHomeActionChip(
-                  label: retencaoFocusActionLabel(
-                    RetencaoFocusActionId.aluno360,
-                  ),
-                  accent: primary,
-                  isDark: isDark,
-                  onPressed: onAluno,
-                ),
-                DashboardHomeActionChip(
-                  label: 'Mais',
-                  accent: ShellChrome.of(context).mute,
-                  isDark: isDark,
-                  onPressed: onMais,
-                ),
-              ],
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: 'Mais ações',
+              onPressed: onMais,
+              icon: Icon(Icons.more_horiz_rounded, color: mute, size: 20),
+              visualDensity: VisualDensity.compact,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
