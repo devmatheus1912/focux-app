@@ -167,7 +167,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         constrainWidth: false,
         appBar: FxShellAppBar(
           title: 'Saúde da base',
-          subtitle: freshnessLabel ?? 'Score de retenção por aluno',
+          subtitle: freshnessLabel ?? 'Quem precisa de você · o que fazer agora',
           onBack: () {
             FxKeyboardDismissScope.dismiss();
             safePopOrGo(context, '/dashboard/personal');

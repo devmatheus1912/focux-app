@@ -16,7 +16,15 @@ void main() {
 
   test('aplica só tipos executáveis do contrato existente', () {
     expect(
-      iaCopilotoApplySpec(tipoAcao: 'TREINO')?.backendTipo,
+      iaCopilotoApplySpec(
+        tipoAcao: 'TREINO',
+        mensagemSugerida: 'Faz o check-in quando puder.',
+      )?.backendTipo,
+      'ENVIAR_PUSH',
+    );
+    expect(iaCopilotoApplySpec(tipoAcao: 'TREINO'), isNull);
+    expect(
+      iaCopilotoApplySpec(tipoAcao: 'CARGA')?.backendTipo,
       'REDUZIR_CARGA',
     );
     expect(

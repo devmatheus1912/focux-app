@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../treinos/data/treino_repository.dart';
 import '../data/aluno_repository.dart';
 import 'aluno360_copilot_outreach_logic.dart';
 
@@ -20,6 +21,17 @@ class CopilotExecutarAcaoSpec {
   final String executingLabel;
   final String executingSemantics;
   final String? parametros;
+}
+
+/// True se algum exercício do treino tem kg > 0.
+bool treinoListaTemCargaNumerica(Iterable<Treino> treinos) {
+  for (final treino in treinos) {
+    for (final item in treino.exercicios) {
+      final kg = item.cargaKg;
+      if (kg != null && kg > 0) return true;
+    }
+  }
+  return false;
 }
 
 /// Confirmation copy for copilot executar bottom sheet (testable).
@@ -58,12 +70,17 @@ CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({
   required Aluno aluno,
   ProximaAcaoResumo? proxima,
   String? outreachMessage,
+  bool? treinoTemCargaNumerica,
 }) {
   final tipo = tipoAcao?.toUpperCase();
   final acao = proxima?.acao;
 
   // Ajuste de carga só quando a ação fala explicitamente de carga/progressão.
   if (_acaoSugereAjusteCarga(acao) || tipo == 'CARGA') {
+    // Sem kg no treino ativo: não oferecer CTA que vira SEM_CARGA.
+    if (treinoTemCargaNumerica == false) {
+      return null;
+    }
     return const CopilotExecutarAcaoSpec(
       backendTipo: 'REDUZIR_CARGA',
       label: 'Aplicar ajuste de carga (−15%)',
@@ -166,12 +183,14 @@ bool shouldShowCopilotExecutarAcao({
   required Aluno aluno,
   ProximaAcaoResumo? proxima,
   String? outreachMessage,
+  bool? treinoTemCargaNumerica,
 }) =>
     resolveCopilotExecutarAcao(
       tipoAcao: tipoAcao,
       aluno: aluno,
       proxima: proxima,
       outreachMessage: outreachMessage,
+      treinoTemCargaNumerica: treinoTemCargaNumerica,
     ) !=
     null;
 

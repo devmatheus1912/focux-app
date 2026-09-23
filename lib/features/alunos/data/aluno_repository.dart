@@ -7,6 +7,7 @@ import '../../exercicios/data/enums.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../health/data/health_repository.dart';
+import '../utils/alunos_list_sparkline_logic.dart';
 
 class Aluno {
   final int id;
@@ -35,6 +36,7 @@ class Aluno {
   final String? snoozedUntil;
   final String? ultimoContato;
   final bool? operacaoFocusMode;
+  final List<double> aderenciaSparkline;
 
   Aluno({
     required this.id,
@@ -63,6 +65,7 @@ class Aluno {
     this.snoozedUntil,
     this.ultimoContato,
     this.operacaoFocusMode,
+    this.aderenciaSparkline = const [],
   });
 
   DateTime? get followUpDate {
@@ -122,6 +125,17 @@ class Aluno {
     snoozedUntil: json['snoozedUntil'] as String?,
     ultimoContato: json['ultimoContato'] as String?,
     operacaoFocusMode: json['operacaoFocusMode'] as bool?,
+    aderenciaSparkline:
+        ((json['aderenciaSparkline'] as List?) ?? const [])
+            .map((e) {
+              final n = (e as num?)?.toDouble();
+              if (n == null || !n.isFinite || n <= 0) return 0.0;
+              if (n > alunosListSparklineMaxCheckinsPerDay) {
+                return alunosListSparklineMaxCheckinsPerDay;
+              }
+              return n;
+            })
+            .toList(growable: false),
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,

@@ -107,7 +107,7 @@ class AlunoListCard extends ConsumerWidget {
     final statusText = status.label;
     final avatarColor = alunoAvatarFallbackColor(primary: primary);
     final sparkline = alunosListSparklineMetrics(
-      points: const [],
+      points: alunosListSparklinePointsFromRaw(aluno.aderenciaSparkline),
       cachedAderenciaPercent: aluno.aderenciaPercent,
     );
     final aderenciaPercent = sparkline.aderenciaPercent;

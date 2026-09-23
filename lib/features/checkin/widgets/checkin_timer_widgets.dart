@@ -111,12 +111,14 @@ class CheckinRestBanner extends StatelessWidget {
 
 class CheckinRestFocusView extends StatelessWidget {
   final int seconds;
+  final int? totalSeconds;
   final VoidCallback onSkip;
 
   const CheckinRestFocusView({
     super.key,
     required this.seconds,
     required this.onSkip,
+    this.totalSeconds,
   });
 
   @override
@@ -125,6 +127,11 @@ class CheckinRestFocusView extends StatelessWidget {
     final mm = (seconds ~/ 60).toString().padLeft(1, '0');
     final ss = (seconds % 60).toString().padLeft(2, '0');
     final countdown = seconds >= 60 ? '$mm:$ss' : '$seconds';
+    final total = totalSeconds;
+    final progress =
+        total != null && total > 0
+            ? (seconds / total).clamp(0.0, 1.0)
+            : 1.0;
 
     return Center(
       child: Padding(
@@ -139,18 +146,39 @@ class CheckinRestFocusView extends StatelessWidget {
                 color: chrome.mute,
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
-            Text(
-              countdown,
-              style: FocuxHubTypography.kpi(
-                color: chrome.ink,
-                fontSize: TokensStrip.fontH1,
-                fontWeight: FontWeight.w600,
-              ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+            const SizedBox(height: TokensStrip.s4),
+            SizedBox(
+              width: 168,
+              height: 168,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 168,
+                    height: 168,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      strokeWidth: 6,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: chrome.mute.withValues(alpha: 0.15),
+                    ),
+                  ),
+                  Text(
+                    countdown,
+                    style: FocuxHubTypography.kpi(
+                      color: chrome.ink,
+                      fontSize: TokensStrip.fontH1,
+                      fontWeight: FontWeight.w700,
+                    ).copyWith(
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: TokensStrip.s2),
             Text(
-              seconds >= 60 ? 'minutos' : 'segundos',
+              seconds >= 60 ? 'minutos restantes' : 'segundos restantes',
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: TokensStrip.s5),

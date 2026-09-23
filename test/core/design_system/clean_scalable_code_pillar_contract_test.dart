@@ -81,6 +81,8 @@ void main() {
     expect(screen, contains('aluno_list_card.dart'));
     expect(card, contains('alunos_list_sparkline_logic.dart'));
     expect(card, contains('alunosListSparklineMetrics'));
+    expect(card, contains('aderenciaSparkline'));
+    expect(card, contains('alunosListSparklinePointsFromRaw'));
     expect(card, isNot(contains('List<Map<String, dynamic>>')));
   });
 

@@ -14,6 +14,7 @@ import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../planos/utils/plano_capability.dart';
+import '../../treinos/providers/treinos_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
@@ -219,6 +220,11 @@ class Aluno360CopilotCard extends ConsumerWidget {
         showContactBadge ? '$subtitle · Contato prioritário' : subtitle;
 
     final mute = fxScreenMute(context);
+    final treinosAsync = ref.watch(treinosDoAlunoPageProvider(aluno.id));
+    final treinoTemCargaNumerica = treinosAsync.maybeWhen(
+      data: (page) => treinoListaTemCargaNumerica(page.treinos),
+      orElse: () => null,
+    );
 
     return Semantics(
       container: true,
@@ -361,6 +367,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                   aluno: aluno,
                   proxima: effectiveProxima,
                   outreachMessage: operacao.outreachMessage,
+                  treinoTemCargaNumerica: treinoTemCargaNumerica,
                 )) ...[
               Aluno360CopilotExecutarAcaoButton(
                 alunoId: aluno.id,
@@ -370,6 +377,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
                       aluno: aluno,
                       proxima: effectiveProxima,
                       outreachMessage: operacao.outreachMessage,
+                      treinoTemCargaNumerica: treinoTemCargaNumerica,
                     )!,
                 primary: primary,
               ),

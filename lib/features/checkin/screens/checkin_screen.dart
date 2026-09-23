@@ -132,9 +132,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       });
     } catch (e) {
       if (!mounted) return;
+      final msg = friendlyError(e);
+      final sessaoAberta =
+          msg.toLowerCase().contains('treino em aberto') ||
+          msg.toLowerCase().contains('descarte antes');
       setState(() {
         _loading = false;
-        _loadError = friendlyError(e);
+        _loadError =
+            sessaoAberta
+                ? 'Você já tem um treino em andamento. Volte e retome ou descarte antes de iniciar outro.'
+                : msg;
       });
     } finally {
       _iniciarInFlight = false;

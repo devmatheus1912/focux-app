@@ -46,19 +46,26 @@ IaCopilotoApplySpec? iaCopilotoApplySpec({
   final tipo = tipoAcao?.trim().toUpperCase();
   if (tipo == null || tipo.isEmpty) return null;
 
-  if (tipo == 'TREINO' || tipo == 'REDUZIR_CARGA') {
+  // Paridade com Aluno360: TREINO = check-in/push; carga só em CARGA explícita.
+  if (tipo == 'CARGA' || tipo == 'REDUZIR_CARGA') {
     return const IaCopilotoApplySpec(
       backendTipo: 'REDUZIR_CARGA',
       label: 'Aplicar ajuste de carga (−15%)',
     );
   }
 
-  if (tipo == 'CONTATO' || tipo == 'WEARABLE' || tipo == 'ENVIAR_PUSH') {
+  if (tipo == 'TREINO' ||
+      tipo == 'CONTATO' ||
+      tipo == 'WEARABLE' ||
+      tipo == 'ENVIAR_PUSH') {
     final msg = mensagemSugerida?.trim();
     if (msg == null || msg.isEmpty) return null;
     return IaCopilotoApplySpec(
       backendTipo: 'ENVIAR_PUSH',
-      label: 'Enviar notificação ao aluno',
+      label:
+          tipo == 'TREINO'
+              ? 'Pedir check-in ao aluno'
+              : 'Enviar notificação ao aluno',
       parametros: msg,
     );
   }

@@ -54,6 +54,7 @@ class _State extends ConsumerState<ModoPresencialScreen>
   Timer? _restTimer;
   DateTime? _restEndsAt;
   int _restSecs = 0;
+  int _restTotalSecs = 60;
   bool _resting = false;
 
   String get _parent => '/treinos/${widget.treinoId}';
@@ -147,6 +148,7 @@ class _State extends ConsumerState<ModoPresencialScreen>
       _resting = true;
       _restEndsAt = DateTime.now().add(Duration(seconds: seconds));
       _restSecs = seconds;
+      _restTotalSecs = seconds < 1 ? 60 : seconds;
     });
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted || _restEndsAt == null) return;
@@ -354,6 +356,7 @@ class _State extends ConsumerState<ModoPresencialScreen>
                 _resting
                     ? CheckinRestFocusView(
                       seconds: _restSecs,
+                      totalSeconds: _restTotalSecs,
                       onSkip: () {
                         _restTimer?.cancel();
                         setState(() => _resting = false);

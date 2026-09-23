@@ -70,12 +70,12 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
         widget.actions.where((action) => action.isRadarStudent).toList();
     final title =
         impactActions.isEmpty && radarActions.isNotEmpty
-            ? 'Contato por aluno'
+            ? 'Quem atender agora'
             : 'Prioridades';
     final subtitle =
         impactActions.isEmpty && radarActions.isNotEmpty
-            ? 'Quem precisa de você agora, por urgência.'
-            : 'Fila completa · ordem de impacto.';
+            ? 'Um toque abre o aluno. Ordem = urgência.'
+            : 'Impacto primeiro · depois contato por aluno.';
 
     final sheetHeight = MediaQuery.sizeOf(widget.sheetContext).height;
     final itemEstimate =
@@ -95,14 +95,14 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FxHomeSheetHandle(isDark: isDark),
-          SizedBox(height: TokensStrip.s3),
+          SizedBox(height: TokensStrip.s2),
           FxHomeSheetHeader(
             isDark: isDark,
             title: title,
             subtitle: subtitle,
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
-          SizedBox(height: TokensStrip.s3),
+          SizedBox(height: TokensStrip.s2),
           ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: itemEstimate.clamp(96.0, listMaxHeight),

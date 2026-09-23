@@ -33,4 +33,24 @@ void main() {
     expect(metrics.weeklyCheckins, 0);
     expect(metrics.aderenciaPercent, 72);
   });
+
+  test('sanitiza negativos, NaN e valores absurdos', () {
+    final points = alunosListSparklinePointsFromRaw(const [
+      -3,
+      double.nan,
+      double.infinity,
+      99,
+      2,
+    ]);
+    expect(points.map((e) => e.checkins).toList(), [
+      0,
+      0,
+      0,
+      alunosListSparklineMaxCheckinsPerDay,
+      2,
+    ]);
+    final metrics = alunosListSparklineMetrics(points: points);
+    expect(metrics.weeklyCheckins, 26);
+    expect(metrics.aderenciaPercent, inInclusiveRange(0, 100));
+  });
 }
