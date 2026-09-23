@@ -40,7 +40,8 @@ class ProgressoSemanalWidget extends StatelessWidget {
       glowStrength: 0.04,
       padding: const EdgeInsets.all(TokensStrip.s3),
       semanticsLabel:
-          'Consistência semanal. $completedThisWeek de $weeklyGoal treinos.',
+          'Consistência semanal. $completedThisWeek dias esta semana, '
+          'meta $weeklyGoal.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -57,7 +58,9 @@ class ProgressoSemanalWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                '$completedThisWeek de $weeklyGoal',
+                completedThisWeek == 1
+                    ? '1 dia esta semana'
+                    : '$completedThisWeek dias esta semana',
                 style: FocuxHubTypography.metric(
                   color: primary,
                   fontSize: FocuxHubTypography.metricMd,
@@ -67,7 +70,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s2),
           Text(
-            'Dias com treino nesta semana · descanso não zera a sequência',
+            'Treinos concluídos nesta semana · descanso não zera',
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
@@ -114,6 +117,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
           ),
           const SizedBox(height: TokensStrip.s3),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: LinearProgressIndicator(
@@ -126,7 +130,7 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
               const SizedBox(width: TokensStrip.s3),
               Text(
-                '$completedThisWeek/$weeklyGoal',
+                '$completedThisWeek de $weeklyGoal',
                 style: FocuxHubTypography.metric(
                   color: chrome.ink,
                   fontSize: FocuxHubTypography.metricEm,

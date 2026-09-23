@@ -48,10 +48,9 @@ class RelatorioRankingTile extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        accent: accentFirst
+        // Atenção = cor no %; sem glow full-bleed (design ref: risco = chip).
+        accent: accentFirst && !attention
             ? Theme.of(context).colorScheme.primary
-            : baixo
-            ? EagleTokens.bad
             : null,
         onTap: onTap,
       ),

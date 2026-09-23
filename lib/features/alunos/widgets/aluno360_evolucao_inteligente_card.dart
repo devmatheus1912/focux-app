@@ -390,7 +390,7 @@ class _VolumeSparklineRow extends StatelessWidget {
           Expanded(
             child: Text(
               singleWeek
-                  ? '${volumeLabel ?? 'Volume'} · 1ª sem'
+                  ? '${volumeLabel ?? 'Volume'} · 1ª semana'
                   : 'Volume · semanas',
               style: Aluno360Layout.metaStyle(context).copyWith(
                 color: mute,
@@ -401,12 +401,14 @@ class _VolumeSparklineRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          FxSparkline(
-            data: data,
-            color: color,
-            width: 72,
-            height: 24,
-          ),
+          // Um ponto só vira barra órfã — caption basta na 1ª semana.
+          if (!singleWeek && data.length >= 2)
+            FxSparkline(
+              data: data,
+              color: color,
+              width: 72,
+              height: 24,
+            ),
         ],
       ),
     );

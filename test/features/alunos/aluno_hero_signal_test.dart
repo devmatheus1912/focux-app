@@ -16,7 +16,7 @@ void main() {
       );
     });
 
-    test('keeps metric label for non-risk signals', () {
+    test('drops redundant aderência label when caption already says it', () {
       expect(
         alunoHeroContextLine(
           const AlunoHeroPrimarySignal(
@@ -24,9 +24,22 @@ void main() {
             value: '74',
             suffix: '%',
           ),
-          'Aderência baixa — reforce hábito',
+          'Aderência baixa — reforce o hábito',
         ),
-        'Aderência semanal · Aderência baixa — reforce hábito',
+        'Aderência baixa — reforce o hábito',
+      );
+    });
+
+    test('keeps metric label for other signals', () {
+      expect(
+        alunoHeroContextLine(
+          const AlunoHeroPrimarySignal(
+            label: 'Sem treino',
+            value: '5',
+          ),
+          '5 dias parado — vale check-in',
+        ),
+        'Sem treino · 5 dias parado — vale check-in',
       );
     });
   });

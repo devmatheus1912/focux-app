@@ -305,13 +305,17 @@ class _TrainingPlanCard extends StatelessWidget {
                     TextButton(
                       onPressed: confirming || starting ? null : onConfirmPlano,
                       style: TextButton.styleFrom(
-                        minimumSize: const Size(48, 48),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        minimumSize: const Size(88, 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        tapTargetSize: MaterialTapTargetSize.padded,
+                        foregroundColor: primary,
                       ),
                       child: Text(
                         confirming ? '…' : 'Fiz o treino',
-                        style: FocuxHubTypography.chip(primary),
+                        style: FocuxHubTypography.bodyMuted(
+                          color: primary,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],

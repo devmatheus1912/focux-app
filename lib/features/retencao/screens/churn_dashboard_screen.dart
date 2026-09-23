@@ -367,52 +367,54 @@ class _RetencaoMetricStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: InkWell(
-            onTap: home.alto > 0 ? onFiltrarAlto : null,
-            borderRadius: BorderRadius.circular(12),
-            child: OperationalMetricTile(
-              label: 'Alto',
-              value: '${home.alto}',
-              hint: retencaoMetricAltoLabel(home.alto),
-              color: primary,
-              isDark: isDark,
-              dense: true,
-              emphasis:
-                  home.alto > 0
-                      ? OperationalMetricEmphasis.normal
-                      : OperationalMetricEmphasis.muted,
-              semanticsLabel: '${home.alto} em risco alto',
+        InkWell(
+          onTap: home.alto > 0 ? onFiltrarAlto : null,
+          borderRadius: BorderRadius.circular(12),
+          child: OperationalMetricTile(
+            label: 'Risco alto',
+            value: '${home.alto}',
+            hint: retencaoMetricAltoLabel(home.alto),
+            color: EagleTokens.bad,
+            isDark: isDark,
+            dense: true,
+            emphasis:
+                home.alto > 0
+                    ? OperationalMetricEmphasis.normal
+                    : OperationalMetricEmphasis.muted,
+            semanticsLabel: '${home.alto} em risco alto',
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Row(
+          children: [
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Médio',
+                value: '${home.medio}',
+                hint: retencaoMetricMedioLabel(home.medio),
+                color: EagleTokens.warn,
+                isDark: isDark,
+                dense: true,
+                emphasis: OperationalMetricEmphasis.muted,
+                semanticsLabel: '${home.medio} risco médio',
+              ),
             ),
-          ),
-        ),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: OperationalMetricTile(
-            label: 'Médio',
-            value: '${home.medio}',
-            hint: retencaoMetricMedioLabel(home.medio),
-            color: EagleTokens.warn,
-            isDark: isDark,
-            dense: true,
-            emphasis: OperationalMetricEmphasis.muted,
-            semanticsLabel: '${home.medio} risco médio',
-          ),
-        ),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: OperationalMetricTile(
-            label: 'Saudável',
-            value: '${home.saudavel}',
-            hint: retencaoMetricSaudavelLabel(home.saudavel),
-            color: primary,
-            isDark: isDark,
-            dense: true,
-            emphasis: OperationalMetricEmphasis.muted,
-            semanticsLabel: '${home.saudavel} saudáveis',
-          ),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: OperationalMetricTile(
+                label: 'Saudável',
+                value: '${home.saudavel}',
+                hint: retencaoMetricSaudavelLabel(home.saudavel),
+                color: primary,
+                isDark: isDark,
+                dense: true,
+                emphasis: OperationalMetricEmphasis.muted,
+                semanticsLabel: '${home.saudavel} saudáveis',
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -527,7 +529,7 @@ class _RetencaoFocusCard extends StatelessWidget {
             children: [
               DashboardHomeActionChip(
                 label: retencaoFocusActionLabel(split.primary),
-                accent: primary,
+                accent: firstAlto != null ? EagleTokens.bad : primary,
                 isDark: isDark,
                 onPressed: run(split.primary),
               ),
@@ -571,12 +573,21 @@ class _RetencaoTile extends StatelessWidget {
       child: FxSatelliteListTile(
         title: score.alunoNome,
         subtitle: Text(retencaoPorque(score)),
-        accent: alto ? primary : null,
+        // Risco = copy no subtitle; sem glow full-bleed no card.
+        accent: null,
         onTap: onAluno,
         onLongPress: onMais,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (alto)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: Text(
+                  'Alto',
+                  style: FocuxHubTypography.chip(EagleTokens.bad),
+                ),
+              ),
             DashboardHomeActionChip(
               label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
               accent: primary,

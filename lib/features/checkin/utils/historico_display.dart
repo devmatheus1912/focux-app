@@ -14,6 +14,23 @@ bool historicoConcluido(String status) =>
 String historicoStatusLabel(String status) =>
     historicoConcluido(status) ? 'Concluído' : 'Em andamento';
 
+/// Status honesto quando a sessão foi marcada concluída sem séries.
+String historicoStatusDisplayLabel({
+  required String status,
+  required int seriesFeitas,
+}) {
+  if (historicoConcluido(status) && seriesFeitas <= 0) {
+    return 'Concluído sem séries';
+  }
+  return historicoStatusLabel(status);
+}
+
+String historicoExerciciosMetricHint(int total) {
+  if (total <= 0) return 'sem exercícios';
+  if (total == 1) return '1 exercício';
+  return '$total exercícios';
+}
+
 /// Agrupa "Todos" em Em andamento → Concluído (ordem de lista).
 ({List<ExecucaoTreino> andamento, List<ExecucaoTreino> concluidos})
 historicoGroupByStatus(List<ExecucaoTreino> items) {

@@ -71,7 +71,9 @@ HistoricoSessaoMetrics historicoSessaoMetricsFromExecucao(ExecucaoTreino execuca
   String sinalLabel;
   if (volumeOut == null && seriesFeitas == 0) {
     sinal = 'SEM_DADOS';
-    sinalLabel = 'Sem séries registradas';
+    sinalLabel = historicoConcluido(execucao.status)
+        ? 'Concluído sem séries registradas'
+        : 'Sem séries registradas';
   } else {
     sinal = 'SESSAO';
     sinalLabel = historicoConcluido(execucao.status)

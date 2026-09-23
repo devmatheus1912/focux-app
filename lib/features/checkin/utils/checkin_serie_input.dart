@@ -74,13 +74,22 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
               previous.repeticoes!.trim().isNotEmpty &&
               !checkinIsPrescriptionRange(previous.repeticoes)))) {
     return CheckinCurrentSetSeed(
-      cargaKg: previous.cargaKg ?? ee.cargaKg,
+      cargaKg: previous.cargaKg ?? ee.cargaKg ?? ee.cargaAnteriorKg,
       reps: int.tryParse(checkinFirstRepsToken(previous.repeticoes) ?? ''),
     );
   }
   final prescReps = int.tryParse(checkinFirstRepsToken(ee.repeticoes) ?? '');
-  if (ee.cargaKg != null || prescReps != null) {
-    return CheckinCurrentSetSeed(cargaKg: ee.cargaKg, reps: prescReps);
+  final seedCarga = ee.cargaKg ?? ee.cargaAnteriorKg;
+  if (seedCarga != null || prescReps != null) {
+    return CheckinCurrentSetSeed(cargaKg: seedCarga, reps: prescReps);
+  }
+  if (ee.seriesDetalhes.isNotEmpty) {
+    final last = ee.seriesDetalhes.last;
+    return CheckinCurrentSetSeed(
+      cargaKg: last.cargaKg,
+      reps: int.tryParse(checkinFirstRepsToken(last.repeticoes) ?? '') ??
+          prescReps,
+    );
   }
   if (numero > 1) {
     final prior = byNumero(ee.seriesDetalhes, numero - 1);

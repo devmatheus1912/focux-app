@@ -137,7 +137,7 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
   }
   if (signal.label == 'Aderência semanal') {
     final ader = aluno.aderenciaPercent ?? 0;
-    if (ader < 50) return 'Aderência baixa — reforce hábito';
+    if (ader < 50) return 'Aderência baixa — reforce o hábito';
     if (ader < 70) return 'Aderência moderada';
     return 'Aderência saudável';
   }
@@ -149,7 +149,12 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
 
 /// Hero caption without repeating the dominant metric label.
 String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
-  if (signal.label == 'Risco operacional') return caption;
+  // Caption already carries the signal (aderência / risco) — avoid
+  // "Aderência semanal · Aderência baixa — …" wrap in the identity strip.
+  if (signal.label == 'Risco operacional' ||
+      signal.label == 'Aderência semanal') {
+    return caption;
+  }
   return '${signal.label} · $caption';
 }
 

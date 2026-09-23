@@ -439,14 +439,14 @@ class ConversationBubble extends StatelessWidget {
     return Align(
       alignment:
           system
-              ? Alignment.center
+              ? Alignment.centerLeft
               : (mine ? Alignment.centerRight : Alignment.centerLeft),
       child: GestureDetector(
         onLongPress: onLongPress,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
           decoration: BoxDecoration(
             gradient:

@@ -279,7 +279,10 @@ class _DetalheBody extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                historicoStatusLabel(execucao.status),
+                                historicoStatusDisplayLabel(
+                                  status: execucao.status,
+                                  seriesFeitas: metrics.seriesFeitas,
+                                ),
                                 style: FocuxHubTypography.kpi(
                                   color: fxScreenInk(context),
                                   fontSize: FocuxHubTypography.metricMd,
@@ -336,11 +339,13 @@ class _DetalheBody extends StatelessWidget {
                             const SizedBox(width: TokensStrip.s2),
                             Expanded(
                               child: OperationalMetricTile(
-                                label: 'Sinal',
-                                value: historicoSinalChipLabel(metrics.sinal),
+                                label: recordes > 0 ? 'Recordes' : 'Exerc.',
+                                value: recordes > 0
+                                    ? '$recordes'
+                                    : '$done/$total',
                                 hint: recordes > 0
                                     ? historicoPrHint(recordes)
-                                    : '$done/$total exerc.',
+                                    : historicoExerciciosMetricHint(total),
                                 color: primary,
                                 isDark: isDark,
                                 dense: true,

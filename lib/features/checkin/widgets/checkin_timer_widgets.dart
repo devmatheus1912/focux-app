@@ -66,19 +66,23 @@ class CheckinRestBanner extends StatelessWidget {
               ),
               SizedBox(
                 height: checkinExecutionControlMin + 8,
-                child: FilledButton.tonal(
+                child: FilledButton(
                   onPressed: onSkip,
                   style: FilledButton.styleFrom(
                     minimumSize: Size(
-                      108,
+                      120,
                       checkinExecutionControlMin + 8,
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: TokensStrip.s3,
                     ),
-                    foregroundColor: primary,
+                    backgroundColor: primary,
+                    foregroundColor: Colors.white,
                   ),
-                  child: Text(checkinPularDescansoLabel()),
+                  child: Text(
+                    checkinPularDescansoLabel(),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
               if (onTrocar != null) ...[
