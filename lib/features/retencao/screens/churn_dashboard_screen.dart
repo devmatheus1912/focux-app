@@ -379,10 +379,7 @@ class _RetencaoMetricStrip extends StatelessWidget {
             color: EagleTokens.bad,
             isDark: isDark,
             dense: true,
-            emphasis:
-                home.alto > 0
-                    ? OperationalMetricEmphasis.normal
-                    : OperationalMetricEmphasis.muted,
+            emphasis: OperationalMetricEmphasis.muted,
             semanticsLabel: '${home.alto} em risco alto',
           ),
         ),
@@ -509,9 +506,10 @@ class _RetencaoFocusCard extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           Text(
             focusTitle,
-            style: FocuxHubTypography.body(
+            style: FocuxHubTypography.sectionTitle(
+              context,
               color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -565,7 +563,6 @@ class _RetencaoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final alto = retencaoRiscoAlto(score.riscoChurn);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = ShellChrome.of(context).mute;
     return Padding(
@@ -580,26 +577,20 @@ class _RetencaoTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (alto)
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Text(
-                  'Alto',
-                  style: FocuxHubTypography.chip(EagleTokens.bad),
-                ),
-              ),
             DashboardHomeActionChip(
               label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
               accent: primary,
               isDark: isDark,
               onPressed: onChat,
             ),
-            const SizedBox(width: 4),
-            IconButton(
-              tooltip: 'Mais ações',
-              onPressed: onMais,
-              icon: Icon(Icons.more_horiz_rounded, color: mute, size: 20),
-              visualDensity: VisualDensity.compact,
+            SizedBox(
+              width: TokensStrip.s7,
+              height: TokensStrip.s7,
+              child: IconButton(
+                tooltip: 'Mais ações',
+                onPressed: onMais,
+                icon: Icon(Icons.more_horiz_rounded, color: mute),
+              ),
             ),
           ],
         ),

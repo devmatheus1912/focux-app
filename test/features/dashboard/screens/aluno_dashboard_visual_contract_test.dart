@@ -48,6 +48,8 @@ void main() {
     expect(screen, contains("'Consistência'"));
     expect(screen, contains('descanso não zera'));
     expect(screen, contains('countUniqueCompletedDaysThisWeek'));
+    expect(screen, contains('de \$weeklyGoal dias'));
+    expect(screen, isNot(contains('Frequência')));
     expect(screen, contains('FocuxHubTypography.sectionTitle'));
     expect(screen, contains('FocuxHubTypography.bodyMuted'));
     expect(screen, contains('FocuxHubTypography.metric'));
