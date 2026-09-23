@@ -21,11 +21,9 @@ void main() {
     expect(screen, contains("'/checkin/executar'"));
     expect(screen, contains('detalhe(widget.execucaoId)'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('DashboardHomeActionChip'));
-    expect(screen, contains("label: 'Hoje'"));
-    expect(screen, contains("context.go('/dashboard/aluno')"));
-    expect(screen, contains("context.go('/checkin/treinos')"));
-    expect(screen, isNot(contains("context.push('/checkin/treinos')")));
+    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, contains('HistoricoDetalheMemCache'));
+    expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('historicoDuracaoLabel'));

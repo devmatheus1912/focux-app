@@ -57,7 +57,14 @@ void main() {
       readScreenSourceBundle(
         'lib/features/checkin/widgets/checkin_timer_widgets.dart',
       ),
-      allOf(contains('class CheckinRestBanner'), isNot(contains('SafeArea('))),
+      allOf(
+        contains('class CheckinRestBanner'),
+        contains('SafeArea('),
+        contains('top: false'),
+        contains('bottom: false'),
+        contains('TokensStrip.fontH2'),
+        contains('checkinExecutionControlMin + 8'),
+      ),
     );
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
