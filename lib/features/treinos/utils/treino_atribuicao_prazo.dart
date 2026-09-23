@@ -36,4 +36,14 @@ abstract final class TreinoAtribuicaoPrazo {
     if (fim == t) return 'Vence hoje';
     return 'Até $fmt';
   }
+
+  /// Hint para Home do aluno (soft — nunca bloqueia).
+  static String? homeHint(DateTime? dataFim, {DateTime? today}) {
+    final label = chipLabel(dataFim, today: today);
+    if (label == null) return null;
+    if (isAtrasado(dataFim, today: today)) {
+      return '$label — ainda pode treinar.';
+    }
+    return label;
+  }
 }

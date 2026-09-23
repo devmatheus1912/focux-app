@@ -3,6 +3,7 @@ import '../../chat/data/chat_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../../treinos/utils/treino_atribuicao_prazo.dart';
 
 enum AlunoTaskPriority { alta, media, baixa }
 
@@ -398,12 +399,18 @@ AlunoHomeAction _mainHomeAction({
   );
   if (inactiveDays >= 7 && nextWorkout != null) {
     final workout = nextWorkout;
+    final prazoHint = TreinoAtribuicaoPrazo.homeHint(
+      TreinoAtribuicaoPrazo.parseIsoDate(workout.dataFim),
+      today: now,
+    );
     return AlunoHomeAction(
       mode: AlunoHomeMode.comeback,
       eyebrow: 'Retomada inteligente',
       title: 'Volte com ${workout.treinoNome}',
       description:
-          'Uma sessão hoje já muda seu ritmo da semana. Sem pressão, só o próximo passo.',
+          prazoHint == null
+              ? 'Uma sessão hoje já muda seu ritmo da semana. Sem pressão, só o próximo passo.'
+              : 'Uma sessão hoje já muda seu ritmo da semana. $prazoHint',
       cta: 'Retomar agora',
       route: '/checkin/executar',
       routeExtra: workout.treinoId,
@@ -413,14 +420,20 @@ AlunoHomeAction _mainHomeAction({
   if (nextWorkout != null) {
     final workout = nextWorkout;
     final exerciseCount = workout.exercicios.length;
+    final prazoHint = TreinoAtribuicaoPrazo.homeHint(
+      TreinoAtribuicaoPrazo.parseIsoDate(workout.dataFim),
+      today: now,
+    );
+    final baseDescription =
+        exerciseCount == 0
+            ? 'Sessão pronta para iniciar com registro de séries.'
+            : '$exerciseCount exercícios prontos para trabalhar ${lens.primaryMetric.toLowerCase()}.';
     return AlunoHomeAction(
       mode: AlunoHomeMode.workoutReady,
       eyebrow: 'Plano de hoje',
       title: workout.treinoNome,
       description:
-          exerciseCount == 0
-              ? 'Sessão pronta para iniciar com registro de séries.'
-              : '$exerciseCount exercícios prontos para trabalhar ${lens.primaryMetric.toLowerCase()}.',
+          prazoHint == null ? baseDescription : '$baseDescription $prazoHint',
       cta: 'Treinar agora',
       route: '/checkin/executar',
       routeExtra: workout.treinoId,

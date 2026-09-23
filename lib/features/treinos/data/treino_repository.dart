@@ -60,6 +60,8 @@ class Treino {
   final List<TreinoExercicioItem> exercicios;
   final int? _exerciciosCount;
   final int? _seriesTotal;
+  final String? dataInicio;
+  final String? dataFim;
 
   Treino({
     required this.id,
@@ -71,6 +73,8 @@ class Treino {
     required this.exercicios,
     int? exerciciosCount,
     int? seriesTotal,
+    this.dataInicio,
+    this.dataFim,
   }) : _exerciciosCount = exerciciosCount,
        _seriesTotal = seriesTotal;
 
@@ -95,6 +99,8 @@ class Treino {
             .toList(),
     exerciciosCount: json['exerciciosCount'] as int?,
     seriesTotal: json['seriesTotal'] as int?,
+    dataInicio: json['dataInicio']?.toString(),
+    dataFim: json['dataFim']?.toString(),
   );
 
   factory Treino.fromHomeItemJson(Map<String, dynamic> json) => Treino(

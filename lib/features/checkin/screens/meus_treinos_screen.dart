@@ -28,6 +28,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/screens/progresso_semanal_widget.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
+import '../../treinos/widgets/treino_prazo_badge.dart';
 import '../data/checkin_repository.dart';
 import '../data/meus_treinos_mem_cache.dart';
 import '../providers/checkin_provider.dart';

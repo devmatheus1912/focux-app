@@ -30,10 +30,12 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../data/treino_repository.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/treinos_list_labels.dart';
+import '../utils/treino_atribuicao_prazo.dart';
 import '../constants/treinos_layout.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
+import '../widgets/treino_prazo_badge.dart';
 import '../widgets/treinos_list_help_sheet.dart';
 
 part 'treinos_list_screen_state.part.dart';

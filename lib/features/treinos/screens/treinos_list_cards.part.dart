@@ -31,6 +31,7 @@ class _TreinoCard extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final hasExercises = treino.pronto;
     final displayName = displayWorkoutName(treino.nome);
+    final prazoFim = TreinoAtribuicaoPrazo.parseIsoDate(treino.dataFim);
     final objetivo =
         treino.objetivo?.trim().isNotEmpty == true
             ? TreinosListLabels.prettyField(treino.objetivo!.trim())
@@ -130,6 +131,15 @@ class _TreinoCard extends StatelessWidget {
                             label: 'base',
                             color: primary,
                             isDark: isDark,
+                          ),
+                        ],
+                        if (prazoFim != null) ...[
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: TreinoPrazoBadge(
+                              dataFim: prazoFim,
+                              isDark: isDark,
+                            ),
                           ),
                         ],
                       ],

@@ -37,6 +37,17 @@ void main() {
     );
   });
 
+  test('homeHint soft copy', () {
+    expect(
+      TreinoAtribuicaoPrazo.homeHint(DateTime(2026, 10, 1), today: today),
+      'Até 01/10',
+    );
+    expect(
+      TreinoAtribuicaoPrazo.homeHint(DateTime(2026, 9, 1), today: today),
+      'Atrasado · até 01/09 — ainda pode treinar.',
+    );
+  });
+
   test('parseIsoDate e toIsoDate', () {
     expect(
       TreinoAtribuicaoPrazo.parseIsoDate('2026-10-01'),
