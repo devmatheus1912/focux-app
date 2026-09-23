@@ -21,7 +21,9 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains("label: 'Clínico'"));
     expect(screen, contains('anamneseClinicoResumoValue'));
-    expect(screen, contains('FxSatelliteListTile'));
+    expect(screen, contains('fxListCardDecoration'));
+    expect(screen, contains('FocuxHubTypography'));
+    expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));
@@ -34,9 +36,8 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showAnamneseHelpSheet'));
     expect(screen, contains("'Solicitar anamnese'"));
-    expect(screen, contains("label: 'Lista'"));
-    expect(screen, contains("label: 'Evolução'"));
-    expect(screen, contains("'/alunos/\$alunoId/evolucao'"));
+    expect(screen, contains("label: 'Chat'"));
+    expect(screen, contains("label: 'Pedir atestado'"));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('Slider(')));

@@ -9,6 +9,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../constants/alunos_layout.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_contact_utils.dart';
@@ -93,7 +94,6 @@ class AlunoListCard extends ConsumerWidget {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final secondaryInk = alunoListSecondaryInk(isDark);
-    final line = chrome.line;
     final cardPadding =
         compact ? AlunosLayout.cardPaddingCompact : AlunosLayout.cardPadding;
     final avatarGap =
@@ -112,6 +112,7 @@ class AlunoListCard extends ConsumerWidget {
     );
     final aderenciaPercent = sparkline.aderenciaPercent;
     final weeklyCheckins = sparkline.weeklyCheckins;
+    final sparkValues = sparkline.sparkValues;
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
@@ -334,12 +335,13 @@ class AlunoListCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (meaningfulPercent)
-                          _AdherenceRail(
-                            value: aderenciaPercent!.toDouble(),
+                        if (sparkValues.isNotEmpty)
+                          FxSparkline(
+                            data: sparkValues,
                             color: aderColor,
-                            line: line,
-                            isEmpty: false,
+                            width: compact ? 48 : 56,
+                            height: compact ? 18 : 22,
+                            strokeWidth: 1.8,
                           )
                         else
                           const SizedBox(height: 3),
@@ -354,52 +356,6 @@ class AlunoListCard extends ConsumerWidget {
                       ],
                     ),
                 ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AdherenceRail extends StatelessWidget {
-  final double value;
-  final Color color;
-  final Color line;
-  final bool isEmpty;
-
-  const _AdherenceRail({
-    required this.value,
-    required this.color,
-    required this.line,
-    required this.isEmpty,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = (value / 100).clamp(0.0, 1.0);
-
-    return SizedBox(
-      width: 58,
-      height: 22,
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Stack(
-            children: [
-              Container(
-                width: 54,
-                height: 3,
-                color: isEmpty ? line.withValues(alpha: 0.55) : line,
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                width: 54 * progress,
-                height: 3,
-                color: color,
               ),
             ],
           ),

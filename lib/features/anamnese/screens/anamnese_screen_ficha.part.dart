@@ -34,29 +34,11 @@ class _AnamneseBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: TokensStrip.s4),
+        const SizedBox(height: TokensStrip.s3),
         Wrap(
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
-            DashboardHomeActionChip(
-              label: 'Lista',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => safePopOrGo(context, '/alunos/$alunoId'),
-            ),
-            DashboardHomeActionChip(
-              label: 'Evolução',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push('/alunos/$alunoId/evolucao'),
-            ),
-            DashboardHomeActionChip(
-              label: 'Chat',
-              accent: primary,
-              isDark: isDark,
-              onPressed: () => context.push('/alunos/$alunoId/chat'),
-            ),
             if (!a.isNaoIniciada && !a.isSolicitada)
               DashboardHomeActionChip(
                 label: 'Pedir atestado',
@@ -88,6 +70,12 @@ class _AnamneseBody extends StatelessWidget {
                       confirmLabel: 'Pedir atualização',
                     ),
               ),
+            DashboardHomeActionChip(
+              label: 'Chat',
+              accent: primary,
+              isDark: isDark,
+              onPressed: () => context.push('/alunos/$alunoId/chat'),
+            ),
           ],
         ),
         if (a.alertas.isNotEmpty) ...[
@@ -194,15 +182,43 @@ class _AnamneseFicha extends StatelessWidget {
       ],
     };
 
-    return Column(
-      children: [
-        for (final row in rows)
-          FxSatelliteListTile(
-            title: row.$1,
-            titleCase: false,
-            subtitle: Text(row.$2),
-          ),
-      ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: fxListCardDecoration(
+        context,
+        accent: Theme.of(context).colorScheme.primary,
+        radius: TokensStrip.rCard,
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < rows.length; i++)
+            Padding(
+              padding: EdgeInsets.only(bottom: i == rows.length - 1 ? 0 : 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 112,
+                    child: Text(
+                      rows[i].$1,
+                      style: FocuxHubTypography.chip(
+                        Theme.of(context).hintColor,
+                      ).copyWith(fontWeight: FontWeight.w700, fontSize: 11),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      rows[i].$2,
+                      style: FocuxHubTypography.body(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ).copyWith(fontWeight: FontWeight.w600, height: 1.3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

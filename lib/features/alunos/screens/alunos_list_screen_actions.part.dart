@@ -20,7 +20,6 @@ class _AlunosTriageBanner extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final warn = isDark ? EagleTokens.warnAccent : EagleTokens.warn;
 
     return Material(
       color: Colors.transparent,
@@ -31,13 +30,13 @@ class _AlunosTriageBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: fxStripCardDecoration(
             context,
-            accent: warn,
+            accent: primary,
             radius: TokensStrip.rCard,
-            glowStrength: AlunosLayout.chipGlowStrength,
+            glowStrength: 0.06,
           ),
           child: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, size: 22, color: warn),
+              Icon(Icons.priority_high_rounded, size: 20, color: primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

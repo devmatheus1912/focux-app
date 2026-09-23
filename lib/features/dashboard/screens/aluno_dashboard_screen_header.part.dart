@@ -285,11 +285,6 @@ class _TodayFocusCard extends StatelessWidget {
                 label: score.rhythmLabel,
                 onPrimary: mute,
               ),
-              _WorkoutInsightPill(
-                icon: Icons.person_pin_circle_outlined,
-                label: score.riskLabel,
-                onPrimary: mute,
-              ),
               if (score.nextSignal.trim().isNotEmpty)
                 _WorkoutInsightPill(
                   icon: Icons.bolt_rounded,
@@ -541,43 +536,22 @@ class _PerformanceEvolutionCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Seu score Focux',
+                'Evolução do treino',
                 style: FocuxHubTypography.chip(mute),
               ),
               const SizedBox(height: 4),
               Text(
-                '${view.score} · ${view.scoreLabel}',
-                style: FocuxHubTypography.cardTitle(color: ink).copyWith(
-                  fontSize: FocuxHubTypography.metricEm,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
                 view.insight,
-                style: FocuxHubTypography.bodyMuted(color: mute),
+                style: FocuxHubTypography.cardTitle(color: ink).copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  height: 1.25,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (score.nextSignal.trim().isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Text(
-                  score.nextSignal,
-                  style: FocuxHubTypography.bodyMuted(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
-                  ).copyWith(fontSize: 12.5),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
               if (view.hasChart) ...[
-                const SizedBox(height: TokensStrip.s4),
-                Text(
-                  'Evolução do treino',
-                  style: FocuxHubTypography.chip(mute),
-                ),
-                const SizedBox(height: TokensStrip.s2),
+                const SizedBox(height: TokensStrip.s3),
                 _DualTrendChart(
                   volume: view.volumePorSemana,
                   forca: view.forcaPorSemana,
@@ -593,7 +567,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: TokensStrip.s4),
+              const SizedBox(height: TokensStrip.s3),
               Row(
                 children: [
                   Expanded(

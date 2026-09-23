@@ -313,7 +313,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                       hint:
                                           hideMonthlyVolume
                                               ? (singleWeek
-                                                  ? 'Primeira semana com volume'
+                                                  ? 'Baseline da base'
                                                   : 'Carga × reps')
                                               : 'Mês ${formatAlunoVolumeKg(ev.volumeMensal)}',
                                       color: primary,
@@ -412,26 +412,12 @@ class _VolumeSparklineRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  singleWeek ? 'Tendência' : 'Volume da semana',
-                  style: Aluno360Layout.metaStyle(context).copyWith(
-                    color: mute,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                if (singleWeek) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    'Tendência · 1 semana',
-                    style: Aluno360Layout.captionStyle(context).copyWith(
-                      color: mute,
-                    ),
-                  ),
-                ],
-              ],
+            child: Text(
+              singleWeek ? 'Primeira semana' : 'Volume · semanas',
+              style: Aluno360Layout.metaStyle(context).copyWith(
+                color: mute,
+                letterSpacing: 0.4,
+              ),
             ),
           ),
           FxSparkline(

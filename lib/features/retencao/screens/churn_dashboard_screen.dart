@@ -522,10 +522,7 @@ class _RetencaoFocusCard extends StatelessWidget {
             children: [
               DashboardHomeActionChip(
                 label: retencaoFocusActionLabel(split.primary),
-                accent:
-                    split.primary == RetencaoFocusActionId.chat
-                        ? EagleTokens.bad
-                        : primary,
+                accent: primary,
                 isDark: isDark,
                 onPressed: run(split.primary),
               ),
@@ -534,7 +531,7 @@ class _RetencaoFocusCard extends StatelessWidget {
                   label: retencaoFocusActionLabel(
                     RetencaoFocusActionId.aluno360,
                   ),
-                  accent: primary,
+                  accent: chrome.mute,
                   isDark: isDark,
                   onPressed: () => onAluno(firstAlto),
                 ),

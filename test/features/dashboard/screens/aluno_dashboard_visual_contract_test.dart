@@ -24,11 +24,12 @@ void main() {
     expect(screen, contains('class _WorkoutInsightPill'));
     expect(screen, contains('buildAlunoHomeExperience'));
     expect(screen, contains('class _HomeNarrativeRail'));
-    expect(screen, contains('Seu score Focux'));
+    expect(screen, contains('Evolução do treino'));
     expect(screen, contains('streakAtual'));
     expect(screen, contains('_StreakFoldBadge'));
     expect(screen, contains('score.rhythmLabel'));
-    expect(screen, contains('score.riskLabel'));
+    expect(screen, isNot(contains('Seu score Focux')));
+    expect(screen, isNot(contains('score.riskLabel')));
     expect(screen, contains('brand.nomePersonal'));
     expect(screen, contains("'Ativo'"));
     expect(screen, isNot(contains('class _StudentStatsRow')));

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -340,25 +341,36 @@ class _AnamneseScreenState extends ConsumerState<AnamneseScreen> {
                   subtitle: anamneseStatusSubtitle(a.status),
                 ),
                 const SizedBox(height: TokensStrip.s3),
-                OperationalMetricTile(
-                  label: 'Clínico',
-                  value: anamneseClinicoResumoValue(a),
-                  hint: anamneseClinicoResumoHint(a),
-                  color: primary,
-                  isDark: isDark,
-                  emphasis:
-                      a.parqPositivo == true || a.alertas.isNotEmpty
-                          ? OperationalMetricEmphasis.alert
-                          : OperationalMetricEmphasis.normal,
-                ),
-                const SizedBox(height: TokensStrip.s2),
-                OperationalMetricTile(
-                  label: 'Treino',
-                  value: anamneseOperacaoResumoValue(a),
-                  hint: anamneseOperacaoResumoHint(a),
-                  color: primary,
-                  isDark: isDark,
-                  emphasis: OperationalMetricEmphasis.muted,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: OperationalMetricTile(
+                        label: 'Clínico',
+                        value: anamneseClinicoResumoValue(a),
+                        hint: anamneseClinicoResumoHint(a),
+                        color: primary,
+                        isDark: isDark,
+                        dense: true,
+                        emphasis:
+                            a.parqPositivo == true || a.alertas.isNotEmpty
+                                ? OperationalMetricEmphasis.alert
+                                : OperationalMetricEmphasis.normal,
+                      ),
+                    ),
+                    const SizedBox(width: TokensStrip.s2),
+                    Expanded(
+                      child: OperationalMetricTile(
+                        label: 'Treino',
+                        value: anamneseOperacaoResumoValue(a),
+                        hint: anamneseOperacaoResumoHint(a),
+                        color: primary,
+                        isDark: isDark,
+                        dense: true,
+                        emphasis: OperationalMetricEmphasis.muted,
+                      ),
+                    ),
+                  ],
                 ),
                 _AnamneseBody(
                   anamnese: a,

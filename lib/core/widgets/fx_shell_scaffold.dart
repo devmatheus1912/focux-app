@@ -368,7 +368,7 @@ class FxSatelliteListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.accent,
-    this.margin = const EdgeInsets.only(bottom: 10),
+    this.margin = const EdgeInsets.only(bottom: 6),
     this.isThreeLine = false,
     this.titleCase = true,
   });

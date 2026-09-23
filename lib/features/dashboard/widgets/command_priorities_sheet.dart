@@ -70,15 +70,21 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
         widget.actions.where((action) => action.isRadarStudent).toList();
     final title =
         impactActions.isEmpty && radarActions.isNotEmpty
-            ? 'Ações por aluno'
-            : 'Todas as prioridades';
+            ? 'Contato por aluno'
+            : 'Prioridades';
     final subtitle =
         impactActions.isEmpty && radarActions.isNotEmpty
-            ? 'Contato e retenção dos alunos em risco.'
-            : 'Extra além do que já está na Home.';
+            ? 'Quem precisa de você agora, por urgência.'
+            : 'Fila completa · ordem de impacto.';
 
     final sheetHeight = MediaQuery.sizeOf(widget.sheetContext).height;
-    final listMaxHeight = sheetHeight * FxHomeSheetChrome.maxHeightFactor - 120;
+    final itemEstimate =
+        (impactActions.length +
+                (radarActions.isEmpty ? 0 : radarActions.length + 1)) *
+            64.0 +
+        28;
+    final listMaxHeight = (sheetHeight * FxHomeSheetChrome.maxHeightFactor - 108)
+        .clamp(96.0, sheetHeight * 0.55);
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -89,17 +95,17 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FxHomeSheetHandle(isDark: isDark),
-          SizedBox(height: TokensStrip.s4),
+          SizedBox(height: TokensStrip.s3),
           FxHomeSheetHeader(
             isDark: isDark,
             title: title,
             subtitle: subtitle,
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: listMaxHeight.clamp(120.0, sheetHeight * 0.65),
+              maxHeight: itemEstimate.clamp(96.0, listMaxHeight),
             ),
             child: ListView(
               padding: EdgeInsets.zero,

@@ -23,4 +23,14 @@ void main() {
     );
     expect(metrics.aderenciaPercent, 88);
   });
+
+  test('builds level sparkline from cached percent without week points', () {
+    final metrics = alunosListSparklineMetrics(
+      points: const [],
+      cachedAderenciaPercent: 72,
+    );
+    expect(metrics.sparkValues, [72.0, 72.0]);
+    expect(metrics.weeklyCheckins, 0);
+    expect(metrics.aderenciaPercent, 72);
+  });
 }
