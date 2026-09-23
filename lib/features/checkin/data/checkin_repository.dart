@@ -359,6 +359,49 @@ class EvolucaoPerformance {
       );
 }
 
+/// Resumo BFF da sessão (`GET /checkin/{id}/evolucao-sessao`).
+class SessaoEvolucaoDto {
+  final int? execucaoId;
+  final double? volumeKg;
+  final double? volumeAnteriorKg;
+  final int seriesFeitas;
+  final int seriesPlanejadas;
+  final int recordes;
+  final String sinal;
+  final String sinalLabel;
+  final String? destaqueExercicio;
+  final double? destaqueDeltaKg;
+
+  const SessaoEvolucaoDto({
+    this.execucaoId,
+    this.volumeKg,
+    this.volumeAnteriorKg,
+    required this.seriesFeitas,
+    required this.seriesPlanejadas,
+    required this.recordes,
+    required this.sinal,
+    required this.sinalLabel,
+    this.destaqueExercicio,
+    this.destaqueDeltaKg,
+  });
+
+  factory SessaoEvolucaoDto.fromJson(Map<String, dynamic> j) => SessaoEvolucaoDto(
+    execucaoId: checkinJsonInt(j['execucaoId']),
+    volumeKg: checkinJsonDouble(j['volumeKg']),
+    volumeAnteriorKg: checkinJsonDouble(j['volumeAnteriorKg']),
+    seriesFeitas: checkinJsonIntOr(j['seriesFeitas']),
+    seriesPlanejadas: checkinJsonIntOr(j['seriesPlanejadas']),
+    recordes: checkinJsonIntOr(j['recordes']),
+    sinal: checkinJsonStringOr(j['sinal'], 'SEM_DADOS'),
+    sinalLabel: checkinJsonStringOr(
+      j['sinalLabel'],
+      'Sem séries registradas',
+    ),
+    destaqueExercicio: checkinJsonString(j['destaqueExercicio']),
+    destaqueDeltaKg: checkinJsonDouble(j['destaqueDeltaKg']),
+  );
+}
+
 Pagina<ExecucaoTreino> parseExecucaoTreinoPagina(Map<String, dynamic> json) {
   final raw = json['content'];
   if (raw is! List) {
@@ -552,6 +595,13 @@ class CheckinRepository {
     final r = await _dio.get('/api/checkin/$execucaoId');
     return ExecucaoTreino.fromJson(
       _requireJsonMap(r.data, 'GET /api/checkin/{id}'),
+    );
+  }
+
+  Future<SessaoEvolucaoDto> evolucaoSessao(int execucaoId) async {
+    final r = await _dio.get('/api/checkin/$execucaoId/evolucao-sessao');
+    return SessaoEvolucaoDto.fromJson(
+      _requireJsonMap(r.data, 'GET /api/checkin/{id}/evolucao-sessao'),
     );
   }
 

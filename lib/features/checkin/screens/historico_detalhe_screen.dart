@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +21,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
@@ -27,6 +30,7 @@ import '../data/historico_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/historico_display.dart';
+import '../utils/historico_sessao_metrics.dart';
 
 class HistoricoDetalheScreen extends ConsumerStatefulWidget {
   const HistoricoDetalheScreen({super.key, required this.execucaoId});
@@ -41,6 +45,7 @@ class HistoricoDetalheScreen extends ConsumerStatefulWidget {
 class _HistoricoDetalheScreenState
     extends ConsumerState<HistoricoDetalheScreen> {
   ExecucaoTreino? _execucao;
+  HistoricoSessaoMetrics? _evolucao;
   var _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
@@ -52,6 +57,7 @@ class _HistoricoDetalheScreenState
     final cached = HistoricoDetalheMemCache.loadIfFresh(widget.execucaoId);
     if (cached != null) {
       _execucao = cached;
+      _evolucao = historicoSessaoMetricsFromExecucao(cached);
       _loading = false;
       _fetchedAt = DateTime.now();
     }
@@ -64,22 +70,35 @@ class _HistoricoDetalheScreenState
       _erro = null;
     });
     try {
-      final loaded = await ref
-          .read(checkinRepositoryProvider)
-          .detalhe(widget.execucaoId);
+      final repo = ref.read(checkinRepositoryProvider);
+      final loaded = await repo.detalhe(widget.execucaoId);
       if (!mounted) return;
+      final local = historicoSessaoMetricsFromExecucao(loaded);
       setState(() {
         _execucao = loaded;
+        _evolucao = local;
         _loading = false;
         _fetchedAt = DateTime.now();
       });
       HistoricoDetalheMemCache.save(loaded);
+      // Onda B em paralelo — não bloqueia first paint.
+      unawaited(_carregarEvolucao(repo));
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _erro = friendlyError(e);
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _carregarEvolucao(CheckinRepository repo) async {
+    try {
+      final dto = await repo.evolucaoSessao(widget.execucaoId);
+      if (!mounted) return;
+      setState(() => _evolucao = historicoSessaoMetricsFromDto(dto));
+    } catch (_) {
+      // Mantém métricas locais (Onda A).
     }
   }
 
@@ -170,6 +189,8 @@ class _HistoricoDetalheScreenState
                   )
                   : _DetalheBody(
                     execucao: execucao,
+                    metrics:
+                        _evolucao ?? historicoSessaoMetricsFromExecucao(execucao),
                     secao: _secao,
                     onSecao: (value) => setState(() => _secao = value),
                     onRefresh: _carregar,
@@ -185,6 +206,7 @@ class _HistoricoDetalheScreenState
 class _DetalheBody extends StatelessWidget {
   const _DetalheBody({
     required this.execucao,
+    required this.metrics,
     required this.secao,
     required this.onSecao,
     required this.onRefresh,
@@ -193,6 +215,7 @@ class _DetalheBody extends StatelessWidget {
   });
 
   final ExecucaoTreino execucao;
+  final HistoricoSessaoMetrics metrics;
   final String secao;
   final ValueChanged<String> onSecao;
   final Future<void> Function() onRefresh;
@@ -225,7 +248,9 @@ class _DetalheBody extends StatelessWidget {
     );
     final prs = execucao.evolucoesPerformance;
     final cargas = execucao.evolucoesCarga;
-    final recordes = historicoRecordesCount(prs: prs.length, cargas: cargas.length);
+    final recordes = metrics.recordes > 0
+        ? metrics.recordes
+        : historicoRecordesCount(prs: prs.length, cargas: cargas.length);
 
     return Column(
       children: [
@@ -270,17 +295,26 @@ class _DetalheBody extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          metrics.sinalLabel,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: fxScreenMute(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: TokensStrip.s2),
                         Row(
                           children: [
                             Expanded(
                               child: OperationalMetricTile(
-                                label: 'Exerc.',
-                                value: historicoExerciciosMetric(
-                                  done: done,
-                                  total: total,
-                                ),
-                                hint: '$done feitos · $total no plano',
+                                label: 'Volume',
+                                value: metrics.volumeLabel,
+                                hint: metrics.volumeAnteriorKg != null
+                                    ? 'antes ${historicoVolumeLabel(metrics.volumeAnteriorKg!)}'
+                                    : (metrics.volumeKg == null
+                                        ? 'sem cargas'
+                                        : 'nesta sessão'),
                                 color: primary,
                                 isDark: isDark,
                                 dense: true,
@@ -290,9 +324,23 @@ class _DetalheBody extends StatelessWidget {
                             const SizedBox(width: TokensStrip.s2),
                             Expanded(
                               child: OperationalMetricTile(
-                                label: 'Recordes',
-                                value: historicoPrMetric(recordes),
-                                hint: historicoPrHint(recordes),
+                                label: 'Séries',
+                                value: metrics.seriesLabel,
+                                hint: metrics.seriesHint,
+                                color: primary,
+                                isDark: isDark,
+                                dense: true,
+                                emphasis: OperationalMetricEmphasis.muted,
+                              ),
+                            ),
+                            const SizedBox(width: TokensStrip.s2),
+                            Expanded(
+                              child: OperationalMetricTile(
+                                label: 'Sinal',
+                                value: historicoSinalChipLabel(metrics.sinal),
+                                hint: recordes > 0
+                                    ? historicoPrHint(recordes)
+                                    : '$done/$total exerc.',
                                 color: primary,
                                 isDark: isDark,
                                 dense: true,
@@ -301,6 +349,15 @@ class _DetalheBody extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (metrics.destaqueExercicio != null &&
+                            metrics.destaqueDeltaKg != null) ...[
+                          const SizedBox(height: TokensStrip.s2),
+                          Text(
+                            '${metrics.destaqueExercicio}: '
+                            '${historicoDeltaKgLabel(metrics.destaqueDeltaKg!)}',
+                            style: FocuxHubTypography.chip(primary),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -339,21 +396,35 @@ class _DetalheBody extends StatelessWidget {
                             seriesFeitas: feitas,
                             series: item.series,
                           );
+                          final carga = _carga(item);
+                          final delta = historicoCargaDeltaLabel(
+                            cargaAtual: item.seriesDetalhes.isNotEmpty
+                                ? item.seriesDetalhes.last.cargaKg
+                                : item.cargaKg,
+                            cargaAnterior: item.cargaAnteriorKg,
+                          );
+                          final spark = historicoCargaSparkValues(
+                            item.seriesDetalhes,
+                          );
+                          final subtitle = [
+                            historicoExercicioSubtitle(
+                              seriesFeitas: feitas,
+                              series: item.series,
+                              concluido: feito,
+                              sessaoConcluida: concluido,
+                              carga: carga,
+                              rpe: _rpe(item),
+                              dor: item.dor ||
+                                  item.seriesDetalhes.any((s) => s.dor),
+                            ),
+                            if (delta != null) delta,
+                          ].join(' · ');
                           return FxSatelliteListTile(
                             title: item.exercicioNome,
                             margin: const EdgeInsets.only(bottom: 4),
                             subtitle: Text(
-                              historicoExercicioSubtitle(
-                                seriesFeitas: feitas,
-                                series: item.series,
-                                concluido: feito,
-                                sessaoConcluida: concluido,
-                                carga: _carga(item),
-                                rpe: _rpe(item),
-                                dor: item.dor ||
-                                    item.seriesDetalhes.any((serie) => serie.dor),
-                              ),
-                              maxLines: 1,
+                              subtitle,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             leading: FxIcon(
@@ -365,6 +436,15 @@ class _DetalheBody extends StatelessWidget {
                                       : EagleTokens.warn,
                             ),
                             accent: feito ? null : EagleTokens.warn,
+                            trailing: spark.length >= 2
+                                ? FxSparkline(
+                                  data: spark,
+                                  color: primary,
+                                  width: 48,
+                                  height: 20,
+                                  strokeWidth: 1.6,
+                                )
+                                : null,
                           );
                         },
                       ),

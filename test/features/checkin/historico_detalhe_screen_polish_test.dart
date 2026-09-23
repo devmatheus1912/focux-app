@@ -26,6 +26,12 @@ void main() {
     expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('historicoSeriesFeitasEfetivas'));
+    expect(screen, contains('historicoSessaoMetricsFromExecucao'));
+    expect(screen, contains('evolucaoSessao'));
+    expect(screen, contains("label: 'Volume'"));
+    expect(screen, contains("label: 'Séries'"));
+    expect(screen, contains("label: 'Sinal'"));
+    expect(screen, contains('FxSparkline'));
     expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('historicoDuracaoLabel'));
     expect(screen, contains('viewInsetsOf'));
