@@ -47,4 +47,24 @@ void main() {
 
     expect(find.byType(TextButton), findsNothing);
   });
+
+  testWidgets('quiet mode stays top-aligned without giant icon box', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: FxEmptyState(
+            icon: 'chat',
+            title: 'Nenhuma conversa ainda',
+            subtitle: 'Escolha um aluno para começar.',
+            quiet: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Nenhuma conversa ainda'), findsOneWidget);
+    expect(find.byType(Align), findsWidgets);
+  });
 }

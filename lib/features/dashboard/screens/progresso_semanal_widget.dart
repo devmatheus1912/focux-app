@@ -6,16 +6,29 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
+import '../utils/aluno_volume_format.dart';
 
 class ProgressoSemanalWidget extends StatelessWidget {
   const ProgressoSemanalWidget({
     super.key,
     required this.treinos,
     required this.historico,
+    this.aderenciaPercent,
+    this.volumeSemanaKg,
+    this.insight,
   });
 
   final List<ExecucaoTreino> treinos;
   final List<ExecucaoTreino> historico;
+
+  /// Aderência 30d do aluno, se o provider trouxer. Quiet — sem score paralelo.
+  final int? aderenciaPercent;
+
+  /// Volume da semana (kg), opcional — densifica Treinos/Home.
+  final double? volumeSemanaKg;
+
+  /// Uma linha de insight (ritmo), sem KPI numérico.
+  final String? insight;
 
   static const _weekdayLetters = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 
@@ -35,13 +48,21 @@ class ProgressoSemanalWidget extends StatelessWidget {
       now.month,
       now.day,
     ).subtract(Duration(days: now.weekday - 1));
+    final engagementChips = _engagementChips(
+      completedThisWeek: completedThisWeek,
+      weeklyGoal: weeklyGoal,
+    );
+    final insightLine = insight?.trim();
+    final hasInsight = insightLine != null && insightLine.isNotEmpty;
 
     return FxStripCard(
       glowStrength: 0.04,
       padding: const EdgeInsets.all(TokensStrip.s3),
       semanticsLabel:
           'Consistência semanal. $completedThisWeek dias esta semana, '
-          'meta $weeklyGoal.',
+          'meta $weeklyGoal.'
+          '${aderenciaPercent != null ? ' Aderência $aderenciaPercent por cento.' : ''}'
+          '${hasInsight ? ' $insightLine.' : ''}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -68,11 +89,39 @@ class ProgressoSemanalWidget extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            'Treinos concluídos nesta semana · descanso não zera',
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-          ),
+          if (hasInsight) ...[
+            const SizedBox(height: TokensStrip.s1),
+            Text(
+              insightLine,
+              style: FocuxHubTypography.bodyMuted(
+                color: chrome.mute,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ] else ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              'Treinos concluídos nesta semana · descanso não zera',
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+          ],
+          if (engagementChips.isNotEmpty) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s1,
+              children: [
+                for (final chip in engagementChips)
+                  _QuietMetricChip(
+                    label: chip,
+                    mute: chrome.mute,
+                    ink: chrome.ink,
+                  ),
+              ],
+            ),
+          ],
           const SizedBox(height: TokensStrip.s3),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,6 +192,23 @@ class ProgressoSemanalWidget extends StatelessWidget {
     );
   }
 
+  List<String> _engagementChips({
+    required int completedThisWeek,
+    required int weeklyGoal,
+  }) {
+    final ader = aderenciaPercent;
+    final hasAder = ader != null && ader > 0;
+    final vol = volumeSemanaKg;
+    final hasVol = vol != null && vol > 0;
+    // Só monta strip quieto quando há dado de engajamento/volume — sem score.
+    if (!hasAder && !hasVol) return const [];
+    final chips = <String>[];
+    if (hasAder) chips.add('Aderência $ader%');
+    chips.add('Frequência $completedThisWeek/$weeklyGoal');
+    if (hasVol) chips.add('Volume ${formatAlunoVolumeKg(vol)}');
+    return chips;
+  }
+
   static bool _dayHasCompletedWorkout(
     List<ExecucaoTreino> historico,
     DateTime day,
@@ -162,4 +228,37 @@ class ProgressoSemanalWidget extends StatelessWidget {
 
   static bool _isSameCalendarDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+}
+
+class _QuietMetricChip extends StatelessWidget {
+  const _QuietMetricChip({
+    required this.label,
+    required this.mute,
+    required this.ink,
+  });
+
+  final String label;
+  final Color mute;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s2,
+        vertical: TokensStrip.s1,
+      ),
+      decoration: BoxDecoration(
+        color: mute.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(TokensStrip.rPill),
+      ),
+      child: Text(
+        label,
+        style: FocuxHubTypography.chip(ink).copyWith(
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
+      ),
+    );
+  }
 }

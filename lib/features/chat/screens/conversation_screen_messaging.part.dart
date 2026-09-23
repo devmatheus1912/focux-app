@@ -60,6 +60,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       _captureAlunoId(msg);
       if (!mounted) return;
       setState(() => _upsertMessage(msg));
+      _ackPersonalContactBestEffort();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -67,6 +68,16 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       });
       FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  /// Captura actions/id no frame atual (ainda montado); o Future usa Ref do
+  /// Provider — não toca State após unmount.
+  void _ackPersonalContactBestEffort() {
+    if (_isAlunoMode) return;
+    final alunoId = _alunoId;
+    if (alunoId == null) return;
+    final actions = ref.read(alunoFollowUpActionsProvider);
+    unawaited(actions.markContactDoneBestEffort(alunoId));
   }
 
   void _dedupeInitialDraft() {
@@ -276,6 +287,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       if (!mounted) return;
       setState(() => _upsertMessage(msg));
       _scrollToBottom();
+      _ackPersonalContactBestEffort();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -439,6 +451,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       });
       HapticFeedback.mediumImpact();
       _scrollToBottom();
+      _ackPersonalContactBestEffort();
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));

@@ -23,6 +23,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../alunos/providers/aluno_followup_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/chat_repository.dart';
@@ -32,6 +33,7 @@ import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -460,19 +462,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             },
                           )
                           : _msgs.isEmpty
-                          ? Align(
-                            alignment: Alignment.topCenter,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                TokensStrip.s4,
-                                TokensStrip.s3,
-                                TokensStrip.s4,
-                                TokensStrip.s2,
-                              ),
-                              child: _ConversationQuietEmpty(
-                                isAluno: _isAlunoMode,
-                              ),
-                            ),
+                          ? _ConversationQuietEmpty(
+                            isAluno: _isAlunoMode,
                           )
                           : ListView.builder(
                             controller: _scroll,
@@ -778,26 +769,14 @@ class _ConversationQuietEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = Theme.of(context).colorScheme.onSurfaceVariant;
-    final primary = Theme.of(context).colorScheme.primary;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(Icons.chat_bubble_outline_rounded, size: 18, color: primary),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: Text(
-            isAluno
-                ? 'Envie a primeira mensagem — fotos e ajustes do treino ficam aqui.'
-                : 'Envie a primeira mensagem — fotos, áudios e ajustes ficam aqui.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: mute,
-              height: 1.35,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
+    return FxEmptyState(
+      icon: 'chat',
+      title: 'Envie a primeira mensagem',
+      subtitle:
+          isAluno
+              ? 'Fotos e ajustes do treino ficam aqui.'
+              : 'Fotos, áudios e ajustes ficam aqui.',
+      quiet: true,
     );
   }
 }

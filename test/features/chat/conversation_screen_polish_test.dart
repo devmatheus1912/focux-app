@@ -17,7 +17,8 @@ void main() {
     expect(screen, contains('friendlyError'));
     expect(screen, contains('_ConversationQuietEmpty'));
     expect(screen, contains('Envie a primeira mensagem'));
-    expect(screen, isNot(contains('FxEmptyState')));
+    expect(screen, contains('FxEmptyState'));
+    expect(screen, contains('quiet: true'));
     expect(screen, contains('SkeletonList'));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxKeyboardDismissScope'));

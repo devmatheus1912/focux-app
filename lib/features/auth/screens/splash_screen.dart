@@ -114,15 +114,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       _resolveNavigationTimeout,
       onTimeout: () => _fallbackNavigationTarget(),
     );
-    final progressFuture =
-        budget.progress == Duration.zero
-            ? _progressCtrl.animateTo(0.92, duration: Duration.zero)
-            : _progressCtrl.animateTo(0.92, curve: Curves.easeOutCubic);
+    // Mid progress em paralelo — não espera 0.92 antes de fechar a barra.
+    if (budget.progress == Duration.zero) {
+      _progressCtrl.value = 0.62;
+    } else {
+      unawaited(_progressCtrl.animateTo(0.62, curve: Curves.easeOutCubic));
+    }
     final minDelay = Future<void>.delayed(budget.minVisible);
 
     final target = await bootstrapFuture;
-    // Não fica preso em 0.92: se o resolve já voltou, fecha a barra e navega.
-    await Future.wait([progressFuture, minDelay]);
+    await minDelay;
     if (!mounted) return;
 
     await _progressCtrl.animateTo(
@@ -203,17 +204,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       }
     }
 
+    prefetchPersonalDashboardHome(ref);
+    prefetchAlunosHome(ref);
+    // Prefetch em background — cold start não espera rede do perfil.
+    unawaited(
+      ref.read(perfilProvider.future).timeout(_profilePrefetchTimeout).then((
+        perfil,
+      ) {
+        if (!mounted) return;
+        BibliotecaBootstrap.ensureReadyWithContainer(
+          ProviderScope.containerOf(context),
+        );
+      }).catchError((_) {}),
+    );
     try {
-      prefetchPersonalDashboardHome(ref);
-      prefetchAlunosHome(ref);
-      // Prefetch continua em background; não bloqueia a 1ª abertura do dia.
       final perfil = await ref
           .read(perfilProvider.future)
-          .timeout(_profilePrefetchTimeout);
+          .timeout(const Duration(milliseconds: 450));
       if (!mounted) return '/dashboard/personal';
-      BibliotecaBootstrap.ensureReadyWithContainer(
-        ProviderScope.containerOf(context),
-      );
       final prefs = await SharedPreferences.getInstance();
       final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
       return splashPersonalTarget(

@@ -21,6 +21,9 @@ void main() {
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains("label: 'Clínico'"));
     expect(screen, contains('anamneseClinicoResumoValue'));
+    expect(screen, contains('_FichaDisclosureToggle'));
+    expect(screen, contains('Ver detalhes da ficha'));
+    expect(screen, contains('_fichaExpanded'));
     expect(screen, contains('fxListCardDecoration'));
     expect(screen, contains('FocuxHubTypography'));
     expect(screen, isNot(contains('FxSatelliteListTile')));

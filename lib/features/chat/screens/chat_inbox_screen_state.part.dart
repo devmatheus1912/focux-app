@@ -463,6 +463,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         icon: 'search',
         title: 'Nenhum resultado encontrado',
         subtitle: 'Tente o nome do aluno ou um trecho da mensagem.',
+        quiet: true,
       );
     }
     final extra = _searchHasMore ? 1 : 0;

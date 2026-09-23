@@ -30,7 +30,9 @@ void main() {
     expect(screen, contains('evolucaoSessao'));
     expect(screen, contains("label: 'Volume'"));
     expect(screen, contains("label: 'Séries'"));
-    expect(screen, contains("label: 'Sinal'"));
+    // Sinal vive no caption do hero (não mais tile KPI).
+    expect(screen, contains('metrics.sinalLabel'));
+    expect(screen, isNot(contains("label: 'Sinal'")));
     expect(screen, contains('FxSparkline'));
     expect(screen, isNot(contains('freshness: freshness')));
     expect(screen, contains('historicoDuracaoLabel'));

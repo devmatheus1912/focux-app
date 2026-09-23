@@ -52,6 +52,16 @@ class AlunoFollowUpActions {
     return updated;
   }
 
+  /// Chat send já é o contato — ack de follow-up não pode falhar o envio
+  /// nem depender do ciclo de vida do widget (usa [Ref] do Provider).
+  Future<void> markContactDoneBestEffort(int alunoId) async {
+    try {
+      await markContactDone(alunoId);
+    } catch (_) {
+      // Best-effort: mensagem já foi entregue.
+    }
+  }
+
   void _invalidate(int alunoId) {
     invalidateAlunosCachesRef(_ref);
     _ref.invalidate(alunoProvider(alunoId));

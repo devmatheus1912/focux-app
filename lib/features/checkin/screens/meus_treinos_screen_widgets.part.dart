@@ -93,24 +93,48 @@ class _WeekProgressStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final line =
+    final insight =
+        startableCount > 0
+            ? 'Plano pronto · comece pelo próximo treino'
+            : ativos > 0
+            ? 'Treinos ativos no plano'
+            : 'Aguardando liberação do personal';
+    final volumeLine =
         startableCount > 0
             ? '$startableCount prontos · $total no plano'
             : '$ativos ativos · $total no plano';
     return FxStripCard(
       glowStrength: 0.04,
-      padding: const EdgeInsets.symmetric(
-        horizontal: TokensStrip.s3,
-        vertical: TokensStrip.s2,
-      ),
-      child: Text(
-        line,
-        style: FocuxHubTypography.bodyMuted(
-          color: chrome.mute,
-          fontWeight: FontWeight.w700,
-        ).copyWith(color: primary.withValues(alpha: 0.9)),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      semanticsLabel: '$insight. $volumeLine.',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sua rotina',
+            style: FocuxHubTypography.chip(chrome.mute),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Text(
+            insight,
+            style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+              fontWeight: FontWeight.w800,
+              height: 1.25,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            volumeLine,
+            style: FocuxHubTypography.bodyMuted(
+              color: primary.withValues(alpha: 0.9),
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

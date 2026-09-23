@@ -1,6 +1,6 @@
 part of 'anamnese_screen.dart';
 
-class _AnamneseBody extends StatelessWidget {
+class _AnamneseBody extends StatefulWidget {
   const _AnamneseBody({
     required this.anamnese,
     required this.acting,
@@ -29,8 +29,18 @@ class _AnamneseBody extends StatelessWidget {
   onRevisar;
 
   @override
+  State<_AnamneseBody> createState() => _AnamneseBodyState();
+}
+
+class _AnamneseBodyState extends State<_AnamneseBody> {
+  var _fichaExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    final a = anamnese;
+    final a = widget.anamnese;
+    final isDark = widget.isDark;
+    final primary = widget.primary;
+    final acting = widget.acting;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -46,7 +56,7 @@ class _AnamneseBody extends StatelessWidget {
                 isDark: isDark,
                 enabled: !acting,
                 onPressed:
-                    () => onRevisar(
+                    () => widget.onRevisar(
                       status: AnamneseStatus.precisaAtestado,
                       title: 'Pedir atestado',
                       subtitle:
@@ -62,7 +72,7 @@ class _AnamneseBody extends StatelessWidget {
                 isDark: isDark,
                 enabled: !acting,
                 onPressed:
-                    () => onRevisar(
+                    () => widget.onRevisar(
                       status: AnamneseStatus.solicitada,
                       title: 'Pedir atualização',
                       subtitle:
@@ -74,7 +84,7 @@ class _AnamneseBody extends StatelessWidget {
               label: 'Chat',
               accent: primary,
               isDark: isDark,
-              onPressed: () => context.push('/alunos/$alunoId/chat'),
+              onPressed: () => context.push('/alunos/${widget.alunoId}/chat'),
             ),
           ],
         ),
@@ -112,6 +122,7 @@ class _AnamneseBody extends StatelessWidget {
             icon: 'article',
             title: 'Nenhuma ficha ainda',
             subtitle: 'O aluno preenche a anamnese. Você solicita e revisa.',
+            quiet: true,
           ),
         ] else if (a.isSolicitada && !a.personalPodeRevisar) ...[
           const SizedBox(height: TokensStrip.s5),
@@ -120,19 +131,94 @@ class _AnamneseBody extends StatelessWidget {
             title: 'Aguardando preenchimento',
             subtitle:
                 'O aluno foi notificado. Quando enviar, você revisa aqui.',
+            quiet: true,
           ),
         ] else if (a.personalPodeRevisar) ...[
-          const SizedBox(height: TokensStrip.s4),
-          AlunoSegmentedChoice(
-            options: anamneseDetalheSecoes,
-            selected: secao,
-            isDark: isDark,
-            onSelect: onSecao,
-          ),
           const SizedBox(height: TokensStrip.s3),
-          _AnamneseFicha(anamnese: a, secao: secao),
+          _FichaDisclosureToggle(
+            expanded: _fichaExpanded,
+            primary: primary,
+            onToggle: () => setState(() => _fichaExpanded = !_fichaExpanded),
+          ),
+          if (_fichaExpanded) ...[
+            const SizedBox(height: TokensStrip.s3),
+            AlunoSegmentedChoice(
+              options: anamneseDetalheSecoes,
+              selected: widget.secao,
+              isDark: isDark,
+              onSelect: widget.onSecao,
+            ),
+            const SizedBox(height: TokensStrip.s3),
+            _AnamneseFicha(anamnese: a, secao: widget.secao),
+          ],
         ],
       ],
+    );
+  }
+}
+
+class _FichaDisclosureToggle extends StatelessWidget {
+  const _FichaDisclosureToggle({
+    required this.expanded,
+    required this.primary,
+    required this.onToggle,
+  });
+
+  final bool expanded;
+  final Color primary;
+  final VoidCallback onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = Theme.of(context).colorScheme.onSurfaceVariant;
+    final ink = Theme.of(context).colorScheme.onSurface;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onToggle,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TokensStrip.s3,
+            vertical: TokensStrip.s3,
+          ),
+          decoration: fxListCardDecoration(
+            context,
+            accent: primary,
+            radius: TokensStrip.rCard,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      expanded ? 'Ocultar detalhes' : 'Ver detalhes da ficha',
+                      style: FocuxHubTypography.body(color: ink).copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      expanded
+                          ? 'PAR-Q+, saúde, hábitos e treino'
+                          : 'Resumo no fold · toque para abrir a ficha',
+                      style: FocuxHubTypography.chip(mute),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                expanded
+                    ? Icons.expand_less_rounded
+                    : Icons.expand_more_rounded,
+                color: primary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

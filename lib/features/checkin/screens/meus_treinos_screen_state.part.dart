@@ -6,6 +6,18 @@ String meusTreinosCountLabel(int count) {
   return '$count treinos';
 }
 
+/// Insight quieto do job Treinos — espelha ritmo da Home sem score numérico.
+String _treinosInsightLine({
+  required List<ExecucaoTreino> historico,
+  required int startableCount,
+}) {
+  final days = countUniqueCompletedDaysThisWeek(historico);
+  if (days >= 3) return 'Ritmo forte · mantenha o volume';
+  if (days >= 1) return 'Ritmo construindo · complete a semana';
+  if (startableCount > 0) return 'Hora de treinar · plano pronto';
+  return 'Consistência em retomada';
+}
+
 class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   DateTime? _fetchedAt;
   int? _startingTreinoId;
@@ -217,6 +229,16 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                                     ? ProgressoSemanalWidget(
                                       treinos: home.treinos,
                                       historico: home.historico,
+                                      aderenciaPercent:
+                                          home.aluno.aderenciaPercent,
+                                      volumeSemanaKg:
+                                          home.volumeSemanaKg > 0
+                                              ? home.volumeSemanaKg
+                                              : null,
+                                      insight: _treinosInsightLine(
+                                        historico: home.historico,
+                                        startableCount: startableCount,
+                                      ),
                                     )
                                     : _WeekProgressStrip(
                                       ativos: ativos,

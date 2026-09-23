@@ -21,6 +21,7 @@ class SmartPricingCard extends ConsumerStatefulWidget {
 class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
   SmartPricingRecomendacao? _data;
   bool _loading = true;
+  var _failed = false;
 
   @override
   void initState() {
@@ -38,10 +39,17 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
         setState(() {
           _data = d;
           _loading = false;
+          _failed = false;
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _failed = true;
+          _data = null;
+        });
+      }
     }
   }
 
@@ -52,15 +60,72 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
         builder:
             (context) => Padding(
               padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
-              child: FxLoading.sectionShimmer(context, height: 128),
+              child: FxLoading.sectionShimmer(context, height: 96),
             ),
       );
     }
-    if (_data == null) return const SizedBox.shrink();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
+
+    if (_data == null) {
+      return FxStripCard(
+        glowStrength: 0.04,
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s3,
+          vertical: TokensStrip.s3,
+        ),
+        semanticsLabel: 'Smart Pricing indisponível no momento.',
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.auto_graph_rounded, color: chrome.mute, size: 18),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Smart Pricing',
+                    style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _failed
+                        ? 'Sugestão indisponível agora. Tente de novo em breve.'
+                        : 'Sem sugestão no momento — ticket e pacotes aparecem aqui.',
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (_failed)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _loading = true;
+                    _failed = false;
+                  });
+                  _load();
+                },
+                child: Text(
+                  'Tentar',
+                  style: FocuxHubTypography.chip(primary).copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
     final d = _data!;
     final atual = d.ticketAtual.toStringAsFixed(0);
     final sugerido = d.precoSugerido.toStringAsFixed(0);
@@ -74,8 +139,13 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
 
     return FxStripCard(
       emphasize: true,
-      glowStrength: 0.12,
-      padding: const EdgeInsets.all(TokensStrip.s3),
+      glowStrength: 0.08,
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s3,
+        TokensStrip.s3,
+        TokensStrip.s3,
+        TokensStrip.s2,
+      ),
       semanticsLabel:
           'Smart Pricing. Ticket R\$ $atual, sugerido R\$ $sugerido.',
       child: Column(
@@ -83,19 +153,20 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_graph_rounded, color: primary, size: 18),
-              const SizedBox(width: 8),
+              Icon(Icons.auto_graph_rounded, color: primary, size: 16),
+              const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   'Smart Pricing',
                   style: FocuxHubTypography.body(color: chrome.ink).copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
+                    fontSize: 14,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
                   color: primary.withValues(alpha: isDark ? 0.16 : 0.1),
                   borderRadius: BorderRadius.circular(TokensStrip.rPill),
@@ -110,7 +181,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -123,10 +194,10 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 6, left: 4, right: 4),
+                padding: const EdgeInsets.only(bottom: 4, left: 4, right: 4),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  size: 16,
+                  size: 14,
                   color: chrome.mute,
                 ),
               ),
@@ -151,13 +222,13 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
             const SizedBox(height: TokensStrip.s2),
             Wrap(
               spacing: 6,
-              runSpacing: 6,
+              runSpacing: 4,
               children: [
                 for (final p in d.pacotesSugeridos.take(2))
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 5,
+                      horizontal: 7,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: chrome.line.withValues(alpha: 0.35),
@@ -174,7 +245,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
               ],
             ),
           ],
-          const SizedBox(height: TokensStrip.s3),
+          const SizedBox(height: TokensStrip.s2),
           DashboardHomeActionChip(
             label: 'Criar pacote sugerido',
             accent: primary,
@@ -206,7 +277,7 @@ class _PriceCol extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: FocuxHubTypography.chip(ink)),
-        const SizedBox(height: 2),
+        const SizedBox(height: 1),
         Text(
           value,
           style: FocuxHubTypography.kpi(

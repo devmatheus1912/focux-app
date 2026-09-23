@@ -263,19 +263,30 @@ class _DetalheBody extends StatelessWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(
                   FxSettingsLayout.pageInset,
-                  TokensStrip.s4,
+                  TokensStrip.s3,
                   FxSettingsLayout.pageInset,
-                  24,
+                  TokensStrip.s5,
                 ),
                 children: [
                   FxStripCard(
                     emphasize: false,
                     accent: primary,
-                    padding: const EdgeInsets.all(TokensStrip.s3),
+                    padding: const EdgeInsets.fromLTRB(
+                      TokensStrip.s3,
+                      TokensStrip.s3,
+                      TokensStrip.s3,
+                      TokensStrip.s2,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          'Sinal',
+                          style: FocuxHubTypography.chip(fxScreenMute(context)),
+                        ),
+                        const SizedBox(height: 2),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Text(
@@ -289,6 +300,7 @@ class _DetalheBody extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            const SizedBox(width: TokensStrip.s2),
                             Text(
                               duracao ?? '—',
                               style: FocuxHubTypography.kpi(
@@ -298,13 +310,15 @@ class _DetalheBody extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: TokensStrip.s1),
                         Text(
                           metrics.sinalLabel,
                           style: FocuxHubTypography.bodyMuted(
                             color: fxScreenMute(context),
                             fontWeight: FontWeight.w600,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: TokensStrip.s2),
                         Row(
@@ -366,7 +380,7 @@ class _DetalheBody extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: TokensStrip.s3),
+                  const SizedBox(height: TokensStrip.s2),
                   AlunoSegmentedChoice(
                     options: historicoDetalheSecoes,
                     selected: secao,
@@ -380,7 +394,7 @@ class _DetalheBody extends StatelessWidget {
                     ..._notas(execucao.exercicios)
                   else if (execucao.exercicios.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: TokensStrip.s2),
+                      padding: const EdgeInsets.only(top: TokensStrip.s1),
                       child: Text(
                         'Sem exercícios nesta execução.',
                         style: FocuxHubTypography.bodyMuted(
@@ -426,7 +440,7 @@ class _DetalheBody extends StatelessWidget {
                           ].join(' · ');
                           return FxSatelliteListTile(
                             title: item.exercicioNome,
-                            margin: const EdgeInsets.only(bottom: 4),
+                            margin: const EdgeInsets.only(bottom: 2),
                             subtitle: Text(
                               subtitle,
                               maxLines: 2,
@@ -434,7 +448,7 @@ class _DetalheBody extends StatelessWidget {
                             ),
                             leading: FxIcon(
                               name: feito ? 'circle-check' : 'calendar',
-                              size: 20,
+                              size: 18,
                               color:
                                   feito
                                       ? EagleTokens.good
@@ -445,9 +459,9 @@ class _DetalheBody extends StatelessWidget {
                                 ? FxSparkline(
                                   data: spark,
                                   color: primary,
-                                  width: 48,
-                                  height: 20,
-                                  strokeWidth: 1.6,
+                                  width: 44,
+                                  height: 18,
+                                  strokeWidth: 1.5,
                                 )
                                 : null,
                           );
@@ -463,7 +477,7 @@ class _DetalheBody extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
-              TokensStrip.s2,
+              TokensStrip.s1,
               FxSettingsLayout.pageInset,
               TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
             ),
@@ -487,10 +501,11 @@ class _DetalheBody extends StatelessWidget {
             case final nota?)
           FxSatelliteListTile(
             title: item.exercicioNome,
+            margin: const EdgeInsets.only(bottom: 2),
             subtitle: Text(nota),
             leading: const FxIcon(
               name: 'article',
-              size: 22,
+              size: 20,
               color: EagleTokens.good,
             ),
           ),
@@ -501,6 +516,7 @@ class _DetalheBody extends StatelessWidget {
           icon: 'article',
           title: 'Nenhuma nota nesta sessão',
           subtitle: 'Observação e feedback do exercício aparecem aqui.',
+          quiet: true,
         ),
       ];
     }
@@ -517,6 +533,7 @@ class _DetalheBody extends StatelessWidget {
           icon: 'star',
           title: 'Nenhum recorde nesta sessão',
           subtitle: 'Quando bater carga ou volume, o recorde aparece aqui.',
+          quiet: true,
         ),
       ];
     }
@@ -524,6 +541,7 @@ class _DetalheBody extends StatelessWidget {
       for (final carga in cargas)
         FxSatelliteListTile(
           title: carga.exercicioNome,
+          margin: const EdgeInsets.only(bottom: 2),
           subtitle: Text(
             carga.mensagem.trim().isEmpty
                 ? (checkinCargaLabel(carga.cargaAtualKg) ?? historicoPrHint(1))
@@ -531,13 +549,14 @@ class _DetalheBody extends StatelessWidget {
           ),
           leading: const FxIcon(
             name: 'dumbbell',
-            size: 22,
+            size: 20,
             color: EagleTokens.good,
           ),
         ),
       for (final pr in prs)
         FxSatelliteListTile(
           title: pr.exercicioNome,
+          margin: const EdgeInsets.only(bottom: 2),
           subtitle: Text(
             pr.mensagem.trim().isEmpty
                 ? historicoPrHint(1)
@@ -545,7 +564,7 @@ class _DetalheBody extends StatelessWidget {
           ),
           leading: const FxIcon(
             name: 'star',
-            size: 22,
+            size: 20,
             color: EagleTokens.good,
           ),
         ),

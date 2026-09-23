@@ -95,6 +95,7 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
               _query.isEmpty
                   ? 'Cadastre um aluno para poder conversar por aqui.'
                   : 'Tente outro nome ou e-mail.',
+          quiet: true,
         );
       }
       return ListView(
@@ -314,11 +315,12 @@ class _InboxTabPane extends StatelessWidget {
           ),
       data: (items) {
         if (items.isEmpty) {
-          // Sticky "Nova conversa" é o único CTA (§11) — empty sem action.
+          // Sticky "Nova conversa" é o único CTA (§11) — empty quieto no topo.
           return FxEmptyState(
             icon: isArchived ? 'article' : 'chat',
             title: chatInboxEmptyTitle(view),
             subtitle: chatInboxEmptySubtitle(view),
+            quiet: true,
           );
         }
         return RefreshIndicator(

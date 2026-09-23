@@ -285,7 +285,7 @@ class _TodayFocusCard extends StatelessWidget {
                 label: score.rhythmLabel,
                 onPrimary: mute,
               ),
-              // ≤2 chips no fold — sem aderência extra (ProgressoSemanal já sinaliza).
+              // ≤2 chips no fold — aderência/frequência no ProgressoSemanal.
               if (score.nextSignal.trim().isNotEmpty)
                 _WorkoutInsightPill(
                   icon: Icons.bolt_rounded,
