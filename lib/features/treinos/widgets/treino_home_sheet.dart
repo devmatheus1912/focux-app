@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 
 class TreinoHomeSheetSurface extends StatelessWidget {
