@@ -48,13 +48,11 @@ class CopilotPrescriptionContent {
     required this.title,
     required this.action,
     required this.reason,
-    this.fullAction,
   });
 
   final String title;
   final String action;
   final String reason;
-  final String? fullAction;
 }
 
 int copilotProfileCompletion(Aluno aluno) {
@@ -642,8 +640,6 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
     sanitizedAcao,
     wearableRelevant: wearableRelevant,
   );
-  // Expand = mesmo texto via maxLines (não trocar pelo raw da IA).
-  const String? fullAction = null;
   final reason = sanitizeCopilotPrescriptionReason(
     isIa ? formatCopilotIaMotivo(motivoRaw) : motivoRaw,
     statusMetricsVisible: statusMetricsVisible,
@@ -656,7 +652,6 @@ CopilotPrescriptionContent resolveCopilotPrescriptionFromAction(
             : (action['titulo'] ?? action['tipo'] ?? 'Próxima melhor ação')
                 .toString(),
     action: displayAction,
-    fullAction: fullAction,
     reason: reason,
   );
 }

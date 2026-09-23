@@ -245,6 +245,7 @@ POST	/api/feed/{postId}/curtir	A	FeedController.java:65
 GET	/api/feedback-videos	AL	FeedbackVideoController.java:24
 POST	/api/feedback-videos	AR	FeedbackVideoController.java:36
 GET	/api/feedback-videos/aluno/{alunoId}	AL	FeedbackVideoController.java:30
+GET	/api/feedback-videos/aluno/{alunoId}/exercicios	C	FeedbackVideoController.java:40
 GET	/api/feedback-videos/me	AL	FeedbackVideoController.java:52
 POST	/api/feedback-videos/me	AR	FeedbackVideoController.java:58
 GET	/api/feedback-videos/me/exercicios-disponiveis	AL	FeedbackVideoController.java:67

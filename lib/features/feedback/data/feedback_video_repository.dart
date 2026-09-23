@@ -140,11 +140,6 @@ class FeedbackVideoRepository {
     await _dio.delete('/api/feedback-videos/$id');
   }
 
-  Future<List<ExercicioOpcao>> exerciciosDisponiveis() async {
-    final r = await _dio.get('/api/feedback-videos/me/exercicios-disponiveis');
-    return _parseExercicioOpcoes(r.data);
-  }
-
   Future<List<ExercicioOpcao>> exerciciosDisponiveisParaAluno(int alunoId) async {
     final r = await _dio.get('/api/feedback-videos/aluno/$alunoId/exercicios');
     return _parseExercicioOpcoes(r.data);

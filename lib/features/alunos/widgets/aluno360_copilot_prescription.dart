@@ -17,7 +17,6 @@ class Aluno360CopilotPrescription extends StatefulWidget {
     required this.action,
     required this.reason,
     required this.color,
-    this.fullAction,
     this.isIaSuggestion = false,
     this.onPrepareMessage,
     this.showTitle = true,
@@ -28,7 +27,6 @@ class Aluno360CopilotPrescription extends StatefulWidget {
   final String action;
   final String reason;
   final Color color;
-  final String? fullAction;
   final bool isIaSuggestion;
   final VoidCallback? onPrepareMessage;
   final bool showTitle;
@@ -219,14 +217,6 @@ class _Aluno360CopilotPrescriptionState
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final caption = isDark ? EagleTokens.darkInkMute : EagleTokens.inkSlate;
     final reason = widget.reason.trim();
-    final expandedActionText = widget.fullAction ?? widget.action;
-    final hasDistinctFullAction =
-        widget.fullAction != null &&
-        widget.fullAction!.trim().isNotEmpty &&
-        !copilotPrescriptionActionsEquivalent(
-          widget.fullAction!,
-          widget.action,
-        );
     final actionStyle = _actionStyle(ink);
     final showExpandReason = reason.length > 72;
 
@@ -239,12 +229,12 @@ class _Aluno360CopilotPrescriptionState
             style: actionStyle,
           );
         }
-        final showExpandAction = hasDistinctFullAction || _actionTruncated;
+        final showExpandAction = _actionTruncated;
 
         return Semantics(
           label:
               '${widget.showTitle ? '${widget.title}. ' : ''}'
-              '${widget.showAction ? '$expandedActionText. ' : ''}$reason'
+              '${widget.showAction ? '${widget.action}. ' : ''}$reason'
               '${widget.showAction && showExpandAction && !_expandedAction ? '. Toque para ver texto completo' : ''}'
               '${showExpandReason && !_expandedReason ? '. Toque para ver contexto completo' : ''}',
           child: Column(
@@ -279,7 +269,7 @@ class _Aluno360CopilotPrescriptionState
                   onTap: showExpandAction ? _toggleExpandedAction : null,
                   behavior: HitTestBehavior.opaque,
                   child: Text(
-                    _expandedAction ? expandedActionText : widget.action,
+                    widget.action,
                     maxLines: _expandedAction ? null : _collapsedLines,
                     overflow: _expandedAction ? null : TextOverflow.ellipsis,
                     style: actionStyle,
@@ -548,7 +538,6 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     return Aluno360CopilotPrescription(
       title: content.title,
       action: content.action,
-      fullAction: content.fullAction,
       reason: content.reason,
       color: primary,
       isIaSuggestion: isIaSuggestion,

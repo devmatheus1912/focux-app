@@ -394,10 +394,9 @@ void main() {
         'fallback',
       );
       expect(content.action, 'Retomar contato e pedir sync do wearable.');
-      expect(content.fullAction, isNull);
     });
 
-    test('drops fullAction when only name or punctuation differs', () {
+    test('resolve usa ação curta mesmo com parágrafo longo da IA', () {
       expect(
         copilotPrescriptionActionsEquivalent(
           'Retomar contato e checar como está o treino.',
@@ -413,7 +412,7 @@ void main() {
         })),
         'fallback',
       );
-      expect(content.fullAction, isNull);
+      expect(content.action, isNot(isEmpty));
     });
   });
 
@@ -624,7 +623,7 @@ void main() {
   });
 
   group('resolveCopilotPrescriptionFromAction', () {
-    test('hides expand link when IA action is robotic contact copy', () {
+    test('action curta quando IA manda contato robótico', () {
       final content = resolveCopilotPrescriptionFromAction(
         _aluno(nome: 'Nathalia'),
         {
@@ -636,7 +635,6 @@ void main() {
         'fallback',
       );
       expect(content.action, 'Retomar contato com Nathalia e checar como está o treino.');
-      expect(content.fullAction, isNull);
     });
   });
 
