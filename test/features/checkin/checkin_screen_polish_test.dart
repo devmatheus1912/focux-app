@@ -70,6 +70,8 @@ void main() {
     expect(timers, contains('checkinRestSemanticsLabel'));
     expect(timers, contains('BrandPalette.accent'));
     expect(timers, contains('ExcludeSemantics'));
+    expect(timers, contains('_CheckinRestRingPainter'));
+    expect(timers, isNot(contains('CircularProgressIndicator')));
     expect(timers, isNot(contains('class CheckinRestBanner')));
     expect(timers, isNot(contains('FxLoading')));
     expect(timers, isNot(contains('FxLiquidPrimaryButton')));

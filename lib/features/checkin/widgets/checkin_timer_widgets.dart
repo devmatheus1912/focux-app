@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/brand_palette.dart';
@@ -60,11 +62,14 @@ class CheckinRestFocusView extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     ExcludeSemantics(
-                      child: CircularProgressIndicator(
-                        value: progress,
-                        strokeWidth: TokensStrip.s2,
-                        color: brand,
-                        backgroundColor: chrome.mute.withValues(alpha: 0.14),
+                      child: CustomPaint(
+                        size: const Size.square(checkinRestRingSize),
+                        painter: _CheckinRestRingPainter(
+                          progress: progress,
+                          color: brand,
+                          trackColor: chrome.mute.withValues(alpha: 0.14),
+                          strokeWidth: TokensStrip.s2,
+                        ),
                       ),
                     ),
                     Text(
@@ -123,5 +128,54 @@ class CheckinRestFocusView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _CheckinRestRingPainter extends CustomPainter {
+  const _CheckinRestRingPainter({
+    required this.progress,
+    required this.color,
+    required this.trackColor,
+    required this.strokeWidth,
+  });
+
+  final double progress;
+  final Color color;
+  final Color trackColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.shortestSide - strokeWidth) / 2;
+    final track =
+        Paint()
+          ..color = trackColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
+    final fill =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, track);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      (progress.clamp(0.0, 1.0)) * math.pi * 2,
+      false,
+      fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CheckinRestRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

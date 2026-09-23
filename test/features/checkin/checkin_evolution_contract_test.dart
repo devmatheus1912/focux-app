@@ -86,8 +86,8 @@ void main() {
         ).readAsStringSync();
 
     expect(screen, contains('Evolução do treino'));
-    expect(screen, contains('Volume semana'));
-    expect(screen, contains('Volume mês'));
+    expect(screen, contains('Na semana'));
+    expect(screen, contains('No mês'));
     expect(evolutionLogic, contains('evolucoesPerformance'));
   });
 }
