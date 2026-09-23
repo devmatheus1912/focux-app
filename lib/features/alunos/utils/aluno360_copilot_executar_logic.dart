@@ -38,11 +38,19 @@ String copilotExecutarConfirmBody(String backendTipo) {
 bool _acaoSugereAjusteCarga(String? acao) {
   final lower = (acao ?? '').toLowerCase();
   if (lower.isEmpty) return false;
-  return lower.contains('carga') ||
-      lower.contains('progress') ||
-      lower.contains('reduzir') ||
-      lower.contains('aumentar volume') ||
-      lower.contains('ajuste de');
+  // Só carga explícita — "progresso"/"ajuste de" sozinhos geravam falso positivo (#5).
+  if (lower.contains('ajuste de carga') ||
+      lower.contains('reduzir carga') ||
+      lower.contains('aumentar carga') ||
+      lower.contains('baixar carga') ||
+      lower.contains('diminuir carga')) {
+    return true;
+  }
+  return lower.contains('carga') &&
+      (lower.contains('reduzir') ||
+          lower.contains('aumentar') ||
+          lower.contains('ajustar') ||
+          lower.contains('abaixar'));
 }
 
 CopilotExecutarAcaoSpec? resolveCopilotExecutarAcao({

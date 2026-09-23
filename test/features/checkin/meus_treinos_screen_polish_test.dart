@@ -46,7 +46,8 @@ void main() {
     expect(screen, contains('_hasMore'));
     expect(screen, contains('treinosOrdenadosStartFirst'));
     expect(screen, contains('startableCount'));
-    expect(screen, contains('hasStartable'));
+    expect(screen, contains('ProgressoSemanalWidget'));
+    expect(screen, contains('_WeekProgressStrip'));
     expect(screen, contains('Fiz o treino'));
     expect(screen, contains('TextButton'));
     expect(screen, contains('FxLiquidPrimaryButton'));
@@ -54,13 +55,16 @@ void main() {
     expect(screen, contains('Pronto para treinar'));
     expect(screen, contains('confirmarPlano'));
     expect(screen, contains('alunoDashboardHomeProvider'));
-    expect(screen, contains('buildAlunoHomeExperience'));
+    expect(screen, contains('ProgressoSemanalWidget'));
+    expect(screen, contains('_WeekProgressStrip'));
     expect(screen, contains('_RetomarTreinoBanner'));
     expect(screen, contains('treinoSessaoEmAndamento'));
     expect(screen, contains('streakAtual'));
     expect(screen, contains('historicoCheckinProvider'));
     expect(screen, contains('MeusTreinosMemCache.clear'));
     expect(screen, contains('starting || confirming'));
+    expect(screen, isNot(contains('_TrainingScoreBadge')));
+    expect(screen, isNot(contains('buildAlunoHomeExperience')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 }

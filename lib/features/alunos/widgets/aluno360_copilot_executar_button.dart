@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -83,6 +84,11 @@ class _Aluno360CopilotExecutarAcaoButtonState
       if (!mounted) return;
       if (resp.ok) {
         FeedbackHelper.showOperacaoSuccess(context, resp.mensagem);
+      } else if (resp.status.toUpperCase() == 'SEM_CARGA') {
+        FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
+        if (!mounted) return;
+        // ignore: use_build_context_synchronously
+        context.push('/alunos/${widget.alunoId}/treinos-list');
       } else {
         FeedbackHelper.showOperacaoWarn(context, resp.mensagem);
       }
