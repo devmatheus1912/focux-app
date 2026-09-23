@@ -45,10 +45,10 @@ void main() {
     );
   });
 
-  test('aluno360 follow-up semantics includes subtitle and expand hint', () {
+  test('aluno360 follow-up semantics includes subtitle and sheet hint', () {
     expect(
       aluno360FollowUpSemantics(subtitle: 'Ligar hoje', expanded: false),
-      'Próximo contato. Ligar hoje. Toque para expandir ações',
+      'Próximo contato. Ligar hoje. Toque para abrir o agendamento',
     );
     expect(
       aluno360FollowUpSemantics(subtitle: 'Ligar hoje', expanded: true),

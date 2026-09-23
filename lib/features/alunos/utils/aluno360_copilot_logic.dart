@@ -457,7 +457,10 @@ String copilotStickyLabel(
   }
   if (lower.contains('durm') ||
       lower.contains('sono') ||
-      (lower.contains('hora') && lower.contains('noite'))) {
+      ((lower.contains('hora') ||
+              lower.contains('horár') ||
+              lower.contains('horar')) &&
+          lower.contains('noite'))) {
     return 'Combinar sono';
   }
   return truncateCopilotStickyLabel(copilotDisplayAction(aluno, cleaned));

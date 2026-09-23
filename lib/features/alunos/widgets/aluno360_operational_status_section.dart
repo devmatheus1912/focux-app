@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -12,7 +12,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_contact_utils.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -163,7 +162,6 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     final weekValue = week.weekRatioLabel;
 
     final mute = fxScreenMute(context);
-    final line = ShellChrome.of(context).line;
 
     Widget metric({
       required String label,
@@ -312,37 +310,21 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             statusSubtitle,
-            style: Aluno360Layout.metaStyle(context).copyWith(color: mute),
+            style: FocuxHubTypography.bodyMuted(
+              color: mute,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
           ),
         ],
         const SizedBox(height: TokensStrip.s3),
         ...metrics,
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Divider(
-            height: 1,
-            thickness: 1,
-            color: line.withValues(alpha: 0.45),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Calendário da semana',
-              style: Aluno360Layout.metaStyle(context).copyWith(
-                color: mute,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
+          padding: const EdgeInsets.only(top: 2, bottom: 4),
           child: Semantics(
-            label: 'Check-ins dos últimos 7 dias',
+            label:
+                adherenceEmpty?.compactLine ??
+                'Check-ins dos últimos 7 dias · $weekValue',
             child: AlunoOperacaoAdherenceBars(
               points: weekPoints,
               activeColor: EagleTokens.good,

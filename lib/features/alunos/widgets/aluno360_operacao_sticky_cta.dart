@@ -9,6 +9,7 @@ import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../widgets/aluno360_commitment_sheet.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
 /// Sticky da Operação — CTA primária; Chat/Criar tarefa ficam em Mais ações.
@@ -95,6 +96,12 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
           context.push('/financeiro?alunoId=$alunoId');
         case OperacaoStickyDestination.treino:
           context.push('/alunos/$alunoId/treinos-list', extra: aluno.nome);
+        case OperacaoStickyDestination.commitment:
+          showAluno360CommitmentSheet(
+            context,
+            aluno: aluno,
+            kind: Aluno360CommitmentKind.sleep,
+          );
       }
     }
 

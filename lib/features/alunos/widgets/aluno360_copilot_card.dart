@@ -9,8 +9,6 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/data/command_action_item.dart';
-import '../../dashboard/widgets/command_action_tile.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../planos/utils/effective_plano_features.dart';
@@ -293,17 +291,14 @@ class Aluno360CopilotCard extends ConsumerWidget {
               profileCompletion,
               sticky: stickyAction,
             )) ...[
-              CommandActionTile(
-                item: CommandActionItem(
-                  icon: 'users',
-                  title: copilotProfileGapsButtonLabel(aluno),
-                  subtitle: 'Dados que ainda afetam a prescrição',
-                  route: '/alunos/${aluno.id}/editar',
-                  tone: CommandActionTone.primary,
+              FxSatelliteListTile(
+                title: copilotProfileGapsButtonLabel(aluno),
+                titleCase: false,
+                subtitle: Text(
+                  'Dados que ainda afetam a prescrição',
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
-                isDark: isDark,
-                primary: primary,
-                showDivider: false,
+                accent: primary,
                 onTap: () => _completeProfile(context, aluno),
               ),
               const SizedBox(height: 10),
