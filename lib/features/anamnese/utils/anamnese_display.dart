@@ -97,6 +97,46 @@ const anamneseDetalheSecoes = [
   (value: anamneseSecaoTreino, label: 'Treino'),
 ];
 
+/// Espelha `@Size` de `AnamneseRequest` no backend.
+abstract final class AnamneseFieldLimits {
+  static const objetivo = 4000;
+  static const nivelAtividade = 50;
+  static const lesoes = 4000;
+  static const medicamentos = 4000;
+  static const observacoes = 4000;
+  static const historicoMedico = 4000;
+  static const cirurgias = 4000;
+  static const doresCronicas = 4000;
+  static const objetivoDetalhado = 4000;
+  static const preferenciasTreino = 4000;
+  static const restricoesAlimentares = 4000;
+  static const parqOutraRazaoDetalhe = 2000;
+  static const sintomasCv = 4000;
+  static const alergias = 2000;
+  static const gestacaoPosParto = 1000;
+  static const qualidadeSono = 30;
+  static const nivelEstresse = 20;
+  static const tabagismo = 40;
+  static const alcool = 40;
+  static const historicoAtividade = 4000;
+  static const motivoInterrupcoes = 4000;
+  static const motivacaoAtual = 2000;
+  static const algoMais = 4000;
+}
+
+String anamneseClipField(String value, int max) {
+  final t = value.trim();
+  if (t.length <= max) return t;
+  return t.substring(0, max);
+}
+
+String anamneseSecaoTitle(String secao) => switch (secao) {
+  anamneseSecaoSaude => 'Saúde',
+  anamneseSecaoHabitos => 'Hábitos',
+  anamneseSecaoTreino => 'Treino e objetivos',
+  _ => 'PAR-Q+',
+};
+
 String anamneseParqMetricValue(Anamnese a) {
   if (a.parqPositivo == true) return 'Atenção';
   if (a.parqCompleto == true) return 'Ok';

@@ -76,182 +76,49 @@ class _RetomarTreinoBanner extends StatelessWidget {
   }
 }
 
-class _TrainingHero extends StatelessWidget {
+class _WeekProgressStrip extends StatelessWidget {
   final int ativos;
   final int startableCount;
   final int total;
-  final int totalExercicios;
-  final int totalConcluidos;
-  final bool isDark;
   final int? streakAtual;
-  final String? scoreNudge;
+  final bool isDark;
 
-  const _TrainingHero({
+  const _WeekProgressStrip({
     required this.ativos,
     required this.startableCount,
     required this.total,
-    required this.totalExercicios,
-    required this.totalConcluidos,
     required this.isDark,
     this.streakAtual,
-    this.scoreNudge,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final progresso =
-        totalExercicios == 0 ? 0.0 : totalConcluidos / totalExercicios;
-    final hasExercises = totalExercicios > 0;
-    final hasStartable = startableCount > 0;
-    final String headline;
-    final String subtitle;
-    if (hasStartable) {
-      headline =
-          startableCount == 1
-              ? '1 treino pronto — começa agora'
-              : '$startableCount treinos prontos — escolhe um';
-      subtitle =
-          hasExercises
-              ? '$total no plano · $totalConcluidos/$totalExercicios exercícios'
-              : '$total no plano atual';
-    } else if (hasExercises) {
-      headline =
-          '$ativos treino${ativos == 1 ? '' : 's'} ativo${ativos == 1 ? '' : 's'}';
-      subtitle =
-          '$total no plano atual · $totalConcluidos/$totalExercicios exercícios';
-    } else {
-      headline = 'Plano em montagem';
-      subtitle = '$total treino${total == 1 ? '' : 's'} no plano atual';
-    }
-    final showStreak = streakAtual != null && streakAtual! > 0;
-
+    final streak =
+        streakAtual != null && streakAtual! > 0
+            ? (streakAtual == 1
+                ? ' · 1 sem. de sequência'
+                : ' · $streakAtual sem. de sequência')
+            : '';
+    final line =
+        startableCount > 0
+            ? '$startableCount prontos · $total no plano$streak'
+            : '$ativos ativos · $total no plano$streak';
     return FxStripCard(
-      emphasize: true,
-      accent: primary,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      headline,
-                      style: FocuxHubTypography.sectionTitle(
-                        context,
-                        color: ink,
-                      ).copyWith(fontSize: 16, fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: FocuxHubTypography.bodyMuted(
-                        color: mute,
-                        fontWeight: FontWeight.w600,
-                      ).copyWith(fontSize: 12.5),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (showStreak || (scoreNudge != null && scoreNudge!.isNotEmpty)) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: [
-                if (showStreak)
-                  _TrainingEngageChip(
-                    icon: Icons.local_fire_department_rounded,
-                    label:
-                        streakAtual == 1
-                            ? '1 dia de sequência'
-                            : '$streakAtual dias de sequência',
-                    color: EagleTokens.warn,
-                  ),
-                if (scoreNudge != null && scoreNudge!.isNotEmpty)
-                  _TrainingEngageChip(
-                    icon: Icons.bolt_rounded,
-                    label: scoreNudge!,
-                    color: primary,
-                  ),
-              ],
-            ),
-          ],
-          if (hasExercises) ...[
-            const SizedBox(height: 8),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: progresso,
-                minHeight: 4,
-                backgroundColor:
-                    isDark ? EagleTokens.darkLine : TokensStrip.borderDefault,
-                valueColor: AlwaysStoppedAnimation(primary),
-              ),
-            ),
-          ] else if (!hasStartable) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Exercícios aparecem quando o personal liberar.',
-              style: FocuxHubTypography.bodyMuted(
-                color: mute,
-                fontWeight: FontWeight.w600,
-              ).copyWith(fontSize: 12, height: 1.3),
-            ),
-          ],
-        ],
+      glowStrength: 0.04,
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s2,
       ),
-    );
-  }
-}
-
-class _TrainingEngageChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  const _TrainingEngageChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 4),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 220),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        line,
+        style: FocuxHubTypography.bodyMuted(
+          color: chrome.mute,
+          fontWeight: FontWeight.w700,
+        ).copyWith(color: primary.withValues(alpha: 0.9)),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
@@ -515,251 +382,4 @@ void _showTrainingPendingSheet({
           ),
         ),
   );
-}
-
-class _TrainingReadinessSection extends StatelessWidget {
-  final int totalExercicios;
-  final int totalConcluidos;
-  final int ativos;
-  final bool hasStartable;
-  final bool isDark;
-
-  const _TrainingReadinessSection({
-    required this.totalExercicios,
-    required this.totalConcluidos,
-    required this.ativos,
-    required this.hasStartable,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.forBrightness(context, isDark);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-    final hasExercises = totalExercicios > 0;
-
-    // Start-first: when Iniciar exists, skip the loud "Próxima liberação" pipeline.
-    if (hasStartable && !hasExercises) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: TokensStrip.s4,
-        vertical: TokensStrip.s3,
-      ),
-      decoration: chrome.listCard(primary: primary),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            hasExercises ? 'Antes de treinar' : 'Próxima liberação',
-            style: TextStyle(
-              color: ink,
-              fontSize: hasExercises ? 15 : 14,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            hasExercises
-                ? 'Entre com foco, registre as séries e finalize com feedback.'
-                : 'O que falta para a sessão guiada aparecer.',
-            style: TextStyle(color: mute, fontSize: 12, height: 1.28),
-          ),
-          const SizedBox(height: 10),
-          if (hasExercises)
-            Row(
-              children: [
-                Expanded(
-                  child: _ReadinessPill(
-                    icon: Icons.assignment_turned_in_outlined,
-                    title: 'Registro',
-                    value: '$totalConcluidos/$totalExercicios',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ReadinessPill(
-                    icon: Icons.local_fire_department_outlined,
-                    title: 'Rotina',
-                    value: '$ativos ativo${ativos == 1 ? '' : 's'}',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                ),
-              ],
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: _ReadinessMarker(
-                    icon: Icons.bookmark_added_outlined,
-                    title: 'Reservado',
-                    state: '$ativos ativo${ativos == 1 ? '' : 's'}',
-                    color: EagleTokens.good,
-                    isDark: isDark,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _ReadinessMarker(
-                    icon: Icons.tune_rounded,
-                    title: 'Ficha',
-                    state: 'pendente',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _ReadinessMarker(
-                    icon: Icons.play_circle_outline_rounded,
-                    title: 'Sessão',
-                    state: 'proximo',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ReadinessMarker extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String state;
-  final Color color;
-  final bool isDark;
-
-  const _ReadinessMarker({
-    required this.icon,
-    required this.title,
-    required this.state,
-    required this.color,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
-    final ink = chrome.ink;
-    final mute = chrome.mute;
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: chrome.listCard(primary: color),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: BrandPalette.soft(color, dark: isDark),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 15, color: color),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: ink,
-              fontSize: 11.5,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            state,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: mute,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReadinessPill extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-  final Color color;
-  final bool isDark;
-
-  const _ReadinessPill({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.color,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: BrandPalette.soft(color, dark: isDark),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 16),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: mute,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: ink,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

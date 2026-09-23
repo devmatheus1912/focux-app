@@ -15,10 +15,19 @@ String friendlyError(Object error, {String? fallback}) {
     // Try to extract a server-provided message. `erro` is the field name in
     // the paired contract; the others stay as tolerance for older payloads.
     if (data is Map) {
+      final fieldFriendly = _friendlyValidationDetalhes(data['detalhes']);
+      if (fieldFriendly != null) return fieldFriendly;
       final msg =
           data['erro'] ?? data['message'] ?? data['mensagem'] ?? data['error'];
       if (msg is String && msg.trim().isNotEmpty) {
-        return _humanizeServerMessage(msg);
+        final humanized = _humanizeServerMessage(msg);
+        // Validação genérica sem detalhes → mensagem mais acionável.
+        if (statusCode == 400 &&
+            (humanized.toLowerCase().contains('validação') ||
+                humanized.toLowerCase().contains('validacao'))) {
+          return 'Revise os campos destacados e tente de novo.';
+        }
+        return humanized;
       }
     }
     if (data is String && data.trim().isNotEmpty && data.length < 200) {
@@ -100,6 +109,70 @@ String friendlyError(Object error, {String? fallback}) {
   }
 
   return fb;
+}
+
+/// Converte `detalhes` de MethodArgumentNotValid (campo → mensagem) em copy PT.
+String? _friendlyValidationDetalhes(Object? raw) {
+  if (raw is! Map || raw.isEmpty) return null;
+  final parts = <String>[];
+  for (final entry in raw.entries) {
+    final key = entry.key.toString();
+    final label = _validationFieldLabel(key);
+    final detail = entry.value?.toString().trim() ?? '';
+    if (detail.isEmpty) {
+      parts.add(label);
+      continue;
+    }
+    final lower = detail.toLowerCase();
+    if (lower.contains('size') ||
+        lower.contains('between') ||
+        lower.contains('length') ||
+        lower.contains('máximo') ||
+        lower.contains('maximo') ||
+        lower.contains('max')) {
+      parts.add('$label está longo demais');
+    } else if (lower.contains('not blank') ||
+        lower.contains('not null') ||
+        lower.contains('obrigat')) {
+      parts.add('$label é obrigatório');
+    } else {
+      parts.add('$label: ${_humanizeServerMessage(detail)}');
+    }
+  }
+  if (parts.isEmpty) return null;
+  if (parts.length == 1) return parts.first;
+  if (parts.length == 2) return '${parts[0]} e ${parts[1]}.';
+  return '${parts.take(2).join(', ')} e mais ${parts.length - 2}.';
+}
+
+String _validationFieldLabel(String field) {
+  const labels = {
+    'qualidadeSono': 'Qualidade do sono',
+    'nivelEstresse': 'Nível de estresse',
+    'tabagismo': 'Tabagismo',
+    'alcool': 'Álcool',
+    'objetivo': 'Objetivo',
+    'objetivoDetalhado': 'Objetivo detalhado',
+    'historicoMedico': 'Histórico médico',
+    'cirurgias': 'Cirurgias',
+    'doresCronicas': 'Dores crônicas',
+    'lesoes': 'Lesões',
+    'medicamentos': 'Medicamentos',
+    'alergias': 'Alergias',
+    'gestacaoPosParto': 'Gestação / pós-parto',
+    'sintomasCv': 'Sintomas cardiovasculares',
+    'observacoes': 'Observações',
+    'preferenciasTreino': 'Preferências de treino',
+    'restricoesAlimentares': 'Restrições alimentares',
+    'historicoAtividade': 'Histórico de atividade',
+    'motivoInterrupcoes': 'Motivo de interrupções',
+    'motivacaoAtual': 'Motivação atual',
+    'algoMais': 'Algo mais',
+    'parqOutraRazaoDetalhe': 'Detalhe do PAR-Q+',
+    'sonoHoras': 'Horas de sono',
+    'disponibilidadeSemanal': 'Disponibilidade',
+  };
+  return labels[field] ?? field;
 }
 
 String _humanizeServerMessage(String raw) {

@@ -48,15 +48,12 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: Center(
-          child: SizedBox(
-            width: 22,
-            height: 22,
-            child: FxLoading(strokeWidth: 2),
-          ),
-        ),
+      return Builder(
+        builder:
+            (context) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+              child: FxLoading.sectionShimmer(context, height: 128),
+            ),
       );
     }
     if (_data == null) return const SizedBox.shrink();

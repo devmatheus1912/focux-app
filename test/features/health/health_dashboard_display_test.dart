@@ -10,7 +10,6 @@ void main() {
     expect(saudeDesconectarConfirmTitle(), contains('Desconectar'));
     expect(saudeDesconectarConfirmMessage(), contains('Apple Health'));
     expect(saudeSyncSoftError(), contains('servidor'));
-    expect(saudeSyncSoftRetryLabel(), 'Tentar sync');
     expect(saudeConectarCtaLabel(), 'Conectar');
   });
 }

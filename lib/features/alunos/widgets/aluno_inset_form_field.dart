@@ -22,6 +22,7 @@ class AlunoInsetFormField extends StatelessWidget {
     this.inputFormatters,
     this.validator,
     this.maxLines = 1,
+    this.maxLength,
     this.showDivider = true,
   });
 
@@ -35,6 +36,7 @@ class AlunoInsetFormField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final int maxLines;
+  final int? maxLength;
   final bool showDivider;
 
   @override
@@ -57,6 +59,7 @@ class AlunoInsetFormField extends StatelessWidget {
             inputFormatters: inputFormatters,
             validator: validator,
             maxLines: maxLines,
+            maxLength: maxLength,
             textInputAction:
                 maxLines > 1 ? TextInputAction.newline : TextInputAction.next,
             onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
@@ -66,6 +69,9 @@ class AlunoInsetFormField extends StatelessWidget {
               icon: icon,
               hint: fieldHint,
               iconColor: soft,
+            ).copyWith(
+              // Contador só nos campos curtos (BE @Size ≤ 50).
+              counterText: (maxLength != null && maxLength! <= 50) ? null : '',
             ),
           ),
         ),

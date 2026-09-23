@@ -261,32 +261,92 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
   Map<String, dynamic> _payload() => {
     for (final e in _parq.entries)
       if (e.value != null) e.key: e.value,
-    'parqOutraRazaoDetalhe': _parqOutraDetalheCtrl.text.trim(),
-    'historicoMedico': _historicoCtrl.text.trim(),
-    'cirurgias': _cirurgiasCtrl.text.trim(),
-    'doresCronicas': _doresCtrl.text.trim(),
-    'lesoes': _lesoesCtrl.text.trim(),
-    'medicamentos': _medicCtrl.text.trim(),
-    'alergias': _alergiasCtrl.text.trim(),
-    'gestacaoPosParto': _gestacaoCtrl.text.trim(),
+    'parqOutraRazaoDetalhe': anamneseClipField(
+      _parqOutraDetalheCtrl.text,
+      AnamneseFieldLimits.parqOutraRazaoDetalhe,
+    ),
+    'historicoMedico': anamneseClipField(
+      _historicoCtrl.text,
+      AnamneseFieldLimits.historicoMedico,
+    ),
+    'cirurgias': anamneseClipField(
+      _cirurgiasCtrl.text,
+      AnamneseFieldLimits.cirurgias,
+    ),
+    'doresCronicas': anamneseClipField(
+      _doresCtrl.text,
+      AnamneseFieldLimits.doresCronicas,
+    ),
+    'lesoes': anamneseClipField(_lesoesCtrl.text, AnamneseFieldLimits.lesoes),
+    'medicamentos': anamneseClipField(
+      _medicCtrl.text,
+      AnamneseFieldLimits.medicamentos,
+    ),
+    'alergias': anamneseClipField(
+      _alergiasCtrl.text,
+      AnamneseFieldLimits.alergias,
+    ),
+    'gestacaoPosParto': anamneseClipField(
+      _gestacaoCtrl.text,
+      AnamneseFieldLimits.gestacaoPosParto,
+    ),
     if (_historicoFamiliarCv != null)
       'historicoFamiliarCv': _historicoFamiliarCv,
-    'sintomasCv': _sintomasCvCtrl.text.trim(),
+    'sintomasCv': anamneseClipField(
+      _sintomasCvCtrl.text,
+      AnamneseFieldLimits.sintomasCv,
+    ),
     if (_sonoHoras != null) 'sonoHoras': _sonoHoras,
-    'qualidadeSono': _qualidadeSonoCtrl.text.trim(),
-    'nivelEstresse': _estresseCtrl.text.trim(),
-    'tabagismo': _tabagismoCtrl.text.trim(),
-    'alcool': _alcoolCtrl.text.trim(),
-    'observacoes': _obsCtrl.text.trim(),
-    'objetivo': _objetivoCtrl.text.trim(),
-    'objetivoDetalhado': _objDetalhadoCtrl.text.trim(),
+    'qualidadeSono': anamneseClipField(
+      _qualidadeSonoCtrl.text,
+      AnamneseFieldLimits.qualidadeSono,
+    ),
+    'nivelEstresse': anamneseClipField(
+      _estresseCtrl.text,
+      AnamneseFieldLimits.nivelEstresse,
+    ),
+    'tabagismo': anamneseClipField(
+      _tabagismoCtrl.text,
+      AnamneseFieldLimits.tabagismo,
+    ),
+    'alcool': anamneseClipField(_alcoolCtrl.text, AnamneseFieldLimits.alcool),
+    'observacoes': anamneseClipField(
+      _obsCtrl.text,
+      AnamneseFieldLimits.observacoes,
+    ),
+    'objetivo': anamneseClipField(
+      _objetivoCtrl.text,
+      AnamneseFieldLimits.objetivo,
+    ),
+    'objetivoDetalhado': anamneseClipField(
+      _objDetalhadoCtrl.text,
+      AnamneseFieldLimits.objetivoDetalhado,
+    ),
     'disponibilidadeSemanal': _dispSemanal,
-    'preferenciasTreino': _prefTreinoCtrl.text.trim(),
-    'restricoesAlimentares': _restricoesCtrl.text.trim(),
-    'historicoAtividade': _historicoAtividadeCtrl.text.trim(),
-    'motivoInterrupcoes': _motivoInterrupcoesCtrl.text.trim(),
-    'motivacaoAtual': _motivacaoCtrl.text.trim(),
-    'algoMais': _algoMaisCtrl.text.trim(),
+    'preferenciasTreino': anamneseClipField(
+      _prefTreinoCtrl.text,
+      AnamneseFieldLimits.preferenciasTreino,
+    ),
+    'restricoesAlimentares': anamneseClipField(
+      _restricoesCtrl.text,
+      AnamneseFieldLimits.restricoesAlimentares,
+    ),
+    'historicoAtividade': anamneseClipField(
+      _historicoAtividadeCtrl.text,
+      AnamneseFieldLimits.historicoAtividade,
+    ),
+    'motivoInterrupcoes': anamneseClipField(
+      _motivoInterrupcoesCtrl.text,
+      AnamneseFieldLimits.motivoInterrupcoes,
+    ),
+    'motivacaoAtual': anamneseClipField(
+      _motivacaoCtrl.text,
+      AnamneseFieldLimits.motivacaoAtual,
+    ),
+    'algoMais': anamneseClipField(
+      _algoMaisCtrl.text,
+      AnamneseFieldLimits.algoMais,
+    ),
   };
 
   Future<void> _salvar() async {
@@ -448,6 +508,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                             hint: 'Descreva o motivo',
                             icon: Icons.notes_outlined,
                             maxLines: 3,
+                            maxLength: AnamneseFieldLimits.parqOutraRazaoDetalhe,
                             showDivider: false,
                           ),
                         ),
@@ -464,6 +525,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Doenças, diagnósticos, acompanhamentos',
                         icon: Icons.history_outlined,
                         maxLines: 4,
+                        maxLength: AnamneseFieldLimits.historicoMedico,
                       ),
                       AlunoInsetFormField(
                         controller: _cirurgiasCtrl,
@@ -471,6 +533,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: LCA, hérnia, quando ocorreu',
                         icon: Icons.local_hospital_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.cirurgias,
                       ),
                       AlunoInsetFormField(
                         controller: _doresCtrl,
@@ -478,6 +541,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: cervical, ombro direito',
                         icon: Icons.sentiment_dissatisfied_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.doresCronicas,
                       ),
                       AlunoInsetFormField(
                         controller: _lesoesCtrl,
@@ -485,6 +549,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: joelho, lombar, evitar impacto',
                         icon: Icons.healing_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.lesoes,
                       ),
                       AlunoInsetFormField(
                         controller: _medicCtrl,
@@ -492,6 +557,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: anti-hipertensivo, tireoide',
                         icon: Icons.medication_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.medicamentos,
                       ),
                       AlunoInsetFormField(
                         controller: _alergiasCtrl,
@@ -499,6 +565,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Medicamentos, alimentos, outras',
                         icon: Icons.warning_amber_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.alergias,
                       ),
                       AlunoInsetFormField(
                         controller: _gestacaoCtrl,
@@ -506,6 +573,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Se aplicável',
                         icon: Icons.pregnant_woman_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.gestacaoPosParto,
                       ),
                       AlunoChoiceSection(
                         label: 'Histórico familiar cardiovascular',
@@ -532,6 +600,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Palpitação, falta de ar, etc.',
                         icon: Icons.favorite_border,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.sintomasCv,
                         showDivider: false,
                       ),
                     ],
@@ -556,14 +625,16 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         label: 'Qualidade do sono',
                         hint: 'Ex.: boa, irregular, acordar cansado',
                         icon: Icons.bedtime_outlined,
-                        maxLines: 2,
+                        maxLines: 1,
+                        maxLength: AnamneseFieldLimits.qualidadeSono,
                       ),
                       AlunoInsetFormField(
                         controller: _estresseCtrl,
                         label: 'Nível de estresse',
                         hint: 'Ex.: baixo, médio, alto',
                         icon: Icons.psychology_outlined,
-                        maxLines: 2,
+                        maxLines: 1,
+                        maxLength: AnamneseFieldLimits.nivelEstresse,
                       ),
                       AlunoInsetFormField(
                         controller: _tabagismoCtrl,
@@ -571,6 +642,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Não fumo / quantos por dia',
                         icon: Icons.smoke_free_outlined,
                         maxLines: 1,
+                        maxLength: AnamneseFieldLimits.tabagismo,
                       ),
                       AlunoInsetFormField(
                         controller: _alcoolCtrl,
@@ -578,6 +650,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Frequência e quantidade',
                         icon: Icons.local_bar_outlined,
                         maxLines: 1,
+                        maxLength: AnamneseFieldLimits.alcool,
                       ),
                       AlunoInsetFormField(
                         controller: _obsCtrl,
@@ -585,6 +658,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Rotina, preferências, o que quiser avisar',
                         icon: Icons.notes_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.observacoes,
                         showDivider: false,
                       ),
                     ],
@@ -600,6 +674,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: hipertrofia, emagrecimento',
                         icon: Icons.flag_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.objetivo,
                       ),
                       AlunoInsetFormField(
                         controller: _objDetalhadoCtrl,
@@ -607,6 +682,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Meta em 8–12 semanas, eventos, prioridades',
                         icon: Icons.track_changes_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.objetivoDetalhado,
                       ),
                       FxSettingsTile(
                         fxIcon: 'calendar',
@@ -621,6 +697,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: manhã, musculação, evitar corrida',
                         icon: Icons.fitness_center_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.preferenciasTreino,
                       ),
                       AlunoInsetFormField(
                         controller: _restricoesCtrl,
@@ -628,6 +705,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Ex.: lactose, vegetariano',
                         icon: Icons.restaurant_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.restricoesAlimentares,
                       ),
                       AlunoInsetFormField(
                         controller: _historicoAtividadeCtrl,
@@ -635,6 +713,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'O que já praticou e por quanto tempo',
                         icon: Icons.history_edu_outlined,
                         maxLines: 3,
+                        maxLength: AnamneseFieldLimits.historicoAtividade,
                       ),
                       AlunoInsetFormField(
                         controller: _motivoInterrupcoesCtrl,
@@ -642,6 +721,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Por que parou de treinar antes',
                         icon: Icons.pause_circle_outline,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.motivoInterrupcoes,
                       ),
                       AlunoInsetFormField(
                         controller: _motivacaoCtrl,
@@ -649,6 +729,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'O que te move agora',
                         icon: Icons.local_fire_department_outlined,
                         maxLines: 2,
+                        maxLength: AnamneseFieldLimits.motivacaoAtual,
                         showDivider: false,
                       ),
                     ],
@@ -664,6 +745,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                         hint: 'Livre — o que não coube acima',
                         icon: Icons.chat_bubble_outline,
                         maxLines: 4,
+                        maxLength: AnamneseFieldLimits.algoMais,
                         showDivider: false,
                       ),
                     ],

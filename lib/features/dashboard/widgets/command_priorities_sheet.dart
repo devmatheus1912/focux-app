@@ -102,7 +102,7 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
             subtitle: subtitle,
             leading: FxIcon(name: 'route', size: 18, color: primary),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: TokensStrip.s3),
           ConstrainedBox(
             constraints: BoxConstraints(
               maxHeight: itemEstimate.clamp(96.0, listMaxHeight),
@@ -128,7 +128,7 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                   ),
                 if (radarActions.isNotEmpty) ...[
                   if (impactActions.isNotEmpty) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: TokensStrip.s3),
                     Semantics(
                       button: true,
                       expanded: _radarExpanded,
@@ -142,9 +142,9 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                         },
                         borderRadius: BorderRadius.circular(TokensStrip.rInput),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 8,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: TokensStrip.s1,
+                            vertical: TokensStrip.s2,
                           ),
                           child: Row(
                             children: [
@@ -171,7 +171,8 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
                     ),
                   ],
                   if (_radarExpanded || impactActions.isEmpty) ...[
-                    if (impactActions.isNotEmpty) const SizedBox(height: 8),
+                    if (impactActions.isNotEmpty)
+                      SizedBox(height: TokensStrip.s2),
                     FxSettingsGroup(
                       accent: primary,
                       children: [

@@ -192,43 +192,61 @@ class _AnamneseFicha extends StatelessWidget {
       ],
     };
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      decoration: fxListCardDecoration(
-        context,
-        accent: Theme.of(context).colorScheme.primary,
-        radius: TokensStrip.rCard,
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < rows.length; i++)
-            Padding(
-              padding: EdgeInsets.only(bottom: i == rows.length - 1 ? 0 : 10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 112,
-                    child: Text(
-                      rows[i].$1,
-                      style: FocuxHubTypography.chip(
-                        Theme.of(context).hintColor,
-                      ).copyWith(fontWeight: FontWeight.w700, fontSize: 11),
-                    ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          anamneseSecaoTitle(secao),
+          style: FocuxHubTypography.sectionTitle(
+            context,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        Container(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: fxListCardDecoration(
+            context,
+            accent: Theme.of(context).colorScheme.primary,
+            radius: TokensStrip.rCard,
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < rows.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: i == rows.length - 1 ? 0 : 10,
                   ),
-                  Expanded(
-                    child: Text(
-                      rows[i].$2,
-                      style: FocuxHubTypography.body(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ).copyWith(fontWeight: FontWeight.w600, height: 1.3),
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 112,
+                        child: Text(
+                          rows[i].$1,
+                          style: FocuxHubTypography.chip(
+                            Theme.of(context).hintColor,
+                          ).copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          rows[i].$2,
+                          style: FocuxHubTypography.body(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ).copyWith(fontWeight: FontWeight.w600, height: 1.3),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-        ],
-      ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -98,16 +98,6 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
     final home = homeAsync.valueOrNull;
-    final experience =
-        home == null
-            ? null
-            : buildAlunoHomeExperience(
-              aluno: home.aluno,
-              medidas: home.medidas,
-              treinos: home.treinos,
-              historico: home.historico,
-              mensagens: home.chat.toSyntheticMessages(),
-            );
 
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final base = treinosAsync.valueOrNull?.content ?? const <ExecucaoTreino>[];
@@ -181,16 +171,6 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                           .length;
                   final startableCount =
                       ordered.where(isTreinoDisponivelParaIniciar).length;
-                  final hasStartable = startableCount > 0;
-                  final totalExercicios = ordered.fold<int>(
-                    0,
-                    (sum, t) => sum + t.exercicios.length,
-                  );
-                  final totalConcluidos = ordered.fold<int>(
-                    0,
-                    (sum, t) =>
-                        sum + t.exercicios.where((e) => e.concluido).length,
-                  );
                   final itemCount =
                       ordered.length +
                       (_hasMore || _loadMoreError != null ? 1 : 0);
@@ -232,16 +212,20 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                               20,
                               12,
                             ),
-                            child: _TrainingHero(
-                              ativos: ativos,
-                              startableCount: startableCount,
-                              total: ordered.length,
-                              totalExercicios: totalExercicios,
-                              totalConcluidos: totalConcluidos,
-                              isDark: isDark,
-                              streakAtual: home?.streakAtual,
-                              scoreNudge: experience?.score.nextSignal,
-                            ),
+                            child:
+                                home != null
+                                    ? ProgressoSemanalWidget(
+                                      treinos: home.treinos,
+                                      historico: home.historico,
+                                      streakAtual: home.streakAtual,
+                                    )
+                                    : _WeekProgressStrip(
+                                      ativos: ativos,
+                                      startableCount: startableCount,
+                                      total: ordered.length,
+                                      streakAtual: home?.streakAtual,
+                                      isDark: isDark,
+                                    ),
                           ),
                         ),
                         SliverPadding(
@@ -324,22 +308,8 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                             },
                           ),
                         ),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              TokensStrip.s5,
-                              0,
-                              20,
-                              110,
-                            ),
-                            child: _TrainingReadinessSection(
-                              totalExercicios: totalExercicios,
-                              totalConcluidos: totalConcluidos,
-                              ativos: ativos,
-                              hasStartable: hasStartable,
-                              isDark: isDark,
-                            ),
-                          ),
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 110),
                         ),
                       ],
                     ),

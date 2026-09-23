@@ -106,7 +106,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return prefs.getBool('onboarding_done_v3') ?? false;
   }
 
-  static const _resolveNavigationTimeout = Duration(seconds: 8);
+  static const _resolveNavigationTimeout = Duration(seconds: 5);
+  static const _profilePrefetchTimeout = Duration(seconds: 2);
 
   Future<void> _bootstrap(SplashMotionBudget budget) async {
     final bootstrapFuture = _resolveNavigationTarget(budget).timeout(
@@ -120,6 +121,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final minDelay = Future<void>.delayed(budget.minVisible);
 
     final target = await bootstrapFuture;
+    // Não fica preso em 0.92: se o resolve já voltou, fecha a barra e navega.
     await Future.wait([progressFuture, minDelay]);
     if (!mounted) return;
 
@@ -188,7 +190,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       try {
         final aluno = await ref
             .read(alunoMeProvider.future)
-            .timeout(_resolveNavigationTimeout);
+            .timeout(_profilePrefetchTimeout);
         final prefs = await SharedPreferences.getInstance();
         final onboardingSeen =
             prefs.getBool('aluno_activation_seen_${aluno.id}') ?? false;
@@ -204,7 +206,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     try {
       prefetchPersonalDashboardHome(ref);
       prefetchAlunosHome(ref);
-      final perfil = await ref.read(perfilProvider.future);
+      // Prefetch continua em background; não bloqueia a 1ª abertura do dia.
+      final perfil = await ref
+          .read(perfilProvider.future)
+          .timeout(_profilePrefetchTimeout);
       if (!mounted) return '/dashboard/personal';
       BibliotecaBootstrap.ensureReadyWithContainer(
         ProviderScope.containerOf(context),

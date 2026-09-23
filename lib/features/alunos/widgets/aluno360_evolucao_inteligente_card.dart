@@ -221,39 +221,26 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 runSpacing: TokensStrip.s2,
                                 children: [
                                   DashboardHomeActionChip(
-                                    label: 'Pedir check-in',
-                                    accent: primary,
+                                    label:
+                                        hasRadarP0 && !timelineHasSignals
+                                            ? 'Radar corporal'
+                                            : 'Pedir check-in',
+                                    accent:
+                                        hasRadarP0 && !timelineHasSignals
+                                            ? EagleTokens.warn
+                                            : primary,
                                     isDark: isDark,
                                     onPressed:
-                                        () => _openCheckinMessage(context),
+                                        () =>
+                                            hasRadarP0 && !timelineHasSignals
+                                                ? context.push(
+                                                  '/alunos/$alunoId/evolucao-comparativo',
+                                                  extra: alunoNome,
+                                                )
+                                                : _openCheckinMessage(context),
                                   ),
-                                  if (hasRadarP0 && !timelineHasSignals)
-                                    DashboardHomeActionChip(
-                                      label: 'Radar corporal',
-                                      accent: EagleTokens.warn,
-                                      isDark: isDark,
-                                      onPressed:
-                                          () => context.push(
-                                            '/alunos/$alunoId/evolucao-comparativo',
-                                            extra: alunoNome,
-                                          ),
-                                    ),
                                 ],
                               ),
-                              if (!(hasRadarP0 && !timelineHasSignals)) ...[
-                                const SizedBox(height: TokensStrip.s2),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: TextButton(
-                                    onPressed:
-                                        () => context.push(
-                                          '/alunos/$alunoId/chat',
-                                          extra: alunoNome,
-                                        ),
-                                    child: const Text('Abrir chat'),
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                         )
@@ -313,7 +300,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                       hint:
                                           hideMonthlyVolume
                                               ? (singleWeek
-                                                  ? 'Baseline da base'
+                                                  ? ''
                                                   : 'Carga × reps')
                                               : 'Mês ${formatAlunoVolumeKg(ev.volumeMensal)}',
                                       color: primary,

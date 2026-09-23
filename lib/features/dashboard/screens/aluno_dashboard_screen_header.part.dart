@@ -285,13 +285,14 @@ class _TodayFocusCard extends StatelessWidget {
                 label: score.rhythmLabel,
                 onPrimary: mute,
               ),
+              // ≤2 chips no fold — sem aderência extra (ProgressoSemanal já sinaliza).
               if (score.nextSignal.trim().isNotEmpty)
                 _WorkoutInsightPill(
                   icon: Icons.bolt_rounded,
                   label: score.nextSignal,
                   onPrimary: primary,
                 ),
-            ],
+            ].take(2).toList(),
           ),
           const SizedBox(height: 12),
           DashboardHomeActionChip(

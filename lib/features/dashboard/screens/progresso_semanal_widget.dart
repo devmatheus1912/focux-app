@@ -41,19 +41,32 @@ class ProgressoSemanalWidget extends StatelessWidget {
     ).subtract(Duration(days: now.weekday - 1));
 
     return FxStripCard(
-      glowStrength: 0.08,
+      glowStrength: 0.04,
       padding: const EdgeInsets.all(TokensStrip.s3),
       semanticsLabel:
           'Consistência semanal. $completedThisWeek de $weeklyGoal treinos.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Consistência',
-            style: FocuxHubTypography.sectionTitle(
-              context,
-              color: chrome.ink,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Consistência',
+                  style: FocuxHubTypography.sectionTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                ),
+              ),
+              if (completedThisWeek > 0)
+                Text(
+                  '$completedThisWeek dia${completedThisWeek == 1 ? '' : 's'} esta semana',
+                  style: FocuxHubTypography.chip(primary).copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s2),
           Text(

@@ -14,15 +14,11 @@ alunosListSparklineMetrics({
       (raw.isEmpty
           ? null
           : ((weeklyCheckins / 7.0) * 100).round().clamp(0, 100));
-  // Sem série semanal na lista: nível de aderência como sparkline quieta (não inventa ritmo).
+  // Sem série semanal: empty track honesto (não inventa ritmo com % proxy).
   final sparkValues =
       raw.any((v) => v > 0)
           ? FocuxDataViz.ensureRenderableSeries(raw)
-          : (aderenciaPercent != null && aderenciaPercent > 0
-              ? FocuxDataViz.ensureRenderableSeries([
-                aderenciaPercent.toDouble(),
-              ])
-              : const <double>[]);
+          : const <double>[];
   return (
     sparkValues: sparkValues,
     weeklyCheckins: weeklyCheckins,

@@ -16,14 +16,13 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/checkin_repository.dart';
 import '../data/historico_mem_cache.dart';
 import '../providers/checkin_provider.dart';
@@ -112,7 +111,7 @@ class _HistoricoDetalheScreenState
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
-            title: 'Treino',
+            title: execucao?.treinoNome ?? 'Treino',
             subtitle: freshness,
             onBack: _leave,
             actions: [
@@ -140,9 +139,12 @@ class _HistoricoDetalheScreenState
           ),
           body:
               _loading && execucao == null
-                  ? const Padding(
-                    padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: SkeletonList(count: 3),
+                  ? Padding(
+                    padding: const EdgeInsets.all(FxSettingsLayout.pageInset),
+                    child: FxLoading.sectionShimmer(
+                      context,
+                      height: 220,
+                    ),
                   )
                   : _erro != null && execucao == null
                   ? FxContentWidthLimiter(
@@ -235,7 +237,7 @@ class _DetalheBody extends StatelessWidget {
                       iniciadoEm: execucao.iniciadoEm,
                     ),
                   ),
-                  const SizedBox(height: TokensStrip.s3),
+                  const SizedBox(height: TokensStrip.s2),
                   FxStripCard(
                     emphasize: false,
                     accent: primary,
@@ -254,10 +256,10 @@ class _DetalheBody extends StatelessWidget {
                                     historicoStatusLabel(execucao.status),
                                     style: FocuxHubTypography.kpi(
                                       color: fxScreenInk(context),
-                                      fontSize: FocuxHubTypography.metricLg,
+                                      fontSize: FocuxHubTypography.metricMd,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Text(
                                     historicoDateLabel(execucao.iniciadoEm)
                                             .isEmpty
@@ -277,7 +279,7 @@ class _DetalheBody extends StatelessWidget {
                               duracao ?? '—',
                               style: FocuxHubTypography.kpi(
                                 color: primary,
-                                fontSize: FocuxHubTypography.metricMd,
+                                fontSize: FocuxHubTypography.metricEm,
                               ),
                             ),
                           ],
@@ -295,6 +297,7 @@ class _DetalheBody extends StatelessWidget {
                                 hint: historicoCountLabel(total),
                                 color: primary,
                                 isDark: isDark,
+                                dense: true,
                                 emphasis: OperationalMetricEmphasis.muted,
                               ),
                             ),
@@ -306,6 +309,7 @@ class _DetalheBody extends StatelessWidget {
                                 hint: historicoPrHint(recordes),
                                 color: primary,
                                 isDark: isDark,
+                                dense: true,
                                 emphasis: OperationalMetricEmphasis.muted,
                               ),
                             ),
@@ -315,41 +319,26 @@ class _DetalheBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s3),
-                  Wrap(
-                    spacing: TokensStrip.s2,
-                    runSpacing: TokensStrip.s2,
-                    children: [
-                      DashboardHomeActionChip(
-                        label: 'Treinos',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: () => context.go('/checkin/treinos'),
-                      ),
-                      DashboardHomeActionChip(
-                        label: 'Hoje',
-                        accent: primary,
-                        isDark: isDark,
-                        onPressed: () => context.go('/dashboard/aluno'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
                   AlunoSegmentedChoice(
                     options: historicoDetalheSecoes,
                     selected: secao,
                     isDark: isDark,
                     onSelect: onSecao,
                   ),
-                  const SizedBox(height: TokensStrip.s3),
+                  const SizedBox(height: TokensStrip.s2),
                   if (secao == historicoSecaoRecordes)
                     ..._recordes(prs, cargas)
                   else if (secao == historicoSecaoNotas)
                     ..._notas(execucao.exercicios)
                   else if (execucao.exercicios.isEmpty)
-                    const FxEmptyState(
-                      icon: 'dumbbell',
-                      title: 'Sem exercícios nesta execução',
-                      subtitle: 'O treino ainda pode ser feito de novo.',
+                    Padding(
+                      padding: const EdgeInsets.only(top: TokensStrip.s2),
+                      child: Text(
+                        'Sem exercícios nesta execução.',
+                        style: FocuxHubTypography.bodyMuted(
+                          color: fxScreenMute(context),
+                        ),
+                      ),
                     )
                   else
                     for (final item in execucao.exercicios)
@@ -369,7 +358,7 @@ class _DetalheBody extends StatelessWidget {
                         ),
                         leading: FxIcon(
                           name: item.concluido ? 'circle-check' : 'calendar',
-                          size: 22,
+                          size: 20,
                           color:
                               item.concluido
                                   ? EagleTokens.good

@@ -21,50 +21,84 @@ class CheckinRestBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final mm = (seconds ~/ 60).toString().padLeft(1, '0');
+    final ss = (seconds % 60).toString().padLeft(2, '0');
+    final countdown = seconds >= 60 ? '$mm:$ss' : '$seconds';
+
     return Material(
       color: chrome.cardFill,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          TokensStrip.s4,
-          TokensStrip.s2,
-          TokensStrip.s4,
-          TokensStrip.s2,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Descanso · ${seconds}s',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: chrome.ink,
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TokensStrip.s4,
+            TokensStrip.s3,
+            TokensStrip.s4,
+            TokensStrip.s3,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Descanso',
+                      style: FocuxHubTypography.chip(chrome.mute),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      countdown,
+                      style: FocuxHubTypography.kpi(
+                        color: chrome.ink,
+                        fontSize: TokensStrip.fontH2,
+                        fontWeight: FontWeight.w700,
+                      ).copyWith(
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            SizedBox(
-              height: checkinExecutionControlMin,
-              child: TextButton(
-                onPressed: onSkip,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(64, checkinExecutionControlMin),
-                ),
-                child: Text(checkinPularDescansoLabel()),
-              ),
-            ),
-            if (onTrocar != null)
               SizedBox(
-                height: checkinExecutionControlMin,
-                child: TextButton(
-                  onPressed: onTrocar,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(64, checkinExecutionControlMin),
+                height: checkinExecutionControlMin + 8,
+                child: FilledButton.tonal(
+                  onPressed: onSkip,
+                  style: FilledButton.styleFrom(
+                    minimumSize: Size(
+                      108,
+                      checkinExecutionControlMin + 8,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: TokensStrip.s3,
+                    ),
+                    foregroundColor: primary,
                   ),
-                  child: const Text('Trocar'),
+                  child: Text(checkinPularDescansoLabel()),
                 ),
               ),
-          ],
+              if (onTrocar != null) ...[
+                const SizedBox(width: TokensStrip.s2),
+                SizedBox(
+                  height: checkinExecutionControlMin + 8,
+                  child: TextButton(
+                    onPressed: onTrocar,
+                    style: TextButton.styleFrom(
+                      minimumSize: Size(
+                        72,
+                        checkinExecutionControlMin + 8,
+                      ),
+                    ),
+                    child: const Text('Trocar'),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -84,6 +118,10 @@ class CheckinRestFocusView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
+    final mm = (seconds ~/ 60).toString().padLeft(1, '0');
+    final ss = (seconds % 60).toString().padLeft(2, '0');
+    final countdown = seconds >= 60 ? '$mm:$ss' : '$seconds';
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
@@ -99,7 +137,7 @@ class CheckinRestFocusView extends StatelessWidget {
             ),
             const SizedBox(height: TokensStrip.s3),
             Text(
-              '$seconds',
+              countdown,
               style: FocuxHubTypography.kpi(
                 color: chrome.ink,
                 fontSize: TokensStrip.fontH1,
@@ -108,12 +146,13 @@ class CheckinRestFocusView extends StatelessWidget {
             ),
             const SizedBox(height: TokensStrip.s2),
             Text(
-              'segundos',
+              seconds >= 60 ? 'minutos' : 'segundos',
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
             const SizedBox(height: TokensStrip.s5),
             SizedBox(
-              height: checkinExecutionControlMin,
+              width: double.infinity,
+              height: checkinExecutionControlMin + 8,
               child: FxLiquidPrimaryButton(
                 label: checkinPularDescansoLabel(),
                 onPressed: onSkip,

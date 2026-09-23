@@ -35,7 +35,7 @@ class OperationalMetricTile extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    required this.hint,
+    this.hint = '',
     required this.color,
     required this.isDark,
     this.semanticsLabel,
@@ -102,16 +102,17 @@ class OperationalMetricTile extends StatelessWidget {
               ),
             ],
           ),
-          Text(
-            hint,
-            maxLines: dense ? 2 : 3,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.bodyMuted(
-              color: hintColor,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ).copyWith(fontSize: dense ? 11.5 : null),
-          ),
+          if (hint.trim().isNotEmpty)
+            Text(
+              hint,
+              maxLines: dense ? 2 : 3,
+              overflow: TextOverflow.ellipsis,
+              style: FocuxHubTypography.bodyMuted(
+                color: hintColor,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ).copyWith(fontSize: dense ? 11.5 : null),
+            ),
         ],
       ),
     );

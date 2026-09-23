@@ -375,10 +375,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: DashboardHomeActionChip(
-                    label: _refreshing
-                        ? 'Atualizando…'
-                        : _syncSoftError != null
-                            ? saudeSyncSoftRetryLabel()
+                    label:
+                        _refreshing
+                            ? 'Atualizando…'
                             : saudeAtualizarLabel(),
                     accent: primary,
                     isDark: isDark,
@@ -394,7 +393,6 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             _SaudeSoftSyncBanner(
               isDark: isDark,
               message: _syncSoftError!,
-              onRetry: _refreshDashboard,
             ),
           ],
           const SizedBox(height: TokensStrip.s4),
@@ -469,12 +467,10 @@ class _SaudeSoftSyncBanner extends StatelessWidget {
   const _SaudeSoftSyncBanner({
     required this.isDark,
     required this.message,
-    required this.onRetry,
   });
 
   final bool isDark;
   final String message;
-  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -503,17 +499,6 @@ class _SaudeSoftSyncBanner extends StatelessWidget {
             Text(
               message,
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-            const SizedBox(height: 6),
-            TextButton(
-              onPressed: onRetry,
-              style: TextButton.styleFrom(
-                foregroundColor: primary,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(48, 48),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(saudeSyncSoftRetryLabel()),
             ),
           ],
         ),

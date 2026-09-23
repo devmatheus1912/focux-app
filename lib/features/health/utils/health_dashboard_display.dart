@@ -14,6 +14,4 @@ String saudeDesconectarConfirmMessage() =>
 String saudeSyncSoftError([Object? _]) =>
     'Não sincronizamos com o servidor. Mostrando dados deste aparelho.';
 
-String saudeSyncSoftRetryLabel() => 'Tentar sync';
-
 String saudeConectarCtaLabel() => 'Conectar';

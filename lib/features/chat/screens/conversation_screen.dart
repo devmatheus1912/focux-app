@@ -31,7 +31,6 @@ import '../utils/chat_remetente.dart';
 import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -461,24 +460,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             },
                           )
                           : _msgs.isEmpty
-                          ? _isAlunoMode
-                              ? const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(TokensStrip.s4),
-                                  child: FxEmptyState(
-                                    icon: 'message-circle',
-                                    title: 'Comece uma conversa',
-                                    subtitle:
-                                        'Fotos, vídeos e ajustes do treino aparecem aqui.',
-                                  ),
-                                ),
-                              )
-                              : const FxEmptyState(
-                                icon: 'message-circle',
-                                title: 'Comece uma conversa',
-                                subtitle:
-                                    'Fotos, vídeos, áudios e ajustes do treino vão aparecer aqui em tempo real.',
-                              )
+                          ? Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                TokensStrip.s4,
+                                TokensStrip.s3,
+                                TokensStrip.s4,
+                                TokensStrip.s2,
+                              ),
+                              child: _ConversationQuietEmpty(
+                                isAluno: _isAlunoMode,
+                              ),
+                            ),
+                          )
                           : ListView.builder(
                             controller: _scroll,
                             keyboardDismissBehavior:
@@ -772,5 +767,37 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final la = a.toLocal();
     final lb = b.toLocal();
     return la.year == lb.year && la.month == lb.month && la.day == lb.day;
+  }
+}
+
+/// Empty quieto no topo — sem parede de whitespace (§11 chat).
+class _ConversationQuietEmpty extends StatelessWidget {
+  const _ConversationQuietEmpty({required this.isAluno});
+
+  final bool isAluno;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = Theme.of(context).colorScheme.onSurfaceVariant;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.chat_bubble_outline_rounded, size: 18, color: primary),
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
+          child: Text(
+            isAluno
+                ? 'Envie a primeira mensagem — fotos e ajustes do treino ficam aqui.'
+                : 'Envie a primeira mensagem — fotos, áudios e ajustes ficam aqui.',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: mute,
+              height: 1.35,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

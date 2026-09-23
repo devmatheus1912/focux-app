@@ -32,7 +32,7 @@ class _AlunosTriageBanner extends StatelessWidget {
             context,
             accent: primary,
             radius: TokensStrip.rCard,
-            glowStrength: 0.06,
+            glowStrength: 0,
           ),
           child: Row(
             children: [
