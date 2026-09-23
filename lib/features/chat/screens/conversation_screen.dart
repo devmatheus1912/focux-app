@@ -28,6 +28,7 @@ import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_remetente.dart';
+import '../utils/chat_system_event.dart';
 import 'chat_inbox_screen.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -202,7 +203,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       });
       _dedupeInitialDraft();
       _scrollToBottom(animated: false);
-      // Mark-read em paralelo — não atrasar o scroll (estilo WhatsApp).
+      // Mark-read em paralelo — não atrasar o primeiro paint da conversa.
       // ignore: unawaited_futures
       _markRead();
     } catch (e) {
@@ -467,10 +468,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: EdgeInsets.fromLTRB(
+                              TokensStrip.s4,
+                              TokensStrip.s4,
+                              TokensStrip.s4,
                               TokensStrip.s3,
-                              TokensStrip.s3,
-                              TokensStrip.s3,
-                              TokensStrip.s2,
                             ),
                             itemCount:
                                 _msgs.length +
@@ -491,6 +492,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               final showDate =
                                   previous == null ||
                                   !_sameDay(previous.enviadoEm, msg.enviadoEm);
+                              final system = chatIsSistema(
+                                msg.remetente,
+                                msg.tipoMidia,
+                              );
                               return Column(
                                 children: [
                                   if (showDate)
@@ -499,31 +504,37 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     ),
                                   KeyedSubtree(
                                     key: _messageKey(msg),
-                                    child: ConversationSwipeReplyWrapper(
-                                      alignRight: _isMine(msg),
-                                      accentColor: primary,
-                                      onReply: () => _setReply(msg),
-                                      child: ConversationBubble(
-                                        msg: msg,
-                                        mine: _isMine(msg),
-                                        system: chatIsSistema(
-                                          msg.remetente,
-                                          msg.tipoMidia,
-                                        ),
-                                        isDark: isDark,
-                                        accentColor: primary,
-                                        highlighted:
-                                            _highlightedMessageId == msg.id,
-                                        replyLabelBuilder: _replySenderLabel,
-                                        onLongPress:
-                                            () => _showMessageActions(msg),
-                                        onReplyTap:
-                                            msg.replyToMessageId == null
-                                                ? null
-                                                : () => _jumpToReplySource(msg),
-                                        onOpenMedia: () => _openMedia(msg),
-                                      ),
-                                    ),
+                                    child:
+                                        system
+                                            ? ConversationSystemEvent(msg: msg)
+                                            : ConversationSwipeReplyWrapper(
+                                              alignRight: _isMine(msg),
+                                              accentColor: primary,
+                                              onReply: () => _setReply(msg),
+                                              child: ConversationBubble(
+                                                msg: msg,
+                                                mine: _isMine(msg),
+                                                isDark: isDark,
+                                                accentColor: primary,
+                                                highlighted:
+                                                    _highlightedMessageId ==
+                                                    msg.id,
+                                                replyLabelBuilder:
+                                                    _replySenderLabel,
+                                                onLongPress:
+                                                    () =>
+                                                        _showMessageActions(msg),
+                                                onReplyTap:
+                                                    msg.replyToMessageId == null
+                                                        ? null
+                                                        : () =>
+                                                            _jumpToReplySource(
+                                                              msg,
+                                                            ),
+                                                onOpenMedia:
+                                                    () => _openMedia(msg),
+                                              ),
+                                            ),
                                   ),
                                 ],
                               );
@@ -746,7 +757,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     );
 
     return fxScreenA11yScope(
-      label: 'Conversation',
+      label: 'Conversa',
       child: PopScope(
         canPop: !keyboardOpen,
         onPopInvokedWithResult: (didPop, _) {

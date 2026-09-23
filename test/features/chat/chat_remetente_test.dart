@@ -20,7 +20,16 @@ void main() {
     );
     expect(
       chatInboxPreview(remetente: 'SISTEMA', mensagem: 'Treino concluído'),
-      'Sistema: Treino concluído',
+      'Treino concluído',
+    );
+    expect(
+      chatInboxPreview(
+        remetente: 'SISTEMA',
+        mensagem:
+            'Treino registrado: Costa e Braceta. 1/28 series. '
+            'Responda no chat se quiser ajustar a próxima sessão.',
+      ),
+      'Treino registrado · Costa e Braceta · 1 de 28 séries',
     );
     expect(
       chatInboxPreview(remetente: 'PERSONAL', mensagem: 'Bora'),
