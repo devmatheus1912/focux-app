@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno360_client_cache.dart';
 import 'aluno_detail_providers.dart';
 import 'alunos_provider.dart';
 
@@ -64,9 +65,10 @@ class AlunoFollowUpActions {
   }
 
   void _invalidate(int alunoId) {
-    invalidateAlunosCachesRef(_ref);
+    // Cirúrgico: lista + este aluno — não limpa 360 de toda a carteira.
+    Aluno360ClientCache.invalidate(alunoId);
+    invalidateAlunosListCachesRef(_ref);
     _ref.invalidate(alunoProvider(alunoId));
-    _ref.invalidate(aluno360Provider(alunoId));
     _ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
     _ref.invalidate(dashboardHomeProvider);
   }

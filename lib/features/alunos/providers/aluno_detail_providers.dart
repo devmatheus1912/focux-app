@@ -156,7 +156,7 @@ void prefetchAluno360SecondaryTabs(WidgetRef ref, int alunoId) {
 
 /// Warm Operação dos primeiros da lista — corta delay do 360 no tap.
 void warmAluno360OperacaoList(WidgetRef ref, Iterable<int> alunoIds) {
-  for (final id in alunoIds.take(8)) {
+  for (final id in alunoIds.take(3)) {
     // ignore: unawaited_futures
     ref.read(aluno360OperacaoBundleProvider(id).future);
   }
@@ -193,24 +193,22 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
 });
 
 /// When true, copilot card loads IA via [alunoCopilotoActionProvider] (refresh).
-final alunoCopilotoForceIaProvider = StateProvider.family<bool, int>(
+final alunoCopilotoForceIaProvider = StateProvider.autoDispose.family<bool, int>(
   (ref, alunoId) => false,
 );
 
 /// True while Aluno 360 is creating a Command Center task (disables sticky CTA).
-final alunoCopilotCreatingProvider = StateProvider.family<bool, int>(
+final alunoCopilotCreatingProvider = StateProvider.autoDispose.family<bool, int>(
   (ref, alunoId) => false,
 );
 
 /// Bust IA cache on explicit refresh (see copilot refresh button).
-final alunoCopilotIaSkipCacheProvider = StateProvider.family<bool, int>(
-  (ref, alunoId) => false,
-);
+final alunoCopilotIaSkipCacheProvider =
+    StateProvider.autoDispose.family<bool, int>((ref, alunoId) => false);
 
 /// True while the user-triggered IA refresh is in flight (incl. stale-while-revalidate).
-final alunoCopilotIaRefreshingProvider = StateProvider.family<bool, int>(
-  (ref, alunoId) => false,
-);
+final alunoCopilotIaRefreshingProvider =
+    StateProvider.autoDispose.family<bool, int>((ref, alunoId) => false);
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
@@ -348,6 +346,7 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
   ref.invalidate(aluno360EvolucaoBundleProvider(alunoId));
   ref.invalidate(aluno360FerramentasBundleProvider(alunoId));
+  // Monolito /360 — só se ainda houver listener (legado).
   ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));

@@ -60,9 +60,14 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
     final primary = Theme.of(context).colorScheme.primary;
     final cornerGlow =
         isLight ? BrandPalette.accent(primary) : TokensStrip.neonGlow;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+    final showGrid = widget.showGrid && !reduceMotion;
+    final flatBackground = widget.flatBackground || reduceMotion;
+    final showCornerGlow = widget.showCornerGlow && !reduceMotion;
+    final showCenterGlow = widget.showCenterGlow && !reduceMotion;
 
     Widget? gridLayer;
-    if (widget.showGrid) {
+    if (showGrid) {
       final grid = CustomPaint(
         painter: _CinematicGridPainter(light: isLight),
         size: Size.infinite,
@@ -84,11 +89,11 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
       children: [
         Container(
           color:
-              widget.flatBackground
+              flatBackground
                   ? (isLight ? TokensStrip.lightMeshC : TokensStrip.cinematicBg)
                   : null,
           decoration:
-              widget.flatBackground
+              flatBackground
                   ? null
                   : BoxDecoration(
                       gradient: RadialGradient(
@@ -111,7 +116,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
                     ),
         ),
         if (gridLayer != null) gridLayer,
-        if (widget.showCornerGlow) ...[
+        if (showCornerGlow) ...[
           Positioned(
             top: -100,
             right: -100,
@@ -152,7 +157,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
             ),
           ),
         ],
-        if (widget.showCenterGlow)
+        if (showCenterGlow)
           Align(
             alignment: const Alignment(0, -0.20),
             child: IgnorePointer(

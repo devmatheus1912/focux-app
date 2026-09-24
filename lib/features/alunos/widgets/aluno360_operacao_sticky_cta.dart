@@ -33,19 +33,32 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final creating = ref.watch(alunoCopilotCreatingProvider(alunoId));
     // Bundle/snapshot only — never sidecar GET /ia on Operação critical path.
-    final operacao = ref.watch(aluno360OperacaoProvider(alunoId));
-    if (operacao == null) {
+    // select() limita rebuild ao sticky/effective/outreach.
+    final stickySlice = ref.watch(
+      aluno360OperacaoProvider(alunoId).select(
+        (o) =>
+            o == null
+                ? null
+                : (
+                  sticky: o.stickyAction,
+                  effective: o.effectiveProxima,
+                  outreach: o.outreachMessage,
+                  stickyLabel: o.stickyDisplayLabel,
+                ),
+      ),
+    );
+    if (stickySlice == null) {
       return const SizedBox.shrink();
     }
-    final sticky = operacao.stickyAction;
-    final effectiveProxima = operacao.effectiveProxima;
+    final sticky = stickySlice.sticky;
+    final effectiveProxima = stickySlice.effective;
 
     void openOutreach() {
       showAlunoOutreachMessageSheet(
         context,
         alunoId: alunoId,
         alunoNome: aluno.nome,
-        message: operacao.outreachMessage,
+        message: stickySlice.outreach,
         title: 'Mensagem sugerida',
         subtitle: 'Copiloto · revise antes de enviar.',
         icon: Icons.auto_awesome_rounded,
@@ -75,7 +88,7 @@ class Aluno360OperacaoStickyCtaBar extends ConsumerWidget {
     }
 
     final stickyDisplayLabel =
-        tabIndex == 1 ? 'Ajustar treino' : operacao.stickyDisplayLabel;
+        tabIndex == 1 ? 'Ajustar treino' : stickySlice.stickyLabel;
 
     void onPrimary() {
       HapticFeedback.lightImpact();
