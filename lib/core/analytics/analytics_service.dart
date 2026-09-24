@@ -167,6 +167,10 @@ class ProductEvents {
   static const homeFocusToggled = 'home_focus_toggled';
   static const homeRadarTap = 'home_radar_tap';
   static const homeCatalogOpened = 'home_catalog_opened';
+  /// ms do ensureInitialized → primeiro frame (cold start percebido).
+  static const bootTtff = 'boot_ttff';
+  /// Leituras nativas Keychain/Keystore neste processo (só nativo).
+  static const sessionKeychainReads = 'session_keychain_reads';
   static const homeCoachDismissed = 'home_coach_dismissed';
   static const homeTtv = 'home_ttv';
   static const homeSearchOpened = 'home_search_opened';

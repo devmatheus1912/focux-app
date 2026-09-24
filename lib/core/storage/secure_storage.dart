@@ -72,7 +72,12 @@ class SecureStorage {
     _memRefreshLoaded = false;
     _memRoleLoaded = false;
     _memRequiresLoaded = false;
+    nativeKeychainReads = 0;
   }
+
+  /// Contador de leituras reais do Keychain/Keystore (nativo).
+  /// Sobe só quando o cache RAM ainda não aquecia o valor.
+  static int nativeKeychainReads = 0;
 
   /// Prefetch Keychain → RAM (token/role/refresh/requires) em paralelo ao boot.
   static Future<void> warmSessionCache() async {
@@ -98,6 +103,7 @@ class SecureStorage {
   static Future<String?> getToken() async {
     if (kIsWeb) return _webAccessToken;
     if (_memAccessLoaded) return _memAccessToken;
+    nativeKeychainReads++;
     _memAccessToken = await _storage.read(key: _keyToken);
     _memAccessLoaded = true;
     return _memAccessToken;
@@ -126,6 +132,7 @@ class SecureStorage {
   static Future<String?> getRole() async {
     if (kIsWeb) return _webRole;
     if (_memRoleLoaded) return _memRole;
+    nativeKeychainReads++;
     _memRole = await _storage.read(key: _keyRole);
     _memRoleLoaded = true;
     return _memRole;
@@ -154,6 +161,7 @@ class SecureStorage {
   static Future<String?> getRefreshToken() async {
     if (kIsWeb) return _webRefreshToken;
     if (_memRefreshLoaded) return _memRefreshToken;
+    nativeKeychainReads++;
     _memRefreshToken = await _storage.read(key: _keyRefreshToken);
     _memRefreshLoaded = true;
     return _memRefreshToken;
@@ -185,6 +193,7 @@ class SecureStorage {
     if (_memRequiresLoaded) {
       return _memRequiresPasswordChange == 'true';
     }
+    nativeKeychainReads++;
     final val = await _storage.read(key: _keyRequiresPasswordChange);
     _memRequiresPasswordChange = val;
     _memRequiresLoaded = true;

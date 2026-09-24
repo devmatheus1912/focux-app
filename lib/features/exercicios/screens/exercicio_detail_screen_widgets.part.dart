@@ -74,10 +74,11 @@ class _ExercisePreviewImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        url,
+      child: FxCachedNetworkImage(
+        imageUrl: url,
         height: 190,
         fit: BoxFit.cover,
+        memCacheWidth: 720,
         errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       ),
     );

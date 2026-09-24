@@ -431,7 +431,11 @@ class _LandingStudioImageSlot extends StatelessWidget {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.network(url!, fit: BoxFit.cover),
+                          FxCachedNetworkImage(
+                            imageUrl: url!,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 480,
+                          ),
                           Align(
                             alignment: Alignment.bottomCenter,
                             child: Container(

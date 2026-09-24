@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/api/tls_certificate_pinning.dart';
+import 'core/analytics/analytics_service.dart';
 import 'core/auth/session_cache_evictor.dart';
 import 'core/config/env.dart';
 import 'core/crash/flutter_error_reporting.dart';
@@ -38,12 +39,16 @@ import 'features/perfil/data/perfil_repository.dart';
 import 'features/perfil/providers/perfil_provider.dart';
 import 'l10n/app_localizations.dart';
 
+/// Relógio do cold start — parado no primeiro frame de [FocuxApp].
+final Stopwatch _bootStopwatch = Stopwatch();
+
 void main() {
   // ── runZonedGuarded: captura TODOS os erros async nao tratados ──
   // IMPORTANT: Both ensureInitialized() and runApp() MUST be in the same zone.
   // Otherwise Flutter Web throws "Zone mismatch" which cascades into
   // layout/hit-test failures across the entire widget tree.
   runZonedGuarded(() async {
+    _bootStopwatch.start();
     WidgetsFlutterBinding.ensureInitialized();
     LicenseRegistry.addLicense(() async* {
       final license =
@@ -190,6 +195,18 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (_bootStopwatch.isRunning) {
+        _bootStopwatch.stop();
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.bootTtff,
+            props: {
+              'ms': _bootStopwatch.elapsedMilliseconds,
+              'keychain_reads': SecureStorage.nativeKeychainReads,
+            },
+          ),
+        );
+      }
       unawaited(_bootstrapDeferredServices());
       bindAnalyticsFunnelPoster(ref.read(apiClientProvider));
       PlanSyncCoordinator.bind(ProviderScope.containerOf(context));

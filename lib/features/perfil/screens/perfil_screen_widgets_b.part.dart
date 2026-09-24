@@ -75,11 +75,12 @@ class _Avatar extends StatelessWidget {
                 child: Center(
                   child:
                       logoUrl != null && logoUrl!.isNotEmpty
-                          ? Image.network(
-                            logoUrl!,
+                          ? FxCachedNetworkImage(
+                            imageUrl: logoUrl!,
                             width: inner,
                             height: inner,
                             fit: BoxFit.cover,
+                            memCacheWidth: (inner * 2).round(),
                             errorBuilder: (_, __, ___) => avatarContent(),
                           )
                           : avatarContent(),

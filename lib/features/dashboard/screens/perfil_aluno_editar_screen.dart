@@ -11,6 +11,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../alunos/data/aluno_repository.dart';

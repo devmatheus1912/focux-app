@@ -84,7 +84,11 @@ class _ProgressEntryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               child: AspectRatio(
                 aspectRatio: 1.4,
-                child: Image.network(medida.fotoUrl!, fit: BoxFit.cover),
+                child: FxCachedNetworkImage(
+                  imageUrl: medida.fotoUrl!,
+                  fit: BoxFit.cover,
+                  memCacheWidth: 720,
+                ),
               ),
             ),
           ],

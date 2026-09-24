@@ -380,7 +380,11 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
                         borderRadius: BorderRadius.circular(18),
                         child: AspectRatio(
                           aspectRatio: 1.15,
-                          child: Image.network(fotoUrl!, fit: BoxFit.cover),
+                          child: FxCachedNetworkImage(
+                            imageUrl: fotoUrl!,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 720,
+                          ),
                         ),
                       ),
                     ],

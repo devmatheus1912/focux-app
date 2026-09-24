@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'fx_cached_network_image.dart';
+
 /// Logo oficial Focux Personal — variantes prontas para fundo claro e escuro.
 ///
 /// Assets baixados do Drive (não alterar pixels):
@@ -112,9 +114,12 @@ class FocuxOfficialLogo extends StatelessWidget {
         width: side,
         height: side,
         child: ClipOval(
-          child: Image.network(
-            url,
+          child: FxCachedNetworkImage(
+            imageUrl: url,
+            width: side,
+            height: side,
             fit: BoxFit.cover,
+            memCacheWidth: (side * 2).round(),
             filterQuality: FilterQuality.high,
             errorBuilder: (_, __, ___) => _fallbackAsset(context),
           ),
@@ -122,11 +127,12 @@ class FocuxOfficialLogo extends StatelessWidget {
       );
     }
 
-    return Image.network(
-      url,
+    return FxCachedNetworkImage(
+      imageUrl: url,
       width: width,
       height: height,
       fit: BoxFit.contain,
+      memCacheWidth: width != null ? (width! * 2).round() : 400,
       filterQuality: FilterQuality.high,
       errorBuilder: (_, __, ___) => _fallbackAsset(context),
     );

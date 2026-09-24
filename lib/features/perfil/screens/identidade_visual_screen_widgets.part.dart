@@ -243,7 +243,11 @@ class _LogoUploadRing extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child:
                 logoUrl != null && logoUrl!.isNotEmpty
-                    ? Image.network(logoUrl!, fit: BoxFit.cover)
+                    ? FxCachedNetworkImage(
+                      imageUrl: logoUrl!,
+                      fit: BoxFit.cover,
+                      memCacheWidth: 200,
+                    )
                     : Center(
                       child: Text(
                         nome.isNotEmpty ? nome[0].toUpperCase() : '?',

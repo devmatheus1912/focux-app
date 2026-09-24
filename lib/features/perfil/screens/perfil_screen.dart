@@ -37,6 +37,7 @@ import '../widgets/perfil_sticky_bar.dart';
 import '../widgets/perfil_loading_scaffold.dart';
 import '../widgets/perfil_error_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import 'package:focux_app/core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_settings_group.dart';
 import 'package:focux_app/core/widgets/fx_settings_tile.dart';

@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/tokens_strip.dart';
+import '../../../../core/widgets/fx_cached_network_image.dart';
 import '../../../../core/widgets/fx_home_sheet.dart';
 import '../../../../core/widgets/fx_loading.dart';
 import '../../data/exercicio_repository.dart';
@@ -168,11 +169,11 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                                 mute: mute,
                                 pending: pending,
                               )
-                              : Image.network(
-                                displayUrl,
+                              : FxCachedNetworkImage(
+                                imageUrl: displayUrl,
                                 key: ValueKey(displayUrl),
                                 fit: BoxFit.cover,
-                                alignment: Alignment.center,
+                                memCacheWidth: 960,
                                 errorBuilder: (_, __, ___) {
                                   WidgetsBinding.instance.addPostFrameCallback((
                                     _,
@@ -186,10 +187,6 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                                     mute: mute,
                                     pending: pending,
                                   );
-                                },
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return _PreviewLoading(mute: mute);
                                 },
                               ),
                     ),
