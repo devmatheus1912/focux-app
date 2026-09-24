@@ -163,6 +163,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         },
         child: FxShellScaffold(
         useMesh: true,
+        safeArea: false,
         appBar: FxShellAppBar(
           title: 'Engajamento',
           subtitle: freshness,
@@ -201,7 +202,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                     FxSettingsLayout.pageInset,
                     TokensStrip.s2,
                     FxSettingsLayout.pageInset,
-                    TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
+                    TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
                   child: FxLiquidPrimaryButton(
                     label: 'Registrar evolução',
@@ -221,10 +222,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final header = FxHubHeader(
       title: fxTitleCaseName(widget.alunoNome),
-      subtitle: engajamentoHubSubtitle(
-        alunoNome: widget.alunoNome,
-        dias: _dias,
-      ),
+      subtitle: engajamentoHubSubtitle(dias: _dias),
     );
     final metric = Padding(
       padding: const EdgeInsets.only(
@@ -233,71 +231,90 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
       ),
       child: Column(
         children: [
-          OperationalMetricTile(
-            label: 'Eventos',
-            value: '${_eventos.length}',
-            hint: engajamentoEventosMetricHint(_eventos.length, _dias),
-            color: primary,
-            isDark: isDark,
+          Row(
+            children: [
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Eventos',
+                  value: '${_eventos.length}',
+                  hint: engajamentoEventosMetricHint(_eventos.length, _dias),
+                  color: primary,
+                  isDark: isDark,
+                  dense: true,
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: OperationalMetricTile(
+                  key: _checkinsSectionKey,
+                  label: 'Treinos',
+                  value: '${engajamentoTreinosCount(_eventos)}',
+                  hint: 'Check-ins e treinos',
+                  color: primary,
+                  isDark: isDark,
+                  dense: true,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            key: _checkinsSectionKey,
-            label: 'Treinos',
-            value: '${engajamentoTreinosCount(_eventos)}',
-            hint: 'Check-ins e treinos na janela',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Mensagens',
-            value: '${engajamentoMensagensCount(_eventos)}',
-            hint: 'Chat na janela',
-            color: primary,
-            isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          OperationalMetricTile(
-            label: 'Último',
-            value: engajamentoUltimoValue(_eventos),
-            hint: engajamentoUltimoHint(_eventos),
-            color: primary,
-            isDark: isDark,
+          Row(
+            children: [
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Mensagens',
+                  value: '${engajamentoMensagensCount(_eventos)}',
+                  hint: 'Chat na janela',
+                  color: primary,
+                  isDark: isDark,
+                  dense: true,
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: OperationalMetricTile(
+                  label: 'Último',
+                  value: engajamentoUltimoValue(_eventos),
+                  hint: engajamentoUltimoHint(_eventos),
+                  color: primary,
+                  isDark: isDark,
+                  dense: true,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
-    final periodoChip = Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      children: [
-        DashboardHomeActionChip(
-          label: engajamentoPeriodoLabel(_dias),
-          accent: primary,
-          isDark: isDark,
-          onPressed: _pickPeriodo,
-        ),
-        DashboardHomeActionChip(
-          label: 'Aluno',
-          accent: primary,
-          isDark: isDark,
-          onPressed: _abrirAluno,
-        ),
-        DashboardHomeActionChip(
-          label: 'Evolução',
-          accent: primary,
-          isDark: isDark,
-          onPressed: _abrirEvolucao,
-        ),
-        DashboardHomeActionChip(
-          label: 'Chat',
-          accent: primary,
-          isDark: isDark,
-          onPressed: _abrirChat,
-        ),
-      ],
+    final periodoChip = Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: TokensStrip.s2,
+        runSpacing: TokensStrip.s2,
+        children: [
+          DashboardHomeActionChip(
+            label: engajamentoPeriodoLabel(_dias),
+            accent: primary,
+            isDark: isDark,
+            onPressed: _pickPeriodo,
+          ),
+          DashboardHomeActionChip(
+            label: 'Aluno',
+            accent: primary,
+            isDark: isDark,
+            onPressed: _abrirAluno,
+          ),
+          DashboardHomeActionChip(
+            label: 'Chat',
+            accent: primary,
+            isDark: isDark,
+            onPressed: _abrirChat,
+          ),
+        ],
+      ),
     );
+
+    const listBottom = 88.0;
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -308,7 +325,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 FxSettingsLayout.pageInset,
                 TokensStrip.s4,
                 FxSettingsLayout.pageInset,
-                32,
+                listBottom,
               ),
               children: [
                 header,
@@ -336,7 +353,7 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 FxSettingsLayout.pageInset,
                 TokensStrip.s4,
                 FxSettingsLayout.pageInset,
-                TokensStrip.s6,
+                listBottom,
               ),
               itemCount: _eventos.length + 1,
               itemBuilder: (context, i) {

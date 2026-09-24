@@ -60,6 +60,31 @@ void main() {
       2,
     );
     expect(habitoFocusCompliance(const []), isNull);
+    expect(
+      habitoComplianceListExcludingFocus(
+        [
+          ComplianceItem(
+            alunoId: 1,
+            alunoNome: 'Ana',
+            checksSemana: 2,
+            compliancePct: 80,
+          ),
+          ComplianceItem(
+            alunoId: 2,
+            alunoNome: 'Bia',
+            checksSemana: 0,
+            compliancePct: 20,
+          ),
+        ],
+        ComplianceItem(
+          alunoId: 2,
+          alunoNome: 'Bia',
+          checksSemana: 0,
+          compliancePct: 20,
+        ),
+      ).map((e) => e.alunoId),
+      [1],
+    );
   });
 
   test('habitoCountLabel cobre vazio e plural', () {

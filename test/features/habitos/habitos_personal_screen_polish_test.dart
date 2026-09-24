@@ -49,6 +49,12 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('DashboardHomeActionChip'));
     expect(screen, contains('habitoFocusCompliance'));
+    expect(screen, contains('habitoComplianceListExcludingFocus'));
+    expect(screen, contains('safeArea: false'));
+    expect(
+      screen,
+      isNot(contains('accent:\n                habitoComplianceDanger')),
+    );
     expect(screen, contains('Buscar aluno'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('onTapOutside'));

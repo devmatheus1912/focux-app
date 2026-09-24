@@ -66,6 +66,15 @@ ComplianceItem? habitoFocusCompliance(List<ComplianceItem> items) {
   return worst;
 }
 
+/// Compliance da semana sem o aluno já destacado no strip de atenção.
+List<ComplianceItem> habitoComplianceListExcludingFocus(
+  List<ComplianceItem> items,
+  ComplianceItem? focus,
+) {
+  if (focus == null) return items;
+  return items.where((c) => c.alunoId != focus.alunoId).toList(growable: false);
+}
+
 const habitoComoCalculamos =
     'Compliance é checks da semana sobre a meta. Vale para todos os alunos ativos.';
 

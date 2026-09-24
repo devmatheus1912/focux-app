@@ -28,6 +28,7 @@ class DashboardHomeActionChip extends StatelessWidget {
     final bg = dashboardPrioritiesChipBackground(accent, isDark: isDark);
 
     return Align(
+      widthFactor: 1,
       alignment: Alignment.centerLeft,
       child: Semantics(
         button: true,

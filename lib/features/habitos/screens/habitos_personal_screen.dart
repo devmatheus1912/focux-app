@@ -183,6 +183,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
           },
           child: FxShellScaffold(
           useMesh: true,
+          safeArea: false,
           constrainWidth: false,
           appBar: FxShellAppBar(
             title: 'Hábitos & Compliance',
@@ -238,10 +239,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                         top: false,
                         child: Padding(
                           padding: EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
+                            FxSettingsLayout.pageInset,
                             TokensStrip.s2,
-                            TokensStrip.s4,
-                            TokensStrip.s3 +
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s2 +
                                 MediaQuery.viewInsetsOf(context).bottom,
                           ),
                           child: FxLiquidPrimaryButton(
@@ -265,6 +266,10 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
     final focus = habitoFocusCompliance(_compliance);
     final focusDanger =
         focus != null && habitoComplianceDanger(focus.compliancePct);
+    final complianceRows = habitoComplianceListExcludingFocus(
+      _compliance,
+      focusDanger ? focus : null,
+    );
 
     return [
       if (focusDanger) ...[
@@ -416,7 +421,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
       else ...[
         const DashboardSectionHeader(title: 'Compliance da semana'),
         const SizedBox(height: TokensStrip.s3),
-        for (final item in _compliance)
+        for (final item in complianceRows)
           FxSatelliteListTile(
             title: habitoComplianceLabel(item.alunoNome),
             subtitle: Text(habitoComplianceSubtitle(item.checksSemana)),
@@ -430,10 +435,6 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            accent:
-                habitoComplianceDanger(item.compliancePct)
-                    ? EagleTokens.bad
-                    : null,
             onTap: () => context.push('/alunos/${item.alunoId}'),
           ),
         if (_hasMore)
@@ -493,7 +494,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 FxSettingsLayout.pageInset,
                 8,
                 FxSettingsLayout.pageInset,
-                32,
+                88,
               ),
               itemCount: _habitoRows.length,
               itemBuilder: (context, index) => _habitoRows[index],

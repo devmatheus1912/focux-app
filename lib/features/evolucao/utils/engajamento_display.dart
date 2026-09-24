@@ -87,13 +87,9 @@ String engajamentoEventoSubtitle({
 }) =>
     '${engajamentoTipoLabel(tipo)} · ${engajamentoWhenLabel(dataHora)}';
 
-String engajamentoHubSubtitle({
-  required String alunoNome,
-  required int dias,
-}) {
-  final nome = alunoNome.trim().isEmpty ? 'Aluno' : alunoNome.trim();
-  return '$nome · ${engajamentoPeriodoLabel(dias)}';
-}
+/// Subtítulo do hub: só o período (nome fica no [FxHubHeader]).
+String engajamentoHubSubtitle({required int dias}) =>
+    engajamentoPeriodoLabel(dias);
 
 String engajamentoEventosMetricHint(int count, int dias) {
   if (count <= 0) return 'Nada em ${engajamentoPeriodoLabel(dias)}';

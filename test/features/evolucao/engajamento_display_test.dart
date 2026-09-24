@@ -50,15 +50,9 @@ void main() {
     );
   });
 
-  test('engajamentoHubSubtitle junta nome e período', () {
-    expect(
-      engajamentoHubSubtitle(alunoNome: 'Ana', dias: 30),
-      'Ana · 30 dias',
-    );
-    expect(
-      engajamentoHubSubtitle(alunoNome: '  ', dias: 60),
-      'Aluno · 60 dias',
-    );
+  test('engajamentoHubSubtitle é só o período', () {
+    expect(engajamentoHubSubtitle(dias: 30), '30 dias');
+    expect(engajamentoHubSubtitle(dias: 60), '60 dias');
   });
 
   test('engajamentoEventosMetricHint', () {
