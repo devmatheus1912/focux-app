@@ -19,18 +19,22 @@ import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/auth_http_debug.dart';
+import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../convites/utils/convite_display.dart';
 
 class RegisterAlunoScreen extends ConsumerStatefulWidget {
   final String? personalSlug;
   final String? conviteToken;
+  final String? conviteEmailDica;
 
   const RegisterAlunoScreen({
     super.key,
     this.personalSlug,
     this.conviteToken,
+    this.conviteEmailDica,
   });
 
   @override
@@ -93,7 +97,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
         method: 'POST',
         isAluno: true,
         hasPersonalSlug:
-            widget.personalSlug != null && widget.personalSlug!.trim().isNotEmpty,
+            widget.personalSlug != null &&
+            widget.personalSlug!.trim().isNotEmpty,
       );
       await ref
           .read(authProvider.notifier)
@@ -189,228 +194,235 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       onBack: _voltar,
                     ),
                   ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: authScrollPadding(
-                      context,
-                      top: TokensStrip.s3,
-                      bottomExtra: 28,
-                      ensureFooter: true,
-                    ),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    child: Form(
-                      key: _formKey,
-                      child: AutofillGroup(
-                        child: AuthFormEntrance(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Center(
-                                child: FxConversionLockup(
-                                  width: authLogoWidthFor(
-                                    context,
-                                    withTagline: true,
-                                  ),
-                                  semanticLabel: 'Focux ALUNO',
-                                  aluno: true,
-                                ),
-                              ),
-                              const SizedBox(height: TokensStrip.s4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: TokensStrip.s2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: primary.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rButton,
-                                  ),
-                                  border: Border.all(
-                                    color: primary.withValues(alpha: 0.28),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.mail_outline_rounded,
-                                      color: primary,
-                                      size: 16,
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: authScrollPadding(
+                        context,
+                        top: TokensStrip.s3,
+                        bottomExtra: 28,
+                        ensureFooter: true,
+                      ),
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      child: Form(
+                        key: _formKey,
+                        child: AutofillGroup(
+                          child: AuthFormEntrance(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Center(
+                                  child: FxConversionLockup(
+                                    width: authLogoWidthFor(
+                                      context,
+                                      withTagline: true,
                                     ),
-                                    const SizedBox(width: TokensStrip.s2),
-                                    Text(
-                                      'Convite do seu personal',
-                                      style: FocuxHubTypography.chip(primary),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: TokensStrip.s4),
-                              Text(
-                                'Ativar conta',
-                                style: authPageTitleStyle(context),
-                              ),
-                              const SizedBox(height: TokensStrip.s2),
-                              Text(
-                                'Use o código que seu personal enviou e crie sua senha.',
-                                style: authSubtitleStyle(),
-                              ),
-                              if (widget.personalSlug != null) ...[
-                                const SizedBox(height: TokensStrip.s3),
-                                DecoratedBox(
-                                  decoration: fxStripCardDecoration(
-                                    context,
-                                    glowStrength: 0.08,
+                                    semanticLabel: 'Focux ALUNO',
+                                    aluno: true,
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(14),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.fitness_center_rounded,
-                                          color: primary,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            'Cadastro vinculado ao app do seu personal',
-                                            style: FocuxHubTypography.cardTitle(
-                                              color: primary,
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: TokensStrip.s2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(
+                                      TokensStrip.rButton,
+                                    ),
+                                    border: Border.all(
+                                      color: primary.withValues(alpha: 0.28),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.mail_outline_rounded,
+                                        color: primary,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: TokensStrip.s2),
+                                      Text(
+                                        'Convite do seu personal',
+                                        style: FocuxHubTypography.chip(primary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s4),
+                                Text(
+                                  'Ativar conta',
+                                  style: authPageTitleStyle(context),
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                Text(
+                                  conviteCadastroEmailDica(
+                                        widget.conviteEmailDica,
+                                      ) ??
+                                      'Use o código que seu personal enviou e crie sua senha.',
+                                  style: authSubtitleStyle(),
+                                ),
+                                if (widget.personalSlug != null) ...[
+                                  const SizedBox(height: TokensStrip.s3),
+                                  DecoratedBox(
+                                    decoration: fxStripCardDecoration(
+                                      context,
+                                      glowStrength: 0.08,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(14),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.fitness_center_rounded,
+                                            color: primary,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Expanded(
+                                            child: Text(
+                                              'Cadastro vinculado ao app do seu personal',
+                                              style:
+                                                  FocuxHubTypography.cardTitle(
+                                                    color: primary,
+                                                  ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: TokensStrip.s5),
+                                _InviteCodeField(
+                                  controller: _conviteCtrl,
+                                  primary: primary,
+                                ),
+                                const SizedBox(height: 10),
+                                AuthField(
+                                  label: 'Nome completo',
+                                  controller: _nomeCtrl,
+                                  hintText: 'Maria Souza',
+                                  icon: Icons.person_outline_rounded,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [AutofillHints.name],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Informe seu nome.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 10),
+                                AuthField(
+                                  label: 'E-mail',
+                                  controller: _emailCtrl,
+                                  hintText: 'aluno@exemplo.com',
+                                  icon: Icons.alternate_email_rounded,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [AutofillHints.email],
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'Informe o e-mail.';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 10),
+                                AuthField(
+                                  label: 'Senha',
+                                  controller: _senhaCtrl,
+                                  hintText: 'Mín. 8 caracteres',
+                                  icon: Icons.lock_outline_rounded,
+                                  obscureText: !_senhaVisivel,
+                                  textInputAction: TextInputAction.done,
+                                  autofillHints: const [
+                                    AutofillHints.newPassword,
+                                  ],
+                                  onFieldSubmitted: (_) => _submit(),
+                                  focusNode: _senhaFocus,
+                                  validator: (v) {
+                                    if (v == null || v.isEmpty) {
+                                      return 'Informe a senha.';
+                                    }
+                                    if (v.length < 8) {
+                                      return 'A senha precisa ter no mínimo 8 caracteres.';
+                                    }
+                                    return null;
+                                  },
+                                  suffix: IconButton(
+                                    onPressed: () {
+                                      setState(
+                                        () => _senhaVisivel = !_senhaVisivel,
+                                      );
+                                    },
+                                    icon: Icon(
+                                      _senhaVisivel
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      color: heroTealSurface(0.82),
+                                      size: 18,
                                     ),
                                   ),
                                 ),
-                              ],
-                              const SizedBox(height: TokensStrip.s5),
-                              _InviteCodeField(
-                                controller: _conviteCtrl,
-                                primary: primary,
-                              ),
-                              const SizedBox(height: 10),
-                              AuthField(
-                                label: 'Nome completo',
-                                controller: _nomeCtrl,
-                                hintText: 'Maria Souza',
-                                icon: Icons.person_outline_rounded,
-                                textInputAction: TextInputAction.next,
-                                autofillHints: const [AutofillHints.name],
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return 'Informe seu nome.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              AuthField(
-                                label: 'E-mail',
-                                controller: _emailCtrl,
-                                hintText: 'aluno@exemplo.com',
-                                icon: Icons.alternate_email_rounded,
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                                autofillHints: const [AutofillHints.email],
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return 'Informe o e-mail.';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              AuthField(
-                                label: 'Senha',
-                                controller: _senhaCtrl,
-                                hintText: 'Mín. 8 caracteres',
-                                icon: Icons.lock_outline_rounded,
-                                obscureText: !_senhaVisivel,
-                                textInputAction: TextInputAction.done,
-                                autofillHints: const [
-                                  AutofillHints.newPassword,
+                                if (_senhaFocused ||
+                                    _senhaCtrl.text.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  PasswordStrengthMeter(
+                                    password: _senhaCtrl.text,
+                                    minLength: 8,
+                                  ),
                                 ],
-                                onFieldSubmitted: (_) => _submit(),
-                                focusNode: _senhaFocus,
-                                validator: (v) {
-                                  if (v == null || v.isEmpty) {
-                                    return 'Informe a senha.';
-                                  }
-                                  if (v.length < 8) {
-                                    return 'A senha precisa ter no mínimo 8 caracteres.';
-                                  }
-                                  return null;
-                                },
-                                suffix: IconButton(
-                                  onPressed: () {
-                                    setState(
-                                      () => _senhaVisivel = !_senhaVisivel,
+                                if (_error != null) ...[
+                                  const SizedBox(height: 10),
+                                  Semantics(
+                                    liveRegion: true,
+                                    child: Text(
+                                      _error!,
+                                      style: authInlineErrorStyle(),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 22),
+                                FxLiquidPrimaryButton(
+                                  label: 'Criar conta',
+                                  loading: _loading,
+                                  onPressed: _loading ? null : _submit,
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                AuthLegalConsentText(primary: primary),
+                                FxConversionTextLink(
+                                  text: '',
+                                  actionText:
+                                      FocuxBrandCopy
+                                          .authInviteExistingAccountCta,
+                                  onTap: () {
+                                    if (_loading) return;
+                                    final slug = widget.personalSlug?.trim();
+                                    authUnfocusAndGo(
+                                      context,
+                                      slug == null || slug.isEmpty
+                                          ? '/login?role=aluno'
+                                          : '/login?role=aluno&p=${Uri.encodeComponent(slug)}',
                                     );
                                   },
-                                  icon: Icon(
-                                    _senhaVisivel
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
-                                    color: heroTealSurface(0.82),
-                                    size: 18,
-                                  ),
                                 ),
-                              ),
-                              if (_senhaFocused ||
-                                  _senhaCtrl.text.isNotEmpty) ...[
                                 const SizedBox(height: 8),
-                                PasswordStrengthMeter(
-                                  password: _senhaCtrl.text,
-                                  minLength: 8,
-                                ),
                               ],
-                              if (_error != null) ...[
-                                const SizedBox(height: 10),
-                                Semantics(
-                                  liveRegion: true,
-                                  child: Text(
-                                    _error!,
-                                    style: authInlineErrorStyle(),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 22),
-                              FxLiquidPrimaryButton(
-                                label: 'Criar conta',
-                                loading: _loading,
-                                onPressed: _loading ? null : _submit,
-                              ),
-                              FxConversionTextLink(
-                                text: '',
-                                actionText:
-                                    FocuxBrandCopy.authInviteExistingAccountCta,
-                                onTap: () {
-                                  if (_loading) return;
-                                  final slug = widget.personalSlug?.trim();
-                                  authUnfocusAndGo(
-                                    context,
-                                    slug == null || slug.isEmpty
-                                        ? '/login?role=aluno'
-                                        : '/login?role=aluno&p=${Uri.encodeComponent(slug)}',
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
         ),
       ),
     );

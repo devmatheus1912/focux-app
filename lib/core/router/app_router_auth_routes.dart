@@ -60,16 +60,18 @@ List<RouteBase> buildAuthRoutes() {
     ),
     GoRoute(
       path: '/register',
-      builder: (context, state) => RegisterScreen(
-        referralCodigo: state.uri.queryParameters['ref'],
-      ),
+      builder:
+          (context, state) =>
+              RegisterScreen(referralCodigo: state.uri.queryParameters['ref']),
     ),
     GoRoute(
       path: '/register/aluno',
-      builder: (context, state) => RegisterAlunoScreen(
-        personalSlug: state.uri.queryParameters['p'],
-        conviteToken: state.uri.queryParameters['token'],
-      ),
+      builder:
+          (context, state) => RegisterAlunoScreen(
+            personalSlug: state.uri.queryParameters['p'],
+            conviteToken: state.uri.queryParameters['token'],
+            conviteEmailDica: state.uri.queryParameters['e'],
+          ),
     ),
     GoRoute(
       path: '/onboarding',
@@ -85,9 +87,10 @@ List<RouteBase> buildAuthRoutes() {
     ),
     GoRoute(
       path: '/resetar-senha',
-      builder: (context, state) => ResetarSenhaScreen(
-        resetNonce: state.uri.queryParameters['resetNonce'],
-      ),
+      builder:
+          (context, state) => ResetarSenhaScreen(
+            resetNonce: state.uri.queryParameters['resetNonce'],
+          ),
     ),
     GoRoute(
       path: '/aluno/definir-senha',

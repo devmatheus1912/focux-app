@@ -150,10 +150,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
         _busy = false;
         _emailOtpSent = true;
       });
-      FeedbackHelper.showSuccess(
-        context,
-        mfaDisableOtpSentMessage(masked),
-      );
+      FeedbackHelper.showSuccess(context, mfaDisableOtpSentMessage(masked));
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -162,6 +159,10 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       });
     }
   }
+
+  bool get _pedeSenhaOuEmail => mfaDisablePedeSenhaOuEmail(
+    semSenhaConhecida: _status?.emailOtpPreferred == true,
+  );
 
   Future<void> _disable() async {
     if (_busy) return;
@@ -172,11 +173,8 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       setState(() => _error = 'Informe o código do autenticador.');
       return;
     }
-    if (senha.isEmpty && emailOtp.isEmpty) {
-      setState(
-        () => _error =
-            'Informe a senha ou peça o código por e-mail (contas Apple/Google).',
-      );
+    if (_pedeSenhaOuEmail && senha.isEmpty && emailOtp.isEmpty) {
+      setState(() => _error = mfaDisableFaltaSegundoFator);
       return;
     }
     final ok = await showFxConfirmSheet(
@@ -193,7 +191,9 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
       _error = null;
     });
     try {
-      await ref.read(authProvider.notifier).mfaDisable(
+      await ref
+          .read(authProvider.notifier)
+          .mfaDisable(
             senha: senha.isEmpty ? null : senha,
             emailOtp: emailOtp.isEmpty ? null : emailOtp,
             code: code,
@@ -234,8 +234,9 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mute =
-        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55);
+    final mute = Theme.of(
+      context,
+    ).colorScheme.onSurface.withValues(alpha: 0.55);
     final line = Theme.of(context).dividerColor;
 
     return fxScreenA11yScope(
@@ -275,9 +276,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                           icon: Icons.phonelink_lock_outlined,
                           label: 'MFA TOTP',
                           value:
-                              _status?.enabled == true
-                                  ? 'Ativo'
-                                  : 'Desativado',
+                              _status?.enabled == true ? 'Ativo' : 'Desativado',
                           mute: mute,
                           line: line,
                           showDivider: _status?.enabled == true,
@@ -392,9 +391,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                       ],
                     ] else ...[
                       Text(
-                        _status?.emailOtpPreferred == true
-                            ? 'Conta Apple/Google: digite o código do autenticador (ou um de recuperação) e o código que pedimos por e-mail.'
-                            : 'Confirme com senha (ou código por e-mail) e o autenticador.',
+                        mfaDisableIntro(semSenhaConhecida: !_pedeSenhaOuEmail),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 12),
@@ -406,7 +403,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      if (_status?.emailOtpPreferred != true) ...[
+                      if (_pedeSenhaOuEmail) ...[
                         TextField(
                           controller: _disablePasswordController,
                           obscureText: true,
@@ -416,34 +413,35 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                      ],
-                      TextField(
-                        controller: _disableEmailOtpController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        enabled: !_busy,
-                        decoration: InputDecoration(
-                          labelText: 'Código do e-mail',
-                          counterText: '',
-                          helperText: _emailOtpSent
-                              ? 'Pedido — digite os 6 dígitos quando chegar'
-                              : 'Sem senha? Peça o código no e-mail da conta',
+                        TextField(
+                          controller: _disableEmailOtpController,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          enabled: !_busy,
+                          decoration: InputDecoration(
+                            labelText: 'Código do e-mail',
+                            counterText: '',
+                            helperText:
+                                _emailOtpSent
+                                    ? 'Pedido. Digite os 6 dígitos quando chegar'
+                                    : 'Esqueceu a senha? Peça o código no e-mail da conta',
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                         ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed: _busy ? null : _requestEmailOtp,
-                          child: Text(
-                            _emailOtpSent
-                                ? 'Reenviar código por e-mail'
-                                : 'Enviar código por e-mail',
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: _busy ? null : _requestEmailOtp,
+                            child: Text(
+                              _emailOtpSent
+                                  ? 'Reenviar código por e-mail'
+                                  : 'Enviar código por e-mail',
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 8),
                       FxLiquidPrimaryButton(
                         label: 'Desativar MFA',

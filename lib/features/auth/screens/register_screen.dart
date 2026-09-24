@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
-import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -25,6 +23,7 @@ import '../utils/auth_error_messages.dart';
 import '../utils/auth_http_debug.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
+import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
@@ -106,8 +105,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
       setState(() {
         _emailDeliveryAvailable = caps.passwordResetEmailAvailable;
-        _appleEnabled =
-            appleOffered && AppleSignInService.isSupportedPlatform;
+        _appleEnabled = appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
       });
     } catch (_) {
@@ -123,8 +121,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
       setState(() {
         _emailDeliveryAvailable = null;
-        _appleEnabled =
-            appleOffered && AppleSignInService.isSupportedPlatform;
+        _appleEnabled = appleOffered && AppleSignInService.isSupportedPlatform;
         _googleEnabled = showGoogle;
       });
     }
@@ -442,50 +439,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 padding: const EdgeInsets.only(
                                   bottom: TokensStrip.s2,
                                 ),
-                                child: Center(
-                                  child: Text.rich(
-                                    TextSpan(
-                                      style: FocuxHubTypography.bodyMuted(
-                                        color: heroTealSurface(0.78),
-                                        height: 1.45,
-                                      ),
-                                      children: [
-                                        const TextSpan(
-                                          text:
-                                              'Ao criar, você concorda com os ',
-                                        ),
-                                        TextSpan(
-                                          text: 'Termos de uso',
-                                          style: TextStyle(
-                                            color: primary,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                          recognizer:
-                                              TapGestureRecognizer()
-                                                ..onTap =
-                                                    () =>
-                                                        FocuxLegal.openTerms(),
-                                        ),
-                                        const TextSpan(text: ' e a '),
-                                        TextSpan(
-                                          text: 'Política de privacidade',
-                                          style: TextStyle(
-                                            color: primary,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                          recognizer:
-                                              TapGestureRecognizer()
-                                                ..onTap =
-                                                    () =>
-                                                        FocuxLegal.openPrivacy(),
-                                        ),
-                                        const TextSpan(text: '.'),
-                                      ],
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    softWrap: true,
-                                  ),
-                                ),
+                                child: AuthLegalConsentText(primary: primary),
                               ),
                             ],
                           ),

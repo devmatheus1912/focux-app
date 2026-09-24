@@ -1,5 +1,17 @@
 import '../../perfil/utils/brand_public_identity.dart';
 
+/// Conta sem senha conhecida (Apple/Google) desliga só com o código do app ou de recuperação.
+bool mfaDisablePedeSenhaOuEmail({required bool semSenhaConhecida}) =>
+    !semSenhaConhecida;
+
+String mfaDisableIntro({required bool semSenhaConhecida}) =>
+    semSenhaConhecida
+        ? 'Sua conta entra por Apple/Google. Basta o código do autenticador ou um código de recuperação.'
+        : 'Confirme com a senha (ou um código por e-mail) e o código do autenticador.';
+
+const mfaDisableFaltaSegundoFator =
+    'Informe a senha ou peça o código por e-mail.';
+
 /// Copy pós-envio do OTP de desativar MFA — "pedimos o envio", nunca "chegou".
 String mfaDisableOtpSentMessage(String? emailMascarado) {
   final masked = (emailMascarado ?? '').trim();

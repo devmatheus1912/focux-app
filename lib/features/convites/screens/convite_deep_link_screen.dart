@@ -56,8 +56,7 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
     });
 
     try {
-      final result =
-          await ref.read(conviteRepositoryProvider).validar(token);
+      final result = await ref.read(conviteRepositoryProvider).validar(token);
       if (!mounted) return;
       if (!result.valido) {
         setState(() {
@@ -79,6 +78,8 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
       }
       final params = <String, String>{'token': token};
       if (slug != null && slug.isNotEmpty) params['p'] = slug;
+      final dica = result.emailDica?.trim();
+      if (dica != null && dica.isNotEmpty) params['e'] = dica;
       if (!mounted) return;
       context.go(
         Uri(path: '/register/aluno', queryParameters: params).toString(),
@@ -129,8 +130,7 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
                           const SizedBox(height: TokensStrip.s4),
                           FxLiquidPrimaryButton(
                             label: 'Criar conta sem este link',
-                            onPressed:
-                                () => context.go('/register/aluno'),
+                            onPressed: () => context.go('/register/aluno'),
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           TextButton(

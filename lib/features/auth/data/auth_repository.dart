@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/fcm/fcm_service.dart';
+import '../../../core/legal/focux_legal.dart';
 import '../../../core/storage/secure_storage.dart';
 
 class PasswordResetRequestResult {
@@ -215,16 +216,11 @@ class AuthRepository {
   final Dio _dio;
   final ApiClient _client;
 
-  AuthRepository(ApiClient client)
-      : _client = client,
-        _dio = client.dio;
+  AuthRepository(ApiClient client) : _client = client, _dio = client.dio;
 
   /// POST de login/social em Dio **desacoplado** do pool — evita
   /// `Client is closed` quando o resume recicla o adapter principal.
-  Future<Response<dynamic>> _authPost(
-    String path, {
-    Object? data,
-  }) {
+  Future<Response<dynamic>> _authPost(String path, {Object? data}) {
     return _client.newDetachedAuthDio().post(path, data: data);
   }
 
@@ -293,11 +289,12 @@ class AuthRepository {
     );
   }
 
-  Future<bool> loginAluno(String email, String password, {String? personalSlug}) async {
-    final data = <String, dynamic>{
-      'email': email,
-      'senha': password,
-    };
+  Future<bool> loginAluno(
+    String email,
+    String password, {
+    String? personalSlug,
+  }) async {
+    final data = <String, dynamic>{'email': email, 'senha': password};
     if (personalSlug != null && personalSlug.trim().isNotEmpty) {
       data['personalSlug'] = personalSlug.trim();
     }
@@ -466,6 +463,8 @@ class AuthRepository {
       'email': email,
       'senha': password,
       'conviteToken': conviteToken,
+      'aceitouTermos': true,
+      'versaoTermos': FocuxLegal.consentDocumentVersion,
     };
     if (personalSlug != null) requestBody['personalSlug'] = personalSlug;
     final response = await _dio.post(
@@ -488,10 +487,14 @@ class AuthRepository {
     String senhaAtual,
     String novaSenha,
   ) async {
-    await _dio.post(
+    final response = await _dio.post(
       '/api/auth/aluno/definir-senha',
       data: {'senhaAtual': senhaAtual, 'novaSenha': novaSenha},
     );
+    final body = response.data;
+    if (body is Map<String, dynamic> && body['token'] is String) {
+      await _persistAuthResponse(body, fallbackRole: 'ALUNO');
+    }
     await SecureStorage.saveRequiresPasswordChange(false);
   }
 
@@ -557,10 +560,7 @@ class AuthRepository {
           '/api/auth/logout',
           data: {'refreshToken': refresh},
           options: Options(
-            extra: {
-              'fxNoInvalidate': true,
-              'fxNoOfflineQueue': true,
-            },
+            extra: {'fxNoInvalidate': true, 'fxNoOfflineQueue': true},
           ),
         );
       } catch (_) {

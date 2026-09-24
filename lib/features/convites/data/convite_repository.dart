@@ -1,27 +1,27 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 
+/// Link em claro só vem ao gerar; na home o servidor devolve só prazo e e-mail.
 class Convite {
-  final String token;
-  final String link;
+  final String? token;
+  final String? link;
   final String? webLink;
   final DateTime? expiraEm;
+  final String? email;
 
-  Convite({
-    required this.token,
-    required this.link,
-    this.webLink,
-    this.expiraEm,
-  });
+  Convite({this.token, this.link, this.webLink, this.expiraEm, this.email});
 
-  String get shareLink =>
-      (webLink != null && webLink!.isNotEmpty) ? webLink! : link;
+  String get shareLink {
+    if (webLink != null && webLink!.isNotEmpty) return webLink!;
+    return link ?? '';
+  }
 
   factory Convite.fromJson(Map<String, dynamic> json) => Convite(
-    token: json['token'] as String,
-    link: json['link'] as String,
+    token: json['token'] as String?,
+    link: json['link'] as String?,
     webLink: json['webLink'] as String?,
     expiraEm: _parseDate(json['expiraEm']),
+    email: json['email'] as String?,
   );
 
   static DateTime? _parseDate(dynamic value) {
@@ -36,12 +36,14 @@ class ConviteValidacao {
   final String? personalNome;
   final String? personalSlug;
   final String? mensagem;
+  final String? emailDica;
 
   ConviteValidacao({
     required this.valido,
     this.personalNome,
     this.personalSlug,
     this.mensagem,
+    this.emailDica,
   });
 
   factory ConviteValidacao.fromJson(Map<String, dynamic> json) =>
@@ -49,9 +51,9 @@ class ConviteValidacao {
         valido: json['valido'] as bool? ?? false,
         personalNome: json['personalNome'] as String?,
         personalSlug:
-            (json['personalSlug'] as String?) ??
-            (json['slug'] as String?),
+            (json['personalSlug'] as String?) ?? (json['slug'] as String?),
         mensagem: json['mensagem'] as String?,
+        emailDica: json['emailDica'] as String?,
       );
 }
 
@@ -80,8 +82,12 @@ class ConviteRepository {
     return ConvitesHome.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Convite> gerar() async {
-    final response = await _dio.post('/api/convites/gerar');
+  Future<Convite> gerar({String? email}) async {
+    final e = email?.trim() ?? '';
+    final response = await _dio.post(
+      '/api/convites/gerar',
+      data: e.isEmpty ? null : {'email': e},
+    );
     return Convite.fromJson(response.data as Map<String, dynamic>);
   }
 

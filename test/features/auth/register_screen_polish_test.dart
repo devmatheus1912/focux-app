@@ -71,7 +71,7 @@ void main() {
     expect(screen, contains('environmentStatus'));
     expect(screen, contains('_googleEnabled'));
     expect(screen, isNot(contains('!Platform.isIOS')));
-    expect(screen, contains('FocuxLegal'));
+    expect(screen, contains('AuthLegalConsentText'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('authUnfocusAndGo'));

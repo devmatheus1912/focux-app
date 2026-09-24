@@ -9,6 +9,9 @@ const _tlsCopy =
 const _unavailableCopy = 'Servidor indisponível, tente novamente';
 const _rateLimitCopy = 'Muitas tentativas. Aguarde e tente de novo.';
 const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
+const senhaProvisoriaExpiradaCodigo = 'SENHA_PROVISORIA_EXPIRADA';
+const senhaProvisoriaExpiradaCopy =
+    'Essa senha provisória expirou. Peça uma nova ao seu personal.';
 
 /// Mapeia erros do login por e-mail/senha para mensagens amigáveis em pt-BR.
 ///
@@ -18,6 +21,9 @@ const _loginCredenciaisCopy = 'E-mail ou senha inválidos';
 String mapLoginError(Object error) {
   final api = ApiError.from(error);
   final codigo = api?.codigo;
+  if (codigo == senhaProvisoriaExpiradaCodigo) {
+    return senhaProvisoriaExpiradaCopy;
+  }
   if (codigo != null && ApiErrorCodes.credentials.contains(codigo)) {
     return _loginCredenciaisCopy;
   }
@@ -140,8 +146,7 @@ bool _looksLikeSocketFailure(Object? error) {
 }
 
 bool _looksLikeHostLookupFailure(DioException error) {
-  final haystack =
-      '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
+  final haystack = '${error.message ?? ''} ${error.error ?? ''}'.toLowerCase();
   return haystack.contains('failed host lookup') ||
       haystack.contains('host lookup') ||
       haystack.contains('name resolution') ||
@@ -560,10 +565,7 @@ String? _safeDioUnknownDetail(DioException error) {
     if (error.error != null) error.error.toString(),
     if (error.message != null) error.message!,
   ];
-  final raw = parts
-      .map((s) => s.trim())
-      .where((s) => s.isNotEmpty)
-      .join(' — ');
+  final raw = parts.map((s) => s.trim()).where((s) => s.isNotEmpty).join(' — ');
   if (raw.isEmpty) return null;
   final lower = raw.toLowerCase();
   if (lower.contains('identitytoken') ||

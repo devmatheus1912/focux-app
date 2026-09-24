@@ -18,6 +18,21 @@ void main() {
     });
   });
 
+  group('desligar MFA', () {
+    test('conta sem senha conhecida pede só o código', () {
+      expect(mfaDisablePedeSenhaOuEmail(semSenhaConhecida: true), isFalse);
+      expect(
+        mfaDisableIntro(semSenhaConhecida: true),
+        contains('código de recuperação'),
+      );
+    });
+
+    test('conta com senha pede senha ou e-mail', () {
+      expect(mfaDisablePedeSenhaOuEmail(semSenhaConhecida: false), isTrue);
+      expect(mfaDisableIntro(semSenhaConhecida: false), contains('senha'));
+    });
+  });
+
   group('formatTendenciaVolumeHint', () {
     test('clampa % absurdo em texto legível', () {
       expect(

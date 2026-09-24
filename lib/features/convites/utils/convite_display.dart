@@ -16,10 +16,33 @@ bool conviteAindaValido(DateTime? expiresAt, DateTime now) {
   return expiresAt.isAfter(now);
 }
 
+/// O link só aparece logo depois de gerar; o servidor guarda só o hash.
+String conviteVigenteHint({required bool linkVisivel, String? email}) {
+  final destino =
+      (email ?? '').trim().isEmpty ? 'Um uso' : 'Só para ${email!.trim()}';
+  return linkVisivel
+      ? '$destino. Some da área de transferência em 1 min.'
+      : '$destino. Por segurança o link só aparece ao gerar. Gere outro para reenviar.';
+}
+
+const conviteEmailLabel = 'E-mail do aluno (opcional)';
+const conviteEmailHint = 'Com e-mail, só essa pessoa consegue usar o link';
+
+String? conviteCadastroEmailDica(String? emailDica) {
+  final v = emailDica?.trim() ?? '';
+  if (v.isEmpty) return null;
+  return 'Este convite é para $v. Use esse e-mail e crie sua senha.';
+}
+
+String? conviteEmailInvalido(String raw) {
+  final v = raw.trim();
+  if (v.isEmpty) return null;
+  final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v);
+  return ok ? null : 'E-mail inválido';
+}
+
 String conviteGeradoLabel({required bool substituiu}) =>
-    substituiu
-        ? 'Link anterior deixou de valer.'
-        : 'Link gerado.';
+    substituiu ? 'Link anterior deixou de valer.' : 'Link gerado.';
 
 String conviteShareMessage({
   required String personalNome,
