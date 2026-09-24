@@ -205,7 +205,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
                             label: businessNdrLabel,
-                            value: '${snap.ndrPct.toStringAsFixed(1)}%',
+                            value: businessPctLabel(snap.ndrPct),
                             hint: businessNdrStatus(snap.ndrPct),
                             onInfo: () => _explicar(
                               businessNdrLabel,
@@ -221,7 +221,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           OperationalMetricTile(
-                            label: 'Inadimplentes',
+                            label: 'Alunos inadimplentes',
                             value: '${snap.inadimplentes}',
                             hint: snap.inadimplentes > 0
                                 ? 'Cobre em Mensalidades'
@@ -252,7 +252,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           OperationalMetricTile(
                             label: businessArpaLabel,
                             value: businessMoneyLabel(snap.arpa),
-                            hint: 'Recebido no mês ÷ alunos ativos',
+                            hint: businessArpaHint(snap.alunosPagantes),
                             color: primary,
                             isDark: isDark,
                             onInfo: () => _explicar(
@@ -264,7 +264,10 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           OperationalMetricTile(
                             label: businessLtvLabel,
                             value: businessMoneyLabel(snap.ltvProxy),
-                            hint: 'Média por aluno × 12',
+                            hint: businessLtvHint(
+                              snap.vidaMediaMeses,
+                              snap.churnPct,
+                            ),
                             color: primary,
                             isDark: isDark,
                             onInfo: () => _explicar(

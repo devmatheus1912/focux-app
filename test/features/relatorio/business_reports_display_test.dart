@@ -3,17 +3,28 @@ import 'package:focux_app/features/relatorio/utils/business_reports_display.dart
 
 void main() {
   test('businessNdrStatus e PQL', () {
-    expect(businessNdrStatus(110), 'Acima do mês passado');
-    expect(businessNdrStatus(100), 'Igual ao mês passado');
-    expect(businessNdrStatus(90), 'Abaixo do mês passado');
-    expect(businessNdrAjuda, contains('começo do mês'));
-    expect(businessArpaAjuda, contains('alunos ativos'));
-    expect(businessLtvAjuda, contains('× 12'));
+    expect(businessNdrStatus(110), 'Os mesmos alunos pagam mais');
+    expect(businessNdrStatus(100), 'Os mesmos alunos pagam igual');
+    expect(businessNdrStatus(90), 'Os mesmos alunos pagam menos');
+    expect(businessNdrStatus(null), 'Sem mês anterior para comparar');
+    expect(businessNdrAjuda, contains('Aluno novo não entra'));
+    expect(businessArpaAjuda, contains('alunos com cobrança'));
+    expect(businessLtvAjuda, contains('36 meses'));
     expect(businessNdrRuim(99.9), isTrue);
+    expect(businessNdrRuim(null), isFalse);
     expect(businessPqlLabel('EARLY'), 'Início');
     expect(businessPqlLabel('NURTURE'), 'Nutrir');
     expect(businessPqlLabel('PQL'), 'Qualificado');
     expect(businessPqlLabel('PRIORIDADE'), 'Prioridade');
+  });
+
+  test('percentual, ARPA e LTV', () {
+    expect(businessPctLabel(62.5), '62,5%');
+    expect(businessPctLabel(null), '—');
+    expect(businessArpaHint(1), 'Faturado ÷ 1 aluno com cobrança');
+    expect(businessArpaHint(4), 'Faturado ÷ 4 alunos com cobrança');
+    expect(businessLtvHint(12, null), 'Média por aluno × 12 meses (sem histórico)');
+    expect(businessLtvHint(2.5, 40), 'Média × 2,5 meses · saída 40,0% no mês');
   });
 
   test('businessDunningFalhasLabel pluraliza', () {

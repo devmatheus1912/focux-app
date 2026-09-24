@@ -1,27 +1,44 @@
 import '../../../core/utils/pt_br_display.dart';
 
-String businessNdrStatus(double ndrPct) {
-  if (ndrPct > 100) return 'Acima do mês passado';
-  if (ndrPct == 100) return 'Igual ao mês passado';
-  return 'Abaixo do mês passado';
+String businessNdrStatus(double? ndrPct) {
+  if (ndrPct == null) return 'Sem mês anterior para comparar';
+  if (ndrPct > 100) return 'Os mesmos alunos pagam mais';
+  if (ndrPct == 100) return 'Os mesmos alunos pagam igual';
+  return 'Os mesmos alunos pagam menos';
 }
 
-const businessNdrLabel = 'Receita vs. mês passado (NDR)';
+String businessPctLabel(double? pct) =>
+    pct == null ? '—' : '${pct.toStringAsFixed(1).replaceAll('.', ',')}%';
+
+const businessNdrLabel = 'Retenção de receita (NDR)';
 const businessArpaLabel = 'Média por aluno (ARPA)';
-const businessLtvLabel = 'Valor em 12 meses (LTV)';
+const businessLtvLabel = 'Valor por aluno (LTV)';
 
 const businessNdrAjuda =
-    'Recebido neste mês dividido pelo recebido no mês passado. 100% = igual; acima disso, entrou mais dinheiro. '
-    'Conta só o que já foi pago, então no começo do mês o número costuma ficar baixo até os alunos pagarem.';
+    'Pega só os alunos que tinham cobrança no mês passado e compara quanto eles têm neste mês. '
+    '100% = igual; acima disso, eles pagam mais (aumento ou upgrade). Aluno novo não entra, então o número mostra se você segura a base.';
 
 const businessArpaAjuda =
-    'Recebido no mês dividido pelos alunos ativos. Mostra quanto cada aluno paga, em média. '
-    'Aluno sem mensalidade paga no mês puxa a média para baixo.';
+    'Faturado no mês dividido pelos alunos com cobrança no mês. Conta mensalidade paga e em aberto, '
+    'então não oscila conforme o dia do pagamento.';
 
 const businessLtvAjuda =
-    'Estimativa simples: média por aluno × 12 meses. Serve para comparar meses, não é previsão exata de quanto cada aluno vai render.';
+    'Média por aluno × quantos meses um aluno costuma ficar. A permanência sai da saída do último mês '
+    '(1 ÷ churn), com teto de 36 meses. Sem histórico, usamos 12 meses.';
 
-bool businessNdrRuim(double ndrPct) => ndrPct < 100;
+bool businessNdrRuim(double? ndrPct) => ndrPct != null && ndrPct < 100;
+
+String businessArpaHint(int pagantes) => pagantes == 1
+    ? 'Faturado ÷ 1 aluno com cobrança'
+    : 'Faturado ÷ $pagantes alunos com cobrança';
+
+String businessLtvHint(double vidaMediaMeses, double? churnPct) {
+  final meses = vidaMediaMeses.toStringAsFixed(
+    vidaMediaMeses == vidaMediaMeses.roundToDouble() ? 0 : 1,
+  ).replaceAll('.', ',');
+  if (churnPct == null) return 'Média por aluno × $meses meses (sem histórico)';
+  return 'Média × $meses meses · saída ${businessPctLabel(churnPct)} no mês';
+}
 
 String businessPqlLabel(String raw) {
   switch (raw.trim().toUpperCase()) {
@@ -49,7 +66,7 @@ String businessDunningFalhasLabel(int abertas) {
 String businessMoneyLabel(num value) => formatBrlCurrency(value);
 
 const businessComoCalculamos =
-    'Recebido é a soma das mensalidades pagas do mês. Toque em cada número para ver a conta.';
+    'Recebido é o que entrou no mês pela data do pagamento. Previsto é tudo lançado para o mês, pago ou não. Toque em cada número para ver a conta.';
 
 bool businessTemInadimplencia(int inadimplentes) => inadimplentes > 0;
 

@@ -6,7 +6,7 @@ class BusinessSnapshot {
   final double mrrAtual;
   final double mrrAnterior;
   final double mrrPrevisto;
-  final double ndrPct;
+  final double? ndrPct;
   final double arpa;
   final double ltvProxy;
   final int alunosAtivos;
@@ -16,6 +16,9 @@ class BusinessSnapshot {
   final int dunningAbertas;
   final int pqlScore;
   final String pqlClassificacao;
+  final int alunosPagantes;
+  final double? churnPct;
+  final double vidaMediaMeses;
 
   BusinessSnapshot({
     required this.mrrAtual,
@@ -31,13 +34,16 @@ class BusinessSnapshot {
     required this.dunningAbertas,
     required this.pqlScore,
     required this.pqlClassificacao,
+    this.alunosPagantes = 0,
+    this.churnPct,
+    this.vidaMediaMeses = 12,
   });
 
   factory BusinessSnapshot.fromJson(Map<String, dynamic> j) => BusinessSnapshot(
     mrrAtual: FxMoney.reais(j['mrrAtual']),
     mrrAnterior: FxMoney.reais(j['mrrAnterior']),
     mrrPrevisto: FxMoney.reais(j['mrrPrevisto']),
-    ndrPct: (j['ndrPct'] as num?)?.toDouble() ?? 0,
+    ndrPct: (j['ndrPct'] as num?)?.toDouble(),
     arpa: FxMoney.reais(j['arpa']),
     ltvProxy: FxMoney.reais(j['ltvProxy']),
     alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
@@ -47,6 +53,9 @@ class BusinessSnapshot {
     dunningAbertas: (j['dunningAbertas'] as num?)?.toInt() ?? 0,
     pqlScore: (j['pqlScore'] as num?)?.toInt() ?? 0,
     pqlClassificacao: j['pqlClassificacao'] as String? ?? 'EARLY',
+    alunosPagantes: (j['alunosPagantes'] as num?)?.toInt() ?? 0,
+    churnPct: (j['churnPct'] as num?)?.toDouble(),
+    vidaMediaMeses: (j['vidaMediaMeses'] as num?)?.toDouble() ?? 12,
   );
 }
 

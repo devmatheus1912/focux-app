@@ -1288,7 +1288,7 @@ Dos 90 sem menção, 20 são legitimamente fora do app — 4 webhooks servidor-a
 - **Backend pronto sem UI (camada de smoke):** `POST /api/backup/create`, `GET /api/backup/list`, `GET /api/exportacao/dados`, `GET /api/lgpd/me/export`. Quatro funcionalidades completas sem superfície — candidatas naturais a S8 (Configuração) sem custo de backend.
 - **`PUT` e `DELETE /api/tenant/membros/{id}` sem consumidor.** O app só lista (`GET`) e cria (`POST`) membro; nunca edita nem remove. É exatamente onde mora o P0 de escalonamento de privilégio (`TenantMembroController`). Ver a ressalva abaixo antes de concluir qualquer coisa sobre severidade.
 - **`GET /api/pose-coach/status` nunca chamado** — ver §22.7.3.
-- Outros grupos órfãos, sem decisão pendente: `auditoria` (3 — a trilha existe e nenhuma tela a mostra), `templates` (3), `trilhas` (3 de 6), `dashboard/focux-score` (2), `agenda/ocupacao` e `agenda/periodo`, `financeiro/lote/marcar-pago` e `mensalidades/marcar-atrasadas`.
+- Outros grupos órfãos, sem decisão pendente: `auditoria` (3 — a trilha existe e nenhuma tela a mostra), `templates` (3), `trilhas` (3 de 6), `dashboard/focux-score` (2), `agenda/ocupacao` e `agenda/periodo` e `financeiro/lote/marcar-pago`.
 
 > **Ressalva de leitura, obrigatória.** Órfão significa "nenhum cliente nosso chama", não "inalcançável". Um endpoint autenticado sem consumidor continua exposto a qualquer portador de token com `curl` — o atacante não usa o app. Portanto:
 >
