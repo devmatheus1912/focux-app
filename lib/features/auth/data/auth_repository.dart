@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/fcm/fcm_service.dart';
@@ -281,7 +279,7 @@ class AuthRepository {
       await SecureStorage.saveRefreshToken(refreshToken);
     }
     await SecureStorage.saveRole('PERSONAL');
-    unawaited(FcmService.registrarSeAutenticado(_client));
+    await FcmService.registrarSeAutenticado(_client);
     return token;
   }
 
@@ -314,7 +312,7 @@ class AuthRepository {
     }
     await SecureStorage.saveRole('ALUNO');
     await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
-    unawaited(FcmService.registrarSeAutenticado(_client));
+    await FcmService.registrarSeAutenticado(_client);
     return requiresPasswordChange;
   }
 
@@ -451,8 +449,9 @@ class AuthRepository {
     }
     await SecureStorage.saveRole(role);
     await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
-    // Boot pode ter registrado FCM sem JWT — reclama token agora.
-    unawaited(FcmService.registrarSeAutenticado(_client));
+    // Boot pode ter registrado FCM sem JWT — reclama token agora (await
+    // evita token antigo de ALUNO continuar no mesmo aparelho).
+    await FcmService.registrarSeAutenticado(_client);
   }
 
   Future<String> registerAluno(
@@ -481,7 +480,7 @@ class AuthRepository {
     }
     await SecureStorage.saveRole('ALUNO');
     await SecureStorage.saveRequiresPasswordChange(false);
-    unawaited(FcmService.registrarSeAutenticado(_client));
+    await FcmService.registrarSeAutenticado(_client);
     return token;
   }
 

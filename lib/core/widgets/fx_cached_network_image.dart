@@ -38,9 +38,14 @@ class FxCachedNetworkImage extends StatelessWidget {
     final cacheW =
         memCacheWidth ??
         (width != null && width!.isFinite ? (width! * dpr).round() : null);
+    // Never pass both axes — that forces a distorting decode size.
     final cacheH =
-        memCacheHeight ??
-        (height != null && height!.isFinite ? (height! * dpr).round() : null);
+        cacheW != null
+            ? null
+            : (memCacheHeight ??
+                (height != null && height!.isFinite
+                    ? (height! * dpr).round()
+                    : null));
 
     return CachedNetworkImage(
       imageUrl: imageUrl,

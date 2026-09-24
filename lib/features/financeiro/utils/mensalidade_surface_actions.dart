@@ -12,6 +12,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -46,6 +47,18 @@ bool _mensagemIndicaCarteiraSemChave(String msg) {
           lower.contains('carteira') ||
           lower.contains('wallet'));
 }
+
+/// Conta Mercado Pago do collector sem chave PIX (não é carteira Focux).
+bool _mensagemIndicaMpSemChavePix(String msg) {
+  final lower = msg.toLowerCase();
+  return lower.contains('without key') ||
+      lower.contains('13253') ||
+      lower.contains('chave pix ativa') ||
+      (lower.contains('mercado pago') && lower.contains('chave pix'));
+}
+
+const _mpPixKeyHelpUrl =
+    'https://www.mercadopago.com.br/ajuda/cadastrar-chave-pix_11801';
 
 Widget _pixQrVisual({
   required String pixCopiaECola,
@@ -172,6 +185,7 @@ Future<void> mostrarPixMensalidade({
   var carregando = true;
   String? erro;
   var precisaCarteira = false;
+  var precisaMpPix = false;
   var loadToken = 0;
   var loadStarted = false;
 
@@ -181,6 +195,7 @@ Future<void> mostrarPixMensalidade({
       carregando = true;
       erro = null;
       precisaCarteira = false;
+      precisaMpPix = false;
     });
     try {
       // BE gera via Mercado Pago; carteira do personal não bloqueia a emissão.
@@ -205,9 +220,12 @@ Future<void> mostrarPixMensalidade({
     } catch (e) {
       if (token != loadToken) return;
       final msg = friendlyError(e);
+      final mpPix = _mensagemIndicaMpSemChavePix(msg);
       setDialogState(() {
         erro = msg;
-        precisaCarteira = !asAluno && _mensagemIndicaCarteiraSemChave(msg);
+        precisaMpPix = mpPix;
+        precisaCarteira =
+            !asAluno && !mpPix && _mensagemIndicaCarteiraSemChave(msg);
         carregando = false;
       });
     }
@@ -283,7 +301,14 @@ Future<void> mostrarPixMensalidade({
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s3),
-                          if (precisaCarteira)
+                          if (precisaMpPix)
+                            FxLiquidPrimaryButton(
+                              label: 'Como ativar PIX no MP',
+                              onPressed: () async {
+                                await launchSafeHttpUrl(_mpPixKeyHelpUrl);
+                              },
+                            )
+                          else if (precisaCarteira)
                             FxLiquidPrimaryButton(
                               label: 'Abrir carteira',
                               onPressed: () {
