@@ -53,7 +53,15 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                   (_filtro == AlunoFiltro.ativos &&
                       ativosCount > 0 &&
                       riscoCount >= ativosCount);
-              final listBottomGap = AlunosLayout.listBottomGap(context);
+              final showStickyCreate =
+                  !_modoSelecao &&
+                  !listRefreshing &&
+                  !(filtrados.isEmpty &&
+                      (_hasActiveFilter || _query.trim().isNotEmpty));
+              final listBottomGap = AlunosLayout.listBottomPad(
+                context,
+                stickyVisible: showStickyCreate,
+              );
               final tail = ref.watch(alunosHomeTailProvider);
 
               return FxContentWidthLimiter(
@@ -222,17 +230,11 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                           (_modoSelecao && _selecionados.isNotEmpty) ? null : 0,
                       child:
                           (_modoSelecao && _selecionados.isNotEmpty)
-                              ? SafeArea(
-                                top: false,
-                                child: Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    TokensStrip.s4,
-                                    8,
-                                    TokensStrip.s4,
-                                    AlunosLayout.bulkBarPaddingBottom +
-                                        MediaQuery.viewInsetsOf(context).bottom,
-                                  ),
-                                  child: Row(
+                              ? _alunosStickyFooter(
+                                topPadding: 8,
+                                bottomPadding:
+                                    AlunosLayout.bulkBarPaddingBottom,
+                                child: Row(
                                     children: [
                                       TextButton(
                                         onPressed: () {
@@ -281,45 +283,50 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                       ),
                                     ],
                                   ),
-                                ),
                               )
                               : const SizedBox.shrink(),
                     ),
                     // Empty de filtro/busca: P0 = Limpar no empty (§11).
-                    if (!_modoSelecao &&
-                        !listRefreshing &&
-                        !(filtrados.isEmpty &&
-                            (_hasActiveFilter ||
-                                _query.trim().isNotEmpty)))
-                      SafeArea(
-                        top: false,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            TokensStrip.s4,
-                            TokensStrip.s2,
-                            TokensStrip.s4,
-                            TokensStrip.s3 +
-                                MediaQuery.viewInsetsOf(context).bottom,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              FxLiquidPrimaryButton(
-                                label: 'Novo aluno',
-                                onPressed: _adicionarAluno,
-                              ),
-                              const SizedBox(height: TokensStrip.s2),
-                              TextButton(
-                                onPressed: _importarVarios,
-                                child: const Text('Importar vários'),
-                              ),
-                            ],
-                          ),
+                    if (showStickyCreate)
+                      _alunosStickyFooter(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            FxLiquidPrimaryButton(
+                              label: 'Novo aluno',
+                              onPressed: _adicionarAluno,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            TextButton(
+                              onPressed: _importarVarios,
+                              child: const Text('Importar vários'),
+                            ),
+                          ],
                         ),
                       ),
                   ],
                 ),
               );
+  }
+
+  /// Sticky acima do [MainShell] dock — sem SafeArea inferior duplicada em tab.
+  Widget _alunosStickyFooter({
+    required Widget child,
+    double topPadding = TokensStrip.s2,
+    double bottomPadding = TokensStrip.s2,
+  }) {
+    final shellTab = FocuxSurfaces.matchOf(context)?.spec.shellTab ?? false;
+    final padded = Padding(
+      padding: EdgeInsets.fromLTRB(
+        AlunosLayout.screenPadding,
+        topPadding,
+        AlunosLayout.screenPadding,
+        bottomPadding + MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      child: child,
+    );
+    if (shellTab) return padded;
+    return SafeArea(top: false, child: padded);
   }
 }

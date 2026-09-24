@@ -65,7 +65,9 @@ class FxShellScaffold extends StatelessWidget {
 
     Widget content = inner;
     if (safeArea) {
-      final bottomInset = safeAreaBottom ?? bottomNavigationBar == null;
+      final shellTab = FocuxSurfaces.matchOf(context)?.spec.shellTab ?? false;
+      final bottomInset =
+          safeAreaBottom ?? (bottomNavigationBar == null && !shellTab);
       content = SafeArea(bottom: bottomInset, child: inner);
     }
     if (bottomNavigationBar != null) {

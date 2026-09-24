@@ -56,12 +56,17 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/chat/screens/conversation_screen.dart',
     );
-    expect(screen, contains('TokensStrip.rCard'));
-    expect(screen, contains('const Size(48, 48)'));
-    expect(screen, contains("hintText: 'Mensagem'"));
-    expect(screen, isNot(contains('Icons.add_circle')));
-    expect(screen, isNot(contains('BackdropFilter')));
-    expect(screen, isNot(contains('ImageFilter.blur')));
+    final composer = readScreenSourceBundle(
+      'lib/features/chat/widgets/conversation_composer_widgets.dart',
+    );
+    expect(composer, contains('TokensStrip.rCard'));
+    expect(composer, contains('const Size(44, 44)'));
+    expect(composer, contains("hintText: 'Mensagem'"));
+    expect(composer, isNot(contains('Icons.add_circle')));
+    expect(composer, isNot(contains('Icons.auto_awesome')));
+    expect(composer, isNot(contains('BackdropFilter')));
+    expect(composer, isNot(contains('ImageFilter.blur')));
+    expect(screen, contains('ConversationMessageComposer'));
     expect(screen, contains('const ConversationChatBackdrop()'));
   });
 }

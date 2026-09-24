@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
 class ConversationAttachOption extends StatelessWidget {
@@ -237,6 +239,248 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// iOS-style docked composer — single chrome surface, no nested SafeArea.
+class ConversationMessageComposer extends StatelessWidget {
+  const ConversationMessageComposer({
+    super.key,
+    required this.isDark,
+    required this.uploading,
+    required this.composerHasText,
+    required this.recordingAudio,
+    required this.textController,
+    required this.composerFocus,
+    required this.replySender,
+    required this.replyPreview,
+    required this.showReplyBar,
+    required this.recordDurationLabel,
+    required this.onCloseReply,
+    required this.onCancelRecording,
+    required this.onSendRecording,
+    required this.onAttach,
+    required this.onEmoji,
+    required this.onSendText,
+    required this.onStartRecording,
+    required this.onStopRecordingSend,
+  });
+
+  final bool isDark;
+  final bool uploading;
+  final bool composerHasText;
+  final bool recordingAudio;
+  final TextEditingController textController;
+  final FocusNode composerFocus;
+  final String? replySender;
+  final String? replyPreview;
+  final bool showReplyBar;
+  final String recordDurationLabel;
+  final VoidCallback onCloseReply;
+  final VoidCallback onCancelRecording;
+  final VoidCallback onSendRecording;
+  final VoidCallback onAttach;
+  final VoidCallback onEmoji;
+  final VoidCallback onSendText;
+  final VoidCallback onStartRecording;
+  final VoidCallback onStopRecordingSend;
+
+  static const double barRadius = 22;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final mute = chrome.mute;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: chrome.isDark
+            ? EagleTokens.darkBg.withValues(alpha: 0.92)
+            : TokensStrip.pageBg.withValues(alpha: 0.94),
+        border: Border(
+          top: BorderSide(color: chrome.line.withValues(alpha: 0.65)),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          TokensStrip.s2,
+          TokensStrip.s2,
+          TokensStrip.s2,
+          TokensStrip.s2,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            IconButton(
+              onPressed: uploading ? null : onAttach,
+              icon: const Icon(Icons.add_rounded),
+              color: mute,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(44, 44),
+              ),
+            ),
+            Expanded(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: chrome.cardFill,
+                  borderRadius: BorderRadius.circular(barRadius),
+                  border: Border.all(
+                    color: chrome.line.withValues(alpha: 0.9),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.18 : 0.04,
+                      ),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showReplyBar &&
+                        replySender != null &&
+                        replyPreview != null)
+                      ConversationReplyComposerBar(
+                        isDark: isDark,
+                        sender: replySender!,
+                        preview: replyPreview!,
+                        onClose: onCloseReply,
+                      ),
+                    if (recordingAudio)
+                      ConversationRecordingComposerBar(
+                        isDark: isDark,
+                        duration: recordDurationLabel,
+                        onCancel: onCancelRecording,
+                        onSend: onSendRecording,
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: textController,
+                              focusNode: composerFocus,
+                              style: FocuxHubTypography.body(color: chrome.ink),
+                              cursorColor: primary,
+                              decoration: InputDecoration(
+                                hintText: 'Mensagem',
+                                hintStyle: FocuxHubTypography.bodyMuted(
+                                  color: mute,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: TokensStrip.s3,
+                                  vertical: TokensStrip.s2 + 2,
+                                ),
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                              ),
+                              minLines: 1,
+                              maxLines: 5,
+                              textInputAction: TextInputAction.send,
+                              onTapOutside: (_) =>
+                                  FxKeyboardDismissScope.dismiss(),
+                              onSubmitted: (_) => onSendText(),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: onEmoji,
+                            icon: const Icon(Icons.sentiment_satisfied_outlined),
+                            color: mute,
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(44, 44),
+                            ),
+                          ),
+                          if (composerHasText)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: TokensStrip.s1,
+                                bottom: TokensStrip.s1,
+                              ),
+                              child: SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: Material(
+                                  color: primary,
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rButton,
+                                  ),
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: uploading ? null : onSendText,
+                                    icon: Icon(
+                                      Icons.arrow_upward_rounded,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          if (!composerHasText)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                right: TokensStrip.s1,
+                                bottom: TokensStrip.s1,
+                              ),
+                              child: SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: Material(
+                                  color:
+                                      recordingAudio
+                                          ? EagleTokens.bad
+                                          : primary,
+                                  borderRadius: BorderRadius.circular(
+                                    TokensStrip.rButton,
+                                  ),
+                                  child: IconButton(
+                                    padding: EdgeInsets.zero,
+                                    tooltip:
+                                        recordingAudio
+                                            ? 'Enviar áudio'
+                                            : 'Gravar áudio',
+                                    onPressed:
+                                        uploading
+                                            ? null
+                                            : recordingAudio
+                                            ? onStopRecordingSend
+                                            : onStartRecording,
+                                    icon: Icon(
+                                      recordingAudio
+                                          ? Icons.stop_rounded
+                                          : Icons.mic_rounded,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

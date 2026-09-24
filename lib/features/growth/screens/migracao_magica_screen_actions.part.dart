@@ -317,6 +317,8 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       return;
     }
 
+    final conteudo = MigracaoTextoNormalizer.normalizeForImport(trimmed);
+
     setState(() {
       _isLoading = true;
       _emptyResult = false;
@@ -327,7 +329,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       final api = ref.read(apiClientProvider);
       final response = await api.dio.post(
         '/api/v1/migracao/texto',
-        data: {'conteudo': trimmed},
+        data: {'conteudo': conteudo},
       );
 
       if (!mounted) return;

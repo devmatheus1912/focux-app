@@ -238,8 +238,13 @@ class _InboxTile extends StatelessWidget {
     return GestureDetector(
       onLongPress: onLongPress,
       child: FxSatelliteListTile(
+        margin: const EdgeInsets.only(bottom: 4),
         title: item.alunoNome,
-        subtitle: Text(preview),
+        subtitle: Text(
+          preview,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         leading:
             selecting && selected
                 ? Icon(Icons.check_rounded, color: primary)
@@ -331,9 +336,9 @@ class _InboxTabPane extends StatelessWidget {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(
               FxSettingsLayout.pageInset,
-              TokensStrip.s3,
+              TokensStrip.s2,
               FxSettingsLayout.pageInset,
-              TokensStrip.s6,
+              TokensStrip.s5,
             ),
             itemCount: items.length + (showLoadMore ? 1 : 0),
             itemBuilder: (context, i) {

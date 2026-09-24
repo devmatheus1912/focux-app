@@ -65,6 +65,13 @@ abstract final class AlunosLayout {
           ? listBottomGapCompact
           : listBottomGapComfort;
 
+  /// Folga inferior da lista quando o sticky CTA fica fora do scroll (paridade Treinos).
+  static double listBottomPad(
+    BuildContext context, {
+    required bool stickyVisible,
+  }) =>
+      stickyVisible ? TokensStrip.s2 : listBottomGap(context);
+
   static const double formBottomBarHeight = 48;
 
   static const double formScrollBottom = 96;

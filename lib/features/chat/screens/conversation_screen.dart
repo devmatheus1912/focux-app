@@ -27,10 +27,10 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../utils/chat_bubble_grouping.dart';
 import '../utils/chat_remetente.dart';
 import '../utils/chat_system_event.dart';
 import 'chat_inbox_screen.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -369,8 +369,6 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final backFallback =
         _isAlunoMode ? '/dashboard/aluno' : '/dashboard/personal';
 
-    final composerBottomPad = TokensStrip.s2;
-
     final scaffold = FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
@@ -471,10 +469,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: EdgeInsets.fromLTRB(
-                              TokensStrip.s4,
-                              TokensStrip.s4,
-                              TokensStrip.s4,
                               TokensStrip.s3,
+                              TokensStrip.s3,
+                              TokensStrip.s3,
+                              TokensStrip.s2,
                             ),
                             itemCount:
                                 _msgs.length +
@@ -492,6 +490,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               final msg = _msgs[msgIndex];
                               final previous =
                                   msgIndex > 0 ? _msgs[msgIndex - 1] : null;
+                              final next =
+                                  msgIndex + 1 < _msgs.length
+                                      ? _msgs[msgIndex + 1]
+                                      : null;
                               final showDate =
                                   previous == null ||
                                   !_sameDay(previous.enviadoEm, msg.enviadoEm);
@@ -499,6 +501,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 msg.remetente,
                                 msg.tipoMidia,
                               );
+                              final groupSlot =
+                                  system
+                                      ? ChatBubbleGroupSlot.single
+                                      : resolveChatBubbleGroupSlot(
+                                        msg: msg,
+                                        older: previous,
+                                        newer: next,
+                                        isMine: _isMine,
+                                        isSystem:
+                                            (m) => chatIsSistema(
+                                              m.remetente,
+                                              m.tipoMidia,
+                                            ),
+                                      );
                               return Column(
                                 children: [
                                   if (showDate)
@@ -519,6 +535,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 mine: _isMine(msg),
                                                 isDark: isDark,
                                                 accentColor: primary,
+                                                groupSlot: groupSlot,
                                                 highlighted:
                                                     _highlightedMessageId ==
                                                     msg.id,
@@ -544,210 +561,29 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             },
                           ),
                 ),
-                Container(
-                  // Scaffold already resizes the body above the keyboard.
-                  // Do not add viewInsets here, or the composer jumps upward.
-                  padding: EdgeInsets.fromLTRB(
-                    TokensStrip.s3,
-                    TokensStrip.s2,
-                    TokensStrip.s3,
-                    composerBottomPad,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          alpha: isDark ? 0.14 : 0.035,
-                        ),
-                        blurRadius: 18,
-                        offset: const Offset(0, -6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed:
-                            _uploading ? null : _showAttachmentSheet,
-                        icon: const Icon(Icons.add_rounded),
-                        color: TokensStrip.textSecondary,
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(48, 48),
-                        ),
-                      ),
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rCard,
-                          ),
-                          child: Container(
-                              decoration: fxListCardDecoration(context),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (_replyingTo != null)
-                                    ConversationReplyComposerBar(
-                                      isDark: isDark,
-                                      sender: _replySenderLabel(
-                                        _replyingTo!.remetente,
-                                      ),
-                                      preview: _previewText(_replyingTo!),
-                                      onClose:
-                                          () => setState(
-                                            () => _replyingTo = null,
-                                          ),
-                                    ),
-                                  if (_recordingAudio)
-                                    ConversationRecordingComposerBar(
-                                      isDark: isDark,
-                                      duration: _formatDuration(
-                                        _recordDuration,
-                                      ),
-                                      onCancel:
-                                          () =>
-                                              _stopAudioRecording(send: false),
-                                      onSend:
-                                          () => _stopAudioRecording(send: true),
-                                    ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _ctrl,
-                                          focusNode: _composerFocus,
-                                          style: FocuxHubTypography.body(
-                                            color: chrome.ink,
-                                          ),
-                                          cursorColor: primary,
-                                          decoration: InputDecoration(
-                                            hintText: 'Mensagem',
-                                            hintStyle:
-                                                FocuxHubTypography.bodyMuted(
-                                              color: chrome.mute,
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: TokensStrip.s3,
-                                                  vertical: TokensStrip.s3,
-                                                ),
-                                            border: InputBorder.none,
-                                            enabledBorder: InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                            disabledBorder: InputBorder.none,
-                                            errorBorder: InputBorder.none,
-                                            focusedErrorBorder:
-                                                InputBorder.none,
-                                          ),
-                                          minLines: 1,
-                                          maxLines: 5,
-                                          textInputAction: TextInputAction.send,
-                                          onTapOutside:
-                                              (_) =>
-                                                  FxKeyboardDismissScope
-                                                      .dismiss(),
-                                          onSubmitted: (_) => _sendText(),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: _showEmojiSheet,
-                                        icon: const Icon(Icons.auto_awesome),
-                                        color: TokensStrip.textSecondary,
-                                        style: IconButton.styleFrom(
-                                          minimumSize: const Size(48, 48),
-                                        ),
-                                      ),
-                                      if (_composerHasText)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: TokensStrip.s1,
-                                            bottom: TokensStrip.s1,
-                                          ),
-                                          child: SizedBox(
-                                            width: 48,
-                                            height: 48,
-                                            child: Material(
-                                              color: primary,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                TokensStrip.rButton,
-                                              ),
-                                              child: IconButton(
-                                                padding: EdgeInsets.zero,
-                                                onPressed:
-                                                    _uploading
-                                                        ? null
-                                                        : _sendText,
-                                                icon: Icon(
-                                                  Icons.arrow_upward_rounded,
-                                                  color:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .onPrimary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      if (!_composerHasText)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: TokensStrip.s1,
-                                            bottom: TokensStrip.s1,
-                                          ),
-                                          child: SizedBox(
-                                            width: 48,
-                                            height: 48,
-                                            child: Material(
-                                              color:
-                                                  _recordingAudio
-                                                      ? EagleTokens.bad
-                                                      : primary,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                TokensStrip.rButton,
-                                              ),
-                                              child: IconButton(
-                                                padding: EdgeInsets.zero,
-                                                tooltip:
-                                                    _recordingAudio
-                                                        ? 'Enviar áudio'
-                                                        : 'Gravar áudio',
-                                                onPressed:
-                                                    _uploading
-                                                        ? null
-                                                        : _recordingAudio
-                                                        ? () =>
-                                                            _stopAudioRecording(
-                                                              send: true,
-                                                            )
-                                                        : _startAudioRecording,
-                                                icon: Icon(
-                                                  _recordingAudio
-                                                      ? Icons.stop_rounded
-                                                      : Icons.mic_rounded,
-                                                  color:
-                                                      Theme.of(context)
-                                                          .colorScheme
-                                                          .onPrimary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                ConversationMessageComposer(
+                  isDark: isDark,
+                  uploading: _uploading,
+                  composerHasText: _composerHasText,
+                  recordingAudio: _recordingAudio,
+                  textController: _ctrl,
+                  composerFocus: _composerFocus,
+                  showReplyBar: _replyingTo != null,
+                  replySender:
+                      _replyingTo == null
+                          ? null
+                          : _replySenderLabel(_replyingTo!.remetente),
+                  replyPreview:
+                      _replyingTo == null ? null : _previewText(_replyingTo!),
+                  recordDurationLabel: _formatDuration(_recordDuration),
+                  onCloseReply: () => setState(() => _replyingTo = null),
+                  onCancelRecording: () => _stopAudioRecording(send: false),
+                  onSendRecording: () => _stopAudioRecording(send: true),
+                  onAttach: _showAttachmentSheet,
+                  onEmoji: _showEmojiSheet,
+                  onSendText: _sendText,
+                  onStartRecording: _startAudioRecording,
+                  onStopRecordingSend: () => _stopAudioRecording(send: true),
                 ),
               ],
             ),

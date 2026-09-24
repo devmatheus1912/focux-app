@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/dashboard_layout.dart';
 import '../data/command_center_data.dart';
 import '../utils/dashboard_microcopy.dart';
+import '../utils/format_agenda_hoje_horario.dart';
 import 'dashboard_section_header.dart';
 
 /// Próximos compromissos de hoje — grupo inset, top 3.
@@ -38,14 +39,14 @@ class DashboardAgendaHojeStrip extends StatelessWidget {
           for (final item in visible)
             Semantics(
               label:
-                  '${item.horario}. ${item.nomeAluno}. '
+                  '${formatAgendaHojeHorario(item.horario)}. ${item.nomeAluno}. '
                   'Status ${_agendaStatusLabel(item.status)}. Abrir agenda',
               button: true,
               child: FxSatelliteListTile(
                 title: fxTitleCaseName(item.nomeAluno),
                 subtitle: Text(_agendaStatusLabel(item.status)),
                 trailing: Text(
-                  item.horario,
+                  formatAgendaHojeHorario(item.horario),
                   style: FocuxHubTypography.bodyMuted(
                     color: fxScreenMute(context),
                     fontWeight: FontWeight.w700,

@@ -149,15 +149,18 @@ class FeedPostCard extends StatelessWidget {
                     ? FeedVideoAttachmentTile(primary: primary, url: mUrl)
                     : ClipRRect(
                         borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                        child: FxCachedNetworkImage(
-                          imageUrl: mUrl,
-                          fit: BoxFit.cover,
-                          height: 168,
-                          width: double.infinity,
-                          memCacheHeight: 336,
-                          memCacheWidth: 800,
-                          errorBuilder: (_, __, ___) =>
-                              FeedImagePlaceholder(primary: primary),
+                        child: AspectRatio(
+                          // Preserve photo proportions; cover crops, never stretches.
+                          aspectRatio: 4 / 3,
+                          child: FxCachedNetworkImage(
+                            imageUrl: mUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            // Only one mem cache axis — both width+height distort decode.
+                            memCacheWidth: 900,
+                            errorBuilder: (_, __, ___) =>
+                                FeedImagePlaceholder(primary: primary),
+                          ),
                         ),
                       ),
               ] else if (post.tipoPost == 'IMAGEM') ...[

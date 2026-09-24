@@ -45,6 +45,7 @@ import '../models/migracao_importacao_resumo.dart';
 import '../utils/migracao_file_parser.dart';
 import '../utils/migracao_foto_limits.dart';
 import '../utils/migracao_ocr_service.dart';
+import '../utils/migracao_texto_normalizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 part 'migracao_magica_screen_actions.part.dart';

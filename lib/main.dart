@@ -15,6 +15,8 @@ import 'core/api/tls_certificate_pinning.dart';
 import 'core/auth/session_cache_evictor.dart';
 import 'core/config/env.dart';
 import 'core/crash/flutter_error_reporting.dart';
+import 'core/router/safe_navigation.dart';
+import 'package:go_router/go_router.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
 import 'features/subscription/providers/iap_store_health_provider.dart';
@@ -101,41 +103,68 @@ void main() {
     // Replaces Flutter's red error screen with a friendly message in release/profile.
     ErrorWidget.builder = (FlutterErrorDetails details) {
       if (kDebugMode) return ErrorWidget(details.exception);
+      if (!isNonFatalFlutterFrameworkError(details.exception, details.stack)) {
+        unawaited(reportFlutterErrorToCrashlytics(details));
+      }
+      debugPrint('[Focux] ErrorWidget: ${details.exceptionAsString()}');
+      debugPrint('${details.stack}');
       return Material(
         color: const Color(0xFF080C10),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.error_outline,
-                    color: Colors.redAccent,
-                    size: 30,
-                  ),
+        child: Builder(
+          builder: (context) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.error_outline,
+                        color: Colors.redAccent,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Algo deu errado nesta tela.\nVolte e tente novamente.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        height: 1.5,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
+                        final router = GoRouter.maybeOf(context);
+                        if (router != null && router.canPop()) {
+                          router.pop();
+                          return;
+                        }
+                        safePopOrGo(context, '/dashboard/personal');
+                      },
+                      child: const Text(
+                        'Voltar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Algo deu errado nesta tela.\nVolte e tente novamente.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                    height: 1.5,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       );
     };

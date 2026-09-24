@@ -9,6 +9,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
+import '../utils/chat_bubble_grouping.dart';
 import '../utils/chat_system_event.dart';
 import 'conversation_media_widgets.dart';
 
@@ -32,11 +33,28 @@ class ConversationDateDivider extends StatelessWidget {
             : '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
     final chrome = ShellChrome.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+      padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
       child: Center(
-        child: Text(
-          label,
-          style: FocuxHubTypography.chip(chrome.mute),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: chrome.sheetFill,
+            borderRadius: BorderRadius.circular(TokensStrip.rButton),
+            border: Border.all(color: chrome.line.withValues(alpha: 0.85)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s3,
+              vertical: TokensStrip.s1,
+            ),
+            child: Text(
+              label,
+              style: FocuxHubTypography.chip(chrome.mute).copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -148,8 +166,7 @@ class _ConversationTypingIndicatorState
       ),
       decoration: BoxDecoration(
         color: chrome.cardFill,
-        borderRadius: BorderRadius.circular(TokensStrip.rCard),
-        border: Border.all(color: chrome.line),
+        borderRadius: BorderRadius.circular(chatBubbleRadiusOuter),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -328,6 +345,7 @@ class ConversationBubble extends StatelessWidget {
   final VoidCallback onLongPress;
   final VoidCallback? onReplyTap;
   final VoidCallback onOpenMedia;
+  final ChatBubbleGroupSlot groupSlot;
 
   const ConversationBubble({
     super.key,
@@ -340,6 +358,7 @@ class ConversationBubble extends StatelessWidget {
     required this.onLongPress,
     required this.onReplyTap,
     required this.onOpenMedia,
+    this.groupSlot = ChatBubbleGroupSlot.single,
   });
 
   @override
@@ -361,6 +380,10 @@ class ConversationBubble extends StatelessWidget {
             : (mine
                 ? accentColor.withValues(alpha: isDark ? 0.28 : 0.18)
                 : chrome.line);
+    final showMeta = chatBubbleShowsTimestampMeta(groupSlot);
+    final bubbleShape = chatBubbleBorderRadius(mine: mine, slot: groupSlot);
+    final borderWidth =
+        highlighted ? 1.6 : (mine ? 0.0 : 1.0);
 
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
@@ -368,18 +391,18 @@ class ConversationBubble extends StatelessWidget {
         onLongPress: onLongPress,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          margin: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
-          padding: const EdgeInsets.fromLTRB(
+          margin: chatBubbleGroupMargin(groupSlot),
+          padding: EdgeInsets.fromLTRB(
             TokensStrip.s3,
-            TokensStrip.s3,
+            groupSlot == ChatBubbleGroupSlot.middle ? TokensStrip.s2 : TokensStrip.s3,
             TokensStrip.s3,
             TokensStrip.s2,
           ),
           constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
           decoration: BoxDecoration(
             color: fill,
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            border: Border.all(color: line, width: highlighted ? 1.6 : 1),
+            borderRadius: bubbleShape,
+            border: borderWidth > 0 ? Border.all(color: line, width: borderWidth) : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,27 +474,36 @@ class ConversationBubble extends StatelessWidget {
                   ],
                 ),
               ],
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (!deleted && msg.editedAt != null) ...[
+              if (showMeta) ...[
+                const SizedBox(height: 3),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!deleted && msg.editedAt != null) ...[
+                      Text(
+                        'editada',
+                        style: FocuxHubTypography.chip(
+                          metaColor.withValues(alpha: 0.72),
+                        ).copyWith(fontSize: 10),
+                      ),
+                      const SizedBox(width: TokensStrip.s1),
+                    ],
                     Text(
-                      'editada',
-                      style: FocuxHubTypography.chip(metaColor),
+                      _conversationTimeLabel(msg.enviadoEm),
+                      style: FocuxHubTypography.chip(
+                        metaColor.withValues(alpha: 0.72),
+                      ).copyWith(fontSize: 10, letterSpacing: 0.15),
                     ),
-                    const SizedBox(width: TokensStrip.s1),
+                    if (mine) ...[
+                      const SizedBox(width: 5),
+                      ConversationDeliveryStatus(
+                        msg: msg,
+                        color: metaColor.withValues(alpha: 0.72),
+                      ),
+                    ],
                   ],
-                  Text(
-                    _conversationTimeLabel(msg.enviadoEm),
-                    style: FocuxHubTypography.chip(metaColor),
-                  ),
-                  if (mine) ...[
-                    const SizedBox(width: 6),
-                    ConversationDeliveryStatus(msg: msg, color: metaColor),
-                  ],
-                ],
-              ),
+                ),
+              ],
             ],
           ),
         ),

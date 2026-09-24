@@ -180,6 +180,21 @@ String _humanizeServerMessage(String raw) {
   if (msg.isEmpty) return 'Algo deu errado. Tente novamente.';
 
   final lower = msg.toLowerCase();
+  if (lower.contains('collector') &&
+      (lower.contains('without key') ||
+          lower.contains('key enabled') ||
+          lower.contains('chave'))) {
+    return 'Conta Mercado Pago sem chave PIX ativa. '
+        'No app do MP, ative uma chave PIX e tente de novo.';
+  }
+  if (lower.contains('erro ao gerar pix') && lower.contains('{')) {
+    if (lower.contains('without key') || lower.contains('key enabled')) {
+      return 'Conta Mercado Pago sem chave PIX ativa. '
+          'No app do MP, ative uma chave PIX e tente de novo.';
+    }
+    return 'Não foi possível gerar o PIX. '
+        'Confira o Mercado Pago e o e-mail do aluno.';
+  }
   if (lower.contains('requer plano') ||
       lower.contains('faça upgrade') ||
       lower.contains('faca upgrade')) {
@@ -195,6 +210,10 @@ String _humanizeServerMessage(String raw) {
   }
   if (lower.contains('service unavailable') || lower.contains('503')) {
     return 'Serviço de mídia temporariamente indisponível. Tente novamente em instantes.';
+  }
+  // Never dump raw JSON / MP payloads into the sheet.
+  if (msg.startsWith('{') || msg.contains('"cause"') || msg.contains('"error"')) {
+    return 'Não foi possível gerar o PIX. Tente de novo em instantes.';
   }
 
   return msg;
