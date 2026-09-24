@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -19,21 +20,7 @@ import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../utils/lead_display.dart';
 
-const _kCols = ['LEAD', 'TESTE', 'ATIVO', 'INADIMPLENTE', 'CANCELADO'];
-const _kLabels = {
-  'LEAD': 'Lead',
-  'TESTE': 'Teste',
-  'ATIVO': 'Ativo',
-  'INADIMPLENTE': 'Inadimplente',
-  'CANCELADO': 'Cancelado',
-};
-const _kHints = {
-  'LEAD': 'Contato novo que ainda precisa de abordagem.',
-  'TESTE': 'Pessoa em aula experimental ou periodo de teste.',
-  'ATIVO': 'Aluno convertido e em acompanhamento.',
-  'INADIMPLENTE': 'Aluno com pendencia financeira para recuperar.',
-  'CANCELADO': 'Lead ou aluno perdido, sem acao ativa.',
-};
+const _kCols = leadFunilColunas;
 
 class LeadsKanbanScreen extends ConsumerStatefulWidget {
   const LeadsKanbanScreen({super.key});
@@ -78,8 +65,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
       final leads = await LeadRepository(ref.read(apiClientProvider)).listar();
       final Map<String, List<Lead>> cols = {for (final c in _kCols) c: []};
       for (final l in leads) {
-        final col = _kCols.contains(l.status) ? l.status : 'LEAD';
-        cols[col]!.add(l);
+        cols[leadFunilColuna(l.status)]!.add(l);
       }
       if (mounted) {
         setState(() {
@@ -98,13 +84,31 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
   }
 
   Future<void> _moverPara(Lead lead, String novoStatus) async {
-    if (lead.status == novoStatus) return;
+    final atual = leadFunilColuna(lead.status);
+    if (atual == novoStatus) return;
+    if (atual == leadStatusConvertido) {
+      FeedbackHelper.showError(context, 'Esse interessado já virou aluno.');
+      return;
+    }
+    if (novoStatus == leadStatusConvertido) {
+      final criado = await context.push<bool>(
+        leadConverterRoute(
+          leadId: lead.id,
+          nome: lead.nome,
+          email: lead.email,
+          telefone: lead.telefone,
+          objetivo: lead.objetivo,
+        ),
+      );
+      if (criado == true && mounted) await _load();
+      return;
+    }
     try {
       await LeadRepository(
         ref.read(apiClientProvider),
       ).atualizar(lead.id, {'status': novoStatus});
       setState(() {
-        _cols[lead.status]?.remove(lead);
+        _cols[atual]?.remove(lead);
         _cols[novoStatus]?.add(lead);
       });
     } catch (e) {
@@ -118,10 +122,9 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
     if (status == 'TESTE') {
       return EagleTokens.semanticWarn(isDark: isDark);
     }
-    if (status == 'ATIVO') {
+    if (status == leadStatusConvertido) {
       return EagleTokens.semanticGood(isDark: isDark);
     }
-    if (status == 'INADIMPLENTE') return EagleTokens.bad;
     if (status == 'CANCELADO') {
       return isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     }
@@ -267,15 +270,13 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                   child: Row(
                     children:
                         _kCols
-                            .where(
-                              (c) => c != 'CANCELADO' && c != 'INADIMPLENTE',
-                            )
+                            .where((c) => c != 'CANCELADO')
                             .map((col) {
                               final cColor = _colColor(col, isDark, brand);
                               return Expanded(
                                 child: Container(
                                   margin: EdgeInsets.only(
-                                    right: col == 'ATIVO' ? 0 : 8,
+                                    right: col == leadStatusConvertido ? 0 : 8,
                                   ),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -307,7 +308,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                         ),
                                       ),
                                       Text(
-                                        _kLabels[col]!,
+                                        leadStatusLabel(col),
                                         style: TextStyle(
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w600,
@@ -373,9 +374,9 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                             ),
                                             const SizedBox(width: 8),
                                             Tooltip(
-                                              message: _kHints[col]!,
+                                              message: leadFunilHint(col),
                                               child: Text(
-                                                _kLabels[col]!,
+                                                leadStatusLabel(col),
                                                 style: TextStyle(
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.w700,
@@ -385,7 +386,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                                             ),
                                             const SizedBox(width: 4),
                                             Tooltip(
-                                              message: _kHints[col]!,
+                                              message: leadFunilHint(col),
                                               child: Icon(
                                                 Icons.info_outline,
                                                 size: 13,

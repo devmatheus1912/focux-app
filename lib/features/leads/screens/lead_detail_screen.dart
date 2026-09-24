@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -33,8 +32,8 @@ import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/lead_repository.dart';
+import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
 import '../widgets/lead_detail_help_sheet.dart';
 

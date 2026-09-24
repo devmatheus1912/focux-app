@@ -14,6 +14,8 @@ class Lead {
   final String criadoEm;
   final String? convertidoEm;
   final String? proximoContato;
+  final String? email;
+  final int? alunoId;
 
   Lead({
     required this.id,
@@ -26,6 +28,8 @@ class Lead {
     required this.criadoEm,
     this.convertidoEm,
     this.proximoContato,
+    this.email,
+    this.alunoId,
   });
 
   factory Lead.fromJson(Map<String, dynamic> j) => Lead(
@@ -45,6 +49,8 @@ class Lead {
         j['proximoContato'] != null
             ? (j['proximoContato'] as String).substring(0, 10)
             : null,
+    email: j['email'] as String?,
+    alunoId: (j['alunoId'] as num?)?.toInt(),
   );
 }
 
@@ -123,11 +129,13 @@ class LeadRepository {
     String? origem,
     String? objetivo,
     String? observacoes,
+    String? email,
   }) async {
     final r = await _dio.post(
       '/api/leads',
       data: {
         'nome': nome,
+        if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
         if (telefone != null && telefone.isNotEmpty) 'telefone': telefone,
         if (origem != null && origem.isNotEmpty) 'origem': origem,
         if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
@@ -149,10 +157,6 @@ class LeadRepository {
 
   Future<void> arquivar(int id) async {
     await _dio.delete('/api/leads/$id');
-  }
-
-  Future<void> converter(int id) async {
-    await _dio.post('/api/leads/$id/converter');
   }
 
   Future<List<LeadInteracao>> listarInteracoes(int leadId) async {

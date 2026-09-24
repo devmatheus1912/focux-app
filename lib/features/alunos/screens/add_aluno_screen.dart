@@ -33,14 +33,27 @@ import '../widgets/add_aluno_help_sheet.dart';
 import '../widgets/add_aluno_senha_sheet.dart';
 import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
+import '../../leads/providers/leads_provider.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
 class AddAlunoScreen extends ConsumerStatefulWidget {
-  const AddAlunoScreen({super.key, this.initialEmail, this.initialNome});
+  const AddAlunoScreen({
+    super.key,
+    this.initialEmail,
+    this.initialNome,
+    this.initialWhatsapp,
+    this.initialObjetivo,
+    this.leadId,
+  });
 
   final String? initialEmail;
   final String? initialNome;
+  final String? initialWhatsapp;
+  final String? initialObjetivo;
+
+  /// Interessado de origem: o POST fecha o lead como "Virou aluno".
+  final int? leadId;
 
   @override
   ConsumerState<AddAlunoScreen> createState() => _AddAlunoScreenState();
@@ -121,6 +134,15 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
     final nome = widget.initialNome?.trim();
     if (nome != null && nome.isNotEmpty) {
       _nomeCtrl.text = nome;
+    }
+    final whatsapp = widget.initialWhatsapp?.trim();
+    if (whatsapp != null && whatsapp.isNotEmpty) {
+      _whatsappCtrl.text = whatsapp;
+    }
+    final objetivo = widget.initialObjetivo?.trim();
+    if (objetivo != null && objetivo.isNotEmpty) {
+      _objetivoCtrl.text = objetivo;
+      _objetivoLivre = !addAlunoObjetivosRapidos.contains(objetivo);
     }
   }
 
@@ -215,16 +237,19 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             whatsapp: whatsapp,
             genero: _genero,
             tipoConsultoria: _tipoConsultoria,
+            leadId: widget.leadId,
           );
 
       if (!mounted) return;
       invalidateAlunosCaches(ref);
+      if (widget.leadId != null) invalidateLeadsCaches(ref);
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.alunoCreated,
           props: {
             'has_whatsapp': whatsapp != null,
             'alunoId': novoAluno.id,
+            if (widget.leadId != null) 'source': 'lead_converter',
           },
         ),
       );

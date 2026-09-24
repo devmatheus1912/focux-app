@@ -131,6 +131,11 @@ RouteBase buildChromeShellRoute() {
                 (context, state) => AddAlunoScreen(
                   initialEmail: state.uri.queryParameters['email'],
                   initialNome: state.uri.queryParameters['nome'],
+                  initialWhatsapp: state.uri.queryParameters['whatsapp'],
+                  initialObjetivo: state.uri.queryParameters['objetivo'],
+                  leadId: int.tryParse(
+                    state.uri.queryParameters['leadId'] ?? '',
+                  ),
                 ),
           ),
           GoRoute(

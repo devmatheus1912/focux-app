@@ -36,14 +36,11 @@ void main() {
     );
   });
 
-  test('leadPublico status e criar aluno', () {
-    expect(leadPublicoValue(true), 'Convertido');
+  test('leadPublico status', () {
+    expect(leadPublicoValue(true), 'Virou aluno');
     expect(leadPublicoValue(false), 'Novo');
     expect(leadPublicoFxIcon(true), 'circle-check');
     expect(leadPublicoFxIcon(false), 'users');
-    expect(leadPublicoPodeCriarAluno('a@b.com'), isTrue);
-    expect(leadPublicoPodeCriarAluno('  '), isFalse);
-    expect(leadPublicoPodeCriarAluno(null), isFalse);
   });
 
   test('leadPublicoCountLabel e chips', () {

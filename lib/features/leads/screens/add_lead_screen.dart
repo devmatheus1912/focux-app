@@ -35,6 +35,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nome = TextEditingController();
   final _telefone = TextEditingController();
+  final _email = TextEditingController();
   final _objetivo = TextEditingController();
   final _observacoes = TextEditingController();
   String? _origem;
@@ -45,6 +46,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
     super.initState();
     _nome.addListener(_onFormChanged);
     _telefone.addListener(_onFormChanged);
+    _email.addListener(_onFormChanged);
     _objetivo.addListener(_onFormChanged);
     _observacoes.addListener(_onFormChanged);
   }
@@ -57,10 +59,12 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   void dispose() {
     _nome.removeListener(_onFormChanged);
     _telefone.removeListener(_onFormChanged);
+    _email.removeListener(_onFormChanged);
     _objetivo.removeListener(_onFormChanged);
     _observacoes.removeListener(_onFormChanged);
     _nome.dispose();
     _telefone.dispose();
+    _email.dispose();
     _objetivo.dispose();
     _observacoes.dispose();
     super.dispose();
@@ -89,6 +93,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
   bool get _dirty =>
       _nome.text.trim().isNotEmpty ||
       _telefone.text.trim().isNotEmpty ||
+      _email.text.trim().isNotEmpty ||
       _objetivo.text.trim().isNotEmpty ||
       _observacoes.text.trim().isNotEmpty ||
       _origem != null;
@@ -140,6 +145,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
       await LeadRepository(ref.read(apiClientProvider)).criar(
         nome: _nome.text.trim(),
         telefone: _telefone.text.trim(),
+        email: _email.text.trim(),
         origem: _origem,
         objetivo: _objetivo.text.trim(),
         observacoes: _observacoes.text.trim(),
@@ -257,6 +263,13 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
                     inputFormatters: [
                       LengthLimitingTextInputFormatter(leadTelefoneMax),
                     ],
+                  ),
+                  AlunoInsetFormField(
+                    controller: _email,
+                    label: 'E-mail (opcional)',
+                    icon: Icons.mail_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) => leadEmailInvalido(v ?? ''),
                   ),
                   FxSettingsTile(
                     fxIcon: 'spark',

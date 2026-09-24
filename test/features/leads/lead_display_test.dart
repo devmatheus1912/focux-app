@@ -18,10 +18,14 @@ void main() {
   });
 
   test('leadStatus e conversão', () {
-    expect(leadStatusLabel('LEAD'), 'Lead');
+    expect(leadStatusLabel('LEAD'), 'Novo');
+    expect(leadStatusLabel('TESTE'), 'Conversei');
     expect(leadStatusLabel('INADIMPLENTE'), 'Inadimplente');
-    expect(leadStatusLabel('CONVERTIDO'), 'Convertido');
+    expect(leadStatusLabel('CONVERTIDO'), 'Virou aluno');
+    expect(leadStatusLabel('ATIVO'), 'Virou aluno');
+    expect(leadStatusLabel('CANCELADO'), 'Arquivado');
     expect(leadStatusLabel(''), 'Sem status');
+    expect(leadStatusValues, isNot(contains('CONVERTIDO')));
     expect(leadPodeConverter('LEAD'), isTrue);
     expect(leadPodeConverter('ATIVO'), isFalse);
     expect(leadPodeConverter('CONVERTIDO'), isFalse);
@@ -44,6 +48,35 @@ void main() {
     expect(leadStatusDanger('LEAD'), isFalse);
   });
 
+  test('funil Novo → Conversei → Virou aluno', () {
+    expect(leadFunilColunas, ['LEAD', 'TESTE', 'CONVERTIDO', 'CANCELADO']);
+    expect(leadFunilColuna('ATIVO'), 'CONVERTIDO');
+    expect(leadFunilColuna('INADIMPLENTE'), 'LEAD');
+    expect(leadFunilColuna('teste'), 'TESTE');
+    expect(leadFunilHint('CONVERTIDO'), 'Cadastrado como aluno.');
+  });
+
+  test('leadConverterRoute abre cadastro preenchido com leadId', () {
+    final uri = Uri.parse(
+      leadConverterRoute(
+        leadId: 7,
+        nome: ' Ana ',
+        email: 'ana@x.com',
+        telefone: '  ',
+        objetivo: 'Força',
+      ),
+    );
+    expect(uri.path, '/alunos/novo');
+    expect(uri.queryParameters, {
+      'leadId': '7',
+      'nome': 'Ana',
+      'email': 'ana@x.com',
+      'objetivo': 'Força',
+    });
+    expect(leadEmailValue(null), 'Não informado');
+    expect(leadEmailHint('a@b.com'), 'Vira o login do aluno');
+  });
+
   test('leadInteracao labels em PT-BR', () {
     expect(leadInteracaoTipoLabel('WHATSAPP'), 'WhatsApp');
     expect(leadInteracaoTipoLabel('LIGACAO'), 'Ligação');
@@ -62,12 +95,13 @@ void main() {
       leadListSubtitle(count: 3, freshness: 'há 1 min'),
       '3 leads · há 1 min',
     );
-    expect(leadMatchesQuery(nome: 'Ana Lima', query: 'ana'), isTrue);
-    expect(leadMatchesQuery(nome: 'Ana', objetivo: 'Força', query: 'for'), isTrue);
-    expect(leadMatchesQuery(nome: 'Ana', query: 'xyz'), isFalse);
-    expect(leadListChipStatuses, hasLength(5));
-    expect(leadHubSubtitle(status: 'LEAD'), 'Lead');
-    expect(leadHubSubtitle(status: 'CONVERTIDO'), 'Convertido');
+    expect(leadListChipStatuses, hasLength(4));
+    expect(leadHubSubtitle(status: 'LEAD'), 'Novo');
+    expect(leadHubSubtitle(status: 'CONVERTIDO'), 'Virou aluno');
+    expect(
+      leadCardSubtitle(objetivo: 'Força', origem: 'Página pública'),
+      'Página pública · Força',
+    );
     expect(
       leadCardSubtitle(objetivo: 'Emagrecer', origem: 'Instagram'),
       'Emagrecer',
@@ -79,10 +113,7 @@ void main() {
     expect(leadTelefoneDisplay(''), 'Sem telefone');
     expect(leadKanbanTitle('Matheus'), 'Matheus');
     expect(leadKanbanTitle('63356775'), contains('('));
-    expect(
-      leadKanbanAgeLabel('2026-09-18', now: DateTime(2026, 9, 20)),
-      '2d',
-    );
+    expect(leadKanbanAgeLabel('2026-09-18', now: DateTime(2026, 9, 20)), '2d');
     expect(
       leadKanbanAgeLabel('2026-09-20', now: DateTime(2026, 9, 20)),
       'hoje',
@@ -105,10 +136,7 @@ void main() {
       leadDiasNoFunilValue('2026-09-07', now: DateTime(2026, 9, 7)),
       'Hoje',
     );
-    expect(
-      leadDiasNoFunilValue('2026-09-01', now: DateTime(2026, 9, 7)),
-      '6',
-    );
+    expect(leadDiasNoFunilValue('2026-09-01', now: DateTime(2026, 9, 7)), '6');
     expect(leadDiasNoFunilHint('2026-09-01'), contains('desde'));
     expect(leadDetailSecoes, hasLength(2));
   });

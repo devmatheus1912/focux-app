@@ -10,13 +10,72 @@ const leadOrigemValues = [
   'Outro',
 ];
 
-const leadStatusValues = [
-  'LEAD',
-  'TESTE',
-  'ATIVO',
-  'INADIMPLENTE',
-  'CANCELADO',
-];
+/// Status que o personal escolhe à mão. "Virou aluno" só nasce do cadastro.
+const leadStatusValues = ['LEAD', 'TESTE', 'CANCELADO'];
+
+const leadStatusConvertido = 'CONVERTIDO';
+
+/// Coluna do funil Novo → Conversei → Virou aluno (+ Arquivado).
+const leadFunilColunas = ['LEAD', 'TESTE', leadStatusConvertido, 'CANCELADO'];
+
+String leadFunilColuna(String status) {
+  final value = status.trim().toUpperCase();
+  if (value == 'ATIVO') return leadStatusConvertido;
+  return leadFunilColunas.contains(value) ? value : 'LEAD';
+}
+
+String leadFunilHint(String coluna) {
+  switch (coluna) {
+    case 'TESTE':
+      return 'Já conversou ou fez aula experimental.';
+    case leadStatusConvertido:
+      return 'Cadastrado como aluno.';
+    case 'CANCELADO':
+      return 'Sem interesse agora. Fica no histórico.';
+    default:
+      return 'Chegou agora e ainda precisa de contato.';
+  }
+}
+
+String leadEmailValue(String? email) {
+  final v = email?.trim() ?? '';
+  return v.isEmpty ? 'Não informado' : v;
+}
+
+String? leadEmailInvalido(String raw) {
+  final v = raw.trim();
+  if (v.isEmpty) return null;
+  final ok = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(v);
+  return ok ? null : 'E-mail inválido';
+}
+
+String leadEmailHint(String? email) {
+  final v = email?.trim() ?? '';
+  return v.isEmpty ? 'Você pede no cadastro do aluno' : 'Vira o login do aluno';
+}
+
+bool leadDaPaginaPublica(String? origem) =>
+    (origem ?? '').trim().toLowerCase() == 'página pública';
+
+/// Abre o cadastro de aluno já preenchido; o backend fecha o lead no mesmo POST.
+String leadConverterRoute({
+  required int leadId,
+  required String nome,
+  String? email,
+  String? telefone,
+  String? objetivo,
+}) {
+  final params = <String, String>{'leadId': '$leadId', 'nome': nome.trim()};
+  void put(String key, String? value) {
+    final v = value?.trim();
+    if (v != null && v.isNotEmpty) params[key] = v;
+  }
+
+  put('email', email);
+  put('whatsapp', telefone);
+  put('objetivo', objetivo);
+  return Uri(path: '/alunos/novo', queryParameters: params).toString();
+}
 
 const leadInteracaoTipoValues = [
   'WHATSAPP',
@@ -54,17 +113,16 @@ String leadConfirmLabel() => 'Salvar';
 String leadStatusLabel(String? status) {
   switch ((status ?? '').trim().toUpperCase()) {
     case 'LEAD':
-      return 'Lead';
+      return 'Novo';
     case 'TESTE':
-      return 'Teste';
+      return 'Conversei';
     case 'ATIVO':
-      return 'Ativo';
+    case 'CONVERTIDO':
+      return 'Virou aluno';
     case 'INADIMPLENTE':
       return 'Inadimplente';
     case 'CANCELADO':
-      return 'Cancelado';
-    case 'CONVERTIDO':
-      return 'Convertido';
+      return 'Arquivado';
     case '':
       return 'Sem status';
     default:
@@ -101,7 +159,7 @@ String leadStickyP0Label(LeadStickyAction action) {
 
 bool leadStatusDanger(String status) {
   final value = status.trim().toUpperCase();
-  return value == 'INADIMPLENTE' || value == 'CANCELADO';
+  return value == 'INADIMPLENTE';
 }
 
 String leadInteracaoTipoLabel(String? tipo) {
@@ -174,7 +232,8 @@ const leadDetailSecoes = [
 String leadDiasNoFunilValue(String criadoEm, {DateTime? now}) {
   final date = DateTime.tryParse(criadoEm.trim());
   if (date == null) return '—';
-  final days = _dateOnly(now ?? DateTime.now()).difference(_dateOnly(date)).inDays;
+  final days =
+      _dateOnly(now ?? DateTime.now()).difference(_dateOnly(date)).inDays;
   if (days <= 0) return 'Hoje';
   return '$days';
 }
@@ -188,26 +247,7 @@ String leadDiasNoFunilHint(String criadoEm) {
 DateTime _dateOnly(DateTime value) =>
     DateTime(value.year, value.month, value.day);
 
-const leadListChipStatuses = [
-  'LEAD',
-  'TESTE',
-  'ATIVO',
-  'INADIMPLENTE',
-  'CANCELADO',
-];
-
-bool leadMatchesQuery({
-  required String nome,
-  String? objetivo,
-  String? origem,
-  required String query,
-}) {
-  final q = query.trim().toLowerCase();
-  if (q.isEmpty) return true;
-  return nome.toLowerCase().contains(q) ||
-      (objetivo ?? '').toLowerCase().contains(q) ||
-      (origem ?? '').toLowerCase().contains(q);
-}
+const leadListChipStatuses = leadFunilColunas;
 
 String leadListSubtitle({required int count, String? freshness}) {
   return FxHubFreshness.joinCount(leadCountLabel(count), freshness);
@@ -215,7 +255,11 @@ String leadListSubtitle({required int count, String? freshness}) {
 
 String leadCardSubtitle({String? objetivo, String? origem}) {
   final obj = objetivo?.trim();
-  if (obj != null && obj.isNotEmpty) return obj;
+  final temObjetivo = obj != null && obj.isNotEmpty;
+  if (leadDaPaginaPublica(origem)) {
+    return temObjetivo ? 'Página pública · $obj' : 'Página pública';
+  }
+  if (temObjetivo) return obj;
   return leadOrigemLabel(origem);
 }
 
@@ -233,7 +277,8 @@ String leadKanbanTitle(String? nome, {String? telefone}) {
   if (n.isEmpty) return leadTelefoneDisplay(telefone);
   final digits = n.replaceAll(RegExp(r'\D'), '');
   final digitsOnly =
-      digits.length >= 8 && digits.length == n.replaceAll(RegExp(r'[\s()+-]'), '').length;
+      digits.length >= 8 &&
+      digits.length == n.replaceAll(RegExp(r'[\s()+-]'), '').length;
   if (digitsOnly) return leadTelefoneDisplay(n);
   return n;
 }

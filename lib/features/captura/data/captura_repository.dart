@@ -12,6 +12,9 @@ class SubmissaoCaptura {
   final bool convertido;
   final String criadoEm;
 
+  /// Interessado espelhado no funil (`/leads`); fecha junto no cadastro do aluno.
+  final int? leadId;
+
   SubmissaoCaptura({
     required this.id,
     required this.nome,
@@ -21,6 +24,7 @@ class SubmissaoCaptura {
     this.email,
     this.objetivo,
     this.pacoteInteresseId,
+    this.leadId,
   });
 
   factory SubmissaoCaptura.fromJson(Map<String, dynamic> j) => SubmissaoCaptura(
@@ -32,6 +36,7 @@ class SubmissaoCaptura {
     pacoteInteresseId: (j['pacoteInteresseId'] as num?)?.toInt(),
     convertido: j['convertido'] as bool? ?? false,
     criadoEm: j['criadoEm'] as String? ?? '',
+    leadId: (j['leadId'] as num?)?.toInt(),
   );
 }
 
@@ -56,9 +61,7 @@ class CapturaRepository {
     );
     final data = r.data;
     if (data is! Map) {
-      throw FormatException(
-        'GET /api/captura devolve Pagina, não lista crua.',
-      );
+      throw FormatException('GET /api/captura devolve Pagina, não lista crua.');
     }
     return Pagina.fromJson(
       Map<String, dynamic>.from(data),

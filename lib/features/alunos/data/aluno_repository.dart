@@ -871,12 +871,14 @@ class AlunoRepository {
     String? whatsapp,
     String? genero,
     String? tipoConsultoria,
+    int? leadId,
   }) async {
     final response = await _dio.post(
       '/api/alunos',
       data: {
         'nome': nome,
         'email': email,
+        if (leadId != null) 'leadId': leadId,
         if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
         if (whatsapp != null && whatsapp.isNotEmpty) 'whatsapp': whatsapp,
         if (genero != null && genero.isNotEmpty) 'genero': genero,

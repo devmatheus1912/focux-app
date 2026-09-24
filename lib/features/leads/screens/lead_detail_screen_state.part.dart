@@ -134,38 +134,19 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
   }
 
   Future<void> _converter() async {
-    final confirm = await showFxConfirmSheet(
-      context,
-      title: 'Converter em Aluno?',
-      message: '${_activeLead.nome} será criado como aluno na sua lista.',
-      icon: Icons.person_add_alt_1_rounded,
-      confirmLabel: 'Converter',
+    final lead = _activeLead;
+    final criado = await context.push<bool>(
+      leadConverterRoute(
+        leadId: lead.id,
+        nome: lead.nome,
+        email: lead.email,
+        telefone: lead.telefone,
+        objetivo: lead.objetivo,
+      ),
     );
-    if (!confirm) return;
-    try {
-      await LeadRepository(
-        ref.read(apiClientProvider),
-      ).converter(_activeLead.id);
-      await AnalyticsService.instance.track(
-        ProductEvents.alunoCreated,
-        props: const {'source': 'lead_converter'},
-      );
-      if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Lead convertido!');
-        safePopOrGo(context, '/leads');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      final surfaced = await UpgradePromptSheet.showFromError(
-        context,
-        e,
-        fallbackFeatureName: 'Alunos',
-        fallbackCapability: 'alunos',
-        source: 'lead_converter',
-      );
-      if (surfaced || !mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
+    if (criado != true || !mounted) return;
+    invalidateLeadsCaches(ref);
+    safePopOrGo(context, '/leads');
   }
 
   Future<void> _arquivar() async {

@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../leads/utils/lead_display.dart';
 import '../data/captura_repository.dart';
 import '../utils/leads_publicos_display.dart';
 
@@ -161,17 +162,32 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
     }
   }
 
-  void _abrirNovoAluno({String? nome, String? email}) {
+  Future<void> _abrirNovoAluno(SubmissaoCaptura lead) async {
     HapticFeedback.selectionClick();
-    final q = <String, String>{
-      if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
-      if (nome != null && nome.trim().isNotEmpty) 'nome': nome.trim(),
-    };
-    if (q.isEmpty) {
-      context.push('/alunos/novo');
-      return;
+    final leadId = lead.leadId;
+    final criado = await context.push<bool>(
+      leadId != null
+          ? leadConverterRoute(
+              leadId: leadId,
+              nome: lead.nome,
+              email: lead.email,
+              telefone: lead.telefone,
+              objetivo: lead.objetivo,
+            )
+          : Uri(
+              path: '/alunos/novo',
+              queryParameters: {
+                'nome': lead.nome,
+                if ((lead.email ?? '').trim().isNotEmpty) 'email': lead.email!,
+              },
+            ).toString(),
+    );
+    if (criado != true || !mounted) return;
+    if (leadId == null) {
+      await _marcarConvertido(lead);
+    } else {
+      await _carregar();
     }
-    context.push(Uri(path: '/alunos/novo', queryParameters: q).toString());
   }
 
   Future<void> _marcarConvertido(SubmissaoCaptura lead) async {
@@ -187,11 +203,10 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
   Future<void> _abrirAcoes(SubmissaoCaptura lead) async {
     if (lead.convertido) return;
     final items = <FxInsetPickerSheetItem<_LeadPublicoAcao>>[
-      if (leadPublicoPodeCriarAluno(lead.email))
-        const FxInsetPickerSheetItem(
-          value: _LeadPublicoAcao.criarAluno,
-          label: 'Converter em aluno',
-        ),
+      const FxInsetPickerSheetItem(
+        value: _LeadPublicoAcao.criarAluno,
+        label: 'Converter em aluno',
+      ),
       const FxInsetPickerSheetItem(
         value: _LeadPublicoAcao.converter,
         label: 'Marcar como convertido',
@@ -205,7 +220,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
     if (picked == null || !mounted) return;
     switch (picked) {
       case _LeadPublicoAcao.criarAluno:
-        _abrirNovoAluno(nome: lead.nome, email: lead.email);
+        await _abrirNovoAluno(lead);
       case _LeadPublicoAcao.converter:
         await _marcarConvertido(lead);
     }

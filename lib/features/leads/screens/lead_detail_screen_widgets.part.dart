@@ -89,7 +89,18 @@ class _LeadDetailContent extends StatelessWidget {
         OperationalMetricTile(
           label: 'Origem',
           value: leadOrigemLabel(origem),
-          hint: objetivo == null || objetivo.isEmpty ? 'Canal de entrada' : objetivo,
+          hint:
+              objetivo == null || objetivo.isEmpty
+                  ? 'Canal de entrada'
+                  : objetivo,
+          color: primary,
+          isDark: isDark,
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        OperationalMetricTile(
+          label: 'E-mail',
+          value: leadEmailValue(lead.email),
+          hint: leadEmailHint(lead.email),
           color: primary,
           isDark: isDark,
         ),
@@ -98,6 +109,13 @@ class _LeadDetailContent extends StatelessWidget {
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
+            if (lead.alunoId != null)
+              DashboardHomeActionChip(
+                label: 'Ver aluno',
+                accent: primary,
+                isDark: isDark,
+                onPressed: () => context.push('/alunos/${lead.alunoId}'),
+              ),
             DashboardHomeActionChip(
               label: 'Lista',
               accent: primary,

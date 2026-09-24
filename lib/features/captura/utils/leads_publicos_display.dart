@@ -52,16 +52,9 @@ String leadPublicoStickyLabel() => 'Abrir página pública';
 bool leadPublicoHasActiveFilter({
   required String query,
   required LeadPublicoChip chip,
-}) =>
-    query.trim().isNotEmpty || chip != LeadPublicoChip.todos;
+}) => query.trim().isNotEmpty || chip != LeadPublicoChip.todos;
 
-String leadPublicoValue(bool convertido) =>
-    convertido ? 'Convertido' : 'Novo';
+String leadPublicoValue(bool convertido) => convertido ? 'Virou aluno' : 'Novo';
 
 String leadPublicoFxIcon(bool convertido) =>
     convertido ? 'circle-check' : 'users';
-
-bool leadPublicoPodeCriarAluno(String? email) {
-  final mail = email?.trim();
-  return mail != null && mail.isNotEmpty;
-}
