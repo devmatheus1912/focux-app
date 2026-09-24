@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/money/fx_money.dart';
@@ -28,9 +28,9 @@ import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../chat/screens/chat_inbox_screen.dart';
-import '../../perfil/providers/perfil_provider.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
+import 'pix_qr_display.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
@@ -47,14 +47,51 @@ bool _mensagemIndicaCarteiraSemChave(String msg) {
           lower.contains('wallet'));
 }
 
-Future<bool> _perfilTemChavePix(WidgetRef ref) async {
-  try {
-    final perfil = await ref.read(perfilProvider.future);
-    final chave = perfil.chavePix?.trim() ?? '';
-    return chave.isNotEmpty;
-  } catch (_) {
-    return true; // Don't block PIX if perfil fetch fails — API decides.
+Widget _pixQrVisual({
+  required String pixCopiaECola,
+  required Uint8List? qrBytes,
+  required bool isDark,
+}) {
+  final copia = pixCopiaECola.trim();
+  if (copia.isNotEmpty) {
+    return Center(
+      child: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.all(12),
+        child: QrImageView(
+          data: copia,
+          size: 200,
+          backgroundColor: Colors.white,
+          eyeStyle: const QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: Colors.black,
+          ),
+          dataModuleStyle: const QrDataModuleStyle(
+            dataModuleShape: QrDataModuleShape.square,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
   }
+  if (qrBytes != null) {
+    return Image.memory(
+      qrBytes,
+      width: 200,
+      height: 200,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.medium,
+    );
+  }
+  return Text(
+    'PIX gerado. Use o botão abaixo para copiar o código.',
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      color: isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+      fontSize: 13,
+      height: 1.35,
+    ),
+  );
 }
 
 Future<String?> pickMensalidadeMesReferencia(
@@ -136,6 +173,7 @@ Future<void> mostrarPixMensalidade({
   String? erro;
   var precisaCarteira = false;
   var loadToken = 0;
+  var loadStarted = false;
 
   Future<void> carregar(void Function(void Function()) setDialogState) async {
     final token = ++loadToken;
@@ -145,22 +183,21 @@ Future<void> mostrarPixMensalidade({
       precisaCarteira = false;
     });
     try {
-      if (!asAluno) {
-        final temChave = await _perfilTemChavePix(ref);
-        if (token != loadToken) return;
-        if (!temChave) {
-          setDialogState(() {
-            precisaCarteira = true;
-            erro =
-                'Cadastre sua chave PIX na carteira para gerar cobranças.';
-            carregando = false;
-          });
-          return;
-        }
-      }
+      // BE gera via Mercado Pago; carteira do personal não bloqueia a emissão.
       final repo = mensalidadeRepo(ref);
       final p = asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
       if (token != loadToken) return;
+      if (!pixQrHasRenderablePayload(
+        pixCopiaECola: p.pixCopiaECola,
+        qrCodeBase64: p.qrCodeBase64,
+      )) {
+        setDialogState(() {
+          erro =
+              'Mercado Pago não retornou QR/código PIX. Confira o token MP e o e-mail do aluno.';
+          carregando = false;
+        });
+        return;
+      }
       setDialogState(() {
         pix = p;
         carregando = false;
@@ -181,24 +218,19 @@ Future<void> mostrarPixMensalidade({
     builder:
         (ctx) => StatefulBuilder(
           builder: (ctx, setDialogState) {
-            if (carregando && pix == null && erro == null) {
+            // Start once — calling carregar from every rebuild + loadToken
+            // cancelled the in-flight PIX forever ("Gerando…" stuck).
+            if (!loadStarted) {
+              loadStarted = true;
               unawaited(carregar(setDialogState));
             }
 
             final isDark = Theme.of(ctx).brightness == Brightness.dark;
             final primary = Theme.of(ctx).colorScheme.primary;
-            Uint8List? qrBytes;
-            var displayErro = erro;
-            if (!carregando && displayErro == null && pix != null) {
-              final rawQr = pix!.qrCodeBase64.trim();
-              if (rawQr.isNotEmpty) {
-                try {
-                  qrBytes = base64Decode(rawQr);
-                } catch (_) {
-                  displayErro = 'Não foi possível exibir o QR Code do PIX.';
-                }
-              }
-            }
+            final qrBytes =
+                !carregando && erro == null && pix != null
+                    ? decodePixQrBase64(pix!.qrCodeBase64)
+                    : null;
             return FxHomeSheetSurface(
               isDark: isDark,
               child: Column(
@@ -235,13 +267,13 @@ Future<void> mostrarPixMensalidade({
                         ],
                       ),
                     )
-                  else if (displayErro != null)
+                  else if (erro != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Column(
                         children: [
                           Text(
-                            displayErro,
+                            erro!,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: EagleTokens.bad,
@@ -268,27 +300,11 @@ Future<void> mostrarPixMensalidade({
                       ),
                     )
                   else ...[
-                    if (qrBytes != null)
-                      Image.memory(
-                        qrBytes,
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.medium,
-                      )
-                    else
-                      Text(
-                        'PIX gerado. Use o botão abaixo para copiar o código.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color:
-                              isDark
-                                  ? EagleTokens.darkInkMute
-                                  : TokensStrip.textSecondary,
-                          fontSize: 13,
-                          height: 1.35,
-                        ),
-                      ),
+                    _pixQrVisual(
+                      pixCopiaECola: pix?.pixCopiaECola ?? '',
+                      qrBytes: qrBytes,
+                      isDark: isDark,
+                    ),
                     const SizedBox(height: TokensStrip.s4),
                     TextButton.icon(
                       icon: const Icon(Icons.copy),
