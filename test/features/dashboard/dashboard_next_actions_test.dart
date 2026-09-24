@@ -406,4 +406,24 @@ void main() {
       expect(sheet.firstWhere((a) => a.isRadarStudent).title, 'Ana');
     });
   });
+
+  group('agenda-semana gargalo', () {
+    test('rota vai para /agenda e auto-completa ao abrir', () {
+      final action = _fila(
+        actionKey: 'STUDENT_AUTONOMY_RECURRING_9_agenda-semana',
+        tipo: 'ALUNO_AUTONOMIA_RECORRENTE',
+        titulo: 'Gargalo recorrente: Conferir agenda da semana',
+        descricao: 'Nathalia clicou 2 vezes',
+        acaoUrl: '/alunos/9',
+        prioridade: 'P1',
+        alunoId: 9,
+        ctaLabel: 'Ver agenda',
+      );
+      expect(dashboardFilaActionRoute(action), '/agenda');
+      final item = sheetItemFromFila(action);
+      expect(item.route, '/agenda');
+      expect(item.actionKey, action.actionKey);
+      expect(commandActionAutoCompletesOnOpen(item), isTrue);
+    });
+  });
 }

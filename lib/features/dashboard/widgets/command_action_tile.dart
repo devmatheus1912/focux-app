@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_readability.dart';
+import '../utils/open_dashboard_command_action.dart';
 
 Color commandToneAccent(CommandActionTone tone, Color primary) {
   return switch (tone) {
@@ -20,7 +21,7 @@ Color commandToneAccent(CommandActionTone tone, Color primary) {
 }
 
 /// Linha inset (ChatGPT/iOS) — ícone 22, chevron 17, divisor após o ícone.
-class CommandActionTile extends StatelessWidget {
+class CommandActionTile extends ConsumerWidget {
   final CommandActionItem item;
   final bool isDark;
   final Color primary;
@@ -37,7 +38,7 @@ class CommandActionTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final chrome = ShellChrome.of(context);
     final mute = dashboardReadableCaption(context, isDark: isDark);
     final accent = commandToneAccent(item.tone, primary);
@@ -53,16 +54,12 @@ class CommandActionTile extends StatelessWidget {
             onTap!();
             return;
           }
-          AnalyticsService.instance.track(
-            ProductEvents.homeDayFocusAction,
-            props: {
-              'route': item.route,
-              'title': item.title,
-              'priority': item.priorityBadge,
-              'source': 'next_actions',
-            },
+          openDashboardCommandAction(
+            context: context,
+            ref: ref,
+            item: item,
+            source: 'next_actions',
           );
-          context.go(item.route);
         },
         child: ConstrainedBox(
           constraints: const BoxConstraints(

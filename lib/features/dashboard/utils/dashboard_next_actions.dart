@@ -73,6 +73,7 @@ List<CommandActionItem> buildDashboardNextActions({
                 route: dashboardFilaActionRoute(queueCandidates.first),
                 tone: CommandActionTone.primary,
                 alunoId: queueCandidates.first.alunoId,
+                actionKey: queueCandidates.first.actionKey,
               ));
 
   final nextActions = <CommandActionItem>[
@@ -196,6 +197,7 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
     isRadarStudent: isRadar,
     priorityBadge: badge,
     alunoId: action.alunoId,
+    actionKey: action.actionKey,
   );
 }
 
@@ -235,6 +237,12 @@ bool _isAgendaSemanaAction(FilaAcaoResumo action) {
   if (key.contains('agenda-semana')) return true;
   final title = action.titulo.toLowerCase();
   return title.contains('conferir agenda');
+}
+
+/// Ao abrir a agenda a partir do gargalo, conclui a ação na fila.
+bool commandActionAutoCompletesOnOpen(CommandActionItem item) {
+  final key = item.actionKey?.toLowerCase() ?? '';
+  return key.contains('agenda-semana');
 }
 
 bool _isFilaRisk(FilaAcaoResumo action) {
@@ -419,6 +427,7 @@ List<CommandActionItem> _collapseRepeatedImpact(List<CommandActionItem> items) {
           route: g.route,
           tone: g.tone,
           alunoId: id,
+          actionKey: g.actionKey,
         ),
       );
     }

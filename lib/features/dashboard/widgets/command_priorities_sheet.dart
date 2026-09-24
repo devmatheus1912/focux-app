@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -10,9 +9,10 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../data/command_action_item.dart';
 import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_readability.dart';
+import '../utils/open_dashboard_command_action.dart';
 import 'command_action_tile.dart';
 
-class CommandPrioritiesSheet extends StatefulWidget {
+class CommandPrioritiesSheet extends ConsumerStatefulWidget {
   const CommandPrioritiesSheet({
     super.key,
     required this.parentContext,
@@ -29,10 +29,12 @@ class CommandPrioritiesSheet extends StatefulWidget {
   final List<CommandActionItem> actions;
 
   @override
-  State<CommandPrioritiesSheet> createState() => _CommandPrioritiesSheetState();
+  ConsumerState<CommandPrioritiesSheet> createState() =>
+      _CommandPrioritiesSheetState();
 }
 
-class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
+class _CommandPrioritiesSheetState
+    extends ConsumerState<CommandPrioritiesSheet> {
   late bool _radarExpanded;
 
   @override
@@ -44,18 +46,14 @@ class _CommandPrioritiesSheetState extends State<CommandPrioritiesSheet> {
     _radarExpanded = radarCount <= 2 || impactOnly;
   }
 
-  void _openAction(CommandActionItem item) {
-    AnalyticsService.instance.track(
-      ProductEvents.homeDayFocusAction,
-      props: {
-        'route': item.route,
-        'title': item.title,
-        'priority': item.priorityBadge,
-        'source': 'priorities_sheet',
-      },
-    );
+  Future<void> _openAction(CommandActionItem item) async {
     Navigator.of(widget.sheetContext).pop();
-    widget.parentContext.go(item.route);
+    await openDashboardCommandAction(
+      context: widget.parentContext,
+      ref: ref,
+      item: item,
+      source: 'priorities_sheet',
+    );
   }
 
   @override
