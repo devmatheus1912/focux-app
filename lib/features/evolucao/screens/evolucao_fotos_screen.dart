@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
@@ -376,7 +377,11 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      Image.network(f.url, fit: BoxFit.cover),
+                      FxCachedNetworkImage(
+                        imageUrl: f.url,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 480,
+                      ),
                       if (isB || isA)
                         DecoratedBox(
                           decoration: BoxDecoration(
@@ -433,19 +438,21 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
         width: w,
         child: Stack(
           children: [
-            Image.network(
-              _fotos[_selAfter!].url,
+            FxCachedNetworkImage(
+              imageUrl: _fotos[_selAfter!].url,
               fit: BoxFit.cover,
               width: w,
               height: 300,
+              memCacheWidth: 900,
             ),
             ClipRect(
               clipper: _Clip(_slider, w),
-              child: Image.network(
-                _fotos[_selBefore!].url,
+              child: FxCachedNetworkImage(
+                imageUrl: _fotos[_selBefore!].url,
                 fit: BoxFit.cover,
                 width: w,
                 height: 300,
+                memCacheWidth: 900,
               ),
             ),
             Positioned(

@@ -105,10 +105,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
 
   StompClient? _stomp;
   Timer? _wsReconnectTimer;
+  Timer? _markReadDebounce;
   int _wsReconnectAttempt = 0;
   int? _wsAlunoId;
   bool _wsLifecycleEnded = false;
   static const _maxWsReconnectAttempts = 8;
+  static const _markReadDebounceMs = 600;
   bool _loading = true;
   bool _uploading = false;
   bool _recordingAudio = false;
@@ -150,6 +152,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   void dispose() {
     _wsLifecycleEnded = true;
     _wsReconnectTimer?.cancel();
+    _markReadDebounce?.cancel();
     _stomp?.deactivate();
     _recordTimer?.cancel();
     unawaited(_audioRecorder.dispose());
@@ -203,9 +206,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       });
       _dedupeInitialDraft();
       _scrollToBottom(animated: false);
-      // Mark-read em paralelo — não atrasar o primeiro paint da conversa.
-      // ignore: unawaited_futures
-      _markRead();
+      // Mark-read debounced — não atrasar o primeiro paint nem storm de HTTP.
+      _scheduleMarkRead();
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -247,6 +249,17 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
   }
 
+  void _scheduleMarkRead() {
+    _markReadDebounce?.cancel();
+    _markReadDebounce = Timer(
+      const Duration(milliseconds: _markReadDebounceMs),
+      () {
+        if (_wsLifecycleEnded || !mounted) return;
+        unawaited(_markRead());
+      },
+    );
+  }
+
   Future<void> _markRead() async {
     final repo = ChatRepository(ref.read(apiClientProvider));
     if (_isAlunoMode) {
@@ -267,6 +280,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (_stomp != null) {
       return;
     }
+    // Token fresco a cada connect/reconnect (evita JWT stale).
     final token = await SecureStorage.getToken();
     final url = '${Env.wsUrl}/ws/websocket';
     _stomp = StompClient(
@@ -325,7 +339,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
           if (!mounted) return;
           setState(() => _upsertMessage(msg));
           if (_isIncoming(msg)) {
-            await _markRead();
+            _scheduleMarkRead();
           }
           _scrollToBottom();
         } catch (_) {

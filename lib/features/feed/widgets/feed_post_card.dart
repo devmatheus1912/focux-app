@@ -157,7 +157,7 @@ class FeedPostCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             // Only one mem cache axis — both width+height distort decode.
-                            memCacheWidth: 900,
+                            memCacheWidth: 720,
                             errorBuilder: (_, __, ___) =>
                                 FeedImagePlaceholder(primary: primary),
                           ),

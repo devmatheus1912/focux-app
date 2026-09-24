@@ -3,6 +3,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../utils/checkin_video_badge.dart';
 
@@ -39,11 +40,12 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          Image.network(
-            url,
+          FxCachedNetworkImage(
+            imageUrl: url,
             height: checkinMediaPreviewHeight,
             width: double.infinity,
             fit: BoxFit.cover,
+            memCacheWidth: 720,
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,
@@ -97,11 +99,12 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          Image.network(
-            url,
+          FxCachedNetworkImage(
+            imageUrl: url,
             height: checkinMediaPreviewHeight,
             width: double.infinity,
             fit: BoxFit.cover,
+            memCacheWidth: 720,
             errorBuilder:
                 (_, __, ___) => Container(
                   height: 120,

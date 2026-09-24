@@ -30,7 +30,19 @@ Future<void> _warmFilterVariants(
   required bool includeFinanceFilter,
 }) async {
   final repo = ref.read(alunoRepositoryProvider);
-  final jobs = <Future<void>>[];
+  const maxConcurrent = 2;
+  final pending = <Future<void>>[];
+
+  Future<void> enqueue(Future<void> Function() job) async {
+    final run = job();
+    pending.add(run);
+    try {
+      await run;
+    } finally {
+      pending.remove(run);
+    }
+  }
+
   for (final filtro in AlunoFiltro.values) {
     if (filtro == AlunoFiltro.inadimplentes && !includeFinanceFilter) {
       continue;
@@ -42,20 +54,30 @@ Future<void> _warmFilterVariants(
       ordenacao: base.ordenacao,
     );
     if (AlunosHomeClientCache.getIfFresh(query) != null) continue;
-    jobs.add(() async {
-      try {
-        final bundle = await repo.getHome(
-          page: 0,
-          size: AlunosHomeQuery.pageSize,
-          q: query.q,
-          filtro: query.filtroApi,
-          ordenacao: query.ordenacaoApi,
-        );
-        AlunosHomeClientCache.put(query, bundle);
-      } catch (_) {}
-    }());
+
+    while (pending.length >= maxConcurrent) {
+      await Future.any(pending);
+    }
+
+    unawaited(
+      enqueue(() async {
+        try {
+          final bundle = await repo.getHome(
+            page: 0,
+            size: AlunosHomeQuery.pageSize,
+            q: query.q,
+            filtro: query.filtroApi,
+            ordenacao: query.ordenacaoApi,
+          );
+          AlunosHomeClientCache.put(query, bundle);
+        } catch (_) {}
+      }),
+    );
   }
-  await Future.wait(jobs);
+
+  if (pending.isNotEmpty) {
+    await Future.wait(pending);
+  }
 }
 
 Future<void> _ignoreErrors(Future<dynamic> future) async {

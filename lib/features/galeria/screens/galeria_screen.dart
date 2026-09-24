@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -292,9 +293,10 @@ class _GaleriaScreenState extends ConsumerState<GaleriaScreen> {
                                       child: Stack(
                                         fit: StackFit.expand,
                                         children: [
-                                          Image.network(
-                                            f.fotoUrl,
+                                          FxCachedNetworkImage(
+                                            imageUrl: f.fotoUrl,
                                             fit: BoxFit.cover,
+                                            memCacheWidth: 480,
                                           ),
                                           Positioned(
                                             top: 0,

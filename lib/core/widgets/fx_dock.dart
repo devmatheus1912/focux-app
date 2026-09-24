@@ -96,42 +96,61 @@ class FxDock extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-        child: BackdropFilter(
-          filter: TokensStrip.blurFilter(TokensStrip.blurHeavy),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(
-                FxSettingsLayout.groupRadius,
-              ),
-              border: Border.all(color: border, width: 0.5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s1,
-                vertical: 6,
-              ),
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  return Expanded(
-                    child: _FxDockNavItem(
-                      item: items[i],
-                      active: i == currentIndex,
-                      isDark: isDark,
-                      primary: primary,
-                      compact: compact,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        onTap(i);
-                      },
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
+        child: _dockSurface(
+          context: context,
+          isDark: isDark,
+          surface: surface,
+          border: border,
+          primary: primary,
+          compact: compact,
         ),
       ),
+    );
+  }
+
+  Widget _dockSurface({
+    required BuildContext context,
+    required bool isDark,
+    required Color surface,
+    required Color border,
+    required Color primary,
+    required bool compact,
+  }) {
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+    final body = DecoratedBox(
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+        border: Border.all(color: border, width: 0.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s1,
+          vertical: 6,
+        ),
+        child: Row(
+          children: List.generate(items.length, (i) {
+            return Expanded(
+              child: _FxDockNavItem(
+                item: items[i],
+                active: i == currentIndex,
+                isDark: isDark,
+                primary: primary,
+                compact: compact,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onTap(i);
+                },
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+    if (reduceMotion) return body;
+    return BackdropFilter(
+      filter: TokensStrip.blurFilter(TokensStrip.blurHeavy),
+      child: body,
     );
   }
 }

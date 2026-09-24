@@ -14,6 +14,17 @@ class SecureStorage {
   static String? _webRole;
   static String? _webRequiresPasswordChange;
 
+  /// Cache RAM nativo — evita Keychain/Keystore a cada Dio/redirect.
+  /// Invalidado em save/delete/clearAll.
+  static String? _memAccessToken;
+  static String? _memRefreshToken;
+  static String? _memRole;
+  static String? _memRequiresPasswordChange;
+  static bool _memAccessLoaded = false;
+  static bool _memRefreshLoaded = false;
+  static bool _memRoleLoaded = false;
+  static bool _memRequiresLoaded = false;
+
   static const _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
     iOptions: IOSOptions(
@@ -21,17 +32,64 @@ class SecureStorage {
     ),
   );
 
+  /// Só testes — zera caches de memória sem tocar no Keychain.
+  @visibleForTesting
+  static void debugResetMemoryCache() {
+    _webAccessToken = null;
+    _webRefreshToken = null;
+    _webRole = null;
+    _webRequiresPasswordChange = null;
+    _clearNativeMemory();
+  }
+
+  /// Só testes — simula nativo já aquecido (sem I/O).
+  @visibleForTesting
+  static void debugPrimeNativeCache({
+    String? token,
+    String? refreshToken,
+    String? role,
+    bool? requiresPasswordChange,
+  }) {
+    _memAccessToken = token;
+    _memAccessLoaded = true;
+    _memRefreshToken = refreshToken;
+    _memRefreshLoaded = true;
+    _memRole = role;
+    _memRoleLoaded = true;
+    _memRequiresPasswordChange =
+        requiresPasswordChange == null
+            ? null
+            : (requiresPasswordChange ? 'true' : 'false');
+    _memRequiresLoaded = true;
+  }
+
+  static void _clearNativeMemory() {
+    _memAccessToken = null;
+    _memRefreshToken = null;
+    _memRole = null;
+    _memRequiresPasswordChange = null;
+    _memAccessLoaded = false;
+    _memRefreshLoaded = false;
+    _memRoleLoaded = false;
+    _memRequiresLoaded = false;
+  }
+
   static Future<void> saveToken(String token) async {
     if (kIsWeb) {
       _webAccessToken = token;
       return;
     }
+    _memAccessToken = token;
+    _memAccessLoaded = true;
     await _storage.write(key: _keyToken, value: token);
   }
 
   static Future<String?> getToken() async {
     if (kIsWeb) return _webAccessToken;
-    return _storage.read(key: _keyToken);
+    if (_memAccessLoaded) return _memAccessToken;
+    _memAccessToken = await _storage.read(key: _keyToken);
+    _memAccessLoaded = true;
+    return _memAccessToken;
   }
 
   static Future<void> deleteToken() async {
@@ -39,6 +97,8 @@ class SecureStorage {
       _webAccessToken = null;
       return;
     }
+    _memAccessToken = null;
+    _memAccessLoaded = true;
     await _storage.delete(key: _keyToken);
   }
 
@@ -47,12 +107,17 @@ class SecureStorage {
       _webRole = role;
       return;
     }
+    _memRole = role;
+    _memRoleLoaded = true;
     await _storage.write(key: _keyRole, value: role);
   }
 
   static Future<String?> getRole() async {
     if (kIsWeb) return _webRole;
-    return _storage.read(key: _keyRole);
+    if (_memRoleLoaded) return _memRole;
+    _memRole = await _storage.read(key: _keyRole);
+    _memRoleLoaded = true;
+    return _memRole;
   }
 
   static Future<void> deleteRole() async {
@@ -60,6 +125,8 @@ class SecureStorage {
       _webRole = null;
       return;
     }
+    _memRole = null;
+    _memRoleLoaded = true;
     await _storage.delete(key: _keyRole);
   }
 
@@ -68,12 +135,17 @@ class SecureStorage {
       _webRefreshToken = token;
       return;
     }
+    _memRefreshToken = token;
+    _memRefreshLoaded = true;
     await _storage.write(key: _keyRefreshToken, value: token);
   }
 
   static Future<String?> getRefreshToken() async {
     if (kIsWeb) return _webRefreshToken;
-    return _storage.read(key: _keyRefreshToken);
+    if (_memRefreshLoaded) return _memRefreshToken;
+    _memRefreshToken = await _storage.read(key: _keyRefreshToken);
+    _memRefreshLoaded = true;
+    return _memRefreshToken;
   }
 
   static Future<void> deleteRefreshToken() async {
@@ -81,6 +153,8 @@ class SecureStorage {
       _webRefreshToken = null;
       return;
     }
+    _memRefreshToken = null;
+    _memRefreshLoaded = true;
     await _storage.delete(key: _keyRefreshToken);
   }
 
@@ -90,12 +164,19 @@ class SecureStorage {
       _webRequiresPasswordChange = str;
       return;
     }
+    _memRequiresPasswordChange = str;
+    _memRequiresLoaded = true;
     await _storage.write(key: _keyRequiresPasswordChange, value: str);
   }
 
   static Future<bool> getRequiresPasswordChange() async {
     if (kIsWeb) return _webRequiresPasswordChange == 'true';
+    if (_memRequiresLoaded) {
+      return _memRequiresPasswordChange == 'true';
+    }
     final val = await _storage.read(key: _keyRequiresPasswordChange);
+    _memRequiresPasswordChange = val;
+    _memRequiresLoaded = true;
     return val == 'true';
   }
 
@@ -104,6 +185,8 @@ class SecureStorage {
       _webRequiresPasswordChange = null;
       return;
     }
+    _memRequiresPasswordChange = null;
+    _memRequiresLoaded = true;
     await _storage.delete(key: _keyRequiresPasswordChange);
   }
 
@@ -122,6 +205,7 @@ class SecureStorage {
       await prefs.remove(_keyRequiresPasswordChange);
       return;
     }
+    _clearNativeMemory();
     await _storage.deleteAll();
   }
 }

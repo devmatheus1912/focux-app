@@ -62,19 +62,14 @@ void main() {
       debugPrint('[Focux] TLS pinning init error: $error');
       reportUncaughtZoneError(error, stack);
     }
-    await HomeWidgetService.init();
+    // HomeWidget + FCM: defer pós-primeiro-frame (ver FocuxApp._bootstrapDeferredServices).
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
 
-    // ignore: unused_local_variable
-    bool crashlyticsReady = false;
-
     try {
       if (!kIsWeb) {
         await Firebase.initializeApp();
-        await FcmService.init(ApiClient());
-        crashlyticsReady = true;
 
         FlutterError.onError = (details) {
           unawaited(reportFlutterErrorToCrashlytics(details));
@@ -191,13 +186,35 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      unawaited(_bootstrapDeferredServices());
       bindAnalyticsFunnelPoster(ref.read(apiClientProvider));
       PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
       _loadCustomTheme();
       if (!kIsWeb) {
-        ref.read(iapStoreHealthProvider);
+        // IAP health: atrasar 5s para não competir com splash/home.
+        Future<void>.delayed(const Duration(seconds: 5), () {
+          if (!mounted) return;
+          ref.read(iapStoreHealthProvider);
+        });
       }
     });
+  }
+
+  /// Home Widget + FCM fora do caminho crítico do primeiro frame.
+  Future<void> _bootstrapDeferredServices() async {
+    try {
+      await HomeWidgetService.init();
+    } catch (error, stack) {
+      debugPrint('[Focux] HomeWidget deferred init error: $error');
+      reportUncaughtZoneError(error, stack);
+    }
+    if (kIsWeb) return;
+    try {
+      await FcmService.init(ApiClient());
+    } catch (error, stack) {
+      debugPrint('[Focux] FCM deferred init error: $error');
+      reportUncaughtZoneError(error, stack);
+    }
   }
 
   @override
