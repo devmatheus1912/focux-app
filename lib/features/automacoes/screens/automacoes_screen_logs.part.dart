@@ -177,13 +177,35 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
                         );
                       }
                       final log = logs[i];
+                      final erro = log.erro?.trim() ?? '';
+                      final problema = automacaoLogComProblema(
+                        status: log.status,
+                        entregasFalha: log.entregasFalha,
+                      );
                       return FxSatelliteListTile(
                         title: automacaoLogStatusLabel(log.status),
-                        subtitle: Text(
-                          automacaoLogSubtitle(
-                            status: log.status,
-                            passoAtual: log.passoAtual,
-                          ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              automacaoLogSubtitle(
+                                status: log.status,
+                                passoAtual: log.passoAtual,
+                                entregasOk: log.entregasOk,
+                                entregasFalha: log.entregasFalha,
+                              ),
+                            ),
+                            if (problema && erro.isNotEmpty)
+                              Text(
+                                erro,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                          ],
                         ),
                       );
                     },

@@ -26,6 +26,26 @@ void main() {
     );
   });
 
+  test('gatilhos novos, status de falha e entregas no histórico', () {
+    expect(automacaoTriggerLabel('ALUNO_VIA_LEAD'), 'Interessado virou aluno');
+    expect(automacaoTriggerLabel('RECORDE_PESSOAL'), 'Novo recorde');
+    expect(automacaoLogStatusLabel('ERRO'), 'Falhou');
+    expect(automacaoLogStatusLabel('CANCELADO'), 'Cancelado');
+    expect(
+      automacaoLogSubtitle(
+        status: 'ATIVO',
+        passoAtual: 2,
+        entregasOk: 2,
+        entregasFalha: 1,
+      ),
+      'Em andamento · passo 3 · 2 enviadas · 1 falhou',
+    );
+    expect(automacaoLogComProblema(status: 'ERRO', entregasFalha: 0), isTrue);
+    expect(automacaoLogComProblema(status: 'ATIVO', entregasFalha: 1), isTrue);
+    expect(automacaoLogComProblema(status: 'CONCLUIDO', entregasFalha: 0), isFalse);
+    expect(automacaoPausarConfirmMessage(), contains('meio do fluxo'));
+  });
+
   test('busca casa nome, descrição e gatilho', () {
     expect(
       automacaoMatchesQuery(

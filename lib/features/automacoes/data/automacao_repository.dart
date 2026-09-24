@@ -165,16 +165,25 @@ class AutomacaoLog {
   final String status;
   final int passoAtual;
   final String? iniciadoEm;
+  final String? erro;
+  final int entregasOk;
+  final int entregasFalha;
 
   const AutomacaoLog({
     required this.status,
     required this.passoAtual,
     this.iniciadoEm,
+    this.erro,
+    this.entregasOk = 0,
+    this.entregasFalha = 0,
   });
 
   factory AutomacaoLog.fromJson(Map<String, dynamic> j) => AutomacaoLog(
     status: j['status'] as String? ?? '',
     passoAtual: (j['passoAtual'] as num?)?.toInt() ?? 0,
     iniciadoEm: j['iniciadoEm'] as String?,
+    erro: j['erro'] as String?,
+    entregasOk: (j['entregasOk'] as num?)?.toInt() ?? 0,
+    entregasFalha: (j['entregasFalha'] as num?)?.toInt() ?? 0,
   );
 }

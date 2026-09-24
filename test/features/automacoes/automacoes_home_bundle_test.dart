@@ -68,6 +68,19 @@ void main() {
     expect(log.iniciadoEm, '2026-09-08T12:00:00');
   });
 
+  test('AutomacaoLog lê entregas e erro', () {
+    final log = AutomacaoLog.fromJson({
+      'status': 'ERRO',
+      'passoAtual': 1,
+      'erro': 'Provedor recusou o envio',
+      'entregasOk': 1,
+      'entregasFalha': 3,
+    });
+    expect(log.erro, 'Provedor recusou o envio');
+    expect(log.entregasOk, 1);
+    expect(log.entregasFalha, 3);
+  });
+
   test('AutomacoesHomeBundle lê page e hasNext', () {
     final bundle = AutomacoesHomeBundle.fromJson({
       'fluxos': [],
