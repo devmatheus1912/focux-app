@@ -103,7 +103,7 @@ void main() {
     test('mostra dias sem treino mesmo em triagem', () {
       expect(
         shouldShowAlunoListOpsLine(
-          adherenceLabel: '12d s/ treino',
+          adherenceLabel: 'Parado há 12d',
           triageContextActive: true,
           aderenciaPercent: 0,
         ),

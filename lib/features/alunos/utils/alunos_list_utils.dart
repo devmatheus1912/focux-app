@@ -101,7 +101,9 @@ bool shouldShowAlunoListBadge(
 
 String alunoWeeklyCheckinsLabel(int weeklyCheckins) {
   if (weeklyCheckins <= 0) return '';
-  return '$weeklyCheckins ${weeklyCheckins == 1 ? 'treino' : 'treinos'}';
+  return weeklyCheckins == 1
+      ? '1 esta semana'
+      : '$weeklyCheckins esta semana';
 }
 
 String adherenceActivityLabel({
@@ -109,8 +111,9 @@ String adherenceActivityLabel({
   required int weeklyCheckins,
 }) {
   final dias = aluno.diasSemTreino;
-  if (dias != null && dias > 0) {
-    return '${dias}d s/ treino';
+  // Paridade hero 360: alarme de inatividade a partir de 3 dias.
+  if (dias != null && dias >= 3) {
+    return 'Parado há ${dias}d';
   }
   return alunoWeeklyCheckinsLabel(weeklyCheckins);
 }

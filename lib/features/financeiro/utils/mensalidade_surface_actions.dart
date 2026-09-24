@@ -273,6 +273,8 @@ Future<void> mostrarPixMensalidade({
                         qrBytes,
                         width: 200,
                         height: 200,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.medium,
                       )
                     else
                       Text(

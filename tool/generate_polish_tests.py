@@ -16,7 +16,6 @@ WIDTH_LIMITER_EXEMPT = {
     "alunos_list_screen.dart",
     "treinos_list_screen.dart",
     "aluno_detail_screen.dart",
-    "modo_presencial_screen.dart",
     "checkin_screen.dart",
     "meus_treinos_screen.dart",
     "historico_screen.dart",

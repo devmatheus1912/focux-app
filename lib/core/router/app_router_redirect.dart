@@ -205,8 +205,7 @@ bool isPersonalOnlyLocation(String path) {
       path.startsWith('/desafios/') ||
       path.startsWith('/habitos') ||
       path.startsWith('/leads/') ||
-      path.startsWith('/ferramentas/') ||
-      path.startsWith('/treino-presencial/');
+      path.startsWith('/ferramentas/');
 }
 
 String? stringRouteExtra(GoRouterState state) {

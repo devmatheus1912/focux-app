@@ -54,6 +54,9 @@ class ConversationMediaPreview extends StatelessWidget {
                   height: previewHeight,
                   width: previewWidth,
                   fit: BoxFit.cover,
+                  cacheWidth: (previewWidth * 2).round(),
+                  cacheHeight: (previewHeight * 2).round(),
+                  filterQuality: FilterQuality.medium,
                   errorBuilder:
                       (_, __, ___) => Container(
                         height: previewHeight,

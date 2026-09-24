@@ -46,7 +46,6 @@ import '../../features/assinatura/assinatura_route_args.dart';
 import '../../features/alertas/screens/alertas_screen.dart';
 import '../../features/evolucao/screens/evolucao_screen.dart';
 import '../../features/evolucao/screens/evolucao_fotos_screen.dart';
-import '../../features/checkin/screens/modo_presencial_screen.dart';
 import '../../features/ia/screens/progressao_aceitar_screen.dart';
 import '../../features/alunos/screens/editar_aluno_screen.dart';
 import '../../features/ranking/screens/ranking_screen.dart';
@@ -225,36 +224,6 @@ RouteBase buildChromeShellRoute() {
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? 'Aluno',
                 ),
-          ),
-          GoRoute(
-            path: '/treino-presencial/:id',
-            redirect:
-                (context, state) =>
-                    intPathParam(state, 'id') == null ? '/treinos' : null,
-            builder:
-                (context, state) {
-                  final fromQuery = int.tryParse(
-                    state.uri.queryParameters['alunoId'] ?? '',
-                  );
-                  final extra = state.extra;
-                  int? fromExtra;
-                  if (extra is Map) {
-                    final raw = extra['alunoId'];
-                    if (raw is int) {
-                      fromExtra = raw;
-                    } else if (raw is num) {
-                      fromExtra = raw.toInt();
-                    } else if (raw is String) {
-                      fromExtra = int.tryParse(raw);
-                    }
-                  } else if (extra is int) {
-                    fromExtra = extra;
-                  }
-                  return ModoPresencialScreen(
-                    treinoId: intPathParam(state, 'id')!,
-                    alunoId: fromQuery ?? fromExtra,
-                  );
-                },
           ),
           GoRoute(
             path: '/alunos/:id/anamnese',

@@ -35,44 +35,6 @@ Future<void> _dispatchTreinoDetailAction({
             .toSet(),
       );
       break;
-    case 'presencial':
-      if (treino.exercicios.isEmpty) {
-        FeedbackHelper.showError(
-          context,
-          'Adicione exercícios antes do modo presencial.',
-        );
-        break;
-      }
-      var aid = alunoId;
-      if (aid == null) {
-        try {
-          final alunos = await ref.read(alunosProvider.future);
-          if (!context.mounted) return;
-          final picked = await _showTreinoSheet<TreinoAtribuicaoResult>(
-            context: context,
-            builder:
-                (dialogContext) => TreinoAssignSheet(
-                  alunos: alunos,
-                  isDark: isDark,
-                  title: 'Modo presencial',
-                  subtitleWhenReady: 'Escolha o aluno desta sessão.',
-                  confirmLabel: 'Continuar',
-                ),
-          );
-          aid = picked?.alunoId;
-        } catch (e) {
-          if (context.mounted) {
-            FeedbackHelper.showError(context, friendlyError(e));
-          }
-          break;
-        }
-      }
-      if (aid == null || !context.mounted) break;
-      context.push(
-        '/treino-presencial/$treinoId?alunoId=$aid',
-        extra: {'alunoId': aid},
-      );
-      break;
     case 'assign':
       try {
         final alunos = await ref.read(alunosProvider.future);

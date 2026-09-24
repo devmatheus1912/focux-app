@@ -116,7 +116,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Beatriz Carvalho'), findsOneWidget);
-    expect(find.textContaining('12d s/ treino'), findsOneWidget);
+    expect(find.textContaining('Parado há 12d'), findsOneWidget);
     expect(find.byTooltip('WhatsApp'), findsOneWidget);
     expect(find.byTooltip('Contato feito'), findsOneWidget);
     expect(find.byTooltip('Adiar 24h'), findsNothing);

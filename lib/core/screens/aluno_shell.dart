@@ -15,15 +15,23 @@ class AlunoShell extends ConsumerWidget {
 
   final StatefulNavigationShell navigationShell;
 
+  /// Índice do tab Chat em [FxDockItems.aluno] — conversa full-screen sem dock.
+  static const int chatTabIndex = 3;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottomInset = FocuxPlatform.safeBottomInset(context);
     final compact = FocuxPlatform.isCompact(context);
-    final dockClearance = FxDock.shellClearance(
-      bottomInset: bottomInset,
-      compact: compact,
-    );
+    final onChat = navigationShell.currentIndex == chatTabIndex;
+    // Conversa full-screen: sem dock; SafeArea do ConversationScreen cobre o inset.
+    final dockClearance =
+        onChat
+            ? 0.0
+            : FxDock.shellClearance(
+              bottomInset: bottomInset,
+              compact: compact,
+            );
     final chatUnread = ref.watch(alunoHomeChatUnreadSelectProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -46,22 +54,23 @@ class AlunoShell extends ConsumerWidget {
                     child: navigationShell,
                   ),
                 ),
-                Positioned(
-                  bottom: bottomInset + FxDock.floatGap,
-                  left: FxDock.sideInset,
-                  right: FxDock.sideInset,
-                  child: FxDock(
-                    items: FxDockItems.aluno(chatUnread: chatUnread),
-                    currentIndex: navigationShell.currentIndex,
-                    cinematicChrome: true,
-                    isDark: isDark,
-                    onTap:
-                        (i) => navigationShell.goBranch(
-                          i,
-                          initialLocation: i == navigationShell.currentIndex,
-                        ),
+                if (!onChat)
+                  Positioned(
+                    bottom: bottomInset + FxDock.floatGap,
+                    left: FxDock.sideInset,
+                    right: FxDock.sideInset,
+                    child: FxDock(
+                      items: FxDockItems.aluno(chatUnread: chatUnread),
+                      currentIndex: navigationShell.currentIndex,
+                      cinematicChrome: true,
+                      isDark: isDark,
+                      onTap:
+                          (i) => navigationShell.goBranch(
+                            i,
+                            initialLocation: i == navigationShell.currentIndex,
+                          ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

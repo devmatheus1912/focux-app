@@ -41,12 +41,6 @@ Future<void> _openTreinoDetailMenu({
               onTap: () => Navigator.pop(sheetContext, 'assign'),
             ),
             TreinoInsetActionSpec(
-              icon: Icons.stay_current_landscape_rounded,
-              label: 'Modo presencial',
-              showChevron: true,
-              onTap: () => Navigator.pop(sheetContext, 'presencial'),
-            ),
-            TreinoInsetActionSpec(
               icon: Icons.assignment_ind_rounded,
               label: 'Copiar para aluno',
               onTap: () => Navigator.pop(sheetContext, 'clone'),

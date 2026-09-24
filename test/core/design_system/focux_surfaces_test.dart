@@ -108,14 +108,12 @@ void main() {
     expect(FocuxSurfaces.resolveParent(identidade), '/perfil');
   });
 
-  test('checkin executar e presencial são S8', () {
+  test('checkin executar é S8', () {
     final checkin = FocuxSurfaces.resolve('/checkin/executar');
     expect(checkin!.spec.type, FocuxSurfaceType.s8);
     expect(FocuxSurfaces.resolveParent(checkin), '/checkin/treinos');
 
-    final presencial = FocuxSurfaces.resolve('/treino-presencial/12');
-    expect(presencial!.spec.type, FocuxSurfaceType.s8);
-    expect(FocuxSurfaces.resolveParent(presencial), '/treinos/12');
+    expect(FocuxSurfaces.resolve('/treino-presencial/12'), isNull);
 
     final feedback = FocuxSurfaces.resolve('/alunos/9/feedback-video');
     expect(feedback!.spec.type, FocuxSurfaceType.s4);

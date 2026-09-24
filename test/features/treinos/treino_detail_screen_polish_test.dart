@@ -170,7 +170,7 @@ void main() {
       File(
         'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
       ).readAsStringSync(),
-      contains("label: 'Modo presencial'"),
+      isNot(contains("label: 'Modo presencial'")),
     );
     expect(
       'showChevron: true'.allMatches(
@@ -178,7 +178,7 @@ void main() {
           'lib/features/treinos/screens/treino_detail_screen_body.part.dart',
         ).readAsStringSync(),
       ).length,
-      2,
+      1,
     );
     expect(
       File(

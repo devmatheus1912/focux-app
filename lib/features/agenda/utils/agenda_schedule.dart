@@ -72,6 +72,29 @@ DateTime agendaWeekStart(DateTime d) {
 String agendaHm(DateTime date) =>
     '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
+/// True se [value] já passou (minuto atual inclusive como “agora”).
+bool agendaDateTimeIsInPast(DateTime value, {DateTime? now}) {
+  final n = now ?? DateTime.now();
+  final floor = DateTime(n.year, n.month, n.day, n.hour, n.minute);
+  return value.isBefore(floor);
+}
+
+bool agendaSlotSelectable(
+  DateTime day,
+  int hour,
+  int minute, {
+  DateTime? now,
+}) {
+  final candidate = DateTime(
+    day.year,
+    day.month,
+    day.day,
+    hour,
+    minute,
+  );
+  return !agendaDateTimeIsInPast(candidate, now: now);
+}
+
 String agendaWhatsappReminder({
   required String alunoNome,
   required DateTime inicio,

@@ -481,20 +481,6 @@ class CheckinRepository {
     );
   }
 
-  /// Personal opera sessão presencial pelo aluno atribuído.
-  Future<ExecucaoTreino> iniciarPresencial({
-    required int treinoId,
-    required int alunoId,
-  }) async {
-    final r = await _dio.post(
-      '/api/checkin/personal/iniciar',
-      data: {'treinoId': treinoId, 'alunoId': alunoId},
-    );
-    return ExecucaoTreino.fromJson(
-      _requireJsonMap(r.data, 'POST /api/checkin/personal/iniciar'),
-    );
-  }
-
   Future<ExecucaoExercicio> marcarExercicio(
     int execucaoId,
     int treinoExercicioId,

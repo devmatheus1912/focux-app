@@ -199,11 +199,14 @@ CommandActionItem sheetItemFromFila(FilaAcaoResumo action) {
   );
 }
 
-/// Deep link honesto: chat-contexto → conversa; resto respeita [acaoUrl].
+/// Deep link honesto: chat-contexto → conversa; agenda-semana → agenda; resto [acaoUrl].
 String dashboardFilaActionRoute(FilaAcaoResumo action) {
   final alunoId = action.alunoId;
   if (alunoId != null && _isChatContextoAction(action)) {
     return '/alunos/$alunoId/chat';
+  }
+  if (_isAgendaSemanaAction(action)) {
+    return '/agenda';
   }
   final url = action.acaoUrl;
   if (url.startsWith('/')) return url;
@@ -225,6 +228,13 @@ bool _isChatContextoAction(FilaAcaoResumo action) {
   if (url.contains('/chat')) return true;
   final title = action.titulo.toLowerCase();
   return title.contains('contexto') && title.contains('chat');
+}
+
+bool _isAgendaSemanaAction(FilaAcaoResumo action) {
+  final key = action.actionKey.toLowerCase();
+  if (key.contains('agenda-semana')) return true;
+  final title = action.titulo.toLowerCase();
+  return title.contains('conferir agenda');
 }
 
 bool _isFilaRisk(FilaAcaoResumo action) {

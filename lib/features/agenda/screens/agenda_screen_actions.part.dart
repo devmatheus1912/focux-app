@@ -1,6 +1,11 @@
 part of 'agenda_screen.dart';
 
 extension on _AgendaScreenState {
+  void _popRootOverlay() {
+    final nav = Navigator.of(context, rootNavigator: true);
+    if (nav.canPop()) nav.pop();
+  }
+
   Future<bool> _confirmDestructive({
     required String title,
     required String body,
@@ -19,7 +24,7 @@ extension on _AgendaScreenState {
   Future<void> _setStatus(Agendamento ag, String status) async {
     await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
     if (!mounted) return;
-    Navigator.pop(context);
+    _popRootOverlay();
     await _load(force: true);
     if (!mounted) return;
     AnalyticsService.instance.track(
@@ -51,7 +56,7 @@ extension on _AgendaScreenState {
         .read(agendaRepositoryProvider)
         .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo);
     if (!mounted) return;
-    Navigator.pop(context);
+    _popRootOverlay();
     await _load(force: true);
     if (!mounted) return;
     AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
@@ -113,7 +118,7 @@ extension on _AgendaScreenState {
             statusLabel: agendaStatusLabel(ag.status),
             photoUrl: aluno?.fotoUrl ?? _photoFor(ag.alunoId),
             onOpenAluno: () async {
-              Navigator.pop(context);
+              _popRootOverlay();
               if (!mounted) return;
               AnalyticsService.instance.track(ProductEvents.agendaAlunoOpened);
               context.push('/alunos/${ag.alunoId}');
@@ -165,7 +170,7 @@ extension on _AgendaScreenState {
               if (!ok) return;
               await ref.read(agendaRepositoryProvider).excluir(ag.id);
               if (!mounted) return;
-              Navigator.pop(context);
+              _popRootOverlay();
               await _load(force: true);
               if (!mounted) return;
               AnalyticsService.instance.track(ProductEvents.agendaDeleted);

@@ -155,6 +155,7 @@ class FeedPostCard extends StatelessWidget {
                           height: 168,
                           width: double.infinity,
                           memCacheHeight: 336,
+                          memCacheWidth: 800,
                           errorBuilder: (_, __, ___) =>
                               FeedImagePlaceholder(primary: primary),
                         ),

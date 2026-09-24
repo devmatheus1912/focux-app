@@ -276,14 +276,25 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = DateTime(
+    final now = DateTime.now();
+    var day = DateTime(
       widget.initial.year,
       widget.initial.month,
       widget.initial.day,
     );
-    _selectedTime = _snapToSlot(
+    final today = DateTime(now.year, now.month, now.day);
+    if (day.isBefore(today)) {
+      day = today;
+    }
+    _selectedDay = day;
+    var time = _snapToSlot(
       TimeOfDay(hour: widget.initial.hour, minute: widget.initial.minute),
     );
+    if (!agendaSlotSelectable(day, time.hour, time.minute, now: now)) {
+      final def = agendaDefaultSlot(day, now: now);
+      time = TimeOfDay(hour: def.hour, minute: def.minute);
+    }
+    _selectedTime = time;
   }
 
   /// Grade só tem :00 e :30 — sem snap o botão nunca fica “selecionado”.
@@ -377,27 +388,45 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
                   final selected =
                       slot.hour == _selectedTime.hour &&
                       slot.minute == _selectedTime.minute;
+                  final selectable = agendaSlotSelectable(
+                    _selectedDay,
+                    slot.hour,
+                    slot.minute,
+                  );
                   final onPrimary =
                       Theme.of(context).colorScheme.onPrimary;
                   return Semantics(
-                    button: true,
+                    button: selectable,
                     selected: selected,
+                    enabled: selectable,
                     label: 'Horário ${_timeLabel(slot)}',
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _selectedTime = slot);
-                        },
+                        onTap:
+                            selectable
+                                ? () {
+                                  HapticFeedback.selectionClick();
+                                  setState(() => _selectedTime = slot);
+                                }
+                                : null,
                         borderRadius: BorderRadius.circular(14),
                         child: Ink(
                           decoration: BoxDecoration(
-                            color: selected ? primary : chrome.cardFill,
+                            color:
+                                selected
+                                    ? primary
+                                    : chrome.cardFill.withValues(
+                                      alpha: selectable ? 1 : 0.45,
+                                    ),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color:
-                                  selected ? primary : chrome.lineStrong,
+                                  selected
+                                      ? primary
+                                      : chrome.lineStrong.withValues(
+                                        alpha: selectable ? 1 : 0.4,
+                                      ),
                               width: selected ? 2 : 1,
                             ),
                           ),
@@ -405,7 +434,12 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
                             child: Text(
                               _timeLabel(slot),
                               style: FocuxHubTypography.cardTitle(
-                                color: selected ? onPrimary : chrome.ink,
+                                color:
+                                    selected
+                                        ? onPrimary
+                                        : chrome.ink.withValues(
+                                          alpha: selectable ? 1 : 0.35,
+                                        ),
                               ).copyWith(
                                 fontWeight:
                                     selected
@@ -427,16 +461,17 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
               label:
                   '${agendaHorarioConfirmLabel()} · ${_timeLabel(_selectedTime)}',
               onPressed: () {
-                Navigator.pop(
-                  context,
-                  DateTime(
-                    _selectedDay.year,
-                    _selectedDay.month,
-                    _selectedDay.day,
-                    _selectedTime.hour,
-                    _selectedTime.minute,
-                  ),
+                final picked = DateTime(
+                  _selectedDay.year,
+                  _selectedDay.month,
+                  _selectedDay.day,
+                  _selectedTime.hour,
+                  _selectedTime.minute,
                 );
+                if (agendaDateTimeIsInPast(picked)) {
+                  return;
+                }
+                Navigator.pop(context, picked);
               },
             ),
           ],
