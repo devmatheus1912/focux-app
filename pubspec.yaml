@@ -60,7 +60,7 @@ dependencies:
   in_app_purchase: ^3.2.3
   image_picker: ^1.1.2
   just_audio: ^0.9.42
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
   record: ^6.2.0
   http: ^1.2.2
   camera: ^0.11.0
