@@ -377,42 +377,41 @@ class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
                   final selected =
                       slot.hour == _selectedTime.hour &&
                       slot.minute == _selectedTime.minute;
+                  final onPrimary =
+                      Theme.of(context).colorScheme.onPrimary;
                   return Semantics(
                     button: true,
                     selected: selected,
                     label: 'Horário ${_timeLabel(slot)}',
-                    child: InkWell(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() => _selectedTime = slot);
-                      },
-                      borderRadius: BorderRadius.circular(14),
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          color:
-                              selected
-                                  ? primary
-                                  : chrome.cardFill,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color:
-                                selected
-                                    ? primary
-                                    : chrome.lineStrong,
-                            width: selected ? 2 : 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _timeLabel(slot),
-                            style: FocuxHubTypography.cardTitle(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          setState(() => _selectedTime = slot);
+                        },
+                        borderRadius: BorderRadius.circular(14),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            color: selected ? primary : chrome.cardFill,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
                               color:
-                                  selected
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : chrome.ink,
-                            ).copyWith(
-                              fontWeight:
-                                  selected ? FontWeight.w800 : FontWeight.w600,
+                                  selected ? primary : chrome.lineStrong,
+                              width: selected ? 2 : 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _timeLabel(slot),
+                              style: FocuxHubTypography.cardTitle(
+                                color: selected ? onPrimary : chrome.ink,
+                              ).copyWith(
+                                fontWeight:
+                                    selected
+                                        ? FontWeight.w800
+                                        : FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),

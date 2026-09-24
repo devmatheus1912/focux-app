@@ -239,11 +239,11 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
   }) {
     return KeyedSubtree(
       key: _chipKeys[filtro],
-      child: _FxChip(
-        label: label,
-        count: count,
-        isSelected: _filtro == filtro,
+      child: FxToggleChip(
+        label: '$label $count',
+        selected: _filtro == filtro,
         isDark: isDark,
+        filledWhenSelected: true,
         onTap:
             () => _setFiltro(
               _filtro == filtro ? AlunoFiltro.todos : filtro,

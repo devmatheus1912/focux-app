@@ -180,19 +180,10 @@ class _TreinoDetailBody extends StatelessWidget {
                       spacing: TokensStrip.s2,
                       runSpacing: TokensStrip.s2,
                       children: [
-                        DashboardHomeActionChip(
-                          label: 'Lista',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => _popTreinoDetail(
-                            context,
-                            alunoId: alunoId,
-                          ),
-                        ),
                         if (alunoId != null)
                           DashboardHomeActionChip(
                             label: 'Aluno',
-                            accent: primary,
+                            accent: chrome.mute,
                             isDark: isDark,
                             onPressed: () =>
                                 context.push('/alunos/$alunoId'),
@@ -209,20 +200,6 @@ class _TreinoDetailBody extends StatelessWidget {
                             alunoId: alunoId,
                             isDark: isDark,
                             action: 'assign',
-                          ),
-                        ),
-                        DashboardHomeActionChip(
-                          label: 'Duplicar',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: () => _dispatchTreinoDetailAction(
-                            context: context,
-                            ref: ref,
-                            treino: treino,
-                            treinoId: treinoId,
-                            alunoId: alunoId,
-                            isDark: isDark,
-                            action: 'duplicate',
                           ),
                         ),
                       ],

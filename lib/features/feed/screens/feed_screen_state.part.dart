@@ -449,6 +449,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 label: feedListChipLabel(chip),
                                 selected: _chip == chip,
                                 isDark: isDark,
+                                filledWhenSelected: true,
                                 onTap: () {
                                   if (_chip == chip) return;
                                   setState(() => _chip = chip);

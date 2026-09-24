@@ -288,15 +288,6 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
                               return _TrainingPlanCard(
                                 treino: ordered[index],
                                 isDark: isDark,
-                                primaryStart:
-                                    sessaoAberta == null &&
-                                    index ==
-                                        ordered.indexWhere(
-                                          (t) =>
-                                              isTreinoDisponivelParaIniciar(t) &&
-                                              normalizeTreinoStatus(t.status) !=
-                                                  treinoStatusConcluido,
-                                        ),
                                 starting:
                                     _startingTreinoId ==
                                     ordered[index].treinoId,

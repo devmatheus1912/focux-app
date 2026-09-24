@@ -37,6 +37,7 @@ abstract final class FocuxGestalt {
     'dashboard_section_header',
     'TabBar',
     '_FxChip',
+    'FxToggleChip',
     'FocuxHubTypography',
     'sectionTitle',
   ];

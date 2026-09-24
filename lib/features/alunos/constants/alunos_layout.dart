@@ -27,14 +27,14 @@ abstract final class AlunosLayout {
 
   static const EdgeInsets searchBarOuterPadding = EdgeInsets.symmetric(
     horizontal: screenPadding,
-    vertical: 6,
+    vertical: 4,
   );
 
   static const EdgeInsets filterRowPadding = EdgeInsets.fromLTRB(
     screenPadding,
-    4,
+    2,
     0,
-    10,
+    6,
   );
 
   /// Folga no fim da row para o último chip não ficar sob o fade.

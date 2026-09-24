@@ -17,15 +17,12 @@ String checkinPrimeiroNome(String nome) {
 }
 
 CheckinFocusAction checkinFocusAction(CheckinPersonalHomeBundle home) {
-  final focus =
-      home.hoje.isNotEmpty
-          ? home.hoje.first
-          : (home.semana.isNotEmpty ? home.semana.first : null);
-  if (focus == null) {
+  if (home.hoje.isEmpty) {
     return const CheckinFocusAction(label: 'Ver alunos');
   }
+  final focus = home.hoje.first;
   return CheckinFocusAction(
-    label: 'Ver aluno',
+    label: home.hoje.length == 1 ? 'Ver aluno' : 'Ver ${checkinPrimeiroNome(focus.alunoNome)}',
     alunoId: focus.alunoId,
   );
 }

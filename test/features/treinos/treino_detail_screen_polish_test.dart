@@ -146,8 +146,8 @@ void main() {
     expect(screen, isNot(contains("label: 'Séries'")));
     expect(screen, isNot(contains('freshnessLabel')));
     expect(screen, contains("label: 'Atribuir'"));
-    expect(screen, contains("label: 'Lista'"));
-    expect(screen, contains("label: 'Duplicar'"));
+    expect(screen, isNot(contains("label: 'Lista'")));
+    expect(screen, contains("label: 'Duplicar treino'"));
     expect(
       File(
         'lib/features/treinos/screens/treino_detail_screen_body.part.dart',

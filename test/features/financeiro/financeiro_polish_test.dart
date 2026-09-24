@@ -26,7 +26,7 @@ void main() {
     expect(shell, contains('alunosProvider.future'));
     expect(tab, contains('novaMensalidadeToken'));
     expect(tab, contains('_scheduleNovaMensalidadeIfNeeded'));
-    expect(tab, contains('FxEmptyAction'));
+    expect(tab, isNot(contains('FxEmptyAction')));
     expect(tab, contains("'Nova mensalidade'"));
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('FxSatelliteListTile'));

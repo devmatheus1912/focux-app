@@ -298,6 +298,7 @@ class _HistoricoCheckinScreenState
                       label: historicoChipLabel(chip),
                       selected: _chip == chip,
                       isDark: chrome.isDark,
+                      filledWhenSelected: true,
                       onTap: () {
                         setState(() => _chip = chip);
                         _load(reset: true);

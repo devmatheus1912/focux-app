@@ -254,7 +254,7 @@ class _QualidadeBody extends StatelessWidget {
               Text(
                 '${data.score}',
                 style: FocuxHubTypography.kpi(
-                  color: chrome.ink,
+                  color: scoreColor,
                   fontSize: FocuxHubTypography.metricLg,
                 ),
               ),
@@ -275,7 +275,7 @@ class _QualidadeBody extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: DashboardHomeActionChip(
                   label: next.label,
-                  accent: scoreColor,
+                  accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,
                   onPressed: () {
                     if (next.shellTab) {

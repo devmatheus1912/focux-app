@@ -285,7 +285,12 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               )
                               : const SizedBox.shrink(),
                     ),
-                    if (!_modoSelecao && !listRefreshing)
+                    // Empty de filtro/busca: P0 = Limpar no empty (§11).
+                    if (!_modoSelecao &&
+                        !listRefreshing &&
+                        !(filtrados.isEmpty &&
+                            (_hasActiveFilter ||
+                                _query.trim().isNotEmpty)))
                       SafeArea(
                         top: false,
                         child: Padding(

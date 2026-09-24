@@ -39,7 +39,20 @@ void main() {
         semana: [item(alunoId: 8, nome: 'Bia')],
       ),
     );
-    expect(semana.label, 'Ver aluno');
-    expect(semana.alunoId, 8);
+    expect(semana.label, 'Ver alunos');
+    expect(semana.alunoId, isNull);
+
+    final variosHoje = checkinFocusAction(
+      CheckinPersonalHomeBundle(
+        checkinsHoje: 2,
+        hoje: [
+          item(alunoId: 3, nome: 'Ana Silva'),
+          item(alunoId: 8, nome: 'Bia'),
+        ],
+        semana: const [],
+      ),
+    );
+    expect(variosHoje.label, 'Ver Ana');
+    expect(variosHoje.alunoId, 3);
   });
 }

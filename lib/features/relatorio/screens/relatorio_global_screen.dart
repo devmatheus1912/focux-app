@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -235,45 +234,49 @@ class _RelatorioGlobalScreenState extends ConsumerState<RelatorioGlobalScreen> {
                             isDark: isDark,
                           ),
                           const SizedBox(height: TokensStrip.s4),
-                          DashboardSectionHeader(
-                            title: 'Mais comprometidos',
-                            actionLabel:
-                                catalogoMais.length > 3 ? 'Ver mais' : null,
-                            onAction:
-                                catalogoMais.length > 3
-                                    ? () => _abrirRanking(
-                                      title: 'Mais comprometidos',
-                                      alunos: catalogoMais,
-                                      attention: false,
-                                    )
-                                    : null,
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          ..._rankingTiles(
-                            relatorioRankingMaisPreview(dados),
-                            emptyLabel: 'Ainda não há treinos concluídos',
-                            attention: false,
-                          ),
-                          const SizedBox(height: TokensStrip.s4),
-                          DashboardSectionHeader(
-                            title: 'Precisam de atenção',
-                            actionLabel:
-                                catalogoMenos.length > 3 ? 'Ver mais' : null,
-                            onAction:
-                                catalogoMenos.length > 3
-                                    ? () => _abrirRanking(
-                                      title: 'Precisam de atenção',
-                                      alunos: catalogoMenos,
-                                      attention: true,
-                                    )
-                                    : null,
-                          ),
-                          const SizedBox(height: TokensStrip.s2),
-                          ..._rankingTiles(
-                            relatorioRankingMenosPreview(dados),
-                            emptyLabel: 'Ninguém precisa de atenção extra',
-                            attention: true,
-                          ),
+                          if (catalogoMais.isNotEmpty) ...[
+                            DashboardSectionHeader(
+                              title: 'Mais comprometidos',
+                              actionLabel:
+                                  catalogoMais.length > 3 ? 'Ver mais' : null,
+                              onAction:
+                                  catalogoMais.length > 3
+                                      ? () => _abrirRanking(
+                                        title: 'Mais comprometidos',
+                                        alunos: catalogoMais,
+                                        attention: false,
+                                      )
+                                      : null,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            ..._rankingTiles(
+                              relatorioRankingMaisPreview(dados),
+                              emptyLabel: 'Ainda não há treinos concluídos',
+                              attention: false,
+                            ),
+                            const SizedBox(height: TokensStrip.s4),
+                          ],
+                          if (catalogoMenos.isNotEmpty) ...[
+                            DashboardSectionHeader(
+                              title: 'Precisam de atenção',
+                              actionLabel:
+                                  catalogoMenos.length > 3 ? 'Ver mais' : null,
+                              onAction:
+                                  catalogoMenos.length > 3
+                                      ? () => _abrirRanking(
+                                        title: 'Precisam de atenção',
+                                        alunos: catalogoMenos,
+                                        attention: true,
+                                      )
+                                      : null,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            ..._rankingTiles(
+                              relatorioRankingMenosPreview(dados),
+                              emptyLabel: 'Ninguém precisa de atenção extra',
+                              attention: true,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -354,12 +357,11 @@ class _RelatorioFocusCard extends StatelessWidget {
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               DashboardHomeActionChip(
                 label: firstAtencao == null ? 'Ver alunos' : 'Ver aluno',
-                accent: firstAtencao == null
-                    ? Theme.of(context).colorScheme.primary
-                    : EagleTokens.bad,
+                accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
                 onPressed: () {
                   final alvo = firstAtencao;
@@ -371,11 +373,9 @@ class _RelatorioFocusCard extends StatelessWidget {
                 },
               ),
               if (firstAtencao != null)
-                DashboardHomeActionChip(
-                  label: 'Ver retenção',
-                  accent: Theme.of(context).colorScheme.primary,
-                  isDark: isDark,
+                TextButton(
                   onPressed: onRetencao,
+                  child: const Text('Ver retenção'),
                 ),
             ],
           ),

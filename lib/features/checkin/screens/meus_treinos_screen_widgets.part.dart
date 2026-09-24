@@ -142,7 +142,6 @@ class _TrainingPlanCard extends StatelessWidget {
   final bool isDark;
   final bool starting;
   final bool confirming;
-  final bool primaryStart;
   final VoidCallback onStart;
   final VoidCallback? onConfirmPlano;
 
@@ -153,7 +152,6 @@ class _TrainingPlanCard extends StatelessWidget {
     this.onConfirmPlano,
     this.starting = false,
     this.confirming = false,
-    this.primaryStart = false,
   });
 
   @override
@@ -172,6 +170,8 @@ class _TrainingPlanCard extends StatelessWidget {
     final status = normalizeTreinoStatus(treino.status);
     final concluido = status == treinoStatusConcluido;
     final canStart = isTreinoDisponivelParaIniciar(treino) || concluido;
+    final showPrimaryStart =
+        !concluido && isTreinoDisponivelParaIniciar(treino);
     final prazoFim = TreinoAtribuicaoPrazo.parseIsoDate(treino.dataFim);
     void handleAction() {
       if (starting || confirming) return;
@@ -305,7 +305,7 @@ class _TrainingPlanCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child:
-                        primaryStart && !concluido
+                        showPrimaryStart
                             ? FxLiquidPrimaryButton(
                               label: 'Iniciar',
                               icon: Icons.play_arrow_rounded,

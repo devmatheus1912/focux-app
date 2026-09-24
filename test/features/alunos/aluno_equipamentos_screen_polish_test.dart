@@ -23,7 +23,8 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('equipamentosCountLabel'));
     expect(screen, contains('equipamentoFxIcon'));
-    expect(screen, contains('Icons.check_rounded'));
+    expect(screen, contains('Switch.adaptive'));
+    expect(screen, isNot(contains('Icons.check_rounded')));
     expect(screen, contains('ListView.builder'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('FxLiquidPrimaryButton'));

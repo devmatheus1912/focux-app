@@ -158,23 +158,19 @@ class _AlunoEquipamentosScreenState
               ),
             ],
           ),
-          bottomNavigationBar:
-              _dirty
-                  ? FxFormStickyBar(
-                    child: Semantics(
-                      button: true,
-                      enabled: !_saving,
-                      label:
-                          _saving ? 'Salvando equipamentos' : 'Salvar',
-                      child: FxLiquidPrimaryButton(
-                        label: 'Salvar',
-                        loading: _saving,
-                        loadingLabel: 'Salvando…',
-                        onPressed: _saving ? null : _save,
-                      ),
-                    ),
-                  )
-                  : null,
+          bottomNavigationBar: FxFormStickyBar(
+            child: Semantics(
+              button: true,
+              enabled: _dirty && !_saving,
+              label: _saving ? 'Salvando equipamentos' : 'Salvar',
+              child: FxLiquidPrimaryButton(
+                label: 'Salvar',
+                loading: _saving,
+                loadingLabel: 'Salvando…',
+                onPressed: (_dirty && !_saving) ? _save : null,
+              ),
+            ),
+          ),
           body: alunoAsync.when(
             loading:
                 () => const Padding(
@@ -248,14 +244,15 @@ class _AlunoEquipamentosScreenState
                                         ? primary
                                         : fxScreenMute(context),
                               ),
-                              trailing:
-                                  noneSelected
-                                      ? Icon(
-                                        Icons.check_rounded,
-                                        color: primary,
-                                        size: FxSettingsLayout.iconSize,
-                                      )
-                                      : null,
+                              trailing: Switch.adaptive(
+                                value: noneSelected,
+                                onChanged:
+                                    _saving
+                                        ? null
+                                        : (v) {
+                                          if (v) _clearRestriction();
+                                        },
+                              ),
                               accent: noneSelected ? primary : null,
                               onTap: _saving ? null : _clearRestriction,
                             ),
@@ -280,14 +277,13 @@ class _AlunoEquipamentosScreenState
                                       ? primary
                                       : fxScreenMute(context),
                             ),
-                            trailing:
-                                selected
-                                    ? Icon(
-                                      Icons.check_rounded,
-                                      color: primary,
-                                      size: FxSettingsLayout.iconSize,
-                                    )
-                                    : null,
+                            trailing: Switch.adaptive(
+                              value: selected,
+                              onChanged:
+                                  _saving
+                                      ? null
+                                      : (_) => _toggle(equipamento),
+                            ),
                             accent: selected ? primary : null,
                             onTap:
                                 _saving ? null : () => _toggle(equipamento),
