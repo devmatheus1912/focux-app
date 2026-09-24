@@ -1889,7 +1889,7 @@ Preferir estes; extrair para core antes de duplicar (pilar 70).
 
 | Símbolo | Caminho |
 |---|---|
-| `FocuxOfficialLogo`, `FocuxBrandTagline`, `BrandedAppIcon` | `lib/core/widgets/focux_official_logo.dart`, `focux_brand_tagline.dart`, `branded_app_identity.dart` |
+| `FocuxOfficialLogo`, `FocuxBrandTagline` | `lib/core/widgets/focux_official_logo.dart`, `focux_brand_tagline.dart` |
 | `FocuxBranding`, `FocuxBrandCopy`, `FocuxMicrocopy` | `lib/core/brand/` |
 
 ### Domínio Hoje (reusar só em outro S1)

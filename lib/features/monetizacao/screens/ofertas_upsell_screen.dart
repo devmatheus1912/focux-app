@@ -133,7 +133,11 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Ofertas para alunos',
-          subtitle: ofertaHubSubtitle(freshnessLabel),
+          subtitle: ofertaHubSubtitle(
+            freshnessLabel,
+            ativas: _loading ? null : _ofertas.where((o) => o.ativo).length,
+            pausadas: _loading ? null : _ofertas.where((o) => !o.ativo).length,
+          ),
           fallbackLocation: '/assinatura',
           actions: [
             ShellHeaderIconButton(
@@ -192,7 +196,10 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
   Widget _buildBody({required bool stickyVisible}) {
     final ativas = _ofertas.where((o) => o.ativo).toList();
     final pausadas = _ofertas.where((o) => !o.ativo).toList();
-    final sparseHint = ofertaSparseHint(count: _ofertas.length);
+    final sparseHint = ofertaSparseHint(
+      count: _ofertas.length,
+      ativas: ativas.length,
+    );
     final bottomPad = ofertaListBottomPad(stickyVisible: stickyVisible);
     final mute = fxScreenMute(context);
 

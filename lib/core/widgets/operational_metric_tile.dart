@@ -42,7 +42,11 @@ class OperationalMetricTile extends StatelessWidget {
     this.leadingIcon,
     this.emphasis = OperationalMetricEmphasis.normal,
     this.dense = false,
+    this.onInfo,
   });
+
+  /// Tile inteiro abre a explicação da métrica (glyph `?` ao lado do rótulo).
+  final VoidCallback? onInfo;
 
   final String label;
   final String value;
@@ -75,12 +79,26 @@ class OperationalMetricTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: FocuxHubTypography.chip(labelColor).copyWith(
-              letterSpacing: 0.4,
-              fontSize: dense ? 10 : null,
-            ),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  label.toUpperCase(),
+                  style: FocuxHubTypography.chip(labelColor).copyWith(
+                    letterSpacing: 0.4,
+                    fontSize: dense ? 10 : null,
+                  ),
+                ),
+              ),
+              if (onInfo != null) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.help_outline_rounded,
+                  size: dense ? 13 : 15,
+                  color: labelColor,
+                ),
+              ],
+            ],
           ),
           SizedBox(height: dense ? 2 : 4),
           Row(
@@ -117,8 +135,25 @@ class OperationalMetricTile extends StatelessWidget {
       ),
     );
 
-    if (semanticsLabel == null) return tile;
-    return Semantics(label: semanticsLabel, child: tile);
+    final info = onInfo;
+    final body =
+        info == null
+            ? tile
+            : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: info,
+                borderRadius: BorderRadius.circular(12),
+                child: tile,
+              ),
+            );
+    if (semanticsLabel == null && info == null) return body;
+    return Semantics(
+      label: semanticsLabel,
+      button: info != null,
+      hint: info != null ? 'Toque para entender a métrica' : null,
+      child: body,
+    );
   }
 }
 

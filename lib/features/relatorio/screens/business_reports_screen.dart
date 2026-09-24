@@ -100,6 +100,15 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
     goPersonalShellTab(context, '/financeiro');
   }
 
+  void _explicar(String titulo, String texto) {
+    showFxHelpSheet(
+      context,
+      title: titulo,
+      subtitle: 'Como ler este número',
+      tips: [FxHelpTip('A conta', texto)],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -130,16 +139,15 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                     context,
                     title: 'Receita recorrente',
                     subtitle:
-                        'MRR e retenção da base. Cobrança auto continua em Dunning.',
+                        'Quanto entra por mês e se está crescendo.',
                     tips: const [
                       FxHelpTip('Como calculamos', businessComoCalculamos),
+                      FxHelpTip(businessNdrLabel, businessNdrAjuda),
+                      FxHelpTip(businessArpaLabel, businessArpaAjuda),
+                      FxHelpTip(businessLtvLabel, businessLtvAjuda),
                       FxHelpTip(
-                        'NDR',
-                        'Acima de 100% a base cresce em reais.',
-                      ),
-                      FxHelpTip(
-                        'Cobrança',
-                        'A recuperação é a mesma do Dunning.',
+                        'Recuperação',
+                        'Cobranças automáticas que falharam e voltaram a ser pagas (Cobrança auto).',
                       ),
                     ],
                   );
@@ -196,9 +204,13 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
-                            label: 'NDR',
+                            label: businessNdrLabel,
                             value: '${snap.ndrPct.toStringAsFixed(1)}%',
                             hint: businessNdrStatus(snap.ndrPct),
+                            onInfo: () => _explicar(
+                              businessNdrLabel,
+                              businessNdrAjuda,
+                            ),
                             color: businessNdrRuim(snap.ndrPct)
                                 ? EagleTokens.bad
                                 : EagleTokens.moneyGreen,
@@ -238,11 +250,27 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           const DashboardSectionHeader(title: 'Mais'),
                           const SizedBox(height: TokensStrip.s2),
                           OperationalMetricTile(
-                            label: 'ARPA',
+                            label: businessArpaLabel,
                             value: businessMoneyLabel(snap.arpa),
-                            hint: 'LTV ${businessMoneyLabel(snap.ltvProxy)}',
+                            hint: 'Recebido no mês ÷ alunos ativos',
                             color: primary,
                             isDark: isDark,
+                            onInfo: () => _explicar(
+                              businessArpaLabel,
+                              businessArpaAjuda,
+                            ),
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                          OperationalMetricTile(
+                            label: businessLtvLabel,
+                            value: businessMoneyLabel(snap.ltvProxy),
+                            hint: 'Média por aluno × 12',
+                            color: primary,
+                            isDark: isDark,
+                            onInfo: () => _explicar(
+                              businessLtvLabel,
+                              businessLtvAjuda,
+                            ),
                           ),
                           const SizedBox(height: TokensStrip.s2),
                           OperationalMetricTile(

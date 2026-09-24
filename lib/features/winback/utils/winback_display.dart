@@ -1,3 +1,5 @@
+import '../../../core/utils/fx_utils.dart';
+
 const winbackTiposConhecidos = [
   'ALUNO_INATIVO_7D',
   'ALUNO_INATIVO_30D',
@@ -36,19 +38,9 @@ String winbackFxIcon(String? tipo) {
   }
 }
 
-String winbackWhenLabel(String enviadoEm) {
-  try {
-    final dt = DateTime.parse(enviadoEm).toLocal();
-    final day = dt.day.toString().padLeft(2, '0');
-    final month = dt.month.toString().padLeft(2, '0');
-    final hour = dt.hour.toString().padLeft(2, '0');
-    final minute = dt.minute.toString().padLeft(2, '0');
-    return '$day/$month $hour:$minute';
-  } catch (_) {
-    final raw = enviadoEm.trim();
-    if (raw.length >= 16) return raw.substring(0, 16);
-    return raw.isEmpty ? '—' : raw;
-  }
+String winbackWhenLabel(String enviadoEm, {DateTime? now}) {
+  final label = fxDateTimeLabelFromIso(enviadoEm, now: now);
+  return label.isEmpty ? '—' : label;
 }
 
 String winbackSubtitle({
@@ -62,7 +54,7 @@ String winbackSubtitle({
 }
 
 const winbackComoCalculamos =
-    'Push no 7º, 30º e 60º dia sem treino. Trial do personal não entra neste log.';
+    'Tentativa de push no 7º, 30º e 60º dia sem treino. Quem não tem o app ou desligou as notificações não recebe, mas o envio aparece aqui.';
 
 String winbackCountLabel(int count) {
   if (count <= 0) return 'Nenhum envio';

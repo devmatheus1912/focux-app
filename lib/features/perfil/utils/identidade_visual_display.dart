@@ -53,7 +53,7 @@ String identidadeHelpSalvarBody() =>
     'Confirme antes de gravar. Restaurar cores aplica o padrão Focux na hora.';
 
 String identidadeLogoSloganSubtitle() =>
-    'Logo no chrome depois do login. Slogan no home do aluno.';
+    'Logo no topo da home (sua e do aluno). Slogan na home do aluno.';
 
 String identidadeAlunoVisibilityLabel() => 'Visível no app do aluno';
 

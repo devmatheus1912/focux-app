@@ -3,8 +3,12 @@ import 'package:focux_app/features/relatorio/utils/business_reports_display.dart
 
 void main() {
   test('businessNdrStatus e PQL', () {
-    expect(businessNdrStatus(110), 'Expansão');
-    expect(businessNdrStatus(90), 'Contração');
+    expect(businessNdrStatus(110), 'Acima do mês passado');
+    expect(businessNdrStatus(100), 'Igual ao mês passado');
+    expect(businessNdrStatus(90), 'Abaixo do mês passado');
+    expect(businessNdrAjuda, contains('começo do mês'));
+    expect(businessArpaAjuda, contains('alunos ativos'));
+    expect(businessLtvAjuda, contains('× 12'));
     expect(businessNdrRuim(99.9), isTrue);
     expect(businessPqlLabel('EARLY'), 'Início');
     expect(businessPqlLabel('NURTURE'), 'Nutrir');

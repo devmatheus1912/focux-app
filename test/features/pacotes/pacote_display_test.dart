@@ -59,4 +59,9 @@ void main() {
     );
     expect(pacoteDesativarConfirmLabel(), 'Desativar');
   });
+
+  test('pacoteCriadoMensagem não promete página fora do ar', () {
+    expect(pacoteCriadoMensagem(paginaNoAr: true), contains('na sua página'));
+    expect(pacoteCriadoMensagem(paginaNoAr: false), contains('Estúdio'));
+  });
 }

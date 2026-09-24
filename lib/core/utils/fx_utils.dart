@@ -101,3 +101,25 @@ String fxDateShort(DateTime d) =>
 
 /// "Mai 2026"
 String fxMonthYear(DateTime d) => '${_monthsShort[d.month - 1]} ${d.year}';
+
+/// "hoje às 18:39" · "ontem às 09:05" · "12/09 às 18:39" · "12/09/2025 às 18:39"
+String fxDateTimeLabel(DateTime d, {DateTime? now}) {
+  final ref = now ?? DateTime.now();
+  final hm =
+      '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+  final day = DateTime(d.year, d.month, d.day);
+  final today = DateTime(ref.year, ref.month, ref.day);
+  final diffDays = today.difference(day).inDays;
+  if (diffDays == 0) return 'hoje às $hm';
+  if (diffDays == 1) return 'ontem às $hm';
+  final date =
+      d.year == ref.year ? fxDateShort(d) : '${fxDateShort(d)}/${d.year}';
+  return '$date às $hm';
+}
+
+/// ISO do backend → [fxDateTimeLabel]; vazio se não parsear.
+String fxDateTimeLabelFromIso(String? raw, {DateTime? now}) {
+  final parsed = DateTime.tryParse(raw ?? '');
+  if (parsed == null) return '';
+  return fxDateTimeLabel(parsed.isUtc ? parsed.toLocal() : parsed, now: now);
+}

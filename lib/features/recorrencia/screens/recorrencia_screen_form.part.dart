@@ -81,6 +81,12 @@ extension on _RecorrenciaScreenState {
         ),
       );
       if (ok != true) return;
+      final escolhido = alunos.where((a) => a.id == alunoId).firstOrNull;
+      if (escolhido == null || escolhido.email.trim().isEmpty) {
+        if (!mounted) return;
+        FeedbackHelper.showWarn(context, recorrenciaSemEmailAviso);
+        return;
+      }
 
       final r = await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
         alunoId: alunoId,

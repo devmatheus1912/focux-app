@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -45,6 +46,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   var _loading = true;
   String? _erro;
   String? _slug;
+  var _paginaNoAr = true;
   DateTime? _fetchedAt;
   var _query = '';
   var _chip = PacoteChip.todos;
@@ -110,6 +112,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
       setState(() {
         _pacotes = home.pacotes;
         _slug = home.perfil?.slug;
+        _paginaNoAr = home.perfil?.paginaNoAr ?? true;
         _page = home.page;
         _hasMore = home.hasNext;
         _total = home.total;
@@ -147,11 +150,24 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         _total = home.total;
         _carregandoMais = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _carregandoMais = false);
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
+
+  void _limparFiltros() {
+    final chipMudou = _chip != PacoteChip.todos;
+    if (chipMudou) setState(() => _chip = PacoteChip.todos);
+    if (_query.isNotEmpty || _searchCtrl.text.isNotEmpty) {
+      _clearQuery();
+    } else if (chipMudou) {
+      _carregar();
+    }
+  }
+
+  void _abrirEstudioPagina() => context.push('/perfil/landing-editor');
 
   Future<void> _novoPacote() async {
     HapticFeedback.selectionClick();
@@ -160,7 +176,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
       repo: ref.read(pacoteRepositoryProvider),
     );
     if (!mounted || !created) return;
-    FeedbackHelper.showSuccess(context, 'Plano criado!');
+    FeedbackHelper.showSuccess(context, pacoteCriadoMensagem(paginaNoAr: _paginaNoAr));
     await _carregar(force: true);
   }
 
@@ -386,8 +402,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final filtered =
         _query.trim().isNotEmpty || _chip != PacoteChip.todos;
-    // Landing/link card saiu do fold — Copiar/Abrir ficam em Mais.
-    const linkCount = 0;
+    final linkCount = _paginaNoAr ? 0 : 1;
     final overviewCount = visible.isNotEmpty ? 2 : 0;
     final base = 1 + linkCount + overviewCount;
     final itemCount =
@@ -408,6 +423,17 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         itemCount: itemCount,
         itemBuilder: (context, index) {
           if (index == 0) return const PacotesComoFuncionaCard();
+          if (linkCount == 1 && index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+              child: FxSatelliteListTile(
+                title: pacotePaginaForaDoArTitulo,
+                subtitle: const Text(pacotePaginaForaDoArTexto),
+                accent: primary,
+                onTap: _abrirEstudioPagina,
+              ),
+            );
+          }
           if (visible.isNotEmpty) {
             final overviewIndex = 1 + linkCount;
             if (index == overviewIndex) {
@@ -438,7 +464,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                     subtitle: 'Ajuste a busca ou o filtro.',
                     action: FxEmptyAction(
                       label: 'Limpar filtros',
-                      onTap: _clearQuery,
+                      onTap: _limparFiltros,
                     ),
                   )
                 : const PacotesEmptyState();

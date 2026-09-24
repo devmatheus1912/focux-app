@@ -1,3 +1,4 @@
+import '../../../core/utils/fx_utils.dart';
 import '../data/nps_repository.dart';
 
 String npsClassify(int score) {
@@ -29,6 +30,17 @@ String npsNormalizeFiltro(String? raw) {
 }
 
 bool npsHasAluno(NpsItem item) => item.alunoId != null && item.alunoId! > 0;
+
+/// "Promotor · Ana · hoje às 18:39" — nome só quando o título é o comentário.
+String npsItemSubtitle(NpsItem item, {DateTime? now}) {
+  final parts = <String>[npsClassify(item.score)];
+  final temComentario = item.comentario?.trim().isNotEmpty == true;
+  final nome = item.alunoNome?.trim();
+  if (temComentario && nome != null && nome.isNotEmpty) parts.add(nome);
+  final quando = fxDateTimeLabelFromIso(item.criadoEm, now: now);
+  if (quando.isNotEmpty) parts.add(quando);
+  return parts.join(' · ');
+}
 
 List<NpsItem> npsItemsForFiltro(List<NpsItem> items, String? filtro) {
   if (npsNormalizeFiltro(filtro) == npsFiltroDetratores) {

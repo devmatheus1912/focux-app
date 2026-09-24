@@ -31,8 +31,33 @@ String recorrenciaSubtitle({
   final label = recorrenciaStatusLabel(status);
   final prox = proximaCobranca?.trim();
   if (prox == null || prox.isEmpty) return label;
-  return '$label · Próx: $prox';
+  return '$label · Próxima: ${recorrenciaProximaValue(prox)}';
 }
+
+const recorrenciaSemEmailAviso =
+    'Cadastre o e-mail desse aluno antes: o Mercado Pago exige para enviar a autorização.';
+
+const recorrenciaAjudaSubtitulo =
+    'O aluno autoriza uma vez no Mercado Pago e é cobrado todo mês no cartão.';
+
+const recorrenciaAjudaTips = <(String, String)>[
+  (
+    'Como funciona',
+    'Você cria a assinatura, o aluno abre o link e autoriza. Até autorizar, ela fica Pendente.',
+  ),
+  (
+    'E as mensalidades?',
+    'Cada cobrança paga pelo cartão vira uma mensalidade paga automaticamente. Não crie as duas para o mesmo aluno e mês.',
+  ),
+  (
+    'Quando usar',
+    'Para quem paga no cartão todo mês. Quem paga por PIX ou dinheiro fica só em Mensalidades.',
+  ),
+  (
+    'Precisa de',
+    'E-mail do aluno cadastrado: o Mercado Pago exige para enviar a autorização.',
+  ),
+];
 
 String recorrenciaValorLabel(FxMoney valor) => valor.format();
 

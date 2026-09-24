@@ -4,10 +4,11 @@ import 'package:focux_app/features/alunos/utils/aluno360_evolucao_inteligente_lo
 
 void main() {
   group('mfaDisableOtpSentMessage', () {
-    test('relay Apple explica Mail da conta', () {
+    test('relay Apple não promete entrega e aponta saída', () {
       final msg = mfaDisableOtpSentMessage('a***@privaterelay.appleid.com');
       expect(msg, contains('e-mail oculto da Apple'));
-      expect(msg, contains('Mail da conta Apple'));
+      expect(msg, startsWith('Pedimos o envio'));
+      expect(msg, contains('suporte'));
     });
 
     test('e-mail comum usa máscara direta', () {

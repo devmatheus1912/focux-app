@@ -24,4 +24,22 @@ void main() {
     expect(npsComoCalculamos, contains('Promotores'));
     expect(npsComoCalculamos, contains('catálogo'));
   });
+
+  test('subtítulo formata data do backend sem ISO cru', () {
+    final now = DateTime(2026, 9, 24, 20);
+    final hoje = NpsItem(
+      id: 1,
+      score: 10,
+      criadoEm: '2026-09-24T18:39:12.123456',
+      comentario: 'Top',
+      alunoNome: 'Ana',
+    );
+    expect(npsItemSubtitle(hoje, now: now), 'Promotor · Ana · hoje às 18:39');
+
+    final antigo = NpsItem(id: 2, score: 5, criadoEm: '2025-12-01T07:05:00');
+    expect(npsItemSubtitle(antigo, now: now), 'Detrator · 01/12/2025 às 07:05');
+
+    final invalido = NpsItem(id: 3, score: 8, criadoEm: '');
+    expect(npsItemSubtitle(invalido, now: now), 'Neutro');
+  });
 }

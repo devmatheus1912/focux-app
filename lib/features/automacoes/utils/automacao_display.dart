@@ -18,12 +18,8 @@ String automacaoTriggerLabel(String raw) {
     case 'NOVO_ALUNO':
     case 'ALUNO_CRIADO':
       return 'Novo aluno';
-    case 'CHECKIN':
-      return 'Check-in';
-    case 'INADIMPLENCIA':
-      return 'Inadimplência';
-    case 'ANIVERSARIO':
-      return 'Aniversário';
+    case 'DIAS_SEM_CHECKIN':
+      return '4 dias sem treinar';
     default:
       final t = raw.trim();
       return t.isEmpty ? 'Gatilho' : t;

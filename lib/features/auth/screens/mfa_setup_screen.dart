@@ -393,7 +393,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                     ] else ...[
                       Text(
                         _status?.emailOtpPreferred == true
-                            ? 'Conta Apple/Google: use o código do autenticador + código enviado ao e-mail (ou senha, se tiver).'
+                            ? 'Conta Apple/Google: digite o código do autenticador (ou um de recuperação) e o código que pedimos por e-mail.'
                             : 'Confirme com senha (ou código por e-mail) e o autenticador.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -402,19 +402,21 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                         controller: _disableCodeController,
                         enabled: !_busy,
                         decoration: const InputDecoration(
-                          labelText: 'Código MFA ou recovery',
+                          labelText: 'Código do autenticador ou de recuperação',
                         ),
                       ),
                       const SizedBox(height: 8),
-                      TextField(
-                        controller: _disablePasswordController,
-                        obscureText: true,
-                        enabled: !_busy,
-                        decoration: const InputDecoration(
-                          labelText: 'Senha (se a conta tiver)',
+                      if (_status?.emailOtpPreferred != true) ...[
+                        TextField(
+                          controller: _disablePasswordController,
+                          obscureText: true,
+                          enabled: !_busy,
+                          decoration: const InputDecoration(
+                            labelText: 'Senha da conta',
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
+                      ],
                       TextField(
                         controller: _disableEmailOtpController,
                         keyboardType: TextInputType.number,
@@ -424,7 +426,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                           labelText: 'Código do e-mail',
                           counterText: '',
                           helperText: _emailOtpSent
-                              ? 'Enviado — digite os 6 dígitos'
+                              ? 'Pedido — digite os 6 dígitos quando chegar'
                               : 'Sem senha? Peça o código no e-mail da conta',
                         ),
                         inputFormatters: [

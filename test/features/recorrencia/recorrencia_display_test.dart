@@ -21,8 +21,9 @@ void main() {
   test('recorrenciaSubtitle e valor', () {
     expect(
       recorrenciaSubtitle(status: 'ATIVA', proximaCobranca: '2026-10-01'),
-      'Ativa · Próx: 2026-10-01',
+      'Ativa · Próxima: 01/10',
     );
+    expect(recorrenciaAjudaTips.map((t) => t.$1), contains('E as mensalidades?'));
     expect(recorrenciaSubtitle(status: 'PENDENTE'), 'Pendente');
     expect(recorrenciaValorLabel(FxMoney.parse(199)), 'R\$ 199,00');
   });

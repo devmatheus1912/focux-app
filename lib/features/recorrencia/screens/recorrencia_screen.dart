@@ -20,6 +20,7 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
@@ -149,7 +150,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
-      label: 'Recorrência MP',
+      label: 'Cobrança recorrente',
       child: PopScope(
         canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {
@@ -165,7 +166,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
-            title: 'Recorrência MP',
+            title: 'Cobrança recorrente',
             subtitle: FxHubFreshness.joinCount(
               recorrenciaCountLabel(_loading ? 0 : _total),
               _loading ? null : FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -174,6 +175,20 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
               FxKeyboardDismissScope.dismiss();
               safePopOrGo(context, '/financeiro');
             },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'O que é cobrança recorrente',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Cobrança recorrente',
+                  subtitle: recorrenciaAjudaSubtitulo,
+                  tips: [
+                    for (final tip in recorrenciaAjudaTips)
+                      FxHelpTip(tip.$1, tip.$2),
+                  ],
+                ),
+              ),
+            ],
           ),
           body: _loading
               ? const Padding(

@@ -390,7 +390,7 @@ class _NpsTile extends StatelessWidget {
               ? item.comentario!.trim()
               : (item.alunoNome ?? 'Sem comentário'),
       titleCase: false,
-      subtitle: Text('${npsClassify(item.score)} · ${item.criadoEm}'),
+      subtitle: Text(npsItemSubtitle(item)),
       accent: detrator ? EagleTokens.bad : null,
       trailing: Text(
         '${item.score}',

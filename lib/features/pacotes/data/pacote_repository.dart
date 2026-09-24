@@ -43,11 +43,15 @@ class PacotesHomePerfil {
   final String? slug;
   final String? nome;
 
-  const PacotesHomePerfil({this.slug, this.nome});
+  /// `/p/{slug}` serve HTML. Backend antigo não manda → assume no ar.
+  final bool paginaNoAr;
+
+  const PacotesHomePerfil({this.slug, this.nome, this.paginaNoAr = true});
 
   factory PacotesHomePerfil.fromJson(Map<String, dynamic> j) => PacotesHomePerfil(
     slug: j['slug'] as String?,
     nome: j['nome'] as String?,
+    paginaNoAr: j['paginaNoAr'] as bool? ?? true,
   );
 }
 

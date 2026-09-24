@@ -81,9 +81,7 @@ class UpsellRepository {
         'valor': FxMoney.parse(valor).wire,
         'tipoGatilho': tipoGatilho,
       },
-      options: ApiClient.idempotent(
-        'upsell-create-$titulo-$valor-$tipoGatilho',
-      ),
+      options: ApiClient.idempotent('upsell-create'),
     );
     return OfertaUpsell.fromJson(r.data as Map<String, dynamic>);
   }

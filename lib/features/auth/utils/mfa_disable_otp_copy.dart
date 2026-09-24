@@ -1,14 +1,15 @@
 import '../../perfil/utils/brand_public_identity.dart';
 
-/// Copy pós-envio do OTP de desativar MFA.
+/// Copy pós-envio do OTP de desativar MFA — "pedimos o envio", nunca "chegou".
 String mfaDisableOtpSentMessage(String? emailMascarado) {
   final masked = (emailMascarado ?? '').trim();
   if (masked.isEmpty) {
-    return 'Código enviado para o e-mail da conta. Confira também spam/lixo eletrônico.';
+    return 'Pedimos o envio do código para o e-mail da conta. Confira também spam/lixo eletrônico.';
   }
   if (isPrivateRelayEmail(masked)) {
-    return 'Código enviado para o e-mail oculto da Apple ($masked). '
-        'Abra o Mail da conta Apple (não só o Gmail) e confira spam.';
+    return 'Pedimos o envio para o e-mail oculto da Apple ($masked). '
+        'Ele chega no e-mail real da sua conta Apple, mas a Apple às vezes bloqueia. '
+        'Se não chegar em 2 minutos, fale com o suporte pelo app.';
   }
-  return 'Código enviado para $masked. Confira também spam/lixo eletrônico.';
+  return 'Pedimos o envio para $masked. Confira também spam/lixo eletrônico.';
 }

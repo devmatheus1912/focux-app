@@ -150,7 +150,7 @@ class _NpsCatalogSheetState extends State<_NpsCatalogSheet> {
                         ? item.comentario!.trim()
                         : (item.alunoNome ?? 'Sem comentário'),
                 titleCase: false,
-            subtitle: Text('${npsClassify(item.score)} · ${item.criadoEm}'),
+                subtitle: Text(npsItemSubtitle(item)),
                 onTap:
                     npsHasAluno(item)
                         ? () {

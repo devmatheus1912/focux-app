@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/a11y_announce.dart';
@@ -11,6 +12,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_celebration_overlay.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_execution_chrome.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
@@ -28,6 +30,8 @@ import '../data/checkin_repository.dart';
 import '../data/meus_treinos_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../utils/checkin_sessao_aberta.dart';
+import '../widgets/checkin_sessao_aberta_state.dart';
 import '../utils/checkin_serie_input.dart';
 import '../widgets/checkin_exercise_widgets.dart';
 import '../widgets/checkin_execucao_sheets.dart';
@@ -49,6 +53,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   ExecucaoTreino? _execucao;
   bool _loading = true;
   String? _loadError;
+  CheckinSessaoAberta? _sessaoAberta;
+  bool _descartandoSessao = false;
   bool _concluindo = false;
   bool _iniciarInFlight = false;
   Timer? _timer;
@@ -103,6 +109,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     setState(() {
       _loading = true;
       _loadError = null;
+      _sessaoAberta = null;
     });
     try {
       final execucao = await ref
@@ -134,16 +141,11 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       });
     } catch (e) {
       if (!mounted) return;
-      final msg = friendlyError(e);
-      final sessaoAberta =
-          msg.toLowerCase().contains('treino em aberto') ||
-          msg.toLowerCase().contains('descarte antes');
+      final sessao = CheckinSessaoAberta.fromError(e);
       setState(() {
         _loading = false;
-        _loadError =
-            sessaoAberta
-                ? 'Você já tem um treino em andamento. Volte e retome ou descarte antes de iniciar outro.'
-                : msg;
+        _sessaoAberta = sessao;
+        _loadError = sessao == null ? friendlyError(e) : null;
       });
     } finally {
       _iniciarInFlight = false;
@@ -447,6 +449,52 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     );
   }
 
+  void _invalidateSessaoCaches() {
+    MeusTreinosMemCache.clear();
+    EvolucaoHomeClientCache.clear();
+    Aluno360ClientCache.clear();
+    ref.invalidate(historicoCheckinProvider);
+    ref.invalidate(meusTreinosProvider);
+    ref.invalidate(alunoDashboardHomeProvider);
+  }
+
+  void _continuarSessaoAberta() {
+    final treinoId = _sessaoAberta?.treinoId;
+    if (treinoId == null) {
+      safePopOrGo(context, '/checkin/treinos');
+      return;
+    }
+    context.pushReplacement('/checkin/executar', extra: treinoId);
+  }
+
+  Future<void> _descartarSessaoAberta() async {
+    final execucaoId = _sessaoAberta?.execucaoId;
+    if (execucaoId == null) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Descartar o treino aberto?',
+      message: 'O progresso dessa sessão não será salvo.',
+      confirmLabel: 'Descartar e iniciar',
+      icon: Icons.delete_outline_rounded,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    setState(() => _descartandoSessao = true);
+    try {
+      await ref.read(checkinRepositoryProvider).descartar(execucaoId);
+      _invalidateSessaoCaches();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _descartandoSessao = false);
+        FeedbackHelper.showError(context, friendlyError(e));
+      }
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _descartandoSessao = false);
+    await _iniciar();
+  }
+
   Future<void> _sair() async {
     FxKeyboardDismissScope.dismiss();
     final exercicios = _execucao?.exercicios ?? [];
@@ -468,12 +516,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         if (id != null) {
           try {
             await ref.read(checkinRepositoryProvider).descartar(id);
-            MeusTreinosMemCache.clear();
-            EvolucaoHomeClientCache.clear();
-            Aluno360ClientCache.clear();
-            ref.invalidate(historicoCheckinProvider);
-            ref.invalidate(meusTreinosProvider);
-            ref.invalidate(alunoDashboardHomeProvider);
+            _invalidateSessaoCaches();
           } catch (e) {
             if (mounted) {
               FeedbackHelper.showError(context, friendlyError(e));
@@ -543,6 +586,22 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
                 style: TextStyle(color: mute, fontWeight: FontWeight.w600),
               ),
             ],
+          ),
+        ),
+      );
+    }
+
+    final sessaoAberta = _sessaoAberta;
+    if (sessaoAberta != null) {
+      return _executionShell(
+        body: SafeArea(
+          child: CheckinSessaoAbertaState(
+            sessao: sessaoAberta,
+            descartando: _descartandoSessao,
+            onContinuar: _continuarSessaoAberta,
+            onDescartar:
+                sessaoAberta.execucaoId == null ? null : _descartarSessaoAberta,
+            onVoltar: () => safePopOrGo(context, '/checkin/treinos'),
           ),
         ),
       );

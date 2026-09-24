@@ -66,7 +66,9 @@ class ApiClient {
             final scope = options.extra[_idempotencyScopeKey];
             options.headers['Idempotency-Key'] =
                 scope is String && scope.isNotEmpty
-                    ? _idempotencyKeyForScope(scope)
+                    ? _idempotencyKeyForScope(
+                      '$scope#${payloadFingerprint(options.data)}',
+                    )
                     : _newIdempotencyKey();
           }
           handler.next(options);
@@ -322,6 +324,24 @@ class ApiClient {
   }
 
   static void resetIdempotencyScopes() => _scopedKeys.clear();
+
+  /// Mesmo escopo + payload diferente precisa de chave nova: o backend
+  /// rejeita (422) chave reutilizada com corpo diferente.
+  @visibleForTesting
+  static String payloadFingerprint(Object? data) {
+    if (data == null) return '-';
+    if (data is FormData) return 'form';
+    return _canonical(data).hashCode.toRadixString(36);
+  }
+
+  static String _canonical(Object? value) {
+    if (value is Map) {
+      final keys = value.keys.map((k) => k.toString()).toList()..sort();
+      return '{${keys.map((k) => '$k:${_canonical(value[k])}').join(',')}}';
+    }
+    if (value is Iterable) return '[${value.map(_canonical).join(',')}]';
+    return '$value';
+  }
 
   static bool _shouldCachePath(String path) {
     if (_isSensitiveDiskCachePath(path)) return false;

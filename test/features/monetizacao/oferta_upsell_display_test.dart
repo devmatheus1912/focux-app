@@ -28,18 +28,21 @@ void main() {
     expect(ofertaSectionTitle(ativo: false), 'Pausadas');
   });
 
-  test('ofertaHubSubtitle junta freshness', () {
-    expect(ofertaHubSubtitle(null), 'Ofertas ativas');
+  test('ofertaHubSubtitle conta ativas e pausadas de verdade', () {
+    expect(ofertaHubSubtitle(null), 'Ofertas');
     expect(
-      ofertaHubSubtitle('há 1 min'),
-      'Ofertas ativas · há 1 min',
+      ofertaHubSubtitle('há 1 min', ativas: 2, pausadas: 1),
+      '2 ativas · 1 pausada · há 1 min',
     );
+    expect(ofertaHubSubtitle(null, ativas: 0, pausadas: 1), '1 pausada');
+    expect(ofertaHubSubtitle(null, ativas: 0, pausadas: 0), 'Nenhuma oferta');
   });
 
   test('sticky e sparse hint', () {
     expect(ofertaStickyCtaLabel(), 'Nova oferta');
     expect(ofertaSparseHint(count: 0), isNull);
     expect(ofertaSparseHint(count: 1), contains('Só uma'));
+    expect(ofertaSparseHint(count: 1, ativas: 0), contains('pausadas'));
     expect(ofertaSparseHint(count: 2), contains('Poucas ofertas'));
     expect(ofertaSparseHint(count: 3), isNull);
     expect(ofertaListBottomPad(stickyVisible: true), 8);

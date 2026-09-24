@@ -251,7 +251,7 @@ class _WhiteLabelSettingsScreenState
                           FxSettingsGroup(
                             header: 'App do aluno',
                             caption:
-                                'Login, splash e cards sociais usam só a sua marca.',
+                                'Depois do login o aluno vê a sua marca. Tela de login e ícone da loja continuam Focux.',
                             children: [
                               FxSettingsTile(
                                 icon: Icons.visibility_off_outlined,

@@ -56,3 +56,13 @@ String pacoteDesativarConfirmMessage(String titulo) {
 }
 
 String pacoteDesativarConfirmLabel() => 'Desativar';
+
+const pacotePaginaForaDoArTitulo = 'Sua página ainda não está no ar';
+
+const pacotePaginaForaDoArTexto =
+    'Os planos só aparecem para o aluno depois que você gera a página no Estúdio. Toque para abrir.';
+
+String pacoteCriadoMensagem({required bool paginaNoAr}) =>
+    paginaNoAr
+        ? 'Plano criado e já na sua página.'
+        : 'Plano criado. Gere sua página no Estúdio para ele aparecer.';

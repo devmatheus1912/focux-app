@@ -58,6 +58,23 @@ void main() {
     expect(adapter.keys[0], adapter.keys[1]);
   });
 
+  test('mesmo escopo com payload diferente ganha chave nova', () async {
+    final options = ApiClient.idempotent('upsell-patch-3');
+    await client.dio.patch('/api/upsell/ofertas/3', data: {'titulo': 'A'}, options: options);
+    await client.dio.patch('/api/upsell/ofertas/3', data: {'titulo': 'B'}, options: options);
+    await client.dio.patch('/api/upsell/ofertas/3', data: {'titulo': 'B'}, options: options);
+
+    expect(adapter.keys[0], isNot(adapter.keys[1]));
+    expect(adapter.keys[1], adapter.keys[2]);
+  });
+
+  test('fingerprint ignora ordem das chaves do payload', () {
+    expect(
+      ApiClient.payloadFingerprint({'a': 1, 'b': [2, 3]}),
+      ApiClient.payloadFingerprint({'b': [2, 3], 'a': 1}),
+    );
+  });
+
   test('escopos diferentes nao colidem', () async {
     await client.dio.put(
       '/api/financeiro/mensalidades/7/pagar',

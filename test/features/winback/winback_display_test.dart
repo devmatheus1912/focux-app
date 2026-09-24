@@ -23,7 +23,11 @@ void main() {
     expect(winbackFxIcon('ALUNO_INATIVO_7D'), 'bell');
     expect(winbackFxIcon('ALUNO_INATIVO_30D'), 'trend');
     expect(winbackFxIcon('ALUNO_INATIVO_60D'), 'alert-triangle');
-    expect(winbackWhenLabel('2026-09-01T14:05:00'), '01/09 14:05');
+    expect(
+      winbackWhenLabel('2026-09-01T14:05:00', now: DateTime(2026, 9, 24)),
+      '01/09 às 14:05',
+    );
+    expect(winbackComoCalculamos, contains('não recebe'));
     expect(winbackWhenLabel(''), '—');
   });
 
