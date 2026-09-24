@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/widgets/skeleton_loader.dart';
+import '../../../../core/widgets/fx_cached_network_image.dart';
 import '../../data/exercicio_repository.dart';
 import '../../services/biblioteca_media_config.dart';
 
@@ -113,24 +113,14 @@ class _ExerciseMediaThumbState extends State<ExerciseMediaThumb>
     if (url != null && url.isNotEmpty) {
       thumb = ClipRRect(
         borderRadius: BorderRadius.circular(widget.radius),
-        child: Image.network(
-          url,
+        child: FxCachedNetworkImage(
+          imageUrl: url,
           width: widget.size,
           height: widget.size,
           fit: BoxFit.cover,
-          gaplessPlayback: true,
-          cacheWidth: (widget.size * 2).round(),
-          cacheHeight: (widget.size * 2).round(),
+          memCacheWidth: (widget.size * 2).round(),
           errorBuilder:
               (_, __, ___) => _fallback(primary, missing: widget.expectMedia),
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return SkeletonLoader(
-              width: widget.size,
-              height: widget.size,
-              borderRadius: widget.radius,
-            );
-          },
         ),
       );
     } else {

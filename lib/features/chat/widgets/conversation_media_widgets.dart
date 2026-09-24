@@ -5,6 +5,7 @@ import 'package:just_audio/just_audio.dart';
 
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/chat_repository.dart';
@@ -49,13 +50,12 @@ class ConversationMediaPreview extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             child: Stack(
               children: [
-                Image.network(
-                  url,
+                FxCachedNetworkImage(
+                  imageUrl: url,
                   height: previewHeight,
                   width: previewWidth,
                   fit: BoxFit.cover,
-                  cacheWidth: (previewWidth * 2).round(),
-                  cacheHeight: (previewHeight * 2).round(),
+                  memCacheWidth: (previewWidth * 2).round(),
                   filterQuality: FilterQuality.medium,
                   errorBuilder:
                       (_, __, ___) => Container(
@@ -270,9 +270,12 @@ class ConversationMediaGalleryTile extends StatelessWidget {
                 color: primary.withValues(alpha: 0.10),
                 child:
                     isImage && url != null && url.isNotEmpty
-                        ? Image.network(
-                          url,
+                        ? FxCachedNetworkImage(
+                          imageUrl: url,
+                          width: 54,
+                          height: 54,
                           fit: BoxFit.cover,
+                          memCacheWidth: 108,
                           errorBuilder:
                               (_, __, ___) => Icon(
                                 Icons.broken_image_outlined,

@@ -225,8 +225,8 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                   child: Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                      child: Image.network(
-                        url,
+                      child: FxCachedNetworkImage(
+                        imageUrl: url,
                         fit: BoxFit.contain,
                         errorBuilder:
                             (_, __, ___) => Container(

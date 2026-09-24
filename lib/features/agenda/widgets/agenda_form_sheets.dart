@@ -7,6 +7,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -35,9 +36,12 @@ class _AgendaAlunoAvatar extends StatelessWidget {
         color: BrandPalette.soft(primary, dark: chrome.isDark),
         child:
             hasPhoto
-                ? Image.network(
-                  foto,
+                ? FxCachedNetworkImage(
+                  imageUrl: foto,
+                  width: 42,
+                  height: 42,
                   fit: BoxFit.cover,
+                  memCacheWidth: 84,
                   errorBuilder: (_, _, _) => _fallback(primary, initials),
                 )
                 : _fallback(primary, initials),

@@ -20,12 +20,14 @@ import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
 import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
 import '../widgets/fx_route_chrome.dart';
+import 'fx_lazy_shell_container.dart';
 
 /// Aluno shell and push routes.
 List<RouteBase> buildAlunoRoutes() {
   return [
       // ── Aluno (student) dashboard — not part of personal trainer shell ────────
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        navigatorContainerBuilder: fxLazyShellNavigatorContainer,
         builder:
             (context, state, navigationShell) =>
                 AlunoShell(navigationShell: navigationShell),

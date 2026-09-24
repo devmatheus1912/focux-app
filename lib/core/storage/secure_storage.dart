@@ -74,6 +74,17 @@ class SecureStorage {
     _memRequiresLoaded = false;
   }
 
+  /// Prefetch Keychain → RAM (token/role/refresh/requires) em paralelo ao boot.
+  static Future<void> warmSessionCache() async {
+    if (kIsWeb) return;
+    await Future.wait<void>([
+      getToken().then((_) {}),
+      getRole().then((_) {}),
+      getRefreshToken().then((_) {}),
+      getRequiresPasswordChange().then((_) {}),
+    ]);
+  }
+
   static Future<void> saveToken(String token) async {
     if (kIsWeb) {
       _webAccessToken = token;

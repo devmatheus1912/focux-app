@@ -63,6 +63,10 @@ void main() {
       reportUncaughtZoneError(error, stack);
     }
     // HomeWidget + FCM: defer pós-primeiro-frame (ver FocuxApp._bootstrapDeferredServices).
+    // JWT/role: aquecer Keychain cedo — Dio/redirect batem RAM cache.
+    if (!kIsWeb) {
+      unawaited(SecureStorage.warmSessionCache());
+    }
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
