@@ -7,12 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/api_error.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/safe_external_launch.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -35,30 +35,6 @@ import 'pix_qr_display.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
-
-bool _mensagemIndicaCarteiraSemChave(String msg) {
-  final lower = msg.toLowerCase();
-  if (lower.contains('informe a chave') || lower.contains('sem chave')) {
-    return true;
-  }
-  if (lower.contains('cadastre') && lower.contains('pix')) return true;
-  return lower.contains('chave') &&
-      (lower.contains('pix') ||
-          lower.contains('carteira') ||
-          lower.contains('wallet'));
-}
-
-/// Conta Mercado Pago do collector sem chave PIX (não é carteira Focux).
-bool _mensagemIndicaMpSemChavePix(String msg) {
-  final lower = msg.toLowerCase();
-  return lower.contains('without key') ||
-      lower.contains('13253') ||
-      lower.contains('chave pix ativa') ||
-      (lower.contains('mercado pago') && lower.contains('chave pix'));
-}
-
-const _mpPixKeyHelpUrl =
-    'https://www.mercadopago.com.br/ajuda/cadastrar-chave-pix_11801';
 
 Widget _pixQrVisual({
   required String pixCopiaECola,
@@ -185,7 +161,8 @@ Future<void> mostrarPixMensalidade({
   var carregando = true;
   String? erro;
   var precisaCarteira = false;
-  var precisaMpPix = false;
+  var avisando = false;
+  var avisado = false;
   var loadToken = 0;
   var loadStarted = false;
 
@@ -195,10 +172,8 @@ Future<void> mostrarPixMensalidade({
       carregando = true;
       erro = null;
       precisaCarteira = false;
-      precisaMpPix = false;
     });
     try {
-      // BE gera via Mercado Pago; carteira do personal não bloqueia a emissão.
       final repo = mensalidadeRepo(ref);
       final p = asAluno ? await repo.gerarPixAluno(id) : await repo.gerarPix(id);
       if (token != loadToken) return;
@@ -207,8 +182,7 @@ Future<void> mostrarPixMensalidade({
         qrCodeBase64: p.qrCodeBase64,
       )) {
         setDialogState(() {
-          erro =
-              'Mercado Pago não retornou QR/código PIX. Confira o token MP e o e-mail do aluno.';
+          erro = pixSemCodigoErro;
           carregando = false;
         });
         return;
@@ -219,15 +193,30 @@ Future<void> mostrarPixMensalidade({
       });
     } catch (e) {
       if (token != loadToken) return;
-      final msg = friendlyError(e);
-      final mpPix = _mensagemIndicaMpSemChavePix(msg);
       setDialogState(() {
-        erro = msg;
-        precisaMpPix = mpPix;
+        erro = friendlyError(e);
         precisaCarteira =
-            !asAluno && !mpPix && _mensagemIndicaCarteiraSemChave(msg);
+            !asAluno && ApiError.from(e)?.codigo == pixChaveAusenteCodigo;
         carregando = false;
       });
+    }
+  }
+
+  Future<void> avisarPagamento(
+    BuildContext ctx,
+    void Function(void Function()) setDialogState,
+  ) async {
+    setDialogState(() => avisando = true);
+    try {
+      await mensalidadeRepo(ref).avisarPagamentoPix(id);
+      setDialogState(() {
+        avisando = false;
+        avisado = true;
+      });
+      if (ctx.mounted) FeedbackHelper.showSuccess(ctx, pixAvisoEnviadoMensagem);
+    } catch (e) {
+      setDialogState(() => avisando = false);
+      if (ctx.mounted) FeedbackHelper.showError(ctx, friendlyError(e));
     }
   }
 
@@ -301,14 +290,7 @@ Future<void> mostrarPixMensalidade({
                             ),
                           ),
                           const SizedBox(height: TokensStrip.s3),
-                          if (precisaMpPix)
-                            FxLiquidPrimaryButton(
-                              label: 'Como ativar PIX no MP',
-                              onPressed: () async {
-                                await launchSafeHttpUrl(_mpPixKeyHelpUrl);
-                              },
-                            )
-                          else if (precisaCarteira)
+                          if (precisaCarteira)
                             FxLiquidPrimaryButton(
                               label: 'Abrir carteira',
                               onPressed: () {
@@ -352,6 +334,28 @@ Future<void> mostrarPixMensalidade({
                         }
                       },
                     ),
+                    Text(
+                      pixDestinoHint(asAluno: asAluno),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? EagleTokens.darkInkMute
+                                : TokensStrip.textSecondary,
+                        fontSize: 12.5,
+                        height: 1.35,
+                      ),
+                    ),
+                    if (asAluno && !avisado) ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      FxLiquidPrimaryButton(
+                        label: avisando ? 'Avisando…' : pixAvisarPagamentoLabel,
+                        onPressed:
+                            avisando
+                                ? null
+                                : () => avisarPagamento(ctx, setDialogState),
+                      ),
+                    ],
                   ],
                   const SizedBox(height: 12),
                   TextButton(

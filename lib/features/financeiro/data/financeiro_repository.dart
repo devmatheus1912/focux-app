@@ -367,9 +367,6 @@ class FinanceiroRepository {
   Future<PixData> gerarPix(int mensalidadeId) async {
     final r = await _dio.post(
       '/api/financeiro/mensalidades/$mensalidadeId/pix',
-      // Sem chave estável, dois toques geram duas cobranças PIX para a mesma
-      // mensalidade e o aluno recebe dois QR codes válidos.
-      options: ApiClient.idempotent('mensalidade-pix-$mensalidadeId'),
     );
     final data = r.data;
     if (data is! Map) {
@@ -381,13 +378,19 @@ class FinanceiroRepository {
   Future<PixData> gerarPixAluno(int mensalidadeId) async {
     final r = await _dio.post(
       '/api/financeiro/mensalidades/aluno/minhas/$mensalidadeId/pix',
-      options: ApiClient.idempotent('mensalidade-pix-aluno-$mensalidadeId'),
     );
     final data = r.data;
     if (data is! Map) {
       throw FormatException('POST .../aluno/.../pix devolve objeto PIX.');
     }
     return PixData.fromJson(Map<String, dynamic>.from(data));
+  }
+
+  Future<void> avisarPagamentoPix(int mensalidadeId) async {
+    await _dio.post(
+      '/api/financeiro/mensalidades/aluno/minhas/$mensalidadeId/avisar-pagamento',
+      options: ApiClient.idempotent('mensalidade-pix-aviso-$mensalidadeId'),
+    );
   }
 
   Future<Mensalidade> editarMensalidade(

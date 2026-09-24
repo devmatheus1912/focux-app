@@ -85,12 +85,27 @@ class RecorrenciaRepository {
   Future<RecorrenciaAssinatura> criar({
     required int alunoId,
     required FxMoney valor,
+    required int diaVencimento,
   }) async {
     final r = await _dio.post(
       '/api/recorrencia',
-      data: {'alunoId': alunoId, 'valor': valor.wire},
+      data: {
+        'alunoId': alunoId,
+        'valor': valor.wire,
+        'diaVencimento': diaVencimento,
+      },
+      options: ApiClient.idempotent('recorrencia-criar'),
     );
     return RecorrenciaAssinatura.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<RecorrenciaAssinatura> acaoPersonal(int id, String acao) async {
+    final r = await _dio.post('/api/recorrencia/$id/$acao');
+    final map = recorrenciaResponseMap(r.data);
+    if (map == null) {
+      throw const FormatException('Não foi possível atualizar. Tente de novo.');
+    }
+    return RecorrenciaAssinatura.fromJson(map);
   }
 
   Future<RecorrenciaAssinatura?> minha() async {

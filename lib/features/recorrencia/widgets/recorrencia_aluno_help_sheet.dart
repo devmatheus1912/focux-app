@@ -6,16 +6,16 @@ Future<void> showRecorrenciaAlunoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Como usar sua assinatura',
-    subtitle: 'Cobrança mensal via Mercado Pago, se o personal criou.',
+    subtitle: 'Mensalidade todo mês, paga por PIX direto ao seu personal.',
     tips: const [
       FxHelpTip(
         'Status',
-        'Pendente espera você autorizar. Ativa cobra sozinha. Pausada não cobra até retomar.',
+        'Ativa lança a mensalidade 5 dias antes do vencimento. Pausada não lança até retomar.',
         icon: 'coin',
       ),
       FxHelpTip(
-        'Autorizar',
-        'Pendente abre o Mercado Pago. Ativa pode pausar. Pausada pode retomar. Sem assinatura, o botão chama o personal no chat.',
+        'Pagar',
+        'Abra a mensalidade no Financeiro, pague o PIX e toque em avisar o personal. Sem assinatura, o botão chama o personal no chat.',
         icon: 'spark',
       ),
       FxHelpTip(

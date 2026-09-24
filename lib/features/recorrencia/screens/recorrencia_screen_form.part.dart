@@ -19,6 +19,7 @@ extension on _RecorrenciaScreenState {
     }
     var alunoId = alunos.first.id;
     var alunoNome = alunos.first.nome;
+    var dia = recorrenciaDiaPadrao(DateTime.now());
     final valorCtrl = TextEditingController(text: '199');
     var created = false;
 
@@ -52,19 +53,34 @@ extension on _RecorrenciaScreenState {
                         ],
                       );
                       if (picked == null) return;
-                      Aluno? match;
-                      for (final a in alunos) {
-                        if (a.id == picked) {
-                          match = a;
-                          break;
-                        }
-                      }
-                      final aluno = match;
+                      final aluno =
+                          alunos.where((a) => a.id == picked).firstOrNull;
                       if (aluno == null) return;
                       setDialogState(() {
                         alunoId = aluno.id;
                         alunoNome = aluno.nome;
                       });
+                    },
+                  ),
+                  FxInsetPickerRow(
+                    icon: Icons.event_outlined,
+                    label: 'Vencimento',
+                    value: recorrenciaDiaLabel(dia),
+                    onTap: () async {
+                      final picked = await showFxInsetPickerSheet<int>(
+                        ctx,
+                        title: 'Dia do vencimento',
+                        selected: dia,
+                        items: [
+                          for (var d = 1; d <= recorrenciaDiaMaximo; d++)
+                            FxInsetPickerSheetItem(
+                              value: d,
+                              label: recorrenciaDiaLabel(d),
+                            ),
+                        ],
+                      );
+                      if (picked == null) return;
+                      setDialogState(() => dia = picked);
                     },
                   ),
                   AlunoInsetFormField(
@@ -81,35 +97,62 @@ extension on _RecorrenciaScreenState {
         ),
       );
       if (ok != true) return;
-      final escolhido = alunos.where((a) => a.id == alunoId).firstOrNull;
-      if (escolhido == null || escolhido.email.trim().isEmpty) {
-        if (!mounted) return;
-        FeedbackHelper.showWarn(context, recorrenciaSemEmailAviso);
-        return;
-      }
 
-      final r = await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
+      await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
         alunoId: alunoId,
         valor: FxMoney.fromInput(
           valorCtrl.text.trim().isEmpty ? '199' : valorCtrl.text,
         ),
+        diaVencimento: dia,
       );
-      final link = r.initPoint?.trim();
-      if (link != null && link.isNotEmpty) {
-        await copySensitiveToClipboard(link);
-        if (!mounted) return;
-        FeedbackHelper.showSuccess(
-          context,
-          'Link de assinatura copiado — envie ao aluno.',
-        );
-      }
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, recorrenciaCriadaMensagem);
       created = true;
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(context, friendlyError(e));
+      if (ApiError.from(e)?.codigo == pixChaveAusenteCodigo) {
+        context.push('/perfil/wallet');
+      }
     } finally {
       valorCtrl.dispose();
     }
     if (created) await _load(reset: true);
+  }
+
+  Future<void> _abrirAcoes(RecorrenciaAssinatura item) async {
+    final acoes = recorrenciaAcoesDisponiveis(item.status);
+    if (acoes.isEmpty) return;
+    final acao = await showFxInsetPickerSheet<RecorrenciaAcao>(
+      context,
+      title: recorrenciaAlunoLabel(item.alunoNome),
+      items: [
+        for (final a in acoes)
+          FxInsetPickerSheetItem(value: a, label: recorrenciaAcaoLabel(a)),
+      ],
+    );
+    if (acao == null || !mounted) return;
+    if (acao == RecorrenciaAcao.cancelar) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Encerrar recorrência?',
+        subtitle: recorrenciaAlunoLabel(item.alunoNome),
+        message: 'Novas mensalidades param de ser lançadas. As já lançadas continuam.',
+        confirmLabel: 'Encerrar',
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    try {
+      await RecorrenciaRepository(
+        ref.read(apiClientProvider),
+      ).acaoPersonal(item.id, recorrenciaAcaoPath(acao));
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, recorrenciaAcaoFeito(acao));
+      await _load(reset: true);
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
   }
 }

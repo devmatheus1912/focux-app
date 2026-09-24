@@ -17,6 +17,20 @@ Uint8List? decodePixQrBase64(String? raw) {
   }
 }
 
+const pixChaveAusenteCodigo = 'PIX_CHAVE_AUSENTE';
+
+const pixSemCodigoErro = 'Não foi possível montar o código PIX. Tente de novo.';
+
+const pixAvisarPagamentoLabel = 'Já paguei, avisar personal';
+
+const pixAvisoEnviadoMensagem =
+    'Avisamos seu personal. Ele confirma assim que ver no banco.';
+
+String pixDestinoHint({required bool asAluno}) =>
+    asAluno
+        ? 'O valor vai direto para a conta do seu personal. Depois de pagar, avise para ele confirmar.'
+        : 'O valor cai direto na sua conta. Confira no banco e toque em Marcar paga.';
+
 /// Prefer copia-e-cola for a scannable QR; fall back to MP image bytes.
 bool pixQrHasRenderablePayload({
   required String? pixCopiaECola,

@@ -31,33 +31,76 @@ String recorrenciaSubtitle({
   final label = recorrenciaStatusLabel(status);
   final prox = proximaCobranca?.trim();
   if (prox == null || prox.isEmpty) return label;
-  return '$label · Próxima: ${recorrenciaProximaValue(prox)}';
+  return '$label · Vence ${recorrenciaProximaValue(prox)}';
 }
 
-const recorrenciaSemEmailAviso =
-    'Cadastre o e-mail desse aluno antes: o Mercado Pago exige para enviar a autorização.';
-
 const recorrenciaAjudaSubtitulo =
-    'O aluno autoriza uma vez no Mercado Pago e é cobrado todo mês no cartão.';
+    'Todo mês o app lança a mensalidade e avisa o aluno. Ele paga por PIX direto na sua chave.';
 
 const recorrenciaAjudaTips = <(String, String)>[
   (
     'Como funciona',
-    'Você cria a assinatura, o aluno abre o link e autoriza. Até autorizar, ela fica Pendente.',
+    'Você escolhe o valor e o dia do vencimento. 5 dias antes, a mensalidade aparece para o aluno com o PIX.',
   ),
   (
     'E as mensalidades?',
-    'Cada cobrança paga pelo cartão vira uma mensalidade paga automaticamente. Não crie as duas para o mesmo aluno e mês.',
+    'A recorrência cria a mensalidade do mês. Se você já lançou uma manual naquele mês, ela não duplica.',
   ),
   (
-    'Quando usar',
-    'Para quem paga no cartão todo mês. Quem paga por PIX ou dinheiro fica só em Mensalidades.',
+    'Confirmar pagamento',
+    'O dinheiro cai na sua conta, não passa pela Focux. O aluno avisa que pagou; você confere no banco e marca paga.',
   ),
   (
     'Precisa de',
-    'E-mail do aluno cadastrado: o Mercado Pago exige para enviar a autorização.',
+    'Chave PIX cadastrada na carteira.',
   ),
 ];
+
+const recorrenciaCriadaMensagem =
+    'Recorrência criada. A mensalidade sai 5 dias antes de cada vencimento.';
+
+const recorrenciaEmptyHubSubtitle =
+    'Crie a primeira para lançar a mensalidade todo mês com PIX.';
+
+const recorrenciaDiaMaximo = 28;
+
+int recorrenciaDiaPadrao(DateTime now) =>
+    now.day > recorrenciaDiaMaximo ? recorrenciaDiaMaximo : now.day;
+
+String recorrenciaDiaLabel(int dia) => 'Todo dia $dia';
+
+enum RecorrenciaAcao { pausar, retomar, cancelar }
+
+List<RecorrenciaAcao> recorrenciaAcoesDisponiveis(String status) {
+  switch (status.trim().toUpperCase()) {
+    case 'ATIVA':
+      return const [RecorrenciaAcao.pausar, RecorrenciaAcao.cancelar];
+    case 'PAUSADA':
+      return const [RecorrenciaAcao.retomar, RecorrenciaAcao.cancelar];
+    case 'PENDENTE':
+      return const [RecorrenciaAcao.cancelar];
+    default:
+      return const [];
+  }
+}
+
+String recorrenciaAcaoLabel(RecorrenciaAcao acao) => switch (acao) {
+  RecorrenciaAcao.pausar => 'Pausar',
+  RecorrenciaAcao.retomar => 'Retomar',
+  RecorrenciaAcao.cancelar => 'Encerrar recorrência',
+};
+
+String recorrenciaAcaoPath(RecorrenciaAcao acao) => switch (acao) {
+  RecorrenciaAcao.pausar => 'pausar',
+  RecorrenciaAcao.retomar => 'retomar',
+  RecorrenciaAcao.cancelar => 'cancelar',
+};
+
+String recorrenciaAcaoFeito(RecorrenciaAcao acao) => switch (acao) {
+  RecorrenciaAcao.pausar => 'Recorrência pausada.',
+  RecorrenciaAcao.retomar => 'Recorrência retomada.',
+  RecorrenciaAcao.cancelar => 'Recorrência encerrada.',
+};
 
 String recorrenciaValorLabel(FxMoney valor) => valor.format();
 
@@ -122,7 +165,7 @@ String recorrenciaPagamentoValue({
   }
   switch ((status ?? '').trim().toUpperCase()) {
     case 'ATIVA':
-      return 'Autorizado';
+      return 'Ativa';
     case 'PAUSADA':
       return 'Pausado';
     case 'CANCELADA':
@@ -139,23 +182,23 @@ String recorrenciaPagamentoHint({
   String? initPoint,
 }) {
   if (recorrenciaTemLinkCheckout(status ?? '', initPoint)) {
-    return 'Abre o Mercado Pago';
+    return 'Abre o link de autorização';
   }
   switch ((status ?? '').trim().toUpperCase()) {
     case 'ATIVA':
-      return 'Cobrança autorizada';
+      return 'Mensalidade todo mês';
     case 'PAUSADA':
       return 'Retome quando quiser';
     case 'CANCELADA':
       return 'Ciclo encerrado';
     default:
-      return 'Sem autorização ainda';
+      return 'Aguardando o personal';
   }
 }
 
 String recorrenciaCicloValue() => 'Mensal';
 
-String recorrenciaCicloHint() => 'Mercado Pago';
+String recorrenciaCicloHint() => 'PIX para o personal';
 
 enum RecorrenciaAlunoStickyKind { autorizar, pausar, retomar, chat }
 
@@ -192,12 +235,12 @@ String recorrenciaAlunoStickyLabel(RecorrenciaAlunoStickyKind kind) {
 String recorrenciaPausarConfirmTitle() => 'Pausar a cobrança automática?';
 
 String recorrenciaPausarConfirmMessage() =>
-    'As próximas mensalidades não são cobradas até você retomar.';
+    'As próximas mensalidades não são lançadas até você retomar.';
 
 String recorrenciaRetomarConfirmTitle() => 'Retomar a cobrança automática?';
 
 String recorrenciaRetomarConfirmMessage() =>
-    'O Mercado Pago volta a cobrar todo mês.';
+    'A mensalidade volta a ser lançada todo mês.';
 
 String recorrenciaProximaValue(String? proximaCobranca) {
   final prox = proximaCobranca?.trim();
@@ -210,5 +253,5 @@ String recorrenciaProximaValue(String? proximaCobranca) {
 String recorrenciaProximaHint(String? proximaCobranca) {
   final prox = proximaCobranca?.trim();
   if (prox == null || prox.isEmpty) return 'Sem data da próxima cobrança';
-  return 'Cobrança automática';
+  return 'Próximo vencimento';
 }

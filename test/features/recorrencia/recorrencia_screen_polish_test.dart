@@ -29,7 +29,9 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('copySensitiveToClipboard'));
+    expect(screen, contains('pixChaveAusenteCodigo'));
+    expect(screen, contains('acaoPersonal'));
+    expect(screen, isNot(contains('Mercado Pago')));
     expect(screen, isNot(contains('TabBar')));
     expect(screen, isNot(contains('TabBarView')));
     expect(screen, isNot(contains('DropdownButton')));

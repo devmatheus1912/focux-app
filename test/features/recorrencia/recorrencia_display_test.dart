@@ -21,9 +21,11 @@ void main() {
   test('recorrenciaSubtitle e valor', () {
     expect(
       recorrenciaSubtitle(status: 'ATIVA', proximaCobranca: '2026-10-01'),
-      'Ativa · Próxima: 01/10',
+      'Ativa · Vence 01/10',
     );
     expect(recorrenciaAjudaTips.map((t) => t.$1), contains('E as mensalidades?'));
+    expect(recorrenciaAjudaSubtitulo, contains('PIX'));
+    expect(recorrenciaAjudaTips.map((t) => t.$2).join(), isNot(contains('Mercado Pago')));
     expect(recorrenciaSubtitle(status: 'PENDENTE'), 'Pendente');
     expect(recorrenciaValorLabel(FxMoney.parse(199)), 'R\$ 199,00');
   });
@@ -79,7 +81,7 @@ void main() {
     expect(recorrenciaProximaValue('2026-10-01'), '01/10');
     expect(
       recorrenciaPagamentoValue(status: 'ATIVA'),
-      'Autorizado',
+      'Ativa',
     );
     expect(
       recorrenciaPagamentoValue(
@@ -90,7 +92,21 @@ void main() {
     );
     expect(recorrenciaCicloValue(), 'Mensal');
     expect(recorrenciaProximaHint(null), 'Sem data da próxima cobrança');
-    expect(recorrenciaProximaHint('2026-10-01'), 'Cobrança automática');
+    expect(recorrenciaProximaHint('2026-10-01'), 'Próximo vencimento');
+    expect(recorrenciaCicloHint(), 'PIX para o personal');
+  });
+
+  test('recorrência via PIX: dia de vencimento e ações do personal', () {
+    expect(recorrenciaDiaPadrao(DateTime(2026, 9, 30)), 28);
+    expect(recorrenciaDiaPadrao(DateTime(2026, 9, 5)), 5);
+    expect(recorrenciaDiaLabel(10), 'Todo dia 10');
+    expect(recorrenciaAcoesDisponiveis('ATIVA'), [
+      RecorrenciaAcao.pausar,
+      RecorrenciaAcao.cancelar,
+    ]);
+    expect(recorrenciaAcoesDisponiveis('PAUSADA').first, RecorrenciaAcao.retomar);
+    expect(recorrenciaAcoesDisponiveis('CANCELADA'), isEmpty);
+    expect(recorrenciaAcaoPath(RecorrenciaAcao.cancelar), 'cancelar');
   });
 
   test('recorrenciaCountLabel e filtro', () {

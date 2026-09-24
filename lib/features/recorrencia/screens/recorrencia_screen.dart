@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/api/api_error.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -12,10 +14,10 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -36,6 +38,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../chat/utils/aluno_picker_list.dart';
+import '../../financeiro/utils/pix_qr_display.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 
@@ -295,7 +298,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                       : 'Nenhuma assinatura encontrada',
                   subtitle: _query.isEmpty &&
                           _filtro == RecorrenciaHubFiltro.todos
-                      ? 'Crie a primeira recorrência para cobrar seus alunos via Mercado Pago.'
+                      ? recorrenciaEmptyHubSubtitle
                       : 'Ajuste a busca ou o filtro para ver outras assinaturas.',
                   action: _query.isEmpty &&
                           _filtro == RecorrenciaHubFiltro.todos
@@ -364,7 +367,9 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                     item.initPoint,
                   )
                       ? () => _abrirCheckout(item.initPoint!)
-                      : null,
+                      : recorrenciaAcoesDisponiveis(item.status).isEmpty
+                          ? null
+                          : () => _abrirAcoes(item),
                 );
               },
             ),
