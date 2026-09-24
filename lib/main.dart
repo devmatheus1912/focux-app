@@ -106,7 +106,7 @@ void main() {
       if (!isNonFatalFlutterFrameworkError(details.exception, details.stack)) {
         unawaited(reportFlutterErrorToCrashlytics(details));
       }
-      debugPrint('[Focux] ErrorWidget: ${details.exceptionAsString()}');
+      debugPrint('[Focux] WidgetFault: ${details.exceptionAsString()}');
       debugPrint('${details.stack}');
       return Material(
         color: const Color(0xFF080C10),

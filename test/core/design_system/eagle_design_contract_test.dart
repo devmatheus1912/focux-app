@@ -45,8 +45,8 @@ void main() {
             },
           ),
           _EagleGateRule(
-            label: "debugPrint('[Focux] Error",
-            pattern: RegExp(r"debugPrint\s*\(\s*'\[Focux\] Error"),
+            label: "debugPrint('[Focux] Error:",
+            pattern: RegExp(r"debugPrint\s*\(\s*'\[Focux\] Error:"),
             allowedFiles: const {},
           ),
           _EagleGateRule(
