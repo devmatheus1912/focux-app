@@ -83,6 +83,7 @@ bool _isAuthTransportFailure(DioException error) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
     case DioExceptionType.receiveTimeout:
+    case DioExceptionType.transformTimeout:
     case DioExceptionType.connectionError:
       return true;
     case DioExceptionType.unknown:
