@@ -72,7 +72,7 @@ dependencies:
   health: ^13.3.1
   home_widget: ^0.10.0
   file_picker: ^8.1.7
-  csv: ^6.0.0
+  csv: ^8.0.0
   excel: ^4.0.6
   sign_in_with_apple: ^8.2.0
   qr_flutter: ^4.1.0
