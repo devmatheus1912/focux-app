@@ -58,6 +58,9 @@ String whiteLabelDnsStepShort(String step, {int maxChars = 88}) {
   return '${t.substring(0, maxChars - 1)}…';
 }
 
+const whiteLabelDominioEmBreveCaption =
+    'Em breve você vai poder usar seu próprio endereço. Por enquanto, divulgue o link Focux da sua página.';
+
 String whiteLabelChecklistValue(bool done) => done ? 'Pronto' : 'Pendente';
 
 String whiteLabelLandingCaption(String modo) =>

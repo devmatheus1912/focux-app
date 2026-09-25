@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/perfil/data/white_label_repository.dart';
 import 'package:focux_app/features/perfil/utils/white_label_display.dart';
 
 void main() {
@@ -89,5 +90,14 @@ void main() {
     expect(whiteLabelNeedsLandingCompleta('SITE'), isTrue);
     expect(whiteLabelNeedsLandingCompleta('CAPTURA'), isFalse);
     expect(whiteLabelNeedsLandingCompleta('site'), isTrue);
+  });
+
+  test('domínio próprio fica em breve até o BE liberar', () {
+    expect(whiteLabelDominioEmBreveCaption, contains('Em breve'));
+    expect(WhiteLabelConfig.fromJson({}).dominioDisponivel, isFalse);
+    expect(
+      WhiteLabelConfig.fromJson({'dominioDisponivel': true}).dominioDisponivel,
+      isTrue,
+    );
   });
 }

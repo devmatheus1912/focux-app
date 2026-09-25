@@ -15,6 +15,7 @@ class WhiteLabelConfig {
   final String publicCapturaUrl;
   final List<WhiteLabelChecklistItem> checklist;
   final int checklistScore;
+  final bool dominioDisponivel;
 
   WhiteLabelConfig({
     this.slug,
@@ -29,6 +30,7 @@ class WhiteLabelConfig {
     this.publicCapturaUrl = '',
     this.checklist = const [],
     this.checklistScore = 0,
+    this.dominioDisponivel = false,
   });
 
   factory WhiteLabelConfig.fromJson(Map<String, dynamic> j) => WhiteLabelConfig(
@@ -50,6 +52,7 @@ class WhiteLabelConfig {
             )
             .toList(),
     checklistScore: j['checklistScore'] as int? ?? 0,
+    dominioDisponivel: j['dominioDisponivel'] as bool? ?? false,
   );
 }
 

@@ -51,6 +51,7 @@ class _WhiteLabelSettingsScreenState
   bool _salvando = false;
   bool _verificando = false;
   bool _loaded = false;
+  bool _dominioDisponivel = false;
   String _baseAppName = '';
   String _baseDomain = '';
   bool _baseOcultar = false;
@@ -82,6 +83,7 @@ class _WhiteLabelSettingsScreenState
     _domainCtrl.text = config.dominioCustomizado ?? '';
     _ocultarFocux = config.ocultarMarcaFocux;
     _landingModo = config.landingModo;
+    _dominioDisponivel = config.dominioDisponivel;
     _baseAppName = _appNameCtrl.text;
     _baseDomain = _domainCtrl.text;
     _baseOcultar = _ocultarFocux;
@@ -119,7 +121,8 @@ class _WhiteLabelSettingsScreenState
           .save(
             appDisplayName: _appNameCtrl.text.trim(),
             ocultarMarcaFocux: _ocultarFocux,
-            dominioCustomizado: _domainCtrl.text.trim(),
+            dominioCustomizado:
+                _dominioDisponivel ? _domainCtrl.text.trim() : null,
             landingModo: _landingModo,
           );
       _baseAppName = _appNameCtrl.text;
@@ -284,6 +287,20 @@ class _WhiteLabelSettingsScreenState
                             ],
                           ),
                           const SizedBox(height: FxSettingsLayout.groupGap),
+                          if (!config.dominioDisponivel)
+                            const FxSettingsGroup(
+                              header: 'Domínio próprio',
+                              caption: whiteLabelDominioEmBreveCaption,
+                              children: [
+                                FxSettingsTile(
+                                  icon: Icons.language_outlined,
+                                  label: 'Seu domínio',
+                                  value: 'Em breve',
+                                  showDivider: false,
+                                ),
+                              ],
+                            )
+                          else
                           FxSettingsGroup(
                             header: 'Domínio customizado',
                             caption: whiteLabelCnameHint(
