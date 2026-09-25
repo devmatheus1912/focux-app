@@ -48,4 +48,17 @@ void main() {
     expect(ofertaListBottomPad(stickyVisible: true), 8);
     expect(ofertaListBottomPad(stickyVisible: false), 24);
   });
+
+  test('envio manual diz se o push chegou', () {
+    expect(ofertaEnviarConfirmTitle('Ana'), 'Enviar para Ana?');
+    expect(ofertaEnviarConfirmMessage('Pack'), contains('"Pack"'));
+    expect(
+      ofertaEnviarSuccess(pushEntregue: true),
+      'Oferta enviada com notificação',
+    );
+    expect(
+      ofertaEnviarSuccess(pushEntregue: false),
+      contains('sem notificação'),
+    );
+  });
 }

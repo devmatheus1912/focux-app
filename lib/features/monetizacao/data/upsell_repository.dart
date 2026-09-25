@@ -56,6 +56,18 @@ class AlunoOferta {
   );
 }
 
+class EnvioOferta {
+  final int alunoOfertaId;
+  final bool pushEntregue;
+
+  const EnvioOferta({required this.alunoOfertaId, required this.pushEntregue});
+
+  factory EnvioOferta.fromJson(Map<String, dynamic> j) => EnvioOferta(
+    alunoOfertaId: (j['alunoOfertaId'] as num).toInt(),
+    pushEntregue: j['pushEntregue'] as bool? ?? false,
+  );
+}
+
 class UpsellRepository {
   final Dio _dio;
   UpsellRepository(ApiClient c) : _dio = c.dio;
@@ -106,6 +118,18 @@ class UpsellRepository {
       options: ApiClient.idempotent('upsell-patch-$id'),
     );
     return OfertaUpsell.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<EnvioOferta> enviar({
+    required int ofertaId,
+    required int alunoId,
+  }) async {
+    final r = await _dio.post(
+      '/api/upsell/ofertas/$ofertaId/enviar',
+      data: {'alunoId': alunoId},
+      options: ApiClient.idempotent('upsell-enviar-$ofertaId-$alunoId'),
+    );
+    return EnvioOferta.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<List<AlunoOferta>> listarMeusPendentes() async {

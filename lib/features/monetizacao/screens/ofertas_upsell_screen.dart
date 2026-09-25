@@ -9,15 +9,19 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../alunos/providers/alunos_provider.dart';
+import '../../chat/utils/aluno_picker_list.dart';
 import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
 import '../widgets/oferta_upsell_editor.dart';
@@ -117,6 +121,56 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _enviarParaAluno(OfertaUpsell oferta) async {
+    HapticFeedback.selectionClick();
+    try {
+      final home = await ref.read(alunosHomeProvider.future);
+      if (!mounted) return;
+      final alunos = filterAlunoPickerAlunos(home.alunos, '');
+      if (alunos.isEmpty) {
+        FeedbackHelper.showError(context, ofertaSemAlunos());
+        return;
+      }
+      final alunoId = await showFxInsetPickerSheet<int>(
+        context,
+        title: ofertaEnviarPickerTitle(),
+        items: [
+          for (final a in alunos)
+            FxInsetPickerSheetItem(
+              value: a.id,
+              label: a.nome,
+              subtitle: a.email.trim().isEmpty ? null : a.email,
+            ),
+        ],
+      );
+      if (alunoId == null || !mounted) return;
+      final aluno = alunos.where((a) => a.id == alunoId).firstOrNull;
+      if (aluno == null) return;
+      final ok = await showFxConfirmSheet(
+        context,
+        title: ofertaEnviarConfirmTitle(aluno.nome),
+        message: ofertaEnviarConfirmMessage(oferta.titulo),
+        icon: Icons.send_rounded,
+        confirmLabel: 'Enviar',
+      );
+      if (!ok || !mounted) return;
+      final envio = await ref
+          .read(upsellRepositoryProvider)
+          .enviar(ofertaId: oferta.id, alunoId: aluno.id);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(
+        context,
+        ofertaEnviarSuccess(pushEntregue: envio.pushEntregue),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: 'Não enviamos a oferta'),
+      );
     }
   }
 
@@ -310,7 +364,14 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-          const SizedBox(width: TokensStrip.s2),
+          if (oferta.ativo)
+            IconButton(
+              tooltip: ofertaEnviarTooltip(),
+              icon: Icon(Icons.send_rounded, color: fxScreenMute(context)),
+              onPressed: () => _enviarParaAluno(oferta),
+            )
+          else
+            const SizedBox(width: TokensStrip.s2),
           Icon(
             Icons.chevron_right_rounded,
             color: fxScreenMute(context),

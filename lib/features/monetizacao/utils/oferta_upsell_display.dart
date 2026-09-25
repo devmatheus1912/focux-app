@@ -54,6 +54,22 @@ String ofertaSectionTitle({required bool ativo}) =>
 
 String ofertaStickyCtaLabel() => 'Nova oferta';
 
+String ofertaEnviarTooltip() => 'Enviar para um aluno';
+
+String ofertaEnviarPickerTitle() => 'Enviar para qual aluno?';
+
+String ofertaSemAlunos() => 'Cadastre um aluno antes de enviar ofertas.';
+
+String ofertaEnviarConfirmTitle(String nome) => 'Enviar para $nome?';
+
+String ofertaEnviarConfirmMessage(String titulo) =>
+    '"$titulo" aparece no app do aluno até ele aceitar ou recusar.';
+
+String ofertaEnviarSuccess({required bool pushEntregue}) =>
+    pushEntregue
+        ? 'Oferta enviada com notificação'
+        : 'Oferta enviada. O aluno vê ao abrir o app (sem notificação no celular).';
+
 /// Hint sob a lista quando há poucas ofertas (evita vazio flutuando).
 String? ofertaSparseHint({required int count, int? ativas}) {
   if (count <= 0) return null;
