@@ -44,7 +44,7 @@ String dunningMoneyLabel(num? value) {
   return formatBrlCurrency(value);
 }
 
-String dunningRateLabel(double rate) => '${rate.toStringAsFixed(1)}%';
+String dunningRateLabel(double rate) => '${formatBrDecimal(rate)}%';
 
 String dunningRecuperadasLabel(int recuperadas, int total) =>
     '$recuperadas de $total';

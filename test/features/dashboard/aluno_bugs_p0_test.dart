@@ -7,10 +7,10 @@ import 'package:focux_app/features/anamnese/utils/anamnese_display.dart';
 void main() {
   group('aluno bugs P0', () {
     test('sonoHoras aceita string e number', () {
-      expect(Anamnese.fromJson({'sonoHoras': '7.5'}).sonoHoras, 7.5);
+      expect(Anamnese.fromJson({'sonoHoras': '7,5'}).sonoHoras, 7.5);
       expect(Anamnese.fromJson({'sonoHoras': 7}).sonoHoras, 7.0);
       expect(Anamnese.fromJson({'sonoHoras': 7.5}).sonoHoras, 7.5);
-      expect(anamneseSonoHorasLabel(7.5), '7.5 horas');
+      expect(anamneseSonoHorasLabel(7.5), '7,5 horas');
       expect(anamneseSonoHorasLabel(7), '7 horas');
     });
 

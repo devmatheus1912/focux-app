@@ -9,7 +9,19 @@ class FxEmptyAction {
   final String label;
   final VoidCallback onTap;
 
-  const FxEmptyAction({required this.label, required this.onTap});
+  /// `true` quando a tela já tem o mesmo P0 no sticky/FAB (§11: 1 primário).
+  final bool secondary;
+
+  const FxEmptyAction({
+    required this.label,
+    required this.onTap,
+    this.secondary = false,
+  });
+
+  Widget build() =>
+      secondary
+          ? FxLiquidSecondaryButton(label: label, onPressed: onTap, expand: false)
+          : FxLiquidPrimaryButton(label: label, onPressed: onTap);
 }
 
 class FxEmptyState extends StatelessWidget {
@@ -73,10 +85,7 @@ class FxEmptyState extends StatelessWidget {
                       const SizedBox(height: TokensStrip.s3),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: FxLiquidPrimaryButton(
-                          label: action!.label,
-                          onPressed: action!.onTap,
-                        ),
+                        child: action!.build(),
                       ),
                     ],
                   ],
@@ -126,10 +135,7 @@ class FxEmptyState extends StatelessWidget {
             ],
             if (action != null) ...[
               const SizedBox(height: 20),
-              FxLiquidPrimaryButton(
-                label: action!.label,
-                onPressed: action!.onTap,
-              ),
+              action!.build(),
             ],
           ],
         ),

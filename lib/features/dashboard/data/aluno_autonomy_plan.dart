@@ -5,6 +5,7 @@ import '../../checkin/utils/treino_ficha_status.dart';
 import '../../evolucao/data/evolucao_repository.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import '../utils/aluno_consistencia_display.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 enum AlunoTaskPriority { alta, media, baixa }
 
@@ -701,7 +702,7 @@ String? _latestEvolution(List<ExecucaoTreino> historico) {
     if (treino.evolucoesCarga.isNotEmpty) {
       final item = treino.evolucoesCarga.first;
       if (item.mensagem.trim().isNotEmpty) return item.mensagem;
-      return 'Sua carga em ${item.exercicioNome} subiu ${item.diferencaKg.toStringAsFixed(1)} kg.';
+      return 'Sua carga em ${item.exercicioNome} subiu ${formatBrDecimal(item.diferencaKg)} kg.';
     }
   }
   return null;

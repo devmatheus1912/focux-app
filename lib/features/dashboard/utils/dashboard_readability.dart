@@ -64,19 +64,6 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
   return (background: accent.withValues(alpha: 0.14), foreground: accent);
 }
 
-Color dashboardPrioritiesChipBackground(
-  Color primary, {
-  required bool isDark,
-}) =>
-    // Mesmo peso visual do chip Foco ON — teal sólido + contraste no scroll.
-    isDark ? primary.withValues(alpha: 0.94) : primary;
-
-Color dashboardPrioritiesChipForeground(
-  Color primary, {
-  required bool isDark,
-}) =>
-    isDark ? EagleTokens.brandDeep : Colors.white;
-
 TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) =>
     FocuxHubTypography.pageTitle(context, color: color);
 

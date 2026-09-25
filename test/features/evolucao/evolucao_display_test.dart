@@ -14,7 +14,7 @@ void main() {
         MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
         MedidaCorporal(id: 2, data: '2026-03-01', peso: 78),
       ]),
-      '-2.0 kg',
+      '-2,0 kg',
     );
     expect(
       evolucaoUltimaMedidaHint([
@@ -38,7 +38,7 @@ void main() {
         MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
         MedidaCorporal(id: 2, data: '2026-03-01', peso: 78),
       ]),
-      '-2.0 kg desde o início',
+      '-2,0 kg desde o início',
     );
   });
 
@@ -49,7 +49,7 @@ void main() {
         MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),
         MedidaCorporal(id: 2, data: '2026-03-01', peso: 78.5),
       ]),
-      '78.5 kg',
+      '78,5 kg',
     );
   });
 
@@ -61,8 +61,8 @@ void main() {
       cintura: 82,
     );
     expect(evolucaoMedidaLabel(medida), '01/09');
-    expect(evolucaoMedidaSubtitle(medida), '78.5 kg · Abdômen 82.0 cm');
-    expect(evolucaoMedidaValue(medida), '78.5 kg');
+    expect(evolucaoMedidaSubtitle(medida), '78,5 kg · Abdômen 82,0 cm');
+    expect(evolucaoMedidaValue(medida), '78,5 kg');
     final recorde = RecordePessoal(
       id: 1,
       exercicioId: 9,
@@ -71,8 +71,8 @@ void main() {
       cargaKg: 80,
       repeticoes: 5,
     );
-    expect(evolucaoRecordeSubtitle(recorde), '80.0 kg · 5 reps · 01/09');
-    expect(evolucaoRecordeValue(recorde), '80.0 kg');
+    expect(evolucaoRecordeSubtitle(recorde), '80,0 kg · 5 reps · 01/09');
+    expect(evolucaoRecordeValue(recorde), '80,0 kg');
     expect(evolucaoMedidasHint(0), 'Nenhuma medida ainda');
     expect(evolucaoMedidasHint(1), '1 registro');
     expect(evolucaoRecordesHint(2), '2 marcas pessoais');
@@ -90,7 +90,7 @@ void main() {
     expect(evolucaoMedidasComConteudo(lista), hasLength(2));
     expect(
       evolucaoMedidaSubtitle(MedidaCorporal(id: 1, data: '2026-09-01', peso: 60)),
-      '60.0 kg',
+      '60,0 kg',
     );
     expect(
       evolucaoMedidaSubtitle(MedidaCorporal(id: 9, data: '2026-09-01')),

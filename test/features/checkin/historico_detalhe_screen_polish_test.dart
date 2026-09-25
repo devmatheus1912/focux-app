@@ -21,7 +21,7 @@ void main() {
     expect(screen, contains("'/checkin/executar'"));
     expect(screen, contains('detalhe(widget.execucaoId)'));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, isNot(contains('FxActionChip')));
     expect(screen, contains('HistoricoDetalheMemCache'));
     expect(screen, contains('FxLoading.sectionShimmer'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));

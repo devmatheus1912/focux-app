@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('Salvar meu perfil'));
     expect(screen, contains('friendlyError'));
-    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, isNot(contains('FxActionChip')));
     expect(
       screen,
       isNot(contains("child: const Text('Salvar')")),

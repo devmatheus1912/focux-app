@@ -25,7 +25,7 @@ import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
@@ -367,51 +367,50 @@ class _RetencaoMetricStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: home.alto > 0 ? onFiltrarAlto : null,
-          borderRadius: BorderRadius.circular(12),
+        Expanded(
+          child: InkWell(
+            onTap: home.alto > 0 ? onFiltrarAlto : null,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            child: OperationalMetricTile(
+              label: 'Alto',
+              value: '${home.alto}',
+              color: EagleTokens.bad,
+              isDark: isDark,
+              dense: true,
+              emphasis:
+                  home.alto > 0
+                      ? OperationalMetricEmphasis.alert
+                      : OperationalMetricEmphasis.muted,
+              semanticsLabel: retencaoMetricAltoLabel(home.alto),
+            ),
+          ),
+        ),
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
           child: OperationalMetricTile(
-            label: 'Risco alto',
-            value: '${home.alto}',
-            hint: retencaoMetricAltoLabel(home.alto),
-            color: EagleTokens.bad,
+            label: 'Médio',
+            value: '${home.medio}',
+            color: EagleTokens.warn,
             isDark: isDark,
             dense: true,
             emphasis: OperationalMetricEmphasis.muted,
-            semanticsLabel: '${home.alto} em risco alto',
+            semanticsLabel: retencaoMetricMedioLabel(home.medio),
           ),
         ),
-        const SizedBox(height: TokensStrip.s2),
-        Row(
-          children: [
-            Expanded(
-              child: OperationalMetricTile(
-                label: 'Médio',
-                value: '${home.medio}',
-                hint: retencaoMetricMedioLabel(home.medio),
-                color: EagleTokens.warn,
-                isDark: isDark,
-                dense: true,
-                emphasis: OperationalMetricEmphasis.muted,
-                semanticsLabel: '${home.medio} risco médio',
-              ),
-            ),
-            const SizedBox(width: TokensStrip.s2),
-            Expanded(
-              child: OperationalMetricTile(
-                label: 'Saudável',
-                value: '${home.saudavel}',
-                hint: retencaoMetricSaudavelLabel(home.saudavel),
-                color: primary,
-                isDark: isDark,
-                dense: true,
-                emphasis: OperationalMetricEmphasis.muted,
-                semanticsLabel: '${home.saudavel} saudáveis',
-              ),
-            ),
-          ],
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
+          child: OperationalMetricTile(
+            label: 'Saudável',
+            value: '${home.saudavel}',
+            color: primary,
+            isDark: isDark,
+            dense: true,
+            emphasis: OperationalMetricEmphasis.muted,
+            semanticsLabel: retencaoMetricSaudavelLabel(home.saudavel),
+          ),
         ),
       ],
     );
@@ -525,14 +524,15 @@ class _RetencaoFocusCard extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: retencaoFocusActionLabel(split.primary),
-                accent: firstAlto != null ? EagleTokens.bad : primary,
+                accent: primary,
                 isDark: isDark,
                 onPressed: run(split.primary),
+                solid: true,
               ),
               if (split.secondary.isNotEmpty)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Mais ações',
                   accent: chrome.mute,
                   isDark: isDark,
@@ -577,11 +577,14 @@ class _RetencaoTile extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            DashboardHomeActionChip(
-              label: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
-              accent: primary,
-              isDark: isDark,
-              onPressed: onChat,
+            SizedBox(
+              width: TokensStrip.s7,
+              height: TokensStrip.s7,
+              child: IconButton(
+                tooltip: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
+                onPressed: onChat,
+                icon: Icon(Icons.chat_bubble_outline_rounded, color: primary),
+              ),
             ),
             SizedBox(
               width: TokensStrip.s7,

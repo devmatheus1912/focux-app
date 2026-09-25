@@ -298,6 +298,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      filled: false,
                       isDense: true,
                       hintText: 'Buscar por nome, e-mail ou objetivo',
                       border: InputBorder.none,

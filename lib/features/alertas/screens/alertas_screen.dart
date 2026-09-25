@@ -386,6 +386,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                           onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
+                            filled: false,
                             isDense: true,
                             hintText: 'Buscar aluno ou motivo',
                             border: InputBorder.none,

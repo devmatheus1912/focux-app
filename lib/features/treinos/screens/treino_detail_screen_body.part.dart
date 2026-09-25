@@ -175,14 +175,14 @@ class _TreinoDetailBody extends StatelessWidget {
                       runSpacing: TokensStrip.s2,
                       children: [
                         if (alunoId != null)
-                          DashboardHomeActionChip(
+                          FxActionChip(
                             label: 'Aluno',
                             accent: chrome.mute,
                             isDark: isDark,
                             onPressed: () =>
                                 context.push('/alunos/$alunoId'),
                           ),
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: 'Atribuir',
                           accent: primary,
                           isDark: isDark,

@@ -5,6 +5,7 @@ import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import 'aluno360_ferramentas_modules_grid.dart';
 import 'aluno360_ferramentas_tab.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 class Aluno360DetailFerramentasTab extends ConsumerWidget {
   const Aluno360DetailFerramentasTab({
@@ -35,11 +36,11 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
     final composicao = ferramentasAsync.valueOrNull?.composicaoResumo;
     final bf =
         composicao?.percGordura != null
-            ? composicao!.percGordura!.toStringAsFixed(1)
+            ? formatBrDecimal(composicao!.percGordura!)
             : null;
     final massaMagra =
         composicao?.massaMuscular != null
-            ? composicao!.massaMuscular!.toStringAsFixed(1)
+            ? formatBrDecimal(composicao!.massaMuscular!)
             : null;
     final anamneseLoading =
         ferramentasAsync.isLoading && !ferramentasAsync.hasValue;

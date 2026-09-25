@@ -27,12 +27,12 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
 import '../utils/anamnese_pdf.dart';
 import '../widgets/anamnese_help_sheet.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'anamnese_screen_ficha.part.dart';
 

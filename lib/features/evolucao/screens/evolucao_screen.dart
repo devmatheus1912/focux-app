@@ -34,7 +34,7 @@ import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../avaliacao/utils/evolucao_comparativo_display.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_display.dart';
 import '../providers/evolucao_home_provider.dart';
@@ -254,13 +254,13 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                               spacing: TokensStrip.s2,
                               runSpacing: TokensStrip.s2,
                               children: [
-                                DashboardHomeActionChip(
+                                FxActionChip(
                                   label: 'Fotos',
                                   accent: primary,
                                   isDark: chrome.isDark,
                                   onPressed: _abrirFotos,
                                 ),
-                                DashboardHomeActionChip(
+                                FxActionChip(
                                   label: 'Comparativo',
                                   accent: primary,
                                   isDark: chrome.isDark,

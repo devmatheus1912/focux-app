@@ -5,7 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../utils/alerta_detalhe_display.dart';
 
 class AlertaDetalheSituacao extends StatelessWidget {
@@ -54,7 +54,7 @@ class AlertaDetalheSituacao extends StatelessWidget {
           runSpacing: TokensStrip.s2,
           children: [
             if (alertaStatusFinanceiroRuim(statusFinanceiro))
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Cobrar',
                 accent: EagleTokens.bad,
                 isDark: isDark,
@@ -62,7 +62,7 @@ class AlertaDetalheSituacao extends StatelessWidget {
                   '/financeiro?alunoId=$alunoId',
                 ),
               ),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: alertaAdiarCtaLabel(),
               accent: primary,
               isDark: isDark,

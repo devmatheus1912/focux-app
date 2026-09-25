@@ -23,7 +23,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../data/qualidade_operacional.dart';
 import '../utils/qualidade_operacional_display.dart';
-import '../widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../widgets/dashboard_section_header.dart';
 
 class QualidadeOperacionalScreen extends ConsumerStatefulWidget {
@@ -273,7 +273,7 @@ class _QualidadeBody extends StatelessWidget {
               const SizedBox(height: TokensStrip.s2),
               Align(
                 alignment: Alignment.centerLeft,
-                child: DashboardHomeActionChip(
+                child: FxActionChip(
                   label: next.label,
                   accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,

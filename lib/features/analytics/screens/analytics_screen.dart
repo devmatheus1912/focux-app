@@ -22,10 +22,11 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../data/analytics_repository.dart';
 import '../providers/analytics_provider.dart';
 import '../utils/analytics_display.dart';
+import '../../../core/utils/pt_br_display.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'analytics_screen_widgets.part.dart';
 

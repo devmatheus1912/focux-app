@@ -13,9 +13,10 @@ void main() {
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('AlunoSegmentedChoice'));
+    expect(screen, isNot(contains('showFxInsetPickerSheet')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('constrainWidth: false'));

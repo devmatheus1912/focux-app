@@ -24,7 +24,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
@@ -365,7 +365,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
               spacing: TokensStrip.s2,
               runSpacing: TokensStrip.s2,
               children: [
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: relatorioAlunoPeriodoValueLabel(
                     dias: _dias,
                     inicio: _rangeCustom?.start,
@@ -375,7 +375,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
                   isDark: isDark,
                   onPressed: _abrirPeriodo,
                 ),
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: relatorioAlunoMaisChip(),
                   accent: primary,
                   isDark: isDark,

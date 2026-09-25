@@ -20,7 +20,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/relatorio_repository.dart';
@@ -359,7 +359,7 @@ class _RelatorioFocusCard extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: firstAtencao == null ? 'Ver alunos' : 'Ver aluno',
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,

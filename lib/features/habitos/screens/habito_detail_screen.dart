@@ -25,7 +25,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/habito_repository.dart';
 import '../utils/habitos_display.dart';
@@ -370,21 +370,21 @@ class _HabitoDetailBody extends StatelessWidget {
                     spacing: TokensStrip.s2,
                     runSpacing: TokensStrip.s2,
                     children: [
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: 'Lista',
                         accent: primary,
                         isDark: isDark,
                         onPressed: onLeave,
                       ),
                       if (forAluno)
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: 'Hoje',
                           accent: primary,
                           isDark: isDark,
                           onPressed: () => context.push('/dashboard/aluno'),
                         ),
                       if (!forAluno && habito.alunoId != null)
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: 'Aluno',
                           accent: primary,
                           isDark: isDark,

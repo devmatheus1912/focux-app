@@ -23,14 +23,14 @@ void main() {
       'lib/features/exercicios/widgets/add_exercicio_filters_sheet.dart',
     ).readAsStringSync();
     expect(filters, contains('FxLiquidPrimaryButton'));
-    expect(filters, isNot(contains('DashboardHomeActionChip')));
+    expect(filters, isNot(contains('FxActionChip')));
     expect(screen, contains('showAddExercicioEnumPicker'));
     expect(screen, contains('exercicioId'));
     expect(screen, contains('S.of(context)'));
     expect(screen, contains('atualizar'));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('bottomNavigationBar'));
-    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, isNot(contains('FxActionChip')));
     expect(screen, contains('disclosure: true'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showNovoExercicioHelpSheet'));

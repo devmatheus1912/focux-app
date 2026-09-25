@@ -1,4 +1,5 @@
 import '../data/anamnese_repository.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 const anamneseNiveis = [
   'SEDENTARIO',
@@ -190,7 +191,7 @@ String anamneseSonoHorasLabel(num? horas) {
   final value = horas.toDouble();
   if (value <= 1) return '1 hora';
   if (value == value.roundToDouble()) return '${value.round()} horas';
-  return '${value.toStringAsFixed(1)} horas';
+  return '${formatBrDecimal(value)} horas';
 }
 
 /// Perguntas PAR-Q+ na ordem da ficha (chave → enunciado curto).

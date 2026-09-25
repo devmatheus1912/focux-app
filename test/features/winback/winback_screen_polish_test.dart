@@ -29,7 +29,7 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('emphasize: false'));
     expect(screen, contains('FxInputDeco.build'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Cobrar'));
     expect(screen, contains('Saúde da base'));

@@ -22,7 +22,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/checkin_personal_home.dart';
 import '../providers/checkin_provider.dart';
@@ -267,7 +267,7 @@ class _CheckinTodayCard extends StatelessWidget {
           const SizedBox(height: TokensStrip.s3),
           Align(
             alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
+            child: FxActionChip(
               label: checkinFocusAction(home).label,
               accent: Theme.of(context).colorScheme.primary,
               isDark: isDark,

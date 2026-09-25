@@ -1,4 +1,5 @@
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 /// Thumb-zone minimum for S8 execution controls.
 const double checkinExecutionControlMin = TokensStrip.s8;
@@ -69,7 +70,7 @@ String? checkinCargaLabel(double? value) {
   final rounded =
       value.roundToDouble() == value
           ? value.toStringAsFixed(0)
-          : value.toStringAsFixed(1);
+          : formatBrDecimal(value);
   return '${rounded.replaceAll('.', ',')} kg';
 }
 

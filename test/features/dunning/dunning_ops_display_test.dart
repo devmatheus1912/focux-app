@@ -45,7 +45,7 @@ void main() {
     expect(dunningTaxaFraca(49.9, 10), isTrue);
     expect(dunningTaxaFraca(50, 10), isFalse);
     expect(dunningRecuperadasLabel(7, 10), '7 de 10');
-    expect(dunningRateLabel(70), '70.0%');
+    expect(dunningRateLabel(70), '70,0%');
     expect(dunningFalhasPreview([1, 2, 3, 4]), [1, 2, 3]);
     expect(dunningComoCalculamos, contains('Recuperadas'));
     expect(dunningHasAluno(8), isTrue);

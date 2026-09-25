@@ -243,6 +243,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                       onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                       textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
+                        filled: false,
                         isDense: true,
                         hintText: _view == LojaHubView.vitrine
                             ? 'Buscar pacote'

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -17,9 +18,9 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
 import '../data/command_center_data.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/copilot_actions_display.dart';
@@ -118,11 +119,17 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DashboardHomeActionChip(
-                    label: copilotActionsStatusLabel(_status),
-                    accent: brand,
+                  AlunoSegmentedChoice(
+                    options: [
+                      for (final status in copilotActionsStatusValues)
+                        (
+                          value: status,
+                          label: copilotActionsStatusLabel(status),
+                        ),
+                    ],
+                    selected: _status,
                     isDark: dark,
-                    onPressed: _abrirFiltro,
+                    onSelect: _selecionarStatus,
                   ),
                   const SizedBox(height: TokensStrip.s2),
                   TextField(
@@ -236,7 +243,10 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                           const SizedBox(height: 4),
                           _SectionHeader(
                             title: 'Sinais automáticos',
-                            detail: '${radar.length} sinais',
+                            detail:
+                                radar.length == 1
+                                    ? '1 sinal'
+                                    : '${radar.length} sinais',
                             ink: ink,
                             mute: mute,
                           ),
@@ -280,20 +290,8 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     );
   }
 
-  Future<void> _abrirFiltro() async {
-    final picked = await showFxInsetPickerSheet<String>(
-      context,
-      title: copilotActionsFiltroTitle(),
-      selected: _status,
-      items: [
-        for (final status in copilotActionsStatusValues)
-          FxInsetPickerSheetItem(
-            value: status,
-            label: copilotActionsStatusLabel(status),
-          ),
-      ],
-    );
-    if (!mounted || picked == null || picked == _status) return;
+  void _selecionarStatus(String picked) {
+    if (picked == _status) return;
     setState(() {
       _status = picked;
       _extra.clear();

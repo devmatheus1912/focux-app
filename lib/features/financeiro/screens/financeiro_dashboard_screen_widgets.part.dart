@@ -89,7 +89,7 @@ class _EvolucaoChart extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
-                              '${(e.value.recebido.cents / 100000).toStringAsFixed(1)}k',
+                              '${formatBrDecimal(e.value.recebido.cents / 100000)}k',
                               style: TextStyle(
                                 fontSize: 9.5,
                                 color: isLast ? ink : mute,

@@ -3,6 +3,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../data/relatorio_repository.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 /// Brand tokens mirrored as [PdfColor] (EagleTokens navy / azul petróleo).
 const PdfColor _pdfNavy = PdfColor.fromInt(0xFF0B1524);
@@ -106,7 +107,7 @@ Future<void> exportRelatorioPdf({
                 pw.Expanded(
                   child: _pdfKpiCard(
                     'Taxa de aderência',
-                    '${dados.taxaAderenciaPercent.toStringAsFixed(1)}%',
+                    '${formatBrDecimal(dados.taxaAderenciaPercent)}%',
                   ),
                 ),
                 pw.SizedBox(width: 10),
@@ -148,17 +149,17 @@ Future<void> exportRelatorioPdf({
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Atual: ${comparativo.aderenciaAtual.toStringAsFixed(1)}% · ${comparativo.checkInsAtual} check-ins',
+                      'Atual: ${formatBrDecimal(comparativo.aderenciaAtual)}% · ${comparativo.checkInsAtual} check-ins',
                       style: const pw.TextStyle(fontSize: 11, color: _pdfInk),
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      'Anterior: ${comparativo.aderenciaAnterior.toStringAsFixed(1)}% · ${comparativo.checkInsAnterior} check-ins',
+                      'Anterior: ${formatBrDecimal(comparativo.aderenciaAnterior)}% · ${comparativo.checkInsAnterior} check-ins',
                       style: const pw.TextStyle(fontSize: 11, color: _pdfInk),
                     ),
                     pw.SizedBox(height: 8),
                     pw.Text(
-                      'Evolução: ${(comparativo.aderenciaAtual - comparativo.aderenciaAnterior).toStringAsFixed(1)}%',
+                      'Evolução: ${formatBrDecimal(comparativo.aderenciaAtual - comparativo.aderenciaAnterior)}%',
                       style: pw.TextStyle(
                         fontSize: 12,
                         fontWeight: pw.FontWeight.bold,

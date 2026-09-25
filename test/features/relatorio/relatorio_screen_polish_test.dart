@@ -33,17 +33,17 @@ void main() {
     expect(screen, contains("value: 'checkin'"));
     expect(
       screen,
-      isNot(contains("DashboardHomeActionChip(\n                  label: 'Aluno'")),
+      isNot(contains("FxActionChip(\n                  label: 'Aluno'")),
     );
     expect(
       screen,
-      isNot(contains("DashboardHomeActionChip(\n                  label: 'Chat'")),
+      isNot(contains("FxActionChip(\n                  label: 'Chat'")),
     );
     expect(
       screen,
       isNot(
         contains(
-          'DashboardHomeActionChip(\n                    label: relatorioAlunoCheckinChip()',
+          'FxActionChip(\n                    label: relatorioAlunoCheckinChip()',
         ),
       ),
     );

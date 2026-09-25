@@ -139,7 +139,7 @@ void main() {
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, isNot(contains("label: 'Grupos'")));
     expect(screen, isNot(contains("label: 'Carga'")));
     expect(screen, isNot(contains("label: 'Exercícios'")));

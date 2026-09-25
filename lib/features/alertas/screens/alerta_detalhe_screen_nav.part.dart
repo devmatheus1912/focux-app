@@ -10,13 +10,13 @@ extension on _AlertaDetalheScreenState {
       spacing: TokensStrip.s2,
       runSpacing: TokensStrip.s2,
       children: [
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Lista',
           accent: primary,
           isDark: isDark,
           onPressed: () => safePopOrGo(context, '/alertas'),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Aluno',
           accent: primary,
           isDark: isDark,
@@ -25,7 +25,7 @@ extension on _AlertaDetalheScreenState {
             extra: nome,
           ),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Evolução',
           accent: primary,
           isDark: isDark,
@@ -34,7 +34,7 @@ extension on _AlertaDetalheScreenState {
             extra: nome,
           ),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Chat',
           accent: primary,
           isDark: isDark,

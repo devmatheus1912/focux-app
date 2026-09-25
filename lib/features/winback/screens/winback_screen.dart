@@ -12,7 +12,6 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
@@ -25,7 +24,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/winback_repository.dart';
 import '../utils/winback_display.dart';
@@ -335,7 +334,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                                   spacing: TokensStrip.s2,
                                   runSpacing: TokensStrip.s2,
                                   children: [
-                                    DashboardHomeActionChip(
+                                    FxActionChip(
                                       label: 'Saúde da base',
                                       accent: Theme.of(context)
                                           .colorScheme
@@ -446,15 +445,15 @@ class _WinbackFocusCard extends StatelessWidget {
               spacing: TokensStrip.s2,
               runSpacing: TokensStrip.s2,
               children: [
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Escrever',
                   accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,
                   onPressed: onChat,
                 ),
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Cobrar',
-                  accent: EagleTokens.moneyGreen,
+                  accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,
                   onPressed: onCobrar,
                 ),

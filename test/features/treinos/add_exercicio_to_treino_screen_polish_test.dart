@@ -20,7 +20,7 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains("label: 'Concluir'"));
-    expect(screen, isNot(contains('dashboardPrioritiesChipBackground')));
+    expect(screen, isNot(contains('FxActionChip.solidBackground')));
     expect(
       screen,
       anyOf(

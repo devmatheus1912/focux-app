@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
 
@@ -70,19 +69,20 @@ class _RetencaoAcoesSheet extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Escrever',
                 accent: primary,
                 isDark: isDark,
                 onPressed: onChat,
+                solid: true,
               ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Cobrar',
-                accent: EagleTokens.moneyGreen,
+                accent: primary,
                 isDark: isDark,
                 onPressed: onCobrar,
               ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Abrir 360',
                 accent: primary,
                 isDark: isDark,

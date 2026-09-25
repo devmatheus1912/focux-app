@@ -24,7 +24,7 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('.registrar('));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/fotos'"));
     expect(screen, contains("label: 'Evolução'"));

@@ -31,11 +31,11 @@ class _AnalyticsBody extends StatelessWidget {
               children: [
                 Semantics(
                   label:
-                      'Inadimplência ${churn.toStringAsFixed(1)} por cento',
+                      'Inadimplência ${formatBrDecimal(churn)} por cento',
                   child: FxStripCard(
                   emphasize: true,
                   semanticsLabel:
-                      'Inadimplência ${churn.toStringAsFixed(1)} por cento',
+                      'Inadimplência ${formatBrDecimal(churn)} por cento',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -45,7 +45,7 @@ class _AnalyticsBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${churn.toStringAsFixed(1)}%',
+                        '${formatBrDecimal(churn)}%',
                         style: FocuxHubTypography.kpi(
                           color: ink,
                           fontSize: FocuxHubTypography.metricLg,
@@ -65,7 +65,7 @@ class _AnalyticsBody extends StatelessWidget {
                         spacing: TokensStrip.s2,
                         runSpacing: TokensStrip.s2,
                         children: [
-                          DashboardHomeActionChip(
+                          FxActionChip(
                             label: 'Ver financeiro',
                             accent:
                                 analyticsTemInadimplencia(data.inadimplentes)
@@ -79,7 +79,7 @@ class _AnalyticsBody extends StatelessWidget {
                               context.push('/financeiro');
                             },
                           ),
-                          DashboardHomeActionChip(
+                          FxActionChip(
                             label: 'Ver retenção',
                             accent: brand,
                             isDark: dark,
@@ -102,8 +102,8 @@ class _AnalyticsBody extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s2),
                 OperationalMetricTile(
                   label: 'Retenção D30',
-                  value: '${data.retencaoD30.toStringAsFixed(1)}%',
-                  hint: 'D7 ${data.retencaoD7.toStringAsFixed(1)}%',
+                  value: '${formatBrDecimal(data.retencaoD30)}%',
+                  hint: 'D7 ${formatBrDecimal(data.retencaoD7)}%',
                   color: EagleTokens.good,
                   isDark: dark,
                 ),
@@ -226,7 +226,7 @@ class _FunilCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Ativação: ${(funil.taxaAtivacao * 100).toStringAsFixed(1)}%',
+                'Ativação: ${formatBrDecimal(funil.taxaAtivacao * 100)}%',
                 style: TextStyle(
                   color: ink,
                   fontSize: 14,
@@ -235,7 +235,7 @@ class _FunilCard extends StatelessWidget {
               ),
               _PillTag(
                 label:
-                    'Engaj: ${(funil.taxaEngajamento * 100).toStringAsFixed(1)}%',
+                    'Engaj: ${formatBrDecimal(funil.taxaEngajamento * 100)}%',
               ),
             ],
           ),

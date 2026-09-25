@@ -48,7 +48,7 @@ void main() {
     expect(formatTreinoLoadKg(null), '—');
     expect(formatTreinoLoadKg(0), '—');
     expect(formatTreinoLoadKg(30), '30kg');
-    expect(formatTreinoLoadKg(12.5), '12.5kg');
+    expect(formatTreinoLoadKg(12.5), '12,5kg');
   });
 
   test('groups by muscle and numbers locally', () {

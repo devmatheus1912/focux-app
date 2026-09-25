@@ -24,7 +24,7 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('goPersonalShellTab'));

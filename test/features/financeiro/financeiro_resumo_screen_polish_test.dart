@@ -11,7 +11,7 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('FxShellScaffold(')));
     expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('Ver mensalidades'));

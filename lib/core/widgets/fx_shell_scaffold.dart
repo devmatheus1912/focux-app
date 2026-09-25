@@ -192,6 +192,11 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
       backButton = null;
     }
 
+    // Mesmo tamanho com ou sem subtítulo — título nunca "cresce" sozinho.
+    final titleStyle = TokensStrip.h2(
+      color: ink,
+      fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
+    ).copyWith(fontSize: 17);
     final titleWidget =
         subtitle == null
             ? Text(
@@ -199,10 +204,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: titleAlign,
-              style: TokensStrip.h2(
-                color: ink,
-                fontFamily: Theme.of(context).textTheme.bodyLarge?.fontFamily,
-              ),
+              style: titleStyle,
             )
             : Column(
               mainAxisSize: MainAxisSize.min,
@@ -213,11 +215,7 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: titleAlign,
-                  style: TokensStrip.h2(
-                    color: ink,
-                    fontFamily:
-                        Theme.of(context).textTheme.bodyLarge?.fontFamily,
-                  ).copyWith(fontSize: 17),
+                  style: titleStyle,
                 ),
                 Text(
                   subtitle!,

@@ -371,6 +371,7 @@ class ConversationMessageComposer extends StatelessWidget {
                               style: FocuxHubTypography.body(color: chrome.ink),
                               cursorColor: primary,
                               decoration: InputDecoration(
+                                filled: false,
                                 hintText: 'Mensagem',
                                 hintStyle: FocuxHubTypography.bodyMuted(
                                   color: mute,

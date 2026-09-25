@@ -7,7 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
 
@@ -44,7 +44,6 @@ class DunningFocusCard extends StatelessWidget {
   Color _accent(BuildContext context, DunningFocusActionId id) {
     final primary = Theme.of(context).colorScheme.primary;
     return switch (id) {
-      DunningFocusActionId.cobrar => EagleTokens.moneyGreen,
       DunningFocusActionId.marcar => EagleTokens.bad,
       _ => primary,
     };
@@ -116,14 +115,15 @@ class DunningFocusCard extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               if (primaryRun != null)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: dunningFocusActionLabel(split.primary),
                   accent: _accent(context, split.primary),
                   isDark: isDark,
                   onPressed: primaryRun,
+                  solid: true,
                 ),
               if (split.secondary.isNotEmpty)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Mais ações',
                   accent: chrome.mute,
                   isDark: isDark,

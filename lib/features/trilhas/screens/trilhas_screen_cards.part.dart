@@ -141,19 +141,19 @@ class _TrilhaCard extends StatelessWidget {
               runSpacing: TokensStrip.s2,
               children: [
                 if (trilha.metaValor != null && !trilha.concluida)
-                  DashboardHomeActionChip(
+                  FxActionChip(
                     label: 'Atualizar progresso',
                     accent: primary,
                     isDark: isDark,
                     onPressed: onAtualizarProgresso,
                   ),
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Nova etapa',
                   accent: primary,
                   isDark: isDark,
                   onPressed: onAdicionarMarco,
                 ),
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Excluir',
                   accent: EagleTokens.bad,
                   isDark: isDark,
@@ -268,13 +268,13 @@ class _TrilhasListBody extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Lista',
                 accent: primary,
                 isDark: isDark,
                 onPressed: () => safePopOrGo(context, '/alunos/$alunoId'),
               ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Evolução',
                 accent: primary,
                 isDark: isDark,
@@ -283,7 +283,7 @@ class _TrilhasListBody extends StatelessWidget {
                   extra: alunoNome,
                 ),
               ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Chat',
                 accent: primary,
                 isDark: isDark,
@@ -385,7 +385,7 @@ class _TrilhasListBody extends StatelessWidget {
                 onConcluirMarco: (marco) => onConcluirMarco(trilha, marco),
               ),
             if (lista.hasMore)
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: loadingMore ? 'Carregando…' : 'Carregar mais',
                 accent: primary,
                 isDark: isDark,

@@ -36,7 +36,7 @@ void main() {
     expect(screen, contains('planoSucessoHubSubtitle'));
     expect(screen, contains('PopScope'));
     expect(screen, contains("'Criar plano'"));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
     expect(screen, contains("label: 'Lista'"));

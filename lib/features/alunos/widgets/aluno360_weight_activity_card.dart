@@ -7,12 +7,13 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import 'aluno360_help_sheets.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 List<double> resolveWeightSeriesForAluno(
   List<double> avaliacoes,
@@ -75,7 +76,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
               value:
                   aluno.peso == null
                       ? '—'
-                      : '${aluno.peso!.toStringAsFixed(1)} kg',
+                      : '${formatBrDecimal(aluno.peso!)} kg',
               hint:
                   showRadarHint
                       ? 'Mapa corporal pendente no radar'
@@ -98,7 +99,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
             error:
                 (_, __) => Align(
                   alignment: Alignment.centerLeft,
-                  child: DashboardHomeActionChip(
+                  child: FxActionChip(
                     label: 'Tentar histórico',
                     accent: primary,
                     isDark: isDark,
@@ -114,7 +115,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
               if (weightSeries.isEmpty) {
                 return Align(
                   alignment: Alignment.centerLeft,
-                  child: DashboardHomeActionChip(
+                  child: FxActionChip(
                     label: 'Registrar primeira medida',
                     accent: primary,
                     isDark: isDark,
@@ -150,7 +151,7 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   const SizedBox(height: TokensStrip.s2),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: DashboardHomeActionChip(
+                    child: FxActionChip(
                       label: 'Registrar medida',
                       accent: primary,
                       isDark: isDark,
@@ -191,7 +192,7 @@ class Aluno360WeightTrendSparkline extends StatelessWidget {
     final deltaLabel =
         deltaKg.abs() < 0.05
             ? 'Estável'
-            : '${deltaKg > 0 ? '+' : ''}${deltaKg.toStringAsFixed(1)} kg';
+            : '${deltaKg > 0 ? '+' : ''}${formatBrDecimal(deltaKg)} kg';
     final deltaColor =
         deltaKg.abs() < 0.05
             ? mute

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_command_center_sticky_header.dart';
-import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
+import 'package:focux_app/core/widgets/fx_action_chip.dart';
 import 'package:focux_app/features/onboarding/utils/setup_action_navigation.dart';
 import 'package:focux_app/features/onboarding/widgets/setup_step_widgets.dart';
 
@@ -58,7 +58,7 @@ void main() {
     final labelBox = tester.getRect(find.text('Continuar'));
     final materialBox = tester.getRect(
       find.descendant(
-        of: find.byType(DashboardHomeActionChip),
+        of: find.byType(FxActionChip),
         matching: find.byType(Material),
       ),
     );

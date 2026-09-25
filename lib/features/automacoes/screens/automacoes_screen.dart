@@ -27,7 +27,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/utils/alunos_home_prefetch.dart';
@@ -39,6 +38,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../../../core/api/pagina.dart';
 import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'automacoes_screen_logs.part.dart';
 part 'automacoes_screen_list.part.dart';
@@ -346,6 +346,7 @@ class _AutomacoesScreenState extends ConsumerState<AutomacoesScreen> {
                       onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                       textInputAction: TextInputAction.search,
                       decoration: InputDecoration(
+                        filled: false,
                         isDense: true,
                         hintText: 'Buscar template ou fluxo',
                         border: InputBorder.none,

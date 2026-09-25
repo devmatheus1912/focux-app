@@ -22,12 +22,13 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import '../utils/health_dashboard_display.dart';
 import '../widgets/recovery_score_ring.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -374,7 +375,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 const SizedBox(height: TokensStrip.s3),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: DashboardHomeActionChip(
+                  child: FxActionChip(
                     label:
                         _refreshing
                             ? 'Atualizando…'
@@ -442,7 +443,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   label: 'Sono',
                   value:
                       s.sleepHours > 0
-                          ? '${s.sleepHours.toStringAsFixed(1)}h'
+                          ? '${formatBrDecimal(s.sleepHours)}h'
                           : '--',
                   hint: 'Última noite',
                   color: EagleTokens.purple,

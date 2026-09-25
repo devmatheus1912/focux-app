@@ -47,7 +47,7 @@ void main() {
     expect(screen, isNot(contains('FloatingActionButton')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('habitoFocusCompliance'));
     expect(screen, contains('habitoComplianceListExcludingFocus'));
     expect(screen, contains('safeArea: false'));

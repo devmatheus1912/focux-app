@@ -158,7 +158,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Medidas em dia'), findsOneWidget);
-    expect(find.text('Gordura 18.4% · Massa magra 52.1 kg'), findsOneWidget);
+    expect(find.text('Gordura 18,4% · Massa magra 52,1 kg'), findsOneWidget);
     expect(find.text('Idade'), findsNothing);
   });
 }

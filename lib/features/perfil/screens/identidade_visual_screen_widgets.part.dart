@@ -517,6 +517,7 @@ class _BrandField extends StatelessWidget {
               height: maxLines > 1 ? 1.45 : 1.2,
             ),
             decoration: InputDecoration(
+              filled: false,
               hintText: hint,
               hintStyle: TextStyle(
                 color: chrome.mute.withValues(alpha: 0.55),

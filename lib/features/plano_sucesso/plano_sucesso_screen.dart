@@ -28,11 +28,11 @@ import '../../core/widgets/operational_metric_tile.dart';
 import '../../core/widgets/skeleton_loader.dart';
 import '../alunos/utils/satellite_screen_utils.dart';
 import '../alunos/widgets/aluno_inset_form_field.dart';
-import '../dashboard/widgets/dashboard_home_action_chip.dart';
 import 'plano_sucesso_display.dart';
 import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
 import 'widgets/plano_sucesso_help_sheet.dart';
+import '../../core/widgets/fx_action_chip.dart';
 
 part 'plano_sucesso_screen_hub.part.dart';
 

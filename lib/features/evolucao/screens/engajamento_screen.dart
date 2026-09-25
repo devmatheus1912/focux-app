@@ -24,7 +24,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
@@ -292,19 +292,19 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
         spacing: TokensStrip.s2,
         runSpacing: TokensStrip.s2,
         children: [
-          DashboardHomeActionChip(
+          FxActionChip(
             label: engajamentoPeriodoLabel(_dias),
             accent: primary,
             isDark: isDark,
             onPressed: _pickPeriodo,
           ),
-          DashboardHomeActionChip(
+          FxActionChip(
             label: 'Aluno',
             accent: primary,
             isDark: isDark,
             onPressed: _abrirAluno,
           ),
-          DashboardHomeActionChip(
+          FxActionChip(
             label: 'Chat',
             accent: primary,
             isDark: isDark,

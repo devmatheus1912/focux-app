@@ -33,7 +33,7 @@ void main() {
     expect(screen, contains('concluirMarco'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('subtitle: freshness'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('showAlunoTrilhasHelpSheet'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('viewInsetsOf'));

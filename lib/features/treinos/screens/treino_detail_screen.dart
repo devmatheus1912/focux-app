@@ -10,7 +10,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
@@ -40,6 +39,7 @@ import '../widgets/treino_inset_sheet.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_prescription_video_block.dart';
 import '../data/workout_builder_preset.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';

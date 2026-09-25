@@ -63,8 +63,8 @@ void main() {
   });
 
   test('relatorioAlunoDeltaLabel e check-ins', () {
-    expect(relatorioAlunoDeltaLabel(10), '+10.0%');
-    expect(relatorioAlunoDeltaLabel(-2.5), '-2.5%');
+    expect(relatorioAlunoDeltaLabel(10), '+10,0%');
+    expect(relatorioAlunoDeltaLabel(-2.5), '-2,5%');
     expect(relatorioAlunoCheckinsLabel(0), 'Nenhum');
     expect(relatorioAlunoCheckinsLabel(1), '1 check-in');
     expect(relatorioAlunoCheckinsLabel(8), '8 check-ins');

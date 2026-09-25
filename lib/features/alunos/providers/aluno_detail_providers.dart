@@ -18,6 +18,7 @@ import '../../../core/analytics/analytics_service.dart';
 import 'package:flutter/foundation.dart';
 import 'aluno_timeline360_paged_provider.dart';
 import 'alunos_provider.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
 
@@ -294,7 +295,7 @@ final alunoEvolucaoInteligenteProvider =
         ultimoPrLabel:
             carga == null
                 ? pr.exercicioNome
-                : '${carga == carga.roundToDouble() ? carga.toStringAsFixed(0) : carga.toStringAsFixed(1)}kg',
+                : '${carga == carga.roundToDouble() ? carga.toStringAsFixed(0) : formatBrDecimal(carga)}kg',
         ultimoPrCargaKg: carga,
         ultimoPrExercicio: pr.exercicioNome,
         volumeSemanal: raw.volumeSemanal,

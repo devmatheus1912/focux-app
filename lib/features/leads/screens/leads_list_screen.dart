@@ -254,6 +254,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                   onTapOutside: (_) => _searchFocus.unfocus(),
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
+                    filled: false,
                     isDense: true,
                     hintText: 'Buscar lead',
                     border: InputBorder.none,

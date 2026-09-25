@@ -32,7 +32,10 @@ void main() {
     expect(businessDunningFalhasLabel(1), '1 falha aberta');
     expect(businessDunningFalhasLabel(4), '4 falhas abertas');
     expect(businessComoCalculamos, contains('Recebido'));
-    expect(businessAlunosLabel(3, 10), '3 / 10');
+    expect(businessAlunosLabel(3, 10), '3 de 10 alunos ativos');
+    expect(businessAlunosLabel(1, 1), '1 de 1 aluno ativo');
+    expect(businessRecuperacaoLabel(0, 0), 'Nenhuma aberta');
+    expect(businessRecuperacaoLabel(50, 2), '50,0% recuperado · 2 falhas abertas');
     expect(businessTemInadimplencia(2), isTrue);
     expect(businessTemDunning(0), isFalse);
   });

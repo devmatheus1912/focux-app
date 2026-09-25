@@ -50,7 +50,7 @@ class _AnamneseBodyState extends State<_AnamneseBody> {
           runSpacing: TokensStrip.s2,
           children: [
             if (!a.isNaoIniciada && !a.isSolicitada)
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Pedir atestado',
                 accent: primary,
                 isDark: isDark,
@@ -66,7 +66,7 @@ class _AnamneseBodyState extends State<_AnamneseBody> {
                     ),
               ),
             if (a.isPreenchida || a.isPrecisaAtestado)
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Pedir atualização',
                 accent: primary,
                 isDark: isDark,
@@ -80,7 +80,7 @@ class _AnamneseBodyState extends State<_AnamneseBody> {
                       confirmLabel: 'Pedir atualização',
                     ),
               ),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: 'Chat',
               accent: primary,
               isDark: isDark,

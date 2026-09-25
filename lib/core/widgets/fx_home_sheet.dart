@@ -236,14 +236,15 @@ class FxHomeSheetSurface extends StatelessWidget {
 class FxHomeSheetHeader extends StatelessWidget {
   const FxHomeSheetHeader({
     super.key,
-    required this.leading,
+    this.leading,
     required this.title,
     this.subtitle,
     this.isDark,
     this.trailing,
   });
 
-  final Widget leading;
+  /// Sem ícone → título alinha no recuo do handle (sem slot vazio).
+  final Widget? leading;
   final String title;
   final String? subtitle;
   final bool? isDark;
@@ -255,18 +256,42 @@ class FxHomeSheetHeader extends StatelessWidget {
     final chrome = ShellChrome.forBrightness(context, dark);
     final caption = chrome.mute;
     final subtitleText = subtitle?.trim();
+    final titleStyle = FocuxHubTypography.sectionTitle(
+      context,
+      color: chrome.ink,
+    );
+    // Ícone e 1ª linha do título centrados no alvo de 48 do Fechar.
+    final titleLine = TextPainter(
+      text: TextSpan(text: title, style: titleStyle),
+      maxLines: 1,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final titleTop = math.max(
+      0.0,
+      (FxHomeSheetChrome.touchTarget - titleLine.height) / 2,
+    );
+    titleLine.dispose();
+    const iconTop =
+        (FxHomeSheetChrome.touchTarget - FxSettingsLayout.iconSize) / 2;
+    final icon = leading;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ExcludeSemantics(
-          child: SizedBox(
-            width: FxSettingsLayout.iconSize,
-            height: FxSettingsLayout.iconSize,
-            child: Center(child: leading),
+        if (icon != null) ...[
+          Padding(
+            padding: const EdgeInsets.only(top: iconTop),
+            child: ExcludeSemantics(
+              child: SizedBox(
+                width: FxSettingsLayout.iconSize,
+                height: FxSettingsLayout.iconSize,
+                child: Center(child: icon),
+              ),
+            ),
           ),
-        ),
-        SizedBox(width: FxSettingsLayout.iconGap),
+          SizedBox(width: FxSettingsLayout.iconGap),
+        ],
         Expanded(
           child: Semantics(
             header: true,
@@ -274,17 +299,16 @@ class FxHomeSheetHeader extends StatelessWidget {
                 subtitleText == null || subtitleText.isEmpty
                     ? title
                     : '$title. $subtitleText',
-            child: Column(
+            child: Padding(
+              padding: EdgeInsets.only(top: titleTop),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.sectionTitle(
-                    context,
-                    color: chrome.ink,
-                  ),
+                  style: titleStyle,
                 ),
                 if (subtitleText != null && subtitleText.isNotEmpty) ...[
                   SizedBox(height: TokensStrip.s1),
@@ -300,6 +324,7 @@ class FxHomeSheetHeader extends StatelessWidget {
                   ),
                 ],
               ],
+            ),
             ),
           ),
         ),

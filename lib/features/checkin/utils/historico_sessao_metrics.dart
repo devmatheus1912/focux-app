@@ -1,5 +1,6 @@
 import '../data/checkin_repository.dart';
 import 'historico_display.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 /// Métricas da sessão derivadas do detalhe (Onda A) + opcional BFF (Onda B).
 class HistoricoSessaoMetrics {
@@ -127,11 +128,11 @@ String historicoVolumeLabel(double kg) {
     final mil = kg / 1000;
     final text = mil >= 10
         ? mil.toStringAsFixed(0)
-        : mil.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+        : formatBrDecimal(mil).replaceAll(RegExp(r',0$'), '');
     return '$text mil kg';
   }
   if (kg == kg.roundToDouble()) return '${kg.toStringAsFixed(0)} kg';
-  return '${kg.toStringAsFixed(1)} kg';
+  return '${formatBrDecimal(kg)} kg';
 }
 
 /// Sem séries nesta sessão, o volume anterior não entra — não compara vazio.
@@ -156,7 +157,7 @@ String? historicoCargaDeltaLabel({
   final sign = delta > 0 ? '+' : '';
   final text = delta == delta.roundToDouble()
       ? delta.toStringAsFixed(0)
-      : delta.toStringAsFixed(1);
+      : formatBrDecimal(delta);
   return '$sign$text kg vs anterior';
 }
 
@@ -179,7 +180,7 @@ String historicoDeltaKgLabel(double delta) {
   final sign = delta > 0 ? '+' : '';
   final text = delta == delta.roundToDouble()
       ? delta.toStringAsFixed(0)
-      : delta.toStringAsFixed(1);
+      : formatBrDecimal(delta);
   return '$sign$text kg vs anterior';
 }
 

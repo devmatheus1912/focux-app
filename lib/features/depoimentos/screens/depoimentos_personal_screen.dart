@@ -335,6 +335,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      filled: false,
                       isDense: true,
                       hintText: 'Buscar aluno ou texto',
                       border: InputBorder.none,

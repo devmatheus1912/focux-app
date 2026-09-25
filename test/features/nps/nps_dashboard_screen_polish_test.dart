@@ -15,7 +15,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, isNot(contains('FilledButton')));

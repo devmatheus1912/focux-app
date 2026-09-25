@@ -18,22 +18,22 @@ class _ProgressEntryCard extends StatelessWidget {
       if (medida.peso != null)
         _MiniValueChip(
           label: 'Peso',
-          value: '${medida.peso!.toStringAsFixed(1)} kg',
+          value: '${formatBrDecimal(medida.peso!)} kg',
         ),
       if (medida.cintura != null)
         _MiniValueChip(
           label: 'Cintura',
-          value: '${medida.cintura!.toStringAsFixed(1)} cm',
+          value: '${formatBrDecimal(medida.cintura!)} cm',
         ),
       if (medida.quadril != null)
         _MiniValueChip(
           label: 'Quadril',
-          value: '${medida.quadril!.toStringAsFixed(1)} cm',
+          value: '${formatBrDecimal(medida.quadril!)} cm',
         ),
       if (medida.braco != null)
         _MiniValueChip(
           label: 'Braco',
-          value: '${medida.braco!.toStringAsFixed(1)} cm',
+          value: '${formatBrDecimal(medida.braco!)} cm',
         ),
     ];
 

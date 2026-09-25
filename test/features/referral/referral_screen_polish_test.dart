@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxStripCard'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('Copiar convite'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('FxHelpIconButton'));

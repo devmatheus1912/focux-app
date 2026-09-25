@@ -29,12 +29,12 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
 import '../utils/trilhas_display.dart';
 import '../widgets/trilhas_help_sheet.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'trilhas_screen_cards.part.dart';
 

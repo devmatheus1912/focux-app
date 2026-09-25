@@ -6,7 +6,7 @@ import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_base_radar_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_finance_empty.dart';
-import 'package:focux_app/features/dashboard/widgets/dashboard_home_action_chip.dart';
+import 'package:focux_app/core/widgets/fx_action_chip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_activation_strip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_coach_banner.dart';
 
@@ -23,7 +23,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(DashboardHomeActionChip), findsNothing);
+    expect(find.byType(FxActionChip), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
     expect(find.byType(OperationalMetricTile), findsOneWidget);
     expect(find.textContaining('RECEBIDO'), findsOneWidget);

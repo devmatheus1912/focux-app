@@ -54,7 +54,7 @@ class _WalletFormFields extends StatelessWidget {
                   spacing: TokensStrip.s2,
                   runSpacing: TokensStrip.s2,
                   children: [
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: 'Perfil',
                       accent: primary,
                       isDark: isDark,
@@ -63,7 +63,7 @@ class _WalletFormFields extends StatelessWidget {
                         safePopOrGo(context, '/perfil');
                       },
                     ),
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: walletVerFinanceiroLabel(),
                       accent: primary,
                       isDark: isDark,
@@ -73,7 +73,7 @@ class _WalletFormFields extends StatelessWidget {
                       },
                     ),
                     if (temChave)
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: walletCopiarTileLabel(),
                         accent: primary,
                         isDark: isDark,
@@ -123,14 +123,14 @@ class _WalletFormFields extends StatelessWidget {
           spacing: TokensStrip.s2,
           runSpacing: TokensStrip.s2,
           children: [
-            DashboardHomeActionChip(
+            FxActionChip(
               label: walletTipoChipLabel(tipoChavePix),
               accent: primary,
               isDark: isDark,
               enabled: !carregando,
               onPressed: onSelecionarTipo,
             ),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: 'Mais',
               accent: primary,
               isDark: isDark,

@@ -94,7 +94,7 @@ extension on _AutomacoesScreenState {
                       ),
                     ),
                     const SizedBox(height: TokensStrip.s3),
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: 'Ativar',
                       accent: primary,
                       isDark: isDark,

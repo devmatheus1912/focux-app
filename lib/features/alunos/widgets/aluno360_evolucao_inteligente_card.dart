@@ -11,7 +11,7 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../dashboard/utils/aluno_volume_format.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -216,7 +216,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label:
                                         hasRadarP0 && !timelineHasSignals
                                             ? 'Radar corporal'

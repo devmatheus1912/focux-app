@@ -26,7 +26,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -326,7 +326,7 @@ class _EvolucaoComparativoScreenState
       spacing: TokensStrip.s2,
       runSpacing: TokensStrip.s2,
       children: [
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Evolução',
           accent: primary,
           isDark: isDark,
@@ -336,7 +336,7 @@ class _EvolucaoComparativoScreenState
                 extra: widget.alunoNome,
               ),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Fotos',
           accent: primary,
           isDark: isDark,

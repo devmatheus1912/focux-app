@@ -25,7 +25,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/desafio_repository.dart';
 import '../utils/desafio_display.dart';
@@ -371,14 +371,14 @@ class _DesafioDetailBody extends StatelessWidget {
                     spacing: TokensStrip.s2,
                     runSpacing: TokensStrip.s2,
                     children: [
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: 'Lista',
                         accent: primary,
                         isDark: isDark,
                         onPressed: onLeave,
                       ),
                       if (forAluno)
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: 'Hoje',
                           accent: primary,
                           isDark: isDark,
@@ -387,7 +387,7 @@ class _DesafioDetailBody extends StatelessWidget {
                       if (!forAluno &&
                           first != null &&
                           first.alunoId > 0)
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: '1º lugar',
                           accent: primary,
                           isDark: isDark,
@@ -395,7 +395,7 @@ class _DesafioDetailBody extends StatelessWidget {
                               context.push('/alunos/${first.alunoId}'),
                         ),
                       if (!forAluno && desafio.grupoAulaId != null)
-                        DashboardHomeActionChip(
+                        FxActionChip(
                           label: 'Turma',
                           accent: primary,
                           isDark: isDark,

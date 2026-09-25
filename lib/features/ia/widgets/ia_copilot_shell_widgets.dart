@@ -5,9 +5,10 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../utils/ia_copiloto_display.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 /// Chip sticky S1 após gerar — paridade [DashboardPrioritiesOverlay].
 /// Overlay flutuante (não barra `bottomNavigationBar` / S3–S5).
@@ -50,7 +51,7 @@ class IaCopilotResultActionBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: primaryLabel ?? iaCopilotoCriarTarefaLabel(),
                 accent: brand,
                 isDark: isDark,
@@ -388,7 +389,7 @@ class IaCopilotPrimaryAction extends StatelessWidget {
       label: label,
       child: Align(
         alignment: Alignment.centerLeft,
-        child: DashboardHomeActionChip(
+        child: FxActionChip(
           label: label,
           accent: brand,
           isDark: Theme.of(context).brightness == Brightness.dark,
@@ -421,7 +422,7 @@ class IaCopilotGenerationStatus extends StatelessWidget {
   Widget build(BuildContext context) {
     final elapsed =
         elapsedMs >= 1000
-            ? '${(elapsedMs / 1000).toStringAsFixed(1)}s'
+            ? '${formatBrDecimal(elapsedMs / 1000)}s'
             : '${elapsedMs}ms';
 
     // Pós-gerar: linha compacta — não empurra Insights abaixo do fold (§9 S1 / pilar 13).

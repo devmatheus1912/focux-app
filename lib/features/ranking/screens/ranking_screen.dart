@@ -21,7 +21,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ranking_repository.dart';
 import '../utils/ranking_display.dart';
@@ -381,13 +381,13 @@ class _RankingFocusCard extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Crescer base',
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
                 onPressed: onAlunos,
               ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Assinatura',
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,

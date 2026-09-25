@@ -21,7 +21,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/gamificacao_repository.dart';
 import '../models/gamificacao_badge_tile.dart';
@@ -294,14 +294,14 @@ class _StreakCard extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: gamificacaoFocusLabel(isAluno: isAluno),
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
                 onPressed: () => _abrirFoco(context, isAluno: isAluno),
               ),
               if (nextBadge case final pending?)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: pending.label,
                   accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,

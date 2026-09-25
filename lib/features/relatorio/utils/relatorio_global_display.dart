@@ -1,8 +1,9 @@
 import '../../../core/utils/fx_utils.dart';
 import '../data/relatorio_repository.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 String relatorioAderenciaMediaLabel(double media) {
-  return '${media.clamp(0, 100).toStringAsFixed(1)}%';
+  return '${formatBrDecimal(media.clamp(0, 100))}%';
 }
 
 String relatorioAderenciaPercentLabel(int concluidos, int total) {

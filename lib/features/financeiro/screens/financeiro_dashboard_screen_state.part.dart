@@ -102,7 +102,7 @@ class _FinanceiroDashboardScreenState
                 ),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: DashboardHomeActionChip(
+                  child: FxActionChip(
                     label:
                         _extraAberto == null
                             ? 'Abrir extras do panorama'

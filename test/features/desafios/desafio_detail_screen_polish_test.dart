@@ -16,7 +16,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FeatureGate'));

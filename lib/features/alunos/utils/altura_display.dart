@@ -1,3 +1,4 @@
+import '../../../core/utils/pt_br_display.dart';
 /// Normaliza altura bruta (pode vir em cm quando > 3) para metros.
 double normalizeAlturaMeters(double raw) {
   if (raw > 3) return raw / 100;
@@ -17,5 +18,5 @@ AlturaDisplay formatAlturaDisplay(double? raw) {
     return const AlturaDisplay(value: '—', unit: 'm');
   }
   final meters = normalizeAlturaMeters(raw);
-  return AlturaDisplay(value: meters.toStringAsFixed(2), unit: 'm');
+  return AlturaDisplay(value: formatBrDecimal(meters, digits: 2), unit: 'm');
 }

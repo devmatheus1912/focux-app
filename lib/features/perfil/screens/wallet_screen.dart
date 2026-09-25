@@ -31,7 +31,6 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../../core/widgets/feature_gate.dart';
@@ -40,6 +39,7 @@ import '../../subscription/models/subscription_plan.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../utils/wallet_pix_validation.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'wallet_screen_widgets.part.dart';
 

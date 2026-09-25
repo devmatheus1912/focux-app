@@ -25,7 +25,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -398,7 +398,7 @@ class _FinanceiroMensalidadesTabState
                                   runSpacing: TokensStrip.s2,
                                   children: [
                                     if (tools.foldChip != null)
-                                      DashboardHomeActionChip(
+                                      FxActionChip(
                                         label: financeiroListaToolLabel(
                                           tools.foldChip!,
                                           modoSelecao: _modoSelecao,
@@ -410,7 +410,7 @@ class _FinanceiroMensalidadesTabState
                                             runTool(tools.foldChip!),
                                       ),
                                     if (tools.mais.isNotEmpty)
-                                      DashboardHomeActionChip(
+                                      FxActionChip(
                                         label: 'Mais',
                                         accent: chrome.mute,
                                         isDark: chrome.isDark,
@@ -558,7 +558,7 @@ class _FinanceiroMensalidadesTabState
                               ),
                               child: Align(
                                 alignment: Alignment.center,
-                                child: DashboardHomeActionChip(
+                                child: FxActionChip(
                                   label: 'Nova mensalidade',
                                   accent: primary,
                                   isDark: chrome.isDark,

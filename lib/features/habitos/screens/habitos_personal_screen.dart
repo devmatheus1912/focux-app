@@ -24,7 +24,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
@@ -304,7 +304,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 spacing: TokensStrip.s2,
                 runSpacing: TokensStrip.s2,
                 children: [
-                  DashboardHomeActionChip(
+                  FxActionChip(
                     label: 'Abrir aluno',
                     accent: primary,
                     isDark: isDark,
@@ -337,7 +337,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                 spacing: TokensStrip.s2,
                 runSpacing: TokensStrip.s2,
                 children: [
-                  DashboardHomeActionChip(
+                  FxActionChip(
                     label: 'Abrir',
                     accent: primary,
                     isDark: isDark,

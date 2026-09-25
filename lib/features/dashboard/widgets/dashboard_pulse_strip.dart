@@ -8,7 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import 'dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -173,7 +173,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
             const SizedBox(height: TokensStrip.s2),
             Align(
               alignment: Alignment.centerLeft,
-              child: DashboardHomeActionChip(
+              child: FxActionChip(
                 label: emptyTrendCtaLabel!,
                 accent: primary,
                 isDark: isDark,

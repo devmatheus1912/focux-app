@@ -365,6 +365,12 @@ class AppTheme {
       ),
 
       listTileTheme: ListTileThemeData(
+        // Trailing/leading texto em Inter; mono só via FocuxHubTypography.metric.
+        leadingAndTrailingTextStyle: _inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: onSurfMute,
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         iconColor: onSurfMute,
         tileColor: surface,

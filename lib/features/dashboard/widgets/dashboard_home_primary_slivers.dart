@@ -22,7 +22,7 @@ import 'dashboard_attention_rail.dart';
 import 'dashboard_base_radar_strip.dart';
 import 'dashboard_command_center_section.dart';
 import 'dashboard_day_focus_banner.dart';
-import 'dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import 'dashboard_home_coach_banner.dart';
 import 'dashboard_home_header.dart';
 import 'dashboard_pulse_strip.dart';
@@ -121,11 +121,12 @@ List<Widget> buildDashboardHomePrimarySlivers({
           padding: DashboardLayout.foldCard,
           child: Align(
             alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
+            child: FxActionChip(
               label: coachPendingLabel,
               accent: primary,
               isDark: isDark,
               onPressed: () => context.push('/coach'),
+              solid: true,
             ),
           ),
         ),

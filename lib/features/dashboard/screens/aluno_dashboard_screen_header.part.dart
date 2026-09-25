@@ -282,7 +282,7 @@ class _TodayFocusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TokensStrip.s3),
-          DashboardHomeActionChip(
+          FxActionChip(
             label: action.cta,
             accent: primary,
             isDark: isDark,
@@ -623,7 +623,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     final formatted =
         carga == carga.roundToDouble()
             ? carga.toStringAsFixed(0)
-            : carga.toStringAsFixed(1);
+            : formatBrDecimal(carga);
     return '${formatted}kg';
   }
 
@@ -631,7 +631,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     final formatted =
         value == value.roundToDouble()
             ? value.toStringAsFixed(0)
-            : value.toStringAsFixed(1);
+            : formatBrDecimal(value);
     if (unidade.isEmpty) return formatted;
     return '$formatted $unidade';
   }

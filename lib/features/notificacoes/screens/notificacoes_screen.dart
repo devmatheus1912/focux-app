@@ -250,6 +250,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                   },
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   decoration: const InputDecoration(
+                    filled: false,
                     isDense: true,
                     hintText: 'Buscar aviso',
                     border: InputBorder.none,

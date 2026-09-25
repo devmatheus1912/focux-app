@@ -44,20 +44,20 @@ extension _PlanoSucessoHub on _PlanoSucessoScreenState {
       runSpacing: TokensStrip.s2,
       children: [
         if (onEditar != null)
-          DashboardHomeActionChip(
+          FxActionChip(
             label: 'Editar',
             accent: primary,
             isDark: isDark,
             onPressed: onEditar,
           ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Lista',
           accent: primary,
           isDark: isDark,
           onPressed: () =>
               safePopOrGo(context, '/alunos/${widget.alunoId}'),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Evolução',
           accent: primary,
           isDark: isDark,
@@ -66,7 +66,7 @@ extension _PlanoSucessoHub on _PlanoSucessoScreenState {
             extra: widget.alunoNome,
           ),
         ),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: 'Chat',
           accent: primary,
           isDark: isDark,

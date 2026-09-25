@@ -8,7 +8,7 @@ String businessNdrStatus(double? ndrPct) {
 }
 
 String businessPctLabel(double? pct) =>
-    pct == null ? '—' : '${pct.toStringAsFixed(1).replaceAll('.', ',')}%';
+    pct == null ? '—' : formatBrPercent(pct);
 
 const businessNdrLabel = 'Retenção de receita (NDR)';
 const businessArpaLabel = 'Média por aluno (ARPA)';
@@ -55,7 +55,12 @@ String businessPqlLabel(String raw) {
   }
 }
 
-String businessAlunosLabel(int ativos, int total) => '$ativos / $total';
+String businessAlunosLabel(int ativos, int total) =>
+    total == 1 ? '$ativos de 1 aluno ativo' : '$ativos de $total alunos ativos';
+
+String businessRecuperacaoLabel(double pct, int abertas) => abertas <= 0
+    ? businessDunningFalhasLabel(abertas)
+    : '${businessPctLabel(pct)} recuperado · ${businessDunningFalhasLabel(abertas)}';
 
 String businessDunningFalhasLabel(int abertas) {
   if (abertas <= 0) return 'Nenhuma aberta';

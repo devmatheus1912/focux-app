@@ -94,6 +94,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                                 fontWeight: FontWeight.w500,
                               ),
                               decoration: InputDecoration(
+                                filled: false,
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(
                                   vertical: 10,

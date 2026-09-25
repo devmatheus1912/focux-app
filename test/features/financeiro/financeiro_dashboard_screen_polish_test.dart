@@ -40,7 +40,7 @@ void main() {
     expect(screen, contains('financeiroPanoramaExtras'));
     expect(screen, contains("'Mais no panorama'"));
     expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, isNot(contains('FxSettingsGroup')));

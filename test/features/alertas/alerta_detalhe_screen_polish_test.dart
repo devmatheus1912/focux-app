@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('OperationalMetricTile'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('SkeletonList'));

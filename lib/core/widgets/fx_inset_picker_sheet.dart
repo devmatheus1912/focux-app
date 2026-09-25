@@ -81,7 +81,7 @@ Future<T?> showFxInsetPickerSheet<T>(
               subtitle: subtitle,
               leading:
                   headerIcon == null
-                      ? const SizedBox(width: 22, height: 22)
+                      ? null
                       : Icon(headerIcon, color: soft, size: 20),
             ),
             const SizedBox(height: TokensStrip.s3),

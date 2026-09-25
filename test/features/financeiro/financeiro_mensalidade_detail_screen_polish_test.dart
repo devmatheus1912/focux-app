@@ -26,7 +26,7 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('showFinanceiroMensalidadeHelpSheet'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('mensalidadeDetailMaisActions'));
     expect(screen, contains('mensalidadeDetailMaisSheetTitle'));

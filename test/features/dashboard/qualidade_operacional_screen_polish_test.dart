@@ -17,7 +17,7 @@ void main() {
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('relatoriosHubViewed'));

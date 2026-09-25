@@ -406,6 +406,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 FxKeyboardDismissScope.dismiss(),
                             textInputAction: TextInputAction.search,
                             decoration: InputDecoration(
+                              filled: false,
                               isDense: true,
                               hintText: 'Buscar publicação',
                               border: InputBorder.none,

@@ -4,9 +4,9 @@ import 'package:focux_app/features/relatorio/utils/relatorio_global_display.dart
 
 void main() {
   test('relatorioAderenciaMediaLabel formata a média da base', () {
-    expect(relatorioAderenciaMediaLabel(72.3), '72.3%');
-    expect(relatorioAderenciaMediaLabel(0), '0.0%');
-    expect(relatorioAderenciaMediaLabel(140), '100.0%');
+    expect(relatorioAderenciaMediaLabel(72.3), '72,3%');
+    expect(relatorioAderenciaMediaLabel(0), '0,0%');
+    expect(relatorioAderenciaMediaLabel(140), '100,0%');
   });
 
   test('relatorioAderenciaPercentLabel ignora divisão por zero', () {

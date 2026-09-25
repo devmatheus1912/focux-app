@@ -249,6 +249,7 @@ class _HistoricoCheckinScreenState
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   textInputAction: TextInputAction.search,
                   decoration: InputDecoration(
+                    filled: false,
                     isDense: true,
                     hintText: 'Buscar treino',
                     border: InputBorder.none,

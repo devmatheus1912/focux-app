@@ -38,7 +38,7 @@ void main() {
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('ListView.builder'));
     expect(screen, isNot(contains('TabBar')));

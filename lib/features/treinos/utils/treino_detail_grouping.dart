@@ -1,5 +1,6 @@
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../data/treino_repository.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 String treinoDetailContextLabel(Treino treino, String? alunoNome) {
   final name = alunoNome?.trim();
@@ -11,7 +12,7 @@ String treinoDetailContextLabel(Treino treino, String? alunoNome) {
 String formatTreinoLoadKg(double? value) {
   if (value == null || value <= 0) return '—';
   if (value == value.roundToDouble()) return '${value.toStringAsFixed(0)}kg';
-  return '${value.toStringAsFixed(1)}kg';
+  return '${formatBrDecimal(value)}kg';
 }
 
 String treinoDetailGroupLabel(TreinoExercicioItem te) {

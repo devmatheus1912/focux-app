@@ -21,7 +21,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/coach_proativo_repository.dart';
 import '../utils/coach_display.dart';
@@ -282,14 +282,14 @@ class _CoachFocusCard extends StatelessWidget {
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: coachFocusActionLabel(split.primary),
                 accent: primary,
                 isDark: isDark,
                 onPressed: run(split.primary),
               ),
               if (split.secondary.isNotEmpty)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Mais ações',
                   accent: chrome.mute,
                   isDark: isDark,

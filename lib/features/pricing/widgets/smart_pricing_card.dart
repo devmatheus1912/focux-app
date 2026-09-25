@@ -8,7 +8,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/smart_pricing_repository.dart';
 
 class SmartPricingCard extends ConsumerStatefulWidget {
@@ -246,7 +246,7 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
             ),
           ],
           const SizedBox(height: TokensStrip.s2),
-          DashboardHomeActionChip(
+          FxActionChip(
             label: 'Criar pacote sugerido',
             accent: primary,
             isDark: isDark,

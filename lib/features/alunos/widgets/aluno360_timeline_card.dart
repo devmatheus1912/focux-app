@@ -10,7 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -235,7 +235,7 @@ class Aluno360TimelineCard extends StatelessWidget {
               key: const ValueKey('aluno360_timeline_empty'),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: DashboardHomeActionChip(
+                child: FxActionChip(
                   label: compactEmpty ? 'Abrir chat' : 'Pedir check-in',
                   accent: primary,
                   isDark: isDark,

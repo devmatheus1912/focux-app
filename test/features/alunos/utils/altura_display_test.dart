@@ -23,13 +23,13 @@ void main() {
 
     test('formata metros corretos', () {
       final display = formatAlturaDisplay(1.75);
-      expect(display.value, '1.75');
+      expect(display.value, '1,75');
       expect(display.unit, 'm');
     });
 
     test('corrige valor salvo em cm', () {
       final display = formatAlturaDisplay(190);
-      expect(display.value, '1.90');
+      expect(display.value, '1,90');
       expect(display.unit, 'm');
     });
   });

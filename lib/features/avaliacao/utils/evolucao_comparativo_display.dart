@@ -1,5 +1,6 @@
 import '../../../core/utils/fx_utils.dart';
 import '../data/avaliacao_repository.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 enum EvolucaoComparativoDeltaTone { better, worse, same, missing }
 
@@ -38,7 +39,7 @@ bool evolucaoComparativoIsEmptyError(String message) {
 String evolucaoComparativoPesoMetricHint(double? delta) {
   if (delta == null) return 'Peso da última avaliação';
   if (delta == 0) return 'Peso igual ao da primeira';
-  final signed = '${delta > 0 ? '+' : ''}${delta.toStringAsFixed(1)} kg';
+  final signed = '${delta > 0 ? '+' : ''}${formatBrDecimal(delta)} kg';
   return 'Desde a primeira: $signed';
 }
 

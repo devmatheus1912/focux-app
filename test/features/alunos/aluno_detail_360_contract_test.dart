@@ -514,7 +514,7 @@ void main() {
         contains('Agendar follow-up'),
         contains('operacaoOutlinedButtonStyle'),
         contains('showAluno360CommitmentSheet'),
-        isNot(contains('DashboardHomeActionChip')),
+        isNot(contains('FxActionChip')),
         isNot(contains('Registrar ou agendar')),
       ),
     );
@@ -628,7 +628,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('FxLiquidPrimaryButton'),
-        isNot(contains('DashboardHomeActionChip')),
+        isNot(contains('FxActionChip')),
         contains('Ações rápidas da aba operação'),
         contains("tabIndex == 1 ? 'Ajustar treino'"),
       ),
@@ -685,7 +685,7 @@ void main() {
       ).readAsStringSync(),
       allOf(
         contains('DashboardSectionHeader'),
-        contains('DashboardHomeActionChip'),
+        contains('FxActionChip'),
         contains('_EvolucaoMetricChip'),
         contains('_VolumeSparklineRow'),
         contains('formatAlunoVolumeKg'),

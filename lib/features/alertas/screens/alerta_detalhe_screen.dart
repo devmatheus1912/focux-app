@@ -24,7 +24,7 @@ import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/data/ia_repository.dart';
 import '../../ia/widgets/ia_quota_upgrade.dart';
@@ -419,7 +419,7 @@ class _AlertaDetalheScreenState extends ConsumerState<AlertaDetalheScreen> {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label:
                                         _gerandoIa
                                             ? 'Gerando…'

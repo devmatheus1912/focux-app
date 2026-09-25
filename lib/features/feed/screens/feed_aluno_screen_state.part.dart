@@ -330,6 +330,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                                 FxKeyboardDismissScope.dismiss(),
                             textInputAction: TextInputAction.search,
                             decoration: InputDecoration(
+                              filled: false,
                               isDense: true,
                               hintText: 'Buscar publicação',
                               border: InputBorder.none,

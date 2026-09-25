@@ -155,8 +155,8 @@ String relatorioAlunoAderenciaStatus(double taxa) {
 bool relatorioAlunoAderenciaBaixa(double taxa) => taxa < 50;
 
 String relatorioAlunoDeltaLabel(double delta) {
-  if (delta > 0) return '+${delta.toStringAsFixed(1)}%';
-  return '${delta.toStringAsFixed(1)}%';
+  if (delta > 0) return '+${formatBrDecimal(delta)}%';
+  return '${formatBrDecimal(delta)}%';
 }
 
 String relatorioAlunoCheckinsLabel(int count) {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/friendly_error.dart';
-
 import '../../../core/api/media_upload_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -36,6 +35,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 part 'perfil_aluno_editar_screen_state.part.dart';
 part 'perfil_aluno_editar_screen_widgets.part.dart';

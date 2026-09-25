@@ -274,7 +274,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                         ),
                                       ),
                                       const Spacer(),
-                                      DashboardHomeActionChip(
+                                      FxActionChip(
                                         label:
                                             'Ações (${_selecionados.length})',
                                         accent: primary,

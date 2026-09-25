@@ -5,8 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_readability.dart';
-import 'dashboard_home_action_chip.dart';
-
+import '../../../core/widgets/fx_action_chip.dart';
 class DashboardCommandCenterStickyHeaderDelegate
     extends SliverPersistentHeaderDelegate {
   DashboardCommandCenterStickyHeaderDelegate({
@@ -57,8 +56,8 @@ class DashboardCommandCenterStickyHeaderDelegate
     final range = (maxExtent - minExtent).clamp(1.0, 100.0);
     final progress = (shrinkOffset / range).clamp(0.0, 1.0);
     final showSubtitle = !utilityOnly && !compact && progress < 0.55;
-    final chipFg = dashboardPrioritiesChipForeground(primary, isDark: isDark);
-    final chipBg = dashboardPrioritiesChipBackground(primary, isDark: isDark);
+    final chipFg = FxActionChip.solidForeground(isDark: isDark);
+    final chipBg = FxActionChip.solidBackground(primary, isDark: isDark);
     final hasTrailing =
         trailingActionLabel != null &&
         onTrailingAction != null &&
@@ -223,11 +222,12 @@ class DashboardPrioritiesOverlay extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(TokensStrip.s4, 0, TokensStrip.s4, 10),
       child: Align(
         alignment: AlignmentDirectional.bottomEnd,
-        child: DashboardHomeActionChip(
+        child: FxActionChip(
           label: label,
           accent: primary,
           isDark: isDark,
           onPressed: onTap,
+          solid: true,
         ),
       ),
     );

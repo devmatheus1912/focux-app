@@ -21,11 +21,12 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/nps_repository.dart';
 import '../utils/nps_display.dart';
 import '../widgets/nps_catalog_sheet.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 class NpsDashboardScreen extends ConsumerStatefulWidget {
   const NpsDashboardScreen({super.key});
@@ -215,7 +216,7 @@ class _NpsDashboardScreenState extends ConsumerState<NpsDashboardScreen> {
                                 const SizedBox(height: TokensStrip.s2),
                                 OperationalMetricTile(
                                   label: 'Média',
-                                  value: resumo.media.toStringAsFixed(1),
+                                  value: formatBrDecimal(resumo.media),
                                   hint: '${resumo.total} respostas',
                                   color: primary,
                                   isDark: isDark,
@@ -323,14 +324,14 @@ class _NpsFocusCard extends StatelessWidget {
     final chrome = ShellChrome.forBrightness(context, isDark);
     return FxStripCard(
       emphasize: true,
-      semanticsLabel: 'NPS ${resumo.npsScore.toStringAsFixed(1)}',
+      semanticsLabel: 'NPS ${formatBrDecimal(resumo.npsScore)}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('NPS', style: FocuxHubTypography.chip(chrome.mute)),
           const SizedBox(height: 6),
           Text(
-            resumo.npsScore.toStringAsFixed(1),
+            formatBrDecimal(resumo.npsScore),
             style: FocuxHubTypography.kpi(
               color: chrome.ink,
               fontSize: FocuxHubTypography.metricLg,
@@ -348,7 +349,7 @@ class _NpsFocusCard extends StatelessWidget {
           const SizedBox(height: TokensStrip.s3),
           Align(
             alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
+            child: FxActionChip(
               label:
                   firstDetrator == null
                       ? 'Ver alunos'

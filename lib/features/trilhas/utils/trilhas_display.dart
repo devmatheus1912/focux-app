@@ -1,4 +1,5 @@
 import '../models/trilha.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 const trilhaMetaTipos = ['TREINOS', 'PESO', 'MEDIDA', 'CUSTOMIZADO'];
 const trilhaFiltroAndamento = 'andamento';
@@ -189,7 +190,7 @@ String trilhaValorUnidade(String? tipo) {
 String trilhaNumeroLabel(double value) =>
     value == value.roundToDouble()
         ? value.toStringAsFixed(0)
-        : value.toStringAsFixed(1);
+        : formatBrDecimal(value);
 
 String trilhaValorAtualLabel(TrilhaModel trilha) {
   if (trilha.metaValor == null) {

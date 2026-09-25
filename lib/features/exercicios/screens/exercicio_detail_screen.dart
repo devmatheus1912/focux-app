@@ -16,7 +16,6 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
@@ -38,6 +37,7 @@ import '../utils/exercicio_detail_display.dart';
 import '../utils/exercise_video_upload_spec.dart';
 import '../widgets/exercicio_detail_help_sheet.dart';
 import 'widgets/exercise_media_thumb.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'exercicio_detail_screen_state.part.dart';
 part 'exercicio_detail_screen_widgets.part.dart';

@@ -110,19 +110,19 @@ class _LeadDetailContent extends StatelessWidget {
           runSpacing: TokensStrip.s2,
           children: [
             if (lead.alunoId != null)
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Ver aluno',
                 accent: primary,
                 isDark: isDark,
                 onPressed: () => context.push('/alunos/${lead.alunoId}'),
               ),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: 'Lista',
               accent: primary,
               isDark: isDark,
               onPressed: () => safePopOrGo(context, '/leads'),
             ),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: 'Kanban',
               accent: primary,
               isDark: isDark,
@@ -164,21 +164,21 @@ class _LeadDetailContent extends StatelessWidget {
           runSpacing: TokensStrip.s2,
           children: [
             if (sticky != LeadStickyAction.followUp)
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Follow-up',
                 accent: primary,
                 isDark: isDark,
                 onPressed: onDefinirFollowUp,
               ),
             if (temTelefone) ...[
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Ligar',
                 accent: primary,
                 isDark: isDark,
                 onPressed: onLigar,
               ),
               if (sticky != LeadStickyAction.whatsapp)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'WhatsApp',
                   accent: primary,
                   isDark: isDark,

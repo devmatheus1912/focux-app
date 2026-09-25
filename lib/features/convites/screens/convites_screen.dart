@@ -23,7 +23,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
@@ -350,13 +350,13 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                         spacing: TokensStrip.s2,
                                         runSpacing: TokensStrip.s2,
                                         children: [
-                                          DashboardHomeActionChip(
+                                          FxActionChip(
                                             label: 'Copiar',
                                             accent: primary,
                                             isDark: isDark,
                                             onPressed: _copiar,
                                           ),
-                                          DashboardHomeActionChip(
+                                          FxActionChip(
                                             label: 'WhatsApp',
                                             accent: primary,
                                             isDark: isDark,

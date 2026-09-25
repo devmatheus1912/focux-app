@@ -33,7 +33,7 @@ void main() {
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, isNot(contains('Atalhos de foco')));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, isNot(contains('ElevatedButton')));
     expect(screen, contains('_temFinanceiro'));
     expect(screen, contains('if (_temFinanceiro)'));

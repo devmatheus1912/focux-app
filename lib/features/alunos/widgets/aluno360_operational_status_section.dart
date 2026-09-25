@@ -10,7 +10,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_contact_utils.dart';
@@ -345,7 +345,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         if (showCheckinCta && (adherenceEmpty?.showCheckinCta ?? true))
           Align(
             alignment: Alignment.centerLeft,
-            child: DashboardHomeActionChip(
+            child: FxActionChip(
               label: 'Pedir check-in',
               accent: primary,
               isDark: isDark,

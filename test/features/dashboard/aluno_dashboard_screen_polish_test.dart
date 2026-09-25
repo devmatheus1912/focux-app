@@ -55,7 +55,7 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('_StreakFoldBadge'));
     expect(screen, contains('Sequência'));
     expect(screen, contains('Treinar agora'));

@@ -26,7 +26,7 @@ void main() {
     expect(screen, contains('leadStickyP0Label'));
     expect(screen, contains('leadConverterRoute'));
     expect(screen, isNot(contains('.converter(')));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('RefreshIndicator'));

@@ -27,7 +27,7 @@ void main() {
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, isNot(contains('FxActionChip')));
     expect(screen, contains("'Salvando…'"));
     expect(screen, contains('Salvando alterações do perfil'));
     expect(screen, contains('FxHelpIconButton'));

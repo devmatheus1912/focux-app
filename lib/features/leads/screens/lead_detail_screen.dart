@@ -29,13 +29,13 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/aluno360_followup_dates.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lead_repository.dart';
 import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
 import '../widgets/lead_detail_help_sheet.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'lead_detail_screen_state.part.dart';
 part 'lead_detail_screen_widgets.part.dart';

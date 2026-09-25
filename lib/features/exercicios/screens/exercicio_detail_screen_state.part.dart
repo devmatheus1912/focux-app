@@ -267,19 +267,19 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
                                 spacing: TokensStrip.s2,
                                 runSpacing: TokensStrip.s2,
                                 children: [
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label: 'Lista',
                                     accent: primary,
                                     isDark: isDark,
                                     onPressed: leave,
                                   ),
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label: 'Biblioteca',
                                     accent: primary,
                                     isDark: isDark,
                                     onPressed: () => context.push('/exercicios'),
                                   ),
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label: 'Treinos',
                                     accent: primary,
                                     isDark: isDark,

@@ -23,7 +23,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
@@ -387,7 +387,7 @@ class _DetailBody extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s3),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: DashboardHomeActionChip(
+                    child: FxActionChip(
                       label: mensalidadeDetailMaisChipLabel(),
                       accent: primary,
                       isDark: isDark,

@@ -9,7 +9,7 @@ void main() {
       const ExecucaoSerie(id: 2, numero: 2, cargaKg: 45, repeticoes: '8'),
     ];
     expect(historicoVolumeExercicio(series), 40 * 10 + 45 * 8);
-    expect(historicoVolumeLabel(6800), '6.8 mil kg');
+    expect(historicoVolumeLabel(6800), '6,8 mil kg');
     expect(historicoVolumeLabel(90), '90 kg');
     expect(
       historicoCargaDeltaLabel(cargaAtual: 50, cargaAnterior: 40),
@@ -92,7 +92,7 @@ void main() {
     );
     expect(
       historicoVolumeHint(volumeKg: 1800, volumeAnteriorKg: 1400),
-      'antes 1.4 mil kg',
+      'antes 1,4 mil kg',
     );
     expect(
       historicoVolumeHint(volumeKg: 800, volumeAnteriorKg: null),

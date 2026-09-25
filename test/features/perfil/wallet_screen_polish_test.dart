@@ -27,7 +27,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('AlunoSegmentedChoice'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxKeyboardPopScope')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));

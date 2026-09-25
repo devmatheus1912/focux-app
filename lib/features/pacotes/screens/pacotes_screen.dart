@@ -311,6 +311,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      filled: false,
                       isDense: true,
                       hintText: 'Buscar plano',
                       border: InputBorder.none,

@@ -21,7 +21,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/business_repository.dart';
@@ -242,7 +242,10 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
                           FxSatelliteListTile(
                             title: 'Recuperação',
                             subtitle: Text(
-                              '${snap.dunningRecoveryPct.toStringAsFixed(1)}% · ${businessDunningFalhasLabel(snap.dunningAbertas)}',
+                              businessRecuperacaoLabel(
+                                snap.dunningRecoveryPct,
+                                snap.dunningAbertas,
+                              ),
                             ),
                             onTap: () => context.push('/dunning'),
                           ),
@@ -328,27 +331,24 @@ class _BusinessFocusCard extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             'Previsto ${businessMoneyLabel(snap.mrrPrevisto)} · ${businessAlunosLabel(snap.alunosAtivos, snap.alunosTotal)}',
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: businessTemInadimplencia(snap.inadimplentes)
                     ? 'Cobrar atrasados'
                     : 'Mensalidades',
-                accent: businessTemInadimplencia(snap.inadimplentes)
-                    ? EagleTokens.bad
-                    : primary,
+                accent: primary,
                 isDark: isDark,
                 onPressed: onFinanceiro,
+                solid: businessTemInadimplencia(snap.inadimplentes),
               ),
               if (businessTemDunning(snap.dunningAbertas))
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Falhas',
                   accent: EagleTokens.bad,
                   isDark: isDark,

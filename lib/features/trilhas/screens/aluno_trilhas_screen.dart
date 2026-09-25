@@ -26,7 +26,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../models/trilha.dart';
 import '../providers/trilhas_provider.dart';
@@ -314,13 +314,13 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                   spacing: TokensStrip.s2,
                   runSpacing: TokensStrip.s2,
                   children: [
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: 'Hábitos',
                       accent: primary,
                       isDark: isDark,
                       onPressed: () => context.push('/aluno/habitos'),
                     ),
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: 'Chat',
                       accent: primary,
                       isDark: isDark,
@@ -457,7 +457,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                               ),
                             ),
                             const SizedBox(height: TokensStrip.s3),
-                            DashboardHomeActionChip(
+                            FxActionChip(
                               label: 'Continuar',
                               accent: primary,
                               isDark: isDark,
@@ -508,7 +508,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                             padding: const EdgeInsets.only(
                               bottom: TokensStrip.s3,
                             ),
-                            child: DashboardHomeActionChip(
+                            child: FxActionChip(
                               label: 'Concluir ${marco.titulo}',
                               accent: primary,
                               isDark: isDark,
@@ -526,7 +526,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
               SliverPadding(
                 padding: pagePadding.copyWith(top: 0),
                 sliver: SliverToBoxAdapter(
-                  child: DashboardHomeActionChip(
+                  child: FxActionChip(
                     label: _loadingMore ? 'Carregando…' : 'Carregar mais',
                     accent: primary,
                     isDark: isDark,

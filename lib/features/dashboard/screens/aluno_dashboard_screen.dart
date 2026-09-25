@@ -25,7 +25,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../widgets/dashboard_home_action_chip.dart';
 import '../widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../anamnese/providers/anamnese_provider.dart';
@@ -50,6 +49,8 @@ import '../utils/aluno_home_display.dart';
 import '../utils/aluno_performance_evolution.dart';
 import '../utils/aluno_volume_format.dart';
 import 'progresso_semanal_widget.dart';
+import '../../../core/utils/pt_br_display.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 part 'aluno_dashboard_screen_cards.part.dart';

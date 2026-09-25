@@ -16,7 +16,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
@@ -259,7 +259,7 @@ class _FinanceiroResumoScreenState
                   : OperationalMetricEmphasis.normal,
             ),
             const SizedBox(height: TokensStrip.s3),
-            DashboardHomeActionChip(
+            FxActionChip(
               label: p0Label,
               accent: r.inadimplentes > 0 ? EagleTokens.bad : primary,
               isDark: isDark,

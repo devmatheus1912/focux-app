@@ -19,7 +19,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -218,14 +218,14 @@ class _ReferralBody extends StatelessWidget {
                 spacing: TokensStrip.s2,
                 runSpacing: TokensStrip.s2,
                 children: [
-                  DashboardHomeActionChip(
+                  FxActionChip(
                     label: 'Copiar convite',
                     accent: primary,
                     isDark: isDark,
                     onPressed: onShare,
                   ),
                   if (referralTemLink(info.linkCompartilhamento))
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: 'Só o link',
                       accent: chrome.mute,
                       isDark: isDark,

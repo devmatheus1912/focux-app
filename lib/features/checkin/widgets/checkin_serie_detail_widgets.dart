@@ -13,6 +13,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../utils/checkin_serie_input.dart';
+import '../../../core/utils/pt_br_display.dart';
 
 class CheckinSeriePayload {
   final double? cargaKg;
@@ -411,7 +412,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
     if (value == null) return '';
     return value.roundToDouble() == value
         ? value.toStringAsFixed(0)
-        : value.toStringAsFixed(1);
+        : formatBrDecimal(value);
   }
 
   double? _parseKg(String value) {

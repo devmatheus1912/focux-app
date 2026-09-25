@@ -27,7 +27,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
@@ -372,7 +372,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               runSpacing: TokensStrip.s2,
                               children: [
                                 if (pending.isNotEmpty)
-                                  DashboardHomeActionChip(
+                                  FxActionChip(
                                     label: progressaoPendingReviewLabel(
                                       pending.length,
                                     ),
@@ -380,7 +380,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                     isDark: isDark,
                                     onPressed: () => _abrirAceitar(),
                                   ),
-                                DashboardHomeActionChip(
+                                FxActionChip(
                                   label: 'Treinos',
                                   accent: primary,
                                   isDark: isDark,
@@ -390,7 +390,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                         extra: widget.alunoNome,
                                       ),
                                 ),
-                                DashboardHomeActionChip(
+                                FxActionChip(
                                   label: 'Evolução',
                                   accent: primary,
                                   isDark: isDark,

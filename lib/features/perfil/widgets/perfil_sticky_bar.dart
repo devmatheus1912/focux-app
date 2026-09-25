@@ -7,6 +7,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
 import '../constants/perfil_layout.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 
 /// Chip flutuante — só Completar, e só com pendência real.
 class PerfilStickyBar extends StatelessWidget {
@@ -34,11 +35,9 @@ class PerfilStickyBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chipFg = dashboardPrioritiesChipForeground(
-      accent,
-      isDark: isDark,
+    final chipFg = FxActionChip.solidForeground(isDark: isDark,
     );
-    final chipBg = dashboardPrioritiesChipBackground(
+    final chipBg = FxActionChip.solidBackground(
       accent,
       isDark: isDark,
     );

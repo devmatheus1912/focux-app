@@ -35,7 +35,7 @@ class _CopilotTaskCard extends StatelessWidget {
         TokensStrip.s3,
         TokensStrip.s3,
         TokensStrip.s3,
-        10,
+        TokensStrip.s3,
       ),
       decoration:
           highlighted
@@ -45,16 +45,8 @@ class _CopilotTaskCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (highlighted) ...[
-            Text(
-              'Próxima ação',
-              style: TextStyle(
-                color: brand,
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 8),
+            Text('Próxima ação', style: FocuxHubTypography.chip(brand)),
+            const SizedBox(height: TokensStrip.s2),
           ],
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,22 +59,14 @@ class _CopilotTaskCard extends StatelessWidget {
                   children: [
                     Text(
                       action.titulo,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: ink,
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: FocuxHubTypography.cardTitle(color: ink),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: TokensStrip.s1),
                     Text(
                       'Copiloto · $mode',
-                      style: TextStyle(
-                        color: brand,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                      ),
+                      style: FocuxHubTypography.chip(brand),
                     ),
                   ],
                 ),
@@ -93,40 +77,41 @@ class _CopilotTaskCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 9),
+          const SizedBox(height: TokensStrip.s2),
           Text(
             action.descricao,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: mute, fontSize: 12, height: 1.32),
+            style: FocuxHubTypography.bodyMuted(color: mute),
           ),
-          const SizedBox(height: 11),
+          const SizedBox(height: TokensStrip.s3),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
             children: [
               if (canOpen)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: copilotActionsOpenAlunoLabel(isDone),
                   accent: brand,
                   isDark: Theme.of(context).brightness == Brightness.dark,
                   onPressed: onOpen,
+                  solid: highlighted,
                 ),
               if (isDone)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: copilotActionsReabrirLabel(),
                   accent: brand,
                   isDark: Theme.of(context).brightness == Brightness.dark,
                   onPressed: onReopen,
                 )
               else ...[
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: copilotActionsAdiarLabel(),
                   accent: brand,
                   isDark: Theme.of(context).brightness == Brightness.dark,
                   onPressed: onSnooze,
                 ),
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: copilotActionsConcluirLabel(),
                   accent: brand,
                   isDark: Theme.of(context).brightness == Brightness.dark,
@@ -184,13 +169,9 @@ class _RadarSignalCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         action.titulo,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ink,
-                          fontSize: 13.2,
-                          fontWeight: FontWeight.w900,
-                        ),
+                        style: FocuxHubTypography.cardTitle(color: ink),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -202,34 +183,34 @@ class _RadarSignalCard extends StatelessWidget {
                   action.descricao,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: mute, fontSize: 11.8, height: 1.3),
+                  style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
                 const SizedBox(height: 9),
                 Wrap(
                   spacing: TokensStrip.s2,
                   runSpacing: TokensStrip.s2,
                   children: [
-                    DashboardHomeActionChip(
+                    FxActionChip(
                       label: action.ctaLabel,
                       accent: brand,
                       isDark: Theme.of(context).brightness == Brightness.dark,
                       onPressed: onOpen,
                     ),
                     if (isDone)
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: copilotActionsReabrirLabel(),
                         accent: brand,
                         isDark: Theme.of(context).brightness == Brightness.dark,
                         onPressed: onReopen,
                       )
                     else ...[
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: copilotActionsAdiarLabel(),
                         accent: brand,
                         isDark: Theme.of(context).brightness == Brightness.dark,
                         onPressed: onSnooze,
                       ),
-                      DashboardHomeActionChip(
+                      FxActionChip(
                         label: copilotActionsConcluirLabel(),
                         accent: brand,
                         isDark: Theme.of(context).brightness == Brightness.dark,
@@ -283,11 +264,7 @@ class _CompactPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w900,
-        ),
+        style: FocuxHubTypography.chip(color),
       ),
     );
   }
@@ -310,24 +287,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: ink,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.2,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          detail,
-          style: TextStyle(
-            color: mute,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        Text(title, style: FocuxHubTypography.cardTitle(color: ink)),
+        const SizedBox(width: TokensStrip.s2),
+        Text(detail, style: FocuxHubTypography.bodyMuted(color: mute)),
       ],
     );
   }

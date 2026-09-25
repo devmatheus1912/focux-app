@@ -907,7 +907,7 @@ class _OwnVideoPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s3),
-        DashboardHomeActionChip(
+        FxActionChip(
           label: uploading
               ? 'Enviando…'
               : exerciseVideoUploadLabel(hasVideo: hasVideo),

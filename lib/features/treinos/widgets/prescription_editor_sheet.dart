@@ -317,6 +317,7 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                             color: fxScreenInk(context),
                           ),
                           decoration: InputDecoration(
+                            filled: false,
                             hintText: _selectedPreset.repeticoes,
                             hintStyle: FxSettingsLayout.rowValue(color: mute),
                             border: InputBorder.none,
@@ -909,6 +910,7 @@ class _PrescriptionValueRow extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                   decoration: InputDecoration(
+                    filled: false,
                     hintText: hint,
                     hintStyle: FxSettingsLayout.rowValue(color: mute),
                     border: InputBorder.none,

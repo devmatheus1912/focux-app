@@ -1,4 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../data/evolucao_repository.dart';
 
 enum EvolucaoHubView { medidas, recordes }
@@ -76,7 +77,7 @@ String evolucaoPesoAtual(List<MedidaCorporal> medidas) {
   final comPeso = [...medidas.where((m) => m.peso != null)]
     ..sort((a, b) => a.data.compareTo(b.data));
   if (comPeso.isEmpty) return '—';
-  return '${comPeso.last.peso!.toStringAsFixed(1)} kg';
+  return formatBrKg(comPeso.last.peso!);
 }
 
 String evolucaoVariacaoPeso(List<MedidaCorporal> medidas) {
@@ -87,7 +88,7 @@ String evolucaoVariacaoPeso(List<MedidaCorporal> medidas) {
   final ultimo = comPeso.last.peso!;
   final diff = ultimo - primeiro;
   final sinal = diff >= 0 ? '+' : '';
-  return '$sinal${diff.toStringAsFixed(1)} kg desde o início';
+  return '$sinal${formatBrKg(diff)} desde o início';
 }
 
 String evolucaoMedidaLabel(MedidaCorporal medida) {
@@ -108,16 +109,16 @@ bool evolucaoMedidaTemConteudo(MedidaCorporal medida) {
 String evolucaoMedidaSubtitle(MedidaCorporal medida) {
   final parts = <String>[];
   if (medida.peso != null) {
-    parts.add('${medida.peso!.toStringAsFixed(1)} kg');
+    parts.add(formatBrKg(medida.peso!));
   }
   if (medida.cintura != null) {
-    parts.add('Abdômen ${medida.cintura!.toStringAsFixed(1)} cm');
+    parts.add('Abdômen ${formatBrCm(medida.cintura!)}');
   }
   if (medida.quadril != null) {
-    parts.add('Quadril ${medida.quadril!.toStringAsFixed(1)} cm');
+    parts.add('Quadril ${formatBrCm(medida.quadril!)}');
   }
   if (medida.braco != null) {
-    parts.add('Braço ${medida.braco!.toStringAsFixed(1)} cm');
+    parts.add('Braço ${formatBrCm(medida.braco!)}');
   }
   if (parts.isNotEmpty) return parts.join(' · ');
   // Só chega aqui se a lista não filtrou por [evolucaoMedidaTemConteudo].
@@ -126,10 +127,10 @@ String evolucaoMedidaSubtitle(MedidaCorporal medida) {
 
 String evolucaoMedidaValue(MedidaCorporal medida) {
   if (medida.peso != null) {
-    return '${medida.peso!.toStringAsFixed(1)} kg';
+    return formatBrKg(medida.peso!);
   }
   if (medida.cintura != null) {
-    return '${medida.cintura!.toStringAsFixed(1)} cm';
+    return formatBrCm(medida.cintura!);
   }
   return '';
 }
@@ -137,7 +138,7 @@ String evolucaoMedidaValue(MedidaCorporal medida) {
 String evolucaoRecordeSubtitle(RecordePessoal recorde) {
   final parts = <String>[];
   if (recorde.cargaKg != null) {
-    parts.add('${recorde.cargaKg!.toStringAsFixed(1)} kg');
+    parts.add(formatBrKg(recorde.cargaKg!));
   }
   if (recorde.repeticoes != null) {
     parts.add('${recorde.repeticoes} reps');
@@ -152,7 +153,7 @@ String evolucaoRecordeSubtitle(RecordePessoal recorde) {
 
 String evolucaoRecordeValue(RecordePessoal recorde) {
   if (recorde.cargaKg != null) {
-    return '${recorde.cargaKg!.toStringAsFixed(1)} kg';
+    return formatBrKg(recorde.cargaKg!);
   }
   if (recorde.repeticoes != null) return '${recorde.repeticoes} reps';
   return '';

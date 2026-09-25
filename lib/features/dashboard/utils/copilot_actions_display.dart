@@ -18,8 +18,6 @@ String copilotActionsStatusLabel(String status) {
   };
 }
 
-String copilotActionsFiltroTitle() => 'Filtrar tarefas';
-
 String copilotActionsRevisarAlunoLabel() => 'Revisar aluno';
 
 String copilotActionsVerAlunoLabel() => 'Ver aluno';
@@ -55,10 +53,11 @@ const copilotActionsComoCalculamos =
     'Abertas são tarefas salvas do Copiloto e sinais do Radar ainda sem conclusão. A lista pagina e busca no título. Nada some sozinho.';
 
 String copilotActionsSectionDetail(String status, int count) {
+  final one = count == 1;
   final suffix = switch (status) {
-    copilotActionsStatusAdiado => 'adiadas',
-    copilotActionsStatusConcluido => 'concluídas',
-    _ => 'abertas',
+    copilotActionsStatusAdiado => one ? 'adiada' : 'adiadas',
+    copilotActionsStatusConcluido => one ? 'concluída' : 'concluídas',
+    _ => one ? 'aberta' : 'abertas',
   };
   return '$count $suffix';
 }

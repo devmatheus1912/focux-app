@@ -156,6 +156,29 @@ String formatBrlCurrency(Object value, {bool showDecimals = true}) {
   return '${prefix}R\$ ${buffer.toString()}$decimals';
 }
 
+/// Decimal no padrão BR (ex.: 1.234,5). Nunca ponto decimal na UI (§8).
+String formatBrDecimal(num value, {int digits = 1}) {
+  final negative = value < 0;
+  final parts = value.abs().toStringAsFixed(digits).split('.');
+  final intPart = parts[0];
+  final buffer = StringBuffer();
+  for (var i = 0; i < intPart.length; i++) {
+    if (i > 0 && (intPart.length - i) % 3 == 0) buffer.write('.');
+    buffer.write(intPart[i]);
+  }
+  final decimals = parts.length > 1 ? ',${parts[1]}' : '';
+  return '${negative ? '-' : ''}$buffer$decimals';
+}
+
+String formatBrPercent(num value, {int digits = 1}) =>
+    '${formatBrDecimal(value, digits: digits)}%';
+
+String formatBrKg(num value, {int digits = 1}) =>
+    '${formatBrDecimal(value, digits: digits)} kg';
+
+String formatBrCm(num value, {int digits = 1}) =>
+    '${formatBrDecimal(value, digits: digits)} cm';
+
 /// Contagem com singular/plural PT-BR (ex.: 1 curtida / 3 curtidas).
 String ptCountLabel(int count, String singular, String plural) {
   if (count <= 0) return '0 $plural';

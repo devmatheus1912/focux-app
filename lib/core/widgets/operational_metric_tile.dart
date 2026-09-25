@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/focux_hub_typography.dart';
+import '../theme/tokens_strip.dart';
 import 'fx_shell_scaffold.dart';
 
 /// Shared surface styling for operational KPI tiles (Aluno 360).
@@ -9,23 +10,18 @@ enum OperationalMetricEmphasis { normal, alert, muted }
 BoxDecoration operationalMetricDecoration({
   required Color accent,
   required bool isDark,
-  double radius = 12,
+  double radius = TokensStrip.rCard,
   OperationalMetricEmphasis emphasis = OperationalMetricEmphasis.normal,
 }) {
-  final bgAlpha = switch (emphasis) {
-    OperationalMetricEmphasis.alert => isDark ? 0.16 : 0.11,
-    OperationalMetricEmphasis.muted => isDark ? 0.08 : 0.06,
-    OperationalMetricEmphasis.normal => isDark ? 0.12 : 0.08,
-  };
-  final borderAlpha = switch (emphasis) {
-    OperationalMetricEmphasis.alert => isDark ? 0.36 : 0.28,
-    OperationalMetricEmphasis.muted => isDark ? 0.18 : 0.12,
-    OperationalMetricEmphasis.normal => isDark ? 0.24 : 0.16,
-  };
+  // Vidro neutro (§2/§6): cor semântica só na borda do alerta, nunca no fill.
+  final border =
+      emphasis == OperationalMetricEmphasis.alert
+          ? accent.withValues(alpha: isDark ? 0.46 : 0.38)
+          : TokensStrip.glassBorder(dark: isDark);
   return BoxDecoration(
-    color: accent.withValues(alpha: bgAlpha),
+    color: TokensStrip.glassFill(dark: isDark),
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: accent.withValues(alpha: borderAlpha)),
+    border: Border.all(color: border),
   );
 }
 
@@ -68,8 +64,8 @@ class OperationalMetricTile extends StatelessWidget {
     // de métricas na Home — §11 secundário não compete com P0).
     final tile = Container(
       padding: EdgeInsets.symmetric(
-        horizontal: dense ? 10 : 12,
-        vertical: dense ? 7 : 10,
+        horizontal: TokensStrip.s3,
+        vertical: dense ? TokensStrip.s2 : TokensStrip.s3,
       ),
       decoration: operationalMetricDecoration(
         accent: color,

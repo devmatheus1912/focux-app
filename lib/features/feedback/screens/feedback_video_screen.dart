@@ -257,6 +257,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      filled: false,
                       isDense: true,
                       hintText: 'Buscar comentário',
                       border: InputBorder.none,

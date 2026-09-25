@@ -84,7 +84,7 @@ void main() {
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('Pendente'));
     expect(screen, contains('Ticket'));
-    expect(screen, contains('DashboardHomeActionChip'));
+    expect(screen, contains('FxActionChip'));
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('showPrioritiesLink'));
     expect(screen, contains('verPrioridades'));
@@ -98,7 +98,7 @@ void main() {
     expect(screen, contains('buscarFerramenta'));
     expect(screen, contains('dashboardReadableMuted'));
     expect(screen, contains('dashboardPriorityBadgeColors'));
-    expect(screen, contains('dashboardPrioritiesChipForeground'));
+    expect(screen, contains('FxActionChip.solidForeground'));
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('DashboardFinanceEmptyState'));
     // Sheet de prioridades migrou para o chrome canônico da Home (sem
@@ -224,9 +224,9 @@ void main() {
     expect(panel, contains('CommandActionTile'));
     expect(panel, isNot(contains('FxSettingsGroup')));
     expect(finance, contains('OperationalMetricTile'));
-    expect(finance, isNot(contains('DashboardHomeActionChip')));
+    expect(finance, isNot(contains('FxActionChip')));
     expect(aderencia, contains('FxSatelliteListTile'));
-    expect(aderencia, isNot(contains('DashboardHomeActionChip')));
+    expect(aderencia, isNot(contains('FxActionChip')));
   });
 
   test('pulso operacional é um grupo inset, sem cards KPI', () {

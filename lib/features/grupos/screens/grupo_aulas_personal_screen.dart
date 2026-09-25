@@ -461,6 +461,7 @@ class _GrupoAulasPersonalScreenState
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
+                      filled: false,
                       isDense: true,
                       hintText: 'Buscar aula ou local',
                       border: InputBorder.none,

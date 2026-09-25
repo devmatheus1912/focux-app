@@ -129,6 +129,25 @@ void main() {
     expect(surface.height, lessThan(screenH * 0.45));
   });
 
+  testWidgets('header sem ícone não reserva slot e centra título no Fechar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 360,
+            child: FxHomeSheetHeader(isDark: false, title: 'Mais em pacotes'),
+          ),
+        ),
+      ),
+    );
+    final title = tester.getRect(find.text('Mais em pacotes'));
+    final close = tester.getRect(find.byTooltip('Fechar'));
+    expect(title.left, 0);
+    expect((title.center.dy - close.center.dy).abs(), lessThanOrEqualTo(2));
+  });
+
   test('sheet header is ícone 22 + título ink, sem poço colorido', () {
     final src = File('lib/core/widgets/fx_home_sheet.dart').readAsStringSync();
     expect(src, contains('FocuxHubTypography.sectionTitle'));

@@ -47,6 +47,7 @@ class _LibraryControls extends StatelessWidget {
               color: ink,
             ).copyWith(fontSize: 13),
             decoration: InputDecoration(
+              filled: false,
               isDense: true,
               hintText: 'Buscar treino, objetivo ou nível',
               hintStyle: FocuxHubTypography.bodyMuted(color: mute),

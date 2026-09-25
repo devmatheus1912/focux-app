@@ -29,9 +29,9 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(shellWidgets, contains('IaCopilotResultActionBar'));
-    expect(shellWidgets, contains('DashboardHomeActionChip'));
+    expect(shellWidgets, contains('FxActionChip'));
     expect(
-      'DashboardHomeActionChip'.allMatches(shellWidgets).length,
+      'FxActionChip'.allMatches(shellWidgets).length,
       2,
       reason: 'P0 só em Gerar + sticky de resultado — seletor de aluno é tonal',
     );

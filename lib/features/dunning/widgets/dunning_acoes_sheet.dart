@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../dashboard/widgets/dashboard_home_action_chip.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../data/dunning_repository.dart';
 import '../utils/dunning_ops_display.dart';
 
@@ -87,27 +87,28 @@ class _DunningAcoesSheet extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               if (hasAluno)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Escrever',
                   accent: primary,
                   isDark: isDark,
                   onPressed: onChat,
+                  solid: true,
                 ),
               if (hasAluno)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Cobrar',
-                  accent: EagleTokens.moneyGreen,
+                  accent: primary,
                   isDark: isDark,
                   onPressed: onCobrar,
                 ),
               if (!hasAluno && onAssinatura != null)
-                DashboardHomeActionChip(
+                FxActionChip(
                   label: 'Assinatura',
                   accent: primary,
                   isDark: isDark,
                   onPressed: onAssinatura!,
                 ),
-              DashboardHomeActionChip(
+              FxActionChip(
                 label: 'Marcar recuperada',
                 accent: EagleTokens.bad,
                 isDark: isDark,

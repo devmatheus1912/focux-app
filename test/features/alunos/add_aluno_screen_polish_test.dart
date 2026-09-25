@@ -28,7 +28,7 @@ void main() {
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(screen, contains("child: const Text('Cancelar')"));
-    expect(screen, isNot(contains('DashboardHomeActionChip')));
+    expect(screen, isNot(contains('FxActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));
     expect(screen, contains('FxErrorState'));
     expect(screen, isNot(contains('_ErrorCard')));

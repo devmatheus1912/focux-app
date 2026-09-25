@@ -31,7 +31,7 @@ void main() {
     expect(tab, contains('class FinanceiroMensalidadesTab'));
     expect(tab, contains('FxSatelliteListTile'));
     expect(tab, contains('ListView.builder'));
-    expect(tab, contains('DashboardHomeActionChip'));
+    expect(tab, contains('FxActionChip'));
     expect(tab, contains('loadingLabel:'));
     expect(tab, isNot(contains("'Lançando…' : 'Confirmar'")));
     expect(tab, contains('showFxConfirmSheet'));
