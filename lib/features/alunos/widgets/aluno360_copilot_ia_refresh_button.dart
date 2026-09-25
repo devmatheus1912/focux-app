@@ -39,7 +39,7 @@ class Aluno360CopilotIaRefreshButtonState
     final requestSeq = ++_requestSeq;
     setState(() => _refreshing = true);
     // Keep current card visible; status badge/spinner only.
-    ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).state =
+    ref.read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier).value =
         true;
     unawaited(
       AnalyticsService.instance.track(
@@ -48,9 +48,9 @@ class Aluno360CopilotIaRefreshButtonState
       ),
     );
     await AlunoCopilotIaCacheStore.clear(widget.alunoId);
-    ref.read(alunoCopilotIaSkipCacheProvider(widget.alunoId).notifier).state =
+    ref.read(alunoCopilotIaSkipCacheProvider(widget.alunoId).notifier).value =
         true;
-    ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
+    ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).value =
         true;
     try {
       ref.invalidate(alunoCopilotoActionProvider(widget.alunoId));
@@ -67,7 +67,7 @@ class Aluno360CopilotIaRefreshButtonState
       // Keep deterministic card — clear forceIa only when no usable IA value.
       final ia = ref.read(alunoCopilotoActionProvider(widget.alunoId));
       if (!ia.hasValue) {
-        ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).state =
+        ref.read(alunoCopilotoForceIaProvider(widget.alunoId).notifier).value =
             false;
       }
       if (!mounted) return;
@@ -94,7 +94,7 @@ class Aluno360CopilotIaRefreshButtonState
       if (_isLatestRequest(requestSeq)) {
         ref
             .read(alunoCopilotIaRefreshingProvider(widget.alunoId).notifier)
-            .state = false;
+            .value = false;
         if (mounted) setState(() => _refreshing = false);
       }
     }

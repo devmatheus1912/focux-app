@@ -13,8 +13,6 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-      - dependency-name: rive
-        versions: [">=0.14.0"]
     groups:
       pub-minor-patch:
         applies-to: version-updates

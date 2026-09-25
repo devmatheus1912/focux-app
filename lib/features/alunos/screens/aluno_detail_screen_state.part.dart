@@ -114,7 +114,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final autonomiaResumoAsync =
         const AsyncValue<AlunoAutonomiaResumo>.loading();
 
-    final bundledRecovery = operacaoAsync.valueOrNull?.recoverySnapshot;
+    final bundledRecovery = operacaoAsync.value?.recoverySnapshot;
     final AsyncValue<RecoverySnapshot?> recoveryAsync;
     if (tabIndex != 0) {
       recoveryAsync = const AsyncValue.data(null);
@@ -161,7 +161,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     final loadingFallback =
         resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
 
-    final proximaAcao360 = operacaoAsync.valueOrNull?.proximaAcao;
+    final proximaAcao360 = operacaoAsync.value?.proximaAcao;
     final showOperacaoSticky =
         (_tabController.index == 0 || _tabController.index == 1) &&
         resolvedAlunoAsync.hasValue;
@@ -224,7 +224,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       ),
                   data: (aluno) {
                     final perfilCompletion = copilotProfileCompletion(aluno);
-                    final uiHints = operacaoAsync.valueOrNull?.operacaoUiHints;
+                    final uiHints = operacaoAsync.value?.operacaoUiHints;
                     final proximaForPriority = proximaAcao360;
                     final contactPriority = resolveOperacaoContactPriority(
                       aluno: aluno,
@@ -381,17 +381,17 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     proximaAcao360: proximaAcao360,
                                     hasOpenCopilotTask360:
                                         operacaoAsync
-                                            .valueOrNull
+                                            .value
                                             ?.hasOpenCopilotTask ??
                                         false,
                                     aderenciaSemanal:
                                         operacaoAsync
-                                            .valueOrNull
+                                            .value
                                             ?.aderenciaSemanal
                                             .diasMaps,
                                     aderenciaBundle:
                                         operacaoAsync
-                                            .valueOrNull
+                                            .value
                                             ?.aderenciaSemanal,
                                     recoveryAsync: recoveryAsync,
                                     autonomiaResumoAsync:
@@ -493,7 +493,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     tabIndex: _tabController.index,
                     proximaAcao360: proximaAcao360,
                     hasOpenCopilotTask360:
-                        operacaoAsync.valueOrNull?.hasOpenCopilotTask ?? false,
+                        operacaoAsync.value?.hasOpenCopilotTask ?? false,
                   ),
                 ),
               ),

@@ -26,7 +26,7 @@ class NotificacaoBadgeButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final live = ref.watch(notificacoesNaoLidasProvider).valueOrNull;
+    final live = ref.watch(notificacoesNaoLidasProvider).value;
     final count = countOverride ?? live ?? 0;
 
     return ShellHeaderIconButton(

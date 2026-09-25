@@ -25,7 +25,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   var _loadingMoreUnread = false;
   var _loadingMoreArchived = false;
 
-  late final StateController<String> _queryCtrl;
+  late final FxValueNotifier<String> _queryCtrl;
 
   bool get _isSearching => _query.isNotEmpty;
 
@@ -41,10 +41,10 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
     _searchCtrl.dispose();
     _searchFocus.dispose();
     final queryCtrl = _queryCtrl;
-    if (queryCtrl.mounted && queryCtrl.state.isNotEmpty) {
+    if (queryCtrl.mounted && queryCtrl.value.isNotEmpty) {
       // `ref` não pode ser usado no dispose; o provider não é autoDispose.
       Future.microtask(() {
-        if (queryCtrl.mounted) queryCtrl.state = '';
+        if (queryCtrl.mounted) queryCtrl.value = '';
       });
     }
     super.dispose();
@@ -63,7 +63,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         _searchPage = 0;
         _selectedAlunoIds.clear();
       });
-      _queryCtrl.state = next;
+      _queryCtrl.value = next;
       if (next.isEmpty) return;
       _performSearch(reset: true);
     });
@@ -251,7 +251,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _viewTracked) return;
         _viewTracked = true;
-        final items = inboxAsync.valueOrNull ?? const <ChatInboxItem>[];
+        final items = inboxAsync.value ?? const <ChatInboxItem>[];
         AnalyticsService.instance.track(
           ProductEvents.chatInboxViewed,
           props: {'count': items.length},
@@ -269,19 +269,19 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       });
     }
 
-    final home = ref.watch(chatInboxHomeProvider).valueOrNull;
+    final home = ref.watch(chatInboxHomeProvider).value;
     final hubCount = switch (_view) {
       ChatInboxHubView.todas =>
         home?.inboxTotal ??
-            ((ref.watch(chatInboxProvider).valueOrNull?.length ?? 0) +
+            ((ref.watch(chatInboxProvider).value?.length ?? 0) +
                 _extraInbox.length),
       ChatInboxHubView.naoLidas =>
         home?.unreadTotal ??
-            ((ref.watch(chatInboxUnreadProvider).valueOrNull?.length ?? 0) +
+            ((ref.watch(chatInboxUnreadProvider).value?.length ?? 0) +
                 _extraUnread.length),
       ChatInboxHubView.arquivadas =>
         home?.archivedTotal ??
-            ((ref.watch(chatInboxArchivedProvider).valueOrNull?.length ?? 0) +
+            ((ref.watch(chatInboxArchivedProvider).value?.length ?? 0) +
                 _extraArchived.length),
     };
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
@@ -459,7 +459,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
 
   Widget _buildSearchBody(bool isDark, Color ink, Color mute) {
     final home = ref.watch(chatInboxHomeProvider);
-    final conversations = home.valueOrNull?.inbox ?? const <ChatInboxItem>[];
+    final conversations = home.value?.inbox ?? const <ChatInboxItem>[];
     final waiting =
         (_searchLoading && _searchResults.isEmpty) ||
         (home.isLoading && conversations.isEmpty && _searchResults.isEmpty);
@@ -518,7 +518,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
 
   String? _alunoNomeFor(int? alunoId) {
     if (alunoId == null) return null;
-    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    final home = ref.read(chatInboxHomeProvider).value;
     for (final item in [
       ...?home?.inbox,
       ..._extraInbox,

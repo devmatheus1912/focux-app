@@ -11,7 +11,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
     final mute = chrome.mute;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(iaCopilotoHomeProvider);
-    final home = homeAsync.valueOrNull;
+    final home = homeAsync.value;
     final planoFromHome = home?.planoFeatures;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

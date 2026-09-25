@@ -35,7 +35,7 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
         fromProxima.isNotEmpty
             ? fromProxima
             : copilotFallbackAction(aluno, null);
-    ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).state = true;
+    ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).value = true;
     try {
       await criarTarefaCopilotoFromAluno360(
         context: context,
@@ -44,7 +44,7 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
         acao: acao,
       );
     } finally {
-      ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).state = false;
+      ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).value = false;
     }
   }
 

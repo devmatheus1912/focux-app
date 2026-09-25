@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
@@ -10,8 +10,9 @@ import 'package:focux_app/features/perfil/screens/identidade_visual_screen.dart'
 import 'package:focux_app/features/perfil/utils/identidade_visual_display.dart';
 import 'package:focux_app/features/planos/data/plano_features_bff_cache.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
-import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+
+import '../../support/riverpod_seeds.dart';
 
 void main() {
   setUp(() {
@@ -115,23 +116,17 @@ Override _planoOverride({
   required bool whiteLabel,
   required SubscriptionPlan plan,
 }) {
-  return planoFeaturesProvider.overrideWith((ref) {
-    final notifier = PlanoFeaturesNotifier(
-      PlanosRepository(ref.read(apiClientProvider)),
-    );
-    notifier.seedFromHome(
-      PlanoFeatures(
-        plano: plan,
-        financeiro: true,
-        agenda: true,
-        relatorios: true,
-        whiteLabel: whiteLabel,
-        iaCopiloto: false,
-        migracaoFoto: false,
-      ),
-    );
-    return notifier;
-  });
+  return seededPlanoFeatures(
+    PlanoFeatures(
+      plano: plan,
+      financeiro: true,
+      agenda: true,
+      relatorios: true,
+      whiteLabel: whiteLabel,
+      iaCopiloto: false,
+      migracaoFoto: false,
+    ),
+  );
 }
 
 final _enterprisePerfil = PerfilPersonal(

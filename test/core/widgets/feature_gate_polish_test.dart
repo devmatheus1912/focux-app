@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/widgets/feature_gate.dart';
 import 'package:focux_app/core/widgets/skeleton_loader.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
@@ -13,6 +12,8 @@ import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+
+import '../../support/riverpod_seeds.dart';
 
 DashboardHomeBundle _homeBundle(PlanoFeatures planoFeatures) {
   return DashboardHomeBundle(
@@ -46,12 +47,12 @@ DashboardHomeBundle _homeBundle(PlanoFeatures planoFeatures) {
 }
 
 Widget _gateApp({
-  required PlanoFeaturesNotifier notifier,
+  required SeededPlanoFeaturesNotifier notifier,
   required Widget gate,
 }) {
   return ProviderScope(
     overrides: [
-      planoFeaturesProvider.overrideWith((ref) => notifier),
+      planoFeaturesProvider.overrideWith(() => notifier),
     ],
     child: MaterialApp(home: gate),
   );
@@ -100,8 +101,7 @@ void main() {
         ),
       );
 
-      final notifier = PlanoFeaturesNotifier(PlanosRepository(ApiClient()));
-      expect(notifier.state.isLoading, isTrue);
+      final notifier = SeededPlanoFeaturesNotifier(const AsyncLoading());
 
       await tester.pumpWidget(
         _gateApp(
@@ -137,7 +137,7 @@ void main() {
         ),
       );
 
-      final notifier = PlanoFeaturesNotifier(PlanosRepository(ApiClient()));
+      final notifier = SeededPlanoFeaturesNotifier(const AsyncLoading());
 
       await tester.pumpWidget(
         _gateApp(
@@ -161,7 +161,7 @@ void main() {
   testWidgets(
     'FeatureGate shows SkeletonList when loading and Home cache is empty',
     (tester) async {
-      final notifier = PlanoFeaturesNotifier(PlanosRepository(ApiClient()));
+      final notifier = SeededPlanoFeaturesNotifier(const AsyncLoading());
 
       await tester.pumpWidget(
         _gateApp(

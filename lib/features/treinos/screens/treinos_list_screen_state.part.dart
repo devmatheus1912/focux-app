@@ -87,13 +87,13 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       if (widget.alunoId != null) {
         final current = ref.read(treinosDoAlunoQueryProvider(widget.alunoId!));
         if (current.q == next) return;
-        ref.read(treinosDoAlunoQueryProvider(widget.alunoId!).notifier).state =
+        ref.read(treinosDoAlunoQueryProvider(widget.alunoId!).notifier).value =
             TreinosAlunoQuery(q: next);
         return;
       }
       final current = ref.read(treinosHomeQueryProvider);
       if (current.q == next) return;
-      ref.read(treinosHomeQueryProvider.notifier).state =
+      ref.read(treinosHomeQueryProvider.notifier).value =
           TreinosHomeQuery(q: next);
     });
   }
@@ -311,7 +311,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             ? ref.watch(treinosProvider)
             : alunoPageAsync!.whenData((page) => page.treinos);
     final homeBundle =
-        fromLibrary ? ref.watch(treinosHomeProvider).valueOrNull : null;
+        fromLibrary ? ref.watch(treinosHomeProvider).value : null;
     final tail =
         fromLibrary
             ? ref.watch(treinosHomeTailProvider)
@@ -346,7 +346,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final pageTreinos = treinosAsync.valueOrNull ?? const <Treino>[];
+    final pageTreinos = treinosAsync.value ?? const <Treino>[];
     final loadedTreinos = [...pageTreinos, ...tail.treinos];
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final fromAluno = widget.alunoId != null;
@@ -422,7 +422,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                               ? (homeBundle?.totalElements ??
                                   homeBundle?.resumo.totalPlanos ??
                                   loadedTreinos.length)
-                              : (alunoPageAsync?.valueOrNull?.totalElements ??
+                              : (alunoPageAsync?.value?.totalElements ??
                                   loadedTreinos.length),
                       freshness: freshnessLabel,
                     ),

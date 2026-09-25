@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:rive/rive.dart';
 
+import '../../../core/animations/fx_rive_assets.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_rive_player.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
@@ -42,13 +43,10 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                 Semantics(
                   image: true,
                   label: 'Confirmação da assinatura',
-                  child: const SizedBox(
+                  child: const FxRivePlayer(
+                    asset: FxRiveAssets.confettiSuccess,
                     height: 160,
                     width: 160,
-                    child: RiveAnimation.asset(
-                      'assets/animations/confetti_success.riv',
-                      fit: BoxFit.contain,
-                    ),
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s2),

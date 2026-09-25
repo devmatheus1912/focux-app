@@ -116,10 +116,10 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
-    final home = homeAsync.valueOrNull;
+    final home = homeAsync.value;
 
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final base = treinosAsync.valueOrNull?.content ?? const <ExecucaoTreino>[];
+    final base = treinosAsync.value?.content ?? const <ExecucaoTreino>[];
     final treinos = [...base, ..._extra];
     final count =
         treinosAsync.hasValue

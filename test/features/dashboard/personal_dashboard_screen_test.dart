@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/providers/dashboard_provider.dart';
@@ -13,10 +12,11 @@ import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/onboarding/data/onboarding_status_data.dart';
 import 'package:focux_app/features/onboarding/providers/onboarding_provider.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
-import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../support/riverpod_seeds.dart';
 
 DashboardHomeBundle _homeFixture() {
   return DashboardHomeBundle(
@@ -146,13 +146,7 @@ void main() {
                 'Home BFF already sent onboardingResumo',
               ),
             ),
-            planoFeaturesProvider.overrideWith((ref) {
-              final notifier = PlanoFeaturesNotifier(
-                PlanosRepository(ref.read(apiClientProvider)),
-              );
-              notifier.seedFromHome(features);
-              return notifier;
-            }),
+            seededPlanoFeatures(features),
           ],
           child: MaterialApp.router(routerConfig: router),
         ),

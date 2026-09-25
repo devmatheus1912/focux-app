@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -19,43 +20,48 @@ final planosRepositoryProvider = Provider<PlanosRepository>(
 /// [PlanoFeaturesNotifier.bootstrap] usa esse snapshot e não chama
 /// GET `/api/planos/me`. Sem Home cache, aplica stale-while-revalidate no
 /// snapshot local de [PlanosRepository] (gate imediato + refresh em fundo).
-final planoFeaturesProvider = StateNotifierProvider<
-  PlanoFeaturesNotifier,
-  AsyncValue<PlanoFeatures>
->((ref) {
-  final notifier = PlanoFeaturesNotifier(ref.read(planosRepositoryProvider));
-  unawaited(notifier.bootstrap());
-  return notifier;
-});
+final planoFeaturesProvider =
+    NotifierProvider<PlanoFeaturesNotifier, AsyncValue<PlanoFeatures>>(
+      PlanoFeaturesNotifier.new,
+    );
 
-class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
-  final PlanosRepository _repo;
+class PlanoFeaturesNotifier extends Notifier<AsyncValue<PlanoFeatures>> {
+  late PlanosRepository _repo;
   bool _refreshing = false;
 
   /// Bumps on [seedFromHome] so an in-flight bootstrap `/planos/me` cannot
   /// overwrite a fresher Home BFF snapshot.
   int _generation = 0;
 
-  PlanoFeaturesNotifier(this._repo) : super(const AsyncLoading());
+  @visibleForTesting
+  Future<void> bootstrapped = Future<void>.value();
+
+  @override
+  AsyncValue<PlanoFeatures> build() {
+    _repo = ref.read(planosRepositoryProvider);
+    final fresh = _freshHomeSnapshot();
+    if (fresh != null) return AsyncData(_remember(fresh));
+    bootstrapped = Future.microtask(bootstrap);
+    return const AsyncLoading();
+  }
+
+  PlanoFeatures? _freshHomeSnapshot() =>
+      PlanoFeaturesBffCache.getIfFresh() ??
+      DashboardHomeClientCache.getIfFresh()?.planoFeatures;
 
   bool _applyFreshHomeCacheIfAny() {
-    final fromBff = PlanoFeaturesBffCache.getIfFresh();
-    if (fromBff != null) {
-      seedFromHome(fromBff);
-      return true;
-    }
-    final fromHome = DashboardHomeClientCache.getIfFresh()?.planoFeatures;
-    if (fromHome == null) return false;
-    seedFromHome(fromHome);
+    final fresh = _freshHomeSnapshot();
+    if (fresh == null) return false;
+    seedFromHome(fresh);
     return true;
   }
 
   Future<void> bootstrap() async {
-    if (_applyFreshHomeCacheIfAny()) return;
+    if (!ref.mounted || _applyFreshHomeCacheIfAny()) return;
 
     final gen = _generation;
     final cached = await _repo.loadCachedPlanoFeatures();
-    if (_generation != gen) return;
+    if (!ref.mounted || _generation != gen) return;
     if (_applyFreshHomeCacheIfAny()) return;
 
     if (cached != null) {
@@ -94,7 +100,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
     if (_refreshing) return;
     _refreshing = true;
     final gen = _generation;
-    final previous = state.valueOrNull;
+    final previous = state.value;
     if (forceLoading || previous == null) {
       state = const AsyncLoading();
     }
@@ -104,10 +110,10 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
           reconcileFirst
               ? await _repo.reconcilePlanoFeatures()
               : await _fetchWithRetry();
-      if (_generation != gen) return;
+      if (!ref.mounted || _generation != gen) return;
       state = AsyncData(fresh.normalizeForTier());
     } catch (error) {
-      if (_generation != gen) return;
+      if (!ref.mounted || _generation != gen) return;
       if (previous != null &&
           PlanosRepository.canUseStaleEntitlementsOnError(
             previous.cacheSavedAt,
@@ -126,7 +132,7 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
         );
       } else {
         final forAluno = await _isAlunoSession();
-        if (_generation != gen) return;
+        if (!ref.mounted || _generation != gen) return;
         final fallback =
             (forAluno
                     ? PlanoFeatures.optimisticAluno
@@ -178,9 +184,13 @@ class PlanoFeaturesNotifier extends StateNotifier<AsyncValue<PlanoFeatures>> {
 
   /// Seed imediato a partir do BFF `/home` (mesmo shape de `/planos/me`).
   void seedFromHome(PlanoFeatures features) {
+    state = AsyncData(_remember(features));
+  }
+
+  PlanoFeatures _remember(PlanoFeatures features) {
     _generation++;
     final normalized = features.normalizeForTier();
     PlanoFeaturesBffCache.put(normalized);
-    state = AsyncData(normalized);
+    return normalized;
   }
 }

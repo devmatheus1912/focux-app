@@ -413,7 +413,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(alunoPerfilHomeProvider);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(
-      homeAsync.valueOrNull?.fetchedAt,
+      homeAsync.value?.fetchedAt,
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.forBrightness(context, isDark);

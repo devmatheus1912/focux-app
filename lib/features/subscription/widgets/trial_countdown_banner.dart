@@ -16,7 +16,7 @@ class TrialCountdownBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final features = ref.watch(planoFeaturesProvider).valueOrNull;
+    final features = ref.watch(planoFeaturesProvider).value;
     if (features == null) return const SizedBox.shrink();
 
     return FutureBuilder<TrialStatus>(

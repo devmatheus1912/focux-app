@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../ia/providers/ia_copilot_providers.dart';
 import '../../planos/providers/plano_features_provider.dart';
@@ -11,8 +12,8 @@ final alunoRepositoryProvider = Provider<AlunoRepository>(
   (ref) => AlunoRepository(ref.read(apiClientProvider)),
 );
 
-final alunosHomeQueryProvider = StateProvider<AlunosHomeQuery>(
-  (ref) => const AlunosHomeQuery(),
+final alunosHomeQueryProvider = fxValueProvider<AlunosHomeQuery>(
+  const AlunosHomeQuery(),
 );
 
 class AlunosHomeTailState {
@@ -41,8 +42,12 @@ class AlunosHomeTailState {
   );
 }
 
-class AlunosHomeTailNotifier extends StateNotifier<AlunosHomeTailState> {
-  AlunosHomeTailNotifier() : super(const AlunosHomeTailState());
+class AlunosHomeTailNotifier extends Notifier<AlunosHomeTailState> {
+  @override
+  AlunosHomeTailState build() {
+    ref.watch(alunosHomeQueryProvider);
+    return const AlunosHomeTailState();
+  }
 
   void clear() {
     state = const AlunosHomeTailState();
@@ -66,24 +71,22 @@ class AlunosHomeTailNotifier extends StateNotifier<AlunosHomeTailState> {
         filtro: query.filtroApi,
         ordenacao: query.ordenacaoApi,
       );
+      if (!ref.mounted) return;
       state = AlunosHomeTailState(
         nextPage: state.nextPage + 1,
         alunos: [...state.alunos, ...chunk.alunos],
         hasNext: chunk.page.hasNext,
       );
     } catch (_) {
-      state = state.copyWith(loading: false);
+      if (ref.mounted) state = state.copyWith(loading: false);
       rethrow;
     }
   }
 }
 
 final alunosHomeTailProvider =
-    StateNotifierProvider<AlunosHomeTailNotifier, AlunosHomeTailState>(
-      (ref) {
-        ref.watch(alunosHomeQueryProvider);
-        return AlunosHomeTailNotifier();
-      },
+    NotifierProvider<AlunosHomeTailNotifier, AlunosHomeTailState>(
+      AlunosHomeTailNotifier.new,
     );
 
 final alunosHomeProvider = FutureProvider<AlunosHomeBundle>((ref) async {

@@ -19,6 +19,6 @@ void main() {
     ).readAsStringSync();
     expect(src, contains('alunoIds.take(3)'));
     expect(src, isNot(contains('alunoIds.take(8)')));
-    expect(src, contains('StateProvider.autoDispose.family'));
+    expect(src, contains('fxValueAutoDisposeFamily'));
   });
 }

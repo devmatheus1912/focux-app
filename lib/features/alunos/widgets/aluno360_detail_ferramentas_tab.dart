@@ -32,8 +32,8 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
     // BF / massa / anamnese tile: only `/360/ferramentas` — never sidecars.
     final ferramentasAsync = ref.watch(aluno360FerramentasBundleProvider(alunoId));
     final aderenciaSemanal =
-        ref.watch(alunoAderenciaSemanalProvider(alunoId)).valueOrNull;
-    final composicao = ferramentasAsync.valueOrNull?.composicaoResumo;
+        ref.watch(alunoAderenciaSemanalProvider(alunoId)).value;
+    final composicao = ferramentasAsync.value?.composicaoResumo;
     final bf =
         composicao?.percGordura != null
             ? formatBrDecimal(composicao!.percGordura!)
@@ -47,7 +47,7 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
     // null resumo (or null status) ⇒ não iniciada — no GET /anamnese for the tile.
     final anamneseStatus =
         ferramentasAsync.hasValue
-            ? ferramentasAsync.valueOrNull?.anamneseResumo?.status
+            ? ferramentasAsync.value?.anamneseResumo?.status
             : null;
 
     return Aluno360FerramentasTab(

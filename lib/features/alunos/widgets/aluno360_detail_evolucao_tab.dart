@@ -8,7 +8,7 @@ import 'aluno360_timeline_card.dart';
 import 'aluno360_weight_activity_card.dart';
 
 bool _evolucaoSemDados(AsyncValue<EvolucaoInteligente> evolucaoAsync) {
-  final ev = evolucaoAsync.valueOrNull;
+  final ev = evolucaoAsync.value;
   if (ev == null) return evolucaoAsync.isLoading;
   return ev.sinal == 'SEM_DADOS';
 }
@@ -46,7 +46,7 @@ class Aluno360DetailEvolucaoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timelineEvents = timeline360Async.valueOrNull ?? const [];
+    final timelineEvents = timeline360Async.value ?? const [];
     final timelineHasSignals = timelineEvents.isNotEmpty;
     final hasRadarP0 = _hasRadarP0(timelineEvents);
     final evolucaoEmpty = _evolucaoSemDados(evolucaoAsync);

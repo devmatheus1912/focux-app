@@ -228,7 +228,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 _MigracaoImportacaoResumoBody(
                   data: _importResumo!,
                   personalSlug:
-                      ref.watch(perfilProvider).valueOrNull?.slug,
+                      ref.watch(perfilProvider).value?.slug,
                 ),
               ] else if (!_isReviewing) ...[
               const SizedBox(height: FxSettingsLayout.headerToGroup),

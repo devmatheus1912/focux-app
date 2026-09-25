@@ -184,7 +184,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
     if (cachedPlano != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        if (ref.read(planoFeaturesProvider).valueOrNull != null) return;
+        if (ref.read(planoFeaturesProvider).value != null) return;
         ref.read(planoFeaturesProvider.notifier).seedFromHome(cachedPlano);
       });
     }
@@ -221,7 +221,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
                 openLandingEditorOrUpgrade(context, ref);
                 return;
               }
-              final features = ref.read(planoFeaturesProvider).valueOrNull;
+              final features = ref.read(planoFeaturesProvider).value;
               // Free: página pública fica 403/indisponível — vende upgrade no app.
               if (features?.landingCompleta != true) {
                 openLandingEditorOrUpgrade(context, ref);

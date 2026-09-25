@@ -95,7 +95,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_queryKey));
-    final contagem = ref.watch(iaActionsContagemProvider(_query)).valueOrNull;
+    final contagem = ref.watch(iaActionsContagemProvider(_query)).value;
 
     return fxScreenA11yScope(
       label: 'Tarefas IA',

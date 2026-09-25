@@ -73,7 +73,7 @@ Future<void> confirmarGerarSenhaAlunoDetail(
       ref.read(apiClientProvider),
     ).gerarSenhaProvisoria(aluno.id);
     ref.invalidate(alunoProvider(aluno.id));
-    final slug = ref.read(perfilProvider).valueOrNull?.slug;
+    final slug = ref.read(perfilProvider).value?.slug;
     if (context.mounted) {
       showAlunoNovaSenhaProvisoriaSheet(
         context,

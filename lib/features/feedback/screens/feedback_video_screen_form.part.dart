@@ -3,7 +3,7 @@ part of 'feedback_video_screen.dart';
 extension on _FeedbackVideoScreenState {
   Future<void> _novoFeedback() async {
     HapticFeedback.selectionClick();
-    final features = ref.read(planoFeaturesProvider).valueOrNull;
+    final features = ref.read(planoFeaturesProvider).value;
     if (features == null || !PlanoCapability.has(features, 'poseCoach')) {
       if (!mounted) return;
       await UpgradePromptSheet.show(

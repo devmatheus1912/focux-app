@@ -129,9 +129,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   Future<bool> _ensureAlunoVagaDisponivel({
     String source = 'alunos_list',
   }) async {
-    final home = ref.read(alunosHomeProvider).valueOrNull;
+    final home = ref.read(alunosHomeProvider).value;
     final plano =
-        home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull;
+        home?.planoFeatures ?? ref.read(planoFeaturesProvider).value;
     final limite = plano?.limiteAlunos;
     final total = home?.stats.total ?? 0;
     if (limite != null && limite > 0 && total >= limite) {
@@ -204,7 +204,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   void _syncHomeQuery() {
-    ref.read(alunosHomeQueryProvider.notifier).state = AlunosHomeQuery(
+    ref.read(alunosHomeQueryProvider.notifier).value = AlunosHomeQuery(
       q: _query,
       filtro: _filtro,
       ordenacao: _ordenacao,
@@ -302,8 +302,8 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   }
 
   bool get _temFinanceiro {
-    final home = ref.read(alunosHomeProvider).valueOrNull;
-    return (home?.planoFeatures ?? ref.read(planoFeaturesProvider).valueOrNull)
+    final home = ref.read(alunosHomeProvider).value;
+    return (home?.planoFeatures ?? ref.read(planoFeaturesProvider).value)
             ?.normalizeForTier()
             .financeiro ==
         true;
@@ -386,7 +386,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final qtd = _selecionados.length;
-    final home = ref.read(alunosHomeProvider).valueOrNull;
+    final home = ref.read(alunosHomeProvider).value;
     final alunos = <Aluno>[
       ...?home?.alunos,
       ...ref.read(alunosHomeTailProvider).alunos,
@@ -459,7 +459,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       });
     });
 
-    final home = _displayHome ?? homeAsync.valueOrNull;
+    final home = _displayHome ?? homeAsync.value;
     final count = home?.stats.total ?? 0;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);

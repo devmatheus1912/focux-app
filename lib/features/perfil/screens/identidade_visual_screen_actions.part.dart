@@ -108,13 +108,13 @@ extension on _IdentidadeVisualScreenState {
       };
       if (_logoUrl != null) body['logoUrl'] = _logoUrl;
       await dio.put('/api/personal/identidade', data: body);
-      ref.read(primaryColorProvider.notifier).state = _corPrimaria;
-      ref.read(secondaryColorProvider.notifier).state = _corSecundaria;
+      ref.read(primaryColorProvider.notifier).value = _corPrimaria;
+      ref.read(secondaryColorProvider.notifier).value = _corSecundaria;
       final slogan = _sloganCtrl.text.trim();
-      ref.read(sloganProvider.notifier).state =
+      ref.read(sloganProvider.notifier).value =
           slogan.isNotEmpty ? slogan : null;
       if (_logoUrl != null && _logoUrl!.isNotEmpty) {
-        ref.read(logoUrlProvider.notifier).state = _logoUrl;
+        ref.read(logoUrlProvider.notifier).value = _logoUrl;
       }
       ref.invalidate(perfilProvider);
       unawaited(

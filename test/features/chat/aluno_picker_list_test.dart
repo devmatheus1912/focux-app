@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alertas/data/alertas_repository.dart';
@@ -22,6 +24,29 @@ AlunosHomeBundle _bundle(List<Aluno> alunos) {
   );
 }
 
+/// Home já visitada e recarregando (ou falhando) — estado real do Riverpod.
+Future<AsyncValue<AlunosHomeBundle>> _homeAfterRevisit(
+  AlunosHomeBundle first, {
+  required bool secondFails,
+}) async {
+  var calls = 0;
+  final pending = Completer<AlunosHomeBundle>();
+  final homeProvider = FutureProvider<AlunosHomeBundle>((ref) {
+    calls++;
+    if (calls == 1) return first;
+    if (secondFails) throw Exception('down');
+    return pending.future;
+  });
+  final container = ProviderContainer.test(retry: (_, _) => null);
+  container.listen(homeProvider, (_, _) {});
+  await container.read(homeProvider.future);
+  container.invalidate(homeProvider);
+  if (secondFails) {
+    await expectLater(container.read(homeProvider.future), throwsException);
+  }
+  return container.read(homeProvider);
+}
+
 void main() {
   final ana = _aluno(id: 1, nome: 'Ana Silva', email: 'ana@test.com');
   final bruno = _aluno(id: 2, nome: 'Bruno Costa', email: 'bruno@test.com');
@@ -39,18 +64,15 @@ void main() {
       );
     });
 
-    test('keeps cached alunos while home refreshes', () {
-      final refreshing = const AsyncLoading<AlunosHomeBundle>().copyWithPrevious(
-        AsyncData(home),
-      );
+    test('keeps cached alunos while home refreshes', () async {
+      final refreshing = await _homeAfterRevisit(home, secondFails: false);
+      expect(refreshing.isLoading, isTrue);
       expect(alunoPickerAlunosFromHome(refreshing), [ana, bruno]);
     });
 
-    test('keeps cached alunos when home errors after a visit', () {
-      final errored = AsyncError<AlunosHomeBundle>(
-        Exception('down'),
-        StackTrace.current,
-      ).copyWithPrevious(AsyncData(home));
+    test('keeps cached alunos when home errors after a visit', () async {
+      final errored = await _homeAfterRevisit(home, secondFails: true);
+      expect(errored.hasError, isTrue);
       expect(alunoPickerAlunosFromHome(errored), [ana, bruno]);
     });
   });

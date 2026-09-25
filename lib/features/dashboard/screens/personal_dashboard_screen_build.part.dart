@@ -110,7 +110,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 final onboardingFromHome = home.onboardingResumo;
                 final landingCompleta =
                     planoFromHome?.landingCompleta ??
-                    ref.watch(planoFeaturesProvider).valueOrNull?.landingCompleta ??
+                    ref.watch(planoFeaturesProvider).value?.landingCompleta ??
                     false;
                 final onboardingIncomplete =
                     onboardingFromHome != null &&

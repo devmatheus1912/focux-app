@@ -447,7 +447,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Future<void> _selectPlan(SubscriptionPlan plan) async {
     if (_selectedPlanName == plan.apiName) return;
 
-    final perfil = ref.read(perfilProvider).valueOrNull;
+    final perfil = ref.read(perfilProvider).value;
     final current = subscriptionPlanFromApi(perfil?.plano);
     if (plan.level < current.level) {
       _handleDowngradeTierTap();
@@ -519,7 +519,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           )];
       final priceDisplay = _formatPrice(backendPlan, product, _billingPeriod);
       final billingPlan = subscriptionPlanFromApi(
-        ref.read(perfilProvider).valueOrNull?.plano,
+        ref.read(perfilProvider).value?.plano,
       );
       final trialNote =
           paywallShowsMaxPlanTrial(

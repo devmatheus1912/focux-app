@@ -402,10 +402,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
     final brand =
-        _isAlunoMode ? ref.watch(personalBrandProvider).valueOrNull : null;
+        _isAlunoMode ? ref.watch(personalBrandProvider).value : null;
     final alunoFotoUrl =
         _isPersonalMode && widget.alunoId != null
-            ? ref.watch(alunoProvider(widget.alunoId!)).valueOrNull?.fotoUrl
+            ? ref.watch(alunoProvider(widget.alunoId!)).value?.fotoUrl
             : null;
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);

@@ -44,8 +44,7 @@ class FxCelebrationOverlay {
                 child: Opacity(
                   opacity: 0.28,
                   child: FxRivePlayer(
-                    asset: 'assets/animations/confetti_burst.riv',
-                    networkUrl: FxRiveAssets.confettiBurstUrl,
+                    asset: FxRiveAssets.confettiBurst,
                     fit: BoxFit.cover,
                   ),
                 ),

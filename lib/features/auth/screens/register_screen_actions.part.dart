@@ -297,7 +297,7 @@ extension on _RegisterScreenState {
       setState(() => _error = 'Não foi possível iniciar a verificação MFA.');
       return true;
     }
-    ref.read(mfaChallengeProvider.notifier).state = MfaChallenge(
+    ref.read(mfaChallengeProvider.notifier).value = MfaChallenge(
       mfaToken: token,
     );
     unawaited(

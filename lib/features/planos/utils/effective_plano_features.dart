@@ -12,7 +12,7 @@ PlanoFeatures effectivePlanoFeatures(
   final fromHome = homeOverride?.normalizeForTier();
   if (fromHome != null) return fromHome;
   final async = ref.watch(planoFeaturesProvider);
-  final fresh = async.valueOrNull?.normalizeForTier();
+  final fresh = async.value?.normalizeForTier();
   if (fresh != null) return fresh;
   return PlanoFeatures.free;
 }

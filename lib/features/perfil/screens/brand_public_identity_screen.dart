@@ -136,7 +136,7 @@ class _BrandPublicIdentityScreenState
         ),
       );
     }
-    final live = widget.perfil ?? async.valueOrNull;
+    final live = widget.perfil ?? async.value;
     if (live != null &&
         _nomeCtrl.text.isEmpty &&
         live.nome.trim().isNotEmpty &&

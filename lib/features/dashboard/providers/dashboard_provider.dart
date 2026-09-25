@@ -113,7 +113,7 @@ final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
 final alunoHomeNotificacoesSelectProvider = Provider<int>((ref) {
   return ref.watch(
     alunoDashboardHomeProvider.select(
-      (async) => async.valueOrNull?.notificacoesNaoLidas ?? 0,
+      (async) => async.value?.notificacoesNaoLidas ?? 0,
     ),
   );
 });
@@ -121,7 +121,7 @@ final alunoHomeNotificacoesSelectProvider = Provider<int>((ref) {
 final alunoHomeChatUnreadSelectProvider = Provider<int>((ref) {
   return ref.watch(
     alunoDashboardHomeProvider.select(
-      (async) => async.valueOrNull?.chat.naoLidasDoPersonal ?? 0,
+      (async) => async.value?.chat.naoLidasDoPersonal ?? 0,
     ),
   );
 });

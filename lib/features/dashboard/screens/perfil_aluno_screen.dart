@@ -32,7 +32,7 @@ class PerfilAlunoScreen extends ConsumerWidget {
         appBar: FxShellAppBar(
           title: 'Meu perfil',
           showBack: false,
-          subtitle: FxHubFreshness.fromFetchedAt(homeAsync.valueOrNull?.fetchedAt),
+          subtitle: FxHubFreshness.fromFetchedAt(homeAsync.value?.fetchedAt),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como usar o perfil',

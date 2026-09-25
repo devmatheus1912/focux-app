@@ -123,7 +123,7 @@ class IaQuotaUpgrade {
     BuildContext context,
     WidgetRef ref,
   ) async {
-    final features = ref.read(planoFeaturesProvider).valueOrNull;
+    final features = ref.read(planoFeaturesProvider).value;
     if (features == null || !isBlockedLocally(features)) return true;
     await showUpgradeDialog(context, ref, features: features);
     return false;
@@ -142,7 +142,7 @@ class IaQuotaUpgrade {
       context,
       ref,
       error: error,
-      features: ref.read(planoFeaturesProvider).valueOrNull,
+      features: ref.read(planoFeaturesProvider).value,
     );
     await ref.read(planoFeaturesProvider.notifier).refresh();
   }

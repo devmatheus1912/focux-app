@@ -71,8 +71,11 @@ void main() {
     );
     expect(
       provider,
-      contains(
-        'SessionInvalidator.listenable.removeListener(_handleSessionInvalidated)',
+      matches(
+        RegExp(
+          r'ref\.onDispose\(\s*\(\) => SessionInvalidator\.listenable'
+          r'\.removeListener\(\s*_handleSessionInvalidated,?\s*\)',
+        ),
       ),
     );
     expect(provider, contains('state = AuthStatus.unauthenticated'));

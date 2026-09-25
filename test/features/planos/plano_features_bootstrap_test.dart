@@ -90,6 +90,13 @@ class _RecordingPlanosRepository extends PlanosRepository {
   }
 }
 
+PlanoFeaturesNotifier _notifierFor(PlanosRepository repo) {
+  final container = ProviderContainer.test(
+    overrides: [planosRepositoryProvider.overrideWithValue(repo)],
+  );
+  return container.read(planoFeaturesProvider.notifier);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   FlutterSecureStorage.setMockInitialValues({});
@@ -110,14 +117,14 @@ void main() {
     () async {
       DashboardHomeClientCache.put(_homeBundle(_premium));
       final repo = _RecordingPlanosRepository();
-      final notifier = PlanoFeaturesNotifier(repo);
+      final notifier = _notifierFor(repo);
 
-      await notifier.bootstrap();
+      await notifier.bootstrapped;
 
       expect(repo.freshCalls, 0);
       expect(repo.cacheLoads, 0);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
-      expect(notifier.state.valueOrNull?.financeiro, isTrue);
+      expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
+      expect(notifier.state.value?.financeiro, isTrue);
     },
   );
 
@@ -126,12 +133,12 @@ void main() {
     () async {
       DashboardHomeClientCache.put(_homeBundle(null));
       final repo = _RecordingPlanosRepository()..freshResult = _premium;
-      final notifier = PlanoFeaturesNotifier(repo);
+      final notifier = _notifierFor(repo);
 
-      await notifier.bootstrap();
+      await notifier.bootstrapped;
 
       expect(repo.freshCalls, 1);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
+      expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
     },
   );
 
@@ -141,12 +148,12 @@ void main() {
       now: DateTime.now().subtract(const Duration(seconds: 91)),
     );
     final repo = _RecordingPlanosRepository()..freshResult = _free;
-    final notifier = PlanoFeaturesNotifier(repo);
+    final notifier = _notifierFor(repo);
 
-    await notifier.bootstrap();
+    await notifier.bootstrapped;
 
     expect(repo.freshCalls, 1);
-    expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.FREE);
+    expect(notifier.state.value?.plano, SubscriptionPlan.FREE);
   });
 
   test(
@@ -157,11 +164,11 @@ void main() {
           fromCache: true,
           cacheSavedAt: DateTime.now(),
         );
-      final notifier = PlanoFeaturesNotifier(repo);
+      final notifier = _notifierFor(repo);
 
-      await notifier.bootstrap();
+      await notifier.bootstrapped;
 
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
+      expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
       expect(repo.freshCalls, 0);
     },
   );
@@ -169,13 +176,13 @@ void main() {
   test('BFF cache seeds without GET /planos/me', () async {
     PlanoFeaturesBffCache.put(_premium);
     final repo = _RecordingPlanosRepository();
-    final notifier = PlanoFeaturesNotifier(repo);
+    final notifier = _notifierFor(repo);
 
-    await notifier.bootstrap();
+    await notifier.bootstrapped;
 
     expect(repo.freshCalls, 0);
     expect(repo.cacheLoads, 0);
-    expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
+    expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
   });
 
   test(
@@ -183,9 +190,9 @@ void main() {
     () async {
       final repo = _RecordingPlanosRepository()
         ..freshDelay = Completer<PlanoFeatures>();
-      final notifier = PlanoFeaturesNotifier(repo);
+      final notifier = _notifierFor(repo);
 
-      final done = notifier.bootstrap();
+      final done = notifier.bootstrapped;
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
 
@@ -195,8 +202,8 @@ void main() {
       repo.freshDelay!.complete(_free);
       await done;
 
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
-      expect(notifier.state.valueOrNull?.financeiro, isTrue);
+      expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
+      expect(notifier.state.value?.financeiro, isTrue);
     },
   );
 
@@ -205,15 +212,17 @@ void main() {
     () async {
       final repo = _RecordingPlanosRepository()
         ..cacheDelay = Completer<PlanoFeatures?>();
-      final notifier = PlanoFeaturesNotifier(repo);
+      final notifier = _notifierFor(repo);
 
-      final done = notifier.bootstrap();
+      final done = notifier.bootstrapped;
+      await Future<void>.delayed(Duration.zero);
+      expect(repo.cacheLoads, 1);
       notifier.seedFromHome(_premium);
       repo.cacheDelay!.complete(null);
       await done;
 
       expect(repo.freshCalls, 0);
-      expect(notifier.state.valueOrNull?.plano, SubscriptionPlan.PRO);
+      expect(notifier.state.value?.plano, SubscriptionPlan.PRO);
     },
   );
 }

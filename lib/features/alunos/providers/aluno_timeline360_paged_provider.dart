@@ -37,17 +37,22 @@ class Timeline360PagedState {
 }
 
 class Timeline360PagedNotifier
-    extends StateNotifier<AsyncValue<Timeline360PagedState>> {
-  Timeline360PagedNotifier(this._ref, this.alunoId)
-    : super(const AsyncValue.loading());
+    extends Notifier<AsyncValue<Timeline360PagedState>> {
+  Timeline360PagedNotifier(this.alunoId);
 
-  final Ref _ref;
   final int alunoId;
   static const int _pageSize = 40;
 
-  AlunoRepository get _repo => AlunoRepository(_ref.read(apiClientProvider));
+  AlunoRepository get _repo => AlunoRepository(ref.read(apiClientProvider));
+
+  @override
+  AsyncValue<Timeline360PagedState> build() {
+    Future.microtask(refresh);
+    return const AsyncValue.loading();
+  }
 
   Future<void> refresh() async {
+    if (!ref.mounted) return;
     state = const AsyncValue.loading();
     try {
       final page = await _repo.buscarTimeline360Page(
@@ -55,6 +60,7 @@ class Timeline360PagedNotifier
         limit: _pageSize,
         offset: 0,
       );
+      if (!ref.mounted) return;
       state = AsyncValue.data(
         Timeline360PagedState(
           events: page.events,
@@ -65,12 +71,12 @@ class Timeline360PagedNotifier
         ),
       );
     } catch (error, stack) {
-      state = AsyncValue.error(error, stack);
+      if (ref.mounted) state = AsyncValue.error(error, stack);
     }
   }
 
   Future<void> loadMore() async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null || !current.hasMore || current.loadingMore) return;
     final offset = current.nextOffset ?? current.events.length;
     state = AsyncValue.data(current.copyWith(loadingMore: true));
@@ -80,6 +86,7 @@ class Timeline360PagedNotifier
         limit: _pageSize,
         offset: offset,
       );
+      if (!ref.mounted) return;
       state = AsyncValue.data(
         Timeline360PagedState(
           events: [...current.events, ...page.events],
@@ -92,20 +99,17 @@ class Timeline360PagedNotifier
         ),
       );
     } catch (_) {
-      state = AsyncValue.data(current.copyWith(loadingMore: false));
+      if (ref.mounted) {
+        state = AsyncValue.data(current.copyWith(loadingMore: false));
+      }
     }
   }
 }
 
-final alunoTimeline360PagedProvider = StateNotifierProvider.autoDispose
-    .family<Timeline360PagedNotifier, AsyncValue<Timeline360PagedState>, int>((
-      ref,
-      alunoId,
-    ) {
-      final notifier = Timeline360PagedNotifier(ref, alunoId);
-      notifier.refresh();
-      return notifier;
-    });
+final alunoTimeline360PagedProvider = NotifierProvider.autoDispose
+    .family<Timeline360PagedNotifier, AsyncValue<Timeline360PagedState>, int>(
+      Timeline360PagedNotifier.new,
+    );
 
 /// Backwards-compatible event list for Evolução tab.
 final alunoTimeline360ApiProvider =

@@ -313,7 +313,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pending =
-        ref.watch(progressaoSugestoesProvider(widget.alunoId)).valueOrNull ??
+        ref.watch(progressaoSugestoesProvider(widget.alunoId)).value ??
         const [];
     return fxScreenA11yScope(
       label: 'Progressão de Carga',

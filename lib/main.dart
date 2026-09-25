@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rive/rive.dart' show RiveNative;
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
@@ -173,9 +174,22 @@ void main() {
       );
     };
 
+    unawaited(_initRiveNative());
     applyLegacyPasswordResetRedirect(AppRouter.router);
-    runApp(const ProviderScope(child: FocuxApp()));
+    runApp(
+      // Retry fica no ApiClient (fxNoRetry); retry do provider dobraria 4xx.
+      ProviderScope(retry: (_, _) => null, child: const FocuxApp()),
+    );
   }, reportUncaughtZoneError);
+}
+
+/// Motor nativo do Rive; se falhar, as animações caem no fallback estático.
+Future<void> _initRiveNative() async {
+  try {
+    await RiveNative.init();
+  } catch (error) {
+    debugPrint('[Focux] Rive native init error: $error');
+  }
 }
 
 class FocuxApp extends ConsumerStatefulWidget {
@@ -312,18 +326,18 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
       if (!mounted) return;
       final primary = _safePrimaryColor(perfil.corPrimaria);
-      ref.read(primaryColorProvider.notifier).state = primary;
-      ref.read(secondaryColorProvider.notifier).state = _safeSecondaryColor(
+      ref.read(primaryColorProvider.notifier).value = primary;
+      ref.read(secondaryColorProvider.notifier).value = _safeSecondaryColor(
         primary,
         perfil.corSecundaria,
       );
       if (perfil.logoUrl != null && perfil.logoUrl!.isNotEmpty) {
-        ref.read(logoUrlProvider.notifier).state = perfil.logoUrl;
+        ref.read(logoUrlProvider.notifier).value = perfil.logoUrl;
       }
       final slogan = perfil.slogan?.trim();
-      ref.read(sloganProvider.notifier).state =
+      ref.read(sloganProvider.notifier).value =
           (slogan != null && slogan.isNotEmpty) ? slogan : null;
-      ref.read(personalNameProvider.notifier).state = perfil.nome;
+      ref.read(personalNameProvider.notifier).value = perfil.nome;
       return;
     } catch (error) {
       debugPrint('[Focux] personal theme load failed: $error');
@@ -346,25 +360,25 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       if (!mounted) return;
       final corPrimaria = data['corPrimaria'] as String?;
       final primary = _safePrimaryColor(corPrimaria);
-      ref.read(primaryColorProvider.notifier).state = primary;
-      ref.read(secondaryColorProvider.notifier).state = _safeSecondaryColor(
+      ref.read(primaryColorProvider.notifier).value = primary;
+      ref.read(secondaryColorProvider.notifier).value = _safeSecondaryColor(
         primary,
         data['corSecundaria'] as String?,
       );
       final logoUrl = data['logoUrl'] as String?;
       if (logoUrl != null && logoUrl.isNotEmpty) {
-        ref.read(logoUrlProvider.notifier).state = logoUrl;
+        ref.read(logoUrlProvider.notifier).value = logoUrl;
       }
       final slogan = (data['slogan'] as String?)?.trim();
-      ref.read(sloganProvider.notifier).state =
+      ref.read(sloganProvider.notifier).value =
           (slogan != null && slogan.isNotEmpty) ? slogan : null;
       final nomePersonal = data['nomePersonal'] as String?;
       if (nomePersonal != null && nomePersonal.isNotEmpty) {
-        ref.read(personalNameProvider.notifier).state = nomePersonal;
+        ref.read(personalNameProvider.notifier).value = nomePersonal;
       }
-      ref.read(hideFocuxBrandingProvider.notifier).state =
+      ref.read(hideFocuxBrandingProvider.notifier).value =
           data['hideFocuxBranding'] as bool? ?? false;
-      ref.read(appDisplayNameProvider.notifier).state =
+      ref.read(appDisplayNameProvider.notifier).value =
           data['appDisplayName'] as String?;
     } catch (error) {
       debugPrint('[Focux] aluno theme load failed: $error');
@@ -372,14 +386,14 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
   }
 
   void _resetCustomTheme() {
-    ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
-    ref.read(secondaryColorProvider.notifier).state =
+    ref.read(primaryColorProvider.notifier).value = EagleTokens.brand;
+    ref.read(secondaryColorProvider.notifier).value =
         BrandPalette.defaultSecondary;
-    ref.read(logoUrlProvider.notifier).state = null;
-    ref.read(sloganProvider.notifier).state = null;
-    ref.read(personalNameProvider.notifier).state = null;
-    ref.read(hideFocuxBrandingProvider.notifier).state = false;
-    ref.read(appDisplayNameProvider.notifier).state = null;
+    ref.read(logoUrlProvider.notifier).value = null;
+    ref.read(sloganProvider.notifier).value = null;
+    ref.read(personalNameProvider.notifier).value = null;
+    ref.read(hideFocuxBrandingProvider.notifier).value = false;
+    ref.read(appDisplayNameProvider.notifier).value = null;
   }
 
   Color _safePrimaryColor(String? raw) {

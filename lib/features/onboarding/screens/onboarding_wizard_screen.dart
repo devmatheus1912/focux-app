@@ -74,7 +74,7 @@ class _OnboardingWizardScreenState
 
   Future<void> _load({bool silent = false}) async {
     final landingCompleta =
-        ref.read(planoFeaturesProvider).valueOrNull?.landingCompleta ?? false;
+        ref.read(planoFeaturesProvider).value?.landingCompleta ?? false;
     final cachedRaw = OnboardingWizardClientCache.getIfFresh();
     final cached =
         cachedRaw == null
@@ -104,7 +104,7 @@ class _OnboardingWizardScreenState
           await OnboardingRepository(ref.read(apiClientProvider)).wizard();
       if (!mounted) return;
       final liveLanding =
-          ref.read(planoFeaturesProvider).valueOrNull?.landingCompleta ??
+          ref.read(planoFeaturesProvider).value?.landingCompleta ??
           landingCompleta;
       final w = normalizeOnboardingWizard(
         raw,

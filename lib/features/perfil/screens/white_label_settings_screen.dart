@@ -161,7 +161,7 @@ class _WhiteLabelSettingsScreenState
 
   Future<void> _onLandingModoSelect(String v) async {
     if (whiteLabelNeedsLandingCompleta(v)) {
-      final features = ref.read(planoFeaturesProvider).valueOrNull;
+      final features = ref.read(planoFeaturesProvider).value;
       if (features?.landingCompleta != true) {
         if (!mounted) return;
         await UpgradePromptSheet.show(
@@ -191,7 +191,7 @@ class _WhiteLabelSettingsScreenState
   @override
   Widget build(BuildContext context) {
     final configAsync = ref.watch(whiteLabelConfigProvider);
-    final config = configAsync.valueOrNull;
+    final config = configAsync.value;
     if (config != null) _apply(config);
     final chrome = ShellChrome.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;

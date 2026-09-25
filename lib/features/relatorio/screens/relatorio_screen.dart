@@ -163,7 +163,7 @@ class _RelatorioScreenState extends ConsumerState<RelatorioScreen> {
     if (dados == null || _exporting) return;
     setState(() => _exporting = true);
     try {
-      final wl = ref.read(whiteLabelConfigProvider).valueOrNull;
+      final wl = ref.read(whiteLabelConfigProvider).value;
       await exportRelatorioPdf(
         alunoNome: widget.alunoNome,
         periodoLabel: relatorioPeriodoLabelPdf(

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../auth/providers/auth_provider.dart';
 
 final notificacoesRepositoryProvider = Provider<NotificacoesRepository>(
@@ -101,7 +102,7 @@ class NotificacoesInbox {
   }
 }
 
-final notificacoesQueryProvider = StateProvider<String>((ref) => '');
+final notificacoesQueryProvider = fxValueProvider<String>('');
 
 class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
   static const pageSize = 30;
@@ -115,7 +116,7 @@ class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
   }
 
   Future<void> loadMore() async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null || !current.hasMore || current.loadingMore) return;
     state = AsyncData(current.copyWith(loadingMore: true));
     try {

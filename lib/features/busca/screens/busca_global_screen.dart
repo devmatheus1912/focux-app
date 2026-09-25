@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -29,8 +30,8 @@ import '../models/busca_global_models.dart';
 import '../utils/busca_display.dart';
 import 'widgets/busca_global_results.dart';
 
-final buscaQueryProvider = StateProvider<String>((ref) => '');
-final buscaFilterProvider = StateProvider<BuscaTipo>((ref) => BuscaTipo.todos);
+final buscaQueryProvider = fxValueProvider<String>('');
+final buscaFilterProvider = fxValueProvider<BuscaTipo>(BuscaTipo.todos);
 
 final buscaRepositoryProvider = Provider<BuscaRepository>(
   (ref) => BuscaRepository(ref.read(apiClientProvider)),
@@ -79,7 +80,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: buscaDebounceMs), () {
       if (!mounted) return;
-      ref.read(buscaQueryProvider.notifier).state = _ctrl.text;
+      ref.read(buscaQueryProvider.notifier).value = _ctrl.text;
     });
   }
 
@@ -87,7 +88,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     HapticFeedback.selectionClick();
     _debounce?.cancel();
     _ctrl.clear();
-    ref.read(buscaQueryProvider.notifier).state = '';
+    ref.read(buscaQueryProvider.notifier).value = '';
   }
 
   void _showHelp() {
@@ -171,7 +172,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final hasQuery = _ctrl.text.isNotEmpty;
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final result = resultAsync.valueOrNull;
+    final result = resultAsync.value;
     final countLabel = query.trim().length < buscaMinQueryLength
         ? 'Busca'
         : buscaCountLabel(result?.totalCount ?? 0);
@@ -254,7 +255,7 @@ class _BuscaGlobalScreenState extends ConsumerState<BuscaGlobalScreen> {
                           selected: tipo == filter,
                           isDark: chrome.isDark,
                           onTap: () =>
-                              ref.read(buscaFilterProvider.notifier).state =
+                              ref.read(buscaFilterProvider.notifier).value =
                                   tipo,
                         ),
                     ],

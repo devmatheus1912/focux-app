@@ -9,6 +9,7 @@ import 'package:focux_app/features/alunos/widgets/aluno360_evolucao_tab.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_weight_activity_card.dart';
 
+import '../../../support/riverpod_seeds.dart';
 import '../../../support/tolerant_golden_comparator.dart';
 
 void main() {
@@ -56,13 +57,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
-        alunoTimeline360PagedProvider(42).overrideWith(
-          (ref) =>
-              Timeline360PagedNotifier(ref, 42)
-                ..state = AsyncValue.data(
-                  Timeline360PagedState(events: timelineEvents),
-                ),
-        ),
+        seededTimeline360(42, Timeline360PagedState(events: timelineEvents)),
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(

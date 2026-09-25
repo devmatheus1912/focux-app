@@ -12,10 +12,4 @@ abstract final class FxRiveAssets {
 
   /// Community sparkle pack — badge unlock shimmer.
   static const starSparkle = 'assets/animations/star_sparkle.riv';
-
-  /// Network fallbacks when bundling fails (same files on Rive CDN).
-  static const confettiSuccessUrl =
-      'https://public.rive.app/community/runtime-files/7184-13803-success-confetti-animation.riv';
-  static const confettiBurstUrl =
-      'https://public.rive.app/community/runtime-files/15318-28910-confetti-animation.riv';
 }

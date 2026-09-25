@@ -148,7 +148,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
   }
 
   void _abrirComentarios(int postId) {
-    final aluno = ref.read(alunoMeProvider).valueOrNull;
+    final aluno = ref.read(alunoMeProvider).value;
     showFxHomeSheet<void>(
       context,
       builder: (ctx) => FeedCommentsSheet(

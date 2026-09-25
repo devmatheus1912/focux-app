@@ -263,7 +263,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
                           : (_alunoSelecionado?.nome ?? 'Selecionar'),
                   picker: true,
                   onTap: () {
-                    final alunos = alunosAsync.valueOrNull;
+                    final alunos = alunosAsync.value;
                     if (alunos == null) {
                       ref.invalidate(alunosProvider);
                       return;

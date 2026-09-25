@@ -59,7 +59,7 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
             code: _codeController.text.trim(),
           );
       if (!mounted) return;
-      ref.read(mfaChallengeProvider.notifier).state = null;
+      ref.read(mfaChallengeProvider.notifier).value = null;
       final from = challenge?.returnTo;
       final dest =
           (from != null && from.isNotEmpty)
@@ -73,7 +73,7 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
       final message = mapMfaVerifyError(error);
       // Token da challenge expirou/inválido → login. Código errado → fica na tela.
       if (_isMfaChallengeGone(error, message)) {
-        ref.read(mfaChallengeProvider.notifier).state = null;
+        ref.read(mfaChallengeProvider.notifier).value = null;
         context.go('/login');
         return;
       }
@@ -98,7 +98,7 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
   }
 
   void _backToLogin() {
-    ref.read(mfaChallengeProvider.notifier).state = null;
+    ref.read(mfaChallengeProvider.notifier).value = null;
     context.go('/login');
   }
 

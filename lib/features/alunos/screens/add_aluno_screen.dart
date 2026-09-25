@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -257,7 +257,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         await showAddAlunoSenhaSheet(
           context: context,
           aluno: novoAluno,
-          personalSlug: ref.read(perfilProvider).valueOrNull?.slug,
+          personalSlug: ref.read(perfilProvider).value?.slug,
           onDone: () {
             if (mounted) context.pop(true);
           },

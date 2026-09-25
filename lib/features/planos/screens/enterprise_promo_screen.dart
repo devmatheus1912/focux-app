@@ -39,7 +39,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
 
   Future<void> _markPromoAsSeen() async {
     final prefs = await SharedPreferences.getInstance();
-    final personalId = ref.read(perfilProvider).valueOrNull?.id;
+    final personalId = ref.read(perfilProvider).value?.id;
     if (personalId != null) {
       await prefs.setBool('promo_shown_$personalId', true);
     }

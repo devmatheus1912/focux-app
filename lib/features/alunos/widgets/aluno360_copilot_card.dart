@@ -119,7 +119,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final bundleAsync = ref.watch(aluno360OperacaoBundleProvider(aluno.id));
-    final bundle = bundleAsync.valueOrNull;
+    final bundle = bundleAsync.value;
     // Prefer /360 bundle for open tasks — avoid sidecar GET on first paint.
     final AsyncValue<List<FilaAcaoResumo>> openActionsAsync;
     if (bundle?.openCopilotTasks != null) {
@@ -132,7 +132,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
     } else {
       openActionsAsync = const AsyncLoading();
     }
-    final openActions = openActionsAsync.valueOrNull ?? const <FilaAcaoResumo>[];
+    final openActions = openActionsAsync.value ?? const <FilaAcaoResumo>[];
     final openTask = findOpenCopilotTask(openActions);
     final hasOpenTask = openTask != null || hasOpenCopilotTask360;
     final bundleLoading = bundleAsync.isLoading && !bundleAsync.hasValue;
@@ -161,7 +161,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
       );
     }
 
-    final resumo = resumoAsync.valueOrNull;
+    final resumo = resumoAsync.value;
     final profileCompletion = copilotProfileCompletion(aluno);
     final fallback = copilotFallbackAction(aluno, resumo);
     final seed360 =

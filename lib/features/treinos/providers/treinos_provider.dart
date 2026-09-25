@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/treino_repository.dart';
 
@@ -44,8 +45,22 @@ class TreinosHomeTailState {
   );
 }
 
-class TreinosHomeTailNotifier extends StateNotifier<TreinosHomeTailState> {
-  TreinosHomeTailNotifier() : super(const TreinosHomeTailState());
+class TreinosHomeTailNotifier extends Notifier<TreinosHomeTailState> {
+  TreinosHomeTailNotifier([this.alunoId]);
+
+  /// `null` = lista geral; senão, treinos do aluno.
+  final int? alunoId;
+
+  @override
+  TreinosHomeTailState build() {
+    final id = alunoId;
+    if (id == null) {
+      ref.watch(treinosHomeQueryProvider);
+    } else {
+      ref.watch(treinosDoAlunoQueryProvider(id));
+    }
+    return const TreinosHomeTailState();
+  }
 
   void clear() {
     state = const TreinosHomeTailState();
@@ -67,13 +82,14 @@ class TreinosHomeTailNotifier extends StateNotifier<TreinosHomeTailState> {
         size: TreinosHomeQuery.pageSize,
         q: query.q,
       );
+      if (!ref.mounted) return;
       state = TreinosHomeTailState(
         nextPage: state.nextPage + 1,
         treinos: [...state.treinos, ...chunk.treinos],
         hasNext: chunk.hasNext,
       );
     } catch (_) {
-      state = state.copyWith(loading: false);
+      if (ref.mounted) state = state.copyWith(loading: false);
       rethrow;
     }
   }
@@ -92,13 +108,14 @@ class TreinosHomeTailNotifier extends StateNotifier<TreinosHomeTailState> {
         size: TreinosAlunoQuery.pageSize,
         q: query.q,
       );
+      if (!ref.mounted) return;
       state = TreinosHomeTailState(
         nextPage: state.nextPage + 1,
         treinos: [...state.treinos, ...chunk.treinos],
         hasNext: chunk.hasNext,
       );
     } catch (_) {
-      state = state.copyWith(loading: false);
+      if (ref.mounted) state = state.copyWith(loading: false);
       rethrow;
     }
   }
@@ -108,15 +125,14 @@ final treinoRepositoryProvider = Provider<TreinoRepository>(
   (ref) => TreinoRepository(ref.read(apiClientProvider)),
 );
 
-final treinosHomeQueryProvider = StateProvider<TreinosHomeQuery>(
-  (ref) => const TreinosHomeQuery(),
+final treinosHomeQueryProvider = fxValueProvider<TreinosHomeQuery>(
+  const TreinosHomeQuery(),
 );
 
 final treinosHomeTailProvider =
-    StateNotifierProvider<TreinosHomeTailNotifier, TreinosHomeTailState>((ref) {
-      ref.watch(treinosHomeQueryProvider);
-      return TreinosHomeTailNotifier();
-    });
+    NotifierProvider<TreinosHomeTailNotifier, TreinosHomeTailState>(
+      TreinosHomeTailNotifier.new,
+    );
 
 final treinosHomeProvider = FutureProvider<TreinosHomeBundle>((ref) async {
   final query = ref.watch(treinosHomeQueryProvider);
@@ -131,18 +147,17 @@ final treinosProvider = FutureProvider<List<Treino>>((ref) async {
   return (await ref.watch(treinosHomeProvider.future)).treinos;
 });
 
-final treinosDoAlunoQueryProvider = StateProvider.family<TreinosAlunoQuery, int>(
-  (ref, alunoId) => const TreinosAlunoQuery(),
-);
+final treinosDoAlunoQueryProvider = NotifierProvider.family<
+  FxValueNotifier<TreinosAlunoQuery>,
+  TreinosAlunoQuery,
+  int
+>((alunoId) => FxValueNotifier(const TreinosAlunoQuery()));
 
-final treinosDoAlunoTailProvider = StateNotifierProvider.family<
+final treinosDoAlunoTailProvider = NotifierProvider.family<
   TreinosHomeTailNotifier,
   TreinosHomeTailState,
   int
->((ref, alunoId) {
-  ref.watch(treinosDoAlunoQueryProvider(alunoId));
-  return TreinosHomeTailNotifier();
-});
+>(TreinosHomeTailNotifier.new);
 
 final treinosDoAlunoPageProvider =
     FutureProvider.family<TreinosAlunoPage, int>((ref, alunoId) async {

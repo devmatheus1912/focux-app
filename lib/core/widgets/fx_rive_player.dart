@@ -4,62 +4,89 @@ import 'package:rive/rive.dart';
 import '../animations/fx_rive_assets.dart';
 
 /// Autoplay Rive animation from bundled assets (offline-first).
-class FxRivePlayer extends StatelessWidget {
+///
+/// Sem motor nativo (`RiveNative.init` falhou ou testes), mostra [fallback].
+class FxRivePlayer extends StatefulWidget {
   const FxRivePlayer({
     super.key,
     required this.asset,
-    this.networkUrl,
     this.width,
     this.height,
     this.fit = BoxFit.contain,
-    this.artboard,
-    this.animation,
-    this.stateMachine,
     this.fallback,
   });
 
   final String asset;
-  final String? networkUrl;
   final double? width;
   final double? height;
   final BoxFit fit;
-  final String? artboard;
-  final String? animation;
-  final String? stateMachine;
   final Widget? fallback;
 
-  void _bindControllers(Artboard artboard) {
-    if (stateMachine != null) {
-      final controller = StateMachineController.fromArtboard(
-        artboard,
-        stateMachine!,
-      );
-      if (controller != null) {
-        artboard.addController(controller);
-      }
-      return;
+  @override
+  State<FxRivePlayer> createState() => _FxRivePlayerState();
+}
+
+class _FxRivePlayerState extends State<FxRivePlayer> {
+  FileLoader? _loader;
+
+  @override
+  void initState() {
+    super.initState();
+    _loader = _createLoader();
+  }
+
+  @override
+  void didUpdateWidget(FxRivePlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.asset != widget.asset) {
+      _loader?.dispose();
+      _loader = _createLoader();
     }
-    if (animation != null) {
-      artboard.addController(SimpleAnimation(animation!, autoplay: true));
-    }
+  }
+
+  FileLoader? _createLoader() {
+    if (!RiveNative.isInitialized) return null;
+    return FileLoader.fromAsset(widget.asset, riveFactory: Factory.rive);
+  }
+
+  @override
+  void dispose() {
+    _loader?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final fallback = widget.fallback ?? const SizedBox.shrink();
+    final loader = _loader;
     return SizedBox(
-      width: width,
-      height: height,
-      child: RiveAnimation.asset(
-        asset,
-        fit: fit,
-        artboard: artboard,
-        animations: animation == null ? const [] : [animation!],
-        onInit: _bindControllers,
-        placeHolder: fallback ?? const SizedBox.shrink(),
-      ),
+      width: widget.width,
+      height: widget.height,
+      child: loader == null
+          ? fallback
+          : RiveWidgetBuilder(
+              fileLoader: loader,
+              builder: (context, state) => switch (state) {
+                RiveLoaded(:final controller) => RiveWidget(
+                  controller: controller,
+                  fit: _riveFit(widget.fit),
+                ),
+                RiveLoading() || RiveFailed() => fallback,
+              },
+            ),
     );
   }
 }
+
+Fit _riveFit(BoxFit fit) => switch (fit) {
+  BoxFit.fill => Fit.fill,
+  BoxFit.cover => Fit.cover,
+  BoxFit.fitWidth => Fit.fitWidth,
+  BoxFit.fitHeight => Fit.fitHeight,
+  BoxFit.none => Fit.none,
+  BoxFit.scaleDown => Fit.scaleDown,
+  BoxFit.contain => Fit.contain,
+};
 
 /// Full-screen celebration confetti (Avinash_Narayanan — Rive community).
 class FxRiveCelebration extends StatelessWidget {

@@ -2,39 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../state/fx_value_notifier.dart';
 import 'brand_palette.dart';
 import 'design_tokens.dart';
 
 const _themePrefKey = 'focux_appearance_mode';
 
-final themeModeProvider = StateNotifierProvider<ThemeModeController, ThemeMode>(
-  (ref) => ThemeModeController(),
+final themeModeProvider = NotifierProvider<ThemeModeController, ThemeMode>(
+  ThemeModeController.new,
 );
 
-final primaryColorProvider = StateProvider<Color>((ref) => EagleTokens.brand);
+final primaryColorProvider = fxValueProvider<Color>(EagleTokens.brand);
 
-final secondaryColorProvider = StateProvider<Color>(
-  (ref) => BrandPalette.defaultSecondary,
+final secondaryColorProvider = fxValueProvider<Color>(
+  BrandPalette.defaultSecondary,
 );
 
-final logoUrlProvider = StateProvider<String?>((ref) => null);
+final logoUrlProvider = fxValueProvider<String?>(null);
 
-final sloganProvider = StateProvider<String?>((ref) => null);
+final sloganProvider = fxValueProvider<String?>(null);
 
-final personalNameProvider = StateProvider<String?>((ref) => null);
+final personalNameProvider = fxValueProvider<String?>(null);
 
-final hideFocuxBrandingProvider = StateProvider<bool>((ref) => false);
+final hideFocuxBrandingProvider = fxValueProvider<bool>(false);
 
-final appDisplayNameProvider = StateProvider<String?>((ref) => null);
+final appDisplayNameProvider = fxValueProvider<String?>(null);
 
 /// Aparência do app. Padrão = modo do celular ([ThemeMode.system]).
-class ThemeModeController extends StateNotifier<ThemeMode> {
-  ThemeModeController() : super(ThemeMode.system) {
-    ready = _restore();
-  }
-
+class ThemeModeController extends Notifier<ThemeMode> {
   @visibleForTesting
-  late final Future<void> ready;
+  late Future<void> ready;
+
+  @override
+  ThemeMode build() {
+    ready = _restore();
+    return ThemeMode.system;
+  }
 
   Future<void> _restore() async {
     try {

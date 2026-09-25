@@ -138,7 +138,7 @@ class _DesafioDetailScreenState extends ConsumerState<DesafioDetailScreen> {
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
     final meId =
         widget.forAluno
-            ? ref.watch(alunoMeProvider).valueOrNull?.id
+            ? ref.watch(alunoMeProvider).value?.id
             : null;
 
     return fxScreenA11yScope(

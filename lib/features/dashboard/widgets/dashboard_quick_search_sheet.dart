@@ -100,7 +100,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
   @override
   Widget build(BuildContext context) {
     final q = _query.trim().toLowerCase();
-    final catalogo = ref.watch(ferramentasCatalogoProvider).valueOrNull;
+    final catalogo = ref.watch(ferramentasCatalogoProvider).value;
     final all =
         catalogo == null
             ? const <DashboardToolShortcut>[]

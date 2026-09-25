@@ -343,7 +343,7 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
         context,
         ref,
         error: _erro! as IaOperationalException,
-        features: ref.read(planoFeaturesProvider).valueOrNull,
+        features: ref.read(planoFeaturesProvider).value,
       );
     }
   }

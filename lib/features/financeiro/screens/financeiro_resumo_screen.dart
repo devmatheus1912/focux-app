@@ -119,8 +119,8 @@ class _FinanceiroResumoScreenState
     final bool loading;
     String? errorMsg = _erro;
     if (_isCurrentMonth) {
-      resumo = homeAsync.valueOrNull?.resumoMesAtual;
-      fetchedAt = homeAsync.valueOrNull?.fetchedAt;
+      resumo = homeAsync.value?.resumoMesAtual;
+      fetchedAt = homeAsync.value?.fetchedAt;
       loading = homeAsync.isLoading && resumo == null;
       if (homeAsync.hasError && resumo == null) {
         errorMsg = friendlyError(homeAsync.error!);

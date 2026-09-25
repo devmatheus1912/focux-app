@@ -101,7 +101,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
   @override
   Widget build(BuildContext context) {
     final featuresAsync = ref.watch(planoFeaturesProvider);
-    final features = featuresAsync.valueOrNull;
+    final features = featuresAsync.value;
     final hasFinanceiro = features?.financeiro == true;
 
     if (features == null || !hasFinanceiro) {
@@ -114,7 +114,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
     }
 
     final homeAsync = ref.watch(financeiroHomeProvider);
-    final home = homeAsync.valueOrNull;
+    final home = homeAsync.value;
     final planoFromHome = home?.planoFeatures;
     if (planoFromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -221,7 +221,7 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final nome = alunoAsync.valueOrNull?.nome;
+    final nome = alunoAsync.value?.nome;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,

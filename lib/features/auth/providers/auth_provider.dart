@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/auth/session_invalidator.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../core/storage/secure_storage.dart';
 import '../data/auth_repository.dart';
 
@@ -30,39 +31,47 @@ enum AuthStatus { unknown, authenticated, unauthenticated }
 
 enum UserRole { personal, aluno }
 
-class AuthNotifier extends StateNotifier<AuthStatus> {
-  final AuthRepository _repo;
+class AuthNotifier extends Notifier<AuthStatus> {
+  late AuthRepository _repo;
   UserRole? _currentRole;
   bool _requiresPasswordChange = false;
 
   UserRole? get currentRole => _currentRole;
   bool get requiresPasswordChange => _requiresPasswordChange;
 
-  AuthNotifier(this._repo) : super(AuthStatus.unknown) {
+  @override
+  AuthStatus build() {
+    _repo = ref.read(authRepositoryProvider);
     SessionInvalidator.listenable.addListener(_handleSessionInvalidated);
-    _checkToken();
+    ref.onDispose(
+      () => SessionInvalidator.listenable.removeListener(
+        _handleSessionInvalidated,
+      ),
+    );
+    Future.microtask(_checkToken);
+    return AuthStatus.unknown;
   }
 
   void _handleSessionInvalidated() {
+    if (!ref.mounted) return;
     _currentRole = null;
     _requiresPasswordChange = false;
     state = AuthStatus.unauthenticated;
   }
 
-  @override
-  void dispose() {
-    SessionInvalidator.listenable.removeListener(_handleSessionInvalidated);
-    super.dispose();
-  }
-
   Future<void> _checkToken() async {
+    if (!ref.mounted) return;
     final token = await SecureStorage.getToken();
     if (token != null) {
       final roleStr = await SecureStorage.getRole();
+      final requiresPasswordChange =
+          await SecureStorage.getRequiresPasswordChange();
+      if (!ref.mounted) return;
       _currentRole = roleStr == 'ALUNO' ? UserRole.aluno : UserRole.personal;
-      _requiresPasswordChange = await SecureStorage.getRequiresPasswordChange();
+      _requiresPasswordChange = requiresPasswordChange;
       state = AuthStatus.authenticated;
     } else {
+      if (!ref.mounted) return;
       state = AuthStatus.unauthenticated;
     }
   }
@@ -230,10 +239,10 @@ class MfaChallenge {
   final String? returnTo;
 }
 
-final mfaChallengeProvider = StateProvider<MfaChallenge?>((ref) => null);
+final mfaChallengeProvider = fxValueProvider<MfaChallenge?>(null);
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthStatus>(
-  (ref) => AuthNotifier(ref.read(authRepositoryProvider)),
+final authProvider = NotifierProvider<AuthNotifier, AuthStatus>(
+  AuthNotifier.new,
 );
 
 final userRoleProvider = Provider<UserRole?>((ref) {

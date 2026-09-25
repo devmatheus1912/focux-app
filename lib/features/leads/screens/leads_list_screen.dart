@@ -152,7 +152,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
-    final plano = ref.watch(planoFeaturesProvider).valueOrNull;
+    final plano = ref.watch(planoFeaturesProvider).value;
     final limiteLeads = plano?.limiteLeads;
     final showLeadsLimitBanner = leadShowsLimitBanner(
       _total,

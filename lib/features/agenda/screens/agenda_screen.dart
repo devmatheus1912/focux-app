@@ -175,7 +175,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   String? _photoFor(int alunoId) {
-    final list = ref.read(alunosProvider).valueOrNull;
+    final list = ref.read(alunosProvider).value;
     if (list == null) return null;
     for (final aluno in list) {
       if (aluno.id == alunoId) return aluno.fotoUrl;
@@ -184,7 +184,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Aluno? _alunoFromCache(int alunoId) {
-    final list = ref.read(alunosProvider).valueOrNull;
+    final list = ref.read(alunosProvider).value;
     if (list == null) return null;
     for (final aluno in list) {
       if (aluno.id == alunoId) return aluno;

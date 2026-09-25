@@ -315,8 +315,6 @@ void main() {
         overrides: [
           alunoOpenIaActionsProvider(42).overrideWith((ref) async => const []),
           alunoRecoveryProvider(42).overrideWith((ref) async => null),
-          alunoCopilotoForceIaProvider(42).overrideWith((ref) => false),
-          alunoCopilotCreatingProvider(42).overrideWith((ref) => false),
           aluno360OperacaoProvider(42).overrideWith(
             (ref) => resolveAluno360OperacaoSnapshot(
               aluno: stickyAluno,

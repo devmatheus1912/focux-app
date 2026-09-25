@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
@@ -13,9 +13,10 @@ import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.d
 import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_card.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
-import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../support/riverpod_seeds.dart';
 
 /// Smoke 360 sem [AlunoDetailScreen]: tela cheia + GoRouter travava o suite
 /// no CI (`Cannot close sink while adding stream` / cancel).
@@ -64,11 +65,8 @@ List<Map<String, dynamic>> _week() {
   });
 }
 
-Override _proPlanoOverride() {
-  final notifier = PlanoFeaturesNotifier(PlanosRepository(ApiClient()));
-  notifier.seedFromHome(PlanoFeatures.optimisticEnterprise);
-  return planoFeaturesProvider.overrideWith((ref) => notifier);
-}
+Override _proPlanoOverride() =>
+    seededPlanoFeatures(PlanoFeatures.optimisticEnterprise);
 
 Widget _harness({
   required List<Override> overrides,
@@ -126,7 +124,6 @@ void main() {
             alunoOpenIaActionsProvider(_alunoId)
                 .overrideWith((ref) async => const []),
             alunoRecoveryProvider(_alunoId).overrideWith((ref) async => null),
-            alunoCopilotoForceIaProvider(_alunoId).overrideWith((ref) => false),
           ],
           child: Column(
             children: [
@@ -195,7 +192,6 @@ void main() {
           ),
           alunoOpenIaActionsProvider(7).overrideWith((ref) async => const []),
           alunoRecoveryProvider(7).overrideWith((ref) async => null),
-          alunoCopilotoForceIaProvider(7).overrideWith((ref) => false),
         ],
         child: Column(
           children: [

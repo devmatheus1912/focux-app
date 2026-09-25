@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
-import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Override _ferramentasPlanoOverride() {
-  final notifier = PlanoFeaturesNotifier(
-    PlanosRepository(ApiClient()),
-  );
-  notifier.seedFromHome(PlanoFeatures.optimisticEnterprise);
-  return planoFeaturesProvider.overrideWith((ref) => notifier);
-}
+import '../../../support/riverpod_seeds.dart';
+
+Override _ferramentasPlanoOverride() =>
+    seededPlanoFeatures(PlanoFeatures.optimisticEnterprise);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -36,10 +36,10 @@ class _StudentJourneyCardState extends ConsumerState<_StudentJourneyCard> {
     final ink = chrome.ink;
     final mute = chrome.mute;
 
-    final medidas = widget.medidasAsync.valueOrNull ?? const <MedidaCorporal>[];
+    final medidas = widget.medidasAsync.value ?? const <MedidaCorporal>[];
     final historico =
-        widget.historicoAsync.valueOrNull ?? const <ExecucaoTreino>[];
-    final mensagens = widget.chatAsync.valueOrNull ?? const <ChatMsg>[];
+        widget.historicoAsync.value ?? const <ExecucaoTreino>[];
+    final mensagens = widget.chatAsync.value ?? const <ChatMsg>[];
 
     final plan = buildAlunoAutonomyPlan(
       aluno: widget.aluno,

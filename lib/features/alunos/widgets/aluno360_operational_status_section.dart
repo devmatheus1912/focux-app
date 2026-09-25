@@ -104,7 +104,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
         homeInitialized
             ? ref
                 .watch(alunosHomeProvider)
-                .valueOrNull
+                .value
                 ?.alertasConfig
                 .diasSemTreino
             : null;

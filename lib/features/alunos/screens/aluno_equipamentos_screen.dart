@@ -149,7 +149,7 @@ class _AlunoEquipamentosScreenState
           useMesh: true,
           appBar: FxShellAppBar(
             title: 'Equipamentos',
-            subtitle: satelliteFirstName(alunoAsync.valueOrNull?.nome),
+            subtitle: satelliteFirstName(alunoAsync.value?.nome),
             onBack: _cancel,
             actions: [
               FxHelpIconButton(

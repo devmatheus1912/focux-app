@@ -133,7 +133,7 @@ extension on _LoginScreenState {
       return true;
     }
     final from = GoRouterState.of(context).uri.queryParameters['from'];
-    ref.read(mfaChallengeProvider.notifier).state = MfaChallenge(
+    ref.read(mfaChallengeProvider.notifier).value = MfaChallenge(
       mfaToken: token,
       returnTo: from,
     );
@@ -271,7 +271,7 @@ extension on _LoginScreenState {
 
   Future<String> _personalPostLoginDestination() async {
     try {
-      final perfil = ref.read(perfilProvider).valueOrNull;
+      final perfil = ref.read(perfilProvider).value;
       if (perfil?.needsBrandPublicIdentity == true) {
         return '/perfil/link-publico';
       }

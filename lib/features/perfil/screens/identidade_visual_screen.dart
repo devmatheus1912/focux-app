@@ -184,7 +184,7 @@ class _IdentidadeVisualScreenState
     final plano = perfil.plano;
     final hasWhiteLabel = identidadeHasWhiteLabel(
       featureWhiteLabel:
-          ref.watch(planoFeaturesProvider).valueOrNull?.whiteLabel,
+          ref.watch(planoFeaturesProvider).value?.whiteLabel,
       plano: plano,
     );
     final nomePersonal = perfil.nome;

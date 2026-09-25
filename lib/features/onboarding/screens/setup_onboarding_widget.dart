@@ -32,7 +32,7 @@ class SetupOnboardingWidget extends ConsumerWidget {
             ? AsyncValue<OnboardingStatusData>.data(statusFromHome!)
             : ref.watch(onboardingStatusProvider);
     final landingCompleta =
-        ref.watch(planoFeaturesProvider).valueOrNull?.landingCompleta ?? false;
+        ref.watch(planoFeaturesProvider).value?.landingCompleta ?? false;
 
     return statusAsync.when(
       loading: () => const Padding(

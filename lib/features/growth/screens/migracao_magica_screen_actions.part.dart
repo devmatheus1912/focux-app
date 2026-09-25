@@ -367,7 +367,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       return;
     }
 
-    final plano = _plano ?? ref.read(planoFeaturesProvider).valueOrNull;
+    final plano = _plano ?? ref.read(planoFeaturesProvider).value;
     final atuais = plano?.alunosAtivos ?? 0;
     final snap = MigracaoVagasSnapshot(
       alunosAtuais: atuais,

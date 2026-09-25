@@ -272,7 +272,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     final perfilAsync = ref.watch(perfilWalletProvider);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final features = ref.watch(planoFeaturesProvider).valueOrNull;
+    final features = ref.watch(planoFeaturesProvider).value;
     final hasFinanceiro = features?.financeiro == true;
 
     if (features == null || !hasFinanceiro) {

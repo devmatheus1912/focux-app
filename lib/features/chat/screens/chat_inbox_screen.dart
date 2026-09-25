@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -44,7 +45,7 @@ part 'chat_inbox_screen_state.part.dart';
 part 'chat_inbox_screen_paging.part.dart';
 part 'chat_inbox_screen_widgets.part.dart';
 
-final chatInboxQueryProvider = StateProvider<String>((ref) => '');
+final chatInboxQueryProvider = fxValueProvider<String>('');
 
 final chatInboxHomeProvider = FutureProvider<ChatInboxHomeBundle>((ref) async {
   final q = ref.watch(chatInboxQueryProvider);

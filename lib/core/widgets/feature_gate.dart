@@ -46,7 +46,7 @@ class FeatureGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final featuresAsync = ref.watch(planoFeaturesProvider);
-    final fromProvider = featuresAsync.valueOrNull;
+    final fromProvider = featuresAsync.value;
     final fromHome =
         fromProvider == null
             ? DashboardHomeClientCache.getIfFresh()?.planoFeatures
@@ -55,7 +55,7 @@ class FeatureGate extends ConsumerWidget {
     if (fromProvider == null && fromHome != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
-        if (ref.read(planoFeaturesProvider).valueOrNull != null) return;
+        if (ref.read(planoFeaturesProvider).value != null) return;
         ref.read(planoFeaturesProvider.notifier).seedFromHome(fromHome);
       });
     }

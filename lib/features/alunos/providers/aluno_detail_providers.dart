@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../avaliacao/data/avaliacao_repository.dart';
 import '../../dashboard/data/command_center_data.dart';
@@ -194,22 +195,16 @@ final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
 });
 
 /// When true, copilot card loads IA via [alunoCopilotoActionProvider] (refresh).
-final alunoCopilotoForceIaProvider = StateProvider.autoDispose.family<bool, int>(
-  (ref, alunoId) => false,
-);
+final alunoCopilotoForceIaProvider = fxValueAutoDisposeFamily<bool>(false);
 
 /// True while Aluno 360 is creating a Command Center task (disables sticky CTA).
-final alunoCopilotCreatingProvider = StateProvider.autoDispose.family<bool, int>(
-  (ref, alunoId) => false,
-);
+final alunoCopilotCreatingProvider = fxValueAutoDisposeFamily<bool>(false);
 
 /// Bust IA cache on explicit refresh (see copilot refresh button).
-final alunoCopilotIaSkipCacheProvider =
-    StateProvider.autoDispose.family<bool, int>((ref, alunoId) => false);
+final alunoCopilotIaSkipCacheProvider = fxValueAutoDisposeFamily<bool>(false);
 
 /// True while the user-triggered IA refresh is in flight (incl. stale-while-revalidate).
-final alunoCopilotIaRefreshingProvider =
-    StateProvider.autoDispose.family<bool, int>((ref, alunoId) => false);
+final alunoCopilotIaRefreshingProvider = fxValueAutoDisposeFamily<bool>(false);
 
 final alunoCopilotoActionProvider =
     FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
@@ -222,14 +217,14 @@ final alunoCopilotoActionProvider =
         ref.read(apiClientProvider),
       ).proximaAcao(alunoId);
       await AlunoCopilotIaCacheStore.save(alunoId, payload);
-      ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
+      ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).value = false;
       return payload;
     });
 
 /// Unified Operação snapshot (sticky + copilot + outreach).
 final aluno360OperacaoProvider =
     Provider.family<Aluno360OperacaoSnapshot?, int>((ref, alunoId) {
-      final bundle = ref.watch(aluno360OperacaoBundleProvider(alunoId)).valueOrNull;
+      final bundle = ref.watch(aluno360OperacaoBundleProvider(alunoId)).value;
       if (bundle == null) return null;
       final aluno = bundle.aluno;
       final forceIa = ref.watch(alunoCopilotoForceIaProvider(alunoId));
@@ -241,7 +236,7 @@ final aluno360OperacaoProvider =
       final hasOpenTask =
           findOpenCopilotTask(openActions) != null ||
           (bundle.hasOpenCopilotTask ?? false);
-      final backendWearable = iaAsync?.valueOrNull?.wearableRelevant;
+      final backendWearable = iaAsync?.value?.wearableRelevant;
       final bundledWearable = bundle.hasWearableHistory;
       final wearableRelevant =
           backendWearable is bool
@@ -354,9 +349,9 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(alunoAutonomiaResumoProvider(alunoId));
   ref.invalidate(alunoEvolucaoInteligenteProvider(alunoId));
   ref.invalidate(alunoTimeline360PagedProvider(alunoId));
-  ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).state = false;
-  ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).state = false;
-  ref.read(alunoCopilotIaRefreshingProvider(alunoId).notifier).state = false;
+  ref.read(alunoCopilotoForceIaProvider(alunoId).notifier).value = false;
+  ref.read(alunoCopilotIaSkipCacheProvider(alunoId).notifier).value = false;
+  ref.read(alunoCopilotIaRefreshingProvider(alunoId).notifier).value = false;
   ref.invalidate(alunoCopilotoActionProvider(alunoId));
   ref.invalidate(alunoOpenIaActionsProvider(alunoId));
   ref.invalidate(alunoAderenciaSemanalProvider(alunoId));

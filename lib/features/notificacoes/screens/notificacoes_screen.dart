@@ -58,7 +58,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     _debounce = Timer(const Duration(milliseconds: 350), () {
       final next = value.trim();
       if (next == ref.read(notificacoesQueryProvider)) return;
-      ref.read(notificacoesQueryProvider.notifier).state = next;
+      ref.read(notificacoesQueryProvider.notifier).value = next;
     });
   }
 
@@ -106,8 +106,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     final repo = ref.read(notificacoesRepositoryProvider);
     final home = roleHomePath(ref);
     final unreadCount =
-        ref.watch(notificacoesNaoLidasProvider).valueOrNull ??
-        (async.valueOrNull?.items.where((item) => !item.lida).length ?? 0);
+        ref.watch(notificacoesNaoLidasProvider).value ??
+        (async.value?.items.where((item) => !item.lida).length ?? 0);
     final query = ref.watch(notificacoesQueryProvider);
 
     Future<void> reload() async {
@@ -246,7 +246,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     _debounce?.cancel();
                     final next = value.trim();
                     if (next == ref.read(notificacoesQueryProvider)) return;
-                    ref.read(notificacoesQueryProvider.notifier).state = next;
+                    ref.read(notificacoesQueryProvider.notifier).value = next;
                   },
                   onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
                   decoration: const InputDecoration(
@@ -298,7 +298,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                           : () {
                               _debounce?.cancel();
                               _searchCtrl.clear();
-                              ref.read(notificacoesQueryProvider.notifier).state =
+                              ref.read(notificacoesQueryProvider.notifier).value =
                                   '';
                             },
                     ),

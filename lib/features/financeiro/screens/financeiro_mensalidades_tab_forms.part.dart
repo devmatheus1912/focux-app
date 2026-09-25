@@ -10,7 +10,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
     try {
       alunos = await ref.read(alunosProvider.future);
     } catch (_) {
-      alunos = ref.read(alunosProvider).valueOrNull ?? const [];
+      alunos = ref.read(alunosProvider).value ?? const [];
     }
 
     int? alunoSelecionadoId = widget.initialAlunoId;

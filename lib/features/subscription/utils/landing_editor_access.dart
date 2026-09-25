@@ -11,7 +11,7 @@ Future<void> openLandingEditorOrUpgrade(
   BuildContext context,
   WidgetRef ref,
 ) async {
-  final features = ref.read(planoFeaturesProvider).valueOrNull;
+  final features = ref.read(planoFeaturesProvider).value;
   if (features?.landingCompleta == true) {
     if (context.mounted) context.push('/perfil/landing-editor');
     return;

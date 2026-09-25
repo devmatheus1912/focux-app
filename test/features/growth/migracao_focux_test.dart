@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/widgets/mesh_scope.dart';
 import 'package:focux_app/features/growth/screens/migracao_magica_screen.dart';
 import 'package:focux_app/features/growth/utils/migracao_foto_limits.dart';
@@ -10,6 +9,7 @@ import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
+import '../../support/riverpod_seeds.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
@@ -39,21 +39,21 @@ void main() {
       ProviderScope(
         overrides: [
           planoFeaturesProvider.overrideWith(
-            (ref) =>
-                PlanoFeaturesNotifier(PlanosRepository(ApiClient()))
-                  ..state = const AsyncData(
-                    PlanoFeatures(
-                      plano: SubscriptionPlan.PRO,
-                      financeiro: true,
-                      agenda: true,
-                      relatorios: true,
-                      whiteLabel: false,
-                      iaCopiloto: true,
-                      migracaoFoto: true,
-                      limiteMigracaoFotoMensal: MigracaoFotoLimits.pro,
-                      migracaoFotosUsadasMes: 2,
-                    ),
-                  ),
+            () => SeededPlanoFeaturesNotifier(
+              const AsyncData(
+                PlanoFeatures(
+                  plano: SubscriptionPlan.PRO,
+                  financeiro: true,
+                  agenda: true,
+                  relatorios: true,
+                  whiteLabel: false,
+                  iaCopiloto: true,
+                  migracaoFoto: true,
+                  limiteMigracaoFotoMensal: MigracaoFotoLimits.pro,
+                  migracaoFotosUsadasMes: 2,
+                ),
+              ),
+            ),
           ),
         ],
         child: const MaterialApp(

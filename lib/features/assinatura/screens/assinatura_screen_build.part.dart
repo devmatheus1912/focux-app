@@ -10,10 +10,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final line = chrome.line;
     final primary = BrandPalette.softened(theme.colorScheme.primary);
 
-    final perfil = ref.watch(perfilProvider).valueOrNull;
+    final perfil = ref.watch(perfilProvider).value;
     final currentPlan = subscriptionPlanFromApi(perfil?.plano);
     final homeAsync = ref.watch(paywallHomeProvider);
-    final home = homeAsync.valueOrNull;
+    final home = homeAsync.value;
     final vitrine = home?.vitrine;
     final meFromHome = home?.me;
     final AsyncValue<PlanoFeatures?> featuresAsync;
@@ -57,7 +57,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted || _initialSelectionApplied) return;
           final billingPlan = subscriptionPlanFromApi(
-            ref.read(perfilProvider).valueOrNull?.plano,
+            ref.read(perfilProvider).value?.plano,
           );
           setState(() {
             _selectedPlanName = _resolveInitialPlanSelection(

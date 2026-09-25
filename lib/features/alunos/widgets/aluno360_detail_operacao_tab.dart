@@ -58,7 +58,7 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
         aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente;
     final operacaoSnapshot = ref.watch(aluno360OperacaoProvider(alunoId));
     final contactPriority = operacaoSnapshot?.contactPriority ?? false;
-    final showRecovery = alunoTemHistoricoWearable(recoveryAsync.valueOrNull);
+    final showRecovery = alunoTemHistoricoWearable(recoveryAsync.value);
 
     return Aluno360OperacaoTab(
       alunoId: alunoId,

@@ -74,13 +74,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _resetPublicAuthBranding() {
-    ref.read(logoUrlProvider.notifier).state = null;
-    ref.read(hideFocuxBrandingProvider.notifier).state = false;
-    ref.read(personalNameProvider.notifier).state = null;
-    ref.read(appDisplayNameProvider.notifier).state = null;
-    ref.read(sloganProvider.notifier).state = null;
-    ref.read(primaryColorProvider.notifier).state = EagleTokens.brand;
-    ref.read(secondaryColorProvider.notifier).state =
+    ref.read(logoUrlProvider.notifier).value = null;
+    ref.read(hideFocuxBrandingProvider.notifier).value = false;
+    ref.read(personalNameProvider.notifier).value = null;
+    ref.read(appDisplayNameProvider.notifier).value = null;
+    ref.read(sloganProvider.notifier).value = null;
+    ref.read(primaryColorProvider.notifier).value = EagleTokens.brand;
+    ref.read(secondaryColorProvider.notifier).value =
         BrandPalette.defaultSecondary;
   }
 

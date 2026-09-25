@@ -25,45 +25,32 @@ class IapStoreHealth {
 }
 
 final iapStoreHealthProvider =
-    StateNotifierProvider<IapStoreHealthNotifier, IapStoreHealth>((ref) {
-      final notifier = IapStoreHealthNotifier(
-        ref.read(iapServiceProvider),
-        ref.read(paymentApiClientProvider),
-      );
-      notifier.start();
-      ref.onDispose(notifier.dispose);
-      return notifier;
-    });
+    NotifierProvider<IapStoreHealthNotifier, IapStoreHealth>(
+      IapStoreHealthNotifier.new,
+    );
 
-class IapStoreHealthNotifier extends StateNotifier<IapStoreHealth> {
-  IapStoreHealthNotifier(this._iap, this._payment)
-    : super(
-        IapStoreHealth(
-          storeAvailable: false,
-          checkedAt: DateTime.fromMillisecondsSinceEpoch(0),
-        ),
-      );
-
-  final IapService _iap;
-  final PaymentApiClient _payment;
-  Timer? _timer;
+class IapStoreHealthNotifier extends Notifier<IapStoreHealth> {
+  late IapService _iap;
+  late PaymentApiClient _payment;
   bool _running = false;
 
   static const _interval = Duration(minutes: 15);
 
-  void start() {
-    _timer ??= Timer.periodic(_interval, (_) => unawaited(runCheck()));
-    unawaited(runCheck());
-  }
-
   @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  IapStoreHealth build() {
+    _iap = ref.read(iapServiceProvider);
+    _payment = ref.read(paymentApiClientProvider);
+    final timer = Timer.periodic(_interval, (_) => unawaited(runCheck()));
+    ref.onDispose(timer.cancel);
+    Future.microtask(runCheck);
+    return IapStoreHealth(
+      storeAvailable: false,
+      checkedAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
   }
 
   Future<void> runCheck() async {
-    if (_running) return;
+    if (_running || !ref.mounted) return;
     _running = true;
     try {
       final storeOk = await _iap.isAvailable();
@@ -91,6 +78,7 @@ class IapStoreHealthNotifier extends StateNotifier<IapStoreHealth> {
           if (kDebugMode) debugPrint('[IapHealth] backend check failed: $e');
         }
       }
+      if (!ref.mounted) return;
       state = IapStoreHealth(
         storeAvailable: storeOk,
         backendReachable: backendOk,

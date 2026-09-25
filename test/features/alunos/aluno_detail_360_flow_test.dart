@@ -6,6 +6,8 @@ import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart'
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_full_sheet.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../support/riverpod_seeds.dart';
+
 /// Flow Histórico 360 — sheet isolado (sem AlunoDetailScreen completo).
 /// Mount full-screen + GoRouter + idle prefetch travava isolate (99% CPU / CI cancel).
 const _alunoId = 42;
@@ -49,16 +51,14 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          alunoTimeline360PagedProvider(_alunoId).overrideWith(
-            (ref) => Timeline360PagedNotifier(ref, _alunoId)
-              ..state = AsyncValue.data(
-                Timeline360PagedState(
-                  events: _timelineFixture,
-                  hasMore: true,
-                  nextOffset: 5,
-                  totalCount: 12,
-                ),
-              ),
+          seededTimeline360(
+            _alunoId,
+            Timeline360PagedState(
+              events: _timelineFixture,
+              hasMore: true,
+              nextOffset: 5,
+              totalCount: 12,
+            ),
           ),
         ],
         child: MaterialApp(

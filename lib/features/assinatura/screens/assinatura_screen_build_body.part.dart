@@ -60,11 +60,11 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
       });
     }
 
-    final meFeatures = featuresAsync.valueOrNull?.alignedToBilling(currentPlan);
+    final meFeatures = featuresAsync.value?.alignedToBilling(currentPlan);
     if (meFeatures != null) {
       _maybeReconcilePlanOnLoad(
         billingPlan: currentPlan,
-        meFeatures: featuresAsync.valueOrNull,
+        meFeatures: featuresAsync.value,
       );
     }
 
@@ -74,7 +74,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
             : PlanEntitlements.snapshotFrom(
               plano: meFeatures.plano,
               billingPlan: currentPlan,
-              serverPlano: featuresAsync.valueOrNull?.plano,
+              serverPlano: featuresAsync.value?.plano,
               alunosAtivos: meFeatures.alunosAtivos,
               limiteAlunos: meFeatures.limiteAlunos,
               iaUsadaMes: meFeatures.iaUsadaMes,

@@ -3,7 +3,7 @@ part of 'chat_inbox_screen.dart';
 extension on _ChatInboxScreenState {
   Future<void> _loadMoreInbox() async {
     if (_loadingMoreInbox || !_inboxHasMore) return;
-    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    final home = ref.read(chatInboxHomeProvider).value;
     if (home == null || home.inboxSize <= 0) return;
     setState(() => _loadingMoreInbox = true);
     try {
@@ -37,7 +37,7 @@ extension on _ChatInboxScreenState {
 
   Future<void> _loadMoreUnread() async {
     if (_loadingMoreUnread || !_unreadHasMore) return;
-    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    final home = ref.read(chatInboxHomeProvider).value;
     if (home == null || home.inboxSize <= 0) return;
     setState(() => _loadingMoreUnread = true);
     try {
@@ -71,7 +71,7 @@ extension on _ChatInboxScreenState {
 
   Future<void> _loadMoreArchived() async {
     if (_loadingMoreArchived || !_archivedHasMore) return;
-    final home = ref.read(chatInboxHomeProvider).valueOrNull;
+    final home = ref.read(chatInboxHomeProvider).value;
     if (home == null || home.inboxSize <= 0) return;
     setState(() => _loadingMoreArchived = true);
     try {
