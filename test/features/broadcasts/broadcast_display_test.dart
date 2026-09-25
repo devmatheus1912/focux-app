@@ -12,6 +12,17 @@ void main() {
     expect(broadcastSendSuccess(0), 'Nenhum aluno no público escolhido.');
     expect(broadcastSendSuccess(1), 'Enviado para 1 aluno.');
     expect(broadcastSendSuccess(4), 'Enviado para 4 alunos.');
+    expect(
+      broadcastSendSuccess(4, comPush: 4),
+      'Enviado para 4 alunos, com notificação no celular.',
+    );
+    expect(
+      broadcastSendSuccess(4, comPush: 1),
+      'Enviado para 4 alunos. 1 com notificação; os demais veem ao abrir o app.',
+    );
+    expect(broadcastSendSuccess(2, comPush: 0), contains('Nenhum tem notificação'));
+    expect(broadcastAlunosValue(3, comPush: 2), '3 alunos · 2 com notificação');
+    expect(broadcastAlunosValue(3), '3 alunos');
   });
 
   test('broadcastTipoApi', () {

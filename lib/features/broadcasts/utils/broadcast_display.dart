@@ -24,15 +24,24 @@ String broadcastRequiredTitulo() => 'Informe o título';
 
 String broadcastRequiredMensagem() => 'Informe a mensagem';
 
-String broadcastSendSuccess(int count) {
+String broadcastSendSuccess(int count, {int? comPush}) {
   if (count <= 0) return 'Nenhum aluno no público escolhido.';
-  if (count == 1) return 'Enviado para 1 aluno.';
-  return 'Enviado para $count alunos.';
+  final base = count == 1 ? 'Enviado para 1 aluno' : 'Enviado para $count alunos';
+  if (comPush == null) return '$base.';
+  if (comPush >= count) return '$base, com notificação no celular.';
+  if (comPush <= 0) {
+    return '$base. Nenhum tem notificação ativa; eles veem ao abrir o app.';
+  }
+  return '$base. ${broadcastComPushLabel(comPush)}; os demais veem ao abrir o app.';
 }
 
-String broadcastAlunosValue(int count) {
-  if (count == 1) return '1 aluno';
-  return '$count alunos';
+String broadcastComPushLabel(int comPush) =>
+    comPush == 1 ? '1 com notificação' : '$comPush com notificação';
+
+String broadcastAlunosValue(int count, {int? comPush}) {
+  final base = count == 1 ? '1 aluno' : '$count alunos';
+  if (comPush == null) return base;
+  return '$base · ${broadcastComPushLabel(comPush)}';
 }
 
 String broadcastConfirmTitle(String publico) {

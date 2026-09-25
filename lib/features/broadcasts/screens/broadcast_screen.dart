@@ -146,7 +146,10 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,
-        broadcastSendSuccess(resultado.totalEnviados),
+        broadcastSendSuccess(
+          resultado.totalEnviados,
+          comPush: resultado.totalComPush,
+        ),
       );
     } catch (e) {
       if (!mounted) return;

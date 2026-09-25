@@ -10,6 +10,9 @@ class Broadcast {
   final DateTime enviadoEm;
   final int totalEnviados;
 
+  /// Alunos com push ativo no envio; null em broadcasts antigos (não medido).
+  final int? totalComPush;
+
   Broadcast({
     required this.id,
     required this.titulo,
@@ -17,11 +20,13 @@ class Broadcast {
     this.tipoConsultoriaAlvo,
     required this.enviadoEm,
     required this.totalEnviados,
+    this.totalComPush,
   });
 
   factory Broadcast.fromJson(Map<String, dynamic> json) {
     final idRaw = json['id'];
     final countRaw = json['totalEnviados'];
+    final pushRaw = json['totalComPush'];
     return Broadcast(
       id: idRaw is num ? idRaw.toInt() : 0,
       titulo: '${json['titulo'] ?? ''}',
@@ -31,6 +36,7 @@ class Broadcast {
           DateTime.tryParse('${json['enviadoEm'] ?? ''}') ??
           DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
       totalEnviados: countRaw is num ? countRaw.toInt() : 0,
+      totalComPush: pushRaw is num ? pushRaw.toInt() : null,
     );
   }
 }

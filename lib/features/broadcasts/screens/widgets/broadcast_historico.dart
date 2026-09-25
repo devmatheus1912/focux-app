@@ -48,7 +48,7 @@ class BroadcastHistorico extends StatelessWidget {
       context,
       title: item.titulo,
       subtitle:
-          '${broadcastPublicoLabel(item.tipoConsultoriaAlvo)} · ${broadcastAlunosValue(item.totalEnviados)} · ${broadcastFormatDate(item.enviadoEm)}',
+          '${broadcastPublicoLabel(item.tipoConsultoriaAlvo)} · ${broadcastAlunosValue(item.totalEnviados, comPush: item.totalComPush)} · ${broadcastFormatDate(item.enviadoEm)}',
       tips: [
         FxHelpTip('Mensagem', item.mensagem, icon: 'message-circle'),
       ],
