@@ -1,3 +1,5 @@
+# Um PR por ecossistema por semana. Majors (e 0.x que quebram API) sobem à mão,
+# com migração e teste — senão viram uma branch aberta por pacote.
 version: 2
 updates:
   - package-ecosystem: pub
@@ -7,10 +9,19 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Sao_Paulo
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: rive
+        versions: [">=0.14.0"]
     groups:
       pub-minor-patch:
+        applies-to: version-updates
         update-types: [minor, patch]
+      pub-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: npm
     directory: /e2e
@@ -19,9 +30,17 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Sao_Paulo
+    open-pull-requests-limit: 2
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       e2e-minor-patch:
+        applies-to: version-updates
         update-types: [minor, patch]
+      e2e-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: github-actions
     directory: /
@@ -30,6 +49,7 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Sao_Paulo
+    open-pull-requests-limit: 2
     groups:
-      actions-minor-patch:
-        update-types: [minor, patch]
+      actions:
+        patterns: ["*"]

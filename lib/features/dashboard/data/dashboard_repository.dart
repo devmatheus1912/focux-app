@@ -251,9 +251,13 @@ class DashboardRepository {
     return IaCommandActionsPage.fromJson(response.data);
   }
 
-  Future<IaCommandActionsContagem> getIaCommandActionsContagem() async {
+  Future<IaCommandActionsContagem> getIaCommandActionsContagem({
+    String? q,
+  }) async {
+    final query = q?.trim() ?? '';
     final response = await _dio.get(
       '/api/dashboard/command-center/actions/ia/contagem',
+      queryParameters: {if (query.isNotEmpty) 'q': query},
     );
     return IaCommandActionsContagem.fromJson(
       Map<String, dynamic>.from(response.data as Map),

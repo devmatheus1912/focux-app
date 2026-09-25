@@ -216,16 +216,14 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     setState(() => _isImportingFile = true);
 
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['csv', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'webp'],
-        withData: true,
       );
-      if (result == null || result.files.isEmpty) return;
+      if (file == null) return;
 
-      final file = result.files.first;
-      final bytes = file.bytes;
-      if (bytes == null || bytes.isEmpty) {
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
         if (!mounted) return;
         FeedbackHelper.showError(
           context,

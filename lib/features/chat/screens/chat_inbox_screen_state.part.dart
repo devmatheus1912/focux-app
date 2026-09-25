@@ -25,16 +25,27 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
   var _loadingMoreUnread = false;
   var _loadingMoreArchived = false;
 
+  late final StateController<String> _queryCtrl;
+
   bool get _isSearching => _query.isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _queryCtrl = ref.read(chatInboxQueryProvider.notifier);
+  }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
     _searchCtrl.dispose();
     _searchFocus.dispose();
-    if (ref.exists(chatInboxQueryProvider) &&
-        ref.read(chatInboxQueryProvider).isNotEmpty) {
-      ref.read(chatInboxQueryProvider.notifier).state = '';
+    final queryCtrl = _queryCtrl;
+    if (queryCtrl.mounted && queryCtrl.state.isNotEmpty) {
+      // `ref` não pode ser usado no dispose; o provider não é autoDispose.
+      Future.microtask(() {
+        if (queryCtrl.mounted) queryCtrl.state = '';
+      });
     }
     super.dispose();
   }
@@ -52,7 +63,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
         _searchPage = 0;
         _selectedAlunoIds.clear();
       });
-      ref.read(chatInboxQueryProvider.notifier).state = next;
+      _queryCtrl.state = next;
       if (next.isEmpty) return;
       _performSearch(reset: true);
     });

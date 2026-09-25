@@ -17,11 +17,7 @@ class SubscriptionBiometricGate {
 
       return await _auth.authenticate(
         localizedReason: 'Confirme para assinar o plano $planName',
-        options: const AuthenticationOptions(
-          biometricOnly: false,
-          stickyAuth: true,
-          sensitiveTransaction: true,
-        ),
+        persistAcrossBackgrounding: true,
       );
     } catch (_) {
       return false;

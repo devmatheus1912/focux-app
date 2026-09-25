@@ -65,11 +65,11 @@ class MigracaoFileParser {
 
   static MigracaoFileParseResult _parseCsvText(String text, String filename) {
     final delimiter = text.contains(';') && !text.contains(',') ? ';' : ',';
-    final rows = CsvToListConverter(
+    final rows = Csv(
       fieldDelimiter: delimiter,
-      eol: '\n',
-      shouldParseNumbers: false,
-    ).convert(text);
+      lineDelimiter: '\n',
+      autoDetect: false,
+    ).decode(text);
 
     final parsed = _rowsToAlunos(rows);
     if (parsed != null && parsed.isNotEmpty) {

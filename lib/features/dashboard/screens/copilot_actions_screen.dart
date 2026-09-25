@@ -39,9 +39,11 @@ final iaActionsProvider =
           .getIaCommandActionsPage(status: query.status, q: query.q);
     });
 
-final iaActionsContagemProvider =
-    FutureProvider.autoDispose<IaCommandActionsContagem>((ref) {
-      return ref.read(dashboardRepositoryProvider).getIaCommandActionsContagem();
+final iaActionsContagemProvider = FutureProvider.autoDispose
+    .family<IaCommandActionsContagem, String>((ref, q) {
+      return ref
+          .read(dashboardRepositoryProvider)
+          .getIaCommandActionsContagem(q: q);
     });
 
 class CopilotActionsScreen extends ConsumerStatefulWidget {
@@ -93,7 +95,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_queryKey));
-    final contagem = ref.watch(iaActionsContagemProvider).valueOrNull;
+    final contagem = ref.watch(iaActionsContagemProvider(_query)).valueOrNull;
 
     return fxScreenA11yScope(
       label: 'Tarefas IA',
@@ -375,7 +377,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     _extraHasNext = false;
     _extraPage = 0;
     ref.invalidate(iaActionsProvider(_queryKey));
-    ref.invalidate(iaActionsContagemProvider);
+    ref.invalidate(iaActionsContagemProvider(_query));
     await ref.read(iaActionsProvider(_queryKey).future);
   }
 
@@ -441,7 +443,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       await action();
       if (!mounted) return;
       ref.invalidate(iaActionsProvider(_queryKey));
-      ref.invalidate(iaActionsContagemProvider);
+      ref.invalidate(iaActionsContagemProvider(_query));
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showInfo(context, successMessage);
