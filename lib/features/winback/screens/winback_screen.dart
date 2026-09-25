@@ -366,6 +366,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                             winbackSubtitle(
                               tipo: entry.tipo,
                               mensagem: entry.mensagem,
+                              status: entry.status,
                             ),
                           ),
                           trailing: Text(

@@ -8,6 +8,7 @@ class WinbackLogEntry {
   final String tipo;
   final String mensagem;
   final String enviadoEm;
+  final String? status;
 
   const WinbackLogEntry({
     this.alunoId,
@@ -15,6 +16,7 @@ class WinbackLogEntry {
     required this.tipo,
     required this.mensagem,
     required this.enviadoEm,
+    this.status,
   });
 
   factory WinbackLogEntry.fromJson(Map<String, dynamic> json) =>
@@ -24,6 +26,7 @@ class WinbackLogEntry {
         tipo: json['tipo'] as String? ?? '',
         mensagem: json['mensagem'] as String? ?? '',
         enviadoEm: json['enviadoEm']?.toString() ?? '',
+        status: json['status'] as String?,
       );
 }
 

@@ -1,13 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/winback/data/winback_repository.dart';
 import 'package:focux_app/features/winback/utils/winback_display.dart';
 
 void main() {
   test('winbackTipoLabel em PT-BR', () {
-    expect(winbackTiposConhecidos, [
-      'ALUNO_INATIVO_7D',
-      'ALUNO_INATIVO_30D',
-      'ALUNO_INATIVO_60D',
-    ]);
     expect(winbackTipoLabel('ALUNO_INATIVO_7D'), 'Inativo 7 dias');
     expect(winbackTipoLabel('aluno_inativo_30d'), 'Inativo 30 dias');
     expect(winbackTipoLabel('ALUNO_INATIVO_60D'), 'Inativo 60 dias');
@@ -33,20 +29,21 @@ void main() {
 
   test('winbackSubtitle e hub', () {
     expect(
-      winbackSubtitle(tipo: 'ALUNO_INATIVO_7D', mensagem: ''),
-      'Inativo 7 dias',
+      winbackSubtitle(tipo: 'ALUNO_INATIVO_30D', mensagem: ''),
+      'Inativo 30 dias',
     );
     expect(
       winbackSubtitle(
-        tipo: 'ALUNO_INATIVO_7D',
+        tipo: 'ALUNO_INATIVO_30D',
         mensagem: '  Sentimos sua falta!  ',
       ),
-      'Inativo 7 dias · Sentimos sua falta!',
+      'Inativo 30 dias · Sentimos sua falta!',
     );
     expect(winbackCountLabel(0), 'Nenhum envio');
     expect(winbackCountLabel(1), '1 envio');
     expect(winbackCountLabel(4), '4 envios');
-    expect(winbackComoCalculamos, contains('7º'));
+    expect(winbackComoCalculamos, contains('30º'));
+    expect(winbackComoCalculamos, isNot(contains('7º')));
     expect(winbackHubSubtitle(null), 'Log dos pushes automáticos');
     expect(
       winbackHubSubtitle('Atualizado agora'),
@@ -55,5 +52,27 @@ void main() {
     expect(winbackSearchEmptyTitle(''), 'Nenhum envio ainda');
     expect(winbackSearchEmptyTitle('Ana'), 'Nenhum envio encontrado');
     expect(winbackSearchEmptySubtitle('Ana'), contains('nome'));
+  });
+
+  test('status de entrega aparece quando o push não chegou', () {
+    expect(winbackEntregaFalhaLabel('ENVIADO'), isNull);
+    expect(winbackEntregaFalhaLabel(null), isNull);
+    expect(winbackEntregaFalhaLabel('SEM_TOKEN'), contains('sem notificações'));
+    expect(
+      winbackSubtitle(
+        tipo: 'ALUNO_INATIVO_60D',
+        mensagem: 'Volte!',
+        status: 'FALHOU',
+      ),
+      'Inativo 60 dias · Não entregue: o envio falhou',
+    );
+    final entry = WinbackLogEntry.fromJson({
+      'alunoNome': 'Ana',
+      'tipo': 'ALUNO_INATIVO_30D',
+      'mensagem': 'x',
+      'enviadoEm': '2026-09-01T10:00:00',
+      'status': 'SEM_TOKEN',
+    });
+    expect(entry.status, 'SEM_TOKEN');
   });
 }

@@ -1,11 +1,5 @@
 import '../../../core/utils/fx_utils.dart';
 
-const winbackTiposConhecidos = [
-  'ALUNO_INATIVO_7D',
-  'ALUNO_INATIVO_30D',
-  'ALUNO_INATIVO_60D',
-];
-
 String winbackAlunoLabel(String? nome) {
   final value = nome?.trim();
   if (value == null || value.isEmpty) return 'Aluno';
@@ -43,18 +37,30 @@ String winbackWhenLabel(String enviadoEm, {DateTime? now}) {
   return label.isEmpty ? '—' : label;
 }
 
+/// `null` quando o push chegou ao provedor (ou log antigo sem status).
+String? winbackEntregaFalhaLabel(String? status) =>
+    switch ((status ?? '').trim().toUpperCase()) {
+      'SEM_TOKEN' => 'Não entregue: aluno sem notificações ativas',
+      'FALHOU' => 'Não entregue: o envio falhou',
+      'DESLIGADO' => 'Não entregue: push desligado no servidor',
+      _ => null,
+    };
+
 String winbackSubtitle({
   required String? tipo,
   required String mensagem,
+  String? status,
 }) {
   final tipoLabel = winbackTipoLabel(tipo);
+  final falha = winbackEntregaFalhaLabel(status);
+  if (falha != null) return '$tipoLabel · $falha';
   final msg = mensagem.trim();
   if (msg.isEmpty) return tipoLabel;
   return '$tipoLabel · $msg';
 }
 
 const winbackComoCalculamos =
-    'Tentativa de push no 7º, 30º e 60º dia sem treino. Quem não tem o app ou desligou as notificações não recebe, mas o envio aparece aqui.';
+    'Push no 30º e 60º dia sem treino, nos planos com automações. O lembrete da primeira semana sai pela rotina de engajamento, sem repetir aqui. Quem não tem o app ou desligou as notificações não recebe, e o envio aparece como não entregue.';
 
 String winbackCountLabel(int count) {
   if (count <= 0) return 'Nenhum envio';
