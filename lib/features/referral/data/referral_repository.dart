@@ -1,23 +1,8 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import 'referral_info.dart';
 
-class ReferralInfo {
-  final String codigo;
-  final int usosTotais;
-  final String linkCompartilhamento;
-
-  ReferralInfo({
-    required this.codigo,
-    required this.usosTotais,
-    required this.linkCompartilhamento,
-  });
-
-  factory ReferralInfo.fromJson(Map<String, dynamic> j) => ReferralInfo(
-    codigo: j['codigo'] as String? ?? '',
-    usosTotais: (j['usosTotais'] as num?)?.toInt() ?? 0,
-    linkCompartilhamento: j['linkCompartilhamento'] as String? ?? '',
-  );
-}
+export 'referral_info.dart';
 
 class ReferralRepository {
   final Dio _dio;

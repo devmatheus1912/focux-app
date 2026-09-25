@@ -130,6 +130,10 @@ class ProductEvents {
   static const iaCopilotoModeChanged = 'ia_copiloto_mode_changed';
 
   static const referralLinkShared = 'referral_link_shared';
+  static const referralViewed = 'referral_viewed';
+  static const referralLinkCopied = 'referral_link_copied';
+  static const referralLoadFailed = 'referral_load_failed';
+  static const referralHelpOpened = 'referral_help_opened';
   static const activationCtaTapped = 'activation_cta_tapped';
   static const setupWizardViewed = 'setup_wizard_viewed';
   static const setupWizardRefreshed = 'setup_wizard_refreshed';
