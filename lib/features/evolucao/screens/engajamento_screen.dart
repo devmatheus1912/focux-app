@@ -205,8 +205,8 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                     TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
                   ),
                   child: FxLiquidPrimaryButton(
-                    label: 'Registrar evolução',
-                    onPressed: _abrirEvolucao,
+                    label: 'Escrever',
+                    onPressed: _abrirChat,
                   ),
                 ),
               ),
@@ -305,16 +305,17 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
             onPressed: _abrirAluno,
           ),
           FxActionChip(
-            label: 'Chat',
+            label: 'Evolução',
             accent: primary,
             isDark: isDark,
-            onPressed: _abrirChat,
+            onPressed: _abrirEvolucao,
           ),
         ],
       ),
     );
 
     const listBottom = 88.0;
+    final linhas = engajamentoLinhasPorDia(_eventos);
 
     return RefreshIndicator(
       onRefresh: _load,
@@ -355,46 +356,49 @@ class _EngajamentoScreenState extends ConsumerState<EngajamentoScreen> {
                 FxSettingsLayout.pageInset,
                 listBottom,
               ),
-              itemCount: _eventos.length + 1,
+              itemCount: linhas.length + 1,
               itemBuilder: (context, i) {
                 if (i == 0) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      header,
-                      metric,
-                      periodoChip,
-                      const SizedBox(height: TokensStrip.s5),
-                      const DashboardSectionHeader(title: 'Eventos'),
-                      const SizedBox(height: TokensStrip.s3),
-                    ],
+                    children: [header, metric, periodoChip],
                   );
                 }
-                final evento = _eventos[i - 1];
+                final linha = linhas[i - 1];
+                final evento = linha.evento;
+                if (evento == null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      top: TokensStrip.s5,
+                      bottom: TokensStrip.s3,
+                    ),
+                    child: DashboardSectionHeader(title: linha.dia!),
+                  );
+                }
+                final titulo = engajamentoEventoLabel(
+                  evento.descricao,
+                  evento.tipo,
+                );
+                final apoio = engajamentoEventoSubtitle(
+                  tipo: evento.tipo,
+                  titulo: titulo,
+                );
                 return FxSatelliteListTile(
-                  title: engajamentoEventoLabel(
-                    evento.descricao,
-                    evento.tipo,
-                  ),
+                  title: titulo,
                   titleCase: false,
                   onTap:
                       engajamentoEventoRota(evento.tipo, widget.alunoId) ==
                               null
                           ? null
                           : () => _abrirEvento(evento),
-                  subtitle: Text(
-                    engajamentoEventoSubtitle(
-                      tipo: evento.tipo,
-                      dataHora: evento.dataHora,
-                    ),
-                  ),
+                  subtitle: apoio == null ? null : Text(apoio),
                   leading: FxIcon(
                     name: engajamentoFxIcon(evento.tipo),
                     size: 18,
                     color: primary,
                   ),
                   trailing: Text(
-                    engajamentoWhenLabel(evento.dataHora),
+                    engajamentoHoraLabel(evento.dataHora),
                     style: FocuxHubTypography.bodyMuted(
                       color: fxScreenMute(context),
                       fontWeight: FontWeight.w600,

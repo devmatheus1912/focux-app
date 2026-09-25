@@ -28,8 +28,11 @@ void main() {
     expect(screen, isNot(contains("safePopOrGo(context, '/evolucao')")));
     expect(screen, contains("'/alunos/\${widget.alunoId}/evolucao'"));
     expect(screen, contains("'/alunos/\${widget.alunoId}/chat'"));
-    expect(screen, contains("label: 'Registrar evolução'"));
-    expect(screen, isNot(contains("label: 'Evolução'")));
+    expect(screen, contains("label: 'Escrever'"));
+    expect(screen, contains('onPressed: _abrirChat'));
+    expect(screen, isNot(contains("label: 'Chat'")));
+    expect(screen, contains('engajamentoLinhasPorDia'));
+    expect(screen, contains('engajamentoHoraLabel'));
     expect(screen, contains('safeArea: false'));
     expect(screen, contains('dense: true'));
     expect(screen, contains('engajamentoUltimoValue'));

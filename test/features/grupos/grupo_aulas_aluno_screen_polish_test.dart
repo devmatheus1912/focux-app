@@ -32,6 +32,8 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('context.pop()')));
     expect(screen, isNot(contains('FilledButton')));
+    expect(screen, contains('grupoAulaStatusLabel'));
+    expect(screen, isNot(contains(": 'Inscrever';")));
     expect(screen, isNot(contains('FloatingActionButton')));
   });
 }

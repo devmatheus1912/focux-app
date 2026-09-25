@@ -36,18 +36,33 @@ void main() {
 
   test('engajamentoEventoLabel e subtitle', () {
     expect(engajamentoEventoLabel('  Treino A - CONCLUIDO  ', 'TREINO'),
-        'Treino A - Concluído');
-    expect(engajamentoEventoLabel('EM_ANDAMENTO', 'TREINO'), 'Em andamento');
+        'Treino A · concluído');
+    expect(engajamentoEventoLabel('Peito A · em andamento', 'TREINO'),
+        'Peito A · em andamento');
     expect(engajamentoEventoLabel('  ', 'MEDIDA'), 'Medida');
     expect(engajamentoStatusLabel('EM_ANDAMENTO'), 'Em andamento');
     expect(engajamentoStatusLabel('CONCLUIDO'), 'Concluído');
     expect(
-      engajamentoEventoSubtitle(
-        tipo: 'TREINO',
-        dataHora: '2026-09-01T14:05:00',
-      ),
-      'Treino · 01/09 14:05',
+      engajamentoEventoSubtitle(tipo: 'TREINO', titulo: 'Peito A · concluído'),
+      'Treino',
     );
+    expect(engajamentoEventoSubtitle(tipo: 'MEDIDA', titulo: 'Medida'), isNull);
+  });
+
+  test('engajamento agrupa por dia com hora no trailing', () {
+    final now = DateTime(2026, 9, 3, 18);
+    expect(engajamentoHoraLabel('2026-09-01T14:05:00'), '14:05');
+    expect(engajamentoHoraLabel('x'), '—');
+    expect(engajamentoDiaLabel('2026-09-03T08:00:00', now: now), 'Hoje');
+    expect(engajamentoDiaLabel('2026-09-02T23:00:00', now: now), 'Ontem');
+    expect(engajamentoDiaLabel('2026-08-30T10:00:00', now: now), '30/08');
+    final linhas = engajamentoLinhasPorDia([
+      EventoEngajamento(tipo: 'TREINO', descricao: 'A', dataHora: '2026-09-03T10:00:00'),
+      EventoEngajamento(tipo: 'MENSAGEM', descricao: 'B', dataHora: '2026-09-03T09:00:00'),
+      EventoEngajamento(tipo: 'MEDIDA', descricao: 'C', dataHora: '2026-09-02T09:00:00'),
+    ], now: now);
+    expect(linhas.map((l) => l.dia ?? l.evento!.descricao).toList(),
+        ['Hoje', 'A', 'B', 'Ontem', 'C']);
   });
 
   test('engajamentoHubSubtitle é só o período', () {
@@ -80,7 +95,7 @@ void main() {
     ];
     expect(engajamentoTreinosCount(eventos), 2);
     expect(engajamentoMensagensCount(eventos), 1);
-    expect(engajamentoUltimoHint(eventos), 'Check-in · 03/09 12:00');
+    expect(engajamentoUltimoHint(eventos), '03/09 12:00');
     expect(engajamentoUltimoValue(eventos), 'Check-in');
     expect(engajamentoUltimoValue(const []), '—');
     expect(engajamentoEventoRota('MENSAGEM', 9), '/alunos/9/chat');

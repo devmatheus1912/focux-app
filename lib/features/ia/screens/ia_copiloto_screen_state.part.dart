@@ -110,6 +110,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String _quotaHeaderLabel(PlanoFeatures? features) {
     if (features == null) return 'Pronto';
     if (features.iaQuotaEsgotada) return 'Cota esgotada';
-    return '${features.iaRestantes} restantes';
+    return ptCountLabel(features.iaRestantes, 'restante', 'restantes');
   }
 }

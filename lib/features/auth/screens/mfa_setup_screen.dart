@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/utils/pt_br_display.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
@@ -286,7 +287,11 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                             icon: Icons.vpn_key_outlined,
                             label: 'Códigos de recuperação',
                             value:
-                                '${_status!.recoveryCodesRemaining} restantes',
+                                ptCountLabel(
+                                  _status!.recoveryCodesRemaining,
+                                  'restante',
+                                  'restantes',
+                                ),
                             mute: mute,
                             line: line,
                             showDivider: false,

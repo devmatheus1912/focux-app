@@ -3,12 +3,10 @@ part of 'evolucao_screen.dart';
 class _TabMedidas extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<MedidaCorporal>> medidasAsync;
-  final VoidCallback onRegister;
   final VoidCallback onRetry;
   const _TabMedidas({
     required this.alunoNome,
     required this.medidasAsync,
-    required this.onRegister,
     required this.onRetry,
   });
 
@@ -42,10 +40,6 @@ class _TabMedidas extends StatelessWidget {
                 title: 'Nenhuma medida registrada',
                 subtitle:
                     'Registre peso e circunferências de $first para acompanhar a evolução.',
-                action: FxEmptyAction(
-                  label: 'Registrar medida',
-                  onTap: onRegister,
-                ),
               ),
             ),
           );
@@ -63,10 +57,6 @@ class _TabMedidas extends StatelessWidget {
                 title: 'Nenhuma medida registrada',
                 subtitle:
                     'Registre peso e circunferências de $first para acompanhar a evolução.',
-                action: FxEmptyAction(
-                  label: 'Registrar medida',
-                  onTap: onRegister,
-                ),
               ),
             ),
           );
@@ -138,12 +128,10 @@ class _TabMedidas extends StatelessWidget {
 class _TabRecordes extends StatelessWidget {
   final String alunoNome;
   final AsyncValue<List<RecordePessoal>> recordesAsync;
-  final VoidCallback onRegister;
   final VoidCallback onRetry;
   const _TabRecordes({
     required this.alunoNome,
     required this.recordesAsync,
-    required this.onRegister,
     required this.onRetry,
   });
 
@@ -177,10 +165,6 @@ class _TabRecordes extends StatelessWidget {
                 title: 'Nenhum recorde registrado',
                 subtitle:
                     'Marque o primeiro recorde de $first após um check-in ou treino forte.',
-                action: FxEmptyAction(
-                  label: 'Registrar recorde',
-                  onTap: onRegister,
-                ),
               ),
             ),
           );

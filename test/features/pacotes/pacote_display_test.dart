@@ -14,6 +14,17 @@ void main() {
     expect(pacoteIncluiValue(false), 'Não');
   });
 
+  test('pacoteResumoLinha junta inclusos e duração', () {
+    expect(
+      pacoteResumoLinha(treino: true, consultoria: true, meses: 3),
+      'Treino · Consultoria · 3 meses',
+    );
+    expect(
+      pacoteResumoLinha(treino: false, consultoria: false, meses: 1),
+      '1 mês',
+    );
+  });
+
   test('contagem e filtro de destaque', () {
     expect(pacoteCountLabel(0), 'Nenhum plano');
     expect(pacoteCountLabel(1), '1 plano');

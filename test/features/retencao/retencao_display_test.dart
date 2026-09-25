@@ -3,6 +3,18 @@ import 'package:focux_app/features/retencao/data/retencao_repository.dart';
 import 'package:focux_app/features/retencao/utils/retencao_display.dart';
 
 void main() {
+  test('variação semanal do risco alto', () {
+    expect(retencaoAltoVariacaoHint(3, null), isNull);
+    expect(retencaoAltoVariacaoHint(3, 3), 'Igual à semana passada');
+    expect(retencaoAltoVariacaoHint(5, 3), '+2 na semana');
+    expect(retencaoAltoVariacaoHint(1, 4), '−3 na semana');
+    expect(
+      RetencaoHome.fromJson({'alto': 2, 'altoSemanaAnterior': 1}).altoSemanaAnterior,
+      1,
+    );
+    expect(RetencaoHome.fromJson({'alto': 2}).altoSemanaAnterior, isNull);
+  });
+
   test('placeholder Aluno names are filtered from lists', () {
     final scores = [
       RetencaoAlunoScore(

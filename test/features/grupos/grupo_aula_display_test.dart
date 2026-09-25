@@ -24,6 +24,9 @@ void main() {
     );
     expect(grupoAulaLotada(inscritos: 20, capacidadeMax: 20), isTrue);
     expect(grupoAulaLotada(inscritos: 5, capacidadeMax: 20), isFalse);
+    expect(grupoAulaStatusLabel(inscrito: true, lotada: true), 'Inscrito');
+    expect(grupoAulaStatusLabel(inscrito: false, lotada: true), 'Lotada');
+    expect(grupoAulaStatusLabel(inscrito: false, lotada: false), isNull);
     expect(grupoAulaFxIcon(inscritos: 20, capacidadeMax: 20), 'alert-triangle');
     expect(grupoAulaFxIcon(inscritos: 5, capacidadeMax: 20), 'calendar');
   });

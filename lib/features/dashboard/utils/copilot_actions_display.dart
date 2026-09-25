@@ -18,6 +18,20 @@ String copilotActionsStatusLabel(String status) {
   };
 }
 
+String copilotActionsStatusChoiceLabel(
+  String status,
+  IaCommandActionsContagem? contagem,
+) {
+  final label = copilotActionsStatusLabel(status);
+  if (contagem == null) return label;
+  final n = switch (status) {
+    copilotActionsStatusAdiado => contagem.adiadas,
+    copilotActionsStatusConcluido => contagem.concluidas,
+    _ => contagem.abertas,
+  };
+  return '$label $n';
+}
+
 String copilotActionsRevisarAlunoLabel() => 'Revisar aluno';
 
 String copilotActionsVerAlunoLabel() => 'Ver aluno';

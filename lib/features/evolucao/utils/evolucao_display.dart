@@ -58,7 +58,7 @@ String evolucaoVariacaoValue(List<MedidaCorporal> medidas) {
 
 String evolucaoVariacaoHint(List<MedidaCorporal> medidas) {
   if (evolucaoVariacaoPeso(medidas).isEmpty) {
-    return 'Registre duas medidas para ver o delta';
+    return 'Registre 2 pesos para comparar';
   }
   return 'Desde a 1ª medida';
 }

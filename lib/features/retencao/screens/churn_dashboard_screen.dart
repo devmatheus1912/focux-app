@@ -377,6 +377,12 @@ class _RetencaoMetricStrip extends StatelessWidget {
             child: OperationalMetricTile(
               label: 'Alto',
               value: '${home.alto}',
+              hint:
+                  retencaoAltoVariacaoHint(
+                    home.alto,
+                    home.altoSemanaAnterior,
+                  ) ??
+                  '',
               color: EagleTokens.bad,
               isDark: isDark,
               dense: true,

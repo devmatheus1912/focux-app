@@ -22,6 +22,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/pacote_repository.dart';
 import '../providers/pacotes_provider.dart';
@@ -93,6 +94,12 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
   }
 
   List<Pacote> get _visible => _pacotes;
+
+  bool get _mostrarFiltros =>
+      _pacotes.isNotEmpty ||
+      _query.isNotEmpty ||
+      _searchCtrl.text.isNotEmpty ||
+      _chip != PacoteChip.todos;
 
   bool? get _destaqueParam =>
       _chip == PacoteChip.destaque ? true : null;
@@ -276,12 +283,21 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                   subtitle: 'Preço e link para o aluno comprar no WhatsApp.',
                   tips: const [
                     FxHelpTip(
+                      'Como funciona',
+                      'Monte planos com preço (ex.: musculação, 3 meses, R\$ 500). '
+                          'Eles ficam na sua página; envie o link no WhatsApp ou Instagram.',
+                    ),
+                    FxHelpTip(
                       'Novo pacote',
                       'O botão de baixo publica na sua página de vendas.',
                     ),
                     FxHelpTip(
                       'Link',
                       'Copiar e abrir a página ficam em Mais, no topo.',
+                    ),
+                    FxHelpTip(
+                      'Desativar',
+                      'Toque em ⋮ no plano. Ele some da sua página.',
                     ),
                   ],
                 ),
@@ -290,6 +306,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
           ),
           body: Column(
             children: [
+              if (_mostrarFiltros) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   TokensStrip.s4,
@@ -364,6 +381,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                   ],
                 ),
               ),
+              ],
               Expanded(
                 child: _loading
                     ? const PacotesStorefrontSkeleton()
@@ -405,7 +423,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         _query.trim().isNotEmpty || _chip != PacoteChip.todos;
     final linkCount = _paginaNoAr ? 0 : 1;
     final overviewCount = visible.isNotEmpty ? 2 : 0;
-    final base = 1 + linkCount + overviewCount;
+    final base = linkCount + overviewCount;
     final itemCount =
         base + (visible.isEmpty ? 1 : visible.length) + (_hasMore ? 1 : 0);
 
@@ -423,8 +441,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
         ),
         itemCount: itemCount,
         itemBuilder: (context, index) {
-          if (index == 0) return const PacotesComoFuncionaCard();
-          if (linkCount == 1 && index == 1) {
+          if (linkCount == 1 && index == 0) {
             return Padding(
               padding: const EdgeInsets.only(bottom: TokensStrip.s2),
               child: FxSatelliteListTile(
@@ -436,24 +453,14 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
             );
           }
           if (visible.isNotEmpty) {
-            final overviewIndex = 1 + linkCount;
+            final overviewIndex = linkCount;
             if (index == overviewIndex) {
               return PacotesOverviewStrip(pacotes: visible);
             }
             if (index == overviewIndex + 1) {
-              return Padding(
-                padding: const EdgeInsets.only(
-                  left: 2,
-                  bottom: TokensStrip.s2,
-                ),
-                child: Text(
-                  'Seus planos (link da página em Mais)',
-                  style: TextStyle(
-                    color: fxScreenMute(context),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
+              return const Padding(
+                padding: EdgeInsets.only(bottom: TokensStrip.s3),
+                child: DashboardSectionHeader(title: 'Seus planos'),
               );
             }
           }

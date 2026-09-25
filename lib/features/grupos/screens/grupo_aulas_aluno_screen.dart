@@ -258,6 +258,9 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                 )
               : Column(
                   children: [
+                    if (_aulas.isNotEmpty ||
+                        searching ||
+                        _searchCtrl.text.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         TokensStrip.s4,
@@ -340,29 +343,28 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                   inscritos: a.inscritos,
                   capacidadeMax: a.capacidadeMax,
                 );
-                final trailingLabel = a.inscrito
-                    ? 'Inscrito'
-                    : lotada
-                    ? 'Lotada'
-                    : 'Inscrever';
-                final trailingColor = a.inscrito
+                final status = grupoAulaStatusLabel(
+                  inscrito: a.inscrito,
+                  lotada: lotada,
+                );
+                final statusColor = a.inscrito
                     ? Theme.of(context).colorScheme.primary
-                    : lotada
-                    ? EagleTokens.warn
-                    : Theme.of(context).colorScheme.primary;
+                    : EagleTokens.warn;
                 return FxSatelliteListTile(
                   title: a.titulo,
                   titleCase: false,
                   subtitle: Text(
                     '${grupoAulaSubtitle(inicio: a.inicio, localAula: a.localAula)} · ${grupoAulaVagasLabel(inscritos: a.inscritos, capacidadeMax: a.capacidadeMax)}',
                   ),
-                  trailing: Text(
-                    trailingLabel,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: trailingColor,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+                  trailing: status == null
+                      ? null
+                      : Text(
+                          status,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: statusColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                   onTap: () => _inscrever(a),
                 );
               },

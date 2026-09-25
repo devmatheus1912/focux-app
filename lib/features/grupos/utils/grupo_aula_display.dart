@@ -91,6 +91,13 @@ bool grupoAulaLotada({
 }) =>
     capacidadeMax > 0 && inscritos >= capacidadeMax;
 
+/// Status no trailing; nulo quando a aula está aberta (o toque na linha inscreve).
+String? grupoAulaStatusLabel({required bool inscrito, required bool lotada}) {
+  if (inscrito) return 'Inscrito';
+  if (lotada) return 'Lotada';
+  return null;
+}
+
 String grupoAulaFxIcon({
   required int inscritos,
   required int capacidadeMax,

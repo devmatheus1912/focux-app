@@ -324,6 +324,25 @@ class FilaAcaoResumo {
   );
 }
 
+class IaCommandActionsContagem {
+  const IaCommandActionsContagem({
+    this.abertas = 0,
+    this.adiadas = 0,
+    this.concluidas = 0,
+  });
+
+  final int abertas;
+  final int adiadas;
+  final int concluidas;
+
+  factory IaCommandActionsContagem.fromJson(Map<String, dynamic> json) =>
+      IaCommandActionsContagem(
+        abertas: (json['abertas'] as num?)?.toInt() ?? 0,
+        adiadas: (json['adiadas'] as num?)?.toInt() ?? 0,
+        concluidas: (json['concluidas'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class IaCommandActionsPage {
   const IaCommandActionsPage({
     required this.itens,

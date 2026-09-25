@@ -43,12 +43,14 @@ class RetencaoHome {
     required this.medio,
     required this.saudavel,
     required this.top3,
+    this.altoSemanaAnterior,
     this.fetchedAt,
   });
 
   final int alto;
   final int medio;
   final int saudavel;
+  final int? altoSemanaAnterior;
   final List<RetencaoAlunoScore> top3;
   final DateTime? fetchedAt;
 
@@ -59,6 +61,7 @@ class RetencaoHome {
       alto: (j['alto'] as num?)?.toInt() ?? 0,
       medio: (j['medio'] as num?)?.toInt() ?? 0,
       saudavel: (j['saudavel'] as num?)?.toInt() ?? 0,
+      altoSemanaAnterior: (j['altoSemanaAnterior'] as num?)?.toInt(),
       top3:
           ((j['top3'] as List?) ?? const [])
               .whereType<Map>()

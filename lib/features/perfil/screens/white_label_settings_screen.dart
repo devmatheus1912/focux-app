@@ -17,6 +17,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
@@ -211,6 +212,30 @@ class _WhiteLabelSettingsScreenState
             onBack: () {
               _cancel();
             },
+            actions: [
+              FxHelpIconButton(
+                tooltip: 'Como funciona a marca própria',
+                onTap: () => showFxHelpSheet(
+                  context,
+                  title: 'Marca própria',
+                  subtitle: 'Seu nome no app do aluno e nos links de venda.',
+                  tips: const [
+                    FxHelpTip(
+                      'App do aluno',
+                      'Depois do login o aluno vê sua marca. Login e ícone da loja seguem Focux.',
+                    ),
+                    FxHelpTip(
+                      'Links',
+                      'Toque num link para copiar e mande no WhatsApp ou Instagram.',
+                    ),
+                    FxHelpTip(
+                      'Checklist',
+                      'Itens pendentes abrem a tela certa para completar.',
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           bottomNavigationBar:
               config == null
@@ -302,7 +327,7 @@ class _WhiteLabelSettingsScreenState
                             )
                           else
                           FxSettingsGroup(
-                            header: 'Domínio customizado',
+                            header: 'Domínio próprio',
                             caption: whiteLabelCnameHint(
                               _domainCtrl.text,
                               verificacaoToken: config.dominioVerificacaoToken,
@@ -475,7 +500,7 @@ class _WhiteLabelSettingsScreenState
                                 ).copyWith(fontWeight: FontWeight.w700),
                               ),
                               subtitle: Text(
-                                'Máquina de vendas — sob demanda',
+                                'O que falta para vender pelo link',
                                 style: FocuxHubTypography.bodyMuted(
                                   color: chrome.mute,
                                 ),

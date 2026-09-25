@@ -73,19 +73,65 @@ String engajamentoEventoLabel(String? descricao, String? tipo) {
   final text = descricao?.trim();
   if (text != null && text.isNotEmpty) {
     return text
-        .replaceAll('EM_ANDAMENTO', 'Em andamento')
-        .replaceAll('CONCLUIDO', 'Concluído')
-        .replaceAll('CANCELADO', 'Cancelado')
+        .replaceAll(' - ', ' · ')
+        .replaceAll('EM_ANDAMENTO', 'em andamento')
+        .replaceAll('CONCLUIDO', 'concluído')
+        .replaceAll('CANCELADO', 'cancelado')
         .replaceAll('_', ' ');
   }
   return engajamentoTipoLabel(tipo);
 }
 
-String engajamentoEventoSubtitle({
+/// Tipo do evento como apoio; nulo quando o título já é o próprio tipo.
+String? engajamentoEventoSubtitle({
   required String? tipo,
-  required String dataHora,
-}) =>
-    '${engajamentoTipoLabel(tipo)} · ${engajamentoWhenLabel(dataHora)}';
+  required String titulo,
+}) {
+  final label = engajamentoTipoLabel(tipo);
+  return label.toLowerCase() == titulo.trim().toLowerCase() ? null : label;
+}
+
+String engajamentoHoraLabel(String dataHora) {
+  final dt = DateTime.tryParse(dataHora)?.toLocal();
+  if (dt == null) return '—';
+  final hour = dt.hour.toString().padLeft(2, '0');
+  final minute = dt.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+String engajamentoDiaLabel(String dataHora, {DateTime? now}) {
+  final dt = DateTime.tryParse(dataHora)?.toLocal();
+  if (dt == null) return 'Sem data';
+  final ref = now ?? DateTime.now();
+  final hoje = DateTime(ref.year, ref.month, ref.day);
+  final dia = DateTime(dt.year, dt.month, dt.day);
+  final diff = hoje.difference(dia).inDays;
+  if (diff == 0) return 'Hoje';
+  if (diff == 1) return 'Ontem';
+  final d = dt.day.toString().padLeft(2, '0');
+  final m = dt.month.toString().padLeft(2, '0');
+  return '$d/$m';
+}
+
+typedef EngajamentoLinha = ({String? dia, EventoEngajamento? evento});
+
+/// Achata eventos (já ordenados do mais recente) em cabeçalho de dia + itens.
+List<EngajamentoLinha> engajamentoLinhasPorDia(
+  List<EventoEngajamento> eventos, {
+  DateTime? now,
+}) {
+  final linhas = <EngajamentoLinha>[];
+  String? atual;
+  for (final evento in eventos) {
+    final dia = engajamentoDiaLabel(evento.dataHora, now: now);
+    if (dia != atual) {
+      linhas.add((dia: dia, evento: null));
+      atual = dia;
+    }
+    linhas.add((dia: null, evento: evento));
+  }
+  return linhas;
+}
 
 /// Subtítulo do hub: só o período (nome fica no [FxHubHeader]).
 String engajamentoHubSubtitle({required int dias}) =>
@@ -132,7 +178,7 @@ String engajamentoUltimoHint(Iterable<EventoEngajamento> eventos) {
     }
   }
   if (last == null) return 'Nenhum evento na janela';
-  return '${engajamentoTipoLabel(last.tipo)} · ${engajamentoWhenLabel(last.dataHora)}';
+  return engajamentoWhenLabel(last.dataHora);
 }
 
 String? engajamentoEventoRota(String? tipo, int alunoId) {

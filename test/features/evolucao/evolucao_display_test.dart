@@ -8,7 +8,7 @@ void main() {
     expect(evolucaoHubViewLabel(EvolucaoHubView.recordes), 'Recordes');
     expect(evolucaoHubSubtitle(), 'Peso, medidas e recordes');
     expect(evolucaoVariacaoValue(const []), '—');
-    expect(evolucaoVariacaoHint(const []), 'Registre duas medidas para ver o delta');
+    expect(evolucaoVariacaoHint(const []), 'Registre 2 pesos para comparar');
     expect(
       evolucaoVariacaoValue([
         MedidaCorporal(id: 1, data: '2026-01-01', peso: 80),

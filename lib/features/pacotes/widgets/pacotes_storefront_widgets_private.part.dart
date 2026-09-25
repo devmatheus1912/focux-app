@@ -1,28 +1,25 @@
 part of 'pacotes_storefront_widgets.dart';
 
-class _PacoteTag extends StatelessWidget {
-  const _PacoteTag(this.label);
+class _PacoteDestaqueBadge extends StatelessWidget {
+  const _PacoteDestaqueBadge({required this.accent});
 
-  final String label;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color:
-            isDark
-                ? Colors.white.withValues(alpha: 0.06)
-                : Theme.of(context).colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: FocuxHubTypography.bodyMuted(
-          color: Theme.of(context).colorScheme.onSurface,
-          fontWeight: FontWeight.w600,
+    return Semantics(
+      label: 'Destaque na página',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s2,
+          vertical: TokensStrip.s1,
         ),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(TokensStrip.rPill),
+        ),
+        child: Text('Destaque', style: FocuxHubTypography.chip(accent)),
       ),
     );
   }

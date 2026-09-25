@@ -39,6 +39,11 @@ final iaActionsProvider =
           .getIaCommandActionsPage(status: query.status, q: query.q);
     });
 
+final iaActionsContagemProvider =
+    FutureProvider.autoDispose<IaCommandActionsContagem>((ref) {
+      return ref.read(dashboardRepositoryProvider).getIaCommandActionsContagem();
+    });
+
 class CopilotActionsScreen extends ConsumerStatefulWidget {
   const CopilotActionsScreen({super.key});
 
@@ -88,6 +93,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     final ink = dark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final actionsAsync = ref.watch(iaActionsProvider(_queryKey));
+    final contagem = ref.watch(iaActionsContagemProvider).valueOrNull;
 
     return fxScreenA11yScope(
       label: 'Tarefas IA',
@@ -124,7 +130,10 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
                       for (final status in copilotActionsStatusValues)
                         (
                           value: status,
-                          label: copilotActionsStatusLabel(status),
+                          label: copilotActionsStatusChoiceLabel(
+                            status,
+                            contagem,
+                          ),
                         ),
                     ],
                     selected: _status,
@@ -366,6 +375,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
     _extraHasNext = false;
     _extraPage = 0;
     ref.invalidate(iaActionsProvider(_queryKey));
+    ref.invalidate(iaActionsContagemProvider);
     await ref.read(iaActionsProvider(_queryKey).future);
   }
 
@@ -431,6 +441,7 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       await action();
       if (!mounted) return;
       ref.invalidate(iaActionsProvider(_queryKey));
+      ref.invalidate(iaActionsContagemProvider);
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(commandCenterProvider);
       FeedbackHelper.showInfo(context, successMessage);

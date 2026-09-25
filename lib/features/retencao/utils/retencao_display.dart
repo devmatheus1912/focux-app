@@ -33,6 +33,15 @@ String retencaoMetricMedioLabel(int n) =>
 String retencaoMetricSaudavelLabel(int n) =>
     n == 1 ? '1 saudável' : '$n saudáveis';
 
+/// Variação do risco alto contra a leitura de 7 dias atrás; nulo sem histórico.
+String? retencaoAltoVariacaoHint(int alto, int? altoSemanaAnterior) {
+  if (altoSemanaAnterior == null) return null;
+  final delta = alto - altoSemanaAnterior;
+  if (delta == 0) return 'Igual à semana passada';
+  final sinal = delta > 0 ? '+' : '−';
+  return '$sinal${delta.abs()} na semana';
+}
+
 bool retencaoNomeExibivel(String nome) {
   final t = nome.trim();
   if (t.isEmpty) return false;

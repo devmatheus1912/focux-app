@@ -36,6 +36,17 @@ String pacoteDuracaoLabel(int meses) {
 
 String pacoteIncluiValue(bool on) => on ? 'Sim' : 'Não';
 
+String pacoteResumoLinha({
+  required bool treino,
+  required bool consultoria,
+  required int meses,
+}) =>
+    [
+      if (treino) 'Treino',
+      if (consultoria) 'Consultoria',
+      pacoteDuracaoLabel(meses),
+    ].join(' · ');
+
 String pacoteCriarTileLabel() => 'Criar plano';
 
 String pacoteCriarConfirmTitle() => 'Publicar este plano?';

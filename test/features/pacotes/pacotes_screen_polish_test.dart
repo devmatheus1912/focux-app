@@ -53,8 +53,11 @@ void main() {
     expect(hub, isNot(contains('FxLiquidPrimaryButton')));
     expect(hub, contains('confirmDesativarPacote'));
     expect(sheet, isNot(contains('confirmDesativarPacote')));
-    expect(hub, contains("child: const Text('Copiar link')"));
-    expect(hub, isNot(contains("label: 'Copiar link'")));
+    expect(hub, isNot(contains('StorefrontLinkCard')));
+    expect(hub, isNot(contains('PacotesComoFuncionaCard')));
+    expect(hub, contains('Icons.more_vert_rounded'));
+    expect(hub, contains('Desativar plano'));
+    expect(hub, isNot(contains('DESTAQUE NA PÁGINA')));
     expect(sheet, isNot(contains('FxLiquidSecondaryButton')));
     expect(sheet, isNot(contains('ChoiceChip')));
     expect(sheet, isNot(contains('DropdownButton')));

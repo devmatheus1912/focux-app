@@ -295,7 +295,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               'Fotos este mês: ${plano.migracaoFotosUsadasMes}/$limite · '
-                              '${plano.migracaoFotosRestantes} restante(s)',
+                              '${ptCountLabel(plano.migracaoFotosRestantes, 'restante', 'restantes')}',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,

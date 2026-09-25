@@ -132,6 +132,11 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
           onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
           actions: [
+            IconButton(
+              tooltip: 'Enviar no chat',
+              icon: const Icon(Icons.chat_bubble_outline_rounded),
+              onPressed: _compartilharNoChat,
+            ),
             FxHelpIconButton(
               tooltip: 'Como usar a evolução',
               onTap: () => showEvolucaoHelpSheet(context),
@@ -268,14 +273,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                                 ),
                               ],
                             ),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: TextButton(
-                                onPressed: _compartilharNoChat,
-                                child: const Text('Enviar no chat'),
-                              ),
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
+                            const SizedBox(height: TokensStrip.s4),
                             AlunoSegmentedChoice(
                               options: evolucaoDetalheSecoes,
                               selected: _view.name,
@@ -294,7 +292,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                           _TabMedidas(
                             alunoNome: widget.alunoNome,
                             medidasAsync: medidasAsync,
-                            onRegister: _mostrarDialogMedida,
                             onRetry: () {
                               EvolucaoHomeClientCache.invalidate(
                                 widget.alunoId,
@@ -307,7 +304,6 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
                           _TabRecordes(
                             alunoNome: widget.alunoNome,
                             recordesAsync: recordesAsync,
-                            onRegister: _mostrarDialogRecorde,
                             onRetry: () {
                               EvolucaoHomeClientCache.invalidate(
                                 widget.alunoId,
