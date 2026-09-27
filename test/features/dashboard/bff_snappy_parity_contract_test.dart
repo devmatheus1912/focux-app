@@ -5,16 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 /// First paint Home: um BFF, sem sidecars redundantes (pareado BE #75).
 void main() {
   test('aluno home first paint não dispara sidecars de histórico/coach/medidas/upsell', () {
-    final screen = File(
+    final bundle = [
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
-    ).readAsStringSync();
-    final tools = File(
+      'lib/features/dashboard/screens/aluno_dashboard_screen_header.part.dart',
       'lib/features/dashboard/screens/aluno_dashboard_screen_tools.part.dart',
-    ).readAsStringSync();
-    final cards = File(
-      'lib/features/dashboard/screens/aluno_dashboard_screen_cards.part.dart',
-    ).readAsStringSync();
-    final bundle = '$screen\n$tools\n$cards';
+    ].map((p) => File(p).readAsStringSync()).join('\n');
 
     expect(bundle, contains('alunoDashboardHomeProvider'));
     expect(bundle, contains('home.coachMensagens'));

@@ -5,37 +5,36 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../support/screen_source_bundle.dart';
 
 void main() {
-  test('student autonomy center keeps compact mobile layouts safe', () {
+  test('Home "Hoje": um P0, ordem das perguntas e fold antigo fora', () {
     final screen = readScreenSourceBundle(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     );
+    int at(String s) {
+      final i = screen.indexOf(s);
+      expect(i, isNonNegative, reason: s);
+      return i;
+    }
 
-    expect(screen, contains('class _NextBestTaskPanel'));
-    expect(screen, contains('final compact = constraints.maxWidth < 390'));
-    expect(screen, contains('SizedBox(width: double.infinity, child: action)'));
-    expect(screen, contains('maxLines: 3'));
-    expect(screen, contains('class _AutonomyTaskTile'));
-    expect(screen, contains('final compact = constraints.maxWidth < 360'));
-    expect(screen, contains('BoxConstraints(maxWidth: 180)'));
-    expect(screen, contains('BoxConstraints(maxWidth: 132)'));
-    expect(screen, contains('class _AlunoAppBarProfileMenu'));
-    expect(screen, contains("label: 'Perfil do aluno'"));
-    expect(screen, contains('class _WorkoutInsightPill'));
-    expect(screen, contains('class _WorkoutInsightPill'));
-    expect(screen, contains('buildAlunoHomeExperience'));
-    expect(screen, contains('class _HomeNarrativeRail'));
-    expect(screen, contains('Evolução do treino'));
-    expect(screen, contains('streakAtual'));
-    expect(screen, contains('_StreakFoldBadge'));
-    expect(screen, contains('score.rhythmLabel'));
-    expect(screen, isNot(contains('Seu score Focux')));
-    expect(screen, isNot(contains('score.riskLabel')));
-    expect(screen, contains('brand.nomePersonal'));
-    expect(screen, contains("'Ativo'"));
-    expect(screen, isNot(contains('class _StudentStatsRow')));
-    expect(screen, contains("'Sem ação agora'"));
-    expect(screen, contains("'Prioridade média'"));
-    expect(screen, contains("'Conferir horário'"));
+    expect('emphasize: true'.allMatches(screen), hasLength(1));
+    expect(at('AlunoHomeHeader('), lessThan(at('_TodayFocusCard(')));
+    expect(at('_TodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
+    expect(at('_AlunoHomeAviso('), lessThan(at('AlunoWeekSummaryCard(')));
+    expect(at('AlunoWeekSummaryCard('), lessThan(at('AlunoEvolutionCard(')));
+    expect(at('AlunoEvolutionCard('), lessThan(at('AlunoPendenciasBlock(')));
+    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(at('AlunoUpsellCarousel('), lessThan(at('_StudentToolsSection()')));
+
+    expect(screen, contains('s.alunoHomeTitulo'));
+    expect(screen, contains('S.of(context).alunoHomePerfilSemantics'));
+    expect(screen, contains('listenManual'));
+    expect(screen, isNot(contains("'Meu Treino'")));
+    expect(screen, isNot(contains('buildAlunoHomeExperience')));
+    expect(screen, isNot(contains('rhythmLabel')));
+    expect(screen, isNot(contains('_AlunoHeroCard')));
+    expect(screen, isNot(contains('_StudentJourneyCard')));
+    expect(screen, isNot(contains('_StreakFoldBadge')));
+    expect(screen, isNot(contains('ProgressoSemanalWidget')));
+    expect(screen, isNot(contains('Treinar agora')));
   });
 
   test('weekly progress card follows white label and accent copy', () {
@@ -67,7 +66,7 @@ void main() {
     expect(screen, isNot(contains('EagleTokens.good')));
   });
 
-  test('student profile and autonomy copy keep Portuguese accents', () {
+  test('student profile copy keeps Portuguese accents', () {
     final hub = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_screen.dart',
     );
@@ -78,20 +77,11 @@ void main() {
     final profile = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
     );
-    final plan =
-        File(
-          'lib/features/dashboard/data/aluno_autonomy_plan.dart',
-        ).readAsStringSync();
 
     expect(hub, contains('Editar cadastro'));
     expect(hubBody, contains('Anamnese'));
     expect(profile, contains('foto de evolução'));
     expect(profile, contains('friendlyError'));
     expect(profile, contains('segurança e aderência'));
-    expect(plan, contains('histórico de carga, aderência'));
-    expect(plan, contains('você está pronto'));
-    expect(plan, contains('dúvidas, dor, dificuldade, preferência'));
-    expect(plan, contains('horários, compromissos e presenças'));
-    expect(plan, contains('pendências para não interromper'));
   });
 }

@@ -45,11 +45,7 @@ class AlunoHomeHeader extends StatelessWidget {
           ),
         ),
         if (personal.isNotEmpty)
-          _PersonalLine(
-            nome: personal,
-            logoUrl: logoUrl,
-            onTap: onOpenChat,
-          ),
+          _PersonalLine(nome: personal, logoUrl: logoUrl, onTap: onOpenChat),
       ],
     );
   }

@@ -65,10 +65,7 @@ class _AlunoPendenciasBlockState extends State<AlunoPendenciasBlock> {
           child: Column(
             children: [
               for (final p in widget.pendencias)
-                _PendenciaRow(
-                  pendencia: p,
-                  onTap: () => widget.onTap(p),
-                ),
+                _PendenciaRow(pendencia: p, onTap: () => widget.onTap(p)),
             ],
           ),
         ),
@@ -112,11 +109,7 @@ class _PendenciaRow extends StatelessWidget {
                     color: BrandPalette.soft(primary, dark: isDark),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    _icone(pendencia.tipo),
-                    size: 18,
-                    color: primary,
-                  ),
+                  child: Icon(_icone(pendencia.tipo), size: 18, color: primary),
                 ),
                 const SizedBox(width: TokensStrip.s3),
                 Expanded(
@@ -140,11 +133,7 @@ class _PendenciaRow extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: chrome.mute,
-                ),
+                Icon(Icons.chevron_right_rounded, size: 20, color: chrome.mute),
               ],
             ),
           ),

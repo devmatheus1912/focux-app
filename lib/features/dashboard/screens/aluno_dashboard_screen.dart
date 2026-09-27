@@ -3,59 +3,57 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/analytics/analytics_service.dart';
-import '../../../core/providers/personal_brand_provider.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../widgets/aluno_home_insight_line.dart';
-import '../widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../anamnese/providers/anamnese_provider.dart';
-import '../../anamnese/widgets/anamnese_status_banner.dart';
-import '../../anamnese/utils/anamnese_display.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../chat/data/chat_repository.dart';
-import '../../checkin/data/checkin_repository.dart';
+import '../../anamnese/providers/anamnese_provider.dart';
+import '../../anamnese/utils/anamnese_display.dart';
+import '../../anamnese/widgets/anamnese_status_banner.dart';
 import '../../checkin/data/meus_treinos_mem_cache.dart';
+import '../../coach/data/coach_proativo_repository.dart';
 import '../../coach/widgets/coach_proativo_card.dart';
-import '../../evolucao/data/evolucao_repository.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
 import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
-import '../data/aluno_autonomy_plan.dart';
 import '../data/aluno_home_insight.dart';
 import '../data/aluno_onboarding_prefs.dart';
+import '../data/dashboard_repository.dart';
 import '../providers/dashboard_provider.dart';
+import '../utils/aluno_autonomy_analytics.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
-import '../utils/aluno_home_display.dart';
-import '../utils/aluno_performance_evolution.dart';
-import '../utils/aluno_volume_format.dart';
-import 'progresso_semanal_widget.dart';
-import '../../../core/utils/pt_br_display.dart';
-import '../../../core/widgets/fx_action_chip.dart';
+import '../utils/aluno_home_texts.dart';
+import '../utils/aluno_home_week.dart';
+import '../utils/aluno_pendencias.dart';
+import '../utils/aluno_today_action.dart';
+import '../widgets/aluno_evolution_card.dart';
+import '../widgets/aluno_home_header.dart';
+import '../widgets/aluno_home_insight_line.dart';
+import '../widgets/aluno_pendencias_block.dart';
+import '../widgets/aluno_week_summary_card.dart';
+import '../widgets/dashboard_section_header.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
-part 'aluno_dashboard_screen_cards.part.dart';
 part 'aluno_dashboard_screen_tools.part.dart';
 
 class AlunoDashboardScreen extends ConsumerStatefulWidget {
@@ -74,6 +72,21 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   void initState() {
     super.initState();
     unawaited(_loadAgendaReviewed());
+    ref.listenManual(
+      alunoDashboardHomeProvider,
+      (_, next) => next.whenData(_onHomeLoaded),
+      fireImmediately: true,
+    );
+  }
+
+  void _onHomeLoaded(AlunoDashboardHomeBundle home) {
+    MeusTreinosMemCache.save(home.treinos);
+    if (!home.npsDeveResponder || _npsPrompted) return;
+    _npsPrompted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showNpsPromptIfNeeded(context, ref, deveResponder: true);
+    });
   }
 
   Future<void> _loadAgendaReviewed() async {
@@ -82,19 +95,53 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     setState(() => _agendaReviewed = reviewed);
   }
 
+  void _openToday(AlunoTodayAction action) {
+    final task = AlunoAutonomyAnalytics.forToday(action);
+    if (task != null) {
+      AlunoAutonomyAnalytics.clicked(ref.read(alunoRepositoryProvider), task);
+    }
+    context.push(action.route, extra: action.routeExtra);
+  }
+
+  void _openPendencia(AlunoPendencia p) {
+    AlunoAutonomyAnalytics.clicked(
+      ref.read(alunoRepositoryProvider),
+      AlunoAutonomyAnalytics.forPendencia(p),
+    );
+    unawaited(context.push(p.tipo.route).then((_) => _loadAgendaReviewed()));
+  }
+
+  void _pendenciaShown(AlunoPendencia p) {
+    AlunoAutonomyAnalytics.viewed(
+      ref.read(alunoRepositoryProvider),
+      AlunoAutonomyAnalytics.forPendencia(p),
+    );
+  }
+
+  Future<void> _refresh() async {
+    AlunoDashboardHomeClientCache.clear();
+    ref.invalidate(alunoDashboardHomeProvider);
+    ref.invalidate(minhaAnamneseProvider);
+    await Future.wait([
+      ref.read(alunoDashboardHomeProvider.future),
+      _loadAgendaReviewed(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
 
     return fxScreenA11yScope(
-      label: 'Meu Treino',
+      label: s.alunoHomeTitulo,
       child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Meu Treino',
+          title: s.alunoHomeTitulo,
           subtitle: homeAsync.when(
             data: (home) => FxHubFreshness.fromFetchedAt(home.fetchedAt),
             loading: () => null,
@@ -103,22 +150,28 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           showBack: false,
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como usar o Meu Treino',
+              tooltip: s.alunoHomeAjudaTooltip,
               onTap:
                   () => showFxHelpSheet(
                     context,
-                    title: 'Meu Treino',
-                    subtitle: 'O que fazer agora e os atalhos do dia.',
-                    tips: const [
-                      FxHelpTip('Como calculamos', alunoHomeComoCalculamos),
-                      FxHelpTip('Foco', 'A ação do dia fica no card do topo.'),
+                    title: s.alunoHomeTitulo,
+                    subtitle: s.alunoHomeAjudaSubtitulo,
+                    tips: [
                       FxHelpTip(
-                        'Treinos',
-                        'Check-in e histórico ficam em Treinos.',
+                        s.alunoHomeAjudaCalculoTitulo,
+                        s.alunoHomeAjudaCalculo,
                       ),
                       FxHelpTip(
-                        'Mais',
-                        'O catálogo abre o restante sem lotar o início.',
+                        s.alunoHomeAjudaFocoTitulo,
+                        s.alunoHomeAjudaFoco,
+                      ),
+                      FxHelpTip(
+                        s.alunoHomeAjudaPendenciasTitulo,
+                        s.alunoHomeAjudaPendencias,
+                      ),
+                      FxHelpTip(
+                        s.alunoHomeAjudaMaisTitulo,
+                        s.alunoHomeAjudaMais,
                       ),
                     ],
                   ),
@@ -153,130 +206,111 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                 message: friendlyError(e),
                 onRetry: () => ref.invalidate(alunoDashboardHomeProvider),
               ),
-          data: (home) {
-            MeusTreinosMemCache.save(home.treinos);
-            if (home.npsDeveResponder && !_npsPrompted) {
-              _npsPrompted = true;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                showNpsPromptIfNeeded(context, ref, deveResponder: true);
-              });
-            }
-            final experience = buildAlunoHomeExperience(
-              aluno: home.aluno,
-              medidas: home.medidas,
-              treinos: home.treinos,
-              historico: home.historico,
-              mensagens: home.chat.toSyntheticMessages(),
-              agendaReviewed: _agendaReviewed,
-              frequenciaDias: home.frequenciaDias,
-            );
+          data: (home) => _buildHome(context, home, isDark),
+        ),
+      ),
+    );
+  }
 
-            return RefreshIndicator(
-              onRefresh: () async {
-                AlunoDashboardHomeClientCache.clear();
-                ref.invalidate(alunoDashboardHomeProvider);
-                ref.invalidate(minhaAnamneseProvider);
-                await Future.wait([
-                  ref.read(alunoDashboardHomeProvider.future),
-                  _loadAgendaReviewed(),
-                ]);
-              },
-              child: FxContentWidthLimiter(
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  padding: const EdgeInsets.all(TokensStrip.s4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _TodayFocusCard(
-                        experience: experience,
-                        streakAtual: home.streakAtual,
-                        insight: home.insight,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      _AlunoAnamneseCta(),
-                      AlunoRecoveryCard(
-                        isDark: isDark,
-                        snapshot: home.recovery,
-                        hasWearableHistory: home.hasWearableHistory,
-                        recoveryStale: home.recoveryStale,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      CoachProativoCard(
-                        isDark: isDark,
-                        mensagens: home.coachMensagens,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      AlunoUpsellCarousel(ofertas: home.upsellPendentes),
-                      const SizedBox(height: TokensStrip.s3),
-                      _AlunoHeroCard(
-                        aluno: home.aluno,
-                        brand: home.personalBrand,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s3),
-                      if (home.treinos.isEmpty && home.historico.isEmpty)
-                        FxEmptyState(
-                          icon: 'dumbbell',
-                          title: 'Nenhum treino ainda',
-                          subtitle:
-                              'Quando houver treinos ou check-ins, o progresso aparece aqui.',
-                          action: FxEmptyAction(
-                            label: 'Ver treinos',
-                            onTap: () => context.push('/checkin/treinos'),
-                          ),
-                        )
-                      else
-                        ProgressoSemanalWidget(
-                          treinos: home.treinos,
-                          historico: home.historico,
-                          aderenciaPercent: home.aluno.aderenciaPercent,
-                          volumeSemanaKg:
-                              home.volumeSemanaKg > 0
-                                  ? home.volumeSemanaKg
-                                  : null,
-                          insight: experience.score.rhythmLabel,
-                          frequenciaDias: home.frequenciaDias,
-                        ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _PerformanceEvolutionCard(
-                        historicoAsync: AsyncValue.data(home.historico),
-                        volumeSemanaKg: home.volumeSemanaKg,
-                        volumeMesKg: 0,
-                        volumePorSemana: home.volumePorSemana,
-                        forcaPorSemana: home.forcaPorSemana,
-                        recordes: home.recordes,
-                        forcaDeltaPercent: home.forcaDeltaPercent,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(height: TokensStrip.s4),
-                      _StudentJourneyCard(
-                        aluno: home.aluno,
-                        treinos: home.treinos,
-                        medidasAsync: AsyncValue.data(home.medidas),
-                        historicoAsync: AsyncValue.data(home.historico),
-                        chatAsync: AsyncValue.data(
-                          home.chat.toSyntheticMessages(),
-                        ),
-                        isDark: isDark,
-                        agendaReviewed: _agendaReviewed,
-                        onReturnedFromTask: _loadAgendaReviewed,
-                      ),
-                      const SizedBox(height: TokensStrip.s5),
-                      const _StudentToolsSection(),
-                    ],
-                  ),
-                ),
+  Widget _buildHome(
+    BuildContext context,
+    AlunoDashboardHomeBundle home,
+    bool isDark,
+  ) {
+    final s = S.of(context);
+    final action = resolveAlunoTodayAction(
+      aluno: home.aluno,
+      treinos: home.treinos,
+      historico: home.historico,
+    );
+    final pendencias = resolveAlunoPendencias(
+      aluno: home.aluno,
+      medidas: home.medidas,
+      naoLidasDoPersonal: home.chat.naoLidasDoPersonal,
+      agendaReviewed: _agendaReviewed,
+      todayMode: action.mode,
+    );
+    final semana = buildAlunoWeekSummary(
+      concluidosSemanaIso: home.concluidosSemanaIso,
+      frequenciaDias: home.frequenciaDias,
+      streakAtual: home.streakAtual,
+      volumeSemanaKg: home.volumeSemanaKg,
+    );
+    final semTreino = home.treinos.isEmpty && home.historico.isEmpty;
+
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: FxContentWidthLimiter(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.all(TokensStrip.s4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AlunoHomeHeader(
+                alunoNome: home.aluno.nome,
+                nomePersonal: home.personalBrand.nomePersonal,
+                logoUrl: home.personalBrand.logoUrl,
+                onOpenChat: () => context.push('/chat/aluno'),
               ),
-            );
-          },
+              const SizedBox(height: TokensStrip.s2),
+              _TodayFocusCard(
+                action: action,
+                insight: home.insight,
+                isDark: isDark,
+                onAction: () => _openToday(action),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              _AlunoHomeAviso(
+                isDark: isDark,
+                coachMensagens: home.coachMensagens,
+              ),
+              if (semTreino)
+                FxEmptyState(
+                  icon: 'dumbbell',
+                  title: s.alunoHomeSemTreinoTitulo,
+                  subtitle: s.alunoHomeSemTreinoDetalhe,
+                  action: FxEmptyAction(
+                    label: s.alunoHomeVerTreinos,
+                    onTap: () => context.push('/checkin/treinos'),
+                  ),
+                )
+              else
+                AlunoWeekSummaryCard(summary: semana),
+              const SizedBox(height: TokensStrip.s3),
+              AlunoRecoveryCard(
+                isDark: isDark,
+                snapshot: home.recovery,
+                hasWearableHistory: home.hasWearableHistory,
+                recoveryStale: home.recoveryStale,
+              ),
+              if (!semTreino) ...[
+                const SizedBox(height: TokensStrip.s4),
+                AlunoEvolutionCard(
+                  volumePorSemana: home.volumePorSemana,
+                  forcaPorSemana: home.forcaPorSemana,
+                  forcaDeltaPercent: home.forcaDeltaPercent,
+                  ultimoRecorde:
+                      home.recordes.isEmpty ? null : home.recordes.first,
+                ),
+              ],
+              if (pendencias.isNotEmpty) ...[
+                const SizedBox(height: TokensStrip.s4),
+                AlunoPendenciasBlock(
+                  pendencias: pendencias,
+                  onTap: _openPendencia,
+                  onShown: _pendenciaShown,
+                ),
+              ],
+              const SizedBox(height: TokensStrip.s4),
+              AlunoUpsellCarousel(ofertas: home.upsellPendentes),
+              const SizedBox(height: TokensStrip.s3),
+              const _StudentToolsSection(),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-

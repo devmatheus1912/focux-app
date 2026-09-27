@@ -3,7 +3,6 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/api_etag_store.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
-import '../../chat/data/chat_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../coach/data/coach_proativo_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
@@ -352,20 +351,6 @@ class AlunoDashboardChatResumo {
       ),
       naoLidasDoPersonal: (json['naoLidasDoPersonal'] as num?)?.toInt() ?? 0,
     );
-  }
-
-  /// Compat com [buildAlunoHomeExperience] sem dump do histórico.
-  List<ChatMsg> toSyntheticMessages() {
-    if (!possuiMensagemDoAluno || ultimaMensagemAlunoEm == null) {
-      return const [];
-    }
-    return [
-      ChatMsg(
-        remetente: 'ALUNO',
-        conteudo: '',
-        enviadoEm: ultimaMensagemAlunoEm!,
-      ),
-    ];
   }
 }
 

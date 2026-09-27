@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import 'aluno_home_week.dart';
@@ -9,37 +7,34 @@ import 'aluno_today_action.dart';
 typedef AlunoTodayTexto =
     ({String eyebrow, String titulo, String descricao, String cta});
 
-AlunoTodayTexto alunoTodayTexto(
-  S s,
-  AlunoTodayAction a, {
-  DateTime? hoje,
-}) => switch (a.mode) {
-  AlunoTodayMode.financialHold => (
-    eyebrow: s.alunoHojeFinanceiroEyebrow,
-    titulo: s.alunoHojeFinanceiroTitulo,
-    descricao: s.alunoHojeFinanceiroDescricao,
-    cta: s.alunoHojeFinanceiroCta,
-  ),
-  AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje),
-  AlunoTodayMode.awaitingRelease => (
-    eyebrow: s.alunoHojeAguardandoEyebrow,
-    titulo: _nomeOu(a.treinoNome, s.alunoHojeAguardandoTitulo),
-    descricao: s.alunoHojeAguardandoDescricao,
-    cta: s.alunoHojeAguardandoCta,
-  ),
-  AlunoTodayMode.profileSetup => (
-    eyebrow: s.alunoHojePerfilEyebrow,
-    titulo: s.alunoHojePerfilTitulo,
-    descricao: s.alunoHojePerfilDescricao,
-    cta: s.alunoHojePerfilCta,
-  ),
-  AlunoTodayMode.noWorkout => (
-    eyebrow: s.alunoHojeSemTreinoEyebrow,
-    titulo: s.alunoHojeSemTreinoTitulo,
-    descricao: s.alunoHojeSemTreinoDescricao,
-    cta: s.alunoHojeSemTreinoCta,
-  ),
-};
+AlunoTodayTexto alunoTodayTexto(S s, AlunoTodayAction a, {DateTime? hoje}) =>
+    switch (a.mode) {
+      AlunoTodayMode.financialHold => (
+        eyebrow: s.alunoHojeFinanceiroEyebrow,
+        titulo: s.alunoHojeFinanceiroTitulo,
+        descricao: s.alunoHojeFinanceiroDescricao,
+        cta: s.alunoHojeFinanceiroCta,
+      ),
+      AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje),
+      AlunoTodayMode.awaitingRelease => (
+        eyebrow: s.alunoHojeAguardandoEyebrow,
+        titulo: _nomeOu(a.treinoNome, s.alunoHojeAguardandoTitulo),
+        descricao: s.alunoHojeAguardandoDescricao,
+        cta: s.alunoHojeAguardandoCta,
+      ),
+      AlunoTodayMode.profileSetup => (
+        eyebrow: s.alunoHojePerfilEyebrow,
+        titulo: s.alunoHojePerfilTitulo,
+        descricao: s.alunoHojePerfilDescricao,
+        cta: s.alunoHojePerfilCta,
+      ),
+      AlunoTodayMode.noWorkout => (
+        eyebrow: s.alunoHojeSemTreinoEyebrow,
+        titulo: s.alunoHojeSemTreinoTitulo,
+        descricao: s.alunoHojeSemTreinoDescricao,
+        cta: s.alunoHojeSemTreinoCta,
+      ),
+    };
 
 AlunoTodayTexto _treinoTexto(S s, AlunoTodayAction a, DateTime? hoje) {
   final nome = _nomeOu(a.treinoNome, s.alunoHojeTreinoEyebrow);
@@ -66,35 +61,33 @@ String? alunoPrazoTexto(S s, DateTime? prazoFim, {DateTime? hoje}) {
   return s.alunoHojePrazoAte(fim);
 }
 
-({String titulo, String detalhe}) alunoPendenciaTexto(
-  S s,
-  AlunoPendencia p,
-) => switch (p.tipo) {
-  AlunoPendenciaTipo.perfil => (
-    titulo: s.alunoPendenciaPerfilTitulo,
-    detalhe: s.alunoPendenciaPerfilDetalhe,
-  ),
-  AlunoPendenciaTipo.foto => (
-    titulo: s.alunoPendenciaFotoTitulo,
-    detalhe: s.alunoPendenciaFotoDetalhe,
-  ),
-  AlunoPendenciaTipo.medida when p.primeiraVez => (
-    titulo: s.alunoPendenciaMedidaPrimeiraTitulo,
-    detalhe: s.alunoPendenciaMedidaPrimeiraDetalhe,
-  ),
-  AlunoPendenciaTipo.medida => (
-    titulo: s.alunoPendenciaMedidaTitulo,
-    detalhe: s.alunoPendenciaMedidaDetalhe,
-  ),
-  AlunoPendenciaTipo.chat => (
-    titulo: s.alunoPendenciaChatTitulo,
-    detalhe: s.alunoPendenciaChatDetalhe,
-  ),
-  AlunoPendenciaTipo.agenda => (
-    titulo: s.alunoPendenciaAgendaTitulo,
-    detalhe: s.alunoPendenciaAgendaDetalhe,
-  ),
-};
+({String titulo, String detalhe}) alunoPendenciaTexto(S s, AlunoPendencia p) =>
+    switch (p.tipo) {
+      AlunoPendenciaTipo.perfil => (
+        titulo: s.alunoPendenciaPerfilTitulo,
+        detalhe: s.alunoPendenciaPerfilDetalhe,
+      ),
+      AlunoPendenciaTipo.foto => (
+        titulo: s.alunoPendenciaFotoTitulo,
+        detalhe: s.alunoPendenciaFotoDetalhe,
+      ),
+      AlunoPendenciaTipo.medida when p.primeiraVez => (
+        titulo: s.alunoPendenciaMedidaPrimeiraTitulo,
+        detalhe: s.alunoPendenciaMedidaPrimeiraDetalhe,
+      ),
+      AlunoPendenciaTipo.medida => (
+        titulo: s.alunoPendenciaMedidaTitulo,
+        detalhe: s.alunoPendenciaMedidaDetalhe,
+      ),
+      AlunoPendenciaTipo.chat => (
+        titulo: s.alunoPendenciaChatTitulo,
+        detalhe: s.alunoPendenciaChatDetalhe,
+      ),
+      AlunoPendenciaTipo.agenda => (
+        titulo: s.alunoPendenciaAgendaTitulo,
+        detalhe: s.alunoPendenciaAgendaDetalhe,
+      ),
+    };
 
 String alunoTreinosSemanaValor(S s, AlunoWeekSummary w) {
   final feitos = w.feitos ?? 0;
@@ -119,14 +112,21 @@ String alunoWeekSemantics(S s, AlunoWeekSummary w) {
   return frase[0].toUpperCase() + frase.substring(1);
 }
 
-String alunoVolumeTexto(S s, double kg) =>
-    '${NumberFormat.decimalPattern(s.localeName).format(kg.round())} kg';
+String alunoVolumeTexto(S s, double kg) => s.alunoVolumeKg(kg.round());
 
-String alunoForcaDeltaTexto(S s, double pct) =>
-    '${NumberFormat('+#,##0.0;-#,##0.0', s.localeName).format(pct)}%';
+String alunoForcaDeltaTexto(S s, double pct) {
+  final umaCasa = _umaCasa(pct);
+  return umaCasa < 0
+      ? s.alunoForcaDeltaNegativo(umaCasa)
+      : s.alunoForcaDeltaPositivo(umaCasa);
+}
 
-String alunoCargaTexto(S s, double kg) =>
-    NumberFormat('#,##0.#', s.localeName).format(kg);
+String alunoRecordeTexto(S s, String exercicio, double? cargaKg) {
+  if (cargaKg == null || cargaKg <= 0) return exercicio;
+  return s.alunoEvolucaoRecordeValor(exercicio, _umaCasa(cargaKg));
+}
+
+double _umaCasa(double v) => (v * 10).round() / 10;
 
 String alunoPrimeiroNome(String nome) {
   final partes = nome.trim().split(RegExp(r'\s+'));

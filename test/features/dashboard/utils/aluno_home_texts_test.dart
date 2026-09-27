@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_texts.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 final _pt = lookupS(const Locale('pt'));
 final _en = lookupS(const Locale('en'));
@@ -26,7 +26,9 @@ AlunoTodayAction _treino({
 );
 
 void main() {
-  setUpAll(() => initializeDateFormatting());
+  setUpAll(
+    () => GlobalMaterialLocalizations.delegate.load(const Locale('pt')),
+  );
 
   group('alunoTodayTexto', () {
     test('todo modo tem texto em pt e en', () {
@@ -159,8 +161,10 @@ void main() {
   test('números seguem o locale', () {
     expect(alunoForcaDeltaTexto(_pt, 4.2), '+4,2%');
     expect(alunoForcaDeltaTexto(_en, -1.5), '-1.5%');
-    expect(alunoCargaTexto(_pt, 102.5), '102,5');
-    expect(alunoCargaTexto(_pt, 100), '100');
+    expect(alunoRecordeTexto(_pt, 'Supino', 102.5), 'Supino · 102,5 kg');
+    expect(alunoRecordeTexto(_pt, 'Supino', 100), 'Supino · 100 kg');
+    expect(alunoRecordeTexto(_pt, 'Supino', null), 'Supino');
+    expect(alunoVolumeTexto(_en, 3200), '3,200 kg');
   });
 
   test('alunoPrimeiroNome', () {

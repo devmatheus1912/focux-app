@@ -201,28 +201,20 @@ void main() {
     });
   });
 
-  group('AlunoDashboardChatResumo.toSyntheticMessages', () {
-    test('emits one ALUNO message when the student already wrote', () {
+  group('AlunoDashboardChatResumo.fromJson', () {
+    test('reads unread count from the personal', () {
       final chat = AlunoDashboardChatResumo.fromJson({
         'possuiMensagemDoAluno': true,
         'ultimaMensagemAlunoEm': '2026-08-14T18:30:00',
-        'naoLidasDoPersonal': 0,
+        'naoLidasDoPersonal': 2,
       });
 
-      final messages = chat.toSyntheticMessages();
-
-      expect(messages, hasLength(1));
-      expect(messages.first.remetente, 'ALUNO');
-      expect(messages.first.enviadoEm, DateTime(2026, 8, 14, 18, 30));
+      expect(chat.naoLidasDoPersonal, 2);
+      expect(chat.ultimaMensagemAlunoEm, DateTime(2026, 8, 14, 18, 30));
     });
 
-    test('emits nothing when the student never wrote', () {
-      expect(
-        AlunoDashboardChatResumo.fromJson({
-          'possuiMensagemDoAluno': false,
-        }).toSyntheticMessages(),
-        isEmpty,
-      );
+    test('null payload means nothing unread', () {
+      expect(AlunoDashboardChatResumo.fromJson(null).naoLidasDoPersonal, 0);
     });
   });
 }
