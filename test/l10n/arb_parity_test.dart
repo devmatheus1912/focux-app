@@ -9,12 +9,19 @@ Set<String> _messageKeys(String locale) {
   return json.keys.where((k) => !k.startsWith('@')).toSet();
 }
 
+/// O app sobe só em PT-BR: en/es ficam congelados e caem no PT (template)
+/// onde não têm tradução. Não podem ter chave que o PT já não tem.
 void main() {
   final pt = _messageKeys('pt');
 
   for (final locale in ['en', 'es']) {
-    test('app_$locale.arb tem todas as chaves do pt', () {
-      expect(pt.difference(_messageKeys(locale)), isEmpty);
+    test('app_$locale.arb não tem chave fora do pt', () {
+      expect(_messageKeys(locale).difference(pt), isEmpty);
     });
   }
+
+  test('app travado em PT', () {
+    final mainDart = File('lib/main.dart').readAsStringSync();
+    expect(mainDart, contains("locale: const Locale('pt')"));
+  });
 }

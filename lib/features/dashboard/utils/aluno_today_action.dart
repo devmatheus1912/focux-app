@@ -6,6 +6,7 @@ import '../../treinos/utils/treino_atribuicao_prazo.dart';
 /// Ação principal (P0) do card "Hoje" do aluno, em ordem de prioridade.
 enum AlunoTodayMode {
   financialHold,
+  workoutDone,
   workoutReady,
   awaitingRelease,
   profileSetup,
@@ -17,6 +18,9 @@ class AlunoTodayAction {
   final String route;
   final Object? routeExtra;
   final String? treinoNome;
+
+  /// Treino feito hoje: a próxima ficha do rodízio, só como prévia.
+  final String? proximoTreinoNome;
   final int exerciseCount;
 
   /// Treino pronto depois de 7+ dias sem treinar (dias de calendário do servidor).
@@ -28,6 +32,7 @@ class AlunoTodayAction {
     required this.route,
     this.routeExtra,
     this.treinoNome,
+    this.proximoTreinoNome,
     this.exerciseCount = 0,
     this.comeback = false,
     this.prazoFim,
@@ -41,6 +46,7 @@ AlunoTodayAction resolveAlunoTodayAction({
   required Aluno aluno,
   required List<ExecucaoTreino> treinos,
   List<ExecucaoTreino> historico = const [],
+  DateTime? now,
 }) {
   if (aluno.inadimplente) {
     return const AlunoTodayAction(
@@ -50,6 +56,19 @@ AlunoTodayAction resolveAlunoTodayAction({
   }
 
   final proximo = proximoTreinoParaHoje(treinos: treinos, historico: historico);
+  final feitoHoje =
+      treinoSessaoEmAndamento(treinos) == null
+          ? treinoConcluidoHoje(historico, now: now)
+          : null;
+  if (feitoHoje != null) {
+    final id = feitoHoje.id;
+    return AlunoTodayAction(
+      mode: AlunoTodayMode.workoutDone,
+      route: id == null ? '/checkin/historico' : '/checkin/historico/$id',
+      treinoNome: feitoHoje.treinoNome,
+      proximoTreinoNome: proximo?.treinoNome,
+    );
+  }
   if (proximo != null) {
     return AlunoTodayAction(
       mode: AlunoTodayMode.workoutReady,
@@ -104,7 +123,9 @@ String? alunoAutonomyTaskIdForToday(AlunoTodayMode mode) => switch (mode) {
   AlunoTodayMode.financialHold => 'financeiro',
   AlunoTodayMode.noWorkout => 'treino-semana',
   AlunoTodayMode.profileSetup => 'perfil-base',
-  AlunoTodayMode.workoutReady || AlunoTodayMode.awaitingRelease => null,
+  AlunoTodayMode.workoutDone ||
+  AlunoTodayMode.workoutReady ||
+  AlunoTodayMode.awaitingRelease => null,
 };
 
 bool _filled(String? value) => value != null && value.trim().isNotEmpty;

@@ -39,6 +39,7 @@ void main() {
         aluno: _aluno(),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 0,
+        agendaProxima: true,
         agendaReviewed: true,
         todayMode: AlunoTodayMode.workoutReady,
         now: _hoje,
@@ -51,6 +52,7 @@ void main() {
         aluno: _aluno(completo: false, fotoUrl: null),
         medidas: const [],
         naoLidasDoPersonal: 2,
+        agendaProxima: true,
         agendaReviewed: false,
         todayMode: AlunoTodayMode.workoutReady,
         now: _hoje,
@@ -69,11 +71,28 @@ void main() {
         aluno: _aluno(completo: false),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 1,
+        agendaProxima: true,
         agendaReviewed: false,
         todayMode: AlunoTodayMode.profileSetup,
         now: _hoje,
       );
       expect(_tipos(list), [AlunoPendenciaTipo.chat, AlunoPendenciaTipo.agenda]);
+    });
+
+    test('agenda só com horário nos próximos dias', () {
+      List<AlunoPendenciaTipo> agenda({required bool proxima}) => _tipos(
+        listAlunoPendenciasAbertas(
+          aluno: _aluno(),
+          medidas: [_medida(_hoje)],
+          naoLidasDoPersonal: 0,
+          agendaProxima: proxima,
+          agendaReviewed: false,
+          todayMode: AlunoTodayMode.workoutReady,
+          now: _hoje,
+        ),
+      );
+      expect(agenda(proxima: false), isEmpty);
+      expect(agenda(proxima: true), [AlunoPendenciaTipo.agenda]);
     });
 
     test('medida vale por 14 dias', () {
@@ -82,6 +101,7 @@ void main() {
           aluno: _aluno(),
           medidas: [_medida(_hoje.subtract(Duration(days: dias)))],
           naoLidasDoPersonal: 0,
+          agendaProxima: true,
           agendaReviewed: true,
           todayMode: AlunoTodayMode.workoutReady,
           now: _hoje,
@@ -97,6 +117,7 @@ void main() {
           aluno: _aluno(),
           medidas: [_medida(_hoje)],
           naoLidasDoPersonal: n,
+          agendaProxima: true,
           agendaReviewed: true,
           todayMode: AlunoTodayMode.workoutReady,
           now: _hoje,

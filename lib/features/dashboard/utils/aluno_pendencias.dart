@@ -37,10 +37,12 @@ const alunoMedidaValidadeDias = 14;
 
 /// Todas as pendências em aberto, em ordem de prioridade. A Home mostra as
 /// [alunoPendenciasMax] primeiras; uma fora do top 3 continua aberta.
+/// Agenda só com horário nos próximos 7 dias (`agendaProxima` do BFF).
 List<AlunoPendencia> listAlunoPendenciasAbertas({
   required Aluno aluno,
   required List<MedidaCorporal> medidas,
   required int naoLidasDoPersonal,
+  required bool agendaProxima,
   required bool agendaReviewed,
   required AlunoTodayMode todayMode,
   DateTime? now,
@@ -62,7 +64,8 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
         primeiraVez: ultimaMedida == null,
       ),
     if (naoLidasDoPersonal > 0) const AlunoPendencia(AlunoPendenciaTipo.chat),
-    if (!agendaReviewed) const AlunoPendencia(AlunoPendenciaTipo.agenda),
+    if (agendaProxima && !agendaReviewed)
+      const AlunoPendencia(AlunoPendenciaTipo.agenda),
   ];
 }
 

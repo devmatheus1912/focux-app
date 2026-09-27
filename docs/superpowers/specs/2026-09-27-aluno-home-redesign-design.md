@@ -43,20 +43,23 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
    `STREAK_QUEBRADO` (o card de foco já diz isso); com prontidão visível sai
    `SONO_BAIXO`. "Entendi" some com a mensagem na hora e só recarrega a Home
    quando a última é lida.
-4. **Sua semana — como estou.** Três métricas: sessões na semana contra a meta
+4. **Sua semana — como estou.** Só depois do primeiro treino concluído
+   (`AlunoHomeView.jaTreinou`); antes disso o bloco só teria zeros e o card de
+   foco já guia. Três métricas: sessões na semana contra a meta
    ("2 de 3"), sequência em semanas e volume da semana. Meta batida marca o
    tile de sessões com o verde de sucesso e um check. Abaixo, o
    `AlunoRecoveryCard` alimentado pelo BFF (`alunoProntidaoVisivel`): prontidão
    de hoje com histórico de wearable, ou convite para sincronizar quando a
    última é antiga. Sem wearable o bloco não existe.
-5. **Evolução — estou evoluindo.** Gráfico de força (1RM est.) e volume das 8
+5. **Evolução — estou evoluindo.** Mesma regra: só com `jaTreinou`. Gráfico de força (1RM est.) e volume das 8
    semanas, variação da força como métrica e o último recorde em uma linha.
    Recorde dos últimos 7 dias vira "Novo recorde". A linha de força usa a cor
    secundária da marca (verde fica para status). Sem texto que repita o
    insight e sem botão "Treinar agora".
 6. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → o bloco
    some.
-7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF, header de seção,
+7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF (`AlunoHomeView.ofertas`,
+   vazia no bloqueio financeiro), header de seção,
    botões de 48 dp travados durante o envio. Altura do conteúdo (fonte grande
    não corta); uma oferta ocupa a largura toda.
 8. **Ferramentas.** `_StudentToolsSection` com até 3 atalhos dinâmicos
@@ -66,8 +69,10 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
    que o plano do personal não libera (`recursosIndisponiveis`).
 
 NPS: o BFF só libera depois de 3 treinos concluídos e sem resposta nos
-últimos 30 dias. Fechar sem responder adia 7 dias neste aparelho (chave
-limpa no logout).
+últimos 30 dias. O app só pergunta quando o foco está em `workoutDone` (o
+aluno acabou de treinar), então a resposta gravada como `POS_TREINO` é
+verdadeira e a pergunta não interrompe quem abriu a Home para treinar.
+Fechar sem responder adia 7 dias neste aparelho (chave limpa no logout).
 
 Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso. Cada bloco só
 entra com conteúdo e traz o próprio espaçamento, então bloco escondido não
@@ -99,6 +104,9 @@ soma espaço.
   (`HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não libera.
 - `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
   resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
+- `agendaProxima`: o aluno tem horário não cancelado nos próximos 7 dias
+  (`AlunoDashboardHomeSurface.AGENDA_PROXIMA_DIAS`). Criar, remarcar, mudar
+  status, excluir ou confirmar um horário limpa o cache da Home do aluno.
 - Mensalidade paga (manual, em lote ou recorrente), editada ou em atraso,
   treino atribuído (também em lote), desvinculado ou excluído, status em lote
   e mensagem do coach enviada limpam o cache da Home do aluno
@@ -150,11 +158,15 @@ completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
 | # | Modo | Quando | CTA → rota |
 |---|---|---|---|
 | 1 | `financialHold` | `aluno.inadimplente` | Abrir financeiro → `/financeiro/aluno` |
-| 2 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
-| 3 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
-| 4 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
-| 5 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
+| 2 | `workoutDone` | sem sessão `EM_ANDAMENTO` e o último `CONCLUIDO` do histórico é de hoje (`treinoConcluidoHoje`) | Ver resumo → `/checkin/historico/{id}` |
+| 3 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
+| 4 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
+| 5 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
+| 6 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
 
+- `workoutDone`: eyebrow "Treino de hoje feito", título = ficha feita,
+  descrição "Próximo: {ficha}" (próxima do rodízio, só prévia) ou convite ao
+  descanso. Não manda treinar de novo; sessão em andamento vence.
 - `workoutReady` mantém o rodízio de `proximoTreinoParaHoje` e o aviso de
   prazo (`TreinoAtribuicaoPrazo.homeHint`). Descrição: "{n} exercícios no
   treino de hoje" (sem lente de objetivo).
@@ -176,7 +188,7 @@ Candidatas, em ordem de prioridade:
 | `foto` | sem `fotoUrl` | `/aluno/perfil/editar?acao=foto` (abre o seletor) |
 | `medida` | nenhuma medida ou a última com mais de 14 dias (regra atual) | `/aluno/perfil/editar?acao=medida` (abre o registro) |
 | `chat` | `chat.naoLidasDoPersonal > 0` | `/chat/aluno` |
-| `agenda` | agenda não aberta nesta semana | `/agenda/aluno` |
+| `agenda` | `agendaProxima` e agenda não aberta nesta semana | `/agenda/aluno` |
 
 - Agenda: `markAlunoAgendaReviewed` grava a segunda-feira da semana
   (`alunoAgendaSemanaKey`); a pendência volta toda segunda. A chave é limpa no
@@ -249,8 +261,8 @@ card de foco.
     `CLICKED`.
   - Toque no P0 → `CLICKED` só onde o personal precisa agir:
     `financialHold` → `financeiro`, `noWorkout` → `treino-semana`,
-    `profileSetup` → `perfil-base`. `workoutReady` e `awaitingRelease` não
-    mandam evento de autonomia (começar treino não é pedido de apoio).
+    `profileSetup` → `perfil-base`. `workoutDone`, `workoutReady` e `awaitingRelease`
+    não mandam evento de autonomia (começar treino não é pedido de apoio).
   - Nenhum evento novo; sem PII nas props.
 
 ## 6. Estados

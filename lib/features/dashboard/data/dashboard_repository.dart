@@ -387,6 +387,9 @@ class AlunoDashboardHomeBundle {
 
   /// Recursos do plano do personal que o aluno não tem (`HABIT_COACHING`, …).
   final Set<String> recursosIndisponiveis;
+
+  /// Horário não cancelado nos próximos 7 dias; false em backend antigo.
+  final bool agendaProxima;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -414,6 +417,7 @@ class AlunoDashboardHomeBundle {
     this.insight,
     this.anamnesePendente,
     this.recursosIndisponiveis = const {},
+    this.agendaProxima = false,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -545,6 +549,7 @@ class AlunoDashboardHomeBundle {
         ...(json['recursosIndisponiveis'] as List? ?? const [])
             .whereType<String>(),
       },
+      agendaProxima: json['agendaProxima'] == true,
     );
   }
 }

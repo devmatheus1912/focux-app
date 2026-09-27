@@ -60,19 +60,7 @@ ExecucaoTreino? proximoTreinoParaHoje({
     }
   }
 
-  ExecucaoTreino? lastDone;
-  DateTime? lastDt;
-  for (final h in historico) {
-    if (normalizeTreinoStatus(h.status) != treinoStatusConcluido) continue;
-    final raw = h.concluidoEm ?? h.iniciadoEm;
-    if (raw == null) continue;
-    final dt = DateTime.tryParse(raw)?.toLocal();
-    if (dt == null) continue;
-    if (lastDt == null || dt.isAfter(lastDt)) {
-      lastDt = dt;
-      lastDone = h;
-    }
-  }
+  final lastDone = _ultimoConcluido(historico)?.$1;
   if (lastDone == null) return startable.first;
 
   final ids = treinos.map((t) => t.treinoId).toList(growable: false);
@@ -84,6 +72,36 @@ ExecucaoTreino? proximoTreinoParaHoje({
     if (isTreinoDisponivelParaIniciar(cand)) return cand;
   }
   return startable.first;
+}
+
+/// Última execução `CONCLUIDO`, se ela terminou hoje (dia local).
+ExecucaoTreino? treinoConcluidoHoje(
+  List<ExecucaoTreino> historico, {
+  DateTime? now,
+}) {
+  final ultimo = _ultimoConcluido(historico);
+  if (ultimo == null) return null;
+  final clock = now ?? DateTime.now();
+  final (execucao, dt) = ultimo;
+  final mesmoDia =
+      dt.year == clock.year && dt.month == clock.month && dt.day == clock.day;
+  return mesmoDia ? execucao : null;
+}
+
+(ExecucaoTreino, DateTime)? _ultimoConcluido(List<ExecucaoTreino> historico) {
+  (ExecucaoTreino, DateTime)? ultimo;
+  for (final h in historico) {
+    final dt = _concluidoEmLocal(h);
+    if (dt == null) continue;
+    if (ultimo == null || dt.isAfter(ultimo.$2)) ultimo = (h, dt);
+  }
+  return ultimo;
+}
+
+DateTime? _concluidoEmLocal(ExecucaoTreino item) {
+  if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) return null;
+  final raw = item.concluidoEm ?? item.iniciadoEm;
+  return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
 }
 
 /// Startable first — job is find & start, not pipeline noise.
@@ -115,10 +133,7 @@ int countUniqueCompletedDaysThisWeek(
   final days = <String>{};
 
   for (final item in historico) {
-    if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) continue;
-    final raw = item.concluidoEm ?? item.iniciadoEm;
-    if (raw == null) continue;
-    final dt = DateTime.tryParse(raw)?.toLocal();
+    final dt = _concluidoEmLocal(item);
     if (dt == null) continue;
     if (dt.isBefore(startOfWeek) || !dt.isBefore(endOfWeek)) continue;
     final key =

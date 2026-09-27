@@ -1,0 +1,21 @@
+---
+description: App sobe só em PT-BR; outros idiomas ficam para depois da escala
+alwaysApply: true
+---
+
+# Idioma: só PT-BR (obrigatório)
+
+O app vai para a loja **só em PT-BR**. Inglês e espanhol ficam para depois que o app escalar.
+
+## Sempre
+
+1. Texto novo de UI entra **só** em `lib/l10n/app_pt.arb` (template). O gen-l10n usa o PT como fallback nos outros locales.
+2. **Não** adicionar nem traduzir chaves em `app_en.arb` / `app_es.arb`. Esses arquivos ficam congelados.
+3. `main.dart` mantém `locale: const Locale('pt')`. Não criar seletor de idioma nem detecção de locale do aparelho.
+4. Ficha da loja (App Store / Play), screenshots e textos de release: só PT-BR.
+5. Teste novo afirma texto em PT. Não criar teste que exija tradução en/es.
+6. O aviso "untranslated message(s)" do `flutter gen-l10n` é esperado. Não é erro.
+
+## Quando mudar
+
+Só quando o humano pedir explicitamente para abrir outro idioma.

@@ -119,6 +119,67 @@ void main() {
       expect(a.routeExtra, 8);
     });
 
+    group('treino de hoje feito', () {
+      final agora = DateTime(2026, 9, 27, 18);
+      ExecucaoTreino feito(String quando, {int id = 50}) => ExecucaoTreino(
+        id: id,
+        treinoId: 7,
+        treinoNome: 'Treino A',
+        status: 'CONCLUIDO',
+        concluidoEm: quando,
+        exercicios: const [],
+      );
+      final fichas = [_treino(7, 'Treino A'), _treino(8, 'Treino B')];
+
+      test('não manda treinar de novo; mostra o feito e o próximo', () {
+        final a = resolveAlunoTodayAction(
+          aluno: _aluno(),
+          treinos: fichas,
+          historico: [feito('2026-09-27T07:30:00')],
+          now: agora,
+        );
+        expect(a.mode, AlunoTodayMode.workoutDone);
+        expect(a.treinoNome, 'Treino A');
+        expect(a.proximoTreinoNome, 'Treino B');
+        expect(a.route, '/checkin/historico/50');
+      });
+
+      test('treino de ontem volta a oferecer o próximo', () {
+        final a = resolveAlunoTodayAction(
+          aluno: _aluno(),
+          treinos: fichas,
+          historico: [feito('2026-09-26T19:00:00')],
+          now: agora,
+        );
+        expect(a.mode, AlunoTodayMode.workoutReady);
+        expect(a.treinoNome, 'Treino B');
+      });
+
+      test('sessão em andamento vence o feito de hoje', () {
+        final a = resolveAlunoTodayAction(
+          aluno: _aluno(),
+          treinos: [
+            _treino(7, 'Treino A'),
+            _treino(8, 'Treino B', status: 'EM_ANDAMENTO'),
+          ],
+          historico: [feito('2026-09-27T07:30:00')],
+          now: agora,
+        );
+        expect(a.mode, AlunoTodayMode.workoutReady);
+        expect(a.treinoNome, 'Treino B');
+      });
+
+      test('bloqueio financeiro vence o feito de hoje', () {
+        final a = resolveAlunoTodayAction(
+          aluno: _aluno(inadimplente: true),
+          treinos: fichas,
+          historico: [feito('2026-09-27T07:30:00')],
+          now: agora,
+        );
+        expect(a.mode, AlunoTodayMode.financialHold);
+      });
+    });
+
     test('retoma EM_ANDAMENTO antes de girar', () {
       final a = resolveAlunoTodayAction(
         aluno: _aluno(),
@@ -199,6 +260,7 @@ void main() {
         'perfil-base',
       );
       expect(alunoAutonomyTaskIdForToday(AlunoTodayMode.workoutReady), isNull);
+      expect(alunoAutonomyTaskIdForToday(AlunoTodayMode.workoutDone), isNull);
       expect(
         alunoAutonomyTaskIdForToday(AlunoTodayMode.awaitingRelease),
         isNull,

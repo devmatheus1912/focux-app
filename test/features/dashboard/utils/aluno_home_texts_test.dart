@@ -60,6 +60,24 @@ void main() {
       expect(en.titulo, 'Come back with Treino A');
     });
 
+    test('treino feito hoje não manda treinar de novo', () {
+      AlunoTodayTexto feito(String? proximo) => alunoTodayTexto(
+        _pt,
+        AlunoTodayAction(
+          mode: AlunoTodayMode.workoutDone,
+          route: '/checkin/historico/50',
+          treinoNome: 'Treino A',
+          proximoTreinoNome: proximo,
+        ),
+      );
+      final comProximo = feito('Treino B');
+      expect(comProximo.eyebrow, 'Treino de hoje feito');
+      expect(comProximo.titulo, 'Treino A');
+      expect(comProximo.descricao, 'Próximo: Treino B');
+      expect(comProximo.cta, 'Ver resumo');
+      expect(feito(null).descricao, startsWith('Descanse'));
+    });
+
     test('0 exercícios não diz "0 exercícios"', () {
       final t = alunoTodayTexto(_pt, _treino(exercicios: 0), hoje: _hoje);
       expect(t.descricao, isNot(contains('0')));

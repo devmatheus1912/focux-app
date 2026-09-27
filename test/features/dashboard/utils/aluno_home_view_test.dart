@@ -26,6 +26,11 @@ AlunoDashboardHomeBundle _bundle({
   String nomePersonal = '',
   List<String> recursosIndisponiveis = const [],
   String? recordeEm,
+  int ofertas = 0,
+  int fichas = 0,
+  String? concluidoEm,
+  int? concluidosSemana,
+  bool agendaProxima = false,
 }) => AlunoDashboardHomeBundle.fromJson({
   'aluno': {
     'id': 7,
@@ -34,8 +39,26 @@ AlunoDashboardHomeBundle _bundle({
     'status': 'ATIVO',
     'inadimplente': inadimplente,
   },
-  'treinos': [],
-  'historicoResumo': [],
+  'treinos': [
+    for (var i = 0; i < fichas; i++)
+      {'treinoId': 10 + i, 'treinoNome': 'Treino $i', 'status': 'DISPONIVEL'},
+  ],
+  'historicoResumo': [
+    if (concluidoEm != null)
+      {
+        'id': 50,
+        'treinoId': 10,
+        'treinoNome': 'Treino 0',
+        'status': 'CONCLUIDO',
+        'concluidoEm': concluidoEm,
+      },
+  ],
+  'concluidosSemanaIso': concluidosSemana,
+  'agendaProxima': agendaProxima,
+  'upsellPendentes': [
+    for (var i = 0; i < ofertas; i++)
+      {'alunoOfertaId': i, 'ofertaId': i, 'titulo': 'Extra', 'valor': 150},
+  ],
   'medidas': [],
   'chat': {'naoLidasDoPersonal': 2},
   'coachMensagens': [
@@ -104,12 +127,12 @@ void main() {
         agendaReviewed: false,
       );
       expect(view.aviso, AlunoHomeAviso.anamnese);
-      expect(view.semTreino, isTrue);
+      expect(view.jaTreinou, isFalse);
     });
 
     test('Home mostra 3; abertas guardam todas', () {
       final view = buildAlunoHomeView(
-        _bundle(),
+        _bundle(agendaProxima: true),
         agendaReviewed: false,
         now: DateTime(2026, 9, 27),
       );
@@ -135,10 +158,51 @@ void main() {
       );
     });
 
-    test('sem treino a semana some', () {
-      final view = buildAlunoHomeView(_bundle(), agendaReviewed: true);
-      expect(view.semTreino, isTrue);
+    test('bloqueio financeiro não oferece compra', () {
+      expect(
+        buildAlunoHomeView(
+          _bundle(inadimplente: true, ofertas: 1),
+          agendaReviewed: true,
+        ).ofertas,
+        isEmpty,
+      );
+      expect(
+        buildAlunoHomeView(_bundle(ofertas: 1), agendaReviewed: true).ofertas,
+        hasLength(1),
+      );
+    });
+
+    test('ficha sem treino concluído: semana e evolução ficam fora', () {
+      final view = buildAlunoHomeView(
+        _bundle(fichas: 1, concluidosSemana: 0),
+        agendaReviewed: true,
+      );
+      expect(view.jaTreinou, isFalse);
       expect(view.semanaVisivel, isFalse);
+    });
+
+    test('depois do primeiro treino a semana aparece', () {
+      final view = buildAlunoHomeView(
+        _bundle(
+          fichas: 1,
+          concluidoEm: '2026-09-25T10:00:00',
+          concluidosSemana: 1,
+        ),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(view.jaTreinou, isTrue);
+      expect(view.semanaVisivel, isTrue);
+    });
+
+    test('agenda só entra com horário nos próximos dias', () {
+      bool temAgenda({required bool proxima}) => buildAlunoHomeView(
+        _bundle(agendaProxima: proxima),
+        agendaReviewed: false,
+        now: DateTime(2026, 9, 27),
+      ).pendenciasAbertas.any((p) => p.tipo == AlunoPendenciaTipo.agenda);
+      expect(temAgenda(proxima: false), isFalse);
+      expect(temAgenda(proxima: true), isTrue);
     });
   });
 

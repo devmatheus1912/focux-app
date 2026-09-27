@@ -19,6 +19,16 @@ AlunoTodayTexto alunoTodayTexto(S s, AlunoTodayAction a, {DateTime? hoje}) =>
         descricao: s.alunoHojeFinanceiroDescricao,
         cta: s.alunoHojeFinanceiroCta,
       ),
+      AlunoTodayMode.workoutDone => (
+        eyebrow: s.alunoHojeFeitoEyebrow,
+        titulo: _nomeOu(a.treinoNome, s.alunoHojeFeitoTitulo),
+        descricao: switch (a.proximoTreinoNome?.trim()) {
+          final String proximo when proximo.isNotEmpty => s
+              .alunoHojeFeitoProximo(proximo),
+          _ => s.alunoHojeFeitoDescanso,
+        },
+        cta: s.alunoHojeFeitoCta,
+      ),
       AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje),
       AlunoTodayMode.awaitingRelease => (
         eyebrow: s.alunoHojeAguardandoEyebrow,

@@ -95,10 +95,13 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     return view;
   }
 
+  /// NPS só com o treino do dia feito: é o `POS_TREINO` que o backend grava,
+  /// e não interrompe quem abriu a Home para treinar.
   void _onHomeLoaded(AlunoDashboardHomeBundle home) {
     MeusTreinosMemCache.save(home.treinos);
     _syncAnalytics(home);
     if (!home.npsDeveResponder || _npsPrompted) return;
+    if (_viewFor(home).action.mode != AlunoTodayMode.workoutDone) return;
     _npsPrompted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -288,7 +291,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           view.semanaVisivel ? TokensStrip.s3 : TokensStrip.s4,
           AlunoRecoveryCard(snapshot: home.recovery),
         ),
-      if (!view.semTreino)
+      if (view.jaTreinou)
         (
           TokensStrip.s4,
           AlunoEvolutionCard(
@@ -308,8 +311,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onShown: _pendenciaShown,
           ),
         ),
-      if (home.upsellPendentes.isNotEmpty)
-        (TokensStrip.s4, AlunoUpsellCarousel(ofertas: home.upsellPendentes)),
+      if (view.ofertas.isNotEmpty)
+        (TokensStrip.s4, AlunoUpsellCarousel(ofertas: view.ofertas)),
       (
         TokensStrip.s4,
         _StudentToolsSection(
