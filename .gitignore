@@ -43,6 +43,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .vscode/
+*.code-workspace
 .superpowers/
 
 # Local environment and signing material
