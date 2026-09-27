@@ -195,7 +195,7 @@
   "insightRetornoDetalhe": "{dias} días sin entrenar. Tu próximo entrenamiento está listo.",
   "insightMetaAtingidaTitulo": "Meta semanal cumplida",
   "insightMetaAtingidaDetalhe": "{feitos} de {meta} entrenamientos esta semana",
-  "insightForcaSubindoTitulo": "Tu fuerza está subindo",
+  "insightForcaSubindoTitulo": "Tu fuerza está subiendo",
   "insightForcaSubindoDetalhe": "+{pct}% vs la semana pasada ({n} ejercicios)",
   "insightVolumeSubindoTitulo": "Tu volumen está subiendo",
   "insightVolumeSubindoDetalhe": "+{pct}% vs el promedio de las 6 semanas anteriores",

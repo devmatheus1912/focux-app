@@ -72,6 +72,16 @@ void main() {
     expect(paramRuim.titulo, 'Título do servidor');
   });
 
+  test('força subindo em es usa vírgula decimal e título em espanhol', () {
+    final es = lookupS(const Locale('es'));
+    final t = alunoInsightTexto(
+      es,
+      _insight('insightForcaSubindo', const {'pct': '4.5', 'n': '3'}),
+    );
+    expect(t.titulo, 'Tu fuerza está subiendo');
+    expect(t.detalhe, '+4,5% vs la semana pasada (3 ejercicios)');
+  });
+
   test('CTA localizado pela rota; rota desconhecida usa o cta do servidor', () {
     String? cta(String rota) => alunoInsightTexto(
       en,
