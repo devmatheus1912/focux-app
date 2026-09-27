@@ -20,7 +20,10 @@ void main() {
         isNot(contains('constrainWidth: false')),
       ),
     );
-    expect(screen, contains('FxEmptyState'));
+    expect(screen, isNot(contains('FxEmptyState')));
+    expect(screen, isNot(contains('minhaAnamneseProvider')));
+    expect(screen, contains('AlunoHomeAnalytics.viewed'));
+    expect(screen, contains('AlunoHomeAnalytics.focusAction'));
     expect(screen, contains('deveResponder: true'));
     expect(screen, isNot(contains('invalidate(alunoRecoveryProvider)')));
     expect(

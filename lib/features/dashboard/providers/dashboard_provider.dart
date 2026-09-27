@@ -105,6 +105,13 @@ final alunoDashboardHomeProvider =
   return fresh;
 });
 
+/// Write do aluno que muda a Home: sem limpar o cache client, o provider
+/// serviria o bundle antigo por até [AlunoDashboardHomeClientCache.ttl].
+void invalidateAlunoDashboardHome(WidgetRef ref) {
+  AlunoDashboardHomeClientCache.clear();
+  ref.invalidate(alunoDashboardHomeProvider);
+}
+
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
 });

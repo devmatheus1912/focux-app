@@ -168,6 +168,8 @@ class ProductEvents {
 
   static const alunoInsightViewed = 'aluno_insight_viewed';
   static const alunoInsightActionTapped = 'aluno_insight_action_tapped';
+  static const alunoHomeViewed = 'aluno_home_viewed';
+  static const alunoHomeFocusAction = 'aluno_home_focus_action';
 
   static const homeViewed = 'home_viewed';
   static const homeRefreshed = 'home_refreshed';

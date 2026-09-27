@@ -125,43 +125,58 @@ class _TodayFocusCard extends StatelessWidget {
 }
 
 /// No máximo um aviso abaixo do foco: anamnese pendente vence o coach.
-class _AlunoHomeAviso extends ConsumerWidget {
+/// Tudo vem do BFF da Home — nenhum request a mais no fold.
+class _AlunoHomeAviso extends StatelessWidget {
   final bool isDark;
+  final AlunoHomeAviso aviso;
+  final AlunoAnamnesePendente? anamnese;
   final List<CoachMensagem> coachMensagens;
 
-  const _AlunoHomeAviso({required this.isDark, required this.coachMensagens});
+  const _AlunoHomeAviso({
+    required this.isDark,
+    required this.aviso,
+    required this.anamnese,
+    required this.coachMensagens,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final anamnese = ref.watch(minhaAnamneseProvider).value;
-    final aviso = resolveAlunoHomeAviso(
-      anamnesePendente: anamnese?.alunoDevePreencher ?? false,
-      coachMensagens: coachMensagens.length,
-    );
-    return switch (aviso) {
-      AlunoHomeAviso.anamnese => Padding(
-        padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-            onTap: () => context.push('/aluno/anamnese'),
-            child: AnamneseStatusBanner(
-              title: anamneseAlunoCtaTitle(anamnese!),
-              body: anamneseAlunoCtaBody(anamnese),
-              tone:
-                  anamnese.isPrecisaAtestado
-                      ? AnamneseBannerTone.warn
-                      : AnamneseBannerTone.info,
-            ),
+  Widget build(BuildContext context) {
+    final pendente = anamnese;
+    if (aviso == AlunoHomeAviso.anamnese && pendente != null) {
+      return _AnamneseAviso(pendente: pendente);
+    }
+    if (aviso == AlunoHomeAviso.coach) {
+      return CoachProativoCard(isDark: isDark, mensagens: coachMensagens);
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+class _AnamneseAviso extends StatelessWidget {
+  final AlunoAnamnesePendente pendente;
+
+  const _AnamneseAviso({required this.pendente});
+
+  @override
+  Widget build(BuildContext context) {
+    final texto = alunoAnamneseAvisoTexto(S.of(context), pendente);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+          onTap: () => context.push('/aluno/anamnese'),
+          child: AnamneseStatusBanner(
+            title: texto.titulo,
+            body: texto.detalhe,
+            tone:
+                pendente == AlunoAnamnesePendente.precisaAtestado
+                    ? AnamneseBannerTone.warn
+                    : AnamneseBannerTone.info,
           ),
         ),
       ),
-      AlunoHomeAviso.coach => CoachProativoCard(
-        isDark: isDark,
-        mensagens: coachMensagens,
-      ),
-      AlunoHomeAviso.nenhum => const SizedBox.shrink(),
-    };
+    );
   }
 }

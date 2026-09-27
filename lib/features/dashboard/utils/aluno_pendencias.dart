@@ -30,25 +30,8 @@ class AlunoPendencia {
 const alunoPendenciasMax = 3;
 const alunoMedidaValidadeDias = 14;
 
-/// As [alunoPendenciasMax] primeiras de [listAlunoPendenciasAbertas].
-List<AlunoPendencia> resolveAlunoPendencias({
-  required Aluno aluno,
-  required List<MedidaCorporal> medidas,
-  required int naoLidasDoPersonal,
-  required bool agendaReviewed,
-  required AlunoTodayMode todayMode,
-  DateTime? now,
-}) => listAlunoPendenciasAbertas(
-  aluno: aluno,
-  medidas: medidas,
-  naoLidasDoPersonal: naoLidasDoPersonal,
-  agendaReviewed: agendaReviewed,
-  todayMode: todayMode,
-  now: now,
-).take(alunoPendenciasMax).toList(growable: false);
-
-/// Todas as pendências em aberto, sem o corte da Home. Base para saber o que
-/// o aluno resolveu (uma pendência fora do top 3 continua aberta).
+/// Todas as pendências em aberto, em ordem de prioridade. A Home mostra as
+/// [alunoPendenciasMax] primeiras; uma fora do top 3 continua aberta.
 List<AlunoPendencia> listAlunoPendenciasAbertas({
   required Aluno aluno,
   required List<MedidaCorporal> medidas,

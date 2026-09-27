@@ -1,5 +1,6 @@
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
+import '../data/aluno_home_anamnese.dart';
 import 'aluno_home_week.dart';
 import 'aluno_pendencias.dart';
 import 'aluno_today_action.dart';
@@ -127,6 +128,20 @@ String alunoRecordeTexto(S s, String exercicio, double? cargaKg) {
 }
 
 double _umaCasa(double v) => (v * 10).round() / 10;
+
+({String titulo, String detalhe}) alunoAnamneseAvisoTexto(
+  S s,
+  AlunoAnamnesePendente pendente,
+) => switch (pendente) {
+  AlunoAnamnesePendente.solicitada => (
+    titulo: s.alunoAvisoAnamneseTitulo,
+    detalhe: s.alunoAvisoAnamneseDetalhe,
+  ),
+  AlunoAnamnesePendente.precisaAtestado => (
+    titulo: s.alunoAvisoAtestadoTitulo,
+    detalhe: s.alunoAvisoAtestadoDetalhe,
+  ),
+};
 
 String alunoPrimeiroNome(String nome) {
   final partes = nome.trim().split(RegExp(r'\s+'));

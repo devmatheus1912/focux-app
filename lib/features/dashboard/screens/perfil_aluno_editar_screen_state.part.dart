@@ -176,7 +176,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
       });
       ref.invalidate(alunoPerfilHomeProvider);
       ref.invalidate(alunoMeProvider);
-      ref.invalidate(alunoDashboardHomeProvider);
+      invalidateAlunoDashboardHome(ref);
       _captureBaseline();
       if (!silent && mounted) {
         FeedbackHelper.showSuccess(context, 'Perfil do aluno atualizado.');

@@ -15,6 +15,7 @@ import '../utils/aluno_dashboard_home_client_cache.dart';
 import '../utils/aluno_performance_evolution.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_client_cache.dart';
+import 'aluno_home_anamnese.dart';
 import 'aluno_home_insight.dart';
 import 'command_center_data.dart';
 
@@ -385,6 +386,9 @@ class AlunoDashboardHomeBundle {
   /// Última prontidão tem mais de 1 dia: o BFF manda `recovery: null` + true.
   final bool recoveryStale;
   final AlunoHomeInsight? insight;
+
+  /// Null quando o aluno não precisa agir na anamnese (ou backend antigo).
+  final AlunoAnamnesePendente? anamnesePendente;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -410,6 +414,7 @@ class AlunoDashboardHomeBundle {
     this.forcaDeltaPercent,
     this.recoveryStale = false,
     this.insight,
+    this.anamnesePendente,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -534,6 +539,9 @@ class AlunoDashboardHomeBundle {
       },
       recoveryStale: json['recoveryStale'] == true,
       insight: AlunoHomeInsight.tryParse(json['insight']),
+      anamnesePendente: AlunoAnamnesePendente.tryParse(
+        json['anamnesePendente'],
+      ),
     );
   }
 }

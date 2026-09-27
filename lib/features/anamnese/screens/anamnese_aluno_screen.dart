@@ -24,6 +24,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
@@ -372,6 +373,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
       final a = await _repo.salvarMinha(_payload());
       if (!mounted) return;
       ref.invalidate(minhaAnamneseProvider);
+      invalidateAlunoDashboardHome(ref);
       setState(() {
         _anamnese = a;
         _enviada = true;

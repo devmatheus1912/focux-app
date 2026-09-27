@@ -32,9 +32,9 @@ List<AlunoPendenciaTipo> _tipos(List<AlunoPendencia> list) =>
     list.map((p) => p.tipo).toList();
 
 void main() {
-  group('resolveAlunoPendencias', () {
+  group('listAlunoPendenciasAbertas', () {
     test('tudo em dia → lista vazia', () {
-      final list = resolveAlunoPendencias(
+      final list = listAlunoPendenciasAbertas(
         aluno: _aluno(),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 0,
@@ -45,8 +45,8 @@ void main() {
       expect(list, isEmpty);
     });
 
-    test('ordem de prioridade e corte em 3', () {
-      final list = resolveAlunoPendencias(
+    test('ordem de prioridade, sem corte', () {
+      final list = listAlunoPendenciasAbertas(
         aluno: _aluno(completo: false, fotoUrl: null),
         medidas: const [],
         naoLidasDoPersonal: 2,
@@ -58,24 +58,13 @@ void main() {
         AlunoPendenciaTipo.perfil,
         AlunoPendenciaTipo.foto,
         AlunoPendenciaTipo.medida,
+        AlunoPendenciaTipo.chat,
+        AlunoPendenciaTipo.agenda,
       ]);
     });
 
-    test('lista aberta não corta em 3', () {
-      final list = listAlunoPendenciasAbertas(
-        aluno: _aluno(completo: false, fotoUrl: null),
-        medidas: const [],
-        naoLidasDoPersonal: 2,
-        agendaReviewed: false,
-        todayMode: AlunoTodayMode.workoutReady,
-        now: _hoje,
-      );
-      expect(list, hasLength(5));
-      expect(list.last.tipo, AlunoPendenciaTipo.agenda);
-    });
-
     test('não repete o P0 de perfil', () {
-      final list = resolveAlunoPendencias(
+      final list = listAlunoPendenciasAbertas(
         aluno: _aluno(completo: false),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 1,
@@ -88,7 +77,7 @@ void main() {
 
     test('medida vale por 14 dias', () {
       List<AlunoPendenciaTipo> comMedidaDe(int dias) => _tipos(
-        resolveAlunoPendencias(
+        listAlunoPendenciasAbertas(
           aluno: _aluno(),
           medidas: [_medida(_hoje.subtract(Duration(days: dias)))],
           naoLidasDoPersonal: 0,
@@ -103,7 +92,7 @@ void main() {
 
     test('chat só com mensagem do personal não lida', () {
       List<AlunoPendenciaTipo> comNaoLidas(int n) => _tipos(
-        resolveAlunoPendencias(
+        listAlunoPendenciasAbertas(
           aluno: _aluno(),
           medidas: [_medida(_hoje)],
           naoLidasDoPersonal: n,
