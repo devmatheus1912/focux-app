@@ -106,10 +106,6 @@ HistoricoSessaoMetrics historicoSessaoMetricsFromDto(SessaoEvolucaoDto dto) {
   );
 }
 
-HistoricoSessaoMetrics historicoSessaoMetricsFromJson(Map<String, dynamic> j) {
-  return historicoSessaoMetricsFromDto(SessaoEvolucaoDto.fromJson(j));
-}
-
 double? historicoVolumeExercicio(List<ExecucaoSerie> series) {
   var total = 0.0;
   var any = false;

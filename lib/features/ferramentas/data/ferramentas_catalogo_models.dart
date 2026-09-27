@@ -78,16 +78,6 @@ class FerramentasCatalogo {
     return findByLegacyId(legacyOrId);
   }
 
-  CatalogoHub? hubForEntrada(CatalogoEntrada entrada) {
-    for (final hub in hubs) {
-      for (final item in hub.itens) {
-        if (identical(item, entrada) || item.id == entrada.id) return hub;
-        if (item.abas.any((a) => a.id == entrada.id)) return hub;
-      }
-    }
-    return null;
-  }
-
   static bool _matches(CatalogoEntrada e, String needle) {
     if (e.id.toLowerCase() == needle) return true;
     return e.legacyIds.any((id) => id.toLowerCase() == needle);

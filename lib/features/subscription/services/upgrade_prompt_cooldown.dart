@@ -28,9 +28,4 @@ class UpgradePromptCooldown {
       DateTime.now().millisecondsSinceEpoch,
     );
   }
-
-  static Future<void> dismissForever(String triggerKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('$_dismissPrefix$triggerKey', true);
-  }
 }

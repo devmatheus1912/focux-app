@@ -120,22 +120,6 @@ class FeedbackVideoRepository {
     return FeedbackVideo.fromJson(r.data);
   }
 
-  Future<FeedbackVideo> enviarMeu({
-    required String videoUrl,
-    required int exercicioId,
-    String? comentario,
-  }) async {
-    final r = await _dio.post(
-      '/api/feedback-videos/me',
-      data: {
-        'videoUrl': videoUrl,
-        'exercicioId': exercicioId,
-        'comentario': comentario,
-      },
-    );
-    return FeedbackVideo.fromJson(r.data as Map<String, dynamic>);
-  }
-
   Future<void> deletar(int id) async {
     await _dio.delete('/api/feedback-videos/$id');
   }

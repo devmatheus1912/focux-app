@@ -479,13 +479,6 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<List<Treino>> listarTemplates() async {
-    final response = await _dio.get('/api/treinos/templates');
-    return (response.data as List<dynamic>)
-        .map((e) => Treino.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   Future<void> excluirTreino(int id) async {
     await _dio.delete('/api/treinos/$id');
   }

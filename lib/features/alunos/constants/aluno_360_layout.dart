@@ -51,25 +51,6 @@ abstract final class Aluno360Layout {
     return base + ((textScale - 1) * 32);
   }
 
-  /// Status bar + toolbar + tab bar (header collapsed).
-  static double heroHeaderMinExtent(BuildContext context) {
-    return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
-  }
-
-  /// Collapsed header + identity strip body.
-  static double heroHeaderMaxExtent(
-    BuildContext context, {
-    bool compactContactPriority = false,
-  }) {
-    return heroHeaderMinExtent(context) +
-        heroBodyHeight(context, compactContactPriority: compactContactPriority);
-  }
-
-  /// Pinned toolbar + tab bar (content should not scroll under this stack).
-  static double pinnedHeaderHeight(BuildContext context) {
-    return MediaQuery.paddingOf(context).top + kToolbarHeight + tabBarHeight;
-  }
-
   /// Bottom padding so Operação content clears the sticky overlay CTA.
   static double stickyBarTotalHeight(BuildContext context) {
     return stickyBarContentHeight +
@@ -147,11 +128,6 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Timeline metadata (dates) — stronger contrast than mute captions.
-  static TextStyle timelineMetaStyle(BuildContext context) {
-    return metaStyle(context);
-  }
-
   /// Secondary copy inside cards — matches Home/Alunos muted body.
   static TextStyle captionStyle(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -169,14 +145,6 @@ abstract final class Aluno360Layout {
         context,
         isDark: Theme.of(context).brightness == Brightness.dark,
       ),
-    );
-  }
-
-  /// Uppercase metric eyebrows (hero, operational tiles).
-  static TextStyle eyebrowLabelStyle(BuildContext context, Color color) {
-    return FocuxHubTypography.chip(color).copyWith(
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.35,
     );
   }
 
@@ -203,14 +171,6 @@ abstract final class Aluno360Layout {
       color: TokensStrip.textPrimary,
       fontWeight: FontWeight.w600,
     ).copyWith(letterSpacing: -0.1);
-  }
-
-  /// Tab bar unselected label.
-  static TextStyle tabUnselectedLabelStyle() {
-    return FocuxHubTypography.bodyMuted(
-      color: TokensStrip.textSecondary,
-      fontWeight: FontWeight.w500,
-    );
   }
 
   /// Compact secondary actions in empty states.
@@ -257,25 +217,12 @@ abstract final class Aluno360Layout {
     );
   }
 
-  /// Alias for [sectionTitleStyle] — single card-title token.
-  static TextStyle cardTitleStyle(BuildContext context, Color ink) {
-    return sectionTitleStyle(context, ink);
-  }
-
   /// Emphasized body inside cards (prescription, instructions).
   static TextStyle bodyEmphasisStyle(BuildContext context, Color ink) {
     return FocuxHubTypography.bodyMuted(
       color: ink,
       fontWeight: FontWeight.w600,
       height: 1.38,
-    );
-  }
-
-  /// Compact metric inside signal tiles and chips.
-  static TextStyle inlineMetricStyle(BuildContext context, Color ink) {
-    return FocuxHubTypography.cardTitle(color: ink).copyWith(
-      fontWeight: FontWeight.w700,
-      height: 1.15,
     );
   }
 
@@ -296,16 +243,6 @@ abstract final class Aluno360Layout {
   /// WCAG-friendly link color for timeline expand actions (≥4.5:1 on white).
   static Color timelineLinkForeground(Color primary, {required bool isDark}) {
     return operacaoOutlinedForeground(primary, isDark: isDark);
-  }
-
-  /// Timeline event title inside list tiles.
-  static TextStyle timelineTileTitleStyle(BuildContext context, Color ink) {
-    return metaStyle(context).copyWith(
-      color: ink,
-      fontSize: TokensStrip.fontBodySm,
-      fontWeight: FontWeight.w600,
-      height: 1.25,
-    );
   }
 
   /// WCAG AA outline for Operação secondary buttons (≥4.5:1 on white).
@@ -371,13 +308,4 @@ abstract final class Aluno360Layout {
   static const double timelineTileIconRadius = 14;
   static const double timelineTileIconGlyphSize = 19;
   static const double timelineSpineWidth = 2;
-
-  /// Pill background for mini autonomy / signal chips (WCAG-friendly contrast).
-  static BoxDecoration miniChipDecoration(Color color, {required bool isDark}) {
-    return BoxDecoration(
-      color: color.withValues(alpha: isDark ? 0.22 : 0.12),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: color.withValues(alpha: isDark ? 0.38 : 0.28)),
-    );
-  }
 }

@@ -64,27 +64,6 @@ class GamificacaoData {
   );
 }
 
-class ReferralCupom {
-  final String codigo;
-  final int descontoPercentual;
-  final String? cashbackDescricao;
-  final bool foiUsado;
-
-  ReferralCupom({
-    required this.codigo,
-    required this.descontoPercentual,
-    this.cashbackDescricao,
-    required this.foiUsado,
-  });
-
-  factory ReferralCupom.fromJson(Map<String, dynamic> j) => ReferralCupom(
-    codigo: j['codigo'] as String,
-    descontoPercentual: j['descontoPercentual'] as int,
-    cashbackDescricao: j['cashbackDescricao'] as String?,
-    foiUsado: j['foiUsado'] as bool,
-  );
-}
-
 class GamificacaoRepository {
   final Dio _dio;
 
@@ -93,17 +72,5 @@ class GamificacaoRepository {
   Future<GamificacaoData> getGamificacao() async {
     final r = await _dio.get('/api/gamificacao');
     return GamificacaoData.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<ReferralCupom> getReferral() async {
-    final r = await _dio.get('/api/gamificacao/referral');
-    return ReferralCupom.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<void> usarCupom(String codigo) async {
-    await _dio.post(
-      '/api/gamificacao/referral/usar',
-      queryParameters: {'codigo': codigo},
-    );
   }
 }

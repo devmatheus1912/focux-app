@@ -133,21 +133,6 @@ class AgendaRepository {
     return _parseAgendamentos(r.data);
   }
 
-  Future<Agendamento> registrarStatusAtendimento(
-    int id,
-    String status,
-    String? obs,
-  ) async {
-    final r = await _dio.patch(
-      '/api/agenda/$id/status-atendimento',
-      data: {
-        'statusAtendimento': status,
-        if (obs != null && obs.isNotEmpty) 'observacoesPosAtendimento': obs,
-      },
-    );
-    return Agendamento.fromJson(r.data);
-  }
-
   Future<Pagina<Agendamento>> meusAgendamentosPagina({
     int page = 0,
     String q = '',

@@ -5,8 +5,6 @@ const exerciciosFilterDebounceMs = 400;
 
 String exerciciosSearchHint() => 'Nome do exercício';
 
-String exerciciosSearchLabel() => 'Buscar na biblioteca';
-
 String exerciciosFiltrosHeader() => 'Filtros';
 
 String exerciciosFiltrosTodos() => 'Nenhum';
@@ -26,8 +24,6 @@ String exerciciosFavoritosLabel() => 'Favoritos';
 String exerciciosComVideoLabel() => 'Com vídeo';
 
 String exerciciosSemVideoLabel() => 'Sem vídeo';
-
-String exerciciosVideoTodosLabel() => 'Qualquer vídeo';
 
 String exerciciosCountLabel(int count) {
   if (count <= 0) return 'Nenhum exercício';

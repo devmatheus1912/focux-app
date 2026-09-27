@@ -97,31 +97,13 @@ class ShellPalette {
         ...TokensStrip.cardShadow(),
         ...TokensStrip.coloredDepthGlow(brand, strength: 0.22),
       ],
-    );
-  }
-
-  BoxDecoration bottomSheet({double radius = TokensStrip.rXl}) {
-    return BoxDecoration(
-      color: sheetFill,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
-      boxShadow: TokensStrip.elevation(24, dark: isDark),
-    );
+      );
   }
 
   BoxDecoration accentPanel({
     required Color accent,
     double radius = TokensStrip.rLg,
   }) => panel(radius: radius, accent: accent, elevationLevel: 12);
-
-  BoxDecoration searchField({Color? primary, double radius = TokensStrip.rMd}) {
-    final accent = primary ?? brand;
-    return TokensStrip.glassPanel(
-      dark: isDark,
-      radius: radius,
-      accent: accent,
-      elevationLevel: 4,
-    );
-  }
 }
 
 abstract class ShellChrome {

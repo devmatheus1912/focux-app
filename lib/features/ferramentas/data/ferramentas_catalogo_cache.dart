@@ -24,11 +24,6 @@ class FerramentasCatalogoCache {
     }
   }
 
-  static Future<int?> loadStoredVersion() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_prefsVersionKey);
-  }
-
   static Future<void> save(FerramentasCatalogo catalogo, Map<String, dynamic> raw) async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getInt(_prefsVersionKey);

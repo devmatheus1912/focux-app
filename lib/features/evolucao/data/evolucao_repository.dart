@@ -126,11 +126,6 @@ class EvolucaoRepository {
     return EvolucaoHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<MedidaCorporal>> listarMinhasMedidas() async {
-    final r = await _dio.get('/api/aluno/medidas');
-    return (r.data as List).map((e) => MedidaCorporal.fromJson(e)).toList();
-  }
-
   Future<MedidaCorporal> adicionarMinhaMedida({
     String? data,
     double? peso,
@@ -236,14 +231,6 @@ class EvolucaoRepository {
     return eventos
         .map((e) => EventoEngajamento.fromJson(e as Map<String, dynamic>))
         .toList();
-  }
-
-  Future<Map<String, dynamic>> engajamentoResumo(int alunoId) async {
-    final r = await _dio.get('/api/alunos/$alunoId/engajamento');
-    final data = r.data;
-    if (data is Map<String, dynamic>) return data;
-    // Se vier como lista, retorna mapa vazio para não quebrar a UI
-    return {};
   }
 
   Future<void> compartilharEvolucao(int alunoId) async {

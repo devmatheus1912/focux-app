@@ -188,23 +188,6 @@ abstract class EagleTokens {
   static const double radius3xl = 40;
   static const double radiusPill = 999;
 
-  // ── Hero Gradients ──────────────────────────────────────────────────
-  static const List<Color> heroGradientLight = [
-    Color(0xFF0B4F5C),
-    Color(0xFF0A6B7A),
-  ];
-
-  static const List<Color> heroGradientDark = [
-    Color(0xFF051F26),
-    Color(0xFF080C10),
-  ];
-
-  static LinearGradient heroGradient({bool dark = false}) => LinearGradient(
-    colors: dark ? heroGradientDark : heroGradientLight,
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
   /// Generates a hero gradient from any dynamic primary color.
   /// Used by white-label to derive gradients from the personal's custom color.
   static LinearGradient heroGradientFrom(Color primary, {bool dark = false}) {
@@ -248,20 +231,5 @@ abstract class EagleTokens {
     if (score >= 80) return semanticGood(isDark: isDark);
     if (score >= 60) return semanticWarn(isDark: isDark);
     return semanticBad(isDark: isDark);
-  }
-
-  /// NPS: promotor (9–10), neutro (7–8), detrator (0–6).
-  static Color npsScoreColor(int score, {bool isDark = false}) {
-    if (score >= 9) return semanticGood(isDark: isDark);
-    if (score >= 7) return isDark ? warnDark : gold;
-    return semanticBad(isDark: isDark);
-  }
-
-  /// Barra de força de senha (0–1).
-  static Color passwordStrengthColor(double score) {
-    if (score <= 0.25) return bad;
-    if (score <= 0.5) return warn;
-    if (score <= 0.75) return gold;
-    return good;
   }
 }

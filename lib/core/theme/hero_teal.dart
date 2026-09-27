@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 /// Ink/superfícies sobre hero da marca (auth, onboarding, hubs) — sem Colors.white inline.
 Color heroTealInk() => Colors.white;
 
-Color heroTealMuted([double alpha = 0.74]) =>
-    Colors.white.withValues(alpha: alpha);
-
 Color heroTealSurface([double alpha = 0.14]) =>
     Colors.white.withValues(alpha: alpha);
 

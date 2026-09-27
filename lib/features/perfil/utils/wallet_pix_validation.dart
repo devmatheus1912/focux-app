@@ -149,8 +149,6 @@ const walletChavePixMax = 120;
 const walletBancoMax = 80;
 const walletAgenciaMax = 6;
 
-String walletSalvarTooltip() => 'Salvar carteira';
-
 String walletSalvarTileLabel() => 'Salvar dados';
 
 String walletSalvarConfirmTitle() => 'Salvar dados da carteira?';

@@ -464,13 +464,6 @@ class CheckinRepository {
     return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
   }
 
-  Future<List<ExecucaoTreino>> meusTreinos({
-    int page = 0,
-    int size = 20,
-  }) async {
-    return (await meusTreinosPagina(page: page, size: size)).content;
-  }
-
   Future<ExecucaoTreino> iniciar(int treinoId) async {
     final r = await _dio.post(
       '/api/checkin/iniciar',

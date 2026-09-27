@@ -11,21 +11,11 @@ abstract class FocuxLegal {
   /// Versão dos docs enviada em `POST /api/lgpd/me/consent`.
   static const String consentDocumentVersion = '2026-09';
 
-  /// Vitrine completa (comparativo, ROI, features) — fora do app; ativar quando a web estiver no ar.
-  static const bool plansMarketingWebLive = false;
-
-  static const String plansMarketingUrl = 'https://focuxpersonal.com';
-
   static Future<bool> openTerms() => _open(termsUrl);
 
   static Future<bool> openPrivacy() => _open(privacyUrl);
 
   static Future<bool> openSupport() => _open(supportUrl);
-
-  static Future<bool> openPlansMarketing() async {
-    if (!plansMarketingWebLive) return false;
-    return _open(plansMarketingUrl);
-  }
 
   static Future<bool> _open(String url) async {
     final uri = Uri.parse(url);

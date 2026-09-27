@@ -28,11 +28,6 @@ class BibliotecaSyncStatus extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updatePendingMedia(int count) {
-    _pendingMediaCount = count;
-    notifyListeners();
-  }
-
   void warn(String message) {
     _warningMessage = message;
     notifyListeners();
@@ -49,12 +44,6 @@ class BibliotecaSyncStatus extends ChangeNotifier {
     } else if (warningMessage == null && pendingMediaCount == 0) {
       _warningMessage = null;
     }
-    notifyListeners();
-  }
-
-  void clearWarnings() {
-    _warningMessage = null;
-    _pendingMediaCount = 0;
     notifyListeners();
   }
 }

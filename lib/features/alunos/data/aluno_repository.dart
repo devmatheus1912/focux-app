@@ -889,13 +889,6 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<void> atualizarStatusFinanceiro(int alunoId, String status) async {
-    await _dio.patch(
-      '/api/alunos/$alunoId/status-financeiro',
-      data: {'status': status},
-    );
-  }
-
   Future<Aluno> atualizarAluno(int id, Map<String, dynamic> data) async {
     final r = await _dio.put('/api/alunos/$id', data: data);
     return Aluno.fromJson(r.data as Map<String, dynamic>);
@@ -924,17 +917,6 @@ class AlunoRepository {
     return AderenciaSemanalBundle.fromJson(
       Map<String, dynamic>.from(data as Map),
     ).diasMaps;
-  }
-
-  Future<AderenciaSemanalBundle> aderenciaSemanalBundle(int id) async {
-    final response = await _dio.get('/api/alunos/$id/aderencia-semanal');
-    final data = response.data;
-    if (data is List) {
-      return AderenciaSemanalBundle.fromLegacyList(data);
-    }
-    return AderenciaSemanalBundle.fromJson(
-      Map<String, dynamic>.from(data as Map),
-    );
   }
 
   Future<AlunoAutonomiaResumo> buscarAutonomiaResumo(int alunoId) async {

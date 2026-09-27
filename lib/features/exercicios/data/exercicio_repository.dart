@@ -344,106 +344,6 @@ class ExercicioCuradoriaResumo {
   }
 }
 
-class CuradoriaLoteResultado {
-  final int afetados;
-  final int comVideo;
-  final int comThumbnail;
-  final int videosProprios;
-  final int pendentesLicenca;
-  final int prontosParaAluno;
-
-  CuradoriaLoteResultado({
-    required this.afetados,
-    required this.comVideo,
-    required this.comThumbnail,
-    required this.videosProprios,
-    required this.pendentesLicenca,
-    required this.prontosParaAluno,
-  });
-
-  factory CuradoriaLoteResultado.fromJson(Map<String, dynamic> json) =>
-      CuradoriaLoteResultado(
-        afetados: (json['afetados'] as num?)?.toInt() ?? 0,
-        comVideo: (json['comVideo'] as num?)?.toInt() ?? 0,
-        comThumbnail: (json['comThumbnail'] as num?)?.toInt() ?? 0,
-        videosProprios: (json['videosProprios'] as num?)?.toInt() ?? 0,
-        pendentesLicenca: (json['pendentesLicenca'] as num?)?.toInt() ?? 0,
-        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
-      );
-}
-
-class ImportarMidiasResultado {
-  final int total;
-  final int atualizados;
-  final int naoEncontrados;
-  final int prontosParaAluno;
-  final List<String> naoEncontradosKeys;
-
-  ImportarMidiasResultado({
-    required this.total,
-    required this.atualizados,
-    required this.naoEncontrados,
-    required this.prontosParaAluno,
-    required this.naoEncontradosKeys,
-  });
-
-  factory ImportarMidiasResultado.fromJson(Map<String, dynamic> json) =>
-      ImportarMidiasResultado(
-        total: (json['total'] as num?)?.toInt() ?? 0,
-        atualizados: (json['atualizados'] as num?)?.toInt() ?? 0,
-        naoEncontrados: (json['naoEncontrados'] as num?)?.toInt() ?? 0,
-        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
-        naoEncontradosKeys:
-            ((json['naoEncontradosKeys'] as List<dynamic>?) ?? [])
-                .map((e) => e.toString())
-                .toList(),
-      );
-}
-
-class ExercicioMediaImportBatch {
-  final int id;
-  final int total;
-  final int atualizados;
-  final int naoEncontrados;
-  final int prontosParaAluno;
-  final List<String> naoEncontradosKeys;
-  final DateTime? criadoEm;
-
-  ExercicioMediaImportBatch({
-    required this.id,
-    required this.total,
-    required this.atualizados,
-    required this.naoEncontrados,
-    required this.prontosParaAluno,
-    required this.naoEncontradosKeys,
-    required this.criadoEm,
-  });
-
-  factory ExercicioMediaImportBatch.fromJson(Map<String, dynamic> json) =>
-      ExercicioMediaImportBatch(
-        id: (json['id'] as num?)?.toInt() ?? 0,
-        total: (json['total'] as num?)?.toInt() ?? 0,
-        atualizados: (json['atualizados'] as num?)?.toInt() ?? 0,
-        naoEncontrados: (json['naoEncontrados'] as num?)?.toInt() ?? 0,
-        prontosParaAluno: (json['prontosParaAluno'] as num?)?.toInt() ?? 0,
-        naoEncontradosKeys:
-            ((json['naoEncontradosKeys'] as List<dynamic>?) ?? [])
-                .map((e) => e.toString())
-                .toList(),
-        criadoEm:
-            json['criadoEm'] == null
-                ? null
-                : DateTime.tryParse(json['criadoEm'].toString()),
-      );
-}
-
-class ExercicioEditorialQueue {
-  final int total;
-  final List<Exercicio> items;
-
-  ExercicioEditorialQueue({required this.total, required this.items});
-}
-
 class ExercicioRepository {
   final Dio _dio;
 
@@ -674,30 +574,6 @@ class ExercicioRepository {
     await _dio.delete('/api/exercicios/$id');
   }
 
-  Future<ExercicioEditorialQueue> buscarFilaEditorial(
-    String status, {
-    int size = 20,
-  }) async {
-    final response = await _dio.get(
-      '/api/exercicios/v2',
-      queryParameters: {
-        'editorialStatus': status,
-        'page': 0,
-        'size': size,
-        'sort': 'nome,asc',
-      },
-    );
-    final data = response.data as Map<String, dynamic>;
-    final list =
-        (data['content'] as List<dynamic>? ?? [])
-            .map((e) => Exercicio.fromJson(e as Map<String, dynamic>))
-            .toList();
-    return ExercicioEditorialQueue(
-      total: (data['totalElements'] as num?)?.toInt() ?? list.length,
-      items: list,
-    );
-  }
-
   Future<Exercicio> criar({
     required String nome,
     String? descricao,
@@ -919,32 +795,6 @@ class ExercicioRepository {
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<int> atualizarCuradoriaEditorialLote({
-    required List<int> ids,
-    required String status,
-    String? notes,
-  }) async {
-    final response = await _dio.patch(
-      '/api/exercicios/curadoria-editorial/lote',
-      data: {
-        'ids': ids,
-        'editorialStatus': status,
-        if (notes != null) 'editorialNotes': notes,
-      },
-    );
-    final data = response.data as Map<String, dynamic>;
-    return (data['atualizados'] as num?)?.toInt() ?? 0;
-  }
-
-  Future<int> importarSeedV1() async {
-    final response = await _dio.post('/api/exercicios/importar/seed/v1');
-    final data = response.data;
-    if (data is Map<String, dynamic>) {
-      return (data['importados'] as int?) ?? (data['total'] as int?) ?? 0;
-    }
-    return 0;
-  }
-
   Future<int> importarSeedPremiumV1() async {
     final data = await importarCuratedV2(
       modalidades: {
@@ -974,108 +824,11 @@ class ExercicioRepository {
     return 0;
   }
 
-  Future<int> publicarMidiasCuradas() async {
-    final response = await _dio.post(
-      '/api/exercicios/seed/curated/v2/publicar-midias',
-    );
-    final data = response.data;
-    if (data is Map<String, dynamic>) {
-      return (data['publicados'] as num?)?.toInt() ?? 0;
-    }
-    return 0;
-  }
-
   Future<ExercicioCuradoriaResumo> buscarCuradoria() async {
     final response = await _dio.get('/api/exercicios/curadoria/resumo');
     return ExercicioCuradoriaResumo.fromJson(
       response.data as Map<String, dynamic>,
     );
-  }
-
-  Future<CuradoriaLoteResultado> curarLote({
-    String? nome,
-    String? categoria,
-    String? tag,
-    String? musculoAlvo,
-    String? equipamento,
-    String? nivel,
-    String? mecanica,
-    String? objetivo,
-    bool? hasVideo,
-    String? videoSource,
-    String? licenseStatus,
-    String? novoVideoUrl,
-    String? novoThumbnailUrl,
-    String? novoVideoSource,
-    String? novoLicenseStatus,
-  }) async {
-    final data = <String, dynamic>{
-      if (nome != null && nome.isNotEmpty) 'nome': nome,
-      if (categoria != null && categoria.isNotEmpty) 'categoria': categoria,
-      if (tag != null && tag.isNotEmpty) 'tag': tag,
-      if (musculoAlvo != null && musculoAlvo.isNotEmpty)
-        'musculoAlvo': musculoAlvo,
-      if (equipamento != null && equipamento.isNotEmpty)
-        'equipamento': equipamento,
-      if (nivel != null && nivel.isNotEmpty) 'nivel': nivel,
-      if (mecanica != null && mecanica.isNotEmpty) 'mecanica': mecanica,
-      if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-      if (hasVideo != null) 'hasVideo': hasVideo,
-      if (videoSource != null && videoSource.isNotEmpty)
-        'videoSource': videoSource,
-      if (licenseStatus != null && licenseStatus.isNotEmpty)
-        'licenseStatus': licenseStatus,
-      if (novoVideoUrl != null && novoVideoUrl.isNotEmpty)
-        'novoVideoUrl': novoVideoUrl,
-      if (novoThumbnailUrl != null && novoThumbnailUrl.isNotEmpty)
-        'novoThumbnailUrl': novoThumbnailUrl,
-      if (novoVideoSource != null && novoVideoSource.isNotEmpty)
-        'novoVideoSource': novoVideoSource,
-      if (novoLicenseStatus != null && novoLicenseStatus.isNotEmpty)
-        'novoLicenseStatus': novoLicenseStatus,
-    };
-    final response = await _dio.patch(
-      '/api/exercicios/curadoria/lote',
-      data: data,
-    );
-    return CuradoriaLoteResultado.fromJson(
-      response.data as Map<String, dynamic>,
-    );
-  }
-
-  Future<ImportarMidiasResultado> importarMidias(
-    List<Map<String, dynamic>> midias,
-  ) async {
-    final response = await _dio.post(
-      '/api/exercicios/curadoria/midias/importar',
-      data: {'midias': midias},
-    );
-    return ImportarMidiasResultado.fromJson(
-      response.data as Map<String, dynamic>,
-    );
-  }
-
-  Future<ImportarMidiasResultado> previewMidias(
-    List<Map<String, dynamic>> midias,
-  ) async {
-    final response = await _dio.post(
-      '/api/exercicios/curadoria/midias/preview',
-      data: {'midias': midias},
-    );
-    return ImportarMidiasResultado.fromJson(
-      response.data as Map<String, dynamic>,
-    );
-  }
-
-  Future<List<ExercicioMediaImportBatch>> historicoImportacaoMidias() async {
-    final response = await _dio.get(
-      '/api/exercicios/curadoria/midias/historico',
-    );
-    return ((response.data as List<dynamic>?) ?? [])
-        .map(
-          (e) => ExercicioMediaImportBatch.fromJson(e as Map<String, dynamic>),
-        )
-        .toList();
   }
 
   Future<void> favoritarExercicio(int id) async {

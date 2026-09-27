@@ -41,7 +41,3 @@ BoxDecoration activePrescriptionStripDecoration({
     border: Border.all(color: brand.withValues(alpha: 0.22)),
   );
 }
-
-/// Métricas de volume (séries, reps, descanso, carga).
-TextStyle activePrescriptionMetricStyle({required Color ink}) =>
-    FxSettingsLayout.rowMetric(color: ink).copyWith(fontWeight: FontWeight.w800);

@@ -54,48 +54,6 @@ class FcmService {
     }
   }
 
-  /// Inscreve-se em tópicos correspondentes ao papel do usuário no
-  /// tenant. Chame após o login com `tenantId` resolvido para que
-  /// notificações por broadcast (alertas globais por personal/aluno)
-  /// cheguem nos dispositivos certos.
-  static Future<void> subscribeTenantTopics({
-    required int tenantId,
-    int? alunoId,
-    String? role,
-  }) async {
-    try {
-      final messaging = FirebaseMessaging.instance;
-      await messaging.subscribeToTopic('tenant_$tenantId');
-      if (alunoId != null) {
-        await messaging.subscribeToTopic('aluno_$alunoId');
-      }
-      if (role != null && role.isNotEmpty) {
-        await messaging.subscribeToTopic('role_${role.toLowerCase()}');
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('[FCM] subscribe topics error: $e');
-    }
-  }
-
-  static Future<void> unsubscribeTenantTopics({
-    required int tenantId,
-    int? alunoId,
-    String? role,
-  }) async {
-    try {
-      final messaging = FirebaseMessaging.instance;
-      await messaging.unsubscribeFromTopic('tenant_$tenantId');
-      if (alunoId != null) {
-        await messaging.unsubscribeFromTopic('aluno_$alunoId');
-      }
-      if (role != null && role.isNotEmpty) {
-        await messaging.unsubscribeFromTopic('role_${role.toLowerCase()}');
-      }
-    } catch (e) {
-      if (kDebugMode) debugPrint('[FCM] unsubscribe topics error: $e');
-    }
-  }
-
   /// Roteia o toque via [resolveFcmTapRoute]: `route` explícita, senão
   /// `type` já contratado, senão `alunoId` / `chatId` / `execucaoId`.
   static Future<void> _dispatchPlanSync(Map<String, dynamic> data) async {

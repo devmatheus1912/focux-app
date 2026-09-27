@@ -71,14 +71,6 @@ class SubscriptionProducts {
     return null;
   }
 
-  static bool isYearlyProduct(String productId) =>
-      billingPeriodForProductId(productId) == SubscriptionBillingPeriod.yearly;
-
-  /// Preço anual de vitrine quando a loja ainda não retornou ProductDetails.
-  static double referenceAnnualPrice(double monthlyPrice) => monthlyPrice * 10;
-
-  static String savingsLabel() => '2 meses grátis';
-
   static double annualSavingsAmount(double monthlyPrice) => monthlyPrice * 2;
 
   static String annualSavingsCompactLabel(double monthlyPrice) {
@@ -92,7 +84,4 @@ class SubscriptionProducts {
     final saved = annualSavingsAmount(monthlyPrice);
     return 'Economize R\$ ${saved.toStringAsFixed(2).replaceAll('.', ',')}/ano';
   }
-
-  static String periodLabel(SubscriptionBillingPeriod period) =>
-      period == SubscriptionBillingPeriod.yearly ? 'Anual' : 'Mensal';
 }

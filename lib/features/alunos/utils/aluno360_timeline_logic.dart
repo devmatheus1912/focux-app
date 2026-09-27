@@ -536,16 +536,6 @@ String? timeline360SenderLabel({required String meta, required String title}) {
   return null;
 }
 
-/// Semantic color for P0–P3 timeline priority tags.
-Color timeline360PriorityColor(String? priority, {required Color primary}) {
-  final value = (priority ?? '').trim().toUpperCase();
-  if (value.startsWith('P0')) return EagleTokens.bad;
-  if (value.startsWith('P1')) return EagleTokens.warn;
-  if (value.startsWith('P2')) return primary;
-  if (value.startsWith('P3')) return EagleTokens.good;
-  return primary;
-}
-
 /// Ink on priority pill backgrounds — darkens brand teal for WCAG AA on white.
 Color timeline360PriorityInk(Color accent, {required bool isDark}) {
   if (isDark) return accent;
@@ -594,19 +584,4 @@ String resolveTimeline360DeepLinkForPersonal({
     return '/alunos/$alunoId/treinos-list';
   }
   return raw;
-}
-
-bool timeline360HasFooterChips({
-  required String kind,
-  required String meta,
-  required String priority,
-  required String title,
-}) {
-  return timeline360ShouldShowPriorityBadge(kind: kind) ||
-      timeline360ShouldShowMetaChip(
-        kind: kind,
-        meta: meta,
-        priority: priority,
-        title: title,
-      );
 }

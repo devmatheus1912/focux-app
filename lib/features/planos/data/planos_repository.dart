@@ -97,59 +97,6 @@ class EnterpriseUpgradePreview {
       );
 }
 
-class EnterpriseActivationPayload {
-  final String subscriptionToken;
-  final String platform;
-  final String productId;
-  final String? transactionId;
-  final DateTime billingCycleEndsAt;
-
-  const EnterpriseActivationPayload({
-    required this.subscriptionToken,
-    required this.platform,
-    required this.productId,
-    this.transactionId,
-    required this.billingCycleEndsAt,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'subscriptionToken': subscriptionToken,
-    'platform': platform,
-    'productId': productId,
-    if (_hasValue(transactionId)) 'transactionId': transactionId,
-    'billingCycleEndsAt': billingCycleEndsAt.toIso8601String(),
-  };
-}
-
-class EnterpriseActivationResult {
-  final SubscriptionPlan planoAnterior;
-  final SubscriptionPlan planoAtual;
-  final double valorProporcionalCobrado;
-  final int diasRestantesCobrados;
-  final DateTime? planoValidoAte;
-  final bool trialAtivo;
-
-  const EnterpriseActivationResult({
-    required this.planoAnterior,
-    required this.planoAtual,
-    required this.valorProporcionalCobrado,
-    required this.diasRestantesCobrados,
-    this.planoValidoAte,
-    required this.trialAtivo,
-  });
-
-  factory EnterpriseActivationResult.fromJson(Map<String, dynamic> j) =>
-      EnterpriseActivationResult(
-        planoAnterior: subscriptionPlanFromApi(j['planoAnterior'] as String?),
-        planoAtual: subscriptionPlanFromApi(j['planoAtual'] as String?),
-        valorProporcionalCobrado: FxMoney.reais(j['valorProporcionalCobrado']),
-        diasRestantesCobrados:
-            (j['diasRestantesCobrados'] as num?)?.toInt() ?? 0,
-        planoValidoAte: _parseDateTime(j['planoValidoAte']),
-        trialAtivo: j['trialAtivo'] as bool? ?? false,
-      );
-}
-
 class SubscriptionMetadata {
   final String platform;
   final String productId;
@@ -168,16 +115,6 @@ class SubscriptionMetadata {
     platform: platform,
     productId: productId,
     transactionId: transactionId,
-  );
-
-  EnterpriseActivationPayload toEnterpriseActivationPayload({
-    required DateTime billingCycleEndsAt,
-  }) => EnterpriseActivationPayload(
-    subscriptionToken: subscriptionToken,
-    platform: platform,
-    productId: productId,
-    transactionId: transactionId,
-    billingCycleEndsAt: billingCycleEndsAt,
   );
 }
 
@@ -409,10 +346,6 @@ class PlanoFeatures {
       migracaoFotosUsadasMes: migracaoFotosUsadasMes,
     ).normalizeForTier();
   }
-
-  /// Matriz canônica de capabilities por tier (paywall + gates).
-  static Map<String, bool> canonicalCapabilitiesFor(SubscriptionPlan plan) =>
-      Map<String, bool>.unmodifiable(_canonicalCapsFor(plan));
 
   static Map<String, bool> _canonicalCapsFor(SubscriptionPlan plan) {
     const off = false;
@@ -652,16 +585,6 @@ class PlanosRepository {
     return TrialStatus.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<PlanoFeatures> getPlanoFeatures() async {
-    try {
-      return await getPlanoFeaturesFresh();
-    } catch (_) {
-      final cached = await loadCachedPlanoFeatures();
-      if (cached != null) return cached;
-      rethrow;
-    }
-  }
-
   Future<PlanoFeatures> getPlanoFeaturesFresh({bool forAluno = false}) async {
     final path = forAluno ? '/api/planos/contexto-aluno' : '/api/planos/me';
     final r = await _dio.get(path);
@@ -753,21 +676,6 @@ class PlanosRepository {
   Future<EnterpriseUpgradePreview> previewEnterpriseUpgrade() async {
     final r = await _dio.get('/api/personal/trial/enterprise/preview');
     return EnterpriseUpgradePreview.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  Future<EnterpriseActivationResult> activateEnterprise(
-    EnterpriseActivationPayload payload,
-  ) async {
-    final r = await _dio.post(
-      '/api/personal/trial/enterprise/activate',
-      data: payload.toJson(),
-    );
-    return EnterpriseActivationResult.fromJson(r.data as Map<String, dynamic>);
-  }
-
-  /// Restore purchases — re-syncs subscription state from backend.
-  Future<PlanoFeatures> syncSubscription() async {
-    return await getPlanoFeaturesFresh();
   }
 }
 

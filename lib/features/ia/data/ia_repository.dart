@@ -106,34 +106,6 @@ class IaRepository {
   static final _iaOpts = Options(receiveTimeout: const Duration(seconds: 60));
   IaRepository(ApiClient c) : _dio = c.dio;
 
-  Future<String> gerarTreino(
-    int alunoId, {
-    String? objetivo,
-    String? nivelAtividade,
-    String? restricoes,
-    int diasPorSemana = 3,
-    String? equipamentos,
-  }) async {
-    return _withIaErrorContext(() async {
-      final r = await _dio.post(
-        '/api/ia/gerar-treino',
-        options: _iaOpts,
-        data: {
-          'alunoId': alunoId,
-          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-          if (nivelAtividade != null && nivelAtividade.isNotEmpty)
-            'nivelAtividade': nivelAtividade,
-          if (restricoes != null && restricoes.isNotEmpty)
-            'restricoes': restricoes,
-          'diasPorSemana': diasPorSemana,
-          if (equipamentos != null && equipamentos.isNotEmpty)
-            'equipamentosDisponiveis': equipamentos,
-        },
-      );
-      return r.data['resposta'] as String;
-    });
-  }
-
   Future<String> chat(String mensagem, {int? alunoId}) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
@@ -187,16 +159,6 @@ class IaRepository {
       return IaCopilotProximaAcao.fromJson(
         Map<String, dynamic>.from(r.data as Map),
       );
-    });
-  }
-
-  Future<String> analisePerformance(int alunoId) async {
-    return _withIaErrorContext(() async {
-      final r = await _dio.get(
-        '/api/ia/copiloto/analise-performance/$alunoId',
-        options: _iaOpts,
-      );
-      return r.data['resposta'] as String;
     });
   }
 
@@ -313,14 +275,6 @@ class IaRepository {
 
   Future<void> rejeitarSugestao(int id) async {
     await _dio.post('/api/ia/progressao/sugestoes/$id/rejeitar');
-  }
-
-  Future<bool> confirmarPublicar(int alunoId) async {
-    final r = await _dio.post(
-      '/api/ia/confirmar-publicar/$alunoId',
-      options: _iaOpts,
-    );
-    return r.data['confirmado'] == true;
   }
 }
 

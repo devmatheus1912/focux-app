@@ -4,11 +4,4 @@ class PlanoIaLimits {
 
   static const pro = 200;
   static const enterprise = 600;
-
-  static int forPlan(String? apiName) {
-    final p = apiName?.trim().toUpperCase();
-    if (p == 'ENTERPRISE' || p == 'ENTERPRISE_PRO') return enterprise;
-    if (p == 'PREMIUM' || p == 'PRO') return pro;
-    return 0;
-  }
 }

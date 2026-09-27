@@ -137,16 +137,6 @@ class SecureStorage {
     return _memRole;
   }
 
-  static Future<void> deleteRole() async {
-    if (kIsWeb) {
-      _webRole = null;
-      return;
-    }
-    _memRole = null;
-    _memRoleLoaded = true;
-    await _storage.delete(key: _keyRole);
-  }
-
   static Future<void> saveRefreshToken(String token) async {
     if (kIsWeb) {
       _webRefreshToken = token;
@@ -164,16 +154,6 @@ class SecureStorage {
     _memRefreshToken = await _storage.read(key: _keyRefreshToken);
     _memRefreshLoaded = true;
     return _memRefreshToken;
-  }
-
-  static Future<void> deleteRefreshToken() async {
-    if (kIsWeb) {
-      _webRefreshToken = null;
-      return;
-    }
-    _memRefreshToken = null;
-    _memRefreshLoaded = true;
-    await _storage.delete(key: _keyRefreshToken);
   }
 
   static Future<void> saveRequiresPasswordChange(bool value) async {
@@ -197,16 +177,6 @@ class SecureStorage {
     _memRequiresPasswordChange = val;
     _memRequiresLoaded = true;
     return val == 'true';
-  }
-
-  static Future<void> deleteRequiresPasswordChange() async {
-    if (kIsWeb) {
-      _webRequiresPasswordChange = null;
-      return;
-    }
-    _memRequiresPasswordChange = null;
-    _memRequiresLoaded = true;
-    await _storage.delete(key: _keyRequiresPasswordChange);
   }
 
   static Future<void> clearAll() async {

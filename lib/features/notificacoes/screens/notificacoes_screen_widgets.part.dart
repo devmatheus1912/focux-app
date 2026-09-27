@@ -129,21 +129,3 @@ String notificationSubtitle(NotificacaoApp item) {
   if (_isRadar(item)) return _radarSummary(item);
   return item.mensagem.trim();
 }
-
-String notificationFxIcon(NotificacaoApp item) {
-  if (_isRadar(item) || item.titulo.toLowerCase().contains('radar')) {
-    return 'spark';
-  }
-  switch (item.tipo.toLowerCase()) {
-    case 'evolucao':
-      return 'trend';
-    case 'alerta':
-    case 'risco':
-      return 'alert-triangle';
-    case 'pagamento':
-    case 'pag':
-      return 'dollar-sign';
-    default:
-      return 'bell';
-  }
-}

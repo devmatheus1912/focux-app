@@ -12,9 +12,6 @@ abstract final class FocuxPlatform {
   /// Largura máxima do conteúdo em tablet/desktop.
   static const double desktopMaxContent = 960;
 
-  /// Breakpoint para empilhar métricas em cards estreitos.
-  static const double stackBreakpoint = 340;
-
   static const List<String> coreSources = [
     'lib/core/platform/focux_platform.dart',
     'lib/core/widgets/fx_content_width_limiter.dart',
@@ -49,14 +46,8 @@ abstract final class FocuxPlatform {
   static bool isCompact(BuildContext context) =>
       MediaQuery.sizeOf(context).width < compactWidth;
 
-  static bool shouldStackMetrics(BuildContext context) =>
-      MediaQuery.sizeOf(context).width < stackBreakpoint;
-
   static double safeBottomInset(BuildContext context) =>
       MediaQuery.paddingOf(context).bottom;
-
-  static double safeTopInset(BuildContext context) =>
-      MediaQuery.paddingOf(context).top;
 
   static double keyboardInset(BuildContext context) =>
       MediaQuery.viewInsetsOf(context).bottom;
