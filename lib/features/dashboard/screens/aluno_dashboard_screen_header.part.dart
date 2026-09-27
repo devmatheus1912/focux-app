@@ -226,8 +226,6 @@ class _TodayFocusCard extends StatelessWidget {
     return FxStripCard(
       emphasize: true,
       glowStrength: 0.08,
-      semanticsLabel:
-          '${action.title}. Sequência $streakLabel. ${action.description}. ${action.cta}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -686,15 +684,20 @@ class _DualTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 88,
-      width: double.infinity,
-      child: CustomPaint(
-        painter: _DualTrendPainter(
-          volume: volume,
-          forca: forca,
-          volumeColor: volumeColor,
-          forcaColor: forcaColor,
+    return Semantics(
+      image: true,
+      label:
+          'Gráfico das últimas ${volume.length} semanas: volume e força (1RM estimado)',
+      child: SizedBox(
+        height: 88,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: _DualTrendPainter(
+            volume: volume,
+            forca: forca,
+            volumeColor: volumeColor,
+            forcaColor: forcaColor,
+          ),
         ),
       ),
     );
