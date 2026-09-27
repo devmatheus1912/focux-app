@@ -10,6 +10,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -19,10 +20,10 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_status_banner.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../anamnese/widgets/anamnese_status_banner.dart';
 import '../../checkin/data/meus_treinos_mem_cache.dart';
 import '../../coach/data/coach_proativo_repository.dart';
 import '../../coach/widgets/coach_proativo_card.dart';
@@ -64,17 +65,18 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   var _npsPendente = false;
   var _npsPrompted = false;
   var _viewTracked = false;
+  var _naFrente = true;
   GoRouterDelegate? _router;
 
   /// Null até ler as prefs: a pendência de agenda fica fora até lá, sem
   /// piscar nem mandar VIEWED de algo já resolvido.
-  bool? _agendaReviewed;
-  (AlunoDashboardHomeBundle, bool?, AlunoHomeView)? _viewMemo;
+  ({String? inicio})? _agendaVista;
+  (AlunoDashboardHomeBundle, ({String? inicio})?, AlunoHomeView)? _viewMemo;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_loadAgendaReviewed());
+    unawaited(_loadAgendaVista());
     ref.listenManual(
       alunoDashboardHomeProvider,
       (_, next) => next.whenData(_onHomeLoaded),
@@ -87,28 +89,41 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     super.didChangeDependencies();
     final router = GoRouter.of(context).routerDelegate;
     if (identical(router, _router)) return;
-    _router?.removeListener(_agendarNps);
-    _router = router..addListener(_agendarNps);
+    _router?.removeListener(_onRota);
+    _router = router..addListener(_onRota);
   }
 
   @override
   void dispose() {
-    _router?.removeListener(_agendarNps);
+    _router?.removeListener(_onRota);
     super.dispose();
+  }
+
+  bool get _homeNaFrente =>
+      _router?.currentConfiguration.uri.path == alunoHomeRoute;
+
+  /// A agenda pode ter sido aberta por outro caminho (catálogo, notificação):
+  /// ao voltar para a Home, relê o que o aluno já viu.
+  void _onRota() {
+    final naFrente = _homeNaFrente;
+    if (naFrente && !_naFrente) unawaited(_loadAgendaVista());
+    _naFrente = naFrente;
+    _agendarNps();
   }
 
   AlunoHomeView _viewFor(AlunoDashboardHomeBundle home) {
     final memo = _viewMemo;
-    if (memo != null &&
-        identical(memo.$1, home) &&
-        memo.$2 == _agendaReviewed) {
+    final vista = _agendaVista;
+    if (memo != null && identical(memo.$1, home) && memo.$2 == vista) {
       return memo.$3;
     }
     final view = buildAlunoHomeView(
       home,
-      agendaReviewed: _agendaReviewed ?? true,
+      agendaReviewed:
+          vista == null ||
+          alunoAgendaVista(vista.inicio, home.agendaProximoInicio),
     );
-    _viewMemo = (home, _agendaReviewed, view);
+    _viewMemo = (home, vista, view);
     return view;
   }
 
@@ -131,23 +146,22 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// Ao concluir o treino a Home recarrega por baixo da celebração: a pergunta
   /// espera a Home voltar para a frente, senão o pop do check-in a fecharia.
   void _tentarNps() {
-    if (!mounted || !_npsPendente || _npsPrompted) return;
-    if (_router?.currentConfiguration.uri.path != alunoHomeRoute) return;
+    if (!mounted || !_npsPendente || _npsPrompted || !_homeNaFrente) return;
     _npsPrompted = true;
     showAlunoNpsPrompt(context, ref);
   }
 
-  Future<void> _loadAgendaReviewed() async {
-    final reviewed = await isAlunoAgendaReviewed();
+  Future<void> _loadAgendaVista() async {
+    final inicio = await readAlunoAgendaVista();
     if (!mounted) return;
-    setState(() => _agendaReviewed = reviewed);
+    setState(() => _agendaVista = (inicio: inicio));
     final home = ref.read(alunoDashboardHomeProvider).value;
     if (home != null) _syncAnalytics(home);
   }
 
   /// Espera a agenda ser lida: antes disso as pendências ainda não são finais.
   void _syncAnalytics(AlunoDashboardHomeBundle home) {
-    if (_agendaReviewed == null) return;
+    if (_agendaVista == null) return;
     final view = _viewFor(home);
     _completeResolvedTasks(view);
     if (_viewTracked) return;
@@ -165,8 +179,17 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       alunoAutonomyOpenTaskIds(
         action: view.action,
         pendenciasAbertas: view.pendenciasAbertas,
+        financeiroEmAtraso: view.financeiroEmAtraso,
       ),
     );
+  }
+
+  void _openFinanceiro() {
+    AlunoAutonomyAnalytics.clicked(
+      ref.read(alunoRepositoryProvider),
+      AlunoAutonomyAnalytics.financeiro,
+    );
+    context.push(alunoFinanceiroRoute);
   }
 
   void _openToday(AlunoTodayAction action) {
@@ -183,7 +206,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       ref.read(alunoRepositoryProvider),
       AlunoAutonomyAnalytics.forPendencia(p),
     );
-    unawaited(context.push(p.tipo.route).then((_) => _loadAgendaReviewed()));
+    context.push(p.tipo.route);
   }
 
   void _pendenciaShown(AlunoPendencia p) {
@@ -194,13 +217,15 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   }
 
   Future<void> _refresh() async {
-    invalidateAlunoDashboardHome(ref);
-    await Future.wait([
-      ref.read(alunoDashboardHomeProvider.future),
-      _loadAgendaReviewed(),
-    ]);
+    final s = S.of(context);
+    try {
+      await Future.wait([refreshAlunoDashboardHome(ref), _loadAgendaVista()]);
+    } catch (_) {
+      if (mounted) FeedbackHelper.showError(context, s.alunoHomeAtualizarErro);
+      return;
+    }
     if (!mounted) return;
-    fxAnnounce(context, S.of(context).alunoHomeAtualizado);
+    fxAnnounce(context, s.alunoHomeAtualizado);
   }
 
   @override
@@ -260,6 +285,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         ),
         body: homeAsync.when(
           skipLoadingOnReload: true,
+          skipError: true,
           loading: () => const AlunoHomeSkeleton(),
           error:
               (e, _) => FxErrorState(
@@ -299,6 +325,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         _TodayFocusCard(
           action: action,
           insight: view.insight,
+          prontidaoBaixa: view.prontidaoBaixa,
           isDark: isDark,
           onAction: () => _openToday(action),
         ),
@@ -310,6 +337,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             aviso: view.aviso,
             anamnese: home.anamnesePendente,
             coachMensagens: view.coach,
+            onFinanceiro: _openFinanceiro,
           ),
         ),
       if (view.semanaVisivel)

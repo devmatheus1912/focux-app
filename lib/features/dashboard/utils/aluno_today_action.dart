@@ -4,8 +4,8 @@ import '../../checkin/utils/treino_ficha_status.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 
 /// Ação principal (P0) do card "Hoje" do aluno, em ordem de prioridade.
+/// Mensalidade atrasada não bloqueia treino: é aviso ([AlunoHomeAviso]), não modo.
 enum AlunoTodayMode {
-  financialHold,
   workoutDone,
   workoutReady,
   awaitingRelease,
@@ -48,13 +48,6 @@ AlunoTodayAction resolveAlunoTodayAction({
   List<ExecucaoTreino> historico = const [],
   DateTime? now,
 }) {
-  if (aluno.inadimplente) {
-    return const AlunoTodayAction(
-      mode: AlunoTodayMode.financialHold,
-      route: '/financeiro/aluno',
-    );
-  }
-
   final proximo = proximoTreinoParaHoje(treinos: treinos, historico: historico);
   final feitoHoje =
       treinoSessaoEmAndamento(treinos) == null
@@ -120,7 +113,6 @@ int alunoProfileCompletion(Aluno aluno) {
 
 /// `taskId` do contrato de autonomia quando o toque no P0 pede ação do personal.
 String? alunoAutonomyTaskIdForToday(AlunoTodayMode mode) => switch (mode) {
-  AlunoTodayMode.financialHold => 'financeiro',
   AlunoTodayMode.noWorkout => 'treino-semana',
   AlunoTodayMode.profileSetup => 'perfil-base',
   AlunoTodayMode.workoutDone ||

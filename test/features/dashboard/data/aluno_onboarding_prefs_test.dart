@@ -3,41 +3,41 @@ import 'package:focux_app/features/dashboard/data/aluno_onboarding_prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  group('alunoAgendaSemanaKey', () {
-    test('qualquer dia da semana cai na segunda', () {
-      expect(alunoAgendaSemanaKey(DateTime(2026, 9, 21)), '2026-09-21');
-      expect(alunoAgendaSemanaKey(DateTime(2026, 9, 24, 23, 59)), '2026-09-21');
-      expect(alunoAgendaSemanaKey(DateTime(2026, 9, 27)), '2026-09-21');
-    });
+  group('agenda vista', () {
+    final quarta = DateTime(2026, 9, 30, 18);
+    final sexta = DateTime(2026, 10, 2, 7, 30);
 
-    test('atravessa mês e ano', () {
-      expect(alunoAgendaSemanaKey(DateTime(2026, 10, 2)), '2026-09-28');
-      expect(alunoAgendaSemanaKey(DateTime(2027, 1, 1)), '2026-12-28');
-    });
-  });
-
-  group('agenda conferida', () {
     setUp(() => SharedPreferences.setMockInitialValues({}));
 
-    test('vale só para a semana em que foi marcada', () async {
-      await markAlunoAgendaReviewed(now: DateTime(2026, 9, 22));
-      expect(await isAlunoAgendaReviewed(now: DateTime(2026, 9, 27)), isTrue);
-      expect(await isAlunoAgendaReviewed(now: DateTime(2026, 9, 28)), isFalse);
+    test('vale para o horário visto; o seguinte volta a pedir', () async {
+      expect(alunoAgendaVista(await readAlunoAgendaVista(), quarta), isFalse);
+      await markAlunoAgendaReviewed(quarta);
+      final vista = await readAlunoAgendaVista();
+      expect(alunoAgendaVista(vista, quarta), isTrue);
+      expect(alunoAgendaVista(vista, sexta), isFalse);
+      expect(alunoAgendaVista(vista, null), isFalse);
     });
 
-    test('marcar apaga a chave antiga sem semana', () async {
+    test('sem horário conhecido não marca nada', () async {
+      await markAlunoAgendaReviewed(null);
+      expect(await readAlunoAgendaVista(), isNull);
+    });
+
+    test('marcar apaga as chaves antigas por semana', () async {
       SharedPreferences.setMockInitialValues({
         'aluno_agenda_reviewed_v1': true,
+        'aluno_agenda_reviewed_week_v2': '2026-09-21',
       });
-      expect(await isAlunoAgendaReviewed(now: DateTime(2026, 9, 27)), isFalse);
-      await markAlunoAgendaReviewed(now: DateTime(2026, 9, 27));
+      await markAlunoAgendaReviewed(quarta);
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.containsKey('aluno_agenda_reviewed_v1'), isFalse);
+      expect(prefs.containsKey('aluno_agenda_reviewed_week_v2'), isFalse);
     });
 
     test('logout limpa as chaves locais do aluno', () {
-      expect(alunoOnboardingPrefKeys, contains(kAlunoAgendaReviewedKey));
+      expect(alunoOnboardingPrefKeys, contains(kAlunoAgendaVistaKey));
       expect(alunoOnboardingPrefKeys, contains('aluno_agenda_reviewed_v1'));
+      expect(alunoOnboardingPrefKeys, contains('aluno_agenda_reviewed_week_v2'));
       expect(alunoOnboardingPrefKeys, contains(kAlunoNpsAdiadoEmKey));
     });
   });

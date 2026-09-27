@@ -10,14 +10,17 @@ import 'aluno_today_action.dart';
 typedef AlunoAutonomyTask =
     ({String taskId, String taskTitle, String route, String priority});
 
-/// `taskId`s ainda em aberto: o do P0 (quando pede ação) e todas as pendências.
+/// `taskId`s ainda em aberto: o do P0 (quando pede ação), o financeiro em
+/// atraso e todas as pendências.
 Set<String> alunoAutonomyOpenTaskIds({
   required AlunoTodayAction action,
   required List<AlunoPendencia> pendenciasAbertas,
+  bool financeiroEmAtraso = false,
 }) {
   final hoje = alunoAutonomyTaskIdForToday(action.mode);
   return {
     if (hoje != null) hoje,
+    if (financeiroEmAtraso) AlunoAutonomyAnalytics.financeiro.taskId,
     for (final p in pendenciasAbertas) p.tipo.taskId,
   };
 }
@@ -28,12 +31,19 @@ class AlunoAutonomyAnalytics {
   static final Set<String> _vistosNaSessao = {};
   static final Map<String, AlunoAutonomyTask> _clicadosNaSessao = {};
 
+  /// Toque no aviso de mensalidade em atraso.
+  static const AlunoAutonomyTask financeiro = (
+    taskId: 'financeiro',
+    taskTitle: 'Regularizar financeiro',
+    route: '/financeiro/aluno',
+    priority: 'ALTA',
+  );
+
   /// Só os modos em que o toque no P0 pede ação do personal.
   static AlunoAutonomyTask? forToday(AlunoTodayAction action) {
     final taskId = alunoAutonomyTaskIdForToday(action.mode);
     if (taskId == null) return null;
     final title = switch (action.mode) {
-      AlunoTodayMode.financialHold => 'Regularizar financeiro',
       AlunoTodayMode.profileSetup => 'Completar perfil base',
       _ => 'Solicitar treino ativo',
     };

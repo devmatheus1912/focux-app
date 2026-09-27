@@ -31,7 +31,7 @@ AlunoDashboardHomeBundle _bundle({
   int fichas = 0,
   String? concluidoEm,
   int? concluidosSemana,
-  bool agendaProxima = false,
+  String? agendaInicio,
 }) => AlunoDashboardHomeBundle.fromJson({
   'aluno': {
     'id': 7,
@@ -55,7 +55,7 @@ AlunoDashboardHomeBundle _bundle({
       },
   ],
   'concluidosSemanaIso': concluidosSemana,
-  'agendaProxima': agendaProxima,
+  'agendaProximoInicio': agendaInicio,
   'upsellPendentes': [
     for (var i = 0; i < ofertas; i++)
       {'alunoOfertaId': i, 'ofertaId': i, 'titulo': 'Extra', 'valor': 150},
@@ -133,7 +133,7 @@ void main() {
 
     test('Home mostra 3; abertas guardam todas', () {
       final view = buildAlunoHomeView(
-        _bundle(agendaProxima: true),
+        _bundle(agendaInicio: '2026-09-30T18:00:00'),
         agendaReviewed: false,
         now: DateTime(2026, 9, 27),
       );
@@ -142,21 +142,20 @@ void main() {
       expect(view.aviso, AlunoHomeAviso.nenhum);
     });
 
-    test('bloqueio financeiro não divide o card com insight', () {
-      expect(
-        buildAlunoHomeView(
-          _bundle(inadimplente: true, insight: _insight),
-          agendaReviewed: true,
-        ).insight,
-        isNull,
+    test('mensalidade atrasada vira aviso e o foco segue no treino', () {
+      final view = buildAlunoHomeView(
+        _bundle(
+          inadimplente: true,
+          fichas: 1,
+          insight: _insight,
+          anamnese: 'SOLICITADA',
+        ),
+        agendaReviewed: true,
       );
-      expect(
-        buildAlunoHomeView(
-          _bundle(insight: _insight),
-          agendaReviewed: true,
-        ).insight,
-        isNotNull,
-      );
+      expect(view.action.mode, AlunoTodayMode.workoutReady);
+      expect(view.aviso, AlunoHomeAviso.financeiro);
+      expect(view.financeiroEmAtraso, isTrue);
+      expect(view.insight, isNotNull);
     });
 
     test('quem acabou de treinar não lê "Seu ritmo caiu"', () {
@@ -168,7 +167,6 @@ void main() {
       expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutDone), isNull);
       expect(alunoInsightNoFoco(volume, AlunoTodayMode.workoutDone), volume);
       expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutReady), ritmo);
-      expect(alunoInsightNoFoco(volume, AlunoTodayMode.financialHold), isNull);
 
       final view = buildAlunoHomeView(
         _bundle(
@@ -183,7 +181,7 @@ void main() {
       expect(view.insight, isNull);
     });
 
-    test('bloqueio financeiro não oferece compra', () {
+    test('mensalidade atrasada não oferece compra', () {
       expect(
         buildAlunoHomeView(
           _bundle(inadimplente: true, ofertas: 1),
@@ -220,16 +218,17 @@ void main() {
       expect(view.semanaVisivel, isTrue);
     });
 
-    test('agenda só entra com horário nos próximos dias', () {
-      bool temAgenda({required bool proxima}) => buildAlunoHomeView(
-        _bundle(agendaProxima: proxima),
+    test('agenda só entra com horário e leva quando é', () {
+      AlunoPendencia? agenda(String? inicio) => buildAlunoHomeView(
+        _bundle(agendaInicio: inicio),
         agendaReviewed: false,
         now: DateTime(2026, 9, 27),
-      ).pendenciasAbertas.any((p) => p.tipo == AlunoPendenciaTipo.agenda);
-      expect(temAgenda(proxima: false), isFalse);
-      expect(temAgenda(proxima: true), isTrue);
-    });
-  });
+      ).pendenciasAbertas
+          .where((p) => p.tipo == AlunoPendenciaTipo.agenda)
+          .firstOrNull;
+      expect(agenda(null), isNull);
+      expect(agenda('2026-09-30T18:00:00')?.quando, DateTime(2026, 9, 30, 18));
+    });  });
 
   group('atalhos', () {
     test('nenhum atalho repete destino que já está acima', () {
@@ -246,13 +245,14 @@ void main() {
       expect(view.atalhos, hasLength(alunoAtalhosMax));
     });
 
-    test('no bloqueio financeiro o financeiro sai dos atalhos', () {
+    test('com mensalidade atrasada o financeiro sai dos atalhos', () {
       final view = buildAlunoHomeView(
         _bundle(inadimplente: true),
         agendaReviewed: true,
       );
-      expect(view.action.route, '/financeiro/aluno');
-      expect(view.atalhos, isNot(contains('/financeiro/aluno')));
+      expect(view.action.route, isNot(alunoFinanceiroRoute));
+      expect(view.rotasNoTopo, contains(alunoFinanceiroRoute));
+      expect(view.atalhos, isNot(contains(alunoFinanceiroRoute)));
     });
 
     test('chat no cabeçalho só com nome do personal', () {
@@ -394,6 +394,28 @@ void main() {
         ),
         isFalse,
       );
+    });
+
+    test('prontidão baixa só com treino pronto e prontidão na tela', () {
+      const baixa = RecoverySnapshot(
+        steps: 0,
+        caloriesBurned: 0,
+        avgHeartRate: 0,
+        sleepHours: 0,
+        recoveryScore: 40,
+        recoveryLabel: 'baixa',
+        recoveryHint: 'leve',
+      );
+      bool b({
+        AlunoTodayMode mode = AlunoTodayMode.workoutReady,
+        RecoverySnapshot? s = baixa,
+        bool visivel = true,
+      }) => alunoProntidaoBaixa(mode: mode, snapshot: s, prontidaoVisivel: visivel);
+      expect(b(), isTrue);
+      expect(b(s: snap), isFalse);
+      expect(b(visivel: false), isFalse);
+      expect(b(mode: AlunoTodayMode.workoutDone), isFalse);
+      expect(b(s: null), isFalse);
     });
 
     test('sem prontidão de hoje: convite só quando a última é antiga', () {

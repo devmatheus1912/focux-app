@@ -6,6 +6,7 @@ import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 
 final _hoje = DateTime(2026, 9, 27);
+final _horario = DateTime(2026, 9, 30, 18);
 
 Aluno _aluno({bool completo = true, String? fotoUrl = 'https://cdn.test/f.jpg'}) =>
     Aluno(
@@ -39,7 +40,7 @@ void main() {
         aluno: _aluno(),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 0,
-        agendaProxima: true,
+        agendaProximoInicio: _horario,
         agendaReviewed: true,
         todayMode: AlunoTodayMode.workoutReady,
         now: _hoje,
@@ -52,7 +53,7 @@ void main() {
         aluno: _aluno(completo: false, fotoUrl: null),
         medidas: const [],
         naoLidasDoPersonal: 2,
-        agendaProxima: true,
+        agendaProximoInicio: _horario,
         agendaReviewed: false,
         todayMode: AlunoTodayMode.workoutReady,
         now: _hoje,
@@ -71,7 +72,7 @@ void main() {
         aluno: _aluno(completo: false),
         medidas: [_medida(_hoje)],
         naoLidasDoPersonal: 1,
-        agendaProxima: true,
+        agendaProximoInicio: _horario,
         agendaReviewed: false,
         todayMode: AlunoTodayMode.profileSetup,
         now: _hoje,
@@ -79,20 +80,21 @@ void main() {
       expect(_tipos(list), [AlunoPendenciaTipo.chat, AlunoPendenciaTipo.agenda]);
     });
 
-    test('agenda só com horário nos próximos dias', () {
-      List<AlunoPendenciaTipo> agenda({required bool proxima}) => _tipos(
-        listAlunoPendenciasAbertas(
-          aluno: _aluno(),
-          medidas: [_medida(_hoje)],
-          naoLidasDoPersonal: 0,
-          agendaProxima: proxima,
-          agendaReviewed: false,
-          todayMode: AlunoTodayMode.workoutReady,
-          now: _hoje,
-        ),
-      );
-      expect(agenda(proxima: false), isEmpty);
-      expect(agenda(proxima: true), [AlunoPendenciaTipo.agenda]);
+    test('agenda só com horário nos próximos dias, levando o horário', () {
+      List<AlunoPendencia> agenda(DateTime? inicio) =>
+          listAlunoPendenciasAbertas(
+            aluno: _aluno(),
+            medidas: [_medida(_hoje)],
+            naoLidasDoPersonal: 0,
+            agendaProximoInicio: inicio,
+            agendaReviewed: false,
+            todayMode: AlunoTodayMode.workoutReady,
+            now: _hoje,
+          );
+      expect(agenda(null), isEmpty);
+      final list = agenda(_horario);
+      expect(_tipos(list), [AlunoPendenciaTipo.agenda]);
+      expect(list.single.quando, _horario);
     });
 
     test('medida vale por 14 dias', () {
@@ -101,7 +103,7 @@ void main() {
           aluno: _aluno(),
           medidas: [_medida(_hoje.subtract(Duration(days: dias)))],
           naoLidasDoPersonal: 0,
-          agendaProxima: true,
+          agendaProximoInicio: _horario,
           agendaReviewed: true,
           todayMode: AlunoTodayMode.workoutReady,
           now: _hoje,
@@ -117,7 +119,7 @@ void main() {
           aluno: _aluno(),
           medidas: [_medida(_hoje)],
           naoLidasDoPersonal: n,
-          agendaProxima: true,
+          agendaProximoInicio: _horario,
           agendaReviewed: true,
           todayMode: AlunoTodayMode.workoutReady,
           now: _hoje,
@@ -178,25 +180,33 @@ void main() {
   });
 
   group('resolveAlunoHomeAviso', () {
-    test('anamnese vence o coach', () {
+    AlunoHomeAviso aviso({
+      bool inadimplente = false,
+      bool anamnese = false,
+      int coach = 0,
+    }) => resolveAlunoHomeAviso(
+      inadimplente: inadimplente,
+      anamnesePendente: anamnese,
+      coachMensagens: coach,
+    );
+
+    test('mensalidade atrasada vence anamnese e coach', () {
       expect(
-        resolveAlunoHomeAviso(anamnesePendente: true, coachMensagens: 2),
-        AlunoHomeAviso.anamnese,
+        aviso(inadimplente: true, anamnese: true, coach: 2),
+        AlunoHomeAviso.financeiro,
       );
+    });
+
+    test('anamnese vence o coach', () {
+      expect(aviso(anamnese: true, coach: 2), AlunoHomeAviso.anamnese);
     });
 
     test('só coach', () {
-      expect(
-        resolveAlunoHomeAviso(anamnesePendente: false, coachMensagens: 1),
-        AlunoHomeAviso.coach,
-      );
+      expect(aviso(coach: 1), AlunoHomeAviso.coach);
     });
 
     test('nenhum', () {
-      expect(
-        resolveAlunoHomeAviso(anamnesePendente: false, coachMensagens: 0),
-        AlunoHomeAviso.nenhum,
-      );
+      expect(aviso(), AlunoHomeAviso.nenhum);
     });
   });
 }

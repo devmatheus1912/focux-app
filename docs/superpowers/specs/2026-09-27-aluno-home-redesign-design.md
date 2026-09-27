@@ -21,7 +21,7 @@ hoje, 1 P0, sem catálogo de módulos no fold"). System design:
 | Central do aluno | Bloco "Pendências" com até 3 itens, sem repetir o P0, sem porcentagem |
 | Marca do personal | Linha no cabeçalho com logo pequeno e nome; toque abre o chat |
 | Nome da tela | "Hoje", igual ao dock, com "Olá, {primeiro nome}" |
-| Idiomas | Todo texto da Home redesenhada em ARB pt, en e es nesta spec |
+| Idiomas | Só PT-BR (`app_pt.arb`); en/es congelados até o app escalar |
 | Abordagem | Híbrida: servidor manda os fatos de treino; app escolhe a ação do dia numa função pura |
 
 ## 1. Anatomia (topo → base)
@@ -35,10 +35,13 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
 2. **Card de foco — o que tenho hoje.** Eyebrow, título, 1 linha de descrição,
    `AlunoHomeInsightLine` (só leitura: título + detalhe, sem CTA) e o chip P0
    (`FxActionChip`), único toque do card. Saem o badge de sequência, a pill de
-   ritmo local e as linhas de narrativa.
-3. **Aviso único.** No máximo um banner: anamnese pendente; se não houver,
-   mensagem do coach ("Seu coach Focux"). Nenhum dos dois → nada. No
-   bloqueio financeiro o card de foco não mostra insight. O coach passa por
+   ritmo local e as linhas de narrativa. Com prontidão baixa (score < 45, o
+   corte de "Recuperação parcial" do backend) e treino pronto, a descrição
+   vira "Prontidão baixa hoje: aqueça bem e pegue mais leve." (`alunoProntidaoBaixa`).
+3. **Aviso único.** No máximo um banner, nesta ordem: mensalidade em atraso
+   (toque → `/financeiro/aluno`), anamnese pendente, mensagem do coach
+   ("Seu coach Focux"). Nenhum → nada. Mensalidade atrasada não bloqueia
+   treino: o foco segue no treino e o insight fica. O coach passa por
    `alunoCoachVisiveis`: na retomada saem `SEM_TREINO_5D` e
    `STREAK_QUEBRADO` (o card de foco já diz isso); com prontidão visível sai
    `SONO_BAIXO`. "Entendi" some com a mensagem na hora e só recarrega a Home
@@ -59,13 +62,15 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
 6. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → o bloco
    some.
 7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF (`AlunoHomeView.ofertas`,
-   vazia no bloqueio financeiro), header de seção,
-   botões de 48 dp travados durante o envio. Altura do conteúdo (fonte grande
-   não corta); uma oferta ocupa a largura toda.
+   vazia com mensalidade em atraso), header de seção,
+   botões de 48 dp travados durante o envio. Aceitar é `OutlinedButton` e
+   recusar `TextButton` (o P0 segue único destaque); os dois pedem
+   confirmação (`showFxConfirmSheet`), porque a resposta não volta atrás.
+   Altura do conteúdo (fonte grande não corta); uma oferta ocupa a largura toda.
 8. **Ferramentas.** `_StudentToolsSection` com até 3 atalhos dinâmicos
    (`AlunoHomeView.atalhos`): ordem de `alunoAtalhosPrioridade`, sem abas do
    dock e sem destino que já aparece acima (`rotasNoTopo`: foco, aviso de
-   anamnese, chat do cabeçalho e pendências). Atalhos e catálogo escondem o
+   financeiro ou anamnese, chat do cabeçalho e pendências). Atalhos e catálogo escondem o
    que o plano do personal não libera (`recursosIndisponiveis`).
 
 NPS: o BFF só libera depois de 3 treinos concluídos e sem resposta nos
@@ -98,8 +103,7 @@ soma espaço.
 - `insight` só traz o que nenhum bloco mostra: `RITMO_CAIU` (média das 4
   semanas anteriores ≥ 2/semana, 1+ treino nos últimos 7 dias, abaixo da
   metade da média e meta não batida) ou `VOLUME_SUBINDO`. Nada disso → `null`.
-  Sem `acao` nem `evidencia`. O app esconde o insight no bloqueio financeiro e
-  esconde `RITMO_CAIU` em `workoutDone` (`alunoInsightNoFoco`): quem acabou de
+  Sem `acao` nem `evidencia`. O app esconde `RITMO_CAIU` em `workoutDone` (`alunoInsightNoFoco`): quem acabou de
   treinar não lê "Seu ritmo caiu".
 - `coachMensagens`: não lidas dos últimos 3 dias
   (`CoachProativoScheduler.VALIDADE_DIAS`). `SEM_TREINO_5D` e
@@ -110,9 +114,13 @@ soma espaço.
   libera. Sem `AGENDA`, o atalho de agenda some.
 - `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
   resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
-- `agendaProxima`: o aluno tem horário não cancelado nos próximos 7 dias
-  (`AlunoDashboardHomeSurface.AGENDA_PROXIMA_DIAS`). Criar, remarcar, mudar
-  status, excluir ou confirmar um horário limpa o cache da Home do aluno.
+- `agendaProxima` + `agendaProximoInicio`: o próximo horário não cancelado
+  nos próximos 7 dias (`AlunoDashboardHomeSurface.AGENDA_PROXIMA_DIAS`,
+  `MIN(inicio)` numa query só). Plano sem `AGENDA` → `false`/`null`
+  (`agendaVisivel`). Criar, remarcar, mudar status, excluir ou confirmar um
+  horário limpa o cache da Home do aluno.
+- Sequência (`streakAtual`) lê só as execuções das últimas 104 semanas
+  (`TREINOS_JANELA_SEMANAS`), não o histórico inteiro.
 - Mensalidade paga (manual, em lote ou recorrente), editada ou em atraso,
   treino atribuído (também em lote), desvinculado ou excluído, status em lote
   e mensagem do coach enviada limpam o cache da Home do aluno
@@ -127,7 +135,7 @@ soma espaço.
 |---|---|
 | Cabeçalho | `aluno.nome` (primeiro nome), `personalBrand.nomePersonal`, `personalBrand.logoUrl` |
 | Card de foco | `resolveAlunoTodayAction` (§3.1) + `insight` |
-| Aviso | `anamnesePendente` e `coachMensagens` |
+| Aviso | `aluno.inadimplente`, `anamnesePendente` e `coachMensagens` |
 | Sua semana | `concluidosSemanaIso`, `frequenciaDias`, `streakAtual`, `volumeSemanaKg` |
 | Prontidão | `recovery`, `recoveryStale`, `hasWearableHistory` |
 | Evolução | `forcaPorSemana`, `volumePorSemana`, `forcaDeltaPercent`, `recordes.first` |
@@ -163,12 +171,11 @@ completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
 
 | # | Modo | Quando | CTA → rota |
 |---|---|---|---|
-| 1 | `financialHold` | `aluno.inadimplente` | Abrir financeiro → `/financeiro/aluno` |
-| 2 | `workoutDone` | sem sessão `EM_ANDAMENTO` e o último `CONCLUIDO` do histórico é de hoje (`treinoConcluidoHoje`) | Ver resumo → `/checkin/historico/{id}` |
-| 3 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
-| 4 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
-| 5 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
-| 6 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
+| 1 | `workoutDone` | sem sessão `EM_ANDAMENTO` e o último `CONCLUIDO` do histórico é de hoje (`treinoConcluidoHoje`) | Ver resumo → `/checkin/historico/{id}` |
+| 2 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
+| 3 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
+| 4 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
+| 5 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
 
 - `workoutDone`: eyebrow "Treino de hoje feito", título = ficha feita,
   descrição "Próximo: {ficha}" (próxima do rodízio, só prévia) ou convite ao
@@ -180,7 +187,8 @@ completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
   "Volte com {treino}" e CTA "Retomar agora". O dado vem do servidor em dias
   de calendário; sai a conta de 24h no fuso do aparelho.
 - `inadimplente` já é `inadimplente || statusFinanceiro == INADIMPLENTE` no
-  `AlunoSelfResponse` (spec 1), então o app lê só o booleano.
+  `AlunoSelfResponse` (spec 1), então o app lê só o booleano. Não é modo: vira
+  o aviso de financeiro (§1, item 3) e tira as ofertas.
 - Saem os modos `comeback` (vira variação de texto), `evolution` e `steady`.
 - Completude do perfil: telefone e WhatsApp contam como um campo "contato".
 
@@ -194,12 +202,15 @@ Candidatas, em ordem de prioridade:
 | `foto` | sem `fotoUrl` | `/aluno/perfil/editar?acao=foto` (abre o seletor) |
 | `medida` | nenhuma medida ou a última com mais de 14 dias (regra atual) | `/aluno/perfil/editar?acao=medida` (abre o registro) |
 | `chat` | `chat.naoLidasDoPersonal > 0` | `/chat/aluno` |
-| `agenda` | `agendaProxima` e agenda não aberta nesta semana | `/agenda/aluno` |
+| `agenda` | `agendaProximoInicio` e esse horário ainda não visto | `/agenda/aluno` |
 
-- Agenda: `markAlunoAgendaReviewed` grava a segunda-feira da semana
-  (`alunoAgendaSemanaKey`); a pendência volta toda segunda. A chave é limpa no
-  logout (`session_invalidator`). Enquanto o estado não carregou, a Home
-  trata a agenda como conferida: nada pisca e nenhum `VIEWED` sai antes.
+- Agenda: o item diz quando é ("Hoje às 18:00", "Amanhã às 07:30",
+  "qua., 30 de set. às 18:00"). Abrir a agenda por qualquer caminho grava o
+  horário visto (`markAlunoAgendaReviewed`, chave `aluno_agenda_vista_v3`);
+  o próximo horário novo pede de novo. A Home relê o visto quando volta a ser
+  a rota da frente e no pull-to-refresh. A chave é limpa no logout
+  (`session_invalidator`). Enquanto o estado não carregou, a Home trata a
+  agenda como vista: nada pisca e nenhum `VIEWED` sai antes.
 - `alunoPendenciasVisiveis` tira `chat` quando o foco já é `noWorkout`
   (mesmo destino) e corta em 3. As escondidas seguem abertas para o
   `COMPLETED` de autonomia.
@@ -247,9 +258,10 @@ card de foco.
 ## 5. Idiomas, acessibilidade e analytics
 
 - Todo texto novo ou mantido na Home (cabeçalho, ação do dia, aviso, Sua
-  semana, Evolução, Pendências, ajuda) vai para `app_pt.arb`, `app_en.arb` e
-  `app_es.arb`. Números via formatação de locale já usada (`pt_br_display`
-  para pt).
+  semana, Evolução, Pendências, ajuda) vai só para `app_pt.arb`. Números via
+  formatação de locale já usada (`pt_br_display`).
+- Movimento reduzido: o coração da prontidão (`FxRiveHeartPulse`) vira ícone
+  estático com `disableAnimations`.
 - `Semantics` agrupado: "Sua semana" é lido como uma frase ("2 de 3 treinos
   nesta semana, sequência de 4 semanas, volume de 3.200 kg"); o último recorde
   também. Linha do personal tem rótulo "Abrir conversa com {nome}".
@@ -266,8 +278,8 @@ card de foco.
     viewport com a aba ativa (`FxOnVisible`), não a montagem. Toque →
     `CLICKED`.
   - Toque no P0 → `CLICKED` só onde o personal precisa agir:
-    `financialHold` → `financeiro`, `noWorkout` → `treino-semana`,
-    `profileSetup` → `perfil-base`. `workoutDone`, `workoutReady` e `awaitingRelease`
+    `noWorkout` → `treino-semana`, `profileSetup` → `perfil-base`. Toque no
+    aviso de financeiro → `CLICKED` de `financeiro`. `workoutDone`, `workoutReady` e `awaitingRelease`
     não mandam evento de autonomia (começar treino não é pedido de apoio).
   - Nenhum evento novo; sem PII nas props.
 
@@ -282,6 +294,8 @@ card de foco.
 - Coach e ofertas: envio travado, erro com `FeedbackHelper` e texto do ARB.
 - Bloco sem dado some; nada vira zero fingindo dado.
 - Offline e cache: comportamento atual do `AlunoDashboardHomeClientCache`.
+  Pull-to-refresh sem rede mantém os dados na tela (`skipError`, cache
+  preservado em `refreshAlunoDashboardHome`) e avisa com `FeedbackHelper`.
 
 ## 7. Testes
 
@@ -303,7 +317,7 @@ App (flutter test):
   personal sem nome; aviso único (anamnese vence o coach).
 - Contrato visual da Home: um `emphasize: true`; ofertas abaixo de Evolução;
   sem catálogo antes do card de foco.
-- l10n: chaves novas presentes nos três ARB.
+- l10n: chaves novas em `app_pt.arb`; en/es sem chave fora do pt.
 
 Verificação antes do commit: `.\gradlew.bat test --console=plain`,
 `flutter analyze --fatal-warnings --fatal-infos --no-pub`,

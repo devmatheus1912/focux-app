@@ -25,7 +25,11 @@ void main() {
     expect(screen, contains('AlunoHomeAnalytics.viewed'));
     expect(screen, contains('AlunoHomeAnalytics.focusAction'));
     expect(screen, contains('showAlunoNpsPrompt(context, ref)'));
-    expect(screen, contains('currentConfiguration.uri.path != alunoHomeRoute'));
+    expect(screen, contains('currentConfiguration.uri.path == alunoHomeRoute'));
+    expect(screen, contains('_router = router..addListener(_onRota)'));
+    expect(screen, contains('skipError: true'));
+    expect(screen, contains('refreshAlunoDashboardHome(ref)'));
+    expect(screen, contains('s.alunoHomeAtualizarErro'));
     expect(screen, contains('AlunoTodayMode.workoutDone'));
     expect(screen, isNot(contains('invalidate(alunoRecoveryProvider)')));
     expect(

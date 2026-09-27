@@ -48,6 +48,19 @@ void main() {
     expect(screen, isNot(contains('_StreakFoldBadge')));
     expect(screen, isNot(contains('ProgressoSemanalWidget')));
     expect(screen, isNot(contains('Treinar agora')));
+    expect(screen, contains('prontidaoBaixa: view.prontidaoBaixa'));
+    expect(screen, contains('onFinanceiro: _openFinanceiro'));
+  });
+
+  test('oferta da Home confirma antes de responder e não disputa com o P0', () {
+    final carousel =
+        File(
+          'lib/features/monetizacao/widgets/aluno_upsell_carousel.dart',
+        ).readAsStringSync();
+    expect(carousel, contains('showFxConfirmSheet('));
+    expect(carousel, contains('s.alunoOfertaAceitarConfirmTitulo'));
+    expect(carousel, contains('s.alunoOfertaRecusarConfirmTitulo'));
+    expect(carousel, isNot(contains('FilledButton')));
   });
 
   test('weekly progress card follows white label and accent copy', () {

@@ -88,6 +88,20 @@ void main() {
       expect(t.descricao, '6 exercícios no treino de hoje · Vence hoje');
     });
 
+    test('prontidão baixa pede para ir mais leve e mantém o prazo', () {
+      final t = alunoTodayTexto(
+        _pt,
+        _treino(prazoFim: _hoje),
+        hoje: _hoje,
+        prontidaoBaixa: true,
+      );
+      expect(
+        t.descricao,
+        'Prontidão baixa hoje: aqueça bem e pegue mais leve. · Vence hoje',
+      );
+      expect(t.cta, 'Treinar agora');
+    });
+
     test('aguardando sem nome usa o título padrão', () {
       const a = AlunoTodayAction(
         mode: AlunoTodayMode.awaitingRelease,
@@ -134,6 +148,19 @@ void main() {
         const AlunoPendencia(AlunoPendenciaTipo.medida, primeiraVez: true),
       );
       expect(t.titulo, 'Registrar primeira medida');
+    });
+
+    test('agenda mostra quando é o próximo horário', () {
+      final manha = DateTime(2026, 9, 27, 8);
+      String quando(DateTime inicio) => alunoPendenciaTexto(
+        _pt,
+        AlunoPendencia(AlunoPendenciaTipo.agenda, quando: inicio),
+        hoje: manha,
+      ).detalhe;
+      expect(quando(DateTime(2026, 9, 27, 18)), 'Hoje às 18:00');
+      expect(quando(DateTime(2026, 9, 28, 7, 30)), 'Amanhã às 07:30');
+      expect(quando(DateTime(2026, 9, 30, 18)), endsWith('às 18:00'));
+      expect(quando(DateTime(2026, 9, 30, 18)), contains('30'));
     });
   });
 

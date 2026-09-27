@@ -112,6 +112,16 @@ void invalidateAlunoDashboardHome(WidgetRef ref) {
   ref.invalidate(alunoDashboardHomeProvider);
 }
 
+/// Puxar para atualizar: busca o bundle novo sem apagar o atual (mantém o
+/// ETag). Sem rede, lança antes de mexer no cache e a Home segue como estava.
+Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {
+  final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
+  final bundle = fresh ?? AlunoDashboardHomeClientCache.getEvenIfStale();
+  if (bundle != null) AlunoDashboardHomeClientCache.put(bundle);
+  ref.invalidate(alunoDashboardHomeProvider);
+  await ref.read(alunoDashboardHomeProvider.future);
+}
+
 final commandCenterProvider = FutureProvider<CommandCenterData>((ref) async {
   return (await ref.watch(dashboardHomeProvider.future)).commandCenter;
 });

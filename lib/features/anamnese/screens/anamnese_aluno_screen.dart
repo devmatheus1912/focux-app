@@ -20,6 +20,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_status_banner.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
@@ -28,7 +29,6 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/anamnese_repository.dart';
 import '../providers/anamnese_provider.dart';
 import '../utils/anamnese_display.dart';
-import '../widgets/anamnese_status_banner.dart';
 
 /// S5 — Aluno preenche a ficha (PAR-Q+ → Saúde → Hábitos → Treino → Algo mais).
 class AnamneseAlunoScreen extends ConsumerStatefulWidget {
@@ -455,7 +455,7 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                     ),
                     children: [
                     if (showBanner) ...[
-                    AnamneseStatusBanner(
+                    FxStatusBanner(
                       title: _enviada && !a.alunoDevePreencher
                           ? 'Enviada para revisão'
                           : anamneseAlunoCtaTitle(a),
@@ -463,10 +463,10 @@ class _AnamneseAlunoScreenState extends ConsumerState<AnamneseAlunoScreen> {
                           ? 'Seu personal vai revisar a ficha.'
                           : anamneseAlunoCtaBody(a),
                       tone: a.isPrecisaAtestado
-                          ? AnamneseBannerTone.warn
+                          ? FxBannerTone.warn
                           : (_enviada && !a.alunoDevePreencher
-                              ? AnamneseBannerTone.success
-                              : AnamneseBannerTone.info),
+                              ? FxBannerTone.success
+                              : FxBannerTone.info),
                     ),
                     const SizedBox(height: FxSettingsLayout.groupGap),
                   ],

@@ -49,13 +49,13 @@ ExecucaoTreino _treino(
 
 void main() {
   group('resolveAlunoTodayAction', () {
-    test('inadimplente vence treino pronto', () {
+    test('mensalidade atrasada não tira o treino do foco', () {
       final a = resolveAlunoTodayAction(
         aluno: _aluno(inadimplente: true),
         treinos: [_treino(7, 'Treino A')],
       );
-      expect(a.mode, AlunoTodayMode.financialHold);
-      expect(a.route, '/financeiro/aluno');
+      expect(a.mode, AlunoTodayMode.workoutReady);
+      expect(a.route, '/checkin/executar');
     });
 
     test('treino pronto vira o P0 mesmo sem foto de perfil', () {
@@ -169,14 +169,14 @@ void main() {
         expect(a.treinoNome, 'Treino B');
       });
 
-      test('bloqueio financeiro vence o feito de hoje', () {
+      test('mensalidade atrasada ainda mostra o treino feito hoje', () {
         final a = resolveAlunoTodayAction(
           aluno: _aluno(inadimplente: true),
           treinos: fichas,
           historico: [feito('2026-09-27T07:30:00')],
           now: agora,
         );
-        expect(a.mode, AlunoTodayMode.financialHold);
+        expect(a.mode, AlunoTodayMode.workoutDone);
       });
     });
 
@@ -247,10 +247,6 @@ void main() {
 
   group('alunoAutonomyTaskIdForToday', () {
     test('só manda evento onde o personal precisa agir', () {
-      expect(
-        alunoAutonomyTaskIdForToday(AlunoTodayMode.financialHold),
-        'financeiro',
-      );
       expect(
         alunoAutonomyTaskIdForToday(AlunoTodayMode.noWorkout),
         'treino-semana',

@@ -29,7 +29,10 @@ class AlunoPendencia {
   /// Medida: aluno nunca registrou (texto de primeira medida).
   final bool primeiraVez;
 
-  const AlunoPendencia(this.tipo, {this.primeiraVez = false});
+  /// Agenda: início do próximo horário.
+  final DateTime? quando;
+
+  const AlunoPendencia(this.tipo, {this.primeiraVez = false, this.quando});
 }
 
 const alunoPendenciasMax = 3;
@@ -37,12 +40,13 @@ const alunoMedidaValidadeDias = 14;
 
 /// Todas as pendências em aberto, em ordem de prioridade. A Home mostra as
 /// [alunoPendenciasMax] primeiras; uma fora do top 3 continua aberta.
-/// Agenda só com horário nos próximos 7 dias (`agendaProxima` do BFF).
+/// Agenda só com horário nos próximos 7 dias (`agendaProximoInicio` do BFF)
+/// que o aluno ainda não viu ([agendaReviewed]).
 List<AlunoPendencia> listAlunoPendenciasAbertas({
   required Aluno aluno,
   required List<MedidaCorporal> medidas,
   required int naoLidasDoPersonal,
-  required bool agendaProxima,
+  required DateTime? agendaProximoInicio,
   required bool agendaReviewed,
   required AlunoTodayMode todayMode,
   DateTime? now,
@@ -64,8 +68,8 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
         primeiraVez: ultimaMedida == null,
       ),
     if (naoLidasDoPersonal > 0) const AlunoPendencia(AlunoPendenciaTipo.chat),
-    if (agendaProxima && !agendaReviewed)
-      const AlunoPendencia(AlunoPendenciaTipo.agenda),
+    if (agendaProximoInicio != null && !agendaReviewed)
+      AlunoPendencia(AlunoPendenciaTipo.agenda, quando: agendaProximoInicio),
   ];
 }
 
@@ -83,13 +87,15 @@ List<AlunoPendencia> alunoPendenciasVisiveis(
     .take(alunoPendenciasMax)
     .toList(growable: false);
 
-/// Um aviso por vez abaixo do card de foco.
-enum AlunoHomeAviso { anamnese, coach, nenhum }
+/// Um aviso por vez abaixo do card de foco, em ordem de prioridade.
+enum AlunoHomeAviso { financeiro, anamnese, coach, nenhum }
 
 AlunoHomeAviso resolveAlunoHomeAviso({
+  required bool inadimplente,
   required bool anamnesePendente,
   required int coachMensagens,
 }) {
+  if (inadimplente) return AlunoHomeAviso.financeiro;
   if (anamnesePendente) return AlunoHomeAviso.anamnese;
   if (coachMensagens > 0) return AlunoHomeAviso.coach;
   return AlunoHomeAviso.nenhum;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
 import '../animations/fx_rive_assets.dart';
+import '../theme/design_tokens.dart';
 
 /// Autoplay Rive animation from bundled assets (offline-first).
 ///
@@ -125,7 +126,8 @@ class FxRiveBadgeGlow extends StatelessWidget {
   }
 }
 
-/// Heart pulse for recovery / wearable surfaces.
+/// Heart pulse for recovery / wearable surfaces. O pulso é em loop: com
+/// "reduzir animações" do aparelho fica só o ícone parado.
 class FxRiveHeartPulse extends StatelessWidget {
   const FxRiveHeartPulse({super.key, this.size = 28, this.fallback});
 
@@ -134,14 +136,18 @@ class FxRiveHeartPulse extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final estatico =
+        fallback ??
+        Icon(Icons.favorite_rounded, size: size * 0.7, color: EagleTokens.bad);
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      return SizedBox(width: size, height: size, child: Center(child: estatico));
+    }
     return FxRivePlayer(
       asset: FxRiveAssets.heartPulse,
       width: size,
       height: size,
       fit: BoxFit.contain,
-      fallback:
-          fallback ??
-          Icon(Icons.favorite_rounded, size: size * 0.7, color: Colors.redAccent),
+      fallback: estatico,
     );
   }
 }

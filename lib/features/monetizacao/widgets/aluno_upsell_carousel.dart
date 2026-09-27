@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -27,10 +28,27 @@ class AlunoUpsellCarousel extends ConsumerStatefulWidget {
 class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
   final Set<int> _enviando = {};
 
+  /// A resposta não tem volta no servidor: confirma antes de enviar.
   Future<void> _responder(AlunoOferta oferta, {required bool aceitar}) async {
-    if (!_enviando.add(oferta.alunoOfertaId)) return;
-    setState(() {});
+    if (_enviando.contains(oferta.alunoOfertaId)) return;
     final s = S.of(context);
+    final ok = await showFxConfirmSheet(
+      context,
+      title:
+          aceitar
+              ? s.alunoOfertaAceitarConfirmTitulo
+              : s.alunoOfertaRecusarConfirmTitulo,
+      subtitle: oferta.titulo,
+      message:
+          aceitar
+              ? s.alunoOfertaAceitarConfirmMensagem
+              : s.alunoOfertaRecusarConfirmMensagem,
+      confirmLabel:
+          aceitar ? s.alunoOfertaAceitarConfirmar : s.alunoOfertaRecusarConfirmar,
+      icon: aceitar ? Icons.local_offer_outlined : Icons.close_rounded,
+    );
+    if (!ok || !mounted || !_enviando.add(oferta.alunoOfertaId)) return;
+    setState(() {});
     try {
       await UpsellRepository(
         ref.read(apiClientProvider),
@@ -145,8 +163,8 @@ class _OfertaCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
+                child: TextButton(
+                  style: TextButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),
                   onPressed: enviando ? null : onDecline,
@@ -155,8 +173,8 @@ class _OfertaCard extends StatelessWidget {
               ),
               const SizedBox(width: TokensStrip.s2),
               Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),
                   onPressed: enviando ? null : onAccept,

@@ -4,6 +4,7 @@ part of 'aluno_dashboard_screen.dart';
 class _TodayFocusCard extends StatelessWidget {
   final AlunoTodayAction action;
   final AlunoHomeInsight? insight;
+  final bool prontidaoBaixa;
   final bool isDark;
   final VoidCallback onAction;
 
@@ -12,11 +13,16 @@ class _TodayFocusCard extends StatelessWidget {
     required this.isDark,
     required this.onAction,
     this.insight,
+    this.prontidaoBaixa = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final texto = alunoTodayTexto(S.of(context), action);
+    final texto = alunoTodayTexto(
+      S.of(context),
+      action,
+      prontidaoBaixa: prontidaoBaixa,
+    );
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
@@ -62,57 +68,80 @@ class _TodayFocusCard extends StatelessWidget {
   }
 }
 
-/// No máximo um aviso abaixo do foco: anamnese pendente vence o coach.
-/// Tudo vem do BFF da Home — nenhum request a mais no fold.
+/// No máximo um aviso abaixo do foco: mensalidade atrasada, depois anamnese
+/// pendente, depois o coach. Tudo vem do BFF da Home — nenhum request a mais.
 class _AlunoHomeAviso extends StatelessWidget {
   final AlunoHomeAviso aviso;
   final AlunoAnamnesePendente? anamnese;
   final List<CoachMensagem> coachMensagens;
+  final VoidCallback onFinanceiro;
 
   const _AlunoHomeAviso({
     required this.aviso,
     required this.anamnese,
     required this.coachMensagens,
+    required this.onFinanceiro,
   });
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final pendente = anamnese;
-    if (aviso == AlunoHomeAviso.anamnese && pendente != null) {
-      return _AnamneseAviso(pendente: pendente);
-    }
-    if (aviso == AlunoHomeAviso.coach) {
-      return CoachProativoCard(mensagens: coachMensagens);
-    }
-    return const SizedBox.shrink();
+    return switch (aviso) {
+      AlunoHomeAviso.financeiro => _AvisoBanner(
+        titulo: s.alunoAvisoFinanceiroTitulo,
+        detalhe: s.alunoAvisoFinanceiroDetalhe,
+        tone: FxBannerTone.warn,
+        onTap: onFinanceiro,
+      ),
+      AlunoHomeAviso.anamnese when pendente != null => _anamnese(
+        context,
+        pendente,
+      ),
+      AlunoHomeAviso.coach => CoachProativoCard(mensagens: coachMensagens),
+      _ => const SizedBox.shrink(),
+    };
+  }
+
+  Widget _anamnese(BuildContext context, AlunoAnamnesePendente pendente) {
+    final texto = alunoAnamneseAvisoTexto(S.of(context), pendente);
+    return _AvisoBanner(
+      titulo: texto.titulo,
+      detalhe: texto.detalhe,
+      tone:
+          pendente == AlunoAnamnesePendente.precisaAtestado
+              ? FxBannerTone.warn
+              : FxBannerTone.info,
+      onTap: () => context.push('/aluno/anamnese'),
+    );
   }
 }
 
-class _AnamneseAviso extends StatelessWidget {
-  final AlunoAnamnesePendente pendente;
+class _AvisoBanner extends StatelessWidget {
+  final String titulo;
+  final String detalhe;
+  final FxBannerTone tone;
+  final VoidCallback onTap;
 
-  const _AnamneseAviso({required this.pendente});
+  const _AvisoBanner({
+    required this.titulo,
+    required this.detalhe,
+    required this.tone,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final texto = alunoAnamneseAvisoTexto(S.of(context), pendente);
     return Semantics(
       button: true,
-      label: '${texto.titulo}. ${texto.detalhe}',
+      label: '$titulo. $detalhe',
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-          onTap: () => context.push('/aluno/anamnese'),
-          child: AnamneseStatusBanner(
-            title: texto.titulo,
-            body: texto.detalhe,
-            tone:
-                pendente == AlunoAnamnesePendente.precisaAtestado
-                    ? AnamneseBannerTone.warn
-                    : AnamneseBannerTone.info,
-          ),
+          onTap: onTap,
+          child: FxStatusBanner(title: titulo, body: detalhe, tone: tone),
         ),
       ),
     );

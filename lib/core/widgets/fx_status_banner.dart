@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../theme/brand_palette.dart';
+import '../theme/design_tokens.dart';
+import '../theme/focux_hub_typography.dart';
+import '../theme/fx_settings_layout.dart';
+import '../theme/tokens_strip.dart';
+import 'fx_icon.dart';
+import 'fx_shell_scaffold.dart';
 
-enum AnamneseBannerTone { info, warn, success }
+enum FxBannerTone { info, warn, success }
 
-/// Banner de status no fluxo do aluno (solicitar / atestado / enviada).
-class AnamneseStatusBanner extends StatelessWidget {
-  const AnamneseStatusBanner({
+/// Banner de status: título + texto num fundo tingido pelo tom.
+class FxStatusBanner extends StatelessWidget {
+  const FxStatusBanner({
     super.key,
     required this.title,
     required this.body,
-    this.tone = AnamneseBannerTone.info,
+    this.tone = FxBannerTone.info,
   });
 
   final String title;
   final String body;
-  final AnamneseBannerTone tone;
+  final FxBannerTone tone;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final Color accent = switch (tone) {
-      AnamneseBannerTone.warn => EagleTokens.warn,
-      AnamneseBannerTone.success => EagleTokens.good,
-      AnamneseBannerTone.info => BrandPalette.sectionAccent(primary, dark: isDark),
+      FxBannerTone.warn => EagleTokens.warn,
+      FxBannerTone.success => EagleTokens.good,
+      FxBannerTone.info => BrandPalette.sectionAccent(primary, dark: isDark),
     };
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
@@ -50,9 +50,9 @@ class AnamneseStatusBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FxIcon(
-                name: tone == AnamneseBannerTone.warn
+                name: tone == FxBannerTone.warn
                     ? 'alert-triangle'
-                    : tone == AnamneseBannerTone.success
+                    : tone == FxBannerTone.success
                     ? 'circle-check'
                     : 'bell',
                 size: 22,

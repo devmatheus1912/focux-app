@@ -9,6 +9,7 @@ import 'aluno_pendencias.dart';
 import 'aluno_today_action.dart';
 
 const alunoHomeRoute = '/dashboard/aluno';
+const alunoFinanceiroRoute = '/financeiro/aluno';
 
 /// Atalhos da Home em ordem de prioridade. Sem rotas do dock (Hoje, Treinos,
 /// Saúde, Chat, Perfil): o dock já leva a elas.
@@ -18,7 +19,7 @@ const alunoAtalhosPrioridade = [
   '/checkin/historico',
   '/aluno/habitos',
   '/aluno/desafios',
-  '/financeiro/aluno',
+  alunoFinanceiroRoute,
 ];
 const alunoAtalhosMax = 3;
 
@@ -37,11 +38,10 @@ bool alunoFerramentaLiberada(String rota, Set<String> indisponiveis) =>
 class AlunoHomeView {
   final AlunoTodayAction action;
 
-  /// [alunoInsightNoFoco]: sem insight na cobrança nem queda de ritmo no card
-  /// de quem acabou de treinar.
+  /// [alunoInsightNoFoco]: sem queda de ritmo no card de quem acabou de treinar.
   final AlunoHomeInsight? insight;
 
-  /// Vazia no bloqueio financeiro: não oferecer compra a quem está devendo.
+  /// Vazia com mensalidade atrasada: não oferecer compra a quem está devendo.
   final List<AlunoOferta> ofertas;
 
   /// Pendências em aberto, sem corte (base do COMPLETED de autonomia).
@@ -59,6 +59,10 @@ class AlunoHomeView {
   /// o card de foco é o estado guiado da tela.
   final bool jaTreinou;
   final bool prontidaoVisivel;
+
+  /// Treino pronto com a prontidão abaixo de [alunoProntidaoBaixaAbaixoDe]:
+  /// o card de foco pede para ir mais leve.
+  final bool prontidaoBaixa;
 
   /// A linha "Seu personal" do cabeçalho abre o chat.
   final bool chatNoCabecalho;
@@ -78,6 +82,7 @@ class AlunoHomeView {
     required this.jaTreinou,
     required this.prontidaoVisivel,
     required this.chatNoCabecalho,
+    this.prontidaoBaixa = false,
     this.ofertas = const [],
     this.recursosIndisponiveis = const {},
     this.recordeRecente = false,
@@ -85,9 +90,12 @@ class AlunoHomeView {
 
   bool get semanaVisivel => jaTreinou && !semana.isEmpty;
 
+  bool get financeiroEmAtraso => aviso == AlunoHomeAviso.financeiro;
+
   /// Destinos que já têm entrada acima dos atalhos.
   Set<String> get rotasNoTopo => {
     action.route,
+    if (financeiroEmAtraso) alunoFinanceiroRoute,
     if (aviso == AlunoHomeAviso.anamnese) '/aluno/anamnese',
     if (chatNoCabecalho) '/chat/aluno',
     for (final p in pendencias) Uri.parse(p.tipo.route).path,
@@ -114,12 +122,12 @@ AlunoHomeView buildAlunoHomeView(
     historico: home.historico,
     now: now,
   );
-  final financialHold = action.mode == AlunoTodayMode.financialHold;
+  final inadimplente = home.aluno.inadimplente;
   final abertas = listAlunoPendenciasAbertas(
     aluno: home.aluno,
     medidas: home.medidas,
     naoLidasDoPersonal: home.chat.naoLidasDoPersonal,
-    agendaProxima: home.agendaProxima,
+    agendaProximoInicio: home.agendaProximoInicio,
     agendaReviewed: agendaReviewed,
     todayMode: action.mode,
     now: now,
@@ -137,11 +145,12 @@ AlunoHomeView buildAlunoHomeView(
   return AlunoHomeView(
     action: action,
     insight: alunoInsightNoFoco(home.insight, action.mode),
-    ofertas: financialHold ? const [] : home.upsellPendentes,
+    ofertas: inadimplente ? const [] : home.upsellPendentes,
     pendenciasAbertas: abertas,
     pendencias: alunoPendenciasVisiveis(abertas, action.mode),
     coach: coach,
     aviso: resolveAlunoHomeAviso(
+      inadimplente: inadimplente,
       anamnesePendente: home.anamnesePendente != null,
       coachMensagens: coach.length,
     ),
@@ -155,6 +164,11 @@ AlunoHomeView buildAlunoHomeView(
       (h) => normalizeTreinoStatus(h.status) == treinoStatusConcluido,
     ),
     prontidaoVisivel: prontidaoVisivel,
+    prontidaoBaixa: alunoProntidaoBaixa(
+      mode: action.mode,
+      snapshot: home.recovery,
+      prontidaoVisivel: prontidaoVisivel,
+    ),
     chatNoCabecalho: home.personalBrand.nomePersonal.trim().isNotEmpty,
     recursosIndisponiveis: home.recursosIndisponiveis,
     recordeRecente: alunoRecordeRecente(
@@ -167,12 +181,24 @@ AlunoHomeView buildAlunoHomeView(
 AlunoHomeInsight? alunoInsightNoFoco(
   AlunoHomeInsight? insight,
   AlunoTodayMode mode,
-) => switch (mode) {
-  AlunoTodayMode.financialHold => null,
-  AlunoTodayMode.workoutDone when insight?.tipo == AlunoInsightTipo.ritmoCaiu =>
-    null,
-  _ => insight,
-};
+) =>
+    mode == AlunoTodayMode.workoutDone &&
+            insight?.tipo == AlunoInsightTipo.ritmoCaiu
+        ? null
+        : insight;
+
+/// Mesmo corte de "Recuperação parcial" do `RecoveryScoreCalculator` do backend.
+const alunoProntidaoBaixaAbaixoDe = 45;
+
+bool alunoProntidaoBaixa({
+  required AlunoTodayMode mode,
+  required RecoverySnapshot? snapshot,
+  required bool prontidaoVisivel,
+}) =>
+    mode == AlunoTodayMode.workoutReady &&
+    prontidaoVisivel &&
+    snapshot != null &&
+    snapshot.recoveryScore < alunoProntidaoBaixaAbaixoDe;
 
 const alunoRecordeNovoDias = 7;
 

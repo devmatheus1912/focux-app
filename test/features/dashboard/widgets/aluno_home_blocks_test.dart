@@ -186,9 +186,9 @@ void main() {
         ),
       );
       expect(find.text('Adicionar foto'), findsOneWidget);
-      expect(find.text('Conferir agenda'), findsOneWidget);
+      expect(find.text('Seu próximo horário'), findsOneWidget);
       expect(mostrados, [AlunoPendenciaTipo.foto, AlunoPendenciaTipo.agenda]);
-      await tester.tap(find.text('Conferir agenda'));
+      await tester.tap(find.text('Seu próximo horário'));
       expect(tocada?.tipo, AlunoPendenciaTipo.agenda);
     });
   });
@@ -230,11 +230,15 @@ void main() {
         AlunoAutonomyAnalytics.forToday(acao(AlunoTodayMode.noWorkout))?.taskId,
         'treino-semana',
       );
+      expect(AlunoAutonomyAnalytics.financeiro.taskId, 'financeiro');
+      expect(AlunoAutonomyAnalytics.financeiro.route, '/financeiro/aluno');
       expect(
-        AlunoAutonomyAnalytics.forToday(
-          acao(AlunoTodayMode.financialHold),
-        )?.taskId,
-        'financeiro',
+        alunoAutonomyOpenTaskIds(
+          action: acao(AlunoTodayMode.workoutReady),
+          pendenciasAbertas: const [],
+          financeiroEmAtraso: true,
+        ),
+        {'financeiro'},
       );
       expect(
         AlunoAutonomyAnalytics.forToday(acao(AlunoTodayMode.workoutReady)),
