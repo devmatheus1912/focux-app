@@ -40,11 +40,4 @@ abstract final class JwtAccessExp {
     final clock = (now ?? DateTime.now()).toUtc();
     return !clock.isBefore(exp.subtract(skew));
   }
-
-  static bool isExpired(String jwt, {DateTime? now}) {
-    final exp = expiresAt(jwt);
-    if (exp == null) return false;
-    final clock = (now ?? DateTime.now()).toUtc();
-    return !clock.isBefore(exp);
-  }
 }

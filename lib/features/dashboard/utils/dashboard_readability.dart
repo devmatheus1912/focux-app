@@ -22,10 +22,6 @@ Color dashboardReadableCaption(BuildContext context, {required bool isDark}) {
   return TokensStrip.textPrimary.withValues(alpha: 0.88);
 }
 
-Color dashboardHeroCaptionOnTeal() => Colors.white.withValues(alpha: 0.94);
-
-Color dashboardHeroLabelOnTeal() => Colors.white.withValues(alpha: 0.92);
-
 Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 
 ({Color background, Color foreground}) dashboardPriorityBadgeColors({
@@ -88,20 +84,6 @@ TextStyle dashboardMicroLabelStyle(
 TextStyle dashboardActionChipStyle(Color foreground) =>
     FocuxHubTypography.chip(foreground);
 
-TextStyle dashboardHeroEyebrowOnTeal() => FocuxHubTypography.bodyMuted(
-  color: dashboardHeroLabelOnTeal(),
-  fontWeight: FontWeight.w600,
-  height: 1.1,
-).copyWith(letterSpacing: 0.14);
-
-TextStyle dashboardHeroCaptionOnTealStyle({
-  FontWeight fontWeight = FontWeight.w500,
-}) => FocuxHubTypography.bodyMuted(
-  color: dashboardHeroCaptionOnTeal(),
-  fontWeight: fontWeight,
-  height: 1.3,
-);
-
 TextStyle dashboardHeroMutedOnTealStyle({
   FontWeight fontWeight = FontWeight.w700,
 }) => FocuxHubTypography.bodyMuted(
@@ -109,9 +91,6 @@ TextStyle dashboardHeroMutedOnTealStyle({
   fontWeight: fontWeight,
   height: 1.2,
 );
-
-TextStyle dashboardCardTitleStyle(Color ink) =>
-    FocuxHubTypography.cardTitle(color: ink);
 
 TextStyle dashboardCardSubtitleStyle(
   BuildContext context, {

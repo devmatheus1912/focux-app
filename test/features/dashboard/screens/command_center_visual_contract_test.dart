@@ -20,7 +20,6 @@ void main() {
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
-      'lib/features/dashboard/utils/dashboard_tool_recent_store.dart',
       'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
