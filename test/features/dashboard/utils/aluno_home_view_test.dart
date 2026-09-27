@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/coach/data/coach_proativo_repository.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_anamnese.dart';
+import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_analytics.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_texts.dart';
@@ -158,6 +159,30 @@ void main() {
       );
     });
 
+    test('quem acabou de treinar não lê "Seu ritmo caiu"', () {
+      final ritmo = AlunoHomeInsight.tryParse(_insight)!;
+      final volume = AlunoHomeInsight.tryParse({
+        ..._insight,
+        'tipo': 'VOLUME_SUBINDO',
+      })!;
+      expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutDone), isNull);
+      expect(alunoInsightNoFoco(volume, AlunoTodayMode.workoutDone), volume);
+      expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutReady), ritmo);
+      expect(alunoInsightNoFoco(volume, AlunoTodayMode.financialHold), isNull);
+
+      final view = buildAlunoHomeView(
+        _bundle(
+          fichas: 2,
+          concluidoEm: '2026-09-27T07:30:00',
+          insight: _insight,
+        ),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27, 18),
+      );
+      expect(view.action.mode, AlunoTodayMode.workoutDone);
+      expect(view.insight, isNull);
+    });
+
     test('bloqueio financeiro não oferece compra', () {
       expect(
         buildAlunoHomeView(
@@ -254,6 +279,16 @@ void main() {
       expect(view.atalhos, isNot(contains('/aluno/desafios')));
       expect(alunoFerramentaLiberada('/aluno/habitos', const {}), isTrue);
       expect(alunoFerramentaLiberada('/agenda/aluno', {'HABIT_COACHING'}), isTrue);
+    });
+
+    test('plano sem agenda tira o atalho de agenda', () {
+      final view = buildAlunoHomeView(
+        _bundle(recursosIndisponiveis: ['AGENDA']),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(view.atalhos, isNot(contains('/agenda/aluno')));
+      expect(alunoFerramentaLiberada('/agenda/aluno', {'AGENDA'}), isFalse);
     });
 
     test('atalhos nunca apontam para abas do dock', () {

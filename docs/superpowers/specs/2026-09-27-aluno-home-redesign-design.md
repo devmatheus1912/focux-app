@@ -71,7 +71,10 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
 NPS: o BFF só libera depois de 3 treinos concluídos e sem resposta nos
 últimos 30 dias. O app só pergunta quando o foco está em `workoutDone` (o
 aluno acabou de treinar), então a resposta gravada como `POS_TREINO` é
-verdadeira e a pergunta não interrompe quem abriu a Home para treinar.
+verdadeira e a pergunta não interrompe quem abriu a Home para treinar. A
+pergunta também espera a Home ser a rota visível (`alunoHomeRoute`): ao
+concluir o treino a Home recarrega por baixo da celebração, e o pop do
+check-in fecharia a folha.
 Fechar sem responder adia 7 dias neste aparelho (chave limpa no logout).
 
 Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso. Cada bloco só
@@ -95,13 +98,16 @@ soma espaço.
 - `insight` só traz o que nenhum bloco mostra: `RITMO_CAIU` (média das 4
   semanas anteriores ≥ 2/semana, 1+ treino nos últimos 7 dias, abaixo da
   metade da média e meta não batida) ou `VOLUME_SUBINDO`. Nada disso → `null`.
-  Sem `acao` nem `evidencia`.
+  Sem `acao` nem `evidencia`. O app esconde o insight no bloqueio financeiro e
+  esconde `RITMO_CAIU` em `workoutDone` (`alunoInsightNoFoco`): quem acabou de
+  treinar não lê "Seu ritmo caiu".
 - `coachMensagens`: não lidas dos últimos 3 dias
   (`CoachProativoScheduler.VALIDADE_DIAS`). `SEM_TREINO_5D` e
   `STREAK_QUEBRADO` anteriores ao último treino concluído não saem
   (`AlunoDashboardHomeSurface.coachAindaValido`).
 - `recursosIndisponiveis`: recursos de `RECURSOS_DO_ALUNO`
-  (`HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não libera.
+  (`AGENDA`, `HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não
+  libera. Sem `AGENDA`, o atalho de agenda some.
 - `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
   resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
 - `agendaProxima`: o aluno tem horário não cancelado nos próximos 7 dias
@@ -267,8 +273,9 @@ card de foco.
 
 ## 6. Estados
 
-- Carregando: `AlunoHomeSkeleton` no formato novo (cabeçalho, card de foco, 3
-  métricas, gráfico).
+- Carregando: `AlunoHomeSkeleton` só com cabeçalho e card de foco, os blocos
+  que sempre existem. Semana e Evolução dependem do histórico e entram abaixo,
+  então aluno novo não vê bloco sumir.
 - Erro: `FxErrorState` + `friendlyError` + retry (como hoje).
 - Vazio: aluno sem treino e sem histórico → o card de foco em `noWorkout` é o
   estado guiado; Sua semana e Evolução somem.

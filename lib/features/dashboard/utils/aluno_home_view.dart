@@ -8,6 +8,8 @@ import 'aluno_home_week.dart';
 import 'aluno_pendencias.dart';
 import 'aluno_today_action.dart';
 
+const alunoHomeRoute = '/dashboard/aluno';
+
 /// Atalhos da Home em ordem de prioridade. Sem rotas do dock (Hoje, Treinos,
 /// Saúde, Chat, Perfil): o dock já leva a elas.
 const alunoAtalhosPrioridade = [
@@ -23,6 +25,7 @@ const alunoAtalhosMax = 3;
 /// Ferramentas que dependem de um recurso do plano do personal (BFF
 /// `recursosIndisponiveis`). Sem o recurso, a tela só mostraria o bloqueio.
 const alunoFerramentaRecurso = {
+  '/agenda/aluno': 'AGENDA',
   '/aluno/habitos': 'HABIT_COACHING',
   '/aluno/desafios': 'COMUNIDADE_GRUPOS',
 };
@@ -34,7 +37,8 @@ bool alunoFerramentaLiberada(String rota, Set<String> indisponiveis) =>
 class AlunoHomeView {
   final AlunoTodayAction action;
 
-  /// Null no bloqueio financeiro: conquista não divide o card com cobrança.
+  /// [alunoInsightNoFoco]: sem insight na cobrança nem queda de ritmo no card
+  /// de quem acabou de treinar.
   final AlunoHomeInsight? insight;
 
   /// Vazia no bloqueio financeiro: não oferecer compra a quem está devendo.
@@ -132,7 +136,7 @@ AlunoHomeView buildAlunoHomeView(
   );
   return AlunoHomeView(
     action: action,
-    insight: financialHold ? null : home.insight,
+    insight: alunoInsightNoFoco(home.insight, action.mode),
     ofertas: financialHold ? const [] : home.upsellPendentes,
     pendenciasAbertas: abertas,
     pendencias: alunoPendenciasVisiveis(abertas, action.mode),
@@ -159,6 +163,16 @@ AlunoHomeView buildAlunoHomeView(
     ),
   );
 }
+
+AlunoHomeInsight? alunoInsightNoFoco(
+  AlunoHomeInsight? insight,
+  AlunoTodayMode mode,
+) => switch (mode) {
+  AlunoTodayMode.financialHold => null,
+  AlunoTodayMode.workoutDone when insight?.tipo == AlunoInsightTipo.ritmoCaiu =>
+    null,
+  _ => insight,
+};
 
 const alunoRecordeNovoDias = 7;
 

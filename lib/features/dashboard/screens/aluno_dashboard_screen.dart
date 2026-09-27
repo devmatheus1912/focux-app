@@ -61,8 +61,10 @@ class AlunoDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
+  var _npsPendente = false;
   var _npsPrompted = false;
   var _viewTracked = false;
+  GoRouterDelegate? _router;
 
   /// Null até ler as prefs: a pendência de agenda fica fora até lá, sem
   /// piscar nem mandar VIEWED de algo já resolvido.
@@ -78,6 +80,21 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       (_, next) => next.whenData(_onHomeLoaded),
       fireImmediately: true,
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final router = GoRouter.of(context).routerDelegate;
+    if (identical(router, _router)) return;
+    _router?.removeListener(_agendarNps);
+    _router = router..addListener(_agendarNps);
+  }
+
+  @override
+  void dispose() {
+    _router?.removeListener(_agendarNps);
+    super.dispose();
   }
 
   AlunoHomeView _viewFor(AlunoDashboardHomeBundle home) {
@@ -100,13 +117,24 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   void _onHomeLoaded(AlunoDashboardHomeBundle home) {
     MeusTreinosMemCache.save(home.treinos);
     _syncAnalytics(home);
-    if (!home.npsDeveResponder || _npsPrompted) return;
-    if (_viewFor(home).action.mode != AlunoTodayMode.workoutDone) return;
+    _npsPendente =
+        home.npsDeveResponder &&
+        _viewFor(home).action.mode == AlunoTodayMode.workoutDone;
+    _agendarNps();
+  }
+
+  void _agendarNps() {
+    if (!_npsPendente || _npsPrompted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tentarNps());
+  }
+
+  /// Ao concluir o treino a Home recarrega por baixo da celebração: a pergunta
+  /// espera a Home voltar para a frente, senão o pop do check-in a fecharia.
+  void _tentarNps() {
+    if (!mounted || !_npsPendente || _npsPrompted) return;
+    if (_router?.currentConfiguration.uri.path != alunoHomeRoute) return;
     _npsPrompted = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      showAlunoNpsPrompt(context, ref);
-    });
+    showAlunoNpsPrompt(context, ref);
   }
 
   Future<void> _loadAgendaReviewed() async {

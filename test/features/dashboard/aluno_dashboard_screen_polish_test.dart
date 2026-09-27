@@ -25,6 +25,8 @@ void main() {
     expect(screen, contains('AlunoHomeAnalytics.viewed'));
     expect(screen, contains('AlunoHomeAnalytics.focusAction'));
     expect(screen, contains('showAlunoNpsPrompt(context, ref)'));
+    expect(screen, contains('currentConfiguration.uri.path != alunoHomeRoute'));
+    expect(screen, contains('AlunoTodayMode.workoutDone'));
     expect(screen, isNot(contains('invalidate(alunoRecoveryProvider)')));
     expect(
       screen,
