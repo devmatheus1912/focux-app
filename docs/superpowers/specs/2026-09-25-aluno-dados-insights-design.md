@@ -59,6 +59,10 @@ Capítulos de system design citados: `docs/system/03-dados.md` (tenant por
 - `countFromDates` hoje devolve 0 se a semana atual ainda não tem treino. Novo
   `CheckinStreakWeeks.countAtivo(hoje, datas)`: se a semana atual está vazia,
   conta a partir da semana anterior.
+- Gamificação (`GET /api/gamificacao`) usa o mesmo `countAtivo` na leitura; o
+  `aluno_streaks` gravado vale só para `streakMaximo` e badge `STREAK_10`. No hub
+  do personal, "alunos em sequência" exige último treino na semana ISO atual ou
+  anterior (`CheckinStreakWeeks.ativo`).
 - As datas vêm da consulta existente `ExecucaoTreinoRepository.findConcluidoEmByAlunoId`
   (a mesma da gamificação), reaproveitada pelo motor (seção 2.2).
 - A tabela `aluno_streaks` segue alimentando a gamificação; o BFF deixa de lê-la.
@@ -128,7 +132,9 @@ Pacote `com.focux.modules.dashboard.insights`, Java puro, sem Spring:
 - `AlunoInsight` (record), `InsightTipo`, `InsightConfianca` (HIGH/MEDIUM/LOW).
 
 O `AlunoDashboardService` monta o input e chama o engine; exceção no engine →
-`log.warn` com `alunoId` e nome da regra (sem valores) e `insight = null`.
+`log.warn` com `alunoId` e nome da regra (sem valores) e `insight = null`. A regra
+que lança sai em `AlunoInsightEngine.RegraFalhou.regra()`; falha ao montar o input
+loga `regra=montar`.
 
 ### 2.2 Entrada (`AlunoInsightInput`)
 
@@ -137,7 +143,7 @@ O `AlunoDashboardService` monta o input e chama o engine; exceção no engine �
 | `totalConcluidos` | datas concluídas (1.2) |
 | `concluidosSemanaIso` | datas concluídas, semana ISO atual |
 | `concluidos7d`, `concluidos28dAnteriores` | datas concluídas (últimos 7 dias; dias 8–35) |
-| `diasSemTreino` | `aluno.diasSemTreino` |
+| `diasSemTreino` | `aluno.diasSemTreino` (dias de calendário, `AlertasService.diasDeCalendario`) |
 | `frequenciaDias` | `FocuxScoreCalculator.metaDiasSemanaPlano` |
 | `streakSemanas` | 1.2 |
 | `recoveryScore` | snapshot válido (1.3) ou `null` |
@@ -172,13 +178,13 @@ fallback):
 | NOVO | Seu histórico começa aqui | Complete seu primeiro treino. |
 | RECUPERACAO | Dia para ir mais leve | Seu sono e atividade sugerem um dia mais leve. Alinhe com seu personal. |
 | PR | Novo recorde | `{exercicio}: {cargaKg} kg` · Registrado há `{dias}` dias |
-| RETORNO | Bora retomar | `{dias}` dias sem treinar. Seu próximo treino está pronto. |
-| META_ATINGIDA | Meta da semana atingida | `{feitos}` de `{meta}` treinos nesta semana |
+| RETORNO | Bora retomar | `{dias}` dias sem treinar. Que tal retomar hoje? |
+| META_ATINGIDA | Meta da semana atingida | `{feitos}` treinos nesta semana (meta: `{meta}`) |
 | FORCA_SUBINDO | Sua força está subindo | `+{pct}%` vs semana passada (`{n}` exercícios) |
 | VOLUME_SUBINDO | Seu volume está subindo | `+{pct}%` vs média das 6 semanas anteriores |
 | CONSISTENTE | Ritmo forte | `{feitos}` treinos nos últimos 7 dias (chave `insightConsistente`); se disparou só pela sequência: `{semanas}` semanas seguidas treinando (chave `insightSequencia`) |
 | RITMO_CAIU | Seu ritmo caiu esta semana | `{feitos}` treinos nos últimos 7 dias |
-| DADOS_INSUFICIENTES | Continue treinando | Continue treinando para construirmos seu histórico. |
+| DADOS_INSUFICIENTES | Continue treinando | Continue treinando para ver novos sinais aqui. |
 
 Salvaguardas: a v1 não emite queda de força nem de volume; a semana em
 andamento nunca entra na comparação de volume; LOW só no fallback, sem números;

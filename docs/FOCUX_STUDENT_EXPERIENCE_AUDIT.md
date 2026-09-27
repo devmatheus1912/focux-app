@@ -69,12 +69,12 @@ Fora da Home: `/api/checkin/{id}/evolucao-sessao`, `/api/checkin/historico`,
 | Métrica | Onde | Fórmula |
 |---|---|---|
 | Aderência | `AlertasService.metricsFor` / `calcularRisco` | dias distintos com treino concluído em 30 dias × 100 / 30 |
-| Dias sem treino | `AlertasService` | dias desde `MAX(COALESCE(concluidoEm, iniciadoEm))` |
+| Dias sem treino | `AlertasService.diasDeCalendario` | dias de calendário desde `MAX(COALESCE(concluidoEm, iniciadoEm))` (era blocos de 24h) |
 | Score de prontidão | `alunos/ProntidaoService` | 100 − inadimplência − penalidade de aderência; não usado na Home |
 | Prontidão (recovery) | `health/RecoveryScoreCalculator` | base 62 ± sono, passos, FC média; gravado no sync |
-| Sequência | `GamificacaoService.atualizarStreakAposTreino` | semanas ISO consecutivas com treino; só recalculado ao concluir |
-| Volume | `AlunoHomeVolume` | Σ carga × primeiro número das reps, séries concluídas |
-| Força | `AlunoHomeVolume` | média simples da carga de todas as séries da semana |
+| Sequência | `CheckinStreakWeeks.countAtivo` (Home e Gamificação) | semanas ISO consecutivas com treino, calculado na leitura (era só ao concluir) |
+| Volume | `AlunoHomeVolume` | Σ carga × primeiro número das reps (`RepeticoesParser`), séries concluídas |
+| Força | `AlunoHomeVolume` | 1RM estimado (Epley) do top set por exercício; delta só entre exercícios comuns (era média simples da carga) |
 | Meta semanal | `FocuxScoreCalculator.metaDiasSemanaPlano` | `min(7, nº de treinos ativos)` |
 | PR | `CheckinEvolucaoAnalyzer` + `CheckinRecordeSync` | só PR de carga é persistido |
 | FocuxScore (app) | `_buildFocuxScore` em `aluno_autonomy_plan.dart` | pesos de perfil, consistência, evolução, medida, chat, financeiro |
