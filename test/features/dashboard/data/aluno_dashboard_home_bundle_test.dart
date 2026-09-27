@@ -89,7 +89,7 @@ Map<String, dynamic> _payload() => {
     'chave': 'insightMetaAtingida',
     'params': {'feitos': '4', 'meta': '4'},
     'titulo': 'Meta da semana atingida',
-    'mensagem': '4 de 4 treinos nesta semana',
+    'mensagem': '4 treinos nesta semana (meta: 4)',
     'acao': {'rota': '/checkin/treinos', 'cta': 'Ver treinos'},
   },
 };

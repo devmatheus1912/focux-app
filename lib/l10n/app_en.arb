@@ -194,7 +194,7 @@
   "insightRetornoTitulo": "Let's get back to it",
   "insightRetornoDetalhe": "{dias} days without training. How about getting back to it today?",
   "insightMetaAtingidaTitulo": "Weekly goal reached",
-  "insightMetaAtingidaDetalhe": "{feitos} of {meta} workouts this week",
+  "insightMetaAtingidaDetalhe": "{feitos, plural, =1{1 workout this week (goal: {meta})} other{{feitos} workouts this week (goal: {meta})}}",
   "insightForcaSubindoTitulo": "Your strength is going up",
   "insightForcaSubindoDetalhe": "+{pct}% vs last week ({n} exercises)",
   "insightVolumeSubindoTitulo": "Your volume is going up",

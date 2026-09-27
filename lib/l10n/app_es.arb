@@ -194,7 +194,7 @@
   "insightRetornoTitulo": "A retomar",
   "insightRetornoDetalhe": "{dias} días sin entrenar. ¿Qué tal retomar hoy?",
   "insightMetaAtingidaTitulo": "Meta semanal cumplida",
-  "insightMetaAtingidaDetalhe": "{feitos} de {meta} entrenamientos esta semana",
+  "insightMetaAtingidaDetalhe": "{feitos, plural, =1{1 entrenamiento esta semana (meta: {meta})} other{{feitos} entrenamientos esta semana (meta: {meta})}}",
   "insightForcaSubindoTitulo": "Tu fuerza está subiendo",
   "insightForcaSubindoDetalhe": "+{pct}% vs la semana pasada ({n} ejercicios)",
   "insightVolumeSubindoTitulo": "Tu volumen está subiendo",

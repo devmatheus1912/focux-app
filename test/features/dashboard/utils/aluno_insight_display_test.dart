@@ -47,7 +47,7 @@ void main() {
       'insightNovo': (const {}, 'Complete seu primeiro treino.'),
       'insightRecuperacao': (const {'score': '40'}, 'Prontidão 40/100. Alinhe o treino com seu personal.'),
       'insightRetorno': (const {'dias': '9'}, '9 dias sem treinar. Que tal retomar hoje?'),
-      'insightMetaAtingida': (const {'feitos': '4', 'meta': '3'}, '4 de 3 treinos nesta semana'),
+      'insightMetaAtingida': (const {'feitos': '4', 'meta': '3'}, '4 treinos nesta semana (meta: 3)'),
       'insightForcaSubindo': (const {'pct': '4.5', 'n': '3'}, '+4,5% vs semana passada (3 exercícios)'),
       'insightVolumeSubindo': (const {'pct': '12'}, '+12% vs média das 6 semanas anteriores'),
       'insightConsistente': (const {'feitos': '1'}, '1 treino nos últimos 7 dias'),
@@ -58,6 +58,11 @@ void main() {
     for (final e in casos.entries) {
       expect(alunoInsightTexto(pt, _insight(e.key, e.value.$1)).detalhe, e.value.$2, reason: e.key);
     }
+  });
+
+  test('meta de 1 treino usa singular', () {
+    final t = alunoInsightTexto(pt, _insight('insightMetaAtingida', const {'feitos': '1', 'meta': '1'}));
+    expect(t.detalhe, '1 treino nesta semana (meta: 1)');
   });
 
   test('chave desconhecida ou param faltando cai no texto do servidor', () {

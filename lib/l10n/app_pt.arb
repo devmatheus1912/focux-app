@@ -210,7 +210,7 @@
   "insightRetornoDetalhe": "{dias} dias sem treinar. Que tal retomar hoje?",
   "@insightRetornoDetalhe": { "placeholders": { "dias": { "type": "int" } } },
   "insightMetaAtingidaTitulo": "Meta da semana atingida",
-  "insightMetaAtingidaDetalhe": "{feitos} de {meta} treinos nesta semana",
+  "insightMetaAtingidaDetalhe": "{feitos, plural, =1{1 treino nesta semana (meta: {meta})} other{{feitos} treinos nesta semana (meta: {meta})}}",
   "@insightMetaAtingidaDetalhe": { "placeholders": { "feitos": { "type": "int" }, "meta": { "type": "int" } } },
   "insightForcaSubindoTitulo": "Sua força está subindo",
   "insightForcaSubindoDetalhe": "+{pct}% vs semana passada ({n} exercícios)",
