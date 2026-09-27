@@ -143,7 +143,9 @@ card de foco.
 
 - **Novos** em `lib/features/dashboard/`:
   `utils/aluno_today_action.dart`, `utils/aluno_pendencias.dart`,
-  `widgets/aluno_home_header.dart`, `widgets/aluno_week_summary.dart`,
+  `utils/aluno_home_week.dart`, `utils/aluno_home_texts.dart`,
+  `utils/aluno_autonomy_analytics.dart`, `widgets/aluno_home_header.dart`,
+  `widgets/aluno_week_summary_card.dart`, `widgets/aluno_evolution_card.dart`,
   `widgets/aluno_pendencias_block.dart`. `aluno_dashboard_screen.dart` fica só
   com composição e estados.
 - **Apagados** (grep antes; hoje só a Home os usa): `aluno_autonomy_plan.dart`
@@ -152,8 +154,12 @@ card de foco.
   `_HeroPill`, `_HomeNarrativeRail`, `_StreakFoldBadge`, `_WorkoutInsightPill`,
   `_StudentJourneyCard`, `_NextBestTaskPanel`, `_AutonomyTaskTile`,
   `_AutonomyTaskPill` e o texto de insight de `_PerformanceEvolutionCard`.
-  `ProgressoSemanalWidget` sai da Home; se ninguém mais usar, o arquivo é
-  apagado. Testes do contrato antigo (`aluno_autonomy_plan_test.dart` e
+  `ProgressoSemanalWidget` sai da Home, mas o arquivo fica (Meus Treinos usa).
+  `aluno_performance_evolution.dart` perde `AlunoPerformanceEvolutionView`,
+  `buildAlunoPerformanceEvolutionView`, `alunoPerformanceForcaDeltaInsight` e
+  `alunoUltimaEvolucaoPerformance`; ficam `alunoTrendPlot` e
+  `parseAlunoHomeSeries`. `volumeMesKg` sai do bundle do app (o campo segue no
+  payload). Testes do contrato antigo (`aluno_autonomy_plan_test.dart` e
   trechos do `aluno_dashboard_visual_contract_test.dart`) são reescritos para o
   contrato novo.
 - **Efeitos colaterais**: `MeusTreinosMemCache.save` sai do `build()` e vai
@@ -172,9 +178,20 @@ card de foco.
   nesta semana, sequência de 4 semanas, volume de 3.200 kg"); o último recorde
   também. Linha do personal tem rótulo "Abrir conversa com {nome}".
 - Alvos de toque ≥ 48 dp; contraste pelos tokens da paleta.
-- Analytics (`ProductEvents`): `aluno_today_action_tapped` (prop `modo`),
-  `aluno_pendencia_tapped` (prop `tipo`), `aluno_pendencias_viewed` 1× por
-  sessão. Reset no `session_invalidator`, como o insight. Sem PII nas props.
+- Analytics: reaproveita o contrato de autonomia que já existe
+  (`ProductEvents.alunoAutonomyTask*` + `POST /api/aluno/autonomia/eventos`).
+  O backend abre ações no Centro de Comando do personal a partir desses
+  eventos (`AlunoAutonomiaService`), então os `taskId` não mudam:
+  `perfil-base`, `foto-dados`, `medida-recente`, `chat-contexto`,
+  `agenda-semana`, `treino-semana`, `financeiro`. O `taskTitle` enviado fica
+  em pt fixo, porque vira texto da ação do personal.
+  - Pendência visível → `VIEWED` 1× por sessão por `taskId` (reset no
+    `session_invalidator`, como o insight). Toque → `CLICKED`.
+  - Toque no P0 → `CLICKED` só onde o personal precisa agir:
+    `financialHold` → `financeiro`, `noWorkout` → `treino-semana`,
+    `profileSetup` → `perfil-base`. `workoutReady` e `awaitingRelease` não
+    mandam evento de autonomia (começar treino não é pedido de apoio).
+  - Nenhum evento novo; sem PII nas props.
 
 ## 6. Estados
 
