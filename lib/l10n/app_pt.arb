@@ -207,7 +207,7 @@
   "insightPrDetalhe": "{exercicio}: {carga} kg · {dias, plural, =0{hoje} =1{ontem} other{há {dias} dias}}",
   "@insightPrDetalhe": { "placeholders": { "exercicio": { "type": "String" }, "carga": { "type": "String" }, "dias": { "type": "int" } } },
   "insightRetornoTitulo": "Bora retomar",
-  "insightRetornoDetalhe": "{dias} dias sem treinar. Seu próximo treino está pronto.",
+  "insightRetornoDetalhe": "{dias} dias sem treinar. Que tal retomar hoje?",
   "@insightRetornoDetalhe": { "placeholders": { "dias": { "type": "int" } } },
   "insightMetaAtingidaTitulo": "Meta da semana atingida",
   "insightMetaAtingidaDetalhe": "{feitos} de {meta} treinos nesta semana",
@@ -225,7 +225,7 @@
   "@insightSequenciaDetalhe": { "placeholders": { "semanas": { "type": "int" } } },
   "insightRitmoCaiuTitulo": "Seu ritmo caiu esta semana",
   "insightDadosInsuficientesTitulo": "Continue treinando",
-  "insightDadosInsuficientesDetalhe": "Continue treinando para construirmos seu histórico.",
+  "insightDadosInsuficientesDetalhe": "Continue treinando para ver novos sinais aqui.",
   "insightCtaTreinos": "Ver treinos",
   "insightCtaHistorico": "Ver histórico",
   "insightCtaSaude": "Ver prontidão"

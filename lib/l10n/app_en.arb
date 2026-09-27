@@ -192,7 +192,7 @@
   "insightPrTitulo": "New record",
   "insightPrDetalhe": "{exercicio}: {carga} kg · {dias, plural, =0{today} =1{yesterday} other{{dias} days ago}}",
   "insightRetornoTitulo": "Let's get back to it",
-  "insightRetornoDetalhe": "{dias} days without training. Your next workout is ready.",
+  "insightRetornoDetalhe": "{dias} days without training. How about getting back to it today?",
   "insightMetaAtingidaTitulo": "Weekly goal reached",
   "insightMetaAtingidaDetalhe": "{feitos} of {meta} workouts this week",
   "insightForcaSubindoTitulo": "Your strength is going up",
@@ -204,7 +204,7 @@
   "insightSequenciaDetalhe": "{semanas} weeks in a row",
   "insightRitmoCaiuTitulo": "Your rhythm dropped this week",
   "insightDadosInsuficientesTitulo": "Keep training",
-  "insightDadosInsuficientesDetalhe": "Keep training so we can build your history.",
+  "insightDadosInsuficientesDetalhe": "Keep training to see new signals here.",
   "insightCtaTreinos": "See workouts",
   "insightCtaHistorico": "See history",
   "insightCtaSaude": "See readiness"

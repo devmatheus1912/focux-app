@@ -277,6 +277,7 @@ class _TodayFocusCard extends StatelessWidget {
               insight: insight,
               onPrimary: mute,
               onAction: (rota) => context.push(rota),
+              showAction: insight.acao?.rota != action.route,
             )
           else
             Wrap(
@@ -726,7 +727,8 @@ class _DualTrendPainter extends CustomPainter {
     Color color, {
     required double strokeWidth,
   }) {
-    if (data.isEmpty || data.every((v) => v <= 0)) return;
+    final plot = alunoTrendPlot(data);
+    if (plot == null) return;
     final paint =
         Paint()
           ..color = color
@@ -734,23 +736,26 @@ class _DualTrendPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round
           ..strokeJoin = StrokeJoin.round;
-    final maxVal = data.reduce((a, b) => a > b ? a : b);
-    final minVal = data.reduce((a, b) => a < b ? a : b);
-    final span = (maxVal - minVal).abs() < 0.001 ? 1.0 : (maxVal - minVal);
     final path = Path();
-    for (var i = 0; i < data.length; i++) {
-      final x = data.length == 1
+    final isolated = <Offset>[];
+    for (var p = 0; p < plot.indexes.length; p++) {
+      final i = plot.indexes[p];
+      final x = plot.slotCount == 1
           ? size.width / 2
-          : i * size.width / (data.length - 1);
-      final norm = (data[i] - minVal) / span;
+          : i * size.width / (plot.slotCount - 1);
+      final norm = (plot.values[p] - plot.minVal) / plot.span;
       final y = size.height - (norm * (size.height - 8)) - 4;
-      if (i == 0) {
+      if (plot.startsSegment(p)) {
         path.moveTo(x, y);
       } else {
         path.lineTo(x, y);
       }
+      if (plot.isIsolated(p)) isolated.add(Offset(x, y));
     }
     canvas.drawPath(path, paint);
+    for (final at in isolated) {
+      canvas.drawCircle(at, strokeWidth, paint);
+    }
   }
 
   @override

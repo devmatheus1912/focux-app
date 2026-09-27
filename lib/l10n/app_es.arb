@@ -192,7 +192,7 @@
   "insightPrTitulo": "Nuevo récord",
   "insightPrDetalhe": "{exercicio}: {carga} kg · {dias, plural, =0{hoy} =1{ayer} other{hace {dias} días}}",
   "insightRetornoTitulo": "A retomar",
-  "insightRetornoDetalhe": "{dias} días sin entrenar. Tu próximo entrenamiento está listo.",
+  "insightRetornoDetalhe": "{dias} días sin entrenar. ¿Qué tal retomar hoy?",
   "insightMetaAtingidaTitulo": "Meta semanal cumplida",
   "insightMetaAtingidaDetalhe": "{feitos} de {meta} entrenamientos esta semana",
   "insightForcaSubindoTitulo": "Tu fuerza está subiendo",
@@ -204,7 +204,7 @@
   "insightSequenciaDetalhe": "{semanas} semanas seguidas entrenando",
   "insightRitmoCaiuTitulo": "Tu ritmo bajó esta semana",
   "insightDadosInsuficientesTitulo": "Sigue entrenando",
-  "insightDadosInsuficientesDetalhe": "Sigue entrenando para construir tu historial.",
+  "insightDadosInsuficientesDetalhe": "Sigue entrenando para ver nuevas señales aquí.",
   "insightCtaTreinos": "Ver entrenamientos",
   "insightCtaHistorico": "Ver historial",
   "insightCtaSaude": "Ver preparación"

@@ -18,8 +18,9 @@ const _pr = AlunoHomeInsight(
 Future<void> _pump(
   WidgetTester tester,
   AlunoHomeInsight insight,
-  ValueChanged<String> onAction,
-) {
+  ValueChanged<String> onAction, {
+  bool showAction = true,
+}) {
   return tester.pumpWidget(
     MaterialApp(
       locale: const Locale('pt'),
@@ -30,6 +31,7 @@ Future<void> _pump(
           insight: insight,
           onPrimary: Colors.black54,
           onAction: onAction,
+          showAction: showAction,
         ),
       ),
     ),
@@ -59,7 +61,7 @@ void main() {
       confianca: AlunoInsightConfianca.low,
       chave: 'insightDadosInsuficientes',
       titulo: 'Continue treinando',
-      mensagem: 'Continue treinando para construirmos seu histórico.',
+      mensagem: 'Continue treinando para ver novos sinais aqui.',
     );
     var tocou = false;
     await _pump(tester, semAcao, (_) => tocou = true);
@@ -68,6 +70,16 @@ void main() {
     expect(find.textContaining('Ver '), findsNothing);
     await tester.tap(find.byType(AlunoHomeInsightLine));
     expect(tocou, isFalse);
+  });
+
+  testWidgets('showAction false oculta CTA e toque não navega', (tester) async {
+    String? rota;
+    await _pump(tester, _pr, (r) => rota = r, showAction: false);
+
+    expect(find.text('Novo recorde'), findsOneWidget);
+    expect(find.text('Ver histórico'), findsNothing);
+    await tester.tap(find.byType(AlunoHomeInsightLine));
+    expect(rota, isNull);
   });
 
   test('visualização conta uma vez por tipo na sessão', () {

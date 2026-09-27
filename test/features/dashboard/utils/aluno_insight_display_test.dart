@@ -46,14 +46,14 @@ void main() {
     final casos = <String, (Map<String, String>, String)>{
       'insightNovo': (const {}, 'Complete seu primeiro treino.'),
       'insightRecuperacao': (const {'score': '40'}, 'Prontidão 40/100. Alinhe o treino com seu personal.'),
-      'insightRetorno': (const {'dias': '9'}, '9 dias sem treinar. Seu próximo treino está pronto.'),
+      'insightRetorno': (const {'dias': '9'}, '9 dias sem treinar. Que tal retomar hoje?'),
       'insightMetaAtingida': (const {'feitos': '4', 'meta': '3'}, '4 de 3 treinos nesta semana'),
       'insightForcaSubindo': (const {'pct': '4.5', 'n': '3'}, '+4,5% vs semana passada (3 exercícios)'),
       'insightVolumeSubindo': (const {'pct': '12'}, '+12% vs média das 6 semanas anteriores'),
       'insightConsistente': (const {'feitos': '1'}, '1 treino nos últimos 7 dias'),
       'insightSequencia': (const {'semanas': '5'}, '5 semanas seguidas treinando'),
       'insightRitmoCaiu': (const {'feitos': '0'}, '0 treinos nos últimos 7 dias'),
-      'insightDadosInsuficientes': (const {}, 'Continue treinando para construirmos seu histórico.'),
+      'insightDadosInsuficientes': (const {}, 'Continue treinando para ver novos sinais aqui.'),
     };
     for (final e in casos.entries) {
       expect(alunoInsightTexto(pt, _insight(e.key, e.value.$1)).detalhe, e.value.$2, reason: e.key);

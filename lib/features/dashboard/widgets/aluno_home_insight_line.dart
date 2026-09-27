@@ -14,11 +14,13 @@ class AlunoHomeInsightLine extends StatefulWidget {
     required this.insight,
     required this.onPrimary,
     required this.onAction,
+    this.showAction = true,
   });
 
   final AlunoHomeInsight insight;
   final Color onPrimary;
   final ValueChanged<String> onAction;
+  final bool showAction;
 
   @override
   State<AlunoHomeInsightLine> createState() => _AlunoHomeInsightLineState();
@@ -43,7 +45,7 @@ class _AlunoHomeInsightLineState extends State<AlunoHomeInsightLine> {
   Widget build(BuildContext context) {
     final insight = widget.insight;
     final texto = alunoInsightTexto(S.of(context), insight);
-    final acao = insight.acao;
+    final acao = widget.showAction ? insight.acao : null;
     final cta = acao == null ? null : texto.cta;
     final primary = Theme.of(context).colorScheme.primary;
 
