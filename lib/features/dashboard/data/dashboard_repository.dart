@@ -16,6 +16,7 @@ import '../utils/aluno_dashboard_home_client_cache.dart';
 import '../utils/aluno_performance_evolution.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_client_cache.dart';
+import 'aluno_home_insight.dart';
 import 'command_center_data.dart';
 
 class DashboardAderenciaTopItem {
@@ -390,6 +391,13 @@ class AlunoDashboardHomeBundle {
   final List<RecordePessoal> recordes;
   /// Meta semanal (dias) da prescrição ativa — SSOT do BFF.
   final int? frequenciaDias;
+
+  /// e1RM médio, semana atual vs anterior (só exercícios em comum); null = sem base.
+  final double? forcaDeltaPercent;
+
+  /// Última prontidão tem mais de 1 dia: o BFF manda `recovery: null` + true.
+  final bool recoveryStale;
+  final AlunoHomeInsight? insight;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -412,6 +420,9 @@ class AlunoDashboardHomeBundle {
     this.forcaPorSemana = const [],
     this.recordes = const [],
     this.frequenciaDias,
+    this.forcaDeltaPercent,
+    this.recoveryStale = false,
+    this.insight,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -527,6 +538,9 @@ class AlunoDashboardHomeBundle {
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),
       frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
+      forcaDeltaPercent: (json['forcaDeltaPercent'] as num?)?.toDouble(),
+      recoveryStale: json['recoveryStale'] as bool? ?? false,
+      insight: AlunoHomeInsight.tryParse(json['insight']),
     );
   }
 }

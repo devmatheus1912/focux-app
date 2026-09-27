@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 
 Map<String, dynamic> _payload() => {
@@ -80,6 +81,17 @@ Map<String, dynamic> _payload() => {
     'recoveryHint': 'Boa noite de sono',
     'sincronizadoEm': '2026-08-16T07:10:00',
   },
+  'forcaDeltaPercent': 4.5,
+  'recoveryStale': false,
+  'insight': {
+    'tipo': 'META_ATINGIDA',
+    'confianca': 'HIGH',
+    'chave': 'insightMetaAtingida',
+    'params': {'feitos': '4', 'meta': '4'},
+    'titulo': 'Meta da semana atingida',
+    'mensagem': '4 de 4 treinos nesta semana',
+    'acao': {'rota': '/checkin/treinos', 'cta': 'Ver treinos'},
+  },
 };
 
 void main() {
@@ -108,6 +120,15 @@ void main() {
       expect(bundle.volumeSemanaKg, 240);
       expect(bundle.volumeMesKg, 1800);
       expect(bundle.frequenciaDias, 4);
+      expect(bundle.forcaDeltaPercent, 4.5);
+      expect(bundle.recoveryStale, isFalse);
+      expect(bundle.insight?.tipo, AlunoInsightTipo.metaAtingida);
+      expect(bundle.insight?.acao?.rota, '/checkin/treinos');
+      // BFF não manda mais campos de CRM do personal; o modelo usa defaults.
+      expect(bundle.aluno.emRisco, isFalse);
+      expect(bundle.aluno.statusFinanceiro, 'ATIVO');
+      expect(bundle.aluno.inadimplente, isFalse);
+      expect(bundle.aluno.ultimoContato, isNull);
     });
 
     test('tolerates missing optional blocks', () {
@@ -125,7 +146,10 @@ void main() {
         ..remove('streakAtual')
         ..remove('volumeSemanaKg')
         ..remove('volumeMesKg')
-        ..remove('frequenciaDias');
+        ..remove('frequenciaDias')
+        ..remove('forcaDeltaPercent')
+        ..remove('recoveryStale')
+        ..remove('insight');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -143,6 +167,25 @@ void main() {
       expect(bundle.volumeSemanaKg, 0);
       expect(bundle.volumeMesKg, 0);
       expect(bundle.frequenciaDias, isNull);
+      expect(bundle.forcaDeltaPercent, isNull);
+      expect(bundle.recoveryStale, isFalse);
+      expect(bundle.insight, isNull);
+    });
+
+    test('insight malformado é ignorado sem derrubar a Home', () {
+      final json = _payload()..['insight'] = {'tipo': 'QUALQUER'};
+      final bundle = AlunoDashboardHomeBundle.fromJson(json);
+      expect(bundle.insight, isNull);
+      expect(bundle.aluno.nome, 'Ana Souza');
+    });
+
+    test('prontidão velha chega como recovery null + recoveryStale', () {
+      final json = _payload()
+        ..['recovery'] = null
+        ..['recoveryStale'] = true;
+      final bundle = AlunoDashboardHomeBundle.fromJson(json);
+      expect(bundle.recovery, isNull);
+      expect(bundle.recoveryStale, isTrue);
     });
   });
 
