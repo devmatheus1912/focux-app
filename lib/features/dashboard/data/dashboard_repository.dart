@@ -385,7 +385,9 @@ class AlunoDashboardHomeBundle {
   final bool hasWearableHistory;
   final int streakAtual;
   final double volumeSemanaKg;
-  final double volumeMesKg;
+
+  /// Sessões concluídas na semana ISO (BFF); null em backend antigo ou falha.
+  final int? concluidosSemanaIso;
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
@@ -415,7 +417,7 @@ class AlunoDashboardHomeBundle {
     this.hasWearableHistory = false,
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
-    this.volumeMesKg = 0,
+    this.concluidosSemanaIso,
     this.volumePorSemana = const [],
     this.forcaPorSemana = const [],
     this.recordes = const [],
@@ -533,7 +535,10 @@ class AlunoDashboardHomeBundle {
       hasWearableHistory: json['hasWearableHistory'] as bool? ?? false,
       streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
       volumeSemanaKg: (json['volumeSemanaKg'] as num?)?.toDouble() ?? 0,
-      volumeMesKg: (json['volumeMesKg'] as num?)?.toDouble() ?? 0,
+      concluidosSemanaIso: switch (json['concluidosSemanaIso']) {
+        final num v => v.toInt(),
+        _ => null,
+      },
       volumePorSemana: parseAlunoHomeSeries(json['volumePorSemana']),
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),

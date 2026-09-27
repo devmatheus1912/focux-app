@@ -246,7 +246,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       _PerformanceEvolutionCard(
                         historicoAsync: AsyncValue.data(home.historico),
                         volumeSemanaKg: home.volumeSemanaKg,
-                        volumeMesKg: home.volumeMesKg,
+                        volumeMesKg: 0,
                         volumePorSemana: home.volumePorSemana,
                         forcaPorSemana: home.forcaPorSemana,
                         recordes: home.recordes,

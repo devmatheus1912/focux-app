@@ -67,7 +67,7 @@ Map<String, dynamic> _payload() => {
   'npsDeveResponder': true,
   'streakAtual': 12,
   'volumeSemanaKg': 240.0,
-  'volumeMesKg': 1800.0,
+  'concluidosSemanaIso': 2,
   'frequenciaDias': 4,
   'hasWearableHistory': true,
   'recovery': {
@@ -118,7 +118,7 @@ void main() {
       expect(bundle.hasWearableHistory, isTrue);
       expect(bundle.streakAtual, 12);
       expect(bundle.volumeSemanaKg, 240);
-      expect(bundle.volumeMesKg, 1800);
+      expect(bundle.concluidosSemanaIso, 2);
       expect(bundle.frequenciaDias, 4);
       expect(bundle.forcaDeltaPercent, 4.5);
       expect(bundle.recoveryStale, isFalse);
@@ -145,7 +145,7 @@ void main() {
         ..remove('recovery')
         ..remove('streakAtual')
         ..remove('volumeSemanaKg')
-        ..remove('volumeMesKg')
+        ..remove('concluidosSemanaIso')
         ..remove('frequenciaDias')
         ..remove('forcaDeltaPercent')
         ..remove('recoveryStale')
@@ -165,7 +165,7 @@ void main() {
       expect(bundle.recovery, isNull);
       expect(bundle.streakAtual, 0);
       expect(bundle.volumeSemanaKg, 0);
-      expect(bundle.volumeMesKg, 0);
+      expect(bundle.concluidosSemanaIso, isNull);
       expect(bundle.frequenciaDias, isNull);
       expect(bundle.forcaDeltaPercent, isNull);
       expect(bundle.recoveryStale, isFalse);
@@ -191,10 +191,12 @@ void main() {
     test('escalares novos malformados viram null/false sem derrubar a Home', () {
       final json = _payload()
         ..['forcaDeltaPercent'] = '4.5'
-        ..['recoveryStale'] = 'sim';
+        ..['recoveryStale'] = 'sim'
+        ..['concluidosSemanaIso'] = 'x';
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
       expect(bundle.forcaDeltaPercent, isNull);
       expect(bundle.recoveryStale, isFalse);
+      expect(bundle.concluidosSemanaIso, isNull);
       expect(bundle.aluno.nome, 'Ana Souza');
     });
   });
