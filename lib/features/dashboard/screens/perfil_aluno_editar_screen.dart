@@ -36,12 +36,12 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../../../core/utils/pt_br_display.dart';
-
 part 'perfil_aluno_editar_screen_state.part.dart';
 part 'perfil_aluno_editar_screen_widgets.part.dart';
 
 class PerfilAlunoEditarScreen extends ConsumerStatefulWidget {
-  const PerfilAlunoEditarScreen({super.key});
+  const PerfilAlunoEditarScreen({super.key, this.acao});
+  final PerfilEditarAcao? acao;
 
   @override
   ConsumerState<PerfilAlunoEditarScreen> createState() =>

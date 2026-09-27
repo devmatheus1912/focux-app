@@ -74,7 +74,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       Aluno360ClientCache.clear();
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
-      ref.invalidate(alunoDashboardHomeProvider);
+      invalidateAlunoDashboardHome(ref);
       if (!mounted) return;
       await FxCelebrationOverlay.show(
         context,

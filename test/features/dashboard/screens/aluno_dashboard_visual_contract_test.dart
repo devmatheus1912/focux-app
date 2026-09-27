@@ -19,10 +19,17 @@ void main() {
     expect(at('AlunoHomeHeader('), lessThan(at('_TodayFocusCard(')));
     expect(at('_TodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
     expect(at('_AlunoHomeAviso('), lessThan(at('AlunoWeekSummaryCard(')));
-    expect(at('AlunoWeekSummaryCard('), lessThan(at('AlunoEvolutionCard(')));
+    expect(at('AlunoWeekSummaryCard('), lessThan(at('AlunoRecoveryCard(')));
+    expect(at('AlunoRecoveryCard('), lessThan(at('AlunoEvolutionCard(')));
     expect(at('AlunoEvolutionCard('), lessThan(at('AlunoPendenciasBlock(')));
     expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
-    expect(at('AlunoUpsellCarousel('), lessThan(at('_StudentToolsSection()')));
+    expect(
+      at('AlunoUpsellCarousel('),
+      lessThan(at('_StudentToolsSection(atalhos: view.atalhos)')),
+    );
+    expect(screen, contains('insight: view.insight'));
+    expect(screen, contains('view.semanaVisivel'));
+    expect(screen, contains('view.prontidaoVisivel'));
 
     expect(screen, contains('s.alunoHomeTitulo'));
     expect(screen, contains('S.of(context).alunoHomePerfilSemantics'));

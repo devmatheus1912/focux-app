@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/design_tokens.dart';
+
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/coach_proativo_repository.dart';
-
-final coachMensagensProvider = FutureProvider<List<CoachMensagem>>((ref) async {
-  return CoachProativoRepository(ref.read(apiClientProvider)).mensagens();
-});
 
 final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
   return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
 });
 
+/// Mensagens não lidas do coach na Home do aluno (vêm do BFF).
 class CoachProativoCard extends ConsumerStatefulWidget {
-  const CoachProativoCard({super.key, required this.isDark, this.mensagens});
-  final bool isDark;
-  final List<CoachMensagem>? mensagens;
+  const CoachProativoCard({super.key, required this.mensagens});
+
+  final List<CoachMensagem> mensagens;
 
   @override
   ConsumerState<CoachProativoCard> createState() => _CoachProativoCardState();
@@ -25,109 +27,86 @@ class CoachProativoCard extends ConsumerStatefulWidget {
 
 class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
   int _index = 0;
+  bool _enviando = false;
+
+  Future<void> _marcarLido(CoachMensagem msg) async {
+    setState(() => _enviando = true);
+    try {
+      await CoachProativoRepository(
+        ref.read(apiClientProvider),
+      ).marcarLido(msg.id);
+      if (!mounted) return;
+      invalidateAlunoDashboardHome(ref);
+    } catch (_) {
+      if (mounted) {
+        FeedbackHelper.showError(context, S.of(context).alunoCoachErro);
+      }
+    } finally {
+      if (mounted) setState(() => _enviando = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final provided = widget.mensagens;
-    if (provided != null) {
-      return _card(provided);
-    }
-    final async = ref.watch(coachMensagensProvider);
-    return async.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-      data: _card,
-    );
-  }
-
-  Widget _card(List<CoachMensagem> msgs) {
+    final msgs = widget.mensagens;
     if (msgs.isEmpty) return const SizedBox.shrink();
+    final s = S.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final clamped = _index.clamp(0, msgs.length - 1);
-    final msg = msgs[clamped];
+    final chrome = ShellChrome.of(context);
+    final atual = _index.clamp(0, msgs.length - 1);
+    final msg = msgs[atual];
+
     return Container(
-      margin: const EdgeInsets.only(bottom: TokensStrip.s3),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: widget.isDark ? 0.12 : 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.2)),
-      ),
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(Icons.psychology_outlined, color: primary, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Coach proativo',
-                style: TextStyle(fontWeight: FontWeight.w600, color: ink),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: Text(
+                  s.alunoCoachTitulo,
+                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                ),
               ),
-              const Spacer(),
               if (msgs.length > 1)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${clamped + 1}/${msgs.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                Text(
+                  s.alunoCoachPosicao(atual + 1, msgs.length),
+                  style: FocuxHubTypography.chip(chrome.mute),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(msg.mensagem, style: TextStyle(color: ink, height: 1.35)),
+          const SizedBox(height: TokensStrip.s2),
+          Text(msg.mensagem, style: FocuxHubTypography.body(color: chrome.ink)),
+          const SizedBox(height: TokensStrip.s1),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (msgs.length > 1)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left, size: 20),
-                      onPressed:
-                          clamped == 0
-                              ? null
-                              : () => setState(() => _index = clamped - 1),
-                      tooltip: 'Anterior',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right, size: 20),
-                      onPressed:
-                          clamped >= msgs.length - 1
-                              ? null
-                              : () => setState(() => _index = clamped + 1),
-                      tooltip: 'Próxima',
-                    ),
-                  ],
-                )
-              else
-                const SizedBox.shrink(),
+              if (msgs.length > 1) ...[
+                IconButton(
+                  icon: const Icon(Icons.chevron_left_rounded),
+                  tooltip: s.alunoCoachAnterior,
+                  onPressed:
+                      atual == 0
+                          ? null
+                          : () => setState(() => _index = atual - 1),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right_rounded),
+                  tooltip: s.alunoCoachProxima,
+                  onPressed:
+                      atual >= msgs.length - 1
+                          ? null
+                          : () => setState(() => _index = atual + 1),
+                ),
+              ],
+              const Spacer(),
               TextButton(
-                onPressed: () async {
-                  await CoachProativoRepository(
-                    ref.read(apiClientProvider),
-                  ).marcarLido(msg.id);
-                  if (clamped >= msgs.length - 1 && clamped > 0) {
-                    setState(() => _index = clamped - 1);
-                  }
-                  ref.invalidate(coachMensagensProvider);
-                  ref.invalidate(alunoDashboardHomeProvider);
-                },
-                child: const Text('Entendi'),
+                style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
+                onPressed: _enviando ? null : () => _marcarLido(msg),
+                child: Text(s.alunoCoachEntendi),
               ),
             ],
           ),

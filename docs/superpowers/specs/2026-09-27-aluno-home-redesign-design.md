@@ -36,19 +36,29 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
    da ação) e o chip P0 (`FxActionChip`). Saem o badge de sequência, a pill de
    ritmo local e as linhas de narrativa.
 3. **Aviso único.** No máximo um banner: anamnese pendente; se não houver,
-   mensagem do coach proativo. Nenhum dos dois → nada.
+   mensagem do coach ("Seu coach Focux"). Nenhum dos dois → nada. No
+   bloqueio financeiro o card de foco não mostra insight.
 4. **Sua semana — como estou.** Três métricas: sessões na semana contra a meta
    ("2 de 3"), sequência em semanas e volume da semana. Abaixo, o
-   `AlunoRecoveryCard` com as regras atuais (só com histórico de wearable).
+   `AlunoRecoveryCard` alimentado pelo BFF (`alunoProntidaoVisivel`): prontidão
+   de hoje com histórico de wearable, ou convite para sincronizar quando a
+   última é antiga. Sem wearable o bloco não existe.
 5. **Evolução — estou evoluindo.** Gráfico de força (1RM est.) e volume das 8
    semanas, variação da força como métrica e o último recorde em uma linha.
    Sem texto que repita o insight e sem botão "Treinar agora".
 6. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → o bloco
    some.
-7. **Ofertas.** `AlunoUpsellCarousel`, como hoje, só que nesta posição.
-8. **Ferramentas.** `_StudentToolsSection`, sem mudança.
+7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF, header de seção,
+   botões de 48 dp travados durante o envio.
+8. **Ferramentas.** `_StudentToolsSection` com até 3 atalhos dinâmicos
+   (`AlunoHomeView.atalhos`): ordem de `alunoAtalhosPrioridade`, sem abas do
+   dock e sem destino que já aparece acima (`rotasNoTopo`: foco, CTA do
+   insight, aviso de anamnese, chat do cabeçalho e pendências). O catálogo
+   completo continua no "Ver todas".
 
-Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso.
+Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso. Cada bloco só
+entra com conteúdo e traz o próprio espaçamento, então bloco escondido não
+soma espaço.
 
 ## 2. Dados e contrato
 
@@ -60,6 +70,11 @@ Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso.
   `AlunoHomeInsightInputs.montar`, então o bloco "Sua semana" e o insight
   `META_ATINGIDA` usam o mesmo número.
 - Se a montagem do input falhar, o campo vai `null` (mesma regra do `insight`).
+- `frequenciaDias` é a meta da Home: `AlunoDashboardHomeSurface.metaSemanal`
+  = fichas ativas do rodízio (2–7). Com menos de 2 fichas o plano não diz a
+  frequência, então vai `null` e o insight `META_ATINGIDA` não dispara.
+  `FocuxScoreCalculator.metaDiasSemanaPlano` segue só como denominador de score.
+- `recordes` vem com cap 1: a Home usa só o último (evolução e insight PR).
 - Aditivo: nenhum campo removido; `historico` legado continua `[]`. Entra no
   cache de 60s e na ETag. Sem tabela, sem migration.
 - Atualizar a descrição do OpenAPI em `AlunoDashboardController`.
@@ -70,11 +85,18 @@ Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso.
 |---|---|
 | Cabeçalho | `aluno.nome` (primeiro nome), `personalBrand.nomePersonal`, `personalBrand.logoUrl` |
 | Card de foco | `resolveAlunoTodayAction` (§3.1) + `insight` |
-| Aviso | `minhaAnamneseProvider` (como hoje) e `coachMensagens` |
+| Aviso | `anamnesePendente` e `coachMensagens` |
 | Sua semana | `concluidosSemanaIso`, `frequenciaDias`, `streakAtual`, `volumeSemanaKg` |
 | Prontidão | `recovery`, `recoveryStale`, `hasWearableHistory` |
 | Evolução | `forcaPorSemana`, `volumePorSemana`, `forcaDeltaPercent`, `recordes.first` |
-| Pendências | `resolveAlunoPendencias` (§3.2) |
+| Pendências | `listAlunoPendenciasAbertas` + `alunoPendenciasVisiveis` (§3.2) |
+| Ofertas | `upsellPendentes` |
+
+Tudo que a Home deriva do bundle sai de `buildAlunoHomeView`, memoizado por
+bundle e estado da agenda. Escritas que mudam a Home (check-in, confirmar
+plano, coach lido, oferta respondida, chat, anamnese, perfil) chamam
+`invalidateAlunoDashboardHome(ref)`, que limpa o cache do app antes de
+invalidar o provider.
 
 `AlunoDashboardHomeBundle` lê `concluidosSemanaIso` como `int?`; valor ausente
 ou malformado → `null`.
@@ -102,7 +124,7 @@ completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
 | 1 | `financialHold` | `aluno.inadimplente` | Abrir financeiro → `/financeiro/aluno` |
 | 2 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
 | 3 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
-| 4 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil` |
+| 4 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
 | 5 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
 
 - `workoutReady` mantém o rodízio de `proximoTreinoParaHoje` e o aviso de
@@ -116,17 +138,25 @@ completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
 - Saem os modos `comeback` (vira variação de texto), `evolution` e `steady`.
 - Completude do perfil: telefone e WhatsApp contam como um campo "contato".
 
-### 3.2 Pendências — `resolveAlunoPendencias`
+### 3.2 Pendências — `listAlunoPendenciasAbertas`
 
 Candidatas, em ordem de prioridade:
 
 | Tipo | Quando | Rota |
 |---|---|---|
-| `perfil` | completude < 100% | `/aluno/perfil` |
-| `foto` | sem `fotoUrl` | `/aluno/perfil` |
-| `medida` | nenhuma medida ou a última com mais de 14 dias (regra atual) | `/aluno/perfil` |
+| `perfil` | completude < 100% | `/aluno/perfil/editar` |
+| `foto` | sem `fotoUrl` | `/aluno/perfil/editar?acao=foto` (abre o seletor) |
+| `medida` | nenhuma medida ou a última com mais de 14 dias (regra atual) | `/aluno/perfil/editar?acao=medida` (abre o registro) |
 | `chat` | `chat.naoLidasDoPersonal > 0` | `/chat/aluno` |
-| `agenda` | `isAlunoAgendaReviewed() == false` | `/agenda/aluno` |
+| `agenda` | agenda não aberta nesta semana | `/agenda/aluno` |
+
+- Agenda: `markAlunoAgendaReviewed` grava a segunda-feira da semana
+  (`alunoAgendaSemanaKey`); a pendência volta toda segunda. A chave é limpa no
+  logout (`session_invalidator`). Enquanto o estado não carregou, a Home
+  trata a agenda como conferida: nada pisca e nenhum `VIEWED` sai antes.
+- `alunoPendenciasVisiveis` tira `chat` quando o foco já é `noWorkout`
+  (mesmo destino) e corta em 3. As escondidas seguem abertas para o
+  `COMPLETED` de autonomia.
 
 A tarefa "Enviar contexto no chat" (aluno nunca mandou mensagem) e a tarefa
 de treino da semana saem: a primeira não é pendência real e a segunda já é o
@@ -186,7 +216,9 @@ card de foco.
   `agenda-semana`, `treino-semana`, `financeiro`. O `taskTitle` enviado fica
   em pt fixo, porque vira texto da ação do personal.
   - Pendência visível → `VIEWED` 1× por sessão por `taskId` (reset no
-    `session_invalidator`, como o insight). Toque → `CLICKED`.
+    `session_invalidator`, como o insight). "Visível" = metade do bloco na
+    viewport com a aba ativa (`FxOnVisible`), não a montagem. Toque →
+    `CLICKED`.
   - Toque no P0 → `CLICKED` só onde o personal precisa agir:
     `financialHold` → `financeiro`, `noWorkout` → `treino-semana`,
     `profileSetup` → `perfil-base`. `workoutReady` e `awaitingRelease` não
@@ -195,11 +227,12 @@ card de foco.
 
 ## 6. Estados
 
-- Carregando: `SkeletonList` no formato novo (cabeçalho, card de foco, 3
+- Carregando: `AlunoHomeSkeleton` no formato novo (cabeçalho, card de foco, 3
   métricas, gráfico).
 - Erro: `FxErrorState` + `friendlyError` + retry (como hoje).
-- Vazio: aluno sem treino e sem histórico → card de foco em `noWorkout` e
-  `FxEmptyState` no lugar de Sua semana e Evolução, com ação "Ver treinos".
+- Vazio: aluno sem treino e sem histórico → o card de foco em `noWorkout` é o
+  estado guiado; Sua semana e Evolução somem.
+- Coach e ofertas: envio travado, erro com `FeedbackHelper` e texto do ARB.
 - Bloco sem dado some; nada vira zero fingindo dado.
 - Offline e cache: comportamento atual do `AlunoDashboardHomeClientCache`.
 

@@ -370,7 +370,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       Aluno360ClientCache.clear();
       ref.invalidate(historicoCheckinProvider);
       ref.invalidate(meusTreinosProvider);
-      ref.invalidate(alunoDashboardHomeProvider);
+      invalidateAlunoDashboardHome(ref);
       if (!mounted) return;
       final evolucoes =
           concluida.evolucoesPerformance.isNotEmpty
@@ -455,7 +455,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     Aluno360ClientCache.clear();
     ref.invalidate(historicoCheckinProvider);
     ref.invalidate(meusTreinosProvider);
-    ref.invalidate(alunoDashboardHomeProvider);
+    invalidateAlunoDashboardHome(ref);
   }
 
   void _continuarSessaoAberta() {

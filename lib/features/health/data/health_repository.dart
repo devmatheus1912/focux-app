@@ -67,17 +67,6 @@ class HealthRepository {
   factory HealthRepository.fromClient(ApiClient client) =>
       HealthRepository(client.dio);
 
-  Future<RecoverySnapshot?> fetchLatestRecovery() async {
-    try {
-      final response = await _dio.get('/api/aluno/saude/recovery');
-      if (response.statusCode == 204 || response.data == null) return null;
-      return RecoverySnapshot.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (error) {
-      if (error.response?.statusCode == 204) return null;
-      rethrow;
-    }
-  }
-
   Future<RecoverySnapshot?> fetchRecoveryForAluno(int alunoId) async {
     try {
       final response = await _dio.get(

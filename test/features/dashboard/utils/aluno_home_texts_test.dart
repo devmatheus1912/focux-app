@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_texts.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
@@ -165,6 +166,13 @@ void main() {
     expect(alunoRecordeTexto(_pt, 'Supino', 100), 'Supino · 100 kg');
     expect(alunoRecordeTexto(_pt, 'Supino', null), 'Supino');
     expect(alunoVolumeTexto(_en, 3200), '3,200 kg');
+  });
+
+  test('queda de força em tom de atenção', () {
+    expect(alunoForcaDeltaTom(-1.5), EagleTokens.warn);
+    expect(alunoForcaDeltaTom(-0.04), EagleTokens.good);
+    expect(alunoForcaDeltaTom(0), EagleTokens.good);
+    expect(alunoForcaDeltaTom(4.2), EagleTokens.good);
   });
 
   test('alunoPrimeiroNome', () {

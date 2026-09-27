@@ -1,3 +1,6 @@
+import 'package:flutter/painting.dart';
+
+import '../../../core/theme/design_tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import '../data/aluno_home_anamnese.dart';
@@ -121,6 +124,10 @@ String alunoForcaDeltaTexto(S s, double pct) {
       ? s.alunoForcaDeltaNegativo(umaCasa)
       : s.alunoForcaDeltaPositivo(umaCasa);
 }
+
+/// Queda de força em tom de atenção; estável ou subindo, em tom positivo.
+Color alunoForcaDeltaTom(double pct) =>
+    _umaCasa(pct) < 0 ? EagleTokens.warn : EagleTokens.good;
 
 String alunoRecordeTexto(S s, String exercicio, double? cargaKg) {
   if (cargaKg == null || cargaKg <= 0) return exercicio;

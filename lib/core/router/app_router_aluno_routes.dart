@@ -140,8 +140,13 @@ List<RouteBase> buildAlunoRoutes() {
       GoRoute(
         path: '/aluno/perfil/editar',
         builder:
-            (context, state) =>
-                const FxRouteChrome(child: PerfilAlunoEditarScreen()),
+            (context, state) => FxRouteChrome(
+              child: PerfilAlunoEditarScreen(
+                acao: PerfilEditarAcao.tryParse(
+                  state.uri.queryParameters['acao'],
+                ),
+              ),
+            ),
       ),
       GoRoute(
         path: '/aluno/anamnese',

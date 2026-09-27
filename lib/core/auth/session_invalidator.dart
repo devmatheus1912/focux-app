@@ -7,6 +7,7 @@ import '../../features/alunos/data/aluno_followup_store.dart';
 import '../../features/alunos/utils/aluno360_client_cache.dart';
 import '../../features/alunos/utils/alunos_home_client_cache.dart';
 import '../../features/checkin/data/meus_treinos_mem_cache.dart';
+import '../../features/dashboard/data/aluno_onboarding_prefs.dart';
 import '../../features/dashboard/utils/aluno_autonomy_analytics.dart';
 import '../../features/dashboard/utils/aluno_dashboard_home_client_cache.dart';
 import '../../features/dashboard/utils/aluno_insight_analytics.dart';
@@ -28,8 +29,9 @@ class SessionInvalidator {
 
   static Listenable get listenable => _notifier;
 
-  static const _entitlementKeys = [
+  static const _sessionPrefKeys = [
     'focux_plano_features_cache_v2',
+    ...alunoOnboardingPrefKeys,
   ];
 
   static Future<void> invalidate({String? reason}) async {
@@ -40,7 +42,7 @@ class SessionInvalidator {
       OfflineCache.clearAll(),
       LocalCache.clearAll(),
       OfflineSyncService.clearQueue(),
-      _clearEntitlementCaches(),
+      _clearSessionPrefs(),
       MigracaoMagicaDraftCache.clear(),
       AlunoFollowUpStore.clearAll(),
       _clearHealthSession(),
@@ -68,10 +70,10 @@ class SessionInvalidator {
     ApiEtagStore.clear();
   }
 
-  static Future<void> _clearEntitlementCaches() async {
+  static Future<void> _clearSessionPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      for (final key in _entitlementKeys) {
+      for (final key in _sessionPrefKeys) {
         await prefs.remove(key);
       }
     } catch (_) {}

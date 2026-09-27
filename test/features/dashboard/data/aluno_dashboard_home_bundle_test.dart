@@ -205,12 +205,11 @@ void main() {
     test('reads unread count from the personal', () {
       final chat = AlunoDashboardChatResumo.fromJson({
         'possuiMensagemDoAluno': true,
-        'ultimaMensagemAlunoEm': '2026-08-14T18:30:00',
         'naoLidasDoPersonal': 2,
       });
 
       expect(chat.naoLidasDoPersonal, 2);
-      expect(chat.ultimaMensagemAlunoEm, DateTime(2026, 8, 14, 18, 30));
+      expect(chat.possuiMensagemDoAluno, isTrue);
     });
 
     test('null payload means nothing unread', () {

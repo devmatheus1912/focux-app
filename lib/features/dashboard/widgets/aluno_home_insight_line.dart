@@ -7,7 +7,7 @@ import '../data/aluno_home_insight.dart';
 import '../utils/aluno_insight_analytics.dart';
 import '../utils/aluno_insight_display.dart';
 
-/// Um insight por vez no card "Hoje"; substitui a pill de ritmo quando o BFF manda.
+/// Um insight por vez no card "Hoje", quando o BFF manda.
 class AlunoHomeInsightLine extends StatefulWidget {
   const AlunoHomeInsightLine({
     super.key,

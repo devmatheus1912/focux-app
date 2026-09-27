@@ -152,7 +152,7 @@ class CoachScreen extends ConsumerWidget {
                           ref.read(apiClientProvider),
                         ).marcarLido(focus.id);
                         ref.invalidate(coachHomeProvider);
-                        ref.invalidate(alunoDashboardHomeProvider);
+                        invalidateAlunoDashboardHome(ref);
                       },
                     ),
                     const SizedBox(height: TokensStrip.s4),

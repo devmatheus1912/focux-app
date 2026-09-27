@@ -26,7 +26,6 @@ import '../../alunos/providers/aluno_followup_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../dashboard/utils/aluno_dashboard_home_client_cache.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_bubble_grouping.dart';
@@ -293,8 +292,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     if (_isAlunoMode) {
       await repo.marcarLidoAluno();
       if (!mounted) return;
-      AlunoDashboardHomeClientCache.clear();
-      ref.invalidate(alunoDashboardHomeProvider);
+      invalidateAlunoDashboardHome(ref);
       return;
     } else if (_alunoId != null) {
       await repo.marcarLido(_alunoId!);

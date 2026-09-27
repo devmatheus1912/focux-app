@@ -49,7 +49,7 @@ class AlunoEvolutionCard extends StatelessWidget {
         OperationalMetricTile(
           label: s.alunoEvolucaoForcaLabel,
           value: alunoForcaDeltaTexto(s, delta),
-          color: EagleTokens.good,
+          color: alunoForcaDeltaTom(delta),
           isDark: isDark,
           dense: true,
         ),

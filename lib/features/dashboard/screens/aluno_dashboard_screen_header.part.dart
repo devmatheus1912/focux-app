@@ -1,11 +1,11 @@
 part of 'aluno_dashboard_screen.dart';
 
-class _AlunoAppBarProfileMenu extends StatelessWidget {
+class _AlunoAppBarAvatar extends StatelessWidget {
   final Aluno aluno;
   final bool isDark;
   final VoidCallback onProfile;
 
-  const _AlunoAppBarProfileMenu({
+  const _AlunoAppBarAvatar({
     required this.aluno,
     required this.isDark,
     required this.onProfile,
@@ -127,13 +127,11 @@ class _TodayFocusCard extends StatelessWidget {
 /// No máximo um aviso abaixo do foco: anamnese pendente vence o coach.
 /// Tudo vem do BFF da Home — nenhum request a mais no fold.
 class _AlunoHomeAviso extends StatelessWidget {
-  final bool isDark;
   final AlunoHomeAviso aviso;
   final AlunoAnamnesePendente? anamnese;
   final List<CoachMensagem> coachMensagens;
 
   const _AlunoHomeAviso({
-    required this.isDark,
     required this.aviso,
     required this.anamnese,
     required this.coachMensagens,
@@ -146,7 +144,7 @@ class _AlunoHomeAviso extends StatelessWidget {
       return _AnamneseAviso(pendente: pendente);
     }
     if (aviso == AlunoHomeAviso.coach) {
-      return CoachProativoCard(isDark: isDark, mensagens: coachMensagens);
+      return CoachProativoCard(mensagens: coachMensagens);
     }
     return const SizedBox.shrink();
   }
@@ -160,8 +158,10 @@ class _AnamneseAviso extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final texto = alunoAnamneseAvisoTexto(S.of(context), pendente);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+    return Semantics(
+      button: true,
+      label: '${texto.titulo}. ${texto.detalhe}',
+      excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
         child: InkWell(

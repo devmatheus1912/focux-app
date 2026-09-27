@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
@@ -113,6 +114,45 @@ void main() {
       expect(AlunoPendenciaTipo.agenda.taskId, 'agenda-semana');
       expect(AlunoPendenciaTipo.agenda.route, '/agenda/aluno');
       expect(AlunoPendenciaTipo.chat.route, '/chat/aluno');
+    });
+
+    test('perfil, foto e medida abrem direto no editor', () {
+      expect(AlunoPendenciaTipo.perfil.route, '/aluno/perfil/editar');
+      PerfilEditarAcao? acao(AlunoPendenciaTipo t) => PerfilEditarAcao.tryParse(
+        Uri.parse(t.route).queryParameters['acao'],
+      );
+      expect(acao(AlunoPendenciaTipo.foto), PerfilEditarAcao.foto);
+      expect(acao(AlunoPendenciaTipo.medida), PerfilEditarAcao.medida);
+      expect(acao(AlunoPendenciaTipo.perfil), isNull);
+      expect(PerfilEditarAcao.tryParse('x'), isNull);
+    });
+  });
+
+  group('alunoPendenciasVisiveis', () {
+    const todas = [
+      AlunoPendencia(AlunoPendenciaTipo.foto),
+      AlunoPendencia(AlunoPendenciaTipo.chat),
+      AlunoPendencia(AlunoPendenciaTipo.medida),
+      AlunoPendencia(AlunoPendenciaTipo.agenda),
+    ];
+
+    test('sem treino o foco já é o chat: pendência de chat sai', () {
+      expect(_tipos(alunoPendenciasVisiveis(todas, AlunoTodayMode.noWorkout)), [
+        AlunoPendenciaTipo.foto,
+        AlunoPendenciaTipo.medida,
+        AlunoPendenciaTipo.agenda,
+      ]);
+    });
+
+    test('com treino mantém o chat e corta em 3', () {
+      expect(
+        _tipos(alunoPendenciasVisiveis(todas, AlunoTodayMode.workoutReady)),
+        [
+          AlunoPendenciaTipo.foto,
+          AlunoPendenciaTipo.chat,
+          AlunoPendenciaTipo.medida,
+        ],
+      );
     });
   });
 

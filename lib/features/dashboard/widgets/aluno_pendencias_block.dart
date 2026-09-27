@@ -4,6 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_on_visible.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/aluno_home_texts.dart';
@@ -22,7 +23,8 @@ class AlunoPendenciasBlock extends StatefulWidget {
   final List<AlunoPendencia> pendencias;
   final ValueChanged<AlunoPendencia> onTap;
 
-  /// Chamado para cada item visível a cada lista nova (quem ouve deduplica).
+  /// Chamado para cada item quando o bloco aparece na tela e a cada lista nova
+  /// enquanto ele está visível (quem ouve deduplica).
   final ValueChanged<AlunoPendencia>? onShown;
 
   @override
@@ -30,15 +32,16 @@ class AlunoPendenciasBlock extends StatefulWidget {
 }
 
 class _AlunoPendenciasBlockState extends State<AlunoPendenciasBlock> {
-  @override
-  void initState() {
-    super.initState();
-    _notifyShown();
-  }
+  var _visto = false;
 
   @override
   void didUpdateWidget(covariant AlunoPendenciasBlock oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_visto) _notifyShown();
+  }
+
+  void _onVisible() {
+    _visto = true;
     _notifyShown();
   }
 
@@ -54,22 +57,25 @@ class _AlunoPendenciasBlockState extends State<AlunoPendenciasBlock> {
     final s = S.of(context);
     final primary = Theme.of(context).colorScheme.primary;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DashboardSectionHeader(title: s.alunoPendenciasTitulo),
-        const SizedBox(height: TokensStrip.s2),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            children: [
-              for (final p in widget.pendencias)
-                _PendenciaRow(pendencia: p, onTap: () => widget.onTap(p)),
-            ],
+    return FxOnVisible(
+      onVisible: _onVisible,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DashboardSectionHeader(title: s.alunoPendenciasTitulo),
+          const SizedBox(height: TokensStrip.s2),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: TokensStrip.s1),
+            decoration: fxListCardDecoration(context, accent: primary),
+            child: Column(
+              children: [
+                for (final p in widget.pendencias)
+                  _PendenciaRow(pendencia: p, onTap: () => widget.onTap(p)),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

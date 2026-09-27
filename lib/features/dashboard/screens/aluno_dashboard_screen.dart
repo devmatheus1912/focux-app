@@ -66,7 +66,11 @@ class AlunoDashboardScreen extends ConsumerStatefulWidget {
 class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   var _npsPrompted = false;
   var _viewTracked = false;
-  var _agendaReviewed = false;
+
+  /// Null até ler as prefs: a pendência de agenda fica fora até lá, sem
+  /// piscar nem mandar VIEWED de algo já resolvido.
+  bool? _agendaReviewed;
+  (AlunoDashboardHomeBundle, bool?, AlunoHomeView)? _viewMemo;
 
   @override
   void initState() {
@@ -79,18 +83,24 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     );
   }
 
+  AlunoHomeView _viewFor(AlunoDashboardHomeBundle home) {
+    final memo = _viewMemo;
+    if (memo != null &&
+        identical(memo.$1, home) &&
+        memo.$2 == _agendaReviewed) {
+      return memo.$3;
+    }
+    final view = buildAlunoHomeView(
+      home,
+      agendaReviewed: _agendaReviewed ?? true,
+    );
+    _viewMemo = (home, _agendaReviewed, view);
+    return view;
+  }
+
   void _onHomeLoaded(AlunoDashboardHomeBundle home) {
     MeusTreinosMemCache.save(home.treinos);
-    final view = buildAlunoHomeView(home, agendaReviewed: _agendaReviewed);
-    _completeResolvedTasks(view);
-    if (!_viewTracked) {
-      _viewTracked = true;
-      AlunoHomeAnalytics.viewed(
-        action: view.action,
-        pendencias: view.pendencias.length,
-        aviso: view.aviso,
-      );
-    }
+    _syncAnalytics(home);
     if (!home.npsDeveResponder || _npsPrompted) return;
     _npsPrompted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -104,11 +114,21 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     if (!mounted) return;
     setState(() => _agendaReviewed = reviewed);
     final home = ref.read(alunoDashboardHomeProvider).value;
-    if (home != null) {
-      _completeResolvedTasks(
-        buildAlunoHomeView(home, agendaReviewed: reviewed),
-      );
-    }
+    if (home != null) _syncAnalytics(home);
+  }
+
+  /// Espera a agenda ser lida: antes disso as pendências ainda não são finais.
+  void _syncAnalytics(AlunoDashboardHomeBundle home) {
+    if (_agendaReviewed == null) return;
+    final view = _viewFor(home);
+    _completeResolvedTasks(view);
+    if (_viewTracked) return;
+    _viewTracked = true;
+    AlunoHomeAnalytics.viewed(
+      action: view.action,
+      pendencias: view.pendencias.length,
+      aviso: view.aviso,
+    );
   }
 
   void _completeResolvedTasks(AlunoHomeView view) {
@@ -209,7 +229,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             ),
             homeAsync.when(
               data:
-                  (home) => _AlunoAppBarProfileMenu(
+                  (home) => _AlunoAppBarAvatar(
                     aluno: home.aluno,
                     isDark: isDark,
                     onProfile: () => context.push('/aluno/perfil'),
@@ -244,9 +264,69 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     AlunoDashboardHomeBundle home,
     bool isDark,
   ) {
-    final view = buildAlunoHomeView(home, agendaReviewed: _agendaReviewed);
+    final view = _viewFor(home);
     final action = view.action;
-    final pendencias = view.pendencias;
+
+    // (espaço antes, bloco): só entra bloco com conteúdo, então nenhum
+    // espaçamento se soma quando um bloco some.
+    final blocos = <(double, Widget)>[
+      (
+        0,
+        AlunoHomeHeader(
+          alunoNome: home.aluno.nome,
+          nomePersonal: home.personalBrand.nomePersonal,
+          logoUrl: home.personalBrand.logoUrl,
+          onOpenChat: () => context.push('/chat/aluno'),
+        ),
+      ),
+      (
+        TokensStrip.s2,
+        _TodayFocusCard(
+          action: action,
+          insight: view.insight,
+          isDark: isDark,
+          onAction: () => _openToday(action),
+        ),
+      ),
+      if (view.aviso != AlunoHomeAviso.nenhum)
+        (
+          TokensStrip.s3,
+          _AlunoHomeAviso(
+            aviso: view.aviso,
+            anamnese: home.anamnesePendente,
+            coachMensagens: home.coachMensagens,
+          ),
+        ),
+      if (view.semanaVisivel)
+        (TokensStrip.s4, AlunoWeekSummaryCard(summary: view.semana)),
+      if (view.prontidaoVisivel)
+        (
+          view.semanaVisivel ? TokensStrip.s3 : TokensStrip.s4,
+          AlunoRecoveryCard(snapshot: home.recovery),
+        ),
+      if (!view.semTreino)
+        (
+          TokensStrip.s4,
+          AlunoEvolutionCard(
+            volumePorSemana: home.volumePorSemana,
+            forcaPorSemana: home.forcaPorSemana,
+            forcaDeltaPercent: home.forcaDeltaPercent,
+            ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
+          ),
+        ),
+      if (view.pendencias.isNotEmpty)
+        (
+          TokensStrip.s4,
+          AlunoPendenciasBlock(
+            pendencias: view.pendencias,
+            onTap: _openPendencia,
+            onShown: _pendenciaShown,
+          ),
+        ),
+      if (home.upsellPendentes.isNotEmpty)
+        (TokensStrip.s4, AlunoUpsellCarousel(ofertas: home.upsellPendentes)),
+      (TokensStrip.s4, _StudentToolsSection(atalhos: view.atalhos)),
+    ];
 
     return RefreshIndicator(
       onRefresh: _refresh,
@@ -258,58 +338,10 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AlunoHomeHeader(
-                alunoNome: home.aluno.nome,
-                nomePersonal: home.personalBrand.nomePersonal,
-                logoUrl: home.personalBrand.logoUrl,
-                onOpenChat: () => context.push('/chat/aluno'),
-              ),
-              const SizedBox(height: TokensStrip.s2),
-              _TodayFocusCard(
-                action: action,
-                insight: home.insight,
-                isDark: isDark,
-                onAction: () => _openToday(action),
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              _AlunoHomeAviso(
-                isDark: isDark,
-                aviso: view.aviso,
-                anamnese: home.anamnesePendente,
-                coachMensagens: home.coachMensagens,
-              ),
-              if (!view.semTreino) ...[
-                AlunoWeekSummaryCard(summary: view.semana),
-                const SizedBox(height: TokensStrip.s3),
+              for (final (espaco, bloco) in blocos) ...[
+                if (espaco > 0) SizedBox(height: espaco),
+                bloco,
               ],
-              AlunoRecoveryCard(
-                isDark: isDark,
-                snapshot: home.recovery,
-                hasWearableHistory: home.hasWearableHistory,
-                recoveryStale: home.recoveryStale,
-              ),
-              if (!view.semTreino) ...[
-                const SizedBox(height: TokensStrip.s4),
-                AlunoEvolutionCard(
-                  volumePorSemana: home.volumePorSemana,
-                  forcaPorSemana: home.forcaPorSemana,
-                  forcaDeltaPercent: home.forcaDeltaPercent,
-                  ultimoRecorde:
-                      home.recordes.isEmpty ? null : home.recordes.first,
-                ),
-              ],
-              if (pendencias.isNotEmpty) ...[
-                const SizedBox(height: TokensStrip.s4),
-                AlunoPendenciasBlock(
-                  pendencias: pendencias,
-                  onTap: _openPendencia,
-                  onShown: _pendenciaShown,
-                ),
-              ],
-              const SizedBox(height: TokensStrip.s4),
-              AlunoUpsellCarousel(ofertas: home.upsellPendentes),
-              const SizedBox(height: TokensStrip.s3),
-              const _StudentToolsSection(),
             ],
           ),
         ),

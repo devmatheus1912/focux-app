@@ -1,6 +1,21 @@
 part of 'perfil_aluno_editar_screen.dart';
 
+/// Ação aberta ao carregar o editor (`?acao=` vindo das pendências da Home).
+enum PerfilEditarAcao {
+  foto,
+  medida;
+
+  static PerfilEditarAcao? tryParse(String? raw) {
+    for (final a in values) {
+      if (a.name == raw) return a;
+    }
+    return null;
+  }
+}
+
 class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScreen> {
+  bool _acaoInicialFeita = false;
+
   final _formKey = GlobalKey<FormState>();
   final _nome = TextEditingController();
   final _email = TextEditingController();
@@ -127,6 +142,22 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
     _fotoUrl = aluno.fotoUrl;
     _captureBaseline();
     if (mounted) setState(() {});
+    _abrirAcaoInicial();
+  }
+
+  void _abrirAcaoInicial() {
+    final acao = widget.acao;
+    if (acao == null || _acaoInicialFeita) return;
+    _acaoInicialFeita = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      switch (acao) {
+        case PerfilEditarAcao.foto:
+          _pickFoto();
+        case PerfilEditarAcao.medida:
+          _registrarMedida();
+      }
+    });
   }
 
   Future<void> _pickFoto() async {

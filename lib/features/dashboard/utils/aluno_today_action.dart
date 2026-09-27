@@ -75,7 +75,7 @@ AlunoTodayAction resolveAlunoTodayAction({
   if (alunoProfileCompletion(aluno) < alunoPerfilMinimoP0) {
     return const AlunoTodayAction(
       mode: AlunoTodayMode.profileSetup,
-      route: '/aluno/perfil',
+      route: '/aluno/perfil/editar',
     );
   }
 

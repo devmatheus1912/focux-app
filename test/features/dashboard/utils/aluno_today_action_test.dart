@@ -148,7 +148,7 @@ void main() {
         treinos: const [],
       );
       expect(a.mode, AlunoTodayMode.profileSetup);
-      expect(a.route, '/aluno/perfil');
+      expect(a.route, '/aluno/perfil/editar');
     });
 
     test('sem treino e perfil ok pede treino ao personal', () {

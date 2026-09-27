@@ -2,67 +2,82 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/upsell_repository.dart';
 
-final _alunoUpsellProvider = FutureProvider.autoDispose<List<AlunoOferta>>((
-  ref,
-) {
-  return UpsellRepository(ref.read(apiClientProvider)).listarMeusPendentes();
-});
+/// Ofertas pendentes do personal na Home do aluno (vêm do BFF).
+class AlunoUpsellCarousel extends ConsumerStatefulWidget {
+  const AlunoUpsellCarousel({super.key, required this.ofertas});
 
-/// Ofertas pendentes do personal — exibidas no dashboard do aluno.
-class AlunoUpsellCarousel extends ConsumerWidget {
-  const AlunoUpsellCarousel({super.key, this.ofertas});
-
-  final List<AlunoOferta>? ofertas;
+  final List<AlunoOferta> ofertas;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final provided = ofertas;
-    if (provided != null) {
-      return _body(context, ref, provided);
+  ConsumerState<AlunoUpsellCarousel> createState() =>
+      _AlunoUpsellCarouselState();
+}
+
+class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
+  final Set<int> _enviando = {};
+
+  Future<void> _responder(AlunoOferta oferta, {required bool aceitar}) async {
+    if (!_enviando.add(oferta.alunoOfertaId)) return;
+    setState(() {});
+    final s = S.of(context);
+    try {
+      await UpsellRepository(
+        ref.read(apiClientProvider),
+      ).responder(oferta.alunoOfertaId, aceitar ? 'ACEITO' : 'RECUSADO');
+      await AnalyticsService.instance.track(
+        'upsell_aluno_resposta',
+        props: {
+          'ofertaId': oferta.ofertaId,
+          'resposta': aceitar ? 'ACEITO' : 'RECUSADO',
+        },
+      );
+      if (!mounted) return;
+      invalidateAlunoDashboardHome(ref);
+      FeedbackHelper.showSuccess(
+        context,
+        aceitar ? s.alunoOfertaAceita : s.alunoOfertaRecusada,
+      );
+    } catch (_) {
+      if (mounted) FeedbackHelper.showError(context, s.alunoOfertaErro);
+    } finally {
+      _enviando.remove(oferta.alunoOfertaId);
+      if (mounted) setState(() {});
     }
-    final async = ref.watch(_alunoUpsellProvider);
-    return async.when(
-      data: (items) => _body(context, ref, items),
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
   }
 
-  Widget _body(BuildContext context, WidgetRef ref, List<AlunoOferta> ofertas) {
+  @override
+  Widget build(BuildContext context) {
+    final ofertas = widget.ofertas;
     if (ofertas.isEmpty) return const SizedBox.shrink();
-    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            'Ofertas do seu personal',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 15,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-        ),
+        DashboardSectionHeader(title: S.of(context).alunoOfertasTitulo),
+        const SizedBox(height: TokensStrip.s2),
         SizedBox(
-          height: 148,
+          height: 172,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: ofertas.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            separatorBuilder: (_, __) => const SizedBox(width: TokensStrip.s2),
             itemBuilder: (context, i) {
               final o = ofertas[i];
               return _OfertaCard(
                 oferta: o,
-                primary: primary,
-                onAccept: () => _responder(context, ref, o, 'ACEITO'),
-                onDecline: () => _responder(context, ref, o, 'RECUSADO'),
+                enviando: _enviando.contains(o.alunoOfertaId),
+                onAccept: () => _responder(o, aceitar: true),
+                onDecline: () => _responder(o, aceitar: false),
               );
             },
           ),
@@ -70,66 +85,30 @@ class AlunoUpsellCarousel extends ConsumerWidget {
       ],
     );
   }
-
-  Future<void> _responder(
-    BuildContext context,
-    WidgetRef ref,
-    AlunoOferta oferta,
-    String resposta,
-  ) async {
-    try {
-      await UpsellRepository(
-        ref.read(apiClientProvider),
-      ).responder(oferta.alunoOfertaId, resposta);
-      await AnalyticsService.instance.track(
-        'upsell_aluno_resposta',
-        props: {'ofertaId': oferta.ofertaId, 'resposta': resposta},
-      );
-      ref.invalidate(_alunoUpsellProvider);
-      ref.invalidate(alunoDashboardHomeProvider);
-      if (context.mounted) {
-        FeedbackHelper.showSuccess(
-          context,
-          resposta == 'ACEITO'
-              ? 'Oferta aceita! Seu personal será avisado.'
-              : 'Oferta recusada.',
-        );
-      }
-    } catch (_) {
-      if (context.mounted) {
-        FeedbackHelper.showError(
-          context,
-          'Não foi possível registrar sua resposta',
-        );
-      }
-    }
-  }
 }
 
 class _OfertaCard extends StatelessWidget {
   const _OfertaCard({
     required this.oferta,
-    required this.primary,
+    required this.enviando,
     required this.onAccept,
     required this.onDecline,
   });
 
   final AlunoOferta oferta;
-  final Color primary;
+  final bool enviando;
   final VoidCallback onAccept;
   final VoidCallback onDecline;
 
   @override
   Widget build(BuildContext context) {
-    final valor = oferta.valor.format().replaceFirst('R\$', '').trim();
+    final s = S.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
     return Container(
       width: 260,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: primary.withValues(alpha: 0.25)),
-        color: primary.withValues(alpha: 0.06),
-      ),
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -137,53 +116,41 @@ class _OfertaCard extends StatelessWidget {
             oferta.titulo,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: TokensStrip.s1),
           Expanded(
             child: Text(
               oferta.descricao,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.35,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
           ),
           Text(
-            'R\$ $valor',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: primary,
-              fontSize: 16,
-            ),
+            oferta.valor.format(),
+            style: FocuxHubTypography.cardTitle(color: primary),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: TokensStrip.s2),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: onDecline,
                   style: OutlinedButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    minimumSize: const Size.fromHeight(48),
                   ),
-                  child: const Text('Agora não'),
+                  onPressed: enviando ? null : onDecline,
+                  child: Text(s.alunoOfertaRecusar),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: TokensStrip.s2),
               Expanded(
                 child: FilledButton(
-                  onPressed: onAccept,
                   style: FilledButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    minimumSize: const Size.fromHeight(48),
                   ),
-                  child: const Text('Quero'),
+                  onPressed: enviando ? null : onAccept,
+                  child: Text(s.alunoOfertaAceitar),
                 ),
               ),
             ],

@@ -9,7 +9,6 @@ List<_StudentToolAction> _alunoTools(S s) => [
     subtitle: s.alunoFerramentaTreinosDetalhe,
     route: '/checkin/treinos',
     group: _StudentToolGroup.treino,
-    featured: true,
   ),
   _StudentToolAction(
     icon: Icons.trending_up_rounded,
@@ -24,7 +23,6 @@ List<_StudentToolAction> _alunoTools(S s) => [
     subtitle: s.alunoFerramentaAgendaDetalhe,
     route: '/agenda/aluno',
     group: _StudentToolGroup.treino,
-    featured: true,
   ),
   _StudentToolAction(
     icon: Icons.flag_outlined,
@@ -46,7 +44,6 @@ List<_StudentToolAction> _alunoTools(S s) => [
     subtitle: s.alunoFerramentaAnamneseDetalhe,
     route: '/aluno/anamnese',
     group: _StudentToolGroup.saude,
-    featured: true,
   ),
   _StudentToolAction(
     icon: Icons.track_changes_outlined,
@@ -106,14 +103,19 @@ List<_StudentToolAction> _alunoTools(S s) => [
   ),
 ];
 
+/// Atalhos do dia ([AlunoHomeView.atalhos]) + catálogo completo.
 class _StudentToolsSection extends StatelessWidget {
-  const _StudentToolsSection();
+  const _StudentToolsSection({required this.atalhos});
+
+  final List<String> atalhos;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final tools = _alunoTools(s);
-    final featured = tools.where((t) => t.featured).toList(growable: false);
+    final featured = [
+      for (final rota in atalhos) ...tools.where((t) => t.route == rota),
+    ];
     final chrome = ShellChrome.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -227,7 +229,6 @@ class _StudentToolAction {
   final String subtitle;
   final String route;
   final _StudentToolGroup group;
-  final bool featured;
 
   const _StudentToolAction({
     required this.icon,
@@ -235,6 +236,5 @@ class _StudentToolAction {
     required this.subtitle,
     required this.route,
     required this.group,
-    this.featured = false,
   });
 }

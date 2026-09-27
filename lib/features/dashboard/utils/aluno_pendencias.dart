@@ -4,10 +4,15 @@ import 'aluno_today_action.dart';
 
 /// Pendências do aluno, em ordem de prioridade. `taskId` e `taskTitlePt`
 /// seguem o contrato de `POST /api/aluno/autonomia/eventos` (vira ação do personal).
+/// Foto e medida abrem o editor já na ação (`PerfilEditarAcao`).
 enum AlunoPendenciaTipo {
-  perfil('perfil-base', 'Completar perfil base', '/aluno/perfil'),
-  foto('foto-dados', 'Adicionar foto', '/aluno/perfil'),
-  medida('medida-recente', 'Atualizar medida quinzenal', '/aluno/perfil'),
+  perfil('perfil-base', 'Completar perfil base', '/aluno/perfil/editar'),
+  foto('foto-dados', 'Adicionar foto', '/aluno/perfil/editar?acao=foto'),
+  medida(
+    'medida-recente',
+    'Atualizar medida quinzenal',
+    '/aluno/perfil/editar?acao=medida',
+  ),
   chat('chat-contexto', 'Responder o personal', '/chat/aluno'),
   agenda('agenda-semana', 'Conferir agenda da semana', '/agenda/aluno');
 
@@ -60,6 +65,20 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
     if (!agendaReviewed) const AlunoPendencia(AlunoPendenciaTipo.agenda),
   ];
 }
+
+/// As que aparecem na Home: sem repetir o destino do foco e cortadas em
+/// [alunoPendenciasMax]. As escondidas seguem abertas para a autonomia.
+List<AlunoPendencia> alunoPendenciasVisiveis(
+  List<AlunoPendencia> abertas,
+  AlunoTodayMode todayMode,
+) => abertas
+    .where(
+      (p) =>
+          !(todayMode == AlunoTodayMode.noWorkout &&
+              p.tipo == AlunoPendenciaTipo.chat),
+    )
+    .take(alunoPendenciasMax)
+    .toList(growable: false);
 
 /// Um aviso por vez abaixo do card de foco.
 enum AlunoHomeAviso { anamnese, coach, nenhum }

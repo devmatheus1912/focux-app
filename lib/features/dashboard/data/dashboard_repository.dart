@@ -329,12 +329,10 @@ class DashboardRepository {
 /// Sinal de chat do BFF aluno (sem marcar mensagens como lidas).
 class AlunoDashboardChatResumo {
   final bool possuiMensagemDoAluno;
-  final DateTime? ultimaMensagemAlunoEm;
   final int naoLidasDoPersonal;
 
   const AlunoDashboardChatResumo({
     required this.possuiMensagemDoAluno,
-    this.ultimaMensagemAlunoEm,
     required this.naoLidasDoPersonal,
   });
 
@@ -347,9 +345,6 @@ class AlunoDashboardChatResumo {
     }
     return AlunoDashboardChatResumo(
       possuiMensagemDoAluno: json['possuiMensagemDoAluno'] as bool? ?? false,
-      ultimaMensagemAlunoEm: DateTime.tryParse(
-        json['ultimaMensagemAlunoEm']?.toString() ?? '',
-      ),
       naoLidasDoPersonal: (json['naoLidasDoPersonal'] as num?)?.toInt() ?? 0,
     );
   }
@@ -377,7 +372,7 @@ class AlunoDashboardHomeBundle {
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
-  /// Meta semanal (dias) da prescrição ativa — SSOT do BFF.
+  /// Meta da semana em sessões (fichas do rodízio); null sem rodízio — SSOT do BFF.
   final int? frequenciaDias;
 
   /// e1RM médio, semana atual vs anterior (só exercícios em comum); null = sem base.
