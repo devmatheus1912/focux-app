@@ -60,5 +60,15 @@ void main() {
       );
       expect(w.isEmpty, isTrue);
     });
+
+    test('só a sequência não forma a faixa de 2 métricas', () {
+      final w = buildAlunoWeekSummary(
+        concluidosSemanaIso: null,
+        frequenciaDias: 3,
+        streakAtual: 5,
+        volumeSemanaKg: 0,
+      );
+      expect(w.isEmpty, isTrue);
+    });
   });
 }

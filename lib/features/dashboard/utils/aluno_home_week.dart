@@ -19,7 +19,9 @@ class AlunoWeekSummary {
     required this.volumeKg,
   });
 
-  bool get isEmpty => feitos == null && streakSemanas == 0 && volumeKg == null;
+  /// A sequência sempre aparece; sem sessões nem volume sobraria 1 métrica,
+  /// abaixo do mínimo de 2 da faixa de KPI.
+  bool get isEmpty => feitos == null && volumeKg == null;
 }
 
 AlunoWeekSummary buildAlunoWeekSummary({

@@ -9,6 +9,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
@@ -22,7 +23,6 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -49,6 +49,7 @@ import '../utils/aluno_today_action.dart';
 import '../widgets/aluno_evolution_card.dart';
 import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_insight_line.dart';
+import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_pendencias_block.dart';
 import '../widgets/aluno_week_summary_card.dart';
 import '../widgets/dashboard_section_header.dart';
@@ -81,6 +82,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
 
   void _onHomeLoaded(AlunoDashboardHomeBundle home) {
     MeusTreinosMemCache.save(home.treinos);
+    _completeResolvedTasks(home);
     if (!home.npsDeveResponder || _npsPrompted) return;
     _npsPrompted = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,6 +95,29 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     final reviewed = await isAlunoAgendaReviewed();
     if (!mounted) return;
     setState(() => _agendaReviewed = reviewed);
+    final home = ref.read(alunoDashboardHomeProvider).value;
+    if (home != null) _completeResolvedTasks(home);
+  }
+
+  void _completeResolvedTasks(AlunoDashboardHomeBundle home) {
+    final action = resolveAlunoTodayAction(
+      aluno: home.aluno,
+      treinos: home.treinos,
+      historico: home.historico,
+    );
+    AlunoAutonomyAnalytics.completeResolved(
+      ref.read(alunoRepositoryProvider),
+      alunoAutonomyOpenTaskIds(
+        action: action,
+        pendenciasAbertas: listAlunoPendenciasAbertas(
+          aluno: home.aluno,
+          medidas: home.medidas,
+          naoLidasDoPersonal: home.chat.naoLidasDoPersonal,
+          agendaReviewed: _agendaReviewed,
+          todayMode: action.mode,
+        ),
+      ),
+    );
   }
 
   void _openToday(AlunoTodayAction action) {
@@ -126,6 +151,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       ref.read(alunoDashboardHomeProvider.future),
       _loadAgendaReviewed(),
     ]);
+    if (!mounted) return;
+    fxAnnounce(context, S.of(context).alunoHomeAtualizado);
   }
 
   @override
@@ -198,7 +225,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         ),
         body: homeAsync.when(
           skipLoadingOnReload: true,
-          loading: () => const SkeletonList(count: 6),
+          loading: () => const AlunoHomeSkeleton(),
           error:
               (e, _) => FxErrorState(
                 chromeOnDark: isDark,

@@ -2,123 +2,125 @@ part of 'aluno_dashboard_screen.dart';
 
 enum _StudentToolGroup { treino, saude, relacao, conta }
 
+List<_StudentToolAction> _alunoTools(S s) => [
+  _StudentToolAction(
+    icon: Icons.fitness_center,
+    title: s.alunoFerramentaTreinosTitulo,
+    subtitle: s.alunoFerramentaTreinosDetalhe,
+    route: '/checkin/treinos',
+    group: _StudentToolGroup.treino,
+    featured: true,
+  ),
+  _StudentToolAction(
+    icon: Icons.trending_up_rounded,
+    title: s.alunoFerramentaHistoricoTitulo,
+    subtitle: s.alunoFerramentaHistoricoDetalhe,
+    route: '/checkin/historico',
+    group: _StudentToolGroup.treino,
+  ),
+  _StudentToolAction(
+    icon: Icons.calendar_month_outlined,
+    title: s.alunoFerramentaAgendaTitulo,
+    subtitle: s.alunoFerramentaAgendaDetalhe,
+    route: '/agenda/aluno',
+    group: _StudentToolGroup.treino,
+    featured: true,
+  ),
+  _StudentToolAction(
+    icon: Icons.flag_outlined,
+    title: s.alunoFerramentaDesafiosTitulo,
+    subtitle: s.alunoFerramentaDesafiosDetalhe,
+    route: '/aluno/desafios',
+    group: _StudentToolGroup.treino,
+  ),
+  _StudentToolAction(
+    icon: Icons.groups_outlined,
+    title: s.alunoFerramentaAulasGrupoTitulo,
+    subtitle: s.alunoFerramentaAulasGrupoDetalhe,
+    route: '/aluno/grupo-aulas',
+    group: _StudentToolGroup.treino,
+  ),
+  _StudentToolAction(
+    icon: Icons.assignment_outlined,
+    title: s.alunoFerramentaAnamneseTitulo,
+    subtitle: s.alunoFerramentaAnamneseDetalhe,
+    route: '/aluno/anamnese',
+    group: _StudentToolGroup.saude,
+    featured: true,
+  ),
+  _StudentToolAction(
+    icon: Icons.track_changes_outlined,
+    title: s.alunoFerramentaHabitosTitulo,
+    subtitle: s.alunoFerramentaHabitosDetalhe,
+    route: '/aluno/habitos',
+    group: _StudentToolGroup.saude,
+  ),
+  _StudentToolAction(
+    icon: Icons.route_outlined,
+    title: s.alunoFerramentaTrilhasTitulo,
+    subtitle: s.alunoFerramentaTrilhasDetalhe,
+    route: '/aluno/trilhas',
+    group: _StudentToolGroup.saude,
+  ),
+  _StudentToolAction(
+    icon: Icons.watch_outlined,
+    title: s.alunoFerramentaProntidaoTitulo,
+    subtitle: s.alunoFerramentaProntidaoDetalhe,
+    route: '/saude',
+    group: _StudentToolGroup.saude,
+  ),
+  _StudentToolAction(
+    icon: Icons.chat_bubble_outline,
+    title: s.alunoFerramentaPersonalTitulo,
+    subtitle: s.alunoFerramentaPersonalDetalhe,
+    route: '/chat/aluno',
+    group: _StudentToolGroup.relacao,
+  ),
+  _StudentToolAction(
+    icon: Icons.dynamic_feed_outlined,
+    title: s.alunoFerramentaFeedTitulo,
+    subtitle: s.alunoFerramentaFeedDetalhe,
+    route: '/feed/aluno',
+    group: _StudentToolGroup.relacao,
+  ),
+  _StudentToolAction(
+    icon: Icons.rate_review_outlined,
+    title: s.alunoFerramentaDepoimentosTitulo,
+    subtitle: s.alunoFerramentaDepoimentosDetalhe,
+    route: '/depoimentos-aluno',
+    group: _StudentToolGroup.relacao,
+  ),
+  _StudentToolAction(
+    icon: Icons.payments_outlined,
+    title: s.alunoFerramentaFinanceiroTitulo,
+    subtitle: s.alunoFerramentaFinanceiroDetalhe,
+    route: '/financeiro/aluno',
+    group: _StudentToolGroup.conta,
+  ),
+  _StudentToolAction(
+    icon: Icons.autorenew,
+    title: s.alunoFerramentaRecorrenciaTitulo,
+    subtitle: s.alunoFerramentaRecorrenciaDetalhe,
+    route: '/aluno/recorrencia',
+    group: _StudentToolGroup.conta,
+  ),
+];
+
 class _StudentToolsSection extends StatelessWidget {
   const _StudentToolsSection();
 
-  static const tools = <_StudentToolAction>[
-    _StudentToolAction(
-      icon: Icons.fitness_center,
-      title: 'Treinos',
-      subtitle: 'Check-ins e histórico',
-      route: '/checkin/treinos',
-      group: _StudentToolGroup.treino,
-      featured: true,
-    ),
-    _StudentToolAction(
-      icon: Icons.trending_up_rounded,
-      title: 'Histórico',
-      subtitle: 'Medidas e treinos',
-      route: '/checkin/historico',
-      group: _StudentToolGroup.treino,
-    ),
-    _StudentToolAction(
-      icon: Icons.calendar_month_outlined,
-      title: 'Agenda',
-      subtitle: 'Horários',
-      route: '/agenda/aluno',
-      group: _StudentToolGroup.treino,
-      featured: true,
-    ),
-    _StudentToolAction(
-      icon: Icons.flag_outlined,
-      title: 'Desafios',
-      subtitle: 'Campanhas e ranking',
-      route: '/aluno/desafios',
-      group: _StudentToolGroup.treino,
-    ),
-    _StudentToolAction(
-      icon: Icons.groups_outlined,
-      title: 'Aulas grupo',
-      subtitle: 'Turmas abertas',
-      route: '/aluno/grupo-aulas',
-      group: _StudentToolGroup.treino,
-    ),
-    _StudentToolAction(
-      icon: Icons.assignment_outlined,
-      title: 'Anamnese',
-      subtitle: 'Ficha de saúde',
-      route: '/aluno/anamnese',
-      group: _StudentToolGroup.saude,
-      featured: true,
-    ),
-    _StudentToolAction(
-      icon: Icons.track_changes_outlined,
-      title: 'Hábitos',
-      subtitle: 'Metas diárias',
-      route: '/aluno/habitos',
-      group: _StudentToolGroup.saude,
-    ),
-    _StudentToolAction(
-      icon: Icons.route_outlined,
-      title: 'Trilhas',
-      subtitle: 'Metas e progresso',
-      route: '/aluno/trilhas',
-      group: _StudentToolGroup.saude,
-    ),
-    _StudentToolAction(
-      icon: Icons.watch_outlined,
-      title: 'Prontidão',
-      subtitle: 'Wearables',
-      route: '/saude',
-      group: _StudentToolGroup.saude,
-    ),
-    _StudentToolAction(
-      icon: Icons.chat_bubble_outline,
-      title: 'Personal',
-      subtitle: 'Chat direto',
-      route: '/chat/aluno',
-      group: _StudentToolGroup.relacao,
-    ),
-    _StudentToolAction(
-      icon: Icons.dynamic_feed_outlined,
-      title: 'Feed',
-      subtitle: 'Novidades do personal',
-      route: '/feed/aluno',
-      group: _StudentToolGroup.relacao,
-    ),
-    _StudentToolAction(
-      icon: Icons.rate_review_outlined,
-      title: 'Depoimentos',
-      subtitle: 'Avalie seu personal',
-      route: '/depoimentos-aluno',
-      group: _StudentToolGroup.relacao,
-    ),
-    _StudentToolAction(
-      icon: Icons.payments_outlined,
-      title: 'Financeiro',
-      subtitle: 'Pagamentos',
-      route: '/financeiro/aluno',
-      group: _StudentToolGroup.conta,
-    ),
-    _StudentToolAction(
-      icon: Icons.autorenew,
-      title: 'Pagamento automático',
-      subtitle: 'Se o personal ativou',
-      route: '/aluno/recorrencia',
-      group: _StudentToolGroup.conta,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
+    final tools = _alunoTools(s);
     final featured = tools.where((t) => t.featured).toList(growable: false);
     final chrome = ShellChrome.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardSectionHeader(
-          title: 'Atalhos do dia',
-          actionLabel: 'Ver catálogo',
+          title: s.alunoAtalhosTitulo,
+          actionLabel: s.alunoAtalhosVerCatalogo,
           onAction: () => _showAlunoToolsCatalog(context, tools: tools),
         ),
         const SizedBox(height: FxSettingsLayout.headerToGroup),
@@ -145,13 +147,14 @@ void _showAlunoToolsCatalog(
   BuildContext context, {
   required List<_StudentToolAction> tools,
 }) {
+  final s = S.of(context);
   final primary = Theme.of(context).colorScheme.primary;
   final chrome = ShellChrome.of(context);
-  const sections = <(_StudentToolGroup, String)>[
-    (_StudentToolGroup.treino, 'Treino'),
-    (_StudentToolGroup.saude, 'Saúde'),
-    (_StudentToolGroup.relacao, 'Relação'),
-    (_StudentToolGroup.conta, 'Conta'),
+  final sections = <(_StudentToolGroup, String)>[
+    (_StudentToolGroup.treino, s.alunoFerramentasGrupoTreino),
+    (_StudentToolGroup.saude, s.alunoFerramentasGrupoSaude),
+    (_StudentToolGroup.relacao, s.alunoFerramentasGrupoRelacao),
+    (_StudentToolGroup.conta, s.alunoFerramentasGrupoConta),
   ];
 
   showFxHomeSheet<void>(
@@ -163,8 +166,8 @@ void _showAlunoToolsCatalog(
           shrinkWrap: true,
           children: [
             FxHomeSheetHeader(
-              title: 'Ferramentas',
-              subtitle: 'Atalhos da conta.',
+              title: s.alunoFerramentasTitulo,
+              subtitle: s.alunoFerramentasSubtitulo,
               leading: Icon(Icons.apps_outlined, size: 18, color: primary),
             ),
             for (final (group, header) in sections)

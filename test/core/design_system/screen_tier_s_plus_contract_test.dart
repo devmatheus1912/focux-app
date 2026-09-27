@@ -91,7 +91,8 @@ void main() {
             source.contains('DashboardShimmer') ||
             source.contains('Shimmer') ||
             source.contains('IaCopilotInsightsLoading') ||
-            source.contains('_loading');
+            source.contains('_loading') ||
+            RegExp(r'\b\w+Skeleton\(').hasMatch(source);
         if (!hasErrorUx) failures.add('$norm: async sem estado de erro');
         if (!hasLoadingUx) failures.add('$norm: async sem loading DS');
       }

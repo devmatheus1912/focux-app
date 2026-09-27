@@ -34,18 +34,7 @@ void main() {
         contains('ref.invalidate'),
       ),
     );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, isNot(contains('SkeletonList')));
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('useSafeArea: true')));
@@ -63,11 +52,13 @@ void main() {
     expect(screen, isNot(contains('Ver plano completo')));
     expect(screen, isNot(contains('Seu score Focux')));
     expect(screen, isNot(contains('RecoveryScoreRing')));
-    expect(screen, contains('Ver catálogo'));
+    expect(screen, contains('s.alunoAtalhosVerCatalogo'));
+    expect(screen, contains('AlunoHomeSkeleton()'));
+    expect(screen, contains('fxAnnounce('));
     expect(screen, contains('s.alunoHomeAjudaCalculo'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('FxSettingsTile'));
-    expect(screen, contains('Atalhos da conta.'));
+    expect(screen, contains('s.alunoFerramentasSubtitulo'));
     expect(screen, isNot(contains('/ia/aluno')));
     expect(screen, isNot(contains('/aluno/form-check')));
     expect(screen, contains('/aluno/desafios'));

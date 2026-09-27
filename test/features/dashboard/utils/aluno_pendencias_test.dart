@@ -61,6 +61,19 @@ void main() {
       ]);
     });
 
+    test('lista aberta não corta em 3', () {
+      final list = listAlunoPendenciasAbertas(
+        aluno: _aluno(completo: false, fotoUrl: null),
+        medidas: const [],
+        naoLidasDoPersonal: 2,
+        agendaReviewed: false,
+        todayMode: AlunoTodayMode.workoutReady,
+        now: _hoje,
+      );
+      expect(list, hasLength(5));
+      expect(list.last.tipo, AlunoPendenciaTipo.agenda);
+    });
+
     test('não repete o P0 de perfil', () {
       final list = resolveAlunoPendencias(
         aluno: _aluno(completo: false),

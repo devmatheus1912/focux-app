@@ -7,6 +7,7 @@ import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_header.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_home_skeleton.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_pendencias_block.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_week_summary_card.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -24,7 +25,8 @@ class _EventoFake {
   final String taskId;
   final String action;
   final String taskTitle;
-  const _EventoFake(this.taskId, this.action, this.taskTitle);
+  final bool? done;
+  const _EventoFake(this.taskId, this.action, this.taskTitle, this.done);
 }
 
 class _RepoFake extends Fake implements AlunoRepository {
@@ -40,7 +42,7 @@ class _RepoFake extends Fake implements AlunoRepository {
     bool? done,
     int? profileCompletion,
   }) async {
-    eventos.add(_EventoFake(taskId, action, taskTitle));
+    eventos.add(_EventoFake(taskId, action, taskTitle, done));
   }
 }
 
@@ -134,19 +136,27 @@ void main() {
       expect(find.text('VOLUME'), findsOneWidget);
     });
 
-    testWidgets('vazio não desenha nada', (tester) async {
+    testWidgets('só a sequência não desenha a faixa', (tester) async {
       await _pump(
         tester,
         const AlunoWeekSummaryCard(
           summary: AlunoWeekSummary(
             feitos: null,
             meta: null,
-            streakSemanas: 0,
+            streakSemanas: 3,
             volumeKg: null,
           ),
         ),
       );
       expect(find.text('Sua semana'), findsNothing);
+    });
+  });
+
+  group('AlunoHomeSkeleton', () {
+    testWidgets('lê como carregando, sem spinner', (tester) async {
+      await _pump(tester, const AlunoHomeSkeleton());
+      expect(find.bySemanticsLabel('Carregando o seu dia'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
   });
 
@@ -233,6 +243,81 @@ void main() {
       expect(
         AlunoAutonomyAnalytics.forToday(acao(AlunoTodayMode.awaitingRelease)),
         isNull,
+      );
+    });
+
+    test('fecha 1× o que foi tocado e saiu das abertas', () {
+      final repo = _RepoFake();
+      final foto = AlunoAutonomyAnalytics.forPendencia(
+        const AlunoPendencia(AlunoPendenciaTipo.foto),
+      );
+      final agenda = AlunoAutonomyAnalytics.forPendencia(
+        const AlunoPendencia(AlunoPendenciaTipo.agenda),
+      );
+      AlunoAutonomyAnalytics.clicked(repo, foto);
+      AlunoAutonomyAnalytics.clicked(repo, agenda);
+      repo.eventos.clear();
+
+      expect(
+        AlunoAutonomyAnalytics.completeResolved(repo, {'agenda-semana'}),
+        ['foto-dados'],
+      );
+      expect(
+        AlunoAutonomyAnalytics.completeResolved(repo, {'agenda-semana'}),
+        isEmpty,
+      );
+      expect(repo.eventos, hasLength(1));
+      expect(repo.eventos.single.action, 'COMPLETED');
+      expect(repo.eventos.single.taskId, 'foto-dados');
+      expect(repo.eventos.single.done, isTrue);
+    });
+
+    test('só visto, sem toque, não vira COMPLETED', () {
+      final repo = _RepoFake();
+      AlunoAutonomyAnalytics.viewed(
+        repo,
+        AlunoAutonomyAnalytics.forPendencia(
+          const AlunoPendencia(AlunoPendenciaTipo.chat),
+        ),
+      );
+      expect(AlunoAutonomyAnalytics.completeResolved(repo, const {}), isEmpty);
+    });
+
+    test('logout esquece os toques', () {
+      final repo = _RepoFake();
+      AlunoAutonomyAnalytics.clicked(
+        repo,
+        AlunoAutonomyAnalytics.forPendencia(
+          const AlunoPendencia(AlunoPendenciaTipo.foto),
+        ),
+      );
+      SessionInvalidator.clearTenantMemoryCaches();
+      expect(AlunoAutonomyAnalytics.completeResolved(repo, const {}), isEmpty);
+    });
+
+    test('abertas juntam o P0 e todas as pendências', () {
+      expect(
+        alunoAutonomyOpenTaskIds(
+          action: const AlunoTodayAction(
+            mode: AlunoTodayMode.noWorkout,
+            route: '/chat/aluno',
+          ),
+          pendenciasAbertas: const [
+            AlunoPendencia(AlunoPendenciaTipo.foto),
+            AlunoPendencia(AlunoPendenciaTipo.agenda),
+          ],
+        ),
+        {'treino-semana', 'foto-dados', 'agenda-semana'},
+      );
+      expect(
+        alunoAutonomyOpenTaskIds(
+          action: const AlunoTodayAction(
+            mode: AlunoTodayMode.workoutReady,
+            route: '/checkin',
+          ),
+          pendenciasAbertas: const [],
+        ),
+        isEmpty,
       );
     });
   });
