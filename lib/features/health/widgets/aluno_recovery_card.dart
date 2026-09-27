@@ -85,7 +85,7 @@ class AlunoRecoveryCard extends ConsumerWidget {
   /// Home BFF: sem histórico wearable → esconde o card (não confundir com scoreProntidao).
   final bool? hasWearableHistory;
 
-  /// Home BFF: última prontidão tem mais de 1 dia (o BFF manda `snapshot: null`).
+  /// Home BFF: última prontidão não é de hoje nem de ontem (o BFF manda `snapshot: null`).
   final bool recoveryStale;
 
   bool get _fromBundle => !identical(snapshot, _unset);
