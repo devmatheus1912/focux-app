@@ -92,13 +92,16 @@ soma espaço.
   metade da média e meta não batida) ou `VOLUME_SUBINDO`. Nada disso → `null`.
   Sem `acao` nem `evidencia`.
 - `coachMensagens`: não lidas dos últimos 3 dias
-  (`CoachProativoScheduler.VALIDADE_DIAS`).
+  (`CoachProativoScheduler.VALIDADE_DIAS`). `SEM_TREINO_5D` e
+  `STREAK_QUEBRADO` anteriores ao último treino concluído não saem
+  (`AlunoDashboardHomeSurface.coachAindaValido`).
 - `recursosIndisponiveis`: recursos de `RECURSOS_DO_ALUNO`
   (`HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não libera.
 - `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
   resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
-- Mensalidade paga/editada/em atraso, treino atribuído/desvinculado/excluído e
-  mensagem do coach enviada limpam o cache da Home do aluno
+- Mensalidade paga (manual, em lote ou recorrente), editada ou em atraso,
+  treino atribuído (também em lote), desvinculado ou excluído, status em lote
+  e mensagem do coach enviada limpam o cache da Home do aluno
   (`AlunoDashboardHomeCacheEvictor`).
 - Aditivo: nenhum campo removido; `historico` legado continua `[]`. Entra no
   cache de 60s e na ETag. Sem tabela, sem migration.
