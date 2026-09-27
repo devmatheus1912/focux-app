@@ -22,10 +22,18 @@ class AlunoHomeSkeleton extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SkeletonLoader(width: 160, height: 22),
+              const SkeletonLoader(width: 160, height: 24),
+              const SizedBox(
+                height: 48,
+                child: Row(
+                  children: [
+                    SkeletonLoader(width: 24, height: 24, borderRadius: 12),
+                    SizedBox(width: TokensStrip.s2),
+                    SkeletonLoader(width: 180, height: 14),
+                  ],
+                ),
+              ),
               const SizedBox(height: TokensStrip.s2),
-              const SkeletonLoader(width: 200, height: 14),
-              const SizedBox(height: TokensStrip.s4),
               const SkeletonLoader(height: 132, borderRadius: TokensStrip.rCard),
               const SizedBox(height: TokensStrip.s5),
               const SkeletonLoader(width: 110, height: 16),

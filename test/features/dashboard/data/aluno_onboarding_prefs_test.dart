@@ -35,9 +35,26 @@ void main() {
       expect(prefs.containsKey('aluno_agenda_reviewed_v1'), isFalse);
     });
 
-    test('logout limpa as duas chaves', () {
+    test('logout limpa as chaves locais do aluno', () {
       expect(alunoOnboardingPrefKeys, contains(kAlunoAgendaReviewedKey));
       expect(alunoOnboardingPrefKeys, contains('aluno_agenda_reviewed_v1'));
+      expect(alunoOnboardingPrefKeys, contains(kAlunoNpsAdiadoEmKey));
+    });
+  });
+
+  group('NPS adiado', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    test('"Depois" segura a pergunta por 7 dias', () async {
+      expect(await isAlunoNpsAdiado(now: DateTime(2026, 9, 27)), isFalse);
+      await adiarAlunoNps(now: DateTime(2026, 9, 27, 22));
+      expect(await isAlunoNpsAdiado(now: DateTime(2026, 10, 3, 23)), isTrue);
+      expect(await isAlunoNpsAdiado(now: DateTime(2026, 10, 4)), isFalse);
+    });
+
+    test('valor ruim não bloqueia', () {
+      expect(alunoNpsAdiado('x', DateTime(2026, 9, 27)), isFalse);
+      expect(alunoNpsAdiado(null, DateTime(2026, 9, 27)), isFalse);
     });
   });
 }

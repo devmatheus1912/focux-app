@@ -31,30 +31,43 @@ Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
 1. **Cabeçalho.** App bar "Hoje" + freshness (`FxHubFreshness`). No corpo:
    "Olá, {primeiro nome}" e a linha "Seu personal: {nomePersonal}" com logo
    24 px; toque → `/chat/aluno`. Sem nome do personal → a linha não aparece.
+   A app bar não repete o avatar: o Perfil já está no dock.
 2. **Card de foco — o que tenho hoje.** Eyebrow, título, 1 linha de descrição,
-   `AlunoHomeInsightLine` (título + evidência; CTA só se a rota for diferente
-   da ação) e o chip P0 (`FxActionChip`). Saem o badge de sequência, a pill de
+   `AlunoHomeInsightLine` (só leitura: título + detalhe, sem CTA) e o chip P0
+   (`FxActionChip`), único toque do card. Saem o badge de sequência, a pill de
    ritmo local e as linhas de narrativa.
 3. **Aviso único.** No máximo um banner: anamnese pendente; se não houver,
    mensagem do coach ("Seu coach Focux"). Nenhum dos dois → nada. No
-   bloqueio financeiro o card de foco não mostra insight.
+   bloqueio financeiro o card de foco não mostra insight. O coach passa por
+   `alunoCoachVisiveis`: na retomada saem `SEM_TREINO_5D` e
+   `STREAK_QUEBRADO` (o card de foco já diz isso); com prontidão visível sai
+   `SONO_BAIXO`. "Entendi" some com a mensagem na hora e só recarrega a Home
+   quando a última é lida.
 4. **Sua semana — como estou.** Três métricas: sessões na semana contra a meta
-   ("2 de 3"), sequência em semanas e volume da semana. Abaixo, o
+   ("2 de 3"), sequência em semanas e volume da semana. Meta batida marca o
+   tile de sessões com o verde de sucesso e um check. Abaixo, o
    `AlunoRecoveryCard` alimentado pelo BFF (`alunoProntidaoVisivel`): prontidão
    de hoje com histórico de wearable, ou convite para sincronizar quando a
    última é antiga. Sem wearable o bloco não existe.
 5. **Evolução — estou evoluindo.** Gráfico de força (1RM est.) e volume das 8
    semanas, variação da força como métrica e o último recorde em uma linha.
-   Sem texto que repita o insight e sem botão "Treinar agora".
+   Recorde dos últimos 7 dias vira "Novo recorde". A linha de força usa a cor
+   secundária da marca (verde fica para status). Sem texto que repita o
+   insight e sem botão "Treinar agora".
 6. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → o bloco
    some.
 7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF, header de seção,
-   botões de 48 dp travados durante o envio.
+   botões de 48 dp travados durante o envio. Altura do conteúdo (fonte grande
+   não corta); uma oferta ocupa a largura toda.
 8. **Ferramentas.** `_StudentToolsSection` com até 3 atalhos dinâmicos
    (`AlunoHomeView.atalhos`): ordem de `alunoAtalhosPrioridade`, sem abas do
-   dock e sem destino que já aparece acima (`rotasNoTopo`: foco, CTA do
-   insight, aviso de anamnese, chat do cabeçalho e pendências). O catálogo
-   completo continua no "Ver todas".
+   dock e sem destino que já aparece acima (`rotasNoTopo`: foco, aviso de
+   anamnese, chat do cabeçalho e pendências). Atalhos e catálogo escondem o
+   que o plano do personal não libera (`recursosIndisponiveis`).
+
+NPS: o BFF só libera depois de 3 treinos concluídos e sem resposta nos
+últimos 30 dias. Fechar sem responder adia 7 dias neste aparelho (chave
+limpa no logout).
 
 Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso. Cada bloco só
 entra com conteúdo e traz o próprio espaçamento, então bloco escondido não
@@ -67,14 +80,26 @@ soma espaço.
 - `AlunoDashboardHomeResponse` ganha `Integer concluidosSemanaIso`: sessões
   concluídas desde a segunda-feira da semana ISO atual (São Paulo). O valor sai
   de `AlunoInsightInput.concluidosSemanaIso()`, já calculado em
-  `AlunoHomeInsightInputs.montar`, então o bloco "Sua semana" e o insight
-  `META_ATINGIDA` usam o mesmo número.
+  `AlunoHomeInsightInputs.montar`.
 - Se a montagem do input falhar, o campo vai `null` (mesma regra do `insight`).
 - `frequenciaDias` é a meta da Home: `AlunoDashboardHomeSurface.metaSemanal`
   = fichas ativas do rodízio (2–7). Com menos de 2 fichas o plano não diz a
-  frequência, então vai `null` e o insight `META_ATINGIDA` não dispara.
+  frequência, então vai `null`.
   `FocuxScoreCalculator.metaDiasSemanaPlano` segue só como denominador de score.
-- `recordes` vem com cap 1: a Home usa só o último (evolução e insight PR).
+- `recordes` vem com cap 1: a Home usa só o último.
+- `insight` só traz o que nenhum bloco mostra: `RITMO_CAIU` (média das 4
+  semanas anteriores ≥ 2/semana, 1+ treino nos últimos 7 dias, abaixo da
+  metade da média e meta não batida) ou `VOLUME_SUBINDO`. Nada disso → `null`.
+  Sem `acao` nem `evidencia`.
+- `coachMensagens`: não lidas dos últimos 3 dias
+  (`CoachProativoScheduler.VALIDADE_DIAS`).
+- `recursosIndisponiveis`: recursos de `RECURSOS_DO_ALUNO`
+  (`HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não libera.
+- `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
+  resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
+- Mensalidade paga/editada/em atraso, treino atribuído/desvinculado/excluído e
+  mensagem do coach enviada limpam o cache da Home do aluno
+  (`AlunoDashboardHomeCacheEvictor`).
 - Aditivo: nenhum campo removido; `historico` legado continua `[]`. Entra no
   cache de 60s e na ETag. Sem tabela, sem migration.
 - Atualizar a descrição do OpenAPI em `AlunoDashboardController`.

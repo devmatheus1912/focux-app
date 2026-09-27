@@ -1,75 +1,53 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 
-Map<String, dynamic> _pr() => {
-  'tipo': 'PR',
+Map<String, dynamic> _ritmo() => {
+  'tipo': 'RITMO_CAIU',
   'confianca': 'HIGH',
-  'chave': 'insightPr',
-  'params': {'exercicio': 'Supino', 'cargaKg': '82.5', 'dias': 2},
-  'titulo': 'Novo recorde',
-  'mensagem': 'Supino: 82,5 kg',
-  'evidencia': 'Registrado há 2 dias',
-  'acao': {'rota': '/checkin/historico', 'cta': 'Ver histórico'},
+  'chave': 'insightRitmoCaiu',
+  'params': {'media': 3},
+  'titulo': 'Seu ritmo caiu',
+  'mensagem': 'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
 };
 
 void main() {
   test('lê o insight completo do BFF', () {
-    final i = AlunoHomeInsight.tryParse(_pr())!;
-    expect(i.tipo, AlunoInsightTipo.pr);
+    final i = AlunoHomeInsight.tryParse(_ritmo())!;
+    expect(i.tipo, AlunoInsightTipo.ritmoCaiu);
     expect(i.confianca, AlunoInsightConfianca.high);
-    expect(i.chave, 'insightPr');
-    expect(i.params, {'exercicio': 'Supino', 'cargaKg': '82.5', 'dias': '2'});
-    expect(i.evidencia, 'Registrado há 2 dias');
-    expect(i.acao?.rota, '/checkin/historico');
+    expect(i.chave, 'insightRitmoCaiu');
+    expect(i.params, {'media': '3'});
   });
 
   test('mapeia todos os tipos do servidor', () {
     const wire = {
-      'NOVO': AlunoInsightTipo.novo,
-      'RECUPERACAO': AlunoInsightTipo.recuperacao,
-      'PR': AlunoInsightTipo.pr,
-      'RETORNO': AlunoInsightTipo.retorno,
-      'META_ATINGIDA': AlunoInsightTipo.metaAtingida,
-      'FORCA_SUBINDO': AlunoInsightTipo.forcaSubindo,
       'VOLUME_SUBINDO': AlunoInsightTipo.volumeSubindo,
-      'CONSISTENTE': AlunoInsightTipo.consistente,
       'RITMO_CAIU': AlunoInsightTipo.ritmoCaiu,
-      'DADOS_INSUFICIENTES': AlunoInsightTipo.dadosInsuficientes,
     };
     for (final e in wire.entries) {
-      expect(AlunoHomeInsight.tryParse(_pr()..['tipo'] = e.key)?.tipo, e.value);
+      expect(
+        AlunoHomeInsight.tryParse(_ritmo()..['tipo'] = e.key)?.tipo,
+        e.value,
+      );
     }
   });
 
   test('payload ausente, desconhecido ou malformado vira null', () {
     expect(AlunoHomeInsight.tryParse(null), isNull);
-    expect(AlunoHomeInsight.tryParse('PR'), isNull);
-    expect(AlunoHomeInsight.tryParse(_pr()..['tipo'] = 'NOVO_TIPO_FUTURO'), isNull);
-    expect(AlunoHomeInsight.tryParse(_pr()..['confianca'] = 'ALTA'), isNull);
-    expect(AlunoHomeInsight.tryParse(_pr()..remove('titulo')), isNull);
-    expect(AlunoHomeInsight.tryParse(_pr()..['mensagem'] = 3), isNull);
+    expect(AlunoHomeInsight.tryParse('RITMO_CAIU'), isNull);
+    expect(AlunoHomeInsight.tryParse(_ritmo()..['tipo'] = 'PR'), isNull);
+    expect(AlunoHomeInsight.tryParse(_ritmo()..['confianca'] = 'ALTA'), isNull);
+    expect(AlunoHomeInsight.tryParse(_ritmo()..remove('titulo')), isNull);
+    expect(AlunoHomeInsight.tryParse(_ritmo()..['mensagem'] = 3), isNull);
   });
 
   test('campos opcionais malformados não derrubam o insight', () {
     final i = AlunoHomeInsight.tryParse(
-      _pr()
+      _ritmo()
         ..['params'] = 'x'
-        ..['evidencia'] = 7
-        ..['chave'] = null
-        ..['acao'] = null,
+        ..['chave'] = null,
     )!;
     expect(i.params, isEmpty);
-    expect(i.evidencia, isNull);
     expect(i.chave, '');
-    expect(i.acao, isNull);
-  });
-
-  test('ação só aceita rota interna', () {
-    for (final rota in ['https://evil.example', '//evil.example', 'saude', '']) {
-      final i = AlunoHomeInsight.tryParse(
-        _pr()..['acao'] = {'rota': rota, 'cta': 'Abrir'},
-      )!;
-      expect(i.acao, isNull, reason: rota);
-    }
   });
 }

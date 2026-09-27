@@ -25,14 +25,20 @@ void main() {
     expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
     expect(
       at('AlunoUpsellCarousel('),
-      lessThan(at('_StudentToolsSection(atalhos: view.atalhos)')),
+      lessThan(at('_StudentToolsSection(')),
     );
+    expect(screen, contains('recursosIndisponiveis: view.recursosIndisponiveis'));
+    expect(screen, contains('coachMensagens: view.coach'));
     expect(screen, contains('insight: view.insight'));
     expect(screen, contains('view.semanaVisivel'));
     expect(screen, contains('view.prontidaoVisivel'));
 
     expect(screen, contains('s.alunoHomeTitulo'));
-    expect(screen, contains('S.of(context).alunoHomePerfilSemantics'));
+    expect(screen, isNot(contains('_AlunoAppBarAvatar')));
+    expect(
+      screen,
+      contains('AlunoHomeInsightLine(insight: insight, onPrimary: mute)'),
+    );
     expect(screen, contains('listenManual'));
     expect(screen, isNot(contains("'Meu Treino'")));
     expect(screen, isNot(contains('buildAlunoHomeExperience')));

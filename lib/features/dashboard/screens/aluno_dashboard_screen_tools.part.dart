@@ -103,16 +103,23 @@ List<_StudentToolAction> _alunoTools(S s) => [
   ),
 ];
 
-/// Atalhos do dia ([AlunoHomeView.atalhos]) + catálogo completo.
+/// Atalhos do dia ([AlunoHomeView.atalhos]) + catálogo do que o plano do
+/// personal libera.
 class _StudentToolsSection extends StatelessWidget {
-  const _StudentToolsSection({required this.atalhos});
+  const _StudentToolsSection({
+    required this.atalhos,
+    required this.recursosIndisponiveis,
+  });
 
   final List<String> atalhos;
+  final Set<String> recursosIndisponiveis;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final tools = _alunoTools(s);
+    final tools = _alunoTools(s)
+        .where((t) => alunoFerramentaLiberada(t.route, recursosIndisponiveis))
+        .toList(growable: false);
     final featured = [
       for (final rota in atalhos) ...tools.where((t) => t.route == rota),
     ];

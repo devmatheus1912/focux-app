@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/coach/data/coach_proativo_repository.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_anamnese.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_analytics.dart';
@@ -11,11 +12,10 @@ import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
 const _insight = {
-  'tipo': 'PR',
+  'tipo': 'RITMO_CAIU',
   'confianca': 'HIGH',
-  'titulo': 'Recorde novo',
-  'mensagem': 'Supino subiu.',
-  'acao': {'rota': '/checkin/historico', 'cta': 'Ver'},
+  'titulo': 'Seu ritmo caiu',
+  'mensagem': 'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
 };
 
 AlunoDashboardHomeBundle _bundle({
@@ -24,6 +24,8 @@ AlunoDashboardHomeBundle _bundle({
   bool inadimplente = false,
   Object? insight,
   String nomePersonal = '',
+  List<String> recursosIndisponiveis = const [],
+  String? recordeEm,
 }) => AlunoDashboardHomeBundle.fromJson({
   'aluno': {
     'id': 7,
@@ -43,7 +45,20 @@ AlunoDashboardHomeBundle _bundle({
   'anamnesePendente': anamnese,
   'insight': insight,
   'personalBrand': {'nomePersonal': nomePersonal},
+  'recursosIndisponiveis': recursosIndisponiveis,
+  'recordes': [
+    if (recordeEm != null)
+      {'id': 1, 'exercicioId': 2, 'exercicioNome': 'Supino', 'data': recordeEm},
+  ],
 });
+
+CoachMensagem _coach(String tipo) => CoachMensagem(
+  id: tipo.hashCode,
+  tipo: tipo,
+  mensagem: 'oi',
+  criadoEm: '2026-09-27T08:00:00',
+  lido: false,
+);
 
 void main() {
   group('AlunoAnamnesePendente', () {
@@ -135,7 +150,6 @@ void main() {
         now: DateTime(2026, 9, 27),
       );
       expect(view.rotasNoTopo, contains('/aluno/anamnese'));
-      expect(view.rotasNoTopo, contains('/checkin/historico'));
       expect(view.rotasNoTopo, contains('/aluno/perfil/editar'));
       for (final rota in view.atalhos) {
         expect(view.rotasNoTopo, isNot(contains(rota)));
@@ -166,6 +180,18 @@ void main() {
       );
     });
 
+    test('ferramenta sem recurso no plano do personal sai dos atalhos', () {
+      final view = buildAlunoHomeView(
+        _bundle(recursosIndisponiveis: ['HABIT_COACHING', 'COMUNIDADE_GRUPOS']),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(view.atalhos, isNot(contains('/aluno/habitos')));
+      expect(view.atalhos, isNot(contains('/aluno/desafios')));
+      expect(alunoFerramentaLiberada('/aluno/habitos', const {}), isTrue);
+      expect(alunoFerramentaLiberada('/agenda/aluno', {'HABIT_COACHING'}), isTrue);
+    });
+
     test('atalhos nunca apontam para abas do dock', () {
       const dock = [
         '/dashboard/aluno',
@@ -177,6 +203,67 @@ void main() {
       for (final rota in alunoAtalhosPrioridade) {
         expect(dock, isNot(contains(rota)));
       }
+    });
+  });
+
+  group('alunoCoachVisiveis', () {
+    final todas = [
+      _coach('SEM_TREINO_5D'),
+      _coach('STREAK_QUEBRADO'),
+      _coach('SONO_BAIXO'),
+    ];
+
+    test('retomada no card Hoje tira dias sem treino e sequência parada', () {
+      final tipos = alunoCoachVisiveis(
+        todas,
+        comeback: true,
+        prontidaoVisivel: false,
+      ).map((m) => m.tipo);
+      expect(tipos, ['SONO_BAIXO']);
+    });
+
+    test('prontidão visível tira sono curto', () {
+      final tipos = alunoCoachVisiveis(
+        todas,
+        comeback: false,
+        prontidaoVisivel: true,
+      ).map((m) => m.tipo);
+      expect(tipos, ['SEM_TREINO_5D', 'STREAK_QUEBRADO']);
+    });
+
+    test('aviso de coach conta só as visíveis', () {
+      final view = buildAlunoHomeView(_bundle(coach: 2), agendaReviewed: true);
+      expect(view.coach, hasLength(2));
+      expect(view.aviso, AlunoHomeAviso.coach);
+    });
+  });
+
+  group('alunoRecordeRecente', () {
+    final hoje = DateTime(2026, 9, 27, 15);
+
+    test('até 7 dias é novo; depois ou data ruim não', () {
+      expect(alunoRecordeRecente('2026-09-27', hoje), isTrue);
+      expect(alunoRecordeRecente('2026-09-20', hoje), isTrue);
+      expect(alunoRecordeRecente('2026-09-19', hoje), isFalse);
+      expect(alunoRecordeRecente('2026-09-28', hoje), isFalse);
+      expect(alunoRecordeRecente('x', hoje), isFalse);
+      expect(alunoRecordeRecente(null, hoje), isFalse);
+    });
+
+    test('view marca o recorde recente', () {
+      expect(
+        buildAlunoHomeView(
+          _bundle(recordeEm: '2026-09-25'),
+          agendaReviewed: true,
+          now: hoje,
+        ).recordeRecente,
+        isTrue,
+      );
+      expect(
+        buildAlunoHomeView(_bundle(), agendaReviewed: true, now: hoje)
+            .recordeRecente,
+        isFalse,
+      );
     });
   });
 

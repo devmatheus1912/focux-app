@@ -22,12 +22,5 @@ class AlunoInsightAnalytics {
     return true;
   }
 
-  static void actionTapped(AlunoHomeInsight insight) {
-    AnalyticsService.instance.track(
-      ProductEvents.alunoInsightActionTapped,
-      props: props(insight),
-    );
-  }
-
   static void resetSessao() => _vistosNaSessao.clear();
 }

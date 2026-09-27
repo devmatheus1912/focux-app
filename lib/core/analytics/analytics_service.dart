@@ -167,7 +167,6 @@ class ProductEvents {
   static const aluno360FirstPaint = 'aluno360_first_paint';
 
   static const alunoInsightViewed = 'aluno_insight_viewed';
-  static const alunoInsightActionTapped = 'aluno_insight_action_tapped';
   static const alunoHomeViewed = 'aluno_home_viewed';
   static const alunoHomeFocusAction = 'aluno_home_focus_action';
 

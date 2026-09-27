@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../l10n/app_localizations.dart';
@@ -8,6 +9,7 @@ import '../utils/aluno_home_week.dart';
 import 'dashboard_section_header.dart';
 
 /// "Sua semana": sessões x meta, sequência e volume. Lido como uma frase.
+/// Meta batida marca o tile de treinos com o verde de sucesso.
 class AlunoWeekSummaryCard extends StatelessWidget {
   const AlunoWeekSummaryCard({super.key, required this.summary});
 
@@ -21,19 +23,31 @@ class AlunoWeekSummaryCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final volume = summary.volumeKg;
 
-    Widget tile(String label, String value) => Expanded(
+    Widget tile(
+      String label,
+      String value, {
+      Color? color,
+      IconData? icon,
+    }) => Expanded(
       child: OperationalMetricTile(
         label: label,
         value: value,
-        color: primary,
+        color: color ?? primary,
         isDark: isDark,
         dense: true,
+        leadingIcon: icon,
       ),
     );
 
+    final bateuMeta = summary.metaAtingida;
     final tiles = [
       if (summary.feitos != null)
-        tile(s.alunoSemanaTreinosLabel, alunoTreinosSemanaValor(s, summary)),
+        tile(
+          s.alunoSemanaTreinosLabel,
+          alunoTreinosSemanaValor(s, summary),
+          color: bateuMeta ? EagleTokens.semanticGood(isDark: isDark) : null,
+          icon: bateuMeta ? Icons.check_circle_rounded : null,
+        ),
       tile(
         s.alunoSemanaSequenciaLabel,
         s.alunoSemanaSequenciaValor(summary.streakSemanas),

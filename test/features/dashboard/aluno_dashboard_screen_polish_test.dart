@@ -24,7 +24,7 @@ void main() {
     expect(screen, isNot(contains('minhaAnamneseProvider')));
     expect(screen, contains('AlunoHomeAnalytics.viewed'));
     expect(screen, contains('AlunoHomeAnalytics.focusAction'));
-    expect(screen, contains('deveResponder: true'));
+    expect(screen, contains('showAlunoNpsPrompt(context, ref)'));
     expect(screen, isNot(contains('invalidate(alunoRecoveryProvider)')));
     expect(
       screen,

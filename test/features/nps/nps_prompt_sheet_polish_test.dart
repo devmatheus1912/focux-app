@@ -15,5 +15,8 @@ void main() {
     expect(sheet, isNot(contains('FilledButton')));
     expect(sheet, isNot(contains('FxLoading')));
     expect(sheet, isNot(contains('Navigator.pop')));
+    expect(sheet, contains('adiarAlunoNps'));
+    expect(sheet, isNot(contains("'Depois'")));
+    expect(sheet, isNot(contains("'Enviar'")));
   });
 }

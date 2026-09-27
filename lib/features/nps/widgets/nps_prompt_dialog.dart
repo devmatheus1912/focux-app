@@ -9,23 +9,22 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../dashboard/data/aluno_onboarding_prefs.dart';
 import '../data/nps_repository.dart';
 
-Future<void> showNpsPromptIfNeeded(
-  BuildContext context,
-  WidgetRef ref, {
-  bool? deveResponder,
-}) async {
-  if (deveResponder == false) return;
+/// Pergunta o NPS que o BFF liberou. Fechar sem responder adia por
+/// [alunoNpsAdiadoDias] dias neste aparelho.
+Future<void> showAlunoNpsPrompt(BuildContext context, WidgetRef ref) async {
   try {
+    if (await isAlunoNpsAdiado() || !context.mounted) return;
     final repo = NpsRepository(ref.read(apiClientProvider));
-    final deve = deveResponder ?? await repo.deveResponder();
-    if (!deve || !context.mounted) return;
-    await showFxHomeSheet<void>(
+    final respondeu = await showFxHomeSheet<bool>(
       context,
       builder: (ctx) => _NpsPromptSheet(repo: repo),
     );
+    if (respondeu != true) await adiarAlunoNps();
   } catch (_) {}
 }
 
@@ -57,7 +56,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
         score: _score,
         comentario: _comentario.text.trim(),
       );
-      if (mounted) FxHomeSheetChrome.dismissAndPop(context);
+      if (mounted) FxHomeSheetChrome.dismissAndPop(context, true);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -68,6 +67,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
@@ -82,13 +82,13 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
           const SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Como está sua experiência?',
-            subtitle: 'Uma nota rápida ajuda a melhorar o Focux.',
+            title: s.npsPromptTitulo,
+            subtitle: s.npsPromptSubtitulo,
             leading: Icon(Icons.favorite_outline, color: primary, size: 18),
           ),
           const SizedBox(height: TokensStrip.s4),
           Text(
-            'Nota: $_score',
+            s.npsPromptNota(_score),
             textAlign: TextAlign.center,
             style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
@@ -109,13 +109,13 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
             onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             decoration: FxInputDeco.build(
               context,
-              'Comentário',
-              hint: 'Comentário (opcional)',
+              s.npsPromptComentario,
+              hint: s.npsPromptComentarioHint,
             ),
           ),
           const SizedBox(height: TokensStrip.s4),
           FxLiquidPrimaryButton(
-            label: 'Enviar',
+            label: s.npsPromptEnviar,
             loading: _saving,
             onPressed: _saving ? null : _enviar,
           ),
@@ -123,7 +123,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
             onPressed:
                 _saving ? null : () => FxHomeSheetChrome.dismissAndPop(context),
             child: Text(
-              'Depois',
+              s.npsPromptDepois,
               style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
           ),

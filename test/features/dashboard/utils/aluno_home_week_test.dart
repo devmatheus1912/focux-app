@@ -15,6 +15,19 @@ void main() {
       expect(w.streakSemanas, 4);
       expect(w.volumeKg, 3200);
       expect(w.isEmpty, isFalse);
+      expect(w.metaAtingida, isFalse);
+    });
+
+    test('meta batida só com meta e sessões >= meta', () {
+      AlunoWeekSummary w(int? feitos, int? freq) => buildAlunoWeekSummary(
+        concluidosSemanaIso: feitos,
+        frequenciaDias: freq,
+        streakAtual: 0,
+        volumeSemanaKg: 0,
+      );
+      expect(w(3, 3).metaAtingida, isTrue);
+      expect(w(4, 3).metaAtingida, isTrue);
+      expect(w(null, 3).metaAtingida, isFalse);
     });
 
     test('sem meta mantém as sessões', () {

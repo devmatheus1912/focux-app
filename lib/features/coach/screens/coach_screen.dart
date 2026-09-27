@@ -26,7 +26,10 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/coach_proativo_repository.dart';
 import '../utils/coach_display.dart';
 import '../widgets/coach_catalog_sheet.dart';
-import '../widgets/coach_proativo_card.dart';
+
+final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
+  return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
+});
 
 class CoachScreen extends ConsumerWidget {
   const CoachScreen({super.key});

@@ -109,6 +109,7 @@ String alunoWeekSemantics(S s, AlunoWeekSummary w) {
       meta == null
           ? s.alunoSemanaFraseTreinos(feitos)
           : s.alunoSemanaFraseTreinosMeta(feitos, meta),
+    if (w.metaAtingida) s.alunoSemanaFraseMetaBatida,
     s.alunoSemanaFraseSequencia(w.streakSemanas),
     if (volume != null) s.alunoSemanaFraseVolume(alunoVolumeTexto(s, volume)),
   ];

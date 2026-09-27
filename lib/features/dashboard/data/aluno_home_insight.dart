@@ -1,30 +1,12 @@
 /// Insight único da Home do aluno, decidido pelo BFF (`GET /api/dashboard/aluno/home`).
-enum AlunoInsightTipo {
-  novo,
-  recuperacao,
-  pr,
-  retorno,
-  metaAtingida,
-  forcaSubindo,
-  volumeSubindo,
-  consistente,
-  ritmoCaiu,
-  dadosInsuficientes,
-}
+/// Só sinais que nenhum outro bloco da Home mostra.
+enum AlunoInsightTipo { volumeSubindo, ritmoCaiu }
 
 enum AlunoInsightConfianca { high, medium, low }
 
 const _tiposWire = <String, AlunoInsightTipo>{
-  'NOVO': AlunoInsightTipo.novo,
-  'RECUPERACAO': AlunoInsightTipo.recuperacao,
-  'PR': AlunoInsightTipo.pr,
-  'RETORNO': AlunoInsightTipo.retorno,
-  'META_ATINGIDA': AlunoInsightTipo.metaAtingida,
-  'FORCA_SUBINDO': AlunoInsightTipo.forcaSubindo,
   'VOLUME_SUBINDO': AlunoInsightTipo.volumeSubindo,
-  'CONSISTENTE': AlunoInsightTipo.consistente,
   'RITMO_CAIU': AlunoInsightTipo.ritmoCaiu,
-  'DADOS_INSUFICIENTES': AlunoInsightTipo.dadosInsuficientes,
 };
 
 const _confiancaWire = <String, AlunoInsightConfianca>{
@@ -32,13 +14,6 @@ const _confiancaWire = <String, AlunoInsightConfianca>{
   'MEDIUM': AlunoInsightConfianca.medium,
   'LOW': AlunoInsightConfianca.low,
 };
-
-class AlunoInsightAcao {
-  const AlunoInsightAcao({required this.rota, required this.cta});
-
-  final String rota;
-  final String cta;
-}
 
 class AlunoHomeInsight {
   const AlunoHomeInsight({
@@ -48,8 +23,6 @@ class AlunoHomeInsight {
     required this.titulo,
     required this.mensagem,
     this.params = const {},
-    this.evidencia,
-    this.acao,
   });
 
   final AlunoInsightTipo tipo;
@@ -62,8 +35,6 @@ class AlunoHomeInsight {
   /// Texto pt do servidor — fallback quando a chave não existe no app.
   final String titulo;
   final String mensagem;
-  final String? evidencia;
-  final AlunoInsightAcao? acao;
 
   /// `null` quando o payload falta, tem tipo desconhecido ou vem malformado.
   static AlunoHomeInsight? tryParse(Object? raw) {
@@ -79,7 +50,6 @@ class AlunoHomeInsight {
       return null;
     }
     final chave = raw['chave'];
-    final evidencia = raw['evidencia'];
     return AlunoHomeInsight(
       tipo: tipo,
       confianca: confianca,
@@ -87,8 +57,6 @@ class AlunoHomeInsight {
       params: _parseParams(raw['params']),
       titulo: titulo,
       mensagem: mensagem,
-      evidencia: evidencia is String ? evidencia : null,
-      acao: _parseAcao(raw['acao']),
     );
   }
 
@@ -98,18 +66,5 @@ class AlunoHomeInsight {
       for (final e in raw.entries)
         if (e.value != null) '${e.key}': '${e.value}',
     };
-  }
-
-  static AlunoInsightAcao? _parseAcao(Object? raw) {
-    if (raw is! Map) return null;
-    final rota = raw['rota'];
-    final cta = raw['cta'];
-    if (rota is! String ||
-        cta is! String ||
-        !rota.startsWith('/') ||
-        rota.startsWith('//')) {
-      return null;
-    }
-    return AlunoInsightAcao(rota: rota, cta: cta);
   }
 }

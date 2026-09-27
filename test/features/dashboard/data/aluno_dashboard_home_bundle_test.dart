@@ -41,7 +41,6 @@ Map<String, dynamic> _payload() => {
   ],
   'chat': {
     'possuiMensagemDoAluno': true,
-    'ultimaMensagemAlunoEm': '2026-08-14T18:30:00',
     'naoLidasDoPersonal': 2,
   },
   'notificacoesNaoLidas': 4,
@@ -84,14 +83,14 @@ Map<String, dynamic> _payload() => {
   'forcaDeltaPercent': 4.5,
   'recoveryStale': false,
   'insight': {
-    'tipo': 'META_ATINGIDA',
+    'tipo': 'VOLUME_SUBINDO',
     'confianca': 'HIGH',
-    'chave': 'insightMetaAtingida',
-    'params': {'feitos': '4', 'meta': '4'},
-    'titulo': 'Meta da semana atingida',
-    'mensagem': '4 treinos nesta semana (meta: 4)',
-    'acao': {'rota': '/checkin/treinos', 'cta': 'Ver treinos'},
+    'chave': 'insightVolumeSubindo',
+    'params': {'pct': '12'},
+    'titulo': 'Volume subindo',
+    'mensagem': '+12% vs média das 6 semanas anteriores',
   },
+  'recursosIndisponiveis': ['HABIT_COACHING'],
 };
 
 void main() {
@@ -122,8 +121,8 @@ void main() {
       expect(bundle.frequenciaDias, 4);
       expect(bundle.forcaDeltaPercent, 4.5);
       expect(bundle.recoveryStale, isFalse);
-      expect(bundle.insight?.tipo, AlunoInsightTipo.metaAtingida);
-      expect(bundle.insight?.acao?.rota, '/checkin/treinos');
+      expect(bundle.insight?.tipo, AlunoInsightTipo.volumeSubindo);
+      expect(bundle.recursosIndisponiveis, {'HABIT_COACHING'});
       // BFF não manda mais campos de CRM do personal; o modelo usa defaults.
       expect(bundle.aluno.emRisco, isFalse);
       expect(bundle.aluno.statusFinanceiro, 'ATIVO');
@@ -149,7 +148,8 @@ void main() {
         ..remove('frequenciaDias')
         ..remove('forcaDeltaPercent')
         ..remove('recoveryStale')
-        ..remove('insight');
+        ..remove('insight')
+        ..remove('recursosIndisponiveis');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -170,6 +170,7 @@ void main() {
       expect(bundle.forcaDeltaPercent, isNull);
       expect(bundle.recoveryStale, isFalse);
       expect(bundle.insight, isNull);
+      expect(bundle.recursosIndisponiveis, isEmpty);
     });
 
     test('insight malformado é ignorado sem derrubar a Home', () {

@@ -11,10 +11,6 @@ import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/coach_proativo_repository.dart';
 
-final coachHomeProvider = FutureProvider.autoDispose<CoachHome>((ref) {
-  return CoachProativoRepository(ref.read(apiClientProvider)).getHome();
-});
-
 /// Mensagens não lidas do coach na Home do aluno (vêm do BFF).
 class CoachProativoCard extends ConsumerStatefulWidget {
   const CoachProativoCard({super.key, required this.mensagens});
@@ -29,14 +25,18 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
   int _index = 0;
   bool _enviando = false;
 
-  Future<void> _marcarLido(CoachMensagem msg) async {
+  /// Lidas nesta tela: somem na hora; a Home só recarrega depois da última.
+  final _lidas = <int>{};
+
+  Future<void> _marcarLido(CoachMensagem msg, int restantes) async {
     setState(() => _enviando = true);
     try {
       await CoachProativoRepository(
         ref.read(apiClientProvider),
       ).marcarLido(msg.id);
       if (!mounted) return;
-      invalidateAlunoDashboardHome(ref);
+      setState(() => _lidas.add(msg.id));
+      if (restantes == 1) invalidateAlunoDashboardHome(ref);
     } catch (_) {
       if (mounted) {
         FeedbackHelper.showError(context, S.of(context).alunoCoachErro);
@@ -48,7 +48,10 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
 
   @override
   Widget build(BuildContext context) {
-    final msgs = widget.mensagens;
+    final msgs = [
+      for (final m in widget.mensagens)
+        if (!_lidas.contains(m.id)) m,
+    ];
     if (msgs.isEmpty) return const SizedBox.shrink();
     final s = S.of(context);
     final primary = Theme.of(context).colorScheme.primary;
@@ -105,7 +108,8 @@ class _CoachProativoCardState extends ConsumerState<CoachProativoCard> {
               const Spacer(),
               TextButton(
                 style: TextButton.styleFrom(minimumSize: const Size(64, 48)),
-                onPressed: _enviando ? null : () => _marcarLido(msg),
+                onPressed:
+                    _enviando ? null : () => _marcarLido(msg, msgs.length),
                 child: Text(s.alunoCoachEntendi),
               ),
             ],

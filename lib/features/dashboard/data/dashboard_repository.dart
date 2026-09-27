@@ -384,6 +384,9 @@ class AlunoDashboardHomeBundle {
 
   /// Null quando o aluno não precisa agir na anamnese (ou backend antigo).
   final AlunoAnamnesePendente? anamnesePendente;
+
+  /// Recursos do plano do personal que o aluno não tem (`HABIT_COACHING`, …).
+  final Set<String> recursosIndisponiveis;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -410,6 +413,7 @@ class AlunoDashboardHomeBundle {
     this.recoveryStale = false,
     this.insight,
     this.anamnesePendente,
+    this.recursosIndisponiveis = const {},
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -537,6 +541,10 @@ class AlunoDashboardHomeBundle {
       anamnesePendente: AlunoAnamnesePendente.tryParse(
         json['anamnesePendente'],
       ),
+      recursosIndisponiveis: {
+        ...(json['recursosIndisponiveis'] as List? ?? const [])
+            .whereType<String>(),
+      },
     );
   }
 }

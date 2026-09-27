@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -21,17 +20,21 @@ class AlunoEvolutionCard extends StatelessWidget {
     required this.forcaPorSemana,
     this.forcaDeltaPercent,
     this.ultimoRecorde,
+    this.recordeRecente = false,
   });
 
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final double? forcaDeltaPercent;
   final RecordePessoal? ultimoRecorde;
+  final bool recordeRecente;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
+    final scheme = Theme.of(context).colorScheme;
+    final primary = scheme.primary;
+    final forcaColor = scheme.secondary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = ShellChrome.of(context).mute;
     final hasChart =
@@ -43,6 +46,10 @@ class AlunoEvolutionCard extends StatelessWidget {
         recorde == null
             ? null
             : alunoRecordeTexto(s, recorde.exercicioNome, recorde.cargaKg);
+    final recordeLabel =
+        recordeRecente
+            ? s.alunoEvolucaoRecordeNovoLabel
+            : s.alunoEvolucaoRecordeLabel;
 
     final tiles = [
       if (delta != null)
@@ -55,12 +62,13 @@ class AlunoEvolutionCard extends StatelessWidget {
         ),
       if (recordeTexto != null)
         OperationalMetricTile(
-          label: s.alunoEvolucaoRecordeLabel,
+          label: recordeLabel,
           value: recordeTexto,
           color: primary,
           isDark: isDark,
           dense: true,
-          semanticsLabel: '${s.alunoEvolucaoRecordeLabel}: $recordeTexto',
+          leadingIcon: recordeRecente ? Icons.emoji_events_rounded : null,
+          semanticsLabel: '$recordeLabel: $recordeTexto',
         ),
     ];
 
@@ -85,7 +93,7 @@ class AlunoEvolutionCard extends StatelessWidget {
                   volume: volumePorSemana,
                   forca: forcaPorSemana,
                   volumeColor: primary,
-                  forcaColor: EagleTokens.good,
+                  forcaColor: forcaColor,
                   semanticsLabel: s.alunoEvolucaoGraficoSemantics(
                     volumePorSemana.length,
                   ),
@@ -99,7 +107,7 @@ class AlunoEvolutionCard extends StatelessWidget {
                     ),
                     const SizedBox(width: TokensStrip.s3),
                     _LegendDot(
-                      color: EagleTokens.good,
+                      color: forcaColor,
                       label: s.alunoEvolucaoLegendaForca,
                     ),
                   ],

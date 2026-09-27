@@ -1,3 +1,4 @@
+import '../../coach/data/coach_proativo_repository.dart';
 import '../../health/data/health_repository.dart';
 import '../data/aluno_home_insight.dart';
 import '../data/dashboard_repository.dart';
@@ -17,6 +18,16 @@ const alunoAtalhosPrioridade = [
 ];
 const alunoAtalhosMax = 3;
 
+/// Ferramentas que dependem de um recurso do plano do personal (BFF
+/// `recursosIndisponiveis`). Sem o recurso, a tela só mostraria o bloqueio.
+const alunoFerramentaRecurso = {
+  '/aluno/habitos': 'HABIT_COACHING',
+  '/aluno/desafios': 'COMUNIDADE_GRUPOS',
+};
+
+bool alunoFerramentaLiberada(String rota, Set<String> indisponiveis) =>
+    !indisponiveis.contains(alunoFerramentaRecurso[rota]);
+
 /// Tudo que a Home do aluno deriva do BFF, calculado uma vez por bundle.
 class AlunoHomeView {
   final AlunoTodayAction action;
@@ -29,6 +40,9 @@ class AlunoHomeView {
 
   /// As que aparecem na Home ([alunoPendenciasVisiveis]).
   final List<AlunoPendencia> pendencias;
+
+  /// Coach sem o que outro bloco já diz ([alunoCoachVisiveis]).
+  final List<CoachMensagem> coach;
   final AlunoHomeAviso aviso;
   final AlunoWeekSummary semana;
 
@@ -38,17 +52,24 @@ class AlunoHomeView {
 
   /// A linha "Seu personal" do cabeçalho abre o chat.
   final bool chatNoCabecalho;
+  final Set<String> recursosIndisponiveis;
+
+  /// O último recorde é dos últimos [alunoRecordeNovoDias] dias.
+  final bool recordeRecente;
 
   const AlunoHomeView({
     required this.action,
     required this.insight,
     required this.pendenciasAbertas,
     required this.pendencias,
+    required this.coach,
     required this.aviso,
     required this.semana,
     required this.semTreino,
     required this.prontidaoVisivel,
     required this.chatNoCabecalho,
+    this.recursosIndisponiveis = const {},
+    this.recordeRecente = false,
   });
 
   bool get semanaVisivel => !semTreino && !semana.isEmpty;
@@ -56,14 +77,17 @@ class AlunoHomeView {
   /// Destinos que já têm entrada acima dos atalhos.
   Set<String> get rotasNoTopo => {
     action.route,
-    if (insight?.acao?.rota case final rota?) rota,
     if (aviso == AlunoHomeAviso.anamnese) '/aluno/anamnese',
     if (chatNoCabecalho) '/chat/aluno',
     for (final p in pendencias) Uri.parse(p.tipo.route).path,
   };
 
   List<String> get atalhos => alunoAtalhosPrioridade
-      .where((r) => !rotasNoTopo.contains(r))
+      .where(
+        (r) =>
+            !rotasNoTopo.contains(r) &&
+            alunoFerramentaLiberada(r, recursosIndisponiveis),
+      )
       .take(alunoAtalhosMax)
       .toList(growable: false);
 }
@@ -86,14 +110,25 @@ AlunoHomeView buildAlunoHomeView(
     todayMode: action.mode,
     now: now,
   );
+  final prontidaoVisivel = alunoProntidaoVisivel(
+    snapshot: home.recovery,
+    stale: home.recoveryStale,
+    hasWearableHistory: home.hasWearableHistory,
+  );
+  final coach = alunoCoachVisiveis(
+    home.coachMensagens,
+    comeback: action.comeback,
+    prontidaoVisivel: prontidaoVisivel,
+  );
   return AlunoHomeView(
     action: action,
     insight: action.mode == AlunoTodayMode.financialHold ? null : home.insight,
     pendenciasAbertas: abertas,
     pendencias: alunoPendenciasVisiveis(abertas, action.mode),
+    coach: coach,
     aviso: resolveAlunoHomeAviso(
       anamnesePendente: home.anamnesePendente != null,
-      coachMensagens: home.coachMensagens.length,
+      coachMensagens: coach.length,
     ),
     semana: buildAlunoWeekSummary(
       concluidosSemanaIso: home.concluidosSemanaIso,
@@ -102,13 +137,25 @@ AlunoHomeView buildAlunoHomeView(
       volumeSemanaKg: home.volumeSemanaKg,
     ),
     semTreino: home.treinos.isEmpty && home.historico.isEmpty,
-    prontidaoVisivel: alunoProntidaoVisivel(
-      snapshot: home.recovery,
-      stale: home.recoveryStale,
-      hasWearableHistory: home.hasWearableHistory,
-    ),
+    prontidaoVisivel: prontidaoVisivel,
     chatNoCabecalho: home.personalBrand.nomePersonal.trim().isNotEmpty,
+    recursosIndisponiveis: home.recursosIndisponiveis,
+    recordeRecente: alunoRecordeRecente(
+      home.recordes.isEmpty ? null : home.recordes.first.data,
+      now ?? DateTime.now(),
+    ),
   );
+}
+
+const alunoRecordeNovoDias = 7;
+
+bool alunoRecordeRecente(String? data, DateTime now) {
+  final dia = data == null ? null : DateTime.tryParse(data);
+  if (dia == null) return false;
+  final hoje = DateTime(now.year, now.month, now.day);
+  final dias =
+      hoje.difference(DateTime(dia.year, dia.month, dia.day)).inDays;
+  return dias >= 0 && dias <= alunoRecordeNovoDias;
 }
 
 /// Prontidão de hoje com histórico de wearable, ou o convite para sincronizar
@@ -118,3 +165,16 @@ bool alunoProntidaoVisivel({
   required bool stale,
   required bool hasWearableHistory,
 }) => snapshot == null ? stale : hasWearableHistory;
+
+/// Coach sem repetir a Home: dias sem treino e sequência parada já são a
+/// retomada do card "Hoje"; sono curto já está no card de prontidão.
+List<CoachMensagem> alunoCoachVisiveis(
+  List<CoachMensagem> mensagens, {
+  required bool comeback,
+  required bool prontidaoVisivel,
+}) => [
+  for (final m in mensagens)
+    if (!(comeback && (m.tipo == 'SEM_TREINO_5D' || m.tipo == 'STREAK_QUEBRADO')) &&
+        !(prontidaoVisivel && m.tipo == 'SONO_BAIXO'))
+      m,
+];

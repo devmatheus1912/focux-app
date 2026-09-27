@@ -112,11 +112,6 @@ class NpsRepository {
   final Dio _dio;
   NpsRepository(ApiClient c) : _dio = c.dio;
 
-  Future<bool> deveResponder() async {
-    final r = await _dio.get('/api/nps/deve-responder');
-    return (r.data as Map<String, dynamic>)['deve'] as bool? ?? false;
-  }
-
   Future<void> responder({
     required int score,
     String? comentario,

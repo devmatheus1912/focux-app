@@ -22,6 +22,12 @@ class AlunoWeekSummary {
   /// A sequência sempre aparece; sem sessões nem volume sobraria 1 métrica,
   /// abaixo do mínimo de 2 da faixa de KPI.
   bool get isEmpty => feitos == null && volumeKg == null;
+
+  bool get metaAtingida {
+    final f = feitos;
+    final m = meta;
+    return f != null && m != null && m > 0 && f >= m;
+  }
 }
 
 AlunoWeekSummary buildAlunoWeekSummary({

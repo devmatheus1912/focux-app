@@ -1,62 +1,5 @@
 part of 'aluno_dashboard_screen.dart';
 
-class _AlunoAppBarAvatar extends StatelessWidget {
-  final Aluno aluno;
-  final bool isDark;
-  final VoidCallback onProfile;
-
-  const _AlunoAppBarAvatar({
-    required this.aluno,
-    required this.isDark,
-    required this.onProfile,
-  });
-
-  String _initials(String nome) {
-    final parts = nome.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return 'A';
-    if (parts.length == 1 || parts[1].isEmpty) {
-      return parts.first[0].toUpperCase();
-    }
-    return '${parts.first[0]}${parts[1][0]}'.toUpperCase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final hasFoto = aluno.fotoUrl != null && aluno.fotoUrl!.trim().isNotEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: TokensStrip.s3),
-      child: Semantics(
-        button: true,
-        label: S.of(context).alunoHomePerfilSemantics,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onProfile,
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: BrandPalette.soft(primary, dark: isDark),
-            backgroundImage:
-                hasFoto
-                    ? fxCachedNetworkImageProvider(
-                      aluno.fotoUrl!.trim(),
-                      maxWidth: 72,
-                    )
-                    : null,
-            child:
-                hasFoto
-                    ? null
-                    : Text(
-                      _initials(aluno.nome),
-                      style: FocuxHubTypography.chip(primary),
-                    ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Card de foco: a única superfície com `emphasize` na Home.
 class _TodayFocusCard extends StatelessWidget {
   final AlunoTodayAction action;
@@ -104,12 +47,7 @@ class _TodayFocusCard extends StatelessWidget {
           ),
           if (insight case final insight?) ...[
             const SizedBox(height: TokensStrip.s3),
-            AlunoHomeInsightLine(
-              insight: insight,
-              onPrimary: mute,
-              onAction: (rota) => context.push(rota),
-              showAction: insight.acao?.rota != action.route,
-            ),
+            AlunoHomeInsightLine(insight: insight, onPrimary: mute),
           ],
           const SizedBox(height: TokensStrip.s3),
           FxActionChip(

@@ -60,28 +60,39 @@ class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
   Widget build(BuildContext context) {
     final ofertas = widget.ofertas;
     if (ofertas.isEmpty) return const SizedBox.shrink();
+    Widget card(AlunoOferta o) => _OfertaCard(
+      oferta: o,
+      enviando: _enviando.contains(o.alunoOfertaId),
+      onAccept: () => _responder(o, aceitar: true),
+      onDecline: () => _responder(o, aceitar: false),
+    );
+    // Altura do conteúdo (fonte grande não corta); cards lado a lado alinham.
+    final linha = IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (ofertas.length == 1)
+            Expanded(child: card(ofertas.single))
+          else
+            for (var i = 0; i < ofertas.length; i++) ...[
+              if (i > 0) const SizedBox(width: TokensStrip.s2),
+              SizedBox(width: 260, child: card(ofertas[i])),
+            ],
+        ],
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardSectionHeader(title: S.of(context).alunoOfertasTitulo),
         const SizedBox(height: TokensStrip.s2),
-        SizedBox(
-          height: 172,
-          child: ListView.separated(
+        if (ofertas.length == 1)
+          linha
+        else
+          SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            itemCount: ofertas.length,
-            separatorBuilder: (_, __) => const SizedBox(width: TokensStrip.s2),
-            itemBuilder: (context, i) {
-              final o = ofertas[i];
-              return _OfertaCard(
-                oferta: o,
-                enviando: _enviando.contains(o.alunoOfertaId),
-                onAccept: () => _responder(o, aceitar: true),
-                onDecline: () => _responder(o, aceitar: false),
-              );
-            },
+            child: linha,
           ),
-        ),
       ],
     );
   }
@@ -106,7 +117,6 @@ class _OfertaCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
     return Container(
-      width: 260,
       padding: const EdgeInsets.all(TokensStrip.s3),
       decoration: fxListCardDecoration(context, accent: primary),
       child: Column(
@@ -119,14 +129,14 @@ class _OfertaCard extends StatelessWidget {
             style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
           const SizedBox(height: TokensStrip.s1),
-          Expanded(
-            child: Text(
-              oferta.descricao,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
+          Text(
+            oferta.descricao,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
+          const Spacer(),
+          const SizedBox(height: TokensStrip.s2),
           Text(
             oferta.valor.format(),
             style: FocuxHubTypography.cardTitle(color: primary),
