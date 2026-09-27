@@ -480,7 +480,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
-  final FocuxScore score;
+  final double? forcaDeltaPercent;
   final bool isDark;
 
   const _PerformanceEvolutionCard({
@@ -489,7 +489,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
     required this.volumeMesKg,
     required this.volumePorSemana,
     required this.forcaPorSemana,
-    required this.score,
+    required this.forcaDeltaPercent,
     required this.isDark,
     this.recordes = const [],
   });
@@ -514,7 +514,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
         data: (historico) {
           final ultimoRecorde = recordes.isEmpty ? null : recordes.first;
           final view = buildAlunoPerformanceEvolutionView(
-            score: score,
+            forcaDeltaPercent: forcaDeltaPercent,
             historico: historico,
             volumeSemanaKg: volumeSemanaKg,
             volumeMesKg: volumeMesKg,
@@ -551,7 +551,7 @@ class _PerformanceEvolutionCard extends StatelessWidget {
                   children: [
                     _LegendDot(color: primary, label: 'Volume'),
                     const SizedBox(width: TokensStrip.s3),
-                    _LegendDot(color: EagleTokens.good, label: 'Força'),
+                    _LegendDot(color: EagleTokens.good, label: 'Força (1RM est.)'),
                   ],
                 ),
               ],

@@ -1,10 +1,7 @@
 import '../../checkin/data/checkin_repository.dart';
-import '../data/aluno_autonomy_plan.dart';
 
 /// Snapshot da evolução de performance no Meu Treino (aluno).
 class AlunoPerformanceEvolutionView {
-  final int score;
-  final String scoreLabel;
   final String insight;
   final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
@@ -15,8 +12,6 @@ class AlunoPerformanceEvolutionView {
   final bool hasChart;
 
   const AlunoPerformanceEvolutionView({
-    required this.score,
-    required this.scoreLabel,
     required this.insight,
     required this.volumePorSemana,
     required this.forcaPorSemana,
@@ -28,35 +23,15 @@ class AlunoPerformanceEvolutionView {
   });
 }
 
-String alunoPerformanceScoreLabel(int score) {
-  if (score >= 85) return 'Excelente';
-  if (score >= 70) return 'Em boa forma';
-  if (score >= 50) return 'No ritmo';
-  if (score >= 30) return 'Aquecendo';
-  return 'Começando';
-}
-
 String alunoPerformanceForcaDeltaInsight({
-  required List<double> forcaPorSemana,
+  required double? forcaDeltaPercent,
   List<double> volumePorSemana = const [],
-  EvolucaoPerformance? ultimaEvolucao,
+  List<double> forcaPorSemana = const [],
 }) {
-  if (ultimaEvolucao?.percentual != null && ultimaEvolucao!.percentual! != 0) {
-    final pct = ultimaEvolucao.percentual!;
-    final sinal = pct > 0 ? '+' : '';
-    return 'Força $sinal$pct% no último PR · ${ultimaEvolucao.exercicioNome}';
-  }
-  final series = forcaPorSemana.where((v) => v > 0).toList();
-  if (series.length >= 2) {
-    final old = series.first;
-    final neu = series.last;
-    if (old > 0) {
-      final pct = (((neu - old) / old) * 100).round();
-      if (pct != 0) {
-        final sinal = pct > 0 ? '+' : '';
-        return 'Força $sinal$pct% nas últimas semanas';
-      }
-    }
+  final delta = forcaDeltaPercent;
+  if (delta != null && delta != 0) {
+    final sinal = delta > 0 ? '+' : '';
+    return 'Força (1RM est.) $sinal${_fmtNumero(delta)}% vs semana passada';
   }
   final hasSeries =
       volumePorSemana.any((v) => v > 0) || forcaPorSemana.any((v) => v > 0);
@@ -90,7 +65,7 @@ EvolucaoPerformance? alunoUltimaEvolucaoPerformance(
 }
 
 AlunoPerformanceEvolutionView buildAlunoPerformanceEvolutionView({
-  required FocuxScore score,
+  required double? forcaDeltaPercent,
   required List<ExecucaoTreino> historico,
   required double volumeSemanaKg,
   required double volumeMesKg,
@@ -112,12 +87,10 @@ AlunoPerformanceEvolutionView buildAlunoPerformanceEvolutionView({
           : '${_fmtNumero(ultima.valorAtual)} ${ultima.unidade}'.trim();
 
   return AlunoPerformanceEvolutionView(
-    score: score.value,
-    scoreLabel: alunoPerformanceScoreLabel(score.value),
     insight: alunoPerformanceForcaDeltaInsight(
+      forcaDeltaPercent: forcaDeltaPercent,
       forcaPorSemana: forca,
       volumePorSemana: volume,
-      ultimaEvolucao: ultima,
     ),
     volumePorSemana: volume,
     forcaPorSemana: forca,

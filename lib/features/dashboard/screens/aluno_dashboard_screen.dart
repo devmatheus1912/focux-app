@@ -249,7 +249,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                         volumePorSemana: home.volumePorSemana,
                         forcaPorSemana: home.forcaPorSemana,
                         recordes: home.recordes,
-                        score: experience.score,
+                        forcaDeltaPercent: home.forcaDeltaPercent,
                         isDark: isDark,
                       ),
                       const SizedBox(height: TokensStrip.s4),
