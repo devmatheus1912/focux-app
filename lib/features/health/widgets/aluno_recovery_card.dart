@@ -71,6 +71,7 @@ class AlunoRecoveryCard extends ConsumerWidget {
     required this.isDark,
     this.snapshot = _unset,
     this.hasWearableHistory,
+    this.recoveryStale = false,
   });
 
   static const Object _unset = Object();
@@ -84,12 +85,22 @@ class AlunoRecoveryCard extends ConsumerWidget {
   /// Home BFF: sem histórico wearable → esconde o card (não confundir com scoreProntidao).
   final bool? hasWearableHistory;
 
+  /// Home BFF: última prontidão tem mais de 1 dia (o BFF manda `snapshot: null`).
+  final bool recoveryStale;
+
   bool get _fromBundle => !identical(snapshot, _unset);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (_fromBundle) {
       final snap = snapshot as RecoverySnapshot?;
+      if (snap == null && recoveryStale) {
+        return _ConnectCard(
+          isDark: isDark,
+          message: 'Sincronize a Saúde para ver a prontidão de hoje.',
+          onTap: () => context.push('/saude'),
+        );
+      }
       final hist = hasWearableHistory ?? (snap != null);
       if (!hist || snap == null) return const SizedBox.shrink();
       return _buildFromSnapshot(context, snap);
@@ -240,10 +251,16 @@ class AlunoRecoveryCard extends ConsumerWidget {
 }
 
 class _ConnectCard extends StatelessWidget {
-  const _ConnectCard({required this.isDark, required this.onTap});
+  const _ConnectCard({
+    required this.isDark,
+    required this.onTap,
+    this.message =
+        'Conecte Apple Health ou Google Fit para ver sua prontidão diária.',
+  });
 
   final bool isDark;
   final VoidCallback onTap;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +283,7 @@ class _ConnectCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Conecte Apple Health ou Google Fit para ver sua prontidão diária.',
+                  message,
                   style: TextStyle(color: mute, fontSize: 12.5, height: 1.35),
                 ),
               ),

@@ -203,6 +203,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                         isDark: isDark,
                         snapshot: home.recovery,
                         hasWearableHistory: home.hasWearableHistory,
+                        recoveryStale: home.recoveryStale,
                       ),
                       const SizedBox(height: TokensStrip.s3),
                       CoachProativoCard(

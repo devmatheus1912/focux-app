@@ -60,8 +60,8 @@ class RecoveryScoreView {
     if (score >= 45) {
       return RecoveryScoreView(
         score: score,
-        label: 'Recuperacao parcial',
-        hint: 'Priorize mobilidade, sono e hidratacao antes de intensificar.',
+        label: 'Recuperação parcial',
+        hint: 'Priorize mobilidade, sono e hidratação antes de intensificar.',
       );
     }
     return RecoveryScoreView(
