@@ -121,7 +121,9 @@ dias em `ProgressoSemanalWidget`.
 - Textos sem acento em caminho do aluno: "Recuperacao parcial" e "hidratacao"
   (`lib/core/health/recovery_score.dart`), "Nao foi possivel…" no chat.
 - "Adêrencia" (citado no prompt) não existe no código.
-- `score.value`, `riskLabel`, `objectiveLens` calculados e nunca exibidos.
+- `AlunoPerformanceEvolutionView.score`/`scoreLabel` e `FocuxScore.riskLabel`
+  calculados e nunca exibidos (`score.value` e `objectiveLens` alimentam o foco
+  do dia e as narrativas).
 - Home e Central do aluno recalculam o mesmo plano.
 
 ## 11. Problemas de performance

@@ -56,8 +56,11 @@ Capítulos de system design citados: `docs/system/03-dados.md` (tenant por
   calculado no BFF. A semana ISO atual sem treino não quebra a sequência; ela só
   quebra quando termina sem treino (comportamento já existente de `countFromDates`;
   o plano confirma com teste de virada de semana).
-- As datas vêm de uma consulta única de `concluidoEm` (status `CONCLUIDO`, últimos
-  400 dias) reaproveitada pelo motor (seção 2.2).
+- `countFromDates` hoje devolve 0 se a semana atual ainda não tem treino. Novo
+  `CheckinStreakWeeks.countAtivo(hoje, datas)`: se a semana atual está vazia,
+  conta a partir da semana anterior.
+- As datas vêm da consulta existente `ExecucaoTreinoRepository.findConcluidoEmByAlunoId`
+  (a mesma da gamificação), reaproveitada pelo motor (seção 2.2).
 - A tabela `aluno_streaks` segue alimentando a gamificação; o BFF deixa de lê-la.
 
 ### 1.3 Prontidão
@@ -86,6 +89,8 @@ Capítulos de system design citados: `docs/system/03-dados.md` (tenant por
 - Novo `AlunoSelfResponse` usado pelo BFF do aluno e por `GET /api/aluno/me`.
 - Remove: `emRisco`, `riscoNivel`, `proximoContato`, `snoozedUntil`,
   `ultimoContato`, `operacaoFocusMode`, `statusFinanceiro`.
+- `inadimplente` do DTO do aluno = `inadimplente || statusFinanceiro == INADIMPLENTE`,
+  porque o app da loja usa os dois sinais para o foco `financialHold`.
 - Mantém: identidade, contato, objetivo, corpo, `inadimplente`,
   `aderenciaPercent` (significado inalterado: dias distintos com treino
   concluído nos últimos 30 dias × 100 / 30), `diasSemTreino`, `scoreProntidao`.
@@ -93,11 +98,18 @@ Capítulos de system design citados: `docs/system/03-dados.md` (tenant por
 
 ### 1.7 Performance do BFF
 
-- Substituir os 14 `CompletableFuture` por no máximo 4 tarefas paralelas, cada
-  uma em um `TransactionTemplate` read-only (limite do Hikari = 5).
-- Carregar a entidade do aluno uma vez e repassar (hoje ~4 cargas).
-- Upsell: `JOIN FETCH` em `AlunoOferta.oferta` (remove N+1 de até 5).
-- `CheckinService.iniciar` e `registrarSerie` passam a chamar o evictor da Home.
+- Substituir os 14 `CompletableFuture` por 4 grupos paralelos (perfil, treino,
+  social, saúde), cada um em um `TransactionTemplate` read-only (limite do
+  Hikari = 5).
+- O grupo perfil (aluno, marca, medidas, recordes) roda numa transação só, então
+  as várias buscas do aluno por id saem do cache de primeiro nível do Hibernate
+  (hoje ~4 cargas).
+- Upsell: `JOIN FETCH` em `AlunoOferta.oferta` (remove N+1 de até 5); recordes
+  com `@EntityGraph` em `exercicio`.
+- `CheckinService.iniciar` passa a chamar o evictor da Home (a sessão em
+  andamento aparece no `historicoResumo`). `registrarSerie` não: série de sessão
+  em andamento não muda nenhum campo da Home, e evictar a cada série só geraria
+  cache miss.
 - Perfil de teste continua serial.
 
 ## Parte 2 — Motor Focux Insights (`focux-backend`)
@@ -108,7 +120,8 @@ Pacote `com.focux.modules.dashboard.insights`, Java puro, sem Spring:
 
 - `AlunoInsightInput` (record) — dados já calculados pelo BFF.
 - `AlunoInsightRule` — `Optional<AlunoInsight> avaliar(AlunoInsightInput in)`.
-- Uma classe por regra (tabela 2.3).
+- `AlunoInsightRegras` — uma função estática nomeada por regra (tabela 2.3),
+  cada uma testável isoladamente.
 - `AlunoInsightEngine` — lista ordenada; devolve a primeira regra que dispara;
   a última regra sempre dispara.
 - `AlunoInsightLimites` — constantes numéricas.
@@ -163,7 +176,7 @@ fallback):
 | META_ATINGIDA | Meta da semana atingida | `{feitos}` de `{meta}` treinos nesta semana |
 | FORCA_SUBINDO | Sua força está subindo | `+{pct}%` vs semana passada (`{n}` exercícios) |
 | VOLUME_SUBINDO | Seu volume está subindo | `+{pct}%` vs média das 6 semanas anteriores |
-| CONSISTENTE | Ritmo forte | `{feitos}` treinos nos últimos 7 dias |
+| CONSISTENTE | Ritmo forte | `{feitos}` treinos nos últimos 7 dias (chave `insightConsistente`); se disparou só pela sequência: `{semanas}` semanas seguidas treinando (chave `insightSequencia`) |
 | RITMO_CAIU | Seu ritmo caiu esta semana | `{feitos}` treinos nos últimos 7 dias |
 | DADOS_INSUFICIENTES | Continue treinando | Continue treinando para construirmos seu histórico. |
 
@@ -205,8 +218,11 @@ o resto do payload e na ETag.
 4. `_TodayFocusCard`: a linha de ritmo (`_WorkoutInsightPill`) passa a mostrar
    `insight` (título + evidência) com o CTA da ação quando houver. Sem insight →
    `rhythmLabel` atual.
-5. Limpeza no mesmo ship: `FocuxScore.value`, `riskLabel`, `AlunoObjectiveLens`
-   e demais símbolos que ficarem sem caller (grep + analyze com `--fatal-infos`).
+5. Limpeza no mesmo ship: `AlunoPerformanceEvolutionView.score`/`scoreLabel`,
+   `alunoPerformanceScoreLabel` e o parâmetro `score` do card de evolução, que
+   ficam sem caller. `FocuxScore.value` e `AlunoObjectiveLens` continuam: alimentam
+   `_mainHomeAction` e as narrativas. A pill de ritmo (`score.rhythmLabel`) fica
+   como fallback quando não há insight.
 6. i18n: chaves `insight*` em `app_pt.arb`, `app_en.arb`, `app_es.arb`;
    corrigir "Recuperacao parcial" e "hidratacao" em `lib/core/health/recovery_score.dart`.
 7. Analytics (`ProductEvents`): `aluno_insight_viewed` (1× por sessão por tipo)
