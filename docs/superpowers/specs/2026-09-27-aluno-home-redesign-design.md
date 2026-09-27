@@ -1,339 +1,283 @@
-# Aluno — Home "Hoje" redesenhada (spec 3 de 4)
+# Aluno — Home "Hoje" (referência oficial)
 
-Data: 2026-09-27 · Repos: `focux-app` (principal), `focux-backend` (1 campo aditivo).
-Base: auditoria da Home do aluno (27/09, 25 achados) e
-`docs/FOCUX_STUDENT_EXPERIENCE_AUDIT.md` §14–§17. Spec anterior:
-`2026-09-25-aluno-dados-insights-design.md` (partes 1 e 2, entregues).
+Data: 2026-09-27 · Revisão 2 (fecha os gaps das auditorias de 27/09).
+Repos: `focux-app` (principal), `focux-backend` (ajustes pequenos).
 
-Referência de design: `docs/FOCUX_DESIGN_REFERENCE.md` §9 (S1), §11 (orçamento
-de destaque), §12 (densidade), §13 (estados), §37.5 (Home aluno: "o que fazer
-hoje, 1 P0, sem catálogo de módulos no fold"). System design:
+Esta spec é a **referência da Home do aluno** (`/dashboard/aluno`). A
+`FOCUX_DESIGN_REFERENCE.md` descreve a Home do personal; dela a Home do aluno
+herda só a pele (tokens, `FxStripCard`, estados, densidade). System design:
 `docs/system/04-api.md` (contrato aditivo), `05-cache.md` (Caffeine 60s + ETag).
+
+A seção 8 é o **contrato fechado**: a auditoria final checa só aquela lista.
+Ideia nova vira backlog, não gap.
 
 ## Decisões aprovadas
 
 | Tema | Decisão |
 |---|---|
-| Escopo | Só a Home. Tela de Evolução vira spec 3b |
-| Ritmo e meta | Servidor é a fonte. Sai o score local do app |
-| Bloco "Evolução detectada" | Removido (o insight de força cobre) |
-| Ofertas de upsell | Abaixo do progresso do aluno |
-| Central do aluno | Bloco "Pendências" com até 3 itens, sem repetir o P0, sem porcentagem |
-| Marca do personal | Linha no cabeçalho com logo pequeno e nome; toque abre o chat |
-| Nome da tela | "Hoje", igual ao dock, com "Olá, {primeiro nome}" |
+| Job da tela | O que fazer hoje primeiro; depois como estou indo |
+| Ordem | Agir primeiro: foco, aviso e pendências antes de semana, prontidão e evolução |
+| Pendências | Por urgência: mensagem do personal, horário novo, medida, cadastro |
+| Prontidão baixa | O card de foco fala; o card de prontidão não repete a dica |
+| Aviso único | Saúde antes de dinheiro: atestado, mensalidade, anamnese, coach |
+| Execução | Regras em funções puras no app (`utils/`); servidor manda os fatos |
+| Evolução | Só força na Home; volume fica em Sua semana. Tela de Evolução é a spec 3b |
 | Idiomas | Só PT-BR (`app_pt.arb`); en/es congelados até o app escalar |
-| Abordagem | Híbrida: servidor manda os fatos de treino; app escolhe a ação do dia numa função pura |
 
 ## 1. Anatomia (topo → base)
 
 Cada bloco responde uma pergunta. Só o card de foco tem `emphasize: true`.
+Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento).
 
-1. **Cabeçalho.** App bar "Hoje" + freshness (`FxHubFreshness`). No corpo:
+1. **Cabeçalho.** App bar "Hoje" + frescor (`FxHubFreshness`). No corpo,
    "Olá, {primeiro nome}" e a linha "Seu personal: {nomePersonal}" com logo
-   24 px; toque → `/chat/aluno`. Sem nome do personal → a linha não aparece.
-   A app bar não repete o avatar: o Perfil já está no dock.
-2. **Card de foco — o que tenho hoje.** Eyebrow, título, 1 linha de descrição,
-   `AlunoHomeInsightLine` (só leitura: título + detalhe, sem CTA) e o chip P0
-   (`FxActionChip`), único toque do card. Saem o badge de sequência, a pill de
-   ritmo local e as linhas de narrativa. Com prontidão baixa (score < 45, o
-   corte de "Recuperação parcial" do backend) e treino pronto, a descrição
-   vira "Prontidão baixa hoje: aqueça bem e pegue mais leve." (`alunoProntidaoBaixa`).
-3. **Aviso único.** No máximo um banner, nesta ordem: mensalidade em atraso
-   (toque → `/financeiro/aluno`), anamnese pendente, mensagem do coach
-   ("Seu coach Focux"). Nenhum → nada. Mensalidade atrasada não bloqueia
-   treino: o foco segue no treino e o insight fica. O coach passa por
-   `alunoCoachVisiveis`: na retomada saem `SEM_TREINO_5D` e
-   `STREAK_QUEBRADO` (o card de foco já diz isso); com prontidão visível sai
-   `SONO_BAIXO`. "Entendi" some com a mensagem na hora e só recarrega a Home
-   quando a última é lida.
-4. **Sua semana — como estou.** Só depois do primeiro treino concluído
-   (`AlunoHomeView.jaTreinou`); antes disso o bloco só teria zeros e o card de
-   foco já guia. Três métricas: sessões na semana contra a meta
-   ("2 de 3"), sequência em semanas e volume da semana. Meta batida marca o
-   tile de sessões com o verde de sucesso e um check. Abaixo, o
-   `AlunoRecoveryCard` alimentado pelo BFF (`alunoProntidaoVisivel`): prontidão
-   de hoje com histórico de wearable, ou convite para sincronizar quando a
-   última é antiga. Sem wearable o bloco não existe.
-5. **Evolução — estou evoluindo.** Mesma regra: só com `jaTreinou`. Gráfico de força (1RM est.) e volume das 8
-   semanas, variação da força como métrica e o último recorde em uma linha.
-   Recorde dos últimos 7 dias vira "Novo recorde". A linha de força usa a cor
-   secundária da marca (verde fica para status). Sem texto que repita o
-   insight e sem botão "Treinar agora".
-6. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → o bloco
-   some.
-7. **Ofertas.** `AlunoUpsellCarousel` com as ofertas do BFF (`AlunoHomeView.ofertas`,
-   vazia com mensalidade em atraso), header de seção,
-   botões de 48 dp travados durante o envio. Aceitar é `OutlinedButton` e
-   recusar `TextButton` (o P0 segue único destaque); os dois pedem
-   confirmação (`showFxConfirmSheet`), porque a resposta não volta atrás.
-   Altura do conteúdo (fonte grande não corta); uma oferta ocupa a largura toda.
-8. **Ferramentas.** `_StudentToolsSection` com até 3 atalhos dinâmicos
-   (`AlunoHomeView.atalhos`): ordem de `alunoAtalhosPrioridade`, sem abas do
-   dock e sem destino que já aparece acima (`rotasNoTopo`: foco, aviso de
-   financeiro ou anamnese, chat do cabeçalho e pendências). Atalhos e catálogo escondem o
-   que o plano do personal não libera (`recursosIndisponiveis`).
+   24 px; toque → `/chat/aluno`. Sem nome do personal → a linha some. A app bar
+   não repete o avatar (o Perfil está no dock).
+2. **Foco do dia — o que faço hoje.** Eyebrow, título, descrição, prazo,
+   linha do próximo horário, `AlunoHomeInsightLine` e o chip P0
+   (`FxActionChip`), único toque do card.
+   - Descrição até 2 linhas. Prazo em linha própria (até 2 linhas): nunca é
+     cortado pela descrição.
+   - Próximo horário: linha só de leitura "Horário com seu personal: hoje às
+     18:00" (ou "amanhã às 07:30") quando `agendaProximoInicio` é hoje ou amanhã.
+   - Prontidão baixa (§3.4): a descrição vira "Prontidão baixa: prefira um
+     treino leve ou mobilidade." O CTA não muda.
+3. **Aviso único.** No máximo um banner (§3.3). O coach passa por
+   `alunoCoachVisiveis`: na retomada saem `SEM_TREINO_5D` e `STREAK_QUEBRADO`;
+   com prontidão visível sai `SONO_BAIXO`. "Entendi" some com a mensagem na
+   hora e só recarrega a Home quando a última é lida.
+4. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → some.
+5. **Sua semana — como estou.** Só depois do primeiro treino concluído
+   (`jaTreinou`). Sessões contra a meta ("2 de 3"), sequência em semanas e
+   volume da semana. Meta batida marca o tile de sessões com verde e check.
+6. **Prontidão.** `AlunoRecoveryCard` (`alunoProntidaoVisivel`): anel, rótulo
+   e dica do servidor. Com prontidão baixa, sem a dica (o foco já falou).
+   Sem snapshot de hoje e última antiga → convite para sincronizar. Sem
+   wearable → some.
+7. **Evolução — estou evoluindo.** Só com `jaTreinou`. Linha de força (1RM
+   est.) das 8 semanas, variação da força e o último recorde ("Novo recorde"
+   até 7 dias). Sem volume (já está em Sua semana). O card não abre nada
+   (`/evolucao` redireciona para a Home até a spec 3b).
+8. **Ofertas.** `AlunoUpsellCarousel` (`AlunoHomeView.ofertas`, vazia com
+   mensalidade em atraso). Aceitar é `OutlinedButton`, recusar `TextButton`,
+   48 dp, travados no envio. Os dois pedem confirmação (`showFxConfirmSheet`):
+   a resposta não volta atrás. Uma oferta ocupa a largura toda.
+9. **Atalhos.** Até 3 (`AlunoHomeView.atalhos`), na ordem de
+   `alunoAtalhosPrioridade`, sem abas do dock, sem destino que já aparece
+   acima (`rotasNoTopo`) e sem recurso fora do plano (`recursosIndisponiveis`).
+   Sem atalho → a seção mostra só o cabeçalho com "Ver catálogo".
 
-NPS: o BFF só libera depois de 3 treinos concluídos e sem resposta nos
-últimos 30 dias. O app só pergunta quando o foco está em `workoutDone` (o
-aluno acabou de treinar), então a resposta gravada como `POS_TREINO` é
-verdadeira e a pergunta não interrompe quem abriu a Home para treinar. A
-pergunta também espera a Home ser a rota visível (`alunoHomeRoute`): ao
-concluir o treino a Home recarrega por baixo da celebração, e o pop do
-check-in fecharia a folha.
-Fechar sem responder adia 7 dias neste aparelho (chave limpa no logout).
-
-Acima da dobra: cabeçalho, card de foco e, no máximo, o aviso. Cada bloco só
-entra com conteúdo e traz o próprio espaçamento, então bloco escondido não
-soma espaço.
+NPS: o BFF libera depois de 3 treinos concluídos e sem resposta em 30 dias. O
+app só pergunta com o foco em `workoutDone` e com a Home como rota visível
+(`alunoHomeRoute`). Fechar sem responder adia 7 dias (chave limpa no logout).
 
 ## 2. Dados e contrato
 
 ### 2.1 Backend (`focux-backend`)
 
-- `AlunoDashboardHomeResponse` ganha `Integer concluidosSemanaIso`: sessões
-  concluídas desde a segunda-feira da semana ISO atual (São Paulo). O valor sai
-  de `AlunoInsightInput.concluidosSemanaIso()`, já calculado em
-  `AlunoHomeInsightInputs.montar`.
-- Se a montagem do input falhar, o campo vai `null` (mesma regra do `insight`).
-- `frequenciaDias` é a meta da Home: `AlunoDashboardHomeSurface.metaSemanal`
-  = fichas ativas do rodízio (2–7). Com menos de 2 fichas o plano não diz a
-  frequência, então vai `null`.
-  `FocuxScoreCalculator.metaDiasSemanaPlano` segue só como denominador de score.
-- `recordes` vem com cap 1: a Home usa só o último.
-- `insight` só traz o que nenhum bloco mostra: `RITMO_CAIU` (média das 4
-  semanas anteriores ≥ 2/semana, 1+ treino nos últimos 7 dias, abaixo da
-  metade da média e meta não batida) ou `VOLUME_SUBINDO`. Nada disso → `null`.
-  Sem `acao` nem `evidencia`. O app esconde `RITMO_CAIU` em `workoutDone` (`alunoInsightNoFoco`): quem acabou de
-  treinar não lê "Seu ritmo caiu".
-- `coachMensagens`: não lidas dos últimos 3 dias
-  (`CoachProativoScheduler.VALIDADE_DIAS`). `SEM_TREINO_5D` e
-  `STREAK_QUEBRADO` anteriores ao último treino concluído não saem
-  (`AlunoDashboardHomeSurface.coachAindaValido`).
-- `recursosIndisponiveis`: recursos de `RECURSOS_DO_ALUNO`
-  (`AGENDA`, `HABIT_COACHING`, `COMUNIDADE_GRUPOS`) que o plano do personal não
-  libera. Sem `AGENDA`, o atalho de agenda some.
-- `npsDeveResponder` segue `NpsElegibilidade` (3+ treinos concluídos, sem
-  resposta em 30 dias), a mesma regra de `/api/nps/deve-responder`.
-- `agendaProxima` + `agendaProximoInicio`: o próximo horário não cancelado
-  nos próximos 7 dias (`AlunoDashboardHomeSurface.AGENDA_PROXIMA_DIAS`,
-  `MIN(inicio)` numa query só). Plano sem `AGENDA` → `false`/`null`
-  (`agendaVisivel`). Criar, remarcar, mudar status, excluir ou confirmar um
-  horário limpa o cache da Home do aluno.
-- Sequência (`streakAtual`) lê só as execuções das últimas 104 semanas
-  (`TREINOS_JANELA_SEMANAS`), não o histórico inteiro.
-- Mensalidade paga (manual, em lote ou recorrente), editada ou em atraso,
-  treino atribuído (também em lote), desvinculado ou excluído, status em lote
-  e mensagem do coach enviada limpam o cache da Home do aluno
-  (`AlunoDashboardHomeCacheEvictor`).
-- Aditivo: nenhum campo removido; `historico` legado continua `[]`. Entra no
-  cache de 60s e na ETag. Sem tabela, sem migration.
-- Atualizar a descrição do OpenAPI em `AlunoDashboardController`.
+`GET /api/dashboard/aluno/home` (`AlunoDashboardService`, `@Cacheable` 60s +
+ETag, 4 grupos read-only em paralelo):
+
+- `concluidosSemanaIso`: sessões desde a segunda ISO (São Paulo); `null` se a
+  montagem do input falhar.
+- `frequenciaDias` = fichas do rodízio (2–7); menos de 2 → `null`.
+- `streakAtual` lê só as execuções das últimas 104 semanas
+  (`TREINOS_JANELA_SEMANAS`).
+- `recordes` com cap 1.
+- `insight`: `RITMO_CAIU` ou `VOLUME_SUBINDO`, sem `acao` nem `evidencia`.
+- `coachMensagens`: não lidas dos últimos 3 dias, sem `SEM_TREINO_5D` e
+  `STREAK_QUEBRADO` anteriores ao último treino (`coachAindaValido`).
+- `recursosIndisponiveis`: `AGENDA`, `HABIT_COACHING`, `COMUNIDADE_GRUPOS`
+  que o plano do personal não libera.
+- `agendaProximoInicio`: próximo horário não cancelado nos próximos 7 dias
+  (`MIN(inicio)` numa query). Plano sem `AGENDA` → `null` (`agendaVisivel`).
+- `npsDeveResponder` segue `NpsElegibilidade`.
+- Escritas que mudam a Home limpam o cache do aluno
+  (`AlunoDashboardHomeCacheEvictor`): agenda, mensalidade, treino atribuído,
+  status, coach, oferta respondida.
+- **Deprecated** no OpenAPI: `agendaProxima` e `volumeMesKg`. O app atual não
+  lê; builds antigos da loja leem. Saem quando a versão mínima subir.
+- `historico` legado segue `[]`. Sem tabela nova, sem migration.
 
 ### 2.2 App — fonte de cada bloco
 
 | Bloco | Fonte |
 |---|---|
-| Cabeçalho | `aluno.nome` (primeiro nome), `personalBrand.nomePersonal`, `personalBrand.logoUrl` |
-| Card de foco | `resolveAlunoTodayAction` (§3.1) + `insight` |
-| Aviso | `aluno.inadimplente`, `anamnesePendente` e `coachMensagens` |
+| Cabeçalho | `aluno.nome`, `personalBrand.nomePersonal`, `personalBrand.logoUrl` |
+| Foco | `resolveAlunoTodayAction` (§3.1), `insight`, `recovery`, `agendaProximoInicio` |
+| Aviso | `anamnesePendente`, `aluno.inadimplente`, `coachMensagens` |
+| Pendências | `listAlunoPendenciasAbertas` + `alunoPendenciasVisiveis` (§3.2) |
 | Sua semana | `concluidosSemanaIso`, `frequenciaDias`, `streakAtual`, `volumeSemanaKg` |
 | Prontidão | `recovery`, `recoveryStale`, `hasWearableHistory` |
-| Evolução | `forcaPorSemana`, `volumePorSemana`, `forcaDeltaPercent`, `recordes.first` |
-| Pendências | `listAlunoPendenciasAbertas` + `alunoPendenciasVisiveis` (§3.2) |
+| Evolução | `forcaPorSemana`, `forcaDeltaPercent`, `recordes.first` |
 | Ofertas | `upsellPendentes` |
 
-Tudo que a Home deriva do bundle sai de `buildAlunoHomeView`, memoizado por
-bundle e estado da agenda. Escritas que mudam a Home (check-in, confirmar
-plano, coach lido, oferta respondida, chat, anamnese, perfil) chamam
-`invalidateAlunoDashboardHome(ref)`, que limpa o cache do app antes de
-invalidar o provider.
+Tudo que a Home deriva sai de `buildAlunoHomeView(home, now:, agendaReviewed:)`.
+Ausente ou malformado no bundle → `null`, e o bloco segue §6.
 
-`AlunoDashboardHomeBundle` lê `concluidosSemanaIso` como `int?`; valor ausente
-ou malformado → `null`.
+## 3. Regras (funções puras em `lib/features/dashboard/utils/`)
 
-### 2.3 Fallback honesto
-
-- `concluidosSemanaIso == null` (backend antigo ou falha): "Sua semana" mostra
-  só sequência e volume.
-- `frequenciaDias == null`: "{n} treinos nesta semana", sem meta.
-- `volumeSemanaKg == 0`: a métrica de volume some (não mostra "0 kg").
-- Sem série válida para força: `forcaDeltaPercent == null` → a métrica some;
-  o gráfico segue com as regras atuais (sem zero falso).
-- Sem objetivo cadastrado: nenhum texto menciona objetivo.
-
-## 3. Regras no app (funções puras em `lib/features/dashboard/utils/`)
-
-### 3.1 Ação do dia — `resolveAlunoTodayAction`
-
-Entrada: `Aluno`, `treinos`, `historico` (resumo do BFF, só para o rodízio),
-completude do perfil e `hoje`. Saída: `AlunoTodayAction` (modo, rota,
-`routeExtra`, chave de texto e parâmetros). Ordem = prioridade:
+### 3.1 Foco — `resolveAlunoTodayAction`
 
 | # | Modo | Quando | CTA → rota |
 |---|---|---|---|
-| 1 | `workoutDone` | sem sessão `EM_ANDAMENTO` e o último `CONCLUIDO` do histórico é de hoje (`treinoConcluidoHoje`) | Ver resumo → `/checkin/historico/{id}` |
-| 2 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` (`routeExtra: treinoId`) |
-| 3 | `awaitingRelease` | algum treino `isTreinoAguardandoLiberacao` | Ver treinos → `/checkin/treinos` |
+| 1 | `workoutDone` | sem sessão `EM_ANDAMENTO` e o último `CONCLUIDO` é de hoje | Ver resumo → `/checkin/historico/{id}` |
+| 2 | `workoutReady` | `proximoTreinoParaHoje(treinos, historico) != null` | Treinar agora → `/checkin/executar` |
+| 3 | `awaitingRelease` | algum treino aguardando liberação | Ver treinos → `/checkin/treinos` |
 | 4 | `profileSetup` | completude < 60% | Completar perfil → `/aluno/perfil/editar` |
 | 5 | `noWorkout` | nenhum dos anteriores | Falar com o personal → `/chat/aluno` |
 
-- `workoutDone`: eyebrow "Treino de hoje feito", título = ficha feita,
-  descrição "Próximo: {ficha}" (próxima do rodízio, só prévia) ou convite ao
-  descanso. Não manda treinar de novo; sessão em andamento vence.
-- `workoutReady` mantém o rodízio de `proximoTreinoParaHoje` e o aviso de
-  prazo (`TreinoAtribuicaoPrazo.homeHint`). Descrição: "{n} exercícios no
-  treino de hoje" (sem lente de objetivo).
-- Em `workoutReady`, se `aluno.diasSemTreino >= 7`, só muda o texto: título
-  "Volte com {treino}" e CTA "Retomar agora". O dado vem do servidor em dias
-  de calendário; sai a conta de 24h no fuso do aparelho.
-- `inadimplente` já é `inadimplente || statusFinanceiro == INADIMPLENTE` no
-  `AlunoSelfResponse` (spec 1), então o app lê só o booleano. Não é modo: vira
-  o aviso de financeiro (§1, item 3) e tira as ofertas.
-- Saem os modos `comeback` (vira variação de texto), `evolution` e `steady`.
-- Completude do perfil: telefone e WhatsApp contam como um campo "contato".
+- `workoutDone`: "Próximo: {ficha}" ou convite ao descanso; não manda treinar.
+- `workoutReady`: "{n} exercícios no treino de hoje"; com `diasSemTreino >= 7`
+  vira "Volte com {treino}" / "Retomar agora".
+- Mensalidade atrasada não é modo: vira aviso (§3.3) e tira as ofertas.
+- Completude: telefone e WhatsApp contam como um campo.
 
-### 3.2 Pendências — `listAlunoPendenciasAbertas`
+### 3.2 Pendências
 
-Candidatas, em ordem de prioridade:
+Candidatas, em ordem de urgência:
 
-| Tipo | Quando | Rota |
-|---|---|---|
-| `perfil` | completude < 100% | `/aluno/perfil/editar` |
-| `foto` | sem `fotoUrl` | `/aluno/perfil/editar?acao=foto` (abre o seletor) |
-| `medida` | nenhuma medida ou a última com mais de 14 dias (regra atual) | `/aluno/perfil/editar?acao=medida` (abre o registro) |
-| `chat` | `chat.naoLidasDoPersonal > 0` | `/chat/aluno` |
-| `agenda` | `agendaProximoInicio` e esse horário ainda não visto | `/agenda/aluno` |
+| Tipo | Quando | Rota | Título · detalhe |
+|---|---|---|---|
+| `chat` | `chat.naoLidasDoPersonal > 0` | `/chat/aluno` | "Responder o personal" · "1 mensagem nova" / "{n} mensagens novas" |
+| `agenda` | horário depois de amanhã e ainda não visto | `/agenda/aluno` | "Seu próximo horário" · "qua., 30 de set. às 18:00" |
+| `medida` | nenhuma medida ou a última com mais de 14 dias | `/aluno/perfil/editar?acao=medida` | texto de primeira medida quando nunca registrou |
+| `perfil` | completude < 100% ou sem `fotoUrl` | só a foto falta → `/aluno/perfil/editar?acao=foto`; senão `/aluno/perfil/editar` | "Adicionar foto" quando só a foto falta; senão "Completar perfil" |
 
-- Agenda: o item diz quando é ("Hoje às 18:00", "Amanhã às 07:30",
-  "qua., 30 de set. às 18:00"). Abrir a agenda por qualquer caminho grava o
-  horário visto (`markAlunoAgendaReviewed`, chave `aluno_agenda_vista_v3`);
-  o próximo horário novo pede de novo. A Home relê o visto quando volta a ser
-  a rota da frente e no pull-to-refresh. A chave é limpa no logout
-  (`session_invalidator`). Enquanto o estado não carregou, a Home trata a
-  agenda como vista: nada pisca e nenhum `VIEWED` sai antes.
-- `alunoPendenciasVisiveis` tira `chat` quando o foco já é `noWorkout`
-  (mesmo destino) e corta em 3. As escondidas seguem abertas para o
-  `COMPLETED` de autonomia.
+- Agenda hoje ou amanhã fica na linha do foco; a pendência não repete.
+- Visto por horário: abrir a agenda por qualquer caminho grava o início visto
+  (`aluno_agenda_vista_v3`). Horário novo ou remarcado pede de novo. A Home
+  relê o visto quando volta a ser a rota da frente e no pull-to-refresh. Chave
+  limpa no logout. Antes de ler, a agenda conta como vista (nada pisca).
+- `alunoPendenciasVisiveis`: sem o destino do foco (`profileSetup` tira
+  `perfil`; `noWorkout` tira `chat`) e corta em 3. As escondidas seguem
+  abertas para o `COMPLETED` de autonomia.
 
-A tarefa "Enviar contexto no chat" (aluno nunca mandou mensagem) e a tarefa
-de treino da semana saem: a primeira não é pendência real e a segunda já é o
-card de foco.
+### 3.3 Aviso — `resolveAlunoHomeAviso`
 
-- Remove a candidata do mesmo tipo do P0 (ex.: `profileSetup` remove "perfil
-  incompleto").
-- Corta em 3. Sem porcentagem, sem barra e sem contar "financeiro em dia"
-  como pendência resolvida.
-- Cada item: ícone, título, uma linha de contexto, toque → rota. Chevron
-  permitido (é navegação, P2).
+Um por vez, nesta ordem:
 
-## 4. Estrutura do código
+| # | Aviso | Quando | Toque |
+|---|---|---|---|
+| 1 | Atestado | `anamnesePendente == PRECISA_ATESTADO` | `/aluno/anamnese` |
+| 2 | Financeiro | `aluno.inadimplente` | `/financeiro/aluno` |
+| 3 | Anamnese | `anamnesePendente == SOLICITADA` | `/aluno/anamnese` |
+| 4 | Coach | `alunoCoachVisiveis` não vazia | card do coach |
 
-- **Novos** em `lib/features/dashboard/`:
-  `utils/aluno_today_action.dart`, `utils/aluno_pendencias.dart`,
-  `utils/aluno_home_week.dart`, `utils/aluno_home_texts.dart`,
-  `utils/aluno_autonomy_analytics.dart`, `widgets/aluno_home_header.dart`,
-  `widgets/aluno_week_summary_card.dart`, `widgets/aluno_evolution_card.dart`,
-  `widgets/aluno_pendencias_block.dart`. `aluno_dashboard_screen.dart` fica só
-  com composição e estados.
-- **Apagados** (grep antes; hoje só a Home os usa): `aluno_autonomy_plan.dart`
-  (`FocuxScore`, `AlunoObjectiveLens`, narrativas, `_latestEvolution`,
-  `buildAlunoHomeExperience`, `buildAlunoAutonomyPlan`), `_AlunoHeroCard`,
-  `_HeroPill`, `_HomeNarrativeRail`, `_StreakFoldBadge`, `_WorkoutInsightPill`,
-  `_StudentJourneyCard`, `_NextBestTaskPanel`, `_AutonomyTaskTile`,
-  `_AutonomyTaskPill` e o texto de insight de `_PerformanceEvolutionCard`.
-  `ProgressoSemanalWidget` sai da Home, mas o arquivo fica (Meus Treinos usa).
-  `aluno_performance_evolution.dart` perde `AlunoPerformanceEvolutionView`,
-  `buildAlunoPerformanceEvolutionView`, `alunoPerformanceForcaDeltaInsight` e
-  `alunoUltimaEvolucaoPerformance`; ficam `alunoTrendPlot` e
-  `parseAlunoHomeSeries`. `volumeMesKg` sai do bundle do app (o campo segue no
-  payload). Testes do contrato antigo (`aluno_autonomy_plan_test.dart` e
-  trechos do `aluno_dashboard_visual_contract_test.dart`) são reescritos para o
-  contrato novo.
-- **Efeitos colaterais**: `MeusTreinosMemCache.save` sai do `build()` e vai
-  para o ponto em que o provider entrega os dados. Nenhum cálculo roda duas
-  vezes por build.
-- `alunoHomeComoCalculamos` e o sheet de ajuda passam a falar de "Hoje" e das
-  quatro perguntas; sem citar score.
+Atestado e financeiro em tom `warn`; anamnese em `info`.
 
-## 5. Idiomas, acessibilidade e analytics
+### 3.4 Prontidão baixa — `alunoProntidaoBaixa`
 
-- Todo texto novo ou mantido na Home (cabeçalho, ação do dia, aviso, Sua
-  semana, Evolução, Pendências, ajuda) vai só para `app_pt.arb`. Números via
-  formatação de locale já usada (`pt_br_display`).
+Foco em `workoutReady`, prontidão visível, snapshot de hoje e
+`recoveryScore < 45` (corte "Descanso recomendado" do `RecoveryScoreCalculator`).
+
+### 3.5 Próximo horário no foco — `alunoHorarioNoFoco`
+
+`agendaProximoInicio` cujo dia é hoje ou amanhã (relativo a `now`). Fora
+disso → `null`.
+
+### 3.6 Atalhos
+
+`rotasNoTopo` = rota do foco, rota do aviso (atestado e anamnese →
+`/aluno/anamnese`; financeiro → `/financeiro/aluno`), chat do
+cabeçalho e rotas das pendências visíveis.
+
+## 4. Estado, dados e frescor
+
+- **Volta do background:** pausa de 2 min ou mais recarrega a Home do aluno
+  junto com a do personal (`main.dart`); acima do TTL limpa o cache do aluno.
+- **Virada do dia:** o memo da view usa (bundle, horário visto, dia de hoje).
+  O mesmo bundle no dia seguinte recalcula foco, horário, recorde e prazo.
+- **Um relógio por build:** a tela passa `now` para `buildAlunoHomeView` e
+  para os textos; nenhum widget decide texto com `DateTime.now()` próprio.
+- **304:** o bundle reaproveitado ganha `fetchedAt` = agora (`withFetchedAt`).
+- **Subtítulo:** mesmo `skipLoadingOnReload` e `skipError` do corpo.
+- **Pull-to-refresh:** busca sem apagar o cache; sem rede, mantém os dados e
+  avisa ("Sem conexão agora. Mostrando os últimos dados.").
+- **Escritas** (check-in, plano, coach, oferta, chat, anamnese, perfil) chamam
+  `invalidateAlunoDashboardHome(ref)`.
+- **Custo:** voltar para a Home só faz `setState` se o horário visto mudou.
+  `UpsellRepository` vem de provider.
+
+## 5. Acessibilidade, idioma e analytics
+
+- Todo texto em `app_pt.arb`. Números via locale (`pt_br_display`).
+- "Sua semana" e o último recorde lidos como uma frase. Linha do personal com
+  rótulo "Abrir conversa com {nome}". Avisos lidos como botão com título e
+  detalhe.
+- Alvos ≥ 48 dp. Contraste pelos tokens.
 - Movimento reduzido: o coração da prontidão (`FxRiveHeartPulse`) vira ícone
-  estático com `disableAnimations`.
-- `Semantics` agrupado: "Sua semana" é lido como uma frase ("2 de 3 treinos
-  nesta semana, sequência de 4 semanas, volume de 3.200 kg"); o último recorde
-  também. Linha do personal tem rótulo "Abrir conversa com {nome}".
-- Alvos de toque ≥ 48 dp; contraste pelos tokens da paleta.
-- Analytics: reaproveita o contrato de autonomia que já existe
-  (`ProductEvents.alunoAutonomyTask*` + `POST /api/aluno/autonomia/eventos`).
-  O backend abre ações no Centro de Comando do personal a partir desses
-  eventos (`AlunoAutonomiaService`), então os `taskId` não mudam:
-  `perfil-base`, `foto-dados`, `medida-recente`, `chat-contexto`,
-  `agenda-semana`, `treino-semana`, `financeiro`. O `taskTitle` enviado fica
-  em pt fixo, porque vira texto da ação do personal.
-  - Pendência visível → `VIEWED` 1× por sessão por `taskId` (reset no
-    `session_invalidator`, como o insight). "Visível" = metade do bloco na
-    viewport com a aba ativa (`FxOnVisible`), não a montagem. Toque →
-    `CLICKED`.
-  - Toque no P0 → `CLICKED` só onde o personal precisa agir:
-    `noWorkout` → `treino-semana`, `profileSetup` → `perfil-base`. Toque no
-    aviso de financeiro → `CLICKED` de `financeiro`. `workoutDone`, `workoutReady` e `awaitingRelease`
-    não mandam evento de autonomia (começar treino não é pedido de apoio).
-  - Nenhum evento novo; sem PII nas props.
+  estático.
+- Autonomia (`POST /api/aluno/autonomia/eventos`): `taskId` fixos
+  (`perfil-base`, `foto-dados`, `medida-recente`, `chat-contexto`,
+  `agenda-semana`, `treino-semana`, `financeiro`). `taskTitle` em pt fixo; o
+  da agenda é "Conferir próximo horário".
+  - Pendência → `VIEWED` 1× por sessão quando visível (`FxOnVisible`); toque →
+    `CLICKED`. Perfil e foto no mesmo item mandam o `taskId` do que falta
+    (`foto-dados` se só a foto falta; senão `perfil-base`).
+  - P0: `noWorkout` → `treino-semana`, `profileSetup` → `perfil-base`.
+  - Aviso financeiro → `CLICKED` de `financeiro`.
+  - Nenhum evento novo; sem PII.
 
 ## 6. Estados
 
-- Carregando: `AlunoHomeSkeleton` só com cabeçalho e card de foco, os blocos
-  que sempre existem. Semana e Evolução dependem do histórico e entram abaixo,
-  então aluno novo não vê bloco sumir.
-- Erro: `FxErrorState` + `friendlyError` + retry (como hoje).
-- Vazio: aluno sem treino e sem histórico → o card de foco em `noWorkout` é o
-  estado guiado; Sua semana e Evolução somem.
-- Coach e ofertas: envio travado, erro com `FeedbackHelper` e texto do ARB.
-- Bloco sem dado some; nada vira zero fingindo dado.
-- Offline e cache: comportamento atual do `AlunoDashboardHomeClientCache`.
-  Pull-to-refresh sem rede mantém os dados na tela (`skipError`, cache
-  preservado em `refreshAlunoDashboardHome`) e avisa com `FeedbackHelper`.
+- Carregando: `AlunoHomeSkeleton` com cabeçalho e foco.
+- Erro sem cache: `FxErrorState` + `friendlyError` + retry.
+- Vazio: aluno sem treino → foco em `noWorkout`; semana e evolução somem.
+- Evolução com treino mas sem carga registrada: texto guia "Registre a carga
+  das séries para ver sua evolução aqui."
+- Coach e ofertas: envio travado; erro com `FeedbackHelper` e texto do ARB.
 
-## 7. Testes
+## 7. Estrutura do código
 
-Backend (JUnit):
-- `AlunoDashboardControllerTest`: payload com `concluidosSemanaIso`; `null`
-  quando a montagem do input falha.
-- `AlunoHomeInsightInputsTest` (ou o teste existente do input): virada de
-  semana (domingo → segunda) e sessões duplicadas no mesmo dia contam 2.
+- Regras: `aluno_today_action.dart`, `aluno_pendencias.dart`,
+  `aluno_home_view.dart` (inclui `alunoHorarioNoFoco`, `alunoProntidaoBaixa`),
+  `aluno_home_texts.dart`, `aluno_autonomy_analytics.dart`.
+- Tela: `aluno_dashboard_screen.dart` (composição e estado) e os `part`s de
+  cabeçalho/foco/aviso e ferramentas.
+- Limpeza no mesmo ship: série de volume do `AlunoEvolutionCard`, o
+  `AlunoPendenciaTipo.foto` separado (vira variação de `perfil`) e o que mais
+  ficar sem caller.
 
-App (flutter test):
-- `aluno_today_action_test.dart`: um caso por modo, prioridade entre modos,
-  variação "Volte com {treino}" com `diasSemTreino` 6 e 7, foto ausente não
-  tira o treino do P0, rodízio preservado.
-- `aluno_pendencias_test.dart`: exclusão do tipo do P0, corte em 3, lista
-  vazia, medida com 14 e 15 dias, chat com 0 e 1 não lida, contato contado
-  uma vez.
-- Bundle: `concluidosSemanaIso` válido, ausente e malformado.
-- Widget: Sua semana com e sem meta e com `concluidosSemanaIso` nulo; linha do
-  personal sem nome; aviso único (anamnese vence o coach).
-- Contrato visual da Home: um `emphasize: true`; ofertas abaixo de Evolução;
-  sem catálogo antes do card de foco.
-- l10n: chaves novas em `app_pt.arb`; en/es sem chave fora do pt.
+## 8. Contrato fechado (auditoria final)
 
-Verificação antes do commit: `.\gradlew.bat test --console=plain`,
-`flutter analyze --fatal-warnings --fatal-infos --no-pub`,
-`flutter test --no-pub -r failures-only`, gitleaks no diff.
+Cada critério tem prova. A Home é 10/10 quando todos passam.
 
-## 8. Rollout
-
-- Backend primeiro (campo aditivo); o app da loja ignora o campo.
-- App novo tolera backend sem o campo (§2.3).
-- O build de loja sai quando o dono mandar.
+| # | Critério | Prova |
+|---|---|---|
+| C1 | Ordem: cabeçalho, foco, aviso, pendências, semana, prontidão, evolução, ofertas, atalhos | contrato visual |
+| C2 | Só o foco tem `emphasize` | contrato visual |
+| C3 | Bloco sem dado some e não soma espaço | contrato visual |
+| C4 | Foco com 5 modos na prioridade de §3.1; financeiro não é modo | unit |
+| C5 | Linha do próximo horário só hoje ou amanhã | unit + widget |
+| C6 | Prontidão baixa: texto no foco, CTA igual, card sem dica | unit + widget |
+| C7 | Prazo visível com fonte 2x | widget |
+| C8 | Aviso: atestado, financeiro, anamnese, coach | unit |
+| C9 | Mensalidade atrasada: treino no foco, ofertas vazias | unit |
+| C10 | Pendências: chat, agenda, medida, perfil; no máximo 3 | unit |
+| C11 | Perfil e foto em 1 item; só a foto falta → seletor de foto | unit |
+| C12 | Agenda: só depois de amanhã e não visto; visto por horário; relido ao voltar | unit + contrato |
+| C13 | Nenhuma pendência repete o destino do foco | unit |
+| C14 | Chat mostra a quantidade de mensagens | unit |
+| C15 | Evolução só com força; volume só em Sua semana | widget |
+| C16 | Atalhos sem topo, sem dock, sem recurso bloqueado; vazio → só catálogo | unit + widget |
+| C17 | Oferta confirma antes; sem `FilledButton` | contrato |
+| C18 | Volta do background (≥ 2 min) recarrega a Home do aluno | contrato `main.dart` |
+| C19 | Mesmo bundle no dia seguinte: "feito hoje" vira treino pronto | unit |
+| C20 | 304 atualiza `fetchedAt` | unit |
+| C21 | Subtítulo não pisca e segue offline | contrato |
+| C22 | Refresh offline mantém dados e avisa | contrato |
+| C23 | Movimento reduzido, alvos 48 dp, leitura agrupada | widget |
+| C24 | `taskId` iguais; título da agenda "Conferir próximo horário"; VIEWED só visível | unit |
+| C25 | Só PT-BR; en/es sem chave fora do pt | `arb_parity_test` |
+| C26 | BE: `agendaProxima` e `volumeMesKg` deprecated no OpenAPI; `gradlew test` verde | gradle |
+| C27 | `dart analyze --fatal-warnings --fatal-infos`, órfãos, `flutter test`, gitleaks verdes | comandos |
 
 ## 9. Fora de escopo
 
 - Tela de Evolução do aluno (spec 3b).
-- Acabamento transversal fora da Home (spec 4).
-- Meta semanal definida pelo personal (campo novo).
-- Mover a ação do dia ou as pendências para o servidor.
-- Remover `historico` legado do payload (depende da versão mínima do app).
-- Mudar regras do insight, da sequência ou da prontidão.
+- Mover foco ou pendências para o servidor.
+- Remover `agendaProxima`, `volumeMesKg` e `historico` do payload (depende da
+  versão mínima do app).
+- Mudar regras do insight, da sequência ou do cálculo de prontidão.
+- Meta semanal definida pelo personal.
