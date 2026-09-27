@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/auth/session_invalidator.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_insight_analytics.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_insight_line.dart';
@@ -89,5 +90,12 @@ void main() {
       'tipo': 'pr',
       'confianca': 'high',
     });
+  });
+
+  test('logout limpa tipos vistos da sessão', () {
+    expect(AlunoInsightAnalytics.viewed(_pr), isTrue);
+    expect(AlunoInsightAnalytics.viewed(_pr), isFalse);
+    SessionInvalidator.clearTenantMemoryCaches();
+    expect(AlunoInsightAnalytics.viewed(_pr), isTrue);
   });
 }

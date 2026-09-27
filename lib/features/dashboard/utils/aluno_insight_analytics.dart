@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../../../core/analytics/analytics_service.dart';
 import '../data/aluno_home_insight.dart';
 
@@ -31,6 +29,5 @@ class AlunoInsightAnalytics {
     );
   }
 
-  @visibleForTesting
   static void resetSessao() => _vistosNaSessao.clear();
 }
