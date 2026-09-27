@@ -187,6 +187,16 @@ void main() {
       expect(bundle.recovery, isNull);
       expect(bundle.recoveryStale, isTrue);
     });
+
+    test('escalares novos malformados viram null/false sem derrubar a Home', () {
+      final json = _payload()
+        ..['forcaDeltaPercent'] = '4.5'
+        ..['recoveryStale'] = 'sim';
+      final bundle = AlunoDashboardHomeBundle.fromJson(json);
+      expect(bundle.forcaDeltaPercent, isNull);
+      expect(bundle.recoveryStale, isFalse);
+      expect(bundle.aluno.nome, 'Ana Souza');
+    });
   });
 
   group('AlunoDashboardChatResumo.toSyntheticMessages', () {

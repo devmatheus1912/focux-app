@@ -538,8 +538,11 @@ class AlunoDashboardHomeBundle {
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),
       frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
-      forcaDeltaPercent: (json['forcaDeltaPercent'] as num?)?.toDouble(),
-      recoveryStale: json['recoveryStale'] as bool? ?? false,
+      forcaDeltaPercent: switch (json['forcaDeltaPercent']) {
+        final num v => v.toDouble(),
+        _ => null,
+      },
+      recoveryStale: json['recoveryStale'] == true,
       insight: AlunoHomeInsight.tryParse(json['insight']),
     );
   }
