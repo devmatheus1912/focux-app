@@ -197,12 +197,14 @@ class _HeroPill extends StatelessWidget {
 class _TodayFocusCard extends StatelessWidget {
   final AlunoHomeExperience experience;
   final int streakAtual;
+  final AlunoHomeInsight? insight;
   final bool isDark;
 
   const _TodayFocusCard({
     required this.experience,
     required this.streakAtual,
     required this.isDark,
+    this.insight,
   });
 
   @override
@@ -270,17 +272,24 @@ class _TodayFocusCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: TokensStrip.s3),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              _WorkoutInsightPill(
-                icon: Icons.trending_up_rounded,
-                label: score.rhythmLabel,
-                onPrimary: mute,
-              ),
-            ],
-          ),
+          if (insight case final insight?)
+            AlunoHomeInsightLine(
+              insight: insight,
+              onPrimary: mute,
+              onAction: (rota) => context.push(rota),
+            )
+          else
+            Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                _WorkoutInsightPill(
+                  icon: Icons.trending_up_rounded,
+                  label: score.rhythmLabel,
+                  onPrimary: mute,
+                ),
+              ],
+            ),
           const SizedBox(height: TokensStrip.s3),
           FxActionChip(
             label: action.cta,

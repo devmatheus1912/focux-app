@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../widgets/aluno_home_insight_line.dart';
 import '../widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../anamnese/providers/anamnese_provider.dart';
@@ -42,6 +43,7 @@ import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../data/aluno_autonomy_plan.dart';
+import '../data/aluno_home_insight.dart';
 import '../data/aluno_onboarding_prefs.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
@@ -192,6 +194,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                       _TodayFocusCard(
                         experience: experience,
                         streakAtual: home.streakAtual,
+                        insight: home.insight,
                         isDark: isDark,
                       ),
                       const SizedBox(height: TokensStrip.s3),
