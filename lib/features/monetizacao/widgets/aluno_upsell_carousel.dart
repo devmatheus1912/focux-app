@@ -9,7 +9,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/upsell_repository.dart';
@@ -50,9 +49,9 @@ class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
     if (!ok || !mounted || !_enviando.add(oferta.alunoOfertaId)) return;
     setState(() {});
     try {
-      await UpsellRepository(
-        ref.read(apiClientProvider),
-      ).responder(oferta.alunoOfertaId, aceitar ? 'ACEITO' : 'RECUSADO');
+      await ref
+          .read(upsellRepositoryProvider)
+          .responder(oferta.alunoOfertaId, aceitar ? 'ACEITO' : 'RECUSADO');
       await AnalyticsService.instance.track(
         'upsell_aluno_resposta',
         props: {

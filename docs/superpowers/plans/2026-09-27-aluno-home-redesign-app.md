@@ -779,21 +779,15 @@ DateTime? alunoHorarioNoFoco(DateTime? inicio, DateTime now) {
   test('volta do background recarrega a Home do aluno', () {
     final main = File('lib/main.dart').readAsStringSync();
     expect(main, contains('ref.invalidate(alunoDashboardHomeProvider);'));
-    expect(main, contains('AlunoDashboardHomeClientCache.clear();'));
   });
 ```
 
 - [ ] **Step 2: Rodar e ver falhar** → FAIL.
-- [ ] **Step 3: Implementar** — import `features/dashboard/utils/aluno_dashboard_home_client_cache.dart`; no fim de `_warmSessionThenSoftReload`:
+- [ ] **Step 3: Implementar** — no fim de `_warmSessionThenSoftReload`, depois de `ref.invalidate(dashboardHomeProvider);`, invalidar `alunoDashboardHomeProvider` sem limpar o cache: a pausa mínima (2 min) já passa do TTL, então o SWR pinta o bundle anterior e revalida com ETag (304 barato). Limpar jogaria fora o ETag e forçaria o corpo inteiro.
 
 ```dart
-    if (away > DashboardHomeClientCache.ttl) {
-      DashboardHomeClientCache.clear();
-    }
-    if (away > AlunoDashboardHomeClientCache.ttl) {
-      AlunoDashboardHomeClientCache.clear();
-    }
     ref.invalidate(dashboardHomeProvider);
+    // SWR do aluno: pinta o bundle anterior e revalida com ETag.
     ref.invalidate(alunoDashboardHomeProvider);
     ref.invalidate(perfilProvider);
 ```

@@ -233,11 +233,12 @@ cabeçalho e rotas das pendências visíveis.
 - Regras: `aluno_today_action.dart`, `aluno_pendencias.dart`,
   `aluno_home_view.dart` (inclui `alunoHorarioNoFoco`, `alunoProntidaoBaixa`),
   `aluno_home_texts.dart`, `aluno_autonomy_analytics.dart`.
-- Tela: `aluno_dashboard_screen.dart` (composição e estado) e os `part`s de
-  cabeçalho/foco/aviso e ferramentas.
-- Limpeza no mesmo ship: série de volume do `AlunoEvolutionCard`, o
-  `AlunoPendenciaTipo.foto` separado (vira variação de `perfil`) e o que mais
-  ficar sem caller.
+- Tela: `aluno_dashboard_screen.dart` (composição e estado), os `part`s de
+  aviso e ferramentas e o widget `AlunoTodayFocusCard`.
+- `AlunoPendenciaTipo.foto` continua no enum (rota e `taskId` próprios), mas
+  só aparece quando o perfil está completo: nunca junto com `perfil`.
+- Limpeza no mesmo ship: série de volume do `AlunoEvolutionCard`,
+  `volumePorSemana` do bundle, `_TodayFocusCard` e o que mais ficar sem caller.
 
 ## 8. Contrato fechado (auditoria final)
 
@@ -270,7 +271,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C23 | Movimento reduzido, alvos 48 dp, leitura agrupada | widget |
 | C24 | `taskId` iguais; título da agenda "Conferir próximo horário"; VIEWED só visível | unit |
 | C25 | Só PT-BR; en/es sem chave fora do pt | `arb_parity_test` |
-| C26 | BE: `agendaProxima` e `volumeMesKg` deprecated no OpenAPI; `gradlew test` verde | gradle |
+| C26 | BE: `agendaProxima`, `volumeMesKg` e `volumePorSemana` deprecated no OpenAPI; `gradlew test` verde | gradle |
 | C27 | `dart analyze --fatal-warnings --fatal-infos`, órfãos, `flutter test`, gitleaks verdes | comandos |
 
 ## 9. Fora de escopo

@@ -1,5 +1,6 @@
 import '../../alunos/data/aluno_repository.dart';
 import '../../evolucao/data/evolucao_repository.dart';
+import '../data/aluno_home_anamnese.dart';
 import 'aluno_today_action.dart';
 
 /// Pendências do aluno, em ordem de prioridade. `taskId` e `taskTitlePt`
@@ -14,7 +15,7 @@ enum AlunoPendenciaTipo {
     '/aluno/perfil/editar?acao=medida',
   ),
   chat('chat-contexto', 'Responder o personal', '/chat/aluno'),
-  agenda('agenda-semana', 'Conferir agenda da semana', '/agenda/aluno');
+  agenda('agenda-semana', 'Conferir próximo horário', '/agenda/aluno');
 
   const AlunoPendenciaTipo(this.taskId, this.taskTitlePt, this.route);
 
@@ -32,16 +33,35 @@ class AlunoPendencia {
   /// Agenda: início do próximo horário.
   final DateTime? quando;
 
-  const AlunoPendencia(this.tipo, {this.primeiraVez = false, this.quando});
+  /// Chat: mensagens do personal não lidas.
+  final int quantidade;
+
+  const AlunoPendencia(
+    this.tipo, {
+    this.primeiraVez = false,
+    this.quando,
+    this.quantidade = 0,
+  });
 }
 
 const alunoPendenciasMax = 3;
 const alunoMedidaValidadeDias = 14;
 
-/// Todas as pendências em aberto, em ordem de prioridade. A Home mostra as
+/// Horário de hoje e amanhã fica na linha do card de foco.
+const alunoAgendaPendenciaDesdeDias = 2;
+
+/// Dias de calendário entre hoje e [alvo] (negativo = passado), sem horário de verão.
+int alunoDiasAte(DateTime alvo, DateTime agora) =>
+    DateTime.utc(
+      alvo.year,
+      alvo.month,
+      alvo.day,
+    ).difference(DateTime.utc(agora.year, agora.month, agora.day)).inDays;
+
+/// Todas as pendências em aberto, em ordem de urgência. A Home mostra as
 /// [alunoPendenciasMax] primeiras; uma fora do top 3 continua aberta.
-/// Agenda só com horário nos próximos 7 dias (`agendaProximoInicio` do BFF)
-/// que o aluno ainda não viu ([agendaReviewed]).
+/// Perfil e foto nunca aparecem juntos. Agenda só depois de amanhã
+/// (`agendaProximoInicio` do BFF) e ainda não vista ([agendaReviewed]).
 List<AlunoPendencia> listAlunoPendenciasAbertas({
   required Aluno aluno,
   required List<MedidaCorporal> medidas,
@@ -51,25 +71,33 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
   required AlunoTodayMode todayMode,
   DateTime? now,
 }) {
-  final hoje = _dateOnly(now ?? DateTime.now());
+  final agora = now ?? DateTime.now();
+  final hoje = _dateOnly(agora);
   final ultimaMedida = _ultimaMedida(medidas);
   final medidaVencida =
       ultimaMedida == null ||
       hoje.difference(ultimaMedida).inDays > alunoMedidaValidadeDias;
+  final inicio = agendaProximoInicio;
+  final agendaPendente =
+      inicio != null &&
+      !agendaReviewed &&
+      alunoDiasAte(inicio, agora) >= alunoAgendaPendenciaDesdeDias;
+  final cadastroNoFoco = todayMode == AlunoTodayMode.profileSetup;
 
   return [
-    if (todayMode != AlunoTodayMode.profileSetup &&
-        alunoProfileCompletion(aluno) < 100)
-      const AlunoPendencia(AlunoPendenciaTipo.perfil),
-    if (!_filled(aluno.fotoUrl)) const AlunoPendencia(AlunoPendenciaTipo.foto),
+    if (naoLidasDoPersonal > 0)
+      AlunoPendencia(AlunoPendenciaTipo.chat, quantidade: naoLidasDoPersonal),
+    if (agendaPendente)
+      AlunoPendencia(AlunoPendenciaTipo.agenda, quando: inicio),
     if (medidaVencida)
       AlunoPendencia(
         AlunoPendenciaTipo.medida,
         primeiraVez: ultimaMedida == null,
       ),
-    if (naoLidasDoPersonal > 0) const AlunoPendencia(AlunoPendenciaTipo.chat),
-    if (agendaProximoInicio != null && !agendaReviewed)
-      AlunoPendencia(AlunoPendenciaTipo.agenda, quando: agendaProximoInicio),
+    if (!cadastroNoFoco && alunoProfileCompletion(aluno) < 100)
+      const AlunoPendencia(AlunoPendenciaTipo.perfil)
+    else if (!cadastroNoFoco && !_filled(aluno.fotoUrl))
+      const AlunoPendencia(AlunoPendenciaTipo.foto),
   ];
 }
 
@@ -87,16 +115,21 @@ List<AlunoPendencia> alunoPendenciasVisiveis(
     .take(alunoPendenciasMax)
     .toList(growable: false);
 
-/// Um aviso por vez abaixo do card de foco, em ordem de prioridade.
-enum AlunoHomeAviso { financeiro, anamnese, coach, nenhum }
+/// Um aviso por vez abaixo do card de foco. Saúde antes de dinheiro.
+enum AlunoHomeAviso { atestado, financeiro, anamnese, coach, nenhum }
 
 AlunoHomeAviso resolveAlunoHomeAviso({
   required bool inadimplente,
-  required bool anamnesePendente,
+  required AlunoAnamnesePendente? anamnese,
   required int coachMensagens,
 }) {
+  if (anamnese == AlunoAnamnesePendente.precisaAtestado) {
+    return AlunoHomeAviso.atestado;
+  }
   if (inadimplente) return AlunoHomeAviso.financeiro;
-  if (anamnesePendente) return AlunoHomeAviso.anamnese;
+  if (anamnese == AlunoAnamnesePendente.solicitada) {
+    return AlunoHomeAviso.anamnese;
+  }
   if (coachMensagens > 0) return AlunoHomeAviso.coach;
   return AlunoHomeAviso.nenhum;
 }

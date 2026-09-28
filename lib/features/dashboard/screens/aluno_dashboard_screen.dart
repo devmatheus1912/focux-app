@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -11,7 +10,6 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -21,7 +19,6 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_status_banner.dart';
-import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../checkin/data/meus_treinos_mem_cache.dart';
@@ -32,7 +29,6 @@ import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
 import '../data/aluno_home_anamnese.dart';
-import '../data/aluno_home_insight.dart';
 import '../data/aluno_onboarding_prefs.dart';
 import '../data/dashboard_repository.dart';
 import '../providers/dashboard_provider.dart';
@@ -44,9 +40,9 @@ import '../utils/aluno_pendencias.dart';
 import '../utils/aluno_today_action.dart';
 import '../widgets/aluno_evolution_card.dart';
 import '../widgets/aluno_home_header.dart';
-import '../widgets/aluno_home_insight_line.dart';
 import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_pendencias_block.dart';
+import '../widgets/aluno_today_focus_card.dart';
 import '../widgets/aluno_week_summary_card.dart';
 import '../widgets/dashboard_section_header.dart';
 
@@ -71,7 +67,12 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// Null até ler as prefs: a pendência de agenda fica fora até lá, sem
   /// piscar nem mandar VIEWED de algo já resolvido.
   ({String? inicio})? _agendaVista;
-  (AlunoDashboardHomeBundle, ({String? inicio})?, AlunoHomeView)? _viewMemo;
+  (
+    AlunoDashboardHomeBundle,
+    ({String? inicio})?,
+    DateTime,
+    AlunoHomeView,
+  )? _viewMemo;
 
   @override
   void initState() {
@@ -111,19 +112,25 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     _agendarNps();
   }
 
-  AlunoHomeView _viewFor(AlunoDashboardHomeBundle home) {
+  /// Memo por dia: o mesmo bundle depois da meia-noite recalcula o foco.
+  AlunoHomeView _viewFor(AlunoDashboardHomeBundle home, DateTime now) {
     final memo = _viewMemo;
     final vista = _agendaVista;
-    if (memo != null && identical(memo.$1, home) && memo.$2 == vista) {
-      return memo.$3;
+    final dia = DateUtils.dateOnly(now);
+    if (memo != null &&
+        identical(memo.$1, home) &&
+        memo.$2 == vista &&
+        memo.$3 == dia) {
+      return memo.$4;
     }
     final view = buildAlunoHomeView(
       home,
+      now: now,
       agendaReviewed:
           vista == null ||
           alunoAgendaVista(vista.inicio, home.agendaProximoInicio),
     );
-    _viewMemo = (home, vista, view);
+    _viewMemo = (home, vista, dia, view);
     return view;
   }
 
@@ -134,7 +141,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     _syncAnalytics(home);
     _npsPendente =
         home.npsDeveResponder &&
-        _viewFor(home).action.mode == AlunoTodayMode.workoutDone;
+        _viewFor(home, DateTime.now()).action.mode ==
+            AlunoTodayMode.workoutDone;
     _agendarNps();
   }
 
@@ -154,6 +162,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   Future<void> _loadAgendaVista() async {
     final inicio = await readAlunoAgendaVista();
     if (!mounted) return;
+    final atual = _agendaVista;
+    if (atual != null && atual.inicio == inicio) return;
     setState(() => _agendaVista = (inicio: inicio));
     final home = ref.read(alunoDashboardHomeProvider).value;
     if (home != null) _syncAnalytics(home);
@@ -162,7 +172,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// Espera a agenda ser lida: antes disso as pendências ainda não são finais.
   void _syncAnalytics(AlunoDashboardHomeBundle home) {
     if (_agendaVista == null) return;
-    final view = _viewFor(home);
+    final view = _viewFor(home, DateTime.now());
     _completeResolvedTasks(view);
     if (_viewTracked) return;
     _viewTracked = true;
@@ -234,6 +244,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(alunoDashboardHomeProvider);
+    final now = DateTime.now();
 
     return fxScreenA11yScope(
       label: s.alunoHomeTitulo,
@@ -243,6 +254,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         appBar: FxShellAppBar(
           title: s.alunoHomeTitulo,
           subtitle: homeAsync.when(
+            skipLoadingOnReload: true,
+            skipError: true,
             data: (home) => FxHubFreshness.fromFetchedAt(home.fetchedAt),
             loading: () => null,
             error: (_, __) => null,
@@ -294,7 +307,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                 message: friendlyError(e),
                 onRetry: () => ref.invalidate(alunoDashboardHomeProvider),
               ),
-          data: (home) => _buildHome(context, home, isDark),
+          data: (home) => _buildHome(context, home, isDark, now),
         ),
       ),
     );
@@ -304,8 +317,9 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     BuildContext context,
     AlunoDashboardHomeBundle home,
     bool isDark,
+    DateTime now,
   ) {
-    final view = _viewFor(home);
+    final view = _viewFor(home, now);
     final action = view.action;
 
     // (espaço antes, bloco): só entra bloco com conteúdo, então nenhum
@@ -322,9 +336,11 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       ),
       (
         TokensStrip.s2,
-        _TodayFocusCard(
+        AlunoTodayFocusCard(
           action: action,
+          hoje: now,
           insight: view.insight,
+          horario: view.horarioNoFoco,
           prontidaoBaixa: view.prontidaoBaixa,
           isDark: isDark,
           onAction: () => _openToday(action),
@@ -340,31 +356,34 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onFinanceiro: _openFinanceiro,
           ),
         ),
-      if (view.semanaVisivel)
-        (TokensStrip.s4, AlunoWeekSummaryCard(summary: view.semana)),
-      if (view.prontidaoVisivel)
-        (
-          view.semanaVisivel ? TokensStrip.s3 : TokensStrip.s4,
-          AlunoRecoveryCard(snapshot: home.recovery),
-        ),
-      if (view.jaTreinou)
-        (
-          TokensStrip.s4,
-          AlunoEvolutionCard(
-            volumePorSemana: home.volumePorSemana,
-            forcaPorSemana: home.forcaPorSemana,
-            forcaDeltaPercent: home.forcaDeltaPercent,
-            ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
-            recordeRecente: view.recordeRecente,
-          ),
-        ),
       if (view.pendencias.isNotEmpty)
         (
           TokensStrip.s4,
           AlunoPendenciasBlock(
             pendencias: view.pendencias,
+            hoje: now,
             onTap: _openPendencia,
             onShown: _pendenciaShown,
+          ),
+        ),
+      if (view.semanaVisivel)
+        (TokensStrip.s4, AlunoWeekSummaryCard(summary: view.semana)),
+      if (view.prontidaoVisivel)
+        (
+          view.semanaVisivel ? TokensStrip.s3 : TokensStrip.s4,
+          AlunoRecoveryCard(
+            snapshot: home.recovery,
+            mostrarDica: !view.prontidaoBaixa,
+          ),
+        ),
+      if (view.jaTreinou)
+        (
+          TokensStrip.s4,
+          AlunoEvolutionCard(
+            forcaPorSemana: home.forcaPorSemana,
+            forcaDeltaPercent: home.forcaDeltaPercent,
+            ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
+            recordeRecente: view.recordeRecente,
           ),
         ),
       if (view.ofertas.isNotEmpty)

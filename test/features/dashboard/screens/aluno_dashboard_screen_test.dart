@@ -76,8 +76,12 @@ void main() {
     expect(find.text('+2,9%'), findsOneWidget);
     expect(find.text('Pendências'), findsOneWidget);
     expect(find.text('Completar perfil'), findsOneWidget);
-    expect(find.text('Adicionar foto'), findsOneWidget);
+    expect(find.text('Adicionar foto'), findsNothing);
     expect(find.text('Atualizar medidas'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Pendências')).dy,
+      lessThan(tester.getTopLeft(find.text('Sua semana')).dy),
+    );
     expect(find.text('Responder o personal'), findsNothing);
     expect(find.text('Anamnese solicitada'), findsNothing);
     expect(tester.takeException(), isNull);

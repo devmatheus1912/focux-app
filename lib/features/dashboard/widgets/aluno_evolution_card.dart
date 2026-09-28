@@ -11,19 +11,17 @@ import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_performance_evolution.dart';
 import 'dashboard_section_header.dart';
 
-/// "Evolução": força (1RM est.) e volume das últimas semanas, variação da
-/// força e o último recorde. O texto do insight fica só no card de foco.
+/// "Evolução": força (1RM est.) das últimas semanas, variação da força e o
+/// último recorde. Volume fica só em "Sua semana"; o insight, no card de foco.
 class AlunoEvolutionCard extends StatelessWidget {
   const AlunoEvolutionCard({
     super.key,
-    required this.volumePorSemana,
     required this.forcaPorSemana,
     this.forcaDeltaPercent,
     this.ultimoRecorde,
     this.recordeRecente = false,
   });
 
-  final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final double? forcaDeltaPercent;
   final RecordePessoal? ultimoRecorde;
@@ -37,9 +35,7 @@ class AlunoEvolutionCard extends StatelessWidget {
     final forcaColor = scheme.secondary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mute = ShellChrome.of(context).mute;
-    final hasChart =
-        alunoTrendPlot(volumePorSemana) != null ||
-        alunoTrendPlot(forcaPorSemana) != null;
+    final hasChart = alunoTrendPlot(forcaPorSemana) != null;
     final delta = forcaDeltaPercent;
     final recorde = ultimoRecorde;
     final recordeTexto =
@@ -89,28 +85,17 @@ class AlunoEvolutionCard extends StatelessWidget {
                   style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
               if (hasChart) ...[
-                _DualTrendChart(
-                  volume: volumePorSemana,
-                  forca: forcaPorSemana,
-                  volumeColor: primary,
-                  forcaColor: forcaColor,
+                _TrendChart(
+                  data: forcaPorSemana,
+                  color: forcaColor,
                   semanticsLabel: s.alunoEvolucaoGraficoSemantics(
-                    volumePorSemana.length,
+                    forcaPorSemana.length,
                   ),
                 ),
                 const SizedBox(height: TokensStrip.s2),
-                Row(
-                  children: [
-                    _LegendDot(
-                      color: primary,
-                      label: s.alunoEvolucaoLegendaVolume,
-                    ),
-                    const SizedBox(width: TokensStrip.s3),
-                    _LegendDot(
-                      color: forcaColor,
-                      label: s.alunoEvolucaoLegendaForca,
-                    ),
-                  ],
+                _LegendDot(
+                  color: forcaColor,
+                  label: s.alunoEvolucaoLegendaForca,
                 ),
               ],
               if (tiles.isNotEmpty) ...[
@@ -159,18 +144,14 @@ class _LegendDot extends StatelessWidget {
   }
 }
 
-class _DualTrendChart extends StatelessWidget {
-  final List<double> volume;
-  final List<double> forca;
-  final Color volumeColor;
-  final Color forcaColor;
+class _TrendChart extends StatelessWidget {
+  final List<double> data;
+  final Color color;
   final String semanticsLabel;
 
-  const _DualTrendChart({
-    required this.volume,
-    required this.forca,
-    required this.volumeColor,
-    required this.forcaColor,
+  const _TrendChart({
+    required this.data,
+    required this.color,
     required this.semanticsLabel,
   });
 
@@ -182,45 +163,22 @@ class _DualTrendChart extends StatelessWidget {
       child: SizedBox(
         height: 88,
         width: double.infinity,
-        child: CustomPaint(
-          painter: _DualTrendPainter(
-            volume: volume,
-            forca: forca,
-            volumeColor: volumeColor,
-            forcaColor: forcaColor,
-          ),
-        ),
+        child: CustomPaint(painter: _TrendPainter(data: data, color: color)),
       ),
     );
   }
 }
 
-class _DualTrendPainter extends CustomPainter {
-  final List<double> volume;
-  final List<double> forca;
-  final Color volumeColor;
-  final Color forcaColor;
+class _TrendPainter extends CustomPainter {
+  static const strokeWidth = 2.4;
 
-  _DualTrendPainter({
-    required this.volume,
-    required this.forca,
-    required this.volumeColor,
-    required this.forcaColor,
-  });
+  final List<double> data;
+  final Color color;
+
+  _TrendPainter({required this.data, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    _paintSeries(canvas, size, forca, forcaColor, strokeWidth: 2);
-    _paintSeries(canvas, size, volume, volumeColor, strokeWidth: 2.4);
-  }
-
-  void _paintSeries(
-    Canvas canvas,
-    Size size,
-    List<double> data,
-    Color color, {
-    required double strokeWidth,
-  }) {
     final plot = alunoTrendPlot(data);
     if (plot == null) return;
     final paint =
@@ -254,10 +212,6 @@ class _DualTrendPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _DualTrendPainter oldDelegate) {
-    return oldDelegate.volume != volume ||
-        oldDelegate.forca != forca ||
-        oldDelegate.volumeColor != volumeColor ||
-        oldDelegate.forcaColor != forcaColor;
-  }
+  bool shouldRepaint(covariant _TrendPainter oldDelegate) =>
+      oldDelegate.data != data || oldDelegate.color != color;
 }

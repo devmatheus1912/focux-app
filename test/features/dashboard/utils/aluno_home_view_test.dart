@@ -16,7 +16,8 @@ const _insight = {
   'tipo': 'RITMO_CAIU',
   'confianca': 'HIGH',
   'titulo': 'Seu ritmo caiu',
-  'mensagem': 'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
+  'mensagem':
+      'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
 };
 
 AlunoDashboardHomeBundle _bundle({
@@ -114,8 +115,10 @@ void main() {
         'Anamnese solicitada',
       );
       expect(
-        alunoAnamneseAvisoTexto(s, AlunoAnamnesePendente.precisaAtestado)
-            .titulo,
+        alunoAnamneseAvisoTexto(
+          s,
+          AlunoAnamnesePendente.precisaAtestado,
+        ).titulo,
         'Seu personal pediu atestado',
       );
     });
@@ -133,7 +136,7 @@ void main() {
 
     test('Home mostra 3; abertas guardam todas', () {
       final view = buildAlunoHomeView(
-        _bundle(agendaInicio: '2026-09-30T18:00:00'),
+        _bundle(fichas: 1, agendaInicio: '2026-09-30T18:00:00'),
         agendaReviewed: false,
         now: DateTime(2026, 9, 27),
       );
@@ -160,10 +163,8 @@ void main() {
 
     test('quem acabou de treinar não lê "Seu ritmo caiu"', () {
       final ritmo = AlunoHomeInsight.tryParse(_insight)!;
-      final volume = AlunoHomeInsight.tryParse({
-        ..._insight,
-        'tipo': 'VOLUME_SUBINDO',
-      })!;
+      final volume =
+          AlunoHomeInsight.tryParse({..._insight, 'tipo': 'VOLUME_SUBINDO'})!;
       expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutDone), isNull);
       expect(alunoInsightNoFoco(volume, AlunoTodayMode.workoutDone), volume);
       expect(alunoInsightNoFoco(ritmo, AlunoTodayMode.workoutReady), ritmo);
@@ -219,16 +220,57 @@ void main() {
     });
 
     test('agenda só entra com horário e leva quando é', () {
-      AlunoPendencia? agenda(String? inicio) => buildAlunoHomeView(
-        _bundle(agendaInicio: inicio),
-        agendaReviewed: false,
-        now: DateTime(2026, 9, 27),
-      ).pendenciasAbertas
-          .where((p) => p.tipo == AlunoPendenciaTipo.agenda)
-          .firstOrNull;
+      AlunoPendencia? agenda(String? inicio) =>
+          buildAlunoHomeView(
+                _bundle(agendaInicio: inicio),
+                agendaReviewed: false,
+                now: DateTime(2026, 9, 27),
+              ).pendenciasAbertas
+              .where((p) => p.tipo == AlunoPendenciaTipo.agenda)
+              .firstOrNull;
       expect(agenda(null), isNull);
       expect(agenda('2026-09-30T18:00:00')?.quando, DateTime(2026, 9, 30, 18));
-    });  });
+    });
+
+    test('horário no foco só hoje ou amanhã', () {
+      final agora = DateTime(2026, 9, 27, 8);
+      expect(alunoHorarioNoFoco(DateTime(2026, 9, 27, 18), agora), isNotNull);
+      expect(alunoHorarioNoFoco(DateTime(2026, 9, 28, 7), agora), isNotNull);
+      expect(alunoHorarioNoFoco(DateTime(2026, 9, 29, 7), agora), isNull);
+      expect(alunoHorarioNoFoco(DateTime(2026, 9, 26, 7), agora), isNull);
+      expect(alunoHorarioNoFoco(null, agora), isNull);
+      final view = buildAlunoHomeView(
+        _bundle(agendaInicio: '2026-09-27T18:00:00'),
+        agendaReviewed: false,
+        now: agora,
+      );
+      expect(view.horarioNoFoco, DateTime(2026, 9, 27, 18));
+      expect(
+        view.pendenciasAbertas.map((p) => p.tipo),
+        isNot(contains(AlunoPendenciaTipo.agenda)),
+      );
+    });
+
+    test('mesmo bundle no dia seguinte: feito hoje vira treino pronto', () {
+      final home = _bundle(fichas: 2, concluidoEm: '2026-09-27T07:30:00');
+      AlunoTodayMode modo(DateTime now) =>
+          buildAlunoHomeView(home, agendaReviewed: true, now: now).action.mode;
+      expect(modo(DateTime(2026, 9, 27, 20)), AlunoTodayMode.workoutDone);
+      expect(modo(DateTime(2026, 9, 28, 7)), AlunoTodayMode.workoutReady);
+    });
+
+    test('atestado pedido vem antes da mensalidade', () {
+      final view = buildAlunoHomeView(
+        _bundle(anamnese: 'PRECISA_ATESTADO', inadimplente: true),
+        agendaReviewed: true,
+      );
+      expect(view.aviso, AlunoHomeAviso.atestado);
+      expect(view.financeiroEmAtraso, isTrue);
+      expect(view.ofertas, isEmpty);
+      expect(view.rotasNoTopo, contains('/aluno/anamnese'));
+      expect(view.atalhos, isNot(contains('/aluno/anamnese')));
+    });
+  });
 
   group('atalhos', () {
     test('nenhum atalho repete destino que já está acima', () {
@@ -278,7 +320,10 @@ void main() {
       expect(view.atalhos, isNot(contains('/aluno/habitos')));
       expect(view.atalhos, isNot(contains('/aluno/desafios')));
       expect(alunoFerramentaLiberada('/aluno/habitos', const {}), isTrue);
-      expect(alunoFerramentaLiberada('/agenda/aluno', {'HABIT_COACHING'}), isTrue);
+      expect(
+        alunoFerramentaLiberada('/agenda/aluno', {'HABIT_COACHING'}),
+        isTrue,
+      );
     });
 
     test('plano sem agenda tira o atalho de agenda', () {
@@ -359,8 +404,11 @@ void main() {
         isTrue,
       );
       expect(
-        buildAlunoHomeView(_bundle(), agendaReviewed: true, now: hoje)
-            .recordeRecente,
+        buildAlunoHomeView(
+          _bundle(),
+          agendaReviewed: true,
+          now: hoje,
+        ).recordeRecente,
         isFalse,
       );
     });
@@ -410,7 +458,11 @@ void main() {
         AlunoTodayMode mode = AlunoTodayMode.workoutReady,
         RecoverySnapshot? s = baixa,
         bool visivel = true,
-      }) => alunoProntidaoBaixa(mode: mode, snapshot: s, prontidaoVisivel: visivel);
+      }) => alunoProntidaoBaixa(
+        mode: mode,
+        snapshot: s,
+        prontidaoVisivel: visivel,
+      );
       expect(b(), isTrue);
       expect(b(s: snap), isFalse);
       expect(b(visivel: false), isFalse);

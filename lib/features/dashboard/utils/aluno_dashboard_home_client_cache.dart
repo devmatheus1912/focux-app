@@ -64,6 +64,17 @@ abstract final class AlunoDashboardHomeClientCache {
     _fetchedAt = now ?? DateTime.now();
   }
 
+  /// 304: o servidor confirmou o bundle atual. Renova a idade e devolve uma
+  /// cópia nova, para a tela saber que atualizou.
+  static AlunoDashboardHomeBundle? revalidar({DateTime? now}) {
+    final bundle = getEvenIfStale(now: now);
+    if (bundle == null) return null;
+    final at = now ?? DateTime.now();
+    final renovado = bundle.withFetchedAt(at);
+    put(renovado, now: at);
+    return renovado;
+  }
+
   static void clear() {
     _bundle = null;
     _fetchedAt = null;

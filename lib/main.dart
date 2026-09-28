@@ -301,6 +301,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       DashboardHomeClientCache.clear();
     }
     ref.invalidate(dashboardHomeProvider);
+    // SWR do aluno: pinta o bundle anterior e revalida com ETag.
+    ref.invalidate(alunoDashboardHomeProvider);
     ref.invalidate(perfilProvider);
     unawaited(_loadCustomTheme());
   }

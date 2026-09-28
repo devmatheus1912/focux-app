@@ -15,19 +15,28 @@ void main() {
       return i;
     }
 
-    expect('emphasize: true'.allMatches(screen), hasLength(1));
-    expect(at('AlunoHomeHeader('), lessThan(at('_TodayFocusCard(')));
-    expect(at('_TodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
-    expect(at('_AlunoHomeAviso('), lessThan(at('AlunoWeekSummaryCard(')));
+    final foco =
+        File(
+          'lib/features/dashboard/widgets/aluno_today_focus_card.dart',
+        ).readAsStringSync();
+    expect('emphasize: true'.allMatches(screen), isEmpty);
+    expect('emphasize: true'.allMatches(foco), hasLength(1));
+    expect(at('AlunoHomeHeader('), lessThan(at('AlunoTodayFocusCard(')));
+    expect(at('AlunoTodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
+    expect(at('_AlunoHomeAviso('), lessThan(at('AlunoPendenciasBlock(')));
+    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoWeekSummaryCard(')));
     expect(at('AlunoWeekSummaryCard('), lessThan(at('AlunoRecoveryCard(')));
     expect(at('AlunoRecoveryCard('), lessThan(at('AlunoEvolutionCard(')));
-    expect(at('AlunoEvolutionCard('), lessThan(at('AlunoPendenciasBlock(')));
-    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(at('AlunoEvolutionCard('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(at('AlunoUpsellCarousel('), lessThan(at('_StudentToolsSection(')));
+    expect(screen, contains('mostrarDica: !view.prontidaoBaixa'));
+    expect(screen, contains('horario: view.horarioNoFoco'));
+    expect(screen, contains('if (featured.isNotEmpty)'));
+    expect(screen, isNot(contains('volumePorSemana')));
     expect(
-      at('AlunoUpsellCarousel('),
-      lessThan(at('_StudentToolsSection(')),
+      screen,
+      contains('recursosIndisponiveis: view.recursosIndisponiveis'),
     );
-    expect(screen, contains('recursosIndisponiveis: view.recursosIndisponiveis'));
     expect(screen, contains('coachMensagens: view.coach'));
     expect(screen, contains('insight: view.insight'));
     expect(screen, contains('view.semanaVisivel'));
@@ -36,7 +45,7 @@ void main() {
     expect(screen, contains('s.alunoHomeTitulo'));
     expect(screen, isNot(contains('_AlunoAppBarAvatar')));
     expect(
-      screen,
+      foco,
       contains('AlunoHomeInsightLine(insight: insight, onPrimary: mute)'),
     );
     expect(screen, contains('listenManual'));
@@ -61,6 +70,8 @@ void main() {
     expect(carousel, contains('s.alunoOfertaAceitarConfirmTitulo'));
     expect(carousel, contains('s.alunoOfertaRecusarConfirmTitulo'));
     expect(carousel, isNot(contains('FilledButton')));
+    expect(carousel, contains('.read(upsellRepositoryProvider)'));
+    expect(carousel, isNot(contains('UpsellRepository(')));
   });
 
   test('weekly progress card follows white label and accent copy', () {

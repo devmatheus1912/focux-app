@@ -53,6 +53,9 @@ class AlunoHomeView {
   /// Coach sem o que outro bloco já diz ([alunoCoachVisiveis]).
   final List<CoachMensagem> coach;
   final AlunoHomeAviso aviso;
+
+  /// Mensalidade atrasada, mesmo quando o atestado ocupa o aviso.
+  final bool financeiroEmAtraso;
   final AlunoWeekSummary semana;
 
   /// Já concluiu algum treino. Antes disso semana e evolução só teriam zeros:
@@ -71,6 +74,9 @@ class AlunoHomeView {
   /// O último recorde é dos últimos [alunoRecordeNovoDias] dias.
   final bool recordeRecente;
 
+  /// Próximo horário de hoje ou amanhã ([alunoHorarioNoFoco]).
+  final DateTime? horarioNoFoco;
+
   const AlunoHomeView({
     required this.action,
     required this.insight,
@@ -82,21 +88,22 @@ class AlunoHomeView {
     required this.jaTreinou,
     required this.prontidaoVisivel,
     required this.chatNoCabecalho,
+    this.financeiroEmAtraso = false,
     this.prontidaoBaixa = false,
     this.ofertas = const [],
     this.recursosIndisponiveis = const {},
     this.recordeRecente = false,
+    this.horarioNoFoco,
   });
 
   bool get semanaVisivel => jaTreinou && !semana.isEmpty;
 
-  bool get financeiroEmAtraso => aviso == AlunoHomeAviso.financeiro;
-
   /// Destinos que já têm entrada acima dos atalhos.
   Set<String> get rotasNoTopo => {
     action.route,
-    if (financeiroEmAtraso) alunoFinanceiroRoute,
-    if (aviso == AlunoHomeAviso.anamnese) '/aluno/anamnese',
+    if (aviso == AlunoHomeAviso.financeiro) alunoFinanceiroRoute,
+    if (aviso == AlunoHomeAviso.atestado || aviso == AlunoHomeAviso.anamnese)
+      '/aluno/anamnese',
     if (chatNoCabecalho) '/chat/aluno',
     for (final p in pendencias) Uri.parse(p.tipo.route).path,
   };
@@ -116,11 +123,12 @@ AlunoHomeView buildAlunoHomeView(
   required bool agendaReviewed,
   DateTime? now,
 }) {
+  final agora = now ?? DateTime.now();
   final action = resolveAlunoTodayAction(
     aluno: home.aluno,
     treinos: home.treinos,
     historico: home.historico,
-    now: now,
+    now: agora,
   );
   final inadimplente = home.aluno.inadimplente;
   final abertas = listAlunoPendenciasAbertas(
@@ -130,7 +138,7 @@ AlunoHomeView buildAlunoHomeView(
     agendaProximoInicio: home.agendaProximoInicio,
     agendaReviewed: agendaReviewed,
     todayMode: action.mode,
-    now: now,
+    now: agora,
   );
   final prontidaoVisivel = alunoProntidaoVisivel(
     snapshot: home.recovery,
@@ -151,9 +159,10 @@ AlunoHomeView buildAlunoHomeView(
     coach: coach,
     aviso: resolveAlunoHomeAviso(
       inadimplente: inadimplente,
-      anamnesePendente: home.anamnesePendente != null,
+      anamnese: home.anamnesePendente,
       coachMensagens: coach.length,
     ),
+    financeiroEmAtraso: inadimplente,
     semana: buildAlunoWeekSummary(
       concluidosSemanaIso: home.concluidosSemanaIso,
       frequenciaDias: home.frequenciaDias,
@@ -173,9 +182,17 @@ AlunoHomeView buildAlunoHomeView(
     recursosIndisponiveis: home.recursosIndisponiveis,
     recordeRecente: alunoRecordeRecente(
       home.recordes.isEmpty ? null : home.recordes.first.data,
-      now ?? DateTime.now(),
+      agora,
     ),
+    horarioNoFoco: alunoHorarioNoFoco(home.agendaProximoInicio, agora),
   );
+}
+
+/// Hoje ou amanhã: vai para o card de foco em vez de virar pendência.
+DateTime? alunoHorarioNoFoco(DateTime? inicio, DateTime now) {
+  if (inicio == null) return null;
+  final dias = alunoDiasAte(inicio, now);
+  return dias >= 0 && dias < alunoAgendaPendenciaDesdeDias ? inicio : null;
 }
 
 AlunoHomeInsight? alunoInsightNoFoco(
@@ -206,8 +223,7 @@ bool alunoRecordeRecente(String? data, DateTime now) {
   final dia = data == null ? null : DateTime.tryParse(data);
   if (dia == null) return false;
   final hoje = DateTime(now.year, now.month, now.day);
-  final dias =
-      hoje.difference(DateTime(dia.year, dia.month, dia.day)).inDays;
+  final dias = hoje.difference(DateTime(dia.year, dia.month, dia.day)).inDays;
   return dias >= 0 && dias <= alunoRecordeNovoDias;
 }
 
@@ -227,7 +243,8 @@ List<CoachMensagem> alunoCoachVisiveis(
   required bool prontidaoVisivel,
 }) => [
   for (final m in mensagens)
-    if (!(comeback && (m.tipo == 'SEM_TREINO_5D' || m.tipo == 'STREAK_QUEBRADO')) &&
+    if (!(comeback &&
+            (m.tipo == 'SEM_TREINO_5D' || m.tipo == 'STREAK_QUEBRADO')) &&
         !(prontidaoVisivel && m.tipo == 'SONO_BAIXO'))
       m,
 ];

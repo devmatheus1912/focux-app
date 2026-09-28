@@ -1,6 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/api/api_client.dart';
 import '../../../core/money/fx_money.dart';
+import '../../auth/providers/auth_provider.dart';
+
+final upsellRepositoryProvider = Provider(
+  (ref) => UpsellRepository(ref.read(apiClientProvider)),
+);
 
 class OfertaUpsell {
   final int id;

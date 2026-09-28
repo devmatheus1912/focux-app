@@ -132,21 +132,23 @@ class _StudentToolsSection extends StatelessWidget {
           actionLabel: s.alunoAtalhosVerCatalogo,
           onAction: () => _showAlunoToolsCatalog(context, tools: tools),
         ),
-        const SizedBox(height: FxSettingsLayout.headerToGroup),
-        FxSettingsGroup(
-          children: [
-            for (var i = 0; i < featured.length; i++)
-              FxSettingsTile(
-                icon: featured[i].icon,
-                label: featured[i].title,
-                value: featured[i].subtitle,
-                mute: chrome.mute,
-                line: chrome.line,
-                showDivider: i < featured.length - 1,
-                onTap: () => context.push(featured[i].route),
-              ),
-          ],
-        ),
+        if (featured.isNotEmpty) ...[
+          const SizedBox(height: FxSettingsLayout.headerToGroup),
+          FxSettingsGroup(
+            children: [
+              for (var i = 0; i < featured.length; i++)
+                FxSettingsTile(
+                  icon: featured[i].icon,
+                  label: featured[i].title,
+                  value: featured[i].subtitle,
+                  mute: chrome.mute,
+                  line: chrome.line,
+                  showDivider: i < featured.length - 1,
+                  onTap: () => context.push(featured[i].route),
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }

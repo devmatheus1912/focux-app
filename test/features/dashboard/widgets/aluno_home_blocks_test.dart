@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/auth/session_invalidator.dart';
+import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_autonomy_analytics.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_evolution_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_header.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_skeleton.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_pendencias_block.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_today_focus_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_week_summary_card.dart';
+import 'package:focux_app/features/health/data/health_repository.dart';
+import 'package:focux_app/features/health/widgets/aluno_recovery_card.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
 Future<void> _pump(WidgetTester tester, Widget child) => tester.pumpWidget(
@@ -62,7 +67,10 @@ void main() {
       );
       expect(find.text('Olá, Ana'), findsOneWidget);
       expect(find.text('Seu personal: Carlos'), findsOneWidget);
-      expect(find.bySemanticsLabel('Abrir conversa com Carlos'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Abrir conversa com Carlos'),
+        findsOneWidget,
+      );
       await tester.tap(find.text('Seu personal: Carlos'));
       expect(abriu, isTrue);
     });
@@ -164,7 +172,11 @@ void main() {
     testWidgets('lista vazia não desenha nada', (tester) async {
       await _pump(
         tester,
-        AlunoPendenciasBlock(pendencias: const [], onTap: (_) {}),
+        AlunoPendenciasBlock(
+          pendencias: const [],
+          hoje: DateTime(2026, 9, 27),
+          onTap: (_) {},
+        ),
       );
       expect(find.text('Pendências'), findsNothing);
     });
@@ -181,6 +193,7 @@ void main() {
             AlunoPendencia(AlunoPendenciaTipo.foto),
             AlunoPendencia(AlunoPendenciaTipo.agenda),
           ],
+          hoje: DateTime(2026, 9, 27),
           onTap: (p) => tocada = p,
           onShown: (p) => mostrados.add(p.tipo),
         ),
@@ -190,6 +203,122 @@ void main() {
       expect(mostrados, [AlunoPendenciaTipo.foto, AlunoPendenciaTipo.agenda]);
       await tester.tap(find.text('Seu próximo horário'));
       expect(tocada?.tipo, AlunoPendenciaTipo.agenda);
+    });
+  });
+
+  group('AlunoTodayFocusCard', () {
+    testWidgets('prazo, horário e prontidão aparecem com fonte 2x', (
+      tester,
+    ) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _pump(
+        tester,
+        AlunoTodayFocusCard(
+          action: AlunoTodayAction(
+            mode: AlunoTodayMode.workoutReady,
+            route: '/checkin/executar',
+            treinoNome: 'Treino A',
+            exerciseCount: 6,
+            prazoFim: DateTime(2026, 9, 27),
+          ),
+          hoje: DateTime(2026, 9, 27, 8),
+          horario: DateTime(2026, 9, 27, 18),
+          prontidaoBaixa: true,
+          isDark: false,
+          onAction: () {},
+        ),
+      );
+      expect(find.text('Vence hoje'), findsOneWidget);
+      expect(
+        find.text('Horário com seu personal: hoje às 18:00'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Prontidão baixa: prefira um treino leve ou mobilidade.'),
+        findsOneWidget,
+      );
+      expect(find.text('Treinar agora'), findsOneWidget);
+    });
+
+    testWidgets('sem prazo nem horário as linhas somem', (tester) async {
+      await _pump(
+        tester,
+        AlunoTodayFocusCard(
+          action: const AlunoTodayAction(
+            mode: AlunoTodayMode.workoutReady,
+            route: '/checkin/executar',
+            treinoNome: 'Treino A',
+            exerciseCount: 6,
+          ),
+          hoje: DateTime(2026, 9, 27, 8),
+          isDark: false,
+          onAction: () {},
+        ),
+      );
+      expect(find.textContaining('Vence'), findsNothing);
+      expect(find.textContaining('Horário com seu personal'), findsNothing);
+    });
+  });
+
+  group('AlunoEvolutionCard', () {
+    testWidgets('só força: sem volume no gráfico', (tester) async {
+      await _pump(
+        tester,
+        const AlunoEvolutionCard(
+          forcaPorSemana: [0, 80, 82, 0, 85, 86, 88, 90],
+          forcaDeltaPercent: 2.3,
+        ),
+      );
+      expect(find.text('Força (1RM est.)'), findsOneWidget);
+      expect(find.text('Volume'), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          'Gráfico das últimas 8 semanas: força (1RM estimado)',
+        ),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('AlunoRecoveryCard', () {
+    const baixa = RecoverySnapshot(
+      steps: 0,
+      caloriesBurned: 0,
+      avgHeartRate: 0,
+      sleepHours: 0,
+      recoveryScore: 40,
+      recoveryLabel: 'Descanso recomendado',
+      recoveryHint: 'Sono ou carga baixa',
+    );
+
+    testWidgets('sem a dica quando o foco já falou', (tester) async {
+      await _pump(
+        tester,
+        const AlunoRecoveryCard(snapshot: baixa, mostrarDica: false),
+      );
+      expect(find.text('Descanso recomendado'), findsOneWidget);
+      expect(find.text('Sono ou carga baixa'), findsNothing);
+      expect(
+        find.bySemanticsLabel('Prontidão do dia: Descanso recomendado'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('movimento reduzido: sem animação em loop', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: const MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: Scaffold(body: AlunoRecoveryCard(snapshot: baixa)),
+          ),
+        ),
+      );
+      expect(find.byType(FxRivePlayer), findsNothing);
+      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
     });
   });
 
@@ -262,10 +391,9 @@ void main() {
       AlunoAutonomyAnalytics.clicked(repo, agenda);
       repo.eventos.clear();
 
-      expect(
-        AlunoAutonomyAnalytics.completeResolved(repo, {'agenda-semana'}),
-        ['foto-dados'],
-      );
+      expect(AlunoAutonomyAnalytics.completeResolved(repo, {'agenda-semana'}), [
+        'foto-dados',
+      ]);
       expect(
         AlunoAutonomyAnalytics.completeResolved(repo, {'agenda-semana'}),
         isEmpty,

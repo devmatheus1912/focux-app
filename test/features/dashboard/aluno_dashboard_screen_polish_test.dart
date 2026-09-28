@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -51,9 +53,7 @@ void main() {
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
-    expect(screen, contains('FxActionChip'));
+    expect(screen, contains('AlunoTodayFocusCard('));
     expect(screen, contains('AlunoWeekSummaryCard'));
     expect(screen, contains('AlunoEvolutionCard'));
     expect(screen, contains('AlunoPendenciasBlock'));
@@ -76,5 +76,32 @@ void main() {
     expect(screen, isNot(contains('/gamificacao')));
     expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('class _AlunoProfileCard')));
+  });
+
+  test('Home do aluno fica certa no tempo e barata de redesenhar', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
+    );
+    final provider =
+        File(
+          'lib/features/dashboard/providers/dashboard_provider.dart',
+        ).readAsStringSync();
+    final main = File('lib/main.dart').readAsStringSync();
+
+    expect(screen, contains('memo.\$3 == dia'));
+    expect(screen, contains('_viewFor(home, now)'));
+    expect(screen, contains('hoje: now'));
+    expect(
+      RegExp(
+        r'subtitle: homeAsync\.when\(\s*skipLoadingOnReload: true,\s*skipError: true',
+      ).hasMatch(screen),
+      isTrue,
+    );
+    expect(
+      screen,
+      contains('if (atual != null && atual.inicio == inicio) return;'),
+    );
+    expect(provider, contains('AlunoDashboardHomeClientCache.revalidar()'));
+    expect(main, contains('ref.invalidate(alunoDashboardHomeProvider);'));
   });
 }

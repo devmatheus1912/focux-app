@@ -16,11 +16,15 @@ class AlunoPendenciasBlock extends StatefulWidget {
   const AlunoPendenciasBlock({
     super.key,
     required this.pendencias,
+    required this.hoje,
     required this.onTap,
     this.onShown,
   });
 
   final List<AlunoPendencia> pendencias;
+
+  /// Mesmo relógio do build da Home (textos "hoje", "amanhã").
+  final DateTime hoje;
   final ValueChanged<AlunoPendencia> onTap;
 
   /// Chamado para cada item quando o bloco aparece na tela e a cada lista nova
@@ -70,7 +74,11 @@ class _AlunoPendenciasBlockState extends State<AlunoPendenciasBlock> {
             child: Column(
               children: [
                 for (final p in widget.pendencias)
-                  _PendenciaRow(pendencia: p, onTap: () => widget.onTap(p)),
+                  _PendenciaRow(
+                    pendencia: p,
+                    hoje: widget.hoje,
+                    onTap: () => widget.onTap(p),
+                  ),
               ],
             ),
           ),
@@ -81,14 +89,19 @@ class _AlunoPendenciasBlockState extends State<AlunoPendenciasBlock> {
 }
 
 class _PendenciaRow extends StatelessWidget {
-  const _PendenciaRow({required this.pendencia, required this.onTap});
+  const _PendenciaRow({
+    required this.pendencia,
+    required this.hoje,
+    required this.onTap,
+  });
 
   final AlunoPendencia pendencia;
+  final DateTime hoje;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final texto = alunoPendenciaTexto(S.of(context), pendencia);
+    final texto = alunoPendenciaTexto(S.of(context), pendencia, hoje: hoje);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;

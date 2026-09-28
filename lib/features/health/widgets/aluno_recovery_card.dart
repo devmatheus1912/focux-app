@@ -15,9 +15,16 @@ import 'recovery_score_ring.dart';
 /// aparece é `alunoProntidaoVisivel`; sem [snapshot], a última prontidão é
 /// antiga e o card convida a sincronizar.
 class AlunoRecoveryCard extends StatelessWidget {
-  const AlunoRecoveryCard({super.key, required this.snapshot});
+  const AlunoRecoveryCard({
+    super.key,
+    required this.snapshot,
+    this.mostrarDica = true,
+  });
 
   final RecoverySnapshot? snapshot;
+
+  /// Falso quando o card de foco já pediu para ir mais leve.
+  final bool mostrarDica;
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +38,9 @@ class AlunoRecoveryCard extends StatelessWidget {
       label:
           snap == null
               ? s.alunoProntidaoSincronizar
-              : s.alunoProntidaoSemantics(
-                snap.recoveryLabel,
-                snap.recoveryHint,
-              ),
+              : mostrarDica
+              ? s.alunoProntidaoSemantics(snap.recoveryLabel, snap.recoveryHint)
+              : s.alunoProntidaoSemanticsRotulo(snap.recoveryLabel),
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
@@ -95,15 +101,17 @@ class AlunoRecoveryCard extends StatelessWidget {
                                   color: chrome.ink,
                                 ),
                               ),
-                              const SizedBox(height: TokensStrip.s1),
-                              Text(
-                                snap.recoveryHint,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: chrome.mute,
+                              if (mostrarDica) ...[
+                                const SizedBox(height: TokensStrip.s1),
+                                Text(
+                                  snap.recoveryHint,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                 ),

@@ -19,16 +19,11 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../chat/utils/aluno_picker_list.dart';
 import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
 import '../widgets/oferta_upsell_editor.dart';
-
-final upsellRepositoryProvider = Provider(
-  (ref) => UpsellRepository(ref.read(apiClientProvider)),
-);
 
 class OfertasUpsellScreen extends ConsumerStatefulWidget {
   const OfertasUpsellScreen({super.key});

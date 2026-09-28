@@ -1,75 +1,7 @@
 part of 'aluno_dashboard_screen.dart';
 
-/// Card de foco: a única superfície com `emphasize` na Home.
-class _TodayFocusCard extends StatelessWidget {
-  final AlunoTodayAction action;
-  final AlunoHomeInsight? insight;
-  final bool prontidaoBaixa;
-  final bool isDark;
-  final VoidCallback onAction;
-
-  const _TodayFocusCard({
-    required this.action,
-    required this.isDark,
-    required this.onAction,
-    this.insight,
-    this.prontidaoBaixa = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final texto = alunoTodayTexto(
-      S.of(context),
-      action,
-      prontidaoBaixa: prontidaoBaixa,
-    );
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.of(context);
-    final mute = chrome.mute;
-
-    return FxStripCard(
-      emphasize: true,
-      glowStrength: 0.08,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            texto.eyebrow,
-            style: FocuxHubTypography.eyebrow(context, color: mute),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            texto.titulo,
-            style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            texto.descricao,
-            style: FocuxHubTypography.bodyMuted(color: mute),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (insight case final insight?) ...[
-            const SizedBox(height: TokensStrip.s3),
-            AlunoHomeInsightLine(insight: insight, onPrimary: mute),
-          ],
-          const SizedBox(height: TokensStrip.s3),
-          FxActionChip(
-            label: texto.cta,
-            accent: primary,
-            isDark: isDark,
-            onPressed: onAction,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// No máximo um aviso abaixo do foco: mensalidade atrasada, depois anamnese
-/// pendente, depois o coach. Tudo vem do BFF da Home — nenhum request a mais.
+/// No máximo um aviso abaixo do foco: atestado, mensalidade atrasada,
+/// anamnese, coach. Tudo vem do BFF da Home — nenhum request a mais.
 class _AlunoHomeAviso extends StatelessWidget {
   final AlunoHomeAviso aviso;
   final AlunoAnamnesePendente? anamnese;
@@ -94,6 +26,7 @@ class _AlunoHomeAviso extends StatelessWidget {
         tone: FxBannerTone.warn,
         onTap: onFinanceiro,
       ),
+      AlunoHomeAviso.atestado ||
       AlunoHomeAviso.anamnese when pendente != null => _anamnese(
         context,
         pendente,

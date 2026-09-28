@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
+import 'package:focux_app/features/dashboard/utils/aluno_dashboard_home_client_cache.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 
@@ -40,11 +41,15 @@ void main() {
     final t0 = DateTime(2026, 8, 16, 12);
     DashboardHomeClientCache.put(bundle, now: t0);
     expect(
-      DashboardHomeClientCache.getIfFresh(now: t0.add(const Duration(seconds: 89))),
+      DashboardHomeClientCache.getIfFresh(
+        now: t0.add(const Duration(seconds: 89)),
+      ),
       isNotNull,
     );
     expect(
-      DashboardHomeClientCache.getIfFresh(now: t0.add(const Duration(seconds: 91))),
+      DashboardHomeClientCache.getIfFresh(
+        now: t0.add(const Duration(seconds: 91)),
+      ),
       isNull,
     );
   });
@@ -69,5 +74,40 @@ void main() {
       ),
       isNull,
     );
+  });
+
+  group('AlunoDashboardHomeClientCache.revalidar', () {
+    tearDown(AlunoDashboardHomeClientCache.clear);
+
+    test('304 renova a idade e devolve cópia nova', () {
+      final t0 = DateTime(2026, 9, 27, 8);
+      final bundle = AlunoDashboardHomeBundle.fromJson({
+        'aluno': {
+          'id': 7,
+          'nome': 'Ana',
+          'email': 'ana@focux.test',
+          'status': 'ATIVO',
+        },
+        'streakAtual': 3,
+      });
+      AlunoDashboardHomeClientCache.put(bundle, now: t0);
+      final t1 = t0.add(const Duration(minutes: 2));
+      final novo = AlunoDashboardHomeClientCache.revalidar(now: t1)!;
+      expect(identical(novo, bundle), isFalse);
+      expect(novo.fetchedAt, t1);
+      expect(novo.aluno.nome, 'Ana');
+      expect(novo.streakAtual, 3);
+      expect(AlunoDashboardHomeClientCache.fetchedAt, t1);
+      expect(
+        AlunoDashboardHomeClientCache.getIfFresh(
+          now: t1.add(const Duration(seconds: 30)),
+        ),
+        same(novo),
+      );
+    });
+
+    test('sem bundle → null', () {
+      expect(AlunoDashboardHomeClientCache.revalidar(), isNull);
+    });
   });
 }

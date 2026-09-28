@@ -369,7 +369,6 @@ class AlunoDashboardHomeBundle {
 
   /// Sessões concluídas na semana ISO (BFF); null em backend antigo ou falha.
   final int? concluidosSemanaIso;
-  final List<double> volumePorSemana;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
   /// Meta da semana em sessões (fichas do rodízio); null sem rodízio — SSOT do BFF.
@@ -409,7 +408,6 @@ class AlunoDashboardHomeBundle {
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
     this.concluidosSemanaIso,
-    this.volumePorSemana = const [],
     this.forcaPorSemana = const [],
     this.recordes = const [],
     this.frequenciaDias,
@@ -421,6 +419,36 @@ class AlunoDashboardHomeBundle {
     this.agendaProximoInicio,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
+
+  /// Mesmo conteúdo com outra idade (resposta 304 do servidor).
+  AlunoDashboardHomeBundle withFetchedAt(DateTime at) =>
+      AlunoDashboardHomeBundle(
+        aluno: aluno,
+        personalBrand: personalBrand,
+        treinos: treinos,
+        historico: historico,
+        medidas: medidas,
+        chat: chat,
+        notificacoesNaoLidas: notificacoesNaoLidas,
+        coachMensagens: coachMensagens,
+        upsellPendentes: upsellPendentes,
+        npsDeveResponder: npsDeveResponder,
+        recovery: recovery,
+        hasWearableHistory: hasWearableHistory,
+        streakAtual: streakAtual,
+        volumeSemanaKg: volumeSemanaKg,
+        concluidosSemanaIso: concluidosSemanaIso,
+        forcaPorSemana: forcaPorSemana,
+        recordes: recordes,
+        frequenciaDias: frequenciaDias,
+        forcaDeltaPercent: forcaDeltaPercent,
+        recoveryStale: recoveryStale,
+        insight: insight,
+        anamnesePendente: anamnesePendente,
+        recursosIndisponiveis: recursosIndisponiveis,
+        agendaProximoInicio: agendaProximoInicio,
+        fetchedAt: at,
+      );
 
   factory AlunoDashboardHomeBundle.fromJson(Map<String, dynamic> json) {
     List<ExecucaoTreino> parseExec(dynamic raw) =>
@@ -533,7 +561,6 @@ class AlunoDashboardHomeBundle {
         final num v => v.toInt(),
         _ => null,
       },
-      volumePorSemana: parseAlunoHomeSeries(json['volumePorSemana']),
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(recordesRaw),
       frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),

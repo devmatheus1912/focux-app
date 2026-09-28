@@ -9,7 +9,13 @@ import 'aluno_pendencias.dart';
 import 'aluno_today_action.dart';
 
 typedef AlunoTodayTexto =
-    ({String eyebrow, String titulo, String descricao, String cta});
+    ({
+      String eyebrow,
+      String titulo,
+      String descricao,
+      String? prazo,
+      String cta,
+    });
 
 AlunoTodayTexto alunoTodayTexto(
   S s,
@@ -17,38 +23,44 @@ AlunoTodayTexto alunoTodayTexto(
   DateTime? hoje,
   bool prontidaoBaixa = false,
 }) => switch (a.mode) {
-      AlunoTodayMode.workoutDone => (
-        eyebrow: s.alunoHojeFeitoEyebrow,
-        titulo: _nomeOu(a.treinoNome, s.alunoHojeFeitoTitulo),
-        descricao: switch (a.proximoTreinoNome?.trim()) {
-          final String proximo when proximo.isNotEmpty => s
-              .alunoHojeFeitoProximo(proximo),
-          _ => s.alunoHojeFeitoDescanso,
-        },
-        cta: s.alunoHojeFeitoCta,
+  AlunoTodayMode.workoutDone => (
+    eyebrow: s.alunoHojeFeitoEyebrow,
+    titulo: _nomeOu(a.treinoNome, s.alunoHojeFeitoTitulo),
+    descricao: switch (a.proximoTreinoNome?.trim()) {
+      final String proximo when proximo.isNotEmpty => s.alunoHojeFeitoProximo(
+        proximo,
       ),
-      AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje, prontidaoBaixa),
-      AlunoTodayMode.awaitingRelease => (
-        eyebrow: s.alunoHojeAguardandoEyebrow,
-        titulo: _nomeOu(a.treinoNome, s.alunoHojeAguardandoTitulo),
-        descricao: s.alunoHojeAguardandoDescricao,
-        cta: s.alunoHojeAguardandoCta,
-      ),
-      AlunoTodayMode.profileSetup => (
-        eyebrow: s.alunoHojePerfilEyebrow,
-        titulo: s.alunoHojePerfilTitulo,
-        descricao: s.alunoHojePerfilDescricao,
-        cta: s.alunoHojePerfilCta,
-      ),
-      AlunoTodayMode.noWorkout => (
-        eyebrow: s.alunoHojeSemTreinoEyebrow,
-        titulo: s.alunoHojeSemTreinoTitulo,
-        descricao: s.alunoHojeSemTreinoDescricao,
-        cta: s.alunoHojeSemTreinoCta,
-      ),
-    };
+      _ => s.alunoHojeFeitoDescanso,
+    },
+    prazo: null,
+    cta: s.alunoHojeFeitoCta,
+  ),
+  AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje, prontidaoBaixa),
+  AlunoTodayMode.awaitingRelease => (
+    eyebrow: s.alunoHojeAguardandoEyebrow,
+    titulo: _nomeOu(a.treinoNome, s.alunoHojeAguardandoTitulo),
+    descricao: s.alunoHojeAguardandoDescricao,
+    prazo: null,
+    cta: s.alunoHojeAguardandoCta,
+  ),
+  AlunoTodayMode.profileSetup => (
+    eyebrow: s.alunoHojePerfilEyebrow,
+    titulo: s.alunoHojePerfilTitulo,
+    descricao: s.alunoHojePerfilDescricao,
+    prazo: null,
+    cta: s.alunoHojePerfilCta,
+  ),
+  AlunoTodayMode.noWorkout => (
+    eyebrow: s.alunoHojeSemTreinoEyebrow,
+    titulo: s.alunoHojeSemTreinoTitulo,
+    descricao: s.alunoHojeSemTreinoDescricao,
+    prazo: null,
+    cta: s.alunoHojeSemTreinoCta,
+  ),
+};
 
 /// Prontidão baixa troca a contagem de exercícios pelo pedido de ir mais leve.
+/// O prazo vai em linha própria para não sumir no corte com fonte grande.
 AlunoTodayTexto _treinoTexto(
   S s,
   AlunoTodayAction a,
@@ -62,14 +74,20 @@ AlunoTodayTexto _treinoTexto(
           : a.exerciseCount > 0
           ? s.alunoHojeTreinoDescricao(a.exerciseCount)
           : s.alunoHojeTreinoDescricaoSemExercicios;
-  final prazo = alunoPrazoTexto(s, a.prazoFim, hoje: hoje);
   return (
     eyebrow: a.comeback ? s.alunoHojeRetomarEyebrow : s.alunoHojeTreinoEyebrow,
     titulo: a.comeback ? s.alunoHojeRetomarTitulo(nome) : nome,
-    descricao: prazo == null ? base : '$base · $prazo',
+    descricao: base,
+    prazo: alunoPrazoTexto(s, a.prazoFim, hoje: hoje),
     cta: a.comeback ? s.alunoHojeRetomarCta : s.alunoHojeTreinoCta,
   );
 }
+
+/// Linha do card de foco para horário de hoje ou amanhã (`alunoHorarioNoFoco`).
+String alunoHorarioFocoTexto(S s, DateTime quando, {required DateTime hoje}) =>
+    alunoDiasAte(quando, hoje) == 0
+        ? s.alunoHojeHorarioHoje(quando)
+        : s.alunoHojeHorarioAmanha(quando);
 
 /// Prazo soft da atribuição: orienta, nunca bloqueia o check-in.
 String? alunoPrazoTexto(S s, DateTime? prazoFim, {DateTime? hoje}) {
@@ -86,39 +104,36 @@ String? alunoPrazoTexto(S s, DateTime? prazoFim, {DateTime? hoje}) {
   AlunoPendencia p, {
   DateTime? hoje,
 }) => switch (p.tipo) {
-      AlunoPendenciaTipo.perfil => (
-        titulo: s.alunoPendenciaPerfilTitulo,
-        detalhe: s.alunoPendenciaPerfilDetalhe,
-      ),
-      AlunoPendenciaTipo.foto => (
-        titulo: s.alunoPendenciaFotoTitulo,
-        detalhe: s.alunoPendenciaFotoDetalhe,
-      ),
-      AlunoPendenciaTipo.medida when p.primeiraVez => (
-        titulo: s.alunoPendenciaMedidaPrimeiraTitulo,
-        detalhe: s.alunoPendenciaMedidaPrimeiraDetalhe,
-      ),
-      AlunoPendenciaTipo.medida => (
-        titulo: s.alunoPendenciaMedidaTitulo,
-        detalhe: s.alunoPendenciaMedidaDetalhe,
-      ),
-      AlunoPendenciaTipo.chat => (
-        titulo: s.alunoPendenciaChatTitulo,
-        detalhe: s.alunoPendenciaChatDetalhe,
-      ),
-      AlunoPendenciaTipo.agenda => (
-        titulo: s.alunoPendenciaAgendaTitulo,
-        detalhe: alunoAgendaQuandoTexto(s, p.quando, hoje: hoje),
-      ),
-    };
+  AlunoPendenciaTipo.perfil => (
+    titulo: s.alunoPendenciaPerfilTitulo,
+    detalhe: s.alunoPendenciaPerfilDetalhe,
+  ),
+  AlunoPendenciaTipo.foto => (
+    titulo: s.alunoPendenciaFotoTitulo,
+    detalhe: s.alunoPendenciaFotoDetalhe,
+  ),
+  AlunoPendenciaTipo.medida when p.primeiraVez => (
+    titulo: s.alunoPendenciaMedidaPrimeiraTitulo,
+    detalhe: s.alunoPendenciaMedidaPrimeiraDetalhe,
+  ),
+  AlunoPendenciaTipo.medida => (
+    titulo: s.alunoPendenciaMedidaTitulo,
+    detalhe: s.alunoPendenciaMedidaDetalhe,
+  ),
+  AlunoPendenciaTipo.chat => (
+    titulo: s.alunoPendenciaChatTitulo,
+    detalhe: s.alunoPendenciaChatNovas(p.quantidade),
+  ),
+  AlunoPendenciaTipo.agenda => (
+    titulo: s.alunoPendenciaAgendaTitulo,
+    detalhe: alunoAgendaQuandoTexto(s, p.quando, hoje: hoje),
+  ),
+};
 
 /// "Hoje às 18:00", "Amanhã às 7:30" ou "qua., 30 de set. às 18:00".
 String alunoAgendaQuandoTexto(S s, DateTime? quando, {DateTime? hoje}) {
   if (quando == null) return s.alunoFerramentaAgendaDetalhe;
-  final agora = hoje ?? DateTime.now();
-  final dia = DateTime(quando.year, quando.month, quando.day);
-  final dias = dia.difference(DateTime(agora.year, agora.month, agora.day)).inDays;
-  return switch (dias) {
+  return switch (alunoDiasAte(quando, hoje ?? DateTime.now())) {
     0 => s.alunoPendenciaAgendaHoje(quando),
     1 => s.alunoPendenciaAgendaAmanha(quando),
     _ => s.alunoPendenciaAgendaDia(quando, quando),

@@ -27,9 +27,7 @@ AlunoTodayAction _treino({
 );
 
 void main() {
-  setUpAll(
-    () => GlobalMaterialLocalizations.delegate.load(const Locale('pt')),
-  );
+  setUpAll(() => GlobalMaterialLocalizations.delegate.load(const Locale('pt')));
 
   group('alunoTodayTexto', () {
     test('todo modo tem texto em pt e en', () {
@@ -83,12 +81,14 @@ void main() {
       expect(t.descricao, isNot(contains('0')));
     });
 
-    test('prazo entra na descrição do treino', () {
+    test('prazo tem linha própria', () {
       final t = alunoTodayTexto(_pt, _treino(prazoFim: _hoje), hoje: _hoje);
-      expect(t.descricao, '6 exercícios no treino de hoje · Vence hoje');
+      expect(t.descricao, '6 exercícios no treino de hoje');
+      expect(t.prazo, 'Vence hoje');
+      expect(alunoTodayTexto(_pt, _treino(), hoje: _hoje).prazo, isNull);
     });
 
-    test('prontidão baixa pede para ir mais leve e mantém o prazo', () {
+    test('prontidão baixa pede treino leve e mantém prazo e CTA', () {
       final t = alunoTodayTexto(
         _pt,
         _treino(prazoFim: _hoje),
@@ -97,9 +97,22 @@ void main() {
       );
       expect(
         t.descricao,
-        'Prontidão baixa hoje: aqueça bem e pegue mais leve. · Vence hoje',
+        'Prontidão baixa: prefira um treino leve ou mobilidade.',
       );
+      expect(t.prazo, 'Vence hoje');
       expect(t.cta, 'Treinar agora');
+    });
+
+    test('horário no foco: hoje ou amanhã', () {
+      final manha = DateTime(2026, 9, 27, 8);
+      expect(
+        alunoHorarioFocoTexto(_pt, DateTime(2026, 9, 27, 18), hoje: manha),
+        'Horário com seu personal: hoje às 18:00',
+      );
+      expect(
+        alunoHorarioFocoTexto(_pt, DateTime(2026, 9, 28, 7, 30), hoje: manha),
+        'Horário com seu personal: amanhã às 07:30',
+      );
     });
 
     test('aguardando sem nome usa o título padrão', () {
@@ -150,13 +163,24 @@ void main() {
       expect(t.titulo, 'Registrar primeira medida');
     });
 
+    test('chat diz quantas mensagens', () {
+      String detalhe(int n) =>
+          alunoPendenciaTexto(
+            _pt,
+            AlunoPendencia(AlunoPendenciaTipo.chat, quantidade: n),
+          ).detalhe;
+      expect(detalhe(1), '1 mensagem nova');
+      expect(detalhe(3), '3 mensagens novas');
+    });
+
     test('agenda mostra quando é o próximo horário', () {
       final manha = DateTime(2026, 9, 27, 8);
-      String quando(DateTime inicio) => alunoPendenciaTexto(
-        _pt,
-        AlunoPendencia(AlunoPendenciaTipo.agenda, quando: inicio),
-        hoje: manha,
-      ).detalhe;
+      String quando(DateTime inicio) =>
+          alunoPendenciaTexto(
+            _pt,
+            AlunoPendencia(AlunoPendenciaTipo.agenda, quando: inicio),
+            hoje: manha,
+          ).detalhe;
       expect(quando(DateTime(2026, 9, 27, 18)), 'Hoje às 18:00');
       expect(quando(DateTime(2026, 9, 28, 7, 30)), 'Amanhã às 07:30');
       expect(quando(DateTime(2026, 9, 30, 18)), endsWith('às 18:00'));

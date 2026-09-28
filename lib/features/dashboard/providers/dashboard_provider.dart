@@ -73,10 +73,10 @@ final alunoDashboardHomeProvider =
             await ref.read(dashboardRepositoryProvider).getAlunoHome();
         if (fresh != null) {
           AlunoDashboardHomeClientCache.put(fresh);
-          ref.invalidateSelf();
         } else {
-          AlunoDashboardHomeClientCache.put(staleHit);
+          AlunoDashboardHomeClientCache.revalidar();
         }
+        ref.invalidateSelf();
       } catch (_) {
         // Mantém stale.
       } finally {
@@ -88,11 +88,8 @@ final alunoDashboardHomeProvider =
 
   final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
   if (fresh == null) {
-    final stale = AlunoDashboardHomeClientCache.getEvenIfStale();
-    if (stale != null) {
-      AlunoDashboardHomeClientCache.put(stale);
-      return stale;
-    }
+    final stale = AlunoDashboardHomeClientCache.revalidar();
+    if (stale != null) return stale;
     final recovered =
         await ref.read(dashboardRepositoryProvider).getAlunoHome();
     if (recovered != null) {
@@ -116,8 +113,11 @@ void invalidateAlunoDashboardHome(WidgetRef ref) {
 /// ETag). Sem rede, lança antes de mexer no cache e a Home segue como estava.
 Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {
   final fresh = await ref.read(dashboardRepositoryProvider).getAlunoHome();
-  final bundle = fresh ?? AlunoDashboardHomeClientCache.getEvenIfStale();
-  if (bundle != null) AlunoDashboardHomeClientCache.put(bundle);
+  if (fresh != null) {
+    AlunoDashboardHomeClientCache.put(fresh);
+  } else {
+    AlunoDashboardHomeClientCache.revalidar();
+  }
   ref.invalidate(alunoDashboardHomeProvider);
   await ref.read(alunoDashboardHomeProvider.future);
 }
