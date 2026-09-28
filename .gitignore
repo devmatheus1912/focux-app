@@ -151,3 +151,7 @@ credentials.json
 # Fastlane local artifacts
 fastlane/report.xml
 fastlane/Preview.html
+
+# Local worktrees and session scratch
+.worktrees/
+.superpowers/
