@@ -11,7 +11,7 @@ Cliente Flutter (Android, iOS e web) para personal trainers e alunos. Conecta-se
 | **Personal** | Operação do negócio, alunos, treinos, agenda, financeiro, IA e crescimento |
 | **Aluno** | Treinos, check-in, evolução, saúde, chat e notificações |
 
-Autenticação JWT, rotas por papel (GoRouter) e design system próprio.
+Autenticação JWT, rotas por papel (GoRouter) e design system próprio. Catálogo de rotas (fonte da verdade): `lib/core/router/` — não duplicar inventário aqui.
 
 ## Estado do projeto
 
