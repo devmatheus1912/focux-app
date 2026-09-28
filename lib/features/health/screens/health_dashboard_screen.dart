@@ -29,6 +29,7 @@ import '../data/health_repository.dart';
 import '../utils/health_dashboard_display.dart';
 import '../widgets/recovery_score_ring.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../l10n/app_localizations.dart';
 
 typedef HealthDashboardCheckAuthorization = Future<bool> Function();
 typedef HealthDashboardLoadTodaySummary = Future<HealthSummary> Function();
@@ -364,6 +365,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
   }
 
   Widget _buildDashboard(bool isDark) {
+    final l10n = S.of(context);
     final s = _summary!;
     final recovery = _recovery;
     final chrome = ShellChrome.forBrightness(context, isDark);
@@ -380,8 +382,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             glowStrength: 0.06,
             semanticsLabel:
                 recovery != null
-                    ? 'Prontidão ${recovery.recoveryScore} por cento. ${recovery.recoveryLabel}'
-                    : 'Prontidão indisponível. Aguardando sincronização com o servidor.',
+                    ? l10n.saudeProntidaoSemantics(
+                      recovery.recoveryScore,
+                      recovery.recoveryLabel,
+                    )
+                    : l10n.saudeProntidaoIndisponivelSemantics,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

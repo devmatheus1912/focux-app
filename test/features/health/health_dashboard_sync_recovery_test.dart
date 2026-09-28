@@ -101,6 +101,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(RecoveryScoreRing), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          'Prontidão indisponível. Aguardando sincronização com o servidor.',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('--'), findsWidgets);
       expect(find.textContaining('%'), findsNothing);
       expect(find.text('12000'), findsOneWidget);
@@ -135,6 +141,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(RecoveryScoreRing), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Prontidão 77 por cento. Pronto para treinar'),
+        findsOneWidget,
+      );
       expect(find.text('77%'), findsOneWidget);
       expect(find.text('Pronto para treinar'), findsOneWidget);
       expect(find.text('12000'), findsOneWidget);
