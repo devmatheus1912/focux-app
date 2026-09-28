@@ -67,15 +67,7 @@ class FxStripCard extends StatelessWidget {
       child: Padding(padding: padding, child: child),
     );
 
-    if (onTap == null) {
-      if (semanticsLabel == null) return surface;
-      return Semantics(
-        label: semanticsLabel,
-        container: true,
-        excludeSemantics: true,
-        child: surface,
-      );
-    }
+    if (onTap == null) return surface;
 
     surface = Material(
       color: Colors.transparent,
@@ -86,12 +78,6 @@ class FxStripCard extends StatelessWidget {
       ),
     );
     if (semanticsLabel == null) return surface;
-    return Semantics(
-      button: true,
-      label: semanticsLabel,
-      container: true,
-      excludeSemantics: true,
-      child: surface,
-    );
+    return Semantics(button: true, label: semanticsLabel, child: surface);
   }
 }

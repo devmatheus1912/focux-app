@@ -203,10 +203,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             _erro = friendlyError(e);
             _syncSoftError = null;
           } else {
-            _syncSoftError = friendlyError(
-              e,
-              fallback: saudeSyncSoftError(),
-            );
+            _syncSoftError = friendlyError(e, fallback: saudeSyncSoftError());
           }
         });
       }
@@ -281,8 +278,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 tooltip: saudeAtualizarLabel(),
                 onTap: _refreshing ? null : _refreshDashboard,
               ),
-            if (_authorized && !_loading)
-              SizedBox(width: FxHelpChrome.gap),
+            if (_authorized && !_loading) SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
               tooltip: 'Como usar Saúde',
               onTap: () {
@@ -380,69 +376,75 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           FxStripCard(
             emphasize: true,
             glowStrength: 0.06,
-            semanticsLabel:
-                recovery != null
-                    ? l10n.saudeProntidaoSemantics(
-                      recovery.recoveryScore,
-                      recovery.recoveryLabel,
-                    )
-                    : l10n.saudeProntidaoIndisponivelSemantics,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (recovery != null)
-                      RecoveryScoreRing(
-                        score: recovery.recoveryScore,
-                        color: primary,
-                        size: 72,
-                      )
-                    else
-                      SizedBox(
-                        width: 72,
-                        height: 72,
-                        child: Center(
-                          child: Text(
-                            '--',
-                            style: FocuxHubTypography.kpi(
-                              color: chrome.mute,
-                              fontSize: FocuxHubTypography.metricLg,
+                Semantics(
+                  container: true,
+                  excludeSemantics: true,
+                  label:
+                      recovery != null
+                          ? l10n.saudeProntidaoSemantics(
+                            recovery.recoveryScore,
+                            recovery.recoveryLabel,
+                          )
+                          : l10n.saudeProntidaoIndisponivelSemantics,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (recovery != null)
+                        RecoveryScoreRing(
+                          score: recovery.recoveryScore,
+                          color: primary,
+                          size: 72,
+                        )
+                      else
+                        SizedBox(
+                          width: 72,
+                          height: 72,
+                          child: Center(
+                            child: Text(
+                              '--',
+                              style: FocuxHubTypography.kpi(
+                                color: chrome.mute,
+                                fontSize: FocuxHubTypography.metricLg,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    const SizedBox(width: TokensStrip.s3),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Prontidão',
-                            style: FocuxHubTypography.chip(chrome.mute),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            recovery != null ? '${recovery.recoveryScore}%' : '--',
-                            style: FocuxHubTypography.kpi(
-                              color: chrome.ink,
-                              fontSize: FocuxHubTypography.metricLg,
+                      const SizedBox(width: TokensStrip.s3),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Prontidão',
+                              style: FocuxHubTypography.chip(chrome.mute),
                             ),
-                          ),
-                          if (recovery != null) ...[
                             const SizedBox(height: 4),
                             Text(
-                              recovery.recoveryLabel,
-                              style: FocuxHubTypography.body(
+                              recovery != null
+                                  ? '${recovery.recoveryScore}%'
+                                  : '--',
+                              style: FocuxHubTypography.kpi(
                                 color: chrome.ink,
-                              ).copyWith(fontWeight: FontWeight.w700),
+                                fontSize: FocuxHubTypography.metricLg,
+                              ),
                             ),
+                            if (recovery != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                recovery.recoveryLabel,
+                                style: FocuxHubTypography.body(
+                                  color: chrome.ink,
+                                ).copyWith(fontWeight: FontWeight.w700),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 if (recovery != null) ...[
                   const SizedBox(height: TokensStrip.s2),
@@ -455,10 +457,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: FxActionChip(
-                    label:
-                        _refreshing
-                            ? 'Atualizando…'
-                            : saudeAtualizarLabel(),
+                    label: _refreshing ? 'Atualizando…' : saudeAtualizarLabel(),
                     accent: primary,
                     isDark: isDark,
                     enabled: !_refreshing,
@@ -470,10 +469,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           ),
           if (_syncSoftError != null) ...[
             const SizedBox(height: TokensStrip.s3),
-            _SaudeSoftSyncBanner(
-              isDark: isDark,
-              message: _syncSoftError!,
-            ),
+            _SaudeSoftSyncBanner(isDark: isDark, message: _syncSoftError!),
           ],
           const SizedBox(height: TokensStrip.s4),
           const DashboardSectionHeader(title: 'Resumo de hoje'),
@@ -544,10 +540,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 }
 
 class _SaudeSoftSyncBanner extends StatelessWidget {
-  const _SaudeSoftSyncBanner({
-    required this.isDark,
-    required this.message,
-  });
+  const _SaudeSoftSyncBanner({required this.isDark, required this.message});
 
   final bool isDark;
   final String message;

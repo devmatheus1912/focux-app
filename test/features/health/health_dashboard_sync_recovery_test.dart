@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/health/health_service.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/screens/health_dashboard_screen.dart';
+import 'package:focux_app/features/health/utils/health_dashboard_display.dart';
 import 'package:focux_app/features/health/widgets/recovery_score_ring.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
@@ -111,6 +112,10 @@ void main() {
       expect(find.textContaining('%'), findsNothing);
       expect(find.text('12000'), findsOneWidget);
       expect(find.text('8,0h'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(saudeAtualizarLabel())),
+        findsWidgets,
+      );
       expect(homeWidgetUpdates, 0);
     },
   );
@@ -148,6 +153,10 @@ void main() {
       expect(find.text('77%'), findsOneWidget);
       expect(find.text('Pronto para treinar'), findsOneWidget);
       expect(find.text('12000'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(saudeAtualizarLabel())),
+        findsWidgets,
+      );
       expect(homeWidgetUpdates, 1);
       expect(syncedScore, 77);
     },
