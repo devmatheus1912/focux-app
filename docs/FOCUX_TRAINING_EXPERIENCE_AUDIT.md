@@ -1,6 +1,6 @@
 # Aluno — aba Treinos (auditoria e referência oficial)
 
-Data: 2026-09-27 · Revisão 1 (fatia 1: hub de Treinos).
+Data: 2026-09-28 · Revisão 2 (fatia 1: hub de Treinos; fatia 2: histórico, seção 14).
 Repos: `focux-app` (principal), `focux-backend` (ajustes aditivos + prévia).
 
 Este documento junta a auditoria da experiência de treino do aluno e a spec
@@ -293,3 +293,84 @@ símbolo; zero chamadores → apaga. Testes do contrato velho atualizados.
   limpos no logout; limites de `cargaKg`.
 - Push de treino novo abrir a prévia.
 - Agenda por dia da semana (não existe no backend).
+
+## 14. Fatia 2: histórico
+
+### 14.1 Auditoria (antes)
+
+- Lista `/checkin/historico` (540 linhas): sessões da mesma ficha viram uma
+  linha ("3 sessões · data") e só a mais recente abre; linha só com data de
+  início e chip de status; busca por texto e chips Todos/Concluído/Em
+  andamento; ajuda escrita para o personal ("Treinos que o aluno já
+  fechou."); textos fixos no código; 3 requests de detalhe em prefetch a cada
+  abertura; estado manual + `HistoricoMemCache`; botão "Carregar mais".
+- Detalhe `/checkin/historico/:id` (596 linhas): eyebrow "Sinal"; tile que
+  alterna "Recordes"/"Exerc."; abas Exercícios/Recordes/Notas; "Treinar de
+  novo" abre a execução direto (sessão sem prévia, 409 com outra aberta);
+  duração vira "—"; textos fixos; estado manual + `HistoricoDetalheMemCache`.
+- Evolução hoje: peso, medidas, recordes. Tendência de volume e força é da
+  fatia 4, então o histórico é um diário de sessões, sem gráfico de período.
+
+### 14.2 Decisões aprovadas
+
+| Tema | Decisão |
+|---|---|
+| Escopo | Lista + detalhe da sessão |
+| Organização | Uma linha por sessão, agrupada por semana ISO (segunda a domingo) |
+| Filtro | Chips das fichas atuais (vindas do agregado da Home); sai a busca |
+| Status | Só sessões concluídas; a sessão aberta vive no hub |
+| Linha | Igual aos Últimos do hub: nome, dia de conclusão, duração real ou "N exercícios feitos" / "Sem séries registradas" |
+| Treinar de novo | Abre a prévia |
+| Abordagem | A: endpoint atual + `treinoId` + `exerciciosConcluidos`; semanas no app |
+
+### 14.3 Solução
+
+**Lista.** App bar "Histórico" com frescor, sem ajuda. Chips "Todos · Treino A
+· …" só com 2+ fichas. Cabeçalhos "Esta semana", "Semana passada", "Semana de
+14 set"; "· N treinos" só quando a semana veio inteira (a última semana
+carregada, com página seguinte, fica sem número). Linha =
+`TreinoRecenteRow`. Próxima página carrega perto do fim (linha de skeleton).
+Estados: skeleton com leitura própria, erro com retry, vazio sem filtro
+("Ver treinos"), vazio com filtro ("Ver todos"), puxar para atualizar.
+
+**Detalhe.** Subtítulo "Concluído · qua, 24 de set" (data de conclusão).
+Resumo: status ("Concluído" / "Concluído sem séries"), duração só se
+confiável, frase de comparação do backend quando houver. Tiles fixos: Volume
+(só > 0), Séries "N de M", Exercícios "N de M". Uma rolagem: Exercícios,
+Recordes (se houver), Notas (se houver). Botão fixo: concluída → "Treinar de
+novo" abre a prévia, some se a ficha saiu do plano; aberta (link antigo ou
+push) → "Continuar treino". Estados: skeleton, erro, 404 ("Voltar ao
+histórico").
+
+**Backend.** `GET /api/checkin/historico?cursor&size&status&treinoId`: sai
+`q` (Spring ignora parâmetro desconhecido; builds antigos só perdem a busca).
+Item da lista ganha `exerciciosConcluidos` (uma query agrupada por página).
+Dono continua pelo `alunoId` do token.
+
+**App.** Lista em provider de paginação por ficha; detalhe e evolução da
+sessão em providers `family`. Regra pura em `utils/`
+(`agruparHistoricoPorSemana`, textos). Texto novo só em `app_pt.arb`.
+
+**Mortos.** `historico_mem_cache.dart` (as duas caches), prefetch, busca,
+chips de status, `historicoCollapseSamePlan`, `historicoGroupByStatus`,
+`HistoricoStatusChip`, `historicoStatusQuery`, `historicoClusterSubtitle`,
+abas do detalhe, os dois botões de ajuda e widgets privados do layout antigo.
+
+### 14.4 Contrato fechado (fatia 2)
+
+| # | Critério | Prova |
+|---|---|---|
+| H1 | Cada sessão concluída tem a própria linha e abre o próprio detalhe | widget |
+| H2 | Semana ISO local; "Esta semana" / "Semana passada" / "Semana de d MMM" | unit |
+| H3 | Contagem da semana só quando completa | unit + widget |
+| H4 | Linha igual aos Últimos do hub (dia de conclusão, duração 5 min–8 h, exercícios) | widget |
+| H5 | Chips das fichas só com 2+ fichas; filtro vai como `treinoId` | widget + gradle |
+| H6 | Só concluídas na lista | widget + gradle |
+| H7 | Próxima página carrega sozinha; sem "Carregar mais" | widget |
+| H8 | Estados da lista: carregando, erro, vazio, vazio filtrado | widget |
+| H9 | Detalhe sem "Sinal" e sem abas; Recordes e Notas somem sem dado | widget |
+| H10 | "Treinar de novo" abre a prévia; some com a ficha fora do plano | widget |
+| H11 | Detalhe: carregando, erro, 404 | widget |
+| H12 | BE: `treinoId` filtra; ficha de outro aluno volta vazio; `exerciciosConcluidos` certo; `q` antigo não quebra | gradle |
+| H13 | Texto em `app_pt.arb`; alvos ≥ 48 dp; fonte 2x sem corte | widget + grep |
+| H14 | Mortos de 14.3 apagados; analyze, órfãos, `flutter test`, `gradlew test`, gitleaks verdes | comandos |
