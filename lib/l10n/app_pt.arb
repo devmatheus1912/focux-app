@@ -216,6 +216,8 @@
   "alunoSemanaTreinosLabel": "Treinos na semana",
   "alunoSemanaTreinosValor": "{feitos} de {meta}",
   "@alunoSemanaTreinosValor": { "placeholders": { "feitos": { "type": "int" }, "meta": { "type": "int" } } },
+  "alunoSemanaTreinosFeitos": "{feitos, plural, =1{1 treino} other{{feitos} treinos}}",
+  "@alunoSemanaTreinosFeitos": { "placeholders": { "feitos": { "type": "int" } } },
   "alunoSemanaSequenciaLabel": "Sequência",
   "alunoSemanaSequenciaValor": "{semanas, plural, =0{Sem sequência} =1{1 semana} other{{semanas} semanas}}",
   "@alunoSemanaSequenciaValor": { "placeholders": { "semanas": { "type": "int" } } },

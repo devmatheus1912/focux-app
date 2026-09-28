@@ -224,7 +224,7 @@ void main() {
         streakSemanas: 1,
         volumeKg: 12445,
       );
-      expect(alunoTreinosSemanaValor(_pt, w), '6');
+      expect(alunoTreinosSemanaValor(_pt, w), '6 treinos');
       expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 2 batida');
       expect(
         alunoWeekSemantics(_pt, w),
@@ -240,7 +240,7 @@ void main() {
         streakSemanas: 2,
         volumeKg: null,
       );
-      expect(alunoTreinosSemanaValor(_pt, w), '3');
+      expect(alunoTreinosSemanaValor(_pt, w), '3 treinos');
       expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 3 batida');
     });
 

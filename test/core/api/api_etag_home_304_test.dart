@@ -113,7 +113,6 @@ Map<String, dynamic> _minimalAlunoHomeJson() => {
       'concluidoEm': '2026-09-18T11:00:00Z',
     },
   ],
-  'historico': [],
   'medidas': [],
   'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
   'notificacoesNaoLidas': 0,

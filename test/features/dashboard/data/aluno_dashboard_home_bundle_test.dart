@@ -26,7 +26,6 @@ Map<String, dynamic> _payload() => {
       'exercicios': [],
     },
   ],
-  'historico': [],
   'historicoResumo': [
     {
       'id': 90,
@@ -133,7 +132,6 @@ void main() {
           _payload()
             ..remove('personalBrand')
             ..remove('treinos')
-            ..remove('historico')
             ..remove('historicoResumo')
             ..remove('medidas')
             ..remove('chat')

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/auth/session_invalidator.dart';
 import 'package:focux_app/core/money/fx_money.dart';
+import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
@@ -174,7 +175,9 @@ void main() {
       );
     });
 
-    testWidgets('meta superada mostra "6" e "META 2 BATIDA"', (tester) async {
+    testWidgets('meta superada mostra "6 treinos" e "META 2 BATIDA"', (
+      tester,
+    ) async {
       await _pump(
         tester,
         const AlunoWeekSummaryCard(
@@ -186,7 +189,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('6'), findsOneWidget);
+      expect(find.text('6 treinos'), findsOneWidget);
       expect(find.text('META 2 BATIDA'), findsOneWidget);
       expect(find.text('6 de 2'), findsNothing);
       expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
@@ -464,6 +467,11 @@ void main() {
       expect(find.text('Força (1RM est.)'), findsNothing);
       expect(find.textContaining('Sua curva'), findsNothing);
       expect(find.text('Supino · 50 kg'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byType(OperationalMetricTile)).dx,
+        tester.getTopLeft(find.byType(AlunoEvolutionCard)).dx,
+        reason: 'sem gráfico, o tile não fica dentro de outro card',
+      );
     });
 
     testWidgets('recorde com nome longo mostra a carga', (tester) async {

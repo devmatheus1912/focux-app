@@ -143,7 +143,8 @@ String alunoAgendaQuandoTexto(S s, DateTime? quando, {DateTime? hoje}) {
 String alunoTreinosSemanaValor(S s, AlunoWeekSummary w) {
   final feitos = w.feitos ?? 0;
   final meta = w.meta;
-  if (meta == null || w.metaAtingida) return '$feitos';
+  if (meta == null) return '$feitos';
+  if (w.metaAtingida) return s.alunoSemanaTreinosFeitos(feitos);
   return s.alunoSemanaTreinosValor(feitos, meta);
 }
 

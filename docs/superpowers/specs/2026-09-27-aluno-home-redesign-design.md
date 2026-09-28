@@ -56,7 +56,7 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
 5. **Sua semana — como estou.** Só depois do primeiro treino concluído
    (`jaTreinou`). Sessões contra a meta ("2 de 3"), sequência em semanas e
    volume da semana. Meta batida (§3.7) marca o tile de sessões com verde e
-   check, mostra só o número feito e troca o rótulo por "Meta {n} batida".
+   check, mostra "{feitos} treinos" e troca o rótulo por "Meta {n} batida".
    Fonte acima de 1,3x empilha os tiles (`alunoSemanaEmpilhada`).
 6. **Prontidão.** `AlunoRecoveryCard` (`alunoProntidaoVisivel`): anel, rótulo
    e dica do servidor (sem corte). Com prontidão baixa, sem a dica (o foco já
@@ -66,7 +66,8 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
 7. **Evolução — estou evoluindo.** Só com `jaTreinou`. Linha de força (1RM
    est.) das 8 semanas, variação da força e o último recorde ("Novo recorde"
    até 7 dias). A linha só aparece com 2 ou mais semanas com força; com
-   menos, o card fica só com os tiles (sem área vazia). Um tile por linha; o
+   menos, os tiles aparecem soltos, sem o card de fora (tile já é card; nada
+   de card em card). Um tile por linha; o
    recorde tem até 2 linhas para o nome do exercício não esconder a carga e
    começa com maiúscula ("Supino · 50 kg"), mesmo que o servidor mande
    minúsculo. Sem volume (já está em Sua semana). O card não abre nada
@@ -110,10 +111,10 @@ ETag, 4 grupos read-only em paralelo):
 - Escritas que mudam a Home limpam o cache do aluno
   (`AlunoDashboardHomeCacheEvictor`): agenda, mensalidade, treino atribuído,
   status, coach, oferta respondida.
-- **Deprecated** no OpenAPI: `agendaProxima`, `volumeMesKg` e
-  `volumePorSemana`. O app atual não lê; builds antigos da loja leem. Saem
-  quando a versão mínima subir.
-- `historico` legado segue `[]`. Sem tabela nova, sem migration.
+- `agendaProxima`, `volumeMesKg`, `volumePorSemana` e `historico` saíram do
+  payload (o app só existe no TestFlight e nenhum build lê esses campos).
+  Histórico completo só em `GET /api/checkin/historico`. Sem tabela nova,
+  sem migration.
 
 ### 2.2 App — fonte de cada bloco
 
@@ -204,7 +205,7 @@ cabeçalho e rotas das pendências visíveis.
 
 ### 3.7 Meta semanal batida
 
-`feitos >= meta` (com meta definida). Valor = `feitos` ("6"), rótulo =
+`feitos >= meta` (com meta definida). Valor = "{feitos} treinos" ("6 treinos"), rótulo =
 "Meta {meta} batida", verde + check. Leitor de tela: "{feitos} treinos nesta
 semana, meta de {meta} batida". Abaixo da meta, valor "{feitos} de {meta}" e
 rótulo "Treinos na semana". Sem meta, só o número.
@@ -303,7 +304,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C12 | Agenda: só depois de amanhã e não visto; visto por horário; relido ao voltar | unit + contrato |
 | C13 | Nenhuma pendência repete o destino do foco | unit |
 | C14 | Chat mostra a quantidade de mensagens | unit |
-| C15 | Evolução só com força; volume só em Sua semana; linha só com 2+ semanas; recorde com maiúscula | unit + widget |
+| C15 | Evolução só com força; volume só em Sua semana; linha só com 2+ semanas; sem linha, tiles sem card de fora; recorde com maiúscula | unit + widget |
 | C16 | Atalhos sem topo, sem dock, sem recurso bloqueado; anamnese por último; "Atalhos" / "Ver todos"; vazio → só "Ver todos" | unit + widget |
 | C17 | Oferta confirma antes; sem `FilledButton` | contrato |
 | C18 | Volta do background (≥ 2 min) recarrega a Home do aluno | contrato `main.dart` |
@@ -314,16 +315,14 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C23 | Movimento reduzido, alvos 48 dp, leitura agrupada | widget |
 | C24 | `taskId` iguais; título da agenda "Conferir próximo horário"; VIEWED só visível | unit |
 | C25 | Só PT-BR; en/es sem chave fora do pt | `arb_parity_test` |
-| C26 | BE: `agendaProxima`, `volumeMesKg` e `volumePorSemana` deprecated no OpenAPI; `gradlew test` verde | gradle |
+| C26 | BE: `agendaProxima`, `volumeMesKg`, `volumePorSemana` e `historico` fora do contrato; `gradlew test` verde | gradle |
 | C27 | `dart analyze --fatal-warnings --fatal-infos`, órfãos, `flutter test`, gitleaks verdes | comandos |
-| C28 | Meta batida (`feitos >= meta`): valor só o número, rótulo "Meta {n} batida", frase do leitor sem "6 de 2" | unit + widget |
+| C28 | Meta batida (`feitos >= meta`): valor "{feitos} treinos", rótulo "Meta {n} batida", frase do leitor sem "6 de 2" | unit + widget |
 | C29 | `FxActionChip`: cápsula 36 dp, área 48 dp, toque na margem aciona, rótulo 13 px, 2 linhas sem corte | widget |
 
 ## 9. Fora de escopo
 
 - Tela de Evolução do aluno (spec 3b).
 - Mover foco ou pendências para o servidor.
-- Remover `agendaProxima`, `volumeMesKg`, `volumePorSemana` e `historico` do
-  payload (depende da versão mínima do app).
 - Mudar regras do insight, da sequência ou do cálculo de prontidão.
 - Meta semanal definida pelo personal.

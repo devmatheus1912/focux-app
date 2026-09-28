@@ -69,48 +69,58 @@ class AlunoEvolutionCard extends StatelessWidget {
         ),
     ];
 
+    // Um tile por linha: nome do exercício + carga não cabem em meia largura.
+    final tileRows = [
+      for (var i = 0; i < tiles.length; i++) ...[
+        if (i > 0) const SizedBox(height: TokensStrip.s2),
+        SizedBox(width: double.infinity, child: tiles[i]),
+      ],
+    ];
+
+    // Tile já é card: sem gráfico, os tiles ficam soltos (nada de card em card).
+    final body =
+        !hasChart && tiles.isNotEmpty
+            ? Column(children: tileRows)
+            : Container(
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              decoration: fxListCardDecoration(context, accent: primary),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!hasChart)
+                    Text(
+                      alunoTrendPontos(forcaPorSemana) == 1
+                          ? s.alunoEvolucaoCurvaEmBreve
+                          : s.alunoEvolucaoVazio,
+                      style: FocuxHubTypography.bodyMuted(color: mute),
+                    )
+                  else ...[
+                    _TrendChart(
+                      data: forcaPorSemana,
+                      color: forcaColor,
+                      semanticsLabel: s.alunoEvolucaoGraficoSemantics(
+                        forcaPorSemana.length,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    _LegendDot(
+                      color: forcaColor,
+                      label: s.alunoEvolucaoLegendaForca,
+                    ),
+                    if (tiles.isNotEmpty)
+                      const SizedBox(height: TokensStrip.s3),
+                    ...tileRows,
+                  ],
+                ],
+              ),
+            );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardSectionHeader(title: s.alunoEvolucaoTitulo),
         const SizedBox(height: TokensStrip.s2),
-        Container(
-          padding: const EdgeInsets.all(TokensStrip.s4),
-          decoration: fxListCardDecoration(context, accent: primary),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!hasChart && tiles.isEmpty)
-                Text(
-                  alunoTrendPontos(forcaPorSemana) == 1
-                      ? s.alunoEvolucaoCurvaEmBreve
-                      : s.alunoEvolucaoVazio,
-                  style: FocuxHubTypography.bodyMuted(color: mute),
-                ),
-              if (hasChart) ...[
-                _TrendChart(
-                  data: forcaPorSemana,
-                  color: forcaColor,
-                  semanticsLabel: s.alunoEvolucaoGraficoSemantics(
-                    forcaPorSemana.length,
-                  ),
-                ),
-                const SizedBox(height: TokensStrip.s2),
-                _LegendDot(
-                  color: forcaColor,
-                  label: s.alunoEvolucaoLegendaForca,
-                ),
-              ],
-              // Um tile por linha: nome do exercício + carga não cabem em
-              // meia largura.
-              for (var i = 0; i < tiles.length; i++) ...[
-                if (i > 0 || hasChart)
-                  SizedBox(height: i > 0 ? TokensStrip.s2 : TokensStrip.s3),
-                SizedBox(width: double.infinity, child: tiles[i]),
-              ],
-            ],
-          ),
-        ),
+        body,
       ],
     );
   }

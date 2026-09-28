@@ -49,7 +49,6 @@ AlunoDashboardHomeBundle _home({
   'concluidosSemanaIso': 2,
   'frequenciaDias': 3,
   'hasWearableHistory': false,
-  'volumePorSemana': [0, 1000, 1500, 0, 2000, 2500, 3000, 3200],
   'forcaPorSemana': [0, 60, 62, 0, 64, 66, 70, 72],
   'forcaDeltaPercent': 2.9,
   'anamnesePendente': anamnesePendente,

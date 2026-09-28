@@ -128,7 +128,6 @@ AlunoDashboardHomeBundle _minimalAlunoHome() {
     'aluno': {'id': 1, 'nome': 'A', 'email': 'a@t.com', 'status': 'ATIVO'},
     'personalBrand': {},
     'treinos': [],
-    'historico': [],
     'medidas': [],
     'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
   });
