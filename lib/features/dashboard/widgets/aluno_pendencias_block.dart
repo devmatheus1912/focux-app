@@ -139,15 +139,13 @@ class _PendenciaRow extends StatelessWidget {
                       Text(
                         texto.titulo,
                         style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         texto.detalhe,
                         style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

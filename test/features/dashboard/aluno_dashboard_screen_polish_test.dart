@@ -88,7 +88,9 @@ void main() {
         ).readAsStringSync();
     final main = File('lib/main.dart').readAsStringSync();
 
-    expect(screen, contains('memo.\$3 == dia'));
+    expect(screen, contains('now.isBefore(memo.validaAte)'));
+    expect(screen, contains('_agendarRelogio(validaAte.difference(now))'));
+    expect(screen, contains('_relogio?.cancel();'));
     expect(screen, contains('_viewFor(home, now)'));
     expect(screen, contains('hoje: now'));
     expect(

@@ -39,14 +39,17 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
    - Descrição até 2 linhas. Prazo em linha própria (até 2 linhas): nunca é
      cortado pela descrição.
    - Próximo horário: linha só de leitura "Horário com seu personal: hoje às
-     18:00" (ou "amanhã às 07:30") quando `agendaProximoInicio` é hoje ou amanhã.
-   - Prontidão baixa (§3.4): a descrição vira "Prontidão baixa: prefira um
-     treino leve ou mobilidade." O CTA não muda.
+     18:00" (ou "amanhã às 07:30") quando `agendaProximoInicio` ainda vai
+     acontecer, hoje ou amanhã.
+   - Prontidão baixa (§3.4): a descrição vira "Corpo pedindo descanso: se
+     treinar, vá leve ou faça mobilidade." O CTA não muda.
 3. **Aviso único.** No máximo um banner (§3.3). O coach passa por
    `alunoCoachVisiveis`: na retomada saem `SEM_TREINO_5D` e `STREAK_QUEBRADO`;
    com prontidão visível sai `SONO_BAIXO`. "Entendi" some com a mensagem na
    hora e só recarrega a Home quando a última é lida.
 4. **Pendências — próximo passo.** Até 3 itens (§3.2). Lista vazia → some.
+   Título até 2 linhas e detalhe sem corte: com fonte 2x a hora do horário
+   continua visível.
 5. **Sua semana — como estou.** Só depois do primeiro treino concluído
    (`jaTreinou`). Sessões contra a meta ("2 de 3"), sequência em semanas e
    volume da semana. Meta batida marca o tile de sessões com verde e check.
@@ -95,8 +98,9 @@ ETag, 4 grupos read-only em paralelo):
 - Escritas que mudam a Home limpam o cache do aluno
   (`AlunoDashboardHomeCacheEvictor`): agenda, mensalidade, treino atribuído,
   status, coach, oferta respondida.
-- **Deprecated** no OpenAPI: `agendaProxima` e `volumeMesKg`. O app atual não
-  lê; builds antigos da loja leem. Saem quando a versão mínima subir.
+- **Deprecated** no OpenAPI: `agendaProxima`, `volumeMesKg` e
+  `volumePorSemana`. O app atual não lê; builds antigos da loja leem. Saem
+  quando a versão mínima subir.
 - `historico` legado segue `[]`. Sem tabela nova, sem migration.
 
 ### 2.2 App — fonte de cada bloco
@@ -173,8 +177,8 @@ Foco em `workoutReady`, prontidão visível, snapshot de hoje e
 
 ### 3.5 Próximo horário no foco — `alunoHorarioNoFoco`
 
-`agendaProximoInicio` cujo dia é hoje ou amanhã (relativo a `now`). Fora
-disso → `null`.
+`agendaProximoInicio` depois de `now` e com dia hoje ou amanhã. Fora disso
+(inclusive o horário de hoje que já passou) → `null`.
 
 ### 3.6 Atalhos
 
@@ -185,9 +189,12 @@ cabeçalho e rotas das pendências visíveis.
 ## 4. Estado, dados e frescor
 
 - **Volta do background:** pausa de 2 min ou mais recarrega a Home do aluno
-  junto com a do personal (`main.dart`); acima do TTL limpa o cache do aluno.
-- **Virada do dia:** o memo da view usa (bundle, horário visto, dia de hoje).
-  O mesmo bundle no dia seguinte recalcula foco, horário, recorde e prazo.
+  junto com a do personal (`main.dart`). Não limpa o cache: pinta o bundle
+  anterior e revalida com ETag (304 barato).
+- **Relógio da tela:** o memo da view usa (bundle, horário visto) e vale até
+  `alunoHomeViewValidaAte`: o horário do foco ou a meia-noite, o que vier
+  antes. Um timer redesenha a Home nesse momento, então com a tela aberta o
+  horário que passou some e o dia seguinte recalcula foco, recorde e prazo.
 - **Um relógio por build:** a tela passa `now` para `buildAlunoHomeView` e
   para os textos; nenhum widget decide texto com `DateTime.now()` próprio.
 - **304:** o bundle reaproveitado ganha `fetchedAt` = agora (`withFetchedAt`).
@@ -250,9 +257,9 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C2 | Só o foco tem `emphasize` | contrato visual |
 | C3 | Bloco sem dado some e não soma espaço | contrato visual |
 | C4 | Foco com 5 modos na prioridade de §3.1; financeiro não é modo | unit |
-| C5 | Linha do próximo horário só hoje ou amanhã | unit + widget |
+| C5 | Linha do próximo horário só hoje ou amanhã e ainda por vir | unit + widget |
 | C6 | Prontidão baixa: texto no foco, CTA igual, card sem dica | unit + widget |
-| C7 | Prazo visível com fonte 2x | widget |
+| C7 | Prazo do foco e hora da pendência visíveis com fonte 2x | widget |
 | C8 | Aviso: atestado, financeiro, anamnese, coach | unit |
 | C9 | Mensalidade atrasada: treino no foco, ofertas vazias | unit |
 | C10 | Pendências: chat, agenda, medida, perfil; no máximo 3 | unit |
@@ -264,7 +271,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C16 | Atalhos sem topo, sem dock, sem recurso bloqueado; vazio → só catálogo | unit + widget |
 | C17 | Oferta confirma antes; sem `FilledButton` | contrato |
 | C18 | Volta do background (≥ 2 min) recarrega a Home do aluno | contrato `main.dart` |
-| C19 | Mesmo bundle no dia seguinte: "feito hoje" vira treino pronto | unit |
+| C19 | Mesmo bundle no dia seguinte: "feito hoje" vira treino pronto; a view vale até o horário do foco ou a meia-noite | unit |
 | C20 | 304 atualiza `fetchedAt` | unit |
 | C21 | Subtítulo não pisca e segue offline | contrato |
 | C22 | Refresh offline mantém dados e avisa | contrato |
@@ -278,7 +285,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 
 - Tela de Evolução do aluno (spec 3b).
 - Mover foco ou pendências para o servidor.
-- Remover `agendaProxima`, `volumeMesKg` e `historico` do payload (depende da
-  versão mínima do app).
+- Remover `agendaProxima`, `volumeMesKg`, `volumePorSemana` e `historico` do
+  payload (depende da versão mínima do app).
 - Mudar regras do insight, da sequência ou do cálculo de prontidão.
 - Meta semanal definida pelo personal.

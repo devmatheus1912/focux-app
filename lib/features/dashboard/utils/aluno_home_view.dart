@@ -188,11 +188,20 @@ AlunoHomeView buildAlunoHomeView(
   );
 }
 
-/// Hoje ou amanhã: vai para o card de foco em vez de virar pendência.
+/// Hoje (ainda por vir) ou amanhã: vai para o card de foco em vez de virar
+/// pendência.
 DateTime? alunoHorarioNoFoco(DateTime? inicio, DateTime now) {
-  if (inicio == null) return null;
-  final dias = alunoDiasAte(inicio, now);
-  return dias >= 0 && dias < alunoAgendaPendenciaDesdeDias ? inicio : null;
+  if (inicio == null || !inicio.isAfter(now)) return null;
+  return alunoDiasAte(inicio, now) < alunoAgendaPendenciaDesdeDias
+      ? inicio
+      : null;
+}
+
+/// A view muda sozinha quando o horário do foco passa ou o dia vira.
+DateTime alunoHomeViewValidaAte(AlunoHomeView view, DateTime now) {
+  final meiaNoite = DateTime(now.year, now.month, now.day + 1);
+  final horario = view.horarioNoFoco;
+  return horario != null && horario.isBefore(meiaNoite) ? horario : meiaNoite;
 }
 
 AlunoHomeInsight? alunoInsightNoFoco(
@@ -204,7 +213,8 @@ AlunoHomeInsight? alunoInsightNoFoco(
         ? null
         : insight;
 
-/// Mesmo corte de "Recuperação parcial" do `RecoveryScoreCalculator` do backend.
+/// Abaixo daqui o `RecoveryScoreCalculator` do backend rotula "Descanso
+/// recomendado".
 const alunoProntidaoBaixaAbaixoDe = 45;
 
 bool alunoProntidaoBaixa({

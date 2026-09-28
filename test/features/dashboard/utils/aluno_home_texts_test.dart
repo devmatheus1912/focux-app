@@ -97,7 +97,7 @@ void main() {
       );
       expect(
         t.descricao,
-        'Prontidão baixa: prefira um treino leve ou mobilidade.',
+        'Corpo pedindo descanso: se treinar, vá leve ou faça mobilidade.',
       );
       expect(t.prazo, 'Vence hoje');
       expect(t.cta, 'Treinar agora');

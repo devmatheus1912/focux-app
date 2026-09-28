@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/auth/session_invalidator.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
@@ -204,6 +205,39 @@ void main() {
       await tester.tap(find.text('Seu próximo horário'));
       expect(tocada?.tipo, AlunoPendenciaTipo.agenda);
     });
+
+    testWidgets('hora do horário cabe com fonte 2x em tela estreita', (
+      tester,
+    ) async {
+      tester.view
+        ..physicalSize = const Size(320, 900)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _pump(
+        tester,
+        AlunoPendenciasBlock(
+          pendencias: [
+            AlunoPendencia(
+              AlunoPendenciaTipo.agenda,
+              quando: DateTime(2026, 9, 30, 18),
+            ),
+          ],
+          hoje: DateTime(2026, 9, 27),
+          onTap: (_) {},
+        ),
+      );
+      for (final texto in [
+        find.text('Seu próximo horário'),
+        find.textContaining('18:00'),
+      ]) {
+        expect(
+          tester.renderObject<RenderParagraph>(texto).didExceedMaxLines,
+          isFalse,
+        );
+      }
+    });
   });
 
   group('AlunoTodayFocusCard', () {
@@ -235,7 +269,9 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text('Prontidão baixa: prefira um treino leve ou mobilidade.'),
+        find.text(
+          'Corpo pedindo descanso: se treinar, vá leve ou faça mobilidade.',
+        ),
         findsOneWidget,
       );
       expect(find.text('Treinar agora'), findsOneWidget);

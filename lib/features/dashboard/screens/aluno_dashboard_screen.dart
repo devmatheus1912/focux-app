@@ -67,12 +67,14 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// Null até ler as prefs: a pendência de agenda fica fora até lá, sem
   /// piscar nem mandar VIEWED de algo já resolvido.
   ({String? inicio})? _agendaVista;
-  (
-    AlunoDashboardHomeBundle,
-    ({String? inicio})?,
-    DateTime,
-    AlunoHomeView,
-  )? _viewMemo;
+  ({
+    AlunoDashboardHomeBundle home,
+    ({String? inicio})? vista,
+    DateTime validaAte,
+    AlunoHomeView view,
+  })?
+  _viewMemo;
+  Timer? _relogio;
 
   @override
   void initState() {
@@ -97,6 +99,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   @override
   void dispose() {
     _router?.removeListener(_onRota);
+    _relogio?.cancel();
     super.dispose();
   }
 
@@ -112,16 +115,16 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     _agendarNps();
   }
 
-  /// Memo por dia: o mesmo bundle depois da meia-noite recalcula o foco.
+  /// Memo até [alunoHomeViewValidaAte]: com a Home aberta, o horário que passa
+  /// e a virada do dia redesenham a tela sem esperar outro rebuild.
   AlunoHomeView _viewFor(AlunoDashboardHomeBundle home, DateTime now) {
     final memo = _viewMemo;
     final vista = _agendaVista;
-    final dia = DateUtils.dateOnly(now);
     if (memo != null &&
-        identical(memo.$1, home) &&
-        memo.$2 == vista &&
-        memo.$3 == dia) {
-      return memo.$4;
+        identical(memo.home, home) &&
+        memo.vista == vista &&
+        now.isBefore(memo.validaAte)) {
+      return memo.view;
     }
     final view = buildAlunoHomeView(
       home,
@@ -130,8 +133,18 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           vista == null ||
           alunoAgendaVista(vista.inicio, home.agendaProximoInicio),
     );
-    _viewMemo = (home, vista, dia, view);
+    final validaAte = alunoHomeViewValidaAte(view, now);
+    _viewMemo = (home: home, vista: vista, validaAte: validaAte, view: view);
+    _agendarRelogio(validaAte.difference(now));
     return view;
+  }
+
+  void _agendarRelogio(Duration ate) {
+    _relogio?.cancel();
+    // Margem: o rebuild tem que cair depois do limite, senão o memo ainda vale.
+    _relogio = Timer(ate + const Duration(seconds: 1), () {
+      if (mounted) setState(() {});
+    });
   }
 
   /// NPS só com o treino do dia feito: é o `POS_TREINO` que o backend grava,

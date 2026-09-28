@@ -238,6 +238,8 @@ void main() {
       expect(alunoHorarioNoFoco(DateTime(2026, 9, 28, 7), agora), isNotNull);
       expect(alunoHorarioNoFoco(DateTime(2026, 9, 29, 7), agora), isNull);
       expect(alunoHorarioNoFoco(DateTime(2026, 9, 26, 7), agora), isNull);
+      expect(alunoHorarioNoFoco(DateTime(2026, 9, 27, 7), agora), isNull);
+      expect(alunoHorarioNoFoco(agora, agora), isNull);
       expect(alunoHorarioNoFoco(null, agora), isNull);
       final view = buildAlunoHomeView(
         _bundle(agendaInicio: '2026-09-27T18:00:00'),
@@ -249,6 +251,23 @@ void main() {
         view.pendenciasAbertas.map((p) => p.tipo),
         isNot(contains(AlunoPendenciaTipo.agenda)),
       );
+    });
+
+    test('view vale até o horário do foco ou a meia-noite', () {
+      final agora = DateTime(2026, 9, 27, 8);
+      final meiaNoite = DateTime(2026, 9, 28);
+      DateTime validaAte(String? inicio) => alunoHomeViewValidaAte(
+        buildAlunoHomeView(
+          _bundle(agendaInicio: inicio),
+          agendaReviewed: true,
+          now: agora,
+        ),
+        agora,
+      );
+      expect(validaAte('2026-09-27T18:00:00'), DateTime(2026, 9, 27, 18));
+      expect(validaAte('2026-09-28T07:00:00'), meiaNoite);
+      expect(validaAte('2026-09-27T07:00:00'), meiaNoite);
+      expect(validaAte(null), meiaNoite);
     });
 
     test('mesmo bundle no dia seguinte: feito hoje vira treino pronto', () {

@@ -139,13 +139,6 @@ class UpsellRepository {
     return EnvioOferta.fromJson(r.data as Map<String, dynamic>);
   }
 
-  Future<List<AlunoOferta>> listarMeusPendentes() async {
-    final r = await _dio.get('/api/upsell/me/pendentes');
-    return (r.data as List<dynamic>)
-        .map((e) => AlunoOferta.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
   Future<void> responder(int alunoOfertaId, String resposta) async {
     await _dio.post(
       '/api/upsell/aluno-oferta/$alunoOfertaId/resposta',
