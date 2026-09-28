@@ -1,0 +1,24 @@
+---
+description: Bootstrap Superpowers — ler a skill aplicável antes de agir
+alwaysApply: true
+---
+
+# Superpowers (obra/superpowers 6.4.2)
+
+Antes de qualquer tarefa, leia o `SKILL.md` da skill aplicável em `.cursor/skills/` com a ferramenta Read. Não resuma o fluxo pela description.
+
+## Sempre
+
+1. Início de conversa / qualquer tarefa: `.cursor/skills/using-superpowers/SKILL.md`
+2. Feature, componente ou mudança de comportamento: `brainstorming` antes de código
+3. Bug, teste falhando, comportamento inesperado: `systematic-debugging`
+4. Implementar feature ou correção: `test-driven-development`
+5. Antes de declarar pronto / merge / PR: `verification-before-completion`
+
+## Também
+
+- Plano escrito: `writing-plans` depois `executing-plans` ou `subagent-driven-development`
+- Review recebido: `receiving-code-review`
+- Encerrar branch: `finishing-a-development-branch`
+
+Instruções do humano (regras do Focux, Ruflo, PT-BR) vencem as skills. Skills vencem o comportamento padrão.
