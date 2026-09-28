@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/mesh_scope.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/qa_smoke_catalog.dart';
 import '../../agenda/screens/agenda_screen.dart';
 import '../../alertas/screens/alertas_screen.dart';
@@ -64,7 +65,12 @@ GoRouter buildQaPreviewRouter(String initialLocation) {
 }
 
 Widget buildQaRoutePreviewApp(String path) {
-  return MaterialApp.router(routerConfig: buildQaPreviewRouter(path));
+  return MaterialApp.router(
+    locale: const Locale('pt'),
+    supportedLocales: S.supportedLocales,
+    localizationsDelegates: S.localizationsDelegates,
+    routerConfig: buildQaPreviewRouter(path),
+  );
 }
 
 Widget _buildQaRouteScreen(Uri uri) {
@@ -114,10 +120,7 @@ Widget _buildQaRouteScreen(Uri uri) {
 
 /// Full-screen QA preview — isolated from GoRouter stack.
 class QaRoutePreviewDialog extends StatelessWidget {
-  const QaRoutePreviewDialog({
-    required this.path,
-    super.key,
-  });
+  const QaRoutePreviewDialog({required this.path, super.key});
 
   final String path;
 

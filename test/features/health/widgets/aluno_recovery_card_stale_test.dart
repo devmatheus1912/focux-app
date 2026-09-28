@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/widgets/aluno_recovery_card.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 Future<void> _pump(WidgetTester tester, RecoverySnapshot? snapshot) {
   return tester.pumpWidget(
-    MaterialApp(home: Scaffold(body: AlunoRecoveryCard(snapshot: snapshot))),
+    MaterialApp(
+      locale: const Locale('pt'),
+      supportedLocales: S.supportedLocales,
+      localizationsDelegates: S.localizationsDelegates,
+      home: Scaffold(body: AlunoRecoveryCard(snapshot: snapshot)),
+    ),
   );
 }
 
