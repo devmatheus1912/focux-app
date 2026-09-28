@@ -129,3 +129,25 @@ coverage/
 # Strix local runs (never public)
 strix_runs/
 .strix/
+
+# Apple signing (local only)
+**/AuthKey_*.p8
+*.mobileprovision
+*.provisionprofile
+
+# Agent / MCP local configs (may contain tokens)
+.mcp.json
+.cursor/mcp.json
+
+# Sentry CLI (local auth)
+sentry.properties
+.sentryclirc
+
+# Generic secret filenames
+*.secret
+secrets.json
+credentials.json
+
+# Fastlane local artifacts
+fastlane/report.xml
+fastlane/Preview.html
