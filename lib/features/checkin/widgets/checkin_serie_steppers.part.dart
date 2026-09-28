@@ -19,6 +19,7 @@ class _CheckinSetSteppers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final brand = Theme.of(context).colorScheme.primary;
     return IntrinsicHeight(
@@ -26,7 +27,7 @@ class _CheckinSetSteppers extends StatelessWidget {
         children: [
           Expanded(
             child: _CheckinStepper(
-              label: 'kg',
+              label: s.checkinStepperKg,
               value: checkinCargaLabel(cargaKg) ?? '0',
               onMinus: onMinusCarga,
               onPlus: onPlusCarga,
@@ -42,7 +43,7 @@ class _CheckinSetSteppers extends StatelessWidget {
           ),
           Expanded(
             child: _CheckinStepper(
-              label: 'reps',
+              label: s.checkinStepperReps,
               value: reps == null ? '—' : '$reps',
               onMinus: onMinusReps,
               onPlus: onPlusReps,
@@ -78,6 +79,7 @@ class _CheckinStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Column(
       children: [
         Text(
@@ -93,7 +95,7 @@ class _CheckinStepper extends StatelessWidget {
           children: [
             _CheckinStepperButton(
               icon: Icons.remove_rounded,
-              tooltip: 'Diminuir $label',
+              tooltip: s.checkinDiminuir(label),
               onPressed: onMinus,
               ink: ink,
               accent: accent,
@@ -107,7 +109,7 @@ class _CheckinStepper extends StatelessWidget {
             ),
             _CheckinStepperButton(
               icon: Icons.add_rounded,
-              tooltip: 'Aumentar $label',
+              tooltip: s.checkinAumentar(label),
               onPressed: onPlus,
               ink: ink,
               accent: accent,

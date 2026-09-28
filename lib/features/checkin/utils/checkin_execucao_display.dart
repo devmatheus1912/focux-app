@@ -1,5 +1,6 @@
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Thumb-zone minimum for S8 execution controls.
 const double checkinExecutionControlMin = TokensStrip.s8;
@@ -36,13 +37,14 @@ String checkinSerieKpiLabel(int feitas, int? total) {
   return '$feitas/$total';
 }
 
-String checkinChromeContextLine({
+String checkinChromeContextLine(
+  S s, {
   required String duration,
   required int current,
   required int total,
 }) {
   if (total <= 0) return duration;
-  return '$duration · exercício $current de $total';
+  return s.checkinChromeContexto(duration, current, total);
 }
 
 String checkinSeriesRepsLabel(int? series, String? reps) {
@@ -51,7 +53,8 @@ String checkinSeriesRepsLabel(int? series, String? reps) {
   return '$s × $r';
 }
 
-String checkinSerieContextLine({
+String checkinSerieContextLine(
+  S s, {
   required String seriesReps,
   String? carga,
   int? descansoSegundos,
@@ -60,7 +63,7 @@ String checkinSerieContextLine({
     seriesReps,
     if (carga != null && carga.trim().isNotEmpty) carga.trim(),
     if (descansoSegundos != null && descansoSegundos > 0)
-      'descanso ${descansoSegundos}s',
+      s.checkinDescansoSegundos(descansoSegundos),
   ];
   return parts.join(' · ');
 }
@@ -81,28 +84,29 @@ String checkinKgLabel(double value) {
   return fixed.replaceAll('.', ',');
 }
 
-String checkinEvolucaoTipoLabel(String tipo) {
-  switch (tipo) {
-    case 'REPETICOES':
-      return 'Repetições';
-    case 'VOLUME':
-      return 'Volume';
-    default:
-      return 'Carga';
-  }
-}
+String checkinEvolucaoTipoLabel(S s, String tipo) => switch (tipo) {
+  'REPETICOES' => s.checkinEvolucaoRepeticoes,
+  'VOLUME' => s.checkinEvolucaoVolume,
+  _ => s.checkinEvolucaoCarga,
+};
 
-String checkinRegistrarLabel({required bool first}) =>
-    first ? 'Registrar série' : 'Próxima série';
+String checkinRegistrarLabel(S s, {required bool first}) =>
+    first ? s.checkinRegistrarSerie : s.checkinProximaSerie;
 
-String checkinConfirmarRestanteLabel({required int feitas, required int? total}) {
+String checkinConfirmarRestanteLabel(
+  S s, {
+  required int feitas,
+  required int? total,
+}) {
   final left = (total ?? 0) - feitas;
-  if (left <= 1) return 'Confirmar série que falta';
-  return 'Confirmar $left séries que faltam';
+  return s.checkinConfirmarRestante(left <= 1 ? 1 : left);
 }
 
-String checkinTrocarExercicioHint({required int index, required int total}) =>
-    'Exercício $index de $total · toque para trocar';
+String checkinTrocarExercicioHint(
+  S s, {
+  required int index,
+  required int total,
+}) => s.checkinTrocarHint(index, total);
 
 T checkinPickCurrentExercise<T>({
   required List<T> exercicios,
@@ -121,12 +125,6 @@ T checkinPickCurrentExercise<T>({
   );
 }
 
-String checkinDesfazerLabel() => 'Desfazer série';
-
-String checkinFinalizarLabel() => 'Finalizar treino';
-
-String checkinPularDescansoLabel() => 'Pular descanso';
-
 /// Anel do lockup de descanso — 3× o alvo S8, sem literal solto.
 const double checkinRestRingSize = checkinExecutionControlMin * 3;
 
@@ -137,7 +135,8 @@ String checkinRestCountdownLabel(int seconds) {
   return '$mm:$ss';
 }
 
-String checkinRestContextLine({
+String checkinRestContextLine(
+  S s, {
   required String exerciseName,
   required int seriesFeitas,
   int? series,
@@ -145,19 +144,20 @@ String checkinRestContextLine({
   final next = seriesFeitas + 1;
   final seriesPart =
       series == null || series <= 0
-          ? 'Próxima série'
-          : 'Série $next de $series';
+          ? s.checkinProximaSerie
+          : s.checkinSerieNDeM(next, series);
   final name = exerciseName.trim();
   if (name.isEmpty) return seriesPart;
   return '$seriesPart · $name';
 }
 
-String checkinRestSemanticsLabel({
+String checkinRestSemanticsLabel(
+  S s, {
   required int seconds,
   String? contextLine,
 }) {
   final time = checkinRestCountdownLabel(seconds);
   final ctx = contextLine?.trim();
-  if (ctx == null || ctx.isEmpty) return 'Descanso $time';
-  return 'Descanso $time. $ctx';
+  if (ctx == null || ctx.isEmpty) return s.checkinDescansoTempo(time);
+  return s.checkinDescansoTempoCom(time, ctx);
 }

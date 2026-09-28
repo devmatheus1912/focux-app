@@ -8,6 +8,7 @@ import 'package:focux_app/features/alunos/data/aluno_followup_store.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_client_cache.dart';
 import 'package:focux_app/features/alunos/utils/alunos_home_client_cache.dart';
+import 'package:focux_app/features/checkin/data/checkin_series_pendentes.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
@@ -151,6 +152,16 @@ void main() {
       fonte: MigracaoFonte.texto,
     );
     await AlunoFollowUpStore.snooze(7);
+    const filaCheckin = CheckinSeriesPendentesStore();
+    await filaCheckin.adicionar(
+      const CheckinSeriePendente(
+        execucaoId: 1,
+        treinoExercicioId: 2,
+        numero: 1,
+        cargaKg: 20,
+      ),
+    );
+    expect(await filaCheckin.ler(), isNotEmpty);
     final prefsBefore = await SharedPreferences.getInstance();
     await prefsBefore.setBool('health_authorized', true);
     expect(prefsBefore.getBool('health_authorized'), isTrue);
@@ -177,6 +188,7 @@ void main() {
     expect(BibliotecaWizardDraftCache.get(), isNull);
     expect(await MigracaoMagicaDraftCache.load(), isNull);
     expect(await AlunoFollowUpStore.loadAll(), isEmpty);
+    expect(await filaCheckin.ler(), isEmpty);
     final prefsAfter = await SharedPreferences.getInstance();
     expect(prefsAfter.getBool('health_authorized'), isNull);
   });

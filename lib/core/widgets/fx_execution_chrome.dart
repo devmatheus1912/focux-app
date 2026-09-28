@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
@@ -80,18 +81,6 @@ Future<FxExecutionLeaveChoice?> showFxExecutionLeaveSheet(
   );
 }
 
-/// Compat: retorna `true` só para sair mantendo a sessão (Continuar depois).
-Future<bool> fxConfirmLeaveExecution(
-  BuildContext context, {
-  required bool hasProgress,
-}) async {
-  final choice = await showFxExecutionLeaveSheet(
-    context,
-    hasProgress: hasProgress,
-  );
-  return choice == FxExecutionLeaveChoice.continuarDepois;
-}
-
 class _FxExecutionLeaveSheet extends StatelessWidget {
   const _FxExecutionLeaveSheet({required this.onPick});
 
@@ -99,6 +88,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
@@ -114,14 +104,13 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Sair do treino?',
-            subtitle: 'Escolha o que fazer com esta sessão.',
+            title: s.checkinSairTitulo,
+            subtitle: s.checkinSairSub,
             leading: Icon(Icons.fitness_center_rounded, color: primary, size: 18),
           ),
           const SizedBox(height: TokensStrip.s3),
           Text(
-            'Continuar depois mantém séries e tempo salvos. Encerrar agora '
-            'registra o treino como concluído. Descartar apaga o progresso desta sessão.',
+            s.checkinSairTexto,
             textAlign: TextAlign.center,
             style: FocuxHubTypography.bodyMuted(
               color: mute,
@@ -132,7 +121,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s4),
           _leaveButton(
             context,
-            label: 'Continuar depois',
+            label: s.checkinContinuarDepois,
             icon: Icons.pause_circle_outline_rounded,
             accent: primary,
             onPrimary: theme.colorScheme.onPrimary,
@@ -141,7 +130,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           _leaveButton(
             context,
-            label: 'Encerrar agora',
+            label: s.checkinEncerrarAgora,
             icon: Icons.flag_rounded,
             accent: primary,
             onPrimary: theme.colorScheme.onPrimary,
@@ -150,7 +139,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           _leaveButton(
             context,
-            label: 'Descartar',
+            label: s.checkinDescartar,
             icon: Icons.delete_outline_rounded,
             accent: EagleTokens.bad,
             onPrimary: Colors.white,
@@ -163,7 +152,7 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
             child: TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Voltar ao treino',
+                s.checkinVoltarAoTreino,
                 style: FocuxHubTypography.bodyMuted(
                   color: mute,
                   fontWeight: FontWeight.w700,

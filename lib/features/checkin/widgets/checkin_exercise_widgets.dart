@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_exercise_tips.dart';
@@ -24,7 +25,6 @@ class CheckinSerieCard extends StatelessWidget {
   final int total;
   final VoidCallback onRegistrar;
   final VoidCallback? onDesfazer;
-  final VoidCallback? onOpenDemo;
   final VoidCallback? onAjustar;
   final VoidCallback? onConfirmarRestante;
   final VoidCallback? onTrocar;
@@ -43,7 +43,6 @@ class CheckinSerieCard extends StatelessWidget {
     required this.total,
     required this.onRegistrar,
     this.onDesfazer,
-    this.onOpenDemo,
     this.onAjustar,
     this.onConfirmarRestante,
     this.onTrocar,
@@ -58,6 +57,7 @@ class CheckinSerieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
@@ -65,11 +65,17 @@ class CheckinSerieCard extends StatelessWidget {
     final target = ee.series ?? 0;
     final done = ee.concluido || (target > 0 && ee.seriesFeitas >= target);
     final contextLine = checkinSerieContextLine(
+      s,
       seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
       carga: checkinCargaLabel(ee.cargaKg),
       descansoSegundos: ee.descansoSegundos,
     );
-    final previous = _previousLine(ee);
+    final previous = _previousLine(s, ee);
+    final trocarHint = checkinTrocarExercicioHint(
+      s,
+      index: index,
+      total: total,
+    );
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -101,7 +107,7 @@ class CheckinSerieCard extends StatelessWidget {
             semanticsLabel:
                 onTrocar == null
                     ? null
-                    : '${ee.exercicioNome}. ${checkinTrocarExercicioHint(index: index, total: total)}',
+                    : '${ee.exercicioNome}. $trocarHint',
             child: Column(
               children: [
                 Text(
@@ -117,7 +123,7 @@ class CheckinSerieCard extends StatelessWidget {
                 if (onTrocar != null) ...[
                   const SizedBox(height: TokensStrip.s1),
                   Text(
-                    checkinTrocarExercicioHint(index: index, total: total),
+                    trocarHint,
                     textAlign: TextAlign.center,
                     style: FocuxHubTypography.bodyMuted(
                     color: brand,
@@ -194,14 +200,13 @@ class CheckinSerieCard extends StatelessWidget {
               SizedBox(
                 height: checkinExecutionControlMin,
                 child: FxLiquidPrimaryButton(
-                  label: checkinRegistrarLabel(first: ee.seriesFeitas <= 0),
+                  label: checkinRegistrarLabel(s, first: ee.seriesFeitas <= 0),
                   onPressed: onRegistrar,
                 ),
               ),
             if (onAjustar != null ||
                 onConfirmarRestante != null ||
-                onDesfazer != null ||
-                (onOpenDemo != null && !hasDemo)) ...[
+                onDesfazer != null) ...[
               const SizedBox(height: TokensStrip.s1),
               TextButton(
                 onPressed: () async {
@@ -214,33 +219,27 @@ class CheckinSerieCard extends StatelessWidget {
                     if (onAjustar != null)
                       (
                         id: 'ajustar',
-                        label: 'Ajustar',
-                        subtitle: 'Carga, reps e RPE',
+                        label: s.checkinAjustar,
+                        subtitle: s.checkinAjustarSub,
                         icon: Icons.tune_rounded,
                       ),
                     if (onConfirmarRestante != null)
                       (
                         id: 'confirmar',
                         label: checkinConfirmarRestanteLabel(
+                          s,
                           feitas: ee.seriesFeitas,
                           total: ee.series,
                         ),
-                        subtitle: 'Marca o que falta de uma vez',
+                        subtitle: s.checkinConfirmarRestanteSub,
                         icon: Icons.done_all_rounded,
                       ),
                     if (onDesfazer != null)
                       (
                         id: 'desfazer',
-                        label: checkinDesfazerLabel(),
-                        subtitle: 'Remove a última série',
+                        label: s.checkinDesfazerSerie,
+                        subtitle: s.checkinDesfazerSub,
                         icon: Icons.undo_rounded,
-                      ),
-                    if (onOpenDemo != null && !hasDemo)
-                      (
-                        id: 'demo',
-                        label: 'Demonstração',
-                        subtitle: 'Vídeo do exercício',
-                        icon: Icons.play_circle_outline_rounded,
                       ),
                   ];
                   if (actions.isEmpty) return;
@@ -261,8 +260,8 @@ class CheckinSerieCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             FxHomeSheetHeader(
                               isDark: isDark,
-                              title: 'Mais na série',
-                              subtitle: 'Ajustes e ações secundárias',
+                              title: s.checkinMaisTitulo,
+                              subtitle: s.checkinMaisSub,
                               leading: Icon(
                                 Icons.more_horiz_rounded,
                                 color: soft,
@@ -301,15 +300,13 @@ class CheckinSerieCard extends StatelessWidget {
                       onConfirmarRestante?.call();
                     case 'desfazer':
                       onDesfazer?.call();
-                    case 'demo':
-                      onOpenDemo?.call();
                   }
                 },
                 style: TextButton.styleFrom(
                   minimumSize: const Size(64, checkinExecutionControlMin),
                 ),
                 child: Text(
-                  'Mais',
+                  s.checkinMais,
                   style: FocuxHubTypography.chip(chrome.mute),
                 ),
               ),
@@ -323,7 +320,7 @@ class CheckinSerieCard extends StatelessWidget {
                 vertical: TokensStrip.s4,
               ),
               child: Text(
-                'Exercício concluído',
+                s.checkinExercicioConcluido,
                 textAlign: TextAlign.center,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
@@ -369,13 +366,14 @@ class CheckinSerieCard extends StatelessWidget {
     );
   }
 
-  static String? _previousLine(ExecucaoExercicio ee) {
+  static String? _previousLine(S s, ExecucaoExercicio ee) {
     final parts = <String>[
-      if (ee.seriesFeitasAnterior != null) '${ee.seriesFeitasAnterior} séries',
+      if (ee.seriesFeitasAnterior != null)
+        s.checkinNSeries(ee.seriesFeitasAnterior!),
       if (checkinCargaLabel(ee.cargaAnteriorKg) != null)
         checkinCargaLabel(ee.cargaAnteriorKg)!,
     ];
     if (parts.isEmpty) return null;
-    return 'Última vez: ${parts.join(' · ')}';
+    return s.checkinUltimaVez(parts.join(' · '));
   }
 }

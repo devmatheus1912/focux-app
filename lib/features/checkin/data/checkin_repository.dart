@@ -146,6 +146,7 @@ class ExecucaoExercicio {
     String? feedback,
     int? rpe,
     bool? dor,
+    List<ExecucaoSerie>? seriesDetalhes,
   }) => ExecucaoExercicio(
     id: id,
     treinoExercicioId: treinoExercicioId,
@@ -174,7 +175,7 @@ class ExecucaoExercicio {
     feedbackAnterior: feedbackAnterior,
     rpeAnterior: rpeAnterior,
     dorAnterior: dorAnterior,
-    seriesDetalhes: seriesDetalhes,
+    seriesDetalhes: seriesDetalhes ?? this.seriesDetalhes,
     seriesAnteriores: seriesAnteriores,
   );
 }

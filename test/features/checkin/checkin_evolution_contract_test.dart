@@ -64,16 +64,24 @@ void main() {
         File(
           'lib/features/checkin/screens/checkin_screen.dart',
         ).readAsStringSync();
+    final estado =
+        File(
+          'lib/features/checkin/utils/checkin_execucao_estado.dart',
+        ).readAsStringSync();
     final sheets =
         File(
           'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
         ).readAsStringSync();
+    final arb = File('lib/l10n/app_pt.arb').readAsStringSync();
 
-    expect(screen, contains('showCheckinEvolucaoSheet'));
-    expect(screen, contains('evolucoesPerformance'));
-    expect(screen, contains('evolucoesCarga'));
-    expect(sheets, contains('Evolução registrada'));
-    expect(sheets, contains('mensagem também ficou salva no chat'));
+    expect(screen, contains('showCheckinResultado'));
+    expect(sheets, contains('showCheckinEvolucaoSheet'));
+    expect(sheets, contains('checkinEvolucoesParaCelebrar'));
+    expect(estado, contains('evolucoesPerformance'));
+    expect(estado, contains('evolucoesCarga'));
+    expect(sheets, contains('s.checkinEvolucaoTitulo'));
+    expect(arb, contains('Evolução registrada'));
+    expect(arb, contains('mensagem também ficou salva no chat'));
   });
 
   test('student dashboard keeps persistent performance evolution card', () {

@@ -3,42 +3,27 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_timer_widgets.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../support/screen_source_bundle.dart';
 
+String _src(String path) => readScreenSourceBundle(path);
+
+int _linhas(String path) => File(path).readAsLinesSync().length;
+
 void main() {
+  const screenPath = 'lib/features/checkin/screens/checkin_screen.dart';
+  const estadosPath =
+      'lib/features/checkin/widgets/checkin_execucao_estados.dart';
+
   test('checkin cumpre contrato Tier S+', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/checkin/screens/checkin_screen.dart',
-    );
-    expect(
-      screen,
-      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
-    );
+    final screen = _src(screenPath);
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(
-      screen,
-      anyOf(
-        contains('friendlyError'),
-        contains('DashboardErrorState'),
-        contains('FxEmptyState'),
-        contains('_erro'),
-        contains('_TrainingEmptyState'),
-        contains('ref.invalidate'),
-      ),
-    );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
+    expect(screen, contains('friendlyError'));
+    expect(screen, contains('_loading'));
+    expect(screen, contains('CheckinPreparandoView'));
+    expect(screen, contains('CheckinIniciarErroView'));
     expect(screen, contains('showFxExecutionLeaveSheet'));
     expect(screen, contains('FxExecutionKeepAwake'));
     expect(screen, contains('FxExecutionPopGuard'));
@@ -49,11 +34,75 @@ void main() {
     expect(screen, contains('useMesh: false'));
     expect(screen, contains('scaffoldBackgroundColor'));
     expect(screen, contains('ColoredBox'));
-    expect(screen, contains('checkinSerieRepsSeed'));
-    expect(screen, contains('Preparando seu treino'));
+    expect(screen, contains('showCheckinSerieDetalhe'));
+    expect(screen, contains('CheckinRascunhos'));
     expect(screen, contains('CheckinRestFocusView'));
+    expect(screen, contains('_registrarSerieRapida'));
+    expect(screen, contains('onAjustar:'));
+    expect(screen, contains('onConfirmarRestante:'));
+    expect(screen, contains('CheckinFinalizarBar'));
+    expect(screen, contains('selectedId:'));
+    expect(screen, isNot(contains('ListView(')));
+    expect(screen, isNot(contains('SkeletonList')));
     expect(screen, isNot(contains('CheckinRestBanner')));
-    final timers = readScreenSourceBundle(
+    expect(screen, isNot(contains('CheckinRestTimerDock')));
+    expect(screen, isNot(contains('CheckinLiveCoachingCard')));
+    expect(screen, isNot(contains('CheckinLiveBadge')));
+    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
+
+    final estados = _src(estadosPath);
+    expect(estados, contains('FxLoading'));
+    expect(estados, contains('.checkinPreparando'));
+    expect(estados, contains('checkinExecutionControlMin'));
+    expect(estados, contains('s.checkinFinalizarTreino'));
+    expect(estados, contains('liveRegion: true'));
+    expect(estados, isNot(contains('CircularProgressIndicator')));
+  });
+
+  test('execução fica abaixo de 500 linhas por arquivo', () {
+    for (final path in [
+      screenPath,
+      'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
+      'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
+      'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
+      estadosPath,
+    ]) {
+      expect(_linhas(path), lessThan(500), reason: path);
+    }
+  });
+
+  test('fila offline, finalizar e descanso vivem fora do layout', () {
+    final screen = _src(screenPath);
+    expect(screen, contains('checkinEnviarFila'));
+    expect(screen, contains('checkinErroDeConexao'));
+    expect(screen, contains('_filaLimpa'));
+    expect(screen, contains('checkinExerciciosFaltando'));
+    expect(screen, contains('showCheckinFinalizarIncompleto'));
+    expect(screen, contains('CheckinDescansoRelogio'));
+    expect(screen, contains('checkinConexaoVoltouProvider'));
+    expect(screen, contains('checkinDescansoAlertaProvider'));
+    expect(screen, contains('AppLifecycleState.resumed'));
+    expect(screen, contains('removerDaExecucao'));
+    final corpo =
+        File(
+          'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
+        ).readAsStringSync();
+    expect(corpo, isNot(contains('setState(')));
+    expect(corpo, contains('CheckinPendentesAviso'));
+    final sheets = _src(
+      'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
+    );
+    expect(sheets, contains('s.checkinFaltamExercicios'));
+    expect(sheets, contains('s.checkinVoltarAoTreino'));
+    final relogio = _src(
+      'lib/features/checkin/utils/checkin_descanso_relogio.dart',
+    );
+    expect(relogio, contains('checkinRestRemaining'));
+    expect(relogio, contains('sincronizar'));
+  });
+
+  test('timer de descanso usa texto do ARB', () {
+    final timers = _src(
       'lib/features/checkin/widgets/checkin_timer_widgets.dart',
     );
     expect(
@@ -71,30 +120,18 @@ void main() {
     expect(timers, contains('BrandPalette.accent'));
     expect(timers, contains('ExcludeSemantics'));
     expect(timers, contains('_CheckinRestRingPainter'));
+    expect(timers, contains('s.checkinTrocar'));
+    expect(timers, contains('s.checkinPularDescanso'));
     expect(timers, isNot(contains('CircularProgressIndicator')));
     expect(timers, isNot(contains('class CheckinRestBanner')));
     expect(timers, isNot(contains('FxLoading')));
     expect(timers, isNot(contains('FxLiquidPrimaryButton')));
     expect(timers, contains('TextButton('));
     expect(timers, isNot(contains('FilledButton')));
-    expect(screen, contains('_registrarSerieRapida'));
-    expect(screen, contains('onAjustar:'));
-    expect(screen, contains('onConfirmarRestante:'));
-    expect(screen, contains('checkinExecutionControlMin'));
-    expect(screen, contains('checkinFinalizarLabel'));
-    expect(screen, contains('selectedId:'));
-    expect(screen, contains('FxLoading'));
-    expect(screen, isNot(contains('ListView(')));
-    expect(screen, isNot(contains('SkeletonList')));
-    expect(screen, isNot(contains('CheckinRestTimerDock')));
-    expect(screen, isNot(contains('CheckinLiveCoachingCard')));
-    expect(screen, isNot(contains('CheckinLiveBadge')));
-    expect(screen, isNot(contains('Ver fila')));
-    expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 
   test('fila do checkin é picker inset, sem ListTile', () {
-    final sheet = readScreenSourceBundle(
+    final sheet = _src(
       'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
     );
     expect(sheet, contains('showFxInsetPickerSheet'));
@@ -104,10 +141,10 @@ void main() {
   });
 
   test('checkin header é S8 sem badge ao vivo', () {
-    final header = readScreenSourceBundle(
+    final header = _src(
       'lib/features/checkin/widgets/checkin_header_widgets.dart',
     );
-    expect(header, contains("child: const Text('Sair')"));
+    expect(header, contains('s.checkinSair'));
     expect(header, contains('checkinExecutionControlMin'));
     expect(header, contains('FxHelpIconButton'));
     expect(header, isNot(contains('CheckinLiveBadge')));
@@ -117,26 +154,28 @@ void main() {
     expect(header, isNot(contains('CheckinHeaderMetric')));
   });
 
-  test('checkin serie card é um alvo, sem chevron', () {
-    final card = readScreenSourceBundle(
+  test('checkin serie card é um alvo, sem chevron nem Demonstração', () {
+    final card = _src(
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
     );
     expect(card, contains('checkinExecutionControlMin'));
     expect(card, contains('this.resting'));
     expect(card, contains('if (!resting)'));
     expect(card, contains('FxLiquidPrimaryButton'));
-    expect(card, contains("'Ajustar'"));
-    expect(card, contains("'Mais'"));
-    expect(card, contains("'Mais na série'"));
+    expect(card, contains('s.checkinAjustar'));
+    expect(card, contains('s.checkinMais'));
+    expect(card, contains('s.checkinMaisTitulo'));
     expect(card, contains('showFxHomeSheet'));
     expect(card, contains('checkinConfirmarRestanteLabel'));
     expect(card, contains('checkinTrocarExercicioHint'));
     expect(card, contains('_CheckinSetSteppers'));
     expect(card, contains('_CheckinStepperButton'));
+    expect(card, contains('s.checkinDiminuir'));
     expect(card, contains('CheckinExerciseVideoPreview'));
     expect(card, contains('CheckinExerciseThumbnailPreview'));
     expect(card, contains('CheckinExerciseMediaPreview'));
-    expect(card, contains("'Demonstração'"));
+    expect(card, isNot(contains('Demonstração')));
+    expect(card, isNot(contains('onOpenDemo')));
     expect(card, isNot(contains("'Postura'")));
     expect(card, isNot(contains('onOpenCoach')));
     expect(card, isNot(contains("'Dicas'")));
@@ -158,9 +197,7 @@ void main() {
   });
 
   test('tips e locale do exercício vivem no util SRP', () {
-    final tips = readScreenSourceBundle(
-      'lib/features/checkin/utils/checkin_exercise_tips.dart',
-    );
+    final tips = _src('lib/features/checkin/utils/checkin_exercise_tips.dart');
     expect(tips, contains('checkinTextLooksNonPtBr'));
     expect(tips, contains('checkinErrosComunsFallback'));
     expect(tips, contains('showCheckinExerciseTipsSheet'));
@@ -168,33 +205,24 @@ void main() {
   });
 
   test('checkin execution alinha card no topo com scroll', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/checkin/screens/checkin_screen.dart',
-    );
+    final screen = _src(screenPath);
     expect(screen, contains('alignment: Alignment.topCenter'));
     expect(screen, contains('onHelp:'));
     expect(screen, contains('showCheckinExerciseTipsSheet'));
     expect(screen, isNot(contains('onOpenTips:')));
     expect(screen, contains('CheckinSerieCard'));
-    expect(screen, contains('resting: _showRestTimer'));
+    expect(screen, contains('resting: _descanso.ativo'));
   });
 
   test('descanso substitui o card e deixa Trocar em texto', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/checkin/screens/checkin_screen.dart',
-    );
+    final screen = _src(screenPath);
     expect(screen, isNot(contains('Positioned(')));
-    expect(screen, contains('_showRestTimer'));
+    expect(screen, contains('_descanso.ativo'));
     expect(screen, contains('CheckinRestFocusView('));
-    expect(screen, contains('totalSeconds: _restTotalSeconds'));
+    expect(screen, contains('totalSeconds: _descanso.total'));
     expect(screen, contains('checkinRestContextLine'));
     expect(screen, contains('fxAnnounce'));
-    expect(screen, contains('!_showRestTimer'));
-    final timers = readScreenSourceBundle(
-      'lib/features/checkin/widgets/checkin_timer_widgets.dart',
-    );
-    expect(timers, contains('this.onTrocar'));
-    expect(timers, contains("child: const Text('Trocar')"));
+    expect(screen, contains('!_descanso.ativo'));
   });
 
   testWidgets('Pular e Trocar ficam tocáveis no lockup de descanso', (
@@ -204,6 +232,9 @@ void main() {
     var skipTaps = 0;
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('pt'),
+        localizationsDelegates: S.localizationsDelegates,
+        supportedLocales: S.supportedLocales,
         home: Scaffold(
           body: CheckinRestFocusView(
             seconds: 69,
@@ -227,9 +258,9 @@ void main() {
   });
 
   test('RPE sheet esconde hint longo após first-use', () {
-    final sheet = readScreenSourceBundle(
-      'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
-    );
+    final sheet =
+        '${_src('lib/features/checkin/widgets/checkin_serie_detail_widgets.dart')}\n'
+        '${_src('lib/features/checkin/widgets/checkin_serie_campos_widgets.dart')}';
     expect(sheet, contains('checkinConsumeRpeFirstUseHint'));
     expect(sheet, contains('FxHelpIconButton'));
     expect(sheet, contains('Esforço sentido'));
@@ -239,10 +270,12 @@ void main() {
     expect(sheet, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
     expect(sheet, contains('onTapOutside'));
     expect(sheet, contains('FxHomeSheetSurface'));
+    expect(sheet, contains('checkinFeedbackChipMin'));
+    expect(sheet, isNot(contains('class CheckinTinyMetric')));
   });
 
   test('demo sheet usa preview maior com autoplay muted', () {
-    final media = readScreenSourceBundle(
+    final media = _src(
       'lib/features/checkin/widgets/checkin_media_widgets.dart',
     );
     expect(media, contains('checkinMediaPreviewHeight'));
@@ -257,22 +290,22 @@ void main() {
   });
 
   test('troca de exercício remonta o card com ValueKey', () {
-    final screen = readScreenSourceBundle(
-      'lib/features/checkin/screens/checkin_screen.dart',
-    );
+    final screen = _src(screenPath);
     expect(screen, contains('ValueKey('));
     expect(screen, contains('treinoExercicioId'));
   });
 
-  test('execução não embute Pose Coach gated no mid-workout', () {
-    final sheet = readScreenSourceBundle(
+  test('execução não embute Pose Coach nem sheet de demonstração', () {
+    final sheet = _src(
       'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
     );
     expect(sheet, isNot(contains('showCheckinCoachSheet')));
     expect(sheet, isNot(contains('GatedPoseCoachPanel')));
-    expect(sheet, contains('showCheckinDemoSheet'));
+    expect(sheet, isNot(contains('showCheckinDemoSheet')));
     expect(
-      File('lib/features/checkin/widgets/gated_pose_coach_panel.dart').existsSync(),
+      File(
+        'lib/features/checkin/widgets/gated_pose_coach_panel.dart',
+      ).existsSync(),
       isFalse,
     );
     expect(

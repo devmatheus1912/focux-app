@@ -6,6 +6,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 
 /// S8: um alvo — o tempo. Pular/Trocar ficam texto na thumb zone.
@@ -27,6 +28,7 @@ class CheckinRestFocusView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
@@ -44,6 +46,7 @@ class CheckinRestFocusView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
         child: Semantics(
           label: checkinRestSemanticsLabel(
+            s,
             seconds: seconds,
             contextLine: contextText,
           ),
@@ -51,7 +54,7 @@ class CheckinRestFocusView extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Descanso',
+                s.checkinDescanso,
                 style: FocuxHubTypography.chip(chrome.mute),
               ),
               const SizedBox(height: TokensStrip.s4),
@@ -108,7 +111,7 @@ class CheckinRestFocusView extends StatelessWidget {
                         checkinExecutionControlMin + 8,
                       ),
                     ),
-                    child: Text(checkinPularDescansoLabel()),
+                    child: Text(s.checkinPularDescanso),
                   ),
                   if (onTrocar != null)
                     TextButton(
@@ -119,7 +122,7 @@ class CheckinRestFocusView extends StatelessWidget {
                           checkinExecutionControlMin + 8,
                         ),
                       ),
-                      child: const Text('Trocar'),
+                      child: Text(s.checkinTrocar),
                     ),
                 ],
               ),

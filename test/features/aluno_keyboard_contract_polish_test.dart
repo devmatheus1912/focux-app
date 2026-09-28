@@ -32,10 +32,13 @@ void main() {
     final sheet = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
     );
+    final campos = readScreenSourceBundle(
+      'lib/features/checkin/widgets/checkin_serie_campos_widgets.dart',
+    );
     expect(sheet, contains('FxKeyboardDismissScope'));
     expect(sheet, contains('FxKeyboardDismissScope.dismiss'));
     expect(sheet, contains('keyboardDismissBehavior'));
-    expect(sheet, contains('onTapOutside'));
+    expect(campos, contains('onTapOutside'));
     expect(sheet, contains('FxHomeSheetSurface'));
   });
 

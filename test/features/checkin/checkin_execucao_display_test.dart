@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/utils/checkin_execucao_display.dart';
+import 'package:focux_app/l10n/app_localizations_pt.dart';
 
 void main() {
+  final s = SPt();
+
   test('checkinDurationLabel formata mm:ss e hh:mm:ss', () {
     expect(checkinDurationLabel(const Duration(seconds: 5)), '00:05');
     expect(
@@ -20,6 +23,7 @@ void main() {
     expect(checkinSeriesRepsLabel(3, '12'), '3 × 12');
     expect(
       checkinSerieContextLine(
+        s,
         seriesReps: '3 × 12',
         carga: '80 kg',
         descansoSegundos: 60,
@@ -27,19 +31,19 @@ void main() {
       '3 × 12 · 80 kg · descanso 60s',
     );
     expect(
-      checkinChromeContextLine(duration: '08:12', current: 2, total: 5),
+      checkinChromeContextLine(s, duration: '08:12', current: 2, total: 5),
       '08:12 · exercício 2 de 5',
     );
     expect(
-      checkinConfirmarRestanteLabel(feitas: 3, total: 4),
+      checkinConfirmarRestanteLabel(s, feitas: 3, total: 4),
       'Confirmar série que falta',
     );
     expect(
-      checkinConfirmarRestanteLabel(feitas: 1, total: 4),
+      checkinConfirmarRestanteLabel(s, feitas: 1, total: 4),
       'Confirmar 3 séries que faltam',
     );
     expect(
-      checkinTrocarExercicioHint(index: 2, total: 2),
+      checkinTrocarExercicioHint(s, index: 2, total: 2),
       'Exercício 2 de 2 · toque para trocar',
     );
   });
@@ -74,12 +78,13 @@ void main() {
   test('checkinCargaLabel usa vírgula BR', () {
     expect(checkinCargaLabel(80), '80 kg');
     expect(checkinCargaLabel(7.5), '7,5 kg');
-    expect(checkinRegistrarLabel(first: true), 'Registrar série');
-    expect(checkinPularDescansoLabel(), 'Pular descanso');
+    expect(checkinRegistrarLabel(s, first: true), 'Registrar série');
+    expect(checkinRegistrarLabel(s, first: false), 'Próxima série');
     expect(checkinRestCountdownLabel(45), '0:45');
     expect(checkinRestCountdownLabel(69), '1:09');
     expect(
       checkinRestContextLine(
+        s,
         exerciseName: 'Supino reto',
         seriesFeitas: 1,
         series: 4,
@@ -88,6 +93,7 @@ void main() {
     );
     expect(
       checkinRestSemanticsLabel(
+        s,
         seconds: 69,
         contextLine: 'Série 2 de 4 · Supino reto',
       ),
@@ -95,11 +101,14 @@ void main() {
     );
   });
 
+  test('tipo de evolução vem do ARB', () {
+    expect(checkinEvolucaoTipoLabel(s, 'REPETICOES'), 'Repetições');
+    expect(checkinEvolucaoTipoLabel(s, 'VOLUME'), 'Volume');
+    expect(checkinEvolucaoTipoLabel(s, 'CARGA'), 'Carga');
+  });
+
   test('trocar exercício honra o foco mesmo se o item já foi concluído', () {
-    const items = [
-      (id: 1, done: true),
-      (id: 2, done: false),
-    ];
+    const items = [(id: 1, done: true), (id: 2, done: false)];
     expect(
       checkinPickCurrentExercise(
         exercicios: items,

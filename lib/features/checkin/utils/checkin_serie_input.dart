@@ -87,7 +87,8 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
     final last = ee.seriesDetalhes.last;
     return CheckinCurrentSetSeed(
       cargaKg: last.cargaKg,
-      reps: int.tryParse(checkinFirstRepsToken(last.repeticoes) ?? '') ??
+      reps:
+          int.tryParse(checkinFirstRepsToken(last.repeticoes) ?? '') ??
           prescReps,
     );
   }
@@ -101,6 +102,34 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
     }
   }
   return const CheckinCurrentSetSeed();
+}
+
+/// Carga e reps mexidos no stepper antes de registrar, por série.
+class CheckinRascunhos {
+  final Map<String, CheckinCurrentSetSeed> _porSerie = {};
+
+  String _chave(ExecucaoExercicio ee) =>
+      '${ee.treinoExercicioId}-${ee.seriesFeitas + 1}';
+
+  CheckinCurrentSetSeed de(ExecucaoExercicio ee) =>
+      _porSerie[_chave(ee)] ??
+      checkinCurrentSetSeed(ee: ee, numero: ee.seriesFeitas + 1);
+
+  void somarCarga(ExecucaoExercicio ee, double delta) {
+    final atual = de(ee);
+    _porSerie[_chave(ee)] = CheckinCurrentSetSeed(
+      cargaKg: ((atual.cargaKg ?? 0) + delta).clamp(0, 500).toDouble(),
+      reps: atual.reps,
+    );
+  }
+
+  void somarReps(ExecucaoExercicio ee, int delta) {
+    final atual = de(ee);
+    _porSerie[_chave(ee)] = CheckinCurrentSetSeed(
+      cargaKg: atual.cargaKg,
+      reps: ((atual.reps ?? 0) + delta).clamp(0, 50).toInt(),
+    );
+  }
 }
 
 String? checkinSeriePrescricaoHint(String? prescricacao) {

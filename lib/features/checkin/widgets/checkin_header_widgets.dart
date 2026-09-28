@@ -6,6 +6,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 
 class CheckinWorkoutHeader extends StatelessWidget {
@@ -24,6 +25,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     return SafeArea(
       bottom: false,
@@ -61,7 +63,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
             ),
             if (onHelp != null)
               FxHelpIconButton(
-                tooltip: 'Dicas do exercício',
+                tooltip: s.checkinDicasExercicio,
                 onTap: onHelp!,
                 expandHitTarget: true,
               ),
@@ -76,7 +78,7 @@ class CheckinWorkoutHeader extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
                 ),
-                child: const Text('Sair'),
+                child: Text(s.checkinSair),
               ),
             ),
           ],
