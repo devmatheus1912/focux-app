@@ -30,12 +30,35 @@ import '../utils/health_dashboard_display.dart';
 import '../widgets/recovery_score_ring.dart';
 import '../../../core/utils/pt_br_display.dart';
 
+typedef HealthDashboardCheckAuthorization = Future<bool> Function();
+typedef HealthDashboardLoadTodaySummary = Future<HealthSummary> Function();
+typedef HealthDashboardSyncToday =
+    Future<RecoverySnapshot> Function(HealthSummary summary);
+typedef HealthDashboardUpdateHomeWidget =
+    Future<void> Function({
+      required int recoveryScore,
+      required String recoveryLabel,
+      required String recoveryHint,
+      required int steps,
+    });
+
 /// Screen showing synced Apple Health / Google Fit data.
 ///
 /// Displays: steps, calories, heart rate, sleep.
 /// Authorization flow is handled inline.
 class HealthDashboardScreen extends StatefulWidget {
-  const HealthDashboardScreen({super.key});
+  const HealthDashboardScreen({
+    super.key,
+    this.checkAuthorization,
+    this.loadTodaySummary,
+    this.syncToday,
+    this.updateHomeWidgetRecovery,
+  });
+
+  final HealthDashboardCheckAuthorization? checkAuthorization;
+  final HealthDashboardLoadTodaySummary? loadTodaySummary;
+  final HealthDashboardSyncToday? syncToday;
+  final HealthDashboardUpdateHomeWidget? updateHomeWidgetRecovery;
 
   @override
   State<HealthDashboardScreen> createState() => _HealthDashboardScreenState();
@@ -57,9 +80,38 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     _checkAuth();
   }
 
+  Future<bool> _resolveCheckAuthorization() =>
+      widget.checkAuthorization?.call() ?? HealthService.isAuthorized();
+
+  Future<HealthSummary> _resolveLoadTodaySummary() =>
+      widget.loadTodaySummary?.call() ?? HealthService.getTodaySummary();
+
+  Future<RecoverySnapshot> _resolveSyncToday(HealthSummary summary) =>
+      widget.syncToday?.call(summary) ??
+      HealthRepository.fromClient(ApiClient()).syncToday(summary);
+
+  Future<void> _resolveUpdateHomeWidgetRecovery({
+    required int recoveryScore,
+    required String recoveryLabel,
+    required String recoveryHint,
+    required int steps,
+  }) =>
+      widget.updateHomeWidgetRecovery?.call(
+        recoveryScore: recoveryScore,
+        recoveryLabel: recoveryLabel,
+        recoveryHint: recoveryHint,
+        steps: steps,
+      ) ??
+      HomeWidgetService.updateRecovery(
+        recoveryScore: recoveryScore,
+        recoveryLabel: recoveryLabel,
+        recoveryHint: recoveryHint,
+        steps: steps,
+      );
+
   Future<void> _checkAuth() async {
     try {
-      final auth = await HealthService.isAuthorized();
+      final auth = await _resolveCheckAuthorization();
       if (auth) {
         await _loadData();
       } else {
@@ -113,13 +165,12 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 
   Future<void> _loadData() async {
     try {
-      final summary = await HealthService.getTodaySummary();
+      final summary = await _resolveLoadTodaySummary();
       RecoverySnapshot? synced;
       String? soft;
       try {
-        final repo = HealthRepository.fromClient(ApiClient());
-        synced = await repo.syncToday(summary);
-        await HomeWidgetService.updateRecovery(
+        synced = await _resolveSyncToday(summary);
+        await _resolveUpdateHomeWidgetRecovery(
           recoveryScore: synced.recoveryScore,
           recoveryLabel: synced.recoveryLabel,
           recoveryHint: synced.recoveryHint,
