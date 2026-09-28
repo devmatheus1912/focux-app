@@ -103,7 +103,7 @@ List<_StudentToolAction> _alunoTools(S s) => [
   ),
 ];
 
-/// Atalhos do dia ([AlunoHomeView.atalhos]) + catálogo do que o plano do
+/// Atalhos ([AlunoHomeView.atalhos]) + catálogo do que o plano do
 /// personal libera.
 class _StudentToolsSection extends StatelessWidget {
   const _StudentToolsSection({
@@ -129,7 +129,7 @@ class _StudentToolsSection extends StatelessWidget {
       children: [
         DashboardSectionHeader(
           title: s.alunoAtalhosTitulo,
-          actionLabel: s.alunoAtalhosVerCatalogo,
+          actionLabel: s.alunoAtalhosVerTodos,
           onAction: () => _showAlunoToolsCatalog(context, tools: tools),
         ),
         if (featured.isNotEmpty) ...[
@@ -186,10 +186,9 @@ void _showAlunoToolsCatalog(
                 context: context,
                 sheetContext: ctx,
                 header: header,
-                items:
-                    tools
-                        .where((t) => t.group == group)
-                        .toList(growable: false),
+                items: tools
+                    .where((t) => t.group == group)
+                    .toList(growable: false),
                 mute: chrome.mute,
                 line: chrome.line,
               ),

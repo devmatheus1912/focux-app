@@ -355,6 +355,15 @@ void main() {
       expect(alunoFerramentaLiberada('/agenda/aluno', {'AGENDA'}), isFalse);
     });
 
+    test('anamnese por último: não é tarefa do dia', () {
+      expect(alunoAtalhosPrioridade.last, '/aluno/anamnese');
+      expect(alunoAtalhosPrioridade.take(3), [
+        '/agenda/aluno',
+        '/checkin/historico',
+        '/aluno/habitos',
+      ]);
+    });
+
     test('atalhos nunca apontam para abas do dock', () {
       const dock = [
         '/dashboard/aluno',

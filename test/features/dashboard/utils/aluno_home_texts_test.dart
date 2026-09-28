@@ -217,6 +217,43 @@ void main() {
       expect(alunoTreinosSemanaValor(_pt, w), '1');
     });
 
+    test('meta superada: número, rótulo de meta e frase sem "6 de 2"', () {
+      const w = AlunoWeekSummary(
+        feitos: 6,
+        meta: 2,
+        streakSemanas: 1,
+        volumeKg: 12445,
+      );
+      expect(alunoTreinosSemanaValor(_pt, w), '6');
+      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 2 batida');
+      expect(
+        alunoWeekSemantics(_pt, w),
+        '6 treinos nesta semana, meta de 2 batida, sequência de 1 semana, '
+        'volume de 12.445 kg',
+      );
+    });
+
+    test('meta igual: mesmo formato de meta batida', () {
+      const w = AlunoWeekSummary(
+        feitos: 3,
+        meta: 3,
+        streakSemanas: 2,
+        volumeKg: null,
+      );
+      expect(alunoTreinosSemanaValor(_pt, w), '3');
+      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 3 batida');
+    });
+
+    test('abaixo da meta: "2 de 3" e rótulo padrão', () {
+      const w = AlunoWeekSummary(
+        feitos: 2,
+        meta: 3,
+        streakSemanas: 0,
+        volumeKg: null,
+      );
+      expect(alunoTreinosSemanaLabel(_pt, w), 'Treinos na semana');
+    });
+
     test('sem dado de sessões começa pela sequência', () {
       const w = AlunoWeekSummary(
         feitos: null,
@@ -234,6 +271,9 @@ void main() {
     expect(alunoRecordeTexto(_pt, 'Supino', 102.5), 'Supino · 102,5 kg');
     expect(alunoRecordeTexto(_pt, 'Supino', 100), 'Supino · 100 kg');
     expect(alunoRecordeTexto(_pt, 'Supino', null), 'Supino');
+    expect(alunoRecordeTexto(_pt, 'supino', 50), 'Supino · 50 kg');
+    expect(alunoRecordeTexto(_pt, ' leg press 45°', null), 'Leg press 45°');
+    expect(alunoRecordeTexto(_pt, 'Leg Press', 80), 'Leg Press · 80 kg');
     expect(alunoVolumeTexto(_en, 3200), '3,200 kg');
   });
 

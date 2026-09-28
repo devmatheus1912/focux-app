@@ -143,8 +143,15 @@ String alunoAgendaQuandoTexto(S s, DateTime? quando, {DateTime? hoje}) {
 String alunoTreinosSemanaValor(S s, AlunoWeekSummary w) {
   final feitos = w.feitos ?? 0;
   final meta = w.meta;
-  return meta == null ? '$feitos' : s.alunoSemanaTreinosValor(feitos, meta);
+  if (meta == null || w.metaAtingida) return '$feitos';
+  return s.alunoSemanaTreinosValor(feitos, meta);
 }
+
+/// Meta batida troca o rótulo: "6 de 2" não se lê.
+String alunoTreinosSemanaLabel(S s, AlunoWeekSummary w) =>
+    w.metaAtingida
+        ? s.alunoSemanaMetaBatidaLabel(w.meta!)
+        : s.alunoSemanaTreinosLabel;
 
 /// "Sua semana" lida como uma frase pelo leitor de tela.
 String alunoWeekSemantics(S s, AlunoWeekSummary w) {
@@ -153,10 +160,13 @@ String alunoWeekSemantics(S s, AlunoWeekSummary w) {
   final volume = w.volumeKg;
   final partes = [
     if (feitos != null)
-      meta == null
-          ? s.alunoSemanaFraseTreinos(feitos)
-          : s.alunoSemanaFraseTreinosMeta(feitos, meta),
-    if (w.metaAtingida) s.alunoSemanaFraseMetaBatida,
+      if (w.metaAtingida) ...[
+        s.alunoSemanaFraseTreinos(feitos),
+        s.alunoSemanaFraseMetaDeBatida(meta!),
+      ] else
+        meta == null
+            ? s.alunoSemanaFraseTreinos(feitos)
+            : s.alunoSemanaFraseTreinosMeta(feitos, meta),
     s.alunoSemanaFraseSequencia(w.streakSemanas),
     if (volume != null) s.alunoSemanaFraseVolume(alunoVolumeTexto(s, volume)),
   ];
@@ -178,9 +188,13 @@ Color alunoForcaDeltaTom(double pct) =>
     _umaCasa(pct) < 0 ? EagleTokens.warn : EagleTokens.good;
 
 String alunoRecordeTexto(S s, String exercicio, double? cargaKg) {
-  if (cargaKg == null || cargaKg <= 0) return exercicio;
-  return s.alunoEvolucaoRecordeValor(exercicio, _umaCasa(cargaKg));
+  final nome = _inicialMaiuscula(exercicio.trim());
+  if (cargaKg == null || cargaKg <= 0) return nome;
+  return s.alunoEvolucaoRecordeValor(nome, _umaCasa(cargaKg));
 }
+
+String _inicialMaiuscula(String t) =>
+    t.isEmpty ? t : t[0].toUpperCase() + t.substring(1);
 
 double _umaCasa(double v) => (v * 10).round() / 10;
 

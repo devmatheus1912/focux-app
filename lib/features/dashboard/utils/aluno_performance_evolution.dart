@@ -1,8 +1,6 @@
 List<double> parseAlunoHomeSeries(dynamic raw) {
   if (raw is! List) return const [];
-  return raw
-      .map((e) => (e as num?)?.toDouble() ?? 0.0)
-      .toList(growable: false);
+  return raw.map((e) => (e as num?)?.toDouble() ?? 0.0).toList(growable: false);
 }
 
 /// Semanas `> 0` da série semanal. `<= 0` são buracos — fora do min/max.
@@ -21,8 +19,7 @@ class AlunoTrendPlot {
   final double maxVal;
   final int slotCount;
 
-  double get span =>
-      (maxVal - minVal).abs() < 0.001 ? 1.0 : maxVal - minVal;
+  double get span => (maxVal - minVal).abs() < 0.001 ? 1.0 : maxVal - minVal;
 
   bool startsSegment(int pointIndex) =>
       pointIndex == 0 || indexes[pointIndex] != indexes[pointIndex - 1] + 1;
@@ -37,7 +34,12 @@ class AlunoTrendPlot {
   }
 }
 
-/// `null` quando a série não tem valor positivo.
+/// Com 1 ponto a linha vira um ponto solto numa área vazia.
+const alunoTrendMinPontos = 2;
+
+int alunoTrendPontos(List<double> data) => data.where((v) => v > 0).length;
+
+/// `null` com menos de [alunoTrendMinPontos] semanas com valor positivo.
 AlunoTrendPlot? alunoTrendPlot(List<double> data) {
   final indexes = <int>[];
   final values = <double>[];
@@ -51,7 +53,7 @@ AlunoTrendPlot? alunoTrendPlot(List<double> data) {
     minVal = minVal == null || v < minVal ? v : minVal;
     maxVal = maxVal == null || v > maxVal ? v : maxVal;
   }
-  if (indexes.isEmpty) return null;
+  if (indexes.length < alunoTrendMinPontos) return null;
   return AlunoTrendPlot(
     indexes: List.unmodifiable(indexes),
     values: List.unmodifiable(values),

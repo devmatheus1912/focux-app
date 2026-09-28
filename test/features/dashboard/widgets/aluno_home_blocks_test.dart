@@ -174,6 +174,24 @@ void main() {
       );
     });
 
+    testWidgets('meta superada mostra "6" e "META 2 BATIDA"', (tester) async {
+      await _pump(
+        tester,
+        const AlunoWeekSummaryCard(
+          summary: AlunoWeekSummary(
+            feitos: 6,
+            meta: 2,
+            streakSemanas: 1,
+            volumeKg: 12445,
+          ),
+        ),
+      );
+      expect(find.text('6'), findsOneWidget);
+      expect(find.text('META 2 BATIDA'), findsOneWidget);
+      expect(find.text('6 de 2'), findsNothing);
+      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+    });
+
     testWidgets('sem meta mostra só o número de treinos', (tester) async {
       await _pump(
         tester,
@@ -408,6 +426,44 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('uma semana de força sem tile: sem gráfico, texto da curva', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        const AlunoEvolutionCard(forcaPorSemana: [0, 0, 0, 0, 0, 0, 0, 90]),
+      );
+      expect(find.text('Força (1RM est.)'), findsNothing);
+      expect(
+        find.text(
+          'Sua curva de força aparece a partir da segunda semana com carga.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('uma semana com recorde: só o tile, sem área vazia', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        AlunoEvolutionCard(
+          forcaPorSemana: const [0, 0, 0, 0, 0, 0, 0, 90],
+          ultimoRecorde: RecordePessoal(
+            id: 1,
+            exercicioId: 1,
+            exercicioNome: 'Supino',
+            data: '2026-09-25',
+            cargaKg: 50,
+          ),
+          recordeRecente: true,
+        ),
+      );
+      expect(find.text('Força (1RM est.)'), findsNothing);
+      expect(find.textContaining('Sua curva'), findsNothing);
+      expect(find.text('Supino · 50 kg'), findsOneWidget);
     });
 
     testWidgets('recorde com nome longo mostra a carga', (tester) async {

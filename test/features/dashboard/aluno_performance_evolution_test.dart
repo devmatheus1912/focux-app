@@ -24,6 +24,12 @@ void main() {
       expect(plot.isIsolated(2), isFalse);
     });
 
+    test('um ponto só não vira gráfico', () {
+      expect(alunoTrendPlot(const [0, 0, 0, 0, 0, 0, 0, 90]), isNull);
+      expect(alunoTrendPontos(const [0, 0, 0, 0, 0, 0, 0, 90]), 1);
+      expect(alunoTrendPlot(const [0, 0, 0, 0, 0, 0, 88, 90]), isNotNull);
+    });
+
     test('min/max ignora zeros nas pontas', () {
       final plot = alunoTrendPlot(const [0, 5, 8, 0]);
       expect(plot!.minVal, 5);

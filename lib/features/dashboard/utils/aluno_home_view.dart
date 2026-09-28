@@ -15,11 +15,11 @@ const alunoFinanceiroRoute = '/financeiro/aluno';
 /// Saúde, Chat, Perfil): o dock já leva a elas.
 const alunoAtalhosPrioridade = [
   '/agenda/aluno',
-  '/aluno/anamnese',
   '/checkin/historico',
   '/aluno/habitos',
   '/aluno/desafios',
   alunoFinanceiroRoute,
+  '/aluno/anamnese',
 ];
 const alunoAtalhosMax = 3;
 

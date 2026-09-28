@@ -61,7 +61,7 @@ void main() {
     expect(screen, isNot(contains('Ver plano completo')));
     expect(screen, isNot(contains('Seu score Focux')));
     expect(screen, isNot(contains('RecoveryScoreRing')));
-    expect(screen, contains('s.alunoAtalhosVerCatalogo'));
+    expect(screen, contains('s.alunoAtalhosVerTodos'));
     expect(screen, contains('AlunoHomeSkeleton()'));
     expect(screen, contains('fxAnnounce('));
     expect(screen, contains('s.alunoHomeAjudaCalculo'));

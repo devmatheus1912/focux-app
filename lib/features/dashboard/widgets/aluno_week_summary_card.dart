@@ -43,7 +43,7 @@ class AlunoWeekSummaryCard extends StatelessWidget {
     final tiles = [
       if (summary.feitos != null)
         tile(
-          s.alunoSemanaTreinosLabel,
+          alunoTreinosSemanaLabel(s, summary),
           alunoTreinosSemanaValor(s, summary),
           color: bateuMeta ? EagleTokens.semanticGood(isDark: isDark) : null,
           icon: bateuMeta ? Icons.check_circle_rounded : null,

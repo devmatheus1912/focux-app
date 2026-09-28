@@ -82,7 +82,9 @@ class AlunoEvolutionCard extends StatelessWidget {
             children: [
               if (!hasChart && tiles.isEmpty)
                 Text(
-                  s.alunoEvolucaoVazio,
+                  alunoTrendPontos(forcaPorSemana) == 1
+                      ? s.alunoEvolucaoCurvaEmBreve
+                      : s.alunoEvolucaoVazio,
                   style: FocuxHubTypography.bodyMuted(color: mute),
                 ),
               if (hasChart) ...[
