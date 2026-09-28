@@ -2,7 +2,7 @@
 
 Auditoria 360º do Focux que está no código agora: experiência, software, dados, negócio, segurança, operação e prontidão para a Apple App Store.
 
-Os repositórios são a fonte da verdade. Este texto não é o inventário. É a ordem para descobrir o produto, confrontar o que já se sabe, e entregar um plano fechado. Quando as implementações desse plano terminarem, o passo humano seguinte é testar no iPhone as telas que mudaram e enviar o binário para a Apple. Não sobra rodada de descoberta, nem lista de “considerações finais”.
+Os repositórios são a fonte da verdade. Este texto não é o inventário. É a ordem para descobrir o produto, confrontar o que já se sabe, e entregar um plano fechado. Quando os pacotes terminarem, a limpeza da seção 29 tira o código morto e o legado. O passo humano seguinte é testar no iPhone as telas que mudaram e enviar o binário para a Apple. Não sobra rodada de descoberta, nem lista de “considerações finais”.
 
 ---
 
@@ -700,8 +700,9 @@ Esta é a resposta inteira. Não há seção de considerações finais, próximo
 18. **P3** — fora.
 19. **Não construir agora**
 20. **Plano de implementação** — só P0 e P1, em ordem de dependência. Uma área por vez. Sem calendário. Cada passo aponta o pacote, os testes e as telas do roteiro. Sem patch.
-21. **Roteiro de teste no iPhone** — o único teste humano depois que o plano estiver implementado. Ver a seção 25.
-22. **Submissão** — a ficha da seção 26. Quando o roteiro passar, a ação seguinte é enviar o binário.
+21. **Limpeza de código morto e legado** — a seção 29. Acontece depois dos pacotes, antes do iPhone.
+22. **Roteiro de teste no iPhone** — o único teste humano depois da limpeza. Ver a seção 25.
+23. **Submissão** — a ficha da seção 26. Quando o roteiro passar, a ação seguinte é enviar o binário.
 
 Se uma seção não tiver item, escreva `NADA ENCONTRADO` e a busca. Não acrescente apêndice.
 
@@ -754,7 +755,7 @@ Ordem:
 9. notas de review só para o que o binário faz e a Apple não vê sozinha (Health, compra sandbox)
 10. upload
 
-Quando os pacotes P0 e P1 estiverem implementados, os testes do plano estiverem passando e o roteiro da seção 25 estiver em passa, o próximo ato é este upload. Não há auditoria extra.
+Quando os pacotes P0 e P1 estiverem implementados, a limpeza da seção 29 estiver feita, os testes estiverem passando e o roteiro da seção 25 estiver em passa, o próximo ato é este upload. Não há auditoria extra.
 
 ---
 
@@ -763,9 +764,10 @@ Quando os pacotes P0 e P1 estiverem implementados, os testes do plano estiverem 
 Você não executa estas fases. O relatório deixa elas fechadas.
 
 1. Implementar os pacotes P0 e P1, um por vez, na ordem do plano. Testes existentes permanecem. O teste novo do pacote passa. P2, P3 e “Não construir agora” não entram.
-2. Rodar o roteiro da seção 25 no iPhone, só nas telas alteradas e no bloco fixo.
-3. Se um caso falhar, corrigir contra o aceite daquele pacote. Sem novo brainstorm.
-4. Enviar para a Apple com a ficha da seção 26.
+2. Executar a limpeza da seção 29. O comportamento visível não muda. A suíte de testes continua passando.
+3. Rodar o roteiro da seção 25 no iPhone, só nas telas alteradas e no bloco fixo.
+4. Se um caso falhar, corrigir contra o aceite daquele pacote. Sem novo brainstorm.
+5. Enviar para a Apple com a ficha da seção 26.
 
 ---
 
@@ -776,7 +778,7 @@ Você não executa estas fases. O relatório deixa elas fechadas.
 - alguma pasta de `lib/features/` ou de `com.focux.modules` ficou de fora do inventário
 - o relatório usa o nome Personal 360
 - algum P0 ou P1 não tem comportamento desejado, teste e tela de roteiro
-- o roteiro de celular ou a ficha de submissão ficaram de fora
+- o roteiro de celular, a ficha de submissão ou a limpeza da seção 29 ficaram de fora
 - sobrou pergunta, consideração final ou “depois a gente vê”
 - você propôs apagar teste, patch, diff ou PR
 - você tratou uma lista deste prompt como o produto inteiro
@@ -785,4 +787,59 @@ Você não executa estas fases. O relatório deixa elas fechadas.
 - você deu nota a uma tela
 - você afirmou que a Apple aprova, sem o item correspondente na ficha
 
-A sessão está boa quando uma implementação seguida do roteiro no iPhone esgota o trabalho até o upload.
+A sessão está boa quando a implementação, a limpeza e o roteiro no iPhone esgotam o trabalho até o upload.
+
+---
+
+## 29. Limpeza de código morto e legado
+
+Esta seção fecha o relatório. Ela é o último pacote de trabalho antes do iPhone. O objetivo é o tree que sobra depois dos P0 e P1: um caminho por job, sem resquício que a próxima mudança precise contornar.
+
+A limpeza não é feature, não é redesign e não é auditoria nova. Ela só remove o que o inventário e os pacotes já provaram que ninguém usa. Comportamento visível permanece o dos aceites P0 e P1.
+
+### Quando
+
+Depois que todos os pacotes P0 e P1 estiverem implementados e os testes desses pacotes estiverem passando. Antes do roteiro da seção 25. Código morto criado pela própria implementação entra nesta leva, junto com o que já era morto no inventário.
+
+### O que entra
+
+Para cada candidato, uma linha com evidência de que não há caller restante no app, no backend, em rota, em job, em webhook ou em teste de comportamento:
+
+- arquivo, classe, provider, repository ou model sem referência
+- endpoint que nenhum cliente chama, e que não é o contrato 410 de cliente antigo ainda em produção
+- rota que só redireciona e cuja tela de destino já não existe
+- parser, DTO ou campo de BFF que o contrato vigente não envia mais
+- segundo cálculo deixado para trás quando o pacote escolheu uma fonte só (recovery local versus servidor, parser legado da Home, fila genérica no path que a fila de séries passou a cobrir)
+- dependência no `pubspec.yaml` ou no Gradle sem uso em código de produção, quando isso aumenta o binário ou a superfície nativa
+- flag, stub e catálogo de QA que o binário de release ainda carrega
+- import, part e asset que só serviam ao código removido
+
+O relatório lista só candidatos com essa evidência. O que ainda tem caller fica de fora, com o caller citado.
+
+### O que não entra
+
+- apagar, pular ou enfraquecer teste
+- reescrever arquitetura para “escalar”
+- migrar framework, partir monólito ou criar camada nova
+- remover endpoint 410 enquanto um cliente já publicado ainda pode chamá-lo; nesse caso a linha diz `MANTER` e o motivo
+- remover redirect que o app, o push ou o link universal ainda usam
+- limpar P2, P3 ou item de “Não construir agora” como se fosse implementação
+- mudança que altere o que a pessoa vê; isso é pacote P0 ou P1, não limpeza
+
+### Formato de cada linha
+
+`REMOVER` ou `MANTER` — o que — evidência de uso ou de ausência — o que quebra se a decisão estiver errada — teste que tem de continuar passando
+
+`REMOVER` sem evidência de ausência não entra na lista.
+
+### Pronto
+
+A limpeza está pronta quando:
+
+- cada `REMOVER` saiu do tree e nenhum caller restante aponta para ele
+- cada `MANTER` tem o caller ou o contrato que o justifica
+- a suíte existente passa, inclusive os testes novos dos pacotes
+- o binário de release não leva dependência nativa que a lista mandou remover
+- o roteiro do iPhone não precisa de caso novo por causa da limpeza, porque a limpeza não muda tela
+
+Escalável, aqui, significa o próximo pacote mexe num caminho só. Não significa plataforma nova.
