@@ -1,30 +1,23 @@
 # FOCUX — PROMPT MESTRE PARA SUPERPOWERS → BRAINSTORMING
 
-Auditoria 360º do produto real: experiência, software, dados, negócio, segurança, operação e prontidão para a Apple App Store.
+Auditoria 360º do Focux que está no código agora: experiência, software, dados, negócio, segurança, operação e prontidão para a Apple App Store.
 
-Você vai auditar o Focux como um sistema integrado. Os dois repositórios abaixo são a fonte da verdade. Este texto não é o inventário do produto. É a ordem de trabalho para você descobrir o produto, validar o que existe, e só então priorizar.
+Os repositórios são a fonte da verdade. Este texto não é o inventário. É a ordem para descobrir o produto, confrontar o que já se sabe, e entregar um plano fechado. Quando as implementações desse plano terminarem, o passo humano seguinte é testar no iPhone as telas que mudaram e enviar o binário para a Apple. Não sobra rodada de descoberta, nem lista de “considerações finais”.
 
 ---
 
 ## 0. O que você é nesta sessão
 
-Pense ao mesmo tempo como:
+Pense ao mesmo tempo como Product Manager, UX Designer, UI Designer, Flutter Engineer, Backend Engineer, Software Architect, QA Engineer, Security Engineer, Performance Engineer, DevOps/SRE e especialista em publicação na Apple App Store.
 
-- Product Manager
-- UX Designer
-- UI Designer
-- Flutter Engineer
-- Backend Engineer
-- Software Architect
-- QA Engineer
-- Security Engineer
-- Performance Engineer
-- DevOps / SRE
-- especialista em publicação na Apple App Store
+Cada achado nasce do código, do contrato ou de um fluxo rastreado. Sem evidência, o achado não existe: marque `NECESSITA VALIDAÇÃO` e transforme isso num passo concreto do roteiro de celular ou da submissão. Não deixe pergunta aberta no fim.
 
-Isso não autoriza uma lista genérica de boas práticas. Cada achado nasce do código, do contrato ou de um fluxo rastreado. Se a evidência não existe, o achado não existe: marque `NECESSITA VALIDAÇÃO`.
+O produto no binário iOS se chama Focux Personal. Um app Flutter, dois papéis, um backend Spring Boot multi-tenant:
 
-O produto se chama Focux Personal no binário iOS. Há duas experiências no mesmo app Flutter, ligadas a um backend Spring Boot multi-tenant: **Personal** e **Aluno**. Não assuma um terceiro app. Não assuma que “Personal 360” é o nome de uma tela.
+- **Personal** — quem opera o negócio e acompanha alunos.
+- **Aluno** — quem treina.
+
+Não existe um terceiro app. Não existe superfície, módulo ou fluxo chamado Personal 360. Não use esse nome em lugar nenhum do relatório. A visão do personal sobre um aluno é o **Aluno 360** (`AlunoDetailScreen`, rota `/alunos/:id`). O hub do personal é o **Hoje** (`PersonalDashboardScreen`, rota `/dashboard/personal`), com o command center em `/dashboard/command-center/copiloto`.
 
 ---
 
@@ -32,202 +25,230 @@ O produto se chama Focux Personal no binário iOS. Há duas experiências no mes
 
 Esta sessão é somente:
 
-ANALISAR → DESCOBRIR → QUESTIONAR → CONECTAR → PRIORIZAR → PLANEJAR.
+DESCOBRIR → ENTENDER → VALIDAR → QUESTIONAR → CONECTAR → PRIORIZAR → PLANEJAR.
 
-É proibido, durante o brainstorming:
+É proibido:
 
-- implementar
-- editar arquivos
-- refatorar
+- implementar, editar, refatorar, formatar ou gerar código
 - alterar banco, migração, API ou UI
-- apagar código
-- remover, enfraquecer ou “simplificar” testes
-- criar funcionalidade
+- apagar código ou teste
+- enfraquecer teste para a mudança caber
+- criar funcionalidade nesta sessão
 - criar branch, commit ou pull request
 - modificar o working tree
-- formatar, gerar código, ou rodar comando que grave arquivo
-- propor patch, diff ou snippet pronto para colar como implementação
+- entregar patch, diff ou snippet para colar
 
-Leitura, busca e inspeção são permitidas. Testes e builds só se forem estritamente somente-leitura e não alterarem o tree; se houver dúvida, não rode e marque `NECESSITA VALIDAÇÃO`.
+Leitura e busca são o trabalho. Se um comando gravaria arquivo, não rode.
 
-O relatório é a resposta desta sessão. Não grave o relatório no repositório, a menos que o humano peça isso numa sessão posterior.
+O relatório é a resposta. Não grave o relatório no repositório.
 
-A fase de implementação controlada descrita no final deste prompt **não começa agora**.
+A implementação descrita no plano não começa nesta sessão.
 
 ---
 
-## 2. Repositórios e baseline
+## 2. Onde está o produto
 
-Audite os dois repositórios em conjunto. Um achado de tela sem o endpoint, ou um endpoint sem o consumidor, está incompleto.
+Audite os dois repositórios juntos. Tela sem endpoint, ou endpoint sem consumidor, é achado incompleto.
 
-| Repositório | Papel | Branch padrão observada |
+| Repositório | Papel | Branch |
 |---|---|---|
-| `focux-app` | Cliente Flutter (iOS, Android, web) | `main` |
-| `focux-backend` | API Spring Boot, jobs, webhooks, páginas públicas servidas pelo backend | `master` |
+| `focux-app` | Cliente Flutter (iOS, Android e web) | `main` |
+| `focux-backend` | API, jobs, webhooks e páginas públicas servidas pelo backend | `master` |
 
-Há também, dentro do backend, o subprojeto `landing-web/` (Astro). Trate-o como superfície real se o código o publicar. O README do app cita um terceiro repositório, `focux-website`, que **não está neste workspace**. Qualquer comportamento que dependa dele fica `NECESSITA VALIDAÇÃO` fora do código disponível. Não invente o site.
+O código desses trees é o produto atual. Não trate o workspace como checkout atrasado. Não condicione a auditoria a “se o HEAD mudou”.
 
-### Baseline em que este prompt foi escrito — não confie nele
+A versão do app está em `focux-app/pubspec.yaml`: `1.2.1+133`. O README do app está desatualizado: ainda cita `1.2.1+92`. Esse é o documento velho. Não use o README como mapa de rotas, de stack ou de escopo. O router, o `pubspec.yaml` e os módulos é que mandam.
 
-Este prompt foi redigido depois de uma leitura dos trees, mas os dois repositórios se movem. Antes de qualquer conclusão:
+Dentro do backend existe `landing-web/` (Astro). Se o código publica essa superfície, ela entra no inventário. O README cita um repositório `focux-website` que não está neste workspace. O que depender dele fica como passo externo no roteiro de submissão, sem inventar o site.
 
-1. Confirme o HEAD real de `focux-app` `main` e de `focux-backend` `master` (incluindo o remoto, se o working tree estiver atrás).
-2. Se o HEAD for diferente dos SHAs abaixo, o snapshot deste prompt está desatualizado na diferença. Releia o que mudou.
-3. O código do HEAD vence este prompt, os READMEs, os ADRs, as specs antigas e qualquer auditoria já commitada.
+### Documentos
 
-SHAs usados como piso desta redação (podem já não ser o HEAD):
+Código vence documento. Leia os docs só depois do inventário independente, como confronto, nunca como prova de que a feature funciona:
 
-- app: `ad95f815` em `main` — versão em `pubspec.yaml`: `1.2.1+133`
-- backend remoto observado: `39b3249f` em `master`
-
-O working tree do backend pode estar atrás do remoto. Não audite um checkout velho se o remoto já tiver o contrato novo da Home do aluno, da prévia de treino e do check-in.
-
-### Docs que existem e não mandam no código
-
-Leia como contexto, nunca como prova de que a feature funciona:
-
-- `focux-app/docs/FOCUX_DESIGN_REFERENCE.md` (taxonomia S1–S9, pele, job, gates)
-- `focux-app/docs/system/*` e `focux-app/docs/CONTRATO_APP_BACKEND.md`
+- `focux-app/docs/FOCUX_DESIGN_REFERENCE.md`
+- `focux-app/docs/system/*`
+- `focux-app/docs/CONTRATO_APP_BACKEND.md`
 - `focux-backend/docs/CONTRATO_APP_BACKEND.md`, `docs/SYSTEM.md`, `AUDIT.md`, `docs/adr/*`
 - `focux-app/docs/FOCUX_PERFORMANCE_AUDIT.md`
 - `focux-app/docs/FOCUX_STUDENT_EXPERIENCE_AUDIT.md`
 - `focux-app/docs/FOCUX_REFERRAL_SYSTEM.md` e `FOCUX_REFERRAL_SECURITY.md`
 - `focux-app/docs/superpowers/specs/*` e `docs/superpowers/plans/*`
-- `focux-app/tools/audit/backend_endpoints.tsv` se ainda existir
+- `focux-app/tools/audit/backend_endpoints.tsv`
 
-Há specs recentes de Home do aluno, dados/insights e referral. Commits recentes nos dois repositórios mexeram exatamente nesses fluxos (Home do aluno, prévia de treino, “já fiz”, histórico, fila de séries, anamnese no BFF, cache). Sua tarefa é descobrir o que já está no código e o que a spec ainda promete. Não reabra um redesign já shipped como se não existisse. Não dê a spec como pronta só porque o arquivo existe.
-
-Divergência já vista e que você deve reconfirmar: o README do app ainda citava a versão `1.2.1+92` enquanto `pubspec.yaml` estava em `1.2.1+133`. Docs atrasados são um achado de operação, não uma fonte.
+Specs de Home do aluno, dados/insights e referral descrevem intenção. O código da Home, da prévia de treino, do “já fiz”, do histórico, da fila de séries, da anamnese no BFF e do cache é o que está shipado. Não redesenhe o que já está no código. Não marque spec como pronta porque o arquivo existe.
 
 ---
 
-## 3. Regra de escopo — a mais importante
+## 3. Regra de escopo
 
-Nenhuma lista deste prompt é escopo fechado. Isso inclui:
+Nenhuma lista deste prompt é escopo fechado. Isso inclui rotas, telas, módulos, fluxos de exemplo, entidades, integrações e o snapshot da seção 6.
 
-- rotas
-- telas
-- módulos
-- fluxos de exemplo (treino, saúde, chat, pagamento, referral)
-- entidades
-- integrações
-- o snapshot de ancoragem da seção 6
+Essas listas não são a lista completa, a prioridade, as únicas telas nem as únicas integrações.
 
-Essas listas são exemplos e âncoras para você não esquecer domínios já vistos. Elas não são:
-
-- a lista completa de funcionalidades
-- a ordem de prioridade
-- as únicas telas
-- as únicas integrações
-
-Protocolo:
-
-1. Descubra o produto a partir dos repositórios.
-2. Reconstrua o inventário.
-3. Só então audite.
-4. Se o código contradisser este prompt, o código vence e você registra a correção.
-5. Se existir rota, tela, sheet, dialog, provider, repository, endpoint, entidade, job, webhook ou integração que este prompt não cita, ela entra com a mesma profundidade.
-6. Um item do snapshot que você não reabriu no código fica `NÃO REVALIDADO NESTA SESSÃO`. Nunca vira `IMPLEMENTADO` por estar escrito aqui.
-
-Nomes não bastam. Classe, rota, endpoint, arquivo, comentário, TODO ou model não provam feature. Para cada capacidade, classifique com uma destas etiquetas, sempre com evidência:
+Nomes não bastam. Classe, rota, endpoint, arquivo, comentário, TODO ou model não provam feature. Classifique com evidência:
 
 | Etiqueta | Significado |
 |---|---|
-| `IMPLEMENTADO` | Chega ao usuário, persiste, e o outro lado do contrato consome ou produz o dado |
-| `PARCIAL` | Parte do caminho existe; falta passo, estado, papel ou persistência |
-| `INCOMPLETO` | Esboço ou fluxo que não fecha |
-| `ÓRFÃO` | Código sem consumidor, sem rota, ou sem efeito de produto |
-| `NÃO UTILIZADO` | Existe num lado (app ou backend) e o outro lado não chama |
-| `QUEBRADO` | O caminho existe e falha, perde dado, ou mente para o usuário |
-| `NÃO VALIDADO` | Não deu para provar pelo código nesta sessão |
-| `NECESSITA VALIDAÇÃO` | Depende de ambiente, loja, dispositivo, segredo ou regra externa da Apple |
-| `NÃO REVALIDADO NESTA SESSÃO` | Estava no snapshot e você não reabriu o arquivo |
+| `IMPLEMENTADO` | Chega ao usuário, persiste, e o outro lado do contrato produz ou consome o dado |
+| `PARCIAL` | Falta passo, estado, papel ou persistência |
+| `INCOMPLETO` | O fluxo não fecha |
+| `ÓRFÃO` | Código sem consumidor, sem rota ou sem efeito |
+| `NÃO UTILIZADO` | Existe num lado e o outro não chama |
+| `QUEBRADO` | O caminho existe e falha, perde dado ou mente para o usuário |
+| `NECESSITA VALIDAÇÃO` | Depende de aparelho, loja, segredo ou ambiente. Vira passo do roteiro de celular ou da submissão, com o que observar e o que é aprovação |
 
-Diferencie também: dado real, dado calculado no cliente, dado calculado no servidor, fallback estático, cache, e valor de marketing hardcoded.
+Diferencie dado real, cálculo no cliente, cálculo no servidor, fallback estático, cache e texto de marketing.
+
+Não atribua nota, estrela, percentual ou ranking a tela, fluxo ou módulo. O relatório lista gaps. “10/10” não é nota de tela. É o estado-alvo de prontidão da seção 22.
 
 ---
 
-## 4. Como descobrir antes de opinar
+## 3.1 Ordem obrigatória de descoberta
 
-Faça quatro passagens, nesta ordem. Não comece pela estética.
+Existe uma diferença importante entre:
 
-### Passagem A — Inventário
+A) descobrir o produto;
 
-App:
+B) validar hipóteses sobre o produto.
 
-- todos os `GoRoute` em `lib/core/router/` (`app_router.dart`, `app_router_auth_routes.dart`, `app_router_personal_shell_routes.dart`, `app_router_aluno_routes.dart`, `app_router_chrome_routes.dart`, `app_router_redirect.dart`, `qa_routes.dart`, `qa_routes_stub.dart`, `role_home.dart`)
-- shells `lib/core/screens/main_shell.dart` e `aluno_shell.dart`
-- dock `lib/core/widgets/fx_dock.dart`
-- cada diretório em `lib/features/`
-- sheets, dialogs e modais que não são rota (`showModalBottomSheet`, `showDialog`, widgets `*sheet*`, `*dialog*`)
+Você deve fazer A antes de B.
+
+Primeiro:
+
+- percorra os repositórios
+- descubra as features
+- descubra as rotas
+- descubra as telas
+- descubra os módulos
+- descubra os endpoints
+- descubra as entidades
+- descubra os fluxos
+- descubra as integrações
+- descubra os jobs
+- descubra os webhooks
+- descubra os mecanismos de persistência
+- descubra os contratos App ↔ Backend
+- descubra as superfícies públicas
+- descubra os estados e comportamentos reais
+
+Somente depois:
+
+- use o snapshot da seção 6
+- use os exemplos das seções seguintes
+- use os documentos existentes
+- use as hipóteses levantadas anteriormente
+
+O resultado do inventário independente é a fonte de verdade da auditoria.
+
+O snapshot não pode determinar o que será auditado.
+
+Se o inventário independente descobrir algo que não aparece no snapshot, esse item tem prioridade de descoberta sobre o snapshot e deve ser auditado normalmente.
+
+Se o inventário independente contradizer o snapshot, registre:
+
+`SNAPSHOT INCORRETO → REAL NO HEAD → EVIDÊNCIA`
+
+Não tente fazer o código se encaixar no snapshot.
+
+Não deixe de analisar uma funcionalidade porque ela não aparece no snapshot.
+
+Não deixe de analisar uma funcionalidade porque ela não aparece nas listas deste prompt.
+
+O objetivo é descobrir o Focux que existe, não confirmar o Focux que alguém imaginou anteriormente.
+
+Até o inventário independente estar escrito, é proibido abrir a seção 6, citar hipótese da seção 6.7, ou deixar uma lista deste prompt decidir se uma pasta entra ou fica de fora.
+
+---
+
+## 4. Passagens, depois da descoberta
+
+A passagem A é a descoberta. As outras só começam com o inventário independente já escrito.
+
+### Passagem A — inventário independente
+
+App, lendo o tree, sem usar a seção 6:
+
+- todo `GoRoute` em `lib/core/router/`
+- `lib/core/screens/main_shell.dart`, `lib/core/screens/aluno_shell.dart`, `lib/core/widgets/fx_dock.dart`
+- cada diretório de `lib/features/`
+- sheets, dialogs e modais que não são rota
 - providers, repositories, services, models
 - `lib/core/api/`, `lib/core/storage/`, `lib/core/auth/`, `lib/core/fcm/`, `lib/core/health/`, `lib/core/config/env.dart`
 
-Backend:
+Backend, lendo o tree:
 
-- cada diretório em `src/main/java/com/focux/modules/`
-- `src/main/java/com/focux/infra/` e `config/` (segurança, rate limit, websocket, cache, webhook, observabilidade)
-- `@RequestMapping` / `@GetMapping` / `@PostMapping` e equivalentes
-- entidades JPA, DTOs, Flyway em `src/main/resources/db/migration/`
+- cada diretório de `src/main/java/com/focux/modules/`
+- `src/main/java/com/focux/infra/` e `config/`
+- mappings HTTP
+- entidades, DTOs, Flyway em `src/main/resources/db/migration/`
 - `@Scheduled`, listeners, publishers STOMP
-- `SecurityConfig` e a lista de rotas públicas
+- `SecurityConfig` e rotas públicas
 
-Conte de novo. Não reutilize contagens deste prompt como fato.
+Conte no tree. Não reutilize número deste prompt.
 
-### Passagem B — Rastro ponta a ponta
+### Passagem B — confronto
 
-Para cada fluxo crítico, reconstrua:
+Só agora abra a seção 6 e os docs. Para cada divergência, a linha `SNAPSHOT INCORRETO → REAL NO HEAD → EVIDÊNCIA`. O que o inventário achou e o snapshot não cita entra na auditoria com a mesma profundidade.
 
-tela → ação → provider → repository → API → controller → service → banco → resposta → estado → próxima tela → quem mais lê esse dado (Home, histórico, evolução, Aluno 360, Personal, jobs, push)
+### Passagem C — rastro
+
+Para cada fluxo que o inventário mostrou ser real:
+
+tela → ação → provider → repository → API → controller → service → banco → resposta → estado → próxima tela → quem mais lê o mesmo fato (Hoje do aluno, Hoje do personal, histórico, evolução, Aluno 360, job, push)
 
 Marque o primeiro elo quebrado, duplicado ou fictício.
 
-### Passagem C — Órfãos, duplicação, mentira de dado
+### Passagem D — órfãos, duplicação, dado que mente
 
-Procure endpoint sem caller no app, tela sem entrada, provider sem listener, model sem uso, feature flag, `kDebugMode`, redirect que esconde rota antiga, HTTP 410, `@Deprecated`, dependência no `pubspec.yaml` sem import em `lib/`, cálculo duplicado, fallback estático servido como se fosse medida.
+Endpoint sem caller, tela sem entrada, provider sem uso, model sem uso, flag, `kDebugMode`, redirect que esconde rota, HTTP 410, `@Deprecated`, dependência no `pubspec.yaml` sem uso em `lib/`, cálculo duplicado, fallback estático no lugar de medida.
 
-### Passagem D — Risco de produção
+### Passagem E — risco e plano fechado
 
-Segurança, pagamento, auth, integridade de treino, saúde, App Store, testes, observabilidade. Só depois disso, julgamento de produto e prioridade.
+Segurança, pagamento, auth, integridade do treino, saúde, App Store, testes, observabilidade. Depois o julgamento e a prioridade. Cada P0 e P1 sai como item de implementação com aceite. Cada verificação que só o aparelho faz sai no roteiro de celular. Nada fica para uma “fase seguinte de análise”.
 
 ---
 
-## 5. Mapa de nomes — não traduza errado
+## 5. Vocabulário do produto
 
-| Como alguém pode chamar | O que o código usa (revalidar) |
+Use os nomes do código. Não traduza para um nome que o produto não tem.
+
+| No produto | Onde está |
 |---|---|
-| Personal 360 | Não há tela com esse nome. A visão do personal sobre **um aluno** é o Aluno 360: `AlunoDetailScreen` em `/alunos/:id`, abas Operação / Evolução / Ferramentas, BFF `GET /api/alunos/{id}/360/operacao`, `/evolucao`, `/ferramentas`, mais timeline. O hub do próprio personal é `PersonalDashboardScreen` em `/dashboard/personal` (dock “Hoje”) e o command center em `/dashboard/command-center/copiloto`. |
-| Home | Dock “Hoje”. Personal: `/dashboard/personal`. Aluno: `/dashboard/aluno` (`AlunoDashboardScreen`). Há BFF `GET /api/dashboard/home` e `GET /api/dashboard/aluno/home`. |
-| Treinos do aluno | Tab `/checkin/treinos` → `MeusTreinosScreen`. Prévia: `/checkin/treino/:treinoId` → `TreinoPreviaScreen`. Execução: `/checkin/executar` → `CheckinScreen`. |
-| Execução / série / RPE / dor | Módulo `checkin`, não um módulo “serie”. Backend: `ExecucaoTreino`, `ExecucaoExercicio`, `ExecucaoSerie`, com `rpe` e `dor`. |
-| Saúde / readiness | Tab `/saude`, `health`, recovery score, widget iOS `ios/FocuxRecoveryWidget/`. |
-| Assinatura do personal (SaaS) | `in_app_purchase` no app nativo + `POST /api/iap/verify`. Mercado Pago aparece no checkout **web** e em cobranças de aluno (PIX, recorrência, loja). Não há RevenueCat nem Stripe no que foi visto — confirme ausência, não assuma que “deveria” existir. |
-| Papéis | `PERSONAL` e `ALUNO` no app. RBAC de equipe e `Personal.isAdmin` são outra coisa. Não invente um app admin separado. |
+| Hoje do personal | Dock “Hoje”. `PersonalDashboardScreen`, `/dashboard/personal`. BFF `GET /api/dashboard/home`. |
+| Hoje do aluno | Dock “Hoje”. `AlunoDashboardScreen`, `/dashboard/aluno`. BFF `GET /api/dashboard/aluno/home`. |
+| Aluno 360 | Visão do personal sobre um aluno. `AlunoDetailScreen`, `/alunos/:id`. Abas Operação, Evolução e Ferramentas. BFF `GET /api/alunos/{id}/360/operacao`, `/evolucao`, `/ferramentas`, mais timeline. |
+| Command center | `/dashboard/command-center/copiloto`. |
+| Treinos do aluno | Tab `/checkin/treinos`, `MeusTreinosScreen`. Prévia `/checkin/treino/:treinoId`, `TreinoPreviaScreen`. Execução `/checkin/executar`, `CheckinScreen`. |
+| Série, RPE, dor | Módulo `checkin`. Backend: `ExecucaoTreino`, `ExecucaoExercicio`, `ExecucaoSerie`. |
+| Saúde | Tab `/saude`. Módulo `health`. Widget iOS `ios/FocuxRecoveryWidget/`. |
+| Assinatura do personal | Compra nativa com `in_app_purchase` e `POST /api/iap/verify`. Mercado Pago no checkout web do plano e na cobrança do aluno (PIX, recorrência, loja). Não há RevenueCat nem Stripe no código. Não proponha um deles. |
+| Papéis | `PERSONAL` e `ALUNO`. Equipe e RBAC são permissão dentro do tenant. `Personal.isAdmin` não é um terceiro app. |
 
-Se a UI chamar algo de “360” em copy de marketing, isso não cria uma tela.
+Copy de marketing que diga “360°” não cria outra tela. A tela é o Aluno 360.
 
 ---
 
-## 6. Snapshot de ancoragem — revalidar, não copiar
+## 6. Snapshot para confronto — só depois do inventário
 
-Tudo nesta seção é hipótese de partida. Reabra o arquivo. Classifique. Acrescente o que faltar.
+Proibido usar esta seção para decidir o que auditar. Ela descreve o código atual para você confrontar com o inventário independente. Se bater, siga o inventário. Se não bater, registre `SNAPSHOT INCORRETO → REAL NO HEAD → EVIDÊNCIA` e audite o real.
 
 ### 6.1 Forma do app
 
-- Pacote `focux_app`. Estado principal: Riverpod. `provider`/`ChangeNotifier` ainda aparece em plano de sucesso — confirme se continua.
-- HTTP: Dio em `lib/core/api/api_client.dart` (Bearer, ETag, retry, fila offline genérica). Dinheiro/IAP: `payment_api_client.dart`. Upload: `media_upload_service.dart`.
-- Base URL: `lib/core/config/env.dart` (`API_URL`, `WS_URL`, URL pública). Não copie segredos nem hosts com credencial para o relatório.
-- Navegação: GoRouter com redirect de auth/papel.
-- Design system já existe. Não invente outro. Tokens e pele: `lib/core/theme/` (`design_tokens.dart`, `tokens_strip.dart`, `app_theme.dart`, tipografia, `fx_settings_layout.dart`). Motion: `lib/core/motion/focux_motion.dart`. Data viz: `lib/core/data_viz/focux_data_viz.dart`. Catálogo de superfícies: `lib/core/design_system/`. Referência normativa: `docs/FOCUX_DESIGN_REFERENCE.md`. Onde o código divergir do doc, descreva os dois e diga qual o usuário vê.
-- Locale: `MaterialApp.router` força `Locale('pt')` e mesmo assim registra `S.localizationsDelegates`. ARB `pt`/`en`/`es` existem. ADR do backend (`docs/adr/002-brasil-first-sem-i18n.md`) pode estar atrasado. Descubra se a UI está de fato só em português e se strings ainda estão hardcoded fora do ARB.
-- `main.dart` limita `textScaler` (teto mais baixo em telefone estreito). Cruze isso com os commits recentes que tentam não cortar texto da Home com fonte grande. Acessibilidade e Dynamic Type: `VALIDAR ANTES DA SUBMISSÃO`, com o clamp citado em arquivo e linha.
-- iOS observado: bundle `com.focux.focuxApp`, display name Focux Personal, entitlements com Sign in with Apple, associated domains `focuxpersonal.com` / `www.focuxpersonal.com`, HealthKit, app group. `PrivacyInfo.xcprivacy` existe. `ios/Products.storekit` existe. Firebase real é template (`*.example`) e não deve ser versionado — confirme `git ls-files`. Permissões de câmera, fotos, microfone, fala, Face ID e Health estão no `Info.plist`; releia os textos, não copie da memória.
+- Pacote `focux_app`, versão `1.2.1+133` no `pubspec.yaml`.
+- Estado: Riverpod. `ChangeNotifier` de plano de sucesso ainda existe no código; o inventário diz se a rota usa.
+- HTTP: Dio em `lib/core/api/api_client.dart` (Bearer, ETag, retry, fila offline genérica). Dinheiro e IAP: `payment_api_client.dart`. Upload: `media_upload_service.dart`.
+- URLs: `lib/core/config/env.dart`. Não copie segredo para o relatório.
+- Navegação: GoRouter com redirect de auth e papel.
+- Design system já existe. Não invente outro. Tema em `lib/core/theme/` (`design_tokens.dart`, `tokens_strip.dart`, `app_theme.dart`, tipografia, `fx_settings_layout.dart`). Motion em `lib/core/motion/focux_motion.dart`. Data viz em `lib/core/data_viz/focux_data_viz.dart`. Catálogo em `lib/core/design_system/`. Norma em `docs/FOCUX_DESIGN_REFERENCE.md`. Se o doc e o widget divergirem, o usuário vê o widget.
+- Locale: `MaterialApp.router` usa `Locale('pt')` e `S.localizationsDelegates`. Existem ARB `pt`, `en` e `es`. O app não oferece troca de idioma. O ADR `focux-backend/docs/adr/002-brasil-first-sem-i18n.md` está alinhado com o locale fixo; o wiring do delegate é detalhe de implementação, não um produto trilíngue.
+- `main.dart` limita `textScaler` (teto menor em telefone estreito). A Home do aluno também trata quebra de texto. O efeito no iPhone entra no roteiro de celular como `VALIDAR ANTES DA SUBMISSÃO`, com arquivo e linha do clamp.
+- iOS: bundle `com.focux.focuxApp`, nome Focux Personal, Sign in with Apple, associated domains `focuxpersonal.com` e `www.focuxpersonal.com`, HealthKit, app group, `PrivacyInfo.xcprivacy`, `ios/Products.storekit`. Firebase real não entra no git; o que existe versionado é template `*.example`. Purpose strings de câmera, fotos, microfone, fala, Face ID e Health estão no `Info.plist`.
 
 ### 6.2 Shells
 
-Personal (`MainShell`), dock: Hoje, Alunos, Treinos, Agenda, IA.
+Personal, `MainShell`, dock: Hoje, Alunos, Treinos, Agenda, IA.
 
-| Path | Tela a confirmar |
+| Path | Tela |
 |---|---|
 | `/dashboard/personal` | `PersonalDashboardScreen` |
 | `/alunos` | `AlunosListScreen` |
@@ -235,9 +256,9 @@ Personal (`MainShell`), dock: Hoje, Alunos, Treinos, Agenda, IA.
 | `/agenda` | `AgendaScreen` |
 | `/ia/copiloto` | `IaCopilotoScreen` |
 
-Aluno (`AlunoShell`), dock: Hoje, Treinos, Saúde, Chat, Perfil. O dock de chat some em algumas condições — confirme.
+Aluno, `AlunoShell`, dock: Hoje, Treinos, Saúde, Chat, Perfil. Na tab de chat o dock se esconde.
 
-| Path | Tela a confirmar |
+| Path | Tela |
 |---|---|
 | `/dashboard/aluno` | `AlunoDashboardScreen` |
 | `/checkin/treinos` | `MeusTreinosScreen` |
@@ -245,569 +266,523 @@ Aluno (`AlunoShell`), dock: Hoje, Treinos, Saúde, Chat, Perfil. O dock de chat 
 | `/chat/aluno` | `ChatAlunoScreen` |
 | `/aluno/perfil` | `PerfilAlunoScreen` |
 
-Atalhos: `/` splash; `/home`, `/dashboard`, `/dashboard/home` redirecionam para a home do papel; `/aluno` → dashboard aluno; `/personal` → dashboard personal; `/ia` → copiloto.
+Atalhos: `/` é a splash. `/home`, `/dashboard` e `/dashboard/home` vão para o Hoje do papel. `/aluno` vai para o Hoje do aluno. `/personal` vai para o Hoje do personal. `/ia` vai para o copiloto.
 
 ### 6.3 Rotas públicas e de conta
 
-Recontar em `app_router_auth_routes.dart`: `/login`, `/login/mfa`, `/register`, `/register/aluno`, `/onboarding`, `/esqueci-senha`, `/resetar-senha`, `/resetar-senha/verificar-codigo`, `/p/:slug` (redirect para login de aluno com slug), `/convite/:token`, `/aluno/definir-senha`.
+`app_router_auth_routes.dart`: `/login`, `/login/mfa`, `/register`, `/register/aluno`, `/onboarding`, `/esqueci-senha`, `/resetar-senha`, `/resetar-senha/verificar-codigo`, `/p/:slug` (redirect para login de aluno com o slug), `/convite/:token`, `/aluno/definir-senha`.
 
-Debug: `/qa/smoke`, `/qa/tokens-strip` só em debug; release usa stub. Confirme que não vazam no binário de loja.
+`/qa/smoke` e `/qa/tokens-strip` só em debug. Release usa stub.
 
-### 6.4 Rotas autenticadas fora do dock
+### 6.4 Rotas fora do dock
 
-Reabra `app_router_chrome_routes.dart` e `app_router_aluno_routes.dart` e produza a tabela completa path → widget → papel. O piso abaixo estava no router no SHA do app citado. Acrescente o que nascer depois. Vários paths são redirect, não tela.
+O inventário independente produz a tabela path → widget → papel → como se chega (dock, push, deep link, FCM ou só URL). A lista abaixo é o router atual, para confronto. Vários paths são redirect.
 
-Aluno além do dock: `/aluno/ativacao`, `/aluno/habitos`, `/aluno/habitos/:id`, `/aluno/desafios`, `/aluno/desafios/:id`, `/aluno/recorrencia`, `/aluno/grupo-aulas`, `/aluno/perfil/editar`, `/aluno/anamnese`, `/aluno/trilhas`, `/aluno/form-check` (redirect), `/evolucao` (redirect), `/feed/aluno`, `/financeiro/aluno`, `/agenda/aluno`, `/depoimentos-aluno`.
+Aluno, além do dock: `/aluno/ativacao`, `/aluno/habitos`, `/aluno/habitos/:id`, `/aluno/desafios`, `/aluno/desafios/:id`, `/aluno/recorrencia`, `/aluno/grupo-aulas`, `/aluno/perfil/editar`, `/aluno/anamnese`, `/aluno/trilhas`, `/aluno/form-check` (redirect), `/evolucao` (redirect), `/feed/aluno`, `/financeiro/aluno`, `/agenda/aluno`, `/depoimentos-aluno`.
 
-Personal e compartilhadas (confirmar guarda de papel em cada uma):
+Demais rotas autenticadas:
 
-- operação: `/dashboard/qualidade`, `/dashboard/command-center/copiloto`
-- aluno: `/alunos/novo`, `/alunos/acoes-massa` (redirect), `/alunos/:id`, `/alunos/:id/editar`, `/alunos/:id/equipamentos`, `/alunos/:id/relatorio`, `/alunos/:id/evolucao`, `/alunos/:id/plano-sucesso`, `/alunos/:id/fotos`, `/alunos/:id/anamnese`, `/personal/alunos/:id/anamnese` (redirect), `/alunos/:id/treinos-list`, `/alunos/:id/ia/progressao`, `/alunos/:id/chat`, `/alunos/:id/feedback-video`, `/alunos/:id/engajamento`, `/alunos/:id/evolucao-comparativo`, `/alunos/:id/trilhas`, `/alunos/:id/feedback-videos`
-- treino e biblioteca: `/treinos/novo`, `/treinos/:id`, `/treinos/:id/exercicios/add`, `/exercicios`, `/exercicios/novo`, `/exercicios/biblioteca-wizard`, `/exercicios/:id`, `/exercicios/:id/editar`
-- check-in: `/checkin`, `/checkin/executar`, `/checkin/treino/:treinoId`, `/checkin/historico`, `/checkin/historico/:id`
-- agenda e dinheiro: `/agenda/novo`, `/financeiro`, `/financeiro/mensalidades/:id`
-- conta e marca: `/perfil`, `/configuracoes`, `/perfil/editar`, `/perfil/link-publico`, `/perfil/wallet`, `/perfil/ferramentas`, `/perfil/mfa`, `/identidade-visual`, `/white-label`, `/perfil/white-label`, `/setup/identidade`, `/perfil/equipe`, `/perfil/landing-editor`
-- IA e chat: `/ia/chat`, `/ia/checkin` (redirect), `/ia/progressao/aceitar`, `/chat/inbox`
-- feed, CRM: `/feed`, `/leads`, `/leads/kanban`, `/kanban`, `/leads/novo`, `/leads/:id`, `/leads-publicos`
-- alertas e relatórios: `/alertas`, `/alertas/aluno/:id`, `/alertas/config`, `/relatorios/global`, `/relatorio/business`
-- monetização e growth: `/convites`, `/planos` e `/paywall` (redirect para `/assinatura`), `/assinatura`, `/assinatura/review`, `/assinatura/success`, `/referral`, `/retencao`, `/ofertas-upsell`, `/cancel-save`, `/dunning`, `/winback`, `/promo-enterprise`, `/migracao-magica`, `/migracao-focux`, `/growth/migracao`
-- programas: `/habitos`, `/habitos/:id`, `/automacoes`, `/desafios`, `/desafios/:id`, `/loja`, `/pacotes`, `/recorrencia`, `/nps`, `/grupo-aulas`, `/onboarding/wizard`
-- outros: `/ranking`, `/coach`, `/notificacoes`, `/suporte`, `/broadcasts`, `/depoimentos`, `/galeria`, `/feedback-videos`, `/busca`, `/analytics`, `/gamificacao`, `/ferramentas/hub/:itemId`, `/admin/rbac`
+- `/dashboard/qualidade`, `/dashboard/command-center/copiloto`
+- `/alunos/novo`, `/alunos/acoes-massa` (redirect), `/alunos/:id`, `/alunos/:id/editar`, `/alunos/:id/equipamentos`, `/alunos/:id/relatorio`, `/alunos/:id/evolucao`, `/alunos/:id/plano-sucesso`, `/alunos/:id/fotos`, `/alunos/:id/anamnese`, `/personal/alunos/:id/anamnese` (redirect), `/alunos/:id/treinos-list`, `/alunos/:id/ia/progressao`, `/alunos/:id/chat`, `/alunos/:id/feedback-video`, `/alunos/:id/engajamento`, `/alunos/:id/evolucao-comparativo`, `/alunos/:id/trilhas`, `/alunos/:id/feedback-videos`
+- `/treinos/novo`, `/treinos/:id`, `/treinos/:id/exercicios/add`, `/exercicios`, `/exercicios/novo`, `/exercicios/biblioteca-wizard`, `/exercicios/:id`, `/exercicios/:id/editar`
+- `/checkin`, `/checkin/executar`, `/checkin/treino/:treinoId`, `/checkin/historico`, `/checkin/historico/:id`
+- `/agenda/novo`, `/financeiro`, `/financeiro/mensalidades/:id`
+- `/perfil`, `/configuracoes`, `/perfil/editar`, `/perfil/link-publico`, `/perfil/wallet`, `/perfil/ferramentas`, `/perfil/mfa`, `/identidade-visual`, `/white-label`, `/perfil/white-label`, `/setup/identidade`, `/perfil/equipe`, `/perfil/landing-editor`
+- `/ia/chat`, `/ia/checkin` (redirect), `/ia/progressao/aceitar`, `/chat/inbox`
+- `/feed`, `/leads`, `/leads/kanban`, `/kanban`, `/leads/novo`, `/leads/:id`, `/leads-publicos`
+- `/alertas`, `/alertas/aluno/:id`, `/alertas/config`, `/relatorios/global`, `/relatorio/business`
+- `/convites`, `/planos` e `/paywall` (redirect para `/assinatura`), `/assinatura`, `/assinatura/review`, `/assinatura/success`, `/referral`, `/retencao`, `/ofertas-upsell`, `/cancel-save`, `/dunning`, `/winback`, `/promo-enterprise`, `/migracao-magica`, `/migracao-focux`, `/growth/migracao`
+- `/habitos`, `/habitos/:id`, `/automacoes`, `/desafios`, `/desafios/:id`, `/loja`, `/pacotes`, `/recorrencia`, `/nps`, `/grupo-aulas`, `/onboarding/wizard`
+- `/ranking`, `/coach`, `/notificacoes`, `/suporte`, `/broadcasts`, `/depoimentos`, `/galeria`, `/feedback-videos`, `/busca`, `/analytics`, `/gamificacao`, `/ferramentas/hub/:itemId`, `/admin/rbac`
 
-Para cada rota responda: quem chega nela sem saber a URL? O dock, um push, um deep link, um push FCM, ou só quem digita o path?
-
-### 6.5 Módulos do app (`lib/features/`)
-
-Piso, não teto. Um diretório sem tela ainda pode ser infraestrutura (`subscription`, `pricing`).
+### 6.5 Módulos do app
 
 `admin`, `agenda`, `alertas`, `alunos`, `analytics`, `anamnese`, `assinatura`, `auth`, `automacoes`, `avaliacao`, `broadcasts`, `busca`, `captura`, `chat`, `checkin`, `coach`, `convites`, `dashboard`, `depoimentos`, `desafios`, `dunning`, `evolucao`, `exercicios`, `feed`, `feedback`, `ferramentas`, `financeiro`, `galeria`, `gamificacao`, `growth`, `grupos`, `habitos`, `health`, `ia`, `leads`, `loja`, `monetizacao`, `notificacoes`, `nps`, `onboarding`, `pacotes`, `perfil`, `planos`, `plano_sucesso`, `pricing`, `qa`, `ranking`, `recorrencia`, `referral`, `relatorio`, `retencao`, `subscription`, `suporte`, `treinos`, `trilhas`, `winback`.
 
-### 6.6 Módulos do backend (`com.focux.modules`)
+`subscription` e `pricing` não têm tela própria. O inventário diz quem os chama.
 
-Piso. No intervalo até `39b3249f` nasceram ou mudaram peças de check-in (`CheckinPreviaService`), Home do aluno (campos de anamnese, insight, volume, agenda condicionada ao plano), NPS e agenda. Releia esses pacotes no HEAD.
+### 6.6 Módulos do backend
 
 `agenda`, `alertas`, `alimentar`, `alunos`, `analytics`, `anamnese`, `auditoria`, `auth`, `automacoes`, `avaliacao`, `backup`, `brand`, `broadcast`, `busca`, `campanhas`, `captura`, `chat`, `checkin`, `coach`, `comunidade`, `convites`, `dashboard`, `depoimentos`, `desafios`, `dunning`, `engajamento`, `evolucao`, `exercicios`, `exportacao`, `fcm`, `feed`, `feedback`, `ferramentas`, `financeiro`, `galeria`, `gamificacao`, `growth`, `grupos`, `habitos`, `health`, `ia`, `iap`, `leads`, `lgpd`, `loja`, `monetizacao`, `nfse`, `notificacoes`, `nps`, `onboarding`, `pacotes`, `pagamentos`, `personal`, `planos`, `planosucesso`, `posecoach`, `pql`, `pricing`, `ranking`, `rbac`, `recorrencia`, `referral`, `relatorio`, `retencao`, `suporte`, `sync`, `templates`, `treinos`, `trilhas`, `upload`, `webhooks`, `winback`.
 
-Flyway: conte os `V*.sql`. A leitura antiga viu na ordem de 170 migrações. Não use o número como fato.
+Flyway está em `src/main/resources/db/migration/`. Conte no tree.
 
-Padrão frequente: CRUD mais um BFF `*/home`. Muitos hubs do app foram desenhados para first paint em um request. Verifique se a tela ainda dispara sidecars que anulam isso.
+O padrão do produto é CRUD mais BFF `*/home` para o first paint. A auditoria diz se a tela ainda dispara sidecar que anula o BFF.
 
-### 6.7 Hipóteses para confirmar ou refutar
+Peças atuais do contrato de treino e da Home do aluno, para confronto com o inventário: `CheckinPreviaService`, bundles da Home do aluno (anamnese, insight, volume, agenda condicionada ao plano), NPS.
 
-Não transforme nenhuma linha em P0 sem reler o código e mostrar o efeito no usuário ou no dado.
+### 6.7 Comportamentos atuais para confrontar
 
-1. **Duas filas offline de treino.** `OfflineSyncService.isSensitivePath` exclui `/checkin` (e também chat, anamnese, health, lgpd, wallet, mensalidade, pagamento, financeiro, auth, alunos, leads, perfil, ia, comunidade, fcm, upload — releia a função). Em paralelo, o check-in tem fila própria de séries: `CheckinSeriesPendentesStore`, `checkin_series_fila.dart`, `CheckinFilaSync`, escopo global `checkin_fila_sync_scope.dart`. A série guarda carga, repetições, RPE, dor e feedback e reenvia por `registrarSerie`. 4xx sai da fila; 5xx/401/408/429/rede ficam. Audite: concluir treino com pendência, reabrir sessão, duplicar série, “já fiz” repetido no dia, o que a Home e o Aluno 360 mostram antes do flush, e se o personal vê carga inventada. O backend recente tem regra explícita de “confirmar restante sem inventar carga” — rastreie até a UI.
-2. **Prévia e hub de treinos.** `TreinoPreviaScreen` e `MeusTreinosScreen` mudaram de papel (hub com prévia, rodízio, “já fiz” sem séries). Não descreva a tab Treinos como uma lista antiga.
-3. **Home do aluno e BFF.** O contrato `GET /api/dashboard/aluno/home` perdeu campos legados. Cruze `AlunoDashboardHomeResponse` com o parser Dart. Insight, coach, meta, recorde, anamnese, agenda com horário, NPS adiado e cache da Home são um fluxo só. Procure card duplicado de evolução e atalho que repete o topo.
-4. **Recovery em dois lugares.** Cliente: `lib/core/health/recovery_score.dart` (`RecoveryScoreView.compute`). Servidor: calculadora de recovery no módulo `health`, alimentada por `POST /api/aluno/saude/sync`, lida em `/api/aluno/saude/recovery` e no BFF / Aluno 360. Diga qual número aparece antes do sync, depois, offline, e na tela do personal. Widget iOS entra nesse rastro.
-5. **Terra versus Health.** Webhook Terra no backend. O app sincroniza Apple Health / Health Connect. Confirme se Terra tem efeito de produto ou é caminho morto.
-6. **Biblioteca de exercício.** `kBibliotecaLibraryVideosStandby` em `lib/features/exercicios/services/biblioteca_media_config.dart` estava `true`, com comentário de que a mídia MoveKit/Cloudinary live usa URL publicada e que não se abre sheet “em breve”. Confirme o comportamento real da prévia sem mídia.
-7. **Pose coach.** Testes do app afirmavam que `gated_pose_coach_panel.dart` e `pose_coach_panel.dart` não existem. `google_mlkit_pose_detection` estava no `pubspec.yaml` sem uso em `lib/`. O backend tem módulo `posecoach`. Classifique os três fatos no HEAD. Não proponha reativar pose coach sem evidência de job de usuário.
-8. **Comunidade e `/api/hoje`.** `api_client.dart` listava `/api/comunidade` e `/api/hoje` em cache. Hipótese: sem repository no app; `ComunidadeController` existe; `/api/hoje` sem mapping. Grupo de aulas (`/api/grupo-aulas`) é outro domínio. Não misture.
-9. **Alimentar.** Módulo `alimentar` respondia 410. Confirme se sobrou UI de dieta.
-10. **Listas cruas 410.** Analytics e agenda teriam endpoints crus aposentados em favor de `*/home`. Confirme se o app ainda chama os crus.
-11. **Outbox.** `OutboxProcessorJob` marca evento como `PROCESSADO` depois de log, sem consumer externo. Descubra se algum fluxo de produto depende disso ou se é infra morta. Não proponha Kafka por padrão.
-12. **Pagamentos.** IAP nativo verifica no backend. Preferência Mercado Pago de plano SaaS no app estava condicionada a `kIsWeb`. `POST /api/pagamentos/preapproval/{planoId}` parecia sem caller no app. Webhook Mercado Pago é servidor (`/api/webhooks`). Recorrência e PIX de mensalidade do aluno são outro dinheiro (aluno → personal), não a assinatura da loja. Separe os três ledgers: SaaS do personal, mensalidade do aluno, loja/pedido. Referral converte em pagamento real — rastreie IAP e MP até o ledger.
-13. **IAP fail-closed.** Há código de verificação Apple/Google que muda de comportamento sem segredo. Não afirme que recibo falso passa. Diga o que o código faz quando o verifier não está configurado, e marque produção como `NECESSITA VALIDAÇÃO`.
-14. **Restore e exclusão de conta.** `restorePurchases` existe na assinatura. Exclusão: `DELETE /api/lgpd/me/delete` no aluno e no perfil do personal. Confirme se os dois papéis concluem o fluxo exigido pela App Store (exclusão iniciada no app, não só um link solto) e o que é apagado de verdade (treino, saúde, mídia, tokens, tenant).
-15. **Suporte.** A rota `/suporte` redireciona para a web. `ApiClient` pode postar `POST /api/suporte/analisar-erro` para personal. Separe o que o usuário vê do que o cliente dispara sozinho.
-16. **Referral.** UI chama `GET /api/referral`. Validação pública de código e atribuição no cadastro precisam ser rastreadas até conversão, limite e estorno. `GET /api/referral/validar/{codigo}` pode estar sem caller.
-17. **Export/backup.** Endpoints de exportação e backup podem estar só no catálogo de QA. Confirme se LGPD export (`/api/lgpd/me`) é o caminho real do titular.
-18. **Entitlements.** Queda de rede usa mapa estático de capabilities e cache local em planos. Diga se o app libera ou bloqueia feature quando o BFF não responde. A regra do design system é capability, nunca `plano == 'FREE'`. Procure o atalho proibido.
-19. **NFS-e, campanhas, PQL, smart pricing.** Podem ser backend-only ou sem superfície útil. Classifique. Não vire feature de lançamento por existir classe.
-20. **White-label e landing.** Identidade, editor de landing, páginas `/p/`, `/c/`, `/landing/`, convite HTML. Fazem parte do produto público. Audite o que um aluno vê antes de ter conta.
-21. **STOMP.** Chat usa SockJS/STOMP em `{ws}/ws/websocket` com tópicos por personal/aluno. Handshake `/ws/**` é público e o JWT entra no CONNECT — confirme o interceptor. Não há, na leitura antiga, WS para dashboard ou push. Notificação de produto é FCM + centro in-app.
-22. **Analytics de produto.** `POST /api/analytics/evento` pode estar ligado só a um funil estreito. Crashlytics existe no app. Sentry existe no backend (DSN opcional). Não chame isso de observabilidade completa até ver o que um incidente de pagamento ou de fila de séries emite.
-23. **RBAC.** `/admin/rbac` e membros de tenant. Descubra quem abre a tela e se o backend recusa o recurso, não só esconde o botão.
-24. **Textos e escala.** Home do aluno teve correções de quebra de linha com fonte grande ao mesmo tempo em que o scaler é clampado. Diga qual dos dois o usuário de iPhone pequeno experimenta.
-25. **README versus binário.** Versão, stack e escopo do README não batem necessariamente com `pubspec.yaml` nem com o router. Trate README como superfície pública desatualizada até prova em contrário.
+Não promova nenhuma linha a P0 sem o rastro da passagem C. Se o inventário mostrar outra coisa, o inventário vence.
 
----
-
-## 7. Inventário obrigatório (saída, seção 1–4)
-
-Antes de sugerir melhoria, publique:
-
-1. Inventário de módulos dos dois repos, com etiqueta de status.
-2. Mapa de telas: path, widget, papel, tipo S1–S9 se conseguir classificar pela referência já existente, entrada (dock, push, deep link, FCM), e se é redirect morto.
-3. Mapa de sheets e dialogs que não são rota, amarrados à tela dona.
-4. Mapa de fluxos ponta a ponta (seção 9).
-5. Arquitetura App ↔ Backend: BFFs usados no first paint, sidecars, cache/ETag, fila offline genérica versus fila de séries, STOMP, FCM, webhooks que o app nunca vê.
-6. Entidades que importam para o usuário, não o catálogo bruto das ~100 classes. Inclua relações: Personal 1—N Aluno; treino prescrito; execução e séries; medida, foto, recorde; mensalidade e recorrência; plano SaaS e `planoValidoAte`; referral; chat; agenda; health snapshot; anamnese.
-
-Não desenhe arquitetura-alvo. Descreva a que o código executa.
+1. **Duas filas no treino.** `OfflineSyncService.isSensitivePath` exclui `/checkin`, e também chat, anamnese, health, lgpd, wallet, mensalidade, pagamento, financeiro, auth, alunos, leads, perfil, ia, comunidade, fcm e upload. A execução tem outra fila: `CheckinSeriesPendentesStore`, `checkin_series_fila.dart`, `CheckinFilaSync`, `checkin_fila_sync_scope.dart`. A série pendente guarda carga, repetições, RPE, dor e feedback e reenvia com `registrarSerie`. 4xx sai da fila. 5xx, 401, 408, 429 e falha de rede ficam. O backend, em `CheckinService`, não inventa carga ao confirmar o restante. Rastreie concluir com pendência, reabrir sessão, “já fiz” no mesmo dia, o que o Hoje e o Aluno 360 mostram antes do envio, e o que o personal vê.
+2. **Hub e prévia.** `MeusTreinosScreen` é hub. `TreinoPreviaScreen` é a prévia, com rodízio e “já fiz” sem exigir séries. Não descreva a tab Treinos como lista antiga.
+3. **Home do aluno.** `GET /api/dashboard/aluno/home` é o contrato vigente, sem os campos legados removidos. Cruze `AlunoDashboardHomeResponse` com o parser Dart. Insight, coach, meta, recorde, anamnese, agenda com horário, NPS adiado e cache são o mesmo fluxo.
+4. **Recovery.** Cliente: `lib/core/health/recovery_score.dart`. Servidor: módulo `health`, `POST /api/aluno/saude/sync`, `GET /api/aluno/saude/recovery`, BFF e Aluno 360. Diga qual número a UI mostra antes do sync, depois, offline, e na tela do personal. O widget iOS entra no rastro.
+5. **Terra e Health.** O backend tem webhook Terra. O app sincroniza Apple Health e Health Connect. Classifique se Terra altera o que o usuário vê.
+6. **Biblioteca.** `kBibliotecaLibraryVideosStandby` em `lib/features/exercicios/services/biblioteca_media_config.dart` é `true`. Mídia MoveKit já publicada no Cloudinary continua na prévia. Sem mídia publicada, não abre sheet “em breve”.
+7. **Pose.** Não há painel de pose no app. `google_mlkit_pose_detection` está no `pubspec.yaml`. O backend tem o módulo `posecoach`. Classifique os três. Não proponha reativar pose.
+8. **Comunidade e `/api/hoje`.** `api_client.dart` cita os dois paths em cache. Não há repository de comunidade no app. `ComunidadeController` existe. `/api/hoje` não tem mapping. Grupo de aulas é `/api/grupo-aulas`.
+9. **Alimentar.** O módulo responde 410. Não há dieta no produto.
+10. **Listas cruas.** Analytics e agenda aposentaram lista crua em favor de `*/home`, com 410 no caminho velho. Veja se o app ainda chama o velho.
+11. **Outbox.** `OutboxProcessorJob` marca o evento como `PROCESSADO` depois de log. Não há consumer externo. Não proponha Kafka.
+12. **Três dinheiros.** SaaS do personal (IAP no nativo; preferência Mercado Pago quando `kIsWeb`). Mensalidade do aluno (PIX, recorrência, webhook). Loja/pedido. `POST /api/pagamentos/preapproval/{planoId}` não é chamado pelo app. Referral converte em pagamento real: rastreie IAP e Mercado Pago até o ledger.
+13. **IAP sem segredo.** O verifier muda de comportamento quando o segredo de produção não está configurado. Descreva o que o código faz. O efeito em produção entra no roteiro de submissão, sem afirmar que recibo falso passa.
+14. **Restore e exclusão.** `restorePurchases` está na assinatura. Exclusão dos dois papéis: `DELETE /api/lgpd/me/delete` (`aluno_delete_account.dart` e o perfil do personal). Diga o que o servidor apaga. O gesto no iPhone entra no roteiro.
+15. **Suporte.** `/suporte` abre a web. `ApiClient` envia `POST /api/suporte/analisar-erro` para o personal em erro de transporte. Separe o que a pessoa vê do que o app dispara.
+16. **Referral.** A UI chama `GET /api/referral`. Atribuição, conversão, limite e estorno estão no backend. `GET /api/referral/validar/{codigo}` não é chamado pelo app.
+17. **Export e backup.** Exportação e backup de tenant aparecem no catálogo de QA. O caminho do titular é `/api/lgpd/me`.
+18. **Entitlement.** Sem rede, o app usa mapa estático de capabilities e cache local. Diga se a feature abre ou fecha. A regra do produto é capability, não `plano == 'FREE'`.
+19. **NFS-e, campanhas, PQL, pricing.** Existem no backend. A auditoria diz se algum tem tela. Não viram escopo de loja por existir classe.
+20. **Marca e páginas públicas.** Identidade, editor de landing, `/p/`, `/c/`, `/landing/`, HTML de convite. Fazem parte do que um aluno vê antes da conta.
+21. **Tempo real.** Chat usa STOMP em `{ws}/ws/websocket`, tópico por personal e por aluno. O handshake de `/ws/**` é público; o JWT entra no CONNECT. Push de produto é FCM mais o centro `/notificacoes`. Não há WebSocket de dashboard.
+22. **Sinal de produção.** Funil `POST /api/analytics/evento`. Crashlytics no app. Sentry no backend, com DSN opcional. Diga se uma série presa na fila ou um pagamento sem entitlement deixa rastro.
+23. **RBAC.** Tela `/admin/rbac` e membros em `/api/tenant/membros`. A autorização que importa é a do backend quando o cliente mente o recurso.
+24. **Escala de texto.** Clamp em `main.dart` e o layout da Home do aluno. O iPhone pequeno confirma no roteiro, com o arquivo citado.
 
 ---
 
-## 8. Auditoria de cada tela
+## 7. O que publicar antes de qualquer gap
 
-Toda tela alcançável ganha um scorecard curto. Fluxos P0/P1 ganham narrativa. Não escreva um ensaio de UX idêntico para cem telas.
+Com o inventário independente, e só então o confronto:
 
-Scorecard mínimo:
+1. Módulos dos dois repositórios, com etiqueta.
+2. Telas: path, widget, papel, como se chega, redirect ou tela, tipo S1–S9 quando o design system já classifica.
+3. Sheets e dialogs que não são rota, com a tela dona.
+4. Fluxos ponta a ponta.
+5. App ↔ Backend: BFF do first paint, sidecar, ETag, fila genérica versus fila de séries, STOMP, FCM, webhook que o app não chama.
+6. Entidades que o usuário produz: Personal e Aluno, treino prescrito, execução e série, medida, foto, recorde, mensalidade, recorrência, plano SaaS e validade, referral, chat, agenda, snapshot de saúde, anamnese.
 
-- por que a tela existe e qual job fecha
-- ação primária
-- de onde vem o dado (endpoint, repository, cache, constante)
-- o que o backend tem e a tela não mostra
-- o que a tela mostra sem origem
-- loading, vazio, erro, offline, sucesso, primeira vez, retorno
-- uma frase de UI só se houver inconsistência real com o design system existente (densidade, card sem job, métrica sem decisão, motion sem função, safe area, contraste, tipo)
-- risco de segurança só se a tela lê ou grava dado de outro tenant, saúde, pagamento ou sessão
-
-### UX, quando houver achado
-
-Clareza, hierarquia, decisão, carga cognitiva, consistência com o resto do Focux, feedback, prevenção e recuperação de erro, acessibilidade, estados. Cite o widget. “Deixar mais bonito” não é achado.
-
-### UI
-
-Use a pele que já existe (Tokens Strip, tipografia, inset-grouped só onde o tipo S2 manda, CTA conforme S5/S6/S9). Aponte tela que virou outro produto: genérica, entupida de cards, gamificada sem regra, gráfico decorativo, animação que compete com a ação. Não proponha design system novo.
-
-### Produto
-
-Para a tela: problema que resolve, valor, informação sobrando, informação faltando, decisão que o sistema já poderia tomar, função que mora no lugar errado. Separe problema real de ideia.
-
-### Dados
-
-Origem, endpoint, repository/provider, persistência, duplicação de conta, cálculo em dois lugares, dado estático no lugar de dado real, campo do BFF ignorado pelo parser.
-
-### Performance
-
-Requests no primeiro frame, duplicata, waterfall, payload, cache e invalidação, rebuild, lista, imagem, vídeo, animação. Não peça BFF novo se o BFF existe e a tela o ignora. Não peça cache novo se o bug é cache velho (Home do aluno e pagamento limpando cache são área quente).
-
-### Segurança da tela
-
-Autorização, IDOR/BOLA, tenant, deep link com id na URL, token em log, upload, saúde, pagamento. Só com caminho de código.
-
-Telas que não podem ficar com scorecard raso, salvo se você provar que não existem:
-
-- Splash, login, MFA, cadastro personal, cadastro aluno, convite, definir senha, esqueci senha
-- Hoje do personal e Hoje do aluno
-- Lista de alunos e Aluno 360 (três abas)
-- Hub de treinos do aluno, prévia, execução, histórico, detalhe da sessão
-- Biblioteca e editor de treino do personal
-- Saúde e recovery
-- Chat aluno e inbox do personal
-- Financeiro dos dois papéis, mensalidade, recorrência
-- Assinatura, review, success, paywall redirects
-- Referral, convites
-- Perfil dos dois papéis, exclusão de conta, MFA, white-label
-- Agenda dos dois papéis
-- Anamnese dos dois papéis
-- Feed, broadcasts, notificações
-- Leads, kanban, captura pública
-- IA copiloto, chat IA, progressão
-- Migração mágica
-- Onboarding
-
-As demais rotas da seção 6 entram no mapa e no scorecard compacto. Módulo sem rota também entra, como órfão ou infraestrutura.
+Descreva a arquitetura que o código executa. Não desenhe outra.
 
 ---
 
-## 9. Fluxos completos — não audite tela isolada
+## 8. Auditoria de cada tela do inventário
 
-Reconstrua cada fluxo que o código implementar. Os nomes abaixo são exemplos obrigatórios **se existirem**, mais tudo o que você achar.
+Toda tela que o inventário encontrou entra. Tela que só está na seção 6 e o inventário não encontrou não é inventada de volta. Tela que o inventário encontrou e a seção 6 omitiu entra do mesmo jeito.
 
-Para cada fluxo: diagrama em texto (A → B → C), etiqueta de status, elo quebrado, e quem mais deveria ver o mesmo fato (aluno, personal, Aluno 360, Home, job, push).
+### Não transformar o scorecard em nota
+
+Não atribua notas numéricas, estrelas, percentuais ou rankings às telas.
+
+“10/10” representa apenas o estado-alvo de prontidão definido na seção 22.
+
+Uma tela pode estar visualmente excelente e ainda possuir um gap P0 de dados, segurança ou integração.
+
+Da mesma forma, uma tela simples pode estar pronta sem precisar receber novas funcionalidades.
+
+O objetivo é identificar gaps concretos, não produzir uma pontuação subjetiva.
+
+Para cada tela, só gaps. Se não houver gap, escreva `SEM GAP RELEVANTE` e a evidência do job, do dado e dos estados. Não escreva elogio.
+
+Campos do gap, quando existir:
+
+- job da tela e ação primária
+- origem do dado (endpoint, repository, cache ou constante)
+- campo que o backend tem e a tela não mostra
+- valor que a tela mostra sem origem
+- estado que falta: loading, vazio, erro, offline, sucesso, primeira vez, retorno
+- inconsistência com o design system existente, se mudar o que a pessoa consegue fazer
+- autorização, tenant, saúde, pagamento ou sessão, se a tela lê ou grava isso
+
+UX, UI, produto, dado, performance e segurança entram como gap com arquivo, não como capítulo genérico por tela. “Deixar mais bonito” não é gap.
+
+UI usa a pele que já existe. Aponte tela que virou outro produto: card sem job, métrica sem decisão, motion que compete com a ação, safe area, contraste, tipo. Não proponha design system novo.
+
+Fluxos que o inventário marcar como caminho principal (entrar, Hoje dos dois papéis, Aluno 360, treino da prescrição até o personal ver a série, saúde, chat, os três dinheiros, referral, exclusão de conta) ganham o rastro completo da seção 9, não um parágrafo solto.
+
+---
+
+## 9. Fluxos do inventário
+
+Reconstrua os fluxos que o código implementa. Os títulos abaixo são exemplos do que procurar no inventário, não a lista fechada. Fluxo ausente no código: `AUSENTE` e a busca. Não vira roadmap.
+
+Para cada fluxo real: cadeia em texto, etiqueta, elo quebrado, e quem mais lê o mesmo fato.
 
 ### Treino
 
-Prescrição do personal → atribuição → hub do aluno → prévia → iniciar execução → série (carga, repetições, RPE, dor, feedback) → descanso → fila offline de séries → concluir / “já fiz” / confirmar restante → histórico semanal e detalhe → evolução, recordes, volume → Home do aluno → Hoje do personal / pulse → Aluno 360 (aderência, timeline, recordes).
+Prescrição → atribuição → hub do aluno → prévia → execução → série (carga, repetições, RPE, dor, feedback) → descanso → fila de séries → concluir, “já fiz” ou confirmar restante → histórico → evolução, recorde, volume → Hoje do aluno → Hoje do personal → Aluno 360.
 
-Perguntas que o código tem de responder:
-
-- A série pendente na fila local aparece como feita?
-- Concluir com fila suja perde carga ou inventa carga?
-- “Já fiz” no mesmo dia duplica execução? Há teste recente disso no backend — veja se a UI concorda.
-- RPE e dor sobrevivem até o Aluno 360 ou morrem na execução?
-- Descanso termina com o app em background? Há alerta de descanso; confirme permissão e limite de iOS.
-- Check-in do personal (`/checkin`, sessão personal) é o mesmo modelo de dados?
+O código tem de responder: a série ainda na fila aparece como feita; concluir com fila suja perde ou inventa carga; “já fiz” no mesmo dia duplica execução; RPE e dor chegam ao Aluno 360; o descanso acaba com o app em background; o check-in do personal em `/checkin` usa o mesmo modelo.
 
 ### Saúde
 
-Permissão → fonte (HealthKit / Health Connect) → sync → snapshot → recovery → Home, tab Saúde, widget, Aluno 360. Procure número estático, score local divergente, e dado de saúde em log ou analytics.
+Permissão → HealthKit ou Health Connect → sync → snapshot → recovery → Hoje, tab Saúde, widget, Aluno 360. Número estático, score local diferente do servidor, e saúde em log são gaps.
 
 ### Comunicação
 
-Mensagem → REST e/ou STOMP → persistência → entrega → não lido no pulse da Home do personal → push FCM → leitura → histórico. Broadcast é outro fluxo. Feed é outro fluxo. Não os misture.
+Mensagem → REST e STOMP → persistência → entrega → não lido no Hoje do personal → FCM → leitura. Broadcast é outro fluxo. Feed é outro fluxo.
 
 ### Conta
 
-Cadastro personal e aluno, Apple, Google, e-mail/senha, MFA TOTP, senha provisória do aluno, refresh, logout, denylist, troca de tenant/equipe, exclusão LGPD. Deep link `/convite/:token` e `/p/:slug` entram aqui.
+Cadastro dos dois papéis, Apple, Google, e-mail, MFA, senha provisória do aluno, refresh, logout, denylist, equipe, exclusão. Deep link `/convite/:token` e `/p/:slug`.
 
-### Dinheiro do personal (loja Apple / Play / web)
+### SaaS do personal
 
-Trial → paywall → compra nativa → verify → entitlement → Home e gates. Em paralelo, o caminho web Mercado Pago e o webhook. Restore purchases. O que acontece com plano expirado, recibo atrasado, e jailbreak/dev-mode guard (`subscription_device_guard.dart`) — descreva o comportamento, não o contorne.
+Trial → `/assinatura` → compra nativa → verify → entitlement → gates do Hoje. Caminho web Mercado Pago e webhook, em separado. Restore. Plano expirado. O guard de dispositivo em `subscription_device_guard.dart` é comportamento a descrever, não a contornar.
 
 ### Dinheiro do aluno
 
-Mensalidade, PIX, recorrência, loja do personal, dunning, winback. Confirmação só vale com o estado que o backend considera pago (o glossário interno fala em captura aprovada, não em pré-autorização). Veja se a UI comemora cedo.
+Mensalidade, PIX, recorrência, loja, dunning, winback. A UI só trata como pago o estado que o backend trata como pago.
 
 ### Referral
 
-Convite ou código → atribuição → cadastro → trial → pagamento real (IAP e/ou MP) → webhook ou verify → conversão → espera → recompensa → limite → estorno → histórico. Leia `docs/FOCUX_REFERRAL_*.md` e depois o código. O doc não fecha o achado.
+Código ou convite → atribuição → cadastro → pagamento real → conversão → limite → estorno → histórico na tela `/referral`.
 
 ### Aluno 360
 
-Não assuma que a tela está certa porque o BFF existe. Primeiro paint usa bundles fatiados, não o `GET .../360` monolítico (há provider legado). Confirme o que cada aba mostra com dado produzido pelo aluno de verdade: treino, frequência, histórico, carga, volume, recorde, RPE, dor, saúde, recovery, consistência, chat, comportamento, pagamento, anamnese, equipamentos, autonomia. Aponte métrica sem fórmula, fórmula em dois lugares, e dado que o personal precisaria para decidir e que não chega.
+O first paint usa os três bundles, não o `GET .../360` monolítico. Diga o que cada aba mostra a partir do que o aluno produziu: treino, frequência, histórico, carga, volume, recorde, RPE, dor, saúde, recovery, consistência, chat, pagamento, anamnese, equipamentos. Métrica sem fórmula, duas fórmulas, e dado necessário para decidir que não chega são gaps.
 
-### Outros fluxos que você deve procurar
+### O restante que o inventário achar
 
-Anamnese, agenda e lembrete, hábitos, desafios, trilhas, plano de sucesso, gamificação, ranking, NPS, depoimentos, galeria e fotos de evolução, feedback em vídeo, migração mágica (arquivo, planilha, OCR), grupo de aulas, automações, alertas, coach proativo, onboarding wizard, identidade e landing, captura de lead, equipe/RBAC, qualidade operacional, Focux Score, command center, upsell, cancel-save, enterprise promo, retenção/churn, relatórios, busca global, notificações in-app, widget de recovery, link universal e scheme `focux://`.
-
-Se um fluxo não existir, escreva `AUSENTE` com a busca que você fez. Não o desenhe como roadmap nessa seção.
+Anamnese, agenda, hábitos, desafios, trilhas, plano de sucesso, gamificação, ranking, NPS, depoimentos, fotos, feedback em vídeo, migração mágica, grupo de aulas, automações, alertas, coach, onboarding, landing, captura, RBAC, qualidade operacional, Focux Score, command center, upsell, cancel-save, retenção, relatórios, busca, notificações, widget, universal link e scheme `focux://`.
 
 ---
 
-## 10. Auditoria de dados
+## 10. Dados
 
-Para cada família que existir, responda: é coletado, persistido, atualizado, calculado, onde é calculado, sobe ao backend, volta ao app, chega ao personal, chega ao Aluno 360, entra em alguma decisão, duplica, perde campo, ou existe e ninguém lê?
+Para cada família que o inventário encontrar: é coletado, persistido, atualizado, calculado, onde, sobe, volta, o personal vê, o Aluno 360 vê, alguma decisão usa, duplica, perde campo, ou ninguém lê?
 
-Famílias mínimas a procurar: aluno; treino prescrito; exercício; série; carga; repetições; RPE; dor; frequência; consistência; volume; evolução; recorde; medida corporal; foto; saúde; sono; passos; frequência cardíaca; recuperação; readiness; pagamento SaaS; mensalidade; recorrência; referral; mensagem; notificação; lead; agenda; financeiro; anamnese; hábito; desafio; NPS; feed; mídia; consentimento LGPD.
+Famílias que o código tem e que a passagem A deve localizar: aluno, treino, exercício, série, carga, repetições, RPE, dor, frequência, consistência, volume, evolução, recorde, medida, foto, saúde, sono, passos, frequência cardíaca, recovery, pagamento SaaS, mensalidade, recorrência, referral, mensagem, notificação, lead, agenda, anamnese, hábito, desafio, NPS, feed, mídia, consentimento.
 
-Destaque informação disponível no banco que a tela principal não usa, e informação na tela que não está no banco.
+Dado no banco que a tela principal ignora, e dado na tela que não está no banco, são gaps.
 
 ---
 
 ## 11. Duplicação
 
-Procure o mesmo fato em Hoje, Treinos, Histórico, Evolução, Saúde, Perfil, Aluno 360, dashboard do personal, relatórios, ranking, gamificação, coach e insights.
+O mesmo fato em Hoje, Treinos, Histórico, Evolução, Saúde, Perfil, Aluno 360, relatórios, ranking, gamificação, coach e insights.
 
-Para cada repetição:
+Para cada repetição: qual tela é a fonte, onde basta resumo, onde a repetição atrapalha, e se os números podem divergir (cache, cálculo local, “já fiz” versus série).
 
-- qual superfície é a fonte
-- onde basta resumo
-- onde a repetição atrapalha
-- se os números podem divergir (cache, cálculo local, janela de tempo, “já fiz” versus série)
-
-Não recomende apagar bloco só porque repete. Diga o que o usuário decide em cada lugar.
-
-A Home do aluno acabou de ser retrabalhada para tirar card duplo e atalho repetido. Verifique se o problema voltou ou mudou de lugar.
+Não peça para apagar bloco só porque repete. Diga a decisão que a pessoa toma em cada lugar.
 
 ---
 
 ## 12. Órfãos e incompletos
 
-Liste, com arquivo:
+Com arquivo:
 
-- endpoint sem consumidor no app
-- tela sem rota ou rota sem entrada
+- endpoint sem consumidor
+- tela sem rota, ou rota sem entrada
 - provider, repository ou model sem uso
-- dependência nativa sem uso (candidato: pose ML Kit — confirme)
-- módulo backend sem produto (candidatos a confirmar: alimentar 410, comunidade, outbox stub, campanhas internas, nfse, pose coach, export/backup, preapproval, `/api/hoje`)
-- feature escondida por redirect (`/evolucao`, `/aluno/form-check`, `/alunos/acoes-massa`, `/planos`, `/paywall`, `/ia/checkin`)
-- UI que chama API aposentada
-- API pronta sem UI
+- dependência sem uso em `lib/`
+- módulo backend sem efeito no app
+- redirect que esconde rota (`/evolucao`, `/aluno/form-check`, `/alunos/acoes-massa`, `/planos`, `/paywall`, `/ia/checkin`, e os que o inventário achar)
+- UI em API 410
+- API sem UI
 - UI sem API
-- integração pela metade
 
-Redirect legado pode ser decisão consciente (esconder em vez de manter tela rasa). Não proponha reabrir rota escondida sem job. Não proponha apagar código de teste nem módulo 410 sem dizer o que quebra.
+Redirect pode ser decisão de esconder tela rasa. Não reabra rota escondida sem job no código atual. Não apague teste nem módulo 410 no plano, a menos que o item diga o que quebra e por que o lançamento exige isso.
 
 ---
 
 ## 13. Design system
 
-Audite a coerência com o sistema que já está no repositório. Objetivo: um Focux só, premium, claro, funcional, intencional.
+Audite contra o sistema do repositório. Um Focux só: claro, funcional, intencional.
 
-Verifique no código, não no PDF imaginário: cor e contraste, tipo, espaço, raio, botão, input, card, sheet, dialog, gráfico, estado vazio/erro/loading, ícone, dock, motion, safe area, teclado, voltar.
+No código: cor, contraste, tipo, espaço, raio, botão, input, card, sheet, dialog, gráfico, estados, ícone, dock, motion, safe area, teclado, voltar.
 
-Regras já escritas em `docs/FOCUX_DESIGN_REFERENCE.md` que você deve checar se o código cumpre — e sinalizar se o doc e o código brigam:
+O `docs/FOCUX_DESIGN_REFERENCE.md` já exige pele constante, anatomia S1–S9, chevron para push, ação primária que não se disfarça de linha de ajuste, quatro estados, `safePopOrGo`, teclado sem freeze, capability em vez de `plano == 'FREE'`, uma ação principal. Onde o widget descumpre, é gap. Onde o doc e o widget discordam, vale o widget, e o gap é a divergência se ela muda o comportamento.
 
-- pele constante, anatomia conforme o tipo S1–S9
-- chevron empurra rota; ação primária não é disfarçada de linha de ajustes
-- quatro estados
-- voltar previsível (`safePopOrGo` versus pop cru)
-- teclado iOS sem freeze
-- capability de plano, não string mágica de plano
-- orçamento de destaque: uma ação principal
-
-Não redesenhe a marca. Não peça ilustração nova. Não peça gamificação extra se a tela já compete consigo mesma.
+Não redesenhe a marca. Não peça ilustração. Não peça gamificação nova.
 
 ---
 
 ## 14. Performance
 
-Baseie no código. “Trocar para arquitetura X” só entra se você mostrar o custo atual.
+Só com custo visível no código.
 
-Flutter: startup e splash, primeiro frame da Hoje dos dois papéis, primeiro frame do Aluno 360, navegação entre tabs, rebuild de provider, listas longas (alunos, exercícios, histórico, chat), imagem e vídeo (Cloudinary, biblioteca, feedback), memória da execução de treino, animação (Rive, flutter_animate), serialização dos BFF, ETag/304, caches de Home e de Aluno 360, fila de séries.
+Flutter: splash, primeiro frame dos dois Hoje, primeiro frame do Aluno 360, troca de tab, rebuild, lista de alunos, exercícios, histórico e chat, imagem e vídeo, memória da execução, animação, parse do BFF, ETag, cache da Home e do Aluno 360, fila de séries.
 
-Backend: query da Home do personal, Home do aluno, 360, check-in, chat, financeiro. N+1, payload, índice, cache Caffeine/Redis e invalidação, open-in-view, concorrência da fila de séries e do webhook, job que corre à toa (o outbox já reduziu frequência por causa de lock — entenda antes de sugerir cron novo).
+Backend: Home do personal, Home do aluno, Aluno 360, check-in, chat, financeiro. N+1, payload, índice, cache e invalidação, open-in-view, corrida da fila com o webhook, job que não faz trabalho de produto.
 
-Pergunte: o BFF existe e a tela ainda busca o sidecar? O cache de 60–90s mente depois de um treino ou de um pagamento? Há métrica Micrometer (`focux.dashboard.home`, `focux.aluno.360` ou outras) que cubra o caminho quente?
+Gap típico a confirmar no código: BFF existe e a tela ainda busca sidecar; cache da Home mente depois de treino ou pagamento.
 
 ---
 
 ## 15. Segurança
 
-Audite o que está implementado, não um checklist OWASP genérico. Para cada controle: existe, é parcial, ou não foi encontrado. Arquivo obrigatório.
+Para cada controle: presente, parcial ou ausente, com arquivo.
 
-Procure de verdade:
-
-- JWT (access, refresh, rotação, logout, denylist, JTI)
+- JWT, refresh, rotação, logout, denylist
 - MFA e senha provisória
-- Apple e Google sign-in: o que o backend valida
-- RBAC e o que acontece se o cliente mentir o recurso
-- tenant: `TenantContext`, `findByIdAndPersonalId`, membro de equipe, RLS/`RlsSecurityGuard` — confirme se RLS é obrigatório no Postgres que vocês usam ou só um guard condicional
-- IDOR em `/alunos/:id`, chat, evolução, financeiro, saúde do aluno visto pelo personal, timeline, uploads
-- deep link e universal link: token de convite, slug, open redirect
-- STOMP: inscrição em tópico de outro usuário
+- validação de Apple e Google no backend
+- RBAC quando o cliente mente
+- tenant: `TenantContext`, `findByIdAndPersonalId`, membro de equipe, `RlsSecurityGuard`
+- IDOR em aluno, chat, evolução, financeiro, saúde, timeline, upload
+- convite, slug e open redirect
+- STOMP em tópico de outra pessoa
 - webhook Mercado Pago, IAP e Terra: assinatura, replay, idempotência
-- `Idempotency-Key` e a fila de séries (replay duplica execução?)
+- fila de séries e replay
 - rate limit com e sem Redis
-- Turnstile na captura pública
-- logs com PII, saúde, token, recibo
-- armazenamento local: Keychain, SharedPreferences da fila de séries e do cache de plano, fila offline genérica
-- uploads e Cloudinary (SSRF / URL controlada pelo cliente)
-- mass assignment em DTOs de aluno, treino e check-in
-- dados de saúde e LGPD
-- actuator e OpenAPI em produção (quem é ADMIN)
-- antifraude já existente (jailbreak no checkout, device guard) sem transformá-lo em bypass
-- concorrência: duas conclusões de treino, dois webhooks, refresh paralelo
+- Turnstile na captura
+- log com PII, saúde, token ou recibo
+- Keychain, fila de séries, cache de plano
+- upload e URL de mídia
+- DTO de aluno, treino e check-in
+- saúde e LGPD
+- actuator e OpenAPI em produção
+- guard de dispositivo no checkout, descrito sem virar bypass
+- duas conclusões de treino, dois webhooks, refresh paralelo
 
-Não escreva exploit, payload, nem passo a passo de ataque. Descreva o controle que falta e o impacto. Segredos, DSN, client id e recibo não entram no relatório; cite o arquivo de config e diga se o valor está hardcoded.
-
-Endpoints administrativos e de QA: diga se o binário de release e o profile de produção os expõem.
+Não escreva exploit nem payload. Segredo não entra no relatório. Diga se QA ou actuator ficam no binário de release.
 
 ---
 
 ## 16. Apple App Store
 
-Não diga que está conforme. Onde faltar evidência no projeto, a etiqueta é `VALIDAR ANTES DA SUBMISSÃO`.
+Não afirme conformidade. O que o código não prova vira item do roteiro de celular ou da ficha de submissão, com a etiqueta `VALIDAR ANTES DA SUBMISSÃO` e o passo exato.
 
-Releia no tree, não neste prompt:
+Leia no tree:
 
-- bundle id, versão de marketing, build number, nome de exibição
-- signing, entitlements, capabilities, associated domains, app group, widget extension
-- `Info.plist` e purpose strings (câmera, fotos, microfone, reconhecimento de fala, Face ID, Health share/update)
-- `PrivacyInfo.xcprivacy` e se o binário declara os dados que o código realmente coleta (conta, saúde, fotos, vídeo, identificadores de push, compra)
-- tracking (`NSUserTrackingUsageDescription`, ATT): confirme ausência ou presença
-- Sign in with Apple ao lado de Google e e-mail
-- compras: produtos em `Products.storekit` versus os ids que o app pede e o backend reconhece; restore; conteúdo digital não vendido por fora no iOS (a política de `kIsWeb` versus loja nativa)
-- exclusão de conta dentro do app
-- privacidade, termos, consentimento, suporte — links reais, não placeholder
-- deep link / universal link e o `apple-app-site-association` servido pelo backend (`DeepLinkController`, `/.well-known/`)
-- splash, ícone, orientação, safe area
-- Dynamic Type: o clamp de `textScaler` em `main.dart` contra as telas que acabaram de corrigir fonte grande
-- VoiceOver: semântica dos controles da execução de treino e do dock
-- offline: fila de séries e o que mais mente sucesso
-- crashes: Crashlytics ligado em release? Firebase plist real não deve estar no git
-- erros, loading, vazio
+- bundle, versão `1.2.1+133`, build, nome
+- entitlements, associated domains, app group, widget
+- purpose strings e `PrivacyInfo.xcprivacy` contra o que o código coleta
+- tracking e ATT, presentes ou ausentes
+- Sign in with Apple junto de Google e e-mail
+- ids em `Products.storekit`, no app e no backend; restore; plano digital no iOS só pela loja
+- exclusão de conta dentro do app, nos dois papéis
+- links de privacidade, termos e suporte
+- `apple-app-site-association` no backend
+- ícone, splash, orientação, safe area
+- clamp de `textScaler` e VoiceOver da execução e do dock
+- fila de séries e qualquer sucesso mentiroso
+- Crashlytics em release, sem plist Firebase no git
 - `ITSAppUsesNonExemptEncryption`
-- permissões pedidas cedo demais, ou declaradas e não usadas (pose, microfone, fala) — motivo clássico de rejeição e de review de privacidade
-- login obrigatório: o app é para personal e aluno; confirme se a review consegue entrar (conta demo é `NECESSITA VALIDAÇÃO`, não invente credencial)
-- backend de produção apontado por dart-define, não por URL de debug no binário
+- permissão declarada e não usada
+- URL de API de release via dart-define, não host de debug no binário
 
-Pontos de atenção para rejeição devem citar a capability do código (Health, IAP, conta, Sign in with Apple, purpose string, UGC de chat/feed/foto). Não cite guideline de memória se você não conferiu o comportamento.
+Rejeição possível só com a capability que o código liga: Health, IAP, conta, Sign in with Apple, purpose string, conteúdo de chat, feed e foto.
 
-Android pode aparecer como paridade (Health Connect, Play Billing), mas o alvo desta auditoria de loja é a Apple. Não dilua.
+Android fica como paridade de Health Connect e Play Billing quando o mesmo código ramifica. O alvo da loja desta auditoria é a Apple.
 
 ---
 
 ## 17. Testes
 
-O humano citou cerca de 3.979 testes. Isso não é cota nem fato eterno. Reconte no HEAD: arquivos `*_test.dart`, `test()`/`testWidgets()`, classes Java de teste, `@Test`. Na leitura que originou este prompt, a ordem de grandeza era de centenas de arquivos no app e centenas de classes no backend, com milhares de métodos somados — e o número muda a cada commit (a Home e o check-in ganharam testes novos).
+Reconte no tree: arquivos `*_test.dart`, `test` e `testWidgets`, classes Java, `@Test`. O número de testes existentes é grande e não é cota. Não sugira apagar teste.
 
-É proibido sugerir apagar teste para facilitar mudança.
+Diga o que a rede cobre de verdade: contrato de router e repository, widget, fila de séries, histórico, Home do aluno, recovery, referral, RBAC, tenant, webhook, `integration_test`, Playwright em `e2e/` (web, não o iPhone), geradores em `focux-backend/tool/`, piso JaCoCo se o `build.gradle` ainda declara.
 
-Classifique a rede que existe:
-
-- contrato de router e de repositories
-- widget/polish
-- regras puras (fila de séries, histórico por semana, Home do aluno, recovery, referral, RBAC, IDOR, webhook)
-- `integration_test` (havia um smoke curto)
-- E2E Playwright em `e2e/` — isso é Flutter web com backend, não XCUITest do iOS
-- testes gerados em `focux-backend/tool/`
-- piso de cobertura JaCoCo, se o `build.gradle` ainda o declara
-
-Aponte buraco que importa para lançamento, não porcentagem abstrata:
-
-- fila de séries versus concluir treino versus Aluno 360
-- IAP verify e webhook (sem segredo real no git)
-- isolamento de tenant
-- Home do aluno no contrato novo
-- exclusão de conta
-- saúde: permissão negada, sync parcial
-- pagamento do aluno marcado pago só na UI
-
-Aponte teste que não representa o comportamento atual (parser de campo legado removido, rota redirect, widget de pose que o teste só garante que não existe). Teste frágil entra como risco de regressão, não como lixo.
+Buraco que entra no plano é o que deixa passar série perdida, pagamento mentiroso, tenant cruzado, Home no contrato errado, exclusão que não apaga, saúde com permissão negada. Teste que trava comportamento que o código já removeu entra como ajuste do teste, não como lixo.
 
 ---
 
-## 18. Observabilidade e produção
+## 18. Observabilidade
 
-Pergunta única, respondida com ferramenta concreta ou com “não há”:
+Responda com a ferramenta que existe no repositório, ou com “não há”:
 
-“Se isso quebrar amanhã em produção, dá para saber o que aconteceu?”
+se a fila de séries não subir, se o webhook de pagamento falhar depois do 200, se o entitlement não aplicar, se o sync de saúde falhar, se o FCM não registrar — dá para saber no dia seguinte?
 
-Cubra: Crashlytics, Sentry do backend, logs com request id, métrica, tracing, health público versus actuator, alerta (se não houver config de alerta no repo, diga que o alerta não está no código), erro de API engolido pelo cliente, fila de séries que não sobe, webhook que falha depois do 200, job ShedLock, FCM que não registra, sync de saúde, pagamento aprovado sem entitlement.
-
-Não proponha stack nova (Datadog, Kafka, segundo APM) se o buraco é “o evento existe e ninguém olha” ou “o log leva PII”.
+Cubra Crashlytics, Sentry, request id, métrica, tracing, health público, actuator, job com ShedLock. Não proponha outro APM nem fila nova. O gap é evento invisível ou log com PII.
 
 ---
 
-## 19. Julgamento de produto
+## 19. Julgamento
 
-Para cada funcionalidade descoberta, julgue valor, clareza, frequência, fricção, necessidade e ligação com o resto. O lançamento é um personal real com alunos reais, na App Store, com treino que não perde série, dinheiro que não mente, e uma visão do aluno que usa o dado que o aluno produziu.
+Para cada funcionalidade do inventário: valor, clareza, frequência, fricção e ligação com o resto. O lançamento é personal e aluno reais, treino que não perde série, dinheiro que não mente, e Aluno 360 que mostra o que o aluno produziu.
 
-Separe cada achado em exatamente um balde:
+Cada gap cai num balde só:
 
 1. problema real
-2. melhoria necessária para o lançamento
+2. melhoria necessária para a loja
 3. melhoria opcional
 4. funcionalidade nova
 5. scope creep
 
-Funcionalidade nova sem problema observado no código ou no fluxo cai em scope creep.
+Funcionalidade nova sem buraco no fluxo atual é scope creep e vai para “Não construir agora”.
 
-Não sugira rede social, marketplace, dieta, pose coach, hardware, ou i18n de três idiomas só porque o ARB `en`/`es` existe ou porque um módulo Java existe. O ADR e o `Locale('pt')` são evidência de produto Brasil-first até você provar o contrário. PIX, NFS-e e copy em português fazem parte do contexto; não internacionalize o lançamento.
+Não sugira rede social, marketplace, dieta, pose, hardware, Stripe, RevenueCat nem i18n. O produto é Brasil-first, locale `pt`, PIX e copy em português.
 
 ---
 
 ## 20. Prioridade
 
-O resultado não é uma lista infinita. Cada item tem: título, balde da seção 19, evidência (arquivo, símbolo, rota ou endpoint), impacto no usuário ou no dado, e dependência.
+Cada item de P0 e P1 é um pacote de implementação, não uma ideia:
 
-### P0 — crítico antes de produção
+- título
+- balde da seção 19
+- comportamento atual, com arquivo, símbolo, rota ou endpoint
+- comportamento desejado, verificável
+- app, backend ou os dois
+- testes que já existem e devem continuar passando, e o teste novo que trava o comportamento
+- telas que o roteiro de celular precisa abrir por causa deste item
+- dependência de outro item
+- o que este item não mexe
 
-Compromete segurança, dado, pagamento, autenticação, estabilidade, integridade do treino, publicação, ou o fluxo principal (entrar, treinar, ver o aluno, cobrar com honestidade).
+### P0
 
-### P1 — necessário para o lançamento
+Segurança, dado, pagamento, autenticação, estabilidade, integridade do treino, publicação, ou o fluxo de entrar, treinar, ver o aluno e cobrar com honestidade.
 
-A experiência de produção fica frágil ou confusa sem isso, mas não é um furo de integridade.
+### P1
 
-### P2 — alto valor depois
+Sem isso a versão de loja fica frágil ou confusa, e não é furo de integridade.
 
-Importante e já evidenciado, sem bloquear a primeira versão da loja.
+### P2
 
-### P3 — futuro
+Evidenciado, e fica fora da primeira submissão.
 
-Ideia ou expansão. Fica fora do escopo imediato.
+### P3
 
-Se você não tem evidência, o item não sobe de `NECESSITA VALIDAÇÃO` para P0.
+Expansão. Fora do plano de implementação.
+
+`NECESSITA VALIDAÇÃO` não vira P0. Vira passo do roteiro de celular ou da ficha de submissão.
+
+P2 e P3 não entram no plano que antecede a loja.
 
 ---
 
 ## 21. Não construir agora
 
-Seção obrigatória do relatório. Entram itens que:
+Seção obrigatória. Entram itens sem necessidade para a loja, de complexidade alta, sem evidência, ou que atrasam a submissão.
 
-- não são necessários para o lançamento
-- aumentam muita complexidade
-- não têm evidência de necessidade
-- podem esperar
-- colocam a submissão em risco
+Julgue e, se a evidência for fraca, coloque aqui: pose, comunidade, consumer de outbox, Stripe, RevenueCat, i18n, design system novo, dieta, form-check, dashboard analítico novo, gamificação nova, automação nova, white-label além do que já funciona.
 
-Candidatos que você deve julgar e, se a evidência for fraca, colocar aqui em vez de no P0: reativar pose coach; ligar comunidade; implementar consumer de outbox/Kafka; Stripe ou RevenueCat paralelos ao IAP; i18n en/es; novo design system; reabrir form-check e dieta; dashboard analítico novo; gamificação adicional; automações novas; white-label além do que já está shippable. Você pode discordar, desde que mostre o job de usuário e o buraco atual.
-
-O objetivo é um produto excelente e finito.
+O plano de implementação não contém esta seção.
 
 ---
 
-## 22. O que é 10/10
+## 22. Estado-alvo de prontidão
 
-10/10 não é “mais bonito”. É: não há gap relevante conhecido que comprometa experiência, funcionamento, segurança, dados ou lançamento.
+“10/10” não é nota e não é “mais bonito”. É este estado, para o produto inteiro: não há gap relevante conhecido que comprometa experiência, funcionamento, segurança, dados ou lançamento.
 
-Para cada fluxo crítico (auth, Hoje aluno, Hoje personal, execução de treino incluindo fila, histórico, Aluno 360, saúde, chat, assinatura/IAP, mensalidade do aluno, referral, exclusão de conta), defina critérios verificáveis do tipo:
+Não dê nota por tela. Para cada fluxo que for parar na loja, o plano só está pronto quando os critérios que se aplicam estão escritos como aceite de item P0 ou P1, ou como passo do roteiro de celular:
 
 - job principal óbvio
-- dado correto e com uma fonte
-- backend integrado no caminho feliz e no erro
+- um dado, uma fonte
+- backend no caminho feliz e no erro
 - loading, vazio e erro
-- offline honesto onde a rede falta (a fila não finge que o servidor gravou)
-- acessibilidade mínima do fluxo (alvo de toque, escala, rótulo)
-- performance do first paint sem waterfall acidental
-- autorização e tenant
-- feedback de sucesso e de falha
-- teste que protege o comportamento, ou buraco de teste nomeado
-- ligação com a outra ponta (aluno ↔ personal) explícita
-- sem segunda verdade numérica
-- comportamento igual ao resto do Focux
+- offline que não finge gravação
+- alvo de toque, rótulo, e o comportamento de escala que o roteiro confirma no iPhone
+- first paint sem waterfall que o código mostra
+- tenant e autorização
+- sucesso e falha visíveis
+- teste que trava o comportamento, ou passo de aparelho que o teste não alcança
+- o outro papel vê o mesmo fato quando o fluxo cruza
+- o widget se comporta como o resto do Focux
 
-Uma tela está pronta quando esses critérios que se aplicam a ela estão verdadeiros no código, não quando a pele foi trocada.
+Tela pronta é tela em que esses critérios são verdade no código. Pele nova, sozinha, não autoriza loja.
 
 ---
 
 ## 23. Evidência
 
-Cada achado cita pelo menos um de: arquivo, classe, função, rota, endpoint, provider, repository, model, migração, widget, teste.
+Formato:
 
-Formato curto:
+`ACHADO — etiqueta — evidência — impacto — P0|P1|P2|P3|NÃO CONSTRUIR|ROTEIRO`
 
-`ACHADO — etiqueta — evidência — impacto — prioridade`
-
-Proibido:
-
-- inventar tela, métrica, integração ou bug
-- tratar TODO como feature
-- tratar spec como implementação
-- tratar este snapshot como revalidação
-- copiar auditoria antiga (`FOCUX_PERFORMANCE_AUDIT.md`, auditoria de experiência do aluno, AUDIT.md) sem reler o código que ela aponta
-- colar segredo, token, e-mail real, id de cliente OAuth, plist Firebase, ou connection string
-
-Quando o código não fecha a questão (ambiente de produção, review da Apple, comportamento de HealthKit num aparelho, webhook com credencial real): `NECESSITA VALIDAÇÃO` ou `VALIDAR ANTES DA SUBMISSÃO`.
+Proibido inventar tela, métrica, integração ou bug; tratar TODO ou spec como feature; forçar o código a caber no snapshot; copiar auditoria antiga sem reler o arquivo; colar segredo, token, e-mail, id OAuth ou plist.
 
 ---
 
 ## 24. Forma do relatório
 
-Entregue nesta ordem. Seções vazias não existem: escreva `NADA ENCONTRADO` e a busca.
+Esta é a resposta inteira. Não há seção de considerações finais, próximos passos soltos, observações ou perguntas para o humano decidir depois.
 
-1. **Inventário completo do produto** — mapa real, com etiquetas.
-2. **Mapa de telas** — todas as rotas e as telas sem rota.
-3. **Mapa de fluxos** — os que você reconstruiu.
-4. **Arquitetura App ↔ Backend** — como o dado anda.
-5. **Auditoria tela por tela** — scorecards; narrativa só no que muda prioridade.
-6. **Auditoria fluxo por fluxo** — elos quebrados.
-7. **Auditoria de dados** — origem → cálculo → persistência → consumo, inclusive Personal ↔ Aluno.
-8. **Auditoria de performance.**
-9. **Auditoria de segurança.**
-10. **Auditoria de App Store** — confirmado no código, pendente, validar antes da submissão.
-11. **Auditoria de testes** — buracos críticos; o que não apagar.
-12. **Funcionalidades órfãs.**
-13. **Duplicações.**
-14. **P0**
-15. **P1**
-16. **P2**
-17. **P3**
-18. **Não construir agora**
-19. **Plano de execução** — ordem por dependência técnica e impacto, uma área por vez. Sem calendário de dias ou semanas. Cada passo diz o que prova que ficou pronto (teste existente a estender, contrato, fluxo). Não inclui patch.
-20. **Definition of done** — critérios objetivos para chamar o produto de pronto para produção e para submissão. Inclui freeze: visual sozinho não autoriza loja.
+1. **Inventário independente** — o mapa do tree, com etiquetas. Fonte da auditoria.
+2. **Confronto com o snapshot** — só divergências, no formato `SNAPSHOT INCORRETO → REAL NO HEAD → EVIDÊNCIA`. Se não houver divergência, `SNAPSHOT CONFERE COM O INVENTÁRIO`.
+3. **Mapa de telas** — as do inventário, mais sheets.
+4. **Mapa de fluxos**
+5. **Arquitetura App ↔ Backend**
+6. **Gaps por tela** — sem nota. `SEM GAP RELEVANTE` quando for o caso.
+7. **Gaps por fluxo**
+8. **Dados** — origem, cálculo, persistência, consumo, inclusive aluno → Aluno 360.
+9. **Performance**
+10. **Segurança**
+11. **App Store** — o que o código já mostra, e o que vai para o roteiro.
+12. **Testes** — buraco que vira item de plano; teste que permanece.
+13. **Órfãos**
+14. **Duplicações**
+15. **P0** — pacotes de implementação.
+16. **P1** — pacotes de implementação.
+17. **P2** — fora da primeira submissão.
+18. **P3** — fora.
+19. **Não construir agora**
+20. **Plano de implementação** — só P0 e P1, em ordem de dependência. Uma área por vez. Sem calendário. Cada passo aponta o pacote, os testes e as telas do roteiro. Sem patch.
+21. **Roteiro de teste no iPhone** — o único teste humano depois que o plano estiver implementado. Ver a seção 25.
+22. **Submissão** — a ficha da seção 26. Quando o roteiro passar, a ação seguinte é enviar o binário.
 
-Feche com uma lista curta do que você não conseguiu provar e por quê.
-
----
-
-## 25. Plano de execução (o que o relatório deve conter, não o que você faz agora)
-
-O plano recomendado descreve fases posteriores. Você não as executa.
-
-Fase A. Esta auditoria.
-
-Fase B. Implementação controlada, uma área por vez, numa sessão futura, começando pelo P0 que destrava os outros (em geral integridade de sessão, treino/fila, dinheiro, tenant — você confirma com o grafo de dependências real).
-
-Depois de cada área, na sessão de implementação, não nesta: testes que já existem mais os que faltam para o comportamento, análise, integração app↔backend, regressão do fluxo vizinho. Não se apaga teste para a área caber.
-
-Fase C. Auditoria final do mesmo roteiro, contra o código novo, procurando regressão de dado e de duplicação.
-
-Fase D. QA de produção: ambiente real, compra sandbox, Health, push, link universal, exclusão de conta. O que depender de aparelho ou de conta Apple fica explícito como validação humana.
-
-Fase E. Submissão. Itens `VALIDAR ANTES DA SUBMISSÃO` resolvidos ou assumidos por escrito.
+Se uma seção não tiver item, escreva `NADA ENCONTRADO` e a busca. Não acrescente apêndice.
 
 ---
 
-## 26. Critério de pronto deste brainstorming
+## 25. Roteiro de teste no iPhone
 
-A sessão falhou se:
+O relatório inclui o roteiro completo. Ele é o que a pessoa executa depois das implementações, no celular, nas telas que o plano alterou e nos passos que só o aparelho prova. Não é uma nova auditoria. Não descobre escopo. Falha no roteiro é bug contra o aceite já escrito.
 
-- você sugeriu UI antes de fechar o inventário
-- alguma pasta de `lib/features/` ou de `com.focux.modules` não aparece
-- Personal 360 foi tratado como tela própria sem você provar o widget
-- um P0 não tem arquivo
-- você propôs apagar testes
-- você propôs implementação, diff ou PR
-- você tratou as listas deste prompt como se fossem o produto inteiro
-- você não separou SaaS, mensalidade do aluno e referral
-- você não rastreou a série até o Aluno 360
-- você afirmou conformidade com a Apple sem evidência
-- você inventou problema que o código não mostra
+Para cada tela que algum P0 ou P1 alterar, um caso:
 
-A sessão está boa se um engenheiro consegue, só com o relatório, saber o que o Focux é, o que está partido, o que não deve ser construído, e a ordem segura de mexer depois — sem receber código nesta sessão.
+- papel
+- caminho desde o dock, o push ou o link
+- preparo (vazio, com dado, sem rede, erro)
+- ação
+- resultado visível
+- quando o fluxo cruza de papel, o que o outro papel vê em seguida
+
+Bloco fixo, sempre no roteiro, porque o teste automatizado não substitui o aparelho:
+
+- entrar com Apple, com Google e com e-mail, nos dois papéis
+- compra sandbox do plano, restore, e o gate da feature depois da compra
+- exclusão de conta do aluno e do personal, e a sessão que termina
+- Health: permitir e recusar; o número na tab Saúde e no Aluno 360
+- push: tocar e cair na tela certa
+- universal link de convite e de `/p/{slug}`
+- execução de uma série sem rede, reabrir o app, ver a série subir, ver carga, RPE e dor no Aluno 360
+- fonte grande no iPhone pequeno na Home do aluno e na execução
+- câmera ou foto só se o plano tiver mexido em evolução ou exercício
+- propósito de permissão coerente com o que a tela faz
+
+Cada caso termina em passa ou falha. Não há campo de comentário livre.
+
+---
+
+## 26. Submissão
+
+O relatório inclui a ficha, nesta ordem. Item que o código já satisfaz fica marcado `NO CÓDIGO`, com arquivo. Item que o roteiro cobre fica `NO ROTEIRO`, com o número do caso. Item que é preenchimento na App Store Connect fica `NA FICHA`, com o texto ou o asset que o repositório já tem (nome, bundle, versão, purpose string, URL de privacidade). O que não estiver no repositório não é inventado: entra como `NA FICHA` com o campo vazio nomeado, para preencher na hora do envio, sem reabrir produto.
+
+Ordem:
+
+1. versão e build iguais ao `pubspec.yaml`
+2. ícone, nome Focux Personal, bundle `com.focux.focuxApp`
+3. capabilities do entitlements conferidas com o que o binário usa
+4. privacy nutrition label alinhada ao `PrivacyInfo.xcprivacy` e ao que o app coleta
+5. Sign in with Apple, compra, restore e exclusão de conta demonstráveis pelo roteiro
+6. purpose strings iguais às do `Info.plist`
+7. URL de suporte, privacidade e termos
+8. conta de review: o que o revisor precisa conseguir fazer (entrar como personal, entrar como aluno, abrir um treino). Sem senha no relatório
+9. notas de review só para o que o binário faz e a Apple não vê sozinha (Health, compra sandbox)
+10. upload
+
+Quando os pacotes P0 e P1 estiverem implementados, os testes do plano estiverem passando e o roteiro da seção 25 estiver em passa, o próximo ato é este upload. Não há auditoria extra.
+
+---
+
+## 27. O que acontece depois deste relatório
+
+Você não executa estas fases. O relatório deixa elas fechadas.
+
+1. Implementar os pacotes P0 e P1, um por vez, na ordem do plano. Testes existentes permanecem. O teste novo do pacote passa. P2, P3 e “Não construir agora” não entram.
+2. Rodar o roteiro da seção 25 no iPhone, só nas telas alteradas e no bloco fixo.
+3. Se um caso falhar, corrigir contra o aceite daquele pacote. Sem novo brainstorm.
+4. Enviar para a Apple com a ficha da seção 26.
+
+---
+
+## 28. A sessão falhou se
+
+- uma sugestão de tela apareceu antes do inventário independente
+- a seção 6 definiu o que foi auditado
+- alguma pasta de `lib/features/` ou de `com.focux.modules` ficou de fora do inventário
+- o relatório usa o nome Personal 360
+- algum P0 ou P1 não tem comportamento desejado, teste e tela de roteiro
+- o roteiro de celular ou a ficha de submissão ficaram de fora
+- sobrou pergunta, consideração final ou “depois a gente vê”
+- você propôs apagar teste, patch, diff ou PR
+- você tratou uma lista deste prompt como o produto inteiro
+- SaaS, mensalidade do aluno e referral ficaram no mesmo fluxo
+- a série não foi rastreada até o Aluno 360
+- você deu nota a uma tela
+- você afirmou que a Apple aprova, sem o item correspondente na ficha
+
+A sessão está boa quando uma implementação seguida do roteiro no iPhone esgota o trabalho até o upload.
