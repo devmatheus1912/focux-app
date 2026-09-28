@@ -1,6 +1,6 @@
 # Aluno — aba Treinos (auditoria e referência oficial)
 
-Data: 2026-09-28 · Revisão 2 (fatia 1: hub de Treinos; fatia 2: histórico, seção 14).
+Data: 2026-09-28 · Revisão 3 (fatia 1: hub de Treinos; fatia 2: histórico, seção 14; fatia 3: execução, seção 15).
 Repos: `focux-app` (principal), `focux-backend` (ajustes aditivos + prévia).
 
 Este documento junta a auditoria da experiência de treino do aluno e a spec
@@ -374,3 +374,77 @@ abas do detalhe, os dois botões de ajuda e widgets privados do layout antigo.
 | H12 | BE: `treinoId` filtra; ficha de outro aluno volta vazio; `exerciciosConcluidos` certo; `q` antigo não quebra | gradle |
 | H13 | Texto em `app_pt.arb`; alvos ≥ 48 dp; fonte 2x sem corte | widget + grep |
 | H14 | Mortos de 14.3 apagados; analyze, órfãos, `flutter test`, `gradlew test`, gitleaks verdes | comandos |
+
+## 15. Fatia 3: execução
+
+### 15.1 Auditoria (antes)
+
+- `/checkin/executar` (`checkin_screen.dart`, 793 linhas): estado, rede,
+  timers, mapeamento de evoluções e layout na mesma classe.
+- "Finalizar treino" com exercícios pendentes fecha a sessão direto, sem
+  aviso. O mesmo vale para "Encerrar agora" na folha de sair.
+- Série que falha por falta de conexão some: erro na tela, e o aluno refaz de
+  memória. A fila offline genérica recusa `/checkin` de propósito (a tela
+  precisa da entidade de volta).
+- Descanso chega a zero em silêncio: o timer só some.
+- "Confirmar restante" usa o seed do backend e grava carga e reps que o aluno
+  não fez (entram em volume e recorde).
+- Caminho "Demonstração" morto: `onOpenDemo` sempre nulo, ação no "Mais na
+  série" e `showCheckinDemoSheet` sem chamador.
+- Chips de sensação com ~32 dp de alvo; textos fixos no código.
+
+### 15.2 Decisões aprovadas
+
+| Tema | Decisão |
+|---|---|
+| Finalizar incompleto | Folha "Faltam N exercícios": Finalizar / Voltar ao treino. Vale para a barra e para "Encerrar agora" |
+| Offline | Série sem conexão vai para uma fila local, aparece feita com aviso de pendente e reenvia sozinha. Finalizar espera a fila esvaziar |
+| Fim do descanso | Com o app aberto: vibra, toca um bipe curto, anuncia e volta para a série. Sem notificação em background |
+| Confirmar restante | Continua, mas grava as séries sem carga nem reps: contam como feitas, sem volume e sem recorde |
+
+### 15.3 Solução
+
+**Fila de séries.** `CheckinSeriePendente` (execução, exercício, número,
+carga, reps, sensação, RPE, dor) em `SharedPreferences`; a mesma série
+(execução + exercício + número) substitui a anterior. Limpa no logout. Só erro
+de rede enfileira; resposta do servidor (4xx) tira da fila e avisa. Reenvio
+ao abrir a execução, ao voltar do background, quando a conexão volta, depois
+de um envio bem-sucedido e no "Tentar agora". A série pendente entra no
+estado local (conta como feita, o descanso começa) e a tela mostra "N séries
+esperando conexão". Finalizar, desfazer e confirmar restante tentam esvaziar a
+fila antes; se não der, avisam e não seguem.
+
+**Finalizar.** Com exercício não concluído, folha "Faltam N exercícios /
+Finalizar assim mesmo?". Exercício sem série fica sem série. Tudo feito
+finaliza direto.
+
+**Descanso.** No zero com o app aberto: vibração, bipe (asset curto via
+`just_audio`), anúncio "Descanso acabou" e volta ao card. Pular ou voltar do
+background não toca.
+
+**Backend.** `confirmarRestante` cria as séries que faltam com carga e reps
+nulas (sem seed), marca o exercício concluído e limpa a Home se mudou.
+Chamar de novo não duplica. Volume e recorde já ignoram carga nula.
+
+**App.** Regras puras em `utils/` (fila, aplicação local, faltam N,
+evoluções); tela abaixo de 500 linhas; texto da execução em `app_pt.arb`;
+chips de sensação com 48 dp.
+
+**Mortos.** `onOpenDemo`, ação "Demonstração", `showCheckinDemoSheet`.
+
+### 15.4 Contrato fechado (fatia 3)
+
+| # | Critério | Prova |
+|---|---|---|
+| E1 | Finalizar com exercício pendente pede confirmação (barra e "Encerrar agora"); completo finaliza direto | widget |
+| E2 | Série sem conexão fica feita no card, descanso começa, aviso de pendente aparece | widget |
+| E3 | Fila persiste, reenvia (abrir, voltar, reconectar, "Tentar agora") e limpa no logout | unit + widget |
+| E4 | Erro do servidor tira da fila e avisa; erro de rede mantém | unit |
+| E5 | Finalizar, desfazer e confirmar restante não seguem com fila pendente | widget |
+| E6 | Fim do descanso com app aberto: vibra, toca, anuncia, volta à série; pular não toca | widget |
+| E7 | BE: confirmar restante grava séries sem carga/reps, fora do volume; repetir não duplica | gradle |
+| E8 | Sem "Demonstração" (`onOpenDemo`, ação, `showCheckinDemoSheet`) | grep |
+| E9 | Chips de sensação ≥ 48 dp | widget |
+| E10 | Texto da execução em `app_pt.arb` | grep |
+| E11 | `checkin_screen.dart` < 500 linhas; fila fora da UI | contagem |
+| E12 | analyze, órfãos, `flutter test`, `gradlew test`, gitleaks verdes | comandos |
