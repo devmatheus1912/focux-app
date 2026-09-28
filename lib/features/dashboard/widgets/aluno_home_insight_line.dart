@@ -61,15 +61,13 @@ class _AlunoHomeInsightLineState extends State<AlunoHomeInsightLine> {
                 Text(
                   texto.titulo,
                   style: FocuxHubTypography.chip(widget.onPrimary),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: TokensStrip.s1),
                 Text(
                   texto.detalhe,
                   style: FocuxHubTypography.bodyMuted(color: widget.onPrimary),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

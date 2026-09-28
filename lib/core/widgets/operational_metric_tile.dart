@@ -38,8 +38,12 @@ class OperationalMetricTile extends StatelessWidget {
     this.leadingIcon,
     this.emphasis = OperationalMetricEmphasis.normal,
     this.dense = false,
+    this.valueMaxLines,
     this.onInfo,
   });
+
+  /// Padrão: 1 linha no [dense], 2 fora dele.
+  final int? valueMaxLines;
 
   /// Tile inteiro abre a explicação da métrica (glyph `?` ao lado do rótulo).
   final VoidCallback? onInfo;
@@ -80,10 +84,9 @@ class OperationalMetricTile extends StatelessWidget {
               Flexible(
                 child: Text(
                   label.toUpperCase(),
-                  style: FocuxHubTypography.chip(labelColor).copyWith(
-                    letterSpacing: 0.4,
-                    fontSize: dense ? 10 : null,
-                  ),
+                  style: FocuxHubTypography.chip(
+                    labelColor,
+                  ).copyWith(letterSpacing: 0.4, fontSize: dense ? 10 : null),
                 ),
               ),
               if (onInfo != null) ...[
@@ -106,11 +109,14 @@ class OperationalMetricTile extends StatelessWidget {
               Flexible(
                 child: Text(
                   value,
-                  maxLines: dense ? 1 : 2,
+                  maxLines: valueMaxLines ?? (dense ? 1 : 2),
                   overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.kpi(
                     color: ink,
-                    fontSize: dense ? FocuxHubTypography.metricEm : FocuxHubTypography.metricMd,
+                    fontSize:
+                        dense
+                            ? FocuxHubTypography.metricEm
+                            : FocuxHubTypography.metricMd,
                   ).copyWith(letterSpacing: 0.2),
                 ),
               ),

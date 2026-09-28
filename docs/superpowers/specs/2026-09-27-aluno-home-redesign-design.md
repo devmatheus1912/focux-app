@@ -36,8 +36,8 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
 2. **Foco do dia — o que faço hoje.** Eyebrow, título, descrição, prazo,
    linha do próximo horário, `AlunoHomeInsightLine` e o chip P0
    (`FxActionChip`), único toque do card.
-   - Descrição até 2 linhas. Prazo em linha própria (até 2 linhas): nunca é
-     cortado pela descrição.
+   - Título até 2 linhas. Descrição, prazo, horário e detalhe do insight
+     quebram linha sem corte: com fonte grande nada que decide o dia some.
    - Próximo horário: linha só de leitura "Horário com seu personal: hoje às
      18:00" (ou "amanhã às 07:30") quando `agendaProximoInicio` ainda vai
      acontecer, hoje ou amanhã.
@@ -53,18 +53,22 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
 5. **Sua semana — como estou.** Só depois do primeiro treino concluído
    (`jaTreinou`). Sessões contra a meta ("2 de 3"), sequência em semanas e
    volume da semana. Meta batida marca o tile de sessões com verde e check.
+   Fonte acima de 1,3x empilha os tiles (`alunoSemanaEmpilhada`).
 6. **Prontidão.** `AlunoRecoveryCard` (`alunoProntidaoVisivel`): anel, rótulo
-   e dica do servidor. Com prontidão baixa, sem a dica (o foco já falou).
+   e dica do servidor (sem corte). Com prontidão baixa, sem a dica (o foco já
+   falou).
    Sem snapshot de hoje e última antiga → convite para sincronizar. Sem
    wearable → some.
 7. **Evolução — estou evoluindo.** Só com `jaTreinou`. Linha de força (1RM
    est.) das 8 semanas, variação da força e o último recorde ("Novo recorde"
-   até 7 dias). Sem volume (já está em Sua semana). O card não abre nada
+   até 7 dias). Um tile por linha; o recorde tem até 2 linhas para o nome do
+   exercício não esconder a carga. Sem volume (já está em Sua semana). O card não abre nada
    (`/evolucao` redireciona para a Home até a spec 3b).
 8. **Ofertas.** `AlunoUpsellCarousel` (`AlunoHomeView.ofertas`, vazia com
    mensalidade em atraso). Aceitar é `OutlinedButton`, recusar `TextButton`,
    48 dp, travados no envio. Os dois pedem confirmação (`showFxConfirmSheet`):
-   a resposta não volta atrás. Uma oferta ocupa a largura toda.
+   a resposta não volta atrás. Uma oferta ocupa a largura toda. Título até 2
+   linhas; descrição até 4 (texto livre do personal, sem limite no servidor).
 9. **Atalhos.** Até 3 (`AlunoHomeView.atalhos`), na ordem de
    `alunoAtalhosPrioridade`, sem abas do dock, sem destino que já aparece
    acima (`rotasNoTopo`) e sem recurso fora do plano (`recursosIndisponiveis`).
@@ -259,7 +263,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C4 | Foco com 5 modos na prioridade de §3.1; financeiro não é modo | unit |
 | C5 | Linha do próximo horário só hoje ou amanhã e ainda por vir | unit + widget |
 | C6 | Prontidão baixa: texto no foco, CTA igual, card sem dica | unit + widget |
-| C7 | Prazo do foco e hora da pendência visíveis com fonte 2x | widget |
+| C7 | Nenhum texto de decisão cortado com fonte grande (foco, insight, pendência, prontidão, semana, recorde, oferta) | widget (`didExceedMaxLines`) |
 | C8 | Aviso: atestado, financeiro, anamnese, coach | unit |
 | C9 | Mensalidade atrasada: treino no foco, ofertas vazias | unit |
 | C10 | Pendências: chat, agenda, medida, perfil; no máximo 3 | unit |

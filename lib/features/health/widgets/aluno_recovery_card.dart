@@ -105,8 +105,6 @@ class AlunoRecoveryCard extends StatelessWidget {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   snap.recoveryHint,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                   style: FocuxHubTypography.bodyMuted(
                                     color: chrome.mute,
                                   ),

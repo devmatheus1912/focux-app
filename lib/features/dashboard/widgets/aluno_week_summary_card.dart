@@ -8,6 +8,12 @@ import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_home_week.dart';
 import 'dashboard_section_header.dart';
 
+/// Acima disso 3 tiles lado a lado cortam o valor ("4 semanas", "3.200 kg").
+const alunoSemanaEmpilharAcimaDe = 1.3;
+
+bool alunoSemanaEmpilhada(TextScaler scaler) =>
+    scaler.scale(1) > alunoSemanaEmpilharAcimaDe;
+
 /// "Sua semana": sessões x meta, sequência e volume. Lido como uma frase.
 /// Meta batida marca o tile de treinos com o verde de sucesso.
 class AlunoWeekSummaryCard extends StatelessWidget {
@@ -23,21 +29,15 @@ class AlunoWeekSummaryCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final volume = summary.volumeKg;
 
-    Widget tile(
-      String label,
-      String value, {
-      Color? color,
-      IconData? icon,
-    }) => Expanded(
-      child: OperationalMetricTile(
-        label: label,
-        value: value,
-        color: color ?? primary,
-        isDark: isDark,
-        dense: true,
-        leadingIcon: icon,
-      ),
-    );
+    Widget tile(String label, String value, {Color? color, IconData? icon}) =>
+        OperationalMetricTile(
+          label: label,
+          value: value,
+          color: color ?? primary,
+          isDark: isDark,
+          dense: true,
+          leadingIcon: icon,
+        );
 
     final bateuMeta = summary.metaAtingida;
     final tiles = [
@@ -64,17 +64,28 @@ class AlunoWeekSummaryCard extends StatelessWidget {
         Semantics(
           label: alunoWeekSemantics(s, summary),
           excludeSemantics: true,
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < tiles.length; i++) ...[
-                  if (i > 0) const SizedBox(width: TokensStrip.s2),
-                  tiles[i],
-                ],
-              ],
-            ),
-          ),
+          child:
+              alunoSemanaEmpilhada(MediaQuery.textScalerOf(context))
+                  ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < tiles.length; i++) ...[
+                        if (i > 0) const SizedBox(height: TokensStrip.s2),
+                        tiles[i],
+                      ],
+                    ],
+                  )
+                  : IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < tiles.length; i++) ...[
+                          if (i > 0) const SizedBox(width: TokensStrip.s2),
+                          Expanded(child: tiles[i]),
+                        ],
+                      ],
+                    ),
+                  ),
         ),
       ],
     );

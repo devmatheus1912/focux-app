@@ -68,17 +68,10 @@ class AlunoTodayFocusCard extends StatelessWidget {
           Text(
             texto.descricao,
             style: FocuxHubTypography.bodyMuted(color: mute),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
           ),
           if (texto.prazo case final prazo?) ...[
             const SizedBox(height: TokensStrip.s1),
-            Text(
-              prazo,
-              style: FocuxHubTypography.bodyMuted(color: mute),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(prazo, style: FocuxHubTypography.bodyMuted(color: mute)),
           ],
           if (horario case final h?) ...[
             const SizedBox(height: TokensStrip.s1),
@@ -88,8 +81,6 @@ class AlunoTodayFocusCard extends StatelessWidget {
                 color: chrome.ink,
                 fontWeight: FontWeight.w600,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
           if (insight case final insight?) ...[

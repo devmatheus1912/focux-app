@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/auth/session_invalidator.dart';
+import 'package:focux_app/core/money/fx_money.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_autonomy_analytics.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
@@ -14,8 +17,11 @@ import 'package:focux_app/features/dashboard/widgets/aluno_home_skeleton.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_pendencias_block.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_today_focus_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_week_summary_card.dart';
+import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/widgets/aluno_recovery_card.dart';
+import 'package:focux_app/features/monetizacao/data/upsell_repository.dart';
+import 'package:focux_app/features/monetizacao/widgets/aluno_upsell_carousel.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
 Future<void> _pump(WidgetTester tester, Widget child) => tester.pumpWidget(
@@ -25,6 +31,49 @@ Future<void> _pump(WidgetTester tester, Widget child) => tester.pumpWidget(
     localizationsDelegates: S.localizationsDelegates,
     home: Scaffold(body: SingleChildScrollView(child: child)),
   ),
+);
+
+/// Tela de 360 dp com o padding da Home. A fonte de teste do Flutter tem
+/// glifos de 1 em, mais larga que a Inter: a escala aqui já é o pior caso.
+Future<void> _pumpEstreito(
+  WidgetTester tester,
+  Widget child, {
+  double escala = 2,
+}) async {
+  tester.view
+    ..physicalSize = const Size(360, 2400)
+    ..devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  tester.platformDispatcher.textScaleFactorTestValue = escala;
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+  await _pump(tester, Padding(padding: const EdgeInsets.all(16), child: child));
+}
+
+void _expectInteiro(WidgetTester tester, Finder texto) {
+  expect(texto, findsOneWidget);
+  expect(
+    tester.renderObject<RenderParagraph>(texto).didExceedMaxLines,
+    isFalse,
+  );
+}
+
+void _expectNadaCortado(WidgetTester tester) {
+  final cortados = [
+    for (final p in tester.renderObjectList<RenderParagraph>(
+      find.byType(RichText),
+    ))
+      if (p.didExceedMaxLines) p.text.toPlainText(),
+  ];
+  expect(cortados, isEmpty);
+}
+
+const _ritmoCaiu = AlunoHomeInsight(
+  tipo: AlunoInsightTipo.ritmoCaiu,
+  confianca: AlunoInsightConfianca.high,
+  chave: 'insightRitmoCaiu',
+  params: {'media': '3'},
+  titulo: 'Seu ritmo caiu',
+  mensagem: 'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
 );
 
 class _EventoFake {
@@ -244,9 +293,7 @@ void main() {
     testWidgets('prazo, horário e prontidão aparecem com fonte 2x', (
       tester,
     ) async {
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      await _pump(
+      await _pumpEstreito(
         tester,
         AlunoTodayFocusCard(
           action: AlunoTodayAction(
@@ -263,18 +310,49 @@ void main() {
           onAction: () {},
         ),
       );
-      expect(find.text('Vence hoje'), findsOneWidget);
-      expect(
+      _expectInteiro(tester, find.text('Vence hoje'));
+      _expectInteiro(
+        tester,
         find.text('Horário com seu personal: hoje às 18:00'),
-        findsOneWidget,
       );
-      expect(
+      _expectInteiro(
+        tester,
         find.text(
           'Corpo pedindo descanso: se treinar, vá leve ou faça mobilidade.',
         ),
-        findsOneWidget,
       );
       expect(find.text('Treinar agora'), findsOneWidget);
+    });
+
+    testWidgets('descrição longa e insight inteiros com fonte 2x', (
+      tester,
+    ) async {
+      await _pumpEstreito(
+        tester,
+        AlunoTodayFocusCard(
+          action: const AlunoTodayAction(
+            mode: AlunoTodayMode.noWorkout,
+            route: '/chat/aluno',
+          ),
+          hoje: DateTime(2026, 9, 27, 8),
+          insight: _ritmoCaiu,
+          isDark: false,
+          onAction: () {},
+        ),
+      );
+      _expectInteiro(
+        tester,
+        find.text(
+          'Nenhum treino liberado agora. Seu personal libera o próximo pelo chat.',
+        ),
+      );
+      _expectInteiro(tester, find.text('Seu ritmo caiu'));
+      _expectInteiro(
+        tester,
+        find.text(
+          'Nas 4 semanas anteriores, sua média era de 3 treinos por semana.',
+        ),
+      );
     });
 
     testWidgets('sem prazo nem horário as linhas somem', (tester) async {
@@ -315,6 +393,51 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('recorde com nome longo mostra a carga', (tester) async {
+      await _pumpEstreito(
+        tester,
+        escala: 1,
+        AlunoEvolutionCard(
+          forcaPorSemana: const [],
+          forcaDeltaPercent: 2.3,
+          ultimoRecorde: RecordePessoal(
+            id: 1,
+            exercicioId: 1,
+            exercicioNome: 'Agachamento livre',
+            data: '2026-09-25',
+            cargaKg: 100,
+          ),
+        ),
+      );
+      _expectNadaCortado(tester);
+      expect(find.textContaining('100'), findsOneWidget);
+    });
+  });
+
+  group('AlunoWeekSummaryCard com fonte grande', () {
+    test('empilha os tiles só acima de 1,3x', () {
+      expect(alunoSemanaEmpilhada(const TextScaler.linear(1.3)), isFalse);
+      expect(alunoSemanaEmpilhada(const TextScaler.linear(1.5)), isTrue);
+    });
+
+    testWidgets('empilhado, nenhum valor é cortado', (tester) async {
+      await _pumpEstreito(
+        tester,
+        escala: 1.5,
+        const AlunoWeekSummaryCard(
+          summary: AlunoWeekSummary(
+            feitos: 2,
+            meta: 3,
+            streakSemanas: 4,
+            volumeKg: 3200,
+          ),
+        ),
+      );
+      _expectNadaCortado(tester);
+      expect(find.text('4 semanas'), findsOneWidget);
+      expect(find.text('3.200 kg'), findsOneWidget);
+    });
   });
 
   group('AlunoRecoveryCard', () {
@@ -341,6 +464,26 @@ void main() {
       );
     });
 
+    testWidgets('dica inteira com fonte 2x', (tester) async {
+      const hint =
+          'Priorize mobilidade, sono e hidratação antes de intensificar.';
+      await _pumpEstreito(
+        tester,
+        const AlunoRecoveryCard(
+          snapshot: RecoverySnapshot(
+            steps: 0,
+            caloriesBurned: 0,
+            avgHeartRate: 0,
+            sleepHours: 0,
+            recoveryScore: 50,
+            recoveryLabel: 'Recuperação parcial',
+            recoveryHint: hint,
+          ),
+        ),
+      );
+      _expectInteiro(tester, find.text(hint));
+    });
+
     testWidgets('movimento reduzido: sem animação em loop', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -355,6 +498,29 @@ void main() {
       );
       expect(find.byType(FxRivePlayer), findsNothing);
       expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+    });
+  });
+
+  group('AlunoUpsellCarousel', () {
+    testWidgets('título e descrição inteiros com fonte 2x', (tester) async {
+      await _pumpEstreito(
+        tester,
+        ProviderScope(
+          child: AlunoUpsellCarousel(
+            ofertas: [
+              AlunoOferta(
+                alunoOfertaId: 1,
+                ofertaId: 1,
+                titulo: 'Consultoria extra',
+                descricao: 'Uma sessão avulsa',
+                valor: FxMoney.parse(150),
+                status: 'PENDENTE',
+              ),
+            ],
+          ),
+        ),
+      );
+      _expectNadaCortado(tester);
     });
   });
 

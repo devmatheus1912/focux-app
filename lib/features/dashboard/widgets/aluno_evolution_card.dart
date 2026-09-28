@@ -63,6 +63,7 @@ class AlunoEvolutionCard extends StatelessWidget {
           color: primary,
           isDark: isDark,
           dense: true,
+          valueMaxLines: 2,
           leadingIcon: recordeRecente ? Icons.emoji_events_rounded : null,
           semanticsLabel: '$recordeLabel: $recordeTexto',
         ),
@@ -98,19 +99,12 @@ class AlunoEvolutionCard extends StatelessWidget {
                   label: s.alunoEvolucaoLegendaForca,
                 ),
               ],
-              if (tiles.isNotEmpty) ...[
-                if (hasChart) const SizedBox(height: TokensStrip.s3),
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var i = 0; i < tiles.length; i++) ...[
-                        if (i > 0) const SizedBox(width: TokensStrip.s2),
-                        Expanded(child: tiles[i]),
-                      ],
-                    ],
-                  ),
-                ),
+              // Um tile por linha: nome do exercício + carga não cabem em
+              // meia largura.
+              for (var i = 0; i < tiles.length; i++) ...[
+                if (i > 0 || hasChart)
+                  SizedBox(height: i > 0 ? TokensStrip.s2 : TokensStrip.s3),
+                SizedBox(width: double.infinity, child: tiles[i]),
               ],
             ],
           ),

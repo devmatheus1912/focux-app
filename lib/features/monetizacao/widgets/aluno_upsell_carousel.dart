@@ -13,6 +13,10 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/upsell_repository.dart';
 
+/// Texto livre do personal, sem limite no servidor: corta aqui para uma oferta
+/// longa não esticar todas as do carrossel (a altura é a da mais alta).
+const alunoOfertaDescricaoMaxLinhas = 4;
+
 /// Ofertas pendentes do personal na Home do aluno (vêm do BFF).
 class AlunoUpsellCarousel extends ConsumerStatefulWidget {
   const AlunoUpsellCarousel({super.key, required this.ofertas});
@@ -43,7 +47,9 @@ class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
               ? s.alunoOfertaAceitarConfirmMensagem
               : s.alunoOfertaRecusarConfirmMensagem,
       confirmLabel:
-          aceitar ? s.alunoOfertaAceitarConfirmar : s.alunoOfertaRecusarConfirmar,
+          aceitar
+              ? s.alunoOfertaAceitarConfirmar
+              : s.alunoOfertaRecusarConfirmar,
       icon: aceitar ? Icons.local_offer_outlined : Icons.close_rounded,
     );
     if (!ok || !mounted || !_enviando.add(oferta.alunoOfertaId)) return;
@@ -106,10 +112,7 @@ class _AlunoUpsellCarouselState extends ConsumerState<AlunoUpsellCarousel> {
         if (ofertas.length == 1)
           linha
         else
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: linha,
-          ),
+          SingleChildScrollView(scrollDirection: Axis.horizontal, child: linha),
       ],
     );
   }
@@ -141,14 +144,14 @@ class _OfertaCard extends StatelessWidget {
         children: [
           Text(
             oferta.titulo,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
           const SizedBox(height: TokensStrip.s1),
           Text(
             oferta.descricao,
-            maxLines: 2,
+            maxLines: alunoOfertaDescricaoMaxLinhas,
             overflow: TextOverflow.ellipsis,
             style: FocuxHubTypography.bodyMuted(color: chrome.mute),
           ),
