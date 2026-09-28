@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
+import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_video_badge.dart';
 
 /// Fixed preview height for thumbnails / loading (demo sheet + inline).
@@ -131,8 +132,8 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
           Positioned(
             left: 10,
             bottom: 10,
-            child: const _CheckinMediaBadge(
-              label: 'Tecnica do exercicio',
+            child: _CheckinMediaBadge(
+              label: S.of(context).checkinMidiaTecnica,
               icon: Icons.play_arrow_rounded,
             ),
           ),
@@ -418,7 +419,7 @@ class CheckinVideoFallback extends StatelessWidget {
           Icon(Icons.play_circle_fill_rounded, color: brand, size: 34),
           const SizedBox(height: 6),
           Text(
-            'Vídeo próprio do personal disponível',
+            S.of(context).checkinMidiaVideoPersonal,
             style: TextStyle(
               color: brand,
               fontSize: 12.5,

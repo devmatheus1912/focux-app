@@ -179,13 +179,13 @@ class _CheckinRpeAlvoPromptSheetState
           const SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: checkinRpeSectionTitle,
-            subtitle: checkinRpeAlvoHint(widget.rpeAlvo),
+            title: s.checkinRpeTitulo,
+            subtitle: checkinRpeAlvoHint(s, widget.rpeAlvo),
             leading: Icon(Icons.speed_rounded, color: brand, size: 18),
           ),
           const SizedBox(height: TokensStrip.s3),
           Text(
-            checkinRpeValueLine(_rpe),
+            checkinRpeValueLine(s, _rpe),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: brand,
@@ -199,7 +199,7 @@ class _CheckinRpeAlvoPromptSheetState
             max: 10,
             divisions: 9,
             activeColor: brand,
-            label: checkinRpeValueLine(_rpe),
+            label: checkinRpeValueLine(s, _rpe),
             onChanged: (v) => setState(() => _rpe = v.round()),
           ),
           const SizedBox(height: TokensStrip.s2),

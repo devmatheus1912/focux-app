@@ -34,6 +34,7 @@ import 'core/theme/focux_system_chrome.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/auth/providers/auth_provider.dart';
 import 'features/auth/utils/legacy_password_reset_redirect.dart';
+import 'features/checkin/widgets/checkin_fila_sync_scope.dart';
 import 'features/dashboard/providers/dashboard_provider.dart';
 import 'features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'features/perfil/data/perfil_repository.dart';
@@ -471,7 +472,11 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
         );
         return MediaQuery(
           data: mq.copyWith(textScaler: scaler),
-          child: FxConnectivityBanner(child: child ?? const SizedBox.shrink()),
+          child: FxConnectivityBanner(
+            child: CheckinFilaSyncScope(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         );
       },
     );

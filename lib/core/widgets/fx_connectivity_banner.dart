@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../api/api_transport_circuit.dart';
 import '../api/offline_sync_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../auth/session_refresh_coordinator.dart';
 import '../theme/design_tokens.dart';
 
@@ -109,7 +110,7 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _bannerMessage(),
+                                _bannerMessage(S.of(context)),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12.5,
@@ -129,7 +130,7 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
                                   ),
                                   minimumSize: const Size(44, 44),
                                 ),
-                                child: const Text('OK'),
+                                child: Text(S.of(context).conexaoOk),
                               ),
                           ],
                         ),
@@ -157,18 +158,10 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
     return Icons.sync;
   }
 
-  String _bannerMessage() {
-    if (_offline) {
-      return 'Sem conexao — alteracoes serao sincronizadas depois.';
-    }
-    if (_dropped > 0) {
-      return _dropped == 1
-          ? 'Uma alteracao nao pode ser salva. Refaca a acao.'
-          : '$_dropped alteracoes nao puderam ser salvas. Refaca as acoes.';
-    }
-    if (_circuitOpen) {
-      return 'Servidor instavel — aguarde alguns segundos e tente de novo.';
-    }
-    return 'Sincronizando $_pending acao(oes) pendente(s)...';
+  String _bannerMessage(S s) {
+    if (_offline) return s.conexaoOffline;
+    if (_dropped > 0) return s.conexaoDescartadas(_dropped);
+    if (_circuitOpen) return s.conexaoInstavel;
+    return s.conexaoSincronizando(_pending);
   }
 }

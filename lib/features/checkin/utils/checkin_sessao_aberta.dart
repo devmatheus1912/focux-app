@@ -27,11 +27,4 @@ class CheckinSessaoAberta {
       treinoNome: nome == null || nome.isEmpty ? null : nome,
     );
   }
-
-  String get mensagem {
-    final nome = treinoNome;
-    return nome == null
-        ? 'Uma sessão ainda está aberta. Continue de onde parou ou descarte para começar este treino.'
-        : '“$nome” ainda está aberto. Continue de onde parou ou descarte para começar este treino.';
-  }
 }

@@ -78,7 +78,10 @@ Future<CheckinSeriePayload?> showCheckinSerieDetalhe(
                 serieRepeticoes: null,
                 prescricacao: ee.repeticoes,
               ),
-          prescricacaoHint: checkinSeriePrescricaoHint(ee.repeticoes),
+          prescricacaoHint: checkinSeriePrescricaoHint(
+            S.of(context),
+            ee.repeticoes,
+          ),
           initialFeedback: ee.feedback,
           initialRpe: ee.rpe,
           rpeAlvo: ee.rpeAlvo,
@@ -123,17 +126,20 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
     });
   }
 
-  String get _rpeHintBody =>
+  String _rpeHintBody(S s) =>
       widget.rpeAlvo == null
-          ? checkinRpeSectionHint
-          : checkinRpeAlvoHint(widget.rpeAlvo!);
+          ? s.checkinRpeHint
+          : checkinRpeAlvoHint(s, widget.rpeAlvo!);
 
   void _openRpeHelp() {
+    final s = S.of(context);
     showFxHelpSheet(
       context,
-      title: checkinRpeSectionTitle,
-      subtitle: 'Como marcar o esforço desta série.',
-      tips: [FxHelpTip('Esforço sentido', _rpeHintBody, icon: 'dumbbell')],
+      title: s.checkinRpeTitulo,
+      subtitle: s.checkinRpeAjudaSub,
+      tips: [
+        FxHelpTip(s.checkinRpeEsforco, _rpeHintBody(s), icon: 'dumbbell'),
+      ],
     );
   }
 
@@ -195,7 +201,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   Expanded(
                     child: CheckinSerieField(
                       controller: _cargaController,
-                      label: 'Carga',
+                      label: s.checkinCampoCarga,
                       suffix: 'kg',
                       icon: Icons.scale_rounded,
                       keyboardType: const TextInputType.numberWithOptions(
@@ -214,7 +220,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   Expanded(
                     child: CheckinSerieField(
                       controller: _repsController,
-                      label: 'Reps feitas',
+                      label: s.checkinCampoReps,
                       suffix: 'x',
                       icon: Icons.repeat_rounded,
                       keyboardType: TextInputType.number,
@@ -231,7 +237,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
               ),
             const SizedBox(height: TokensStrip.s4),
             Text(
-              'Sensação',
+              s.checkinSensacao,
               style: TextStyle(
                 color: mute,
                 fontSize: 12,
@@ -286,7 +292,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                               children: [
                                 Flexible(
                                   child: Text(
-                                    checkinRpeSectionTitle,
+                                    s.checkinRpeTitulo,
                                     style: TextStyle(
                                       color: ink,
                                       fontWeight: FontWeight.w900,
@@ -295,7 +301,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                                 ),
                                 if (_rpeHintLoaded && !_showRpeHint)
                                   FxHelpIconButton(
-                                    tooltip: 'Esforço sentido',
+                                    tooltip: s.checkinRpeEsforco,
                                     size: 28,
                                     onTap: _openRpeHelp,
                                   ),
@@ -304,8 +310,8 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                             const SizedBox(height: 2),
                             Text(
                               _useRpe
-                                  ? checkinRpeValueLine(_rpe)
-                                  : 'Desligado — opcional',
+                                  ? checkinRpeValueLine(s, _rpe)
+                                  : s.checkinRpeDesligado,
                               style: TextStyle(
                                 color: _useRpe ? brand : mute,
                                 fontSize: 13,
@@ -319,7 +325,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                         Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: Text(
-                            'Alvo ${widget.rpeAlvo}',
+                            s.checkinRpeAlvo(widget.rpeAlvo!),
                             style: TextStyle(
                               color: brand,
                               fontSize: 12,
@@ -337,7 +343,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                   if (_showRpeHint) ...[
                     const SizedBox(height: 4),
                     Text(
-                      _rpeHintBody,
+                      _rpeHintBody(s),
                       style: TextStyle(
                         color: mute,
                         fontSize: 12,
@@ -352,7 +358,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     divisions: 9,
                     activeColor: brand,
                     secondaryActiveColor: brand.withValues(alpha: 0.28),
-                    label: checkinRpeValueLine(_rpe),
+                    label: checkinRpeValueLine(s, _rpe),
                     onChanged:
                         _useRpe
                             ? (value) => setState(() => _rpe = value.round())
@@ -362,11 +368,11 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '1 leve',
+                        s.checkinRpeEscalaMin,
                         style: TextStyle(color: mute, fontSize: 11),
                       ),
                       Text(
-                        '10 no limite',
+                        s.checkinRpeEscalaMax,
                         style: TextStyle(color: mute, fontSize: 11),
                       ),
                     ],
@@ -389,11 +395,11 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
                     }
                   }),
               title: Text(
-                'Senti dor nesta série',
+                s.checkinSentiDor,
                 style: TextStyle(color: ink, fontWeight: FontWeight.w800),
               ),
               subtitle: Text(
-                'Marca alerta para o personal acompanhar.',
+                s.checkinSentiDorSub,
                 style: TextStyle(color: mute, fontSize: 12),
               ),
             ),
@@ -401,7 +407,7 @@ class _CheckinSerieDetailSheetState extends State<CheckinSerieDetailSheet> {
             SizedBox(
               width: double.infinity,
               child: FxLiquidPrimaryButton(
-                label: 'Salvar série',
+                label: s.checkinSalvarSerie,
                 icon: Icons.check_rounded,
                 onPressed: _submit,
               ),

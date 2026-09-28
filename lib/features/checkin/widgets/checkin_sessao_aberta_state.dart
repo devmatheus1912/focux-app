@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_sessao_aberta.dart';
 
 /// Conflito de sessão aberta — estado de decisão, não de falha.
@@ -24,7 +25,9 @@ class CheckinSessaoAbertaState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final nome = sessao.treinoNome;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(
@@ -53,7 +56,7 @@ class CheckinSessaoAbertaState extends StatelessWidget {
               Semantics(
                 header: true,
                 child: Text(
-                  'Você tem um treino em andamento',
+                  s.checkinSessaoAbertaTitulo,
                   textAlign: TextAlign.center,
                   style: FocuxHubTypography.body(
                     color: scheme.onSurface,
@@ -62,7 +65,9 @@ class CheckinSessaoAbertaState extends StatelessWidget {
               ),
               const SizedBox(height: TokensStrip.s2),
               Text(
-                sessao.mensagem,
+                nome == null
+                    ? s.checkinSessaoAbertaTexto
+                    : s.checkinSessaoAbertaTextoCom(nome),
                 textAlign: TextAlign.center,
                 style: FocuxHubTypography.bodyMuted(
                   color: scheme.onSurfaceVariant,
@@ -70,7 +75,7 @@ class CheckinSessaoAbertaState extends StatelessWidget {
               ),
               const SizedBox(height: TokensStrip.s5),
               FxLiquidPrimaryButton(
-                label: 'Continuar treino em andamento',
+                label: s.checkinSessaoAbertaContinuar,
                 icon: Icons.play_arrow_rounded,
                 onPressed: descartando ? null : onContinuar,
               ),
@@ -78,14 +83,16 @@ class CheckinSessaoAbertaState extends StatelessWidget {
                 const SizedBox(height: TokensStrip.s3),
                 FxLiquidSecondaryButton(
                   label:
-                      descartando ? 'Descartando…' : 'Descartar e iniciar este',
+                      descartando
+                          ? s.checkinDescartando
+                          : s.checkinDescartarEIniciar,
                   onPressed: descartando ? null : onDescartar,
                 ),
               ],
               const SizedBox(height: TokensStrip.s2),
               TextButton(
                 onPressed: descartando ? null : onVoltar,
-                child: const Text('Voltar aos treinos'),
+                child: Text(s.checkinVoltarAosTreinos),
               ),
             ],
           ),

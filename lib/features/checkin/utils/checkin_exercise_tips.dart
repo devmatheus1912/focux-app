@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
-
-/// Fallback when personal-authored "erros comuns" arrives in English.
-const checkinErrosComunsFallback =
-    'Peça orientação ao personal se tiver dúvida na execução.';
 
 const _enStopwords = {
   'the',
@@ -87,10 +84,11 @@ bool checkinTextLooksNonPtBr(String text) {
   return false;
 }
 
-String checkinErrosComunsBody(String? errosComuns) {
+/// "Erros comuns" do personal em inglês viram orientação genérica em PT.
+String checkinErrosComunsBody(S s, String? errosComuns) {
   final t = errosComuns?.trim() ?? '';
   if (t.isEmpty) return '';
-  if (checkinTextLooksNonPtBr(t)) return checkinErrosComunsFallback;
+  if (checkinTextLooksNonPtBr(t)) return s.checkinDicasFallbackErros;
   return t;
 }
 
@@ -98,25 +96,38 @@ Future<void> showCheckinExerciseTipsSheet(
   BuildContext context, {
   required ExecucaoExercicio ee,
 }) {
+  final s = S.of(context);
   final tips = <FxHelpTip>[
     if (ee.observacoes?.trim().isNotEmpty == true)
-      FxHelpTip('Observação', ee.observacoes!.trim(), icon: 'file-text'),
+      FxHelpTip(
+        s.checkinDicasObservacao,
+        ee.observacoes!.trim(),
+        icon: 'file-text',
+      ),
     if (ee.errosComuns?.trim().isNotEmpty == true)
       FxHelpTip(
-        'Erros comuns',
-        checkinErrosComunsBody(ee.errosComuns),
+        s.checkinDicasErrosComuns,
+        checkinErrosComunsBody(s, ee.errosComuns),
         icon: 'alert-triangle',
       ),
     if (ee.contraindicacoes?.trim().isNotEmpty == true)
-      FxHelpTip('Contraindicações', ee.contraindicacoes!.trim(), icon: 'heart'),
+      FxHelpTip(
+        s.checkinDicasContraindicacoes,
+        ee.contraindicacoes!.trim(),
+        icon: 'heart',
+      ),
     if (ee.substitutos?.trim().isNotEmpty == true)
-      FxHelpTip('Substitutos', ee.substitutos!.trim(), icon: 'refresh-cw'),
+      FxHelpTip(
+        s.checkinDicasSubstitutos,
+        ee.substitutos!.trim(),
+        icon: 'refresh-cw',
+      ),
   ];
   if (tips.isEmpty) {
     tips.add(
-      const FxHelpTip(
-        'Sem dicas',
-        'Este exercício não tem observação, erro comum ou substituto cadastrado.',
+      FxHelpTip(
+        s.checkinDicasVazioTitulo,
+        s.checkinDicasVazioTexto,
         icon: 'info',
       ),
     );
@@ -124,7 +135,7 @@ Future<void> showCheckinExerciseTipsSheet(
   return showFxHelpSheet(
     context,
     title: ee.exercicioNome,
-    subtitle: 'Leia e volte — o treino continua na tela.',
+    subtitle: s.checkinDicasSub,
     tips: tips,
   );
 }

@@ -6,6 +6,7 @@ library;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 
 /// SharedPreferences flag: long RPE copy shown once, then only via `?`.
@@ -132,34 +133,28 @@ class CheckinRascunhos {
   }
 }
 
-String? checkinSeriePrescricaoHint(String? prescricacao) {
+String? checkinSeriePrescricaoHint(S s, String? prescricacao) {
   final t = prescricacao?.trim() ?? '';
   if (t.isEmpty) return null;
-  return 'Prescrição do personal: $t';
+  return s.checkinPrescricaoHint(t);
 }
 
 /// Plain-language RPE for students who don't know the acronym.
-String checkinRpePlainLabel(int rpe) {
+String checkinRpePlainLabel(S s, int rpe) {
   final v = rpe.clamp(1, 10);
   return switch (v) {
-    1 || 2 => 'Muito leve',
-    3 || 4 => 'Leve',
-    5 || 6 => 'Moderado',
-    7 => 'Cansativo',
-    8 => 'Pesado',
-    9 => 'Muito pesado',
-    _ => 'No limite',
+    1 || 2 => s.checkinRpeMuitoLeve,
+    3 || 4 => s.checkinRpeLeve,
+    5 || 6 => s.checkinRpeModerado,
+    7 => s.checkinRpeCansativo,
+    8 => s.checkinRpePesado,
+    9 => s.checkinRpeMuitoPesado,
+    _ => s.checkinRpeNoLimite,
   };
 }
 
-String checkinRpeValueLine(int rpe) => '$rpe · ${checkinRpePlainLabel(rpe)}';
+String checkinRpeValueLine(S s, int rpe) =>
+    s.checkinRpeValor(rpe, checkinRpePlainLabel(s, rpe));
 
-const checkinRpeSectionTitle = 'Esforço sentido (RPE)';
-
-const checkinRpeSectionHint =
-    'RPE não é quantidade de reps. É o quão difícil a série pareceu '
-    '(1 = muito leve, 10 = no limite). As reps feitas ficam no campo acima.';
-
-String checkinRpeAlvoHint(int alvo) =>
-    'Seu personal pediu esforço perto de $alvo (${checkinRpePlainLabel(alvo)}). '
-    'Ajuste pelo que você sentiu nesta série.';
+String checkinRpeAlvoHint(S s, int alvo) =>
+    s.checkinRpeAlvoHint(alvo, checkinRpePlainLabel(s, alvo));

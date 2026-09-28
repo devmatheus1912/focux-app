@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/utils/checkin_exercise_tips.dart';
+import 'package:focux_app/l10n/app_localizations_pt.dart';
 
 void main() {
+  final s = SPt();
+
   test('checkinTextLooksNonPtBr catches English cues and stopwords', () {
     expect(
       checkinTextLooksNonPtBr(
@@ -21,13 +24,15 @@ void main() {
   test('checkinErrosComunsBody swaps EN copy for PT fallback', () {
     expect(
       checkinErrosComunsBody(
+        s,
         'Keep your elbows tucked and avoid locking your shoulders.',
       ),
-      checkinErrosComunsFallback,
+      'Peça orientação ao personal se tiver dúvida na execução.',
     );
     expect(
-      checkinErrosComunsBody('Não arqueie a lombar.'),
+      checkinErrosComunsBody(s, 'Não arqueie a lombar.'),
       'Não arqueie a lombar.',
     );
+    expect(checkinErrosComunsBody(s, null), '');
   });
 }

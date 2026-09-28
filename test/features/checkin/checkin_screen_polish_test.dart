@@ -65,15 +65,58 @@ void main() {
       'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
       'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
+      'lib/features/checkin/widgets/checkin_media_widgets.dart',
+      'lib/features/checkin/data/checkin_repository.dart',
+      'lib/features/checkin/models/checkin_execucao_models.dart',
       estadosPath,
     ]) {
       expect(_linhas(path), lessThan(500), reason: path);
     }
   });
 
+  test('execução não tem texto de UI fora do ARB', () {
+    final frase = RegExp(r"'[^'$\n]*[A-Za-zÀ-ú]{2,} [A-Za-zÀ-ú]{2,}[^'\n]*'");
+    final rotulo = RegExp(
+      r"(?:label|title|subtitle|tooltip|message):\s*'|Text\(\s*'",
+    );
+    for (final path in [
+      screenPath,
+      'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
+      'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
+      'lib/features/checkin/widgets/checkin_serie_steppers.part.dart',
+      'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
+      'lib/features/checkin/widgets/checkin_serie_campos_widgets.dart',
+      'lib/features/checkin/widgets/checkin_media_widgets.dart',
+      'lib/features/checkin/widgets/checkin_timer_widgets.dart',
+      'lib/features/checkin/widgets/checkin_header_widgets.dart',
+      estadosPath,
+      'lib/features/checkin/widgets/checkin_execucao_sheets.dart',
+      'lib/features/checkin/widgets/checkin_sessao_aberta_state.dart',
+      'lib/features/checkin/utils/checkin_exercise_tips.dart',
+      'lib/features/checkin/utils/checkin_serie_input.dart',
+      'lib/features/checkin/utils/checkin_execucao_display.dart',
+      'lib/core/widgets/fx_execution_chrome.dart',
+      'lib/core/widgets/fx_connectivity_banner.dart',
+      'lib/features/checkin/widgets/checkin_fila_sync_scope.dart',
+    ]) {
+      final src = File(path).readAsStringSync();
+      expect(frase.hasMatch(src), isFalse, reason: path);
+      expect(rotulo.hasMatch(src), isFalse, reason: path);
+    }
+  });
+
   test('fila offline, finalizar e descanso vivem fora do layout', () {
     final screen = _src(screenPath);
-    expect(screen, contains('checkinEnviarFila'));
+    expect(screen, contains('checkinFilaSyncProvider'));
+    expect(screen, isNot(contains('checkinEnviarFila(')));
+    expect(
+      _src('lib/features/checkin/services/checkin_fila_sync.dart'),
+      contains('checkinEnviarFila('),
+    );
+    expect(
+      File('lib/main.dart').readAsStringSync(),
+      contains('CheckinFilaSyncScope('),
+    );
     expect(screen, contains('checkinErroDeConexao'));
     expect(screen, contains('_filaLimpa'));
     expect(screen, contains('checkinExerciciosFaltando'));
@@ -199,7 +242,7 @@ void main() {
   test('tips e locale do exercício vivem no util SRP', () {
     final tips = _src('lib/features/checkin/utils/checkin_exercise_tips.dart');
     expect(tips, contains('checkinTextLooksNonPtBr'));
-    expect(tips, contains('checkinErrosComunsFallback'));
+    expect(tips, contains('s.checkinDicasFallbackErros'));
     expect(tips, contains('showCheckinExerciseTipsSheet'));
     expect(tips, contains('checkinExerciseHasDemo'));
   });
@@ -263,7 +306,7 @@ void main() {
         '${_src('lib/features/checkin/widgets/checkin_serie_campos_widgets.dart')}';
     expect(sheet, contains('checkinConsumeRpeFirstUseHint'));
     expect(sheet, contains('FxHelpIconButton'));
-    expect(sheet, contains('Esforço sentido'));
+    expect(sheet, contains('s.checkinRpeEsforco'));
     expect(sheet, contains('showFxHelpSheet'));
     expect(sheet, contains('FxKeyboardDismissScope'));
     expect(sheet, contains('FxKeyboardDismissScope.dismiss'));

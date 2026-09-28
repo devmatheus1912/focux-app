@@ -22,6 +22,7 @@ import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
 import '../providers/checkin_provider.dart';
 import '../services/checkin_descanso_alerta.dart';
+import '../services/checkin_fila_sync.dart';
 import '../utils/checkin_descanso_relogio.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
@@ -65,7 +66,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   int? _focoTreinoExercicioId;
   final _rascunhos = CheckinRascunhos();
   int _pendentes = 0;
-  Future<bool>? _filaEmVoo;
   StreamSubscription<void>? _conexaoSub;
   late final ProviderSubscription<CheckinDescansoAlerta> _alerta;
   late final _descanso = CheckinDescansoRelogio(
@@ -153,15 +153,15 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     });
   }
 
-  /// Uma rodada por vez; quem chamar durante o envio espera a mesma.
-  Future<bool> _enviarFila() =>
-      _filaEmVoo ??= _enviarFilaAgora().whenComplete(() => _filaEmVoo = null);
-
-  Future<bool> _enviarFilaAgora() async {
-    final r = await checkinEnviarFila(
-      store: _fila,
-      enviar: checkinEnvioPelo(_repo),
-    );
+  /// Recusa do servidor é avisada pelo escopo global da fila; aqui só o
+  /// estado da tela acompanha a rodada.
+  Future<bool> _enviarFila() async {
+    final CheckinFilaResultado r;
+    try {
+      r = await ref.read(checkinFilaSyncProvider).enviar();
+    } catch (_) {
+      return false;
+    }
     if (!mounted) return false;
     final base = _execucao;
     ExecucaoTreino? atual;
@@ -176,13 +176,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       _execucao = atual;
       _pendentes = checkinPendentesDaExecucao(r.restantes, atual?.id);
     });
-    if (r.rejeitadas > 0) {
-      FeedbackHelper.showError(
-        context,
-        S.of(context).checkinSeriesRejeitadas(r.rejeitadas),
-      );
-      await _recarregar();
-    }
+    if (r.rejeitadas > 0) await _recarregar();
     return _pendentes == 0;
   }
 

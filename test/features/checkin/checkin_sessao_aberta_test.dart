@@ -22,7 +22,7 @@ void main() {
     expect(s, isNotNull);
     expect(s!.execucaoId, 9);
     expect(s.treinoId, 4);
-    expect(s.mensagem, contains('Peito'));
+    expect(s.treinoNome, 'Peito');
   });
 
   test('backend antigo sem código cai no texto', () {
