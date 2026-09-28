@@ -28,6 +28,18 @@ void main() {
     }
   });
 
+  test('gitignore blocks common local secret paths', () {
+    final gitignore = File('.gitignore').readAsStringSync();
+    for (final snippet in [
+      'AuthKey_',
+      '.mcp.json',
+      'sentry.properties',
+      'secrets.json',
+    ]) {
+      expect(gitignore, contains(snippet));
+    }
+  });
+
   test('real Firebase configs are not tracked by git', () {
     final tracked = Process.runSync('git', ['ls-files', '--', ...ignoredFirebaseConfigs]);
     expect(tracked.exitCode, 0, reason: tracked.stderr);

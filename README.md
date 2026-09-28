@@ -1,109 +1,71 @@
 # Focux Personal — App
 
-Cliente Flutter (Android, iOS e web) para personal trainers e alunos operarem treino, alunos, financeiro, agenda, IA e crescimento em um produto multi-tenant.
+Cliente Flutter (Android, iOS e web) para personal trainers e alunos. Conecta-se à API do repositório **privado** `focux-backend`.
 
-> **Repositório público.** Não versionar secrets, keystores, Firebase real nem `.env`. Use só arquivos `*.example` com placeholders.
+> **Repositório público no GitHub ≠ software livre.** Código proprietário: consulta permitida; cópia, execução em produção, modificação e distribuição **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
 
-## Visão geral
+## Perfis
 
-Duas experiências no mesmo app, conectadas à API (`focux-backend`):
+| Perfil | Uso |
+|--------|-----|
+| **Personal** | Operação do negócio, alunos, treinos, agenda, financeiro, IA e crescimento |
+| **Aluno** | Treinos, check-in, evolução, saúde, chat e notificações |
 
-| Perfil | Foco |
-|---|---|
-| **Personal** | Command Center, alunos, treinos, biblioteca, agenda, financeiro, IA, CRM, marca e planos |
-| **Aluno** | Treinos, check-in, evolução, saúde, chat, feed, pagamentos e notificações |
+Autenticação JWT, rotas por papel (GoRouter) e design system próprio.
 
-Autenticação JWT, rotas por perfil (GoRouter) e design system próprio (Tokens Strip / Liquid Glass).
-
-## Snapshot
+## Estado do projeto
 
 | | |
 |---|---|
-| Versão | `1.2.1+92` (ver `pubspec.yaml`) |
-| Flutter / Dart | SDK `^3.7` |
-| Branch | `main` |
+| Versão / build | Ver `pubspec.yaml` (fonte da verdade) |
+| Branch principal | `main` |
 | Site | [focuxpersonal.com](https://focuxpersonal.com) |
+| Estágio | Pré-produção / App Store em preparação |
 
 ## Ecossistema
 
-| Repositório | Papel |
-|---|---|
-| `focux-app` | Este app |
-| `focux-backend` | API REST, WebSocket e regras de negócio |
-| `focux-website` | Site oficial e superfícies públicas |
+| Repositório | Visibilidade | Papel |
+|-------------|--------------|--------|
+| `focux-app` | Público | Este cliente |
+| `focux-backend` | **Privado** | API REST, WebSocket e regras de negócio |
+| Site | Externo | [focuxpersonal.com](https://focuxpersonal.com) |
 
-## Stack
+Não documente aqui infra, URLs internas, credenciais ou detalhes do backend privado.
 
-Flutter · Riverpod · GoRouter · Dio · Secure Storage · STOMP/WebSocket · Firebase (FCM, Crashlytics) · Google Sign-In · IAP · Health Connect / Apple Health · ML Kit · Rive · Material 3
+## Stack (resumo)
 
-## Estrutura
+Flutter · Riverpod · GoRouter · Dio · secure storage · STOMP · Firebase (FCM/Crashlytics) · IAP · Health · l10n (pt, en, es)
 
-```text
-lib/
-├── core/          # api, auth, router, theme, widgets, security
-├── features/      # domínios (dashboard, alunos, treinos, ia, …)
-└── l10n/          # pt, en, es
-android/ · ios/ · web/ · test/ · integration_test/ · e2e/
-```
-
-Hubs principais usam BFF `GET …/home` (first paint em um request). Rotas: `lib/core/router/`.
-
-## Escopo funcional (resumo)
-
-**Personal** — Command Center e Focux Score · Aluno 360 · treinos e biblioteca · IA copiloto · financeiro e PIX · agenda · chat, feed e broadcasts · leads, landing e identidade visual · [...]
-
-**Aluno** — dashboard · execução de treino · evolução e fotos · saúde/recovery · chat e feed · financeiro · IA e gamificação.
-
-## Desenvolvimento
+## Desenvolvimento local
 
 ### Pré-requisitos
 
-Flutter SDK · Android Studio ou Xcode · emulador ou Chrome · backend local ou remoto
+Flutter SDK (compatível com `pubspec.yaml`) · Android Studio ou Xcode · backend acessível só no **seu** ambiente autorizado
 
 ### Setup
 
 ```bash
 flutter pub get
 cp .env.local.example .env.local
-# Edite .env.local com placeholders locais (nunca commite este arquivo)
+# Edite .env.local localmente — nunca commite
 
-cp android/gradle.properties.example android/gradle.properties   # se necessário
-cp android/key.properties.example android/key.properties         # só para release local
 cp android/app/google-services.json.example android/app/google-services.json
 cp ios/Runner/GoogleService-Info.plist.example ios/Runner/GoogleService-Info.plist
+cp android/gradle.properties.example android/gradle.properties   # se necessário
+cp android/key.properties.example android/key.properties         # só release local
 ```
 
-Configuração de runtime via `--dart-define` (ver `lib/core/config/env.dart`).
-Modelos seguros: `.env.local.example`, `android/key.properties.example`, `*.google-services*.example`.
+Templates e chaves de runtime: `lib/core/config/env.dart` e arquivos `*.example` versionados.
 
-### Rodar (local)
-
-```bash
-# Android (emulador → host da máquina)
-flutter run -d emulator-5554 \
-  --dart-define=API_URL=http://10.0.2.2:8080 \
-  --dart-define=PUBLIC_WEB_URL=http://10.0.2.2:8080
-
-# Web
-flutter run -d chrome --web-port 61791 \
-  --dart-define=API_URL=http://localhost:8080 \
-  --dart-define=PUBLIC_WEB_URL=http://localhost:61791
-```
-
-No PowerShell, use `` ` `` no lugar de `\` para continuar a linha.
-
-### Build
+### Rodar
 
 ```bash
-flutter build apk --release \
+flutter run \
   --dart-define=API_URL=https://your-backend.example.com \
   --dart-define=PUBLIC_WEB_URL=https://your-frontend.example.com
-
-flutter build appbundle --release
-flutter build web --release
 ```
 
-Use URLs e credenciais do **seu** ambiente. Não cole tokens reais no README nem no código.
+Use **sempre** placeholders ou hosts do seu ambiente de dev. Nunca cole tokens, API keys ou senhas reais em issues, PRs ou README.
 
 ### Qualidade
 
@@ -112,14 +74,16 @@ dart analyze --fatal-warnings --fatal-infos
 flutter test
 ```
 
-E2E web (opcional): `cd e2e && npm install && npx playwright test`
-CI: analyze, testes e varredura de secrets — ver `.github/workflows/`.
+CI (`.github/workflows/`): analyze, testes e varredura de secrets (gitleaks).
 
-### i18n
+## Segurança — nunca versionar
 
-Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
+`.env*` · keystores (`*.jks`, `*.keystore`, `*.p12`, `*.pem`) · `key.properties` · `google-services.json` / `GoogleService-Info.plist` reais · service accounts · `e2e/.auth/` · dumps e screenshots de QA com PII · chaves Apple (`AuthKey_*.p8`, perfis de provisionamento)
 
+Se encontrar secret no histórico: trate como comprometido, revogue no provedor e avise o mantenedor — não force-push sem alinhamento.
+
+**Vulnerabilidades:** não abra issue pública. E-mail: **contato@focuxpersonal.com** (relato responsável).
 
 ## Licença
 
-Código proprietário. O repositório é público só para transparência; uso, cópia, modificação e distribuição dependem de autorização por escrito. Termos completos em [LICENSE](LICENSE).
+[LICENSE](LICENSE) — MATHEUS OLIVEIRA DOS SANTOS DESENVOLVIMENTO DE SOFTWARE LTDA. Todos os direitos reservados.
