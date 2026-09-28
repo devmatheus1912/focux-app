@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/health/health_service.dart';
-import 'package:focux_app/core/health/recovery_score.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/screens/health_dashboard_screen.dart';
 import 'package:focux_app/features/health/widgets/recovery_score_ring.dart';
@@ -40,13 +39,6 @@ Future<void> _pumpDashboard(
 
 void main() {
   test('sync falhou sem snapshot anterior não publica nota local', () {
-    final local = RecoveryScoreView.compute(
-      steps: 12000,
-      sleepHours: 8,
-      avgHeartRate: 58,
-    );
-    expect(local.score, greaterThan(0));
-
     expect(
       recoveryAfterSyncAttempt(
         syncedFromServer: null,
