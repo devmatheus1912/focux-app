@@ -18,7 +18,7 @@ String resetCodigoHelpCodigoBody() =>
     'Confira spam. Reenviar invalida o código antigo.';
 
 String resetCodigoHelpPapelBody() =>
-    'Aluno precisa do ?p=slug. Sem o personal o código não fecha.';
+    'O código vale só para a conta personal. Aluno pede senha ao personal.';
 
 String resetCodigoRoleQuery({required bool isAluno}) =>
     isAluno ? 'aluno' : 'personal';
@@ -41,8 +41,6 @@ String resetCodigoNovaSenhaPath({
   final role = resetCodigoRoleQuery(isAluno: isAluno);
   final slug = personalSlug?.trim();
   final slugQ =
-      slug != null && slug.isNotEmpty
-          ? '&p=${Uri.encodeComponent(slug)}'
-          : '';
+      slug != null && slug.isNotEmpty ? '&p=${Uri.encodeComponent(slug)}' : '';
   return '/resetar-senha?resetNonce=${Uri.encodeComponent(nonce)}&role=$role$slugQ';
 }

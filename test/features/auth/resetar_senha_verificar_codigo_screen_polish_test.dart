@@ -35,5 +35,6 @@ void main() {
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('authUnfocusAndGo'));
+    expect(screen, contains('esqueciAlunoOtpRedirect'));
   });
 }

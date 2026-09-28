@@ -57,6 +57,15 @@ class _ResetarSenhaVerificarCodigoScreenState
       _personalSlug = slug;
     }
     startResendCooldown(0);
+    final redirect = esqueciAlunoOtpRedirect(
+      isAluno: _isAluno,
+      personalSlug: _personalSlug,
+    );
+    if (redirect != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(redirect);
+      });
+    }
   }
 
   @override

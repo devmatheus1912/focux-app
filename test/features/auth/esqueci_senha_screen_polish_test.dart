@@ -49,6 +49,9 @@ void main() {
     expect(screen, contains('personalSlug:'));
     expect(screen, contains('esqueciEnviarLabel'));
     expect(screen, contains('esqueciVoltarLoginLabel'));
+    expect(screen, contains('esqueciMostraCodigo'));
+    expect(screen, contains('esqueciPageSubtitle'));
+    expect(screen, isNot(contains('esqueciAlunoSemSlugError')));
     expect(
       screen.indexOf('esqueciEnviarLabel'),
       lessThan(screen.indexOf('esqueciVoltarLoginLabel')),

@@ -8,22 +8,23 @@ extension on _EsqueciSenhaScreenState {
     return showFxHelpSheet(
       context,
       title: esqueciHelpTitle(),
-      subtitle: esqueciHelpSubtitle(),
+      subtitle: esqueciHelpSubtitle(isAluno: _isAluno),
       tips: [
-        FxHelpTip('Código', esqueciHelpCodigoBody(), icon: 'spark'),
-        FxHelpTip('Papel', esqueciHelpPapelBody(), icon: 'users'),
+        if (esqueciMostraCodigo(isAluno: _isAluno))
+          FxHelpTip('Código', esqueciHelpCodigoBody(), icon: 'spark'),
+        FxHelpTip(
+          'Papel',
+          esqueciHelpPapelBody(isAluno: _isAluno),
+          icon: 'users',
+        ),
       ],
     );
   }
 
   Future<void> _pedirEnviar() async {
-    if (_loading) return;
+    if (_loading || !esqueciMostraCodigo(isAluno: _isAluno)) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
-    if (_isAluno && (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
-      setState(() => _error = esqueciAlunoSemSlugError());
-      return;
-    }
     final ok = await showFxConfirmSheet(
       context,
       title: esqueciConfirmTitle(),
@@ -35,12 +36,9 @@ extension on _EsqueciSenhaScreenState {
   }
 
   Future<void> _submit() async {
+    if (!esqueciMostraCodigo(isAluno: _isAluno)) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) {
-      return;
-    }
-    if (_isAluno && (_personalSlug == null || _personalSlug!.trim().isEmpty)) {
-      setState(() => _error = esqueciAlunoSemSlugError());
       return;
     }
 
@@ -54,11 +52,7 @@ extension on _EsqueciSenhaScreenState {
     try {
       await ref
           .read(authRepositoryProvider)
-          .solicitarResetSenha(
-            email: _emailController.text.trim(),
-            isAluno: _isAluno,
-            personalSlug: _isAluno ? _personalSlug : null,
-          );
+          .solicitarResetSenha(email: _emailController.text.trim());
 
       if (!mounted) {
         return;
@@ -67,14 +61,14 @@ extension on _EsqueciSenhaScreenState {
       context.go(
         esqueciVerificarCodigoPath(
           email: _emailController.text.trim(),
-          isAluno: _isAluno,
+          isAluno: false,
           personalSlug: _personalSlug,
         ),
       );
       unawaited(
         AnalyticsService.instance.track(
           ProductEvents.passwordResetRequested,
-          props: {'role': _isAluno ? 'aluno' : 'personal'},
+          props: {'role': 'personal'},
         ),
       );
     } catch (error) {

@@ -72,6 +72,15 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
     if (slug != null && slug.isNotEmpty) {
       _personalSlug = slug;
     }
+    final redirect = esqueciAlunoOtpRedirect(
+      isAluno: role == 'aluno',
+      personalSlug: _personalSlug,
+    );
+    if (redirect != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go(redirect);
+      });
+    }
   }
 
   @override

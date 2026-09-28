@@ -7,7 +7,10 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/auth/screens/resetar_senha_screen.dart',
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
+    expect(
+      screen,
+      anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
+    );
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(
       screen,
@@ -55,5 +58,6 @@ void main() {
     expect(screen, contains('authUnfocusAndLeave'));
     expect(screen, contains('authUnfocusAndGo'));
     expect(screen, contains('AutofillHints.newPassword'));
+    expect(screen, contains('esqueciAlunoOtpRedirect'));
   });
 }
