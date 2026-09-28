@@ -122,4 +122,4 @@ Fontes: `lib/l10n/app_{pt,en,es}.arb` · gerar: `flutter gen-l10n`
 
 ## Licença
 
-Código proprietário. O repositório pode ser público para transparência; uso, distribuição e cópia dependem de autorização do proprietário.
+Código proprietário. O repositório é público só para transparência; uso, cópia, modificação e distribuição dependem de autorização por escrito. Termos completos em [LICENSE](LICENSE).

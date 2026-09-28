@@ -1,0 +1,80 @@
+LICENÇA DE SOFTWARE PROPRIETÁRIO — FOCUX PERSONAL
+
+Copyright (c) 2026 MATHEUS OLIVEIRA DOS SANTOS DESENVOLVIMENTO DE SOFTWARE LTDA
+CNPJ 67.019.279/0001-26 — Curitiba/PR, Brasil
+Todos os direitos reservados.
+
+1. TITULARIDADE
+
+O código-fonte, a arquitetura, o design, as telas, os textos, as imagens, os
+ícones e demais materiais deste repositório (o "Software") pertencem
+exclusivamente à MATHEUS OLIVEIRA DOS SANTOS DESENVOLVIMENTO DE SOFTWARE LTDA
+(a "Titular"). "Focux" e "Focux Personal" são marcas da Titular.
+
+O Software é protegido pela Lei nº 9.609/1998 (Lei do Software), pela Lei
+nº 9.610/1998 (Lei de Direitos Autorais) e pela Lei nº 9.279/1996 (Lei da
+Propriedade Industrial).
+
+2. REPOSITÓRIO PÚBLICO NÃO É LICENÇA ABERTA
+
+Este repositório é público apenas para transparência e consulta. A
+disponibilidade do código não concede nenhuma licença de uso, cópia,
+modificação ou distribuição, exceto o mínimo exigido pelos Termos de Serviço
+do GitHub (visualizar o repositório e criar um fork dentro da plataforma
+GitHub).
+
+3. O QUE É PERMITIDO
+
+a) Ler e consultar o código-fonte pelo GitHub.
+b) Criar fork dentro do GitHub, sem uso fora do escopo do item 2.
+c) Reportar falhas de segurança de forma responsável pelo e-mail
+   contato@focuxpersonal.com.
+
+4. O QUE É PROIBIDO SEM AUTORIZAÇÃO PRÉVIA E POR ESCRITO DA TITULAR
+
+a) Copiar, reproduzir ou baixar o Software para uso próprio ou de terceiros.
+b) Compilar, executar em produção, publicar em lojas de aplicativos ou
+   disponibilizar o Software, no todo ou em parte.
+c) Modificar, adaptar, traduzir ou criar obras derivadas.
+d) Distribuir, sublicenciar, vender, alugar ou ceder o Software.
+e) Usar o Software, ou partes dele, em produto ou serviço concorrente ou
+   comercial.
+f) Usar as marcas, logotipos ou a identidade visual Focux.
+g) Usar o Software para treinar, ajustar ou avaliar modelos de inteligência
+   artificial ou aprendizado de máquina.
+h) Remover ou alterar avisos de direitos autorais ou desta licença.
+
+5. COMPONENTES DE TERCEIROS
+
+Bibliotecas e pacotes de terceiros usados pelo Software seguem suas próprias
+licenças, indicadas em seus respectivos arquivos. Esta licença não altera
+esses termos.
+
+6. CONTRIBUIÇÕES
+
+A Titular não é obrigada a aceitar contribuições. Ao enviar pull request,
+issue, sugestão ou qualquer contribuição, você declara ser autor do conteúdo
+enviado e cede à Titular, de forma gratuita, irrevogável e sem restrição de
+território ou prazo, os direitos patrimoniais sobre ele, incluindo uso,
+modificação, distribuição e sublicenciamento.
+
+7. AUSÊNCIA DE GARANTIA
+
+O Software é disponibilizado para consulta "no estado em que se encontra",
+sem garantia de qualquer tipo. A Titular não se responsabiliza por danos
+decorrentes do uso não autorizado do Software.
+
+8. VIOLAÇÃO
+
+O uso em desacordo com esta licença encerra automaticamente qualquer
+permissão prevista no item 3 e sujeita o infrator às sanções civis e penais
+previstas na legislação brasileira.
+
+9. LEI E FORO
+
+Esta licença é regida pelas leis da República Federativa do Brasil. Fica
+eleito o foro da comarca de Curitiba/PR.
+
+10. CONTATO
+
+Pedidos de autorização e licenciamento: contato@focuxpersonal.com
