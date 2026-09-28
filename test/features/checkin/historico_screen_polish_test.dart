@@ -1,44 +1,51 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('historico cumpre contrato Tier S+', () {
+  test('histórico: sessões concluídas por semana e fold antigo fora', () {
     final screen = readScreenSourceBundle(
       'lib/features/checkin/screens/historico_screen.dart',
     );
-    expect(screen, anyOf(contains('fxScreenA11yScope'), contains('Semantics(')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
+
+    expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('friendlyError'));
-    expect(screen, contains('FxEmptyState'));
-    expect(screen, contains('FxErrorState'));
-    expect(screen, contains('FxEmptyAction'));
-    expect(screen, contains('SkeletonList'));
+    expect(screen, contains('FxAsyncBody<HistoricoLista>'));
+    expect(screen, contains('skipError: true'));
+    expect(screen, contains('historicoListaProvider'));
+    expect(screen, contains('agruparHistoricoPorSemana'));
+    expect(screen, contains('historicoSemanaCabecalho'));
+    expect(screen, contains('TreinoRecenteRow'));
+    expect(screen, contains('HistoricoFiltroFichas'));
+    expect(screen, contains('HistoricoMaisRodape'));
     expect(screen, contains('RefreshIndicator'));
-    expect(screen, contains('FxHubFreshness.joinCount'));
-    expect(screen, contains('safePopOrGo'));
-    expect(screen, contains('showBack: true'));
+    expect(screen, contains('FxEmptyState'));
     expect(screen, contains("fallbackLocation: '/checkin/treinos'"));
-    expect(screen, contains('ListView('));
-    expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('historicoDetalhePath'));
-    expect(screen, contains('historicoStatusQuery'));
-    expect(screen, contains('historicoGroupByStatus'));
-    expect(screen, contains('historicoCollapseSamePlan'));
-    expect(screen, contains('historicoClusterSubtitle'));
-    expect(screen, contains('_HistoricoStatusChip'));
-    expect(screen, contains('_HistoricoSectionLabel'));
-    expect(screen, contains('q: _query'));
-    expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(screen, contains('viewInsetsOf'));
-    expect(screen, contains('onTapOutside'));
-    expect(screen, isNot(contains('FxSettingsGroup')));
-    expect(screen, isNot(contains('FloatingActionButton')));
-    expect(screen, isNot(contains("icon: 'plus'")));
-    expect(screen, contains('PopScope'));
-    expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxKeyboardDismissScope.dismiss'));
-    expect(screen, contains('FeedbackHelper.showError'));
+
+    for (final morto in [
+      'HistoricoMemCache',
+      'HistoricoDetalheMemCache',
+      'TextField',
+      'HistoricoStatusChip',
+      'historicoCollapseSamePlan',
+      'historicoGroupByStatus',
+      'historicoStatusQuery',
+      'FxHelpIconButton',
+      'Carregar mais',
+      '_prefetch',
+      "'Histórico de Treinos'",
+    ]) {
+      expect(screen, isNot(contains(morto)), reason: morto);
+    }
+    for (final apagado in [
+      'lib/features/checkin/data/historico_mem_cache.dart',
+      'lib/features/checkin/utils/historico_display.dart',
+      'lib/features/checkin/utils/historico_sessao_metrics.dart',
+    ]) {
+      expect(File(apagado).existsSync(), isFalse, reason: apagado);
+    }
   });
 }

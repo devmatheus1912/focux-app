@@ -154,20 +154,23 @@ List<TreinoRecente> _ultimos(
 }) {
   final concluidos = <TreinoRecente>[];
   for (final h in historico) {
-    if (normalizeTreinoStatus(h.status) != treinoStatusConcluido) continue;
     if (excluirExecucaoId != null && h.id == excluirExecucaoId) continue;
-    final quando = _parseLocal(h.concluidoEm) ?? _parseLocal(h.iniciadoEm);
-    if (quando == null) continue;
-    concluidos.add(
-      TreinoRecente(
-        execucao: h,
-        quando: quando,
-        duracao: treinoDuracaoReal(h.iniciadoEm, h.concluidoEm),
-      ),
-    );
+    if (treinoRecenteDe(h) case final r?) concluidos.add(r);
   }
   concluidos.sort((a, b) => b.quando.compareTo(a.quando));
   return concluidos.take(treinosHubUltimosMax).toList();
+}
+
+/// Sessão concluída com data (conclusão, senão início); null para as demais.
+TreinoRecente? treinoRecenteDe(ExecucaoTreino h) {
+  if (normalizeTreinoStatus(h.status) != treinoStatusConcluido) return null;
+  final quando = _parseLocal(h.concluidoEm) ?? _parseLocal(h.iniciadoEm);
+  if (quando == null) return null;
+  return TreinoRecente(
+    execucao: h,
+    quando: quando,
+    duracao: treinoDuracaoReal(h.iniciadoEm, h.concluidoEm),
+  );
 }
 
 /// `concluidoEm − iniciadoEm` quando plausível (5 min a 8 h). Fora disso é

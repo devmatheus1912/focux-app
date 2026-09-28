@@ -1,37 +1,32 @@
-import 'dart:async';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/utils/friendly_error.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/utils/a11y_announce.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_async_body.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
-import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_icon.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_sparkline.dart';
-import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/checkin_repository.dart';
-import '../data/historico_mem_cache.dart';
-import '../providers/checkin_provider.dart';
-import '../utils/checkin_execucao_display.dart';
-import '../utils/historico_display.dart';
-import '../utils/historico_sessao_metrics.dart';
+import '../providers/historico_provider.dart';
+import '../utils/historico_detalhe_texts.dart';
+import '../utils/historico_detalhe_view.dart';
+import '../utils/treinos_hub_view.dart';
+import '../widgets/historico_detalhe_widgets.dart';
 
+/// Uma sessão do histórico. Concluída: "Treinar de novo" abre a prévia.
+/// Aberta (link antigo ou push): "Continuar treino".
 class HistoricoDetalheScreen extends ConsumerStatefulWidget {
   const HistoricoDetalheScreen({super.key, required this.execucaoId});
 
@@ -44,553 +39,219 @@ class HistoricoDetalheScreen extends ConsumerStatefulWidget {
 
 class _HistoricoDetalheScreenState
     extends ConsumerState<HistoricoDetalheScreen> {
-  ExecucaoTreino? _execucao;
-  HistoricoSessaoMetrics? _evolucao;
-  var _loading = true;
-  String? _erro;
-  DateTime? _fetchedAt;
-  var _secao = historicoSecaoExercicios;
+  var _abrindo = false;
 
-  @override
-  void initState() {
-    super.initState();
-    final cached = HistoricoDetalheMemCache.loadIfFresh(widget.execucaoId);
-    if (cached != null) {
-      _execucao = cached;
-      _evolucao = historicoSessaoMetricsFromExecucao(cached);
-      _loading = false;
-      _fetchedAt = DateTime.now();
-    }
-    _carregar();
+  void _voltar() => safePopOrGo(context, '/checkin/historico');
+
+  /// Treinar ou "Já fiz" na prévia mudam a Home e a lista.
+  void _recarregarDependentes() {
+    invalidateAlunoDashboardHome(ref);
+    ref.invalidate(historicoListaProvider);
   }
 
-  Future<void> _carregar() async {
-    setState(() {
-      _loading = _execucao == null;
-      _erro = null;
-    });
-    try {
-      final repo = ref.read(checkinRepositoryProvider);
-      final loaded = await repo.detalhe(widget.execucaoId);
-      if (!mounted) return;
-      final local = historicoSessaoMetricsFromExecucao(loaded);
-      setState(() {
-        _execucao = loaded;
-        _evolucao = local;
-        _loading = false;
-        _fetchedAt = DateTime.now();
-      });
-      HistoricoDetalheMemCache.save(loaded);
-      // Onda B em paralelo — não bloqueia first paint.
-      unawaited(_carregarEvolucao(repo));
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _erro = friendlyError(e);
-        _loading = false;
-      });
+  Future<void> _treinarDeNovo(int treinoId) async {
+    if (_abrindo) return;
+    _abrindo = true;
+    final iniciar = await context.push<bool>(treinoPreviaPath(treinoId));
+    if (mounted && iniciar == true) {
+      await context.push('/checkin/executar', extra: treinoId);
     }
+    _abrindo = false;
+    if (mounted) _recarregarDependentes();
   }
 
-  Future<void> _carregarEvolucao(CheckinRepository repo) async {
+  Future<void> _continuar(int treinoId) async {
+    if (_abrindo) return;
+    _abrindo = true;
+    await context.push('/checkin/executar', extra: treinoId);
+    _abrindo = false;
+    if (!mounted) return;
+    _recarregarDependentes();
+    ref.invalidate(historicoDetalheProvider(widget.execucaoId));
+    ref.invalidate(historicoEvolucaoProvider(widget.execucaoId));
+  }
+
+  Future<void> _refresh() async {
+    final s = S.of(context);
+    ref
+      ..invalidate(historicoEvolucaoProvider(widget.execucaoId))
+      ..invalidate(historicoDetalheProvider(widget.execucaoId));
     try {
-      final dto = await repo.evolucaoSessao(widget.execucaoId);
-      if (!mounted) return;
-      setState(() => _evolucao = historicoSessaoMetricsFromDto(dto));
+      await ref.read(historicoDetalheProvider(widget.execucaoId).future);
     } catch (_) {
-      // Mantém métricas locais (Onda A).
+      if (mounted) FeedbackHelper.showError(context, s.historicoAtualizarErro);
+      return;
     }
-  }
-
-  void _leave() => safePopOrGo(context, '/checkin/historico');
-
-  void _agir() {
-    final execucao = _execucao;
-    if (execucao == null) return;
-    context.push('/checkin/executar', extra: execucao.treinoId);
+    if (mounted) fxAnnounce(context, s.historicoDetalheAtualizado);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final execucao = _execucao;
-    final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
+    final s = S.of(context);
+    final detalheAsync = ref.watch(historicoDetalheProvider(widget.execucaoId));
+    final evolucao =
+        ref.watch(historicoEvolucaoProvider(widget.execucaoId)).value;
+    final execucao = detalheAsync.value;
+    final view =
+        execucao == null
+            ? null
+            : buildHistoricoDetalheView(execucao, evolucao: evolucao);
+    final noPlano =
+        ref
+            .watch(alunoDashboardHomeProvider)
+            .value
+            ?.treinos
+            .any((t) => t.treinoId == execucao?.treinoId) ??
+        false;
+    final titulo = execucao?.treinoNome ?? s.historicoTitulo;
+    final naoEncontrada =
+        !detalheAsync.hasValue &&
+        detalheAsync.error is DioException &&
+        (detalheAsync.error! as DioException).response?.statusCode == 404;
 
     return fxScreenA11yScope(
-      label: execucao?.treinoNome ?? 'Treino',
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          _leave();
-        },
-        child: FxShellScaffold(
-          useMesh: true,
-          constrainWidth: false,
-          appBar: FxShellAppBar(
-            title: execucao?.treinoNome ?? 'Treino',
-            subtitle:
-                execucao != null &&
-                        historicoDateLabel(execucao.iniciadoEm).isNotEmpty
-                    ? historicoDateLabel(execucao.iniciadoEm)
-                    : freshness,
-            onBack: _leave,
-            actions: [
-              FxHelpIconButton(
-                tooltip: 'Como ler esta sessão',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Sessão do histórico',
-                  subtitle: 'O que aconteceu neste treino e o próximo passo.',
-                  tips: const [
-                    FxHelpTip(
-                      'Continuar',
-                      'Se ficou pela metade, o botão retoma a execução.',
-                      icon: 'circle-check',
-                    ),
-                    FxHelpTip(
-                      'De novo',
-                      'Sessão concluída abre um treino novo com o mesmo plano.',
-                      icon: 'dumbbell',
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          body:
-              _loading && execucao == null
-                  ? Padding(
-                    padding: const EdgeInsets.all(FxSettingsLayout.pageInset),
-                    child: FxLoading.sectionShimmer(
-                      context,
-                      height: 220,
-                    ),
-                  )
-                  : _erro != null && execucao == null
-                  ? FxContentWidthLimiter(
-                    child: FxErrorState(
-                      chromeOnDark: isDark,
-                      primary: primary,
-                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                      message: _erro!,
-                      onRetry: _carregar,
-                    ),
-                  )
-                  : execucao == null
-                  ? FxContentWidthLimiter(
-                    child: FxEmptyState(
-                      icon: 'dumbbell',
-                      title: 'Treino não encontrado',
-                      subtitle: 'Volte ao histórico e escolha outro.',
-                      action: FxEmptyAction(label: 'Voltar', onTap: _leave),
-                    ),
-                  )
-                  : _DetalheBody(
-                    execucao: execucao,
-                    metrics:
-                        _evolucao ?? historicoSessaoMetricsFromExecucao(execucao),
-                    secao: _secao,
-                    onSecao: (value) => setState(() => _secao = value),
-                    onRefresh: _carregar,
-                    onAct: _agir,
-                    onLeave: _leave,
-                  ),
+      label: titulo,
+      child: FxShellScaffold(
+        useMesh: true,
+        constrainWidth: false,
+        appBar: FxShellAppBar(
+          title: titulo,
+          subtitle: view == null ? null : historicoDetalheSubtitulo(s, view),
+          onBack: _voltar,
         ),
+        body:
+            naoEncontrada
+                ? FxContentWidthLimiter(
+                  child: FxEmptyState(
+                    icon: 'dumbbell',
+                    title: s.historicoDetalheNaoEncontrado,
+                    action: FxEmptyAction(
+                      label: s.historicoDetalheVoltar,
+                      onTap: _voltar,
+                    ),
+                  ),
+                )
+                : FxAsyncBody<ExecucaoTreino>(
+                  value: detalheAsync,
+                  skipLoadingOnReload: true,
+                  skipError: true,
+                  skeleton: const HistoricoDetalheSkeleton(),
+                  onRetry:
+                      () => ref.invalidate(
+                        historicoDetalheProvider(widget.execucaoId),
+                      ),
+                  builder:
+                      (context, e) => _corpo(
+                        context,
+                        e,
+                        view ?? buildHistoricoDetalheView(e),
+                        noPlano: noPlano,
+                      ),
+                ),
       ),
     );
   }
-}
 
-class _DetalheBody extends StatelessWidget {
-  const _DetalheBody({
-    required this.execucao,
-    required this.metrics,
-    required this.secao,
-    required this.onSecao,
-    required this.onRefresh,
-    required this.onAct,
-    required this.onLeave,
-  });
-
-  final ExecucaoTreino execucao;
-  final HistoricoSessaoMetrics metrics;
-  final String secao;
-  final ValueChanged<String> onSecao;
-  final Future<void> Function() onRefresh;
-  final VoidCallback onAct;
-  final VoidCallback onLeave;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final done = historicoExerciciosConcluidos(
-      execucao.exercicios.map((item) {
-        final feitas = historicoSeriesFeitasEfetivas(
-          seriesFeitas: item.seriesFeitas,
-          seriesDetalhesCount: item.seriesDetalhes.length,
-        );
-        return historicoExercicioConcluidoEfetivo(
-          concluido: item.concluido,
-          seriesFeitas: feitas,
-          series: item.series,
-        );
-      }),
-    );
-    final total = execucao.exercicios.length;
-    final concluido = historicoConcluido(execucao.status);
-    final duracao = historicoDuracaoLabel(
-      execucao.iniciadoEm,
-      execucao.concluidoEm,
-      sessaoAberta: !concluido,
-    );
-    final prs = execucao.evolucoesPerformance;
-    final cargas = execucao.evolucoesCarga;
-    final recordes = metrics.recordes > 0
-        ? metrics.recordes
-        : historicoRecordesCount(prs: prs.length, cargas: cargas.length);
-    final emptySeries = historicoEmptySeriesFromExercicios(execucao.exercicios);
+  Widget _corpo(
+    BuildContext context,
+    ExecucaoTreino execucao,
+    HistoricoDetalheView v, {
+    required bool noPlano,
+  }) {
+    final s = S.of(context);
+    final cta = switch ((v.concluida, noPlano)) {
+      (true, true) => (
+        s.historicoTreinarDeNovo,
+        () => _treinarDeNovo(execucao.treinoId),
+      ),
+      (false, _) => (
+        s.treinosContinuarCta,
+        () => _continuar(execucao.treinoId),
+      ),
+      _ => null,
+    };
 
     return Column(
       children: [
         Expanded(
           child: RefreshIndicator(
-            color: primary,
-            onRefresh: onRefresh,
+            onRefresh: _refresh,
             child: FxContentWidthLimiter(
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s3,
-                  FxSettingsLayout.pageInset,
-                  TokensStrip.s5,
-                ),
+                padding: const EdgeInsets.all(TokensStrip.s4),
                 children: [
-                  FxStripCard(
-                    emphasize: false,
-                    accent: primary,
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s3,
-                      TokensStrip.s3,
-                      TokensStrip.s3,
-                      TokensStrip.s2,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  HistoricoResumoCard(view: v),
+                  const SizedBox(height: TokensStrip.s3),
+                  HistoricoMetricas(view: v),
+                  const SizedBox(height: TokensStrip.s4),
+                  HistoricoSecao(
+                    titulo: s.historicoExercicios,
+                    filhos: [
+                      if (v.exercicios.isEmpty)
                         Text(
-                          'Sinal',
-                          style: FocuxHubTypography.chip(fxScreenMute(context)),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                historicoStatusDisplayLabel(
-                                  status: execucao.status,
-                                  seriesFeitas: metrics.seriesFeitas,
-                                ),
-                                style: FocuxHubTypography.sectionTitle(
-                                  context,
-                                  color: fxScreenInk(context),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: TokensStrip.s2),
-                            Text(
-                              duracao ?? '—',
-                              style: FocuxHubTypography.bodyMuted(
-                                color: fxScreenMute(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: TokensStrip.s1),
-                        Text(
-                          metrics.sinalLabel,
+                          s.historicoSemExercicios,
                           style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
+                            color: ShellChrome.of(context).mute,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: TokensStrip.s2),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OperationalMetricTile(
-                                label: 'Volume',
-                                value: metrics.volumeLabel,
-                                hint: historicoVolumeHint(
-                                  volumeKg: metrics.volumeKg,
-                                  volumeAnteriorKg: metrics.volumeAnteriorKg,
-                                ),
-                                color: primary,
-                                isDark: isDark,
-                                dense: true,
-                                emphasis: OperationalMetricEmphasis.muted,
-                              ),
-                            ),
-                            const SizedBox(width: TokensStrip.s2),
-                            Expanded(
-                              child: OperationalMetricTile(
-                                label: 'Séries',
-                                value: metrics.seriesLabel,
-                                hint: metrics.seriesHint,
-                                color: primary,
-                                isDark: isDark,
-                                dense: true,
-                                emphasis: OperationalMetricEmphasis.muted,
-                              ),
-                            ),
-                            const SizedBox(width: TokensStrip.s2),
-                            Expanded(
-                              child: OperationalMetricTile(
-                                label: recordes > 0 ? 'Recordes' : 'Exerc.',
-                                value: recordes > 0
-                                    ? '$recordes'
-                                    : '$done/$total',
-                                hint: recordes > 0
-                                    ? historicoPrHint(recordes)
-                                    : historicoExerciciosMetricHint(total),
-                                color: primary,
-                                isDark: isDark,
-                                dense: true,
-                                emphasis: OperationalMetricEmphasis.muted,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (metrics.destaqueExercicio != null &&
-                            metrics.destaqueDeltaKg != null) ...[
-                          const SizedBox(height: TokensStrip.s2),
-                          Text(
-                            '${metrics.destaqueExercicio}: '
-                            '${historicoDeltaKgLabel(metrics.destaqueDeltaKg!)}',
-                            style: FocuxHubTypography.chip(primary),
+                      for (final l in v.exercicios)
+                        HistoricoExercicioTile(linha: l),
+                    ],
+                  ),
+                  if (v.recordes.isNotEmpty) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    HistoricoSecao(
+                      titulo: s.historicoRecordes,
+                      filhos: [
+                        for (final r in v.recordes)
+                          HistoricoInfoTile(
+                            titulo: r.exercicio,
+                            detalhe: historicoRecordeDetalhe(s, r),
+                            icone: 'star',
                           ),
-                        ],
                       ],
                     ),
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  AlunoSegmentedChoice(
-                    options: historicoDetalheSecoes,
-                    selected: secao,
-                    isDark: isDark,
-                    onSelect: onSecao,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  if (secao == historicoSecaoRecordes)
-                    ..._recordes(prs, cargas)
-                  else if (secao == historicoSecaoNotas)
-                    ..._notas(execucao.exercicios)
-                  else if (execucao.exercicios.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: TokensStrip.s1),
-                      child: Text(
-                        'Sem exercícios nesta execução.',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: fxScreenMute(context),
-                        ),
-                      ),
-                    )
-                  else ...[
-                    if (emptySeries >= 3)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-                        child: Text(
-                          historicoEmptySeriesSummary(emptySeries),
-                          style: FocuxHubTypography.bodyMuted(
-                            color: fxScreenMute(context),
-                            fontWeight: FontWeight.w600,
+                  ],
+                  if (v.notas.isNotEmpty) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    HistoricoSecao(
+                      titulo: s.historicoNotas,
+                      filhos: [
+                        for (final n in v.notas)
+                          HistoricoInfoTile(
+                            titulo: n.exercicio,
+                            detalhe: n.nota,
+                            icone: 'article',
                           ),
-                        ),
-                      ),
-                    for (final item in execucao.exercicios)
-                      Builder(
-                        builder: (context) {
-                          final feitas = historicoSeriesFeitasEfetivas(
-                            seriesFeitas: item.seriesFeitas,
-                            seriesDetalhesCount: item.seriesDetalhes.length,
-                          );
-                          final feito = historicoExercicioConcluidoEfetivo(
-                            concluido: item.concluido,
-                            seriesFeitas: feitas,
-                            series: item.series,
-                          );
-                          final carga = _carga(item);
-                          final delta = historicoCargaDeltaLabel(
-                            cargaAtual: item.seriesDetalhes.isNotEmpty
-                                ? item.seriesDetalhes.last.cargaKg
-                                : item.cargaKg,
-                            cargaAnterior: item.cargaAnteriorKg,
-                          );
-                          final spark = historicoCargaSparkValues(
-                            item.seriesDetalhes,
-                          );
-                          final subtitle = [
-                            historicoExercicioSubtitle(
-                              seriesFeitas: feitas,
-                              series: item.series,
-                              concluido: feito,
-                              sessaoConcluida: concluido,
-                              carga: carga,
-                              rpe: _rpe(item),
-                              dor: item.dor ||
-                                  item.seriesDetalhes.any((s) => s.dor),
-                            ),
-                            if (delta != null) delta,
-                          ].join(' · ');
-                          return FxSatelliteListTile(
-                            title: item.exercicioNome,
-                            margin: const EdgeInsets.only(bottom: 2),
-                            subtitle: Text(
-                              subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            leading: FxIcon(
-                              name: feito ? 'circle-check' : 'target',
-                              size: 18,
-                              color:
-                                  feito
-                                      ? EagleTokens.good
-                                      : fxScreenMute(context),
-                            ),
-                            trailing: spark.length >= 2
-                                ? FxSparkline(
-                                  data: spark,
-                                  color: primary,
-                                  width: 44,
-                                  height: 18,
-                                  strokeWidth: 1.5,
-                                )
-                                : null,
-                          );
-                        },
-                      ),
+                      ],
+                    ),
                   ],
                 ],
               ),
             ),
           ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s1,
-              FxSettingsLayout.pageInset,
-              TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: FxLiquidPrimaryButton(
-              label: historicoStickyLabel(execucao.status),
-              onPressed: onAct,
+        if (cta case (final label, final onPressed))
+          SafeArea(
+            top: false,
+            child: FxContentWidthLimiter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s1,
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s3,
+                ),
+                child: FxLiquidPrimaryButton(
+                  label: label,
+                  icon: Icons.play_arrow_rounded,
+                  onPressed: onPressed,
+                ),
+              ),
             ),
           ),
-        ),
       ],
     );
-  }
-
-  List<Widget> _notas(List<ExecucaoExercicio> exercicios) {
-    final tiles = <Widget>[
-      for (final item in exercicios)
-        if (historicoNotaLine(
-              observacoes: item.observacoes,
-              feedback: item.feedback,
-            )
-            case final nota?)
-          FxSatelliteListTile(
-            title: item.exercicioNome,
-            margin: const EdgeInsets.only(bottom: 2),
-            subtitle: Text(nota),
-            leading: const FxIcon(
-              name: 'article',
-              size: 20,
-              color: EagleTokens.good,
-            ),
-          ),
-    ];
-    if (tiles.isEmpty) {
-      return [
-        const FxEmptyState(
-          icon: 'article',
-          title: 'Nenhuma nota nesta sessão',
-          subtitle: 'Observação e feedback do exercício aparecem aqui.',
-          quiet: true,
-        ),
-      ];
-    }
-    return tiles;
-  }
-
-  List<Widget> _recordes(
-    List<EvolucaoPerformance> prs,
-    List<EvolucaoCarga> cargas,
-  ) {
-    if (prs.isEmpty && cargas.isEmpty) {
-      return [
-        const FxEmptyState(
-          icon: 'star',
-          title: 'Nenhum recorde nesta sessão',
-          subtitle: 'Quando bater carga ou volume, o recorde aparece aqui.',
-          quiet: true,
-        ),
-      ];
-    }
-    return [
-      for (final carga in cargas)
-        FxSatelliteListTile(
-          title: carga.exercicioNome,
-          margin: const EdgeInsets.only(bottom: 2),
-          subtitle: Text(
-            carga.mensagem.trim().isEmpty
-                ? (checkinCargaLabel(carga.cargaAtualKg) ?? historicoPrHint(1))
-                : carga.mensagem.trim(),
-          ),
-          leading: const FxIcon(
-            name: 'dumbbell',
-            size: 20,
-            color: EagleTokens.good,
-          ),
-        ),
-      for (final pr in prs)
-        FxSatelliteListTile(
-          title: pr.exercicioNome,
-          margin: const EdgeInsets.only(bottom: 2),
-          subtitle: Text(
-            pr.mensagem.trim().isEmpty
-                ? historicoPrHint(1)
-                : pr.mensagem.trim(),
-          ),
-          leading: const FxIcon(
-            name: 'star',
-            size: 20,
-            color: EagleTokens.good,
-          ),
-        ),
-    ];
-  }
-
-  String? _carga(ExecucaoExercicio item) {
-    final fromItem = checkinCargaLabel(item.cargaKg);
-    if (fromItem != null) return fromItem;
-    if (item.seriesDetalhes.isEmpty) return null;
-    return checkinCargaLabel(item.seriesDetalhes.last.cargaKg);
-  }
-
-  int? _rpe(ExecucaoExercicio item) {
-    if (item.rpe != null) return item.rpe;
-    if (item.seriesDetalhes.isEmpty) return null;
-    return item.seriesDetalhes.last.rpe;
   }
 }

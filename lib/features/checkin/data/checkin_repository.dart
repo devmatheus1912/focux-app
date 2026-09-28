@@ -600,21 +600,19 @@ class CheckinRepository {
     );
   }
 
-  Future<Pagina<ExecucaoTreino>> historico({
+  /// Só sessões concluídas; a aberta vive no hub. [treinoId] filtra por ficha.
+  Future<Pagina<ExecucaoTreino>> historicoConcluidos({
     String? cursor,
+    int? treinoId,
     int size = 20,
-    String? q,
-    String? status,
   }) async {
-    final query = q?.trim() ?? '';
-    final statusFilter = status?.trim() ?? '';
     final r = await _dio.get(
       '/api/checkin/historico',
       queryParameters: {
         'size': size,
+        'status': 'CONCLUIDO',
         if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
-        if (query.isNotEmpty) 'q': query,
-        if (statusFilter.isNotEmpty) 'status': statusFilter,
+        if (treinoId != null) 'treinoId': treinoId,
       },
     );
     final data = r.data;

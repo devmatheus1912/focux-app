@@ -17,7 +17,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/checkin_repository.dart';
-import '../utils/historico_display.dart';
+import '../utils/historico_detalhe_view.dart';
 import '../utils/treino_ficha_status.dart';
 import '../utils/treinos_hub_view.dart';
 import '../widgets/treino_preparacao_sheet.dart';
