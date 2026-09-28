@@ -54,6 +54,48 @@
           "type" : "RecurringSubscription"
         },
         {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "49.90",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "pro_monthly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plano Pro mensal",
+              "displayName" : "Focux Pro Mensal",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_pro_monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Focux Pro Mensal",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "479.00",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "pro_yearly",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plano Pro anual",
+              "displayName" : "Focux Pro Anual",
+              "locale" : "pt_BR"
+            }
+          ],
+          "productID" : "focux_pro_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Focux Pro Anual",
+          "subscriptionGroupID" : "focux_plans",
+          "type" : "RecurringSubscription"
+        },
+        {
           "displayPrice" : "99.90",
           "familyShareable" : false,
           "groupNumber" : 2,
