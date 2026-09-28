@@ -126,14 +126,16 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           steps: synced.steps,
         );
       } catch (e) {
-        synced = RecoverySnapshot.fromSummary(summary);
         soft = saudeSyncSoftError(friendlyError(e));
       }
       if (mounted) {
         setState(() {
           _authorized = true;
           _summary = summary;
-          _recovery = synced;
+          _recovery = recoveryAfterSyncAttempt(
+            syncedFromServer: synced,
+            previousSnapshot: _recovery,
+          );
           _loading = false;
           _erro = null;
           _syncSoftError = soft;
@@ -312,7 +314,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
 
   Widget _buildDashboard(bool isDark) {
     final s = _summary!;
-    final recovery = _recovery ?? RecoverySnapshot.fromSummary(s);
+    final recovery = _recovery;
     final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
@@ -326,18 +328,35 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             emphasize: true,
             glowStrength: 0.06,
             semanticsLabel:
-                'Prontidão ${recovery.recoveryScore} por cento. ${recovery.recoveryLabel}',
+                recovery != null
+                    ? 'Prontidão ${recovery.recoveryScore} por cento. ${recovery.recoveryLabel}'
+                    : 'Prontidão indisponível. Aguardando sincronização com o servidor.',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    RecoveryScoreRing(
-                      score: recovery.recoveryScore,
-                      color: primary,
-                      size: 72,
-                    ),
+                    if (recovery != null)
+                      RecoveryScoreRing(
+                        score: recovery.recoveryScore,
+                        color: primary,
+                        size: 72,
+                      )
+                    else
+                      SizedBox(
+                        width: 72,
+                        height: 72,
+                        child: Center(
+                          child: Text(
+                            '--',
+                            style: FocuxHubTypography.kpi(
+                              color: chrome.mute,
+                              fontSize: FocuxHubTypography.metricLg,
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(width: TokensStrip.s3),
                     Expanded(
                       child: Column(
@@ -349,29 +368,33 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${recovery.recoveryScore}%',
+                            recovery != null ? '${recovery.recoveryScore}%' : '--',
                             style: FocuxHubTypography.kpi(
                               color: chrome.ink,
                               fontSize: FocuxHubTypography.metricLg,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            recovery.recoveryLabel,
-                            style: FocuxHubTypography.body(
-                              color: chrome.ink,
-                            ).copyWith(fontWeight: FontWeight.w700),
-                          ),
+                          if (recovery != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              recovery.recoveryLabel,
+                              style: FocuxHubTypography.body(
+                                color: chrome.ink,
+                              ).copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  recovery.recoveryHint,
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
+                if (recovery != null) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  Text(
+                    recovery.recoveryHint,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                ],
                 const SizedBox(height: TokensStrip.s3),
                 Align(
                   alignment: Alignment.centerLeft,

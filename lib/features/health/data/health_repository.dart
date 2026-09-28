@@ -1,7 +1,14 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/health/health_service.dart';
-import '../../../core/health/recovery_score.dart';
+
+/// Após tentativa de sync: só snapshot do servidor; falha mantém o anterior.
+RecoverySnapshot? recoveryAfterSyncAttempt({
+  required RecoverySnapshot? syncedFromServer,
+  required RecoverySnapshot? previousSnapshot,
+}) {
+  return syncedFromServer ?? previousSnapshot;
+}
 
 class RecoverySnapshot {
   final DateTime? dataReferencia;
@@ -39,24 +46,6 @@ class RecoverySnapshot {
     recoveryHint: json['recoveryHint'] as String? ?? '',
     sincronizadoEm: DateTime.tryParse(json['sincronizadoEm'] as String? ?? ''),
   );
-
-  factory RecoverySnapshot.fromSummary(HealthSummary summary) {
-    final recovery = RecoveryScoreView.compute(
-      steps: summary.steps,
-      sleepHours: summary.sleepHours,
-      avgHeartRate: summary.avgHeartRate,
-    );
-    return RecoverySnapshot(
-      steps: summary.steps,
-      caloriesBurned: summary.caloriesBurned,
-      avgHeartRate: summary.avgHeartRate,
-      sleepHours: summary.sleepHours,
-      recoveryScore: recovery.score,
-      recoveryLabel: recovery.label,
-      recoveryHint: recovery.hint,
-      sincronizadoEm: DateTime.now(),
-    );
-  }
 }
 
 class HealthRepository {
