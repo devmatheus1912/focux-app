@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_action_chip.dart';
 
@@ -65,6 +66,78 @@ void main() {
       ),
     );
     expect(solid.color, primary);
+  });
+
+  Finder capsula() => find.descendant(
+    of: find.byType(FxActionChip),
+    matching: find.byType(Material),
+  );
+
+  testWidgets('cápsula de 36 dentro de área de toque de 48', (tester) async {
+    await tester.pumpWidget(
+      host(
+        FxActionChip(
+          label: 'Ver resumo',
+          accent: primary,
+          isDark: false,
+          onPressed: () {},
+        ),
+      ),
+    );
+    expect(tester.getSize(capsula()).height, 36);
+    expect(tester.getSize(find.byType(FxActionChip)).height, 48);
+  });
+
+  testWidgets('toque na margem acima da cápsula dispara a ação', (
+    tester,
+  ) async {
+    var n = 0;
+    await tester.pumpWidget(
+      host(
+        FxActionChip(
+          label: 'Ver resumo',
+          accent: primary,
+          isDark: false,
+          onPressed: () => n++,
+        ),
+      ),
+    );
+    final area = tester.getRect(find.byType(FxActionChip));
+    await tester.tapAt(Offset(area.center.dx, area.top + 2));
+    expect(n, 1);
+  });
+
+  testWidgets('rótulo em 13 px; com 2 linhas a cápsula cresce sem cortar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 200,
+              child: Wrap(
+                children: [
+                  FxActionChip(
+                    label: 'Falar com o personal',
+                    accent: primary,
+                    isDark: false,
+                    maxLines: 2,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final texto = tester.renderObject<RenderParagraph>(
+      find.text('Falar com o personal'),
+    );
+    expect(texto.text.style?.fontSize, 13);
+    expect(texto.didExceedMaxLines, isFalse);
+    expect(tester.getSize(capsula()).height, greaterThan(36));
   });
 
   test('at most one solid chip per feature file (§11 one P0)', () {

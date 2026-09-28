@@ -30,6 +30,9 @@ class FxActionChip extends StatelessWidget {
   final bool enabled;
   final bool solid;
 
+  /// Cápsula visível; a área de toque segue com 48 dp em volta.
+  static const double capsulaMin = 36;
+
   static Color solidBackground(Color primary, {required bool isDark}) =>
       isDark ? primary.withValues(alpha: 0.94) : primary;
 
@@ -63,6 +66,14 @@ class FxActionChip extends StatelessWidget {
               ),
             );
 
+    final VoidCallback? onTap =
+        enabled
+            ? () {
+              HapticFeedback.selectionClick();
+              onPressed();
+            }
+            : null;
+
     return Align(
       widthFactor: 1,
       alignment: Alignment.centerLeft,
@@ -70,41 +81,51 @@ class FxActionChip extends StatelessWidget {
         button: true,
         enabled: enabled,
         label: label,
-        child: Opacity(
-          opacity: enabled ? 1 : 0.42,
-          child: Material(
-            color: bg,
-            elevation: solid && enabled ? (isDark ? 4 : 2) : 0,
-            shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
-            shape: shape,
-            child: InkWell(
-              onTap:
-                  enabled
-                      ? () {
-                        HapticFeedback.selectionClick();
-                        onPressed();
-                      }
-                      : null,
-              customBorder: const StadiumBorder(),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minHeight: FxHelpChrome.touchTarget,
-                  minWidth: FxHelpChrome.touchTarget,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: TokensStrip.s4,
-                  ),
-                  child: Center(
-                    widthFactor: 1,
-                    child: Text(
-                      label,
-                      maxLines: maxLines,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: FocuxHubTypography.chip(fg).copyWith(
-                        fontWeight: solid ? FontWeight.w800 : FontWeight.w700,
-                        height: maxLines > 1 ? 1.15 : 1.0,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: FxHelpChrome.touchTarget,
+              minWidth: FxHelpChrome.touchTarget,
+            ),
+            child: Center(
+              widthFactor: 1,
+              heightFactor: 1,
+              child: Opacity(
+                opacity: enabled ? 1 : 0.42,
+                child: Material(
+                  color: bg,
+                  elevation: solid && enabled ? (isDark ? 4 : 2) : 0,
+                  shadowColor: accent.withValues(alpha: isDark ? 0.38 : 0.14),
+                  shape: shape,
+                  child: InkWell(
+                    onTap: onTap,
+                    customBorder: const StadiumBorder(),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: capsulaMin),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: TokensStrip.s4,
+                          vertical: TokensStrip.s1,
+                        ),
+                        child: Center(
+                          widthFactor: 1,
+                          heightFactor: 1,
+                          child: Text(
+                            label,
+                            maxLines: maxLines,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: FocuxHubTypography.chip(fg).copyWith(
+                              fontSize: TokensStrip.fontBodySm,
+                              fontWeight:
+                                  solid ? FontWeight.w800 : FontWeight.w700,
+                              height: maxLines > 1 ? 1.15 : 1.0,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
