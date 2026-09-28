@@ -1,3 +1,5 @@
+import 'login_display.dart';
+
 String esqueciEnviarLabel() => 'Enviar código';
 
 String esqueciEnviandoLabel() => 'Enviando…';
@@ -11,17 +13,32 @@ String esqueciConfirmMessage() =>
 
 String esqueciHelpTitle() => 'Recuperar senha';
 
-String esqueciHelpSubtitle() =>
-    'Código no e-mail. Personal e aluno usam o mesmo fluxo, com o slug do aluno.';
+bool esqueciMostraCodigo({required bool isAluno}) => !isAluno;
+
+String esqueciAlunoPedePersonalBody() => 'Peça uma senha nova ao seu personal.';
+
+String esqueciPageSubtitle({required bool isAluno}) =>
+    isAluno
+        ? esqueciAlunoPedePersonalBody()
+        : 'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.';
+
+String esqueciHelpSubtitle({bool isAluno = false}) =>
+    isAluno
+        ? 'O personal gera uma senha provisória. Não há código por e-mail.'
+        : 'Código no e-mail. Válido por 10 minutos.';
 
 String esqueciHelpCodigoBody() =>
     'O app não diz se o e-mail existe. Se estiver cadastrado, o código chega.';
 
-String esqueciHelpPapelBody() =>
-    'Aluno precisa do link com ?p=slug. Sem o personal a recuperação não fecha.';
+String esqueciHelpPapelBody({bool isAluno = false}) =>
+    isAluno
+        ? 'Peça ao personal uma senha provisória nova. Depois entre pelo link ?p=slug.'
+        : 'O código vale para a conta personal deste e-mail.';
 
-String esqueciAlunoSemSlugError() =>
-    'Abra o link do seu personal (?p=slug) para recuperar a senha de aluno.';
+String? esqueciAlunoOtpRedirect({required bool isAluno, String? personalSlug}) {
+  if (!isAluno) return null;
+  return loginEsqueciPath(isAluno: true, personalSlug: personalSlug);
+}
 
 String esqueciRoleQuery({required bool isAluno}) =>
     isAluno ? 'aluno' : 'personal';
@@ -44,9 +61,7 @@ String esqueciVerificarCodigoPath({
   final encoded = Uri.encodeComponent(email.trim());
   final slug = personalSlug?.trim();
   final slugQ =
-      slug != null && slug.isNotEmpty
-          ? '&p=${Uri.encodeComponent(slug)}'
-          : '';
+      slug != null && slug.isNotEmpty ? '&p=${Uri.encodeComponent(slug)}' : '';
   return '/resetar-senha/verificar-codigo?email=$encoded&role=$role$slugQ';
 }
 

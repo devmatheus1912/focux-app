@@ -500,16 +500,10 @@ class AuthRepository {
 
   Future<PasswordResetRequestResult> solicitarResetSenha({
     required String email,
-    required bool isAluno,
-    String? personalSlug,
   }) async {
     final response = await _dio.post(
       '/api/auth/esqueci-senha',
-      data: {
-        'email': email,
-        'tipo': isAluno ? 'ALUNO' : 'PERSONAL',
-        if (personalSlug != null) 'personalSlug': personalSlug,
-      },
+      data: {'email': email, 'tipo': 'PERSONAL'},
     );
     return PasswordResetRequestResult.fromJson(
       response.data as Map<String, dynamic>,
@@ -519,18 +513,10 @@ class AuthRepository {
   Future<String> validarResetCodigo({
     required String email,
     required String codigo,
-    required bool isAluno,
-    String? personalSlug,
   }) async {
     final response = await _dio.post(
       '/api/auth/resetar-senha/validar-codigo',
-      data: {
-        'email': email,
-        'codigo': codigo,
-        'tipo': isAluno ? 'ALUNO' : 'PERSONAL',
-        if (personalSlug != null && personalSlug.isNotEmpty)
-          'personalSlug': personalSlug,
-      },
+      data: {'email': email, 'codigo': codigo, 'tipo': 'PERSONAL'},
     );
     return (response.data as Map<String, dynamic>)['resetNonce'] as String;
   }

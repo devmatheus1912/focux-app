@@ -10,5 +10,6 @@ void main() {
       resetCodigoNovaSenhaPath(nonce: 'abc', isAluno: false),
       '/resetar-senha?resetNonce=abc&role=personal',
     );
+    expect(resetCodigoHelpPapelBody(), isNot(contains('?p=slug')));
   });
 }

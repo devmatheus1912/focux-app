@@ -171,7 +171,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                         maxWidth: 320,
                                       ),
                                       child: Text(
-                                        'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.',
+                                        esqueciPageSubtitle(isAluno: _isAluno),
                                         style: authSubtitleStyle(
                                           color: heroTealSurface(0.82),
                                         ).copyWith(height: 1.55),
@@ -183,55 +183,68 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       onPersonalTap: () {
                                         if (_isAluno) {
                                           HapticFeedback.selectionClick();
-                                          setState(() => _isAluno = false);
+                                          setState(() {
+                                            _isAluno = false;
+                                            _error = null;
+                                          });
                                         }
                                       },
                                       onAlunoTap: () {
                                         if (!_isAluno) {
                                           HapticFeedback.selectionClick();
-                                          setState(() => _isAluno = true);
+                                          setState(() {
+                                            _isAluno = true;
+                                            _error = null;
+                                          });
                                         }
                                       },
                                     ),
                                     const SizedBox(height: 18),
-                                    AuthField(
-                                      label: 'E-mail cadastrado',
-                                      controller: _emailController,
-                                      hintText: 'seu@email.com',
-                                      icon: Icons.person_outline_rounded,
-                                      keyboardType: TextInputType.emailAddress,
-                                      textInputAction: TextInputAction.done,
-                                      autofillHints: const [
-                                        AutofillHints.email,
-                                      ],
-                                      onFieldSubmitted: (_) => _pedirEnviar(),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return 'Informe o e-mail.';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: TokensStrip.s4),
-                                    if (_emailDeliveryAvailable == false) ...[
-                                      AuthOperationalNotice(
-                                        icon: Icons.mark_email_unread_outlined,
-                                        title: esqueciEnvironmentTitle(
-                                          issue?.title,
-                                        ),
-                                        text: esqueciEnvironmentWarning(
-                                          hasIssue: issue != null,
-                                          issueDetail: issue?.detail,
-                                        ),
-                                        action: esqueciEnvironmentAction(
-                                          issueAction: issue?.action,
-                                          nextActions:
-                                              _environmentStatus?.nextActions ??
-                                              const [],
-                                        ),
+                                    if (esqueciMostraCodigo(
+                                      isAluno: _isAluno,
+                                    )) ...[
+                                      AuthField(
+                                        label: 'E-mail cadastrado',
+                                        controller: _emailController,
+                                        hintText: 'seu@email.com',
+                                        icon: Icons.person_outline_rounded,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        textInputAction: TextInputAction.done,
+                                        autofillHints: const [
+                                          AutofillHints.email,
+                                        ],
+                                        onFieldSubmitted: (_) => _pedirEnviar(),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return 'Informe o e-mail.';
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                      const SizedBox(height: 18),
+                                      const SizedBox(height: TokensStrip.s4),
+                                      if (_emailDeliveryAvailable == false) ...[
+                                        AuthOperationalNotice(
+                                          icon:
+                                              Icons.mark_email_unread_outlined,
+                                          title: esqueciEnvironmentTitle(
+                                            issue?.title,
+                                          ),
+                                          text: esqueciEnvironmentWarning(
+                                            hasIssue: issue != null,
+                                            issueDetail: issue?.detail,
+                                          ),
+                                          action: esqueciEnvironmentAction(
+                                            issueAction: issue?.action,
+                                            nextActions:
+                                                _environmentStatus
+                                                    ?.nextActions ??
+                                                const [],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 18),
+                                      ],
                                     ],
                                     if (_error != null) ...[
                                       Semantics(
@@ -243,20 +256,31 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       ),
                                       const SizedBox(height: 14),
                                     ],
-                                    FxLiquidPrimaryButton(
-                                      label: esqueciEnviarLabel(),
-                                      loading: _loading,
-                                      loadingLabel: esqueciEnviandoLabel(),
-                                      onPressed: _loading ? null : _pedirEnviar,
-                                    ),
-                                    FxConversionTextLink(
-                                      text: '',
-                                      actionText: esqueciVoltarLoginLabel(),
-                                      onTap: () {
-                                        if (_loading) return;
-                                        authUnfocusAndGo(context, _loginPath);
-                                      },
-                                    ),
+                                    if (esqueciMostraCodigo(
+                                      isAluno: _isAluno,
+                                    )) ...[
+                                      FxLiquidPrimaryButton(
+                                        label: esqueciEnviarLabel(),
+                                        loading: _loading,
+                                        loadingLabel: esqueciEnviandoLabel(),
+                                        onPressed:
+                                            _loading ? null : _pedirEnviar,
+                                      ),
+                                      FxConversionTextLink(
+                                        text: '',
+                                        actionText: esqueciVoltarLoginLabel(),
+                                        onTap: () {
+                                          if (_loading) return;
+                                          authUnfocusAndGo(context, _loginPath);
+                                        },
+                                      ),
+                                    ] else
+                                      FxLiquidPrimaryButton(
+                                        label: esqueciVoltarLoginLabel(),
+                                        onPressed: () {
+                                          authUnfocusAndGo(context, _loginPath);
+                                        },
+                                      ),
                                   ],
                                 ),
                               ),

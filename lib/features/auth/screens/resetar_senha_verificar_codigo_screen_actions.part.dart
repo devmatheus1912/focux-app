@@ -20,7 +20,7 @@ extension on _ResetarSenhaVerificarCodigoScreenState {
   }
 
   Future<void> _pedirReenviar() async {
-    if (_resending || _email.isEmpty || resendSeconds > 0) return;
+    if (_isAluno || _resending || _email.isEmpty || resendSeconds > 0) return;
     final ok = await showFxConfirmSheet(
       context,
       title: resetCodigoReenviarConfirmTitle(),
@@ -32,25 +32,21 @@ extension on _ResetarSenhaVerificarCodigoScreenState {
   }
 
   Future<void> _pedirContinuar() async {
-    if (_loading) return;
+    if (_loading || _isAluno) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     await _submit();
   }
 
   Future<void> _resend() async {
-    if (_email.isEmpty) return;
+    if (_isAluno || _email.isEmpty) return;
     setState(() {
       _resending = true;
       _error = null;
     });
     HapticFeedback.selectionClick();
     try {
-      await ref.read(authRepositoryProvider).solicitarResetSenha(
-        email: _email,
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
+      await ref.read(authRepositoryProvider).solicitarResetSenha(email: _email);
       if (!mounted) return;
       startResendCooldown();
     } catch (error) {
@@ -64,18 +60,19 @@ extension on _ResetarSenhaVerificarCodigoScreenState {
   Future<void> _submit() async {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
+    if (_isAluno) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     HapticFeedback.mediumImpact();
     try {
-      final nonce = await ref.read(authRepositoryProvider).validarResetCodigo(
-        email: _email,
-        codigo: _codeController.text.trim(),
-        isAluno: _isAluno,
-        personalSlug: _isAluno ? _personalSlug : null,
-      );
+      final nonce = await ref
+          .read(authRepositoryProvider)
+          .validarResetCodigo(
+            email: _email,
+            codigo: _codeController.text.trim(),
+          );
       if (!mounted) return;
       context.go(
         resetCodigoNovaSenhaPath(

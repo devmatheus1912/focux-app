@@ -22,7 +22,7 @@ extension on _ResetarSenhaScreenState {
   }
 
   Future<void> _pedirAlterar() async {
-    if (_loading || !resetSenhaHasNonce(_resetNonce)) return;
+    if (_loading || _isAluno || !resetSenhaHasNonce(_resetNonce)) return;
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
     final ok = await showFxConfirmSheet(
