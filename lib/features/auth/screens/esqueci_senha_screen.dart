@@ -87,6 +87,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
   @override
   Widget build(BuildContext context) {
     final issue = _environmentStatus?.firstIssueFor('password_reset');
+    final mostraCodigo = esqueciMostraCodigo(isAluno: _isAluno);
     return fxScreenA11yScope(
       label: esqueciHelpTitle(),
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -200,9 +201,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       },
                                     ),
                                     const SizedBox(height: 18),
-                                    if (esqueciMostraCodigo(
-                                      isAluno: _isAluno,
-                                    )) ...[
+                                    if (mostraCodigo) ...[
                                       AuthField(
                                         label: 'E-mail cadastrado',
                                         controller: _emailController,
@@ -256,28 +255,29 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                       ),
                                       const SizedBox(height: 14),
                                     ],
-                                    if (esqueciMostraCodigo(
-                                      isAluno: _isAluno,
-                                    )) ...[
-                                      FxLiquidPrimaryButton(
-                                        label: esqueciEnviarLabel(),
-                                        loading: _loading,
-                                        loadingLabel: esqueciEnviandoLabel(),
-                                        onPressed:
-                                            _loading ? null : _pedirEnviar,
-                                      ),
+                                    FxLiquidPrimaryButton(
+                                      label:
+                                          mostraCodigo
+                                              ? esqueciEnviarLabel()
+                                              : esqueciVoltarLoginLabel(),
+                                      loading: mostraCodigo && _loading,
+                                      loadingLabel: esqueciEnviandoLabel(),
+                                      onPressed:
+                                          mostraCodigo
+                                              ? (_loading ? null : _pedirEnviar)
+                                              : () {
+                                                authUnfocusAndGo(
+                                                  context,
+                                                  _loginPath,
+                                                );
+                                              },
+                                    ),
+                                    if (mostraCodigo)
                                       FxConversionTextLink(
                                         text: '',
                                         actionText: esqueciVoltarLoginLabel(),
                                         onTap: () {
                                           if (_loading) return;
-                                          authUnfocusAndGo(context, _loginPath);
-                                        },
-                                      ),
-                                    ] else
-                                      FxLiquidPrimaryButton(
-                                        label: esqueciVoltarLoginLabel(),
-                                        onPressed: () {
                                           authUnfocusAndGo(context, _loginPath);
                                         },
                                       ),
