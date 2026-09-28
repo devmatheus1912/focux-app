@@ -1,6 +1,7 @@
 # Aluno — Home "Hoje" (referência oficial)
 
-Data: 2026-09-27 · Revisão 2 (fecha os gaps das auditorias de 27/09).
+Data: 2026-09-27 · Revisão 3 (gráfico, meta batida, recorde, atalhos e
+chip de ação).
 Repos: `focux-app` (principal), `focux-backend` (ajustes pequenos).
 
 Esta spec é a **referência da Home do aluno** (`/dashboard/aluno`). A
@@ -54,7 +55,8 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
    continua visível.
 5. **Sua semana — como estou.** Só depois do primeiro treino concluído
    (`jaTreinou`). Sessões contra a meta ("2 de 3"), sequência em semanas e
-   volume da semana. Meta batida marca o tile de sessões com verde e check.
+   volume da semana. Meta batida (§3.7) marca o tile de sessões com verde e
+   check, mostra só o número feito e troca o rótulo por "Meta {n} batida".
    Fonte acima de 1,3x empilha os tiles (`alunoSemanaEmpilhada`).
 6. **Prontidão.** `AlunoRecoveryCard` (`alunoProntidaoVisivel`): anel, rótulo
    e dica do servidor (sem corte). Com prontidão baixa, sem a dica (o foco já
@@ -63,18 +65,22 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
    wearable → some.
 7. **Evolução — estou evoluindo.** Só com `jaTreinou`. Linha de força (1RM
    est.) das 8 semanas, variação da força e o último recorde ("Novo recorde"
-   até 7 dias). Um tile por linha; o recorde tem até 2 linhas para o nome do
-   exercício não esconder a carga. Sem volume (já está em Sua semana). O card não abre nada
+   até 7 dias). A linha só aparece com 2 ou mais semanas com força; com
+   menos, o card fica só com os tiles (sem área vazia). Um tile por linha; o
+   recorde tem até 2 linhas para o nome do exercício não esconder a carga e
+   começa com maiúscula ("Supino · 50 kg"), mesmo que o servidor mande
+   minúsculo. Sem volume (já está em Sua semana). O card não abre nada
    (`/evolucao` redireciona para a Home até a spec 3b).
 8. **Ofertas.** `AlunoUpsellCarousel` (`AlunoHomeView.ofertas`, vazia com
    mensalidade em atraso). Aceitar é `OutlinedButton`, recusar `TextButton`,
    48 dp, travados no envio. Os dois pedem confirmação (`showFxConfirmSheet`):
    a resposta não volta atrás. Uma oferta ocupa a largura toda. Título até 2
    linhas; descrição até 4 (texto livre do personal, sem limite no servidor).
-9. **Atalhos.** Até 3 (`AlunoHomeView.atalhos`), na ordem de
-   `alunoAtalhosPrioridade`, sem abas do dock, sem destino que já aparece
-   acima (`rotasNoTopo`) e sem recurso fora do plano (`recursosIndisponiveis`).
-   Sem atalho → a seção mostra só o cabeçalho com "Ver catálogo".
+9. **Atalhos.** Título "Atalhos", link "Ver todos" (abre o catálogo). Até 3
+   (`AlunoHomeView.atalhos`), na ordem de `alunoAtalhosPrioridade` (§3.6),
+   sem abas do dock, sem destino que já aparece acima (`rotasNoTopo`) e sem
+   recurso fora do plano (`recursosIndisponiveis`).
+   Sem atalho → a seção mostra só o cabeçalho com "Ver todos".
 
 NPS: o BFF libera depois de 3 treinos concluídos e sem resposta em 30 dias. O
 app só pergunta com o foco em `workoutDone` e com a Home como rota visível
@@ -188,9 +194,20 @@ Foco em `workoutReady`, prontidão visível, snapshot de hoje e
 
 ### 3.6 Atalhos
 
+Prioridade: agenda, histórico, hábitos, desafios, financeiro, anamnese. A
+anamnese não é tarefa do dia: fica por último e, quando pendente, já está no
+aviso do topo.
+
 `rotasNoTopo` = rota do foco, rota do aviso (atestado e anamnese →
 `/aluno/anamnese`; financeiro → `/financeiro/aluno`), chat do
 cabeçalho e rotas das pendências visíveis.
+
+### 3.7 Meta semanal batida
+
+`feitos >= meta` (com meta definida). Valor = `feitos` ("6"), rótulo =
+"Meta {meta} batida", verde + check. Leitor de tela: "{feitos} treinos nesta
+semana, meta de {meta} batida". Abaixo da meta, valor "{feitos} de {meta}" e
+rótulo "Treinos na semana". Sem meta, só o número.
 
 ## 4. Estado, dados e frescor
 
@@ -239,6 +256,8 @@ cabeçalho e rotas das pendências visíveis.
 - Vazio: aluno sem treino → foco em `noWorkout`; semana e evolução somem.
 - Evolução com treino mas sem carga registrada: texto guia "Registre a carga
   das séries para ver sua evolução aqui."
+- Evolução com força em só 1 semana e sem tile (sem variação nem recorde):
+  "Sua curva de força aparece a partir da segunda semana com carga."
 - Coach e ofertas: envio travado; erro com `FeedbackHelper` e texto do ARB.
 
 ## 7. Estrutura do código
@@ -252,6 +271,17 @@ cabeçalho e rotas das pendências visíveis.
   só aparece quando o perfil está completo: nunca junto com `perfil`.
 - Limpeza no mesmo ship: série de volume do `AlunoEvolutionCard`,
   `volumePorSemana` do bundle, `_TodayFocusCard` e o que mais ficar sem caller.
+
+### 7.1 Chip de ação (`FxActionChip`, vale para o app todo)
+
+- Área de toque com no mínimo 48 dp, invisível; dentro dela a cápsula
+  visível com no mínimo 36 dp, centrada na vertical. Toque na cápsula tem
+  ripple; toque na margem também dispara a ação, sem ripple.
+- Rótulo em 13 px (`TokensStrip.fontBodySm`), peso 800 no sólido e 700 no
+  tonal. Com `maxLines: 2` a cápsula cresce com o texto e a área acompanha.
+- A altura ocupada não muda (48 dp), então nada desce na tela. A largura
+  cresce com a fonte: chip em `Row` sem quebra é conferido tela a tela.
+- Entra num commit separado da Home para poder ser revertido sozinho.
 
 ## 8. Contrato fechado (auditoria final)
 
@@ -273,8 +303,8 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C12 | Agenda: só depois de amanhã e não visto; visto por horário; relido ao voltar | unit + contrato |
 | C13 | Nenhuma pendência repete o destino do foco | unit |
 | C14 | Chat mostra a quantidade de mensagens | unit |
-| C15 | Evolução só com força; volume só em Sua semana | widget |
-| C16 | Atalhos sem topo, sem dock, sem recurso bloqueado; vazio → só catálogo | unit + widget |
+| C15 | Evolução só com força; volume só em Sua semana; linha só com 2+ semanas; recorde com maiúscula | unit + widget |
+| C16 | Atalhos sem topo, sem dock, sem recurso bloqueado; anamnese por último; "Atalhos" / "Ver todos"; vazio → só "Ver todos" | unit + widget |
 | C17 | Oferta confirma antes; sem `FilledButton` | contrato |
 | C18 | Volta do background (≥ 2 min) recarrega a Home do aluno | contrato `main.dart` |
 | C19 | Mesmo bundle no dia seguinte: "feito hoje" vira treino pronto; a view vale até o horário do foco ou a meia-noite | unit |
@@ -286,6 +316,8 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C25 | Só PT-BR; en/es sem chave fora do pt | `arb_parity_test` |
 | C26 | BE: `agendaProxima`, `volumeMesKg` e `volumePorSemana` deprecated no OpenAPI; `gradlew test` verde | gradle |
 | C27 | `dart analyze --fatal-warnings --fatal-infos`, órfãos, `flutter test`, gitleaks verdes | comandos |
+| C28 | Meta batida (`feitos >= meta`): valor só o número, rótulo "Meta {n} batida", frase do leitor sem "6 de 2" | unit + widget |
+| C29 | `FxActionChip`: cápsula 36 dp, área 48 dp, toque na margem aciona, rótulo 13 px, 2 linhas sem corte | widget |
 
 ## 9. Fora de escopo
 
