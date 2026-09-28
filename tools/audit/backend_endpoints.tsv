@@ -162,8 +162,8 @@ PATCH	/api/chat/messages/{messageId}	A	ChatController.java:115
 POST	/api/chat/messages/{messageId}/reacao	A	ChatController.java:102
 GET	/api/checkin/historico	CL	CheckinController.java:57
 POST	/api/checkin/iniciar	C	CheckinController.java:28
-GET	/api/checkin/meus-treinos	CL	CheckinController.java:23
 GET	/api/checkin/personal/home	CRO	CheckinPersonalHomeController.java:40
+GET	/api/checkin/treinos/{treinoId}/previa	C	CheckinController.java:26
 GET	/api/checkin/{id}	C	CheckinController.java:62
 PUT	/api/checkin/{id}/concluir	C	CheckinController.java:52
 PUT	/api/checkin/{id}/exercicio/{treinoExercicioId}	C	CheckinController.java:34

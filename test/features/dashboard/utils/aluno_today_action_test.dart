@@ -71,6 +71,23 @@ void main() {
       expect(a.comeback, isFalse);
     });
 
+    test('lista da Home sem exercícios usa a contagem do servidor', () {
+      final a = resolveAlunoTodayAction(
+        aluno: _aluno(),
+        treinos: [
+          ExecucaoTreino(
+            treinoId: 7,
+            treinoNome: 'Treino A',
+            status: 'DISPONIVEL',
+            exercicios: const [],
+            exerciciosCount: 6,
+          ),
+        ],
+      );
+      expect(a.mode, AlunoTodayMode.workoutReady);
+      expect(a.exerciseCount, 6);
+    });
+
     test('treino pronto vence perfil incompleto', () {
       final a = resolveAlunoTodayAction(
         aluno: _aluno(perfilCompleto: false),

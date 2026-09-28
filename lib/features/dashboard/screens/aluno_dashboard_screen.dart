@@ -21,7 +21,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_status_banner.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
-import '../../checkin/data/meus_treinos_mem_cache.dart';
 import '../../coach/data/coach_proativo_repository.dart';
 import '../../coach/widgets/coach_proativo_card.dart';
 import '../../health/widgets/aluno_recovery_card.dart';
@@ -150,7 +149,6 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// NPS só com o treino do dia feito: é o `POS_TREINO` que o backend grava,
   /// e não interrompe quem abriu a Home para treinar.
   void _onHomeLoaded(AlunoDashboardHomeBundle home) {
-    MeusTreinosMemCache.save(home.treinos);
     _syncAnalytics(home);
     _npsPendente =
         home.npsDeveResponder &&

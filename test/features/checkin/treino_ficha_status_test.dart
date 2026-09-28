@@ -39,21 +39,16 @@ void main() {
       expect(isTreinoDisponivelParaIniciar(treino), isFalse);
     });
 
-    test('ordenacao start-first coloca iniciaveis no topo', () {
-      final reservado = ExecucaoTreino(
+    test('legado com contagem do servidor pode iniciar', () {
+      final treino = ExecucaoTreino(
         treinoId: 1,
-        treinoNome: 'Reservado',
-        status: 'AGUARDANDO_LIBERACAO',
+        treinoNome: 'A',
+        status: 'PENDENTE',
         exercicios: const [],
+        exerciciosCount: 4,
       );
-      final pronto = ExecucaoTreino(
-        treinoId: 2,
-        treinoNome: 'Pronto',
-        status: 'DISPONIVEL',
-        exercicios: const [],
-      );
-      final ordered = treinosOrdenadosStartFirst([reservado, pronto]);
-      expect(ordered.map((t) => t.treinoId), [2, 1]);
+      expect(isTreinoAguardandoLiberacao(treino), isFalse);
+      expect(isTreinoDisponivelParaIniciar(treino), isTrue);
     });
 
     test('proximoTreinoParaHoje gira apos ultimo concluido', () {
@@ -133,39 +128,6 @@ void main() {
         ),
       ];
       expect(treinoSessaoEmAndamento(treinos)?.treinoId, 2);
-    });
-
-    test('consistencia conta dias unicos e nao N execucoes', () {
-      final historico = [
-        ExecucaoTreino(
-          treinoId: 1,
-          treinoNome: 'A',
-          status: 'CONCLUIDO',
-          concluidoEm: '2026-09-08T10:00:00',
-          exercicios: const [],
-        ),
-        ExecucaoTreino(
-          treinoId: 1,
-          treinoNome: 'A',
-          status: 'CONCLUIDO',
-          concluidoEm: '2026-09-08T10:00:01',
-          exercicios: const [],
-        ),
-        ExecucaoTreino(
-          treinoId: 1,
-          treinoNome: 'A',
-          status: 'CONCLUIDO',
-          concluidoEm: '2026-09-08T10:00:02',
-          exercicios: const [],
-        ),
-      ];
-      expect(
-        countUniqueCompletedDaysThisWeek(
-          historico,
-          now: DateTime(2026, 9, 9),
-        ),
-        1,
-      );
     });
   });
 

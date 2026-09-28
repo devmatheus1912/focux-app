@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
 import '../models/checkin_personal_home.dart';
+import '../models/treino_previa.dart';
 import '../utils/checkin_json.dart';
 
 class ExecucaoExercicio {
@@ -229,13 +230,19 @@ class ExecucaoTreino {
   final String status;
   final String? iniciadoEm;
   final String? concluidoEm;
-  /// Vigência da atribuição (meus-treinos); ISO date.
+  /// Vigência da atribuição (lista de treinos da Home); ISO date.
   final String? dataInicio;
   /// Prazo soft — orientação; nunca bloqueia check-in.
   final String? dataFim;
   final List<ExecucaoExercicio> exercicios;
   final List<EvolucaoCarga> evolucoesCarga;
   final List<EvolucaoPerformance> evolucoesPerformance;
+
+  /// Exercícios ativos da ficha; a lista da Home vem sem `exercicios`.
+  final int? exerciciosCount;
+
+  /// Só no histórico resumido: exercícios concluídos na execução.
+  final int? exerciciosConcluidos;
 
   ExecucaoTreino({
     this.id,
@@ -249,7 +256,11 @@ class ExecucaoTreino {
     required this.exercicios,
     this.evolucoesCarga = const [],
     this.evolucoesPerformance = const [],
+    this.exerciciosCount,
+    this.exerciciosConcluidos,
   });
+
+  int get totalExercicios => exerciciosCount ?? exercicios.length;
 
   factory ExecucaoTreino.fromJson(Map<String, dynamic> j) => ExecucaoTreino(
     id: checkinJsonInt(j['id']),
@@ -272,6 +283,7 @@ class ExecucaoTreino {
         checkinJsonMapList(
           j['evolucoesPerformance'],
         ).map(EvolucaoPerformance.fromJson).toList(),
+    exerciciosCount: checkinJsonInt(j['exerciciosCount']),
   );
 
   /// Item slim do BFF `historicoResumo` (sem séries/mídia/evoluções).
@@ -284,6 +296,8 @@ class ExecucaoTreino {
       iniciadoEm: checkinJsonString(j['iniciadoEm']),
       concluidoEm: checkinJsonString(j['concluidoEm']),
       exercicios: const [],
+      exerciciosCount: checkinJsonInt(j['exerciciosCount']),
+      exerciciosConcluidos: checkinJsonInt(j['exerciciosConcluidos']),
     );
   }
 
@@ -299,6 +313,8 @@ class ExecucaoTreino {
     'exercicios': exercicios.map((e) => e.toJson()).toList(),
     'evolucoesCarga': [],
     'evolucoesPerformance': [],
+    'exerciciosCount': exerciciosCount,
+    'exerciciosConcluidos': exerciciosConcluidos,
   };
 }
 
@@ -447,21 +463,11 @@ class CheckinRepository {
 
   CheckinRepository(ApiClient client) : _dio = client.dio;
 
-  Future<Pagina<ExecucaoTreino>> meusTreinosPagina({
-    int page = 0,
-    int size = 20,
-  }) async {
-    final r = await _dio.get(
-      '/api/checkin/meus-treinos',
-      queryParameters: {'page': page, 'size': size},
+  Future<TreinoPrevia> previa(int treinoId) async {
+    final r = await _dio.get('/api/checkin/treinos/$treinoId/previa');
+    return TreinoPrevia.fromJson(
+      _requireJsonMap(r.data, 'GET /api/checkin/treinos/{id}/previa'),
     );
-    final data = r.data;
-    if (data is! Map) {
-      throw FormatException(
-        'GET /api/checkin/meus-treinos devolve Pagina, não lista crua.',
-      );
-    }
-    return parseExecucaoTreinoPagina(Map<String, dynamic>.from(data));
   }
 
   Future<ExecucaoTreino> iniciar(int treinoId) async {

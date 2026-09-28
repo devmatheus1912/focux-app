@@ -116,7 +116,6 @@ class _HistoricoCheckinScreenState
         if (reset) {
           _fetchedAt = DateTime.now();
           HistoricoMemCache.save(_items);
-          ref.invalidate(historicoCheckinProvider);
           _prefetchTopDetalhes(_items);
         }
       });

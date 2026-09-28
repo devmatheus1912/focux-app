@@ -68,7 +68,7 @@ AlunoTodayAction resolveAlunoTodayAction({
       route: '/checkin/executar',
       routeExtra: proximo.treinoId,
       treinoNome: proximo.treinoNome,
-      exerciseCount: proximo.exercicios.length,
+      exerciseCount: proximo.totalExercicios,
       comeback: (aluno.diasSemTreino ?? 0) >= alunoComebackDias,
       prazoFim: TreinoAtribuicaoPrazo.parseIsoDate(proximo.dataFim),
     );

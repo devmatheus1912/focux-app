@@ -8,7 +8,6 @@ import 'package:focux_app/features/alunos/data/aluno_followup_store.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_client_cache.dart';
 import 'package:focux_app/features/alunos/utils/alunos_home_client_cache.dart';
-import 'package:focux_app/features/checkin/data/meus_treinos_mem_cache.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_repository.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
@@ -146,7 +145,6 @@ void main() {
         espacos: <Espaco>{},
       ),
     );
-    MeusTreinosMemCache.save(const []);
 
     await MigracaoMagicaDraftCache.save(
       text: 'Ana, ana@tenant-a.test, 11999999999',
@@ -164,7 +162,6 @@ void main() {
     expect(OnboardingWizardClientCache.getIfFresh(now: now), isNotNull);
     expect(AgendaWeekClientCache.get('2026-09-07'), isNotNull);
     expect(BibliotecaWizardDraftCache.get(), isNotNull);
-    expect(MeusTreinosMemCache.loadIfFresh(), isNotNull);
     expect(await MigracaoMagicaDraftCache.load(), isNotNull);
     expect(await AlunoFollowUpStore.loadAll(), isNotEmpty);
 
@@ -178,7 +175,6 @@ void main() {
     expect(OnboardingWizardClientCache.getIfFresh(now: now), isNull);
     expect(AgendaWeekClientCache.get('2026-09-07'), isNull);
     expect(BibliotecaWizardDraftCache.get(), isNull);
-    expect(MeusTreinosMemCache.loadIfFresh(), isNull);
     expect(await MigracaoMagicaDraftCache.load(), isNull);
     expect(await AlunoFollowUpStore.loadAll(), isEmpty);
     final prefsAfter = await SharedPreferences.getInstance();

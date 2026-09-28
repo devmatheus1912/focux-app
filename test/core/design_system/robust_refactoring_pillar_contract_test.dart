@@ -215,15 +215,14 @@ void main() {
     expect(screen, contains("part 'financeiro_dashboard_screen_state.part.dart'"));
   });
 
-  test('meus treinos entry stays decomposed under 200 LOC', () {
-    final lines = File(
-      'lib/features/checkin/screens/meus_treinos_screen.dart',
-    ).readAsLinesSync().length;
-    expect(lines, lessThan(200));
-    expect(
-      File('lib/features/checkin/screens/meus_treinos_screen.dart').readAsStringSync(),
-      contains("part 'meus_treinos_screen_widgets.part.dart'"),
-    );
+  test('aba Treinos: tela só orquestra; regra em utils, blocos em widgets', () {
+    final file = File('lib/features/checkin/screens/meus_treinos_screen.dart');
+    expect(file.readAsLinesSync().length, lessThan(300));
+    final source = file.readAsStringSync();
+    expect(source, contains("import '../utils/treinos_hub_view.dart';"));
+    expect(source, contains("import '../widgets/treinos_destaque_card.dart';"));
+    expect(source, contains("import '../widgets/treinos_hub_rows.dart';"));
+    expect(source, isNot(contains("part '")));
   });
 
   test('create treino entry stays decomposed under 100 LOC', () {

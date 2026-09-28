@@ -27,7 +27,6 @@ import '../../alunos/utils/aluno360_client_cache.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../evolucao/utils/evolucao_home_client_cache.dart';
 import '../data/checkin_repository.dart';
-import '../data/meus_treinos_mem_cache.dart';
 import '../providers/checkin_provider.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_sessao_aberta.dart';
@@ -365,11 +364,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       final concluida = await ref
           .read(checkinRepositoryProvider)
           .concluir(_execucao!.id!);
-      MeusTreinosMemCache.clear();
       EvolucaoHomeClientCache.clear();
       Aluno360ClientCache.clear();
-      ref.invalidate(historicoCheckinProvider);
-      ref.invalidate(meusTreinosProvider);
       invalidateAlunoDashboardHome(ref);
       if (!mounted) return;
       final evolucoes =
@@ -450,11 +446,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   void _invalidateSessaoCaches() {
-    MeusTreinosMemCache.clear();
     EvolucaoHomeClientCache.clear();
     Aluno360ClientCache.clear();
-    ref.invalidate(historicoCheckinProvider);
-    ref.invalidate(meusTreinosProvider);
     invalidateAlunoDashboardHome(ref);
   }
 

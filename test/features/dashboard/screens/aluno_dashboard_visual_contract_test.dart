@@ -74,35 +74,6 @@ void main() {
     expect(carousel, isNot(contains('UpsellRepository(')));
   });
 
-  test('weekly progress card follows white label and accent copy', () {
-    final screen =
-        File(
-          'lib/features/dashboard/screens/progresso_semanal_widget.dart',
-        ).readAsStringSync();
-
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains("'Consistência'"));
-    expect(screen, contains('descanso não zera'));
-    expect(screen, contains('countUniqueCompletedDaysThisWeek'));
-    expect(screen, contains('alunoConsistenciaCaption'));
-    expect(screen, contains('alunoWeeklyDayGoal'));
-    expect(screen, isNot(contains('clamp(3, 6)')));
-    expect(screen, isNot(contains('de \$weeklyGoal dias')));
-    expect(screen, isNot(contains('LinearProgressIndicator')));
-    expect(screen, isNot(contains('Frequência')));
-    expect(screen, contains('FocuxHubTypography.sectionTitle'));
-    expect(screen, contains('FocuxHubTypography.bodyMuted'));
-    expect(screen, contains('FocuxHubTypography.chip'));
-    expect(screen, isNot(contains('FocuxHubTypography.metric')));
-    expect(screen, isNot(contains('local_fire_department')));
-    expect(screen, isNot(contains('BrandPalette.deep')));
-    expect(screen, isNot(contains('LinearGradient')));
-    expect(screen, isNot(contains('fontSize: 12')));
-    expect(screen, isNot(contains('TextStyle(')));
-    expect(screen, isNot(contains('cs.tertiary')));
-    expect(screen, isNot(contains('EagleTokens.good')));
-  });
-
   test('student profile copy keeps Portuguese accents', () {
     final hub = readScreenSourceBundle(
       'lib/features/dashboard/screens/perfil_aluno_screen.dart',

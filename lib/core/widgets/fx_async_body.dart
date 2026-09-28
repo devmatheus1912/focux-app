@@ -20,6 +20,8 @@ class FxAsyncBody<T> extends StatelessWidget {
     this.chromeOnDark,
     this.primary,
     this.errorTitle,
+    this.skipLoadingOnReload = false,
+    this.skipError = false,
   });
 
   final AsyncValue<T> value;
@@ -33,6 +35,11 @@ class FxAsyncBody<T> extends StatelessWidget {
   final Color? primary;
   final String? errorTitle;
 
+  /// Repassados ao `AsyncValue.when`: com `skipError`, refresh que falha
+  /// mantém os dados na tela (o erro vai para um snackbar de quem chamou).
+  final bool skipLoadingOnReload;
+  final bool skipError;
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -40,6 +47,8 @@ class FxAsyncBody<T> extends StatelessWidget {
     final accent = primary ?? Theme.of(context).colorScheme.primary;
 
     return value.when(
+      skipLoadingOnReload: skipLoadingOnReload,
+      skipError: skipError,
       loading:
           () =>
               skeleton ??

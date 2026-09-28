@@ -24,6 +24,7 @@ Map<String, dynamic> _payload() => {
       'treinoNome': 'Treino A',
       'status': 'PENDENTE',
       'exercicios': [],
+      'exerciciosCount': 6,
     },
   ],
   'historicoResumo': [
@@ -34,6 +35,7 @@ Map<String, dynamic> _payload() => {
       'status': 'CONCLUIDO',
       'concluidoEm': '2026-08-15T10:00:00',
       'exerciciosCount': 5,
+      'exerciciosConcluidos': 4,
     },
   ],
   'medidas': [
@@ -101,7 +103,10 @@ void main() {
       expect(bundle.personalBrand.whiteLabelActive, isTrue);
       expect(bundle.treinos, hasLength(1));
       expect(bundle.treinos.first.status, 'PENDENTE');
+      expect(bundle.treinos.first.totalExercicios, 6);
       expect(bundle.historico.first.status, 'CONCLUIDO');
+      expect(bundle.historico.first.totalExercicios, 5);
+      expect(bundle.historico.first.exerciciosConcluidos, 4);
       expect(bundle.medidas.first.peso, 62.5);
       expect(bundle.chat.naoLidasDoPersonal, 2);
       expect(bundle.notificacoesNaoLidas, 4);

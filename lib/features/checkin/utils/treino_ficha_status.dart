@@ -1,6 +1,6 @@
 import '../data/checkin_repository.dart';
 
-/// Status de ficha devolvidos por `meus-treinos` / `dashboard/aluno/home`.
+/// Status de ficha devolvidos por `dashboard/aluno/home`.
 const treinoStatusDisponivel = 'DISPONIVEL';
 const treinoStatusAguardandoLiberacao = 'AGUARDANDO_LIBERACAO';
 const treinoStatusEmAndamento = 'EM_ANDAMENTO';
@@ -19,7 +19,7 @@ bool isTreinoAguardandoLiberacao(ExecucaoTreino treino) {
     return false;
   }
   // Legado: status genérico + lista vazia = ainda em preparação.
-  return treino.exercicios.isEmpty;
+  return treino.totalExercicios == 0;
 }
 
 /// Pode iniciar / retomar execução.
@@ -31,7 +31,7 @@ bool isTreinoDisponivelParaIniciar(ExecucaoTreino treino) {
   }
   if (status == treinoStatusConcluido) return false;
   // Legado: tem exercícios ativos.
-  return treino.exercicios.isNotEmpty;
+  return treino.totalExercicios > 0;
 }
 
 List<ExecucaoTreino> treinosProntosParaIniciar(List<ExecucaoTreino> treinos) =>
@@ -102,45 +102,4 @@ DateTime? _concluidoEmLocal(ExecucaoTreino item) {
   if (normalizeTreinoStatus(item.status) != treinoStatusConcluido) return null;
   final raw = item.concluidoEm ?? item.iniciadoEm;
   return raw == null ? null : DateTime.tryParse(raw)?.toLocal();
-}
-
-/// Startable first — job is find & start, not pipeline noise.
-List<ExecucaoTreino> treinosOrdenadosStartFirst(List<ExecucaoTreino> treinos) {
-  final pronto = <ExecucaoTreino>[];
-  final resto = <ExecucaoTreino>[];
-  for (final t in treinos) {
-    if (isTreinoDisponivelParaIniciar(t)) {
-      pronto.add(t);
-    } else {
-      resto.add(t);
-    }
-  }
-  return [...pronto, ...resto];
-}
-
-/// Conta dias distintos com ≥1 execução `CONCLUIDO` na semana corrente.
-int countUniqueCompletedDaysThisWeek(
-  List<ExecucaoTreino> historico, {
-  DateTime? now,
-}) {
-  final clock = now ?? DateTime.now();
-  final startOfWeek = DateTime(
-    clock.year,
-    clock.month,
-    clock.day,
-  ).subtract(Duration(days: clock.weekday - 1));
-  final endOfWeek = startOfWeek.add(const Duration(days: 7));
-  final days = <String>{};
-
-  for (final item in historico) {
-    final dt = _concluidoEmLocal(item);
-    if (dt == null) continue;
-    if (dt.isBefore(startOfWeek) || !dt.isBefore(endOfWeek)) continue;
-    final key =
-        '${dt.year.toString().padLeft(4, '0')}-'
-        '${dt.month.toString().padLeft(2, '0')}-'
-        '${dt.day.toString().padLeft(2, '0')}';
-    days.add(key);
-  }
-  return days.length;
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/auth/utils/post_login_redirect.dart';
 
 import '../../../support/screen_source_bundle.dart';
 
@@ -27,6 +28,12 @@ void main() {
     expect(util, contains('bool isPersonalPath'));
     expect(util, contains("path == '/financeiro'"));
     expect(util, contains("path == '/dashboard/aluno'"));
+  });
+
+  test('prévia do treino volta após login só para o aluno', () {
+    expect(isAlunoPath('/checkin/treino/5'), isTrue);
+    expect(safePostLoginPath('/checkin/treino/5', isAluno: true), '/checkin/treino/5');
+    expect(safePostLoginPath('/checkin/treino/5', isAluno: false), isNull);
   });
 
   test('student password change still overrides from route', () {

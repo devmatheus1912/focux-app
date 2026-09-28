@@ -6,7 +6,6 @@ import '../../features/alunos/data/aluno_copilot_ia_cache_store.dart';
 import '../../features/alunos/data/aluno_followup_store.dart';
 import '../../features/alunos/utils/aluno360_client_cache.dart';
 import '../../features/alunos/utils/alunos_home_client_cache.dart';
-import '../../features/checkin/data/meus_treinos_mem_cache.dart';
 import '../../features/dashboard/data/aluno_onboarding_prefs.dart';
 import '../../features/dashboard/utils/aluno_autonomy_analytics.dart';
 import '../../features/dashboard/utils/aluno_dashboard_home_client_cache.dart';
@@ -55,7 +54,6 @@ class SessionInvalidator {
 
   /// Snapshots estáticos por tenant. `ref.invalidate` não os esvazia.
   static void clearTenantMemoryCaches() {
-    MeusTreinosMemCache.clear();
     AlunoInsightAnalytics.resetSessao();
     AlunoAutonomyAnalytics.resetSessao();
     AlunosHomeClientCache.clear();

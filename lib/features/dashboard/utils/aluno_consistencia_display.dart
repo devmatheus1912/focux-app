@@ -6,14 +6,3 @@ int? alunoWeeklyDayGoal({int? frequenciaDias}) {
   if (frequenciaDias == null || frequenciaDias < 1) return null;
   return frequenciaDias.clamp(1, 7);
 }
-
-String alunoConsistenciaCaption(
-  int completedThisWeek, {
-  int? weeklyGoal,
-}) {
-  if (completedThisWeek <= 0) return 'Nenhum treino esta semana';
-  final dayWord = completedThisWeek == 1 ? 'dia' : 'dias';
-  final base = 'Você treinou $completedThisWeek $dayWord esta semana';
-  if (weeklyGoal == null) return base;
-  return '$base · meta $weeklyGoal';
-}

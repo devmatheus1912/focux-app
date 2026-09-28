@@ -20,6 +20,7 @@ import '../../features/checkin/screens/checkin_personal_hub_screen.dart';
 import '../../features/checkin/screens/checkin_screen.dart';
 import '../../features/checkin/screens/historico_detalhe_screen.dart';
 import '../../features/checkin/screens/historico_screen.dart';
+import '../../features/checkin/screens/treino_previa_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
@@ -453,6 +454,18 @@ RouteBase buildChromeShellRoute() {
             builder:
                 (context, state) =>
                     CheckinScreen(treinoId: treinoIdFromState(state)!),
+          ),
+          GoRoute(
+            path: '/checkin/treino/:treinoId',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'treinoId') == null
+                        ? '/checkin/treinos'
+                        : null,
+            builder:
+                (context, state) => TreinoPreviaScreen(
+                  treinoId: intPathParam(state, 'treinoId')!,
+                ),
           ),
           GoRoute(
             path: '/checkin/historico',

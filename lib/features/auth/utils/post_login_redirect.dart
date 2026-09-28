@@ -56,7 +56,8 @@ bool isAlunoPath(String path) {
       path == '/suporte' ||
       path == '/checkin/treinos' ||
       path == '/checkin/executar' ||
-      path == '/checkin/historico';
+      path == '/checkin/historico' ||
+      path.startsWith('/checkin/treino/');
 }
 
 bool isPersonalPath(String path) {

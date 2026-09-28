@@ -116,6 +116,7 @@ bool isAlunoOnlyLocation(String path) {
   };
   return alunoOnly.contains(path) ||
       path.startsWith('/checkin/historico/') ||
+      path.startsWith('/checkin/treino/') ||
       path.startsWith('/aluno/desafios/') ||
       path.startsWith('/aluno/habitos/');
 }
