@@ -255,6 +255,8 @@ class _PreviaSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
+      liveRegion: true,
       label: S.of(context).treinoPreviaCarregando,
       excludeSemantics: true,
       child: const FxContentWidthLimiter(

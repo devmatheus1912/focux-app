@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -175,6 +177,17 @@ void main() {
     expect(find.text('abrir'), findsOneWidget);
   });
 
+  testWidgets('carregando: skeleton com leitura, sem botões', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _pump(tester, home: _home(), pendente: true);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.bySemanticsLabel('Carregando o treino'), findsOneWidget);
+    expect(find.text('Iniciar treino'), findsNothing);
+    expect(find.text('Já fiz este treino'), findsNothing);
+    handle.dispose();
+  });
+
   testWidgets('falha de rede: erro com tentar de novo', (tester) async {
     await _pump(tester, home: _home(), erro: Exception('offline'));
 
@@ -225,6 +238,7 @@ Future<void> _pump(
   TreinoPrevia previa = _previa,
   Object? erro,
   _FakeCheckinRepository? repo,
+  bool pendente = false,
 }) async {
   await tester.binding.setSurfaceSize(const Size(430, 1400));
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -247,7 +261,12 @@ Future<void> _pump(
       overrides: [
         alunoDashboardHomeProvider.overrideWith((ref) async => home),
         treinoPreviaProvider.overrideWith(
-          (ref, id) async => erro == null ? previa : throw erro,
+          (ref, id) =>
+              pendente
+                  ? Completer<TreinoPrevia>().future
+                  : erro == null
+                  ? Future.value(previa)
+                  : Future.error(erro),
         ),
         checkinRepositoryProvider.overrideWithValue(
           repo ?? _FakeCheckinRepository(),

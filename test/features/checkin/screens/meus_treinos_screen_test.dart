@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -154,6 +156,16 @@ void main() {
     expect(find.text('chat'), findsOneWidget);
   });
 
+  testWidgets('carregando: skeleton com leitura própria', (tester) async {
+    final handle = tester.ensureSemantics();
+    await _pump(tester, null, pendente: true);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.bySemanticsLabel('Carregando seus treinos'), findsOneWidget);
+    expect(find.text('Próximo treino'), findsNothing);
+    handle.dispose();
+  });
+
   testWidgets('falha no primeiro carregamento: erro com tentar de novo', (
     tester,
   ) async {
@@ -239,6 +251,7 @@ Future<void> _pump(
   AlunoDashboardHomeBundle? home, {
   Size size = const Size(430, 2400),
   double textScale = 1,
+  bool pendente = false,
 }) async {
   await tester.binding.setSurfaceSize(size);
   addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -277,7 +290,12 @@ Future<void> _pump(
     ProviderScope(
       overrides: [
         alunoDashboardHomeProvider.overrideWith(
-          (ref) async => home ?? (throw Exception('offline')),
+          (ref) =>
+              pendente
+                  ? Completer<AlunoDashboardHomeBundle>().future
+                  : home == null
+                  ? Future.error(Exception('offline'))
+                  : Future.value(home),
         ),
       ],
       child: MaterialApp.router(

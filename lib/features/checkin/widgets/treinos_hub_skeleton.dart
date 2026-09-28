@@ -12,6 +12,8 @@ class TreinosHubSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
+      container: true,
+      liveRegion: true,
       label: S.of(context).treinosHubCarregando,
       excludeSemantics: true,
       child: const FxContentWidthLimiter(
