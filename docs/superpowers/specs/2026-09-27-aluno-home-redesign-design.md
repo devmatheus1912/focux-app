@@ -31,13 +31,15 @@ Bloco sem dado some e não soma espaço (cada bloco traz o próprio espaçamento
 
 1. **Cabeçalho.** App bar "Hoje" + frescor (`FxHubFreshness`). No corpo,
    "Olá, {primeiro nome}" e a linha "Seu personal: {nomePersonal}" com logo
-   24 px; toque → `/chat/aluno`. Sem nome do personal → a linha some. A app bar
+   24 px; toque → `/chat/aluno`. Sem nome do personal → a linha some; nome
+   longo quebra em até 2 linhas. A app bar
    não repete o avatar (o Perfil está no dock).
 2. **Foco do dia — o que faço hoje.** Eyebrow, título, descrição, prazo,
    linha do próximo horário, `AlunoHomeInsightLine` e o chip P0
    (`FxActionChip`), único toque do card.
-   - Título até 2 linhas. Descrição, prazo, horário e detalhe do insight
-     quebram linha sem corte: com fonte grande nada que decide o dia some.
+   - Título até 3 linhas e rótulo do chip até 2. Descrição, prazo, horário e
+     detalhe do insight quebram linha sem corte: com fonte grande nada que
+     decide o dia some.
    - Próximo horário: linha só de leitura "Horário com seu personal: hoje às
      18:00" (ou "amanhã às 07:30") quando `agendaProximoInicio` ainda vai
      acontecer, hoje ou amanhã.
@@ -263,7 +265,7 @@ Cada critério tem prova. A Home é 10/10 quando todos passam.
 | C4 | Foco com 5 modos na prioridade de §3.1; financeiro não é modo | unit |
 | C5 | Linha do próximo horário só hoje ou amanhã e ainda por vir | unit + widget |
 | C6 | Prontidão baixa: texto no foco, CTA igual, card sem dica | unit + widget |
-| C7 | Nenhum texto de decisão cortado com fonte grande (foco, insight, pendência, prontidão, semana, recorde, oferta) | widget (`didExceedMaxLines`) |
+| C7 | Nenhum texto de decisão cortado com fonte grande (foco e chip, insight, pendência, prontidão, semana, recorde, oferta, personal) | widget (`didExceedMaxLines`) |
 | C8 | Aviso: atestado, financeiro, anamnese, coach | unit |
 | C9 | Mensalidade atrasada: treino no foco, ofertas vazias | unit |
 | C10 | Pendências: chat, agenda, medida, perfil; no máximo 3 | unit |

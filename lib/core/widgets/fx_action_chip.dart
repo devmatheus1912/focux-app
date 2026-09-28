@@ -18,8 +18,11 @@ class FxActionChip extends StatelessWidget {
     required this.onPressed,
     this.enabled = true,
     this.solid = false,
+    this.maxLines = 1,
   });
 
+  /// 2 no P0 de card largo: com fonte grande o rótulo quebra em vez de cortar.
+  final int maxLines;
   final String label;
   final Color accent;
   final bool isDark;
@@ -96,12 +99,12 @@ class FxActionChip extends StatelessWidget {
                     widthFactor: 1,
                     child: Text(
                       label,
-                      maxLines: 1,
+                      maxLines: maxLines,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: FocuxHubTypography.chip(fg).copyWith(
                         fontWeight: solid ? FontWeight.w800 : FontWeight.w700,
-                        height: 1.0,
+                        height: maxLines > 1 ? 1.15 : 1.0,
                       ),
                     ),
                   ),

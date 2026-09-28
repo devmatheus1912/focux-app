@@ -61,7 +61,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
           Text(
             texto.titulo,
             style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
-            maxLines: 2,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -93,6 +93,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
             accent: primary,
             isDark: isDark,
             onPressed: onAction,
+            maxLines: 2,
           ),
         ],
       ),

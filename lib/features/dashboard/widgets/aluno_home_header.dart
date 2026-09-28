@@ -104,7 +104,7 @@ class _PersonalLine extends StatelessWidget {
                     color: mute,
                     fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

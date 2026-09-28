@@ -125,6 +125,21 @@ void main() {
       expect(abriu, isTrue);
     });
 
+    testWidgets('nome longo do personal inteiro com fonte grande', (
+      tester,
+    ) async {
+      await _pumpEstreito(
+        tester,
+        escala: 1.5,
+        AlunoHomeHeader(
+          alunoNome: 'Ana',
+          nomePersonal: 'Carlos Eduardo',
+          onOpenChat: () {},
+        ),
+      );
+      _expectInteiro(tester, find.text('Seu personal: Carlos Eduardo'));
+    });
+
     testWidgets('sem nome do personal a linha não aparece', (tester) async {
       await _pump(
         tester,
@@ -347,6 +362,7 @@ void main() {
         ),
       );
       _expectInteiro(tester, find.text('Seu ritmo caiu'));
+      _expectInteiro(tester, find.text('Falar com o personal'));
       _expectInteiro(
         tester,
         find.text(
