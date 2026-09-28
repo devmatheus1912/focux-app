@@ -26,23 +26,21 @@ Map<String, dynamic> _payload() => {
       'exercicios': [],
     },
   ],
-  'historico': [
+  'historico': [],
+  'historicoResumo': [
     {
       'id': 90,
       'treinoId': 11,
       'treinoNome': 'Treino A',
       'status': 'CONCLUIDO',
       'concluidoEm': '2026-08-15T10:00:00',
-      'exercicios': [],
+      'exerciciosCount': 5,
     },
   ],
   'medidas': [
     {'id': 3, 'data': '2026-08-10', 'peso': 62.5, 'cintura': 70.0},
   ],
-  'chat': {
-    'possuiMensagemDoAluno': true,
-    'naoLidasDoPersonal': 2,
-  },
+  'chat': {'possuiMensagemDoAluno': true, 'naoLidasDoPersonal': 2},
   'notificacoesNaoLidas': 4,
   'coachMensagens': [
     {
@@ -131,25 +129,27 @@ void main() {
     });
 
     test('tolerates missing optional blocks', () {
-      final json = _payload()
-        ..remove('personalBrand')
-        ..remove('treinos')
-        ..remove('historico')
-        ..remove('medidas')
-        ..remove('chat')
-        ..remove('notificacoesNaoLidas')
-        ..remove('coachMensagens')
-        ..remove('upsellPendentes')
-        ..remove('npsDeveResponder')
-        ..remove('recovery')
-        ..remove('streakAtual')
-        ..remove('volumeSemanaKg')
-        ..remove('concluidosSemanaIso')
-        ..remove('frequenciaDias')
-        ..remove('forcaDeltaPercent')
-        ..remove('recoveryStale')
-        ..remove('insight')
-        ..remove('recursosIndisponiveis');
+      final json =
+          _payload()
+            ..remove('personalBrand')
+            ..remove('treinos')
+            ..remove('historico')
+            ..remove('historicoResumo')
+            ..remove('medidas')
+            ..remove('chat')
+            ..remove('notificacoesNaoLidas')
+            ..remove('coachMensagens')
+            ..remove('upsellPendentes')
+            ..remove('npsDeveResponder')
+            ..remove('recovery')
+            ..remove('streakAtual')
+            ..remove('volumeSemanaKg')
+            ..remove('concluidosSemanaIso')
+            ..remove('frequenciaDias')
+            ..remove('forcaDeltaPercent')
+            ..remove('recoveryStale')
+            ..remove('insight')
+            ..remove('recursosIndisponiveis');
 
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
 
@@ -181,25 +181,30 @@ void main() {
     });
 
     test('prontidão velha chega como recovery null + recoveryStale', () {
-      final json = _payload()
-        ..['recovery'] = null
-        ..['recoveryStale'] = true;
+      final json =
+          _payload()
+            ..['recovery'] = null
+            ..['recoveryStale'] = true;
       final bundle = AlunoDashboardHomeBundle.fromJson(json);
       expect(bundle.recovery, isNull);
       expect(bundle.recoveryStale, isTrue);
     });
 
-    test('escalares novos malformados viram null/false sem derrubar a Home', () {
-      final json = _payload()
-        ..['forcaDeltaPercent'] = '4.5'
-        ..['recoveryStale'] = 'sim'
-        ..['concluidosSemanaIso'] = 'x';
-      final bundle = AlunoDashboardHomeBundle.fromJson(json);
-      expect(bundle.forcaDeltaPercent, isNull);
-      expect(bundle.recoveryStale, isFalse);
-      expect(bundle.concluidosSemanaIso, isNull);
-      expect(bundle.aluno.nome, 'Ana Souza');
-    });
+    test(
+      'escalares novos malformados viram null/false sem derrubar a Home',
+      () {
+        final json =
+            _payload()
+              ..['forcaDeltaPercent'] = '4.5'
+              ..['recoveryStale'] = 'sim'
+              ..['concluidosSemanaIso'] = 'x';
+        final bundle = AlunoDashboardHomeBundle.fromJson(json);
+        expect(bundle.forcaDeltaPercent, isNull);
+        expect(bundle.recoveryStale, isFalse);
+        expect(bundle.concluidosSemanaIso, isNull);
+        expect(bundle.aluno.nome, 'Ana Souza');
+      },
+    );
   });
 
   group('AlunoDashboardChatResumo.fromJson', () {

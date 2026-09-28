@@ -42,8 +42,9 @@ class DashboardAderenciaTopItem {
       alunoId: (json['alunoId'] as num).toInt(),
       nome: json['nome'] as String? ?? '',
       objetivo: json['objetivo'] as String?,
-      sparkline:
-          sparkRaw.map((e) => (e as num?)?.toDouble() ?? 0.0).toList(growable: false),
+      sparkline: sparkRaw
+          .map((e) => (e as num?)?.toDouble() ?? 0.0)
+          .toList(growable: false),
       totalCheckinsSemana: (json['totalCheckinsSemana'] as num?)?.toInt() ?? 0,
       aderenciaPercent: (json['aderenciaPercent'] as num?)?.toInt() ?? 0,
     );
@@ -71,12 +72,12 @@ class DashboardPulseSnapshot {
     return DashboardPulseSnapshot(
       checkinsHoje: (json['checkinsHoje'] as num?)?.toInt(),
       mensagensNaoLidas: (json['mensagensNaoLidas'] as num?)?.toInt(),
-      coachPendentes: (json['coachPendentes'] as num?)?.toInt() ??
+      coachPendentes:
+          (json['coachPendentes'] as num?)?.toInt() ??
           (json['coachPending'] as num?)?.toInt(),
-      checkinsTrend:
-          trendRaw
-              .map((e) => (e as num?)?.toInt() ?? 0)
-              .toList(growable: false),
+      checkinsTrend: trendRaw
+          .map((e) => (e as num?)?.toInt() ?? 0)
+          .toList(growable: false),
       emptyHint: json['emptyHint'] as String?,
     );
   }
@@ -121,15 +122,14 @@ class DashboardHomeBundle {
       financeiro: FinanceiroDashboard.fromJson(
         json['financeiro'] as Map<String, dynamic>,
       ),
-      topAderencia:
-          topRaw
-              .whereType<Map>()
-              .map(
-                (e) => DashboardAderenciaTopItem.fromJson(
-                  Map<String, dynamic>.from(e),
-                ),
-              )
-              .toList(growable: false),
+      topAderencia: topRaw
+          .whereType<Map>()
+          .map(
+            (e) => DashboardAderenciaTopItem.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .toList(growable: false),
       pulse:
           pulseRaw is Map
               ? DashboardPulseSnapshot.fromJson(
@@ -371,6 +371,7 @@ class AlunoDashboardHomeBundle {
   final int? concluidosSemanaIso;
   final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
+
   /// Meta da semana em sessões (fichas do rodízio); null sem rodízio — SSOT do BFF.
   final int? frequenciaDias;
 
@@ -455,51 +456,30 @@ class AlunoDashboardHomeBundle {
         (raw as List? ?? const [])
             .map((e) => ExecucaoTreino.fromJson(e as Map<String, dynamic>))
             .toList();
-    List<ExecucaoTreino> parseHistorico(Map<String, dynamic> json) {
+    // Mesmos caps do `AlunoDashboardHomeSurface` do backend (rede de segurança).
+    List<ExecucaoTreino> parseHistoricoResumo(dynamic raw) {
       const historicoCap = 12;
-      // BFF #75: se a chave `historicoResumo` veio (mesmo vazia), é a SSOT —
-      // não parsear dump `historico` rico.
-      if (json.containsKey('historicoResumo')) {
-        final resumo = json['historicoResumo'];
-        if (resumo is! List) return const [];
-        final list = resumo
-            .whereType<Map>()
-            .map(
-              (e) => ExecucaoTreino.fromHistoricoResumoJson(
-                Map<String, dynamic>.from(e),
-              ),
-            )
-            .toList(growable: false);
-        if (list.length <= historicoCap) return list;
-        return list.sublist(0, historicoCap);
-      }
-      // API antiga: dump completo — slim + cap no client (Home não precisa séries).
-      final full = parseExec(json['historico']);
-      final slim = full
-          .take(historicoCap)
+      final list = (raw as List? ?? const [])
+          .whereType<Map>()
           .map(
-            (e) => ExecucaoTreino(
-              id: e.id,
-              treinoId: e.treinoId,
-              treinoNome: e.treinoNome,
-              status: e.status,
-              iniciadoEm: e.iniciadoEm,
-              concluidoEm: e.concluidoEm,
-              exercicios: const [],
+            (e) => ExecucaoTreino.fromHistoricoResumoJson(
+              Map<String, dynamic>.from(e),
             ),
           )
           .toList(growable: false);
-      return slim;
+      if (list.length <= historicoCap) return list;
+      return list.sublist(0, historicoCap);
     }
+
     List<MedidaCorporal> parseMedidas(dynamic raw) {
       final list =
           (raw as List? ?? const [])
               .map((e) => MedidaCorporal.fromJson(e as Map<String, dynamic>))
               .toList();
-      // Caps client se o BFF ainda mandar dump completo.
       if (list.length <= 5) return list;
       return list.sublist(0, 5);
     }
+
     List<CoachMensagem> parseCoach(dynamic raw) {
       final list =
           (raw as List? ?? const [])
@@ -508,6 +488,7 @@ class AlunoDashboardHomeBundle {
       if (list.length <= 5) return list;
       return list.sublist(0, 5);
     }
+
     List<AlunoOferta> parseUpsell(dynamic raw) {
       final list =
           (raw as List? ?? const [])
@@ -516,27 +497,20 @@ class AlunoDashboardHomeBundle {
       if (list.length <= 5) return list;
       return list.sublist(0, 5);
     }
+
     List<RecordePessoal> parseRecordes(dynamic raw) =>
         (raw as List? ?? const [])
             .map((e) => RecordePessoal.fromJson(e as Map<String, dynamic>))
             .toList();
     final recoveryRaw = json['recovery'];
-    final evolucaoHome = json['evolucaoHome'];
-    final recordesRaw =
-        json['recordes'] ??
-        (evolucaoHome is Map ? evolucaoHome['recordes'] : null);
 
     return AlunoDashboardHomeBundle(
-      aluno: Aluno.fromJson(
-        Map<String, dynamic>.from(json['aluno'] as Map),
-      ),
+      aluno: Aluno.fromJson(Map<String, dynamic>.from(json['aluno'] as Map)),
       personalBrand: PersonalBrand.fromJson(
-        Map<String, dynamic>.from(
-          (json['personalBrand'] as Map?) ?? const {},
-        ),
+        Map<String, dynamic>.from((json['personalBrand'] as Map?) ?? const {}),
       ),
       treinos: parseExec(json['treinos']),
-      historico: parseHistorico(json),
+      historico: parseHistoricoResumo(json['historicoResumo']),
       medidas: parseMedidas(json['medidas']),
       chat: AlunoDashboardChatResumo.fromJson(
         json['chat'] is Map
@@ -562,7 +536,7 @@ class AlunoDashboardHomeBundle {
         _ => null,
       },
       forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
-      recordes: parseRecordes(recordesRaw),
+      recordes: parseRecordes(json['recordes']),
       frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
       forcaDeltaPercent: switch (json['forcaDeltaPercent']) {
         final num v => v.toDouble(),

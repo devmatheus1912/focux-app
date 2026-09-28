@@ -12,11 +12,15 @@ void main() {
     AlunoDashboardHomeClientCache.put(bundle, now: now);
 
     expect(
-      AlunoDashboardHomeClientCache.getIfFresh(now: now.add(const Duration(seconds: 30))),
+      AlunoDashboardHomeClientCache.getIfFresh(
+        now: now.add(const Duration(seconds: 30)),
+      ),
       isNotNull,
     );
     expect(
-      AlunoDashboardHomeClientCache.getIfFresh(now: now.add(const Duration(seconds: 61))),
+      AlunoDashboardHomeClientCache.getIfFresh(
+        now: now.add(const Duration(seconds: 61)),
+      ),
       isNull,
     );
     expect(
@@ -33,7 +37,7 @@ void main() {
     );
   });
 
-  test('fromJson prefere historicoResumo ao historico completo', () {
+  test('fromJson lê só historicoResumo; historico legado é ignorado', () {
     final bundle = AlunoDashboardHomeBundle.fromJson({
       'aluno': {
         'id': 1,
@@ -86,59 +90,25 @@ void main() {
     expect(bundle.historico.first.id, 7);
   });
 
-  test('historicoResumo vazio (chave presente) não cai no dump legado', () {
+  test('historicoResumo corta em 12', () {
     final bundle = AlunoDashboardHomeBundle.fromJson({
       'aluno': {'id': 1, 'nome': 'A', 'email': 'a@t.com', 'status': 'ATIVO'},
       'personalBrand': {},
       'treinos': [],
-      'historicoResumo': [],
-      'historico': [
-        {
-          'id': 99,
-          'treinoId': 1,
-          'treinoNome': 'LEGADO',
+      'historicoResumo': List.generate(
+        20,
+        (i) => {
+          'id': i + 1,
+          'treinoId': i + 1,
+          'treinoNome': 'T$i',
           'status': 'CONCLUIDO',
-          'exercicios': [],
+          'exerciciosCount': 3,
         },
-      ],
-      'medidas': [],
-      'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
-    });
-    expect(bundle.historico, isEmpty);
-  });
-
-  test('fallback historico dump: slim + cap 12', () {
-    final items = List.generate(
-      20,
-      (i) => {
-        'id': i + 1,
-        'treinoId': i + 1,
-        'treinoNome': 'T$i',
-        'status': 'CONCLUIDO',
-        'exercicios': [
-          {
-            'id': 1,
-            'treinoExercicioId': 1,
-            'exercicioNome': 'Squat',
-            'seriesFeitas': 3,
-            'concluido': true,
-            'dor': false,
-            'seriesDetalhes': [],
-            'seriesAnteriores': [],
-          },
-        ],
-      },
-    );
-    final bundle = AlunoDashboardHomeBundle.fromJson({
-      'aluno': {'id': 1, 'nome': 'A', 'email': 'a@t.com', 'status': 'ATIVO'},
-      'personalBrand': {},
-      'treinos': [],
-      'historico': items,
+      ),
       'medidas': [],
       'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
     });
     expect(bundle.historico, hasLength(12));
-    expect(bundle.historico.every((e) => e.exercicios.isEmpty), isTrue);
   });
 
   test('ExecucaoTreino.fromHistoricoResumoJson ignora mídia', () {
