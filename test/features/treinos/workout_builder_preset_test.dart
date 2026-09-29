@@ -41,10 +41,9 @@ void main() {
   });
 
   test('workout builder sends premium prescription fields to backend', () {
-    final repository =
-        File(
-          'lib/features/treinos/data/treino_repository.dart',
-        ).readAsStringSync();
+    final repository = readScreenSourceBundle(
+      'lib/features/treinos/data/treino_repository.dart',
+    );
     final screen = readScreenSourceBundle(
       'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
     );
@@ -62,10 +61,9 @@ void main() {
   });
 
   test('workout detail exposes persisted reorder and duplicate actions', () {
-    final repository =
-        File(
-          'lib/features/treinos/data/treino_repository.dart',
-        ).readAsStringSync();
+    final repository = readScreenSourceBundle(
+      'lib/features/treinos/data/treino_repository.dart',
+    );
     final detail = readScreenSourceBundle(
       'lib/features/treinos/screens/treino_detail_screen.dart',
     );

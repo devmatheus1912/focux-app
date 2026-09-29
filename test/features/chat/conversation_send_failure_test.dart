@@ -376,6 +376,11 @@ void main() {
     final reenviar = tester.getRect(find.text('Tentar novamente'));
     final descartar = tester.getRect(find.text('Descartar'));
     expect(descartar.top, greaterThanOrEqualTo(reenviar.bottom));
+    final acoes = tester.getRect(find.byType(ConversationSendFailedActions));
+    final botaoDescartar = tester.getRect(
+      find.widgetWithText(TextButton, 'Descartar'),
+    );
+    expect(botaoDescartar.right, moreOrLessEquals(acoes.right));
   });
 
   testWidgets('reenvio sem ação (outro anexo subindo) aparece desabilitado', (

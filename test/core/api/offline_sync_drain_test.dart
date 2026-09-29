@@ -288,6 +288,18 @@ void main() {
     expect(await OfflineSyncService.getPendingCount(), 2);
   });
 
+  test('contador de pendentes ignora item corrompido antes da drenagem', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        QueuedRequest(path: _path, method: 'POST').toJson(),
+        'lixo',
+        {'method': 'POST', 'attempts': 'x'},
+      ]),
+    });
+
+    expect(await OfflineSyncService.getPendingCount(), 1);
+  });
+
   test('DELETE com 404 no reenvio conta como feito, sem aviso', () async {
     SharedPreferences.setMockInitialValues({});
     await OfflineSyncService.enqueueRequest(

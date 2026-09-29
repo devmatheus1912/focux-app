@@ -108,7 +108,9 @@ class CheckinPendentesAviso extends StatelessWidget {
             Expanded(
               child: Text(
                 s.checkinPendentes(pendentes),
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                style: FocuxHubTypography.bodyMuted(
+                  color: chrome.mute,
+                ).copyWith(fontSize: checkinPendentesAvisoFonte),
               ),
             ),
             TextButton(

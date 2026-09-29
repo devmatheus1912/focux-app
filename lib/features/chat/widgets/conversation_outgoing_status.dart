@@ -81,6 +81,7 @@ class ConversationSendFailedActions extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
     );
     return Wrap(
+      alignment: WrapAlignment.end,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         MergeSemantics(

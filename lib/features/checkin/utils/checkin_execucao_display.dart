@@ -10,6 +10,9 @@ const double checkinExecutionControlMin = TokensStrip.s8;
 /// Altura da faixa "N séries esperando conexão" (alvo do "Tentar agora").
 const double checkinPendentesAvisoAltura = 48;
 
+/// Fonte do texto do aviso; a reserva do rodapé escala por ela.
+const double checkinPendentesAvisoFonte = TokensStrip.fontBodySm;
+
 /// Altura do rodapé fixo (+ aviso de pendentes); snackbar flutua acima. O
 /// aviso cresce com a fonte do aparelho, porque o texto dele quebra linha.
 double checkinRodapeReserva({
@@ -22,8 +25,8 @@ double checkinRodapeReserva({
     (comPendentes ? _pendentesAvisoReserva(textScaler) : 0);
 
 double _pendentesAvisoReserva(TextScaler textScaler) {
-  const fonte = TokensStrip.fontBodySm;
-  final escala = textScaler.scale(fonte) / fonte;
+  final escala =
+      textScaler.scale(checkinPendentesAvisoFonte) / checkinPendentesAvisoFonte;
   return checkinPendentesAvisoAltura * (escala < 1 ? 1 : escala);
 }
 

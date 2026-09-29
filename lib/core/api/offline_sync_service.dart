@@ -113,7 +113,9 @@ class OfflineSyncService {
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
     if (queueStr == null) return 0;
-    return (jsonDecode(queueStr) as List).length;
+    return (jsonDecode(queueStr) as List)
+        .where((raw) => tryParseQueuedRequest(raw) != null)
+        .length;
   }
 
   /// Try to sync all pending requests using the provided Dio instance.

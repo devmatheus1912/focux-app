@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/data/checkin_series_pendentes.dart';
+import 'package:focux_app/features/checkin/utils/checkin_execucao_display.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_serie_campos_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,6 +40,10 @@ void main() {
 
     expect(find.text('Pular descanso'), findsOneWidget);
     expect(find.text('1 série esperando conexão'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('1 série esperando conexão')).style?.fontSize,
+      checkinPendentesAvisoFonte,
+    );
     expect((await fila.ler()).single.numero, 1);
 
     await tester.tap(find.text('Pular descanso'));

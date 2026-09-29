@@ -25,6 +25,7 @@ import '../../../core/widgets/fx_inset_picker_row.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/queued_offline_exit.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/create_treino_logic.dart';

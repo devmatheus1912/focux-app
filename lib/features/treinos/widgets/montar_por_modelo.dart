@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
+import '../data/treino_repository.dart';
 import '../data/workout_builder_preset.dart';
 import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';

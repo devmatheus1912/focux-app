@@ -27,7 +27,9 @@ class _FakeTreinoRepository extends TreinoRepository {
   final bool offline;
   int falhasAtribuir;
   final atribuicoes = <(int, int)>[];
+  final tentativasAtribuir = <int>[];
   final nonces = <String>[];
+  var _proximoId = 12;
 
   @override
   Future<Treino> criar(
@@ -40,7 +42,7 @@ class _FakeTreinoRepository extends TreinoRepository {
   }) async {
     nonces.add(formNonce);
     if (offline) throw const OfflineQueuedException();
-    return Treino(id: 12, nome: nome, exercicios: const []);
+    return Treino(id: _proximoId++, nome: nome, exercicios: const []);
   }
 
   @override
@@ -49,6 +51,7 @@ class _FakeTreinoRepository extends TreinoRepository {
     int alunoId, {
     DateTime? dataFim,
   }) async {
+    tentativasAtribuir.add(treinoId);
     if (falhasAtribuir > 0) {
       falhasAtribuir--;
       throw Exception('falha');
@@ -317,7 +320,7 @@ void main() {
     expect(find.bySemanticsLabel('Detalhe do treino'), findsNothing);
   });
 
-  testWidgets('reenviar o mesmo formulário com aluno repete o nonce', (
+  testWidgets('falha ao atribuir: reenvio só atribui, sem 2º treino', (
     tester,
   ) async {
     final repo = _FakeTreinoRepository(falhasAtribuir: 1);
@@ -328,13 +331,19 @@ void main() {
     await _pumpFluxo(tester, router, repo);
 
     await _criarTreino(tester, 'Aluno 360');
-    expect(find.text('Não foi possível criar o treino'), findsOneWidget);
-    await tester.tap(find.text('Criar'));
+    expect(find.text('Treino criado, falta atribuir ao aluno'), findsOneWidget);
+    expect(find.textContaining('O treino já foi criado'), findsOneWidget);
+    expect(find.text('Criar'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField).first, 'Outro nome');
+    await tester.pump();
+    await tester.tap(find.text('Tentar atribuir de novo'));
     await _settle(tester);
 
+    expect(repo.nonces, hasLength(1));
+    expect(repo.tentativasAtribuir, [12, 12]);
     expect(repo.atribuicoes, [(12, 5)]);
-    expect(repo.nonces, hasLength(2));
-    expect(repo.nonces.last, repo.nonces.first);
+    expect(find.text('Concluir'), findsOneWidget);
   });
 
   testWidgets('criado offline (enfileirado) não abre detalhe sem id', (

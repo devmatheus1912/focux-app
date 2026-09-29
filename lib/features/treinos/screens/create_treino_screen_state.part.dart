@@ -12,6 +12,9 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   bool _loading = false;
   String? _error;
 
+  /// Treino já criado cuja atribuição ao aluno falhou: reenviar só atribui.
+  int? _treinoCriadoId;
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +58,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
 
   Future<void> _submit() async {
     FxKeyboardDismissScope.dismiss();
-    if (!_formKey.currentState!.validate()) {
+    if (_treinoCriadoId == null && !_formKey.currentState!.validate()) {
       _nomeFocusNode.requestFocus();
       final fieldContext = _nomeFieldKey.currentContext;
       if (fieldContext != null) {
@@ -74,29 +77,29 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     });
     HapticFeedback.mediumImpact();
     try {
-      final treino = await ref
-          .read(treinoRepositoryProvider)
-          .criar(
+      final repo = ref.read(treinoRepositoryProvider);
+      final treinoId =
+          _treinoCriadoId ??
+          (await repo.criar(
             _nomeCtrl.text.trim(),
             _descricaoCtrl.text.trim(),
             _objetivoCtrl.text.trim(),
             _nivel,
             offlineQueue: widget.alunoId == null,
             formNonce: _formNonce,
-          );
+          )).id;
       if (widget.alunoId != null) {
-        await ref
-            .read(treinoRepositoryProvider)
-            .atribuirAluno(treino.id, widget.alunoId!);
+        _treinoCriadoId = treinoId;
+        await repo.atribuirAluno(treinoId, widget.alunoId!);
         invalidateTreinosDoAluno(ref, widget.alunoId!);
       }
       invalidateTreinosCaches(ref);
-      ref.invalidate(treinoProvider(treino.id));
+      ref.invalidate(treinoProvider(treinoId));
       if (mounted) {
         HapticFeedback.heavyImpact();
         // pushReplacement evita pop+push (tela branca / freeze no go_router).
         context.pushReplacement(
-          '/treinos/${treino.id}/exercicios/add',
+          '/treinos/$treinoId/exercicios/add',
           extra:
               TreinoRouteExtra(
                 alunoId: widget.alunoId,
@@ -109,8 +112,12 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       if (mounted) leaveWithQueuedNotice(context, '/treinos');
     } catch (e) {
       if (mounted) {
+        final erro = friendlyError(e, fallback: 'Erro ao criar treino.');
         setState(() {
-          _error = friendlyError(e, fallback: 'Erro ao criar treino.');
+          _error =
+              _treinoCriadoId == null
+                  ? erro
+                  : S.of(context).treinoAtribuirFalhouTexto(erro);
         });
       }
     } finally {
@@ -147,7 +154,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
-    final canSubmit = _nomeCtrl.text.trim().isNotEmpty && !_loading;
+    final s = S.of(context);
+    final soAtribuir = _treinoCriadoId != null;
+    final canSubmit =
+        (soAtribuir || _nomeCtrl.text.trim().isNotEmpty) && !_loading;
     final selectedPreset = CreateTreinoLogic.matchingPresetTitle(
       _objetivoCtrl.text,
     );
@@ -199,15 +209,17 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
             button: true,
             enabled: canSubmit,
             label:
-                _loading
+                soAtribuir
+                    ? (_loading ? s.treinoAtribuindo : s.treinoTentarAtribuir)
+                    : _loading
                     ? 'Criando treino'
                     : canSubmit
                     ? 'Criar treino'
                     : 'Criar treino. Informe o nome para habilitar',
             child: FxLiquidPrimaryButton(
-              label: 'Criar',
+              label: soAtribuir ? s.treinoTentarAtribuir : 'Criar',
               loading: _loading,
-              loadingLabel: 'Criando…',
+              loadingLabel: soAtribuir ? s.treinoAtribuindo : 'Criando…',
               onPressed: canSubmit ? _submit : null,
             ),
           ),
@@ -349,7 +361,10 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                           child: FxErrorState(
                             chromeOnDark: isDark,
                             primary: primary,
-                            title: 'Não foi possível criar o treino',
+                            title:
+                                soAtribuir
+                                    ? s.treinoAtribuirFalhouTitulo
+                                    : 'Não foi possível criar o treino',
                             message: _error!,
                             onRetry: _submit,
                           ),

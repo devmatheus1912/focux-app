@@ -41,9 +41,9 @@ void main() {
     expect(screen, contains('Scrollable.ensureVisible'));
     expect(screen, isNot(contains("label: 'Modelo \${preset.title}")));
     expect(screen, isNot(contains('BouncingScrollPhysics')));
-    expect(screen, contains("label: 'Criar'"));
+    expect(screen, contains("soAtribuir ? s.treinoTentarAtribuir : 'Criar'"));
     expect(screen, contains("child: const Text('Cancelar')"));
-    expect(screen, contains("loadingLabel: 'Criando…'"));
+    expect(screen, contains("soAtribuir ? s.treinoAtribuindo : 'Criando…'"));
     expect(screen, contains('FxInsetPickerOption.list'));
     expect(screen, contains("label: 'Abrir biblioteca'"));
   });

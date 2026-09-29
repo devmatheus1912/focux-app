@@ -6,6 +6,8 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
+import 'conversation_composer_acao.dart';
 
 class ConversationAttachOption extends StatelessWidget {
   final IconData icon;
@@ -226,7 +228,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             icon: Icon(Icons.delete_outline_rounded, color: mute),
           ),
           IconButton(
-            tooltip: 'Enviar áudio',
+            tooltip: S.of(context).chatEnviarAudio,
             visualDensity: VisualDensity.compact,
             onPressed: onSend,
             icon: Icon(
@@ -291,6 +293,7 @@ class ConversationMessageComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final mute = chrome.mute;
@@ -404,74 +407,30 @@ class ConversationMessageComposer extends StatelessWidget {
                             ),
                           ),
                           if (composerHasText)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: TokensStrip.s1,
-                                bottom: TokensStrip.s1,
-                              ),
-                              child: SizedBox(
-                                width: 36,
-                                height: 36,
-                                child: Material(
-                                  color: primary,
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rButton,
-                                  ),
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: uploading ? null : onSendText,
-                                    icon: Icon(
-                                      Icons.arrow_upward_rounded,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          if (!composerHasText)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                right: TokensStrip.s1,
-                                bottom: TokensStrip.s1,
-                              ),
-                              child: SizedBox(
-                                width: 36,
-                                height: 36,
-                                child: Material(
-                                  color:
-                                      recordingAudio
-                                          ? EagleTokens.bad
-                                          : primary,
-                                  borderRadius: BorderRadius.circular(
-                                    TokensStrip.rButton,
-                                  ),
-                                  child: IconButton(
-                                    padding: EdgeInsets.zero,
-                                    tooltip:
-                                        recordingAudio
-                                            ? 'Enviar áudio'
-                                            : 'Gravar áudio',
-                                    onPressed:
-                                        uploading
-                                            ? null
-                                            : recordingAudio
-                                            ? onStopRecordingSend
-                                            : onStartRecording,
-                                    icon: Icon(
-                                      recordingAudio
-                                          ? Icons.stop_rounded
-                                          : Icons.mic_rounded,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary,
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ),
+                            ConversationComposerAcao(
+                              icon: Icons.arrow_upward_rounded,
+                              label: s.chatEnviarMensagem,
+                              color: primary,
+                              onPressed: uploading ? null : onSendText,
+                            )
+                          else
+                            ConversationComposerAcao(
+                              icon:
+                                  recordingAudio
+                                      ? Icons.stop_rounded
+                                      : Icons.mic_rounded,
+                              label:
+                                  recordingAudio
+                                      ? s.chatEnviarAudio
+                                      : s.chatGravarAudio,
+                              color:
+                                  recordingAudio ? EagleTokens.bad : primary,
+                              onPressed:
+                                  uploading
+                                      ? null
+                                      : recordingAudio
+                                      ? onStopRecordingSend
+                                      : onStartRecording,
                             ),
                         ],
                       ),
