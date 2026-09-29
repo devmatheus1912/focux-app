@@ -261,8 +261,6 @@
   "alunoFerramentaRecorrenciaDetalhe": "If your trainer turned it on",
   "alunoProntidaoTitulo": "Today's readiness",
   "alunoProntidaoSincronizar": "Sync Health to see today's readiness.",
-  "alunoProntidaoSemantics": "Today's readiness: {nivel}. {dica}",
-  "@alunoProntidaoSemantics": { "placeholders": { "nivel": { "type": "String" }, "dica": { "type": "String" } } },
   "alunoCoachTitulo": "Your Focux coach",
   "alunoCoachPosicao": "{atual} of {total}",
   "@alunoCoachPosicao": { "placeholders": { "atual": { "type": "int" }, "total": { "type": "int" } } },
