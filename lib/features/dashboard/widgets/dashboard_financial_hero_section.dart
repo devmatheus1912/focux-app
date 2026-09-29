@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../constants/dashboard_layout.dart';
@@ -95,8 +94,8 @@ class _FinanceTiles extends StatelessWidget {
       progressRaw,
       exceeded: metaSuperada,
     );
-    final recebido = formatBrlCurrency(receitaAtual, showDecimals: false);
-    final pendenteLabel = formatBrlCurrency(pendente, showDecimals: false);
+    final recebido = FxMoney.parse(receitaAtual).formatCompact();
+    final pendenteLabel = FxMoney.parse(pendente).formatCompact();
 
     return Semantics(
       label:
@@ -145,7 +144,7 @@ class _FinanceTiles extends StatelessWidget {
               label: 'Meta',
               value: metaLabel,
               hint: showTicket
-                  ? 'Ticket ${ticket.format(showDecimals: false)}'
+                  ? 'Ticket ${ticket.formatCompact()}'
                   : 'Acompanhe a meta do mês',
               color: Theme.of(context).colorScheme.primary,
               isDark: Theme.of(context).brightness == Brightness.dark,

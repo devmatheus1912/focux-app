@@ -223,7 +223,7 @@ class _FinanceiroResumoScreenState
         emphasize: true,
         padding: const EdgeInsets.all(TokensStrip.s3),
         semanticsLabel:
-            'Recebido ${r.totalRecebido.format(showDecimals: false)}, '
+            'Recebido ${r.totalRecebido.formatCompact()}, '
             '${r.inadimplentes} inadimplentes',
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,8 +242,8 @@ class _FinanceiroResumoScreenState
             const SizedBox(height: TokensStrip.s3),
             OperationalMetricTile(
               label: 'Recebido',
-              value: r.totalRecebido.format(showDecimals: false),
-              hint: 'Previsto ${r.totalPrevisto.format(showDecimals: false)}',
+              value: r.totalRecebido.formatCompact(),
+              hint: 'Previsto ${r.totalPrevisto.formatCompact()}',
               color: primary,
               isDark: isDark,
             ),
@@ -251,7 +251,7 @@ class _FinanceiroResumoScreenState
             OperationalMetricTile(
               label: 'Inadimplentes',
               value: '${r.inadimplentes}',
-              hint: 'Ticket ${r.ticketMedio.format(showDecimals: false)}',
+              hint: 'Ticket ${r.ticketMedio.formatCompact()}',
               color: r.inadimplentes > 0 ? EagleTokens.bad : primary,
               isDark: isDark,
               emphasis: r.inadimplentes > 0

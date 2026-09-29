@@ -56,38 +56,49 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     _carregar();
   }
 
-  /// [silencioso]: atualiza sem trocar a lista pelo skeleton; erro vira toast.
-  Future<void> _carregar({bool silencioso = false}) async {
-    if (!silencioso) {
-      setState(() {
-        _loading = true;
-        _erro = null;
-      });
-    }
+  Future<void> _carregar() async {
+    setState(() {
+      _loading = true;
+      _erro = null;
+    });
     try {
       final result =
           await FinanceiroRepository(
             ref.read(apiClientProvider),
           ).minhasMensalidades();
       if (!mounted) return;
-      setState(() {
-        _mensalidades = result.mensalidades;
-        _page = result.page;
-        _hasMore = result.hasMore;
-        _fetchedAt = DateTime.now();
-        _loading = false;
-        _erro = null;
-      });
+      _aplicar(result);
     } catch (e) {
       if (!mounted) return;
-      if (silencioso) {
-        FeedbackHelper.showError(context, friendlyError(e));
-        return;
-      }
       setState(() {
         _erro = friendlyError(e);
         _loading = false;
       });
+    }
+  }
+
+  void _aplicar(MensalidadesPage result) {
+    setState(() {
+      _mensalidades = result.mensalidades;
+      _page = result.page;
+      _hasMore = result.hasMore;
+      _fetchedAt = DateTime.now();
+      _loading = false;
+      _erro = null;
+    });
+  }
+
+  /// Sem skeleton e sem voltar à página 0; erro vira toast.
+  Future<void> _recarregarMantendoPaginas() async {
+    try {
+      final result = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).minhasMensalidadesAte(_page);
+      if (!mounted) return;
+      _aplicar(result);
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 
@@ -98,7 +109,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
       mensalidade: item,
       asAluno: true,
     );
-    if (interagiu && mounted) await _carregar(silencioso: true);
+    if (interagiu && mounted) await _recarregarMantendoPaginas();
   }
 
   Future<void> _carregarMais() async {
@@ -213,9 +224,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         OperationalMetricTile(
           label: 'Vence',
           value: nextValue,
-          hint: financeiroAlunoProximoVencimentoHint(
+          hint: financeiroAlunoVenceHint(
+            s,
             temAberto: _abertas.isNotEmpty,
             temData: nextValue != '—',
+            parcial: _hasMore,
           ),
           color: primary,
           isDark: isDark,

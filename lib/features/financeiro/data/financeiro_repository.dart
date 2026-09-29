@@ -441,6 +441,25 @@ class FinanceiroRepository {
     }
     return MensalidadesPage.fromJson(Map<String, dynamic>.from(data));
   }
+
+  /// Recarrega da página 0 até [ultimaPagina] (inclusive), sem repetir id —
+  /// mantém o que o aluno já tinha aberto com "Carregar mais".
+  Future<MensalidadesPage> minhasMensalidadesAte(int ultimaPagina) async {
+    final itens = <Mensalidade>[];
+    final vistos = <int>{};
+    var atual = await minhasMensalidades();
+    itens.addAll(atual.mensalidades.where((m) => vistos.add(m.id)));
+    while (atual.hasMore && atual.page < ultimaPagina) {
+      atual = await minhasMensalidades(page: atual.page + 1);
+      itens.addAll(atual.mensalidades.where((m) => vistos.add(m.id)));
+    }
+    return MensalidadesPage(
+      mensalidades: itens,
+      page: atual.page,
+      size: atual.size,
+      hasMore: atual.hasMore,
+    );
+  }
 }
 
 /// Página de `GET /api/financeiro/mensalidades` e `.../aluno/minhas`.

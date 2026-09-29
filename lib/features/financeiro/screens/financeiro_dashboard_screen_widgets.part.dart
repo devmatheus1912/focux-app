@@ -256,7 +256,7 @@ class _FinanceiroTopAlunosGroup extends StatelessWidget {
               title: visible[i].alunoNome,
               subtitle: Text('#${i + 1}'),
               trailing: Text(
-                visible[i].totalPago.format(showDecimals: false),
+                visible[i].totalPago.formatCobranca(),
                 style: FocuxHubTypography.bodyMuted(
                   color: fxScreenMute(context),
                   fontWeight: FontWeight.w700,

@@ -620,6 +620,7 @@
   "assinaturaLojaIndisponivel": "Loja indisponível no momento. Tente de novo em instantes.",
   "financeiroAlunoRecorteParcial": "Nas cobranças carregadas",
   "financeiroAlunoRecorteCompleto": "Em todas as cobranças",
+  "financeiroAlunoCobrancasVencidas": "Cobranças vencidas",
   "pixCopiarCodigo": "Copiar código PIX",
   "pixVenceEm": "Vence em {data}",
   "@pixVenceEm": { "placeholders": { "data": { "type": "String" } } },

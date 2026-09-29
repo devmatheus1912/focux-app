@@ -8,7 +8,7 @@ const qualidadeComoCalculamos =
 bool qualidadeTicketUnavailable(double ticketPessoal) => ticketPessoal <= 0;
 
 String _qualidadeMoneyLabel(double reais) =>
-    formatBrlCents((reais * 100).round(), showDecimals: false);
+    formatBrlCompact((reais * 100).round());
 
 String qualidadeTicketValueLabel(double ticketPessoal) {
   if (qualidadeTicketUnavailable(ticketPessoal)) return 'Sem ticket';

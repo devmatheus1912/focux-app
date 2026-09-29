@@ -60,6 +60,9 @@ class FxMoney implements Comparable<FxMoney> {
   /// Valor cobrado ou pago (mensalidade, PIX, total a pagar): nunca sem centavos.
   String formatCobranca() => formatBrlCents(cents);
 
+  /// KPI agregado sem centavos, arredondado — ver [formatBrlCompact].
+  String formatCompact() => formatBrlCompact(cents);
+
   double ratioOf(FxMoney other) {
     if (other.cents == 0) return 0;
     return cents / other.cents;
@@ -90,11 +93,22 @@ class FxMoney implements Comparable<FxMoney> {
   String toString() => wire;
 }
 
+/// `showDecimals: false` é o mesmo que [formatBrlCompact] (arredonda).
 String formatBrlCents(int cents, {bool showDecimals = true}) {
-  final negative = cents < 0;
+  if (!showDecimals) return formatBrlCompact(cents);
   final abs = cents.abs();
-  final reais = abs ~/ 100;
-  final frac = abs % 100;
+  final frac = (abs % 100).toString().padLeft(2, '0');
+  return _brl(negative: cents < 0, reais: abs ~/ 100, decimals: ',$frac');
+}
+
+/// KPI agregado (recebido, previsto, ticket): reais inteiros arredondados
+/// meio-para-cima. Nunca trunca — R$ 149,90 vira "R$ 150".
+String formatBrlCompact(int cents) {
+  final reais = (cents.abs() + 50) ~/ 100;
+  return _brl(negative: cents < 0 && reais > 0, reais: reais);
+}
+
+String _brl({required bool negative, required int reais, String decimals = ''}) {
   final intText = reais.toString();
   final buffer = StringBuffer();
   for (var i = 0; i < intText.length; i++) {
@@ -103,7 +117,6 @@ String formatBrlCents(int cents, {bool showDecimals = true}) {
     }
     buffer.write(intText[i]);
   }
-  final decimals = showDecimals ? ',${frac.toString().padLeft(2, '0')}' : '';
   final prefix = negative ? '-' : '';
   return '${prefix}R\$ ${buffer.toString()}$decimals';
 }

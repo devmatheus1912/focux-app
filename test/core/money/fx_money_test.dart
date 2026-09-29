@@ -23,6 +23,17 @@ void main() {
     expect(FxMoney.parse('-12,34').formatCobranca(), '-R\$ 12,34');
   });
 
+  test('formato compacto de KPI arredonda meio-para-cima, nunca trunca', () {
+    expect(formatBrlCompact(14949), 'R\$ 149');
+    expect(formatBrlCompact(14950), 'R\$ 150');
+    expect(formatBrlCompact(14990), 'R\$ 150');
+    expect(formatBrlCompact(1240000), 'R\$ 12.400');
+    expect(formatBrlCompact(-14950), '-R\$ 150');
+    expect(formatBrlCompact(-30), 'R\$ 0');
+    expect(FxMoney.parse(149.9).formatCompact(), 'R\$ 150');
+    expect(FxMoney.parse(149.9).format(showDecimals: false), 'R\$ 150');
+  });
+
   test('fromInput rejeita vazio', () {
     expect(() => FxMoney.fromInput(''), throwsFormatException);
   });

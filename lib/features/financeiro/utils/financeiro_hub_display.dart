@@ -199,8 +199,21 @@ String financeiroAlunoAtrasadasTileHint(
   if (parcial || atrasadas == 0) {
     return financeiroAlunoRecorteHint(s, parcial: parcial);
   }
-  return 'Cobranças vencidas';
+  return s.financeiroAlunoCobrancasVencidas;
 }
+
+String financeiroAlunoVenceHint(
+  S s, {
+  required bool temAberto,
+  required bool temData,
+  required bool parcial,
+}) =>
+    parcial
+        ? s.financeiroAlunoRecorteParcial
+        : financeiroAlunoProximoVencimentoHint(
+          temAberto: temAberto,
+          temData: temData,
+        );
 
 String financeiroAlunoProximoVencimentoValue(Iterable<String> isos) {
   DateTime? nearest;

@@ -85,6 +85,24 @@ void main() {
       financeiroAlunoAtrasadasTileHint(s, atrasadas: 3, parcial: false),
       'Cobranças vencidas',
     );
+    expect(
+      financeiroAlunoVenceHint(
+        s,
+        temAberto: true,
+        temData: true,
+        parcial: true,
+      ),
+      'Nas cobranças carregadas',
+    );
+    expect(
+      financeiroAlunoVenceHint(
+        s,
+        temAberto: true,
+        temData: true,
+        parcial: false,
+      ),
+      'Próximo vencimento',
+    );
   });
 
   test('financeiroAlunoHubSubtitle só conta lançamentos', () {

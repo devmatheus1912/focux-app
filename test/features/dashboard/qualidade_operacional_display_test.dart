@@ -80,4 +80,9 @@ void main() {
       'Mercado R\$ 250',
     );
   });
+
+  test('ticket compacto arredonda, não trunca', () {
+    expect(qualidadeTicketValueLabel(149.9), 'R\$ 150');
+    expect(qualidadeTicketValueLabel(149.49), 'R\$ 149');
+  });
 }
