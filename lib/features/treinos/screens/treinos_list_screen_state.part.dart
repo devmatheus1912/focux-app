@@ -264,41 +264,53 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     if (confirmed != true) return;
 
     final repository = ref.read(treinoRepositoryProvider);
-    try {
-      for (final treino in treinos) {
+    var queued = 0;
+    var failed = 0;
+    Object? failure;
+    for (final treino in treinos) {
+      try {
         if (widget.alunoId == null) {
           await repository.excluirTreino(treino.id);
         } else {
           await repository.desvincularAluno(widget.alunoId!, treino.id);
         }
+      } on OfflineQueuedException {
+        queued++;
+      } catch (e) {
+        failed++;
+        failure ??= e;
       }
-      _clearSelection();
-      if (widget.alunoId == null) {
-        invalidateTreinosCaches(ref);
-      } else {
-        invalidateTreinosDoAluno(ref, widget.alunoId!);
-      }
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(
-        context,
-        count == 1 ? 'Treino removido.' : '$count treinos removidos.',
-      );
-      AnalyticsService.instance.track(
-        ProductEvents.treinosDeleted,
-        props: {
-          ..._analyticsScope,
-          'count': count,
-          'unlink': widget.alunoId != null,
-          'source': source,
-        },
-      );
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showApiFailure(
-        context,
-        e,
-        fallback: 'Não foi possível remover o treino.',
-      );
+    }
+    _clearSelection();
+    if (widget.alunoId == null) {
+      invalidateTreinosCaches(ref);
+    } else {
+      invalidateTreinosDoAluno(ref, widget.alunoId!);
+    }
+    if (!mounted) return;
+    switch (resolveBatchMutationNotice(failed: failed, queued: queued)) {
+      case BatchMutationNotice.failure:
+        FeedbackHelper.showApiFailure(
+          context,
+          failure!,
+          fallback: 'Não foi possível remover o treino.',
+        );
+      case BatchMutationNotice.queued:
+        FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
+      case BatchMutationNotice.success:
+        FeedbackHelper.showSuccess(
+          context,
+          count == 1 ? 'Treino removido.' : '$count treinos removidos.',
+        );
+        AnalyticsService.instance.track(
+          ProductEvents.treinosDeleted,
+          props: {
+            ..._analyticsScope,
+            'count': count,
+            'unlink': widget.alunoId != null,
+            'source': source,
+          },
+        );
     }
   }
 

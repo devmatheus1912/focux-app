@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../models/curated_biblioteca.dart';
 import 'enums.dart';
@@ -571,7 +572,7 @@ class ExercicioRepository {
   }
 
   Future<void> excluir(int id) async {
-    await _dio.delete('/api/exercicios/$id');
+    throwIfQueuedOffline(await _dio.delete('/api/exercicios/$id'));
   }
 
   Future<Exercicio> criar({
@@ -635,6 +636,7 @@ class ExercicioRepository {
           'observacoes': observacoes,
       },
     );
+    throwIfQueuedOffline(response);
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -700,6 +702,7 @@ class ExercicioRepository {
           'observacoes': observacoes,
       },
     );
+    throwIfQueuedOffline(response);
     return Exercicio.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -832,10 +835,10 @@ class ExercicioRepository {
   }
 
   Future<void> favoritarExercicio(int id) async {
-    await _dio.post('/api/exercicios/$id/favoritar');
+    throwIfQueuedOffline(await _dio.post('/api/exercicios/$id/favoritar'));
   }
 
   Future<void> desfavoritarExercicio(int id) async {
-    await _dio.delete('/api/exercicios/$id/favoritar');
+    throwIfQueuedOffline(await _dio.delete('/api/exercicios/$id/favoritar'));
   }
 }

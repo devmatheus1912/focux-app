@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/utils/batch_mutation_notice.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
@@ -20,6 +22,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../l10n/app_localizations.dart';
 import '../utils/exercicios_filter_display.dart';
 import '../data/exercise_enum_api.dart';
 import '../data/exercicio_repository.dart';
@@ -183,7 +186,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
+        FeedbackHelper.showApiFailure(context, e);
       }
     }
   }
@@ -199,19 +202,38 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _refresh();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     }
   }
 
   Future<void> _favoriteBatch() async {
     final repo = ref.read(exercicioRepositoryProvider);
     final ids = _selected.toList();
+    var queued = 0;
+    var failed = 0;
     for (final id in ids) {
       final ex = _items.firstWhere((item) => item.id == id);
-      if (!ex.favoritado) await repo.favoritarExercicio(id);
+      if (ex.favoritado) continue;
+      try {
+        await repo.favoritarExercicio(id);
+      } on OfflineQueuedException {
+        queued++;
+      } catch (_) {
+        failed++;
+      }
     }
+    if (!mounted) return;
     setState(_selected.clear);
     _refresh();
+    final s = S.of(context);
+    switch (resolveBatchMutationNotice(failed: failed, queued: queued)) {
+      case BatchMutationNotice.failure:
+        FeedbackHelper.showError(context, s.exerciciosFavoritarLoteFalhou);
+      case BatchMutationNotice.queued:
+        FeedbackHelper.showWarn(context, s.acaoEnfileiradaOffline);
+      case BatchMutationNotice.success:
+        break;
+    }
   }
 
   void _selectAllVisible() {
@@ -242,12 +264,16 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final deleted = <int>[];
     final blocked = <_DeleteFailure>[];
     final selectedIds = _selected.toList();
+    var queued = 0;
 
     for (final id in selectedIds) {
       final ex = byId[id];
       try {
         await repo.excluir(id);
         deleted.add(id);
+      } on OfflineQueuedException {
+        deleted.add(id);
+        queued++;
       } catch (e) {
         blocked.add(
           _DeleteFailure(
@@ -266,14 +292,20 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (blocked.isEmpty) _selected.clear();
     });
     _refresh();
-    if (blocked.isEmpty) {
-      FeedbackHelper.showSuccess(
-        context,
-        deleted.length == 1
-            ? '1 exercicio excluido.'
-            : '${deleted.length} exercicios excluidos.',
-      );
-      return;
+    switch (resolveBatchMutationNotice(failed: blocked.length, queued: queued)) {
+      case BatchMutationNotice.success:
+        FeedbackHelper.showSuccess(
+          context,
+          deleted.length == 1
+              ? '1 exercicio excluido.'
+              : '${deleted.length} exercicios excluidos.',
+        );
+        return;
+      case BatchMutationNotice.queued:
+        FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
+        return;
+      case BatchMutationNotice.failure:
+        break;
     }
 
     await showFxNoticeSheet(
@@ -284,8 +316,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (deleted.isNotEmpty)
-            Text('${deleted.length} excluido(s) com sucesso.'),
+          if (deleted.length > queued)
+            Text('${deleted.length - queued} excluido(s) com sucesso.'),
+          if (queued > 0) Text(S.of(context).acaoEnfileiradaOffline),
           const SizedBox(height: 8),
           const Text(
             'Mantidos porque estao cadastrados para aluno ou em treino:',

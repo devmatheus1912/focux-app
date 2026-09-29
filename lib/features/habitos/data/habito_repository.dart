@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_queued_ack.dart';
+import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 
@@ -284,8 +285,12 @@ class HabitoRepository {
   }
 
   Future<({bool feito, int streak})> toggleHoje(int habitoId) async {
-    final r = await _dio.post('/api/habitos/me/$habitoId/check');
-    throwIfQueuedOffline(r);
+    // Toggle não é idempotente: replay fora de ordem inverteria o estado.
+    // Sem rede vira erro honesto em vez de fila.
+    final r = await _dio.post(
+      '/api/habitos/me/$habitoId/check',
+      options: Options(extra: {OfflineSyncService.noQueueExtra: true}),
+    );
     final data = r.data as Map<String, dynamic>;
     return (
       feito: data['feito'] as bool? ?? false,

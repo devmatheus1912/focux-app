@@ -15,7 +15,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
       ref.invalidate(exercicioProvider(widget.exercicioId));
     } catch (e) {
       if (context.mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
+        FeedbackHelper.showApiFailure(context, e);
       }
     }
   }

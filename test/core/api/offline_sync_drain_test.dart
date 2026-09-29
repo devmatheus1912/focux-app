@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -89,6 +90,77 @@ void main() {
     await OfflineSyncService.syncPendingRequests(dio);
 
     expect(await OfflineSyncService.getPendingCount(), 0);
+  });
+
+  test('logout durante 4xx não grava nem avisa descarte', () async {
+    final avisos = <List<DroppedMutation>>[];
+    OfflineSyncService.onMutationsDropped = avisos.add;
+    addTearDown(() => OfflineSyncService.onMutationsDropped = null);
+    final adapter = _Adapter(
+      statusCode: 400,
+      onFetch: (_) => OfflineSyncService.clearQueue(),
+    );
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(await OfflineSyncService.pendingDropped(), isEmpty);
+    expect(avisos, isEmpty);
+    expect(await OfflineSyncService.getPendingCount(), 0);
+  });
+
+  test('item em backoff segura o item pronto atrás dele', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        QueuedRequest(
+          path: _path,
+          method: 'POST',
+          attempts: 1,
+          nextRetryAtMillis:
+              DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch,
+        ).toJson(),
+        QueuedRequest(path: '/api/treinos/2/concluir', method: 'POST').toJson(),
+      ]),
+    });
+    final adapter = _Adapter();
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(adapter.requests, isEmpty);
+    expect(await OfflineSyncService.getPendingCount(), 2);
+  });
+
+  test('falha retentável no primeiro item não envia os seguintes', () async {
+    await _enqueue('/api/treinos/2/concluir');
+    final adapter = _Adapter(statusCode: 503);
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(adapter.requests.map((r) => r.path), [_path]);
+    expect(await OfflineSyncService.getPendingCount(), 2);
+  });
+
+  test('falha de transporte não gasta tentativa', () async {
+    final adapter = _Adapter(
+      onFetch: (options) async => throw DioException.connectionError(
+        requestOptions: options,
+        reason: 'offline',
+      ),
+    );
+    final dio = Dio()..httpClientAdapter = adapter;
+
+    for (var i = 0; i < 10; i++) {
+      await OfflineSyncService.syncPendingRequests(dio);
+    }
+
+    expect(adapter.requests, hasLength(10));
+    expect(await OfflineSyncService.getPendingCount(), 1);
+    expect(await OfflineSyncService.pendingDropped(), isEmpty);
   });
 
   test('fila avisa quando muda', () async {

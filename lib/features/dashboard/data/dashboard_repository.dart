@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_etag_store.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/providers/personal_brand_provider.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../checkin/data/checkin_repository.dart';
@@ -277,24 +278,27 @@ class DashboardRepository {
   }
 
   Future<void> completeCommandAction(String actionKey) async {
-    await _dio.post(
+    final r = await _dio.post(
       '/api/dashboard/command-center/actions/complete',
       data: {'actionKey': actionKey},
     );
+    throwIfQueuedOffline(r);
   }
 
   Future<void> reopenCommandAction(String actionKey) async {
-    await _dio.post(
+    final r = await _dio.post(
       '/api/dashboard/command-center/actions/reopen',
       data: {'actionKey': actionKey},
     );
+    throwIfQueuedOffline(r);
   }
 
   Future<void> snoozeCommandAction(String actionKey, {int hours = 24}) async {
-    await _dio.post(
+    final r = await _dio.post(
       '/api/dashboard/command-center/actions/snooze',
       data: {'actionKey': actionKey, 'hours': hours},
     );
+    throwIfQueuedOffline(r);
   }
 
   /// `null` = HTTP 304 com body no ClientCache — caller reusa cache.

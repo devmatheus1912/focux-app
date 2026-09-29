@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show AppLifecycleState;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/offline_drain_scheduler.dart';
@@ -110,5 +111,55 @@ void main() {
     await second;
     expect(queue.drains, 1);
     scheduler.dispose();
+  });
+
+  testWidgets('criado em segundo plano: fila cheia não liga timer', (
+    tester,
+  ) async {
+    final background = OfflineDrainScheduler(
+      pendingCount: queue.count,
+      drain: queue.drain,
+      interval: _interval,
+      foreground: isForegroundLifecycle(AppLifecycleState.paused),
+    );
+    addTearDown(background.dispose);
+    queue.pending = 1;
+
+    await background.onQueueChanged();
+    await tester.pump(_interval);
+
+    expect(background.hasTimer, isFalse);
+    expect(queue.drains, 0);
+  });
+
+  testWidgets('falha na drenagem não escapa e o intervalo segue', (
+    tester,
+  ) async {
+    var calls = 0;
+    final failing = OfflineDrainScheduler(
+      pendingCount: () async => 1,
+      drain: () async {
+        calls++;
+        throw StateError('falhou');
+      },
+      interval: _interval,
+    );
+    addTearDown(failing.dispose);
+
+    await failing.onResumed();
+    await tester.pump(_interval);
+
+    expect(calls, 2);
+    expect(failing.hasTimer, isTrue);
+    failing.dispose();
+  });
+
+  test('ciclo de vida: só paused/hidden/detached contam como fundo', () {
+    expect(isForegroundLifecycle(null), isTrue);
+    expect(isForegroundLifecycle(AppLifecycleState.resumed), isTrue);
+    expect(isForegroundLifecycle(AppLifecycleState.inactive), isTrue);
+    expect(isForegroundLifecycle(AppLifecycleState.paused), isFalse);
+    expect(isForegroundLifecycle(AppLifecycleState.hidden), isFalse);
+    expect(isForegroundLifecycle(AppLifecycleState.detached), isFalse);
   });
 }

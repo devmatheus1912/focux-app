@@ -240,7 +240,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     }
   }
 

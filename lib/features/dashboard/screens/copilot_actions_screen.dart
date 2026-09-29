@@ -449,9 +449,10 @@ class _CopilotActionsScreenState extends ConsumerState<CopilotActionsScreen> {
       FeedbackHelper.showInfo(context, successMessage);
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(
+      FeedbackHelper.showApiFailure(
         context,
-        friendlyError(e, fallback: 'Não foi possível atualizar a tarefa.'),
+        e,
+        fallback: 'Não foi possível atualizar a tarefa.',
       );
     }
   }

@@ -45,8 +45,11 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
     _scheduler = OfflineDrainScheduler(
       pendingCount: OfflineSyncService.getPendingCount,
       drain: _drain,
+      foreground: isForegroundLifecycle(
+        WidgetsBinding.instance.lifecycleState,
+      ),
     );
-    OfflineSyncService.onMutationDropped = _onMutationDropped;
+    OfflineSyncService.onMutationsDropped = _onMutationsDropped;
     _queueChanges = OfflineSyncService.changes.listen((_) {
       _reloadCounts();
       _scheduler.onQueueChanged();
@@ -111,7 +114,8 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
     });
   }
 
-  void _onMutationDropped(DroppedMutation _) {
+  /// Chamado uma vez por rodada da fila: vários descartes, um aviso.
+  void _onMutationsDropped(List<DroppedMutation> _) {
     if (!mounted) return;
     FeedbackHelper.showError(context, S.of(context).conexaoAlteracaoDescartada);
   }
@@ -121,8 +125,8 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (OfflineSyncService.onMutationDropped == _onMutationDropped) {
-      OfflineSyncService.onMutationDropped = null;
+    if (OfflineSyncService.onMutationsDropped == _onMutationsDropped) {
+      OfflineSyncService.onMutationsDropped = null;
     }
     _scheduler.dispose();
     _queueChanges?.cancel();
@@ -163,12 +167,18 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Text(
-                                _bannerMessage(S.of(context), kind),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
+                              // Leitor de tela anuncia a troca de estado
+                              // (offline, pendente, descarte) sem foco.
+                              child: Semantics(
+                                liveRegion: true,
+                                container: true,
+                                child: Text(
+                                  _bannerMessage(S.of(context), kind),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../../core/utils/friendly_error.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
@@ -45,7 +44,7 @@ class ExercicioCard extends ConsumerWidget {
       onFavoritoToggle();
     } catch (e) {
       if (context.mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
+        FeedbackHelper.showApiFailure(context, e);
       }
     }
   }

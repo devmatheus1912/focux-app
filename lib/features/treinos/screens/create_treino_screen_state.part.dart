@@ -100,6 +100,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                   : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
         );
       }
+    } on OfflineQueuedException {
+      if (mounted) leaveWithQueuedNotice(context, '/treinos');
     } catch (e) {
       if (mounted) {
         setState(() {

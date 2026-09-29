@@ -20,11 +20,11 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/queued_offline_exit.dart';
 import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
-import '../../../l10n/app_localizations.dart';
 import '../providers/agenda_provider.dart';
 import '../utils/agenda_schedule.dart';
 import '../widgets/agenda_form_sheets.dart';
@@ -176,11 +176,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
       AnalyticsService.instance.track(ProductEvents.agendaCreated);
       if (mounted) safePopOrGo(context, '/agenda');
     } on OfflineQueuedException {
-      // Já está na fila: ficar no form convidaria a um segundo envio.
-      if (mounted) {
-        FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
-        safePopOrGo(context, '/agenda');
-      }
+      if (mounted) leaveWithQueuedNotice(context, '/agenda');
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(

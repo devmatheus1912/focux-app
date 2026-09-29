@@ -399,34 +399,37 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Treino> substituirExercicio(
+  /// Inclui antes de remover: falha real no meio mantém o antigo em vez de
+  /// deixar o treino sem nenhum. Na fila, as duas seguem juntas e em ordem.
+  Future<void> substituirExercicio(
     int treinoId,
     TreinoExercicioItem item,
     int novoExercicioId,
   ) async {
-    // Remoção na fila não pode deixar o treino sem o substituto: a inclusão
-    // segue (e vai para a fila junto) e o chamador fica sabendo do pendente.
-    var removalQueued = false;
+    var queued = false;
+    try {
+      await adicionarExercicio(
+        treinoId,
+        novoExercicioId,
+        series: item.series,
+        repeticoes: item.repeticoes,
+        descanso: item.descansoSegundos ?? 60,
+        cargaKg: item.cargaKg,
+        rpeAlvo: item.rpeAlvo,
+        observacoes: item.observacoes,
+        tipoSerie: item.tipoSerie,
+        grupoSuperset: item.grupoSuperset,
+        ordem: item.ordem,
+      );
+    } on OfflineQueuedException {
+      queued = true;
+    }
     try {
       await removerExercicio(treinoId, item.id);
     } on OfflineQueuedException {
-      removalQueued = true;
+      queued = true;
     }
-    final treino = await adicionarExercicio(
-      treinoId,
-      novoExercicioId,
-      series: item.series,
-      repeticoes: item.repeticoes,
-      descanso: item.descansoSegundos ?? 60,
-      cargaKg: item.cargaKg,
-      rpeAlvo: item.rpeAlvo,
-      observacoes: item.observacoes,
-      tipoSerie: item.tipoSerie,
-      grupoSuperset: item.grupoSuperset,
-      ordem: item.ordem,
-    );
-    if (removalQueued) throw const OfflineQueuedException();
-    return treino;
+    if (queued) throw const OfflineQueuedException();
   }
 
   Future<void> atribuirAluno(

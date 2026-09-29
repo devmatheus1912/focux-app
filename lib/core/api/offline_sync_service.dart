@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'transient_error.dart';
+
 /// Modelo de uma request mutativa enfileirada para retry quando o app
 /// estiver offline. Carrega contagem de tentativas e {@code nextRetryAt}
 /// para implementar backoff exponencial sem ressubmeter em loop apertado.
@@ -121,10 +123,10 @@ class OfflineSyncService {
   /// em voo — a tentativa seguinte recebe o replay da resposta original.
   static const _retryableClientStatuses = {408, 409, 425, 429};
 
-  /// Notificada quando uma mutação é descartada em definitivo. A UI liga aqui
-  /// para avisar o usuário; sem ouvinte, o descarte fica só no registro
-  /// persistido de [pendingDropped].
-  static void Function(DroppedMutation)? onMutationDropped;
+  /// Notificada uma vez por rodada com as mutações descartadas em definitivo.
+  /// A UI liga aqui para avisar o usuário; sem ouvinte, o descarte fica só no
+  /// registro persistido de [pendingDropped].
+  static void Function(List<DroppedMutation>)? onMutationsDropped;
 
   /// `extra` que impede o [ApiClient] de enfileirar a requisição. O replay da
   /// fila usa isto: falha de rede no replay fica com o backoff do item, em vez
@@ -226,9 +228,10 @@ class OfflineSyncService {
 
   /// Try to sync all pending requests using the provided Dio instance.
   ///
-  /// Aplica backoff exponencial: requests que falharam recentemente são
-  /// puladas até `nextRetryAtMillis`. Após `_maxAttempts` falhas a request
-  /// é descartada para não bloquear a fila eternamente.
+  /// Aplica backoff exponencial em ordem FIFO: a rodada para no primeiro item
+  /// ainda em `nextRetryAtMillis` ou que falhou de forma retentável. Após
+  /// `_maxAttempts` respostas de erro a request é descartada para não
+  /// bloquear a fila eternamente; falha de transporte não conta tentativa.
   ///
   /// Falha permanente (4xx que não seja [_retryableClientStatuses]) sai na
   /// primeira tentativa, sem gastar o backoff. Todo descarte, por limite de
@@ -253,43 +256,35 @@ class OfflineSyncService {
 
     final generation = _generation;
     final List<dynamic> remainingList = [];
+    final List<DroppedMutation> dropped = [];
 
-    for (final item in queueList) {
-      final req = QueuedRequest.fromJson(item as Map<String, dynamic>);
-      if (!req.isReadyToRetry) {
-        remainingList.add(req.toJson());
-        continue;
-      }
-      try {
-        await dio.request(
-          req.path,
-          data: req.data,
-          queryParameters: req.queryParameters,
-          options: Options(
-            method: req.method,
-            headers: {
-              if (req.idempotencyKey != null)
-                'Idempotency-Key': req.idempotencyKey,
-            },
-            // A fila tem backoff próprio; retry do cliente só atrasa a rodada.
-            extra: {noQueueExtra: true, 'fxNoRetry': true},
-          ),
-        );
-      } catch (error) {
-        // Erro que nunca vai passar (validação, gate de plano, recurso que
-        // sumiu) não ganha nova tentativa: reenviar 8 vezes só atrasa o
-        // aviso ao usuário, que já recebeu `202 queued` como se tivesse dado
-        // certo.
-        final permanent = !_isRetryable(error);
-        if (permanent || req.attempts + 1 >= _maxAttempts) {
-          await _recordDropped(req, error);
-          continue;
-        }
+    // FIFO: item em backoff ou falha que ainda vale retentar segura os
+    // seguintes — uma edição não pode chegar antes da criação que a precede.
+    var index = 0;
+    for (; index < queueList.length; index++) {
+      if (generation != _generation) return;
+      final req = QueuedRequest.fromJson(
+        queueList[index] as Map<String, dynamic>,
+      );
+      if (!req.isReadyToRetry) break;
+      final error = await _replay(dio, req);
+      if (generation != _generation) return;
+      if (error == null) continue;
+      // Sem resposta do servidor não diz nada sobre a mutação: não gasta
+      // tentativa, senão uma rede ruim descartaria ação válida.
+      if (isConnectionError(error)) break;
+      // Erro que nunca vai passar (validação, gate de plano, recurso que
+      // sumiu) não ganha nova tentativa: reenviar 8 vezes só atrasa o aviso
+      // ao usuário, que já recebeu `202 queued` como se tivesse dado certo.
+      if (_isRetryable(error) && req.attempts + 1 < _maxAttempts) {
         remainingList.add(req.withRetry().toJson());
+        index++;
+        break;
       }
+      dropped.add(_droppedFrom(req, error));
     }
+    remainingList.addAll(queueList.skip(index));
 
-    if (generation != _generation) return;
     // Enquanto a rodada rodava, novas ações só podem ter sido anexadas ao fim.
     final latestStr = prefs.getString(_queueKey);
     final latest =
@@ -304,7 +299,30 @@ class OfflineSyncService {
     } else {
       await prefs.setString(_queueKey, jsonEncode(merged));
     }
+    if (dropped.isNotEmpty) await _recordDropped(dropped, generation);
     _notifyChanged();
+  }
+
+  static Future<Object?> _replay(Dio dio, QueuedRequest req) async {
+    try {
+      await dio.request(
+        req.path,
+        data: req.data,
+        queryParameters: req.queryParameters,
+        options: Options(
+          method: req.method,
+          headers: {
+            if (req.idempotencyKey != null)
+              'Idempotency-Key': req.idempotencyKey,
+          },
+          // A fila tem backoff próprio; retry do cliente só atrasa a rodada.
+          extra: {noQueueExtra: true, 'fxNoRetry': true},
+        ),
+      );
+      return null;
+    } catch (error) {
+      return error;
+    }
   }
 
   /// Na dúvida, retenta: só descarta o que dá para provar que é permanente.
@@ -317,18 +335,27 @@ class OfflineSyncService {
     return true;
   }
 
-  static Future<void> _recordDropped(QueuedRequest req, Object error) async {
-    final dropped = DroppedMutation(
-      path: req.path,
-      method: req.method,
-      statusCode: error is DioException ? error.response?.statusCode : null,
-      droppedAtMillis: DateTime.now().millisecondsSinceEpoch,
-    );
+  static DroppedMutation _droppedFrom(QueuedRequest req, Object error) =>
+      DroppedMutation(
+        path: req.path,
+        method: req.method,
+        statusCode: error is DioException ? error.response?.statusCode : null,
+        droppedAtMillis: DateTime.now().millisecondsSinceEpoch,
+      );
+
+  /// Grava os descartes da rodada e avisa uma vez. Rodada de antes de um
+  /// [clearQueue] (logout) não grava nem avisa: as mutações eram de outro
+  /// usuário.
+  static Future<void> _recordDropped(
+    List<DroppedMutation> dropped,
+    int generation,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (generation != _generation) return;
       final raw = prefs.getString(_droppedKey);
       final list = raw != null ? (jsonDecode(raw) as List<dynamic>) : <dynamic>[];
-      list.add(dropped.toJson());
+      list.addAll(dropped.map((d) => d.toJson()));
       // Mantém só as últimas: o registro serve para avisar, não para auditar.
       final trimmed =
           list.length > _maxDropped
@@ -338,8 +365,9 @@ class OfflineSyncService {
     } catch (_) {
       // Perder o registro não pode impedir a fila de seguir drenando.
     }
+    if (generation != _generation) return;
     try {
-      onMutationDropped?.call(dropped);
+      onMutationsDropped?.call(dropped);
     } catch (_) {}
   }
 

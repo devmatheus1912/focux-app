@@ -238,6 +238,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       }
       ref.invalidate(exerciciosFilteredProvider);
       if (mounted) context.pop(true);
+    } on OfflineQueuedException {
+      if (mounted) leaveWithQueuedNotice(context, '/exercicios');
     } catch (e) {
       if (mounted) {
         final l10n = S.of(context);

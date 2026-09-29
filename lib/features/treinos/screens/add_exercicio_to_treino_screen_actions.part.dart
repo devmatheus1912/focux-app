@@ -249,6 +249,10 @@ extension _AddExercicioToTreinoScreenActions
           '${exercicio.nomeDisplay} adicionado.',
         );
       }
+    } on OfflineQueuedException {
+      if (mounted) {
+        leaveWithQueuedNotice(context, '/treinos/${widget.treinoId}');
+      }
     } catch (e) {
       if (mounted) {
         HapticFeedback.lightImpact();

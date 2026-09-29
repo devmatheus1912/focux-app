@@ -48,7 +48,7 @@ Future<Dio> _seedQueue(int statusCode, {required _StubAdapter adapter}) async {
 }
 
 void main() {
-  tearDown(() => OfflineSyncService.onMutationDropped = null);
+  tearDown(() => OfflineSyncService.onMutationsDropped = null);
 
   test('4xx permanente sai da fila na primeira tentativa', () async {
     final adapter = _StubAdapter(422);
@@ -114,13 +114,29 @@ void main() {
     final adapter = _StubAdapter(400);
     final dio = await _seedQueue(400, adapter: adapter);
 
-    final avisos = <DroppedMutation>[];
-    OfflineSyncService.onMutationDropped = avisos.add;
+    final avisos = <List<DroppedMutation>>[];
+    OfflineSyncService.onMutationsDropped = avisos.add;
 
     await OfflineSyncService.syncPendingRequests(dio);
 
     expect(avisos, hasLength(1));
-    expect(avisos.single.statusCode, 400);
+    expect(avisos.single.single.statusCode, 400);
+  });
+
+  test('vários descartes na mesma rodada viram um aviso só', () async {
+    final adapter = _StubAdapter(422);
+    final dio = await _seedQueue(422, adapter: adapter);
+    await OfflineSyncService.enqueueRequest(
+      RequestOptions(path: '$_path/2', method: 'POST'),
+    );
+
+    final avisos = <List<DroppedMutation>>[];
+    OfflineSyncService.onMutationsDropped = avisos.add;
+
+    await OfflineSyncService.syncPendingRequests(dio);
+
+    expect(avisos, hasLength(1));
+    expect(avisos.single, hasLength(2));
   });
 
   test('invalidacao de sessao leva o registro de descartes', () async {
