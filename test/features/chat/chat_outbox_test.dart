@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/chat/data/chat_repository.dart';
 import 'package:focux_app/features/chat/utils/chat_outbox.dart';
@@ -119,8 +122,142 @@ void main() {
       );
 
       expect(merged, [confirmada]);
-      expect(chatClientIdConfirmed(merged, 'c1'), isTrue);
-      expect(chatClientIdConfirmed([_msg(clientId: 'c1')], 'c1'), isFalse);
     });
+  });
+
+  group('confirmação tardia', () {
+    test('eco do servidor depois da falha encerra a bolha: mesmo texto vira '
+        'mensagem nova', () async {
+      final outbox = ChatOutbox();
+      outbox.track('c1', () async => throw Exception('rede'));
+      await expectLater(outbox.dispatch('c1'), throwsException);
+      final eco = _msg(id: 5);
+
+      outbox.forgetConfirmed(eco);
+
+      expect(outbox.phaseOf('c1'), ChatSendPhase.gone);
+      expect(outbox.failedWithText([eco], 'Bora treinar?'), isNull);
+    });
+
+    test('bolha já com id nunca é tratada como não enviada', () async {
+      final outbox = ChatOutbox();
+      outbox.track('c1', () async => throw Exception('rede'));
+      await expectLater(outbox.dispatch('c1'), throwsException);
+
+      expect(outbox.failedWithText([_msg(id: 5)], 'Bora treinar?'), isNull);
+    });
+
+    test('WebSocket confirma antes do erro do POST: sem "Não enviada"', () async {
+      final outbox = ChatOutbox();
+      final resposta = Completer<ChatMsg>();
+      outbox.track('c1', () => resposta.future);
+      final envio = outbox.dispatch('c1');
+
+      outbox.forgetConfirmed(_msg(id: 5));
+      resposta.completeError(Exception('timeout'));
+
+      await expectLater(envio, throwsException);
+      expect(outbox.isFailed('c1'), isFalse);
+      expect(outbox.phaseOf('c1'), ChatSendPhase.gone);
+    });
+
+    test('mensagem sem id do servidor não encerra o envio', () {
+      final outbox = ChatOutbox();
+      outbox.track('c1', () async => _msg(id: 1));
+
+      outbox.forgetConfirmed(_msg());
+
+      expect(outbox.phaseOf('c1'), ChatSendPhase.sending);
+    });
+  });
+
+  group('409 da idempotência', () {
+    DioException conflito() => DioException(
+      requestOptions: RequestOptions(path: '/api/chat/aluno/enviar'),
+      response: Response(
+        requestOptions: RequestOptions(path: '/api/chat/aluno/enviar'),
+        statusCode: 409,
+      ),
+    );
+
+    test('primeira tentativa em processamento segue "Enviando…"', () async {
+      final outbox = ChatOutbox();
+      final optimistic = _msg();
+      outbox.track('c1', () async => throw conflito());
+
+      await expectLater(outbox.dispatch('c1'), throwsA(isA<DioException>()));
+
+      expect(isChatSendInFlight(conflito()), isTrue);
+      expect(outbox.phaseOf('c1'), ChatSendPhase.sending);
+      expect(outbox.statusOf(optimistic), ChatOutgoingStatus.sending);
+    });
+
+    test('409 que não resolve vira "Não enviada" depois do limite', () async {
+      final outbox = ChatOutbox();
+      outbox.track('c1', () async => throw conflito());
+
+      for (var i = 0; i < chatMaxInFlightChecks; i++) {
+        await expectLater(outbox.dispatch('c1'), throwsA(isA<DioException>()));
+        expect(outbox.phaseOf('c1'), ChatSendPhase.sending);
+      }
+      await expectLater(outbox.dispatch('c1'), throwsA(isA<DioException>()));
+
+      expect(outbox.phaseOf('c1'), ChatSendPhase.failed);
+    });
+
+    test('outros erros HTTP não contam como em andamento', () {
+      final erro = DioException(
+        requestOptions: RequestOptions(path: '/x'),
+        response: Response(requestOptions: RequestOptions(path: '/x'), statusCode: 503),
+      );
+      expect(isChatSendInFlight(erro), isFalse);
+      expect(isChatSendInFlight(Exception('rede')), isFalse);
+    });
+  });
+
+  test('anexo: reenvio reaproveita a URL do upload e só repete o POST', () async {
+    var uploads = 0;
+    final urls = <String>[];
+    var falhar = true;
+    final outbox = ChatOutbox();
+    outbox.track(
+      'c1',
+      chatMediaSendOperation(
+        upload: () async {
+          uploads++;
+          return 'https://cdn.example.test/chat/foto.jpg';
+        },
+        send: (url) async {
+          urls.add(url);
+          if (falhar) throw Exception('rede');
+          return _msg(id: 3);
+        },
+      ),
+    );
+
+    await expectLater(outbox.dispatch('c1'), throwsException);
+    falhar = false;
+    await outbox.dispatch('c1');
+
+    expect(uploads, 1);
+    expect(urls, hasLength(2));
+    expect(urls.toSet(), {'https://cdn.example.test/chat/foto.jpg'});
+  });
+
+  test('responder exige mensagem salva e não apagada', () {
+    expect(chatCanReplyTo(_msg()), isFalse);
+    expect(chatCanReplyTo(_msg(id: 1)), isTrue);
+    expect(
+      chatCanReplyTo(
+        ChatMsg(
+          id: 1,
+          remetente: 'ALUNO',
+          conteudo: '',
+          enviadoEm: DateTime(2026, 9, 28),
+          deletedAt: DateTime(2026, 9, 28),
+        ),
+      ),
+      isFalse,
+    );
   });
 }

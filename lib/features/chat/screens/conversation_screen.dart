@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show File;
 import '../../../core/utils/friendly_error.dart';
 
 import 'package:flutter/foundation.dart';
@@ -205,6 +206,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         }
       }
       if (!mounted) return;
+      msgs.forEach(_outbox.forgetConfirmed);
       final merged = keepUnsentOutgoing(server: msgs, local: _msgs);
       setState(() {
         _msgs
@@ -557,7 +559,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                             : ConversationSwipeReplyWrapper(
                                               alignRight: _isMine(msg),
                                               accentColor: primary,
-                                              onReply: () => _setReply(msg),
+                                              onReply:
+                                                  chatCanReplyTo(msg)
+                                                      ? () => _setReply(msg)
+                                                      : null,
                                               child: ConversationBubble(
                                                 msg: msg,
                                                 mine: _isMine(msg),
@@ -584,7 +589,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                 outgoingStatus: _outbox
                                                     .statusOf(msg),
                                                 onRetrySend:
-                                                    () => _retryOutgoing(msg),
+                                                    _canRetryOutgoing(msg)
+                                                        ? () =>
+                                                            _retryOutgoing(msg)
+                                                        : null,
                                                 onDiscardSend:
                                                     () => _discardOutgoing(msg),
                                               ),

@@ -34,21 +34,19 @@ class ConversationDeliveryStatus extends StatelessWidget {
     if (status != ChatOutgoingStatus.failed) {
       return Text(label, style: FocuxHubTypography.chip(color));
     }
+    final bad =
+        ShellChrome.of(context).isDark ? EagleTokens.badDark : EagleTokens.bad;
     return Semantics(
       liveRegion: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            size: 12,
-            color: EagleTokens.bad,
-          ),
+          Icon(Icons.error_outline_rounded, size: 12, color: bad),
           const SizedBox(width: 3),
           Text(
             label,
             style: FocuxHubTypography.chip(
-              EagleTokens.bad,
+              bad,
             ).copyWith(fontWeight: FontWeight.w700),
           ),
         ],
@@ -58,9 +56,10 @@ class ConversationDeliveryStatus extends StatelessWidget {
 }
 
 /// Ações da bolha que não chegou ao servidor: reenviar ou tirar da conversa.
+/// Sem [onRetry] (outro anexo subindo), o reenvio aparece desabilitado.
 class ConversationSendFailedActions extends StatelessWidget {
   final Color accentColor;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
   final VoidCallback onDiscard;
 
   const ConversationSendFailedActions({
@@ -74,10 +73,10 @@ class ConversationSendFailedActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
+    final canRetry = onRetry != null;
     final style = TextButton.styleFrom(
-      minimumSize: const Size(44, 44),
+      minimumSize: const Size(48, 48),
       padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -85,14 +84,21 @@ class ConversationSendFailedActions extends StatelessWidget {
         TextButton.icon(
           onPressed: onRetry,
           style: style,
-          icon: Icon(Icons.refresh_rounded, size: 16, color: accentColor),
-          label: Text(s.retry, style: FocuxHubTypography.chip(accentColor)),
+          icon: Icon(
+            Icons.refresh_rounded,
+            size: 16,
+            color: canRetry ? accentColor : chrome.mute,
+          ),
+          label: Text(
+            s.retry,
+            style: FocuxHubTypography.chip(canRetry ? chrome.ink : chrome.mute),
+          ),
         ),
         TextButton(
           onPressed: onDiscard,
           style: style,
           child: Text(
-            s.chatApagarNaoEnviada,
+            s.chatDescartarNaoEnviada,
             style: FocuxHubTypography.chip(chrome.mute),
           ),
         ),

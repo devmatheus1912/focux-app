@@ -98,6 +98,7 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
   }
 
   void _upsertMessage(ChatMsg msg) {
+    _outbox.forgetConfirmed(msg);
     final byId = msg.id != null ? _msgs.indexWhere((m) => m.id == msg.id) : -1;
     if (byId >= 0) {
       _msgs[byId] = msg;

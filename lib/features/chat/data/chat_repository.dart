@@ -242,19 +242,12 @@ class ChatRepository {
     String remetente, {
     int? replyToMessageId,
     String? clientMessageId,
-  }) async {
-    final r = await _dio.post(
-      '/api/chat/enviar',
-      data: {
-        'alunoId': alunoId,
-        'conteudo': conteudo,
-        'remetente': remetente,
-        'clientMessageId': clientMessageId ?? _clientMessageId(),
-        if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
-      },
-    );
-    return ChatMsg.fromJson(r.data);
-  }
+  }) => _postMensagem(
+    '/api/chat/enviar',
+    {'alunoId': alunoId, 'conteudo': conteudo, 'remetente': remetente},
+    replyToMessageId: replyToMessageId,
+    clientMessageId: clientMessageId,
+  );
 
   Future<ChatPage> historicoAlunoPage({int? beforeId, int limit = 30}) async {
     final r = await _dio.get(
@@ -295,17 +288,12 @@ class ChatRepository {
     String conteudo, {
     int? replyToMessageId,
     String? clientMessageId,
-  }) async {
-    final r = await _dio.post(
-      '/api/chat/aluno/enviar',
-      data: {
-        'conteudo': conteudo,
-        'clientMessageId': clientMessageId ?? _clientMessageId(),
-        if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
-      },
-    );
-    return ChatMsg.fromJson(r.data);
-  }
+  }) => _postMensagem(
+    '/api/chat/aluno/enviar',
+    {'conteudo': conteudo},
+    replyToMessageId: replyToMessageId,
+    clientMessageId: clientMessageId,
+  );
 
   Future<ChatMsg> enviarMidiaComoAluno({
     required String conteudo,
@@ -313,19 +301,12 @@ class ChatRepository {
     required String midiaUrl,
     int? replyToMessageId,
     String? clientMessageId,
-  }) async {
-    final r = await _dio.post(
-      '/api/chat/aluno/enviar',
-      data: {
-        'conteudo': conteudo,
-        'tipoMidia': tipoMidia,
-        'midiaUrl': midiaUrl,
-        'clientMessageId': clientMessageId ?? _clientMessageId(),
-        if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
-      },
-    );
-    return ChatMsg.fromJson(r.data);
-  }
+  }) => _postMensagem(
+    '/api/chat/aluno/enviar',
+    {'conteudo': conteudo, 'tipoMidia': tipoMidia, 'midiaUrl': midiaUrl},
+    replyToMessageId: replyToMessageId,
+    clientMessageId: clientMessageId,
+  );
 
   Future<ChatMsg> enviarMidia({
     required int alunoId,
@@ -335,18 +316,37 @@ class ChatRepository {
     required String midiaUrl,
     int? replyToMessageId,
     String? clientMessageId,
+  }) => _postMensagem(
+    '/api/chat/enviar',
+    {
+      'alunoId': alunoId,
+      'conteudo': conteudo,
+      'remetente': remetente,
+      'tipoMidia': tipoMidia,
+      'midiaUrl': midiaUrl,
+    },
+    replyToMessageId: replyToMessageId,
+    clientMessageId: clientMessageId,
+  );
+
+  /// Reenvio com o mesmo `clientMessageId` reusa a `Idempotency-Key`: o
+  /// servidor responde `409` enquanto a primeira tentativa processa e repete
+  /// a resposta original depois.
+  Future<ChatMsg> _postMensagem(
+    String path,
+    Map<String, dynamic> body, {
+    int? replyToMessageId,
+    String? clientMessageId,
   }) async {
+    final clientId = clientMessageId ?? _clientMessageId();
     final r = await _dio.post(
-      '/api/chat/enviar',
+      path,
       data: {
-        'alunoId': alunoId,
-        'conteudo': conteudo,
-        'remetente': remetente,
-        'tipoMidia': tipoMidia,
-        'midiaUrl': midiaUrl,
-        'clientMessageId': clientMessageId ?? _clientMessageId(),
+        ...body,
+        'clientMessageId': clientId,
         if (replyToMessageId != null) 'replyToMessageId': replyToMessageId,
       },
+      options: ApiClient.idempotent('chat:$clientId'),
     );
     return ChatMsg.fromJson(r.data);
   }

@@ -174,7 +174,7 @@ class ConversationSwipeReplyWrapper extends StatefulWidget {
   final Widget child;
   final bool alignRight;
   final Color accentColor;
-  final VoidCallback onReply;
+  final VoidCallback? onReply;
 
   const ConversationSwipeReplyWrapper({
     super.key,
@@ -203,7 +203,7 @@ class _ConversationSwipeReplyWrapperState
     if (!_triggered && next.abs() >= 34) {
       _triggered = true;
       HapticFeedback.lightImpact();
-      widget.onReply();
+      widget.onReply?.call();
     }
     setState(() => _offset = next);
   }
@@ -241,7 +241,8 @@ class _ConversationSwipeReplyWrapperState
             offset: Offset(_offset, 0),
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onHorizontalDragUpdate: _handleUpdate,
+              onHorizontalDragUpdate:
+                  widget.onReply == null ? null : _handleUpdate,
               onHorizontalDragEnd: (_) => _reset(),
               onHorizontalDragCancel: _reset,
               child: widget.child,
@@ -486,12 +487,10 @@ class ConversationBubble extends StatelessWidget {
                   ],
                 ),
               ],
-              if (sendFailed &&
-                  onRetrySend != null &&
-                  onDiscardSend != null)
+              if (sendFailed && onDiscardSend != null)
                 ConversationSendFailedActions(
                   accentColor: accentColor,
-                  onRetry: onRetrySend!,
+                  onRetry: onRetrySend,
                   onDiscard: onDiscardSend!,
                 ),
             ],

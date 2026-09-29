@@ -9,6 +9,7 @@ import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/chat/screens/conversation_screen.dart';
+import 'package:focux_app/features/chat/widgets/conversation_outgoing_status.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,9 @@ const _texto = 'Posso trocar o treino de amanhã?';
 
 class _ChatAdapter implements HttpClientAdapter {
   int falhasRestantes = 0;
+  int conflitosRestantes = 0;
   final List<Map<String, dynamic>> envios = [];
+  final List<Object?> escopos = [];
 
   @override
   Future<ResponseBody> fetch(
@@ -33,6 +36,11 @@ class _ChatAdapter implements HttpClientAdapter {
     if (options.method == 'POST' && options.path == _enviar) {
       final body = Map<String, dynamic>.from(options.data as Map);
       envios.add(body);
+      escopos.add(options.extra['fxIdempotencyScope']);
+      if (conflitosRestantes > 0) {
+        conflitosRestantes--;
+        return _json({'error': 'Requisicao em processamento.'}, 409);
+      }
       if (falhasRestantes > 0) {
         falhasRestantes--;
         return _json({'erro': 'Serviço fora do ar'}, 503);
@@ -161,13 +169,41 @@ void main() {
       await _settle(tester);
 
       expect(adapter.envios, hasLength(2));
+      final clientId = adapter.envios.first['clientMessageId'];
+      expect(adapter.envios.last['clientMessageId'], clientId);
+      expect(adapter.escopos, ['chat:$clientId', 'chat:$clientId']);
+      expect(find.text(_texto), findsOneWidget);
+      expect(find.text('Não enviada'), findsNothing);
+      expect(find.text('Enviado'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+    },
+  );
+
+  testWidgets(
+    '409 da primeira tentativa em processamento segue "Enviando…" e confirma',
+    (tester) async {
+      telaAlta(tester);
+      pluginsMudos(tester);
+      final adapter = _ChatAdapter()..conflitosRestantes = 1;
+      await tester.pumpWidget(_app(adapter));
+      await _settle(tester);
+
+      await _enviarTexto(tester);
+
+      expect(find.text('Enviando…'), findsOneWidget);
+      expect(find.text('Não enviada'), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+
+      await tester.pump(const Duration(seconds: 2));
+      await _settle(tester);
+
+      expect(adapter.envios, hasLength(2));
       expect(
         adapter.envios.last['clientMessageId'],
         adapter.envios.first['clientMessageId'],
       );
-      expect(find.text(_texto), findsOneWidget);
-      expect(find.text('Não enviada'), findsNothing);
       expect(find.text('Enviado'), findsOneWidget);
+      expect(find.text('Não enviada'), findsNothing);
       await tester.pump(const Duration(seconds: 5));
     },
   );
@@ -197,7 +233,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
-  testWidgets('Apagar tira só a bolha local, sem chamar o servidor', (
+  testWidgets('Descartar tira só a bolha local, sem chamar o servidor', (
     tester,
   ) async {
     telaAlta(tester);
@@ -207,13 +243,46 @@ void main() {
     await _settle(tester);
 
     await _enviarTexto(tester);
-    await tester.tap(find.text('Apagar'));
+    await tester.tap(find.text('Descartar'));
     await _settle(tester);
 
     expect(find.text(_texto), findsNothing);
     expect(find.text('Não enviada'), findsNothing);
     expect(adapter.envios, hasLength(1));
     await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('reenvio sem ação (outro anexo subindo) aparece desabilitado', (
+    tester,
+  ) async {
+    var descartou = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
+        home: Scaffold(
+          body: ConversationSendFailedActions(
+            accentColor: EagleTokens.brandAccent,
+            onRetry: null,
+            onDiscard: () => descartou = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final botoes = find.byWidgetPredicate((w) => w is TextButton);
+    expect(botoes, findsNWidgets(2));
+    final reenviar = tester.widget<TextButton>(botoes.first);
+    expect(reenviar.onPressed, isNull);
+    for (final e in botoes.evaluate()) {
+      final size = tester.getSize(find.byWidget(e.widget));
+      expect(size.height, greaterThanOrEqualTo(48));
+      expect(size.width, greaterThanOrEqualTo(48));
+    }
+    await tester.tap(find.text('Descartar'));
+    expect(descartou, isTrue);
   });
 
   testWidgets('envio com sucesso não mostra estado de falha', (tester) async {

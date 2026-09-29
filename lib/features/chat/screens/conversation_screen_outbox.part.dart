@@ -2,7 +2,7 @@ part of 'conversation_screen.dart';
 
 extension ConversationScreenOutbox on _ConversationScreenState {
   /// Mostra a bolha otimista e envia. Se falhar, a bolha fica como
-  /// "Não enviada" com o conteúdo intacto para reenviar ou apagar.
+  /// "Não enviada" com o conteúdo intacto para reenviar ou descartar.
   Future<void> _sendOutgoing(
     ChatMsg optimistic,
     ChatSendOperation send, {
@@ -18,13 +18,50 @@ extension ConversationScreenOutbox on _ConversationScreenState {
     await _dispatchOutgoing(clientId, media: media);
   }
 
+  Future<void> _sendMediaOutgoing(
+    ChatMsg optimistic,
+    Future<String> Function() upload,
+  ) {
+    final repo = ChatRepository(ref.read(apiClientProvider));
+    final alunoId = optimistic.alunoId;
+    return _sendOutgoing(
+      optimistic,
+      media: true,
+      chatMediaSendOperation(
+        upload: upload,
+        send:
+            (url) =>
+                _isAlunoMode
+                    ? repo.enviarMidiaComoAluno(
+                      conteudo: optimistic.conteudo,
+                      tipoMidia: optimistic.tipoMidia!,
+                      midiaUrl: url,
+                      replyToMessageId: optimistic.replyToMessageId,
+                      clientMessageId: optimistic.clientMessageId,
+                    )
+                    : repo.enviarMidia(
+                      alunoId: alunoId!,
+                      conteudo: optimistic.conteudo,
+                      remetente: 'PERSONAL',
+                      tipoMidia: optimistic.tipoMidia!,
+                      midiaUrl: url,
+                      replyToMessageId: optimistic.replyToMessageId,
+                      clientMessageId: optimistic.clientMessageId,
+                    ),
+      ),
+    );
+  }
+
+  /// Um anexo por vez: reenviar mídia espera o upload em curso terminar.
+  bool _canRetryOutgoing(ChatMsg msg) =>
+      !(_uploading && isChatMediaMessage(msg));
+
   Future<void> _retryOutgoing(ChatMsg msg) async {
     final clientId = msg.clientMessageId;
     if (clientId == null || !_outbox.isFailed(clientId)) return;
-    final media = msg.tipoMidia != 'TEXTO';
-    if (media && _uploading) return;
+    if (!_canRetryOutgoing(msg)) return;
     HapticFeedback.selectionClick();
-    await _dispatchOutgoing(clientId, media: media);
+    await _dispatchOutgoing(clientId, media: isChatMediaMessage(msg));
   }
 
   void _discardOutgoing(ChatMsg msg) {
@@ -51,18 +88,34 @@ extension ConversationScreenOutbox on _ConversationScreenState {
       _ackPersonalContactBestEffort();
     } catch (e) {
       if (!mounted) return;
-      if (chatClientIdConfirmed(_msgs, clientId)) {
-        _outbox.forget(clientId);
-        return;
-      }
       setState(() {});
-      FeedbackHelper.showApiFailure(
-        context,
-        e,
-        fallback: S.of(context).chatEnvioFalhou,
-      );
+      switch (_outbox.phaseOf(clientId)) {
+        case ChatSendPhase.gone:
+          return;
+        case ChatSendPhase.sending:
+          _recheckInFlight(clientId);
+        case ChatSendPhase.failed:
+          FeedbackHelper.showApiFailure(
+            context,
+            e,
+            fallback: S.of(context).chatEnvioFalhou,
+          );
+      }
     } finally {
       if (media && mounted) setState(() => _uploading = false);
     }
+  }
+
+  /// `409`: a primeira tentativa ainda processa no servidor. Reconsulta com a
+  /// mesma chave; o upload já terminou, então só o POST se repete.
+  void _recheckInFlight(String clientId) {
+    unawaited(
+      Future<void>.delayed(chatInFlightRecheckDelay, () async {
+        if (!mounted || _outbox.phaseOf(clientId) != ChatSendPhase.sending) {
+          return;
+        }
+        await _dispatchOutgoing(clientId, media: false);
+      }),
+    );
   }
 }

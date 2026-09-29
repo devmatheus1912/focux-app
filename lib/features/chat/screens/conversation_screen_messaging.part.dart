@@ -8,6 +8,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final failedTwin = _outbox.failedWithText(_msgs, text);
     if (failedTwin != null) {
       _ctrl.clear();
+      setState(() => _replyingTo = null);
       await _retryOutgoing(failedTwin);
       return;
     }
@@ -165,7 +166,6 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       return;
     }
 
-    final replyToMessageId = _replyingTo?.id;
     final filename = _safeUploadFilename(file, type);
     final resourceType =
         type == ConversationMediaType.photo
@@ -175,56 +175,34 @@ extension ConversationScreenMessaging on _ConversationScreenState {
             : 'auto';
     final picked = file;
     final uploader = MediaUploadService(ref.read(apiClientProvider));
-    final repo = ChatRepository(ref.read(apiClientProvider));
-    final clientId = repo.newClientMessageId();
-    final alunoId = _alunoId;
-    final label = _mediaLabel(type);
-    final tipoMidia = _mediaType(type);
     final optimistic = ChatMsg(
-      alunoId: alunoId,
+      alunoId: _alunoId,
       remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
-      conteudo: label,
+      conteudo: _mediaLabel(type),
       enviadoEm: DateTime.now(),
-      tipoMidia: tipoMidia,
-      clientMessageId: clientId,
-      replyToMessageId: replyToMessageId,
+      tipoMidia: _mediaType(type),
+      clientMessageId:
+          ChatRepository(ref.read(apiClientProvider)).newClientMessageId(),
+      replyToMessageId: _replyingTo?.id,
     );
 
-    String? mediaUrl;
-    await _sendOutgoing(optimistic, media: true, () async {
-      final url =
-          mediaUrl ??=
-              kIsWeb || picked.path.isEmpty
-                  ? await uploader.uploadBytes(
-                    bytes: await picked.readAsBytes(),
-                    filename: filename,
-                    folder: 'chat',
-                    resourceType: resourceType,
-                  )
-                  : await uploader.uploadFile(
-                    path: picked.path,
-                    filename: filename,
-                    folder: 'chat',
-                    resourceType: resourceType,
-                  );
-      return _isAlunoMode
-          ? repo.enviarMidiaComoAluno(
-            conteudo: label,
-            tipoMidia: tipoMidia,
-            midiaUrl: url,
-            replyToMessageId: replyToMessageId,
-            clientMessageId: clientId,
-          )
-          : repo.enviarMidia(
-            alunoId: alunoId!,
-            conteudo: label,
-            remetente: 'PERSONAL',
-            tipoMidia: tipoMidia,
-            midiaUrl: url,
-            replyToMessageId: replyToMessageId,
-            clientMessageId: clientId,
-          );
-    });
+    await _sendMediaOutgoing(
+      optimistic,
+      () async =>
+          kIsWeb || picked.path.isEmpty
+              ? uploader.uploadBytes(
+                bytes: await picked.readAsBytes(),
+                filename: filename,
+                folder: 'chat',
+                resourceType: resourceType,
+              )
+              : uploader.uploadFile(
+                path: picked.path,
+                filename: filename,
+                folder: 'chat',
+                resourceType: resourceType,
+              ),
+    );
   }
 
   Future<void> _startAudioRecording() async {
@@ -307,6 +285,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
 
     if (!send) {
       HapticFeedback.selectionClick();
+      _deleteRecordedAudio(path);
       return;
     }
     if (path == null || path.isEmpty) {
@@ -321,8 +300,10 @@ extension ConversationScreenMessaging on _ConversationScreenState {
         mimeType: kIsWeb ? 'audio/webm' : 'audio/mp4',
         name: path.split(RegExp(r'[\\/]')).last,
       );
+      final bytes = await file.readAsBytes();
+      _deleteRecordedAudio(path);
       await _sendAudioBytes(
-        bytes: await file.readAsBytes(),
+        bytes: bytes,
         filename: file.name,
         duration: duration,
       );
@@ -335,55 +316,40 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     }
   }
 
+  /// Os bytes já estão em memória (e na operação de reenvio): o arquivo
+  /// temporário da gravação não precisa ficar no aparelho.
+  void _deleteRecordedAudio(String? path) {
+    if (kIsWeb || path == null || path.isEmpty) return;
+    unawaited(File(path).delete().then((_) {}, onError: (Object _) {}));
+  }
+
   Future<void> _sendAudioBytes({
     required List<int> bytes,
     required String filename,
     required Duration duration,
   }) async {
-    final replyToMessageId = _replyingTo?.id;
     final uploader = MediaUploadService(ref.read(apiClientProvider));
-    final repo = ChatRepository(ref.read(apiClientProvider));
-    final clientId = repo.newClientMessageId();
-    final alunoId = _alunoId;
-    final label = 'Audio ${_formatDuration(duration)}';
     final optimistic = ChatMsg(
-      alunoId: alunoId,
+      alunoId: _alunoId,
       remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
-      conteudo: label,
+      conteudo: 'Audio ${_formatDuration(duration)}',
       enviadoEm: DateTime.now(),
       tipoMidia: 'AUDIO',
-      clientMessageId: clientId,
-      replyToMessageId: replyToMessageId,
+      clientMessageId:
+          ChatRepository(ref.read(apiClientProvider)).newClientMessageId(),
+      replyToMessageId: _replyingTo?.id,
     );
 
-    String? mediaUrl;
     HapticFeedback.mediumImpact();
-    await _sendOutgoing(optimistic, media: true, () async {
-      final url =
-          mediaUrl ??= await uploader.uploadBytes(
-            bytes: bytes,
-            filename: filename,
-            folder: 'chat/audio',
-            resourceType: 'auto',
-          );
-      return _isAlunoMode
-          ? repo.enviarMidiaComoAluno(
-            conteudo: label,
-            tipoMidia: 'AUDIO',
-            midiaUrl: url,
-            replyToMessageId: replyToMessageId,
-            clientMessageId: clientId,
-          )
-          : repo.enviarMidia(
-            alunoId: alunoId!,
-            conteudo: label,
-            remetente: 'PERSONAL',
-            tipoMidia: 'AUDIO',
-            midiaUrl: url,
-            replyToMessageId: replyToMessageId,
-            clientMessageId: clientId,
-          );
-    });
+    await _sendMediaOutgoing(
+      optimistic,
+      () => uploader.uploadBytes(
+        bytes: bytes,
+        filename: filename,
+        folder: 'chat/audio',
+        resourceType: 'auto',
+      ),
+    );
   }
 
   Future<void> _toggleReaction(ChatMsg msg, String emoji) async {
@@ -484,7 +450,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
   }
 
   void _setReply(ChatMsg msg) {
-    if (msg.deletedAt != null) return;
+    if (!chatCanReplyTo(msg)) return;
     HapticFeedback.selectionClick();
     setState(() => _replyingTo = msg);
   }

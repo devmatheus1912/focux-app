@@ -5,7 +5,8 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final primarySoft = BrandPalette.soft(primary, dark: isDark);
-    final canInteract = msg.deletedAt == null;
+    final canInteract = chatCanReplyTo(msg);
+    final canCopy = msg.deletedAt == null;
     final canEdit = _canEditMessage(msg);
     final canDelete = _canDeleteMessage(msg);
     showFxHomeSheet<void>(
@@ -74,6 +75,8 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                         _setReply(msg);
                       },
                     ),
+                  ],
+                  if (canCopy)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(
@@ -92,7 +95,6 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                         FeedbackHelper.showSuccess(context, 'Mensagem copiada');
                       },
                     ),
-                  ],
                   if (canEdit)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
