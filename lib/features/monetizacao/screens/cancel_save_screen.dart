@@ -438,7 +438,7 @@ class _OfertaCard extends StatelessWidget {
                     if (oferta.requiresStoreAction) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'Conclusão na ${subscriptionChannelLabel()}',
+                        'Conclusão ${subscriptionChannelWith(ChannelPreposition.em)}',
                         style: TokensStrip.bodyMuted(
                           color: secondary,
                         ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),

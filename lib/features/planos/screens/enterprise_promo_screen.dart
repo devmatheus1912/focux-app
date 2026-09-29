@@ -104,10 +104,15 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     );
     final l10n = S.of(context);
     final useStore = subscriptionUsesNativeStore;
-    final trialFim = enterprisePromoTrialFimTexto(
-      l10n,
-      DateTime.now().add(const Duration(days: kPaywallMaxPlanTrialDays)),
-    );
+    final trialFim =
+        useStore
+            ? null
+            : enterprisePromoTrialFimTexto(
+              l10n,
+              DateTime.now().add(
+                const Duration(days: kPaywallMaxPlanTrialDays),
+              ),
+            );
     final precoPosTeste =
         useStore
             ? null
@@ -160,7 +165,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           const SizedBox(height: TokensStrip.s5),
                           Text(
                             useStore
-                                ? 'Enterprise com 30 dias grátis\nna ${subscriptionChannelLabel()}'
+                                ? 'Enterprise com 30 dias grátis\n${subscriptionChannelWith(ChannelPreposition.em)}'
                                 : 'Transforme seu negócio.\nExperimente o Enterprise.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
@@ -230,10 +235,10 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   useStore
-                                      ? 'O trial de 30 dias do Enterprise é aplicado pela '
-                                          '${subscriptionChannelLabel()} ao confirmar a assinatura. '
+                                      ? 'O trial de 30 dias do Enterprise é aplicado '
+                                          '${subscriptionChannelWith(ChannelPreposition.por)} ao confirmar a assinatura. '
                                           'Cancele na loja antes do fim do trial para não ser cobrado.'
-                                      : trialFim,
+                                      : trialFim!,
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
                                 ),

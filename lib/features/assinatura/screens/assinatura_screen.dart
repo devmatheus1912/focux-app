@@ -280,7 +280,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     HapticFeedback.lightImpact();
     FeedbackHelper.showInfo(
       context,
-      'Downgrade e cancelamento só nas assinaturas do ${subscriptionChannelLabel()}.',
+      'Downgrade e cancelamento só nas assinaturas ${subscriptionChannelWith(ChannelPreposition.de)}.',
     );
   }
 

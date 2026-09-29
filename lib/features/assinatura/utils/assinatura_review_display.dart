@@ -62,12 +62,11 @@ String assinaturaReviewLegalBody({
   required SubscriptionBillingPeriod period,
 }) {
   final freq = assinaturaReviewFrequency(period);
-  final channel = subscriptionChannelLabel();
   return 'Ao confirmar, você autoriza a cobrança de $price na forma de pagamento '
-      'da $channel. A assinatura renova automaticamente ($freq) até ser cancelada. '
+      '${subscriptionChannelWith(ChannelPreposition.de)}. A assinatura renova automaticamente ($freq) até ser cancelada. '
       'Cancele quando quiser em Ajustes > Assinaturas.\n\n'
       'Base legal (LGPD): execução de contrato para processar pagamento e entregar o serviço. '
-      'Dados de pagamento são processados pela $channel — a Focux não armazena número de cartão.';
+      'Dados de pagamento são processados ${subscriptionChannelWith(ChannelPreposition.por)} — a Focux não armazena número de cartão.';
 }
 
 /// Copy de falha da loja. Nunca ecoa `PurchaseError.message` cru.

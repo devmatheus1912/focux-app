@@ -176,7 +176,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                     _PaywallInlineNote(
                       icon: Icons.store_outlined,
                       text:
-                          'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelLabel()} e gerenciar sua assinatura.',
+                          'Loja indisponível nesta sessão — use o botão abaixo para abrir ${subscriptionChannelWith(ChannelPreposition.artigo)} e gerenciar sua assinatura.',
                       ink: ink,
                       mute: mute,
                       isDark: isDark,

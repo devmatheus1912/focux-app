@@ -99,7 +99,7 @@ class PaywallBillingLegalPanel extends StatelessWidget {
           ),
         if (showStoreBillingNote)
           Text(
-            'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. '
+            'Cobrança e renovação automática ${subscriptionChannelWith(ChannelPreposition.por)}. '
             'Cancele quando quiser nas configurações do dispositivo.',
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: secondary),

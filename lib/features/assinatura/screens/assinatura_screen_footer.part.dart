@@ -322,7 +322,7 @@ Future<void> _showAssinaturaTermosSheet(
                     if (showStoreBillingNote) ...[
                       const SizedBox(height: TokensStrip.s3),
                       Text(
-                        'Cobrança e renovação automática pela ${subscriptionChannelLabel()}. '
+                        'Cobrança e renovação automática ${subscriptionChannelWith(ChannelPreposition.por)}. '
                         'Cancele quando quiser nas configurações do dispositivo.',
                         textAlign: TextAlign.center,
                         style: TokensStrip.bodyMuted(color: mute),
