@@ -50,7 +50,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
       status: status,
     );
     final showRiskNotice =
-        aluno.emRisco && signal.label == 'Risco operacional';
+        aluno.emRisco && signal.label == riscoOperacionalLabel;
     final nivel = formatRiscoNivel(aluno.riscoNivel);
 
     return Semantics(

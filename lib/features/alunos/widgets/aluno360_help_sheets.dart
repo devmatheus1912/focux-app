@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
+import '../utils/aluno_hero_signal.dart';
 
 Future<void> showAluno360EvolucaoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
@@ -40,7 +41,7 @@ Future<void> showAluno360OperacaoHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Status operacional',
-        'Aderência e dias sem treino. A faixa de 7 dias é o detalhe da semana, não um segundo calendário.',
+        'Aderência de 30 dias e dias sem treino. A faixa mostra os check-ins dos últimos 7 dias, não um segundo calendário.',
         icon: 'trend',
       ),
       FxHelpTip(
@@ -199,18 +200,18 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
         icon: 'zap',
       ),
       FxHelpTip(
-        'Risco de abandono',
-        'Sobe com dias sem treino além do limite, aderência abaixo do mínimo da sua configuração de alertas e mensalidade em atraso.',
+        riscoOperacionalLabel,
+        'Sobe com dias sem treino além do limite, aderência abaixo do mínimo da sua configuração de alertas e mensalidade em atraso. Não é o risco de churn da retenção.',
         icon: 'alert-triangle',
       ),
       FxHelpTip(
         'Aderência · 30 dias',
-        'Percentual de treinos concluídos entre os iniciados nos últimos 30 dias — não é o mesmo que check-ins da semana.',
+        'Percentual de treinos concluídos entre os iniciados nos últimos 30 dias — não é o mesmo que check-ins dos últimos 7 dias.',
         icon: 'trend',
       ),
       FxHelpTip(
-        'Faixa da semana',
-        'Detalhe da aderência: verde = check-in; laranja = sem registro; anel = hoje. Pedir check-in some quando o botão da base já é o P0.',
+        'Faixa dos últimos 7 dias',
+        'Dias com check-in: verde = check-in; laranja = sem registro; anel = hoje. Pedir check-in some quando o botão da base já é o P0.',
         icon: 'calendar',
       ),
       FxHelpTip(

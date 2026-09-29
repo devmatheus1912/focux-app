@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../alunos/utils/aluno_hero_signal.dart';
 import '../constants/dashboard_layout.dart';
 import '../utils/dashboard_entry_motion.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -129,7 +130,7 @@ class DashboardDayPulseStrip extends StatelessWidget {
             onTap: onRisco,
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
-              label: pulseRiscoLabel,
+              label: riscoOperacionalLabel,
               value: '$riscoAlto',
               hint: riscoCopy.hint,
               color: riscoAccent,

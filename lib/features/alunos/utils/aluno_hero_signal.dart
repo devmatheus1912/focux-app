@@ -13,6 +13,10 @@ const alunoHeroAderenciaLabel = 'Aderência 30 dias';
 const alunoSituacaoLabel = 'Situação do aluno';
 const alunoSituacaoHint = 'Treinos e pagamentos';
 
+/// Modelo de alertas (`emRisco`/`riscoNivel`): dias sem treino, aderência
+/// abaixo do mínimo e mensalidade em atraso. "Risco de churn" é só da retenção.
+const riscoOperacionalLabel = 'Risco operacional';
+
 class AlunoHeroPrimarySignal {
   const AlunoHeroPrimarySignal({
     required this.label,
@@ -42,7 +46,7 @@ bool alunoHeroShouldShowStatusBadge({
   required AlunoHeroPrimarySignal signal,
   required AlunoHeroStatusVisual status,
 }) {
-  if (signal.label == 'Risco operacional' && status.label == 'Em risco') {
+  if (signal.label == riscoOperacionalLabel && status.label == 'Em risco') {
     return false;
   }
   return true;
@@ -100,7 +104,7 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
       (dias == null || dias == 0) &&
       (ader == null || ader == 0)) {
     return AlunoHeroPrimarySignal(
-      label: 'Risco operacional',
+      label: riscoOperacionalLabel,
       value: formatRiscoNivel(aluno.riscoNivel),
     );
   }
@@ -149,7 +153,7 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
     if (ader < 70) return 'Aderência moderada em 30 dias';
     return 'Aderência saudável em 30 dias';
   }
-  if (signal.label == 'Risco operacional') {
+  if (signal.label == riscoOperacionalLabel) {
     return aluno.emRisco ? 'Priorize contato hoje' : 'Monitorar sinais';
   }
   return alunoSituacaoHint;
@@ -159,7 +163,7 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
 String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
   // Caption already carries the signal (aderência / risco) — avoid
   // "Aderência 30 dias · Aderência baixa — …" wrap in the identity strip.
-  if (signal.label == 'Risco operacional' ||
+  if (signal.label == riscoOperacionalLabel ||
       signal.label == alunoHeroAderenciaLabel) {
     return caption;
   }

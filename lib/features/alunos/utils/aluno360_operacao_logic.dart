@@ -384,7 +384,7 @@ String? operacaoStatusSubtitle(
 }) {
   if (compactFollowUpVisible) return null;
   if (heroShowsRisco) {
-    return 'Resumo da semana · aderência, treinos e check-ins';
+    return 'Resumo · aderência de 30 dias e check-ins dos últimos 7';
   }
   return 'Próximo contato: ${formatProximoContato(aluno)}';
 }
@@ -652,7 +652,7 @@ Duration operacaoSectionDelay({
 
 /// True when hero already surfaces operational risk (skip duplicate tiles).
 bool operacaoHeroShowsRisco(Aluno aluno) =>
-    alunoHeroPrimarySignal(aluno).label == 'Risco operacional';
+    alunoHeroPrimarySignal(aluno).label == riscoOperacionalLabel;
 
 bool shouldCompactFollowUpForContactPriority({
   required bool contactPriority,

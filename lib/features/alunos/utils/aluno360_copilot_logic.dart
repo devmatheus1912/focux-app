@@ -5,6 +5,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../ia/models/ia_copilot_proxima_acao.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
+import 'aluno_hero_signal.dart';
 
 export 'aluno360_copilot_executar_logic.dart';
 export 'aluno360_copilot_outreach_logic.dart';
@@ -489,7 +490,7 @@ CopilotPrescriptionContent contactPriorityPrescriptionContent(
   final aderencia = aluno.aderenciaPercent;
   final reason = sanitizeCopilotPrescriptionReason(
     aluno.emRisco
-        ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 30 dias.'
+        ? '$riscoOperacionalLabel · aderência ${aderencia ?? 0}% nos últimos 30 dias.'
         : aderencia != null && aderencia <= 0
         ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
         : 'Sinais do perfil pedem contato direto hoje.',

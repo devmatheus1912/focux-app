@@ -101,7 +101,7 @@ List<CommandActionItem> buildDashboardNextActions({
                 : riskOwnedByDayFocus
                 ? 'Começar agora'
                 : hideRiskSummary
-                ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} com risco de abandono'
+                ? '$alunosRisco aluno${alunosRisco == 1 ? '' : 's'} em risco operacional'
                 : '$alunosRisco no radar · risco, inadimplência ou pausa no treino',
         route:
             leadRiskStudent != null

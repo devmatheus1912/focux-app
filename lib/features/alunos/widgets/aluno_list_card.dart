@@ -113,6 +113,7 @@ class AlunoListCard extends ConsumerWidget {
     final aderenciaPercent = sparkline.aderenciaPercent;
     final weeklyCheckins = sparkline.weeklyCheckins;
     final sparkValues = sparkline.sparkValues;
+    final sparkWidth = compact ? 48.0 : 56.0;
     final aderColor = EagleTokens.aderenciaColor(
       (aderenciaPercent ?? 0).toDouble(),
       isDark: isDark,
@@ -339,15 +340,24 @@ class AlunoListCard extends ConsumerWidget {
                           FxSparkline(
                             data: sparkValues,
                             color: aderColor,
-                            width: compact ? 48 : 56,
+                            width: sparkWidth,
                             height: compact ? 18 : 22,
                             strokeWidth: 1.8,
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            alunoListSparklineLabel,
-                            maxLines: 1,
-                            style: FocuxHubTypography.chip(secondaryInk),
+                          ExcludeSemantics(
+                            child: SizedBox(
+                              width: sparkWidth,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerRight,
+                                child: Text(
+                                  alunoListSparklineLabel,
+                                  maxLines: 1,
+                                  style: FocuxHubTypography.chip(secondaryInk),
+                                ),
+                              ),
+                            ),
                           ),
                         ] else
                           const SizedBox(height: 3),

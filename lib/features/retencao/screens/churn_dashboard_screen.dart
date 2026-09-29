@@ -193,7 +193,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                       FxHelpTip('Como calculamos', retencaoComoCalculamos),
                       FxHelpTip(
                         'Risco de churn',
-                        'Vem só do score de check-ins acima — não é o risco de abandono dos alertas nem a inadimplência. O card do topo é quem precisa de contato hoje.',
+                        'Vem só do score de check-ins acima — não é o risco operacional dos alertas nem a inadimplência. O card do topo é quem precisa de contato hoje.',
                       ),
                       FxHelpTip(
                         'Lista',

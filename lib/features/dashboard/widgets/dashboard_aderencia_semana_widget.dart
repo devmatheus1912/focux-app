@@ -49,7 +49,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
             DashboardAderenciaSemanaEmptyCard(
               primary: primary,
               mute: mute,
-              title: 'Sem check-ins nesta semana',
+              title: 'Sem check-ins nos últimos 7 dias',
               body: DashboardAderenciaCopy.emptyBody(
                 retentionFocus: retentionFocus,
               ),
@@ -69,7 +69,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
             DashboardAderenciaSemanaEmptyCard(
               primary: primary,
               mute: mute,
-              title: 'Treinos parados na semana',
+              title: 'Treinos parados nos últimos 7 dias',
               body: DashboardAderenciaCopy.stoppedBody(
                 retentionFocus: retentionFocus,
               ),

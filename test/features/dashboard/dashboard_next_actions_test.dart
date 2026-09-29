@@ -44,7 +44,7 @@ void main() {
       );
 
       expect(actions.first.title, 'Recuperar alunos em risco');
-      expect(actions.first.subtitle, contains('8 alunos'));
+      expect(actions.first.subtitle, '8 alunos em risco operacional');
       expect(actions.first.priorityBadge, 'P0');
       expect(actions[1].title, 'Cobrar pendências');
     });

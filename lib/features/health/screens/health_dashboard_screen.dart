@@ -43,7 +43,8 @@ typedef HealthDashboardUpdateHomeWidget =
       required String recoveryHint,
       required int steps,
     });
-typedef HealthDashboardClearHomeWidget = Future<void> Function();
+typedef HealthDashboardClearHomeWidgetScore =
+    Future<void> Function({required int? steps});
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -56,14 +57,14 @@ class HealthDashboardScreen extends StatefulWidget {
     this.loadTodaySummary,
     this.syncToday,
     this.updateHomeWidgetRecovery,
-    this.clearHomeWidgetRecovery,
+    this.clearHomeWidgetRecoveryScore,
   });
 
   final HealthDashboardCheckAuthorization? checkAuthorization;
   final HealthDashboardLoadTodaySummary? loadTodaySummary;
   final HealthDashboardSyncToday? syncToday;
   final HealthDashboardUpdateHomeWidget? updateHomeWidgetRecovery;
-  final HealthDashboardClearHomeWidget? clearHomeWidgetRecovery;
+  final HealthDashboardClearHomeWidgetScore? clearHomeWidgetRecoveryScore;
 
   @override
   State<HealthDashboardScreen> createState() => _HealthDashboardScreenState();
@@ -114,8 +115,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         steps: steps,
       );
 
-  Future<void> _resolveClearHomeWidgetRecovery() =>
-      widget.clearHomeWidgetRecovery?.call() ?? HomeWidgetService.clear();
+  Future<void> _resolveClearHomeWidgetRecoveryScore({required int? steps}) =>
+      widget.clearHomeWidgetRecoveryScore?.call(steps: steps) ??
+      HomeWidgetService.clearRecoveryScore(steps: steps);
 
   Future<void> _checkAuth() async {
     try {
@@ -188,7 +190,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           );
         } else {
           // Não deixa a nota de ontem no widget; o nativo mostra "--".
-          await _resolveClearHomeWidgetRecovery();
+          await _resolveClearHomeWidgetRecoveryScore(steps: synced.steps);
         }
       } catch (e) {
         soft = saudeSyncSoftError(friendlyError(e));

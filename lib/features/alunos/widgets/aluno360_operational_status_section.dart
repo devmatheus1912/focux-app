@@ -273,7 +273,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.pause_circle_outline_rounded,
         ),
         OperacaoStatusCardKind.risco => metric(
-          label: 'Risco de abandono',
+          label: riscoOperacionalLabel,
           value: formatRiscoNivel(aluno.riscoNivel),
           hint: aluno.emRisco ? 'Em risco' : 'Estável',
           color: riscoColor,

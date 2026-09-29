@@ -112,10 +112,6 @@ Color pulseCheckinsAccent({
 
 typedef PulseMetricCopy = ({String hint, String semantics});
 
-/// Alunos em risco no modelo de alertas: dias sem treino, aderência abaixo do
-/// mínimo e mensalidade em atraso. Não é o risco de churn da Saúde da base.
-const pulseRiscoLabel = 'Risco de abandono';
-
 PulseMetricCopy pulseAtivosCopy(int alunosAtivos) =>
     alunosAtivos == 0
         ? (hint: 'Nenhum aluno ativo', semantics: '0 alunos ativos')
@@ -126,16 +122,17 @@ PulseMetricCopy pulseCheckinsCopy(int checkinsHoje) =>
         ? (hint: 'Sem movimento hoje', semantics: '0 check-ins, sem movimento hoje')
         : (hint: 'Check-ins de hoje', semantics: '$checkinsHoje check-ins');
 
+/// Contagem do modelo de alertas (Risco operacional), não do churn da retenção.
 PulseMetricCopy pulseRiscoCopy(int riscoAlto) =>
     riscoAlto == 0
         ? (
           hint: 'Nenhum aluno em risco',
-          semantics: 'Nenhum aluno em risco de abandono',
+          semantics: 'Nenhum aluno em risco operacional',
         )
         : (
           hint: 'Alunos pedem contato',
           semantics:
-              '$riscoAlto ${riscoAlto == 1 ? 'aluno' : 'alunos'} em risco de abandono',
+              '$riscoAlto ${riscoAlto == 1 ? 'aluno' : 'alunos'} em risco operacional',
         );
 
 /// Copy de empty do pulso — BFF manda `emptyHint`; FE replica se o payload for legado.

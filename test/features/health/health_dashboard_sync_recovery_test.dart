@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/health/health_service.dart';
@@ -184,6 +186,7 @@ void main() {
     (tester) async {
       var homeWidgetUpdates = 0;
       var homeWidgetClears = 0;
+      int? clearedSteps;
 
       await _pumpDashboard(
         tester,
@@ -199,8 +202,9 @@ void main() {
           }) async {
             homeWidgetUpdates++;
           },
-          clearHomeWidgetRecovery: () async {
+          clearHomeWidgetRecoveryScore: ({required int? steps}) async {
             homeWidgetClears++;
+            clearedSteps = steps;
           },
         ),
       );
@@ -217,6 +221,36 @@ void main() {
       expect(find.textContaining('%'), findsNothing);
       expect(homeWidgetUpdates, 0);
       expect(homeWidgetClears, 1);
+      expect(clearedSteps, 9000);
+    },
+  );
+
+  testWidgets(
+    'sync sem rede não apaga a nota do widget da Home',
+    (tester) async {
+      var homeWidgetClears = 0;
+
+      await _pumpDashboard(
+        tester,
+        screen: HealthDashboardScreen(
+          checkAuthorization: () async => true,
+          loadTodaySummary: () async => _localSummary,
+          syncToday: (_) => throw const SocketException('sem rede'),
+          updateHomeWidgetRecovery: ({
+            required int recoveryScore,
+            required String recoveryLabel,
+            required String recoveryHint,
+            required int steps,
+          }) async {},
+          clearHomeWidgetRecoveryScore: ({required int? steps}) async {
+            homeWidgetClears++;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(homeWidgetClears, 0);
+      expect(find.text('12000'), findsOneWidget);
     },
   );
 }

@@ -35,6 +35,8 @@ void main() {
     bool compact = false,
     AlunoFiltro filtro = AlunoFiltro.todos,
     Aluno? overrideAluno,
+    Size size = const Size(390, 844),
+    double textScale = 1,
   }) {
     return ProviderScope(
       child: MaterialApp(
@@ -47,7 +49,10 @@ void main() {
           useMaterial3: true,
         ),
         home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
+          data: MediaQueryData(
+            size: size,
+            textScaler: TextScaler.linear(textScale),
+          ),
           child: Scaffold(
             backgroundColor:
                 isDark ? EagleTokens.darkBg : TokensStrip.pageBg,
@@ -166,6 +171,43 @@ void main() {
     expect(find.text('3 treinos em 7 dias'), findsOneWidget);
     expect(find.text('Últimos 7 dias'), findsOneWidget);
     expect(find.textContaining('esta semana'), findsNothing);
+  });
+
+  testWidgets('legenda do sparkline cabe em 320px com textScaler 1.3', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      cardHarness(
+        isDark: false,
+        size: const Size(320, 800),
+        textScale: 1.3,
+        overrideAluno: Aluno(
+          id: 8,
+          nome: 'Carla Souza',
+          email: 'carla@test.com',
+          status: 'ATIVO',
+          objetivo: 'Hipertrofia',
+          aderenciaPercent: 72,
+          diasSemTreino: 0,
+          aderenciaSparkline: const [1, 0, 1, 0, 1, 0, 0],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final legenda = find.text('Últimos 7 dias');
+    expect(legenda, findsOneWidget);
+    final fitted = find.ancestor(of: legenda, matching: find.byType(FittedBox));
+    expect(tester.getSize(fitted).width, lessThanOrEqualTo(56));
+    expect(
+      find.ancestor(of: legenda, matching: find.byType(ExcludeSemantics)),
+      findsWidgets,
+    );
   });
 
   testWidgets('compact convite nao mostra 0% nem risco', (tester) async {

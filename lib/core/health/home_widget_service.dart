@@ -39,6 +39,17 @@ class HomeWidgetService {
     } catch (_) {}
   }
 
+  /// Servidor sem nota hoje: tira a nota antiga ("--" no nativo) e mantém os
+  /// passos do dia.
+  static Future<void> clearRecoveryScore({required int? steps}) async {
+    await updateRecovery(
+      recoveryScore: 0,
+      recoveryLabel: 'Prontidão',
+      recoveryHint: 'Sem nota hoje',
+      steps: steps ?? 0,
+    );
+  }
+
   /// Zera o widget de recuperação no logout (não deixa vitais do usuário anterior).
   static Future<void> clear() async {
     await updateRecovery(

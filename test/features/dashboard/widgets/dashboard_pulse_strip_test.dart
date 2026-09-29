@@ -29,7 +29,11 @@ void main() {
     await tester.pumpWidget(_pulse(riscoAlto: 0));
     await tester.pump();
 
-    expect(find.text('RISCO DE ABANDONO'), findsOneWidget);
+    expect(find.text('RISCO OPERACIONAL'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('^Nenhum aluno em risco operacional')),
+      findsOneWidget,
+    );
     expect(find.text('Nenhum aluno em risco'), findsOneWidget);
     expect(find.text('Sem movimento hoje'), findsNothing);
   });

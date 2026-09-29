@@ -223,7 +223,8 @@ void main() {
         heroShowsRisco: true,
       );
       expect(subtitle, isNotNull);
-      expect(subtitle, contains('Resumo da semana'));
+      expect(subtitle, 'Resumo · aderência de 30 dias e check-ins dos últimos 7');
+      expect(subtitle, isNot(contains('semana')));
       expect(subtitle, isNot(contains('priorize contato')));
       expect(subtitle, isNot(contains('risco alto')));
     });
