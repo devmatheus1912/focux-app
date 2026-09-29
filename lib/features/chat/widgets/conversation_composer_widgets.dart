@@ -323,6 +323,7 @@ class ConversationMessageComposer extends StatelessWidget {
           children: [
             IconButton(
               onPressed: uploading ? null : onAttach,
+              tooltip: S.of(context).chatAnexar,
               icon: const Icon(Icons.add_rounded),
               color: mute,
               style: IconButton.styleFrom(
@@ -405,6 +406,7 @@ class ConversationMessageComposer extends StatelessWidget {
                           ),
                           IconButton(
                             onPressed: onEmoji,
+                            tooltip: S.of(context).chatEmoji,
                             icon: const Icon(Icons.sentiment_satisfied_outlined),
                             color: mute,
                             style: IconButton.styleFrom(

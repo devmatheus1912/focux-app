@@ -657,6 +657,8 @@
   "chatEnviarMensagem": "Enviar mensagem",
   "chatGravarAudio": "Gravar áudio",
   "chatEnviarAudio": "Enviar áudio",
+  "chatAnexar": "Anexar",
+  "chatEmoji": "Inserir emoji",
   "agendaExcluirFalhou": "Não foi possível excluir o atendimento. Tente de novo.",
   "agendaStatusFalhou": "Não foi possível atualizar o atendimento. Tente de novo.",
   "agendaRemarcarFalhou": "Não foi possível remarcar o horário. Tente de novo.",

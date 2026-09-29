@@ -123,6 +123,16 @@ void main() {
       tester.getSemantics(find.byType(ConversationComposerAcao)),
       isSemantics(label: 'Enviar mensagem', isButton: true),
     );
+    expect(
+      tester.getSemantics(find.widgetWithIcon(IconButton, Icons.add_rounded)),
+      isSemantics(tooltip: 'Anexar', isButton: true),
+    );
+    expect(
+      tester.getSemantics(
+        find.widgetWithIcon(IconButton, Icons.sentiment_satisfied_outlined),
+      ),
+      isSemantics(tooltip: 'Inserir emoji', isButton: true),
+    );
     semantics.dispose();
   });
 
