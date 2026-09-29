@@ -140,8 +140,8 @@ String alunoListOpsText({
 String alunoListAderenciaLabel(int aderenciaPercent) =>
     '$aderenciaPercent% em 30 dias';
 
-/// Rótulo visível e semântico do sparkline do card.
-const alunoListSparklineLabel = 'Últimos 7 dias';
+/// Legenda do sparkline do card; curta para caber na largura do gráfico.
+const alunoListSparklineLabel = '7 dias';
 
 bool shouldShowAlunoListOpsLine({
   required String adherenceLabel,

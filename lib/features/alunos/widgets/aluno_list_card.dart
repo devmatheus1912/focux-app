@@ -348,14 +348,12 @@ class AlunoListCard extends ConsumerWidget {
                           ExcludeSemantics(
                             child: SizedBox(
                               width: sparkWidth,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  alunoListSparklineLabel,
-                                  maxLines: 1,
-                                  style: FocuxHubTypography.chip(secondaryInk),
-                                ),
+                              child: Text(
+                                alunoListSparklineLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.right,
+                                style: FocuxHubTypography.chip(secondaryInk),
                               ),
                             ),
                           ),

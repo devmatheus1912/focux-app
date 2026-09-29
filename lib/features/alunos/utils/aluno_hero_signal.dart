@@ -4,6 +4,9 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
+import 'risco_labels.dart';
+
+export 'risco_labels.dart';
 
 /// `aderenciaPercent` do servidor cobre os últimos 30 dias.
 const alunoHeroAderenciaLabel = 'Aderência 30 dias';
@@ -12,10 +15,6 @@ const alunoHeroAderenciaLabel = 'Aderência 30 dias';
 /// física do wearable — esse nome fica reservado para o aluno.
 const alunoSituacaoLabel = 'Situação do aluno';
 const alunoSituacaoHint = 'Treinos e pagamentos';
-
-/// Modelo de alertas (`emRisco`/`riscoNivel`): dias sem treino, aderência
-/// abaixo do mínimo e mensalidade em atraso. "Risco de churn" é só da retenção.
-const riscoOperacionalLabel = 'Risco operacional';
 
 class AlunoHeroPrimarySignal {
   const AlunoHeroPrimarySignal({

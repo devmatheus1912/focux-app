@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWidget(cardHarness(isDark: false));
     await tester.pumpAndSettle();
     expect(find.text('72% em 30 dias'), findsOneWidget);
-    expect(find.text('Últimos 7 dias'), findsNothing);
+    expect(find.text('7 dias'), findsNothing);
 
     await tester.pumpWidget(
       cardHarness(
@@ -169,7 +169,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('3 treinos em 7 dias'), findsOneWidget);
-    expect(find.text('Últimos 7 dias'), findsOneWidget);
+    expect(find.text('7 dias'), findsOneWidget);
     expect(find.textContaining('esta semana'), findsNothing);
   });
 
@@ -200,10 +200,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    final legenda = find.text('Últimos 7 dias');
+    final legenda = find.text('7 dias');
     expect(legenda, findsOneWidget);
-    final fitted = find.ancestor(of: legenda, matching: find.byType(FittedBox));
-    expect(tester.getSize(fitted).width, lessThanOrEqualTo(56));
+    // Fonte de teste desenha glifos quadrados: largura não prova corte real.
+    // A altura prova que a legenda segue o textScaler em vez de encolher.
+    final fonte = TokensStrip.fontBodySm - 2;
+    expect(tester.getSize(legenda).height, greaterThanOrEqualTo(fonte * 1.3));
     expect(
       find.ancestor(of: legenda, matching: find.byType(ExcludeSemantics)),
       findsWidgets,

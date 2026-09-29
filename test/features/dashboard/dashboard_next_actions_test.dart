@@ -99,7 +99,7 @@ void main() {
             actionKey: 'RISK_STUDENTS',
             tipo: 'RISCO',
             titulo: 'Recuperar alunos em risco',
-            descricao: '8 alunos com risco de abandono',
+            descricao: '8 alunos em risco operacional',
             acaoUrl: '/retencao',
             prioridade: 'P0',
           ),

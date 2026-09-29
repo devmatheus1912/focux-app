@@ -384,7 +384,7 @@ String? operacaoStatusSubtitle(
 }) {
   if (compactFollowUpVisible) return null;
   if (heroShowsRisco) {
-    return 'Resumo · aderência de 30 dias e check-ins dos últimos 7';
+    return 'Resumo · aderência de 30 dias e check-ins dos últimos 7 dias';
   }
   return 'Próximo contato: ${formatProximoContato(aluno)}';
 }
