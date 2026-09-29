@@ -40,7 +40,7 @@ final setupStepCatalog = [
   SetupStepCatalogEntry(
     id: 'primeiro-treino',
     title: 'Crie o primeiro treino',
-    description: 'Monte na biblioteca ou gere com IA.',
+    description: 'Monte do zero ou por um modelo rápido.',
     icon: 'fitness_center',
     actionRoute: '/treinos/novo',
     estimatedMinutes: 3,

@@ -154,7 +154,7 @@ class DashboardCommandCenterSectionState
             title: 'Mensagens',
             subtitle: Text(chatSubtitle),
             accent: primary,
-            onTap: () => context.go('/chat/inbox'),
+            onTap: () => context.push('/chat/inbox'),
           ),
         ),
       ],

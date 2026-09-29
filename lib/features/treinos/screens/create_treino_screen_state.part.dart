@@ -96,9 +96,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
         context.pushReplacement(
           '/treinos/${treino.id}/exercicios/add',
           extra:
-              widget.alunoId == null
-                  ? null
-                  : {'alunoId': widget.alunoId, 'alunoNome': widget.alunoNome},
+              TreinoRouteExtra(
+                alunoId: widget.alunoId,
+                alunoNome: widget.alunoNome,
+                recemCriado: true,
+              ).toExtra(),
         );
       }
     } on OfflineQueuedException {

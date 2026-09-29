@@ -97,7 +97,7 @@ class _BusinessReportsScreenState extends ConsumerState<BusinessReportsScreen> {
 
   void _abrirFinanceiro() {
     AnalyticsService.instance.track(ProductEvents.financeiroViewed);
-    goPersonalShellTab(context, '/financeiro');
+    context.push('/financeiro');
   }
 
   void _explicar(String titulo, String texto) {

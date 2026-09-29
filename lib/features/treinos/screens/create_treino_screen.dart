@@ -28,6 +28,7 @@ import '../../../core/widgets/queued_offline_exit.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/create_treino_logic.dart';
+import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/create_treino_help_sheet.dart';
 
 part 'create_treino_screen_state.part.dart';

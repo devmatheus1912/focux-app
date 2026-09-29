@@ -13,6 +13,7 @@ import 'package:focux_app/features/onboarding/data/onboarding_status_data.dart';
 import 'package:focux_app/features/onboarding/providers/onboarding_provider.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -148,7 +149,12 @@ void main() {
             ),
             seededPlanoFeatures(features),
           ],
-          child: MaterialApp.router(routerConfig: router),
+          child: MaterialApp.router(
+            locale: const Locale('pt'),
+            supportedLocales: S.supportedLocales,
+            localizationsDelegates: S.localizationsDelegates,
+            routerConfig: router,
+          ),
         ),
       );
 

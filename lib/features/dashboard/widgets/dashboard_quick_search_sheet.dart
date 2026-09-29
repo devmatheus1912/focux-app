@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_input_deco.dart';
+import '../../alunos/constants/alunos_list_filters.dart';
 import '../../ferramentas/providers/ferramentas_catalogo_provider.dart';
 import '../data/dashboard_tool_shortcuts.dart';
 import '../utils/dashboard_microcopy.dart';
@@ -160,12 +161,7 @@ class _QuickSearchSheetState extends ConsumerState<_QuickSearchSheet> {
                       q.isEmpty ? 'Ver alunos' : 'Buscar “$_query” em alunos',
                   onTap: () {
                     Navigator.pop(context);
-                    goPersonalShellTab(
-                      context,
-                      q.isEmpty
-                          ? '/alunos'
-                          : '/alunos?q=${Uri.encodeComponent(q)}',
-                    );
+                    goPersonalShellTab(context, alunosBuscaLocation(_query));
                   },
                 ),
                 SizedBox(height: TokensStrip.s2),

@@ -128,7 +128,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                               ? _EmptyAlunosState(
                                 hasQuery: _query.trim().isNotEmpty,
                                 hasActiveFilter: _hasActiveFilter,
-                                filtroLabel: _filtroLabel(_filtro),
+                                filtroLabel: alunoFiltroLabel(_filtro),
                                 onAdd: _adicionarAluno,
                                 onClear:
                                     _query.trim().isEmpty

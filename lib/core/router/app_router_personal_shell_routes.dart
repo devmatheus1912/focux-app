@@ -36,6 +36,9 @@ RouteBase buildPersonalShellRoute() {
                   initialFiltro: alunoFiltroFromQuery(
                     state.uri.queryParameters['filtro'],
                   ),
+                  initialQuery: alunoBuscaFromQuery(
+                    state.uri.queryParameters['q'],
+                  ),
                 ),
           ),
         ],

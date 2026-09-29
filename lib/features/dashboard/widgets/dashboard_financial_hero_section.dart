@@ -44,14 +44,14 @@ class DashboardFinancialHeroSection extends StatelessWidget {
           DashboardSectionHeader(
             title: DashboardMicrocopy.panoramaFinanceiro,
             actionLabel: DashboardMicrocopy.abrirFinanceiro,
-            onAction: () => context.go('/financeiro'),
+            onAction: () => context.push('/financeiro'),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
           if (zero)
             DashboardFinanceEmptyState(
               mes: mes,
               ctaLabel: finData?.zeroCta,
-              onOpen: () => context.go('/financeiro'),
+              onOpen: () => context.push('/financeiro'),
             )
           else
             _FinanceTiles(
@@ -105,7 +105,7 @@ class _FinanceTiles extends StatelessWidget {
       child: Column(
         children: [
           InkWell(
-            onTap: () => context.go('/financeiro'),
+            onTap: () => context.push('/financeiro'),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Recebido · $mes',
@@ -121,7 +121,7 @@ class _FinanceTiles extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           InkWell(
-            onTap: () => context.go('/financeiro'),
+            onTap: () => context.push('/financeiro'),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Pendente',
@@ -138,7 +138,7 @@ class _FinanceTiles extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           InkWell(
-            onTap: () => context.go('/financeiro'),
+            onTap: () => context.push('/financeiro'),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Meta',

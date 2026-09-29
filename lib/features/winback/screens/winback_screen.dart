@@ -152,7 +152,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
 
   void _abrirRetencao() {
     HapticFeedback.selectionClick();
-    goPersonalShellTab(context, '/retencao');
+    context.push('/retencao');
   }
 
   void _abrirAluno(WinbackLogEntry entry) {

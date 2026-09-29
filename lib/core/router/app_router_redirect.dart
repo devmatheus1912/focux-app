@@ -267,6 +267,9 @@ int? treinoIdFromState(GoRouterState state) {
   return int.tryParse(state.uri.queryParameters['treinoId'] ?? '');
 }
 
+/// Termo de busca vindo de `/alunos?q=` (busca rápida da Hoje).
+String alunoBuscaFromQuery(String? value) => value?.trim() ?? '';
+
 AlunoFiltro alunoFiltroFromQuery(String? value) {
   return switch (value?.trim().toLowerCase()) {
     'ativos' => AlunoFiltro.ativos,

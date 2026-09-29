@@ -657,5 +657,17 @@
   "agendaStatusFalhou": "Não foi possível atualizar o atendimento. Tente de novo.",
   "agendaRemarcarFalhou": "Não foi possível remarcar o horário. Tente de novo.",
   "iaCopilotProntidaoFalhou": "Não foi possível carregar a prontidão.",
-  "setupAtivacaoFalhou": "Não foi possível carregar sua ativação."
+  "setupAtivacaoFalhou": "Não foi possível carregar sua ativação.",
+  "treinoDetalheAtribuirAluno": "Atribuir a aluno",
+  "treinoDetalheAtribuirSubtitulo": "Mesmo treino: suas edições chegam ao aluno",
+  "treinoDetalheCopiarSubtitulo": "Cópia só do aluno: o original não muda",
+  "ativacaoImportarTitulo": "Importe seus alunos",
+  "ativacaoImportarCorpo": "Migração em cerca de 2 min",
+  "ativacaoImportarCta": "Importar alunos",
+  "ativacaoTreinoTitulo": "Crie o primeiro treino",
+  "ativacaoTreinoCorpo": "Comece por um modelo rápido e atribua ao aluno",
+  "ativacaoTreinoCta": "Criar primeiro treino",
+  "ativacaoFinanceiroTitulo": "Lance a primeira mensalidade",
+  "ativacaoFinanceiroCorpo": "Registre a cobrança e acompanhe o pagamento",
+  "ativacaoFinanceiroCta": "Abrir financeiro"
 }

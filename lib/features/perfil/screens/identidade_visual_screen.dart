@@ -249,7 +249,7 @@ class _IdentidadeVisualScreenState
                       delegate: SliverChildListDelegate([
                         if (!hasWhiteLabel) ...[
                           _PaywallCard(
-                            onTap: () => context.go('/assinatura'),
+                            onTap: () => context.push('/assinatura'),
                             chrome: chrome,
                           ),
                           const SizedBox(height: 18),

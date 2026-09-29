@@ -126,11 +126,11 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
 
   void _abrirFinanceiro() {
     AnalyticsService.instance.track(ProductEvents.financeiroViewed);
-    goPersonalShellTab(context, '/financeiro');
+    context.push('/financeiro');
   }
 
   void _abrirAssinatura() {
-    goPersonalShellTab(context, '/assinatura');
+    context.push('/assinatura');
   }
 
   void _abrirChat(DunningFalha falha) {

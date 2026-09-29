@@ -62,8 +62,13 @@ part 'alunos_list_screen_actions.part.dart';
 
 class AlunosListScreen extends ConsumerStatefulWidget {
   final AlunoFiltro initialFiltro;
+  final String initialQuery;
 
-  const AlunosListScreen({super.key, this.initialFiltro = AlunoFiltro.todos});
+  const AlunosListScreen({
+    super.key,
+    this.initialFiltro = AlunoFiltro.todos,
+    this.initialQuery = '',
+  });
 
   @override
   ConsumerState<AlunosListScreen> createState() => _AlunosListScreenState();

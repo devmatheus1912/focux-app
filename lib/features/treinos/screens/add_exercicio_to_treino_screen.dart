@@ -45,6 +45,7 @@ import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../utils/add_exercise_prescription_input.dart';
 import '../utils/exercise_picker_filter.dart';
+import '../utils/treino_criacao_fluxo.dart';
 import '../utils/workout_prescription_display.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
 import '../widgets/exercise_library_panel.dart';
@@ -55,10 +56,12 @@ part 'add_exercicio_to_treino_screen_actions.part.dart';
 class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
+  final bool recemCriado;
   const AddExercicioToTreinoScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
+    this.recemCriado = false,
   });
 
   @override
@@ -89,6 +92,23 @@ class _AddExercicioToTreinoScreenState
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
     safePopOrGo(context, '/treinos/${widget.treinoId}');
+  }
+
+  void _concluir() {
+    final destino = addExercicioConcluirDestino(
+      treinoId: widget.treinoId,
+      recemCriado: widget.recemCriado,
+      alunoId: widget.alunoId,
+    );
+    if (destino == null) {
+      _cancel();
+      return;
+    }
+    FxKeyboardDismissScope.dismiss();
+    context.pushReplacement(
+      destino,
+      extra: const TreinoRouteExtra(recemCriado: true).toExtra(),
+    );
   }
 
   @override
@@ -164,7 +184,7 @@ class _AddExercicioToTreinoScreenState
               label: 'Concluir adição de exercícios',
               child: FxLiquidPrimaryButton(
                 label: 'Concluir',
-                onPressed: _cancel,
+                onPressed: _concluir,
               ),
             ),
           ),

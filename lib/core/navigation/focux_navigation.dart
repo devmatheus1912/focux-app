@@ -17,6 +17,7 @@ abstract final class FocuxNavigation {
     'safePopOrGo',
     'safePopOr',
     'goPersonalShellTab',
+    'openPersonalRoute',
     'goToRoleHome',
     'context.push',
     'context.go',

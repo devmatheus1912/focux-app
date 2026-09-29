@@ -7,6 +7,7 @@ Future<void> _openTreinoDetailMenu({
   required int treinoId,
   required int? alunoId,
   required bool isDark,
+  required VoidCallback onAssigned,
 }) async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailMenuOpened,
@@ -15,6 +16,7 @@ Future<void> _openTreinoDetailMenu({
     final action = await _showTreinoSheet<String>(
       context: context,
       builder: (sheetContext) {
+        final s = S.of(sheetContext);
         final maxHeight = MediaQuery.sizeOf(sheetContext).height * 0.82;
         return TreinoInsetActionSheet(
           isDark: isDark,
@@ -37,12 +39,14 @@ Future<void> _openTreinoDetailMenu({
             ),
             TreinoInsetActionSpec(
               icon: Icons.person_add_alt_1_rounded,
-              label: 'Atribuir a aluno',
+              label: s.treinoDetalheAtribuirAluno,
+              subtitle: s.treinoDetalheAtribuirSubtitulo,
               onTap: () => Navigator.pop(sheetContext, 'assign'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.assignment_ind_rounded,
               label: 'Copiar para aluno',
+              subtitle: s.treinoDetalheCopiarSubtitulo,
               onTap: () => Navigator.pop(sheetContext, 'clone'),
             ),
             TreinoInsetActionSpec(
@@ -78,6 +82,7 @@ Future<void> _openTreinoDetailMenu({
       alunoId: alunoId,
       isDark: isDark,
       action: action,
+      onAssigned: onAssigned,
     );
 }
 
@@ -87,6 +92,8 @@ class _TreinoDetailBody extends StatelessWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
+  final bool atribuirEmDestaque;
+  final VoidCallback onAssigned;
   final Future<void> Function() onRefresh;
   final WidgetRef ref;
   const _TreinoDetailBody({
@@ -95,6 +102,8 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
+    required this.atribuirEmDestaque,
+    required this.onAssigned,
     required this.onRefresh,
     required this.ref,
   });
@@ -143,6 +152,17 @@ class _TreinoDetailBody extends StatelessWidget {
       }
     }
 
+    Future<void> openAssign() => _dispatchTreinoDetailAction(
+      context: context,
+      ref: ref,
+      treino: treino,
+      treinoId: treinoId,
+      alunoId: alunoId,
+      isDark: isDark,
+      action: 'assign',
+      onAssigned: onAssigned,
+    );
+
     return Column(
       children: [
         Expanded(
@@ -186,15 +206,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           label: 'Atribuir',
                           accent: primary,
                           isDark: isDark,
-                          onPressed: () => _dispatchTreinoDetailAction(
-                            context: context,
-                            ref: ref,
-                            treino: treino,
-                            treinoId: treinoId,
-                            alunoId: alunoId,
-                            isDark: isDark,
-                            action: 'assign',
-                          ),
+                          onPressed: openAssign,
                         ),
                       ],
                     ),
@@ -297,6 +309,22 @@ class _TreinoDetailBody extends StatelessWidget {
                             alreadyInTreinoIds: const {},
                           ),
                           child: const Text('Montar por modelo'),
+                        ),
+                      ],
+                    )
+                    : atribuirEmDestaque
+                    ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FxLiquidPrimaryButton(
+                          label: S.of(context).treinoDetalheAtribuirAluno,
+                          onPressed: openAssign,
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () => openAdd(),
+                          child: const Text('Adicionar exercício'),
                         ),
                       ],
                     )

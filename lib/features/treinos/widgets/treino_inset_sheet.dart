@@ -135,7 +135,15 @@ class TreinoInsetActionSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: FxSettingsLayout.headerToGroup),
-          ...groupChildren,
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: groupChildren,
+              ),
+            ),
+          ),
         ],
       ),
     );

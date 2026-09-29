@@ -27,7 +27,9 @@ void main() {
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('Como calculamos'));
-    expect(screen, contains('goPersonalShellTab'));
+    expect(screen, contains("context.push('/financeiro')"));
+    expect(screen, contains("context.push('/assinatura')"));
+    expect(screen, isNot(contains('goPersonalShellTab')));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('OperationalMetricTile'));

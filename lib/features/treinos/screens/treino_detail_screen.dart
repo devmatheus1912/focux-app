@@ -30,6 +30,7 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
+import '../utils/treino_criacao_fluxo.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
 import '../widgets/treino_assign_sheet.dart';
@@ -40,6 +41,7 @@ import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_prescription_video_block.dart';
 import '../data/workout_builder_preset.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../l10n/app_localizations.dart';
 
 part 'treino_detail_screen_body.part.dart';
 part 'treino_detail_screen_exercises.part.dart';
@@ -70,12 +72,14 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
+  final bool recemCriado;
 
   const TreinoDetailScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
     this.alunoNome,
+    this.recemCriado = false,
   });
 
   @override
@@ -84,6 +88,11 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
 
 class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
   DateTime? _fetchedAt;
+  bool _atribuido = false;
+
+  void _onAssigned() {
+    if (mounted && !_atribuido) setState(() => _atribuido = true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +135,7 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                 treinoId: treinoId,
                 alunoId: alunoId,
                 isDark: isDark,
+                onAssigned: _onAssigned,
               ),
             ],
           ),
@@ -162,6 +172,9 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                     alunoId: alunoId,
                     alunoNome: alunoNome,
                     isDark: isDark,
+                    recemCriado: widget.recemCriado,
+                    atribuido: _atribuido,
+                    onAssigned: _onAssigned,
                     onFetched: (value) {
                       if (_fetchedAt == value) return;
                       setState(() => _fetchedAt = value);
@@ -182,6 +195,9 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
     required this.alunoId,
     required this.alunoNome,
     required this.isDark,
+    required this.recemCriado,
+    required this.atribuido,
+    required this.onAssigned,
     required this.onFetched,
   });
 
@@ -190,6 +206,9 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
   final int? alunoId;
   final String? alunoNome;
   final bool isDark;
+  final bool recemCriado;
+  final bool atribuido;
+  final VoidCallback onAssigned;
   final ValueChanged<DateTime> onFetched;
 
   @override
@@ -219,6 +238,13 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       alunoId: widget.alunoId,
       alunoNome: widget.alunoNome,
       isDark: widget.isDark,
+      atribuirEmDestaque: treinoDetailAtribuirEmDestaque(
+        recemCriado: widget.recemCriado,
+        alunoId: widget.alunoId,
+        atribuido: widget.atribuido,
+        temExercicios: treino.exercicios.isNotEmpty,
+      ),
+      onAssigned: widget.onAssigned,
       onRefresh: _refresh,
       ref: ref,
     );
@@ -230,11 +256,13 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
     required this.treinoId,
     required this.alunoId,
     required this.isDark,
+    required this.onAssigned,
   });
 
   final int treinoId;
   final int? alunoId;
   final bool isDark;
+  final VoidCallback onAssigned;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -249,6 +277,7 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
         treinoId: treinoId,
         alunoId: alunoId,
         isDark: isDark,
+        onAssigned: onAssigned,
       ),
       icon: const Icon(Icons.more_horiz_rounded),
     );

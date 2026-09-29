@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -276,7 +277,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                                     goPersonalShellTab(context, '/alunos');
                                   },
                                   onAssinatura: () =>
-                                      goPersonalShellTab(context, '/assinatura'),
+                                      context.push('/assinatura'),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const DashboardSectionHeader(

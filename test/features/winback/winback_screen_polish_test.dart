@@ -20,7 +20,8 @@ void main() {
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('Buscar aluno'));
     expect(screen, contains('onTapOutside'));
-    expect(screen, contains('goPersonalShellTab'));
+    expect(screen, contains("context.push('/retencao')"));
+    expect(screen, isNot(contains('goPersonalShellTab')));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('SkeletonList'));

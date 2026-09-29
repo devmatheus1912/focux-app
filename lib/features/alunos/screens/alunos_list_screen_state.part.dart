@@ -24,6 +24,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   void initState() {
     super.initState();
     _filtro = widget.initialFiltro;
+    _setQueryText(widget.initialQuery);
     _loadListPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -42,17 +43,29 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     if (mounted) setState(() => _listaCompacta = prefs.compact);
   }
 
+  void _setQueryText(String value) {
+    _query = value;
+    _searchController.text = value;
+  }
+
   @override
   void didUpdateWidget(covariant AlunosListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialFiltro != widget.initialFiltro) {
-      setState(() {
-        _filtro = widget.initialFiltro;
-        _ignoredDeepLinkFiltro = false;
-      });
-      _syncHomeQuery();
+    final novaBusca = widget.initialQuery;
+    final buscaMudou =
+        novaBusca.isNotEmpty && novaBusca != oldWidget.initialQuery;
+    final filtroMudou = oldWidget.initialFiltro != widget.initialFiltro;
+    if (!buscaMudou && !filtroMudou) return;
+    if (buscaMudou) _setQueryText(novaBusca);
+    if (filtroMudou) {
+      _filtro = widget.initialFiltro;
+      _ignoredDeepLinkFiltro = false;
       _scrollChipIntoView(_filtro);
     }
+    // didUpdateWidget roda dentro do build: Riverpod proíbe escrever aqui.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncHomeQuery();
+    });
   }
 
   bool _hasDeepLinkFiltro(BuildContext context) {
@@ -292,7 +305,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         );
       }
       if (sucesso > 0) {
-        FeedbackHelper.showSuccess(context, _deletedMessage(sucesso));
+        FeedbackHelper.showSuccess(context, alunosExcluidosMessage(sucesso));
       }
       setState(() {
         _modoSelecao = false;
@@ -420,29 +433,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   bool get _hasActiveFilter => _filtro != AlunoFiltro.todos;
 
-  String _filtroLabel(AlunoFiltro filtro) => switch (filtro) {
-    AlunoFiltro.todos => 'todos',
-    AlunoFiltro.contatoHoje => 'precisando de contato hoje',
-    AlunoFiltro.ativos => 'ativos',
-    AlunoFiltro.inadimplentes => 'em atraso',
-    AlunoFiltro.risco => 'em risco',
-    AlunoFiltro.novos => 'convites pendentes',
-  };
-
-  static String _plural(int count, String singular, String plural) {
-    return '$count ${count == 1 ? singular : plural}';
-  }
-
-  static String _deletedMessage(int total) {
-    if (total == 0) return 'Nenhum aluno foi excluído.';
-    return '${_plural(total, 'aluno excluído', 'alunos excluídos')}.';
-  }
-
-  String _selectionSummary() {
-    if (_selecionados.isEmpty) return 'Selecione os alunos';
-    return _plural(_selecionados.length, 'selecionado', 'selecionados');
-  }
-
   @override
   Widget build(BuildContext context) {
     final homeAsync = ref.watch(alunosHomeProvider);
@@ -487,7 +477,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
             title: context.alunosL10n.alunosTitle,
             subtitle:
                 _modoSelecao
-                    ? _selectionSummary()
+                    ? alunosSelectionSummary(_selecionados.length)
                     : FxHubFreshness.joinCount(
                       alunosListCountLabel(count),
                       freshness,

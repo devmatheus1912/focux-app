@@ -294,7 +294,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     action: FxEmptyAction(
                       label: query.isEmpty ? 'Ir para o Hoje' : 'Limpar busca',
                       onTap: query.isEmpty
-                          ? () => goPersonalShellTab(context, home)
+                          ? () => goToRoleHome(context, ref)
                           : () {
                               _debounce?.cancel();
                               _searchCtrl.clear();

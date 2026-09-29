@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/fx_utils.dart';
@@ -117,13 +116,8 @@ class DashboardAttentionRail extends StatelessWidget {
   }
 }
 
-void _open(BuildContext context, DashboardAttentionEntry entry) {
-  if (entry.route == '/financeiro') {
-    context.go(entry.route);
-  } else {
-    context.push(entry.route);
-  }
-}
+void _open(BuildContext context, DashboardAttentionEntry entry) =>
+    openPersonalRoute(context, entry.route);
 
 class _AttentionTile extends StatelessWidget {
   const _AttentionTile({

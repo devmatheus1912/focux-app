@@ -22,7 +22,7 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('goPersonalShellTab'));
+    expect(screen, contains('goToRoleHome'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('Buscar aviso'));
     expect(screen, contains('onTapOutside'));

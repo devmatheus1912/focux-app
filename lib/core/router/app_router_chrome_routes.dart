@@ -29,6 +29,7 @@ import '../../features/treinos/screens/treinos_list_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
 import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
+import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
@@ -346,18 +347,11 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/treinos/novo',
             builder: (context, state) {
-              final extra = state.extra;
-              int? alunoId;
-              String? alunoNome;
-              if (extra is Map) {
-                final rawAlunoId = extra['alunoId'];
-                alunoId =
-                    rawAlunoId is int
-                        ? rawAlunoId
-                        : int.tryParse(rawAlunoId?.toString() ?? '');
-                alunoNome = extra['alunoNome']?.toString();
-              }
-              return CreateTreinoScreen(alunoId: alunoId, alunoNome: alunoNome);
+              final extra = TreinoRouteExtra.parse(state.extra);
+              return CreateTreinoScreen(
+                alunoId: extra.alunoId,
+                alunoNome: extra.alunoNome,
+              );
             },
           ),
           GoRoute(
@@ -366,21 +360,12 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/treinos' : null,
             builder: (context, state) {
-              final extra = state.extra;
-              int? alunoId;
-              String? alunoNome;
-              if (extra is Map) {
-                final rawAlunoId = extra['alunoId'];
-                alunoId =
-                    rawAlunoId is int
-                        ? rawAlunoId
-                        : int.tryParse(rawAlunoId?.toString() ?? '');
-                alunoNome = extra['alunoNome']?.toString();
-              }
+              final extra = TreinoRouteExtra.parse(state.extra);
               return TreinoDetailScreen(
                 treinoId: intPathParam(state, 'id')!,
-                alunoId: alunoId,
-                alunoNome: alunoNome,
+                alunoId: extra.alunoId,
+                alunoNome: extra.alunoNome,
+                recemCriado: extra.recemCriado,
               );
             },
           ),
@@ -390,16 +375,11 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/treinos' : null,
             builder: (context, state) {
-              int? alunoId;
-              if (state.extra is Map) {
-                final extra = state.extra as Map;
-                final raw = extra['alunoId'];
-                alunoId =
-                    raw is int ? raw : int.tryParse(raw?.toString() ?? '');
-              }
+              final extra = TreinoRouteExtra.parse(state.extra);
               return AddExercicioToTreinoScreen(
                 treinoId: intPathParam(state, 'id')!,
-                alunoId: alunoId,
+                alunoId: extra.alunoId,
+                recemCriado: extra.recemCriado,
               );
             },
           ),
