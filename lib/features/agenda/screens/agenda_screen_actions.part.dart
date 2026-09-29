@@ -21,9 +21,20 @@ extension on _AgendaScreenState {
     );
   }
 
+  /// A ação ficou na fila offline: fecha a sheet e avisa o pendente. Sem
+  /// sucesso e sem recarregar — no servidor a agenda ainda não mudou.
+  void _closeWithQueuedNotice() {
+    if (!mounted) return;
+    _popRootOverlay();
+    FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
+  }
+
   Future<void> _setStatus(Agendamento ag, String status) async {
     try {
       await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
+    } on OfflineQueuedException {
+      _closeWithQueuedNotice();
+      return;
     } catch (e) {
       if (!mounted) return;
       FeedbackHelper.showError(
@@ -188,6 +199,9 @@ extension on _AgendaScreenState {
               if (!ok) return;
               try {
                 await ref.read(agendaRepositoryProvider).excluir(ag.id);
+              } on OfflineQueuedException {
+                _closeWithQueuedNotice();
+                return;
               } catch (e) {
                 if (!mounted) return;
                 FeedbackHelper.showError(

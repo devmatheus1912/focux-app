@@ -1,3 +1,5 @@
+import '../../../core/api/offline_queued_ack.dart';
+
 /// Parsers tolerantes na borda da API de check-in (sem `as String` cego).
 String? checkinJsonString(dynamic value) {
   if (value == null) return null;
@@ -53,20 +55,12 @@ List<Map<String, dynamic>> checkinJsonMapList(dynamic value) {
   return out;
 }
 
-/// Fake 202 body from [OfflineSyncService] — not a série/execução.
-bool checkinIsQueuedAck(Map<String, dynamic> map) {
-  return map['status']?.toString() == 'queued' &&
-      !map.containsKey('treinoId') &&
-      !map.containsKey('treinoExercicioId') &&
-      !map.containsKey('exercicios');
-}
-
 Map<String, dynamic> checkinRequireEntityJson(dynamic data, String endpoint) {
   final map = checkinJsonMap(data);
   if (map == null) {
     throw FormatException('$endpoint devolve objeto JSON.');
   }
-  if (checkinIsQueuedAck(map)) {
+  if (isQueuedOfflineBody(map)) {
     throw FormatException('$endpoint falhou (sem rede). Tente de novo.');
   }
   return map;

@@ -6,12 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/providers/auth_provider.dart';
 import '../api/api_transport_circuit.dart';
+import '../api/offline_drain_scheduler.dart';
 import '../api/offline_sync_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/session_refresh_coordinator.dart';
 import '../theme/design_tokens.dart';
+import '../utils/connectivity_banner_state.dart';
+import 'feedback_helper.dart';
 
-/// Shows offline/sync status and flushes the offline queue when back online.
+/// Mostra conexão e fila offline, e drena a fila: ao voltar a rede, ao voltar
+/// ao primeiro plano e em intervalo enquanto houver pendência.
 class FxConnectivityBanner extends ConsumerStatefulWidget {
   const FxConnectivityBanner({super.key, required this.child});
 
@@ -22,9 +26,12 @@ class FxConnectivityBanner extends ConsumerStatefulWidget {
       _FxConnectivityBannerState();
 }
 
-class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
+class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
+    with WidgetsBindingObserver {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<List<ConnectivityResult>>? _subscription;
+  StreamSubscription<void>? _queueChanges;
+  late final OfflineDrainScheduler _scheduler;
   bool _offline = false;
   bool _circuitOpen = false;
   int _pending = 0;
@@ -34,69 +41,112 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
   @override
   void initState() {
     super.initState();
-    _refresh();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduler = OfflineDrainScheduler(
+      pendingCount: OfflineSyncService.getPendingCount,
+      drain: _drain,
+    );
+    OfflineSyncService.onMutationDropped = _onMutationDropped;
+    _queueChanges = OfflineSyncService.changes.listen((_) {
+      _reloadCounts();
+      _scheduler.onQueueChanged();
+    });
     _subscription = _connectivity.onConnectivityChanged.listen((_) {
-      _refresh();
+      _onConnectivityChanged();
     });
-  }
-
-  Future<void> _refresh() async {
-    final results = await _connectivity.checkConnectivity();
-    final offline = results.every((r) => r == ConnectivityResult.none);
-    final pending = await OfflineSyncService.getPendingCount();
-    final circuitOpen = ApiTransportCircuit.isOpen;
-    if (!mounted) return;
-    setState(() {
-      _offline = offline;
-      _pending = pending;
-      _circuitOpen = circuitOpen;
-    });
-
-    // Volta online: warm JWT (se perto do exp) + drena outbox.
-    if (_wasOffline && !offline) {
-      if (ref.read(authProvider) == AuthStatus.authenticated) {
-        await SessionRefreshCoordinator.ensureFreshAccess(force: false);
-      }
-    }
-    _wasOffline = offline;
-
-    if (!offline && pending > 0) {
-      await OfflineSyncService.syncPendingRequests(
-        ref.read(apiClientProvider).dio,
-      );
-      final after = await OfflineSyncService.getPendingCount();
-      if (mounted) setState(() => _pending = after);
-    }
-    // Depois de drenar: o que a fila desistiu de reenviar precisa aparecer,
-    // porque a tela já disse ao usuário que a ação tinha sido registrada.
-    final dropped = (await OfflineSyncService.pendingDropped()).length;
-    if (mounted && dropped != _dropped) setState(() => _dropped = dropped);
-  }
-
-  Future<void> _dismissDropped() async {
-    await OfflineSyncService.clearDropped();
-    if (mounted) setState(() => _dropped = 0);
+    _onConnectivityChanged();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _scheduler.onResumed();
+      case AppLifecycleState.paused:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        _scheduler.onBackground();
+      case AppLifecycleState.inactive:
+        break;
+    }
+  }
+
+  Future<void> _onConnectivityChanged() async {
+    final results = await _connectivity.checkConnectivity();
+    final offline = results.every((r) => r == ConnectivityResult.none);
+    if (!mounted) return;
+    setState(() => _offline = offline);
+
+    // Volta online: warm JWT (se perto do exp) antes de drenar.
+    if (_wasOffline && !offline &&
+        ref.read(authProvider) == AuthStatus.authenticated) {
+      await SessionRefreshCoordinator.ensureFreshAccess(force: false);
+    }
+    _wasOffline = offline;
+
+    await _drain();
+    await _reloadCounts();
+    await _scheduler.onQueueChanged();
+  }
+
+  /// Drenar sem rede só gastaria tentativas do backoff da fila.
+  Future<void> _drain() async {
+    if (!mounted || _offline) return;
+    if (await OfflineSyncService.getPendingCount() == 0 || !mounted) return;
+    await OfflineSyncService.syncPendingRequests(
+      ref.read(apiClientProvider).dio,
+    );
+  }
+
+  Future<void> _reloadCounts() async {
+    final pending = await OfflineSyncService.getPendingCount();
+    // O que a fila desistiu de reenviar precisa aparecer, porque a tela já
+    // disse ao usuário que a ação ficou para depois.
+    final dropped = (await OfflineSyncService.pendingDropped()).length;
+    if (!mounted) return;
+    setState(() {
+      _pending = pending;
+      _dropped = dropped;
+      _circuitOpen = ApiTransportCircuit.isOpen;
+    });
+  }
+
+  void _onMutationDropped(DroppedMutation _) {
+    if (!mounted) return;
+    FeedbackHelper.showError(context, S.of(context).conexaoAlteracaoDescartada);
+  }
+
+  Future<void> _dismissDropped() => OfflineSyncService.clearDropped();
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    if (OfflineSyncService.onMutationDropped == _onMutationDropped) {
+      OfflineSyncService.onMutationDropped = null;
+    }
+    _scheduler.dispose();
+    _queueChanges?.cancel();
     _subscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final showBanner =
-        _offline || _dropped > 0 || _pending > 0 || _circuitOpen;
+    final kind = resolveConnectivityBanner(
+      offline: _offline,
+      circuitOpen: _circuitOpen,
+      pending: _pending,
+      dropped: _dropped,
+    );
     return Column(
       children: [
         AnimatedSize(
           duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutCubic,
           child:
-              showBanner
+              kind != ConnectivityBannerKind.hidden
                   ? Material(
-                    color: _bannerColor(context),
+                    color: _bannerColor(context, kind),
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
@@ -106,11 +156,15 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
                         ),
                         child: Row(
                           children: [
-                            Icon(_bannerIcon(), color: Colors.white, size: 16),
+                            Icon(
+                              _bannerIcon(kind),
+                              color: Colors.white,
+                              size: 16,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                _bannerMessage(S.of(context)),
+                                _bannerMessage(S.of(context), kind),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12.5,
@@ -120,7 +174,7 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
                             ),
                             // Descarte é o único estado que exige ciência do
                             // usuário: conexão e sincronia se resolvem sozinhas.
-                            if (!_offline && _dropped > 0)
+                            if (kind == ConnectivityBannerKind.dropped)
                               TextButton(
                                 onPressed: _dismissDropped,
                                 style: TextButton.styleFrom(
@@ -144,24 +198,40 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner> {
     );
   }
 
-  Color _bannerColor(BuildContext context) {
-    if (_offline) return EagleTokens.bad.withValues(alpha: 0.92);
-    if (_dropped > 0) return EagleTokens.warn.withValues(alpha: 0.94);
-    if (_circuitOpen) return EagleTokens.warn.withValues(alpha: 0.92);
-    return Theme.of(context).colorScheme.primary.withValues(alpha: 0.92);
+  Color _bannerColor(BuildContext context, ConnectivityBannerKind kind) {
+    return switch (kind) {
+      ConnectivityBannerKind.offline ||
+      ConnectivityBannerKind.offlinePending =>
+        EagleTokens.bad.withValues(alpha: 0.92),
+      ConnectivityBannerKind.dropped => EagleTokens.warn.withValues(
+        alpha: 0.94,
+      ),
+      ConnectivityBannerKind.unstable => EagleTokens.warn.withValues(
+        alpha: 0.92,
+      ),
+      _ => Theme.of(context).colorScheme.primary.withValues(alpha: 0.92),
+    };
   }
 
-  IconData _bannerIcon() {
-    if (_offline) return Icons.wifi_off_rounded;
-    if (_dropped > 0) return Icons.error_outline_rounded;
-    if (_circuitOpen) return Icons.cloud_off_rounded;
-    return Icons.sync;
+  IconData _bannerIcon(ConnectivityBannerKind kind) {
+    return switch (kind) {
+      ConnectivityBannerKind.offline ||
+      ConnectivityBannerKind.offlinePending => Icons.wifi_off_rounded,
+      ConnectivityBannerKind.dropped => Icons.error_outline_rounded,
+      ConnectivityBannerKind.unstable => Icons.cloud_off_rounded,
+      _ => Icons.sync,
+    };
   }
 
-  String _bannerMessage(S s) {
-    if (_offline) return s.conexaoOffline;
-    if (_dropped > 0) return s.conexaoDescartadas(_dropped);
-    if (_circuitOpen) return s.conexaoInstavel;
-    return s.conexaoSincronizando(_pending);
+  String _bannerMessage(S s, ConnectivityBannerKind kind) {
+    return switch (kind) {
+      ConnectivityBannerKind.offline => s.conexaoOffline,
+      ConnectivityBannerKind.offlinePending => s.conexaoPendentesOffline(
+        _pending,
+      ),
+      ConnectivityBannerKind.dropped => s.conexaoDescartadas(_dropped),
+      ConnectivityBannerKind.unstable => s.conexaoInstavel,
+      _ => s.conexaoSincronizando(_pending),
+    };
   }
 }

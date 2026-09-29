@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
 import '../../../core/money/fx_money.dart';
 import '../../planos/data/planos_repository.dart';
@@ -18,7 +19,7 @@ class PixData {
   });
 
   factory PixData.fromJson(Map<String, dynamic> j) {
-    if (j['status']?.toString() == 'queued' && j['paymentId'] == null) {
+    if (isQueuedOfflineBody(j)) {
       throw const FormatException(
         'PIX não foi gerado (sem rede). Tente de novo.',
       );
@@ -56,7 +57,7 @@ class Mensalidade {
   }) : valor = FxMoney.parse(valor);
 
   factory Mensalidade.fromJson(Map<String, dynamic> j) {
-    if (j['status']?.toString() == 'queued' && j['id'] == null) {
+    if (isQueuedOfflineBody(j)) {
       throw const FormatException(
         'Mensalidade não foi persistida (sem rede). Tente de novo.',
       );

@@ -89,9 +89,10 @@ class _TreinoExerciseReorderListState
       widget.ref.invalidate(treinoProvider(widget.treinoId));
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showError(
+        FeedbackHelper.showApiFailure(
           context,
-          friendlyError(e, fallback: 'Erro ao remover exercício.'),
+          e,
+          fallback: 'Erro ao remover exercício.',
         );
       }
     }
@@ -141,9 +142,10 @@ class _TreinoExerciseReorderListState
               widget.ref.invalidate(treinoProvider(widget.treinoId));
             } catch (error) {
               if (mounted) {
-                FeedbackHelper.showError(
+                FeedbackHelper.showApiFailure(
                   this.context,
-                  friendlyError(error, fallback: 'Erro ao duplicar exercício.'),
+                  error,
+                  fallback: 'Erro ao duplicar exercício.',
                 );
               }
             }
@@ -172,12 +174,10 @@ class _TreinoExerciseReorderListState
                         widget.ref.invalidate(treinoProvider(widget.treinoId));
                       } catch (error) {
                         if (mounted) {
-                          FeedbackHelper.showError(
+                          FeedbackHelper.showApiFailure(
                             this.context,
-                            friendlyError(
-                              error,
-                              fallback: 'Erro ao substituir exercício.',
-                            ),
+                            error,
+                            fallback: 'Erro ao substituir exercício.',
                           );
                         }
                       }

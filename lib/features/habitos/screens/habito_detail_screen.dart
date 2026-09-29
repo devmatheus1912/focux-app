@@ -115,7 +115,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
       _leave();
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -141,7 +141,7 @@ class _HabitoDetailScreenState extends ConsumerState<HabitoDetailScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

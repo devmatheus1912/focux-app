@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/config/env.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';

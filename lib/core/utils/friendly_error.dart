@@ -1,12 +1,21 @@
+import 'dart:ui' show Locale;
+
 import 'package:dio/dio.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../api/api_error.dart';
+import '../api/offline_queued_ack.dart';
 
 /// Extracts a user-friendly error message from any exception.
 /// Strips DioException stack traces, HTTP status details, and raw class names
 /// so the user never sees internal technical errors.
 String friendlyError(Object error, {String? fallback}) {
   final fb = fallback ?? 'Algo deu errado. Tente novamente.';
+
+  // Não falhou: ficou na fila. "Erro ao salvar" faria o usuário refazer.
+  if (error is OfflineQueuedException) {
+    return lookupS(const Locale('pt')).acaoEnfileiradaOffline;
+  }
 
   if (error is DioException) {
     final statusCode = error.response?.statusCode;

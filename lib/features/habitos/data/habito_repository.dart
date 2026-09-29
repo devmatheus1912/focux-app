@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
 import '../../planos/data/planos_repository.dart';
 
@@ -246,11 +247,12 @@ class HabitoRepository {
         'alunoId': alunoId,
       },
     );
+    throwIfQueuedOffline(r);
     return Habito.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<void> desativar(int id) async {
-    await _dio.delete('/api/habitos/$id');
+    throwIfQueuedOffline(await _dio.delete('/api/habitos/$id'));
   }
 
   Future<Habito> buscar(int id) async {
@@ -283,6 +285,7 @@ class HabitoRepository {
 
   Future<({bool feito, int streak})> toggleHoje(int habitoId) async {
     final r = await _dio.post('/api/habitos/me/$habitoId/check');
+    throwIfQueuedOffline(r);
     final data = r.data as Map<String, dynamic>;
     return (
       feito: data['feito'] as bool? ?? false,

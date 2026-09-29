@@ -157,9 +157,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(
+      FeedbackHelper.showApiFailure(
         context,
-        friendlyError(e, fallback: 'Não foi possível duplicar o treino.'),
+        e,
+        fallback: 'Não foi possível duplicar o treino.',
       );
     }
   }
@@ -197,9 +198,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(
+      FeedbackHelper.showApiFailure(
         context,
-        friendlyError(e, fallback: 'Não foi possível copiar o treino.'),
+        e,
+        fallback: 'Não foi possível copiar o treino.',
       );
     }
   }
@@ -292,9 +294,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       );
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(
+      FeedbackHelper.showApiFailure(
         context,
-        friendlyError(e, fallback: 'Não foi possível remover o treino.'),
+        e,
+        fallback: 'Não foi possível remover o treino.',
       );
     }
   }

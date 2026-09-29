@@ -10,6 +10,7 @@ import '../auth/session_refresh_coordinator.dart';
 import '../config/env.dart';
 import '../planos/plano_cache_policy.dart';
 import '../storage/secure_storage.dart';
+import 'offline_queued_ack.dart';
 import 'offline_sync_service.dart';
 import 'tls_certificate_pinning.dart';
 
@@ -136,10 +137,7 @@ class ApiClient {
                   Response(
                     requestOptions: e.requestOptions,
                     statusCode: 202,
-                    data: {
-                      'status': 'queued',
-                      'message': 'Offline. Sincronizará quando houver rede.',
-                    },
+                    data: offlineQueuedAckBody(),
                   ),
                 );
               }
@@ -275,7 +273,7 @@ class ApiClient {
   }
 
   static bool _canQueueOfflineMutation(RequestOptions options) {
-    if (options.extra['fxNoOfflineQueue'] == true) return false;
+    if (options.extra[OfflineSyncService.noQueueExtra] == true) return false;
     if (_isAuthPath(options.path)) return false;
     if (options.path == '/api/suporte/analisar-erro') return false;
     if (OfflineSyncService.isSensitivePath(options.path)) return false;

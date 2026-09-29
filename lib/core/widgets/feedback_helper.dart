@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/alunos/constants/aluno_360_layout.dart';
+import '../../l10n/app_localizations.dart';
+import '../api/offline_queued_ack.dart';
 import '../theme/design_tokens.dart';
+import '../utils/friendly_error.dart';
 
 /// Where transient feedback should anchor on screen.
 enum FeedbackPlacement {
@@ -142,6 +145,20 @@ class FeedbackHelper {
       reserveBottom: reserveBottom,
       placement: placement,
     );
+  }
+
+  /// Falha de mutação. Ação que só entrou na fila offline não é erro nem
+  /// sucesso: avisa que sobe quando a rede voltar.
+  static void showApiFailure(
+    BuildContext context,
+    Object error, {
+    String? fallback,
+  }) {
+    if (error is OfflineQueuedException) {
+      showWarn(context, S.of(context).acaoEnfileiradaOffline);
+      return;
+    }
+    showError(context, friendlyError(error, fallback: fallback));
   }
 
   /// Operação tab feedback — pins below header so scroll position never hides CTAs.

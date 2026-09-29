@@ -101,7 +101,7 @@ Future<void> _dispatchTreinoDetailAction({
         }
       } catch (e) {
         if (context.mounted) {
-          FeedbackHelper.showError(context, friendlyError(e));
+          FeedbackHelper.showApiFailure(context, e);
         }
       }
       break;
@@ -118,7 +118,7 @@ Future<void> _dispatchTreinoDetailAction({
         }
       } catch (e) {
         if (context.mounted) {
-          FeedbackHelper.showError(context, friendlyError(e));
+          FeedbackHelper.showApiFailure(context, e);
         }
       }
       break;
@@ -130,7 +130,7 @@ Future<void> _dispatchTreinoDetailAction({
         }
       } catch (e) {
         if (context.mounted) {
-          FeedbackHelper.showError(context, friendlyError(e));
+          FeedbackHelper.showApiFailure(context, e);
         }
       }
       break;
@@ -156,7 +156,7 @@ Future<void> _dispatchTreinoDetailAction({
         }
       } catch (e) {
         if (context.mounted) {
-          FeedbackHelper.showError(context, friendlyError(e));
+          FeedbackHelper.showApiFailure(context, e);
         }
       }
       break;

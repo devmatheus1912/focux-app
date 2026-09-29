@@ -164,7 +164,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     }
   }
 

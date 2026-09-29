@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
 
 class Agendamento {
@@ -93,6 +94,7 @@ class AgendaRepository {
         if (titulo != null && titulo.isNotEmpty) 'titulo': titulo,
       },
     );
+    throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data);
   }
 
@@ -118,11 +120,12 @@ class AgendaRepository {
       '/api/agenda/$id/status',
       queryParameters: {'status': status},
     );
+    throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<void> excluir(int id) async {
-    await _dio.delete('/api/agenda/$id');
+    throwIfQueuedOffline(await _dio.delete('/api/agenda/$id'));
   }
 
   Future<List<Agendamento>> listarSemana(String data) async {
@@ -163,6 +166,7 @@ class AgendaRepository {
 
   Future<Agendamento> confirmarPresenca(int id) async {
     final r = await _dio.post('/api/agenda/$id/confirmar');
+    throwIfQueuedOffline(r);
     return Agendamento.fromJson(r.data as Map<String, dynamic>);
   }
 

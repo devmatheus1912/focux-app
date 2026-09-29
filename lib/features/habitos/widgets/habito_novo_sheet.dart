@@ -167,7 +167,7 @@ Future<bool> showHabitoNovoSheet({
     }
   } catch (e) {
     if (context.mounted) {
-      FeedbackHelper.showError(context, friendlyError(e));
+      FeedbackHelper.showApiFailure(context, e);
     }
   } finally {
     tituloCtrl.dispose();

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/template_split_picker.dart';
@@ -87,7 +86,7 @@ Future<void> openMontarPorModelo({
                 }
               } catch (e) {
                 if (routeContext.mounted) {
-                  FeedbackHelper.showError(routeContext, friendlyError(e));
+                  FeedbackHelper.showApiFailure(routeContext, e);
                 }
                 rethrow;
               }

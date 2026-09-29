@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../utils/treino_atribuicao_prazo.dart';
@@ -361,6 +362,7 @@ class TreinoRepository {
         if (nivel != null) 'nivel': nivel,
       },
     );
+    throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -393,6 +395,7 @@ class TreinoRepository {
         if (ordem != null) 'ordem': ordem,
       },
     );
+    throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -401,8 +404,15 @@ class TreinoRepository {
     TreinoExercicioItem item,
     int novoExercicioId,
   ) async {
-    await removerExercicio(treinoId, item.id);
-    return adicionarExercicio(
+    // Remoção na fila não pode deixar o treino sem o substituto: a inclusão
+    // segue (e vai para a fila junto) e o chamador fica sabendo do pendente.
+    var removalQueued = false;
+    try {
+      await removerExercicio(treinoId, item.id);
+    } on OfflineQueuedException {
+      removalQueued = true;
+    }
+    final treino = await adicionarExercicio(
       treinoId,
       novoExercicioId,
       series: item.series,
@@ -415,6 +425,8 @@ class TreinoRepository {
       grupoSuperset: item.grupoSuperset,
       ordem: item.ordem,
     );
+    if (removalQueued) throw const OfflineQueuedException();
+    return treino;
   }
 
   Future<void> atribuirAluno(
@@ -463,11 +475,12 @@ class TreinoRepository {
   }
 
   Future<void> salvarComoTemplate(int id) async {
-    await _dio.post('/api/treinos/$id/template');
+    throwIfQueuedOffline(await _dio.post('/api/treinos/$id/template'));
   }
 
   Future<Treino> duplicar(int id) async {
     final response = await _dio.post('/api/treinos/$id/duplicar');
+    throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
@@ -476,15 +489,18 @@ class TreinoRepository {
       '/api/treinos/$treinoId/clonar-para-aluno',
       queryParameters: {'alunoId': alunoId},
     );
+    throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
   Future<void> excluirTreino(int id) async {
-    await _dio.delete('/api/treinos/$id');
+    throwIfQueuedOffline(await _dio.delete('/api/treinos/$id'));
   }
 
   Future<void> removerExercicio(int treinoId, int itemId) async {
-    await _dio.delete('/api/treinos/$treinoId/exercicios/$itemId');
+    throwIfQueuedOffline(
+      await _dio.delete('/api/treinos/$treinoId/exercicios/$itemId'),
+    );
   }
 
   Future<Treino> reordenarExercicios(int treinoId, List<int> itemIds) async {
@@ -528,6 +544,7 @@ class TreinoRepository {
     final response = await _dio.post(
       '/api/treinos/$treinoId/exercicios/$itemId/duplicar',
     );
+    throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 

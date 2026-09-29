@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,6 +126,27 @@ class OfflineSyncService {
   /// persistido de [pendingDropped].
   static void Function(DroppedMutation)? onMutationDropped;
 
+  /// `extra` que impede o [ApiClient] de enfileirar a requisição. O replay da
+  /// fila usa isto: falha de rede no replay fica com o backoff do item, em vez
+  /// de virar uma cópia nova que a sync sobrescreveria ao gravar a fila.
+  static const noQueueExtra = 'fxNoOfflineQueue';
+
+  static final _changes = StreamController<void>.broadcast();
+
+  /// Emite quando a fila ou o registro de descartes muda (enfileirou, drenou,
+  /// descartou, limpou). O indicador global recalcula a contagem aqui.
+  static Stream<void> get changes => _changes.stream;
+
+  static Future<void>? _syncInFlight;
+
+  /// Sobe a cada [clearQueue]: sync que começou antes da limpeza (logout) não
+  /// devolve à fila os itens do usuário que saiu.
+  static int _generation = 0;
+
+  static void _notifyChanged() {
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
   /// Add a failed request to the queue (sem body sensível).
   ///
   /// Returns `true` only when the mutation is actually persisted. Callers that
@@ -149,6 +171,7 @@ class OfflineSyncService {
 
     queueList.add(req.toJson());
     await prefs.setString(_queueKey, jsonEncode(queueList));
+    _notifyChanged();
     return true;
   }
 
@@ -186,9 +209,11 @@ class OfflineSyncService {
   /// Chamado na invalidação de sessão: leva o registro de descartes junto,
   /// porque ele descreve mutações do usuário que saiu.
   static Future<void> clearQueue() async {
+    _generation++;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_queueKey);
     await prefs.remove(_droppedKey);
+    _notifyChanged();
   }
 
   /// Get the number of pending requests
@@ -208,7 +233,17 @@ class OfflineSyncService {
   /// Falha permanente (4xx que não seja [_retryableClientStatuses]) sai na
   /// primeira tentativa, sem gastar o backoff. Todo descarte, por limite de
   /// tentativas ou por ser permanente, fica registrado em [pendingDropped].
-  static Future<void> syncPendingRequests(Dio dio) async {
+  ///
+  /// Single-flight: chamada durante uma drenagem em curso recebe a mesma
+  /// execução, então boot, conectividade, resume e intervalo não reenviam o
+  /// mesmo item em paralelo.
+  static Future<void> syncPendingRequests(Dio dio) {
+    return _syncInFlight ??= _sync(dio).whenComplete(() {
+      _syncInFlight = null;
+    });
+  }
+
+  static Future<void> _sync(Dio dio) async {
     final prefs = await SharedPreferences.getInstance();
     final queueStr = prefs.getString(_queueKey);
     if (queueStr == null) return;
@@ -216,6 +251,7 @@ class OfflineSyncService {
     final List<dynamic> queueList = jsonDecode(queueStr);
     if (queueList.isEmpty) return;
 
+    final generation = _generation;
     final List<dynamic> remainingList = [];
 
     for (final item in queueList) {
@@ -235,6 +271,8 @@ class OfflineSyncService {
               if (req.idempotencyKey != null)
                 'Idempotency-Key': req.idempotencyKey,
             },
+            // A fila tem backoff próprio; retry do cliente só atrasa a rodada.
+            extra: {noQueueExtra: true, 'fxNoRetry': true},
           ),
         );
       } catch (error) {
@@ -251,11 +289,22 @@ class OfflineSyncService {
       }
     }
 
-    if (remainingList.isEmpty) {
+    if (generation != _generation) return;
+    // Enquanto a rodada rodava, novas ações só podem ter sido anexadas ao fim.
+    final latestStr = prefs.getString(_queueKey);
+    final latest =
+        latestStr == null ? const <dynamic>[] : jsonDecode(latestStr) as List;
+    final merged = [
+      ...remainingList,
+      if (latest.length > queueList.length) ...latest.sublist(queueList.length),
+    ];
+
+    if (merged.isEmpty) {
       await prefs.remove(_queueKey);
     } else {
-      await prefs.setString(_queueKey, jsonEncode(remainingList));
+      await prefs.setString(_queueKey, jsonEncode(merged));
     }
+    _notifyChanged();
   }
 
   /// Na dúvida, retenta: só descarta o que dá para provar que é permanente.
@@ -311,6 +360,7 @@ class OfflineSyncService {
   static Future<void> clearDropped() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_droppedKey);
+    _notifyChanged();
   }
 
   static String? _readIdempotencyKey(Map<String, dynamic> headers) {
