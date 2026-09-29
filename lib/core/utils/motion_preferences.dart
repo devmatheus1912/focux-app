@@ -17,6 +17,18 @@ int fxMotionDurationMs(
 }) =>
     reduceMotionOf(context) ? 0 : normal;
 
+/// Teto global do Dynamic Type — igual em todas as larguras de tela.
+const double kAppMaxTextScale = 1.3;
+
+/// Piso global — evita texto ilegível quando o sistema reduz a fonte.
+const double kAppMinTextScale = 0.85;
+
+/// Escala efetiva do app a partir da escala do sistema.
+TextScaler appTextScaler(TextScaler system) => system.clamp(
+  minScaleFactor: kAppMinTextScale,
+  maxScaleFactor: kAppMaxTextScale,
+);
+
 /// Limita escala de fonte do sistema para layouts de marketing estáveis.
 TextScaler clampedTextScaler(BuildContext context, {double maxScale = 1.2}) {
   final scaler = MediaQuery.textScalerOf(context);

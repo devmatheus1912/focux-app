@@ -9,6 +9,8 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../support/dynamic_type_harness.dart';
+
 AlunoDashboardHomeBundle _home({
   String? anamnesePendente,
   bool comHistorico = true,
@@ -112,6 +114,15 @@ void main() {
     expect(find.text('Sua semana'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  for (final tela in kDynamicTypeTelas) {
+    testWidgets('Hoje do Aluno aguenta ${descreverTela(tela)}', (tester) async {
+      usarDynamicTypeMaximo(tester, tela);
+      await _pump(tester, tela, _home(anamnesePendente: 'PRECISA_ATESTADO'));
+      expect(find.text('Olá, Ana'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }
 
 Future<void> _pump(

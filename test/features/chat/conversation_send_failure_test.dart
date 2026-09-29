@@ -15,6 +15,8 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../support/dynamic_type_harness.dart';
+
 const _historico = '/api/chat/aluno/historico/page';
 const _enviar = '/api/chat/aluno/enviar';
 const _texto = 'Posso trocar o treino de amanhã?';
@@ -408,6 +410,22 @@ void main() {
     await tester.tap(find.text('Descartar'));
     expect(descartou, isTrue);
   });
+
+  for (final tela in kDynamicTypeTelas) {
+    testWidgets('campo e enviar do chat aguentam ${descreverTela(tela)}', (
+      tester,
+    ) async {
+      usarDynamicTypeMaximo(tester, tela);
+      pluginsMudos(tester);
+      await tester.pumpWidget(_app(_ChatAdapter()..falhasRestantes = 1));
+      await _settle(tester);
+
+      await _enviarTexto(tester);
+      expect(find.text('Não enviada'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 5));
+    });
+  }
 
   testWidgets('envio com sucesso não mostra estado de falha', (tester) async {
     telaAlta(tester);

@@ -7,6 +7,15 @@ import '../theme/tokens_strip.dart';
 
 /// Premium input decoration factory — TOKENS STRIP Liquid Glass.
 class FxInputDeco {
+  /// Placeholder com contraste ≥ 4,5:1 sobre o card/fundo do tema — no modo
+  /// [insetGrouped] ele é o único rótulo visível do campo.
+  static Color placeholderColor({required bool isDark}) =>
+      isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
+
+  /// Rótulo flutuante de [build] — mesmo contraste mínimo do placeholder.
+  static Color labelColor({required bool isDark}) =>
+      isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+
   static OutlineInputBorder outlineBorder({
     BorderRadius? borderRadius,
     BorderSide? borderSide,
@@ -27,7 +36,7 @@ class FxInputDeco {
     double iconSize = 20,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = labelColor(isDark: isDark);
     final primary = Theme.of(context).colorScheme.primary;
     final fillColor =
         isDark
@@ -43,7 +52,7 @@ class FxInputDeco {
         fontWeight: FontWeight.w600,
       ),
       hintStyle: FocuxHubTypography.bodyMuted(
-        color: mute.withValues(alpha: 0.5),
+        color: placeholderColor(isDark: isDark),
       ),
       prefixIcon:
           icon != null
@@ -90,13 +99,13 @@ class FxInputDeco {
     double iconSize = FxSettingsLayout.iconSize,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : EagleTokens.inkMute;
+    final mute = labelColor(isDark: isDark);
 
     return InputDecoration(
       hintText: hint,
       floatingLabelBehavior: FloatingLabelBehavior.never,
       hintStyle: FocuxHubTypography.bodyMuted(
-        color: mute.withValues(alpha: 0.62),
+        color: placeholderColor(isDark: isDark),
       ),
       prefixIcon:
           icon != null

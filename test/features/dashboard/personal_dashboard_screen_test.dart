@@ -8,15 +8,20 @@ import 'package:focux_app/features/dashboard/screens/personal_dashboard_screen.d
 import 'package:focux_app/features/dashboard/utils/dashboard_day_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
+import 'package:focux_app/features/ferramentas/data/ferramentas_catalogo_bootstrap.dart';
+import 'package:focux_app/features/ferramentas/data/ferramentas_catalogo_models.dart';
+import 'package:focux_app/features/ferramentas/providers/ferramentas_catalogo_provider.dart';
 import 'package:focux_app/features/financeiro/data/financeiro_repository.dart';
 import 'package:focux_app/features/onboarding/data/onboarding_status_data.dart';
 import 'package:focux_app/features/onboarding/providers/onboarding_provider.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
+import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../support/dynamic_type_harness.dart';
 import '../../support/riverpod_seeds.dart';
 
 DashboardHomeBundle _homeFixture() {
@@ -114,52 +119,23 @@ void main() {
     DashboardHomeClientCache.clear();
   });
 
+  for (final tela in kDynamicTypeTelas) {
+    testWidgets('Hoje do Personal aguenta ${descreverTela(tela)}', (
+      tester,
+    ) async {
+      usarDynamicTypeMaximo(tester, tela);
+      await tester.binding.setSurfaceSize(tela);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pump(tester);
+      expect(find.text('Foco do dia'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets(
     'PersonalDashboardScreen monta fold com Semantics e ajuda',
     (tester) async {
-      final home = _homeFixture();
-      const features = PlanoFeatures(
-        plano: SubscriptionPlan.PRO,
-        financeiro: true,
-        agenda: true,
-        relatorios: true,
-        whiteLabel: false,
-        iaCopiloto: true,
-        migracaoFoto: false,
-      );
-
-      final router = GoRouter(
-        initialLocation: '/dashboard/personal',
-        routes: [
-          GoRoute(
-            path: '/dashboard/personal',
-            builder: (context, state) => const PersonalDashboardScreen(),
-          ),
-        ],
-      );
-
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            dashboardHomeProvider.overrideWith((ref) async => home),
-            onboardingStatusProvider.overrideWith(
-              (ref) async => throw StateError(
-                'Home BFF already sent onboardingResumo',
-              ),
-            ),
-            seededPlanoFeatures(features),
-          ],
-          child: MaterialApp.router(
-            locale: const Locale('pt'),
-            supportedLocales: S.supportedLocales,
-            localizationsDelegates: S.localizationsDelegates,
-            routerConfig: router,
-          ),
-        ),
-      );
-
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 600));
+      await _pump(tester);
 
       expect(find.byType(PersonalDashboardScreen), findsOneWidget);
       expect(find.textContaining('Matheus'), findsWidgets);
@@ -185,4 +161,62 @@ void main() {
       expect(find.text('Índice Focux'), findsOneWidget);
     },
   );
+}
+
+class _PlanosOffline implements PlanosRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      Future<Never>.error(StateError('offline'));
+}
+
+class _CatalogoLocal extends FerramentasCatalogoNotifier {
+  @override
+  Future<FerramentasCatalogo> build() async => ferramentasCatalogoBootstrap();
+}
+
+Future<void> _pump(WidgetTester tester) async {
+  final home = _homeFixture();
+  const features = PlanoFeatures(
+    plano: SubscriptionPlan.PRO,
+    financeiro: true,
+    agenda: true,
+    relatorios: true,
+    whiteLabel: false,
+    iaCopiloto: true,
+    migracaoFoto: false,
+  );
+
+  final router = GoRouter(
+    initialLocation: '/dashboard/personal',
+    routes: [
+      GoRoute(
+        path: '/dashboard/personal',
+        builder: (context, state) => const PersonalDashboardScreen(),
+      ),
+    ],
+  );
+
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        dashboardHomeProvider.overrideWith((ref) async => home),
+        onboardingStatusProvider.overrideWith(
+          (ref) async =>
+              throw StateError('Home BFF already sent onboardingResumo'),
+        ),
+        seededPlanoFeatures(features),
+        planosRepositoryProvider.overrideWithValue(_PlanosOffline()),
+        ferramentasCatalogoProvider.overrideWith(_CatalogoLocal.new),
+      ],
+      child: MaterialApp.router(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
+        routerConfig: router,
+      ),
+    ),
+  );
+
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
 }

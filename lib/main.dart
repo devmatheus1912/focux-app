@@ -27,6 +27,7 @@ import 'core/health/home_widget_service.dart';
 import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
 import 'core/storage/secure_storage.dart';
+import 'core/utils/motion_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/brand_palette.dart';
 import 'core/theme/curated_brand_palettes.dart';
@@ -456,23 +457,10 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       locale: const Locale('pt'),
       supportedLocales: S.supportedLocales,
       localizationsDelegates: S.localizationsDelegates,
-      // Acessibilidade: respeita escala do sistema, mas evita explosões
-      // de layout em escalas absurdas (>1.6) — mantém WCAG AA sem
-      // quebrar telas densas como dashboard/treinos.
       builder: (context, child) {
         final mq = MediaQuery.of(context);
-        final width = mq.size.width;
-        final isPhone =
-            !kIsWeb &&
-            (defaultTargetPlatform == TargetPlatform.android ||
-                defaultTargetPlatform == TargetPlatform.iOS);
-        final maxScale = isPhone && width <= 390 ? 1.05 : 1.25;
-        final scaler = mq.textScaler.clamp(
-          minScaleFactor: 0.85,
-          maxScaleFactor: maxScale,
-        );
         return MediaQuery(
-          data: mq.copyWith(textScaler: scaler),
+          data: mq.copyWith(textScaler: appTextScaler(mq.textScaler)),
           child: FxConnectivityBanner(
             child: CheckinFilaSyncScope(
               child: IapPurchaseSyncScope(

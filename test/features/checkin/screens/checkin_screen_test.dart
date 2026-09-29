@@ -4,12 +4,30 @@ import 'package:focux_app/features/checkin/data/checkin_series_pendentes.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_serie_campos_widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../support/dynamic_type_harness.dart';
 import '../support/checkin_screen_harness.dart';
 
 void main() {
   const fila = CheckinSeriesPendentesStore();
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  for (final tela in kDynamicTypeTelas) {
+    testWidgets('rodapé da execução aguenta ${descreverTela(tela)}', (
+      tester,
+    ) async {
+      usarDynamicTypeMaximo(tester, tela);
+      final repo = FakeCheckinRepo()..offline = true;
+      await pumpCheckin(tester, repo, tela: tela);
+      expect(find.text('Registrar série'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tocarRegistrar(tester);
+      expect(find.text('Pular descanso'), findsOneWidget);
+      expect(find.text('1 série esperando conexão'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('sem conexão: série fica feita, descanso começa, aviso aparece', (
     tester,

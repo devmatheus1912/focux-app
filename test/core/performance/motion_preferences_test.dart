@@ -43,4 +43,19 @@ void main() {
     final context = tester.element(find.byType(SizedBox));
     expect(clampedTextScaler(context, maxScale: 1.2).scale(1), 1.2);
   });
+
+  group('appTextScaler', () {
+    test('respeita a fonte do sistema até 1,3', () {
+      expect(appTextScaler(const TextScaler.linear(1.15)).scale(1), 1.15);
+      expect(
+        appTextScaler(const TextScaler.linear(1.3)).scale(1),
+        kAppMaxTextScale,
+      );
+    });
+
+    test('corta escalas acima do teto e abaixo do piso', () {
+      expect(appTextScaler(const TextScaler.linear(2)).scale(1), 1.3);
+      expect(appTextScaler(const TextScaler.linear(0.5)).scale(1), 0.85);
+    });
+  });
 }

@@ -179,11 +179,12 @@ class CheckinHarness {
 
 Future<CheckinHarness> pumpCheckin(
   WidgetTester tester,
-  FakeCheckinRepo repo,
-) async {
+  FakeCheckinRepo repo, {
+  Size tela = const Size(430, 1400),
+}) async {
   final h = CheckinHarness(repo);
   addTearDown(h.conexao.close);
-  await tester.binding.setSurfaceSize(const Size(430, 1400));
+  await tester.binding.setSurfaceSize(tela);
   addTearDown(() => tester.binding.setSurfaceSize(null));
   final router = GoRouter(
     initialLocation: '/checkin/executar',

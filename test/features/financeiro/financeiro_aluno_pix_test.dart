@@ -16,6 +16,8 @@ import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../support/dynamic_type_harness.dart';
+
 const _listaPath = '/api/financeiro/mensalidades/aluno/minhas';
 const _pixPath = '$_listaPath/7/pix';
 const _avisoPath = '$_listaPath/7/avisar-pagamento';
@@ -280,6 +282,38 @@ void main() {
     expect(adapter.listas, hasLength(2));
     await tester.pump(const Duration(seconds: 61));
   });
+
+  for (final tela in kDynamicTypeTelas) {
+    testWidgets('Mensalidades do aluno aguentam ${descreverTela(tela)}', (
+      tester,
+    ) async {
+      usarDynamicTypeMaximo(tester, tela);
+      await tester.pumpWidget(
+        _app(
+          adapter: _adapter(duasPaginas: true),
+          home: const FinanceiroAlunoScreen(),
+        ),
+      );
+      await _settle(tester);
+      expect(find.text('Suas cobranças'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.dragUntilVisible(
+        find.text('Setembro 2026'),
+        find.byType(Scrollable).first,
+        const Offset(0, -200),
+      );
+      await tester.tap(find.text('Setembro 2026'));
+      await _settle(tester);
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(find.text('Pagar com PIX'));
+      await tester.tap(find.text('Pagar com PIX'));
+      await _settle(tester);
+      expect(find.text('Copiar código PIX'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pump(const Duration(seconds: 5));
+    });
+  }
 
   testWidgets('recarga após o PIX mantém as páginas já carregadas', (
     tester,

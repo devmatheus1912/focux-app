@@ -42,7 +42,7 @@ class CheckinRestFocusView extends StatelessWidget {
     final hasContext = contextText != null && contextText.isNotEmpty;
 
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s5),
         child: Semantics(
           label: checkinRestSemanticsLabel(
@@ -100,8 +100,8 @@ class CheckinRestFocusView extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: TokensStrip.s5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
                 children: [
                   TextButton(
                     onPressed: onSkip,

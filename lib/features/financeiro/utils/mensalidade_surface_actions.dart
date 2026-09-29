@@ -249,151 +249,154 @@ Future<bool> mostrarPixMensalidade({
                     : null;
             return FxHomeSheetSurface(
               isDark: isDark,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FxHomeSheetHandle(isDark: isDark),
-                  SizedBox(height: TokensStrip.s4),
-                  FxHomeSheetHeader(
-                    isDark: isDark,
-                    title: 'PIX - Escaneie ou copie',
-                    leading: FxIcon(name: 'pix', color: primary, size: 18),
-                  ),
-                  SizedBox(height: TokensStrip.s3),
-                  Text(
-                    mensalidade.valor.formatCobranca(),
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.metric(
-                      color: Theme.of(ctx).colorScheme.onSurface,
-                      fontSize: 28,
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s1),
-                  Text(
-                    pixVencimentoLinha(
-                      s,
-                      mesReferencia: mensalidade.mesReferencia,
-                      vencimento: mensalidade.vencimento,
-                    ),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: mute,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: TokensStrip.s4),
-                  if (carregando)
-                    SizedBox(
-                      height: 96,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const FxLoading(),
-                          const SizedBox(height: TokensStrip.s2),
-                          Text(
-                            'Gerando PIX…',
-                            style: TextStyle(
-                              color:
-                                  isDark
-                                      ? EagleTokens.darkInkMute
-                                      : TokensStrip.textSecondary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else if (erro != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        children: [
-                          Text(
-                            erro!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: EagleTokens.bad,
-                              fontSize: 13,
-                              height: 1.35,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          if (precisaCarteira)
-                            FxLiquidPrimaryButton(
-                              label: 'Abrir carteira',
-                              onPressed: () {
-                                FxHomeSheetChrome.dismissAndPop(ctx);
-                                context.push('/perfil/wallet');
-                              },
-                            )
-                          else
-                            TextButton(
-                              onPressed: () => carregar(setDialogState),
-                              child: const Text('Tentar de novo'),
-                            ),
-                        ],
-                      ),
-                    )
-                  else ...[
-                    _pixQrVisual(
-                      pixCopiaECola: pix?.pixCopiaECola ?? '',
-                      qrBytes: qrBytes,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FxHomeSheetHandle(isDark: isDark),
+                    SizedBox(height: TokensStrip.s4),
+                    FxHomeSheetHeader(
                       isDark: isDark,
+                      title: 'PIX - Escaneie ou copie',
+                      leading: FxIcon(name: 'pix', color: primary, size: 18),
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    FxLiquidPrimaryButton(
-                      icon: Icons.copy,
-                      label: s.pixCopiarCodigo,
-                      onPressed: () async {
-                        final code = pix?.pixCopiaECola.trim() ?? '';
-                        if (code.isEmpty) {
-                          FeedbackHelper.showError(
-                            ctx,
-                            'Código PIX indisponível. Tente gerar de novo.',
-                          );
-                          return;
-                        }
-                        await copySensitiveToClipboard(code);
-                        copiado = true;
-                        if (ctx.mounted) {
-                          FeedbackHelper.showSuccess(
-                            ctx,
-                            'Código PIX copiado. Some em 1 min.',
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
+                    SizedBox(height: TokensStrip.s3),
                     Text(
-                      pixDestinoHint(asAluno: asAluno),
+                      mensalidade.valor.formatCobranca(),
+                      textAlign: TextAlign.center,
+                      style: FocuxHubTypography.metric(
+                        color: Theme.of(ctx).colorScheme.onSurface,
+                        fontSize: 28,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s1),
+                    Text(
+                      pixVencimentoLinha(
+                        s,
+                        mesReferencia: mensalidade.mesReferencia,
+                        vencimento: mensalidade.vencimento,
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: mute,
-                        fontSize: 12.5,
-                        height: 1.35,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (asAluno && !avisado) ...[
-                      const SizedBox(height: TokensStrip.s3),
-                      FxLiquidSecondaryButton(
-                        label: avisando ? 'Avisando…' : pixAvisarPagamentoLabel,
-                        onPressed:
-                            avisando
-                                ? null
-                                : () => avisarPagamento(ctx, setDialogState),
+                    SizedBox(height: TokensStrip.s4),
+                    if (carregando)
+                      SizedBox(
+                        height: 96,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const FxLoading(),
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              'Gerando PIX…',
+                              style: TextStyle(
+                                color:
+                                    isDark
+                                        ? EagleTokens.darkInkMute
+                                        : TokensStrip.textSecondary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else if (erro != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Column(
+                          children: [
+                            Text(
+                              erro!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: EagleTokens.bad,
+                                fontSize: 13,
+                                height: 1.35,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            if (precisaCarteira)
+                              FxLiquidPrimaryButton(
+                                label: 'Abrir carteira',
+                                onPressed: () {
+                                  FxHomeSheetChrome.dismissAndPop(ctx);
+                                  context.push('/perfil/wallet');
+                                },
+                              )
+                            else
+                              TextButton(
+                                onPressed: () => carregar(setDialogState),
+                                child: const Text('Tentar de novo'),
+                              ),
+                          ],
+                        ),
+                      )
+                    else ...[
+                      _pixQrVisual(
+                        pixCopiaECola: pix?.pixCopiaECola ?? '',
+                        qrBytes: qrBytes,
+                        isDark: isDark,
                       ),
+                      const SizedBox(height: TokensStrip.s4),
+                      FxLiquidPrimaryButton(
+                        icon: Icons.copy,
+                        label: s.pixCopiarCodigo,
+                        onPressed: () async {
+                          final code = pix?.pixCopiaECola.trim() ?? '';
+                          if (code.isEmpty) {
+                            FeedbackHelper.showError(
+                              ctx,
+                              'Código PIX indisponível. Tente gerar de novo.',
+                            );
+                            return;
+                          }
+                          await copySensitiveToClipboard(code);
+                          copiado = true;
+                          if (ctx.mounted) {
+                            FeedbackHelper.showSuccess(
+                              ctx,
+                              'Código PIX copiado. Some em 1 min.',
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(height: TokensStrip.s2),
+                      Text(
+                        pixDestinoHint(asAluno: asAluno),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: mute,
+                          fontSize: 12.5,
+                          height: 1.35,
+                        ),
+                      ),
+                      if (asAluno && !avisado) ...[
+                        const SizedBox(height: TokensStrip.s3),
+                        FxLiquidSecondaryButton(
+                          label:
+                              avisando ? 'Avisando…' : pixAvisarPagamentoLabel,
+                          onPressed:
+                              avisando
+                                  ? null
+                                  : () => avisarPagamento(ctx, setDialogState),
+                        ),
+                      ],
                     ],
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => FxHomeSheetChrome.dismissAndPop(ctx),
+                      child: const Text('Fechar'),
+                    ),
                   ],
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () => FxHomeSheetChrome.dismissAndPop(ctx),
-                    child: const Text('Fechar'),
-                  ),
-                ],
+                ),
               ),
             );
           },
