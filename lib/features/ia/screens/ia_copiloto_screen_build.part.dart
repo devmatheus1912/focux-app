@@ -203,6 +203,12 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                   : ref.watch(
                                     copilotRecoveryProvider(_selectedAlunoId!),
                                   ),
+                          onRetryRecovery:
+                              _selectedAlunoId == null
+                                  ? null
+                                  : () => ref.invalidate(
+                                    copilotRecoveryProvider(_selectedAlunoId!),
+                                  ),
                         ),
                       ),
                       Padding(

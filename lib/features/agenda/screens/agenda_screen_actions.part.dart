@@ -22,7 +22,16 @@ extension on _AgendaScreenState {
   }
 
   Future<void> _setStatus(Agendamento ag, String status) async {
-    await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
+    try {
+      await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: S.of(context).agendaStatusFalhou),
+      );
+      return;
+    }
     if (!mounted) return;
     _popRootOverlay();
     await _load(force: true);
@@ -52,9 +61,18 @@ extension on _AgendaScreenState {
     );
     if (dt == null || !mounted) return;
     final fim = dt.add(ag.fim.difference(ag.inicio));
-    await ref
-        .read(agendaRepositoryProvider)
-        .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo);
+    try {
+      await ref
+          .read(agendaRepositoryProvider)
+          .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo);
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showError(
+        context,
+        friendlyError(e, fallback: S.of(context).agendaRemarcarFalhou),
+      );
+      return;
+    }
     if (!mounted) return;
     _popRootOverlay();
     await _load(force: true);
@@ -168,7 +186,16 @@ extension on _AgendaScreenState {
                 confirmLabel: 'Excluir',
               );
               if (!ok) return;
-              await ref.read(agendaRepositoryProvider).excluir(ag.id);
+              try {
+                await ref.read(agendaRepositoryProvider).excluir(ag.id);
+              } catch (e) {
+                if (!mounted) return;
+                FeedbackHelper.showError(
+                  context,
+                  friendlyError(e, fallback: S.of(context).agendaExcluirFalhou),
+                );
+                return;
+              }
               if (!mounted) return;
               _popRootOverlay();
               await _load(force: true);

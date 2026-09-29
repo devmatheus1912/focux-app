@@ -6,6 +6,7 @@ import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -145,7 +146,7 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
               child: FxErrorState(
                 chromeOnDark: chrome.isDark,
                 primary: scheme.primary,
-                message: '$e',
+                message: friendlyError(e),
                 onRetry: () => ref.invalidate(ferramentasCatalogoProvider),
               ),
             ),

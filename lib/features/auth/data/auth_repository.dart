@@ -13,7 +13,7 @@ class PasswordResetRequestResult {
     return PasswordResetRequestResult(
       mensagem:
           json['mensagem'] as String? ??
-          'Se o e-mail estiver cadastrado, voce recebera as instrucoes.',
+          'Se o e-mail estiver cadastrado, você receberá as instruções.',
     );
   }
 }

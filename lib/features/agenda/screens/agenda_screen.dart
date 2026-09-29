@@ -39,6 +39,7 @@ import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../widgets/agenda_form_sheets.dart';
+import '../../../l10n/app_localizations.dart';
 
 part 'agenda_screen_actions.part.dart';
 part 'agenda_screen_widgets.part.dart';

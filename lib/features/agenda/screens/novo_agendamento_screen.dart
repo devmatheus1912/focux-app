@@ -140,7 +140,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     }
     final alunoId = _alunoId;
     if (alunoId == null) {
-      FeedbackHelper.showSuccess(context, 'Selecione um aluno.');
+      FeedbackHelper.showWarn(context, 'Selecione um aluno.');
       return;
     }
     final inicio = _inicio!;

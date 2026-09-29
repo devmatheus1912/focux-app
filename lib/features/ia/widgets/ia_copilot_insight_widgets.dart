@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_inline_retry_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/utils/prontidao_display.dart';
@@ -172,7 +174,8 @@ class IaCopilotReadinessCard extends StatelessWidget {
     required this.checks,
     required this.alunoNome,
     this.recoveryAsync,
-  });
+    this.onRetryRecovery,
+  }) : assert(recoveryAsync == null || onRetryRecovery != null);
 
   final String headline;
   final String modeDisplay;
@@ -181,6 +184,7 @@ class IaCopilotReadinessCard extends StatelessWidget {
   final List<String> checks;
   final String? alunoNome;
   final AsyncValue<RecoverySnapshot?>? recoveryAsync;
+  final VoidCallback? onRetryRecovery;
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +232,10 @@ class IaCopilotReadinessCard extends StatelessWidget {
               title: 'Sync wearable...',
               leading: Icon(Icons.watch_outlined, color: primary, size: 20),
             ),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, __) => FxInlineRetryTile(
+              message: S.of(context).iaCopilotProntidaoFalhou,
+              onRetry: onRetryRecovery ?? () {},
+            ),
             data: (snapshot) => FxSatelliteListTile(
               title: snapshot == null
                   ? 'Sem wearable'

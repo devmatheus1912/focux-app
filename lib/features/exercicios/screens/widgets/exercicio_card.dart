@@ -111,7 +111,7 @@ class ExercicioCard extends ConsumerWidget {
             Icon(Icons.check_circle_rounded, color: primary, size: 20)
           else
             PopupMenuButton<String>(
-              tooltip: 'Acoes do exercicio',
+              tooltip: 'Ações do exercício',
               padding: EdgeInsets.zero,
               splashRadius: 18,
               offset: const Offset(0, 36),

@@ -78,4 +78,33 @@ void main() {
       isNot(contains('FxSettingsGroup')),
     );
   });
+
+  test('excluir, confirmar e remarcar tratam falha com erro, não sucesso', () {
+    final actions = File(
+      'lib/features/agenda/screens/agenda_screen_actions.part.dart',
+    ).readAsStringSync();
+    for (final key in [
+      'agendaExcluirFalhou',
+      'agendaStatusFalhou',
+      'agendaRemarcarFalhou',
+    ]) {
+      expect(actions, contains('S.of(context).$key'));
+    }
+    final delete = actions.substring(actions.indexOf('onDelete:'));
+    expect(
+      delete.indexOf('catch (e)'),
+      lessThan(delete.indexOf("showSuccess(context, 'Agendamento excluído.')")),
+    );
+  });
+
+  test('validação do novo agendamento não usa estilo de sucesso', () {
+    final novo = File(
+      'lib/features/agenda/screens/novo_agendamento_screen.dart',
+    ).readAsStringSync();
+    final salvar = novo.substring(
+      novo.indexOf('Future<void> _salvar()'),
+      novo.indexOf('showFxConfirmSheet(', novo.indexOf('Future<void> _salvar()')),
+    );
+    expect(salvar, isNot(contains('showSuccess')));
+  });
 }

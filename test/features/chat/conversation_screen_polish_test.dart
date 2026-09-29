@@ -52,6 +52,19 @@ void main() {
     expect(widgets, isNot(contains('LinearGradient')));
   });
 
+  test('reação que falha mostra erro humano, nunca sucesso nem exceção crua', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/chat/screens/conversation_screen.dart',
+    );
+    final start = screen.indexOf('Future<void> _toggleReaction(');
+    final end = screen.indexOf('Future<void> _editMessage(', start);
+    final reaction = screen.substring(start, end);
+    expect(reaction, contains('FeedbackHelper.showError('));
+    expect(reaction, contains('chatReacaoFalhou'));
+    expect(reaction, isNot(contains('showSuccess')));
+    expect(reaction, isNot(contains(r'$e')));
+  });
+
   test('compositor é card 48dp, sem send circular de messenger', () {
     final screen = readScreenSourceBundle(
       'lib/features/chat/screens/conversation_screen.dart',

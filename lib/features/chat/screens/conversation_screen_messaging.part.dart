@@ -8,7 +8,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Mensagem recente ja enviada.');
+        FeedbackHelper.showInfo(context, 'Mensagem recente já enviada.');
       }
       return;
     }
@@ -476,7 +476,10 @@ extension ConversationScreenMessaging on _ConversationScreenState {
       setState(() => _upsertMessage(updated));
     } catch (e) {
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Nao foi possivel reagir: $e');
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: S.of(context).chatReacaoFalhou),
+        );
       }
     }
   }
@@ -602,7 +605,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     if (original == null) {
       FeedbackHelper.showInfo(
         context,
-        'Mensagem original nao encontrada aqui.',
+        'Mensagem original não encontrada aqui.',
       );
       return;
     }

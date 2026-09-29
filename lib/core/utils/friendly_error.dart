@@ -11,6 +11,7 @@ String friendlyError(Object error, {String? fallback}) {
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     final data = error.response?.data;
+    final context = _contextFromPath(error.requestOptions.path);
 
     // Try to extract a server-provided message. `erro` is the field name in
     // the paired contract; the others stay as tolerance for older payloads.
@@ -20,7 +21,7 @@ String friendlyError(Object error, {String? fallback}) {
       final msg =
           data['erro'] ?? data['message'] ?? data['mensagem'] ?? data['error'];
       if (msg is String && msg.trim().isNotEmpty) {
-        final humanized = _humanizeServerMessage(msg);
+        final humanized = _humanizeServerMessage(msg, fb, context);
         // Validação genérica sem detalhes → mensagem mais acionável.
         if (statusCode == 400 &&
             (humanized.toLowerCase().contains('validação') ||
@@ -31,7 +32,7 @@ String friendlyError(Object error, {String? fallback}) {
       }
     }
     if (data is String && data.trim().isNotEmpty && data.length < 200) {
-      return _humanizeServerMessage(data);
+      return _humanizeServerMessage(data, fb, context);
     }
 
     // Map common HTTP status codes to friendly messages
@@ -54,7 +55,7 @@ String friendlyError(Object error, {String? fallback}) {
         return 'Erro no servidor. Tente novamente em instantes.';
       case 502:
       case 503:
-        return 'Servidor indisponível, tente novamente';
+        return _unavailableCopy(context);
     }
 
     // Network / timeout — only when there was no HTTP status.
@@ -105,11 +106,29 @@ String friendlyError(Object error, {String? fallback}) {
   if (msg.length < 100 &&
       !msg.contains('Exception') &&
       !msg.contains('Error:')) {
-    return _humanizeServerMessage(msg);
+    return _humanizeServerMessage(msg, fb, _ErrorContext.generic);
   }
 
   return fb;
 }
+
+enum _ErrorContext { generic, media, pix }
+
+_ErrorContext _contextFromPath(String path) {
+  final lower = path.toLowerCase();
+  if (lower.contains('/pix')) return _ErrorContext.pix;
+  if (lower.contains('/uploads') ||
+      lower.contains('/midia') ||
+      lower.contains('/media')) {
+    return _ErrorContext.media;
+  }
+  return _ErrorContext.generic;
+}
+
+String _unavailableCopy(_ErrorContext context) =>
+    context == _ErrorContext.media
+    ? 'Serviço de mídia temporariamente indisponível. Tente novamente em instantes.'
+    : 'Serviço temporariamente indisponível. Tente de novo em instantes.';
 
 /// Converte `detalhes` de MethodArgumentNotValid (campo → mensagem) em copy PT.
 String? _friendlyValidationDetalhes(Object? raw) {
@@ -136,7 +155,7 @@ String? _friendlyValidationDetalhes(Object? raw) {
         lower.contains('obrigat')) {
       parts.add('$label é obrigatório');
     } else {
-      parts.add('$label: ${_humanizeServerMessage(detail)}');
+      parts.add('$label: ${_humanizeServerMessage(detail, 'valor inválido', _ErrorContext.generic)}');
     }
   }
   if (parts.isEmpty) return null;
@@ -175,9 +194,13 @@ String _validationFieldLabel(String field) {
   return labels[field] ?? field;
 }
 
-String _humanizeServerMessage(String raw) {
+String _humanizeServerMessage(
+  String raw,
+  String fallback,
+  _ErrorContext context,
+) {
   final msg = raw.trim();
-  if (msg.isEmpty) return 'Algo deu errado. Tente novamente.';
+  if (msg.isEmpty) return fallback;
 
   final lower = msg.toLowerCase();
   if (lower.contains('collector') &&
@@ -201,23 +224,39 @@ String _humanizeServerMessage(String raw) {
     return msg;
   }
   if (lower.contains('cloudinary') &&
-      lower.contains('nao configurado')) {
-    return 'Envio de vídeo indisponível: Cloudinary não está configurado no servidor (CLOUDINARY_CLOUD_NAME, API_KEY e API_SECRET).';
+      (lower.contains('nao configurado') || lower.contains('não configurado'))) {
+    return 'Envio de mídia indisponível no momento. Tente de novo mais tarde.';
   }
   if (lower.contains('upload') &&
-      (lower.contains('indispon') || lower.contains('midia'))) {
-    return 'Envio de vídeo falhou no servidor. Confira os logs do backend (Cloudinary, tamanho do arquivo ou rede) e tente de novo.';
+      (lower.contains('indispon') ||
+          lower.contains('midia') ||
+          lower.contains('mídia'))) {
+    return 'Não foi possível enviar o arquivo. Confira o tamanho e a conexão e tente de novo.';
   }
   if (lower.contains('service unavailable') || lower.contains('503')) {
-    return 'Serviço de mídia temporariamente indisponível. Tente novamente em instantes.';
+    return _unavailableCopy(context);
   }
-  // Never dump raw JSON / MP payloads into the sheet.
+  // Never dump raw JSON / MP payloads into the UI.
   if (msg.startsWith('{') || msg.contains('"cause"') || msg.contains('"error"')) {
-    return 'Não foi possível gerar o PIX. Tente de novo em instantes.';
+    return context == _ErrorContext.pix
+        ? 'Não foi possível gerar o PIX. Tente de novo em instantes.'
+        : fallback;
   }
+  if (_looksTechnical(msg)) return fallback;
 
   return msg;
 }
+
+final _envVarPattern = RegExp(r'\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b');
+final _infraWordPattern = RegExp(
+  r'\b(logs?|cloudinary|stacktrace|exception)\b',
+  caseSensitive: false,
+);
+
+/// Nome de variável de ambiente ou termo de infraestrutura nunca chega ao
+/// usuário final.
+bool _looksTechnical(String msg) =>
+    _envVarPattern.hasMatch(msg) || _infraWordPattern.hasMatch(msg);
 
 /// True when the error is a plan/feature gate (not a real outage).
 ///
