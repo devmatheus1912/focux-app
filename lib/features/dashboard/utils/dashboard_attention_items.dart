@@ -53,7 +53,7 @@ List<DashboardAttentionEntry> dashboardAttentionEntries({
       DashboardAttentionEntry(
         nome: venc.alunoNome,
         titulo: 'Inadimplente',
-        subt: '${venc.valor.format(showDecimals: false)} pendente',
+        subt: '${venc.valor.formatCobranca()} pendente',
         acao: 'Cobrar',
         route: '/financeiro',
         icon: 'dollar-sign',

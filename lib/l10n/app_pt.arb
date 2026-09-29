@@ -615,5 +615,12 @@
   "conexaoSincronizando": "{n, plural, =1{Sincronizando 1 ação pendente…} other{Sincronizando {n} ações pendentes…}}",
   "@conexaoSincronizando": { "placeholders": { "n": { "type": "int" } } },
   "conexaoOk": "OK",
-  "assinaturaRestaurarFalhou": "Não foi possível validar suas compras agora. Tente de novo em instantes."
+  "assinaturaRestaurarFalhou": "Não foi possível validar suas compras agora. Tente de novo em instantes.",
+  "financeiroAlunoRecorteParcial": "Nas cobranças carregadas",
+  "financeiroAlunoRecorteCompleto": "Em todas as cobranças",
+  "pixCopiarCodigo": "Copiar código PIX",
+  "pixVenceEm": "Vence em {data}",
+  "@pixVenceEm": { "placeholders": { "data": { "type": "String" } } },
+  "pixReferenteA": "Referente a {mes}",
+  "@pixReferenteA": { "placeholders": { "mes": { "type": "String" } } }
 }

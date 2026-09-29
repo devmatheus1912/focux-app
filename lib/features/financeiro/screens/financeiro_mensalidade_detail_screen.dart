@@ -227,7 +227,7 @@ class _FinanceiroMensalidadeDetailScreenState
                         () => mostrarPixMensalidade(
                           context: context,
                           ref: ref,
-                          id: m.id,
+                          mensalidade: m,
                         ),
                     onChat:
                         () => cobrarMensalidadeViaChat(
@@ -339,7 +339,7 @@ class _DetailBody extends StatelessWidget {
                   const SizedBox(height: TokensStrip.s3),
                   _ValorMetricTile(
                     label: status,
-                    value: mensalidade.valor.format(showDecimals: false),
+                    value: mensalidade.valor.formatCobranca(),
                     hint: financeiroMensalidadeDetailValorHint(
                       overdue: overdue,
                       pending: pending,

@@ -1,5 +1,7 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/financeiro/utils/financeiro_hub_display.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
   test('financeiroHubViewLabel e subtitle — P0 mensalidades', () {
@@ -56,6 +58,32 @@ void main() {
     expect(
       mensalidadeDetailActionLabel(MensalidadeDetailActionId.financeiro),
       'Lista de mensalidades',
+    );
+  });
+
+  test('totais do aluno rotulam o recorte carregado com honestidade', () {
+    final s = lookupS(const Locale('pt'));
+    expect(financeiroAlunoRecorteHint(s, parcial: true), 'Nas cobranças carregadas');
+    expect(financeiroAlunoRecorteHint(s, parcial: false), 'Em todas as cobranças');
+    expect(
+      financeiroAlunoEmAbertoHint(s, atrasadas: 2, parcial: true),
+      'Nas cobranças carregadas',
+    );
+    expect(
+      financeiroAlunoEmAbertoHint(s, atrasadas: 2, parcial: false),
+      '2 em atraso',
+    );
+    expect(
+      financeiroAlunoAtrasadasTileHint(s, atrasadas: 3, parcial: true),
+      'Nas cobranças carregadas',
+    );
+    expect(
+      financeiroAlunoAtrasadasTileHint(s, atrasadas: 0, parcial: false),
+      'Em todas as cobranças',
+    );
+    expect(
+      financeiroAlunoAtrasadasTileHint(s, atrasadas: 3, parcial: false),
+      'Cobranças vencidas',
     );
   });
 

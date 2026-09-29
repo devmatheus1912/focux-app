@@ -26,6 +26,7 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/alunos/utils/satellite_screen_utils.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
@@ -55,11 +56,14 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
     _carregar();
   }
 
-  Future<void> _carregar() async {
-    setState(() {
-      _loading = true;
-      _erro = null;
-    });
+  /// [silencioso]: atualiza sem trocar a lista pelo skeleton; erro vira toast.
+  Future<void> _carregar({bool silencioso = false}) async {
+    if (!silencioso) {
+      setState(() {
+        _loading = true;
+        _erro = null;
+      });
+    }
     try {
       final result =
           await FinanceiroRepository(
@@ -72,14 +76,29 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         _hasMore = result.hasMore;
         _fetchedAt = DateTime.now();
         _loading = false;
+        _erro = null;
       });
     } catch (e) {
       if (!mounted) return;
+      if (silencioso) {
+        FeedbackHelper.showError(context, friendlyError(e));
+        return;
+      }
       setState(() {
         _erro = friendlyError(e);
         _loading = false;
       });
     }
+  }
+
+  Future<void> _pagarPix(Mensalidade item) async {
+    final interagiu = await mostrarPixMensalidade(
+      context: context,
+      ref: ref,
+      mensalidade: item,
+      asAluno: true,
+    );
+    if (interagiu && mounted) await _carregar(silencioso: true);
   }
 
   Future<void> _carregarMais() async {
@@ -128,6 +147,12 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
 
   Widget _fold({required Color primary, required bool isDark}) {
     final nextValue = financeiroAlunoProximoVencimentoValue(_vencimentosAbertos);
+    final s = S.of(context);
+    final emAbertoHint = financeiroAlunoEmAbertoHint(
+      s,
+      atrasadas: _atrasadas,
+      parcial: _hasMore,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -144,8 +169,8 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
             accent: EagleTokens.bad,
             child: OperationalMetricTile(
               label: 'Em aberto',
-              value: _abertoTotal.format(showDecimals: false),
-              hint: financeiroAlunoAtrasadasHint(_atrasadas),
+              value: _abertoTotal.formatCobranca(),
+              hint: emAbertoHint,
               color: EagleTokens.bad,
               isDark: isDark,
               emphasis: OperationalMetricEmphasis.alert,
@@ -154,8 +179,8 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         else
           OperationalMetricTile(
             label: 'Em aberto',
-            value: _abertoTotal.format(showDecimals: false),
-            hint: financeiroAlunoAtrasadasHint(_atrasadas),
+            value: _abertoTotal.formatCobranca(),
+            hint: emAbertoHint,
             color: primary,
             isDark: isDark,
             emphasis: OperationalMetricEmphasis.normal,
@@ -164,7 +189,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         OperationalMetricTile(
           label: 'Pagas',
           value: '$_pagas',
-          hint: 'Neste recorte',
+          hint: financeiroAlunoRecorteHint(s, parcial: _hasMore),
           color: primary,
           isDark: isDark,
         ),
@@ -172,7 +197,11 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
         OperationalMetricTile(
           label: 'Atrasadas',
           value: '$_atrasadas',
-          hint: _atrasadas == 0 ? 'Neste recorte' : 'Cobranças vencidas',
+          hint: financeiroAlunoAtrasadasTileHint(
+            s,
+            atrasadas: _atrasadas,
+            parcial: _hasMore,
+          ),
           color: _atrasadas > 0 ? EagleTokens.bad : primary,
           isDark: isDark,
           emphasis:
@@ -335,14 +364,9 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                                                   'PENDENTE' ||
                                                               item.status ==
                                                                   'ATRASADO'
-                                                          ? () =>
-                                                              mostrarPixMensalidade(
-                                                                context:
-                                                                    context,
-                                                                ref: ref,
-                                                                id: item.id,
-                                                                asAluno: true,
-                                                              )
+                                                          ? () => _pagarPix(
+                                                            item,
+                                                          )
                                                           : null,
                                                 ),
                                         subtitle: Text(
@@ -368,9 +392,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                                                   : primary,
                                         ),
                                         trailing: Text(
-                                          item.valor.format(
-                                            showDecimals: false,
-                                          ),
+                                          item.valor.formatCobranca(),
                                           style: FocuxHubTypography.metric(
                                             color:
                                                 Theme.of(

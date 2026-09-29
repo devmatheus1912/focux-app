@@ -529,9 +529,7 @@ class _FinanceiroMensalidadesTabState
                                                     : primary,
                                           ),
                                           trailing: Text(
-                                            item.valor.format(
-                                              showDecimals: false,
-                                            ),
+                                            item.valor.formatCobranca(),
                                             style: TextStyle(
                                               color: chrome.ink,
                                               fontWeight: FontWeight.w700,

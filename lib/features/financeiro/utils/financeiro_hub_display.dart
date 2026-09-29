@@ -1,3 +1,4 @@
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 
 /// Hub financeiro — P0 = lista de mensalidades (A30 / §0.1).
@@ -174,6 +175,31 @@ String financeiroAlunoHubSubtitle({required int lancamentos}) =>
 String financeiroAlunoAtrasadasHint(int atrasadas) {
   if (atrasadas <= 0) return 'Nada atrasado';
   return atrasadas == 1 ? '1 em atraso' : '$atrasadas em atraso';
+}
+
+/// A API do aluno não devolve totais agregados: com mais páginas por vir,
+/// os tiles somam só o que já foi carregado.
+String financeiroAlunoRecorteHint(S s, {required bool parcial}) =>
+    parcial ? s.financeiroAlunoRecorteParcial : s.financeiroAlunoRecorteCompleto;
+
+String financeiroAlunoEmAbertoHint(
+  S s, {
+  required int atrasadas,
+  required bool parcial,
+}) =>
+    parcial
+        ? s.financeiroAlunoRecorteParcial
+        : financeiroAlunoAtrasadasHint(atrasadas);
+
+String financeiroAlunoAtrasadasTileHint(
+  S s, {
+  required int atrasadas,
+  required bool parcial,
+}) {
+  if (parcial || atrasadas == 0) {
+    return financeiroAlunoRecorteHint(s, parcial: parcial);
+  }
+  return 'Cobranças vencidas';
 }
 
 String financeiroAlunoProximoVencimentoValue(Iterable<String> isos) {

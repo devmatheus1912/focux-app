@@ -273,7 +273,7 @@ extension on _LojaScreenState {
               ),
             ),
             trailing: Text(
-              formatBrlCurrency(pacote.valor, showDecimals: false),
+              formatBrlCurrency(pacote.valor),
               style: FocuxHubTypography.bodyMuted(
                 color: fxScreenMute(context),
                 fontWeight: FontWeight.w700,

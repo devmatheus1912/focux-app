@@ -16,6 +16,13 @@ void main() {
     expect(FxMoney.reais(150), 150);
   });
 
+  test('formatCobranca sempre mostra centavos, sem truncar', () {
+    expect(FxMoney.parse(149.9).formatCobranca(), 'R\$ 149,90');
+    expect(FxMoney.parse(1000).formatCobranca(), 'R\$ 1.000,00');
+    expect(FxMoney.parse(0.5).formatCobranca(), 'R\$ 0,50');
+    expect(FxMoney.parse('-12,34').formatCobranca(), '-R\$ 12,34');
+  });
+
   test('fromInput rejeita vazio', () {
     expect(() => FxMoney.fromInput(''), throwsFormatException);
   });

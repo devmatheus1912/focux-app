@@ -10,6 +10,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/money/fx_money.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -25,6 +26,7 @@ import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -151,18 +153,22 @@ Future<Mensalidade?> confirmarPagarMensalidade({
   }
 }
 
-Future<void> mostrarPixMensalidade({
+/// Devolve `true` se o código foi copiado ou o pagamento avisado — sinal para
+/// quem abriu recarregar a lista.
+Future<bool> mostrarPixMensalidade({
   required BuildContext context,
   required WidgetRef ref,
-  required int id,
+  required Mensalidade mensalidade,
   bool asAluno = false,
 }) async {
+  final id = mensalidade.id;
   PixData? pix;
   var carregando = true;
   String? erro;
   var precisaCarteira = false;
   var avisando = false;
   var avisado = false;
+  var copiado = false;
   var loadToken = 0;
   var loadStarted = false;
 
@@ -234,6 +240,9 @@ Future<void> mostrarPixMensalidade({
 
             final isDark = Theme.of(ctx).brightness == Brightness.dark;
             final primary = Theme.of(ctx).colorScheme.primary;
+            final s = S.of(ctx);
+            final mute =
+                isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
             final qrBytes =
                 !carregando && erro == null && pix != null
                     ? decodePixQrBase64(pix!.qrCodeBase64)
@@ -250,6 +259,29 @@ Future<void> mostrarPixMensalidade({
                     isDark: isDark,
                     title: 'PIX - Escaneie ou copie',
                     leading: FxIcon(name: 'pix', color: primary, size: 18),
+                  ),
+                  SizedBox(height: TokensStrip.s3),
+                  Text(
+                    mensalidade.valor.formatCobranca(),
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.metric(
+                      color: Theme.of(ctx).colorScheme.onSurface,
+                      fontSize: 28,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    pixVencimentoLinha(
+                      s,
+                      mesReferencia: mensalidade.mesReferencia,
+                      vencimento: mensalidade.vencimento,
+                    ),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: mute,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   SizedBox(height: TokensStrip.s4),
                   if (carregando)
@@ -313,9 +345,9 @@ Future<void> mostrarPixMensalidade({
                       isDark: isDark,
                     ),
                     const SizedBox(height: TokensStrip.s4),
-                    TextButton.icon(
-                      icon: const Icon(Icons.copy),
-                      label: const Text('Copiar codigo PIX'),
+                    FxLiquidPrimaryButton(
+                      icon: Icons.copy,
+                      label: s.pixCopiarCodigo,
                       onPressed: () async {
                         final code = pix?.pixCopiaECola.trim() ?? '';
                         if (code.isEmpty) {
@@ -326,6 +358,7 @@ Future<void> mostrarPixMensalidade({
                           return;
                         }
                         await copySensitiveToClipboard(code);
+                        copiado = true;
                         if (ctx.mounted) {
                           FeedbackHelper.showSuccess(
                             ctx,
@@ -334,21 +367,19 @@ Future<void> mostrarPixMensalidade({
                         }
                       },
                     ),
+                    const SizedBox(height: TokensStrip.s2),
                     Text(
                       pixDestinoHint(asAluno: asAluno),
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color:
-                            isDark
-                                ? EagleTokens.darkInkMute
-                                : TokensStrip.textSecondary,
+                        color: mute,
                         fontSize: 12.5,
                         height: 1.35,
                       ),
                     ),
                     if (asAluno && !avisado) ...[
                       const SizedBox(height: TokensStrip.s3),
-                      FxLiquidPrimaryButton(
+                      FxLiquidSecondaryButton(
                         label: avisando ? 'Avisando…' : pixAvisarPagamentoLabel,
                         onPressed:
                             avisando
@@ -368,6 +399,7 @@ Future<void> mostrarPixMensalidade({
           },
         ),
   );
+  return copiado || avisado;
 }
 
 Future<void> cobrarMensalidadeViaChat({

@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/financeiro/utils/pix_qr_display.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
   group('decodePixQrBase64', () {
@@ -39,6 +41,28 @@ void main() {
       expect(
         pixQrHasRenderablePayload(pixCopiaECola: '  ', qrCodeBase64: ''),
         isFalse,
+      );
+    });
+  });
+
+  group('pixVencimentoLinha', () {
+    final s = lookupS(const Locale('pt'));
+
+    test('mostra a data de vencimento quando existe', () {
+      expect(
+        pixVencimentoLinha(
+          s,
+          mesReferencia: '2026-09-01',
+          vencimento: '2026-09-10',
+        ),
+        'Vence em 10/09/2026',
+      );
+    });
+
+    test('sem vencimento cai no mês de referência', () {
+      expect(
+        pixVencimentoLinha(s, mesReferencia: '2026-09-01', vencimento: ' '),
+        'Referente a Setembro 2026',
       );
     });
   });

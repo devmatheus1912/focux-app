@@ -57,6 +57,9 @@ class FxMoney implements Comparable<FxMoney> {
   String format({bool showDecimals = true}) =>
       formatBrlCents(cents, showDecimals: showDecimals);
 
+  /// Valor cobrado ou pago (mensalidade, PIX, total a pagar): nunca sem centavos.
+  String formatCobranca() => formatBrlCents(cents);
+
   double ratioOf(FxMoney other) {
     if (other.cents == 0) return 0;
     return cents / other.cents;

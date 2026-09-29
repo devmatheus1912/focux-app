@@ -194,7 +194,7 @@ class _FinanceiroVencimentosGroup extends StatelessWidget {
               title: item.alunoNome,
               subtitle: Text(_vencimentoSubtitle(item)),
               trailing: Text(
-                item.valor.format(showDecimals: false),
+                item.valor.formatCobranca(),
                 style: FocuxHubTypography.bodyMuted(
                   color:
                       item.status == 'ATRASADO'
