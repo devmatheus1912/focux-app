@@ -616,6 +616,7 @@
   "@conexaoSincronizando": { "placeholders": { "n": { "type": "int" } } },
   "conexaoOk": "OK",
   "assinaturaRestaurarFalhou": "Não foi possível validar suas compras agora. Tente de novo em instantes.",
+  "assinaturaLojaIndisponivel": "Loja indisponível no momento. Tente de novo em instantes.",
   "financeiroAlunoRecorteParcial": "Nas cobranças carregadas",
   "financeiroAlunoRecorteCompleto": "Em todas as cobranças",
   "pixCopiarCodigo": "Copiar código PIX",

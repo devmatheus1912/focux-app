@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/subscription/services/iap_purchase_coordinator.dart';
 import 'package:focux_app/features/subscription/services/iap_store.dart';
+import 'package:focux_app/features/subscription/subscription_products.dart';
 import 'package:focux_app/features/subscription/utils/iap_session_gate.dart';
 import 'package:focux_app/features/subscription/widgets/iap_purchase_sync_scope.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -53,15 +54,32 @@ class _FakeStore implements IapStore {
 
   @override
   Future<void> restorePurchases() async {}
+
+  @override
+  Future<void> buyNonConsumable(ProductDetails product) async {}
 }
 
-Future<({_FakeAuth auth, _FakeStore store})> _pump(
+PurchaseDetails _compra(String id) => PurchaseDetails(
+  purchaseID: id,
+  productID: SubscriptionProducts.proMonthly,
+  verificationData: PurchaseVerificationData(
+    localVerificationData: 'local',
+    serverVerificationData: 'recibo',
+    source: 'app_store',
+  ),
+  transactionDate: '1700000000000',
+  status: PurchaseStatus.purchased,
+);
+
+Future<({_FakeAuth auth, _FakeStore store, List<int> refreshes})> _pump(
   WidgetTester tester, {
   AuthStatus status = AuthStatus.authenticated,
   UserRole? papel = UserRole.personal,
+  bool refreshFalha = false,
 }) async {
   final auth = _FakeAuth(status, papel);
   final store = _FakeStore();
+  final refreshes = <int>[];
   final coordinator = IapPurchaseCoordinator(
     store: store,
     verify: (_) async => {'status': 'PROCESSADO'},
@@ -74,13 +92,20 @@ Future<({_FakeAuth auth, _FakeStore store})> _pump(
         iapPurchaseCoordinatorProvider.overrideWithValue(coordinator),
       ],
       child: MaterialApp(
-        builder: (context, child) => IapPurchaseSyncScope(child: child!),
+        builder:
+            (context, child) => IapPurchaseSyncScope(
+              refreshPlan: (_) async {
+                refreshes.add(1);
+                if (refreshFalha) throw StateError('sem rede');
+              },
+              child: child!,
+            ),
         home: const Scaffold(body: Text('hoje')),
       ),
     ),
   );
   await tester.pump(const Duration(milliseconds: 50));
-  return (auth: auth, store: store);
+  return (auth: auth, store: store, refreshes: refreshes);
 }
 
 void main() {
@@ -145,6 +170,36 @@ void main() {
     h.auth.entrar(UserRole.personal);
     await tester.pump(const Duration(milliseconds: 50));
     expect(h.store.listeners, 1);
+  });
+
+  testWidgets('N compras validadas no mesmo lote: 1 refresh do plano', (
+    tester,
+  ) async {
+    final h = await _pump(tester);
+
+    h.store.controller.add([_compra('a'), _compra('b'), _compra('c')]);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(h.refreshes, hasLength(1));
+  });
+
+  testWidgets('lote sem compra validada não faz refresh', (tester) async {
+    final h = await _pump(tester);
+
+    h.store.controller.add(const []);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(h.refreshes, isEmpty);
+  });
+
+  testWidgets('erro no refresh do plano não quebra nem avisa', (tester) async {
+    final h = await _pump(tester, refreshFalha: true);
+
+    h.store.controller.add([_compra('a')]);
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(h.refreshes, hasLength(1));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('logout cancela o listener da loja', (tester) async {

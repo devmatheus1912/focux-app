@@ -6,14 +6,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/fcm/plan_sync_coordinator.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../services/iap_purchase_coordinator.dart';
+import '../services/iap_purchase_event.dart';
 import '../utils/iap_session_gate.dart';
 
+typedef IapPlanRefresh = Future<void> Function(ProviderContainer container);
+
 /// Liga o listener global de compras à sessão do personal e reflete o plano
-/// depois de cada validação (renovação é silenciosa: sem toast).
+/// uma vez por lote com compra validada (renovação é silenciosa: sem toast).
 class IapPurchaseSyncScope extends ConsumerStatefulWidget {
-  const IapPurchaseSyncScope({super.key, required this.child});
+  const IapPurchaseSyncScope({
+    super.key,
+    required this.child,
+    this.refreshPlan = PlanSyncCoordinator.refreshPlan,
+  });
 
   final Widget child;
+  final IapPlanRefresh refreshPlan;
 
   @override
   ConsumerState<IapPurchaseSyncScope> createState() =>
@@ -22,6 +30,7 @@ class IapPurchaseSyncScope extends ConsumerStatefulWidget {
 
 class _IapPurchaseSyncScopeState extends ConsumerState<IapPurchaseSyncScope> {
   StreamSubscription<IapPurchaseEvent>? _events;
+  bool _verifiedInBatch = false;
 
   @override
   void initState() {
@@ -47,15 +56,29 @@ class _IapPurchaseSyncScopeState extends ConsumerState<IapPurchaseSyncScope> {
     if (iapShouldListenForPurchases(status: status, role: role)) {
       unawaited(coordinator.start());
     } else {
+      _verifiedInBatch = false;
       unawaited(coordinator.stop());
     }
   }
 
   void _onEvent(IapPurchaseEvent event) {
-    if (!mounted || event is! IapPurchaseVerified) return;
-    unawaited(
-      PlanSyncCoordinator.refreshPlan(ProviderScope.containerOf(context)),
-    );
+    switch (event) {
+      case IapPurchaseVerified():
+        _verifiedInBatch = true;
+      case IapPurchaseBatchProcessed() when _verifiedInBatch:
+        _verifiedInBatch = false;
+        if (mounted) unawaited(_refreshPlan());
+      default:
+        break;
+    }
+  }
+
+  Future<void> _refreshPlan() async {
+    try {
+      await widget.refreshPlan(ProviderScope.containerOf(context));
+    } catch (error) {
+      debugPrint('[IAP] refresh do plano falhou: ${error.runtimeType}');
+    }
   }
 
   @override

@@ -33,6 +33,7 @@ import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/services/iap_purchase_coordinator.dart';
+import '../../../features/subscription/services/iap_purchase_event.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
 
@@ -47,6 +48,7 @@ import '../../subscription/plan_entitlements.dart';
 import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
 import '../assinatura_route_args.dart';
+import '../utils/assinatura_checkout_events.dart';
 import '../utils/assinatura_review_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 
@@ -136,6 +138,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   String? _selectedPlanName;
   bool _loadingCheckout = false;
   bool _syncingPurchase = false;
+  String? _checkoutProductId;
   bool _storeAvailable = false;
   Map<String, ProductDetails> _productDetails = const {};
   EnterpriseUpgradePreview? _enterprisePreview;
@@ -331,12 +334,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   /// pelo coordenador global em silêncio.
   void _onPurchaseEvent(IapPurchaseEvent event) {
     if (!mounted || _restoringPurchases) return;
-    if (!_loadingCheckout && !_syncingPurchase) return;
+    if (!assinaturaCheckoutOwnsEvent(
+      event,
+      checkoutProductId: _checkoutProductId,
+    )) {
+      return;
+    }
     switch (event) {
       case IapPurchaseCanceled():
         setState(() {
           _loadingCheckout = false;
           _syncingPurchase = false;
+          _checkoutProductId = null;
         });
       case IapPurchaseStoreError():
         _finishPurchaseFlowWithError(
@@ -391,6 +400,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
       if (mounted) safePopOrGo(context, '/dashboard/personal');
     } finally {
+      _checkoutProductId = null;
       if (mounted) {
         setState(() {
           _syncingPurchase = false;
@@ -554,11 +564,21 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       );
     }
 
-    setState(() => _loadingCheckout = true);
+    final productToBuy = product;
+    setState(() {
+      _loadingCheckout = true;
+      _checkoutProductId = productToBuy.id;
+    });
 
     try {
-      await InAppPurchase.instance.buyNonConsumable(
-        purchaseParam: PurchaseParam(productDetails: product),
+      final opened = await ref
+          .read(iapPurchaseCoordinatorProvider)
+          .buy(productToBuy);
+      if (opened) return;
+      if (!mounted) return;
+      _finishPurchaseFlowWithError(
+        S.of(context).assinaturaLojaIndisponivel,
+        reason: 'iap_listener',
       );
     } catch (error) {
       _finishPurchaseFlowWithError(
@@ -575,6 +595,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       ProductEvents.checkoutFailed,
       props: {'reason': reason},
     );
+    _checkoutProductId = null;
     if (!mounted) return;
     setState(() {
       _loadingCheckout = false;

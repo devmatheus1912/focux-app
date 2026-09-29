@@ -11,6 +11,8 @@ abstract interface class IapStore {
   Future<void> completePurchase(PurchaseDetails purchase);
 
   Future<void> restorePurchases();
+
+  Future<void> buyNonConsumable(ProductDetails product);
 }
 
 class PluginIapStore implements IapStore {
@@ -37,6 +39,10 @@ class PluginIapStore implements IapStore {
 
   @override
   Future<void> restorePurchases() => _iap.restorePurchases();
+
+  @override
+  Future<void> buyNonConsumable(ProductDetails product) => _iap
+      .buyNonConsumable(purchaseParam: PurchaseParam(productDetails: product));
 }
 
 final iapStoreProvider = Provider<IapStore>((ref) => const PluginIapStore());

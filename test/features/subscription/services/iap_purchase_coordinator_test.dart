@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/subscription/services/iap_purchase_coordinator.dart';
+import 'package:focux_app/features/subscription/services/iap_purchase_event.dart';
 import 'package:focux_app/features/subscription/services/iap_store.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -37,7 +39,39 @@ class _FakeStore implements IapStore {
     restoreCalls++;
     onRestore?.call();
   }
+
+  final bought = <ProductDetails>[];
+
+  @override
+  Future<void> buyNonConsumable(ProductDetails product) async {
+    bought.add(product);
+  }
 }
+
+DioException _dio({int? status, DioExceptionType? type}) {
+  final req = RequestOptions(path: '/api/iap/verify');
+  return DioException(
+    requestOptions: req,
+    type:
+        type ??
+        (status == null
+            ? DioExceptionType.connectionError
+            : DioExceptionType.badResponse),
+    response:
+        status == null
+            ? null
+            : Response(requestOptions: req, statusCode: status),
+  );
+}
+
+final _produto = ProductDetails(
+  id: SubscriptionProducts.proMonthly,
+  title: 'PRO',
+  description: 'PRO mensal',
+  price: r'R$ 49,90',
+  rawPrice: 49.9,
+  currencyCode: 'BRL',
+);
 
 PurchaseDetails _compra({
   String id = 'tx-1',
@@ -77,6 +111,7 @@ void main() {
     coordinator = IapPurchaseCoordinator(
       store: store,
       verify: (p) => verify(p),
+      isAndroid: false,
     );
     eventos = [];
     coordinator.events.listen(eventos.add);
@@ -99,17 +134,70 @@ void main() {
     expect(ok.response['status'], 'PROCESSADO');
   });
 
-  test('erro na validação: avisa e ainda conclui a transação', () async {
-    verify = (_) async => throw Exception('servidor fora');
-    await coordinator.start();
-    final compra = _compra();
+  group('conclusão depois de verify com erro', () {
+    Future<void> entregarComErro(Object erro) async {
+      verify = (_) async => throw erro;
+      await coordinator.start();
+      store.entregar([_compra()]);
+      await _drenar();
+    }
 
-    store.entregar([compra]);
-    await _drenar();
+    test('iOS + sem conexão: não conclui (StoreKit reentrega)', () async {
+      await entregarComErro(_dio());
 
-    expect(eventos.whereType<IapPurchaseVerifyFailed>(), hasLength(1));
-    expect(eventos.whereType<IapPurchaseVerified>(), isEmpty);
-    expect(store.completed, [compra]);
+      expect(eventos.whereType<IapPurchaseVerifyFailed>(), hasLength(1));
+      expect(eventos.whereType<IapPurchaseVerified>(), isEmpty);
+      expect(store.completed, isEmpty);
+    });
+
+    test('iOS + 5xx / 429 / timeout: não conclui', () async {
+      await coordinator.start();
+      final erros = <Object>[
+        _dio(status: 503),
+        _dio(status: 429),
+        _dio(type: DioExceptionType.receiveTimeout),
+      ];
+      for (final (i, erro) in erros.indexed) {
+        verify = (_) async => throw erro;
+        store.entregar([_compra(id: 'tx-$i')]);
+        await _drenar();
+      }
+
+      expect(eventos.whereType<IapPurchaseVerifyFailed>(), hasLength(3));
+      expect(store.completed, isEmpty);
+    });
+
+    test(
+      'iOS + 4xx (403 de não-dono): conclui para não entrar em loop',
+      () async {
+        await entregarComErro(_dio(status: 403));
+
+        expect(eventos.whereType<IapPurchaseVerifyFailed>(), hasLength(1));
+        expect(store.completed, hasLength(1));
+      },
+    );
+
+    test('iOS + erro que não é HTTP: conclui', () async {
+      await entregarComErro(Exception('resposta inesperada'));
+
+      expect(store.completed, hasLength(1));
+    });
+
+    test('Android + sem conexão: conclui sempre (acknowledge)', () async {
+      final android = IapPurchaseCoordinator(
+        store: store,
+        verify: (_) async => throw _dio(),
+        isAndroid: true,
+      );
+      addTearDown(android.dispose);
+      await coordinator.stop();
+      await android.start();
+
+      store.entregar([_compra()]);
+      await _drenar();
+
+      expect(store.completed, hasLength(1));
+    });
   });
 
   test(
@@ -281,6 +369,36 @@ void main() {
 
       expect(result.storeAvailable, isFalse);
       expect(store.restoreCalls, 0);
+    });
+
+    test('logout (stop) durante o restore encerra o restore', () async {
+      final restoring = coordinator.restore(
+        timeout: const Duration(minutes: 5),
+      );
+      await _drenar();
+      await coordinator.stop();
+
+      final result = await restoring.timeout(const Duration(seconds: 1));
+
+      expect(result.storeAvailable, isTrue);
+      expect(result.hasVerifiedPurchases, isFalse);
+      expect(store.listeners, 0);
+    });
+  });
+
+  group('buy', () {
+    test('garante o listener antes de abrir a compra', () async {
+      expect(await coordinator.buy(_produto), isTrue);
+
+      expect(store.listeners, 1);
+      expect(store.bought, [_produto]);
+    });
+
+    test('loja indisponível: não abre a compra e devolve false', () async {
+      store.available = false;
+
+      expect(await coordinator.buy(_produto), isFalse);
+      expect(store.bought, isEmpty);
     });
   });
 }
