@@ -80,6 +80,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
             _descricaoCtrl.text.trim(),
             _objetivoCtrl.text.trim(),
             _nivel,
+            offlineQueue: widget.alunoId == null,
           );
       if (widget.alunoId != null) {
         await ref

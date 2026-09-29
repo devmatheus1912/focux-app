@@ -295,6 +295,12 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
           failure!,
           fallback: 'Não foi possível remover o treino.',
         );
+      case BatchMutationNotice.failureWithQueued:
+        FeedbackHelper.showError(
+          context,
+          '${friendlyError(failure!, fallback: 'Não foi possível remover o treino.')}\n'
+          '${S.of(context).acaoEnfileiradaOffline}',
+        );
       case BatchMutationNotice.queued:
         FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
       case BatchMutationNotice.success:

@@ -229,6 +229,11 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     switch (resolveBatchMutationNotice(failed: failed, queued: queued)) {
       case BatchMutationNotice.failure:
         FeedbackHelper.showError(context, s.exerciciosFavoritarLoteFalhou);
+      case BatchMutationNotice.failureWithQueued:
+        FeedbackHelper.showError(
+          context,
+          '${s.exerciciosFavoritarLoteFalhou}\n${s.acaoEnfileiradaOffline}',
+        );
       case BatchMutationNotice.queued:
         FeedbackHelper.showWarn(context, s.acaoEnfileiradaOffline);
       case BatchMutationNotice.success:
@@ -305,6 +310,8 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
         return;
       case BatchMutationNotice.failure:
+      case BatchMutationNotice.failureWithQueued:
+        // A sheet lista os bloqueados e, se houver, a linha de pendentes.
         break;
     }
 

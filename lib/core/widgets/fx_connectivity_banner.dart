@@ -74,20 +74,25 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
     }
   }
 
+  // Chamado de listeners sem await: falha do plugin, do refresh ou da
+  // drenagem não pode virar erro não tratado. O banner fica no último estado
+  // conhecido e a contagem ainda é recarregada.
   Future<void> _onConnectivityChanged() async {
-    final results = await _connectivity.checkConnectivity();
-    final offline = results.every((r) => r == ConnectivityResult.none);
-    if (!mounted) return;
-    setState(() => _offline = offline);
+    try {
+      final results = await _connectivity.checkConnectivity();
+      final offline = results.every((r) => r == ConnectivityResult.none);
+      if (!mounted) return;
+      setState(() => _offline = offline);
 
-    // Volta online: warm JWT (se perto do exp) antes de drenar.
-    if (_wasOffline && !offline &&
-        ref.read(authProvider) == AuthStatus.authenticated) {
-      await SessionRefreshCoordinator.ensureFreshAccess(force: false);
-    }
-    _wasOffline = offline;
+      final cameBack = _wasOffline && !offline;
+      _wasOffline = offline;
+      // Volta online: warm JWT (se perto do exp) antes de drenar.
+      if (cameBack && ref.read(authProvider) == AuthStatus.authenticated) {
+        await SessionRefreshCoordinator.ensureFreshAccess(force: false);
+      }
 
-    await _drain();
+      await _drain();
+    } catch (_) {}
     await _reloadCounts();
     await _scheduler.onQueueChanged();
   }
@@ -102,10 +107,16 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
   }
 
   Future<void> _reloadCounts() async {
-    final pending = await OfflineSyncService.getPendingCount();
-    // O que a fila desistiu de reenviar precisa aparecer, porque a tela já
-    // disse ao usuário que a ação ficou para depois.
-    final dropped = (await OfflineSyncService.pendingDropped()).length;
+    final int pending;
+    final int dropped;
+    try {
+      pending = await OfflineSyncService.getPendingCount();
+      // O que a fila desistiu de reenviar precisa aparecer, porque a tela já
+      // disse ao usuário que a ação ficou para depois.
+      dropped = (await OfflineSyncService.pendingDropped()).length;
+    } catch (_) {
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _pending = pending;

@@ -16,10 +16,17 @@ void main() {
     );
   });
 
-  test('falha real prevalece sobre pendente', () {
+  test('falha real sem pendente: só o erro', () {
+    expect(
+      resolveBatchMutationNotice(failed: 1, queued: 0),
+      BatchMutationNotice.failure,
+    );
+  });
+
+  test('falha real com pendente: erro que também avisa a fila', () {
     expect(
       resolveBatchMutationNotice(failed: 1, queued: 3),
-      BatchMutationNotice.failure,
+      BatchMutationNotice.failureWithQueued,
     );
   });
 }

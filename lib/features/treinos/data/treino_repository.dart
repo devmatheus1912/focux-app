@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_queued_ack.dart';
+import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../utils/treino_atribuicao_prazo.dart';
@@ -347,12 +348,15 @@ class TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// [offlineQueue] falso quando o id é necessário logo em seguida (atribuir
+  /// ao aluno): offline vira erro de conexão em vez de 202 sem entidade.
   Future<Treino> criar(
     String nome,
     String? descricao,
     String? objetivo,
-    String? nivel,
-  ) async {
+    String? nivel, {
+    bool offlineQueue = true,
+  }) async {
     final response = await _dio.post(
       '/api/treinos',
       data: {
@@ -361,6 +365,7 @@ class TreinoRepository {
         if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
         if (nivel != null) 'nivel': nivel,
       },
+      options: Options(extra: {OfflineSyncService.noQueueExtra: !offlineQueue}),
     );
     throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);

@@ -36,6 +36,18 @@ Future<void> _enqueue(String path) => OfflineSyncService.enqueueRequest(
   RequestOptions(path: path, method: 'POST', data: {'ok': true}),
 );
 
+/// Zera o backoff gravado para a próxima rodada tentar de novo já.
+Future<void> _skipBackoff() async {
+  final prefs = await SharedPreferences.getInstance();
+  final raw = prefs.getString('offline_outbox_queue');
+  if (raw == null) return;
+  final items = [
+    for (final e in jsonDecode(raw) as List)
+      {...(e as Map<String, dynamic>), 'nextRetryAtMillis': 0},
+  ];
+  await prefs.setString('offline_outbox_queue', jsonEncode(items));
+}
+
 void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -161,6 +173,94 @@ void main() {
     expect(adapter.requests, hasLength(10));
     expect(await OfflineSyncService.getPendingCount(), 1);
     expect(await OfflineSyncService.pendingDropped(), isEmpty);
+  });
+
+  test('receiveTimeout 8 vezes descarta com registro', () async {
+    final adapter = _Adapter(
+      onFetch: (options) async => throw DioException.receiveTimeout(
+        timeout: const Duration(seconds: 1),
+        requestOptions: options,
+      ),
+    );
+    final dio = Dio()..httpClientAdapter = adapter;
+
+    for (var i = 0; i < 8; i++) {
+      await _skipBackoff();
+      await OfflineSyncService.syncPendingRequests(dio);
+    }
+
+    expect(adapter.requests, hasLength(8));
+    expect(await OfflineSyncService.getPendingCount(), 0);
+    expect(await OfflineSyncService.pendingDropped(), hasLength(1));
+  });
+
+  test('item com mais de 7 dias sai sem reenvio e com aviso', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        QueuedRequest(
+          path: _path,
+          method: 'POST',
+          enqueuedAtMillis:
+              DateTime.now()
+                  .subtract(const Duration(days: 8))
+                  .millisecondsSinceEpoch,
+        ).toJson(),
+      ]),
+    });
+    final avisos = <List<DroppedMutation>>[];
+    OfflineSyncService.onMutationsDropped = avisos.add;
+    addTearDown(() => OfflineSyncService.onMutationsDropped = null);
+    final adapter = _Adapter();
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(adapter.requests, isEmpty);
+    expect(await OfflineSyncService.getPendingCount(), 0);
+    expect(await OfflineSyncService.pendingDropped(), hasLength(1));
+    expect(avisos, hasLength(1));
+  });
+
+  test('fila gravada sem enqueuedAtMillis continua carregando', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        {'path': _path, 'method': 'POST', 'attempts': 0, 'nextRetryAtMillis': 0},
+      ]),
+    });
+    final adapter = _Adapter(
+      onFetch: (options) async => throw DioException.connectionError(
+        requestOptions: options,
+        reason: 'offline',
+      ),
+    );
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(adapter.requests, hasLength(1));
+    final prefs = await SharedPreferences.getInstance();
+    final saved = jsonDecode(prefs.getString('offline_outbox_queue')!) as List;
+    expect((saved.single as Map)['enqueuedAtMillis'], isA<int>());
+  });
+
+  test('DELETE com 404 no reenvio conta como feito, sem aviso', () async {
+    SharedPreferences.setMockInitialValues({});
+    await OfflineSyncService.enqueueRequest(
+      RequestOptions(path: '/api/treinos/9', method: 'DELETE'),
+    );
+    final avisos = <List<DroppedMutation>>[];
+    OfflineSyncService.onMutationsDropped = avisos.add;
+    addTearDown(() => OfflineSyncService.onMutationsDropped = null);
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = _Adapter(statusCode: 404),
+    );
+
+    expect(await OfflineSyncService.getPendingCount(), 0);
+    expect(await OfflineSyncService.pendingDropped(), isEmpty);
+    expect(avisos, isEmpty);
   });
 
   test('fila avisa quando muda', () async {

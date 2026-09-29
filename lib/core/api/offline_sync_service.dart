@@ -3,125 +3,14 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'transient_error.dart';
+import 'offline_queue_policy.dart';
 
-/// Modelo de uma request mutativa enfileirada para retry quando o app
-/// estiver offline. Carrega contagem de tentativas e {@code nextRetryAt}
-/// para implementar backoff exponencial sem ressubmeter em loop apertado.
-class QueuedRequest {
-  final String path;
-  final String method;
-  final dynamic data;
-  final Map<String, dynamic>? queryParameters;
-  final String? idempotencyKey;
-  final int attempts;
-  final int nextRetryAtMillis;
-
-  QueuedRequest({
-    required this.path,
-    required this.method,
-    this.data,
-    this.queryParameters,
-    this.idempotencyKey,
-    this.attempts = 0,
-    this.nextRetryAtMillis = 0,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'path': path,
-    'method': method,
-    'data': data,
-    'queryParameters': queryParameters,
-    'idempotencyKey': idempotencyKey,
-    'attempts': attempts,
-    'nextRetryAtMillis': nextRetryAtMillis,
-  };
-
-  factory QueuedRequest.fromJson(Map<String, dynamic> json) => QueuedRequest(
-    path: json['path'] as String,
-    method: json['method'] as String,
-    data: json['data'],
-    queryParameters: (json['queryParameters'] as Map?)?.cast<String, dynamic>(),
-    idempotencyKey: json['idempotencyKey'] as String?,
-    attempts: (json['attempts'] as num?)?.toInt() ?? 0,
-    nextRetryAtMillis: (json['nextRetryAtMillis'] as num?)?.toInt() ?? 0,
-  );
-
-  QueuedRequest withRetry() {
-    final next = attempts + 1;
-    final delayMs = _backoff(next);
-    return QueuedRequest(
-      path: path,
-      method: method,
-      data: data,
-      queryParameters: queryParameters,
-      idempotencyKey: idempotencyKey,
-      attempts: next,
-      nextRetryAtMillis: DateTime.now().millisecondsSinceEpoch + delayMs,
-    );
-  }
-
-  bool get isReadyToRetry =>
-      DateTime.now().millisecondsSinceEpoch >= nextRetryAtMillis;
-
-  static int _backoff(int attempt) {
-    // 5s, 15s, 45s, 2m15s, 6m45s, 20m, então cap de 1h.
-    if (attempt <= 0) return 0;
-    final base = 5 * 1000;
-    final exp = base * pow3(attempt - 1);
-    return exp > 3600 * 1000 ? 3600 * 1000 : exp;
-  }
-
-  static int pow3(int n) {
-    var r = 1;
-    for (var i = 0; i < n; i++) {
-      r *= 3;
-    }
-    return r;
-  }
-}
-
-/// Mutação que a fila desistiu de reenviar, guardada para a UI poder contar a
-/// verdade depois de já ter respondido `202 queued` ao usuário.
-class DroppedMutation {
-  final String path;
-  final String method;
-  final int? statusCode;
-  final int droppedAtMillis;
-
-  const DroppedMutation({
-    required this.path,
-    required this.method,
-    this.statusCode,
-    required this.droppedAtMillis,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'path': path,
-    'method': method,
-    'statusCode': statusCode,
-    'droppedAtMillis': droppedAtMillis,
-  };
-
-  factory DroppedMutation.fromJson(Map<String, dynamic> json) =>
-      DroppedMutation(
-        path: json['path'] as String? ?? '',
-        method: json['method'] as String? ?? '',
-        statusCode: (json['statusCode'] as num?)?.toInt(),
-        droppedAtMillis: (json['droppedAtMillis'] as num?)?.toInt() ?? 0,
-      );
-}
+export 'offline_queue_policy.dart' show DroppedMutation, QueuedRequest;
 
 class OfflineSyncService {
   static const _queueKey = 'offline_outbox_queue';
   static const _droppedKey = 'offline_outbox_dropped';
-  static const _maxAttempts = 8;
   static const _maxDropped = 20;
-
-  /// 4xx que ainda valem nova tentativa. `409` entra porque o backend responde
-  /// isso enquanto a *primeira* requisição com a mesma `Idempotency-Key` está
-  /// em voo — a tentativa seguinte recebe o replay da resposta original.
-  static const _retryableClientStatuses = {408, 409, 425, 429};
 
   /// Notificada uma vez por rodada com as mutações descartadas em definitivo.
   /// A UI liga aqui para avisar o usuário; sem ouvinte, o descarte fica só no
@@ -229,13 +118,10 @@ class OfflineSyncService {
   /// Try to sync all pending requests using the provided Dio instance.
   ///
   /// Aplica backoff exponencial em ordem FIFO: a rodada para no primeiro item
-  /// ainda em `nextRetryAtMillis` ou que falhou de forma retentável. Após
-  /// `_maxAttempts` respostas de erro a request é descartada para não
-  /// bloquear a fila eternamente; falha de transporte não conta tentativa.
-  ///
-  /// Falha permanente (4xx que não seja [_retryableClientStatuses]) sai na
-  /// primeira tentativa, sem gastar o backoff. Todo descarte, por limite de
-  /// tentativas ou por ser permanente, fica registrado em [pendingDropped].
+  /// ainda em `nextRetryAtMillis` ou que falhou de forma retentável. O que
+  /// fazer com cada falha (segurar, retentar, descartar) é
+  /// [decideReplayOutcome]; item mais velho que [kOfflineQueueMaxAge] sai
+  /// sem ser reenviado. Todo descarte fica registrado em [pendingDropped].
   ///
   /// Single-flight: chamada durante uma drenagem em curso recebe a mesma
   /// execução, então boot, conectividade, resume e intervalo não reenviam o
@@ -261,29 +147,38 @@ class OfflineSyncService {
     // FIFO: item em backoff ou falha que ainda vale retentar segura os
     // seguintes — uma edição não pode chegar antes da criação que a precede.
     var index = 0;
+    queue:
     for (; index < queueList.length; index++) {
       if (generation != _generation) return;
       final req = QueuedRequest.fromJson(
         queueList[index] as Map<String, dynamic>,
       );
+      if (isQueuedRequestExpired(req, DateTime.now().millisecondsSinceEpoch)) {
+        dropped.add(DroppedMutation.of(req));
+        continue;
+      }
       if (!req.isReadyToRetry) break;
       final error = await _replay(dio, req);
       if (generation != _generation) return;
-      if (error == null) continue;
-      // Sem resposta do servidor não diz nada sobre a mutação: não gasta
-      // tentativa, senão uma rede ruim descartaria ação válida.
-      if (isConnectionError(error)) break;
-      // Erro que nunca vai passar (validação, gate de plano, recurso que
-      // sumiu) não ganha nova tentativa: reenviar 8 vezes só atrasa o aviso
-      // ao usuário, que já recebeu `202 queued` como se tivesse dado certo.
-      if (_isRetryable(error) && req.attempts + 1 < _maxAttempts) {
-        remainingList.add(req.withRetry().toJson());
-        index++;
-        break;
+      switch (decideReplayOutcome(req, error)) {
+        case ReplayOutcome.done:
+          break;
+        case ReplayOutcome.hold:
+          break queue;
+        case ReplayOutcome.retryLater:
+          remainingList.add(req.withRetry().toJson());
+          index++;
+          break queue;
+        case ReplayOutcome.drop:
+          dropped.add(DroppedMutation.of(req, error: error));
       }
-      dropped.add(_droppedFrom(req, error));
     }
-    remainingList.addAll(queueList.skip(index));
+    // Regrava pelo modelo: item antigo sem `enqueuedAtMillis` ganha o campo.
+    remainingList.addAll(
+      queueList
+          .skip(index)
+          .map((e) => QueuedRequest.fromJson(e as Map<String, dynamic>).toJson()),
+    );
 
     // Enquanto a rodada rodava, novas ações só podem ter sido anexadas ao fim.
     final latestStr = prefs.getString(_queueKey);
@@ -324,24 +219,6 @@ class OfflineSyncService {
       return error;
     }
   }
-
-  /// Na dúvida, retenta: só descarta o que dá para provar que é permanente.
-  static bool _isRetryable(Object error) {
-    if (error is! DioException) return true;
-    final status = error.response?.statusCode;
-    if (status == null) return true; // falha de transporte
-    if (status >= 500) return true;
-    if (status >= 400) return _retryableClientStatuses.contains(status);
-    return true;
-  }
-
-  static DroppedMutation _droppedFrom(QueuedRequest req, Object error) =>
-      DroppedMutation(
-        path: req.path,
-        method: req.method,
-        statusCode: error is DioException ? error.response?.statusCode : null,
-        droppedAtMillis: DateTime.now().millisecondsSinceEpoch,
-      );
 
   /// Grava os descartes da rodada e avisa uma vez. Rodada de antes de um
   /// [clearQueue] (logout) não grava nem avisa: as mutações eram de outro
