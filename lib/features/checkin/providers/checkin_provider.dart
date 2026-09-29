@@ -1,7 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/storage/secure_storage.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/checkin_repository.dart';
+import '../utils/checkin_series_fila.dart';
 import '../models/checkin_personal_home.dart';
 import '../models/treino_previa.dart';
 
@@ -18,6 +20,12 @@ final treinoPreviaProvider = FutureProvider.autoDispose
 /// Relógio da execução (duração e descanso).
 final checkinRelogioProvider = Provider<DateTime Function()>(
   (ref) => DateTime.now,
+);
+
+/// Token ainda no aparelho. O `SessionInvalidator` apaga o token antes do
+/// 401 final chegar à tela.
+final checkinSessaoAtivaProvider = Provider<CheckinSessaoAtiva>(
+  (ref) => () async => await SecureStorage.getToken() != null,
 );
 
 /// Emite quando o aparelho volta a ter alguma rede (reenvio da fila de séries).

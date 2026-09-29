@@ -5,9 +5,15 @@ import '../../../l10n/app_localizations.dart';
 /// Thumb-zone minimum for S8 execution controls.
 const double checkinExecutionControlMin = TokensStrip.s8;
 
-/// Altura do rodapé fixo; avisos flutuam acima dele.
-const double checkinRodapeReserva =
-    checkinExecutionControlMin + TokensStrip.s2 + TokensStrip.s3;
+/// Altura da faixa "N séries esperando conexão" (alvo do "Tentar agora").
+const double checkinPendentesAvisoAltura = 48;
+
+/// Altura do rodapé fixo (+ aviso de pendentes); snackbar flutua acima.
+double checkinRodapeReserva({required bool comPendentes}) =>
+    checkinExecutionControlMin +
+    TokensStrip.s2 +
+    TokensStrip.s3 +
+    (comPendentes ? checkinPendentesAvisoAltura : 0);
 
 /// Teto da mídia inline: o Registrar do rodapé nunca some atrás do vídeo.
 const double checkinMediaMaxFracaoTela = 0.3;

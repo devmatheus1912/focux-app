@@ -186,6 +186,88 @@ void main() {
       expect(repo.cargas, [22.5, 22.5]);
       expect(find.text('Pular descanso'), findsOneWidget);
     });
+
+    testWidgets('401 com sessão encerrada: nada no aparelho, sem vibração', (
+      tester,
+    ) async {
+      final repo = FakeCheckinRepo()..erroSerie = checkinErroStatus(401);
+      final h = await pumpCheckin(tester, repo);
+      h.sessaoAtiva = false;
+      final haptics = _gravarHaptics(tester);
+
+      await tocarRegistrar(tester);
+
+      expect(await fila.ler(), isEmpty);
+      expect(find.text('1 série esperando conexão'), findsNothing);
+      expect(find.text('Pular descanso'), findsNothing);
+      expect(find.text('0/3'), findsOneWidget);
+      expect(haptics, isNot(contains(_sucesso)));
+      expect(find.text('Sessão expirada. Faça login novamente.'), findsOneWidget);
+    });
+
+    testWidgets('dois toques abrem um só pedido de esforço; cancelar libera', (
+      tester,
+    ) async {
+      final repo = FakeCheckinRepo(rpeAlvo: 8);
+      await pumpCheckin(tester, repo);
+
+      await tester.tap(find.text('Registrar série'));
+      await tester.tap(find.text('Registrar série'), warnIfMissed: false);
+      await pumpSheet(tester);
+      expect(find.text('Esforço sentido (RPE)'), findsOneWidget);
+
+      await tester.tap(find.text('Cancelar'));
+      await pumpSheet(tester);
+      expect(find.text('Esforço sentido (RPE)'), findsNothing);
+      expect(repo.registros, 0);
+      expect(find.text('Salvando…'), findsNothing);
+      expect(find.text('Registrar série'), findsOneWidget);
+    });
+
+    testWidgets('durante o envio, Mais não oferece desfazer nem confirmar', (
+      tester,
+    ) async {
+      final repo =
+          FakeCheckinRepo(feitas: [1, 0])..travaSerie = Completer<void>();
+      await pumpCheckin(tester, repo);
+
+      await tester.tap(find.text('Próxima série'));
+      await tester.pump();
+      await tester.tap(find.text('Mais'));
+      await pumpSheet(tester);
+
+      expect(find.text('Ajustar'), findsOneWidget);
+      expect(find.text('Desfazer série'), findsNothing);
+      expect(find.textContaining('Confirmar'), findsNothing);
+      repo.travaSerie!.complete();
+      await tester.pump(const Duration(milliseconds: 100));
+    });
+
+    testWidgets('erro com série pendente não cobre o "Tentar agora"', (
+      tester,
+    ) async {
+      final repo = FakeCheckinRepo()..offline = true;
+      await pumpCheckin(tester, repo);
+      await tocarRegistrar(tester);
+      await tester.tap(find.text('Pular descanso'));
+      await tester.pump();
+
+      repo
+        ..offline = false
+        ..erroSerie = checkinErroStatus(400, erro: 'Série recusada.');
+      await tocarRegistrar(tester, primeira: false);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('Série recusada.'), findsOneWidget);
+      final superficie = find.descendant(
+        of: find.byType(SnackBar),
+        matching: find.byType(Material),
+      );
+      expect(
+        tester.getRect(superficie.first).bottom,
+        lessThanOrEqualTo(tester.getRect(find.text('Tentar agora')).top),
+      );
+    });
   });
 
   group('Descartar com confirmação', () {

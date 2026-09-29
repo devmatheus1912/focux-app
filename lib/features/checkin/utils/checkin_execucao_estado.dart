@@ -4,10 +4,13 @@ import '../data/checkin_series_pendentes.dart';
 
 /// Retry de concluir num backend anterior ao concluir idempotente: o 400
 /// "já foi concluído" quer dizer que a primeira tentativa entrou.
+///
+/// Esse 400 não tem `codigo`; o texto só vale enquanto algum backend em
+/// produção ainda for anterior ao concluir idempotente (rollout/rollback).
 bool checkinConclusaoJaFeita(Object erro) {
   final api = ApiError.from(erro);
-  if (api?.status != 400) return false;
-  final texto = (api!.mensagem ?? '').toLowerCase();
+  if (api?.status != 400 || api!.hasCodigo) return false;
+  final texto = (api.mensagem ?? '').toLowerCase();
   return texto.contains('já foi concluído') || texto.contains('ja foi concluido');
 }
 

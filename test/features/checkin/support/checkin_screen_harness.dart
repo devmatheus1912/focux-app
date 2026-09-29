@@ -38,9 +38,12 @@ DioException checkinErroStatus(int code, {String? erro}) {
 }
 
 class FakeCheckinRepo implements CheckinRepository {
-  FakeCheckinRepo({this.feitas = const [0, 0]});
+  FakeCheckinRepo({this.feitas = const [0, 0], this.rpeAlvo});
 
   final List<int> feitas;
+
+  /// Com valor, Registrar pede o esforço antes de enviar.
+  final int? rpeAlvo;
   bool offline = false;
 
   /// Lançado por `registrarSerie` enquanto não for nulo.
@@ -67,7 +70,10 @@ class FakeCheckinRepo implements CheckinRepository {
         'treinoNome': 'Treino A',
         'status': 'EM_ANDAMENTO',
         'exercicios': [
-          _exercicioJson(10, 2, 'Supino', _feitasPorTe[2] ?? feitas[0]),
+          {
+            ..._exercicioJson(10, 2, 'Supino', _feitasPorTe[2] ?? feitas[0]),
+            'rpeAlvo': rpeAlvo,
+          },
           _exercicioJson(11, 3, 'Remada', _feitasPorTe[3] ?? feitas[1]),
         ],
       });
@@ -166,6 +172,9 @@ class CheckinHarness {
   final alerta = FakeDescansoAlerta();
   final conexao = StreamController<void>.broadcast();
   DateTime agora = DateTime(2026, 9, 28, 18);
+
+  /// `false` simula token apagado pelo `SessionInvalidator`.
+  bool sessaoAtiva = true;
 }
 
 Future<CheckinHarness> pumpCheckin(
@@ -196,6 +205,9 @@ Future<CheckinHarness> pumpCheckin(
         checkinConexaoVoltouProvider.overrideWithValue(h.conexao.stream),
         checkinDescansoAlertaProvider.overrideWithValue(h.alerta),
         checkinRelogioProvider.overrideWithValue(() => h.agora),
+        checkinSessaoAtivaProvider.overrideWithValue(
+          () async => h.sessaoAtiva,
+        ),
       ],
       child: MaterialApp.router(
         locale: const Locale('pt'),

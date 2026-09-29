@@ -111,14 +111,22 @@ void main() {
   });
 
   group('registrar série nova', () {
-    Future<CheckinRegistro> registrar(Object? erro) => checkinRegistrarSerie(
-      serie: _serie(1),
-      store: store,
-      enviar: (p) async {
-        if (erro != null) throw erro;
-        return _exercicio(p.numero);
-      },
-    );
+    Future<CheckinRegistro> registrar(
+      Object? erro, {
+      List<bool> sessao = const [true],
+    }) {
+      var consulta = 0;
+      return checkinRegistrarSerie(
+        serie: _serie(1),
+        store: store,
+        enviar: (p) async {
+          if (erro != null) throw erro;
+          return _exercicio(p.numero);
+        },
+        sessaoAtiva:
+            () async => sessao[(consulta++).clamp(0, sessao.length - 1)],
+      );
+    }
 
     test('2xx salva e não mexe na fila', () async {
       final r = await registrar(null);
@@ -155,6 +163,25 @@ void main() {
         expect(await store.ler(), isEmpty);
       });
     }
+
+    test('401 com sessão invalidada é recusa e nada fica no aparelho', () async {
+      final r = await registrar(_status(401), sessao: const [false]);
+      expect(r, isA<CheckinRegistroRecusado>());
+      expect(await store.ler(), isEmpty);
+    });
+
+    test('401 com token ainda presente (refresh falhou por rede) vai para a fila',
+        () async {
+      final r = await registrar(_status(401));
+      expect(r, isA<CheckinRegistroNaFila>());
+      expect((await store.ler()).single.numero, 1);
+    });
+
+    test('logout durante a gravação tira a série do aparelho', () async {
+      final r = await registrar(_status(503), sessao: const [false]);
+      expect(r, isA<CheckinRegistroRecusado>());
+      expect(await store.ler(), isEmpty);
+    });
   });
 
   test('json corrompido vira fila vazia', () async {

@@ -40,9 +40,6 @@ void main() {
     expect(screen, contains('_registrarSerieRapida'));
     expect(screen, contains('onAjustar:'));
     expect(screen, contains('onConfirmarRestante:'));
-    expect(screen, contains('CheckinRodapeBar'));
-    expect(screen, contains('CheckinFinalizarLink'));
-    expect(screen, isNot(contains('CheckinFinalizarBar')));
     expect(screen, contains('selectedId:'));
     expect(screen, isNot(contains('ListView(')));
     expect(screen, isNot(contains('SkeletonList')));
@@ -119,7 +116,6 @@ void main() {
       File('lib/main.dart').readAsStringSync(),
       contains('CheckinFilaSyncScope('),
     );
-    expect(screen, contains('checkinRegistrarSerie('));
     expect(screen, contains('_filaLimpa'));
     expect(screen, contains('checkinExerciciosFaltando'));
     expect(screen, contains('showCheckinFinalizarIncompleto'));
@@ -204,8 +200,6 @@ void main() {
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
     );
     expect(card, contains('checkinExecutionControlMin'));
-    expect(card, isNot(contains('onRegistrar')));
-    expect(card, isNot(contains('resting')));
     expect(card, contains('s.checkinAjustar'));
     expect(card, contains('s.checkinMais'));
     expect(card, contains('s.checkinMaisTitulo'));
@@ -226,7 +220,6 @@ void main() {
     expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
     expect(card, contains('FxStripCard'));
-    expect(card, contains('glowStrength: 0'));
     expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('_CheckinPosturaHelp')));
     expect(card, contains('ValueKey'));

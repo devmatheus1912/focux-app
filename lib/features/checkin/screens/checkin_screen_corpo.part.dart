@@ -23,11 +23,11 @@ extension _CheckinCorpo on _CheckinScreenState {
     );
   }
 
-  /// Erro flutua acima do rodapé para não cobrir o Registrar.
+  /// Erro flutua acima do rodapé e do aviso de pendentes.
   void _erro(String mensagem) => FeedbackHelper.showError(
     context,
     mensagem,
-    reserveBottom: checkinRodapeReserva,
+    reserveBottom: checkinRodapeReserva(comPendentes: _pendentes > 0),
   );
 
   void _continuarSessaoAberta() {
@@ -193,8 +193,12 @@ extension _CheckinCorpo on _CheckinScreenState {
     VoidCallback? onTrocar,
   ) {
     final draft = _rascunhos.de(current);
+    // Mexer em série já gravada durante um envio embaralha a numeração.
+    final livre = !_registrando;
     final faltaSerie =
-        current.series != null && current.seriesFeitas < current.series!;
+        livre &&
+        current.series != null &&
+        current.seriesFeitas < current.series!;
     return CheckinSerieCard(
       key: ValueKey(current.treinoExercicioId),
       ee: current,
@@ -213,7 +217,8 @@ extension _CheckinCorpo on _CheckinScreenState {
       onConfirmarRestante:
           faltaSerie ? () => _confirmarRestante(current) : null,
       onTrocar: onTrocar,
-      onDesfazer: current.seriesFeitas > 0 ? () => _desfazer(current) : null,
+      onDesfazer:
+          livre && current.seriesFeitas > 0 ? () => _desfazer(current) : null,
     );
   }
 }

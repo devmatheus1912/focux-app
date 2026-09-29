@@ -240,11 +240,16 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   Future<void> _registrarSerieRapida(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
     if (id == null || _registrando) return;
+    setState(() => _registrando = true);
     final draft = _rascunhos.de(ee);
     int? rpe;
     if (ee.rpeAlvo != null) {
       rpe = await showCheckinRpeAlvoPrompt(context, rpeAlvo: ee.rpeAlvo!);
-      if (rpe == null || !mounted) return;
+      if (!mounted) return;
+      if (rpe == null) {
+        setState(() => _registrando = false);
+        return;
+      }
     }
     await _enviarSerie(
       ee,
@@ -291,12 +296,12 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     ExecucaoExercicio ee,
     CheckinSeriePendente serie,
   ) async {
-    if (_registrando) return;
     setState(() => _registrando = true);
     final r = await checkinRegistrarSerie(
       serie: serie,
       store: _fila,
       enviar: checkinEnvioPelo(_repo),
+      sessaoAtiva: ref.read(checkinSessaoAtivaProvider),
     );
     if (!mounted) return;
     setState(() => _registrando = false);

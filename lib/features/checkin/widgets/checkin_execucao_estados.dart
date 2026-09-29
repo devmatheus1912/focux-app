@@ -113,7 +113,12 @@ class CheckinPendentesAviso extends StatelessWidget {
             ),
             TextButton(
               onPressed: onTentar,
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(
+                  checkinPendentesAvisoAltura,
+                  checkinPendentesAvisoAltura,
+                ),
+              ),
               child: Text(s.checkinPendentesTentar),
             ),
           ],

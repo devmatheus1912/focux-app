@@ -17,6 +17,15 @@ void main() {
     );
   });
 
+  test('reserva do snackbar soma o aviso de pendentes ao rodapé', () {
+    final base = checkinRodapeReserva(comPendentes: false);
+    expect(base, greaterThanOrEqualTo(checkinExecutionControlMin));
+    expect(
+      checkinRodapeReserva(comPendentes: true),
+      base + checkinPendentesAvisoAltura,
+    );
+  });
+
   test('mídia inline não passa de 30% da tela, nem vídeo vertical', () {
     expect(
       checkinMediaAltura(largura: 400, alturaTela: 900, aspectRatio: 16 / 9),

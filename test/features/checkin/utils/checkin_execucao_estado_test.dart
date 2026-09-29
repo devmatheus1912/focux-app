@@ -191,7 +191,7 @@ void main() {
   });
 
   group('concluir tolerante a retry', () {
-    DioException erro400(String mensagem) {
+    DioException erro400(String mensagem, {String? codigo}) {
       final req = RequestOptions(path: '/api/checkin/1/concluir');
       return DioException(
         requestOptions: req,
@@ -199,10 +199,23 @@ void main() {
         response: Response(
           requestOptions: req,
           statusCode: 400,
-          data: {'erro': mensagem},
+          data: {'erro': mensagem, if (codigo != null) 'codigo': codigo},
         ),
       );
     }
+
+    test('400 com codigo classificado não é lido pelo texto', () async {
+      await expectLater(
+        checkinConcluir(
+          () async =>
+              throw erro400(
+                'Este treino já foi concluído.',
+                codigo: 'VALIDACAO',
+              ),
+        ),
+        throwsA(isA<DioException>()),
+      );
+    });
 
     test('resposta do servidor passa adiante', () async {
       final r = await checkinConcluir(() async => _treino(const []));
