@@ -1,6 +1,40 @@
 part of 'alunos_list_screen.dart';
 
 extension AlunosListScreenFilters on _AlunosListScreenState {
+  void _setQueryText(String value) {
+    _query = value;
+    _searchController.text = value;
+  }
+
+  void _onSearchChanged(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      final query = AlunosHomeQuery(
+        q: _query,
+        filtro: _filtro,
+        ordenacao: _ordenacao,
+      );
+      final cached = AlunosHomeClientCache.getIfFresh(query);
+      setState(() {
+        _listRefreshing = cached == null;
+        if (cached != null) _displayHome = cached;
+      });
+      _syncHomeQuery();
+      AnalyticsService.instance.track(ProductEvents.alunosSearchUsed);
+    });
+  }
+
+  void _limparBusca() {
+    _searchController.clear();
+    _onSearchChanged('');
+    final location = GoRouterState.of(context).uri;
+    if (location.queryParameters.containsKey('q')) {
+      context.go(alunosLocationSemBusca(location));
+    }
+  }
+
   Future<void> _showListOptions() async {
     HapticFeedback.selectionClick();
     AnalyticsService.instance.track(ProductEvents.alunosOrganizeOpened);

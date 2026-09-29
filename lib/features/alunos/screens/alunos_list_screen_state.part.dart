@@ -43,20 +43,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     if (mounted) setState(() => _listaCompacta = prefs.compact);
   }
 
-  void _setQueryText(String value) {
-    _query = value;
-    _searchController.text = value;
-  }
-
   @override
   void didUpdateWidget(covariant AlunosListScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final novaBusca = widget.initialQuery;
-    final buscaMudou =
-        novaBusca.isNotEmpty && novaBusca != oldWidget.initialQuery;
     final filtroMudou = oldWidget.initialFiltro != widget.initialFiltro;
-    if (!buscaMudou && !filtroMudou) return;
-    if (buscaMudou) _setQueryText(novaBusca);
+    final novaBusca = alunosBuscaAposNavegacao(
+      busca: widget.initialQuery,
+      buscaAtual: _query,
+      filtroMudou: filtroMudou,
+    );
+    if (novaBusca == null && !filtroMudou) return;
+    if (novaBusca != null) _setQueryText(novaBusca);
     if (filtroMudou) {
       _filtro = widget.initialFiltro;
       _ignoredDeepLinkFiltro = false;
@@ -222,26 +219,6 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       filtro: _filtro,
       ordenacao: _ordenacao,
     );
-  }
-
-  void _onSearchChanged(String value) {
-    setState(() => _query = value);
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
-      if (!mounted) return;
-      final query = AlunosHomeQuery(
-        q: _query,
-        filtro: _filtro,
-        ordenacao: _ordenacao,
-      );
-      final cached = AlunosHomeClientCache.getIfFresh(query);
-      setState(() {
-        _listRefreshing = cached == null;
-        if (cached != null) _displayHome = cached;
-      });
-      _syncHomeQuery();
-      AnalyticsService.instance.track(ProductEvents.alunosSearchUsed);
-    });
   }
 
   void _maybeOpenHelpFromDeepLink() {

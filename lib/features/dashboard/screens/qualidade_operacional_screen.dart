@@ -277,13 +277,7 @@ class _QualidadeBody extends StatelessWidget {
                   label: next.label,
                   accent: Theme.of(context).colorScheme.primary,
                   isDark: isDark,
-                  onPressed: () {
-                    if (next.shellTab) {
-                      goPersonalShellTab(context, next.route);
-                    } else {
-                      context.push(next.route);
-                    }
-                  },
+                  onPressed: () => openPersonalRoute(context, next.route),
                 ),
               ),
             ],

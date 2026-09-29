@@ -131,12 +131,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                 filtroLabel: alunoFiltroLabel(_filtro),
                                 onAdd: _adicionarAluno,
                                 onClear:
-                                    _query.trim().isEmpty
-                                        ? null
-                                        : () {
-                                          _searchController.clear();
-                                          _onSearchChanged('');
-                                        },
+                                    _query.trim().isEmpty ? null : _limparBusca,
                                 onClearFilter:
                                     _hasActiveFilter
                                         ? () => _setFiltro(AlunoFiltro.todos)

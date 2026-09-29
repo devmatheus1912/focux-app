@@ -44,37 +44,23 @@ String qualidadeScoreLabel(int score) => switch (qualidadeScoreBand(score)) {
 };
 
 class QualidadeNextAction {
-  const QualidadeNextAction({
-    required this.label,
-    required this.route,
-    required this.shellTab,
-  });
+  const QualidadeNextAction({required this.label, required this.route});
 
   final String label;
   final String route;
-  final bool shellTab;
 }
 
 QualidadeNextAction qualidadeNextAction(QualidadeOperacionalData data) {
   if (data.retencaoPessoal < data.retencaoMercado) {
-    return const QualidadeNextAction(
-      label: 'Ver retenção',
-      route: '/retencao',
-      shellTab: false,
-    );
+    return const QualidadeNextAction(label: 'Ver retenção', route: '/retencao');
   }
   if (data.ticketPessoal < data.ticketMercado) {
     return const QualidadeNextAction(
       label: 'Mensalidades',
       route: '/financeiro',
-      shellTab: false,
     );
   }
-  return const QualidadeNextAction(
-    label: 'Ver alunos',
-    route: '/alunos',
-    shellTab: true,
-  );
+  return const QualidadeNextAction(label: 'Ver alunos', route: '/alunos');
 }
 
 /// Insight coerente com as métricas do card (não só o texto cru do BE).

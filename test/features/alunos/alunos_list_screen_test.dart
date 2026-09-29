@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/router/app_router_redirect.dart';
+import 'package:focux_app/core/router/safe_navigation.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/alertas/data/alertas_repository.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
@@ -177,6 +178,163 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(queryAtual(tester).filtro, AlunoFiltro.risco);
+    });
+
+    testWidgets('filtro novo sem q não herda o termo antigo', (tester) async {
+      await pumpAlunos(tester, alunosBuscaLocation('ana'));
+
+      router.go('/alunos?filtro=risco');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+
+      expect(textoDaBusca(tester), isEmpty);
+      expect(queryAtual(tester).q, isEmpty);
+      expect(queryAtual(tester).filtro, AlunoFiltro.risco);
+    });
+
+    testWidgets('limpar a busca tira o q e mantém o filtro', (tester) async {
+      await pumpAlunos(tester, '/alunos?filtro=risco&q=ana');
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final uri = router.routerDelegate.currentConfiguration.uri;
+      expect(uri.queryParameters, {'filtro': 'risco'});
+      expect(textoDaBusca(tester), isEmpty);
+      expect(queryAtual(tester).q, isEmpty);
+      expect(queryAtual(tester).filtro, AlunoFiltro.risco);
+    });
+  });
+
+  testWidgets('buscar, limpar, voltar à Hoje e buscar de novo refaz a busca', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/dashboard/personal',
+      routes: [
+        StatefulShellRoute.indexedStack(
+          builder: (context, state, shell) => Scaffold(body: shell),
+          branches: [
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/dashboard/personal',
+                  builder: (context, state) => Scaffold(
+                    body: TextButton(
+                      onPressed: () => goPersonalShellTab(
+                        context,
+                        alunosBuscaLocation('ana'),
+                      ),
+                      child: const Text('Buscar ana'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            StatefulShellBranch(
+              routes: [
+                GoRoute(
+                  path: '/alunos',
+                  builder: (context, state) => AlunosListScreen(
+                    initialQuery: alunoBuscaFromQuery(
+                      state.uri.queryParameters['q'],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [alunosHomeProvider.overrideWith((ref) async => home)],
+        child: MaterialApp.router(
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Future<void> settle() async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    String textoDaBusca() =>
+        tester.widget<TextField>(find.byType(TextField)).controller!.text;
+    String qAtual() => ProviderScope.containerOf(
+      tester.element(find.byType(AlunosListScreen)),
+    ).read(alunosHomeQueryProvider).q;
+
+    await tester.tap(find.text('Buscar ana'));
+    await settle();
+    expect(textoDaBusca(), 'ana');
+    expect(qAtual(), 'ana');
+
+    await tester.tap(find.byIcon(Icons.close));
+    await settle();
+    expect(textoDaBusca(), isEmpty);
+    expect(qAtual(), isEmpty);
+    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/alunos');
+
+    router.go('/dashboard/personal');
+    await settle();
+    await tester.tap(find.text('Buscar ana'));
+    await settle();
+
+    expect(tester.takeException(), isNull);
+    expect(textoDaBusca(), 'ana');
+    expect(qAtual(), 'ana');
+  });
+
+  group('busca na location', () {
+    test('limpar tira só o q', () {
+      expect(
+        alunosLocationSemBusca(Uri.parse('/alunos?filtro=risco&q=ana')),
+        '/alunos?filtro=risco',
+      );
+      expect(alunosLocationSemBusca(Uri.parse('/alunos?q=ana')), '/alunos');
+    });
+
+    test('termo novo compara com a busca atual, não com a rota anterior', () {
+      expect(
+        alunosBuscaAposNavegacao(
+          busca: 'ana',
+          buscaAtual: '',
+          filtroMudou: false,
+        ),
+        'ana',
+      );
+      expect(
+        alunosBuscaAposNavegacao(
+          busca: 'ana',
+          buscaAtual: ' ana ',
+          filtroMudou: false,
+        ),
+        isNull,
+      );
+      expect(
+        alunosBuscaAposNavegacao(
+          busca: '',
+          buscaAtual: 'ana',
+          filtroMudou: true,
+        ),
+        '',
+      );
+      expect(
+        alunosBuscaAposNavegacao(
+          busca: '',
+          buscaAtual: 'ana',
+          filtroMudou: false,
+        ),
+        isNull,
+      );
     });
   });
 

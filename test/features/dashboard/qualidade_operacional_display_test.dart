@@ -38,7 +38,6 @@ void main() {
       'Mensalidades',
     );
     expect(qualidadeNextAction(data()).route, '/alunos');
-    expect(qualidadeNextAction(data()).shellTab, isTrue);
     expect(qualidadeComoCalculamos, contains('ticket'));
     expect(qualidadeComoCalculamos, contains('recorte'));
     expect(qualidadeComoCalculamos, contains('retenção'));

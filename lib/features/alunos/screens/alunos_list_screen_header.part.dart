@@ -112,10 +112,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                         ),
                         if (_query.isNotEmpty)
                           InkWell(
-                            onTap: () {
-                              _searchController.clear();
-                              _onSearchChanged('');
-                            },
+                            onTap: _limparBusca,
                             borderRadius: BorderRadius.circular(999),
                             child: Padding(
                               padding: const EdgeInsets.all(6),

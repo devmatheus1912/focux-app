@@ -145,7 +145,7 @@ class _TreinoDetailBody extends StatelessWidget {
       );
       final added = await context.push<bool>(
         '/treinos/$treinoId/exercicios/add',
-        extra: alunoId == null ? null : {'alunoId': alunoId},
+        extra: TreinoRouteExtra(alunoId: alunoId).toExtra(),
       );
       if (added == true) {
         ref.invalidate(treinoProvider(treinoId));

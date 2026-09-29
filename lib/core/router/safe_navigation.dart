@@ -54,8 +54,7 @@ void goPersonalShellTab(BuildContext context, String location) {
     isPersonalShellTabLocation(location),
     'goPersonalShellTab só troca aba do dock; use openPersonalRoute: $location',
   );
-  if (!context.mounted) return;
-  context.go(location);
+  openPersonalRoute(context, location);
 }
 
 /// Dock tab → `go`; any other screen → `push`, so Voltar returns to origin.

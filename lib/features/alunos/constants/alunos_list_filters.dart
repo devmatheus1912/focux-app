@@ -15,6 +15,28 @@ String alunosBuscaLocation(String termo) {
   return Uri(path: '/alunos', queryParameters: {'q': q}).toString();
 }
 
+/// Mesma location sem o `q`; o filtro e demais parâmetros ficam.
+String alunosLocationSemBusca(Uri location) {
+  final params = Map.of(location.queryParameters)..remove('q');
+  return Uri(
+    path: location.path,
+    queryParameters: params.isEmpty ? null : params,
+  ).toString();
+}
+
+/// Termo que a busca assume quando a rota muda com a aba aberta.
+/// `null` mantém o termo atual; rota nova de filtro sem `q` zera a busca.
+String? alunosBuscaAposNavegacao({
+  required String busca,
+  required String buscaAtual,
+  required bool filtroMudou,
+}) {
+  final atual = buscaAtual.trim();
+  if (busca.isNotEmpty) return busca == atual ? null : busca;
+  if (filtroMudou && atual.isNotEmpty) return '';
+  return null;
+}
+
 String alunosSelectionTitle(int count) =>
     count == 1 ? '1 aluno selecionado' : '$count alunos selecionados';
 
