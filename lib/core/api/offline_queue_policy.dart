@@ -181,6 +181,9 @@ ReplayOutcome decideReplayOutcome(QueuedRequest req, Object? error) {
             error.type == DioExceptionType.connectionTimeout)) {
       return ReplayOutcome.hold;
     }
+    // 401 que sobrou do ApiClient = refresh falhou sem invalidar a sessão
+    // (logout zera a fila). Segura até a sessão voltar; o TTL limita a espera.
+    if (status == 401) return ReplayOutcome.hold;
   }
   // Erro que nunca vai passar (validação, gate de plano, recurso que sumiu)
   // não ganha nova tentativa: reenviar 8 vezes só atrasa o aviso ao usuário,

@@ -63,6 +63,13 @@ void main() {
     );
   });
 
+  test('401 sem logout segura sem gastar tentativa', () {
+    expect(
+      decideReplayOutcome(_req(attempts: 7), _status(401)),
+      ReplayOutcome.hold,
+    );
+  });
+
   test('5xx retenta, 4xx permanente descarta', () {
     expect(decideReplayOutcome(_req(), _status(503)), ReplayOutcome.retryLater);
     expect(decideReplayOutcome(_req(), _status(422)), ReplayOutcome.drop);
