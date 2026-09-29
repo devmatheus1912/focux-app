@@ -29,6 +29,8 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_bubble_grouping.dart';
+import '../utils/chat_outbox.dart';
+import '../utils/chat_outgoing_dedupe.dart';
 import '../utils/chat_remetente.dart';
 import '../utils/chat_system_event.dart';
 import 'chat_inbox_screen.dart';
@@ -50,8 +52,10 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import '../widgets/conversation_message_widgets.dart';
 import '../widgets/conversation_composer_widgets.dart';
 import '../widgets/conversation_media_widgets.dart';
+import '../widgets/conversation_outgoing_status.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 part 'conversation_screen_messaging.part.dart';
+part 'conversation_screen_outbox.part.dart';
 part 'conversation_screen_sheets_actions.part.dart';
 part 'conversation_screen_sheets_search.part.dart';
 part 'conversation_screen_sheets_menu_media.part.dart';
@@ -99,6 +103,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   ];
 
   final List<ChatMsg> _msgs = [];
+  final _outbox = ChatOutbox();
   final Map<String, GlobalKey> _messageKeys = {};
   final _ctrl = TextEditingController();
   final _composerFocus = FocusNode();
@@ -200,10 +205,11 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
         }
       }
       if (!mounted) return;
+      final merged = keepUnsentOutgoing(server: msgs, local: _msgs);
       setState(() {
         _msgs
           ..clear()
-          ..addAll(msgs);
+          ..addAll(merged);
         _nextBeforeId = page.nextBeforeId;
         _hasMoreMessages = page.hasMore;
         _loadError = null;
@@ -453,33 +459,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             Column(
               children: [
                 if (_uploading)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    color: primarySoft,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: FxLoading(strokeWidth: 2, color: primary),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Enviando anexo...',
-                          style: TextStyle(
-                            color:
-                                isDark
-                                    ? EagleTokens.darkInk
-                                    : TokensStrip.textPrimary,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
+                  ConversationUploadingBanner(
+                    primary: primary,
+                    background: primarySoft,
+                    isDark: isDark,
                   ),
                 Expanded(
                   child:
@@ -598,6 +581,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                                             ),
                                                 onOpenMedia:
                                                     () => _openMedia(msg),
+                                                outgoingStatus: _outbox
+                                                    .statusOf(msg),
+                                                onRetrySend:
+                                                    () => _retryOutgoing(msg),
+                                                onDiscardSend:
+                                                    () => _discardOutgoing(msg),
                                               ),
                                             ),
                                   ),

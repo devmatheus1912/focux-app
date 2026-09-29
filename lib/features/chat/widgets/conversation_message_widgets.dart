@@ -10,8 +10,10 @@ import '../../../core/widgets/fx_loading.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_bubble_grouping.dart';
+import '../utils/chat_outbox.dart';
 import '../utils/chat_system_event.dart';
 import 'conversation_media_widgets.dart';
+import 'conversation_outgoing_status.dart';
 
 class ConversationDateDivider extends StatelessWidget {
   final DateTime date;
@@ -90,33 +92,6 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
                   style: FocuxHubTypography.chip(primary),
                 ),
       ),
-    );
-  }
-}
-
-class ConversationDeliveryStatus extends StatelessWidget {
-  final ChatMsg msg;
-  final Color color;
-
-  const ConversationDeliveryStatus({
-    super.key,
-    required this.msg,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final read = msg.readAt != null;
-    final delivered = msg.deliveredAt != null;
-    final label =
-        read
-            ? 'Lido'
-            : delivered
-            ? 'Entregue'
-            : 'Enviado';
-    return Text(
-      label,
-      style: FocuxHubTypography.chip(color),
     );
   }
 }
@@ -346,6 +321,9 @@ class ConversationBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback onOpenMedia;
   final ChatBubbleGroupSlot groupSlot;
+  final ChatOutgoingStatus outgoingStatus;
+  final VoidCallback? onRetrySend;
+  final VoidCallback? onDiscardSend;
 
   const ConversationBubble({
     super.key,
@@ -359,6 +337,9 @@ class ConversationBubble extends StatelessWidget {
     required this.onReplyTap,
     required this.onOpenMedia,
     this.groupSlot = ChatBubbleGroupSlot.single,
+    this.outgoingStatus = ChatOutgoingStatus.sent,
+    this.onRetrySend,
+    this.onDiscardSend,
   });
 
   @override
@@ -380,7 +361,8 @@ class ConversationBubble extends StatelessWidget {
             : (mine
                 ? accentColor.withValues(alpha: isDark ? 0.28 : 0.18)
                 : chrome.line);
-    final showMeta = chatBubbleShowsTimestampMeta(groupSlot);
+    final sendFailed = mine && outgoingStatus == ChatOutgoingStatus.failed;
+    final showMeta = sendFailed || chatBubbleShowsTimestampMeta(groupSlot);
     final bubbleShape = chatBubbleBorderRadius(mine: mine, slot: groupSlot);
     final borderWidth =
         highlighted ? 1.6 : (mine ? 0.0 : 1.0);
@@ -497,13 +479,21 @@ class ConversationBubble extends StatelessWidget {
                     if (mine) ...[
                       const SizedBox(width: 5),
                       ConversationDeliveryStatus(
-                        msg: msg,
+                        status: outgoingStatus,
                         color: metaColor.withValues(alpha: 0.72),
                       ),
                     ],
                   ],
                 ),
               ],
+              if (sendFailed &&
+                  onRetrySend != null &&
+                  onDiscardSend != null)
+                ConversationSendFailedActions(
+                  accentColor: accentColor,
+                  onRetry: onRetrySend!,
+                  onDiscard: onDiscardSend!,
+                ),
             ],
           ),
         ),

@@ -5,6 +5,12 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final text = _ctrl.text.trim();
     if (text.isEmpty || _uploading) return;
     FxKeyboardDismissScope.dismiss();
+    final failedTwin = _outbox.failedWithText(_msgs, text);
+    if (failedTwin != null) {
+      _ctrl.clear();
+      await _retryOutgoing(failedTwin);
+      return;
+    }
     if (_isDuplicateOutgoing(text)) {
       HapticFeedback.selectionClick();
       if (mounted) {
@@ -19,10 +25,11 @@ extension ConversationScreenMessaging on _ConversationScreenState {
 
     final replyToMessageId = _replyingTo?.id;
     final replyPreview = _replyingTo;
+    final alunoId = _alunoId;
     final repo = ChatRepository(ref.read(apiClientProvider));
     final clientId = repo.newClientMessageId();
     final optimistic = ChatMsg(
-      alunoId: _alunoId,
+      alunoId: alunoId,
       remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
       conteudo: text,
       enviadoEm: DateTime.now(),
@@ -35,39 +42,24 @@ extension ConversationScreenMessaging on _ConversationScreenState {
 
     _ctrl.clear();
     HapticFeedback.lightImpact();
-    setState(() {
-      _composerHasText = false;
-      _replyingTo = null;
-      _upsertMessage(optimistic);
-    });
-    _scrollToBottom();
-
-    try {
-      final msg =
+    _composerHasText = false;
+    await _sendOutgoing(
+      optimistic,
+      () =>
           _isAlunoMode
-              ? await repo.enviarComoAluno(
+              ? repo.enviarComoAluno(
                 text,
                 replyToMessageId: replyToMessageId,
                 clientMessageId: clientId,
               )
-              : await repo.enviar(
-                _alunoId!,
+              : repo.enviar(
+                alunoId!,
                 text,
                 'PERSONAL',
                 replyToMessageId: replyToMessageId,
                 clientMessageId: clientId,
-              );
-      _captureAlunoId(msg);
-      if (!mounted) return;
-      setState(() => _upsertMessage(msg));
-      _ackPersonalContactBestEffort();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _msgs.removeWhere((m) => m.clientMessageId == clientId && m.id == null);
-      });
-      FeedbackHelper.showError(context, friendlyError(e));
-    }
+              ),
+    );
   }
 
   /// Captura actions/id no frame atual (ainda montado); o Future usa Ref do
@@ -94,60 +86,11 @@ extension ConversationScreenMessaging on _ConversationScreenState {
   }
 
   bool _isDuplicateOutgoing(String text) {
-    final normalized = _normalizeOutgoingText(text);
-    if (normalized.isEmpty) return false;
-    for (final msg in _msgs.reversed.take(8)) {
-      if (!_isMine(msg)) continue;
-      final sent = _normalizeOutgoingText(msg.conteudo);
-      if (sent == normalized || _looksLikeSameCopilotAction(sent, normalized)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  String _normalizeOutgoingText(String value) {
-    return normalizeChatText(
-      value,
-    ).replaceAll(RegExp(r'\s+'), ' ').trim().toLowerCase();
-  }
-
-  bool _looksLikeSameCopilotAction(String a, String b) {
-    final aWords = _meaningfulWords(a);
-    final bWords = _meaningfulWords(b);
-    if (aWords.length < 5 || bWords.length < 5) return false;
-    final overlap = aWords.intersection(bWords).length;
-    final smaller =
-        aWords.length < bWords.length ? aWords.length : bWords.length;
-    return overlap >= 5 && overlap / smaller >= 0.62;
-  }
-
-  Set<String> _meaningfulWords(String value) {
-    const stop = {
-      'oi',
-      'me',
-      'com',
-      'para',
-      'pelo',
-      'pela',
-      'seu',
-      'sua',
-      'que',
-      'uma',
-      'um',
-      'agora',
-      'quando',
-      'fizer',
-      'combinado',
-      'responde',
-      'aqui',
-      'ok',
-      'plano',
-    };
-    return value
-        .split(RegExp(r'[^a-z0-9áéíóúâêôãõç]+', caseSensitive: false))
-        .where((word) => word.length > 2 && !stop.contains(word))
-        .toSet();
+    final recentMine = _msgs.reversed
+        .take(8)
+        .where((m) => _isMine(m) && !_outbox.isFailed(m.clientMessageId))
+        .map((m) => m.conteudo);
+    return isRecentDuplicateOutgoing(text, recentMine);
   }
 
   void _captureAlunoId(ChatMsg msg) {
@@ -230,75 +173,58 @@ extension ConversationScreenMessaging on _ConversationScreenState {
             : type == ConversationMediaType.video
             ? 'video'
             : 'auto';
+    final picked = file;
+    final uploader = MediaUploadService(ref.read(apiClientProvider));
     final repo = ChatRepository(ref.read(apiClientProvider));
     final clientId = repo.newClientMessageId();
+    final alunoId = _alunoId;
+    final label = _mediaLabel(type);
+    final tipoMidia = _mediaType(type);
     final optimistic = ChatMsg(
-      alunoId: _alunoId,
+      alunoId: alunoId,
       remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
-      conteudo: _mediaLabel(type),
+      conteudo: label,
       enviadoEm: DateTime.now(),
-      tipoMidia: _mediaType(type),
+      tipoMidia: tipoMidia,
       clientMessageId: clientId,
       replyToMessageId: replyToMessageId,
     );
 
-    setState(() {
-      _uploading = true;
-      _replyingTo = null;
-      _upsertMessage(optimistic);
+    String? mediaUrl;
+    await _sendOutgoing(optimistic, media: true, () async {
+      final url =
+          mediaUrl ??=
+              kIsWeb || picked.path.isEmpty
+                  ? await uploader.uploadBytes(
+                    bytes: await picked.readAsBytes(),
+                    filename: filename,
+                    folder: 'chat',
+                    resourceType: resourceType,
+                  )
+                  : await uploader.uploadFile(
+                    path: picked.path,
+                    filename: filename,
+                    folder: 'chat',
+                    resourceType: resourceType,
+                  );
+      return _isAlunoMode
+          ? repo.enviarMidiaComoAluno(
+            conteudo: label,
+            tipoMidia: tipoMidia,
+            midiaUrl: url,
+            replyToMessageId: replyToMessageId,
+            clientMessageId: clientId,
+          )
+          : repo.enviarMidia(
+            alunoId: alunoId!,
+            conteudo: label,
+            remetente: 'PERSONAL',
+            tipoMidia: tipoMidia,
+            midiaUrl: url,
+            replyToMessageId: replyToMessageId,
+            clientMessageId: clientId,
+          );
     });
-    _scrollToBottom();
-
-    try {
-      final uploader = MediaUploadService(ref.read(apiClientProvider));
-      final mediaUrl =
-          kIsWeb || file.path.isEmpty
-              ? await uploader.uploadBytes(
-                bytes: await file.readAsBytes(),
-                filename: filename,
-                folder: 'chat',
-                resourceType: resourceType,
-              )
-              : await uploader.uploadFile(
-                path: file.path,
-                filename: filename,
-                folder: 'chat',
-                resourceType: resourceType,
-              );
-      final msg =
-          _isAlunoMode
-              ? await repo.enviarMidiaComoAluno(
-                conteudo: _mediaLabel(type),
-                tipoMidia: _mediaType(type),
-                midiaUrl: mediaUrl,
-                replyToMessageId: replyToMessageId,
-                clientMessageId: clientId,
-              )
-              : await repo.enviarMidia(
-                alunoId: _alunoId!,
-                conteudo: _mediaLabel(type),
-                remetente: 'PERSONAL',
-                tipoMidia: _mediaType(type),
-                midiaUrl: mediaUrl,
-                replyToMessageId: replyToMessageId,
-                clientMessageId: clientId,
-              );
-      _captureAlunoId(msg);
-      if (!mounted) return;
-      setState(() => _upsertMessage(msg));
-      _scrollToBottom();
-      _ackPersonalContactBestEffort();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _msgs.removeWhere((m) => m.clientMessageId == clientId && m.id == null);
-      });
-      FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      if (mounted) {
-        setState(() => _uploading = false);
-      }
-    }
   }
 
   Future<void> _startAudioRecording() async {
@@ -415,52 +341,49 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     required Duration duration,
   }) async {
     final replyToMessageId = _replyingTo?.id;
-    setState(() => _uploading = true);
-    try {
-      final mediaUrl = await MediaUploadService(
-        ref.read(apiClientProvider),
-      ).uploadBytes(
-        bytes: bytes,
-        filename: filename,
-        folder: 'chat/audio',
-        resourceType: 'auto',
-      );
-      final repo = ChatRepository(ref.read(apiClientProvider));
-      final label = 'Audio ${_formatDuration(duration)}';
-      final msg =
-          _isAlunoMode
-              ? await repo.enviarMidiaComoAluno(
-                conteudo: label,
-                tipoMidia: 'AUDIO',
-                midiaUrl: mediaUrl,
-                replyToMessageId: replyToMessageId,
-              )
-              : await repo.enviarMidia(
-                alunoId: _alunoId!,
-                conteudo: label,
-                remetente: 'PERSONAL',
-                tipoMidia: 'AUDIO',
-                midiaUrl: mediaUrl,
-                replyToMessageId: replyToMessageId,
-              );
-      _captureAlunoId(msg);
-      if (!mounted) return;
-      setState(() {
-        _replyingTo = null;
-        _upsertMessage(msg);
-      });
-      HapticFeedback.mediumImpact();
-      _scrollToBottom();
-      _ackPersonalContactBestEffort();
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _uploading = false);
-      }
-    }
+    final uploader = MediaUploadService(ref.read(apiClientProvider));
+    final repo = ChatRepository(ref.read(apiClientProvider));
+    final clientId = repo.newClientMessageId();
+    final alunoId = _alunoId;
+    final label = 'Audio ${_formatDuration(duration)}';
+    final optimistic = ChatMsg(
+      alunoId: alunoId,
+      remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
+      conteudo: label,
+      enviadoEm: DateTime.now(),
+      tipoMidia: 'AUDIO',
+      clientMessageId: clientId,
+      replyToMessageId: replyToMessageId,
+    );
+
+    String? mediaUrl;
+    HapticFeedback.mediumImpact();
+    await _sendOutgoing(optimistic, media: true, () async {
+      final url =
+          mediaUrl ??= await uploader.uploadBytes(
+            bytes: bytes,
+            filename: filename,
+            folder: 'chat/audio',
+            resourceType: 'auto',
+          );
+      return _isAlunoMode
+          ? repo.enviarMidiaComoAluno(
+            conteudo: label,
+            tipoMidia: 'AUDIO',
+            midiaUrl: url,
+            replyToMessageId: replyToMessageId,
+            clientMessageId: clientId,
+          )
+          : repo.enviarMidia(
+            alunoId: alunoId!,
+            conteudo: label,
+            remetente: 'PERSONAL',
+            tipoMidia: 'AUDIO',
+            midiaUrl: url,
+            replyToMessageId: replyToMessageId,
+            clientMessageId: clientId,
+          );
+    });
   }
 
   Future<void> _toggleReaction(ChatMsg msg, String emoji) async {
