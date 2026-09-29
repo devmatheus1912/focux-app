@@ -7,13 +7,14 @@ import '../../subscription/utils/iap_completion_policy.dart';
 
 /// O evento é da compra que a tela abriu? Renovação ou transação de outro
 /// produto que chega com o paywall aberto não vira sucesso/erro da tela.
+/// Evento sem transação (lote, erro do stream) também não: o stream segue
+/// vivo depois de um erro e a compra ainda pode chegar.
 bool assinaturaCheckoutOwnsEvent(
   IapPurchaseEvent event, {
   required String? checkoutProductId,
 }) {
   if (checkoutProductId == null) return false;
-  final purchase = event.purchase;
-  return purchase == null || purchase.productID == checkoutProductId;
+  return event.purchase?.productID == checkoutProductId;
 }
 
 /// StoreKit recusa abrir a compra enquanto a transação anterior do mesmo

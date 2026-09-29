@@ -58,13 +58,20 @@ void main() {
     );
   });
 
-  test('falha do stream durante o checkout é da tela', () {
+  test('evento sem transação não encerra o checkout aberto', () {
     expect(
       assinaturaCheckoutOwnsEvent(
         IapPurchaseStreamFailed(Exception('x')),
         checkoutProductId: pro,
       ),
-      isTrue,
+      isFalse,
+    );
+    expect(
+      assinaturaCheckoutOwnsEvent(
+        const IapPurchaseBatchProcessed(),
+        checkoutProductId: pro,
+      ),
+      isFalse,
     );
   });
 

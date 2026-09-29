@@ -371,11 +371,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             isAndroid: defaultTargetPlatform == TargetPlatform.android,
           ),
         );
-      case IapPurchaseStreamFailed(:final error):
-        _finishPurchaseFlowWithError(
-          friendlyError(error, fallback: 'Erro ao acompanhar a compra.'),
-        );
-      case IapPurchasePending() || IapPurchaseBatchProcessed():
+      case IapPurchasePending() ||
+          IapPurchaseBatchProcessed() ||
+          IapPurchaseStreamFailed():
         break;
     }
   }
