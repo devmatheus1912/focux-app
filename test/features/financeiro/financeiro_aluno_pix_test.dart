@@ -310,6 +310,16 @@ void main() {
       await tester.tap(find.text('Pagar com PIX'));
       await _settle(tester);
       expect(find.text('Copiar código PIX'), findsOneWidget);
+      expect(find.text('PIX - Escaneie ou copie'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      final fechar = find.text('Fechar').last;
+      await tester.ensureVisible(fechar);
+      await tester.pump();
+      expect(find.text('PIX - Escaneie ou copie').hitTestable(), findsOneWidget);
+      await tester.tap(fechar);
+      await _settle(tester);
+      expect(find.text('Copiar código PIX'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pump(const Duration(seconds: 5));
     });

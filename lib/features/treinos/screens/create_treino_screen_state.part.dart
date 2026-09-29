@@ -33,17 +33,38 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       _descricaoCtrl.text.trim().isNotEmpty ||
       _nivel != null;
 
+  CreateTreinoSaida get _saida => CreateTreinoLogic.saida(
+    preenchido: _dirty,
+    treinoCriado: _treinoCriadoId != null,
+  );
+
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
-    if (_dirty) {
+    final s = S.of(context);
+    final saida = _saida;
+    final aviso = switch (saida) {
+      CreateTreinoSaida.livre => null,
+      CreateTreinoSaida.descartar => (
+        titulo: 'Descartar treino?',
+        texto: 'O que você preencheu não será salvo.',
+        confirmar: 'Descartar',
+      ),
+      CreateTreinoSaida.treinoSemAluno => (
+        titulo: s.treinoSairSemAtribuirTitulo,
+        texto: s.treinoSairSemAtribuirTexto,
+        confirmar: s.treinoSairSemAtribuir,
+      ),
+    };
+    if (aviso != null) {
       final ok = await showFxConfirmSheet(
         context,
-        title: 'Descartar treino?',
-        message: 'O que você preencheu não será salvo.',
-        confirmLabel: 'Descartar',
+        title: aviso.titulo,
+        message: aviso.texto,
+        confirmLabel: aviso.confirmar,
       );
       if (!ok || !mounted) return;
     }
+    if (saida == CreateTreinoSaida.treinoSemAluno) invalidateTreinosCaches(ref);
     safePopOrGo(context, '/treinos');
   }
 
@@ -174,7 +195,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     return fxScreenA11yScope(
       label: widget.alunoId == null ? 'Novo treino' : 'Treino vinculado',
       child: FxFormPopGuard(
-        dirty: _dirty,
+        dirty: _saida != CreateTreinoSaida.livre,
         onCancel: _cancel,
         child: FxShellScaffold(
         useMesh: true,

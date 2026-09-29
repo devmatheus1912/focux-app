@@ -14,6 +14,7 @@ import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import 'package:focux_app/features/treinos/screens/create_treino_screen.dart';
 import 'package:focux_app/features/treinos/screens/treino_detail_screen.dart';
+import 'package:focux_app/features/treinos/utils/create_treino_logic.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -266,6 +267,19 @@ void main() {
       expect(destaque(atribuido: true), isFalse);
       expect(destaque(temExercicios: false), isFalse);
     });
+
+    test('sair com treino criado avisa que falta atribuir, sem descartar', () {
+      CreateTreinoSaida saida({bool preenchido = false, bool criado = false}) =>
+          CreateTreinoLogic.saida(preenchido: preenchido, treinoCriado: criado);
+
+      expect(saida(), CreateTreinoSaida.livre);
+      expect(saida(preenchido: true), CreateTreinoSaida.descartar);
+      expect(saida(criado: true), CreateTreinoSaida.treinoSemAluno);
+      expect(
+        saida(preenchido: true, criado: true),
+        CreateTreinoSaida.treinoSemAluno,
+      );
+    });
   });
 
   testWidgets(
@@ -344,6 +358,65 @@ void main() {
     expect(repo.tentativasAtribuir, [12, 12]);
     expect(repo.atribuicoes, [(12, 5)]);
     expect(find.text('Concluir'), findsOneWidget);
+  });
+
+  for (final viaVoltar in [false, true]) {
+    testWidgets(
+      'falha ao atribuir: sair avisa que o treino existe '
+      '(${viaVoltar ? 'voltar' : 'Cancelar'})',
+      (tester) async {
+        final repo = _FakeTreinoRepository(falhasAtribuir: 1);
+        final router = _router(
+          origem: '/alunos/5',
+          extraNovo: const {'alunoId': 5, 'alunoNome': 'Aluno'},
+        );
+        await _pumpFluxo(tester, router, repo);
+
+        await _criarTreino(tester, 'Aluno 360');
+        if (viaVoltar) {
+          await tester.binding.handlePopRoute();
+        } else {
+          await tester.tap(find.text('Cancelar'));
+        }
+        await _settle(tester);
+
+        expect(find.text('Sair sem atribuir?'), findsOneWidget);
+        expect(
+          find.text(
+            'O treino já foi criado, mas ainda não foi atribuído ao aluno. '
+            'Você pode atribuir depois pela lista de treinos.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Descartar treino?'), findsNothing);
+        expect(find.text('O que você preencheu não será salvo.'), findsNothing);
+
+        await tester.tap(find.text('Sair e atribuir depois'));
+        await _settle(tester);
+
+        expect(find.text('Aluno 360'), findsOneWidget);
+        expect(find.text('Sair sem atribuir?'), findsNothing);
+        expect(repo.nonces, hasLength(1));
+        expect(repo.atribuicoes, isEmpty);
+      },
+    );
+  }
+
+  testWidgets('sair sem criar continua pedindo para descartar', (
+    tester,
+  ) async {
+    final router = _router(origem: '/treinos');
+    await _pumpFluxo(tester, router, _FakeTreinoRepository());
+
+    await tester.tap(find.text('Lista de treinos'));
+    await _settle(tester);
+    await tester.enterText(find.byType(TextFormField).first, 'Treino A');
+    await tester.pump();
+    await tester.tap(find.text('Cancelar'));
+    await _settle(tester);
+
+    expect(find.text('Descartar treino?'), findsOneWidget);
+    expect(find.text('Sair sem atribuir?'), findsNothing);
   });
 
   testWidgets('criado offline (enfileirado) não abre detalhe sem id', (

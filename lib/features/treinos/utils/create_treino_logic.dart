@@ -13,8 +13,28 @@ class TreinoCreatePreset {
   final IconData icon;
 }
 
+/// O que a saída do formulário precisa avisar antes de fechar.
+enum CreateTreinoSaida {
+  /// Nada preenchido: sai direto.
+  livre,
+
+  /// Formulário preenchido e nada criado: confirma o descarte.
+  descartar,
+
+  /// Treino criado, atribuição ao aluno falhou: nada é descartado.
+  treinoSemAluno,
+}
+
 abstract final class CreateTreinoLogic {
   CreateTreinoLogic._();
+
+  static CreateTreinoSaida saida({
+    required bool preenchido,
+    required bool treinoCriado,
+  }) {
+    if (treinoCriado) return CreateTreinoSaida.treinoSemAluno;
+    return preenchido ? CreateTreinoSaida.descartar : CreateTreinoSaida.livre;
+  }
 
   static const niveis = ['INICIANTE', 'INTERMEDIARIO', 'AVANCADO'];
   static const niveisLabel = ['Iniciante', 'Intermediário', 'Avançado'];

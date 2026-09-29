@@ -30,8 +30,7 @@ TextScaler appTextScaler(TextScaler system) => system.clamp(
 );
 
 /// Limita escala de fonte do sistema para layouts de marketing estáveis.
-TextScaler clampedTextScaler(BuildContext context, {double maxScale = 1.2}) {
-  final scaler = MediaQuery.textScalerOf(context);
-  final scale = scaler.scale(1).clamp(1.0, maxScale);
-  return TextScaler.linear(scale);
-}
+TextScaler clampedTextScaler(BuildContext context, {double maxScale = 1.2}) =>
+    MediaQuery.textScalerOf(
+      context,
+    ).clamp(minScaleFactor: kAppMinTextScale, maxScaleFactor: maxScale);

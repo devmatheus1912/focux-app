@@ -44,6 +44,29 @@ void main() {
     expect(clampedTextScaler(context, maxScale: 1.2).scale(1), 1.2);
   });
 
+  Future<TextScaler> clampedDe(WidgetTester tester, TextScaler sistema) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: MediaQueryData(textScaler: sistema),
+        child: const SizedBox(),
+      ),
+    );
+    return clampedTextScaler(tester.element(find.byType(SizedBox)));
+  }
+
+  testWidgets('clampedTextScaler usa o mesmo piso global', (tester) async {
+    final escala = await clampedDe(tester, const TextScaler.linear(0.5));
+    expect(escala.scale(10), 10 * kAppMinTextScale);
+  });
+
+  testWidgets('clampedTextScaler preserva escala não linear do sistema', (
+    tester,
+  ) async {
+    final escala = await clampedDe(tester, const _EscalaNaoLinear());
+    expect(escala.scale(10), 11.5);
+    expect(escala.scale(40), 42);
+  });
+
   group('appTextScaler', () {
     test('respeita a fonte do sistema até 1,3', () {
       expect(appTextScaler(const TextScaler.linear(1.15)).scale(1), 1.15);
@@ -58,4 +81,16 @@ void main() {
       expect(appTextScaler(const TextScaler.linear(0.5)).scale(1), 0.85);
     });
   });
+}
+
+/// Como o Android 14: fonte pequena cresce mais que fonte grande.
+class _EscalaNaoLinear extends TextScaler {
+  const _EscalaNaoLinear();
+
+  @override
+  double scale(double fontSize) =>
+      fontSize < 20 ? fontSize * 1.15 : fontSize * 1.05;
+
+  @override
+  double get textScaleFactor => 1.15;
 }
