@@ -4,18 +4,19 @@ import '../brand/focux_microcopy.dart';
 import '../theme/design_tokens.dart';
 import 'fx_shell_scaffold.dart';
 
-/// Erro de um bloco secundário: uma linha com "Tentar novamente", sem
-/// ocupar a tela como o [FxErrorState].
+/// Erro de um bloco secundário: a mensagem e "Tentar novamente" no próprio
+/// card, sem ocupar a tela como o [FxErrorState]. Sem [onRetry], só a
+/// mensagem.
 class FxInlineRetryTile extends StatelessWidget {
   const FxInlineRetryTile({
     super.key,
     required this.message,
-    required this.onRetry,
+    this.onRetry,
     this.margin = const EdgeInsets.only(bottom: 6),
   });
 
   final String message;
-  final VoidCallback onRetry;
+  final VoidCallback? onRetry;
   final EdgeInsetsGeometry margin;
 
   @override
@@ -25,17 +26,25 @@ class FxInlineRetryTile extends StatelessWidget {
       child: FxSatelliteListTile(
         title: message,
         titleCase: false,
+        // Fonte ampliada em 360dp quebra a mensagem em várias linhas.
+        titleMaxLines: 4,
         margin: margin,
+        onTap: onRetry,
         leading: const Icon(
           Icons.cloud_off_rounded,
           color: EagleTokens.bad,
           size: 20,
         ),
-        trailing: TextButton(
-          onPressed: onRetry,
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-          child: const Text(FocuxMicrocopy.tentarNovamente),
-        ),
+        subtitle:
+            onRetry == null
+                ? null
+                : Text(
+                  FocuxMicrocopy.tentarNovamente,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
       ),
     );
   }

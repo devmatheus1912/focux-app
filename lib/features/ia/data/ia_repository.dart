@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/api_error.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
@@ -8,7 +9,8 @@ import '../models/ia_copiloto_home.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../models/progressao_sugestao.dart';
 
-class IaOperationalException implements Exception {
+class IaOperationalException implements UserFacingException {
+  @override
   final String message;
   final String? reference;
   final int? statusCode;

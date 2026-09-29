@@ -21,45 +21,53 @@ extension on _AgendaScreenState {
     );
   }
 
-  /// A ação ficou na fila offline: fecha a sheet e avisa o pendente. Sem
-  /// sucesso e sem recarregar — no servidor a agenda ainda não mudou.
-  void _closeWithQueuedNotice() {
-    if (!mounted) return;
-    _popRootOverlay();
-    FeedbackHelper.showWarn(context, S.of(context).acaoEnfileiradaOffline);
-  }
-
-  Future<void> _setStatus(Agendamento ag, String status) async {
+  /// Sucesso, fila offline ou falha: a sheet fecha antes do aviso, senão o
+  /// snackbar fica escondido atrás dela. Fila offline não recarrega — no
+  /// servidor a agenda ainda não mudou.
+  Future<void> _runSheetMutation(
+    Future<void> Function() mutation, {
+    required String failureFallback,
+    required Future<void> Function() onSuccess,
+  }) async {
+    Object? failure;
     try {
-      await ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status);
-    } on OfflineQueuedException {
-      _closeWithQueuedNotice();
-      return;
+      await mutation();
     } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(
-        context,
-        friendlyError(e, fallback: S.of(context).agendaStatusFalhou),
-      );
-      return;
+      failure = e;
     }
     if (!mounted) return;
     _popRootOverlay();
-    await _load(force: true);
-    if (!mounted) return;
-    AnalyticsService.instance.track(
-      ProductEvents.agendaStatusChanged,
-      props: {'status': status},
-    );
-    FeedbackHelper.showSuccess(
-      context,
-      status == 'CONFIRMADO'
-          ? 'Horário confirmado.'
-          : status == 'CONCLUIDO'
-          ? 'Atendimento concluído.'
-          : 'Horário cancelado.',
-    );
+    if (failure != null) {
+      FeedbackHelper.showApiFailure(
+        context,
+        failure,
+        fallback: failureFallback,
+      );
+      return;
+    }
+    await onSuccess();
   }
+
+  Future<void> _setStatus(Agendamento ag, String status) => _runSheetMutation(
+    () => ref.read(agendaRepositoryProvider).atualizarStatus(ag.id, status),
+    failureFallback: S.of(context).agendaStatusFalhou,
+    onSuccess: () async {
+      await _load(force: true);
+      if (!mounted) return;
+      AnalyticsService.instance.track(
+        ProductEvents.agendaStatusChanged,
+        props: {'status': status},
+      );
+      FeedbackHelper.showSuccess(
+        context,
+        status == 'CONFIRMADO'
+            ? 'Horário confirmado.'
+            : status == 'CONCLUIDO'
+            ? 'Atendimento concluído.'
+            : 'Horário cancelado.',
+      );
+    },
+  );
 
   Future<void> _reschedule(Agendamento ag) async {
     final dt = await showFxHomeSheet<DateTime>(
@@ -72,24 +80,18 @@ extension on _AgendaScreenState {
     );
     if (dt == null || !mounted) return;
     final fim = dt.add(ag.fim.difference(ag.inicio));
-    try {
-      await ref
+    await _runSheetMutation(
+      () => ref
           .read(agendaRepositoryProvider)
-          .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo);
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(
-        context,
-        friendlyError(e, fallback: S.of(context).agendaRemarcarFalhou),
-      );
-      return;
-    }
-    if (!mounted) return;
-    _popRootOverlay();
-    await _load(force: true);
-    if (!mounted) return;
-    AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
-    FeedbackHelper.showSuccess(context, 'Horário remarcado.');
+          .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo),
+      failureFallback: S.of(context).agendaRemarcarFalhou,
+      onSuccess: () async {
+        await _load(force: true);
+        if (!mounted) return;
+        AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
+        FeedbackHelper.showSuccess(context, 'Horário remarcado.');
+      },
+    );
   }
 
   /// Combina `Env.apiUrl` (https://host[/api]) com um path relativo (/api/...) sem
@@ -196,26 +198,17 @@ extension on _AgendaScreenState {
                 body: 'Isso remove o horário com ${ag.alunoNome} da agenda.',
                 confirmLabel: 'Excluir',
               );
-              if (!ok) return;
-              try {
-                await ref.read(agendaRepositoryProvider).excluir(ag.id);
-              } on OfflineQueuedException {
-                _closeWithQueuedNotice();
-                return;
-              } catch (e) {
-                if (!mounted) return;
-                FeedbackHelper.showError(
-                  context,
-                  friendlyError(e, fallback: S.of(context).agendaExcluirFalhou),
-                );
-                return;
-              }
-              if (!mounted) return;
-              _popRootOverlay();
-              await _load(force: true);
-              if (!mounted) return;
-              AnalyticsService.instance.track(ProductEvents.agendaDeleted);
-              FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
+              if (!ok || !mounted) return;
+              await _runSheetMutation(
+                () => ref.read(agendaRepositoryProvider).excluir(ag.id),
+                failureFallback: S.of(context).agendaExcluirFalhou,
+                onSuccess: () async {
+                  await _load(force: true);
+                  if (!mounted) return;
+                  AnalyticsService.instance.track(ProductEvents.agendaDeleted);
+                  FeedbackHelper.showSuccess(context, 'Agendamento excluído.');
+                },
+              );
             },
           ),
     );

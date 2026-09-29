@@ -175,7 +175,7 @@ class IaCopilotReadinessCard extends StatelessWidget {
     required this.alunoNome,
     this.recoveryAsync,
     this.onRetryRecovery,
-  }) : assert(recoveryAsync == null || onRetryRecovery != null);
+  });
 
   final String headline;
   final String modeDisplay;
@@ -234,7 +234,7 @@ class IaCopilotReadinessCard extends StatelessWidget {
             ),
             error: (_, __) => FxInlineRetryTile(
               message: S.of(context).iaCopilotProntidaoFalhou,
-              onRetry: onRetryRecovery ?? () {},
+              onRetry: onRetryRecovery,
             ),
             data: (snapshot) => FxSatelliteListTile(
               title: snapshot == null

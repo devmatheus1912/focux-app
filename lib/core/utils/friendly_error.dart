@@ -110,27 +110,39 @@ String friendlyError(Object error, {String? fallback}) {
     return fb;
   }
 
-  // For non-Dio errors, use the message if short enough
-  final msg = error.toString();
-  if (msg.length < 100 &&
-      !msg.contains('Exception') &&
-      !msg.contains('Error:')) {
+  // Fora do Dio, só texto escrito para o usuário. TypeError, StateError e
+  // afins são bug do app, não mensagem.
+  final msg = switch (error) {
+    final String text => text,
+    final UserFacingException domain => domain.message,
+    _ => null,
+  };
+  if (msg != null && msg.length < 100) {
     return _humanizeServerMessage(msg, fb, _ErrorContext.generic);
   }
-
   return fb;
+}
+
+/// Exceção de domínio cuja [message] já foi escrita para o usuário final.
+abstract interface class UserFacingException implements Exception {
+  String get message;
 }
 
 enum _ErrorContext { generic, media, pix }
 
+const _mediaPathMarkers = [
+  '/uploads',
+  '/midia',
+  '/media',
+  '/video',
+  '/foto',
+  '/feedback-videos',
+];
+
 _ErrorContext _contextFromPath(String path) {
   final lower = path.toLowerCase();
   if (lower.contains('/pix')) return _ErrorContext.pix;
-  if (lower.contains('/uploads') ||
-      lower.contains('/midia') ||
-      lower.contains('/media')) {
-    return _ErrorContext.media;
-  }
+  if (_mediaPathMarkers.any(lower.contains)) return _ErrorContext.media;
   return _ErrorContext.generic;
 }
 
@@ -257,15 +269,27 @@ String _humanizeServerMessage(
 }
 
 final _envVarPattern = RegExp(r'\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b');
+final _credentialNamePattern = RegExp(
+  r'\b\w+_(key|secret|token)\b',
+  caseSensitive: false,
+);
 final _infraWordPattern = RegExp(
   r'\b(logs?|cloudinary|stacktrace|exception)\b',
   caseSensitive: false,
 );
+final _runtimeFaultPattern = RegExp(
+  r'null check operator|is not a subtype|bad state|'
+  r'\b(TypeError|StateError|RangeError|NoSuchMethodError)\b',
+  caseSensitive: false,
+);
 
-/// Nome de variável de ambiente ou termo de infraestrutura nunca chega ao
-/// usuário final.
+/// Nome de variável de ambiente ou credencial, termo de infraestrutura ou
+/// falha de runtime do Dart nunca chega ao usuário final.
 bool _looksTechnical(String msg) =>
-    _envVarPattern.hasMatch(msg) || _infraWordPattern.hasMatch(msg);
+    _envVarPattern.hasMatch(msg) ||
+    _credentialNamePattern.hasMatch(msg) ||
+    _infraWordPattern.hasMatch(msg) ||
+    _runtimeFaultPattern.hasMatch(msg);
 
 /// True when the error is a plan/feature gate (not a real outage).
 ///

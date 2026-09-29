@@ -377,6 +377,7 @@ class FxSatelliteListTile extends StatelessWidget {
     this.margin = const EdgeInsets.only(bottom: 6),
     this.isThreeLine = false,
     this.titleCase = true,
+    this.titleMaxLines,
   });
 
   final String title;
@@ -389,6 +390,9 @@ class FxSatelliteListTile extends StatelessWidget {
   final EdgeInsetsGeometry margin;
   final bool isThreeLine;
   final bool titleCase;
+
+  /// Padrão: 2 linhas em [isThreeLine], senão 1.
+  final int? titleMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +413,7 @@ class FxSatelliteListTile extends StatelessWidget {
         trailing: trailing,
         title: Text(
           displayTitle,
-          maxLines: isThreeLine ? 2 : 1,
+          maxLines: titleMaxLines ?? (isThreeLine ? 2 : 1),
           softWrap: true,
           overflow: TextOverflow.ellipsis,
           style: FocuxHubTypography.body(

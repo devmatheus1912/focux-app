@@ -136,7 +136,7 @@ class AuthEnvironmentIssue {
   factory AuthEnvironmentIssue.fromJson(Map<String, dynamic> json) {
     return AuthEnvironmentIssue(
       area: json['area'] as String? ?? '',
-      title: json['title'] as String? ?? 'Configuracao pendente',
+      title: json['title'] as String? ?? 'Configuração pendente',
       detail: json['detail'] as String? ?? '',
       action: json['action'] as String? ?? '',
     );

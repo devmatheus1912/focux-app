@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_inline_retry_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
@@ -41,14 +42,19 @@ class SetupOnboardingWidget extends ConsumerWidget {
         padding: DashboardLayout.foldCard,
         child: SetupWizardSkeleton(),
       ),
-      error: (_, __) => Padding(
-        padding: DashboardLayout.foldCard,
-        child: FxInlineRetryTile(
-          message: S.of(context).setupAtivacaoFalhou,
-          margin: EdgeInsets.zero,
-          onRetry: () => ref.invalidate(onboardingStatusProvider),
-        ),
-      ),
+      // Gate/cota de plano não é falha de carregamento.
+      error:
+          (e, _) =>
+              isPlanRestrictionError(e)
+                  ? const SizedBox.shrink()
+                  : Padding(
+                    padding: DashboardLayout.foldCard,
+                    child: FxInlineRetryTile(
+                      message: S.of(context).setupAtivacaoFalhou,
+                      margin: EdgeInsets.zero,
+                      onRetry: () => ref.invalidate(onboardingStatusProvider),
+                    ),
+                  ),
       data: (data) {
         if (data.ativacaoCompleta(includeLinkBio: landingCompleta)) {
           return const SizedBox.shrink();

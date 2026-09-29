@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -80,22 +79,5 @@ void main() {
 
     expect(find.text(_pendente), findsOneWidget);
     expect(find.text('Agendamento excluído.'), findsNothing);
-  });
-
-  test('agenda trata a fila antes do sucesso em excluir e status', () {
-    final actions = File(
-      'lib/features/agenda/screens/agenda_screen_actions.part.dart',
-    ).readAsStringSync();
-    final delete = actions.substring(actions.indexOf('onDelete:'));
-    expect(
-      delete.indexOf('on OfflineQueuedException'),
-      lessThan(delete.indexOf("showSuccess(context, 'Agendamento excluído.')")),
-    );
-    final status = actions.substring(
-      actions.indexOf('Future<void> _setStatus('),
-      actions.indexOf('Future<void> _reschedule('),
-    );
-    expect(status, contains('on OfflineQueuedException'));
-    expect(actions, contains('S.of(context).acaoEnfileiradaOffline'));
   });
 }
