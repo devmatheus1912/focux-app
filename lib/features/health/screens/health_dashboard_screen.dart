@@ -27,6 +27,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/health/home_widget_service.dart';
 import '../data/health_repository.dart';
 import '../utils/health_dashboard_display.dart';
+import '../utils/prontidao_display.dart';
 import '../widgets/recovery_score_ring.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/app_localizations.dart';
@@ -171,12 +172,15 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
       String? soft;
       try {
         synced = await _resolveSyncToday(summary);
-        await _resolveUpdateHomeWidgetRecovery(
-          recoveryScore: synced.recoveryScore,
-          recoveryLabel: synced.recoveryLabel,
-          recoveryHint: synced.recoveryHint,
-          steps: synced.steps,
-        );
+        final score = synced.recoveryScore;
+        if (score != null) {
+          await _resolveUpdateHomeWidgetRecovery(
+            recoveryScore: score,
+            recoveryLabel: synced.recoveryLabel,
+            recoveryHint: synced.recoveryHint,
+            steps: synced.steps,
+          );
+        }
       } catch (e) {
         soft = saudeSyncSoftError(friendlyError(e));
       }
@@ -364,6 +368,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     final l10n = S.of(context);
     final s = _summary!;
     final recovery = _recovery;
+    final score = recovery?.recoveryScore;
     final chrome = ShellChrome.forBrightness(context, isDark);
     final primary = Theme.of(context).colorScheme.primary;
     return RefreshIndicator(
@@ -383,18 +388,18 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   container: true,
                   excludeSemantics: true,
                   label:
-                      recovery != null
+                      recovery != null && score != null
                           ? l10n.saudeProntidaoSemantics(
-                            recovery.recoveryScore,
+                            score,
                             recovery.recoveryLabel,
                           )
                           : l10n.saudeProntidaoIndisponivelSemantics,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (recovery != null)
+                      if (score != null)
                         RecoveryScoreRing(
-                          score: recovery.recoveryScore,
+                          score: score,
                           color: primary,
                           size: 72,
                         )
@@ -423,15 +428,13 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              recovery != null
-                                  ? '${recovery.recoveryScore}%'
-                                  : '--',
+                              prontidaoNota(score),
                               style: FocuxHubTypography.kpi(
                                 color: chrome.ink,
                                 fontSize: FocuxHubTypography.metricLg,
                               ),
                             ),
-                            if (recovery != null) ...[
+                            if (recovery != null && score != null) ...[
                               const SizedBox(height: 4),
                               Text(
                                 recovery.recoveryLabel,
@@ -446,7 +449,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     ],
                   ),
                 ),
-                if (recovery != null) ...[
+                if (recovery != null && score != null) ...[
                   const SizedBox(height: TokensStrip.s2),
                   Text(
                     recovery.recoveryHint,

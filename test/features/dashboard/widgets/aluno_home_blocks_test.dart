@@ -9,6 +9,7 @@ import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_autonomy_analytics.dart';
+import 'package:focux_app/features/dashboard/utils/aluno_home_view.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
@@ -539,9 +540,52 @@ void main() {
       expect(find.text('Descanso recomendado'), findsOneWidget);
       expect(find.text('Sono ou carga baixa'), findsNothing);
       expect(
-        find.bySemanticsLabel('Prontidão do dia: Descanso recomendado'),
+        find.bySemanticsLabel('Prontidão 40 de 100. Descanso recomendado.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('sem nota do servidor: -- e sem conselho de ir mais leve', (
+      tester,
+    ) async {
+      const semNota = RecoverySnapshot(
+        steps: 0,
+        caloriesBurned: 0,
+        avgHeartRate: 0,
+        sleepHours: 0,
+        recoveryScore: null,
+        recoveryLabel: '',
+        recoveryHint: '',
+      );
+      final baixa = alunoProntidaoBaixa(
+        mode: AlunoTodayMode.workoutReady,
+        snapshot: semNota,
+        prontidaoVisivel: true,
+      );
+      await _pump(
+        tester,
+        Column(
+          children: [
+            AlunoTodayFocusCard(
+              action: const AlunoTodayAction(
+                mode: AlunoTodayMode.workoutReady,
+                route: '/checkin/executar',
+                treinoNome: 'Treino A',
+                exerciseCount: 6,
+              ),
+              hoje: DateTime(2026, 9, 28, 8),
+              prontidaoBaixa: baixa,
+              isDark: false,
+              onAction: () {},
+            ),
+            AlunoRecoveryCard(snapshot: semNota, mostrarDica: !baixa),
+          ],
+        ),
+      );
+      expect(baixa, isFalse);
+      expect(find.text('--'), findsOneWidget);
+      expect(find.textContaining('vá leve'), findsNothing);
+      expect(find.text('0'), findsNothing);
     });
 
     testWidgets('dica inteira com fonte 2x', (tester) async {

@@ -54,7 +54,7 @@ struct FocuxRecoveryWidgetEntryView: View {
         Text("FOCUX")
           .font(.caption2.weight(.bold))
           .foregroundStyle(.white.opacity(0.55))
-        Text(entry.score > 0 ? "\(entry.score)%" : "--")
+        Text(entry.score > 0 ? "\(entry.score)" : "--")
           .font(.system(size: 34, weight: .black, design: .rounded))
           .foregroundStyle(.white)
         Text(entry.label)

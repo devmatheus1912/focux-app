@@ -5,6 +5,8 @@ void main() {
   test('copy de saúde explica prontidão e desconectar', () {
     expect(saudeComoCalculamos, contains('sono'));
     expect(saudeComoCalculamos, contains('passos'));
+    expect(saudeComoCalculamos, contains('0 a 100'));
+    expect(saudeComoCalculamos, isNot(contains('%')));
     expect(saudeAtualizarLabel(), 'Atualizar agora');
     expect(saudeDesconectarLabel(), 'Desconectar saúde');
     expect(saudeDesconectarConfirmTitle(), contains('Desconectar'));

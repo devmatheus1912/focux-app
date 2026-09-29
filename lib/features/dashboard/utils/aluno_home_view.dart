@@ -217,15 +217,18 @@ AlunoHomeInsight? alunoInsightNoFoco(
 /// recomendado".
 const alunoProntidaoBaixaAbaixoDe = 45;
 
+/// Nota ausente é indisponível, não baixa: sem conselho de ir mais leve.
 bool alunoProntidaoBaixa({
   required AlunoTodayMode mode,
   required RecoverySnapshot? snapshot,
   required bool prontidaoVisivel,
-}) =>
-    mode == AlunoTodayMode.workoutReady &&
-    prontidaoVisivel &&
-    snapshot != null &&
-    snapshot.recoveryScore < alunoProntidaoBaixaAbaixoDe;
+}) {
+  final score = snapshot?.recoveryScore;
+  return mode == AlunoTodayMode.workoutReady &&
+      prontidaoVisivel &&
+      score != null &&
+      score < alunoProntidaoBaixaAbaixoDe;
+}
 
 const alunoRecordeNovoDias = 7;
 

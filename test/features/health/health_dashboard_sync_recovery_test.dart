@@ -59,6 +59,22 @@ void main() {
     );
   });
 
+  test('recoveryScore ausente ou nulo fica nulo, não zero', () {
+    final semCampo = RecoverySnapshot.fromJson({
+      'recoveryLabel': '',
+      'recoveryHint': '',
+    });
+    final nulo = RecoverySnapshot.fromJson({'recoveryScore': null});
+    final comNota = RecoverySnapshot.fromJson({
+      'recoveryScore': 64,
+      'dataReferencia': '2026-09-27',
+    });
+    expect(semCampo.recoveryScore, isNull);
+    expect(nulo.recoveryScore, isNull);
+    expect(comNota.recoveryScore, 64);
+    expect(comNota.dataReferencia, DateTime(2026, 9, 27));
+  });
+
   test('sync ok substitui pelo snapshot do servidor', () {
     const fresh = RecoverySnapshot(
       steps: 10000,
@@ -147,10 +163,11 @@ void main() {
 
       expect(find.byType(RecoveryScoreRing), findsOneWidget);
       expect(
-        find.bySemanticsLabel('Prontidão 77 por cento. Pronto para treinar'),
+        find.bySemanticsLabel('Prontidão 77 de 100. Pronto para treinar'),
         findsOneWidget,
       );
-      expect(find.text('77%'), findsOneWidget);
+      expect(find.text('77/100'), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
       expect(find.text('Pronto para treinar'), findsOneWidget);
       expect(find.text('12000'), findsOneWidget);
       expect(
@@ -159,6 +176,42 @@ void main() {
       );
       expect(homeWidgetUpdates, 1);
       expect(syncedScore, 77);
+    },
+  );
+
+  testWidgets(
+    'servidor sem nota: prontidão indisponível e widget da Home sem zero',
+    (tester) async {
+      var homeWidgetUpdates = 0;
+
+      await _pumpDashboard(
+        tester,
+        screen: HealthDashboardScreen(
+          checkAuthorization: () async => true,
+          loadTodaySummary: () async => _localSummary,
+          syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 9000}),
+          updateHomeWidgetRecovery: ({
+            required int recoveryScore,
+            required String recoveryLabel,
+            required String recoveryHint,
+            required int steps,
+          }) async {
+            homeWidgetUpdates++;
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RecoveryScoreRing), findsNothing);
+      expect(
+        find.bySemanticsLabel(
+          'Prontidão indisponível. Aguardando sincronização com o servidor.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('0'), findsNothing);
+      expect(find.textContaining('%'), findsNothing);
+      expect(homeWidgetUpdates, 0);
     },
   );
 }

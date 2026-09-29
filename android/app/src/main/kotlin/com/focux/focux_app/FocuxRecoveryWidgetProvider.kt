@@ -24,7 +24,7 @@ class FocuxRecoveryWidgetProvider : HomeWidgetProvider() {
 
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.recovery_widget_layout).apply {
-                setTextViewText(R.id.recovery_widget_score, if (score > 0) "$score%" else "--")
+                setTextViewText(R.id.recovery_widget_score, if (score > 0) "$score" else "--")
                 setTextViewText(R.id.recovery_widget_label, label)
                 setTextViewText(R.id.recovery_widget_hint, hint)
                 setTextViewText(

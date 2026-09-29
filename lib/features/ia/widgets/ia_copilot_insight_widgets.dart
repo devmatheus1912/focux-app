@@ -6,6 +6,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../health/data/health_repository.dart';
+import '../../health/utils/prontidao_display.dart';
 import '../models/ia_copilot_insight.dart';
 
 class IaCopilotInsightItem extends StatefulWidget {
@@ -231,7 +232,7 @@ class IaCopilotReadinessCard extends StatelessWidget {
             data: (snapshot) => FxSatelliteListTile(
               title: snapshot == null
                   ? 'Sem wearable'
-                  : '${snapshot.recoveryScore}% prontidao',
+                  : 'Prontidão ${prontidaoNota(snapshot.recoveryScore)}',
               trailing: Text(
                 'Análise IA',
                 style: TextStyle(

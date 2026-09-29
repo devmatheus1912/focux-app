@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../utils/prontidao_display.dart';
+
+/// Índice de prontidão (0–100) no centro; null mostra "--" com o anel vazio.
 class RecoveryScoreRing extends StatelessWidget {
   const RecoveryScoreRing({
     super.key,
@@ -10,7 +13,7 @@ class RecoveryScoreRing extends StatelessWidget {
     this.size = 52,
   });
 
-  final int score;
+  final int? score;
   final Color color;
   final double size;
 
@@ -23,7 +26,7 @@ class RecoveryScoreRing extends StatelessWidget {
         painter: _RecoveryRingPainter(score: score, color: color),
         child: Center(
           child: Text(
-            '$score',
+            score?.toString() ?? '--',
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.w900,
@@ -39,7 +42,7 @@ class RecoveryScoreRing extends StatelessWidget {
 class _RecoveryRingPainter extends CustomPainter {
   _RecoveryRingPainter({required this.score, required this.color});
 
-  final int score;
+  final int? score;
   final Color color;
 
   @override
@@ -60,7 +63,12 @@ class _RecoveryRingPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, background);
-    final sweep = (score.clamp(0, 100) / 100) * math.pi * 2;
+    final value = score;
+    if (value == null) return;
+    final sweep =
+        (value.clamp(0, prontidaoEscalaMax) / prontidaoEscalaMax) *
+        math.pi *
+        2;
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
       -math.pi / 2,

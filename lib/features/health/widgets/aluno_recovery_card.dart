@@ -9,6 +9,7 @@ import '../../../core/widgets/fx_rive_player.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/health_repository.dart';
+import '../utils/prontidao_display.dart';
 import 'recovery_score_ring.dart';
 
 /// Prontidão na Home do aluno, a partir do BFF. Quem decide se o bloco
@@ -19,6 +20,7 @@ class AlunoRecoveryCard extends StatelessWidget {
     super.key,
     required this.snapshot,
     this.mostrarDica = true,
+    this.now,
   });
 
   final RecoverySnapshot? snapshot;
@@ -26,10 +28,18 @@ class AlunoRecoveryCard extends StatelessWidget {
   /// Falso quando o card de foco já pediu para ir mais leve.
   final bool mostrarDica;
 
+  /// Referência do frescor; padrão é o relógio.
+  final DateTime? now;
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final snap = snapshot;
+    final score = snap?.recoveryScore;
+    final frescor =
+        snap == null
+            ? null
+            : prontidaoFrescor(s, snap.dataReferencia, now ?? DateTime.now());
     final primary = Theme.of(context).colorScheme.primary;
     final chrome = ShellChrome.of(context);
 
@@ -38,9 +48,12 @@ class AlunoRecoveryCard extends StatelessWidget {
       label:
           snap == null
               ? s.alunoProntidaoSincronizar
-              : mostrarDica
-              ? s.alunoProntidaoSemantics(snap.recoveryLabel, snap.recoveryHint)
-              : s.alunoProntidaoSemanticsRotulo(snap.recoveryLabel),
+              : alunoProntidaoSemantica(
+                s,
+                snap,
+                mostrarDica: mostrarDica,
+                frescor: frescor,
+              ),
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
@@ -63,7 +76,7 @@ class AlunoRecoveryCard extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       RecoveryScoreRing(
-                        score: snap.recoveryScore,
+                        score: score,
                         color: primary,
                         size: 54,
                       ),
@@ -88,23 +101,45 @@ class AlunoRecoveryCard extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                s.alunoProntidaoTitulo,
+                                score == null
+                                    ? s.alunoProntidaoTitulo
+                                    : s.alunoProntidaoTituloNota(
+                                      prontidaoNota(score),
+                                    ),
                                 style: FocuxHubTypography.eyebrow(
                                   context,
                                   color: chrome.mute,
                                 ),
                               ),
                               const SizedBox(height: TokensStrip.s1),
-                              Text(
-                                snap.recoveryLabel,
-                                style: FocuxHubTypography.cardTitle(
-                                  color: chrome.ink,
+                              if (score == null)
+                                Text(
+                                  s.alunoProntidaoSincronizar,
+                                  style: FocuxHubTypography.bodyMuted(
+                                    color: chrome.mute,
+                                  ),
+                                )
+                              else ...[
+                                Text(
+                                  snap.recoveryLabel,
+                                  style: FocuxHubTypography.cardTitle(
+                                    color: chrome.ink,
+                                  ),
                                 ),
-                              ),
-                              if (mostrarDica) ...[
+                                if (mostrarDica) ...[
+                                  const SizedBox(height: TokensStrip.s1),
+                                  Text(
+                                    snap.recoveryHint,
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: chrome.mute,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                              if (frescor != null) ...[
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
-                                  snap.recoveryHint,
+                                  frescor,
                                   style: FocuxHubTypography.bodyMuted(
                                     color: chrome.mute,
                                   ),

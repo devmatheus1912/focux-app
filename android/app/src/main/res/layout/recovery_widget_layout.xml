@@ -28,7 +28,7 @@
         android:textColor="#FFFFFF"
         android:textSize="34sp"
         android:textStyle="bold"
-        tools:text="82%" />
+        tools:text="82" />
 
     <TextView
         android:id="@+id/recovery_widget_label"

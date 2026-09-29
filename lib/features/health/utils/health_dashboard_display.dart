@@ -1,5 +1,5 @@
 const saudeComoCalculamos =
-    'Prontidão junta sono, passos e FC média do wearable (0–100). Sem permissão, a tela pede para conectar.';
+    'Prontidão é um índice de 0 a 100 (não é porcentagem) que junta sono, passos e FC média do wearable. Sem permissão, a tela pede para conectar.';
 
 String saudeAtualizarLabel() => 'Atualizar agora';
 

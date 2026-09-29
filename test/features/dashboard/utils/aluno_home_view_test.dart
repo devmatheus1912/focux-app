@@ -496,6 +496,11 @@ void main() {
       expect(b(visivel: false), isFalse);
       expect(b(mode: AlunoTodayMode.workoutDone), isFalse);
       expect(b(s: null), isFalse);
+      expect(
+        b(s: RecoverySnapshot.fromJson({'recoveryLabel': 'baixa'})),
+        isFalse,
+        reason: 'nota ausente não é prontidão baixa',
+      );
     });
 
     test('sem prontidão de hoje: convite só quando a última é antiga', () {

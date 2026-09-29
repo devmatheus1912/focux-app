@@ -16,7 +16,9 @@ class RecoverySnapshot {
   final double caloriesBurned;
   final double avgHeartRate;
   final double sleepHours;
-  final int recoveryScore;
+
+  /// Índice 0–100 calculado no servidor; null = indisponível (nunca 0).
+  final int? recoveryScore;
   final String recoveryLabel;
   final String recoveryHint;
   final DateTime? sincronizadoEm;
@@ -41,7 +43,7 @@ class RecoverySnapshot {
     caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble() ?? 0,
     avgHeartRate: (json['avgHeartRate'] as num?)?.toDouble() ?? 0,
     sleepHours: (json['sleepHours'] as num?)?.toDouble() ?? 0,
-    recoveryScore: (json['recoveryScore'] as num?)?.toInt() ?? 0,
+    recoveryScore: (json['recoveryScore'] as num?)?.toInt(),
     recoveryLabel: json['recoveryLabel'] as String? ?? '',
     recoveryHint: json['recoveryHint'] as String? ?? '',
     sincronizadoEm: DateTime.tryParse(json['sincronizadoEm'] as String? ?? ''),
