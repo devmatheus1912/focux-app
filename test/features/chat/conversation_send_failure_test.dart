@@ -9,6 +9,7 @@ import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/chat/screens/conversation_screen.dart';
+import 'package:focux_app/features/chat/utils/chat_outbox.dart';
 import 'package:focux_app/features/chat/widgets/conversation_outgoing_status.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -21,8 +22,9 @@ const _texto = 'Posso trocar o treino de amanhã?';
 class _ChatAdapter implements HttpClientAdapter {
   int falhasRestantes = 0;
   int conflitosRestantes = 0;
+  int recusasRestantes = 0;
   final List<Map<String, dynamic>> envios = [];
-  final List<Object?> escopos = [];
+  final List<Map<String, dynamic>> extras = [];
 
   @override
   Future<ResponseBody> fetch(
@@ -36,7 +38,11 @@ class _ChatAdapter implements HttpClientAdapter {
     if (options.method == 'POST' && options.path == _enviar) {
       final body = Map<String, dynamic>.from(options.data as Map);
       envios.add(body);
-      escopos.add(options.extra['fxIdempotencyScope']);
+      extras.add(Map.of(options.extra));
+      if (recusasRestantes > 0) {
+        recusasRestantes--;
+        return _json({'erro': 'Plano não inclui chat'}, 403);
+      }
       if (conflitosRestantes > 0) {
         conflitosRestantes--;
         return _json({'error': 'Requisicao em processamento.'}, 409);
@@ -171,13 +177,41 @@ void main() {
       expect(adapter.envios, hasLength(2));
       final clientId = adapter.envios.first['clientMessageId'];
       expect(adapter.envios.last['clientMessageId'], clientId);
-      expect(adapter.escopos, ['chat:$clientId', 'chat:$clientId']);
+      final chave = ApiClient.idempotent(chatIdempotencyScope(clientId)).extra;
+      expect(adapter.extras, [chave, chave]);
       expect(find.text(_texto), findsOneWidget);
       expect(find.text('Não enviada'), findsNothing);
       expect(find.text('Enviado'), findsOneWidget);
       await tester.pump(const Duration(seconds: 5));
     },
   );
+
+  testWidgets('403 do servidor: reenvio manual usa chave nova e o mesmo id', (
+    tester,
+  ) async {
+    telaAlta(tester);
+    pluginsMudos(tester);
+    final adapter = _ChatAdapter()..recusasRestantes = 1;
+    await tester.pumpWidget(_app(adapter));
+    await _settle(tester);
+
+    await _enviarTexto(tester);
+    expect(find.text('Não enviada'), findsOneWidget);
+
+    await tester.tap(find.text('Tentar novamente'));
+    await _settle(tester);
+
+    expect(adapter.envios, hasLength(2));
+    final clientId = adapter.envios.first['clientMessageId'];
+    expect(adapter.envios.last['clientMessageId'], clientId);
+    expect(
+      adapter.extras.first,
+      ApiClient.idempotent(chatIdempotencyScope(clientId)).extra,
+    );
+    expect(adapter.extras.last, isNot(adapter.extras.first));
+    expect(find.text('Enviado'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+  });
 
   testWidgets(
     '409 da primeira tentativa em processamento segue "Enviando…" e confirma',
@@ -250,6 +284,96 @@ void main() {
     expect(find.text('Não enviada'), findsNothing);
     expect(adapter.envios, hasLength(1));
     await tester.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('"Não enviada" usa badInk no claro e badDark no escuro', (
+    tester,
+  ) async {
+    Future<Color?> corNo(Brightness brilho) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          key: ValueKey(brilho),
+          theme: ThemeData(brightness: brilho),
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: const Scaffold(
+            body: ConversationDeliveryStatus(
+              status: ChatOutgoingStatus.failed,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+      return tester.widget<Text>(find.text('Não enviada')).style?.color;
+    }
+
+    expect(await corNo(Brightness.light), EagleTokens.badInk);
+    expect(await corNo(Brightness.dark), EagleTokens.badDark);
+  });
+
+  testWidgets('reenvio desabilitado explica por quê ao leitor de tela', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
+        home: Scaffold(
+          body: ConversationSendFailedActions(
+            accentColor: EagleTokens.brandAccent,
+            onRetry: null,
+            onDiscard: () {},
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester.getSemantics(find.text('Tentar novamente')),
+      isSemantics(
+        isButton: true,
+        isEnabled: false,
+        hint: 'Disponível quando o anexo em envio terminar',
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('ações da não enviada quebram linha com texto grande', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                child: ConversationSendFailedActions(
+                  accentColor: EagleTokens.brandAccent,
+                  onRetry: () {},
+                  onDiscard: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    final reenviar = tester.getRect(find.text('Tentar novamente'));
+    final descartar = tester.getRect(find.text('Descartar'));
+    expect(descartar.top, greaterThanOrEqualTo(reenviar.bottom));
   });
 
   testWidgets('reenvio sem ação (outro anexo subindo) aparece desabilitado', (

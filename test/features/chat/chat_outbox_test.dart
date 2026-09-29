@@ -28,7 +28,7 @@ void main() {
     test('falha mantém a mensagem como não enviada e repassa o erro', () async {
       final outbox = ChatOutbox();
       final optimistic = _msg();
-      outbox.track('c1', () async => throw Exception('rede'));
+      outbox.track('c1', (_) async => throw Exception('rede'));
 
       expect(outbox.statusOf(optimistic), ChatOutgoingStatus.sending);
       await expectLater(outbox.dispatch('c1'), throwsException);
@@ -41,7 +41,7 @@ void main() {
       final outbox = ChatOutbox();
       final enviados = <String>[];
       var falhar = true;
-      outbox.track('c1', () async {
+      outbox.track('c1', (_) async {
         enviados.add('c1');
         if (falhar) throw Exception('rede');
         return _msg(id: 42);
@@ -61,7 +61,7 @@ void main() {
     test('mensagem apagada não volta a falhar nem reenvia', () async {
       final outbox = ChatOutbox();
       var chamadas = 0;
-      outbox.track('c1', () async {
+      outbox.track('c1', (_) async {
         chamadas++;
         throw Exception('rede');
       });
@@ -89,7 +89,7 @@ void main() {
 
     test('mesmo texto digitado de novo acha a bolha não enviada', () async {
       final outbox = ChatOutbox();
-      outbox.track('c1', () async => throw Exception('rede'));
+      outbox.track('c1', (_) async => throw Exception('rede'));
       await expectLater(outbox.dispatch('c1'), throwsException);
       final msgs = [_msg(conteudo: 'Bora  treinar?')];
 
@@ -129,7 +129,7 @@ void main() {
     test('eco do servidor depois da falha encerra a bolha: mesmo texto vira '
         'mensagem nova', () async {
       final outbox = ChatOutbox();
-      outbox.track('c1', () async => throw Exception('rede'));
+      outbox.track('c1', (_) async => throw Exception('rede'));
       await expectLater(outbox.dispatch('c1'), throwsException);
       final eco = _msg(id: 5);
 
@@ -141,7 +141,7 @@ void main() {
 
     test('bolha já com id nunca é tratada como não enviada', () async {
       final outbox = ChatOutbox();
-      outbox.track('c1', () async => throw Exception('rede'));
+      outbox.track('c1', (_) async => throw Exception('rede'));
       await expectLater(outbox.dispatch('c1'), throwsException);
 
       expect(outbox.failedWithText([_msg(id: 5)], 'Bora treinar?'), isNull);
@@ -150,7 +150,7 @@ void main() {
     test('WebSocket confirma antes do erro do POST: sem "Não enviada"', () async {
       final outbox = ChatOutbox();
       final resposta = Completer<ChatMsg>();
-      outbox.track('c1', () => resposta.future);
+      outbox.track('c1', (_) => resposta.future);
       final envio = outbox.dispatch('c1');
 
       outbox.forgetConfirmed(_msg(id: 5));
@@ -163,7 +163,7 @@ void main() {
 
     test('mensagem sem id do servidor não encerra o envio', () {
       final outbox = ChatOutbox();
-      outbox.track('c1', () async => _msg(id: 1));
+      outbox.track('c1', (_) async => _msg(id: 1));
 
       outbox.forgetConfirmed(_msg());
 
@@ -183,7 +183,7 @@ void main() {
     test('primeira tentativa em processamento segue "Enviando…"', () async {
       final outbox = ChatOutbox();
       final optimistic = _msg();
-      outbox.track('c1', () async => throw conflito());
+      outbox.track('c1', (_) async => throw conflito());
 
       await expectLater(outbox.dispatch('c1'), throwsA(isA<DioException>()));
 
@@ -194,7 +194,7 @@ void main() {
 
     test('409 que não resolve vira "Não enviada" depois do limite', () async {
       final outbox = ChatOutbox();
-      outbox.track('c1', () async => throw conflito());
+      outbox.track('c1', (_) async => throw conflito());
 
       for (var i = 0; i < chatMaxInFlightChecks; i++) {
         await expectLater(outbox.dispatch('c1'), throwsA(isA<DioException>()));
@@ -206,6 +206,7 @@ void main() {
     });
 
     test('outros erros HTTP não contam como em andamento', () {
+      expect(isChatSendRejected(conflito()), isFalse);
       final erro = DioException(
         requestOptions: RequestOptions(path: '/x'),
         response: Response(requestOptions: RequestOptions(path: '/x'), statusCode: 503),
@@ -213,6 +214,72 @@ void main() {
       expect(isChatSendInFlight(erro), isFalse);
       expect(isChatSendInFlight(Exception('rede')), isFalse);
     });
+  });
+
+  group('chave de idempotência do reenvio', () {
+    DioException erro(int? status, {DioExceptionType? tipo}) => DioException(
+      requestOptions: RequestOptions(path: '/api/chat/aluno/enviar'),
+      type: tipo ?? DioExceptionType.badResponse,
+      response:
+          status == null
+              ? null
+              : Response(
+                requestOptions: RequestOptions(path: '/api/chat/aluno/enviar'),
+                statusCode: status,
+              ),
+    );
+
+    Future<List<String>> escoposApos(Object falha) async {
+      final escopos = <String>[];
+      var falhar = true;
+      final outbox = ChatOutbox();
+      outbox.track('c1', (scope) async {
+        escopos.add(scope);
+        if (falhar) throw falha;
+        return _msg(id: 9);
+      });
+      await expectLater(outbox.dispatch('c1'), throwsA(anything));
+      falhar = false;
+      await outbox.dispatch('c1');
+      return escopos;
+    }
+
+    for (final status in [401, 403]) {
+      test('$status: servidor recusou, reenvio manual usa chave nova', () async {
+        final escopos = await escoposApos(erro(status));
+
+        expect(escopos, hasLength(2));
+        expect(escopos.first, chatIdempotencyScope('c1'));
+        expect(escopos.last, isNot(escopos.first));
+      });
+    }
+
+    test('duas recusas seguidas geram chaves diferentes entre si', () async {
+      final escopos = <String>[];
+      final outbox = ChatOutbox();
+      outbox.track('c1', (scope) async {
+        escopos.add(scope);
+        throw erro(403);
+      });
+      for (var i = 0; i < 3; i++) {
+        await expectLater(outbox.dispatch('c1'), throwsA(anything));
+      }
+
+      expect(escopos.toSet(), hasLength(3));
+    });
+
+    final mesmaChave = <String, Object>{
+      '5xx': erro(503),
+      'timeout': erro(null, tipo: DioExceptionType.receiveTimeout),
+      'offline': erro(null, tipo: DioExceptionType.connectionError),
+    };
+    for (final caso in mesmaChave.entries) {
+      test('${caso.key}: reenvio mantém a mesma chave', () async {
+        final escopos = await escoposApos(caso.value);
+
+        expect(escopos, [chatIdempotencyScope('c1'), chatIdempotencyScope('c1')]);
+      });
+    }
   });
 
   test('anexo: reenvio reaproveita a URL do upload e só repete o POST', () async {
@@ -227,7 +294,7 @@ void main() {
           uploads++;
           return 'https://cdn.example.test/chat/foto.jpg';
         },
-        send: (url) async {
+        send: (url, _) async {
           urls.add(url);
           if (falhar) throw Exception('rede');
           return _msg(id: 3);

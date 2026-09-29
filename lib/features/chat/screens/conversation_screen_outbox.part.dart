@@ -30,12 +30,13 @@ extension ConversationScreenOutbox on _ConversationScreenState {
       chatMediaSendOperation(
         upload: upload,
         send:
-            (url) =>
+            (url, scope) =>
                 _isAlunoMode
                     ? repo.enviarMidiaComoAluno(
                       conteudo: optimistic.conteudo,
                       tipoMidia: optimistic.tipoMidia!,
                       midiaUrl: url,
+                      idempotencyScope: scope,
                       replyToMessageId: optimistic.replyToMessageId,
                       clientMessageId: optimistic.clientMessageId,
                     )
@@ -45,11 +46,33 @@ extension ConversationScreenOutbox on _ConversationScreenState {
                       remetente: 'PERSONAL',
                       tipoMidia: optimistic.tipoMidia!,
                       midiaUrl: url,
+                      idempotencyScope: scope,
                       replyToMessageId: optimistic.replyToMessageId,
                       clientMessageId: optimistic.clientMessageId,
                     ),
       ),
     );
+  }
+
+  void _dedupeInitialDraft() {
+    if (_initialDraftChecked) return;
+    _initialDraftChecked = true;
+    final draft = widget.initialDraft?.trim();
+    if (draft == null || draft.isEmpty) return;
+    if (!_isDuplicateOutgoing(draft)) return;
+    setState(() {
+      _ctrl.clear();
+      _composerHasText = false;
+    });
+    FeedbackHelper.showSuccess(context, 'Mensagem recente já existe no chat.');
+  }
+
+  bool _isDuplicateOutgoing(String text) {
+    final recentMine = _msgs.reversed
+        .take(8)
+        .where((m) => _isMine(m) && !_outbox.isFailed(m.clientMessageId))
+        .map((m) => m.conteudo);
+    return isRecentDuplicateOutgoing(text, recentMine);
   }
 
   /// Um anexo por vez: reenviar mídia espera o upload em curso terminar.

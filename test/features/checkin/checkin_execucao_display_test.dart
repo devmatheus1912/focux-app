@@ -1,3 +1,4 @@
+import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/utils/checkin_execucao_display.dart';
 import 'package:focux_app/l10n/app_localizations_pt.dart';
@@ -23,6 +24,24 @@ void main() {
     expect(
       checkinRodapeReserva(comPendentes: true),
       base + checkinPendentesAvisoAltura,
+    );
+  });
+
+  test('reserva do aviso de pendentes cresce com a fonte do aparelho', () {
+    final base = checkinRodapeReserva(comPendentes: false);
+    double comAviso(double escala) => checkinRodapeReserva(
+      comPendentes: true,
+      textScaler: TextScaler.linear(escala),
+    );
+
+    expect(comAviso(1.3), closeTo(base + checkinPendentesAvisoAltura * 1.3, 1e-9));
+    expect(comAviso(0.85), base + checkinPendentesAvisoAltura);
+    expect(
+      checkinRodapeReserva(
+        comPendentes: false,
+        textScaler: const TextScaler.linear(2),
+      ),
+      base,
     );
   });
 

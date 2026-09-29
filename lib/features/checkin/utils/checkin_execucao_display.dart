@@ -1,3 +1,5 @@
+import 'package:flutter/painting.dart';
+
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/app_localizations.dart';
@@ -8,12 +10,22 @@ const double checkinExecutionControlMin = TokensStrip.s8;
 /// Altura da faixa "N séries esperando conexão" (alvo do "Tentar agora").
 const double checkinPendentesAvisoAltura = 48;
 
-/// Altura do rodapé fixo (+ aviso de pendentes); snackbar flutua acima.
-double checkinRodapeReserva({required bool comPendentes}) =>
+/// Altura do rodapé fixo (+ aviso de pendentes); snackbar flutua acima. O
+/// aviso cresce com a fonte do aparelho, porque o texto dele quebra linha.
+double checkinRodapeReserva({
+  required bool comPendentes,
+  TextScaler textScaler = TextScaler.noScaling,
+}) =>
     checkinExecutionControlMin +
     TokensStrip.s2 +
     TokensStrip.s3 +
-    (comPendentes ? checkinPendentesAvisoAltura : 0);
+    (comPendentes ? _pendentesAvisoReserva(textScaler) : 0);
+
+double _pendentesAvisoReserva(TextScaler textScaler) {
+  const fonte = TokensStrip.fontBodySm;
+  final escala = textScaler.scale(fonte) / fonte;
+  return checkinPendentesAvisoAltura * (escala < 1 ? 1 : escala);
+}
 
 /// Teto da mídia inline: o Registrar do rodapé nunca some atrás do vídeo.
 const double checkinMediaMaxFracaoTela = 0.3;

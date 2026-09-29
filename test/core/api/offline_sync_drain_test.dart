@@ -245,6 +245,49 @@ void main() {
     expect((saved.single as Map)['enqueuedAtMillis'], isA<int>());
   });
 
+  test('item corrompido sai da fila sem travar os válidos', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        QueuedRequest(path: _path, method: 'POST').toJson(),
+        {'method': 'POST', 'attempts': 'x'},
+        QueuedRequest(path: '/api/treinos/2/concluir', method: 'POST').toJson(),
+      ]),
+    });
+    final adapter = _Adapter();
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = adapter,
+    );
+
+    expect(adapter.requests.map((r) => r.path), [
+      _path,
+      '/api/treinos/2/concluir',
+    ]);
+    expect(await OfflineSyncService.getPendingCount(), 0);
+  });
+
+  test('item corrompido atrás de um em backoff também sai', () async {
+    SharedPreferences.setMockInitialValues({
+      'offline_outbox_queue': jsonEncode([
+        QueuedRequest(
+          path: _path,
+          method: 'POST',
+          attempts: 1,
+          nextRetryAtMillis:
+              DateTime.now().add(const Duration(hours: 1)).millisecondsSinceEpoch,
+        ).toJson(),
+        'lixo',
+        QueuedRequest(path: '/api/treinos/2/concluir', method: 'POST').toJson(),
+      ]),
+    });
+
+    await OfflineSyncService.syncPendingRequests(
+      Dio()..httpClientAdapter = _Adapter(),
+    );
+
+    expect(await OfflineSyncService.getPendingCount(), 2);
+  });
+
   test('DELETE com 404 no reenvio conta como feito, sem aviso', () async {
     SharedPreferences.setMockInitialValues({});
     await OfflineSyncService.enqueueRequest(

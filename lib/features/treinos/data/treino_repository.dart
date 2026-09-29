@@ -350,11 +350,13 @@ class TreinoRepository {
 
   /// [offlineQueue] falso quando o id é necessário logo em seguida (atribuir
   /// ao aluno): offline vira erro de conexão em vez de 202 sem entidade.
+  /// [formNonce] é o mesmo em todo envio do formulário: retry não duplica.
   Future<Treino> criar(
     String nome,
     String? descricao,
     String? objetivo,
     String? nivel, {
+    required String formNonce,
     bool offlineQueue = true,
   }) async {
     final response = await _dio.post(
@@ -365,7 +367,10 @@ class TreinoRepository {
         if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
         if (nivel != null) 'nivel': nivel,
       },
-      options: Options(extra: {OfflineSyncService.noQueueExtra: !offlineQueue}),
+      options: ApiClient.idempotent(
+        'treino-criar:$formNonce',
+        extra: {OfflineSyncService.noQueueExtra: !offlineQueue},
+      ),
     );
     throwIfQueuedOffline(response);
     return Treino.fromJson(response.data as Map<String, dynamic>);

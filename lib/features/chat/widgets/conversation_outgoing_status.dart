@@ -35,7 +35,9 @@ class ConversationDeliveryStatus extends StatelessWidget {
       return Text(label, style: FocuxHubTypography.chip(color));
     }
     final bad =
-        ShellChrome.of(context).isDark ? EagleTokens.badDark : EagleTokens.bad;
+        ShellChrome.of(context).isDark
+            ? EagleTokens.badDark
+            : EagleTokens.badInk;
     return Semantics(
       liveRegion: true,
       child: Row(
@@ -78,20 +80,27 @@ class ConversationSendFailedActions extends StatelessWidget {
       minimumSize: const Size(48, 48),
       padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
     );
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        TextButton.icon(
-          onPressed: onRetry,
-          style: style,
-          icon: Icon(
-            Icons.refresh_rounded,
-            size: 16,
-            color: canRetry ? accentColor : chrome.mute,
-          ),
-          label: Text(
-            s.retry,
-            style: FocuxHubTypography.chip(canRetry ? chrome.ink : chrome.mute),
+        MergeSemantics(
+          child: Semantics(
+            hint: canRetry ? null : s.chatReenvioAguardaAnexo,
+            child: TextButton.icon(
+              onPressed: onRetry,
+              style: style,
+              icon: Icon(
+                Icons.refresh_rounded,
+                size: 16,
+                color: canRetry ? accentColor : chrome.mute,
+              ),
+              label: Text(
+                s.retry,
+                style: FocuxHubTypography.chip(
+                  canRetry ? chrome.ink : chrome.mute,
+                ),
+              ),
+            ),
           ),
         ),
         TextButton(

@@ -27,7 +27,10 @@ extension _CheckinCorpo on _CheckinScreenState {
   void _erro(String mensagem) => FeedbackHelper.showError(
     context,
     mensagem,
-    reserveBottom: checkinRodapeReserva(comPendentes: _pendentes > 0),
+    reserveBottom: checkinRodapeReserva(
+      comPendentes: _pendentes > 0,
+      textScaler: MediaQuery.textScalerOf(context),
+    ),
   );
 
   void _continuarSessaoAberta() {

@@ -95,6 +95,17 @@ class QueuedRequest {
   }
 }
 
+/// Item gravado que não vira [QueuedRequest] devolve `null`: a fila descarta
+/// só ele e continua drenando os demais.
+QueuedRequest? tryParseQueuedRequest(Object? raw) {
+  if (raw is! Map) return null;
+  try {
+    return QueuedRequest.fromJson(raw.cast<String, dynamic>());
+  } catch (_) {
+    return null;
+  }
+}
+
 /// Mutação que a fila desistiu de reenviar, guardada para a UI poder contar a
 /// verdade depois de já ter respondido `202 queued` ao usuário.
 class DroppedMutation {
@@ -156,8 +167,9 @@ ReplayOutcome decideReplayOutcome(QueuedRequest req, Object? error) {
   if (error == null) return ReplayOutcome.done;
   if (error is DioException) {
     final status = error.response?.statusCode;
-    // DELETE reenviado depois que o original passou, ou recurso que já
-    // sumiu: o que o usuário pediu já é verdade.
+    // DELETE com 404 = concluído: o recurso já não existe no servidor (o
+    // original passou, ou foi apagado em outro lugar) e isso conta como
+    // sucesso, sem aviso de descarte.
     if (status == 404 && req.method.toUpperCase() == 'DELETE') {
       return ReplayOutcome.done;
     }

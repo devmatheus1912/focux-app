@@ -62,6 +62,7 @@ void main() {
     for (final path in [
       screenPath,
       'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
+      'lib/features/checkin/screens/checkin_screen_saida.part.dart',
       'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
       'lib/features/checkin/widgets/checkin_media_widgets.dart',
@@ -81,6 +82,7 @@ void main() {
     for (final path in [
       screenPath,
       'lib/features/checkin/screens/checkin_screen_corpo.part.dart',
+      'lib/features/checkin/screens/checkin_screen_saida.part.dart',
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
       'lib/features/checkin/widgets/checkin_serie_steppers.part.dart',
       'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',

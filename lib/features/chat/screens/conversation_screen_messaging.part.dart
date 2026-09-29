@@ -46,10 +46,11 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     _composerHasText = false;
     await _sendOutgoing(
       optimistic,
-      () =>
+      (scope) =>
           _isAlunoMode
               ? repo.enviarComoAluno(
                 text,
+                idempotencyScope: scope,
                 replyToMessageId: replyToMessageId,
                 clientMessageId: clientId,
               )
@@ -57,6 +58,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
                 alunoId!,
                 text,
                 'PERSONAL',
+                idempotencyScope: scope,
                 replyToMessageId: replyToMessageId,
                 clientMessageId: clientId,
               ),
@@ -71,27 +73,6 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     if (alunoId == null) return;
     final actions = ref.read(alunoFollowUpActionsProvider);
     unawaited(actions.markContactDoneBestEffort(alunoId));
-  }
-
-  void _dedupeInitialDraft() {
-    if (_initialDraftChecked) return;
-    _initialDraftChecked = true;
-    final draft = widget.initialDraft?.trim();
-    if (draft == null || draft.isEmpty) return;
-    if (!_isDuplicateOutgoing(draft)) return;
-    setState(() {
-      _ctrl.clear();
-      _composerHasText = false;
-    });
-    FeedbackHelper.showSuccess(context, 'Mensagem recente já existe no chat.');
-  }
-
-  bool _isDuplicateOutgoing(String text) {
-    final recentMine = _msgs.reversed
-        .take(8)
-        .where((m) => _isMine(m) && !_outbox.isFailed(m.clientMessageId))
-        .map((m) => m.conteudo);
-    return isRecentDuplicateOutgoing(text, recentMine);
   }
 
   void _captureAlunoId(ChatMsg msg) {
@@ -301,7 +282,6 @@ extension ConversationScreenMessaging on _ConversationScreenState {
         name: path.split(RegExp(r'[\\/]')).last,
       );
       final bytes = await file.readAsBytes();
-      _deleteRecordedAudio(path);
       await _sendAudioBytes(
         bytes: bytes,
         filename: file.name,
@@ -313,6 +293,8 @@ extension ConversationScreenMessaging on _ConversationScreenState {
         context,
         friendlyError(e, fallback: 'Não foi possível enviar o áudio.'),
       );
+    } finally {
+      _deleteRecordedAudio(path);
     }
   }
 

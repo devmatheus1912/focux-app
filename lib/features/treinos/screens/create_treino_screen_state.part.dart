@@ -7,6 +7,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   final _objetivoCtrl = TextEditingController();
   final _nomeFocusNode = FocusNode();
   final _nomeFieldKey = GlobalKey();
+  final _formNonce = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
   String? _nivel;
   bool _loading = false;
   String? _error;
@@ -81,6 +82,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
             _objetivoCtrl.text.trim(),
             _nivel,
             offlineQueue: widget.alunoId == null,
+            formNonce: _formNonce,
           );
       if (widget.alunoId != null) {
         await ref

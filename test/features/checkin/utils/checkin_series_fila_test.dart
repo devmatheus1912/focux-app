@@ -182,6 +182,15 @@ void main() {
       expect(r, isA<CheckinRegistroRecusado>());
       expect(await store.ler(), isEmpty);
     });
+
+    test('sessão inativa depois de gravar limpa a fila inteira', () async {
+      await store.adicionar(_serie(2, execucao: 9));
+
+      final r = await registrar(_status(401), sessao: const [true, false]);
+
+      expect(r, isA<CheckinRegistroRecusado>());
+      expect(await store.ler(), isEmpty);
+    });
   });
 
   test('json corrompido vira fila vazia', () async {

@@ -21,10 +21,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeTreinoRepository extends TreinoRepository {
-  _FakeTreinoRepository({this.offline = false}) : super(ApiClient());
+  _FakeTreinoRepository({this.offline = false, this.falhasAtribuir = 0})
+    : super(ApiClient());
 
   final bool offline;
+  int falhasAtribuir;
   final atribuicoes = <(int, int)>[];
+  final nonces = <String>[];
 
   @override
   Future<Treino> criar(
@@ -32,8 +35,10 @@ class _FakeTreinoRepository extends TreinoRepository {
     String? descricao,
     String? objetivo,
     String? nivel, {
+    required String formNonce,
     bool offlineQueue = true,
   }) async {
+    nonces.add(formNonce);
     if (offline) throw const OfflineQueuedException();
     return Treino(id: 12, nome: nome, exercicios: const []);
   }
@@ -44,6 +49,10 @@ class _FakeTreinoRepository extends TreinoRepository {
     int alunoId, {
     DateTime? dataFim,
   }) async {
+    if (falhasAtribuir > 0) {
+      falhasAtribuir--;
+      throw Exception('falha');
+    }
     atribuicoes.add((treinoId, alunoId));
   }
 }
@@ -306,6 +315,26 @@ void main() {
 
     expect(find.text('Aluno 360'), findsOneWidget);
     expect(find.bySemanticsLabel('Detalhe do treino'), findsNothing);
+  });
+
+  testWidgets('reenviar o mesmo formulário com aluno repete o nonce', (
+    tester,
+  ) async {
+    final repo = _FakeTreinoRepository(falhasAtribuir: 1);
+    final router = _router(
+      origem: '/alunos/5',
+      extraNovo: const {'alunoId': 5, 'alunoNome': 'Aluno'},
+    );
+    await _pumpFluxo(tester, router, repo);
+
+    await _criarTreino(tester, 'Aluno 360');
+    expect(find.text('Não foi possível criar o treino'), findsOneWidget);
+    await tester.tap(find.text('Criar'));
+    await _settle(tester);
+
+    expect(repo.atribuicoes, [(12, 5)]);
+    expect(repo.nonces, hasLength(2));
+    expect(repo.nonces.last, repo.nonces.first);
   });
 
   testWidgets('criado offline (enfileirado) não abre detalhe sem id', (

@@ -224,6 +224,27 @@ void main() {
       expect(find.text('Registrar série'), findsOneWidget);
     });
 
+    testWidgets('pedido de esforço aberto não mostra "Salvando…" atrás', (
+      tester,
+    ) async {
+      final repo = FakeCheckinRepo(rpeAlvo: 8);
+      await pumpCheckin(tester, repo);
+
+      await tester.tap(find.text('Registrar série'));
+      await pumpSheet(tester);
+
+      expect(find.text('Esforço sentido (RPE)'), findsOneWidget);
+      expect(find.text('Salvando…'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(CheckinRodapeBar),
+          matching: find.text('Registrar série'),
+        ),
+        findsOneWidget,
+      );
+      expect(repo.registros, 0);
+    });
+
     testWidgets('durante o envio, Mais não oferece desfazer nem confirmar', (
       tester,
     ) async {

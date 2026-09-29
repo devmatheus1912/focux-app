@@ -5,7 +5,8 @@ import 'chat_outgoing_dedupe.dart';
 
 /// Envio completo de uma mensagem (upload incluso). Reexecutar é seguro: o
 /// servidor deduplica pelo `clientMessageId` capturado na operação.
-typedef ChatSendOperation = Future<ChatMsg> Function();
+/// [idempotencyScope] vem de [ChatOutbox.dispatch].
+typedef ChatSendOperation = Future<ChatMsg> Function(String idempotencyScope);
 
 enum ChatOutgoingStatus { sending, failed, sent, delivered, read }
 
@@ -23,6 +24,19 @@ const chatInFlightRecheckDelay = Duration(seconds: 2);
 bool isChatSendInFlight(Object error) =>
     error is DioException && error.response?.statusCode == 409;
 
+/// `401`/`403`: o servidor recusou sem processar. O filtro de idempotência
+/// guarda essa resposta, então repetir a mesma chave repetiria a recusa.
+bool isChatSendRejected(Object error) {
+  if (error is! DioException) return false;
+  final status = error.response?.statusCode;
+  return status == 401 || status == 403;
+}
+
+/// Mesma chave em timeout/5xx/offline (o servidor pode ter processado); chave
+/// nova a cada recusa [isChatSendRejected].
+String chatIdempotencyScope(String clientId, {int rejections = 0}) =>
+    rejections == 0 ? 'chat:$clientId' : 'chat:$clientId:r$rejections';
+
 bool isChatMediaMessage(ChatMsg msg) =>
     msg.tipoMidia != null && msg.tipoMidia != 'TEXTO';
 
@@ -32,12 +46,13 @@ bool chatCanReplyTo(ChatMsg msg) => msg.id != null && msg.deletedAt == null;
 /// Upload + POST. O reenvio reaproveita a URL já enviada e só repete o POST.
 ChatSendOperation chatMediaSendOperation({
   required Future<String> Function() upload,
-  required Future<ChatMsg> Function(String mediaUrl) send,
+  required Future<ChatMsg> Function(String mediaUrl, String idempotencyScope)
+  send,
 }) {
   String? uploadedUrl;
-  return () async {
+  return (scope) async {
     final url = uploadedUrl ??= await upload();
-    return send(url);
+    return send(url, scope);
   };
 }
 
@@ -48,11 +63,13 @@ class ChatOutbox {
   final Map<String, ChatSendOperation> _operations = {};
   final Set<String> _failed = {};
   final Map<String, int> _inFlightChecks = {};
+  final Map<String, int> _rejections = {};
 
   void track(String clientId, ChatSendOperation send) {
     _operations[clientId] = send;
     _failed.remove(clientId);
     _inFlightChecks.remove(clientId);
+    _rejections.remove(clientId);
   }
 
   bool isFailed(String? clientId) =>
@@ -69,6 +86,7 @@ class ChatOutbox {
     _operations.remove(clientId);
     _failed.remove(clientId);
     _inFlightChecks.remove(clientId);
+    _rejections.remove(clientId);
   }
 
   /// Mensagem que chegou do servidor (resposta, eco do WebSocket ou recarga)
@@ -87,12 +105,17 @@ class ChatOutbox {
     if (send == null) return null;
     if (_failed.remove(clientId)) _inFlightChecks.remove(clientId);
     try {
-      final msg = await send();
+      final msg = await send(
+        chatIdempotencyScope(clientId, rejections: _rejections[clientId] ?? 0),
+      );
       forget(clientId);
       return msg;
     } catch (error) {
       if (_operations.containsKey(clientId) && !_keepSending(clientId, error)) {
         _failed.add(clientId);
+        if (isChatSendRejected(error)) {
+          _rejections[clientId] = (_rejections[clientId] ?? 0) + 1;
+        }
       }
       rethrow;
     }

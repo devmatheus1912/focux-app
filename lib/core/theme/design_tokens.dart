@@ -42,6 +42,9 @@ abstract class EagleTokens {
   static const Color bad = Color(0xFFC73A3A);
   static const Color badSoft = Color(0xFFFCE8E8);
 
+  /// [bad] para texto pequeno no claro: dá ≥ 4,5:1 onde [bad] fica em 4,4:1.
+  static const Color badInk = Color(0xFFB42318);
+
   /// Variantes cinematográficas para dark mode (alertas, scores, NPS).
   static const Color goodDark = Color(0xFF6FE296);
   static const Color warnDark = Color(0xFFE2B46F);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'offline_queue_policy.dart';
@@ -150,9 +151,8 @@ class OfflineSyncService {
     queue:
     for (; index < queueList.length; index++) {
       if (generation != _generation) return;
-      final req = QueuedRequest.fromJson(
-        queueList[index] as Map<String, dynamic>,
-      );
+      final req = _parseOrLog(queueList[index]);
+      if (req == null) continue;
       if (isQueuedRequestExpired(req, DateTime.now().millisecondsSinceEpoch)) {
         dropped.add(DroppedMutation.of(req));
         continue;
@@ -174,11 +174,10 @@ class OfflineSyncService {
       }
     }
     // Regrava pelo modelo: item antigo sem `enqueuedAtMillis` ganha o campo.
-    remainingList.addAll(
-      queueList
-          .skip(index)
-          .map((e) => QueuedRequest.fromJson(e as Map<String, dynamic>).toJson()),
-    );
+    for (final raw in queueList.skip(index)) {
+      final req = _parseOrLog(raw);
+      if (req != null) remainingList.add(req.toJson());
+    }
 
     // Enquanto a rodada rodava, novas ações só podem ter sido anexadas ao fim.
     final latestStr = prefs.getString(_queueKey);
@@ -196,6 +195,13 @@ class OfflineSyncService {
     }
     if (dropped.isNotEmpty) await _recordDropped(dropped, generation);
     _notifyChanged();
+  }
+
+  /// O log não leva o conteúdo do item: pode ter dado de aluno.
+  static QueuedRequest? _parseOrLog(Object? raw) {
+    final req = tryParseQueuedRequest(raw);
+    if (req == null) debugPrint('[OfflineSync] item inválido descartado da fila');
+    return req;
   }
 
   static Future<Object?> _replay(Dio dio, QueuedRequest req) async {

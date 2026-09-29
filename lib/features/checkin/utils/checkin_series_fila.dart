@@ -64,9 +64,10 @@ Future<CheckinRegistro> checkinRegistrarSerie({
         return CheckinRegistroRecusado(e);
       }
       await store.adicionar(serie);
-      // Logout concorrente pode ter limpado a fila antes desta gravação.
+      // Logout concorrente pode ter limpado a fila antes desta gravação: sem
+      // sessão, nenhuma série (dado de saúde) fica no aparelho.
       if (!await sessaoAtiva()) {
-        await store.remover(serie);
+        await CheckinSeriesPendentesStore.limpar();
         return CheckinRegistroRecusado(e);
       }
       return CheckinRegistroNaFila(await store.ler());
