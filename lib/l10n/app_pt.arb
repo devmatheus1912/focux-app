@@ -614,5 +614,6 @@
   "conexaoInstavel": "Servidor instável. Aguarde alguns segundos e tente de novo.",
   "conexaoSincronizando": "{n, plural, =1{Sincronizando 1 ação pendente…} other{Sincronizando {n} ações pendentes…}}",
   "@conexaoSincronizando": { "placeholders": { "n": { "type": "int" } } },
-  "conexaoOk": "OK"
+  "conexaoOk": "OK",
+  "assinaturaRestaurarFalhou": "Não foi possível validar suas compras agora. Tente de novo em instantes."
 }

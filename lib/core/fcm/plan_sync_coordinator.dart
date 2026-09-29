@@ -34,6 +34,14 @@ class PlanSyncCoordinator {
       debugPrint('[PlanSync] FCM event=$event plano=${data['plano']}');
     }
 
+    await refreshPlan(container, reconcileFirst: event == 'tier_revoked');
+  }
+
+  /// Descarta caches de plano e busca `/planos/me` de novo.
+  static Future<void> refreshPlan(
+    ProviderContainer container, {
+    bool reconcileFirst = false,
+  }) async {
     PlanoFeaturesBffCache.clear();
     await container.read(planosRepositoryProvider).clearPlanoFeaturesCache();
     await container.read(assinaturaRepositoryProvider).clearVitrineCache();
@@ -41,6 +49,6 @@ class PlanSyncCoordinator {
     container.invalidate(perfilProvider);
     await container
         .read(planoFeaturesProvider.notifier)
-        .refresh(reconcileFirst: event == 'tier_revoked');
+        .refresh(reconcileFirst: reconcileFirst);
   }
 }

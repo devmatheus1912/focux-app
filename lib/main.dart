@@ -22,6 +22,7 @@ import 'package:go_router/go_router.dart';
 import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
 import 'features/subscription/providers/iap_store_health_provider.dart';
+import 'features/subscription/widgets/iap_purchase_sync_scope.dart';
 import 'core/health/home_widget_service.dart';
 import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
@@ -474,7 +475,9 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
           data: mq.copyWith(textScaler: scaler),
           child: FxConnectivityBanner(
             child: CheckinFilaSyncScope(
-              child: child ?? const SizedBox.shrink(),
+              child: IapPurchaseSyncScope(
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );

@@ -26,12 +26,13 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
-import '../../../features/subscription/services/iap_service.dart';
+import '../../../features/subscription/services/iap_purchase_coordinator.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
 
@@ -129,8 +130,7 @@ class AssinaturaScreen extends ConsumerStatefulWidget {
 }
 
 class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
-  final Set<String> _handledPurchases = <String>{};
-  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  StreamSubscription<IapPurchaseEvent>? _purchaseEvents;
   final ScrollController _paywallScrollController = ScrollController();
 
   String? _selectedPlanName;
@@ -164,16 +164,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     FeedbackHelper.showInfo(context, 'Verificando compras anteriores...');
 
     try {
-      final result = await ref
-          .read(iapServiceProvider)
-          .restoreAndVerifyPurchases(
-            onVerified: (_, __) async {
-              ref.invalidate(perfilProvider);
-              ref.invalidate(planoFeaturesProvider);
-            },
-          );
-      ref.invalidate(perfilProvider);
-      ref.invalidate(planoFeaturesProvider);
+      final result = await ref.read(iapPurchaseCoordinatorProvider).restore();
 
       if (!mounted) return;
 
@@ -190,8 +181,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         return;
       }
 
-      if (result.errors.isNotEmpty) {
-        FeedbackHelper.showError(context, result.errors.first.message);
+      if (result.hasFailures) {
+        FeedbackHelper.showError(
+          context,
+          S.of(context).assinaturaRestaurarFalhou,
+        );
         return;
       }
 
@@ -219,14 +213,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     );
     _selectedPlanName = null;
     if (!kIsWeb) {
-      _purchaseSubscription = InAppPurchase.instance.purchaseStream.listen(
-        _handlePurchaseUpdates,
-        onError: (Object error) {
-          _finishPurchaseFlowWithError(
-            friendlyError(error, fallback: 'Erro ao acompanhar a compra.'),
-          );
-        },
-      );
+      _purchaseEvents = ref
+          .read(iapPurchaseCoordinatorProvider)
+          .events
+          .listen(_onPurchaseEvent);
     }
     _initializeStore();
     _loadTrialStatus();
@@ -293,7 +283,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
 
   @override
   void dispose() {
-    _purchaseSubscription?.cancel();
+    _purchaseEvents?.cancel();
     _paywallFreshnessSub?.close();
     _paywallScrollController.dispose();
     super.dispose();
@@ -337,74 +327,53 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     });
   }
 
-  Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
-    for (final purchase in purchases) {
-      try {
-        switch (purchase.status) {
-          case PurchaseStatus.pending:
-            if (mounted) setState(() => _loadingCheckout = true);
-            break;
-          case PurchaseStatus.error:
-            _finishPurchaseFlowWithError(
-              assinaturaStoreFailureCopy(),
-              reason: 'iap_store',
-            );
-            break;
-          case PurchaseStatus.canceled:
-            if (mounted) {
-              setState(() {
-                _loadingCheckout = false;
-                _syncingPurchase = false;
-              });
-            }
-            break;
-          case PurchaseStatus.purchased:
-          case PurchaseStatus.restored:
-            await _syncPurchase(purchase);
-            break;
-        }
-      } finally {
-        if (purchase.pendingCompletePurchase) {
-          await InAppPurchase.instance.completePurchase(purchase);
-        }
-      }
+  /// Só a compra iniciada nesta tela mexe na UI; renovação e restore passam
+  /// pelo coordenador global em silêncio.
+  void _onPurchaseEvent(IapPurchaseEvent event) {
+    if (!mounted || _restoringPurchases) return;
+    if (!_loadingCheckout && !_syncingPurchase) return;
+    switch (event) {
+      case IapPurchaseCanceled():
+        setState(() {
+          _loadingCheckout = false;
+          _syncingPurchase = false;
+        });
+      case IapPurchaseStoreError():
+        _finishPurchaseFlowWithError(
+          assinaturaStoreFailureCopy(),
+          reason: 'iap_store',
+        );
+      case IapPurchaseUnsupported():
+        _finishPurchaseFlowWithError('Produto recebido não é suportado.');
+      case IapPurchaseVerifying(:final purchase):
+        final plan = _planForProductId(purchase.productID);
+        setState(() {
+          _loadingCheckout = false;
+          _syncingPurchase = true;
+          if (plan != null) _selectedPlanName = plan.apiName;
+        });
+      case IapPurchaseVerified(:final purchase):
+        unawaited(_openCheckoutSuccess(purchase));
+      case IapPurchaseVerifyFailed(:final error):
+        _finishPurchaseFlowWithError(
+          friendlyError(
+            error,
+            fallback: 'Não foi possível sincronizar a assinatura.',
+          ),
+        );
+      case IapPurchaseStreamFailed(:final error):
+        _finishPurchaseFlowWithError(
+          friendlyError(error, fallback: 'Erro ao acompanhar a compra.'),
+        );
+      case IapPurchasePending() || IapPurchaseBatchProcessed():
+        break;
     }
   }
 
-  Future<void> _syncPurchase(PurchaseDetails purchase) async {
-    final purchaseKey = [
-      purchase.productID,
-      purchase.purchaseID ?? 'sem-id',
-      purchase.transactionDate ?? 'sem-data',
-    ].join('|');
-
-    if (_handledPurchases.contains(purchaseKey)) return;
-
+  Future<void> _openCheckoutSuccess(PurchaseDetails purchase) async {
     final purchasedPlan = _planForProductId(purchase.productID);
-    if (purchasedPlan == null) {
-      _finishPurchaseFlowWithError('Produto recebido não é suportado.');
-      return;
-    }
-
-    _handledPurchases.add(purchaseKey);
-
-    if (mounted) {
-      setState(() {
-        _loadingCheckout = false;
-        _syncingPurchase = true;
-        _selectedPlanName = purchasedPlan.apiName;
-      });
-    }
-
     try {
-      await ref.read(iapServiceProvider).verifyPurchase(purchase);
-
-      ref.invalidate(perfilProvider);
-      ref.invalidate(planoFeaturesProvider);
-      ref.invalidate(paywallHomeProvider);
-
-      if (!mounted) return;
-
+      if (purchasedPlan == null) return;
       AnalyticsService.instance.track(
         ProductEvents.checkoutCompleted,
         props: {
@@ -413,8 +382,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             'transaction_id': purchase.purchaseID,
         },
       );
-
-      if (!mounted) return;
       await context.push<void>(
         '/assinatura/success',
         extra: AssinaturaSuccessRouteArgs(
@@ -423,14 +390,6 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ),
       );
       if (mounted) safePopOrGo(context, '/dashboard/personal');
-    } catch (error) {
-      _handledPurchases.remove(purchaseKey);
-      _finishPurchaseFlowWithError(
-        friendlyError(
-          error,
-          fallback: 'Não foi possível sincronizar a assinatura.',
-        ),
-      );
     } finally {
       if (mounted) {
         setState(() {
