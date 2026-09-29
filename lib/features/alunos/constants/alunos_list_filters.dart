@@ -24,6 +24,14 @@ String alunosLocationSemBusca(Uri location) {
   ).toString();
 }
 
+/// Location sem `q` quando ela diverge da busca atual; `null` = não mexer.
+/// Sem isso, repetir a mesma busca da Hoje não muda a rota e é ignorado.
+String? alunosLocationParaBusca(Uri location, String busca) {
+  final q = location.queryParameters['q'];
+  if (q == null || q == busca.trim()) return null;
+  return alunosLocationSemBusca(location);
+}
+
 /// Termo que a busca assume quando a rota muda com a aba aberta.
 /// `null` mantém o termo atual; rota nova de filtro sem `q` zera a busca.
 String? alunosBuscaAposNavegacao({

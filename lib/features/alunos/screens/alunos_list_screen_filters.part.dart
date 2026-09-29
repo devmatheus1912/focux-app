@@ -22,6 +22,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
         if (cached != null) _displayHome = cached;
       });
       _syncHomeQuery();
+      _tirarBuscaDaLocation();
       AnalyticsService.instance.track(ProductEvents.alunosSearchUsed);
     });
   }
@@ -29,10 +30,18 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
   void _limparBusca() {
     _searchController.clear();
     _onSearchChanged('');
+    _tirarBuscaDaLocation();
+  }
+
+  void _tirarBuscaDaLocation() {
     final location = GoRouterState.of(context).uri;
-    if (location.queryParameters.containsKey('q')) {
-      context.go(alunosLocationSemBusca(location));
-    }
+    final atual = GoRouter.of(context).routerDelegate.currentConfiguration.uri;
+    // Debounce pode disparar depois de trocar de aba: não puxar de volta.
+    if (atual.path != location.path) return;
+    final destino = alunosLocationParaBusca(location, _query);
+    if (destino == null) return;
+    // No web, não empilha uma entrada de histórico só para tirar o `q`.
+    Router.neglect(context, () => context.go(destino));
   }
 
   Future<void> _showListOptions() async {

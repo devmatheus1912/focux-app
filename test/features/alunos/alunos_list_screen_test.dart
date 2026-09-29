@@ -207,90 +207,124 @@ void main() {
     });
   });
 
-  testWidgets('buscar, limpar, voltar à Hoje e buscar de novo refaz a busca', (
-    tester,
-  ) async {
-    final router = GoRouter(
-      initialLocation: '/dashboard/personal',
-      routes: [
-        StatefulShellRoute.indexedStack(
-          builder: (context, state, shell) => Scaffold(body: shell),
-          branches: [
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/dashboard/personal',
-                  builder: (context, state) => Scaffold(
-                    body: TextButton(
-                      onPressed: () => goPersonalShellTab(
-                        context,
-                        alunosBuscaLocation('ana'),
-                      ),
-                      child: const Text('Buscar ana'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/alunos',
-                  builder: (context, state) => AlunosListScreen(
-                    initialQuery: alunoBuscaFromQuery(
-                      state.uri.queryParameters['q'],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [alunosHomeProvider.overrideWith((ref) async => home)],
-        child: MaterialApp.router(
-          locale: const Locale('pt'),
-          supportedLocales: S.supportedLocales,
-          localizationsDelegates: S.localizationsDelegates,
-          routerConfig: router,
-        ),
-      ),
-    );
-    await tester.pump();
+  group('busca repetida a partir da Hoje (shell)', () {
+    late GoRouter router;
 
-    Future<void> settle() async {
+    Future<void> pumpShell(WidgetTester tester) async {
+      router = GoRouter(
+        initialLocation: '/dashboard/personal',
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, shell) => Scaffold(body: shell),
+            branches: [
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/dashboard/personal',
+                    builder: (context, state) => Scaffold(
+                      body: TextButton(
+                        onPressed: () => goPersonalShellTab(
+                          context,
+                          alunosBuscaLocation('ana'),
+                        ),
+                        child: const Text('Buscar ana'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/alunos',
+                    builder: (context, state) => AlunosListScreen(
+                      initialQuery: alunoBuscaFromQuery(
+                        state.uri.queryParameters['q'],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [alunosHomeProvider.overrideWith((ref) async => home)],
+          child: MaterialApp.router(
+            locale: const Locale('pt'),
+            supportedLocales: S.supportedLocales,
+            localizationsDelegates: S.localizationsDelegates,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    Future<void> settle(WidgetTester tester) async {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
     }
 
-    String textoDaBusca() =>
+    String textoDaBusca(WidgetTester tester) =>
         tester.widget<TextField>(find.byType(TextField)).controller!.text;
-    String qAtual() => ProviderScope.containerOf(
+
+    String qAtual(WidgetTester tester) => ProviderScope.containerOf(
       tester.element(find.byType(AlunosListScreen)),
     ).read(alunosHomeQueryProvider).q;
 
-    await tester.tap(find.text('Buscar ana'));
-    await settle();
-    expect(textoDaBusca(), 'ana');
-    expect(qAtual(), 'ana');
+    Future<void> buscarAnaNaHoje(WidgetTester tester) async {
+      router.go('/dashboard/personal');
+      await settle(tester);
+      await tester.tap(find.text('Buscar ana'));
+      await settle(tester);
+    }
 
-    await tester.tap(find.byIcon(Icons.close));
-    await settle();
-    expect(textoDaBusca(), isEmpty);
-    expect(qAtual(), isEmpty);
-    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/alunos');
+    testWidgets('limpar no X e buscar de novo refaz a busca', (tester) async {
+      await pumpShell(tester);
+      await buscarAnaNaHoje(tester);
+      expect(textoDaBusca(tester), 'ana');
+      expect(qAtual(tester), 'ana');
 
-    router.go('/dashboard/personal');
-    await settle();
-    await tester.tap(find.text('Buscar ana'));
-    await settle();
+      await tester.tap(find.byIcon(Icons.close));
+      await settle(tester);
+      expect(textoDaBusca(tester), isEmpty);
+      expect(qAtual(tester), isEmpty);
+      expect(
+        router.routerDelegate.currentConfiguration.uri.toString(),
+        '/alunos',
+      );
 
-    expect(tester.takeException(), isNull);
-    expect(textoDaBusca(), 'ana');
-    expect(qAtual(), 'ana');
+      await buscarAnaNaHoje(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(textoDaBusca(tester), 'ana');
+      expect(qAtual(tester), 'ana');
+    });
+
+    testWidgets('apagar pelo teclado e buscar de novo refaz a busca', (
+      tester,
+    ) async {
+      await pumpShell(tester);
+      await buscarAnaNaHoje(tester);
+      expect(textoDaBusca(tester), 'ana');
+
+      await tester.enterText(find.byType(TextField), '');
+      await settle(tester);
+      expect(qAtual(tester), isEmpty);
+      expect(
+        router.routerDelegate.currentConfiguration.uri.toString(),
+        '/alunos',
+      );
+
+      await buscarAnaNaHoje(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(textoDaBusca(tester), 'ana');
+      expect(qAtual(tester), 'ana');
+    });
   });
 
   group('busca na location', () {
@@ -300,6 +334,14 @@ void main() {
         '/alunos?filtro=risco',
       );
       expect(alunosLocationSemBusca(Uri.parse('/alunos?q=ana')), '/alunos');
+    });
+
+    test('q da rota só sai quando diverge da busca', () {
+      final location = Uri.parse('/alunos?filtro=risco&q=ana');
+      expect(alunosLocationParaBusca(location, ' ana '), isNull);
+      expect(alunosLocationParaBusca(location, ''), '/alunos?filtro=risco');
+      expect(alunosLocationParaBusca(location, 'bia'), '/alunos?filtro=risco');
+      expect(alunosLocationParaBusca(Uri.parse('/alunos'), ''), isNull);
     });
 
     test('termo novo compara com a busca atual, não com a rota anterior', () {
