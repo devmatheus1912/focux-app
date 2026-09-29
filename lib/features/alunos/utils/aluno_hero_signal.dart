@@ -5,6 +5,14 @@ import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
 
+/// `aderenciaPercent` do servidor cobre os últimos 30 dias.
+const alunoHeroAderenciaLabel = 'Aderência 30 dias';
+
+/// Score do servidor (treinos em 30 dias + pagamentos). Não é a prontidão
+/// física do wearable — esse nome fica reservado para o aluno.
+const alunoSituacaoLabel = 'Situação do aluno';
+const alunoSituacaoHint = 'Treinos e pagamentos';
+
 class AlunoHeroPrimarySignal {
   const AlunoHeroPrimarySignal({
     required this.label,
@@ -106,7 +114,7 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
   }
   if (ader != null) {
     return AlunoHeroPrimarySignal(
-      label: 'Aderência semanal',
+      label: alunoHeroAderenciaLabel,
       value: '$ader',
       suffix: '%',
     );
@@ -119,7 +127,7 @@ AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
     );
   }
   return AlunoHeroPrimarySignal(
-    label: 'Prontidão',
+    label: alunoSituacaoLabel,
     value: aluno.scoreProntidao == null ? '—' : '${aluno.scoreProntidao}',
   );
 }
@@ -135,24 +143,24 @@ String alunoHeroCaption(Aluno aluno, AlunoHeroPrimarySignal signal) {
     }
     return 'Rotina em dia';
   }
-  if (signal.label == 'Aderência semanal') {
+  if (signal.label == alunoHeroAderenciaLabel) {
     final ader = aluno.aderenciaPercent ?? 0;
-    if (ader < 50) return 'Aderência baixa — reforce o hábito';
-    if (ader < 70) return 'Aderência moderada';
-    return 'Aderência saudável';
+    if (ader < 50) return 'Aderência baixa em 30 dias — reforce o hábito';
+    if (ader < 70) return 'Aderência moderada em 30 dias';
+    return 'Aderência saudável em 30 dias';
   }
   if (signal.label == 'Risco operacional') {
     return aluno.emRisco ? 'Priorize contato hoje' : 'Monitorar sinais';
   }
-  return 'Índice operacional consolidado';
+  return alunoSituacaoHint;
 }
 
 /// Hero caption without repeating the dominant metric label.
 String alunoHeroContextLine(AlunoHeroPrimarySignal signal, String caption) {
   // Caption already carries the signal (aderência / risco) — avoid
-  // "Aderência semanal · Aderência baixa — …" wrap in the identity strip.
+  // "Aderência 30 dias · Aderência baixa — …" wrap in the identity strip.
   if (signal.label == 'Risco operacional' ||
-      signal.label == 'Aderência semanal') {
+      signal.label == alunoHeroAderenciaLabel) {
     return caption;
   }
   return '${signal.label} · $caption';
@@ -168,14 +176,4 @@ String alunoHeroIdentitySubtitle({
 }) {
   if (compactContactPriority) return objective;
   return objectiveDefined ? '$objective · $contextLine' : contextLine;
-}
-
-String? alunoHeroMetricEyebrow(AlunoHeroPrimarySignal signal) {
-  return switch (signal.label) {
-    'Risco operacional' => 'Risco',
-    'Aderência semanal' => 'Aderência',
-    'Sem treino' => 'Parado',
-    'Prontidão' => 'Score',
-    _ => null,
-  };
 }

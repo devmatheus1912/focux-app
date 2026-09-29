@@ -9,6 +9,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../health/data/health_repository.dart';
 import '../../health/widgets/recovery_score_ring.dart';
+import '../../../l10n/app_localizations.dart';
 
 class Aluno360RecoveryInsightCard extends StatefulWidget {
   const Aluno360RecoveryInsightCard({
@@ -90,13 +91,20 @@ class _Aluno360RecoveryInsightCardState
           );
         }
 
+        final s = S.of(context);
+        final score = snapshot.recoveryScore;
+        // Sem nota do servidor, nível e dica não valem como conselho.
+        final temNota = score != null;
         return Semantics(
-          label: 'Prontidão wearable ${snapshot.recoveryLabel}',
+          label:
+              temNota
+                  ? s.saudeProntidaoSemantics(score, snapshot.recoveryLabel)
+                  : s.saudeProntidaoIndisponivelSemantics,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const DashboardSectionHeader(title: 'Wearable'),
-              if (snapshot.recoveryHint.isNotEmpty) ...[
+              if (temNota && snapshot.recoveryHint.isNotEmpty) ...[
                 const SizedBox(height: 4),
                 Text(
                   snapshot.recoveryHint,
@@ -109,30 +117,34 @@ class _Aluno360RecoveryInsightCardState
                 children: [
                   ExcludeSemantics(
                     child: RecoveryScoreRing(
-                      score: snapshot.recoveryScore,
+                      score: score,
                       color: widget.primary,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Prontidão wearable',
-                          style: Aluno360Layout.metaStyle(
-                            context,
-                          ).copyWith(color: ink),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          snapshot.recoveryLabel,
-                          style: Aluno360Layout.sectionTitleStyle(
-                            context,
-                            ink,
+                    child: ExcludeSemantics(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prontidão wearable',
+                            style: Aluno360Layout.metaStyle(
+                              context,
+                            ).copyWith(color: ink),
                           ),
-                        ),
-                      ],
+                          if (temNota) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              snapshot.recoveryLabel,
+                              style: Aluno360Layout.sectionTitleStyle(
+                                context,
+                                ink,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

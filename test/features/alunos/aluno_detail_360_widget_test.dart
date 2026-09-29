@@ -220,6 +220,49 @@ void main() {
     expect(find.text('Status operacional'), findsOneWidget);
   });
 
+  testWidgets('score do servidor aparece como Situação do aluno, não Prontidão', (
+    tester,
+  ) async {
+    final carla = Aluno(
+      id: 9,
+      nome: 'Carla',
+      email: 'carla@test.com',
+      status: 'ATIVO',
+      scoreProntidao: 60,
+    );
+
+    await tester.pumpWidget(
+      _harness(
+        overrides: [
+          aluno360OperacaoProvider(9).overrideWith(
+            (ref) => resolveAluno360OperacaoSnapshot(
+              aluno: carla,
+              proximaAcao360: null,
+              forceIa: false,
+              iaAsync: null,
+              hasOpenTask: false,
+              followUpDue: false,
+              wearableRelevant: false,
+            ),
+          ),
+          alunoOpenIaActionsProvider(9).overrideWith((ref) async => const []),
+        ],
+        child: Aluno360OperationalStatusSection(
+          aluno: carla,
+          alunoId: 9,
+          isDark: false,
+          primary: const Color(0xFF12A3A3),
+          aderenciaSemanal: _week(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('SITUAÇÃO DO ALUNO'), findsOneWidget);
+    expect(find.text('Treinos e pagamentos'), findsOneWidget);
+    expect(find.textContaining(RegExp('prontidão', caseSensitive: false)), findsNothing);
+  });
+
   testWidgets('Evolução empty state shows actionable CTAs', (tester) async {
     await tester.pumpWidget(
       _harness(

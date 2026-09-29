@@ -362,7 +362,8 @@ void main() {
       expect(screen, contains('aderenciaSemanal'));
       expect(screen, contains('class Aluno360OperationalStatusSection'));
       expect(screen, contains('Status operacional'));
-      expect(screen, contains('Índice operacional'));
+      expect(screen, contains('alunoSituacaoLabel'));
+      expect(screen, isNot(contains("'Prontidão'")));
       expect(screen, contains('Próximo contato:'));
       expect(screen, contains('resolveOperacaoStickyAction'));
       expect(screen, contains('operacaoHeroShowsRisco'));

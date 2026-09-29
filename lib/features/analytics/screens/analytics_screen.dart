@@ -90,12 +90,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   () => showFxHelpSheet(
                     context,
                     title: 'Analytics',
-                    subtitle: 'Pulso da base: atividade, churn e retenção.',
+                    subtitle: 'Pulso da base: atividade, inadimplência e retenção.',
                     tips: const [
                       FxHelpTip('Como calculamos', analyticsComoCalculamos),
                       FxHelpTip(
-                        'Churn',
-                        'O card do topo é a inadimplência. Funil e WAU vêm do mesmo BFF.',
+                        'Inadimplência',
+                        'O card do topo é a inadimplência (cobranças em atraso), não churn. Funil e WAU vêm do mesmo BFF.',
                       ),
                       FxHelpTip(
                         'Ação',

@@ -12,7 +12,7 @@ class _AnalyticsBody extends StatelessWidget {
     final ink = chrome.ink;
     final mute = chrome.mute;
     final brand = Theme.of(context).colorScheme.primary;
-    final churn = data.taxaInadimplencia;
+    final taxaInadimplencia = data.taxaInadimplencia;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -31,11 +31,11 @@ class _AnalyticsBody extends StatelessWidget {
               children: [
                 Semantics(
                   label:
-                      'Inadimplência ${formatBrDecimal(churn)} por cento',
+                      'Inadimplência ${formatBrDecimal(taxaInadimplencia)} por cento',
                   child: FxStripCard(
                   emphasize: true,
                   semanticsLabel:
-                      'Inadimplência ${formatBrDecimal(churn)} por cento',
+                      'Inadimplência ${formatBrDecimal(taxaInadimplencia)} por cento',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -45,7 +45,7 @@ class _AnalyticsBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        '${formatBrDecimal(churn)}%',
+                        '${formatBrDecimal(taxaInadimplencia)}%',
                         style: FocuxHubTypography.kpi(
                           color: ink,
                           fontSize: FocuxHubTypography.metricLg,

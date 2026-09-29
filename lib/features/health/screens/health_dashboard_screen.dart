@@ -43,6 +43,7 @@ typedef HealthDashboardUpdateHomeWidget =
       required String recoveryHint,
       required int steps,
     });
+typedef HealthDashboardClearHomeWidget = Future<void> Function();
 
 /// Screen showing synced Apple Health / Google Fit data.
 ///
@@ -55,12 +56,14 @@ class HealthDashboardScreen extends StatefulWidget {
     this.loadTodaySummary,
     this.syncToday,
     this.updateHomeWidgetRecovery,
+    this.clearHomeWidgetRecovery,
   });
 
   final HealthDashboardCheckAuthorization? checkAuthorization;
   final HealthDashboardLoadTodaySummary? loadTodaySummary;
   final HealthDashboardSyncToday? syncToday;
   final HealthDashboardUpdateHomeWidget? updateHomeWidgetRecovery;
+  final HealthDashboardClearHomeWidget? clearHomeWidgetRecovery;
 
   @override
   State<HealthDashboardScreen> createState() => _HealthDashboardScreenState();
@@ -110,6 +113,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
         recoveryHint: recoveryHint,
         steps: steps,
       );
+
+  Future<void> _resolveClearHomeWidgetRecovery() =>
+      widget.clearHomeWidgetRecovery?.call() ?? HomeWidgetService.clear();
 
   Future<void> _checkAuth() async {
     try {
@@ -180,6 +186,9 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
             recoveryHint: synced.recoveryHint,
             steps: synced.steps,
           );
+        } else {
+          // Não deixa a nota de ontem no widget; o nativo mostra "--".
+          await _resolveClearHomeWidgetRecovery();
         }
       } catch (e) {
         soft = saudeSyncSoftError(friendlyError(e));

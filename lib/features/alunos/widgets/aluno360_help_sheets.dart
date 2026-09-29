@@ -194,9 +194,14 @@ Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
     subtitle: 'Diagnóstico rápido antes de prescrever ou cobrar.',
     tips: const [
       FxHelpTip(
-        'Prontidão',
-        'Índice composto de engajamento e dados do aluno.',
+        'Situação do aluno',
+        'Nota de 0 a 100 que junta os dias com treino nos últimos 30 dias e os pagamentos: inadimplência derruba a nota. Não é a prontidão física do wearable.',
         icon: 'zap',
+      ),
+      FxHelpTip(
+        'Risco de abandono',
+        'Sobe com dias sem treino além do limite, aderência abaixo do mínimo da sua configuração de alertas e mensalidade em atraso.',
+        icon: 'alert-triangle',
       ),
       FxHelpTip(
         'Aderência · 30 dias',

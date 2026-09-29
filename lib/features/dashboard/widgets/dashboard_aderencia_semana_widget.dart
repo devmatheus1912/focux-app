@@ -40,7 +40,7 @@ class DashboardAderenciaSemanaWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           DashboardSectionHeader(
-            title: DashboardMicrocopy.aderenciaDaSemana,
+            title: DashboardMicrocopy.aderenciaUltimos7Dias,
             actionLabel: showRelatorio ? 'Relatório' : null,
             onAction: showRelatorio ? onOpenRelatorio : null,
           ),
@@ -121,7 +121,7 @@ class _AderenciaTile extends StatelessWidget {
     ].join(' · ');
     return Semantics(
       label:
-          '$nome. $subtitle. Aderência ${item.aderenciaPercent} por cento. Abrir aluno',
+          '$nome. $subtitle. Aderência ${item.aderenciaPercent} por cento em 7 dias. Abrir aluno',
       button: true,
       child: FxSatelliteListTile(
         title: nome,

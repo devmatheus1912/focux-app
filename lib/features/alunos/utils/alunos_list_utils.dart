@@ -99,11 +99,12 @@ bool shouldShowAlunoListBadge(
   return true;
 }
 
+/// Série da lista = últimos 7 dias corridos (não a semana do calendário).
 String alunoWeeklyCheckinsLabel(int weeklyCheckins) {
   if (weeklyCheckins <= 0) return '';
   return weeklyCheckins == 1
-      ? '1 esta semana'
-      : '$weeklyCheckins esta semana';
+      ? '1 treino em 7 dias'
+      : '$weeklyCheckins treinos em 7 dias';
 }
 
 String adherenceActivityLabel({
@@ -132,8 +133,15 @@ String alunoListOpsText({
   if (filtro == AlunoFiltro.novos) return '';
   if (triageContextActive) return '';
   if (!alunoListHasMeaningfulPercent(aderenciaPercent)) return '';
-  return '$aderenciaPercent%';
+  return alunoListAderenciaLabel(aderenciaPercent!);
 }
+
+/// `aderenciaPercent` do servidor cobre os últimos 30 dias.
+String alunoListAderenciaLabel(int aderenciaPercent) =>
+    '$aderenciaPercent% em 30 dias';
+
+/// Rótulo visível e semântico do sparkline do card.
+const alunoListSparklineLabel = 'Últimos 7 dias';
 
 bool shouldShowAlunoListOpsLine({
   required String adherenceLabel,

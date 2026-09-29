@@ -81,6 +81,9 @@ class DashboardDayPulseStrip extends StatelessWidget {
         showEmptyTrendCta &&
         emptyTrendCtaLabel != null &&
         onEmptyTrendCta != null;
+    final ativosCopy = pulseAtivosCopy(alunosAtivos);
+    final checkinsCopy = pulseCheckinsCopy(checkinsHoje);
+    final riscoCopy = pulseRiscoCopy(riscoAlto);
 
     return dashboardEntryMotion(
       context: context,
@@ -102,15 +105,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
             child: OperationalMetricTile(
               label: 'Ativos',
               value: '$alunosAtivos',
-              hint: alunosAtivos == 0
-                  ? 'Sem movimento hoje'
-                  : 'Base ativa',
+              hint: ativosCopy.hint,
               color: primary,
               isDark: isDark,
-              semanticsLabel:
-                  alunosAtivos == 0
-                      ? '0 ativos, sem movimento hoje'
-                      : '$alunosAtivos ativos',
+              semanticsLabel: ativosCopy.semantics,
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -120,15 +118,10 @@ class DashboardDayPulseStrip extends StatelessWidget {
             child: OperationalMetricTile(
               label: DashboardMicrocopy.checkinsPulseLabel,
               value: '$checkinsHoje',
-              hint: checkinsHoje == 0
-                  ? 'Sem movimento hoje'
-                  : 'Check-ins de hoje',
+              hint: checkinsCopy.hint,
               color: checkinsAccent,
               isDark: isDark,
-              semanticsLabel:
-                  checkinsHoje == 0
-                      ? '0 check-ins, sem movimento hoje'
-                      : '$checkinsHoje check-ins',
+              semanticsLabel: checkinsCopy.semantics,
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
@@ -136,20 +129,15 @@ class DashboardDayPulseStrip extends StatelessWidget {
             onTap: onRisco,
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
-              label: 'Risco',
+              label: pulseRiscoLabel,
               value: '$riscoAlto',
-              hint: riscoAlto == 0
-                  ? 'Sem movimento hoje'
-                  : 'Alunos pedem contato',
+              hint: riscoCopy.hint,
               color: riscoAccent,
               isDark: isDark,
               emphasis: riscoAlto > 0
                   ? OperationalMetricEmphasis.alert
                   : OperationalMetricEmphasis.normal,
-              semanticsLabel:
-                  riscoAlto == 0
-                      ? '0 em risco, sem movimento hoje'
-                      : '$riscoAlto em risco',
+              semanticsLabel: riscoCopy.semantics,
             ),
           ),
           if (showTrendRow) ...[

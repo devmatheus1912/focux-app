@@ -16,7 +16,8 @@ abstract final class DashboardMicrocopy {
   static String atualizadoHa(Duration age) => FxHubFreshness.atualizadoHa(age);
 
   static const precisaDeAtencao = 'Precisa de atenção';
-  static const aderenciaDaSemana = 'Aderência da semana';
+  /// Top da Home: dias com check-in nos últimos 7 dias corridos.
+  static const aderenciaUltimos7Dias = 'Aderência · últimos 7 dias';
   static const maisFerramentas = 'Mais ferramentas';
   static const ferramentasEmDestaque = 'Ferramentas em destaque';
   static const verCatalogoCompleto = 'Ver catálogo';

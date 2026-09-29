@@ -180,9 +180,10 @@ void main() {
   );
 
   testWidgets(
-    'servidor sem nota: prontidão indisponível e widget da Home sem zero',
+    'servidor sem nota: prontidão indisponível e widget da Home limpo',
     (tester) async {
       var homeWidgetUpdates = 0;
+      var homeWidgetClears = 0;
 
       await _pumpDashboard(
         tester,
@@ -198,6 +199,9 @@ void main() {
           }) async {
             homeWidgetUpdates++;
           },
+          clearHomeWidgetRecovery: () async {
+            homeWidgetClears++;
+          },
         ),
       );
       await tester.pumpAndSettle();
@@ -212,6 +216,7 @@ void main() {
       expect(find.text('0'), findsNothing);
       expect(find.textContaining('%'), findsNothing);
       expect(homeWidgetUpdates, 0);
+      expect(homeWidgetClears, 1);
     },
   );
 }

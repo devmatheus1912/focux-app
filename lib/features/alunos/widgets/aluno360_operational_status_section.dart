@@ -18,6 +18,7 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/alertas_config_from_home.dart';
 import '../utils/aluno360_operacao_logic.dart';
+import '../utils/aluno_hero_signal.dart';
 import '../widgets/aluno_operacao_adherence_bars.dart';
 import '../widgets/aluno_operacao_adherence_legend.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
@@ -223,7 +224,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           label:
               dominant.kind == OperacaoDominantMetricKind.prontidao
                   ? dominant.label
-                  : 'Prontidão',
+                  : alunoSituacaoLabel,
           value:
               dominant.kind == OperacaoDominantMetricKind.prontidao
                   ? dominant.value
@@ -233,7 +234,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           hint:
               dominant.kind == OperacaoDominantMetricKind.prontidao
                   ? dominant.hint
-                  : 'Índice operacional',
+                  : alunoSituacaoHint,
           color: primary,
           alert: false,
           kind: kind,
@@ -272,7 +273,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
           icon: Icons.pause_circle_outline_rounded,
         ),
         OperacaoStatusCardKind.risco => metric(
-          label: 'Risco',
+          label: 'Risco de abandono',
           value: formatRiscoNivel(aluno.riscoNivel),
           hint: aluno.emRisco ? 'Em risco' : 'Estável',
           color: riscoColor,

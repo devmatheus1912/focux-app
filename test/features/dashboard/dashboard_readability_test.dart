@@ -68,4 +68,15 @@ void main() {
       'Nenhum check-in hoje',
     );
   });
+
+  test('pulso: zero diz o que o zero significa', () {
+    expect(pulseRiscoCopy(0).hint, 'Nenhum aluno em risco');
+    expect(pulseRiscoCopy(0).semantics, 'Nenhum aluno em risco de abandono');
+    expect(pulseRiscoCopy(1).semantics, '1 aluno em risco de abandono');
+    expect(pulseRiscoCopy(3).hint, 'Alunos pedem contato');
+    expect(pulseAtivosCopy(0).hint, 'Nenhum aluno ativo');
+    expect(pulseAtivosCopy(4).hint, 'Base ativa');
+    expect(pulseCheckinsCopy(0).hint, 'Sem movimento hoje');
+    expect(pulseCheckinsCopy(2).hint, 'Check-ins de hoje');
+  });
 }

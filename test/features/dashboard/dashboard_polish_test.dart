@@ -238,7 +238,7 @@ void main() {
     expect(pulse, isNot(contains('fxStripCardDecoration')));
     expect(pulse, isNot(contains('_PulseChipEntrance')));
     expect(pulse, isNot(contains('FxSettingsTile')));
-    expect(pulse, contains("label: 'Risco'"));
+    expect(pulse, contains('label: pulseRiscoLabel'));
     expect(pulse, isNot(contains("label: 'Agenda'")));
     expect(pulse, isNot(contains('hideRiscoChip')));
   });

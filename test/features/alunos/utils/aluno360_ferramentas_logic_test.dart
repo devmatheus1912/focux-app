@@ -68,7 +68,7 @@ void main() {
             {'data': _isoDay(anchor), 'checkins': 2},
           ],
         ),
-        '2 check-ins na semana',
+        '2 check-ins em 7 dias',
       );
     });
 
@@ -168,7 +168,7 @@ void main() {
         {'data': _isoDay(anchor), 'checkins': 0},
       ];
       final label = Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(raw);
-      expect(label, startsWith('Aderência semanal:'));
+      expect(label, startsWith('Últimos 7 dias:'));
       expect(label, contains(weekdayNameFromIso(_isoDay(anchor))));
     });
 

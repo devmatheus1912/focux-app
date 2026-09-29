@@ -725,7 +725,7 @@ void main() {
     test('returns empty when all segments duplicate status grid', () {
       expect(
         sanitizeCopilotPrescriptionReason(
-          'Risco operacional · aderência 0% nos últimos 7 dias.',
+          'Risco operacional · aderência 0% nos últimos 30 dias.',
           statusMetricsVisible: true,
         ),
         isEmpty,

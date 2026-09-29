@@ -20,13 +20,13 @@ void main() {
       expect(
         alunoHeroContextLine(
           const AlunoHeroPrimarySignal(
-            label: 'Aderência semanal',
+            label: alunoHeroAderenciaLabel,
             value: '74',
             suffix: '%',
           ),
-          'Aderência baixa — reforce o hábito',
+          'Aderência baixa em 30 dias — reforce o hábito',
         ),
-        'Aderência baixa — reforce o hábito',
+        'Aderência baixa em 30 dias — reforce o hábito',
       );
     });
 
@@ -78,20 +78,6 @@ void main() {
           contextLine: 'Priorize contato hoje',
         ),
         'Priorize contato hoje',
-      );
-    });
-  });
-
-  group('alunoHeroMetricEyebrow', () {
-    test('maps risk metric eyebrow', () {
-      expect(
-        alunoHeroMetricEyebrow(
-          const AlunoHeroPrimarySignal(
-            label: 'Risco operacional',
-            value: 'Alto',
-          ),
-        ),
-        'Risco',
       );
     });
   });

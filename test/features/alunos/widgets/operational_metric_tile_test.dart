@@ -23,12 +23,12 @@ void main() {
     await tester.pumpWidget(
       _wrap(
         const OperationalMetricTile(
-          label: 'Prontidão',
+          label: 'Situação do aluno',
           value: '82',
-          hint: 'Índice operacional',
+          hint: 'Treinos e pagamentos',
           color: Colors.blue,
           isDark: false,
-          semanticsLabel: 'Prontidão 82',
+          semanticsLabel: 'Situação do aluno 82',
         ),
         textScaleFactor: 1,
       ),
@@ -36,7 +36,7 @@ void main() {
 
     expect(
       tester.getSemantics(find.byType(OperationalMetricTile)).label,
-      startsWith('Prontidão 82'),
+      startsWith('Situação do aluno 82'),
     );
     handle.dispose();
   });

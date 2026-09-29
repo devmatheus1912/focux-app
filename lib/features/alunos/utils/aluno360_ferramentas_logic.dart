@@ -193,13 +193,13 @@ abstract final class Aluno360FerramentasLogic {
     );
     if (summary.hasAnyCheckin) {
       final n = summary.totalCheckins;
-      return '$n check-in${n == 1 ? '' : 's'} na semana';
+      return '$n check-in${n == 1 ? '' : 's'} em 7 dias';
     }
     final dias = aluno.diasSemTreino;
     if (dias != null && dias >= 7) {
       return '$dias dias sem treino';
     }
-    return 'Sem check-ins nesta semana';
+    return 'Sem check-ins em 7 dias';
   }
 
   static int measurementsPendingCount({
@@ -415,7 +415,7 @@ abstract final class Aluno360FerramentasLogic {
     final points = parseAderenciaSemanal(aderenciaSemanal);
     final summary = summarizeAderenciaWeek(points);
     if (points.isEmpty) {
-      return 'Sem dados de aderência nesta semana';
+      return 'Sem dados dos últimos 7 dias';
     }
     if (!summary.hasAnyCheckin) {
       return 'Sem check-ins nos últimos 7 dias';
@@ -431,9 +431,9 @@ abstract final class Aluno360FerramentasLogic {
       dayParts.add('$day $status');
     }
     if (dayParts.isNotEmpty) {
-      return 'Aderência semanal: ${dayParts.join(', ')}';
+      return 'Últimos 7 dias: ${dayParts.join(', ')}';
     }
     final n = summary.totalCheckins;
-    return 'Tendência semanal: $n check-in${n == 1 ? '' : 's'} nos últimos dias';
+    return 'Últimos 7 dias: $n check-in${n == 1 ? '' : 's'}';
   }
 }

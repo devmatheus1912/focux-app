@@ -197,7 +197,7 @@ class _GamificacaoBodyState extends State<_GamificacaoBody> {
         ),
         const SizedBox(height: TokensStrip.s4),
         OperationalMetricTile(
-          label: 'Aderência',
+          label: 'Aderência 30 dias',
           value: '${data.aderenciaPercent}%',
           hint: '${data.totalTreinos} treinos',
           color: primary,

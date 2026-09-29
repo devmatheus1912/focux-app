@@ -19,4 +19,15 @@ void main() {
     expect(screen, isNot(contains('totalAlunos * 79')));
     expect(screen, isNot(contains('79.0 / (churn')));
   });
+
+  test('herói de inadimplência não é chamado de churn', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/analytics/screens/analytics_screen.dart',
+    );
+
+    expect(screen, isNot(contains("'Churn'")));
+    expect(screen, isNot(contains('atividade, churn')));
+    expect(screen, isNot(contains('final churn')));
+    expect(screen, contains("'Inadimplência'"));
+  });
 }

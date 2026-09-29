@@ -480,13 +480,16 @@ OperacaoDominantMetric resolveOperacaoDominantMetric(Aluno aluno) {
     );
   }
 
-  final prontidao = aluno.scoreProntidao;
+  final situacao = aluno.scoreProntidao;
   return OperacaoDominantMetric(
     kind: OperacaoDominantMetricKind.prontidao,
-    label: 'Prontidão',
-    value: prontidao == null ? '—' : '$prontidao',
-    hint: 'Índice operacional',
-    semanticsLabel: 'Prontidão ${prontidao ?? 'indisponível'}',
+    label: alunoSituacaoLabel,
+    value: situacao == null ? '—' : '$situacao',
+    hint: alunoSituacaoHint,
+    semanticsLabel:
+        situacao == null
+            ? '$alunoSituacaoLabel indisponível'
+            : '$alunoSituacaoLabel $situacao de 100, $alunoSituacaoHint',
   );
 }
 

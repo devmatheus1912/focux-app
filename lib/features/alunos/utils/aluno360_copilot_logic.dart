@@ -489,7 +489,7 @@ CopilotPrescriptionContent contactPriorityPrescriptionContent(
   final aderencia = aluno.aderenciaPercent;
   final reason = sanitizeCopilotPrescriptionReason(
     aluno.emRisco
-        ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 7 dias.'
+        ? 'Risco operacional · aderência ${aderencia ?? 0}% nos últimos 30 dias.'
         : aderencia != null && aderencia <= 0
         ? 'Sem check-ins recentes · priorize contato antes de evoluir o plano.'
         : 'Sinais do perfil pedem contato direto hoje.',

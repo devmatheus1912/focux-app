@@ -91,8 +91,23 @@ void main() {
         aderenciaPercent: 74,
       );
       final signal = alunoHeroPrimarySignal(aluno);
-      expect(signal.label, 'Aderência semanal');
+      expect(signal.label, 'Aderência 30 dias');
       expect(signal.value, '74');
+    });
+
+    test('score do servidor sem aderência nem dias vira Situação do aluno', () {
+      final aluno = Aluno(
+        id: 1,
+        nome: 'Test',
+        email: 'test@test.com',
+        status: 'ATIVO',
+        scoreProntidao: 70,
+      );
+      final signal = alunoHeroPrimarySignal(aluno);
+      expect(signal.label, 'Situação do aluno');
+      expect(signal.label, isNot(contains('Prontidão')));
+      expect(signal.value, '70');
+      expect(alunoHeroCaption(aluno, signal), 'Treinos e pagamentos');
     });
   });
 

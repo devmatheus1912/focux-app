@@ -111,16 +111,16 @@ abstract final class DashboardAderenciaCopy {
 
   static String emptyBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Ranking volta com treinos na semana.';
+      return 'Ranking volta com treinos nos últimos 7 dias.';
     }
     return 'Quando alunos treinarem, a aderência aparece aqui com ranking automático.';
   }
 
   static String stoppedBody({required bool retentionFocus}) {
     if (retentionFocus) {
-      return 'Sem check-ins nesta semana.';
+      return 'Sem check-ins nos últimos 7 dias.';
     }
-    return 'Acione alunos sem treino esta semana pela agenda ou pela base.';
+    return 'Acione alunos sem treino nos últimos 7 dias pela agenda ou pela base.';
   }
 }
 

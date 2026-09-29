@@ -139,6 +139,35 @@ void main() {
     expect(iconColor('WhatsApp'), iconColor('Contato feito'));
   });
 
+  testWidgets('rótulos dizem a janela: % de 30 dias e sparkline de 7', (
+    tester,
+  ) async {
+    await tester.pumpWidget(cardHarness(isDark: false));
+    await tester.pumpAndSettle();
+    expect(find.text('72% em 30 dias'), findsOneWidget);
+    expect(find.text('Últimos 7 dias'), findsNothing);
+
+    await tester.pumpWidget(
+      cardHarness(
+        isDark: false,
+        overrideAluno: Aluno(
+          id: 8,
+          nome: 'Carla Souza',
+          email: 'carla@test.com',
+          status: 'ATIVO',
+          objetivo: 'Hipertrofia',
+          aderenciaPercent: 72,
+          diasSemTreino: 0,
+          aderenciaSparkline: const [1, 0, 1, 0, 1, 0, 0],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('3 treinos em 7 dias'), findsOneWidget);
+    expect(find.text('Últimos 7 dias'), findsOneWidget);
+    expect(find.textContaining('esta semana'), findsNothing);
+  });
+
   testWidgets('compact convite nao mostra 0% nem risco', (tester) async {
     await tester.pumpWidget(
       cardHarness(

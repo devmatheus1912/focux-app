@@ -192,8 +192,8 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                     tips: const [
                       FxHelpTip('Como calculamos', retencaoComoCalculamos),
                       FxHelpTip(
-                        'Risco alto',
-                        'O card do topo é quem precisa de contato hoje.',
+                        'Risco de churn',
+                        'Vem só do score de check-ins acima — não é o risco de abandono dos alertas nem a inadimplência. O card do topo é quem precisa de contato hoje.',
                       ),
                       FxHelpTip(
                         'Lista',
@@ -505,7 +505,7 @@ class _RetencaoFocusCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            firstAlto != null ? 'Próximo contato' : 'Risco na base',
+            firstAlto != null ? 'Próximo contato' : 'Risco de churn',
             style: FocuxHubTypography.chip(chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s2),

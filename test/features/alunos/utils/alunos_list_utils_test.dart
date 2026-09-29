@@ -155,11 +155,27 @@ void main() {
         isTrue,
       );
     });
+
+    test('percentual diz a janela de 30 dias do servidor', () {
+      expect(
+        alunoListOpsText(
+          adherenceLabel: '',
+          triageContextActive: false,
+          aderenciaPercent: 72,
+        ),
+        '72% em 30 dias',
+      );
+    });
   });
 
   group('adherenceActivityLabel', () {
-    test('some o rótulo quando não há treinos na semana', () {
+    test('some o rótulo quando não há treinos em 7 dias', () {
       expect(alunoWeeklyCheckinsLabel(0), isEmpty);
+    });
+
+    test('contagem diz a janela de 7 dias, não a semana', () {
+      expect(alunoWeeklyCheckinsLabel(1), '1 treino em 7 dias');
+      expect(alunoWeeklyCheckinsLabel(3), '3 treinos em 7 dias');
     });
   });
 

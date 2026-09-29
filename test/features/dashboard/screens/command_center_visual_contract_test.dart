@@ -54,7 +54,7 @@ void main() {
     expect(widget, contains('FxSatelliteListTile'));
     expect(widget, contains('pulsoOperacional'));
     expect(widget, isNot(contains('hideRiscoChip')));
-    expect(widget, contains("label: 'Risco'"));
+    expect(widget, contains('label: pulseRiscoLabel'));
     expect(widget, contains('dashboardAttentionSplit'));
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));

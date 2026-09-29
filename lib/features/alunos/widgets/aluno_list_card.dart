@@ -149,7 +149,7 @@ class AlunoListCard extends ConsumerWidget {
         opsText.isNotEmpty
             ? opsText
             : (meaningfulPercent
-                ? '$aderenciaPercent%'
+                ? alunoListAderenciaLabel(aderenciaPercent!)
                 : 'aderência indisponível');
 
     return Semantics(
@@ -335,15 +335,21 @@ class AlunoListCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (sparkValues.isNotEmpty)
+                        if (sparkValues.isNotEmpty) ...[
                           FxSparkline(
                             data: sparkValues,
                             color: aderColor,
                             width: compact ? 48 : 56,
                             height: compact ? 18 : 22,
                             strokeWidth: 1.8,
-                          )
-                        else
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            alunoListSparklineLabel,
+                            maxLines: 1,
+                            style: FocuxHubTypography.chip(secondaryInk),
+                          ),
+                        ] else
                           const SizedBox(height: 3),
                         const SizedBox(height: 6),
                         ExcludeSemantics(
