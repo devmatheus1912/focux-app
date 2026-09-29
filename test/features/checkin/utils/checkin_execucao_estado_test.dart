@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/data/checkin_repository.dart';
 import 'package:focux_app/features/checkin/data/checkin_series_pendentes.dart';
@@ -137,5 +138,107 @@ void main() {
     expect(evolucoes.single.tipo, 'CARGA');
     expect(evolucoes.single.valorAtual, 25);
     expect(evolucoes.single.unidade, 'kg');
+  });
+
+  test('envio recusado mantém carga e reps digitadas na próxima série', () {
+    final r = CheckinRascunhos();
+    final ee = _ee();
+    r.manter(ee, cargaKg: 42.5, repeticoes: '7');
+    expect(r.de(ee).cargaKg, 42.5);
+    expect(r.de(ee).reps, 7);
+  });
+
+  group('rodapé da zona do polegar', () {
+    test('série a registrar põe Registrar no rodapé', () {
+      expect(
+        checkinRodape(descansando: false, tudoFeito: false, atual: _ee()),
+        CheckinRodape.registrar,
+      );
+    });
+
+    test('tudo feito põe Finalizar no rodapé', () {
+      expect(
+        checkinRodape(
+          descansando: false,
+          tudoFeito: true,
+          atual: _ee(feitas: 3, concluido: true),
+        ),
+        CheckinRodape.finalizar,
+      );
+    });
+
+    test('descanso deixa o rodapé como estava (vazio)', () {
+      expect(
+        checkinRodape(descansando: true, tudoFeito: false, atual: _ee()),
+        CheckinRodape.nenhum,
+      );
+      expect(
+        checkinRodape(descansando: true, tudoFeito: true, atual: null),
+        CheckinRodape.nenhum,
+      );
+    });
+
+    test('exercício em foco já feito não oferece Registrar', () {
+      expect(
+        checkinRodape(
+          descansando: false,
+          tudoFeito: false,
+          atual: _ee(feitas: 3),
+        ),
+        CheckinRodape.nenhum,
+      );
+    });
+  });
+
+  group('concluir tolerante a retry', () {
+    DioException erro400(String mensagem) {
+      final req = RequestOptions(path: '/api/checkin/1/concluir');
+      return DioException(
+        requestOptions: req,
+        type: DioExceptionType.badResponse,
+        response: Response(
+          requestOptions: req,
+          statusCode: 400,
+          data: {'erro': mensagem},
+        ),
+      );
+    }
+
+    test('resposta do servidor passa adiante', () async {
+      final r = await checkinConcluir(() async => _treino(const []));
+      expect(r?.id, 1);
+    });
+
+    test('backend antigo: "já foi concluído" vira sucesso sem evolução', () async {
+      expect(
+        await checkinConcluir(
+          () async => throw erro400('Este treino já foi concluído.'),
+        ),
+        isNull,
+      );
+      expect(
+        await checkinConcluir(
+          () async => throw erro400('Este treino ja foi concluido.'),
+        ),
+        isNull,
+      );
+    });
+
+    test('descartado e timeout continuam sendo erro', () async {
+      await expectLater(
+        checkinConcluir(() async => throw erro400('Este treino foi descartado.')),
+        throwsA(isA<DioException>()),
+      );
+      await expectLater(
+        checkinConcluir(
+          () async =>
+              throw DioException(
+                requestOptions: RequestOptions(path: '/x'),
+                type: DioExceptionType.receiveTimeout,
+              ),
+        ),
+        throwsA(isA<DioException>()),
+      );
+    });
   });
 }

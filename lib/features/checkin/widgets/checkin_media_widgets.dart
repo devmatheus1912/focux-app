@@ -6,10 +6,19 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import '../../../l10n/app_localizations.dart';
+import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_video_badge.dart';
 
-/// Fixed preview height for thumbnails / loading (demo sheet + inline).
+/// Preferred preview height for thumbnails / loading, capped by screen.
 const double checkinMediaPreviewHeight = 228;
+
+/// Alvo mínimo do play/pause sobre o vídeo.
+const double checkinMediaPlayMin = 48;
+
+double _previaAltura(BuildContext context) => checkinMediaPreviaAltura(
+  preferida: checkinMediaPreviewHeight,
+  alturaTela: MediaQuery.sizeOf(context).height,
+);
 
 class CheckinExerciseThumbnailPreview extends StatelessWidget {
   final String url;
@@ -43,7 +52,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
         children: [
           FxCachedNetworkImage(
             imageUrl: url,
-            height: checkinMediaPreviewHeight,
+            height: _previaAltura(context),
             width: double.infinity,
             fit: BoxFit.cover,
             memCacheWidth: 720,
@@ -102,7 +111,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
         children: [
           FxCachedNetworkImage(
             imageUrl: url,
-            height: checkinMediaPreviewHeight,
+            height: _previaAltura(context),
             width: double.infinity,
             fit: BoxFit.cover,
             memCacheWidth: 720,
@@ -280,7 +289,7 @@ class _CheckinExerciseVideoPreviewState
     final controller = _controller;
     if (!_ready || controller == null) {
       return Container(
-        height: checkinMediaPreviewHeight,
+        height: _previaAltura(context),
         width: double.infinity,
         decoration: BoxDecoration(
           color:
@@ -301,16 +310,30 @@ class _CheckinExerciseVideoPreviewState
       licenseStatus: widget.licenseStatus,
       videoSource: widget.videoSource,
     );
+    final video = controller.value;
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Stack(
         children: [
-          AspectRatio(
-            aspectRatio:
-                controller.value.aspectRatio == 0
-                    ? 16 / 9
-                    : controller.value.aspectRatio,
-            child: VideoPlayer(controller),
+          LayoutBuilder(
+            builder:
+                (context, constraints) => Container(
+                  color: Colors.black,
+                  width: double.infinity,
+                  height: checkinMediaAltura(
+                    largura: constraints.maxWidth,
+                    alturaTela: MediaQuery.sizeOf(context).height,
+                    aspectRatio: video.aspectRatio,
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: video.size.width > 0 ? video.size.width : 16,
+                      height: video.size.height > 0 ? video.size.height : 9,
+                      child: VideoPlayer(controller),
+                    ),
+                  ),
+                ),
           ),
           Positioned.fill(
             child: DecoratedBox(
@@ -327,25 +350,9 @@ class _CheckinExerciseVideoPreviewState
             ),
           ),
           Positioned(
-            right: 10,
-            bottom: 10,
-            child: Material(
-              color: Colors.black.withValues(alpha: 0.42),
-              shape: const CircleBorder(),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: _togglePlay,
-                child: SizedBox(
-                  width: 36,
-                  height: 36,
-                  child: Icon(
-                    _playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+            right: 6,
+            bottom: 6,
+            child: CheckinVideoPlayButton(playing: _playing, onTap: _togglePlay),
           ),
           if (badge != null && badgeIcon != null)
             Positioned(
@@ -354,6 +361,50 @@ class _CheckinExerciseVideoPreviewState
               child: _CheckinMediaBadge(label: badge, icon: badgeIcon),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class CheckinVideoPlayButton extends StatelessWidget {
+  const CheckinVideoPlayButton({
+    super.key,
+    required this.playing,
+    required this.onTap,
+  });
+
+  final bool playing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final label = playing ? s.checkinVideoPausar : s.checkinVideoReproduzir;
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: Tooltip(
+        message: label,
+        excludeFromSemantics: true,
+        child: Material(
+          color: Colors.black.withValues(alpha: 0.42),
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: SizedBox(
+              width: checkinMediaPlayMin,
+              height: checkinMediaPlayMin,
+              child: Icon(
+                playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

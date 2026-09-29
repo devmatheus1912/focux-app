@@ -17,6 +17,26 @@ void main() {
     );
   });
 
+  test('mídia inline não passa de 30% da tela, nem vídeo vertical', () {
+    expect(
+      checkinMediaAltura(largura: 400, alturaTela: 900, aspectRatio: 16 / 9),
+      closeTo(225, 0.01),
+    );
+    expect(
+      checkinMediaAltura(largura: 400, alturaTela: 900, aspectRatio: 9 / 16),
+      closeTo(270, 0.01),
+    );
+    expect(
+      checkinMediaAltura(largura: 400, alturaTela: 900, aspectRatio: 0),
+      closeTo(225, 0.01),
+    );
+    expect(
+      checkinMediaPreviaAltura(preferida: 228, alturaTela: 640),
+      closeTo(192, 0.01),
+    );
+    expect(checkinMediaPreviaAltura(preferida: 228, alturaTela: 900), 228);
+  });
+
   test('checkinSerieKpiLabel e contexto cabem em uma linha', () {
     expect(checkinSerieKpiLabel(2, 4), '2/4');
     expect(checkinSerieKpiLabel(1, null), '1');

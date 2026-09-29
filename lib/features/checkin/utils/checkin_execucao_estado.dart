@@ -1,5 +1,28 @@
+import '../../../core/api/api_error.dart';
 import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
+
+/// Retry de concluir num backend anterior ao concluir idempotente: o 400
+/// "já foi concluído" quer dizer que a primeira tentativa entrou.
+bool checkinConclusaoJaFeita(Object erro) {
+  final api = ApiError.from(erro);
+  if (api?.status != 400) return false;
+  final texto = (api!.mensagem ?? '').toLowerCase();
+  return texto.contains('já foi concluído') || texto.contains('ja foi concluido');
+}
+
+/// Concluir tolerante a retry. `null` = já estava concluído, sem resposta
+/// de evolução para mostrar.
+Future<ExecucaoTreino?> checkinConcluir(
+  Future<ExecucaoTreino> Function() concluir,
+) async {
+  try {
+    return await concluir();
+  } catch (e) {
+    if (checkinConclusaoJaFeita(e)) return null;
+    rethrow;
+  }
+}
 
 /// Início do cronômetro da sessão; sessão zumbi (8h+) recomeça do zero.
 DateTime checkinInicioCronometro(String? iniciadoEm, DateTime agora) {
@@ -85,6 +108,28 @@ int checkinPendentesDaExecucao(List<CheckinSeriePendente> fila, int? id) =>
 
 int checkinExerciciosFaltando(List<ExecucaoExercicio> exercicios) =>
     exercicios.where((e) => !e.concluido).length;
+
+bool checkinPodeRegistrar(ExecucaoExercicio ee) {
+  final total = ee.series ?? 0;
+  return !ee.concluido && !(total > 0 && ee.seriesFeitas >= total);
+}
+
+enum CheckinRodape { nenhum, registrar, finalizar }
+
+/// Zona do polegar: a ação da série atual; Finalizar só quando tudo foi
+/// feito. Descanso mantém o rodapé que já tinha (nenhum).
+CheckinRodape checkinRodape({
+  required bool descansando,
+  required bool tudoFeito,
+  required ExecucaoExercicio? atual,
+}) {
+  if (descansando) return CheckinRodape.nenhum;
+  if (tudoFeito) return CheckinRodape.finalizar;
+  if (atual != null && checkinPodeRegistrar(atual)) {
+    return CheckinRodape.registrar;
+  }
+  return CheckinRodape.nenhum;
+}
 
 /// Performance primeiro; builds antigos do backend só mandam carga.
 List<EvolucaoPerformance> checkinEvolucoesParaCelebrar(

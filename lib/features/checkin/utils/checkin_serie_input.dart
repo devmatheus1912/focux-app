@@ -131,6 +131,15 @@ class CheckinRascunhos {
       reps: ((atual.reps ?? 0) + delta).clamp(0, 50).toInt(),
     );
   }
+
+  /// Envio recusado: o que foi digitado continua para a próxima tentativa.
+  void manter(ExecucaoExercicio ee, {double? cargaKg, String? repeticoes}) {
+    final atual = de(ee);
+    _porSerie[_chave(ee)] = CheckinCurrentSetSeed(
+      cargaKg: cargaKg ?? atual.cargaKg,
+      reps: int.tryParse(checkinFirstRepsToken(repeticoes) ?? '') ?? atual.reps,
+    );
+  }
 }
 
 String? checkinSeriePrescricaoHint(S s, String? prescricacao) {

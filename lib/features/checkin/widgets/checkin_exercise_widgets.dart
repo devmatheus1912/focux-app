@@ -7,23 +7,23 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
+import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
 import 'checkin_media_widgets.dart';
 
 part 'checkin_serie_steppers.part.dart';
 
+/// Registrar a série fica no rodapé fixo da tela (zona do polegar).
 class CheckinSerieCard extends StatelessWidget {
   final ExecucaoExercicio ee;
   final int index;
   final int total;
-  final VoidCallback onRegistrar;
   final VoidCallback? onDesfazer;
   final VoidCallback? onAjustar;
   final VoidCallback? onConfirmarRestante;
@@ -34,14 +34,12 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onMinusCarga;
   final VoidCallback? onPlusReps;
   final VoidCallback? onMinusReps;
-  final bool resting;
 
   const CheckinSerieCard({
     super.key,
     required this.ee,
     required this.index,
     required this.total,
-    required this.onRegistrar,
     this.onDesfazer,
     this.onAjustar,
     this.onConfirmarRestante,
@@ -52,7 +50,6 @@ class CheckinSerieCard extends StatelessWidget {
     this.onMinusCarga,
     this.onPlusReps,
     this.onMinusReps,
-    this.resting = false,
   });
 
   @override
@@ -62,8 +59,7 @@ class CheckinSerieCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
     final hasDemo = checkinExerciseHasDemo(ee);
-    final target = ee.series ?? 0;
-    final done = ee.concluido || (target > 0 && ee.seriesFeitas >= target);
+    final done = !checkinPodeRegistrar(ee);
     final contextLine = checkinSerieContextLine(
       s,
       seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
@@ -90,7 +86,7 @@ class CheckinSerieCard extends StatelessWidget {
           // S8: um alvo dominante — nome + KPI + receita, agrupados.
           FxStripCard(
             accent: brand,
-            glowStrength: resting ? 0 : 0.04,
+            glowStrength: 0.04,
             padding: const EdgeInsets.fromLTRB(
               TokensStrip.s4,
               TokensStrip.s4,
@@ -195,15 +191,6 @@ class CheckinSerieCard extends StatelessWidget {
                 onMinusReps: onMinusReps,
               ),
             ),
-            const SizedBox(height: TokensStrip.s3),
-            if (!resting)
-              SizedBox(
-                height: checkinExecutionControlMin,
-                child: FxLiquidPrimaryButton(
-                  label: checkinRegistrarLabel(s, first: ee.seriesFeitas <= 0),
-                  onPressed: onRegistrar,
-                ),
-              ),
             if (onAjustar != null ||
                 onConfirmarRestante != null ||
                 onDesfazer != null) ...[

@@ -18,6 +18,47 @@ CheckinEnvioSerie checkinEnvioPelo(CheckinRepository repo) =>
       dor: p.dor,
     );
 
+sealed class CheckinRegistro {
+  const CheckinRegistro();
+}
+
+class CheckinRegistroSalvo extends CheckinRegistro {
+  const CheckinRegistroSalvo(this.exercicio);
+  final ExecucaoExercicio exercicio;
+}
+
+/// Guardada no aparelho: conta como feita até a fila enviar.
+class CheckinRegistroNaFila extends CheckinRegistro {
+  const CheckinRegistroNaFila(this.fila);
+  final List<CheckinSeriePendente> fila;
+}
+
+/// Recusa definitiva (validação): nada foi salvo, nem no aparelho.
+class CheckinRegistroRecusado extends CheckinRegistro {
+  const CheckinRegistroRecusado(this.erro);
+  final Object erro;
+}
+
+/// Série nova: mesma classificação de erro da fila, para que o que a fila
+/// tentaria de novo também não se perca no primeiro envio.
+Future<CheckinRegistro> checkinRegistrarSerie({
+  required CheckinSeriePendente serie,
+  required CheckinSeriesPendentesStore store,
+  required CheckinEnvioSerie enviar,
+}) async {
+  try {
+    return CheckinRegistroSalvo(await enviar(serie));
+  } catch (e) {
+    if (!isTransientApiError(e)) return CheckinRegistroRecusado(e);
+    try {
+      await store.adicionar(serie);
+      return CheckinRegistroNaFila(await store.ler());
+    } catch (_) {
+      return CheckinRegistroRecusado(e);
+    }
+  }
+}
+
 class CheckinFilaResultado {
   const CheckinFilaResultado({
     required this.enviadas,

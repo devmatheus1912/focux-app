@@ -110,6 +110,53 @@ void main() {
     expect(r.restantes.single.numero, 1);
   });
 
+  group('registrar série nova', () {
+    Future<CheckinRegistro> registrar(Object? erro) => checkinRegistrarSerie(
+      serie: _serie(1),
+      store: store,
+      enviar: (p) async {
+        if (erro != null) throw erro;
+        return _exercicio(p.numero);
+      },
+    );
+
+    test('2xx salva e não mexe na fila', () async {
+      final r = await registrar(null);
+      expect(r, isA<CheckinRegistroSalvo>());
+      expect((r as CheckinRegistroSalvo).exercicio.seriesFeitas, 1);
+      expect(await store.ler(), isEmpty);
+    });
+
+    for (final (nome, erro) in [
+      ('sem conexão', _rede()),
+      (
+        'timeout',
+        DioException(
+          requestOptions: RequestOptions(path: '/series'),
+          type: DioExceptionType.receiveTimeout,
+        ),
+      ),
+      ('500', _status(500)),
+      ('503', _status(503)),
+      ('429', _status(429)),
+    ]) {
+      test('$nome vai para a fila', () async {
+        final r = await registrar(erro);
+        expect(r, isA<CheckinRegistroNaFila>());
+        expect((r as CheckinRegistroNaFila).fila.single.numero, 1);
+        expect((await store.ler()).single.numero, 1);
+      });
+    }
+
+    for (final code in [400, 422]) {
+      test('$code é recusa: erro e nada na fila', () async {
+        final r = await registrar(_status(code));
+        expect(r, isA<CheckinRegistroRecusado>());
+        expect(await store.ler(), isEmpty);
+      });
+    }
+  });
+
   test('json corrompido vira fila vazia', () async {
     SharedPreferences.setMockInitialValues({
       CheckinSeriesPendentesStore.prefKey: '{quebrado',

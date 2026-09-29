@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/api/transient_error.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -60,6 +60,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   CheckinSessaoAberta? _sessaoAberta;
   bool _descartandoSessao = false;
   bool _concluindo = false;
+  bool _registrando = false;
   bool _iniciarInFlight = false;
   Timer? _timer;
   Duration _duration = Duration.zero;
@@ -197,7 +198,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     if (_pendentes == 0) return true;
     final ok = await _enviarFila();
     if (!ok && mounted) {
-      FeedbackHelper.showError(context, S.of(context).checkinPendentesBloqueio);
+      _erro(S.of(context).checkinPendentesBloqueio);
     }
     return ok;
   }
@@ -213,7 +214,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       final updated = await chamada(id);
       if (mounted) _applyUpdated(updated);
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+      if (mounted) _erro(friendlyError(e));
     }
   }
 
@@ -238,7 +239,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   Future<void> _registrarSerieRapida(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
-    if (id == null) return;
+    if (id == null || _registrando) return;
     final draft = _rascunhos.de(ee);
     int? rpe;
     if (ee.rpeAlvo != null) {
@@ -260,7 +261,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   Future<void> _registrarSerieDetalhada(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
-    if (id == null) return;
+    if (id == null || _registrando) return;
     final numero = _proximoNumero(ee);
     final payload = await showCheckinSerieDetalhe(
       context,
@@ -284,34 +285,43 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     );
   }
 
-  /// Sem conexão a série fica no aparelho, conta como feita e o descanso
-  /// começa igual; outro erro mostra a mensagem e nada muda.
+  /// Falha transitória guarda a série no aparelho: conta como feita e o
+  /// descanso começa igual. Recusa mostra a mensagem e mantém o digitado.
   Future<void> _enviarSerie(
     ExecucaoExercicio ee,
     CheckinSeriePendente serie,
   ) async {
-    HapticFeedback.selectionClick();
-    ExecucaoExercicio depois;
-    try {
-      depois = await checkinEnvioPelo(_repo)(serie);
-      if (!mounted) return;
-      _applyUpdated(depois);
-      if (_pendentes > 0) unawaited(_enviarFila());
-    } catch (e) {
-      if (!mounted) return;
-      if (!isConnectionError(e)) {
-        FeedbackHelper.showError(context, friendlyError(e));
+    if (_registrando) return;
+    setState(() => _registrando = true);
+    final r = await checkinRegistrarSerie(
+      serie: serie,
+      store: _fila,
+      enviar: checkinEnvioPelo(_repo),
+    );
+    if (!mounted) return;
+    setState(() => _registrando = false);
+    final ExecucaoExercicio depois;
+    switch (r) {
+      case CheckinRegistroRecusado(:final erro):
+        _rascunhos.manter(
+          ee,
+          cargaKg: serie.cargaKg,
+          repeticoes: serie.repeticoes,
+        );
+        _erro(friendlyError(erro));
         return;
-      }
-      await _fila.adicionar(serie);
-      final fila = await _fila.ler();
-      if (!mounted) return;
-      depois = checkinAplicarSerieLocal(ee, serie);
-      _applyUpdated(depois);
-      setState(
-        () => _pendentes = checkinPendentesDaExecucao(fila, serie.execucaoId),
-      );
+      case CheckinRegistroSalvo(:final exercicio):
+        depois = exercicio;
+        _applyUpdated(depois);
+        if (_pendentes > 0) unawaited(_enviarFila());
+      case CheckinRegistroNaFila(:final fila):
+        depois = checkinAplicarSerieLocal(ee, serie);
+        _applyUpdated(depois);
+        setState(
+          () => _pendentes = checkinPendentesDaExecucao(fila, serie.execucaoId),
+        );
     }
+    HapticFeedback.selectionClick();
     if (serie.numero > ee.seriesFeitas) {
       _iniciarDescanso(depois.descansoSegundos ?? 60);
     }
@@ -355,16 +365,19 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     if (mounted) await _concluir();
   }
 
+  /// Concluir é idempotente: retry depois de timeout volta 200 sem evolução
+  /// (ou o 400 "já foi concluído" do backend antigo) e segue como sucesso.
   Future<void> _concluir() async {
     setState(() => _concluindo = true);
     try {
-      final concluida = await _repo.concluir(_execucao!.id!);
+      final id = _execucao!.id!;
+      final concluida = await checkinConcluir(() => _repo.concluir(id));
       _invalidateSessaoCaches();
       if (!mounted) return;
       await showCheckinResultado(context, concluida: concluida);
       if (mounted) safePopOrGo(context, '/checkin/treinos');
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+      if (mounted) _erro(friendlyError(e));
     } finally {
       if (mounted) setState(() => _concluindo = false);
     }
@@ -405,7 +418,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       _invalidateSessaoCaches();
       return true;
     } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+      if (mounted) _erro(friendlyError(e));
       return false;
     }
   }
@@ -424,6 +437,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         await _finalizar();
         return;
       case FxExecutionLeaveChoice.descartar:
+        if (!await showCheckinDescartarTreino(context) || !mounted) return;
         final id = _execucao?.id;
         if (id != null && !await _descartar(id)) return;
       case FxExecutionLeaveChoice.continuarDepois:

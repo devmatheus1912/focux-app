@@ -38,12 +38,32 @@ Future<bool> showCheckinDescartarAberto(BuildContext context) {
   );
 }
 
+/// Segundo toque do "Descartar" do sheet de saída; `true` apaga a sessão.
+Future<bool> showCheckinDescartarTreino(BuildContext context) {
+  final s = S.of(context);
+  return showFxConfirmSheet(
+    context,
+    title: s.checkinDescartarTreinoTitulo,
+    message: s.checkinDescartarTreinoTexto,
+    confirmLabel: s.checkinDescartar,
+    cancelLabel: s.checkinVoltarAoTreino,
+    icon: Icons.delete_outline_rounded,
+    destructive: true,
+  );
+}
+
 /// Evolução quando houver; senão a celebração de treino concluído.
+///
+/// [concluida] nulo ou sem evoluções (retry de concluir só devolve evolução
+/// na primeira resposta) cai na celebração, que não afirma recorde nenhum.
 Future<void> showCheckinResultado(
   BuildContext context, {
-  required ExecucaoTreino concluida,
+  required ExecucaoTreino? concluida,
 }) {
-  final evolucoes = checkinEvolucoesParaCelebrar(concluida);
+  final evolucoes =
+      concluida == null
+          ? const <EvolucaoPerformance>[]
+          : checkinEvolucoesParaCelebrar(concluida);
   if (evolucoes.isNotEmpty) {
     return showCheckinEvolucaoSheet(context, evolucoes: evolucoes);
   }

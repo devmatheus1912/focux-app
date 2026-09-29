@@ -23,6 +23,13 @@ extension _CheckinCorpo on _CheckinScreenState {
     );
   }
 
+  /// Erro flutua acima do rodapé para não cobrir o Registrar.
+  void _erro(String mensagem) => FeedbackHelper.showError(
+    context,
+    mensagem,
+    reserveBottom: checkinRodapeReserva,
+  );
+
   void _continuarSessaoAberta() {
     final treinoId = _sessaoAberta?.treinoId;
     if (treinoId == null) {
@@ -62,6 +69,7 @@ extension _CheckinCorpo on _CheckinScreenState {
         exercicios.isNotEmpty && checkinExerciciosFaltando(exercicios) == 0;
     final onTrocar =
         exercicios.length > 1 ? () => _abrirFila(exercicios) : null;
+    final rodape = _rodape(s, current, tudoFeito: tudoFeito);
 
     return Column(
       children: [
@@ -105,14 +113,33 @@ extension _CheckinCorpo on _CheckinScreenState {
             pendentes: _pendentes,
             onTentar: () => _enviarFila(),
           ),
-        if (exercicios.isNotEmpty && !_descanso.ativo)
-          CheckinFinalizarBar(
-            tudoFeito: tudoFeito,
-            concluindo: _concluindo,
-            onFinalizar: _finalizar,
-          ),
+        if (rodape != null) rodape,
       ],
     );
+  }
+
+  Widget? _rodape(S s, ExecucaoExercicio? current, {required bool tudoFeito}) {
+    final rodape = checkinRodape(
+      descansando: _descanso.ativo,
+      tudoFeito: tudoFeito,
+      atual: current,
+    );
+    return switch (rodape) {
+      CheckinRodape.nenhum => null,
+      CheckinRodape.registrar => CheckinRodapeBar(
+        label: checkinRegistrarLabel(s, first: current!.seriesFeitas <= 0),
+        loading: _registrando,
+        loadingLabel: s.checkinSalvandoSerie,
+        onPressed: () => _registrarSerieRapida(current),
+      ),
+      CheckinRodape.finalizar => CheckinRodapeBar(
+        label: s.checkinFinalizarTreino,
+        icon: Icons.flag_rounded,
+        loading: _concluindo,
+        loadingLabel: s.checkinFinalizando,
+        onPressed: _finalizar,
+      ),
+    };
   }
 
   Widget _cardOuVazio(
@@ -136,37 +163,57 @@ extension _CheckinCorpo on _CheckinScreenState {
         subtitle: s.checkinNenhumAtivoTexto,
       );
     }
-    final draft = _rascunhos.de(current);
-    final faltaSerie =
-        current.series != null && current.seriesFeitas < current.series!;
     return Align(
       alignment: Alignment.topCenter,
       child: SingleChildScrollView(
-        child: CheckinSerieCard(
-          key: ValueKey(current.treinoExercicioId),
-          ee: current,
-          resting: _descanso.ativo,
-          index: currentIndex,
-          total: exercicios.length,
-          draftCargaKg: draft.cargaKg,
-          draftReps: draft.reps,
-          onPlusCarga:
-              () => _mexerRascunho(() => _rascunhos.somarCarga(current, 2.5)),
-          onMinusCarga:
-              () => _mexerRascunho(() => _rascunhos.somarCarga(current, -2.5)),
-          onPlusReps:
-              () => _mexerRascunho(() => _rascunhos.somarReps(current, 1)),
-          onMinusReps:
-              () => _mexerRascunho(() => _rascunhos.somarReps(current, -1)),
-          onRegistrar: () => _registrarSerieRapida(current),
-          onAjustar: () => _registrarSerieDetalhada(current),
-          onConfirmarRestante:
-              faltaSerie ? () => _confirmarRestante(current) : null,
-          onTrocar: onTrocar,
-          onDesfazer:
-              current.seriesFeitas > 0 ? () => _desfazer(current) : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _card(current, currentIndex, exercicios.length, onTrocar),
+            if (checkinExerciciosFaltando(exercicios) > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: FxSettingsLayout.pageInset,
+                ),
+                child: CheckinFinalizarLink(
+                  concluindo: _concluindo,
+                  onFinalizar: _finalizar,
+                ),
+              ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _card(
+    ExecucaoExercicio current,
+    int currentIndex,
+    int total,
+    VoidCallback? onTrocar,
+  ) {
+    final draft = _rascunhos.de(current);
+    final faltaSerie =
+        current.series != null && current.seriesFeitas < current.series!;
+    return CheckinSerieCard(
+      key: ValueKey(current.treinoExercicioId),
+      ee: current,
+      index: currentIndex,
+      total: total,
+      draftCargaKg: draft.cargaKg,
+      draftReps: draft.reps,
+      onPlusCarga:
+          () => _mexerRascunho(() => _rascunhos.somarCarga(current, 2.5)),
+      onMinusCarga:
+          () => _mexerRascunho(() => _rascunhos.somarCarga(current, -2.5)),
+      onPlusReps: () => _mexerRascunho(() => _rascunhos.somarReps(current, 1)),
+      onMinusReps:
+          () => _mexerRascunho(() => _rascunhos.somarReps(current, -1)),
+      onAjustar: () => _registrarSerieDetalhada(current),
+      onConfirmarRestante:
+          faltaSerie ? () => _confirmarRestante(current) : null,
+      onTrocar: onTrocar,
+      onDesfazer: current.seriesFeitas > 0 ? () => _desfazer(current) : null,
     );
   }
 }

@@ -5,6 +5,33 @@ import '../../../l10n/app_localizations.dart';
 /// Thumb-zone minimum for S8 execution controls.
 const double checkinExecutionControlMin = TokensStrip.s8;
 
+/// Altura do rodapé fixo; avisos flutuam acima dele.
+const double checkinRodapeReserva =
+    checkinExecutionControlMin + TokensStrip.s2 + TokensStrip.s3;
+
+/// Teto da mídia inline: o Registrar do rodapé nunca some atrás do vídeo.
+const double checkinMediaMaxFracaoTela = 0.3;
+
+/// Altura da mídia inline; vídeo vertical para no teto e fica com barras.
+double checkinMediaAltura({
+  required double largura,
+  required double alturaTela,
+  required double aspectRatio,
+}) {
+  final natural = aspectRatio > 0 ? largura / aspectRatio : largura * 9 / 16;
+  final teto = alturaTela * checkinMediaMaxFracaoTela;
+  return natural < teto ? natural : teto;
+}
+
+/// Prévia de altura fixa (imagem, carregando) respeitando o mesmo teto.
+double checkinMediaPreviaAltura({
+  required double preferida,
+  required double alturaTela,
+}) {
+  final teto = alturaTela * checkinMediaMaxFracaoTela;
+  return preferida < teto ? preferida : teto;
+}
+
 Duration checkinElapsedSince(String? iniciadoEm, [DateTime? now]) {
   final origin = now ?? DateTime.now();
   if (iniciadoEm == null || iniciadoEm.isEmpty) {

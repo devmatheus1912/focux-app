@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -137,16 +136,6 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
             onTap: () => onPick(FxExecutionLeaveChoice.encerrarAgora),
           ),
           const SizedBox(height: TokensStrip.s2),
-          _leaveButton(
-            context,
-            label: s.checkinDescartar,
-            icon: Icons.delete_outline_rounded,
-            accent: EagleTokens.bad,
-            onPrimary: Colors.white,
-            destructive: true,
-            onTap: () => onPick(FxExecutionLeaveChoice.descartar),
-          ),
-          const SizedBox(height: TokensStrip.s2),
           SizedBox(
             height: 48,
             child: TextButton(
@@ -157,6 +146,20 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
                   color: mute,
                   fontWeight: FontWeight.w700,
                 ),
+              ),
+            ),
+          ),
+          const Divider(height: TokensStrip.s5),
+          // Destrutivo longe dos CTAs; o caller ainda pede confirmação.
+          SizedBox(
+            height: 48,
+            child: TextButton.icon(
+              onPressed: () => onPick(FxExecutionLeaveChoice.descartar),
+              icon: const Icon(Icons.delete_outline_rounded, size: 18),
+              label: Text(s.checkinDescartar),
+              style: TextButton.styleFrom(
+                foregroundColor: EagleTokens.bad,
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -172,15 +175,11 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
     required Color accent,
     required Color onPrimary,
     required VoidCallback onTap,
-    bool destructive = false,
   }) {
     return SizedBox(
       height: 52,
       child: ElevatedButton.icon(
-        onPressed: () {
-          if (destructive) HapticFeedback.heavyImpact();
-          onTap();
-        },
+        onPressed: onTap,
         icon: Icon(icon, size: 18),
         label: Text(label),
         style: ElevatedButton.styleFrom(

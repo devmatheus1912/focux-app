@@ -123,23 +123,25 @@ class CheckinPendentesAviso extends StatelessWidget {
   }
 }
 
-/// Tudo feito: botão cheio. Faltando exercício: texto discreto que confirma.
-class CheckinFinalizarBar extends StatelessWidget {
-  const CheckinFinalizarBar({
+/// Rodapé fixo na zona do polegar: a próxima ação do treino.
+class CheckinRodapeBar extends StatelessWidget {
+  const CheckinRodapeBar({
     super.key,
-    required this.tudoFeito,
-    required this.concluindo,
-    required this.onFinalizar,
+    required this.label,
+    required this.loadingLabel,
+    required this.loading,
+    required this.onPressed,
+    this.icon,
   });
 
-  final bool tudoFeito;
-  final bool concluindo;
-  final VoidCallback onFinalizar;
+  final String label;
+  final String loadingLabel;
+  final bool loading;
+  final VoidCallback onPressed;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
-    final s = S.of(context);
-    final chrome = ShellChrome.of(context);
     return SafeArea(
       top: false,
       child: Padding(
@@ -149,30 +151,48 @@ class CheckinFinalizarBar extends StatelessWidget {
           TokensStrip.s4,
           TokensStrip.s3,
         ),
+        // Soma de padding + botão = checkinRodapeReserva.
         child: SizedBox(
           height: checkinExecutionControlMin,
-          child:
-              tudoFeito
-                  ? FxLiquidPrimaryButton(
-                    label: s.checkinFinalizarTreino,
-                    icon: Icons.flag_rounded,
-                    onPressed: concluindo ? null : onFinalizar,
-                    loading: concluindo,
-                    loadingLabel: s.checkinFinalizando,
-                  )
-                  : TextButton(
-                    onPressed: concluindo ? null : onFinalizar,
-                    style: TextButton.styleFrom(
-                      foregroundColor: chrome.mute,
-                      minimumSize: const Size(
-                        double.infinity,
-                        checkinExecutionControlMin,
-                      ),
-                    ),
-                    child: Text(s.checkinFinalizarTreino),
-                  ),
+          child: Semantics(
+            liveRegion: loading,
+            child: FxLiquidPrimaryButton(
+              label: label,
+              icon: icon,
+              onPressed: loading ? null : onPressed,
+              loading: loading,
+              loadingLabel: loadingLabel,
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Finalizar com exercício faltando: texto discreto abaixo do card, que
+/// confirma antes de encerrar.
+class CheckinFinalizarLink extends StatelessWidget {
+  const CheckinFinalizarLink({
+    super.key,
+    required this.concluindo,
+    required this.onFinalizar,
+  });
+
+  final bool concluindo;
+  final VoidCallback onFinalizar;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    return TextButton(
+      onPressed: concluindo ? null : onFinalizar,
+      style: TextButton.styleFrom(
+        foregroundColor: chrome.mute,
+        minimumSize: const Size(double.infinity, checkinExecutionControlMin),
+      ),
+      child: Text(concluindo ? s.checkinFinalizando : s.checkinFinalizarTreino),
     );
   }
 }
