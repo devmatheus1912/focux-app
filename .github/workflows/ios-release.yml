@@ -73,6 +73,11 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      # A build phase do pod roda `dart run` dentro de ios/Pods (sem pubspec) e
+      # quebra o archive. Rodando da raiz, o marker fica pronto e a fase pula.
+      - name: Rive native setup (iOS)
+        run: dart run rive_native:setup --verbose --platform ios
+
       - name: Decode GoogleService-Info.plist (optional)
         env:
           GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
