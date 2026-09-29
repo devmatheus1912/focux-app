@@ -186,7 +186,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                     const SizedBox(height: TokensStrip.s3),
                     _PaywallInlineNote(
                       icon: Icons.smartphone_outlined,
-                      text: 'No celular, assine pela App Store ou Google Play.',
+                      text: S.of(context).assinaturaWebLojasCelular,
                       ink: ink,
                       mute: mute,
                       isDark: isDark,

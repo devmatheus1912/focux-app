@@ -365,9 +365,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         unawaited(_openCheckoutSuccess(purchase));
       case IapPurchaseVerifyFailed(:final error):
         _finishPurchaseFlowWithError(
-          friendlyError(
+          assinaturaVerifyFailedMessage(
+            S.of(context),
             error,
-            fallback: 'Não foi possível sincronizar a assinatura.',
+            isAndroid: defaultTargetPlatform == TargetPlatform.android,
           ),
         );
       case IapPurchaseStreamFailed(:final error):
@@ -581,8 +582,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         reason: 'iap_listener',
       );
     } catch (error) {
+      if (!mounted) return;
       _finishPurchaseFlowWithError(
-        friendlyError(error, fallback: 'Erro ao iniciar a compra na loja.'),
+        assinaturaBuyErrorMessage(S.of(context), error),
       );
     }
   }

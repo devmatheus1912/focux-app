@@ -29,6 +29,19 @@ void main() {
     expect(_ios(_http(429)), isFalse);
   });
 
+  test('iOS: qualquer falha sem resposta que não foi cancelada não conclui', () {
+    expect(_ios(_semResposta(DioExceptionType.unknown)), isFalse);
+    expect(_ios(_semResposta(DioExceptionType.badCertificate)), isFalse);
+    expect(_ios(_semResposta(DioExceptionType.cancel)), isTrue);
+  });
+
+  test('falha transitória do verify é a mesma regra da conclusão no iOS', () {
+    expect(iapVerifyFailureIsTransient(_semResposta(DioExceptionType.unknown)), isTrue);
+    expect(iapVerifyFailureIsTransient(_http(503)), isTrue);
+    expect(iapVerifyFailureIsTransient(_http(403)), isFalse);
+    expect(iapVerifyFailureIsTransient(StateError('payload')), isFalse);
+  });
+
   test('iOS: recusa definitiva conclui', () {
     expect(_ios(_http(400)), isTrue);
     expect(_ios(_http(403)), isTrue);

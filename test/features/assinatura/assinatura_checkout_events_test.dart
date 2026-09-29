@@ -1,9 +1,11 @@
-import 'dart:io';
-
+import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/assinatura/utils/assinatura_checkout_events.dart';
 import 'package:focux_app/features/subscription/services/iap_purchase_event.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 PurchaseDetails _compra(String produto) => PurchaseDetails(
@@ -66,23 +68,71 @@ void main() {
     );
   });
 
-  test('compra abre pelo coordenador; loja indisponível aborta com aviso', () {
-    final screen =
-        File(
-          'lib/features/assinatura/screens/assinatura_screen.dart',
-        ).readAsStringSync();
-    expect(screen, contains('.buy(productToBuy)'));
-    expect(screen, contains('S.of(context).assinaturaLojaIndisponivel'));
-    expect(screen, isNot(contains('InAppPurchase.instance.buyNonConsumable')));
-    expect(screen, isNot(contains('purchaseStream')));
+  group('mensagens de falha da compra', () {
+    final pt = lookupS(const Locale('pt'));
 
-    final arb = File('lib/l10n/app_pt.arb').readAsStringSync();
-    expect(
-      arb,
-      contains(
-        '"assinaturaLojaIndisponivel": '
-        '"Loja indisponível no momento. Tente de novo em instantes."',
-      ),
-    );
+    test('transação anterior pendente no StoreKit orienta restaurar', () {
+      final msg = assinaturaBuyErrorMessage(
+        pt,
+        PlatformException(code: 'storekit_duplicate_product_object'),
+      );
+      expect(
+        msg,
+        'Sua compra anterior ainda está sendo confirmada. '
+        'Toque em Restaurar compras ou reabra o app.',
+      );
+    });
+
+    test('outra falha ao abrir a compra não vaza código da loja', () {
+      final msg = assinaturaBuyErrorMessage(
+        pt,
+        PlatformException(code: 'storekit_outro', message: 'SKError 2'),
+      );
+      expect(msg, isNot(contains('storekit')));
+      expect(msg, isNot(contains('SKError')));
+    });
+
+    test('verify transitório avisa que o pagamento será confirmado', () {
+      final timeout = DioException(
+        requestOptions: RequestOptions(path: '/api/iap/verify'),
+        type: DioExceptionType.connectionTimeout,
+      );
+      final ios = assinaturaVerifyFailedMessage(pt, timeout, isAndroid: false);
+      expect(ios, contains('confirmado automaticamente'));
+      expect(ios, contains('Restaurar compras'));
+
+      final android = assinaturaVerifyFailedMessage(
+        pt,
+        timeout,
+        isAndroid: true,
+      );
+      expect(android, contains('Restaurar compras'));
+      expect(android, contains('sem nova cobrança'));
+    });
+
+    test('verify recusado mantém a mensagem do servidor', () {
+      final req = RequestOptions(path: '/api/iap/verify');
+      final msg = assinaturaVerifyFailedMessage(
+        pt,
+        DioException(
+          requestOptions: req,
+          type: DioExceptionType.badResponse,
+          response: Response(
+            requestOptions: req,
+            statusCode: 403,
+            data: {'erro': 'Recibo pertence a outra conta.'},
+          ),
+        ),
+        isAndroid: false,
+      );
+      expect(msg, isNot(contains('confirmado automaticamente')));
+    });
+
+    test('loja indisponível tem texto humano', () {
+      expect(
+        pt.assinaturaLojaIndisponivel,
+        'Loja indisponível no momento. Tente de novo em instantes.',
+      );
+    });
   });
 }

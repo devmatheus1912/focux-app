@@ -88,6 +88,43 @@ void main() {
     );
   });
 
+  test('oferta bloqueada não cita estatística sem base', () {
+    const caps = [
+      'financeiro',
+      'iaCopiloto',
+      'landingCompleta',
+      'whiteLabel',
+      'relatorios',
+      'migracaoFoto',
+      'agenda',
+      'habitCoaching',
+      'comunidadePrivada',
+      'automacoes',
+      'automacoesAvancadas',
+      'comunidadeGrupos',
+      'equipeRbac',
+      'lojaDigital',
+      'poseCoach',
+      'leads',
+      'nfse',
+    ];
+    for (final cap in caps) {
+      final offer = PlanEntitlements.lockedOffer(
+        featureName: cap,
+        capability: cap,
+      );
+      expect(offer.body, isNot(contains('%')), reason: cap);
+      expect(offer.body, isNot(contains('R\$')), reason: cap);
+    }
+    expect(
+      PlanEntitlements.lockedOffer(
+        featureName: 'Hábitos',
+        capability: 'habitCoaching',
+      ).body,
+      contains('Hábitos diários'),
+    );
+  });
+
   test('alignedToBilling elevates FREE /me to Enterprise limits', () {
     const me = PlanoFeatures(
       plano: SubscriptionPlan.FREE,

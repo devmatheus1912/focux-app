@@ -39,21 +39,51 @@ void main() {
     expect(referralTemLink(null), isFalse);
   });
 
-  test('convite usa o desconto que o servidor mandou', () {
+  test('desconto do indicado só aparece fora da loja nativa', () {
+    expect(referralMostraDescontoIndicado(_info(), lojaNativa: false), isTrue);
+    expect(referralMostraDescontoIndicado(_info(), lojaNativa: true), isFalse);
     expect(
-      referralInviteText(pt, _info()),
+      referralMostraDescontoIndicado(_info(desconto: 0), lojaNativa: false),
+      isFalse,
+    );
+    expect(
+      referralMostraDescontoIndicado(
+        _info(campanhaAtiva: false),
+        lojaNativa: false,
+      ),
+      isFalse,
+    );
+  });
+
+  test('convite usa o desconto que o servidor mandou no checkout web', () {
+    expect(
+      referralInviteText(pt, _info(), lojaNativa: false),
       'Use meu código ABCD234567 e ganhe 20% off na 1ª cobrança do Focux Personal.\n'
       'https://focux.app/cadastro?ref=ABCD234567',
     );
     expect(
-      referralInviteText(pt, _info(desconto: 0)),
+      referralInviteText(pt, _info(desconto: 0), lojaNativa: false),
       'Use meu código ABCD234567 no cadastro do Focux Personal.\n'
       'https://focux.app/cadastro?ref=ABCD234567',
     );
     expect(
-      referralInviteText(pt, _info(campanhaAtiva: false)),
+      referralInviteText(pt, _info(campanhaAtiva: false), lojaNativa: false),
       startsWith('Use meu código ABCD234567 no cadastro'),
     );
+  });
+
+  test('na loja nativa o convite não promete desconto', () {
+    expect(
+      referralInviteText(pt, _info(), lojaNativa: true),
+      'Use meu código ABCD234567 no cadastro do Focux Personal.\n'
+      'https://focux.app/cadastro?ref=ABCD234567',
+    );
+    expect(referralDiscountLine(pt, _info(), lojaNativa: true), isNull);
+  });
+
+  test('regras de ajuda não falam de reembolso', () {
+    expect(pt.referralHelpRulesBody, isNot(contains('Reembolso')));
+    expect(pt.referralHelpRulesBody, contains('Só pagamento real confirmado conta.'));
   });
 
   test('subtitulo do hub segue a campanha e junta freshness', () {
@@ -77,8 +107,11 @@ void main() {
     expect(referralRewardsProgress(pt, pausada), isNull);
     expect(referralDaysProgress(pt, pausada), '30');
     expect(referralRewardHeadline(pt, pausada), isNull);
-    expect(referralDiscountLine(pt, pausada), isNull);
-    expect(referralDiscountLine(pt, _info()), contains('20% off'));
+    expect(referralDiscountLine(pt, pausada, lojaNativa: false), isNull);
+    expect(
+      referralDiscountLine(pt, _info(), lojaNativa: false),
+      contains('20% off'),
+    );
   });
 
   test('banner prioriza campanha pausada, depois analise, depois limite', () {

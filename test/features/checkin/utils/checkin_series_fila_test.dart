@@ -42,31 +42,6 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  test('erro de conexão enfileira; resposta do servidor não', () {
-    expect(checkinErroDeConexao(_rede()), isTrue);
-    expect(
-      checkinErroDeConexao(
-        DioException(
-          requestOptions: RequestOptions(path: '/x'),
-          type: DioExceptionType.receiveTimeout,
-        ),
-      ),
-      isTrue,
-    );
-    expect(checkinErroDeConexao(_status(400)), isFalse);
-    expect(checkinErroDeConexao(_status(500)), isFalse);
-    expect(checkinErroDeConexao(StateError('x')), isFalse);
-  });
-
-  test('5xx, 401 e 429 são transitórios; 400 e 404 não', () {
-    expect(checkinErroTransitorio(_rede()), isTrue);
-    expect(checkinErroTransitorio(_status(503)), isTrue);
-    expect(checkinErroTransitorio(_status(401)), isTrue);
-    expect(checkinErroTransitorio(_status(429)), isTrue);
-    expect(checkinErroTransitorio(_status(400)), isFalse);
-    expect(checkinErroTransitorio(_status(404)), isFalse);
-  });
-
   test('a mesma série substitui a anterior e a fila persiste', () async {
     await store.adicionar(_serie(1, carga: 20));
     await store.adicionar(_serie(2));

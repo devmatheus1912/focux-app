@@ -7,8 +7,15 @@ bool get subscriptionUsesNativeStore =>
     (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android);
 
-String subscriptionChannelLabel() =>
-    subscriptionUsesNativeStore ? 'App Store ou Google Play' : 'checkout web';
+/// Onde a assinatura é cobrada neste aparelho.
+String subscriptionChannelLabel({TargetPlatform? platform, bool isWeb = kIsWeb}) {
+  if (isWeb) return 'checkout web';
+  return switch (platform ?? defaultTargetPlatform) {
+    TargetPlatform.iOS => 'App Store',
+    TargetPlatform.android => 'Google Play',
+    _ => 'checkout web',
+  };
+}
 
 Future<bool> openNativeSubscriptionManagement() async {
   if (!subscriptionUsesNativeStore) return false;

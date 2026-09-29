@@ -18,6 +18,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../subscription/store_subscription_policy.dart';
 import '../data/referral_repository.dart';
 import '../utils/referral_display.dart';
 import '../widgets/referral_body.dart';
@@ -87,7 +88,9 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
     final l10n = S.of(context);
     HapticFeedback.selectionClick();
     await AnalyticsService.instance.track(ProductEvents.referralLinkShared);
-    await copySensitiveToClipboard(referralInviteText(l10n, info));
+    await copySensitiveToClipboard(
+      referralInviteText(l10n, info, lojaNativa: subscriptionUsesNativeStore),
+    );
     if (!mounted) return;
     FeedbackHelper.showSuccess(context, l10n.referralInviteCopied);
   }
@@ -166,6 +169,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                         child: ReferralBody(
                           info: _info!,
                           isDark: chrome.isDark,
+                          lojaNativa: subscriptionUsesNativeStore,
                           onShare: _share,
                           onCopyLink: _copiarLink,
                         ),

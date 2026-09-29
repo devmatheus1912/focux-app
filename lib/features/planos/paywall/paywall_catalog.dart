@@ -4,6 +4,7 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../subscription/models/subscription_plan.dart';
+import '../../subscription/utils/plano_ia_limits.dart';
 
 /// Catálogo estático de educação e vitrine — preços vêm do backend/loja.
 class PaywallCatalog {
@@ -56,10 +57,12 @@ class PaywallCatalog {
     SubscriptionPlan.ENTERPRISE => 'Sua marca. Seu time. Seu crescimento.',
   };
 
+  /// Resumo factual do plano (limites reais), sem promessa de retorno.
   static String? roiTagForPlan(SubscriptionPlan plan) => switch (plan) {
-    SubscriptionPlan.PRO => 'Custa menos que 1 falta de aluno',
+    SubscriptionPlan.PRO =>
+      'Até 30 alunos, ${PlanoIaLimits.pro} usos de IA/mês e cobrança PIX',
     SubscriptionPlan.ENTERPRISE =>
-      'Substitui R\$ 1–3k de agência · 1 aluno novo paga o plano',
+      'Marca própria, landing, loja e até 5 assistentes além de você',
     _ => null,
   };
 
@@ -150,29 +153,30 @@ class PaywallCatalog {
       title: '2 alunos cadastrados (não 3)',
       transition: 'FREE → PRO',
       message:
-          'Você está a 1 aluno de lotar. Com 30 alunos a R\$ 400 = R\$ 12.000/mês. '
-          'Upgrade por R\$ 99,90 — menos que 1 falta de aluno.',
+          'Você está a 1 aluno do limite do Free. O Pro libera até 30 alunos.',
     ),
     PaywallUpgradeTrigger(
       number: '02',
       title: 'Tenta cobrar via PIX (bloqueado)',
       transition: 'FREE → PRO',
       message:
-          'Personais que cobram pelo app têm 40% menos inadimplência. Desbloqueie por R\$ 99,90/mês.',
+          'Cobrança por PIX, controle de mensalidades e alerta de inadimplência '
+          'fazem parte do plano Pro.',
     ),
     PaywallUpgradeTrigger(
       number: '03',
       title: 'IA Copiloto bloqueado',
       transition: 'FREE → PRO',
       message:
-          'Sua IA está aguardando. Monte o próximo treino em 3 minutos, não 30. Upgrade por R\$ 99,90.',
+          'Sua IA está aguardando. No Pro, o Copiloto monta treinos e sugere '
+          'respostas com ${PlanoIaLimits.pro} usos por mês.',
     ),
     PaywallUpgradeTrigger(
       number: '04',
       title: '27 alunos ativos (não 30)',
       transition: 'PRO → ENTERPRISE',
       message:
-          'Você está a 3 alunos de lotar. Cada novo = R\$ 400+/mês. Enterprise libera ilimitados.',
+          'Você está a 3 alunos do limite do Pro. Enterprise libera alunos ilimitados.',
     ),
     PaywallUpgradeTrigger(
       number: '05',

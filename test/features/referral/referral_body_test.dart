@@ -5,7 +5,12 @@ import 'package:focux_app/features/referral/data/referral_info.dart';
 import 'package:focux_app/features/referral/widgets/referral_body.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
-Future<void> _pump(WidgetTester tester, ReferralInfo info, {VoidCallback? onShare}) {
+Future<void> _pump(
+  WidgetTester tester,
+  ReferralInfo info, {
+  VoidCallback? onShare,
+  bool lojaNativa = false,
+}) {
   return tester.pumpWidget(
     MaterialApp(
       locale: const Locale('pt'),
@@ -16,6 +21,7 @@ Future<void> _pump(WidgetTester tester, ReferralInfo info, {VoidCallback? onShar
         body: ReferralBody(
           info: info,
           isDark: false,
+          lojaNativa: lojaNativa,
           onShare: onShare ?? () {},
           onCopyLink: () {},
         ),
@@ -69,6 +75,12 @@ void main() {
     await tester.tap(find.text('Copiar convite'));
     expect(compartilhou, isTrue);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('na loja nativa o painel não mostra desconto do indicado', (tester) async {
+    await _pump(tester, _ativa, lojaNativa: true);
+    expect(find.textContaining('% off'), findsNothing);
+    expect(find.text('ABCD234567'), findsOneWidget);
   });
 
   testWidgets('sem indicacoes mostra estado vazio', (tester) async {

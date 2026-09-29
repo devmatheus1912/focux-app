@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/api/transient_error.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -298,7 +299,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
       if (_pendentes > 0) unawaited(_enviarFila());
     } catch (e) {
       if (!mounted) return;
-      if (!checkinErroDeConexao(e)) {
+      if (!isConnectionError(e)) {
         FeedbackHelper.showError(context, friendlyError(e));
         return;
       }

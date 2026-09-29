@@ -18,16 +18,24 @@ bool referralTemLink(String? link) {
   return value != null && value.isNotEmpty;
 }
 
-bool _temDesconto(ReferralInfo info) =>
-    info.campanhaAtiva && (info.descontoIndicadoPct ?? 0) > 0;
+/// O desconto do indicado só é aplicado no checkout web; compra pela loja
+/// nativa não recebe desconto, então o app não o promete.
+bool referralMostraDescontoIndicado(
+  ReferralInfo info, {
+  required bool lojaNativa,
+}) => !lojaNativa && info.campanhaAtiva && (info.descontoIndicadoPct ?? 0) > 0;
 
 bool _temRecompensa(ReferralInfo info) =>
     info.campanhaAtiva && (info.diasPorIndicacao ?? 0) > 0;
 
-String referralInviteText(S l10n, ReferralInfo info) {
+String referralInviteText(
+  S l10n,
+  ReferralInfo info, {
+  required bool lojaNativa,
+}) {
   final codigo = referralCodigoLabel(info.codigo);
   final link = info.linkCompartilhamento.trim();
-  if (_temDesconto(info)) {
+  if (referralMostraDescontoIndicado(info, lojaNativa: lojaNativa)) {
     return l10n.referralInviteTextDiscount(
       codigo,
       info.descontoIndicadoPct!,
@@ -53,8 +61,14 @@ String? referralRewardHeadline(S l10n, ReferralInfo info) {
   return l10n.referralRewardHeadline(info.diasPorIndicacao!);
 }
 
-String? referralDiscountLine(S l10n, ReferralInfo info) {
-  if (!_temDesconto(info)) return null;
+String? referralDiscountLine(
+  S l10n,
+  ReferralInfo info, {
+  required bool lojaNativa,
+}) {
+  if (!referralMostraDescontoIndicado(info, lojaNativa: lojaNativa)) {
+    return null;
+  }
   return l10n.referralDiscountLine(info.descontoIndicadoPct!);
 }
 

@@ -18,12 +18,15 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../features/assinatura/providers/assinatura_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../features/subscription/subscription_products.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/planos_repository.dart';
 import '../paywall/paywall_price.dart';
+import '../utils/enterprise_promo_copy.dart';
 
 class EnterprisePromoScreen extends ConsumerStatefulWidget {
   const EnterprisePromoScreen({super.key});
@@ -99,12 +102,19 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     final primary = BrandPalette.softened(
       Theme.of(context).colorScheme.primary,
     );
+    final l10n = S.of(context);
     final useStore = subscriptionUsesNativeStore;
-    final trialEndDate = DateTime.now().add(
-      const Duration(days: kPaywallMaxPlanTrialDays),
+    final trialFim = enterprisePromoTrialFimTexto(
+      l10n,
+      DateTime.now().add(const Duration(days: kPaywallMaxPlanTrialDays)),
     );
-    final dateStr =
-        '${trialEndDate.day.toString().padLeft(2, '0')}/${trialEndDate.month.toString().padLeft(2, '0')}/${trialEndDate.year}';
+    final precoPosTeste =
+        useStore
+            ? null
+            : enterprisePromoPrecoPosTesteTexto(
+              l10n,
+              ref.watch(planosProvider).value,
+            );
     // Promo surface is always cinematic dark — force readable ink.
     const ink = EagleTokens.darkInk;
     const mute = EagleTokens.darkInkMute;
@@ -223,15 +233,15 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                       ? 'O trial de 30 dias do Enterprise é aplicado pela '
                                           '${subscriptionChannelLabel()} ao confirmar a assinatura. '
                                           'Cancele na loja antes do fim do trial para não ser cobrado.'
-                                      : 'Cancele antes de $dateStr para evitar cobrança.',
+                                      : trialFim,
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
                                 ),
-                                if (!useStore)
+                                if (precoPosTeste != null)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4),
                                     child: Text(
-                                      'Depois disso: R\$199,90/mês',
+                                      precoPosTeste,
                                       textAlign: TextAlign.center,
                                       style: TokensStrip.bodyMuted(
                                         color: mute,

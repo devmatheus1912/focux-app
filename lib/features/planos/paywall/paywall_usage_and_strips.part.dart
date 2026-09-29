@@ -1,5 +1,43 @@
 part of 'paywall_components.dart';
 
+/// Frase do banner de contexto: só uso real e limites do plano, sem
+/// projeção de faturamento.
+String? paywallContextMessage({
+  required PlanoUsageSnapshot usage,
+  String? blockedFeatureLabel,
+  required SubscriptionPlan target,
+}) {
+  if (blockedFeatureLabel != null && blockedFeatureLabel.isNotEmpty) {
+    return 'Você tentou usar $blockedFeatureLabel. '
+        'Disponível no plano ${PlanEntitlements.displayPlanName(target)}.';
+  }
+  if (usage.alunosAtLimit && usage.limiteAlunos != null) {
+    final proximo = target == SubscriptionPlan.ENTERPRISE
+        ? 'Enterprise libera alunos ilimitados.'
+        : 'O Pro libera até 30 alunos.';
+    return 'Você atingiu ${usage.limiteAlunos} alunos, o limite do seu plano. '
+        '$proximo';
+  }
+  if (usage.alunosNearLimit && usage.limiteAlunos != null) {
+    final left = (usage.limiteAlunos! - usage.alunosAtivos).clamp(0, 99);
+    return 'Você tem ${usage.alunosAtivos} alunos — faltam $left para o limite. '
+        'Upgrade libera mais vagas.';
+  }
+  if (usage.iaAtLimit) {
+    return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} IA este mês. '
+        'Enterprise libera até ${PlanoIaLimits.enterprise} interações.';
+  }
+  if (usage.iaNearLimit) {
+    return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA. '
+        'Enterprise dá mais folga no Copiloto.';
+  }
+  if (usage.plano == SubscriptionPlan.FREE) {
+    return 'O Pro libera até 30 alunos, cobrança PIX e '
+        '${PlanoIaLimits.pro} usos de IA por mês.';
+  }
+  return null;
+}
+
 class PaywallContextBanner extends StatelessWidget {
   final PlanoUsageSnapshot usage;
   final String? blockedFeatureLabel;
@@ -18,35 +56,6 @@ class PaywallContextBanner extends StatelessWidget {
     this.onCta,
   });
 
-  String? _message(SubscriptionPlan target) {
-    if (blockedFeatureLabel != null && blockedFeatureLabel!.isNotEmpty) {
-      return 'Você tentou usar $blockedFeatureLabel. '
-          'Disponível no plano ${PlanEntitlements.displayPlanName(target)}.';
-    }
-    if (usage.alunosAtLimit && usage.limiteAlunos != null) {
-      return 'Você atingiu ${usage.limiteAlunos} alunos. '
-          'Cada novo = R\$ 300–600/mês. Enterprise remove o teto.';
-    }
-    if (usage.alunosNearLimit && usage.limiteAlunos != null) {
-      final left = (usage.limiteAlunos! - usage.alunosAtivos).clamp(0, 99);
-      return 'Você tem ${usage.alunosAtivos} alunos — faltam $left para o limite. '
-          'Upgrade libera mais vagas e receita.';
-    }
-    if (usage.iaAtLimit) {
-      return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} IA este mês. '
-          'Enterprise libera até ${PlanoIaLimits.enterprise} interações.';
-    }
-    if (usage.iaNearLimit) {
-      return 'Você usou ${usage.iaUsadaMes} de ${usage.limiteIaMensal} interações de IA. '
-          'Enterprise dá mais folga no Copiloto.';
-    }
-    if (usage.plano == SubscriptionPlan.FREE) {
-      return 'Com 30 alunos a R\$ 400 = R\$ 12.000/mês. '
-          'O Pro representa menos de 1% desse faturamento.';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final target = PlanEntitlements.resolveUpgradeTarget(
@@ -54,7 +63,11 @@ class PaywallContextBanner extends StatelessWidget {
       blockedFeatureLabel: blockedFeatureLabel,
       blockedCapability: blockedCapability,
     );
-    final msg = _message(target);
+    final msg = paywallContextMessage(
+      usage: usage,
+      blockedFeatureLabel: blockedFeatureLabel,
+      target: target,
+    );
     if (msg == null) return const SizedBox.shrink();
 
     final accent = PaywallCatalog.accentForPlan(target);

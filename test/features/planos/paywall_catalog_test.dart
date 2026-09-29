@@ -26,6 +26,37 @@ void main() {
     expect(tag!, isNot(startsWith('💰')));
   });
 
+  test('tags do plano descrevem limites reais, sem ROI inventado', () {
+    expect(
+      PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO),
+      'Até 30 alunos, 200 usos de IA/mês e cobrança PIX',
+    );
+    expect(
+      PaywallCatalog.roiTagForPlan(SubscriptionPlan.ENTERPRISE),
+      'Marca própria, landing, loja e até 5 assistentes além de você',
+    );
+    expect(PaywallCatalog.roiTagForPlan(SubscriptionPlan.FREE), isNull);
+  });
+
+  test('gatilhos de upgrade sem preço fixo nem estatística sem base', () {
+    final textos = [
+      for (final t in PaywallCatalog.upgradeTriggers) t.message,
+      PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO)!,
+      PaywallCatalog.roiTagForPlan(SubscriptionPlan.ENTERPRISE)!,
+    ];
+    for (final texto in textos) {
+      expect(texto, isNot(contains('R\$')), reason: texto);
+      expect(texto, isNot(contains('%')), reason: texto);
+      expect(texto, isNot(contains('falta de aluno')), reason: texto);
+      expect(texto, isNot(contains('agência')), reason: texto);
+      expect(texto, isNot(contains('3 minutos')), reason: texto);
+    }
+    expect(
+      PaywallCatalog.modalMessageFor(capability: 'financeiro'),
+      contains('PIX'),
+    );
+  });
+
   test('parseFeatureLabel strips pro markers', () {
     final a = PaywallCatalog.parseFeatureLabel('Pose Coach ML ✦');
     expect(a.label, 'Pose Coach ML');

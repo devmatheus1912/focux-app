@@ -220,7 +220,7 @@ class PlanEntitlements {
       'agenda' => 'Agenda completa para sua operação',
       'habitCoaching' =>
         'Hábitos diários (água, sono, passos) fazem parte do plano $planLabel — '
-            'personais que acompanham hábitos retêm 35% mais alunos.',
+            'você acompanha a rotina de cada aluno entre os treinos.',
       'comunidadePrivada' =>
         'Comunidade privada fechada para seus alunos está no $planLabel.',
       'automacoes' =>

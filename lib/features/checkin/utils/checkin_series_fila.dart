@@ -1,27 +1,6 @@
-import 'package:dio/dio.dart';
-
+import '../../../core/api/transient_error.dart';
 import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
-
-/// Sem resposta do servidor: a série vai para a fila em vez de sumir.
-bool checkinErroDeConexao(Object erro) {
-  if (erro is! DioException || erro.response != null) return false;
-  return switch (erro.type) {
-    DioExceptionType.connectionError ||
-    DioExceptionType.connectionTimeout ||
-    DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout => true,
-    _ => false,
-  };
-}
-
-/// Vale tentar de novo depois; só recusa definitiva (4xx) descarta a série.
-bool checkinErroTransitorio(Object erro) {
-  if (checkinErroDeConexao(erro)) return true;
-  if (erro is! DioException) return false;
-  final status = erro.response?.statusCode ?? 0;
-  return status >= 500 || status == 401 || status == 408 || status == 429;
-}
 
 typedef CheckinEnvioSerie =
     Future<ExecucaoExercicio> Function(CheckinSeriePendente serie);
@@ -67,7 +46,7 @@ Future<CheckinFilaResultado> checkinEnviarFila({
       await store.remover(serie);
       enviadas.add((execucaoId: serie.execucaoId, exercicio: exercicio));
     } catch (e) {
-      if (checkinErroTransitorio(e)) break;
+      if (isTransientApiError(e)) break;
       await store.remover(serie);
       rejeitadas++;
     }

@@ -117,7 +117,7 @@ void main() {
       File('lib/main.dart').readAsStringSync(),
       contains('CheckinFilaSyncScope('),
     );
-    expect(screen, contains('checkinErroDeConexao'));
+    expect(screen, contains('isConnectionError'));
     expect(screen, contains('_filaLimpa'));
     expect(screen, contains('checkinExerciciosFaltando'));
     expect(screen, contains('showCheckinFinalizarIncompleto'));
