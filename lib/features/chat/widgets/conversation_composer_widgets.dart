@@ -223,13 +223,16 @@ class ConversationRecordingComposerBar extends StatelessWidget {
           ),
           IconButton(
             tooltip: 'Cancelar áudio',
-            visualDensity: VisualDensity.compact,
+            visualDensity: VisualDensity.standard,
             onPressed: onCancel,
             icon: Icon(Icons.delete_outline_rounded, color: mute),
+            style: IconButton.styleFrom(
+              minimumSize: const Size.square(kMinInteractiveDimension),
+            ),
           ),
           IconButton(
             tooltip: S.of(context).chatEnviarAudio,
-            visualDensity: VisualDensity.compact,
+            visualDensity: VisualDensity.standard,
             onPressed: onSend,
             icon: Icon(
               Icons.arrow_upward_rounded,
@@ -238,6 +241,7 @@ class ConversationRecordingComposerBar extends StatelessWidget {
             style: IconButton.styleFrom(
               backgroundColor: primary,
               minimumSize: const Size(32, 32),
+              tapTargetSize: MaterialTapTargetSize.padded,
             ),
           ),
         ],
@@ -322,7 +326,8 @@ class ConversationMessageComposer extends StatelessWidget {
               icon: const Icon(Icons.add_rounded),
               color: mute,
               style: IconButton.styleFrom(
-                minimumSize: const Size(44, 44),
+                visualDensity: VisualDensity.standard,
+                minimumSize: const Size.square(kMinInteractiveDimension),
               ),
             ),
             Expanded(
@@ -403,7 +408,10 @@ class ConversationMessageComposer extends StatelessWidget {
                             icon: const Icon(Icons.sentiment_satisfied_outlined),
                             color: mute,
                             style: IconButton.styleFrom(
-                              minimumSize: const Size(44, 44),
+                              visualDensity: VisualDensity.standard,
+                              minimumSize: const Size.square(
+                                kMinInteractiveDimension,
+                              ),
                             ),
                           ),
                           if (composerHasText)

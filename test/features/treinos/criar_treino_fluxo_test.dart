@@ -1,5 +1,8 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/api/offline_queued_ack.dart';
@@ -142,11 +145,13 @@ GoRouter _router({required String origem, Object? extraNovo}) {
 Future<void> _pumpFluxo(
   WidgetTester tester,
   GoRouter router,
-  _FakeTreinoRepository repo,
-) async {
+  _FakeTreinoRepository repo, {
+  List<Override> extra = const [],
+}) async {
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        ...extra,
         treinoRepositoryProvider.overrideWithValue(repo),
         treinoProvider.overrideWith((ref, id) async => _treinoMontado),
         treinoPickerHomeProvider(12).overrideWith(
@@ -342,12 +347,34 @@ void main() {
       origem: '/alunos/5',
       extraNovo: const {'alunoId': 5, 'alunoNome': 'Aluno'},
     );
-    await _pumpFluxo(tester, router, repo);
+    var cargasDaLista = 0;
+    await _pumpFluxo(
+      tester,
+      router,
+      repo,
+      extra: [
+        treinosHomeProvider.overrideWith((ref) {
+          cargasDaLista++;
+          return Completer<TreinosHomeBundle>().future;
+        }),
+      ],
+    );
+    final lista = ProviderScope.containerOf(
+      tester.element(find.text('Aluno 360')),
+    ).listen(treinosHomeProvider, (_, _) {});
+    addTearDown(lista.close);
+    expect(cargasDaLista, 1);
 
     await _criarTreino(tester, 'Aluno 360');
     expect(find.text('Treino criado, falta atribuir ao aluno'), findsOneWidget);
     expect(find.textContaining('O treino já foi criado'), findsOneWidget);
+    expect(
+      find.textContaining('Não foi possível atribuir ao aluno.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Erro ao criar treino'), findsNothing);
     expect(find.text('Criar'), findsNothing);
+    expect(cargasDaLista, 2, reason: 'lista recarrega logo após criar');
 
     await tester.enterText(find.byType(TextFormField).first, 'Outro nome');
     await tester.pump();

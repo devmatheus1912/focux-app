@@ -23,26 +23,32 @@ ConversationMessageComposer _composer({
   bool gravando = false,
   VoidCallback? onSendText,
   VoidCallback? onStartRecording,
-}) => ConversationMessageComposer(
-  isDark: false,
-  uploading: false,
-  composerHasText: comTexto,
-  recordingAudio: gravando,
-  textController: TextEditingController(),
-  composerFocus: FocusNode(),
-  replySender: null,
-  replyPreview: null,
-  showReplyBar: false,
-  recordDurationLabel: '0:03',
-  onCloseReply: () {},
-  onCancelRecording: () {},
-  onSendRecording: () {},
-  onAttach: () {},
-  onEmoji: () {},
-  onSendText: onSendText ?? () {},
-  onStartRecording: onStartRecording ?? () {},
-  onStopRecordingSend: () {},
-);
+}) {
+  final texto = TextEditingController();
+  final foco = FocusNode();
+  addTearDown(texto.dispose);
+  addTearDown(foco.dispose);
+  return ConversationMessageComposer(
+    isDark: false,
+    uploading: false,
+    composerHasText: comTexto,
+    recordingAudio: gravando,
+    textController: texto,
+    composerFocus: foco,
+    replySender: null,
+    replyPreview: null,
+    showReplyBar: false,
+    recordDurationLabel: '0:03',
+    onCloseReply: () {},
+    onCancelRecording: () {},
+    onSendRecording: () {},
+    onAttach: () {},
+    onEmoji: () {},
+    onSendText: onSendText ?? () {},
+    onStartRecording: onStartRecording ?? () {},
+    onStopRecordingSend: () {},
+  );
+}
 
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -67,6 +73,24 @@ void main() {
     expect(enviou, 1);
     await tester.tap(find.byIcon(Icons.arrow_upward_rounded));
     expect(enviou, 2);
+  });
+
+  testWidgets('anexar, emoji e barra de gravação têm alvo de 48dp', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(_composer(comTexto: false, gravando: true)));
+
+    final icones = [
+      Icons.add_rounded,
+      Icons.sentiment_satisfied_outlined,
+      Icons.delete_outline_rounded,
+      Icons.arrow_upward_rounded,
+    ];
+    for (final icone in icones) {
+      final alvo = tester.getSize(find.widgetWithIcon(IconButton, icone));
+      expect(alvo.width, greaterThanOrEqualTo(48), reason: '$icone');
+      expect(alvo.height, greaterThanOrEqualTo(48), reason: '$icone');
+    }
   });
 
   testWidgets('botões do compositor anunciam papel e rótulo', (tester) async {

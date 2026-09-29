@@ -73,7 +73,6 @@ void main() {
       'lib/features/chat/widgets/conversation_composer_widgets.dart',
     );
     expect(composer, contains('TokensStrip.rCard'));
-    expect(composer, contains('const Size(44, 44)'));
     expect(composer, contains("hintText: 'Mensagem'"));
     expect(composer, isNot(contains('Icons.add_circle')));
     expect(composer, isNot(contains('Icons.auto_awesome')));

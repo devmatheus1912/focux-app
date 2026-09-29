@@ -669,6 +669,7 @@
       "erro": {"type": "String"}
     }
   },
+  "treinoAtribuirFalhouFallback": "Não foi possível atribuir ao aluno.",
   "treinoTentarAtribuir": "Tentar atribuir de novo",
   "treinoAtribuindo": "Atribuindo…",
   "treinoSairSemAtribuirTitulo": "Sair sem atribuir?",

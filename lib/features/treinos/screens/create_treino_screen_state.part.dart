@@ -64,7 +64,6 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       );
       if (!ok || !mounted) return;
     }
-    if (saida == CreateTreinoSaida.treinoSemAluno) invalidateTreinosCaches(ref);
     safePopOrGo(context, '/treinos');
   }
 
@@ -99,22 +98,24 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     HapticFeedback.mediumImpact();
     try {
       final repo = ref.read(treinoRepositoryProvider);
-      final treinoId =
-          _treinoCriadoId ??
-          (await repo.criar(
-            _nomeCtrl.text.trim(),
-            _descricaoCtrl.text.trim(),
-            _objetivoCtrl.text.trim(),
-            _nivel,
-            offlineQueue: widget.alunoId == null,
-            formNonce: _formNonce,
-          )).id;
+      var treinoId = _treinoCriadoId;
+      if (treinoId == null) {
+        treinoId = (await repo.criar(
+          _nomeCtrl.text.trim(),
+          _descricaoCtrl.text.trim(),
+          _objetivoCtrl.text.trim(),
+          _nivel,
+          offlineQueue: widget.alunoId == null,
+          formNonce: _formNonce,
+        )).id;
+        invalidateTreinosCaches(ref);
+      }
       if (widget.alunoId != null) {
         _treinoCriadoId = treinoId;
         await repo.atribuirAluno(treinoId, widget.alunoId!);
         invalidateTreinosDoAluno(ref, widget.alunoId!);
+        invalidateTreinosCaches(ref);
       }
-      invalidateTreinosCaches(ref);
       ref.invalidate(treinoProvider(treinoId));
       if (mounted) {
         HapticFeedback.heavyImpact();
@@ -133,12 +134,15 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       if (mounted) leaveWithQueuedNotice(context, '/treinos');
     } catch (e) {
       if (mounted) {
-        final erro = friendlyError(e, fallback: 'Erro ao criar treino.');
+        final s = S.of(context);
+        final criado = _treinoCriadoId != null;
+        final erro = friendlyError(
+          e,
+          fallback:
+              criado ? s.treinoAtribuirFalhouFallback : 'Erro ao criar treino.',
+        );
         setState(() {
-          _error =
-              _treinoCriadoId == null
-                  ? erro
-                  : S.of(context).treinoAtribuirFalhouTexto(erro);
+          _error = criado ? s.treinoAtribuirFalhouTexto(erro) : erro;
         });
       }
     } finally {
