@@ -57,10 +57,7 @@
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>Usado para gravar áudios no chat, vídeos de exercícios com áudio e comandos de voz do Copiloto IA.</string>
-		<!-- Reconhecimento de voz para o Copiloto IA -->
-		<key>NSSpeechRecognitionUsageDescription</key>
-		<string>O Copiloto IA usa reconhecimento de voz para que você possa ditar comandos e registrar treinos sem digitar.</string>
+		<string>Usado para gravar áudios no chat e vídeos de exercícios com áudio.</string>
 		<!-- HealthKit -->
 		<key>NSHealthShareUsageDescription</key>
 		<string>Usado para ler dados de saude e acompanhar sua evolucao no Focux.</string>

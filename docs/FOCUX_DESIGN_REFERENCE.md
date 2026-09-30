@@ -1260,7 +1260,7 @@ Fechados depois desta seção: consumidor de cada endpoint (meta 15) e orçament
 
 ### 22.7 Cruzamento app × backend (backend @66ba467, app nesta branch)
 
-Fecha a meta 15. Reprodutível com `python3 tools/audit/xref_endpoints.py`: o inventário recebido do backend está em `tools/audit/backend_endpoints.tsv` e o extrator varre `lib/**/*.dart` procurando `.get|post|put|patch|delete('/...')`, normaliza `$var`, `${expr}` e `{pathVariable}` para `{}`, e compara verbo + path contra o inventário. Regerar o TSV no repo do backend e substituir o arquivo inteiro; o script sai com código 1 se o app passar a chamar endpoint inexistente, então serve de gate.
+Fecha a meta 15. O cruzamento é feito fora deste repositório: o inventário de endpoints do backend não é publicado aqui.
 
 **Números.** 432 endpoints no backend, 342 call sites em código de produto, 330 endpoints consumidos.
 

@@ -34,7 +34,7 @@ Não documente aqui infra, URLs internas, credenciais ou detalhes do backend pri
 
 ## Stack (resumo)
 
-Flutter · Riverpod · GoRouter · Dio · secure storage · STOMP · Firebase (FCM/Crashlytics) · IAP · Health · l10n (pt, en, es)
+Flutter · Riverpod · GoRouter · Dio · secure storage · STOMP · Firebase (FCM/Crashlytics) · IAP · Health · l10n (só PT-BR)
 
 ## Desenvolvimento local
 
