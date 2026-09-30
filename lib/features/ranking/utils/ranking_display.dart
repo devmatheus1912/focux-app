@@ -1,23 +1,12 @@
 const rankingComoCalculamos =
-    'Posição pelo número de alunos ativos. O desconto do pódio vem do servidor.';
+    'Posição pelo número de alunos ativos. Empate: quem cadastrou antes fica na frente.';
 
 const rankingEmptyTitle = 'Ninguém no placar ainda';
 
 const rankingEmptySubtitle =
-    'Posição por alunos ativos. Top 3: 20%, 15% ou 10% no Mercado Pago. Assinatura da loja não muda.';
+    'Posição por alunos ativos. Cadastre e ative alunos para subir no ranking.';
 
-String rankingDescontoLabel(int? percentual) {
-  final value = percentual ?? 0;
-  if (value <= 0) return '';
-  return '$value% na assinatura';
-}
-
-String rankingItemSubtitle(int alunos, int? descontoPercentual) {
-  final base = rankingAlunosLabel(alunos);
-  final desconto = rankingDescontoLabel(descontoPercentual);
-  if (desconto.isEmpty) return base;
-  return '$base · $desconto';
-}
+String rankingItemSubtitle(int alunos) => rankingAlunosLabel(alunos);
 
 String rankingCountLabel(int? total) {
   final count = total ?? 0;

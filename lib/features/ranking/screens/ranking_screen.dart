@@ -174,7 +174,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                   ),
                   FxHelpTip(
                     'Como ganhar',
-                    'Mais alunos ativos sobem a posição. O desconto do pódio entra na assinatura Focux.',
+                    'Mais alunos ativos sobem a posição.',
                   ),
                 ],
               ),
@@ -301,7 +301,6 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                           subtitle: Text(
                             rankingItemSubtitle(
                               item.totalAlunosAtivos,
-                              item.descontoPercentual,
                             ),
                           ),
                           trailing: Text(
@@ -346,7 +345,6 @@ class _RankingFocusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, isDark);
-    final desconto = rankingDescontoLabel(first.descontoPercentual);
     return FxStripCard(
       emphasize: true,
       semanticsLabel:
@@ -372,9 +370,7 @@ class _RankingFocusCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            desconto.isEmpty
-                ? rankingAlunosLabel(first.totalAlunosAtivos)
-                : '$desconto · ${rankingAlunosLabel(first.totalAlunosAtivos)}',
+            rankingAlunosLabel(first.totalAlunosAtivos),
             style: FocuxHubTypography.body(color: chrome.mute),
           ),
           const SizedBox(height: TokensStrip.s3),

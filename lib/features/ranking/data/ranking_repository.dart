@@ -9,7 +9,6 @@ class RankingItem {
   final String? logoUrl;
   final int totalAlunosAtivos;
   final int posicao;
-  final int? descontoPercentual;
 
   RankingItem({
     required this.personalId,
@@ -17,7 +16,6 @@ class RankingItem {
     this.logoUrl,
     required this.totalAlunosAtivos,
     required this.posicao,
-    this.descontoPercentual,
   });
 
   factory RankingItem.fromJson(Map<String, dynamic> j) => RankingItem(
@@ -26,7 +24,6 @@ class RankingItem {
     logoUrl: j['logoUrl'] as String?,
     totalAlunosAtivos: (j['totalAlunosAtivos'] as num?)?.toInt() ?? 0,
     posicao: (j['posicao'] as num?)?.toInt() ?? 0,
-    descontoPercentual: (j['descontoPercentual'] as num?)?.toInt(),
   );
 }
 

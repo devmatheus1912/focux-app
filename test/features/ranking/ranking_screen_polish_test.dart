@@ -30,7 +30,8 @@ void main() {
     expect(screen, contains('emphasize: true'));
     expect(screen, contains('Crescer base'));
     expect(screen, contains('Assinatura'));
-    expect(screen, contains('rankingDescontoLabel'));
+    expect(screen, contains('rankingAlunosLabel'));
+    expect(screen, isNot(contains('rankingDescontoLabel')));
     expect(screen, contains('FxInputDeco.build'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxHubFreshness.joinCount'));
