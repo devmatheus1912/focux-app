@@ -53,4 +53,10 @@ jobs:
       - name: Unit tests
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         timeout-minutes: 35
-        run: flutter test --concurrency=2
+        run: flutter test --concurrency=2 --exclude-tags golden
+
+      # Ubuntu rasteriza fonte diferente do Windows: pixel vira smoke (`expectFocuxGolden`).
+      - name: Golden tests
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        timeout-minutes: 15
+        run: flutter test --tags golden --concurrency=1

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -31,6 +32,8 @@ import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
 import '../widgets/retencao_acoes_sheet.dart';
 import '../widgets/retencao_catalog_sheet.dart';
+
+part 'churn_dashboard_screen_cards.part.dart';
 
 final retencaoRepositoryProvider = Provider(
   (ref) => RetencaoRepository(ref.read(apiClientProvider)),
@@ -136,7 +139,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   Future<void> _abrirMaisHubs() async {
     final chosen = await showFxInsetPickerSheet<RetencaoHubLinkId>(
       context,
-      title: 'Hubs relacionados',
+      title: retencaoHubsRelacionados,
       headerIcon: Icons.apps_outlined,
       selected: null,
       items: [
@@ -160,14 +163,14 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     final freshnessLabel = FxHubFreshness.fromFetchedAt(home?.fetchedAt);
 
     return fxScreenA11yScope(
-      label: 'Saúde da base',
+      label: FocuxMicrocopy.saudeDaBase,
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Saúde da base',
-          subtitle: freshnessLabel ?? 'Quem precisa de você · o que fazer agora',
+          title: FocuxMicrocopy.saudeDaBase,
+          subtitle: freshnessLabel ?? retencaoDefaultSubtitle,
           onBack: () {
             FxKeyboardDismissScope.dismiss();
             safePopOrGo(context, '/dashboard/personal');
@@ -175,33 +178,33 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
           actions: [
             ShellHeaderIconButton(
               icon: 'route',
-              tooltip: 'Mais hubs',
+              tooltip: retencaoMaisHubs,
               onTap: _abrirMaisHubs,
             ),
             const SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
-              tooltip: 'Como usar a retenção',
+              tooltip: retencaoComoUsar,
               onTap: () {
                 AnalyticsService.instance.track(
                   ProductEvents.retencaoHubHelpOpened,
                 );
                 showFxHelpSheet(
                     context,
-                    title: 'Saúde da base',
-                    subtitle: 'Quem está em risco e o que fazer agora.',
+                    title: FocuxMicrocopy.saudeDaBase,
+                    subtitle: retencaoHelpSubtitle,
                     tips: const [
-                      FxHelpTip('Como calculamos', retencaoComoCalculamos),
+                      FxHelpTip(retencaoComoCalculamosTitle, retencaoComoCalculamos),
                       FxHelpTip(
-                        'Risco de churn',
-                        'Vem só do score de check-ins acima — não é o risco operacional dos alertas nem a inadimplência. O card do topo é quem precisa de contato hoje.',
+                        retencaoRiscoChurnTitle,
+                        retencaoHelpRiscoBody,
                       ),
                       FxHelpTip(
-                        'Lista',
-                        'Os 3 primeiros já vêm do servidor. Ver todos abre a base paginada.',
+                        retencaoHelpListaTitle,
+                        retencaoHelpListaBody,
                       ),
                       FxHelpTip(
-                        'Satélites',
-                        'Histórico win-back guarda os pushes. Cobrança auto lista falhas de pagamento.',
+                        retencaoHelpSatelitesTitle,
+                        retencaoHelpSatelitesBody,
                       ),
                     ],
                   );
@@ -238,7 +241,9 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 title: retencaoEmptyTitle,
                                 subtitle: retencaoEmptySubtitle,
                                 action: FxEmptyAction(
-                                  label: 'Ver alunos',
+                                  label: retencaoFocusActionLabel(
+                                    RetencaoFocusActionId.verAlunos,
+                                  ),
                                   onTap: () {
                                     AnalyticsService.instance.track(
                                       ProductEvents.alunosViewed,
@@ -279,10 +284,10 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 DashboardSectionHeader(
-                                  title: 'Quem olhar agora',
+                                  title: retencaoQuemOlhar,
                                   actionLabel:
                                       home.alto + home.medio + home.saudavel > 3
-                                          ? 'Ver todos'
+                                          ? retencaoVerTodos
                                           : null,
                                   onAction:
                                       home.alto + home.medio + home.saudavel > 3
@@ -303,13 +308,13 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                   runSpacing: TokensStrip.s2,
                                   children: [
                                     FxToggleChip(
-                                      label: 'Todos',
+                                      label: retencaoFiltroTodos,
                                       selected: _filtro.isEmpty,
                                       isDark: isDark,
                                       onTap: () => setState(() => _filtro = ''),
                                     ),
                                     FxToggleChip(
-                                      label: 'Risco de cancelar',
+                                      label: retencaoRiscoLabel('ALTO'),
                                       selected: _filtro == retencaoFiltroAlto,
                                       isDark: isDark,
                                       onTap:
@@ -326,9 +331,9 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                 ).isEmpty)
                                   const FxEmptyState(
                                     icon: 'activity',
-                                    title: 'Ninguém neste recorte',
+                                    title: retencaoNinguemRecorte,
                                     subtitle:
-                                        'Os scores altos desta leitura aparecem aqui.',
+                                        retencaoNinguemRecorteSubtitle,
                                   )
                                 else
                                   for (final score in retencaoItemsForFiltro(
@@ -348,262 +353,6 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                 ),
       ),
     ),
-    );
-  }
-}
-
-class _RetencaoMetricStrip extends StatelessWidget {
-  const _RetencaoMetricStrip({
-    required this.home,
-    required this.isDark,
-    required this.primary,
-    required this.onFiltrarAlto,
-  });
-
-  final RetencaoHome home;
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onFiltrarAlto;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: InkWell(
-            onTap: home.alto > 0 ? onFiltrarAlto : null,
-            borderRadius: BorderRadius.circular(TokensStrip.rCard),
-            child: OperationalMetricTile(
-              label: 'Alto',
-              value: '${home.alto}',
-              hint:
-                  retencaoAltoVariacaoHint(
-                    home.alto,
-                    home.altoSemanaAnterior,
-                  ) ??
-                  '',
-              color: EagleTokens.bad,
-              isDark: isDark,
-              dense: true,
-              emphasis:
-                  home.alto > 0
-                      ? OperationalMetricEmphasis.alert
-                      : OperationalMetricEmphasis.muted,
-              semanticsLabel: retencaoMetricAltoLabel(home.alto),
-            ),
-          ),
-        ),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: OperationalMetricTile(
-            label: 'Médio',
-            value: '${home.medio}',
-            color: EagleTokens.warn,
-            isDark: isDark,
-            dense: true,
-            emphasis: OperationalMetricEmphasis.muted,
-            semanticsLabel: retencaoMetricMedioLabel(home.medio),
-          ),
-        ),
-        const SizedBox(width: TokensStrip.s2),
-        Expanded(
-          child: OperationalMetricTile(
-            label: 'Saudável',
-            value: '${home.saudavel}',
-            color: primary,
-            isDark: isDark,
-            dense: true,
-            emphasis: OperationalMetricEmphasis.muted,
-            semanticsLabel: retencaoMetricSaudavelLabel(home.saudavel),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RetencaoFocusCard extends StatelessWidget {
-  const _RetencaoFocusCard({
-    required this.home,
-    required this.isDark,
-    required this.onAluno,
-    required this.onChat,
-    required this.onCobrar,
-  });
-
-  final RetencaoHome home;
-  final bool isDark;
-  final void Function(RetencaoAlunoScore score) onAluno;
-  final void Function(RetencaoAlunoScore score) onChat;
-  final void Function(RetencaoAlunoScore score) onCobrar;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.forBrightness(context, isDark);
-    final primary = Theme.of(context).colorScheme.primary;
-    final alto = home.alto;
-    final firstAlto = firstAltoRetencao(home.top3);
-    final split = retencaoFocusActions(hasAlto: firstAlto != null);
-
-    VoidCallback run(RetencaoFocusActionId id) => switch (id) {
-      RetencaoFocusActionId.chat => () => onChat(firstAlto!),
-      RetencaoFocusActionId.cobrar => () => onCobrar(firstAlto!),
-      RetencaoFocusActionId.aluno360 => () => onAluno(firstAlto!),
-      RetencaoFocusActionId.verAlunos => () {
-        AnalyticsService.instance.track(ProductEvents.alunosViewed);
-        goPersonalShellTab(context, '/alunos');
-      },
-    };
-
-    Future<void> openMais() async {
-      final chosen = await showFxInsetPickerSheet<RetencaoFocusActionId>(
-        context,
-        title: 'Mais ações',
-        headerIcon: Icons.more_horiz_rounded,
-        selected: null,
-        items: [
-          for (final id in split.secondary)
-            FxInsetPickerSheetItem(
-              value: id,
-              label: retencaoFocusActionLabel(id),
-            ),
-        ],
-      );
-      if (chosen == null) return;
-      HapticFeedback.selectionClick();
-      run(chosen)();
-    }
-
-    final focusTitle =
-        firstAlto != null
-            ? firstAlto.alunoNome
-            : (alto == 0
-                ? 'Ninguém em alerta agora'
-                : alto == 1
-                ? '1 aluno em risco alto'
-                : '$alto alunos em risco alto');
-
-    final focusSubtitle =
-        firstAlto != null
-            ? retencaoPorque(firstAlto)
-            : retencaoContagensSubtitulo(
-              alto: home.alto,
-              medio: home.medio,
-              saudavel: home.saudavel,
-              topNomeados: retencaoItemsForFiltro(home.top3, null).length,
-            );
-
-    return FxStripCard(
-      emphasize: true,
-      padding: const EdgeInsets.all(TokensStrip.s3),
-      semanticsLabel:
-          alto == 0
-              ? 'Nenhum aluno em risco alto'
-              : '$alto em risco alto',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            firstAlto != null ? 'Próximo contato' : 'Risco de churn',
-            style: FocuxHubTypography.chip(chrome.mute),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            focusTitle,
-            style: FocuxHubTypography.sectionTitle(
-              context,
-              color: chrome.ink,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            focusSubtitle,
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
-            children: [
-              FxActionChip(
-                label: retencaoFocusActionLabel(split.primary),
-                accent: primary,
-                isDark: isDark,
-                onPressed: run(split.primary),
-                solid: true,
-              ),
-              if (split.secondary.isNotEmpty)
-                FxActionChip(
-                  label: 'Mais ações',
-                  accent: chrome.mute,
-                  isDark: isDark,
-                  onPressed: openMais,
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _RetencaoTile extends StatelessWidget {
-  const _RetencaoTile({
-    required this.score,
-    required this.isDark,
-    required this.onChat,
-    required this.onAluno,
-    required this.onMais,
-  });
-
-  final RetencaoAlunoScore score;
-  final bool isDark;
-  final VoidCallback onChat;
-  final VoidCallback onAluno;
-  final VoidCallback onMais;
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final mute = ShellChrome.of(context).mute;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-      child: FxSatelliteListTile(
-        title: score.alunoNome,
-        subtitle: Text(retencaoPorque(score)),
-        // Risco = copy no subtitle; sem glow full-bleed no card.
-        accent: null,
-        onTap: onAluno,
-        onLongPress: onMais,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: TokensStrip.s7,
-              height: TokensStrip.s7,
-              child: IconButton(
-                tooltip: retencaoFocusActionLabel(RetencaoFocusActionId.chat),
-                onPressed: onChat,
-                icon: Icon(Icons.chat_bubble_outline_rounded, color: primary),
-              ),
-            ),
-            SizedBox(
-              width: TokensStrip.s7,
-              height: TokensStrip.s7,
-              child: IconButton(
-                tooltip: 'Mais ações',
-                onPressed: onMais,
-                icon: Icon(Icons.more_horiz_rounded, color: mute),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

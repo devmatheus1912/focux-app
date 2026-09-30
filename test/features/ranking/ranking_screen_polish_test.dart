@@ -11,9 +11,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('constrainWidth: false'));
     expect(screen, contains('FxContentWidthLimiter'));
-    expect(screen, contains('Como calculamos'));
+    expect(screen, contains('rankingComoCalculamosTitle'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('Carregar mais'));
+    expect(screen, contains('rankingCarregarMais'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('FxEmptyState'));
@@ -24,12 +24,12 @@ void main() {
     expect(screen, isNot(contains('FilledButton')));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, isNot(contains('Pódio do Mês')));
-    expect(screen, contains('Buscar personal'));
+    expect(screen, contains('rankingBuscarHint'));
     expect(screen, contains('onTapOutside'));
     expect(screen, contains('FxStripCard'));
     expect(screen, contains('emphasize: true'));
-    expect(screen, contains('Crescer base'));
-    expect(screen, contains('Assinatura'));
+    expect(screen, contains('rankingCrescerBase'));
+    expect(screen, contains('rankingAssinatura'));
     expect(screen, contains('rankingAlunosLabel'));
     expect(screen, isNot(contains('rankingDescontoLabel')));
     expect(screen, contains('FxInputDeco.build'));

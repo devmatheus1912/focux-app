@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -115,9 +118,9 @@ void main() {
     expect(find.text('Gordura'), findsNothing);
     expect(tester.takeException(), isNull);
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360DetailFerramentasTab),
-      matchesGoldenFile('goldens/aluno360_ferramentas_tab_390.png'),
+      'goldens/aluno360_ferramentas_tab_390.png',
     );
   });
 
@@ -127,9 +130,9 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360DetailFerramentasTab),
-      matchesGoldenFile('goldens/aluno360_ferramentas_tab_390_dark.png'),
+      'goldens/aluno360_ferramentas_tab_390_dark.png',
     );
   });
 
@@ -141,9 +144,9 @@ void main() {
     expect(find.text('IA Progresso'), findsNothing);
     expect(tester.takeException(), isNull);
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360DetailFerramentasTab),
-      matchesGoldenFile('goldens/aluno360_ferramentas_tab_390_scale13.png'),
+      'goldens/aluno360_ferramentas_tab_390_scale13.png',
     );
   });
 
@@ -159,9 +162,9 @@ void main() {
     expect(find.text('Medidas'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360DetailFerramentasTab),
-      matchesGoldenFile('goldens/aluno360_ferramentas_tab_720.png'),
+      'goldens/aluno360_ferramentas_tab_720.png',
     );
   });
 }

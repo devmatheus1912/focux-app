@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/treinos/data/workout_builder_preset.dart';
 
@@ -47,16 +45,15 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/treinos/screens/add_exercicio_to_treino_screen.dart',
     );
-    final prescription =
-        File(
-          'lib/features/treinos/widgets/prescription_editor_sheet.dart',
-        ).readAsStringSync();
+    final prescription = readScreenSourceBundle(
+      'lib/features/treinos/widgets/prescription_editor_sheet.dart',
+    );
 
     expect(repository, contains('cargaKg'));
     expect(repository, contains('observacoes'));
     expect(prescription, contains('PrescriptionEditorSheet'));
-    expect(prescription, contains('Carga (kg)'));
-    expect(prescription, contains('Adicionar observações'));
+    expect(prescription, contains('prescriptionCarga'));
+    expect(prescription, contains('prescriptionAddNotas'));
     expect(screen, contains('showPrescriptionEditorSheet'));
   });
 

@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -91,9 +94,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360TimelineCard),
-      matchesGoldenFile('goldens/aluno360_timeline_card_390.png'),
+      'goldens/aluno360_timeline_card_390.png',
     );
   });
 
@@ -110,9 +113,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360TimelineCard),
-      matchesGoldenFile('goldens/aluno360_timeline_card_390_dark.png'),
+      'goldens/aluno360_timeline_card_390_dark.png',
     );
   });
 
@@ -141,9 +144,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360EvolucaoInteligenteCard),
-      matchesGoldenFile('goldens/aluno360_evolucao_inteligente_390.png'),
+      'goldens/aluno360_evolucao_inteligente_390.png',
     );
   });
 
@@ -172,9 +175,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360EvolucaoInteligenteCard),
-      matchesGoldenFile('goldens/aluno360_evolucao_inteligente_390_dark.png'),
+      'goldens/aluno360_evolucao_inteligente_390_dark.png',
     );
   });
 
@@ -217,9 +220,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360EvolucaoTab),
-      matchesGoldenFile('goldens/aluno360_evolucao_tab_600.png'),
+      'goldens/aluno360_evolucao_tab_600.png',
     );
   });
 
@@ -237,9 +240,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360WeightActivityCard),
-      matchesGoldenFile('goldens/aluno360_weight_activity_390.png'),
+      'goldens/aluno360_weight_activity_390.png',
     );
   });
 
@@ -257,9 +260,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360WeightActivityCard),
-      matchesGoldenFile('goldens/aluno360_weight_activity_390_dark.png'),
+      'goldens/aluno360_weight_activity_390_dark.png',
     );
   });
 }

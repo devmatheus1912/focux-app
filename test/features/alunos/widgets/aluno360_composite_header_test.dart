@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,9 +80,9 @@ void main() {
     expect(gap, lessThanOrEqualTo(1.0));
     expect(Aluno360Layout.tabContentGap, TokensStrip.s4);
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(CustomScrollView),
-      matchesGoldenFile('goldens/aluno360_composite_header_390.png'),
+      'goldens/aluno360_composite_header_390.png',
     );
   });
 }

@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,27 +76,27 @@ void main() {
   testWidgets('aluno list card golden at 390px', (tester) async {
     await tester.pumpWidget(cardHarness(isDark: false));
     await tester.pumpAndSettle();
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(AlunoListCard),
-      matchesGoldenFile('goldens/aluno_list_card_390.png'),
+      'goldens/aluno_list_card_390.png',
     );
   });
 
   testWidgets('aluno list card golden dark at 390px', (tester) async {
     await tester.pumpWidget(cardHarness(isDark: true));
     await tester.pumpAndSettle();
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(AlunoListCard),
-      matchesGoldenFile('goldens/aluno_list_card_390_dark.png'),
+      'goldens/aluno_list_card_390_dark.png',
     );
   });
 
   testWidgets('aluno list card compact golden dark at 390px', (tester) async {
     await tester.pumpWidget(cardHarness(isDark: true, compact: true));
     await tester.pumpAndSettle();
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(AlunoListCard),
-      matchesGoldenFile('goldens/aluno_list_card_compact_390_dark.png'),
+      'goldens/aluno_list_card_compact_390_dark.png',
     );
   });
 

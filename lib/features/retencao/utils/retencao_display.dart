@@ -140,3 +140,46 @@ String retencaoHubLinkRoute(RetencaoHubLinkId id) => switch (id) {
   RetencaoHubLinkId.winback => '/winback',
   RetencaoHubLinkId.dunning => '/dunning',
 };
+
+const retencaoHubsRelacionados = 'Hubs relacionados';
+const retencaoMaisHubs = 'Mais hubs';
+const retencaoComoUsar = 'Como usar a retenção';
+const retencaoHelpSubtitle = 'Quem está em risco e o que fazer agora.';
+const retencaoDefaultSubtitle =
+    'Quem precisa de você · o que fazer agora';
+const retencaoComoCalculamosTitle = 'Como calculamos';
+const retencaoRiscoChurnTitle = 'Risco de churn';
+const retencaoHelpRiscoBody =
+    'Vem só do score de check-ins acima — não é o risco operacional dos '
+    'alertas nem a inadimplência. O card do topo é quem precisa de contato hoje.';
+const retencaoHelpListaTitle = 'Lista';
+const retencaoHelpListaBody =
+    'Os 3 primeiros já vêm do servidor. Ver todos abre a base paginada.';
+const retencaoHelpSatelitesTitle = 'Satélites';
+const retencaoHelpSatelitesBody =
+    'Histórico win-back guarda os pushes. Cobrança auto lista falhas de pagamento.';
+const retencaoQuemOlhar = 'Quem olhar agora';
+const retencaoVerTodos = 'Ver todos';
+const retencaoFiltroTodos = 'Todos';
+const retencaoNinguemRecorte = 'Ninguém neste recorte';
+const retencaoNinguemRecorteSubtitle =
+    'Os scores altos desta leitura aparecem aqui.';
+const retencaoMetricAlto = 'Alto';
+const retencaoMetricMedio = 'Médio';
+const retencaoMetricSaudavel = 'Saudável';
+const retencaoMaisAcoes = 'Mais ações';
+const retencaoNinguemAlerta = 'Ninguém em alerta agora';
+const retencaoNenhumRiscoAlto = 'Nenhum aluno em risco alto';
+const retencaoProximoContato = 'Próximo contato';
+
+String retencaoFocusEmptyTitle(int alto) {
+  if (alto == 0) return retencaoNinguemAlerta;
+  if (alto == 1) return '1 aluno em risco alto';
+  return '$alto alunos em risco alto';
+}
+
+String retencaoFocusSemantics(int alto) {
+  if (alto == 0) return retencaoNenhumRiscoAlto;
+  return '$alto em risco alto';
+}
+

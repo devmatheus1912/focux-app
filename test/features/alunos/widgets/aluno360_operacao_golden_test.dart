@@ -1,3 +1,6 @@
+@Tags(['golden'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -87,9 +90,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360OperationalStatusSection),
-      matchesGoldenFile('goldens/aluno360_operational_status_390.png'),
+      'goldens/aluno360_operational_status_390.png',
     );
   });
 
@@ -108,9 +111,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360OperationalStatusSection),
-      matchesGoldenFile('goldens/aluno360_operational_status_390_dark.png'),
+      'goldens/aluno360_operational_status_390_dark.png',
     );
   });
 
@@ -138,9 +141,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360CopilotPrescription),
-      matchesGoldenFile('goldens/aluno360_copilot_prescription_390.png'),
+      'goldens/aluno360_copilot_prescription_390.png',
     );
   });
 
@@ -168,9 +171,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360CopilotPrescription),
-      matchesGoldenFile('goldens/aluno360_copilot_prescription_390_dark.png'),
+      'goldens/aluno360_copilot_prescription_390_dark.png',
     );
   });
 
@@ -199,9 +202,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360OperationalStatusSection),
-      matchesGoldenFile('goldens/aluno360_operational_status_empty_390.png'),
+      'goldens/aluno360_operational_status_empty_390.png',
     );
   });
 
@@ -240,9 +243,9 @@ void main() {
     await tester.tap(find.text('Abrir'));
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.text('Aplicar ajuste de carga (−15%)'),
-      matchesGoldenFile('goldens/aluno360_executar_confirm_390.png'),
+      'goldens/aluno360_executar_confirm_390.png',
     );
   });
 
@@ -268,9 +271,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(Aluno360StudentQuickActions),
-      matchesGoldenFile('goldens/aluno360_quick_actions_390.png'),
+      'goldens/aluno360_quick_actions_390.png',
     );
   });
 
@@ -295,9 +298,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byType(AlunoOperacaoAdherenceLegend),
-      matchesGoldenFile('goldens/aluno360_adherence_legend_390.png'),
+      'goldens/aluno360_adherence_legend_390.png',
     );
   });
 
@@ -359,9 +362,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await expectLater(
+    await expectFocuxGolden(
       find.byKey(const ValueKey('aluno360_operacao_sticky_cta')),
-      matchesGoldenFile('goldens/aluno360_sticky_cta_contact_task_390.png'),
+      'goldens/aluno360_sticky_cta_contact_task_390.png',
     );
   });
 }

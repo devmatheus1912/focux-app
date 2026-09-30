@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 String _alunoDetailLibrarySource() {
   const dir = 'lib/features/alunos/screens';
   const mainFile = '$dir/aluno_detail_screen.dart';
@@ -84,6 +86,9 @@ String _alunoDetailLibrarySource() {
   const detailLoadingSkeletonFile =
       'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart';
   const alunoRepositoryFile = 'lib/features/alunos/data/aluno_repository.dart';
+  const alunoCoreModelsFile = 'lib/features/alunos/data/aluno_core_models.dart';
+  const aluno360ModelsFile = 'lib/features/alunos/data/aluno_360_models.dart';
+  const alunoHomeModelsFile = 'lib/features/alunos/data/aluno_home_models.dart';
   final main = File(mainFile).readAsStringSync();
   final statePart = File(statePartFile).readAsStringSync();
   final providers = File(providersFile).readAsStringSync();
@@ -91,7 +96,7 @@ String _alunoDetailLibrarySource() {
   final heroRiskStyle = File(heroRiskStyleFile).readAsStringSync();
   final headerWidget = File(headerWidgetFile).readAsStringSync();
   final operacaoTab = File(operacaoTabFile).readAsStringSync();
-  final operacaoLogic = File(operacaoLogicFile).readAsStringSync();
+  final operacaoLogic = readScreenSourceBundle(operacaoLogicFile);
   final copilotLogic = File(copilotLogicFile).readAsStringSync();
   final copilotExecutarLogic =
       File(copilotExecutarLogicFile).readAsStringSync();
@@ -132,7 +137,10 @@ String _alunoDetailLibrarySource() {
   final detailLoadingSkeleton =
       File(detailLoadingSkeletonFile).readAsStringSync();
   final alunoRepository = File(alunoRepositoryFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository';
+  final alunoCoreModels = File(alunoCoreModelsFile).readAsStringSync();
+  final aluno360Models = File(aluno360ModelsFile).readAsStringSync();
+  final alunoHomeModels = File(alunoHomeModelsFile).readAsStringSync();
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
 }
 
 void main() {
@@ -271,19 +279,25 @@ void main() {
             .readAsStringSync();
     final repo =
         File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync();
+    final repoLib = [
+      repo,
+      File('lib/features/alunos/data/aluno_core_models.dart').readAsStringSync(),
+      File('lib/features/alunos/data/aluno_360_models.dart').readAsStringSync(),
+      File('lib/features/alunos/data/aluno_home_models.dart').readAsStringSync(),
+    ].join('\n');
     final sticky =
         File('lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart')
             .readAsStringSync();
 
-    expect(repo, contains('buscarAluno360Operacao'));
-    expect(repo, contains('/360/operacao'));
-    expect(repo, contains('buscarAluno360Evolucao'));
-    expect(repo, contains('buscarAluno360Ferramentas'));
-    expect(repo, contains('evolucaoHome'));
-    expect(repo, contains('composicaoResumo'));
-    expect(repo, contains('anamneseResumo'));
-    expect(repo, contains('Aluno360AnamneseResumo'));
-    expect(repo, contains('Aluno360ComposicaoResumo'));
+    expect(repoLib, contains('buscarAluno360Operacao'));
+    expect(repoLib, contains('/360/operacao'));
+    expect(repoLib, contains('buscarAluno360Evolucao'));
+    expect(repoLib, contains('buscarAluno360Ferramentas'));
+    expect(repoLib, contains('evolucaoHome'));
+    expect(repoLib, contains('composicaoResumo'));
+    expect(repoLib, contains('anamneseResumo'));
+    expect(repoLib, contains('Aluno360AnamneseResumo'));
+    expect(repoLib, contains('Aluno360ComposicaoResumo'));
     expect(
       File('lib/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart')
           .readAsStringSync(),
@@ -748,7 +762,10 @@ void main() {
       contains('class Aluno360TimelineFullSheet'),
     );
     expect(
-      File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
+      [
+        File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
+        File('lib/features/alunos/data/aluno_core_models.dart').readAsStringSync(),
+      ].join('\n'),
       allOf(
         contains('buscarTimeline360Page'),
         contains('timeline-360/page'),

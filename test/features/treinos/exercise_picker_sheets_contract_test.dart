@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../support/screen_source_bundle.dart';
+
 void main() {
   test('picker sheets extraídos para widgets reutilizáveis', () {
     final library = File(
@@ -10,9 +12,9 @@ void main() {
     final filters = File(
       'lib/features/treinos/widgets/exercise_picker_filter_sheet.dart',
     ).readAsStringSync();
-    final prescription = File(
+    final prescription = readScreenSourceBundle(
       'lib/features/treinos/widgets/prescription_editor_sheet.dart',
-    ).readAsStringSync();
+    );
 
     expect(library, contains('class ExerciseLibraryPanel'));
     expect(library, contains('FxSettingsGroup'));
@@ -25,8 +27,8 @@ void main() {
     expect(prescription, contains('showFxInsetPickerSheet'));
     expect(prescription, contains('FxSettingsTile'));
     expect(prescription, contains('FxSettingsGroup'));
-    expect(prescription, contains("header: 'Prescrição'"));
-    expect(prescription, contains("header: 'Mais detalhes'"));
+    expect(prescription, contains('prescriptionGroupHeader'));
+    expect(prescription, contains('prescriptionMaisDetalhes'));
     expect(prescription, contains('_openRepsSheet'));
     expect(prescription, isNot(contains('AlunoSegmentedChoice')));
     expect(prescription, isNot(contains('_PrescriptionRepsRow')));

@@ -69,10 +69,9 @@ void main() {
       ).readAsStringSync(),
       contains('TreinoHomeSheetSurface'),
     );
-    final editor =
-        File(
-          'lib/features/treinos/widgets/prescription_editor_sheet.dart',
-        ).readAsStringSync();
+    final editor = readScreenSourceBundle(
+      'lib/features/treinos/widgets/prescription_editor_sheet.dart',
+    );
     expect(
       editor,
       allOf(
@@ -80,8 +79,8 @@ void main() {
         contains('stickyFooter'),
         contains('contextSubtitle'),
         contains('showFxInsetPickerSheet'),
-        contains("header: 'Prescrição'"),
-        contains("header: 'Mais detalhes'"),
+        contains('prescriptionGroupHeader'),
+        contains('prescriptionMaisDetalhes'),
         isNot(contains('AlunoSegmentedChoice')),
       ),
     );
