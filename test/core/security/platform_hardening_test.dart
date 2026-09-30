@@ -74,11 +74,6 @@ void main() {
             );
           }
         }
-
-        if (path.endsWith('FOCUX_DESIGN_REFERENCE.md')) {
-          expect(content, contains('FocuxSecurity'));
-          expect(content, contains('Hardening mobile e web'));
-        }
       });
     }
   });

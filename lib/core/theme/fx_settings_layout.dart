@@ -8,8 +8,6 @@ import 'tokens_strip.dart';
 /// Identidade, tipografia e cor: os mesmos papéis do Planos/Home
 /// (`FocuxHubTypography`). **Não** copia o tema preto/azul do ChatGPT.
 ///
-/// Estrutura padrão de S2: `docs/FOCUX_DESIGN_REFERENCE.md`.
-///
 /// ## O que é ChatGPT/iOS (estrutura)
 /// Página inset, grupo arredondado, linha com ícone outline + chevron,
 /// divisor depois do ícone, Sair em grupo separado, picker com check.
