@@ -8,11 +8,39 @@ String alunosListCountLabel(int total) {
 
 enum AlunoOrdenacao { prioridade, nome, semFoto }
 
-/// Aba Alunos já filtrada pelo termo (lido de volta em `/alunos?q=`).
+/// Aba Alunos filtrada pelo termo. O nome **não** vai na URL (histórico web / LGPD).
 String alunosBuscaLocation(String termo) {
-  final q = termo.trim();
-  if (q.isEmpty) return '/alunos';
-  return Uri(path: '/alunos', queryParameters: {'q': q}).toString();
+  AlunosPendingSearch.offer(termo.trim());
+  return '/alunos';
+}
+
+/// Termo vindo da Hoje / sheet — uma leitura. Aviso se a aba já está em `/alunos`.
+class AlunosPendingSearch {
+  static String? _term;
+  static final List<void Function()> _listeners = [];
+
+  static void addListener(void Function() listener) {
+    _listeners.add(listener);
+  }
+
+  static void removeListener(void Function() listener) {
+    _listeners.remove(listener);
+  }
+
+  static void offer(String termo) {
+    final t = termo.trim();
+    _term = t.isEmpty ? null : t;
+    if (_term == null) return;
+    for (final l in List<void Function()>.of(_listeners)) {
+      l();
+    }
+  }
+
+  static String? consume() {
+    final v = _term;
+    _term = null;
+    return v;
+  }
 }
 
 /// Mesma location sem o `q`; o filtro e demais parâmetros ficam.

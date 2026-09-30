@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../api/api_client.dart';
+import '../api/offline_sync_service.dart';
 import '../router/app_router.dart';
 import '../storage/secure_storage.dart';
 import 'fcm_tap_route.dart';
@@ -137,7 +138,10 @@ class FcmService {
             '/api/fcm/token',
             data: {'token': token},
             options: Options(
-              extra: {'fxNoInvalidate': true, 'fxNoOfflineQueue': true},
+              extra: {
+                'fxNoInvalidate': true,
+                OfflineSyncService.noQueueExtra: true,
+              },
             ),
           );
         }

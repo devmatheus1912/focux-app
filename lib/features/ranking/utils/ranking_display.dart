@@ -4,7 +4,7 @@ const rankingComoCalculamos =
 const rankingEmptyTitle = 'Ninguém no placar ainda';
 
 const rankingEmptySubtitle =
-    'A posição vem de alunos ativos. Top 3 ganham 20%, 15% ou 10% na assinatura Focux.';
+    'Posição por alunos ativos. Top 3: 20%, 15% ou 10% no Mercado Pago. Assinatura da loja não muda.';
 
 String rankingDescontoLabel(int? percentual) {
   final value = percentual ?? 0;

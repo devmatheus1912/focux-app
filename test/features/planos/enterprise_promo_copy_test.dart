@@ -43,6 +43,7 @@ void main() {
     ).readAsStringSync();
     expect(screen, isNot(contains('evitar cobrança')));
     expect(screen, isNot(contains('199,90')));
+    expect(screen, contains('oferta introdutória'));
     expect(screen, isNot(contains('R\\\$')));
   });
 }

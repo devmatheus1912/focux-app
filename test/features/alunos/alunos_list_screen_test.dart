@@ -52,6 +52,7 @@ void main() {
   );
 
   setUp(() {
+    AlunosPendingSearch.consume();
     SharedPreferences.setMockInitialValues({});
     AlunosHomeClientCache.clear();
     GoogleFonts.config.allowRuntimeFetching = false;
@@ -96,7 +97,7 @@ void main() {
     expect(find.byTooltip(AlunosMicrocopy.helpA11y), findsOneWidget);
   });
 
-  group('busca vinda da Hoje (?q=)', () {
+  group('busca vinda da Hoje (sem nome na URL)', () {
     late GoRouter router;
 
     Future<void> pumpAlunos(WidgetTester tester, String location) async {

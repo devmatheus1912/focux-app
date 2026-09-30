@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../alunos/utils/risco_labels.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../onboarding/screens/setup_onboarding_widget.dart';
@@ -179,17 +180,17 @@ List<Widget> buildDashboardHomePrimarySlivers({
         child: Padding(
           padding: DashboardLayout.foldCard,
           child: CommandActionTile(
-            item: const CommandActionItem(
+            item: CommandActionItem(
               icon: 'alert-triangle',
-              title: 'Saúde da base',
-              subtitle: 'Alunos em risco pedem contato',
-              route: '/retencao',
+              title: riscoOperacionalLabel,
+              subtitle: 'Mesma lista do pulso: alerta operacional, não churn',
+              route: '/alunos?filtro=risco',
               tone: CommandActionTone.hot,
             ),
             isDark: isDark,
             primary: primary,
             showDivider: false,
-            onTap: () => context.push('/retencao'),
+            onTap: () => goPersonalShellTab(context, '/alunos?filtro=risco'),
           ),
         ),
       ),

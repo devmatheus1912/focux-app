@@ -309,7 +309,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
                                       onTap: () => setState(() => _filtro = ''),
                                     ),
                                     FxToggleChip(
-                                      label: 'Risco alto',
+                                      label: 'Risco de cancelar',
                                       selected: _filtro == retencaoFiltroAlto,
                                       isDark: isDark,
                                       onTap:

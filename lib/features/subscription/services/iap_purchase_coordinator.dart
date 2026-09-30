@@ -70,7 +70,7 @@ class IapPurchaseCoordinator {
 
   bool get isListening => _subscription != null;
 
-  /// Idempotente. Não chama `restorePurchases` (evita prompt da Apple ID).
+  /// Idempotente. Android: `restorePurchases` silencioso (sem prompt). iOS: só o stream.
   Future<bool> start() {
     if (_subscription != null) return Future.value(true);
     return _starting ??= _listen(_session);
@@ -86,6 +86,13 @@ class IapPurchaseCoordinator {
           if (session == _session) _emit(IapPurchaseStreamFailed(error));
         },
       );
+      if (_isAndroid && session == _session) {
+        try {
+          await _store.restorePurchases();
+        } catch (error) {
+          debugPrint('[IAP] restore Android na abertura falhou: ${_failureReason(error)}');
+        }
+      }
       return true;
     } finally {
       if (session == _session) _starting = null;

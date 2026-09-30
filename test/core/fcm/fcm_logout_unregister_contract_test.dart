@@ -54,6 +54,6 @@ void main() {
 
   test('DELETE de logout nao invalida sessao nem entra na fila offline', () {
     expect(fcm, contains("'fxNoInvalidate': true"));
-    expect(fcm, contains("'fxNoOfflineQueue': true"));
+    expect(fcm, contains('OfflineSyncService.noQueueExtra'));
   });
 }

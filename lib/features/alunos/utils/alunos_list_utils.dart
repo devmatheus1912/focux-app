@@ -81,7 +81,7 @@ bool shouldShowAlunoListBadge(
   bool triageContextActive = false,
 }) {
   if (statusText == 'Ativo') return false;
-  if (statusText == 'Risco alto') {
+  if (statusText == 'Atenção alta') {
     if (triageContextActive) return false;
     if (activeFiltro == AlunoFiltro.risco ||
         activeFiltro == AlunoFiltro.contatoHoje ||
@@ -182,7 +182,7 @@ bool shouldShowAlunoListOpsLine({
         ? alunoRiscoAltoBadgeColors(isDark)
         : alunoRiscoMedioBadgeColors(isDark);
     return (
-      label: isAlto ? 'Risco alto' : 'Risco médio',
+      label: isAlto ? 'Atenção alta' : 'Atenção média',
       fill: riscoColors.$2,
       foreground: riscoColors.$1,
     );

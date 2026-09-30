@@ -10,6 +10,7 @@ void main() {
     expect(rankingAlunosLabel(3), '3 alunos ativos');
     expect(rankingPosicaoLabel(1), '1º');
     expect(rankingComoCalculamos, contains('alunos ativos'));
+    expect(rankingEmptySubtitle, contains('Mercado Pago'));
     expect(rankingDescontoLabel(20), '20% na assinatura');
     expect(rankingDescontoLabel(0), '');
     expect(

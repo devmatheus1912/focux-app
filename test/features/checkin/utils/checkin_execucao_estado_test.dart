@@ -254,4 +254,27 @@ void main() {
       );
     });
   });
+
+  test('sessão de evolução hidrata PRs se o concluir veio sem celebração', () {
+    final treino = ExecucaoTreino(
+      id: 1,
+      treinoId: 5,
+      treinoNome: 'Treino A',
+      status: 'CONCLUIDO',
+      exercicios: const [],
+    );
+    final evo = SessaoEvolucaoDto(
+      volumeKg: 120,
+      volumeAnteriorKg: 100,
+      seriesFeitas: 3,
+      seriesPlanejadas: 3,
+      recordes: 1,
+      sinal: 'PR',
+      sinalLabel: 'Novo PR',
+      destaqueExercicio: 'Supino',
+      destaqueDeltaKg: 20,
+    );
+    final after = checkinComSessaoEvolucao(treino, evo);
+    expect(checkinEvolucoesParaCelebrar(after), isNotEmpty);
+  });
 }

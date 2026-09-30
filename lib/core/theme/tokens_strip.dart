@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'design_tokens.dart';
+
 /// TOKENS STRIP v1.0.0 — Liquid Glass design language.
 /// Apple Liquid Glass · Material 3 Expressive · AI-native enterprise UI.
 abstract class TokensStrip {
@@ -14,7 +16,7 @@ abstract class TokensStrip {
   static const Color pageBg = Color(0xFFF4F6F8);
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color textPrimary = Color(0xFF1A1A2E);
-  static const Color textSecondary = Color(0xFF4B5563);
+  static const Color textSecondary = EagleTokens.inkGray;
   static const Color textH2 = primaryHover;
   static const Color borderDefault = Color(0xFFE5E7EB);
 

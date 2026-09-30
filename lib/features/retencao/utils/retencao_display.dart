@@ -1,8 +1,8 @@
 import '../data/retencao_repository.dart';
 
 String retencaoRiscoLabel(String risco) => switch (risco.trim().toUpperCase()) {
-  'ALTO' => 'Risco alto',
-  'MEDIO' || 'MÉDIO' => 'Risco médio',
+  'ALTO' => 'Risco de cancelar',
+  'MEDIO' || 'MÉDIO' => 'Risco médio de cancelar',
   'BAIXO' => 'Saudável',
   _ => risco,
 };

@@ -134,6 +134,17 @@ void main() {
     expect(ok.response['status'], 'PROCESSADO');
   });
 
+  test('Android: start reconsulta compras pendentes', () async {
+    await coordinator.dispose();
+    coordinator = IapPurchaseCoordinator(
+      store: store,
+      verify: (p) => verify(p),
+      isAndroid: true,
+    );
+    expect(await coordinator.start(), isTrue);
+    expect(store.restoreCalls, 1);
+  });
+
   group('conclusão depois de verify com erro', () {
     Future<void> entregarComErro(Object erro) async {
       verify = (_) async => throw erro;

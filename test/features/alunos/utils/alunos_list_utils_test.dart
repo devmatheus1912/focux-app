@@ -12,17 +12,17 @@ void main() {
       );
     });
 
-    test('oculta Risco alto quando filtro risco', () {
+    test('oculta Atenção alta quando filtro risco', () {
       expect(
-        shouldShowAlunoListBadge('Risco alto', AlunoFiltro.risco),
+        shouldShowAlunoListBadge('Atenção alta', AlunoFiltro.risco),
         isFalse,
       );
     });
 
-    test('oculta Risco alto em triagem todos + banner ativo', () {
+    test('oculta Atenção alta em triagem todos + banner ativo', () {
       expect(
         shouldShowAlunoListBadge(
-          'Risco alto',
+          'Atenção alta',
           AlunoFiltro.todos,
           triageContextActive: true,
         ),
@@ -30,16 +30,16 @@ void main() {
       );
     });
 
-    test('oculta Risco alto em convites', () {
+    test('oculta Atenção alta em convites', () {
       expect(
-        shouldShowAlunoListBadge('Risco alto', AlunoFiltro.novos),
+        shouldShowAlunoListBadge('Atenção alta', AlunoFiltro.novos),
         isFalse,
       );
     });
 
-    test('oculta Risco alto em contato hoje', () {
+    test('oculta Atenção alta em contato hoje', () {
       expect(
-        shouldShowAlunoListBadge('Risco alto', AlunoFiltro.contatoHoje),
+        shouldShowAlunoListBadge('Atenção alta', AlunoFiltro.contatoHoje),
         isFalse,
       );
     });
@@ -80,7 +80,7 @@ void main() {
         ),
         true,
       );
-      expect(badge.label, 'Risco alto');
+      expect(badge.label, 'Atenção alta');
     });
 
     test('marca risco medio quando emRisco sem ALTO', () {
@@ -95,7 +95,7 @@ void main() {
         ),
         true,
       );
-      expect(badge.label, 'Risco médio');
+      expect(badge.label, 'Atenção média');
     });
   });
 

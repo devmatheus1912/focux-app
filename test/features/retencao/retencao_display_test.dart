@@ -3,6 +3,10 @@ import 'package:focux_app/features/retencao/data/retencao_repository.dart';
 import 'package:focux_app/features/retencao/utils/retencao_display.dart';
 
 void main() {
+  test('churn alto/médio não usa o rótulo operacional da lista', () {
+    expect(retencaoRiscoLabel('ALTO'), 'Risco de cancelar');
+    expect(retencaoRiscoLabel('MEDIO'), 'Risco médio de cancelar');
+  });
   test('variação semanal do risco alto', () {
     expect(retencaoAltoVariacaoHint(3, null), isNull);
     expect(retencaoAltoVariacaoHint(3, 3), 'Igual à semana passada');

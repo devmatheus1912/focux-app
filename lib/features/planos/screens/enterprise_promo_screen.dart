@@ -235,9 +235,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   useStore
-                                      ? 'O trial de 30 dias do Enterprise é aplicado '
-                                          '${subscriptionChannelWith(ChannelPreposition.por)} ao confirmar a assinatura. '
-                                          'Cancele na loja antes do fim do trial para não ser cobrado.'
+                                      ? 'O período grátis só entra se a oferta introdutória de 30 dias estiver ligada no App Store Connect e no Play Console. Sem isso a loja cobra o preço cheio.'
                                       : trialFim!,
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),

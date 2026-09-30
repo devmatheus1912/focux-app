@@ -19,12 +19,22 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
   final Map<AlunoFiltro, GlobalKey> _chipKeys = {
     for (final filtro in AlunoFiltro.values) filtro: GlobalKey(),
   };
+  late final void Function() _onPendingSearch;
 
   @override
   void initState() {
     super.initState();
+    _onPendingSearch = () {
+      final t = AlunosPendingSearch.consume();
+      if (t == null || !mounted) return;
+      setState(() => _setQueryText(t));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncHomeQuery();
+      });
+    };
+    AlunosPendingSearch.addListener(_onPendingSearch);
     _filtro = widget.initialFiltro;
-    _setQueryText(widget.initialQuery);
+    _setQueryText(AlunosPendingSearch.consume() ?? widget.initialQuery);
     _loadListPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -91,6 +101,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   @override
   void dispose() {
+    AlunosPendingSearch.removeListener(_onPendingSearch);
     _searchDebounce?.cancel();
     _searchController.dispose();
     _searchFocusNode.dispose();

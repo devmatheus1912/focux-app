@@ -202,7 +202,7 @@ class PlanEntitlements {
     final body = switch (capability) {
       'financeiro' =>
         'Mensalidades, inadimplência e resumo financeiro fazem parte do plano $planLabel. '
-            'Personal trainers que cobram no app convertem mais e perdem menos alunos.',
+            'Você vê quem atrasou e cobra pelo chat ou por PIX sem sair do app.',
       'iaCopiloto' =>
         'Gere treinos, insights e respostas com IA no plano $planLabel '
             '(${PlanoIaLimits.pro} interações/mês). '

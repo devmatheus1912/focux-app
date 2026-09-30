@@ -380,7 +380,23 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     setState(() => _concluindo = true);
     try {
       final id = _execucao!.id!;
-      final concluida = await checkinConcluir(() => _repo.concluir(id));
+      var concluida = await checkinConcluir(() => _repo.concluir(id));
+      if (concluida != null &&
+          checkinEvolucoesParaCelebrar(concluida).isEmpty) {
+        try {
+          concluida = checkinComSessaoEvolucao(
+            concluida,
+            await _repo.evolucaoSessao(id),
+          );
+        } catch (_) {}
+      }
+      if (concluida == null) {
+        try {
+          final detalhe = await _repo.detalhe(id);
+          final evo = await _repo.evolucaoSessao(id);
+          concluida = checkinComSessaoEvolucao(detalhe, evo);
+        } catch (_) {}
+      }
       _invalidateSessaoCaches();
       if (!mounted) return;
       await showCheckinResultado(context, concluida: concluida);

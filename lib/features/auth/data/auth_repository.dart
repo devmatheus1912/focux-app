@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_sync_service.dart';
 import '../../../core/fcm/fcm_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -546,7 +547,10 @@ class AuthRepository {
           '/api/auth/logout',
           data: {'refreshToken': refresh},
           options: Options(
-            extra: {'fxNoInvalidate': true, 'fxNoOfflineQueue': true},
+            extra: {
+              'fxNoInvalidate': true,
+              OfflineSyncService.noQueueExtra: true,
+            },
           ),
         );
       } catch (_) {

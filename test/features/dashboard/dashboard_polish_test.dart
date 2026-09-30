@@ -76,6 +76,8 @@ void main() {
     expect(screen, contains('receitaAtual > 0'));
     expect(screen, contains(r'Recebido · $mes'));
     expect(screen, contains('pulsoOperacional'));
+    expect(screen, contains('riscoOperacionalLabel'));
+    expect(screen, contains('/alunos?filtro=risco'));
     expect(screen, contains('impactoHoje'));
     expect(screen, contains('financeInadimplLabel'));
     expect(screen, contains('financePercentLabel'));
