@@ -11,6 +11,8 @@ void main() {
     expect(rankingPosicaoLabel(1), '1º');
     expect(rankingComoCalculamos, contains('alunos ativos'));
     expect(rankingComoCalculamos, isNot(contains('desconto')));
+    expect(rankingPodioExplicacao, isNot(contains('desconto')));
+    expect(rankingPodioExplicacao, contains('destaque'));
     expect(rankingEmptySubtitle, isNot(contains('Mercado Pago')));
     expect(rankingItemSubtitle(3), '3 alunos ativos');
     expect(rankingSearchEmptyTitle(''), rankingEmptyTitle);

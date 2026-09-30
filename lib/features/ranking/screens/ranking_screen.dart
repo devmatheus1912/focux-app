@@ -133,7 +133,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
-      label: 'Ranking de personais',
+      label: rankingA11y,
       child: PopScope(
         canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {
@@ -150,7 +150,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
         dismissKeyboard: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Ranking de personais',
+          title: rankingA11y,
           subtitle: FxHubFreshness.joinCount(
             rankingCountLabel(_loading ? 0 : _total),
             FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -161,21 +161,15 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
           },
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como ler o ranking',
+              tooltip: rankingHelpTooltip,
               onTap: () => showFxHelpSheet(
                 context,
-                title: 'Ranking',
-                subtitle: 'Quem tem mais alunos ativos neste mês.',
+                title: rankingHelpTitle,
+                subtitle: rankingHelpSubtitle,
                 tips: const [
-                  FxHelpTip('Como calculamos', rankingComoCalculamos),
-                  FxHelpTip(
-                    'Pódio',
-                    'Os 3 primeiros levam desconto na assinatura Focux.',
-                  ),
-                  FxHelpTip(
-                    'Como ganhar',
-                    'Mais alunos ativos sobem a posição.',
-                  ),
+                  FxHelpTip(rankingComoCalculamosTitle, rankingComoCalculamos),
+                  FxHelpTip(rankingPodioChip, rankingPodioExplicacao),
+                  FxHelpTip(rankingComoGanharTitle, rankingComoGanhar),
                 ],
               ),
             ),
@@ -212,7 +206,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                       _carregar();
                     },
                     onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                    decoration: FxInputDeco.build(context, 'Buscar personal'),
+                    decoration: FxInputDeco.build(context, rankingBuscarHint),
                   ),
                 ),
                 Expanded(
@@ -232,7 +226,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                         subtitle: rankingSearchEmptySubtitle(_query),
                         action: _query.isEmpty
                             ? FxEmptyAction(
-                          label: 'Ver alunos',
+                          label: rankingVerAlunos,
                           onTap: () {
                             AnalyticsService.instance.track(
                               ProductEvents.alunosViewed,
@@ -281,7 +275,7 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const DashboardSectionHeader(
-                                  title: 'Classificação',
+                                  title: rankingClassificacao,
                                 ),
                               ],
                             ),
@@ -290,8 +284,8 @@ class _RankingScreenState extends ConsumerState<RankingScreen> {
                         if (_hasMore && index == _items.length + 1) {
                           return FxSatelliteListTile(
                             title: _carregandoMais
-                                ? 'Carregando…'
-                                : 'Carregar mais',
+                                ? rankingCarregandoMais
+                                : rankingCarregarMais,
                             onTap: _carregandoMais ? null : _carregarMais,
                           );
                         }
@@ -352,7 +346,7 @@ class _RankingFocusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Pódio', style: FocuxHubTypography.chip(chrome.mute)),
+          Text(rankingPodioChip, style: FocuxHubTypography.chip(chrome.mute)),
           const SizedBox(height: 6),
           Text(
             rankingPosicaoLabel(first.posicao),
@@ -379,13 +373,13 @@ class _RankingFocusCard extends StatelessWidget {
             runSpacing: TokensStrip.s2,
             children: [
               FxActionChip(
-                label: 'Crescer base',
+                label: rankingCrescerBase,
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
                 onPressed: onAlunos,
               ),
               FxActionChip(
-                label: 'Assinatura',
+                label: rankingAssinatura,
                 accent: Theme.of(context).colorScheme.primary,
                 isDark: isDark,
                 onPressed: onAssinatura,
