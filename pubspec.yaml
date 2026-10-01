@@ -35,7 +35,7 @@ dependencies:
 
   dio: ^5.11.1
   crypto: ^3.0.6
-  flutter_secure_storage: ^10.3.4
+  flutter_secure_storage: ^11.2.0
   flutter_riverpod: ^3.4.3
   go_router: ^18.0.1
   shared_preferences: ^2.5.5
@@ -48,7 +48,7 @@ dependencies:
   printing: ^5.13.2
   google_fonts: ^6.2.1
   google_sign_in: ^6.2.2
-  shimmer: ^3.0.0
+  shimmer: ^4.0.0
   provider: ^6.1.5+1
   connectivity_plus: ^7.3.1
   flutter_animate: ^4.5.2
@@ -72,7 +72,7 @@ dependencies:
   qr_flutter: ^4.1.0
   wakelock_plus: ^1.7.0
   webview_flutter: ^4.10.0
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
 
 dev_dependencies:
   flutter_test:
