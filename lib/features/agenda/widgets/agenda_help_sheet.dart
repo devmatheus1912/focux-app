@@ -16,6 +16,11 @@ Future<void> showAgendaHelpSheet(BuildContext context) {
         icon: 'spark',
       ),
       FxHelpTip(
+        'Mês',
+        'Pontos marcam dias com atendimento. Arraste o calendário para trocar o mês; Hoje volta para o dia atual.',
+        icon: 'calendar',
+      ),
+      FxHelpTip(
         'Lacuna',
         'Faixas “min livres” são buracos na agenda. Encaixar preenche o espaço.',
         icon: 'calendar',

@@ -7,7 +7,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
-import '../utils/agenda_schedule.dart';
+import '../utils/agenda_month.dart';
 
 class AgendaHubHeader extends StatelessWidget {
   const AgendaHubHeader({
@@ -84,10 +84,7 @@ class AgendaHubHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: TokensStrip.s2),
-              FxHelpIconButton(
-                tooltip: 'Como usar a agenda',
-                onTap: onHelp,
-              ),
+              FxHelpIconButton(tooltip: 'Como usar a agenda', onTap: onHelp),
               const SizedBox(width: FxHelpChrome.gap),
               ShellHeaderIconButton(
                 icon: 'calendar',
@@ -152,36 +149,33 @@ class AgendaHubHeader extends StatelessWidget {
   }
 }
 
-class AgendaWeekBar extends StatelessWidget {
-  const AgendaWeekBar({
+class AgendaMonthBar extends StatelessWidget {
+  const AgendaMonthBar({
     super.key,
-    required this.weekStart,
+    required this.month,
     required this.onPrev,
     required this.onNext,
   });
 
-  final DateTime weekStart;
+  final DateTime month;
   final VoidCallback onPrev;
   final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final end = weekStart.add(const Duration(days: 6));
-    final label =
-        '${weekStart.day}–${end.day} ${agendaMonthShort[weekStart.month]}';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         TokensStrip.s4,
         0,
         TokensStrip.s4,
-        TokensStrip.s3,
+        TokensStrip.s1,
       ),
       child: Row(
         children: [
           IconButton(
-            tooltip: 'Semana anterior',
+            tooltip: 'Mês anterior',
             onPressed: () {
               HapticFeedback.selectionClick();
               onPrev();
@@ -193,14 +187,18 @@ class AgendaWeekBar extends StatelessWidget {
             icon: Icon(Icons.chevron_left, color: chrome.mute),
           ),
           Expanded(
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.cardTitle(color: chrome.ink),
+            child: Semantics(
+              header: true,
+              liveRegion: true,
+              child: Text(
+                agendaMonthLabel(month),
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
             ),
           ),
           IconButton(
-            tooltip: 'Próxima semana',
+            tooltip: 'Próximo mês',
             onPressed: () {
               HapticFeedback.selectionClick();
               onNext();

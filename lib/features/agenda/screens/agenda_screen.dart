@@ -15,9 +15,10 @@ import '../providers/agenda_provider.dart';
 import '../utils/agenda_day_lane.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
+import '../utils/agenda_month.dart';
 import '../widgets/agenda_day_empty_panel.dart';
-import '../widgets/agenda_day_chip.dart';
 import '../widgets/agenda_event_card.dart';
+import '../widgets/agenda_month_grid.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_hub_header.dart';
 import '../widgets/agenda_next_banner.dart';
@@ -55,15 +56,15 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _loading = true;
   Object? _erro;
   DateTime? _fetchedAt;
-  int _selectedIdx = 0;
-  late DateTime _weekStart;
+  late DateTime _mes;
+  late DateTime _dia;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _selectedIdx = now.weekday - 1;
-    _weekStart = agendaWeekStart(now);
+    _mes = agendaMonthOf(now);
+    _dia = agendaDefaultSelectedDay(_mes, now: now);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AnalyticsService.instance.track(ProductEvents.agendaViewed);
     });
@@ -72,44 +73,31 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
   Future<void> _load({bool force = false}) async {
     final keepStale = _ags.isNotEmpty;
+    final mes = _mes;
+    final cacheKey = 'mes:${agendaIsoDate(mes)}';
     try {
-      final monday = DateTime(
-        _weekStart.year,
-        _weekStart.month,
-        _weekStart.day,
-      );
-      final currentMonday = agendaWeekStart(DateTime.now());
-      final iso = agendaIsoDate(monday);
-      final List<Agendamento> items;
-      if (agendaSameDay(monday, currentMonday)) {
-        if (force) invalidateAgendaCaches(ref);
-        if (!keepStale) {
-          setState(() {
-            _loading = true;
-            _erro = null;
-          });
-        }
-        items = (await ref.read(agendaHomeProvider.future)).firstPaintItems;
-      } else {
-        final cached = force ? null : AgendaWeekClientCache.get(iso);
-        if (cached != null) {
-          if (!mounted) return;
-          setState(() {
-            _ags = cached;
-            _loading = false;
-            _erro = null;
-            _fetchedAt = DateTime.now();
-          });
-          return;
-        }
+      if (force) invalidateAgendaCaches(ref);
+      final cached = force ? null : AgendaWeekClientCache.get(cacheKey);
+      if (cached != null) {
+        setState(() {
+          _ags = cached;
+          _loading = false;
+          _erro = null;
+          _fetchedAt = DateTime.now();
+        });
+        return;
+      }
+      if (!keepStale) {
         setState(() {
           _loading = true;
           _erro = null;
         });
-        items = await ref.read(agendaRepositoryProvider).listarSemana(iso);
-        AgendaWeekClientCache.put(iso, items);
       }
-      if (!mounted) return;
+      final items = await ref
+          .read(agendaRepositoryProvider)
+          .listarMes(mes.year, mes.month);
+      AgendaWeekClientCache.put(cacheKey, items);
+      if (!mounted || mes != _mes) return;
       setState(() {
         _ags = items;
         _loading = false;
@@ -117,7 +105,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         _fetchedAt = DateTime.now();
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || mes != _mes) return;
       if (keepStale) {
         setState(() => _loading = false);
         FeedbackHelper.showError(
@@ -134,46 +122,31 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   }
 
   Future<void> _novoAgendamento({DateTime? slot}) async {
-    final selectedDate = slot ?? _weekStart.add(Duration(days: _selectedIdx));
-    await context.push('/agenda/novo', extra: selectedDate);
+    await context.push('/agenda/novo', extra: slot ?? _dia);
     if (!mounted) return;
     _load(force: true);
   }
 
-  bool get _isTodayVisible {
-    final now = DateTime.now();
-    return agendaSameDay(
-          DateTime(_weekStart.year, _weekStart.month, _weekStart.day),
-          agendaWeekStart(now),
-        ) &&
-        _selectedIdx == now.weekday - 1;
+  bool get _isTodayVisible => agendaSameDay(_dia, DateTime.now());
+
+  void _selectDay(DateTime day) {
+    final mes = agendaMonthOf(day);
+    final mudouMes = mes != _mes;
+    setState(() {
+      _dia = day;
+      if (mudouMes) {
+        _mes = mes;
+        _ags = [];
+      }
+    });
+    if (mudouMes) _load();
   }
 
-  void _goToday() {
-    final now = DateTime.now();
-    final monday = agendaWeekStart(now);
-    final sameWeek = agendaSameDay(
-      DateTime(_weekStart.year, _weekStart.month, _weekStart.day),
-      monday,
-    );
-    setState(() {
-      _weekStart = monday;
-      _selectedIdx = now.weekday - 1;
-    });
-    if (!sameWeek) _load();
-  }
+  void _goToday() =>
+      _selectDay(agendaDefaultSelectedDay(agendaMonthOf(DateTime.now())));
 
-  void _changeWeek(int delta) {
-    final next = _weekStart.add(Duration(days: delta * 7));
-    final now = DateTime.now();
-    final todayMonday = agendaWeekStart(now);
-    setState(() {
-      _weekStart = DateTime(next.year, next.month, next.day);
-      _selectedIdx =
-          agendaSameDay(_weekStart, todayMonday) ? now.weekday - 1 : 0;
-    });
-    _load();
-  }
+  void _changeMonth(int delta) =>
+      _selectDay(agendaDefaultSelectedDay(agendaShiftMonth(_mes, delta)));
 
   String? _photoFor(int alunoId) {
     final list = ref.read(alunosProvider).value;
@@ -198,11 +171,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final diasSemanaStr = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-
-    final eventosMap = agendaEventsByWeekday(_ags, _weekStart);
-    final dailyEvents = [...(eventosMap[_selectedIdx] ?? <Agendamento>[])]
-      ..sort((a, b) => a.inicio.compareTo(b.inicio));
+    final dailyEvents = agendaEventsOn(_ags, _dia);
     final visible = agendaVisibleEvents(dailyEvents);
     final nextOpen = agendaNextOpen(visible);
     final showNextBanner = nextOpen != null && _isTodayVisible;
@@ -211,12 +180,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       excludeNextFromLane: showNextBanner,
     );
     final cancelled = agendaCancelledCount(dailyEvents);
-    final selectedDate = _weekStart.add(Duration(days: _selectedIdx));
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final now = DateTime.now();
     final dayHeading = agendaDayHeading(
-      weekdayLabel: diasSemanaStr[_selectedIdx],
-      date: selectedDate,
+      weekdayLabel: agendaWeekdayShort(_dia.weekday),
+      date: _dia,
       visibleCount: visible.length,
     );
     return fxScreenA11yScope(
@@ -244,43 +211,17 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   onToday: _isTodayVisible ? null : _goToday,
                   onNew: () => _novoAgendamento(),
                 ),
-                AgendaWeekBar(
-                  weekStart: _weekStart,
-                  onPrev: () => _changeWeek(-1),
-                  onNext: () => _changeWeek(1),
+                AgendaMonthBar(
+                  month: _mes,
+                  onPrev: () => _changeMonth(-1),
+                  onNext: () => _changeMonth(1),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    TokensStrip.s4,
-                    0,
-                    TokensStrip.s4,
-                    TokensStrip.s3,
-                  ),
-                  child: Row(
-                    children: List.generate(7, (i) {
-                      final dayDate = _weekStart.add(Duration(days: i));
-                      final count =
-                          agendaVisibleEvents(
-                            eventosMap[i] ?? const <Agendamento>[],
-                          ).length;
-                      return Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            right: i == 6 ? 0 : TokensStrip.s1,
-                          ),
-                          child: AgendaDayChip(
-                            weekdayLabel: diasSemanaStr[i],
-                            dayNumber: dayDate.day,
-                            selected: i == _selectedIdx,
-                            count: count,
-                            isToday: agendaSameDay(dayDate, now),
-                            width: double.infinity,
-                            onTap: () => setState(() => _selectedIdx = i),
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
+                AgendaMonthGrid(
+                  month: _mes,
+                  selected: _dia,
+                  counts: agendaVisibleCountByDay(_ags),
+                  onSelect: _selectDay,
+                  onSwipe: _changeMonth,
                 ),
                 if (nextOpen != null && _isTodayVisible)
                   AgendaNextBanner(

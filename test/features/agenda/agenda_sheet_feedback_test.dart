@@ -34,8 +34,7 @@ class _FakeAgendaRepository implements AgendaRepository {
   }
 
   @override
-  Future<AgendaHomeBundle> getHome() async =>
-      AgendaHomeBundle(proximos: [_hoje], semana: const []);
+  Future<List<Agendamento>> listarMes(int ano, int mes) async => [_hoje];
 
   @override
   Future<Agendamento> atualizarStatus(int id, String status) async {

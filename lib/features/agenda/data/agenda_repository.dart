@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
+import '../utils/agenda_schedule.dart';
 
 class Agendamento {
   final int id;
@@ -134,6 +135,33 @@ class AgendaRepository {
       queryParameters: {'data': data},
     );
     return _parseAgendamentos(r.data);
+  }
+
+  /// Grade de 6 semanas do mês. Backend antigo sem `/mes`: junta as 6 semanas.
+  Future<List<Agendamento>> listarMes(int ano, int mes) async {
+    try {
+      final r = await _dio.get(
+        '/api/agenda/mes',
+        queryParameters: {'ano': ano, 'mes': mes},
+      );
+      return _parseAgendamentos(r.data);
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      if (code != 404 && code != 405) rethrow;
+    }
+    final first = DateTime(ano, mes);
+    final semanas = await Future.wait([
+      for (var i = 0; i < 6; i++)
+        listarSemana(
+          agendaIsoDate(DateTime(ano, mes, 2 - first.weekday + i * 7)),
+        ),
+    ]);
+    final seen = <int>{};
+    return [
+      for (final semana in semanas)
+        for (final ag in semana)
+          if (seen.add(ag.id)) ag,
+    ];
   }
 
   Future<Pagina<Agendamento>> meusAgendamentosPagina({

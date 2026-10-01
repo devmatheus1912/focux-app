@@ -22,7 +22,9 @@ void main() {
     expect(screen, contains('showFxHomeSheet'));
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));
-    expect(screen, contains('AgendaDayChip'));
+    expect(screen, contains('AgendaMonthGrid'));
+    expect(screen, contains('AgendaMonthBar'));
+    expect(screen, isNot(contains('AgendaWeekBar')));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));
     expect(screen, contains('AgendaHubHeader'));
@@ -36,7 +38,7 @@ void main() {
     );
     expect(screen, isNot(contains('arrow_back')));
     expect(screen, isNot(contains('LayoutBuilder(')));
-    expect(screen, contains('listarSemana'));
+    expect(screen, contains('listarMes'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('agendaEventSessionNote'));
     expect(screen, isNot(contains('maskEmailForList')));
