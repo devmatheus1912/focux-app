@@ -137,7 +137,7 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
                             isDark: isDark,
                           ),
                           ConversationMediaFilterChip(
-                            label: 'Audios',
+                            label: 'Áudios',
                             selected: selected == ConversationMediaType.audio,
                             onTap:
                                 () => setSheetState(

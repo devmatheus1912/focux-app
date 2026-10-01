@@ -271,7 +271,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     }
     if (path == null || path.isEmpty) {
       if (!mounted) return;
-      FeedbackHelper.showError(context, 'Audio vazio. Grave novamente.');
+      FeedbackHelper.showError(context, 'Áudio vazio. Grave novamente.');
       return;
     }
 
@@ -314,7 +314,7 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final optimistic = ChatMsg(
       alunoId: _alunoId,
       remetente: _isAlunoMode ? 'ALUNO' : 'PERSONAL',
-      conteudo: 'Audio ${_formatDuration(duration)}',
+      conteudo: 'Áudio ${_formatDuration(duration)}',
       enviadoEm: DateTime.now(),
       tipoMidia: 'AUDIO',
       clientMessageId:

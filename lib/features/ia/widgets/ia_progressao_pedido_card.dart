@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../models/progressao_sugestao.dart';
 import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/progressao_copy.dart';
@@ -29,10 +31,10 @@ class IaProgressaoPedidoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final textTheme = Theme.of(context).textTheme;
-    final mutedStyle = textTheme.bodySmall?.copyWith(
+    final ink = fxScreenInk(context);
+    final titleStyle = FocuxHubTypography.cardTitle(color: ink);
+    final mutedStyle = FocuxHubTypography.bodyMuted(
       color: TokensStrip.textSecondary,
-      height: 1.35,
     );
 
     return Column(
@@ -51,12 +53,7 @@ class IaProgressaoPedidoCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        progressaoContextoTitulo,
-                        style: textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      Text(progressaoContextoTitulo, style: titleStyle),
                       const SizedBox(height: 2),
                       Text(
                         contexto.when(
@@ -78,10 +75,7 @@ class IaProgressaoPedidoCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
-        Text(
-          'Objetivo',
-          style: textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
+        Text('Objetivo', style: titleStyle),
         const SizedBox(height: TokensStrip.s2),
         Wrap(
           spacing: TokensStrip.s2,
@@ -95,18 +89,24 @@ class IaProgressaoPedidoCard extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: TokensStrip.s3),
-        AlunoInsetFormField(
+        const SizedBox(height: TokensStrip.s4),
+        TextField(
           controller: observacoes,
-          label: progressaoObservacoesLabel,
-          hint: progressaoObservacoesHint,
-          icon: Icons.notes_outlined,
-          maxLines: 3,
-          showDivider: false,
+          enabled: enabled,
+          minLines: 2,
+          maxLines: 4,
           textCapitalization: TextCapitalization.sentences,
+          textInputAction: TextInputAction.newline,
+          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
           inputFormatters: [
             LengthLimitingTextInputFormatter(progressaoObservacoesMax),
           ],
+          style: FocuxHubTypography.body(color: ink),
+          decoration: FxInputDeco.build(
+            context,
+            progressaoObservacoesLabel,
+            hint: progressaoObservacoesHint,
+          ).copyWith(alignLabelWithHint: true),
         ),
       ],
     );

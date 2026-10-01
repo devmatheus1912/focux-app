@@ -99,23 +99,20 @@ class ConversationMediaPreview extends StatelessWidget {
     String label = 'Arquivo';
     if (tipo == 'VIDEO') {
       icon = Icons.play_circle_outline;
-      label = 'Video';
+      label = 'Vídeo';
     } else if (tipo == 'AUDIO') {
       icon = Icons.graphic_eq_outlined;
-      label = 'Audio';
+      label = 'Áudio';
     }
 
-    final textColor =
-        mine
-            ? Colors.white
-            : (isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final textColor = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
 
     if (tipo == 'AUDIO') {
       return Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: ConversationAudioInlinePlayer(
           url: url,
-          label: msg.conteudo.replaceFirst('Audio ', ''),
+          recordedDuration: parseChatAudioDuration(msg.conteudo),
           mine: mine,
           isDark: isDark,
           onFallbackOpen: onOpen,
@@ -131,10 +128,7 @@ class ConversationMediaPreview extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color:
-                mine
-                    ? Colors.white.withValues(alpha: 0.12)
-                    : primary.withValues(alpha: 0.10),
+            color: primary.withValues(alpha: mine ? 0.14 : 0.10),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
@@ -325,8 +319,8 @@ class ConversationMediaGalleryTile extends StatelessWidget {
   }
 
   static String _title(String? tipo) {
-    if (tipo == 'VIDEO') return 'Video';
-    if (tipo == 'AUDIO') return 'Audio';
+    if (tipo == 'VIDEO') return 'Vídeo';
+    if (tipo == 'AUDIO') return 'Áudio';
     return 'Foto';
   }
 
@@ -345,9 +339,19 @@ class ConversationMediaGalleryTile extends StatelessWidget {
   }
 }
 
+/// Duração gravada no conteúdo da mensagem ("Áudio 00:02").
+Duration? parseChatAudioDuration(String conteudo) {
+  final m = RegExp(r'(\d{1,2}):(\d{2})\s*$').firstMatch(conteudo.trim());
+  if (m == null) return null;
+  return Duration(
+    minutes: int.parse(m.group(1)!),
+    seconds: int.parse(m.group(2)!),
+  );
+}
+
 class ConversationAudioInlinePlayer extends StatefulWidget {
   final String url;
-  final String label;
+  final Duration? recordedDuration;
   final bool mine;
   final bool isDark;
   final VoidCallback onFallbackOpen;
@@ -355,7 +359,7 @@ class ConversationAudioInlinePlayer extends StatefulWidget {
   const ConversationAudioInlinePlayer({
     super.key,
     required this.url,
-    required this.label,
+    this.recordedDuration,
     required this.mine,
     required this.isDark,
     required this.onFallbackOpen,
@@ -390,8 +394,11 @@ class _ConversationAudioInlinePlayerState
       if (!_loaded) {
         await _player.setUrl(widget.url);
         _loaded = true;
+      } else if (_player.processingState == ProcessingState.completed) {
+        await _player.seek(Duration.zero);
       }
-      await _player.play();
+      // play() só completa quando o áudio para; aguardar travaria o pause.
+      unawaited(_player.play().catchError((Object _) {}));
     } catch (_) {
       widget.onFallbackOpen();
     } finally {
@@ -404,16 +411,10 @@ class _ConversationAudioInlinePlayerState
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final bg =
-        widget.mine
-            ? Colors.white.withValues(alpha: 0.12)
-            : primary.withValues(alpha: 0.10);
-    final ink =
-        widget.mine
-            ? Colors.white
-            : (widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary);
+    final bg = primary.withValues(alpha: widget.mine ? 0.14 : 0.10);
+    final ink = widget.isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final muted = ink.withValues(alpha: 0.70);
-    final name = widget.label.trim().isEmpty ? 'Audio' : widget.label.trim();
+    const name = 'Áudio';
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -432,14 +433,12 @@ class _ConversationAudioInlinePlayerState
                 final loading = _busy || processing == ProcessingState.loading;
                 final playing = snapshot.data?.playing ?? false;
                 return IconButton(
-                  tooltip: playing ? 'Pausar audio' : 'Reproduzir audio',
+                  tooltip: playing ? 'Pausar áudio' : 'Reproduzir áudio',
                   visualDensity: VisualDensity.compact,
                   onPressed: loading ? null : _toggle,
                   style: IconButton.styleFrom(
-                    backgroundColor:
-                        widget.mine
-                            ? Colors.white.withValues(alpha: 0.18)
-                            : primary,
+                    backgroundColor: primary,
+                    disabledBackgroundColor: primary.withValues(alpha: 0.7),
                     foregroundColor: Colors.white,
                     minimumSize: const Size(36, 36),
                   ),
@@ -466,7 +465,8 @@ class _ConversationAudioInlinePlayerState
               child: StreamBuilder<Duration?>(
                 stream: _player.durationStream,
                 builder: (context, durationSnapshot) {
-                  final duration = durationSnapshot.data;
+                  final duration =
+                      durationSnapshot.data ?? widget.recordedDuration;
                   return StreamBuilder<Duration>(
                     stream: _player.positionStream,
                     builder: (context, positionSnapshot) {
@@ -499,7 +499,9 @@ class _ConversationAudioInlinePlayerState
                               minHeight: 4,
                               value: progress,
                               backgroundColor: ink.withValues(alpha: 0.16),
-                              valueColor: AlwaysStoppedAnimation<Color>(ink),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                primary,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 5),
