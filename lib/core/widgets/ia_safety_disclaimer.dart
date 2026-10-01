@@ -4,20 +4,24 @@ import '../../core/theme/design_tokens.dart';
 /// Disclaimer de segurança exibido em TODAS as telas que geram
 /// conteúdo via IA (treino, progressão, chat).
 ///
-/// Atende requisito de Apple/Google Store:
-///   - Apps que geram recomendações de saúde precisam informar
-///     que o conteúdo não substitui profissional qualificado.
+/// Atende requisito de Apple/Google Store: conteúdo de IA sinalizado
+/// e revisado por profissional antes de chegar ao aluno.
+/// Rodapé do PDF entregue ao aluno.
+String iaPdfDisclaimer(String? personalNome) {
+  final nome = personalNome?.trim() ?? '';
+  final quem = nome.isEmpty ? 'pelo seu personal' : 'por $nome';
+  return 'Plano revisado $quem. Gerado com apoio de IA.';
+}
+
 class IaSafetyDisclaimer extends StatelessWidget {
   final String? customText;
   final bool compact;
 
   const IaSafetyDisclaimer({super.key, this.customText, this.compact = false});
 
+  /// Quem lê é o próprio profissional de Educação Física.
   static const defaultText =
-      'As sugestões geradas por IA são apenas orientações iniciais e '
-      'não substituem a avaliação de um profissional de Educação Física. '
-      'Sempre consulte um especialista antes de adotar qualquer plano de treino. '
-      'Para alimentação, procure um nutricionista.';
+      'Sugestões da IA são ponto de partida. Revise antes de aplicar ao aluno.';
 
   @override
   Widget build(BuildContext context) {

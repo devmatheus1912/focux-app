@@ -169,7 +169,7 @@ Future<Uint8List> buildProgressaoPdf({
           ),
         ],
         pw.SizedBox(height: 16),
-        pw.Text(IaSafetyDisclaimer.defaultText, style: muted),
+        pw.Text(iaPdfDisclaimer(personalNome), style: muted),
       ],
     ),
   );
