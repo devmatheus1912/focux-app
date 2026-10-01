@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,6 +15,9 @@ import 'fx_motion.dart';
 /// Layout igual à busca rápida da Home: superfície expandida +
 /// [Expanded] + scroll. O [child] fica com os inputs; o caller
 /// guarda os controllers. Retorna `true` só se o usuário confirmar.
+///
+/// Só retorna depois que a sheet saiu da tela: o caller pode dar `dispose`
+/// nos controllers logo em seguida sem quebrar a animação de saída.
 Future<bool> showFxFormSheet(
   BuildContext context, {
   required String title,
@@ -23,20 +28,39 @@ Future<bool> showFxFormSheet(
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
 }) async {
+  Animation<double>? saida;
   final confirmed = await showFxHomeSheet<bool>(
     context,
-    builder:
-        (ctx) => _FxFormSheet(
-          title: title,
-          subtitle: subtitle,
-          icon: icon,
-          confirmLabel: confirmLabel,
-          cancelLabel: cancelLabel,
-          destructive: destructive,
-          child: child,
-        ),
+    builder: (ctx) {
+      saida ??= ModalRoute.of(ctx)?.animation;
+      return _FxFormSheet(
+        title: title,
+        subtitle: subtitle,
+        icon: icon,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        destructive: destructive,
+        child: child,
+      );
+    },
   );
+  await _aguardarSaida(saida);
   return confirmed ?? false;
+}
+
+Future<void> _aguardarSaida(Animation<double>? animation) {
+  if (animation == null || animation.status == AnimationStatus.dismissed) {
+    return Future.value();
+  }
+  final done = Completer<void>();
+  void listener(AnimationStatus status) {
+    if (status != AnimationStatus.dismissed) return;
+    animation.removeStatusListener(listener);
+    if (!done.isCompleted) done.complete();
+  }
+
+  animation.addStatusListener(listener);
+  return done.future;
 }
 
 /// Sheet informativo (Entendi / Continuar) — substitui `AlertDialog` sem
