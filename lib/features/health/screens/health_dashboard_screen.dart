@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -13,7 +14,6 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
@@ -247,6 +247,23 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
     }
   }
 
+  /// HealthKit não pergunta de novo o que já foi respondido: no iOS só resta
+  /// mandar o aluno aos Ajustes. Health Connect reabre o pedido.
+  Future<void> _comoLiberar() async {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      await _requestAccess();
+      return;
+    }
+    await showFxHelpSheet(
+      context,
+      title: saudeSemScoreAcao,
+      subtitle: saudeLiberarIosSubtitulo,
+      tips: [
+        for (final passo in saudeLiberarIosPassos) FxHelpTip(passo.$1, passo.$2),
+      ],
+    );
+  }
+
   Future<void> _desconectar() async {
     final ok = await showFxConfirmSheet(
       context,
@@ -408,26 +425,11 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      if (score != null)
-                        RecoveryScoreRing(
-                          score: score,
-                          color: primary,
-                          size: 72,
-                        )
-                      else
-                        SizedBox(
-                          width: 72,
-                          height: 72,
-                          child: Center(
-                            child: Text(
-                              '--',
-                              style: FocuxHubTypography.kpi(
-                                color: chrome.mute,
-                                fontSize: FocuxHubTypography.metricLg,
-                              ),
-                            ),
-                          ),
-                        ),
+                      RecoveryScoreRing(
+                        score: score,
+                        color: score != null ? primary : chrome.mute,
+                        size: 72,
+                      ),
                       const SizedBox(width: TokensStrip.s3),
                       Expanded(
                         child: Column(
@@ -438,13 +440,21 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                               style: FocuxHubTypography.chip(chrome.mute),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              prontidaoNota(score),
-                              style: FocuxHubTypography.kpi(
-                                color: chrome.ink,
-                                fontSize: FocuxHubTypography.metricLg,
+                            if (score == null && recovery != null)
+                              Text(
+                                saudeSemScoreMensagem,
+                                style: FocuxHubTypography.bodyMuted(
+                                  color: chrome.ink,
+                                ),
                               ),
-                            ),
+                            if (score != null)
+                              Text(
+                                prontidaoNota(score),
+                                style: FocuxHubTypography.kpi(
+                                  color: chrome.ink,
+                                  fontSize: FocuxHubTypography.metricLg,
+                                ),
+                              ),
                             if (recovery != null && score != null) ...[
                               const SizedBox(height: 4),
                               Text(
@@ -467,28 +477,17 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 ] else if (recovery != null) ...[
-                  const SizedBox(height: TokensStrip.s2),
-                  Text(
-                    saudeSemScoreMensagem,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                  FxConversionTextLink(
-                    text: '',
-                    actionText: saudeSemScoreAcao,
-                    onTap: _requestAccess,
+                  const SizedBox(height: TokensStrip.s3),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FxActionChip(
+                      label: saudeSemScoreAcao,
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: _comoLiberar,
+                    ),
                   ),
                 ],
-                const SizedBox(height: TokensStrip.s3),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: FxActionChip(
-                    label: _refreshing ? 'Atualizando…' : saudeAtualizarLabel(),
-                    accent: primary,
-                    isDark: isDark,
-                    enabled: !_refreshing,
-                    onPressed: _refreshDashboard,
-                  ),
-                ),
               ],
             ),
           ),

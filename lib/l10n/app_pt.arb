@@ -239,6 +239,7 @@
   "@alunoEvolucaoCurvaSemantics": { "placeholders": { "semanas": { "type": "int" }, "exercicio": { "type": "String" }, "inicial": { "type": "double", "format": "decimalPattern" }, "atual": { "type": "double", "format": "decimalPattern" } } },
   "alunoEvolucaoCargaDeAte": "{inicial} → {atual} kg",
   "@alunoEvolucaoCargaDeAte": { "placeholders": { "inicial": { "type": "double", "format": "decimalPattern" }, "atual": { "type": "double", "format": "decimalPattern" } } },
+  "alunoEvolucao1rmEstimado": "1RM estimado",
   "alunoEvolucaoCargaKg": "{carga} kg",
   "@alunoEvolucaoCargaKg": { "placeholders": { "carga": { "type": "double", "format": "decimalPattern" } } },
   "alunoEvolucaoDeltaEmSemanas": "{delta} em {semanas, plural, =1{1 semana} other{{semanas} semanas}}",

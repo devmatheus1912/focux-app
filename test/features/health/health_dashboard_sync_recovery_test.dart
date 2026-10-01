@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/health/health_service.dart';
@@ -119,7 +120,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(RecoveryScoreRing), findsNothing);
+      expect(find.textContaining('/100'), findsNothing);
       expect(
         find.bySemanticsLabel(
           'Prontidão indisponível. Aguardando sincronização com o servidor.',
@@ -130,10 +131,7 @@ void main() {
       expect(find.textContaining('%'), findsNothing);
       expect(find.text('12000'), findsOneWidget);
       expect(find.text('8,0h'), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(RegExp(saudeAtualizarLabel())),
-        findsWidgets,
-      );
+      expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
       expect(homeWidgetUpdates, 0);
     },
   );
@@ -172,10 +170,7 @@ void main() {
       expect(find.textContaining('%'), findsNothing);
       expect(find.text('Pronto para treinar'), findsOneWidget);
       expect(find.text('12000'), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(RegExp(saudeAtualizarLabel())),
-        findsWidgets,
-      );
+      expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
       expect(homeWidgetUpdates, 1);
       expect(syncedScore, 77);
     },
@@ -210,7 +205,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(RecoveryScoreRing), findsNothing);
+      expect(find.textContaining('/100'), findsNothing);
       expect(
         find.bySemanticsLabel(
           'Prontidão indisponível. Aguardando sincronização com o servidor.',
@@ -252,10 +247,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(saudeSemScoreMensagem), findsOneWidget);
-      expect(
-        find.textContaining(saudeSemScoreAcao, findRichText: true),
-        findsOneWidget,
-      );
+      expect(find.text(saudeSemScoreAcao), findsOneWidget);
+      expect(find.text(saudeAtualizarLabel()), findsNothing);
+      expect(find.byType(RecoveryScoreRing), findsOneWidget);
       expect(find.text('4000'), findsOneWidget);
       expect(find.textContaining('kcal'), findsNothing);
       expect(find.text(saudeSemDadosHoje), findsOneWidget);
@@ -269,6 +263,42 @@ void main() {
       expect(find.text(saudeDesconectarLabel()), findsNothing);
     },
   );
+
+  testWidgets('iOS: "Como liberar" ensina o caminho nos Ajustes', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    await _pumpDashboard(
+      tester,
+      screen: HealthDashboardScreen(
+        checkAuthorization: () async => true,
+        loadTodaySummary:
+            () async => const HealthSummary(
+              steps: 4000,
+              caloriesBurned: 0,
+              avgHeartRate: 0,
+              sleepHours: 0,
+            ),
+        syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 4000}),
+        updateHomeWidgetRecovery: ({
+          required int recoveryScore,
+          required String recoveryLabel,
+          required String recoveryHint,
+          required int steps,
+        }) async {},
+        clearHomeWidgetRecoveryScore: ({required int? steps}) async {},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text(saudeSemScoreAcao));
+    await tester.pumpAndSettle();
+
+    expect(find.text(saudeLiberarIosSubtitulo), findsOneWidget);
+    expect(find.text('Abra os Ajustes'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   test('zero do wearable vira --', () {
     expect(saudeValorOuTraco(0, (v) => '$v kcal'), '--');

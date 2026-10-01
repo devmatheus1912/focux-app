@@ -429,6 +429,7 @@ void main() {
       await _pump(tester, const AlunoEvolutionCard(destaque: supino));
       expect(find.text('Supino reto'), findsOneWidget);
       expect(find.text('40 → 50 kg'), findsOneWidget);
+      expect(find.text('1RM estimado'), findsOneWidget);
       expect(find.text('+25% em 6 semanas'), findsOneWidget);
       expect(
         find.bySemanticsLabel(

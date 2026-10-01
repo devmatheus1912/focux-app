@@ -24,6 +24,18 @@ const saudeSemScoreMensagem =
 
 const saudeSemScoreAcao = 'Como liberar';
 
+const saudeLiberarIosSubtitulo =
+    'O iPhone só deixa mudar a permissão nos Ajustes.';
+
+const saudeLiberarIosPassos = [
+  ('Abra os Ajustes', 'Ajustes → Saúde → Acesso a Dados e Dispositivos.'),
+  ('Escolha o Focux', 'Toque em Focux na lista de apps.'),
+  (
+    'Ligue os dados',
+    'Ative Sono, Frequência Cardíaca e Energia Ativa. Volte e toque em atualizar.',
+  ),
+];
+
 const saudeSemDadosHoje = 'Sem dados hoje';
 const saudeSemBatimento = 'Sem dados de batimento';
 const saudeSemSono = 'Use o relógio para dormir';

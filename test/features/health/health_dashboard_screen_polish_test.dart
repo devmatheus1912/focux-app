@@ -33,7 +33,8 @@ void main() {
     expect(screen, contains('AlwaysScrollableScrollPhysics'));
     expect(screen, contains('homeHelpOpened'));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('_comoLiberar'));
+    expect(screen, contains('TargetPlatform.iOS'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxEmptyState'));
     expect(screen, contains('FxActionChip'));

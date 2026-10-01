@@ -110,11 +110,27 @@ class _Destaque extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: TokensStrip.s1),
-        Text(
-          d.temCurva
-              ? s.alunoEvolucaoCargaDeAte(d.inicialKg, d.atualKg)
-              : s.alunoEvolucaoCargaKg(d.atualKg),
-          style: FocuxHubTypography.metric(color: chrome.ink, fontSize: 24),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.end,
+          spacing: TokensStrip.s2,
+          children: [
+            Text(
+              d.temCurva
+                  ? s.alunoEvolucaoCargaDeAte(d.inicialKg, d.atualKg)
+                  : s.alunoEvolucaoCargaKg(d.atualKg),
+              style: FocuxHubTypography.kpi(
+                color: chrome.ink,
+                fontSize: FocuxHubTypography.metricLg,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                s.alunoEvolucao1rmEstimado,
+                style: FocuxHubTypography.chip(chrome.mute),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: TokensStrip.s1),
         if (d.temCurva) ...[
