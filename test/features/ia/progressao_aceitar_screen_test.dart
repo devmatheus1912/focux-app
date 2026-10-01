@@ -57,6 +57,60 @@ void main() {
     expect(find.text('+2,5 kg'), findsOneWidget);
     expect(find.text('Aceitar'), findsOneWidget);
     expect(find.text('Rejeitar'), findsOneWidget);
+    expect(find.text('Aceitar 1 sugestão'), findsOneWidget);
+    expect(find.text('Beatriz Carvalho'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('sugestão fora do treino troca Aceitar por Abrir treino', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const ProgressaoAceitarScreen(),
+        ),
+      ],
+    );
+    router.go(
+      '/',
+      extra: const ProgressaoAceitarRouteArgs(
+        alunoId: 12,
+        alunoNome: 'Beatriz Carvalho',
+      ).toExtra(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          progressaoSugestoesProvider(12).overrideWith(
+            (ref) async => [
+              const ProgressaoSugestao(
+                id: 2,
+                alunoId: 12,
+                exercicio: 'Remada',
+                cargaAtual: '40 kg · 3×10',
+                cargaSugerida: '42,5 kg · 3×10',
+                status: ProgressaoSugestao.statusNaoEncontrada,
+              ),
+            ],
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aceitar'), findsNothing);
+    expect(find.text('Abrir treino'), findsOneWidget);
+    expect(find.text('Descartar'), findsOneWidget);
+    expect(find.textContaining('Não achei no treino'), findsOneWidget);
+    expect(find.textContaining('Aceitar todas'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

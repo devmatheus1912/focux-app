@@ -11,3 +11,12 @@ final progressaoSugestoesProvider = FutureProvider.autoDispose
         ref.read(apiClientProvider),
       ).sugestoesProgressao(alunoId: alunoId);
     });
+
+/// O que a IA vai ler do aluno; não gasta cota.
+final progressaoContextoProvider = FutureProvider.autoDispose
+    .family<ProgressaoContextoResumo, int>((ref, alunoId) async {
+      return IaRepository(ref.read(apiClientProvider)).progressaoContexto(alunoId);
+    });
+
+bool isSemTreinoAtivo(Object? error) =>
+    error is IaOperationalException && error.codigo == 'SEM_TREINO_ATIVO';

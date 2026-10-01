@@ -1,5 +1,4 @@
-/// Envelope de paginação dos endpoints **novos**, conforme §1 do contrato
-/// pareado em `docs/CONTRATO_APP_BACKEND.md`.
+/// Envelope de paginação dos endpoints **novos** do backend.
 ///
 /// Offset e cursor compartilham `content` e `hasNext`. O parser distingue os
 /// dois olhando se veio `page`/`totalElements` ou `nextCursor`. Os três

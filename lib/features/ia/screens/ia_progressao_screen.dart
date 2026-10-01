@@ -3,18 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -23,22 +23,21 @@ import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
-import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../providers/progressao_sugestoes_provider.dart';
-import '../utils/ia_progressao_input_normalizer.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
+import '../utils/progressao_pdf_builder.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
+import '../widgets/ia_progressao_pedido_card.dart';
 import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
-import '../../../core/widgets/ia_safety_disclaimer.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -54,16 +53,16 @@ class IaProgressaoScreen extends ConsumerStatefulWidget {
 }
 
 class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
-  final _objetivo = TextEditingController();
-  final _historico = TextEditingController();
+  final _observacoes = TextEditingController();
   final _scrollController = ScrollController();
   final _resultKey = GlobalKey();
   final _openedAt = DateTime.now();
+  var _objetivo = ProgressaoObjetivo.hipertrofia;
   bool _loading = false;
+  bool _exportando = false;
   IaProgressaoCargaResult? _resultado;
   String? _erro;
   var _viewTracked = false;
-  var _ttvTracked = false;
 
   @override
   void initState() {
@@ -78,106 +77,41 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       ProductEvents.iaProgressaoViewed,
       props: {'alunoId': widget.alunoId},
     );
-    if (!_ttvTracked) {
-      _ttvTracked = true;
-      AnalyticsService.instance.track(
-        ProductEvents.iaProgressaoTtv,
-        props: {
-          'alunoId': widget.alunoId,
-          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
-        },
-      );
-    }
+    AnalyticsService.instance.track(
+      ProductEvents.iaProgressaoTtv,
+      props: {
+        'alunoId': widget.alunoId,
+        'ms': DateTime.now().difference(_openedAt).inMilliseconds,
+      },
+    );
   }
 
   Future<void> _exportarPdf(IaProgressaoCargaResult resultado) async {
-    final parsed = resultado.toParsed();
-    final doc = pw.Document();
-    doc.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(32),
-        build: (ctx) {
-          final blocks = <pw.Widget>[
-            pw.Text(
-              'Progressão de Carga — ${widget.alunoNome}',
-              style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.SizedBox(height: 8),
-            pw.Text(
-              'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
-              style: const pw.TextStyle(fontSize: 10),
-            ),
-            pw.SizedBox(height: 20),
-          ];
-
-          if (parsed.hasStructuredRows) {
-            if (parsed.intro != null && parsed.intro!.isNotEmpty) {
-              blocks.add(
-                pw.Text(parsed.intro!, style: const pw.TextStyle(fontSize: 11)),
-              );
-              blocks.add(pw.SizedBox(height: 12));
-            }
-            for (final row in parsed.exercises) {
-              blocks.addAll([
-                pw.Text(
-                  row.exercicio,
-                  style: pw.TextStyle(
-                    fontSize: 13,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  'Atual: ${row.cargaAtual}  →  Sugerido: ${row.cargaSugerida}'
-                  '${row.deltaLabel != null ? ' (${row.deltaLabel})' : ''}',
-                  style: const pw.TextStyle(fontSize: 11),
-                ),
-                if (row.justificativa.isNotEmpty) ...[
-                  pw.SizedBox(height: 4),
-                  pw.Text(
-                    row.justificativa,
-                    style: const pw.TextStyle(fontSize: 10),
-                  ),
-                ],
-                pw.SizedBox(height: 12),
-              ]);
-            }
-            if (parsed.footer != null && parsed.footer!.isNotEmpty) {
-              blocks.add(
-                pw.Text(
-                  parsed.footer!,
-                  style: const pw.TextStyle(fontSize: 10),
-                ),
-              );
-            }
-          } else {
-            blocks.addAll(
-              resultado.resposta
-                  .split('\n')
-                  .map(
-                    (l) => pw.Padding(
-                      padding: const pw.EdgeInsets.only(bottom: 4),
-                      child: pw.Text(
-                        l
-                            .replaceAll(RegExp(r'^#+\s*'), '')
-                            .replaceAll('**', ''),
-                        style: const pw.TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ),
-            );
-          }
-          return blocks;
-        },
-      ),
-    );
-    await Printing.sharePdf(
-      bytes: await doc.save(),
-      filename: 'progressao_carga.pdf',
-    );
-    if (!mounted) return;
-    FeedbackHelper.showSuccess(context, 'PDF pronto para compartilhar.');
+    if (_exportando) return;
+    setState(() => _exportando = true);
+    try {
+      final agora = resultado.geradoEm ?? DateTime.now();
+      final bytes = await buildProgressaoPdf(
+        result: resultado,
+        alunoNome: widget.alunoNome,
+        personalNome: ref.read(personalNameProvider),
+        assets: await ProgressaoPdfAssets.load(),
+        agora: agora,
+      );
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: progressaoPdfFileName(widget.alunoNome, agora),
+      );
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não consegui gerar o PDF agora.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _exportando = false);
+    }
   }
 
   void _scrollToResult() {
@@ -205,18 +139,18 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
       subtitle: progressaoHubSubtitle(widget.alunoNome),
       tips: const [
         FxHelpTip(
-          'Pedido',
-          'Objetivo e histórico são opcionais. A IA usa o que você escrever.',
+          'Dados reais',
+          'A IA lê o treino ativo e as execuções das últimas 4 semanas. Você só escolhe o objetivo.',
           icon: 'target',
         ),
         FxHelpTip(
           'Opt-in',
-          'Nada é gerado sozinho. Confirme antes de gastar a cota.',
+          'Nada é gerado sozinho. A cota só é usada quando a sugestão chega.',
           icon: 'spark',
         ),
         FxHelpTip(
           'Reversível',
-          'Sugestões ficam pendentes. Só entram no treino se você aceitar.',
+          'Sugestões ficam pendentes. Carga, séries e repetições só mudam se você aceitar.',
           icon: 'circle-check',
         ),
       ],
@@ -231,6 +165,13 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         alunoId: widget.alunoId,
         alunoNome: widget.alunoNome,
       ).toExtra(),
+    );
+  }
+
+  void _abrirTreinos() {
+    context.push(
+      '/alunos/${widget.alunoId}/treinos-list',
+      extra: widget.alunoNome,
     );
   }
 
@@ -249,34 +190,24 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     if (!ok || !mounted) return;
     AnalyticsService.instance.track(
       ProductEvents.iaProgressaoCtaTapped,
-      props: {'alunoId': widget.alunoId},
+      props: {'alunoId': widget.alunoId, 'objetivo': _objetivo.api},
     );
     setState(() {
       _loading = true;
-      _resultado = null;
       _erro = null;
     });
     try {
-      final historico = normalizeIaProgressaoHistorico(_historico.text);
-      final objetivo = normalizeIaProgressaoObjetivo(_objetivo.text);
-      if (iaProgressaoHistoricoWasNormalized(_historico.text, historico) &&
-          mounted) {
-        FeedbackHelper.showInfo(
-          context,
-          'Histórico ajustado (séries e nomes de exercício padronizados).',
-        );
-      }
       final repo = IaRepository(ref.read(apiClientProvider));
       final r = await repo.progressaoCarga(
         widget.alunoId,
-        objetivo: objetivo.isEmpty ? null : objetivo,
-        historicoTreinos: historico.isEmpty ? null : historico,
+        objetivo: _objetivo.api,
+        observacoes: _observacoes.text.trim(),
       );
       if (!mounted) return;
       setState(() => _resultado = r);
       _scrollToResult();
+      ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
       if (r.sugestoesRegistradas > 0) {
-        ref.invalidate(progressaoSugestoesProvider(widget.alunoId));
         FeedbackHelper.showSuccess(
           context,
           progressaoSavedForReviewSnack(r.sugestoesRegistradas),
@@ -293,6 +224,9 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                       'Não consegui falar com a IA agora. Tente novamente em alguns segundos.',
                 );
         setState(() => _erro = message);
+        if (_resultado != null) {
+          FeedbackHelper.showInfo(context, progressaoErroManteveResultado);
+        }
         await IaQuotaUpgrade.handleError(context, ref, e);
       }
     }
@@ -301,8 +235,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
 
   @override
   void dispose() {
-    _objetivo.dispose();
-    _historico.dispose();
+    _observacoes.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -315,6 +248,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     final pending =
         ref.watch(progressaoSugestoesProvider(widget.alunoId)).value ??
         const [];
+    final contexto = ref.watch(progressaoContextoProvider(widget.alunoId));
+    final semTreino = isSemTreinoAtivo(contexto.error);
+    final resultado = _resultado;
+
     return fxScreenA11yScope(
       label: 'Progressão de Carga',
       child: FxKeyboardPopScope(
@@ -325,7 +262,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
             onBack: () => safePopOrGo(context, '/alunos/${widget.alunoId}'),
             actions: [
               FxHelpIconButton(
-                tooltip: 'Como pedir progressão',
+                tooltip: 'Como funciona a progressão',
                 onTap: _showHelp,
               ),
             ],
@@ -378,17 +315,13 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                     ),
                                     accent: primary,
                                     isDark: isDark,
-                                    onPressed: () => _abrirAceitar(),
+                                    onPressed: _abrirAceitar,
                                   ),
                                 FxActionChip(
                                   label: 'Treinos',
                                   accent: primary,
                                   isDark: isDark,
-                                  onPressed:
-                                      () => context.push(
-                                        '/alunos/${widget.alunoId}/treinos-list',
-                                        extra: widget.alunoNome,
-                                      ),
+                                  onPressed: _abrirTreinos,
                                 ),
                                 FxActionChip(
                                   label: 'Evolução',
@@ -404,34 +337,16 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                             const SizedBox(height: TokensStrip.s4),
                             const DashboardSectionHeader(title: 'Pedido'),
                             const SizedBox(height: TokensStrip.s2),
-                            AlunoInsetFormField(
-                              controller: _objetivo,
-                              label: 'Objetivo',
-                              hint: 'Hipertrofia, força, emagrecimento',
-                              icon: Icons.flag_outlined,
-                              textCapitalization: TextCapitalization.sentences,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(
-                                  progressaoObjetivoMax,
-                                ),
-                              ],
-                            ),
-                            AlunoInsetFormField(
-                              controller: _historico,
-                              label: 'Histórico recente',
-                              hint: 'Supino 80kg 3x8, Agachamento 100kg 4x6',
-                              icon: Icons.notes_outlined,
-                              maxLines: 5,
-                              showDivider: false,
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(
-                                  progressaoHistoricoMax,
-                                ),
-                              ],
+                            IaProgressaoPedidoCard(
+                              contexto: contexto,
+                              objetivo: _objetivo,
+                              onObjetivo:
+                                  (o) => setState(() => _objetivo = o),
+                              observacoes: _observacoes,
+                              enabled: !_loading,
                             ),
                             const SizedBox(height: TokensStrip.s3),
                             const IaSafetyDisclaimer(compact: true),
-                            if (_loading) const IaProgressaoLoadingSkeleton(),
                             if (_erro != null) ...[
                               const SizedBox(height: TokensStrip.s4),
                               FxErrorState(
@@ -441,35 +356,25 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                 onRetry: _gerar,
                               ),
                             ],
-                            if (_resultado != null) ...[
+                            if (_loading) const IaProgressaoLoadingSkeleton(),
+                            if (resultado != null && !_loading)
                               KeyedSubtree(
                                 key: _resultKey,
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    const SizedBox(height: TokensStrip.s5),
-                                    IaProgressaoResultView(
-                                      result: _resultado!,
-                                      alunoNome: widget.alunoNome,
-                                      onExportPdf:
-                                          () => _exportarPdf(_resultado!),
-                                      onApplyTreino: () {
-                                        FeedbackHelper.showInfo(
-                                          context,
-                                          'Abra o treino ativo para conferir ou ajustar as cargas.',
-                                        );
-                                        context.push(
-                                          '/alunos/${widget.alunoId}/treinos-list',
-                                          extra: widget.alunoNome,
-                                        );
-                                      },
-                                      onReviewSuggestions: _abrirAceitar,
-                                    ),
-                                  ],
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: TokensStrip.s5,
+                                  ),
+                                  child: IaProgressaoResultView(
+                                    result: resultado,
+                                    alunoNome: widget.alunoNome,
+                                    onExportPdf:
+                                        _exportando
+                                            ? null
+                                            : () => _exportarPdf(resultado),
+                                    onReviewSuggestions: _abrirAceitar,
+                                  ),
                                 ),
                               ),
-                            ],
                           ],
                         ),
                       ),
@@ -492,16 +397,26 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                     label:
                         _loading
                             ? 'Gerando progressão com IA'
+                            : semTreino
+                            ? progressaoAbrirTreino
                             : progressaoStickyLabel(
-                              hasResult: _resultado != null,
+                              hasResult: resultado != null,
                             ),
                     child: FxLiquidPrimaryButton(
-                      label: progressaoStickyLabel(
-                        hasResult: _resultado != null,
-                      ),
+                      label:
+                          semTreino
+                              ? progressaoAbrirTreino
+                              : progressaoStickyLabel(
+                                hasResult: resultado != null,
+                              ),
                       loading: _loading,
                       loadingLabel: progressaoStickyLoadingLabel(),
-                      onPressed: _loading ? null : _gerar,
+                      onPressed:
+                          _loading
+                              ? null
+                              : semTreino
+                              ? _abrirTreinos
+                              : _gerar,
                     ),
                   ),
                 ),

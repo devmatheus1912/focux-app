@@ -42,6 +42,17 @@ String? _computeVolumeDeltaLabel(String cargaAtual, String cargaSugerida) {
   );
 }
 
+/// Delta em kg vindo da API (`deltaKg`); null quando zero ou ilegível.
+String? formatProgressaoDeltaKg(Object? raw) {
+  final value = switch (raw) {
+    final num n => n.toDouble(),
+    final String s => double.tryParse(s.replaceAll(',', '.')),
+    _ => null,
+  };
+  if (value == null || value.abs() < 0.01) return null;
+  return _formatSignedDelta(value, 'kg');
+}
+
 String _formatSignedDelta(double delta, String unit, {bool integer = false}) {
   final sign = delta > 0 ? '+' : '';
   final abs = delta.abs();

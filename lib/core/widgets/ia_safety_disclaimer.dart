@@ -13,7 +13,7 @@ class IaSafetyDisclaimer extends StatelessWidget {
 
   const IaSafetyDisclaimer({super.key, this.customText, this.compact = false});
 
-  static const _defaultText =
+  static const defaultText =
       'As sugestões geradas por IA são apenas orientações iniciais e '
       'não substituem a avaliação de um profissional de Educação Física. '
       'Sempre consulte um especialista antes de adotar qualquer plano de treino. '
@@ -22,7 +22,7 @@ class IaSafetyDisclaimer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final text = customText ?? _defaultText;
+    final text = customText ?? defaultText;
 
     if (compact) {
       return Padding(

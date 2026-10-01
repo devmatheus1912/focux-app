@@ -17,7 +17,13 @@ void main() {
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxHubHeader'));
     expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('AlunoInsetFormField'));
+    expect(screen, contains('IaProgressaoPedidoCard'));
+    expect(screen, contains('progressaoContextoProvider'));
+    expect(screen, contains('isSemTreinoAtivo'));
+    expect(screen, contains('buildProgressaoPdf'));
+    expect(screen, contains('progressaoPdfFileName'));
+    expect(screen, isNot(contains('historicoTreinos')));
+    expect(screen, isNot(contains('_resultado = null')));
     expect(screen, contains('FxKeyboardPopScope'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FxLiquidPrimaryButton'));

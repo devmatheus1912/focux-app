@@ -4,23 +4,25 @@ import 'package:focux_app/features/ia/models/ia_progressao_carga_result.dart';
 import 'package:focux_app/features/ia/widgets/ia_progressao_result_view.dart';
 
 void main() {
-  const beatrizMarkdown = '''
-Com base no histórico recente, sugiro progressão controlada.
+  final result = IaProgressaoCargaResult.fromApi({
+    'resposta': 'resumo',
+    'intro': 'Boa consistência nas últimas semanas.',
+    'sugestoesRegistradas': 1,
+    'exercicios': [
+      {
+        'exercicio': 'Supino',
+        'cargaAtual': '80 kg · 3×8',
+        'cargaSugerida': '82,5 kg · 3×8',
+        'justificativa': 'Curta.',
+        'deltaKg': 2.5,
+      },
+    ],
+  }, geradoEm: DateTime(2026, 9, 30, 10, 0));
 
-| Exercício | Carga Atual | Carga Sugerida | Justificativa |
-| --- | --- | --- | --- |
-| Supino | 80kg 3x8 | 82,5kg 3x8 ou 80kg 3x10 | Aumentar 2,5kg mantendo reps ou manter carga e subir volume. |
-''';
-
-  testWidgets('renders Supino card legível em 390px com delta e ações', (
-    tester,
-  ) async {
+  Future<void> pump(WidgetTester tester, {VoidCallback? onReview}) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
-
-    final result = IaProgressaoCargaResult.fromApi({'resposta': beatrizMarkdown});
-
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -29,21 +31,37 @@ Com base no histórico recente, sugiro progressão controlada.
             child: IaProgressaoResultView(
               result: result,
               alunoNome: 'Beatriz',
-              showApplyTreino: false,
+              onExportPdf: () {},
+              onReviewSuggestions: onReview,
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  testWidgets('card legível em 390px com delta, data e ações', (tester) async {
+    await pump(tester, onReview: () {});
 
     expect(find.text('Supino'), findsOneWidget);
-    expect(find.text('80kg 3x8'), findsOneWidget);
-    expect(find.text('82,5kg 3x8 ou 80kg 3x10'), findsOneWidget);
+    expect(find.text('80 kg · 3×8'), findsOneWidget);
+    expect(find.text('82,5 kg · 3×8'), findsOneWidget);
     expect(find.text('+2,5 kg'), findsOneWidget);
+    expect(find.text('Gerado em 30/09/2026 10:00'), findsOneWidget);
+    expect(find.text('Revisar e aplicar'), findsOneWidget);
     expect(find.text('Copiar'), findsOneWidget);
-    expect(find.textContaining('|'), findsNothing);
-
+    expect(find.text('PDF'), findsOneWidget);
+    expect(find.text('Ver treinos do aluno'), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('justificativa curta não mostra "Ler justificativa"', (
+    tester,
+  ) async {
+    await pump(tester);
+
+    expect(find.text('Ler justificativa completa'), findsNothing);
+    expect(find.text('Revisar e aplicar'), findsNothing);
   });
 }

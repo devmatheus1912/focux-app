@@ -23,7 +23,13 @@ class ProgressaoSugestao {
     this.deltaKg,
     this.aceita = false,
     this.criadoEm,
+    this.seriesSugeridas,
+    this.repeticoesSugeridas,
+    this.status = statusPendente,
   });
+
+  static const statusPendente = 'PENDENTE';
+  static const statusNaoEncontrada = 'NAO_ENCONTRADA';
 
   final int id;
   final int alunoId;
@@ -37,9 +43,14 @@ class ProgressaoSugestao {
   final double? deltaKg;
   final bool aceita;
   final DateTime? criadoEm;
+  final int? seriesSugeridas;
+  final String? repeticoesSugeridas;
+  final String status;
+
+  bool get naoEncontrada => status == statusNaoEncontrada;
 
   String? get deltaLabel =>
-      _deltaFromApi(deltaKg) ??
+      formatProgressaoDeltaKg(deltaKg) ??
       computeProgressaoDeltaLabel(cargaAtual, cargaSugerida);
 
   factory ProgressaoSugestao.fromApi(Map<String, dynamic> json) {
@@ -63,6 +74,9 @@ class ProgressaoSugestao {
       deltaKg: _asDouble(json['deltaKg']),
       aceita: json['aceita'] == true,
       criadoEm: _parseDate(json['criadoEm']),
+      seriesSugeridas: _parseApiInt(json['seriesSugeridas']),
+      repeticoesSugeridas: json['repeticoesSugeridas'] as String?,
+      status: json['status'] as String? ?? statusPendente,
     );
   }
 
@@ -83,23 +97,12 @@ class ProgressaoSugestao {
         kg == kg.roundToDouble()
             ? kg.toStringAsFixed(0)
             : kg.toStringAsFixed(1).replaceAll('.', ',');
-    return '${formatted}kg';
+    return '$formatted kg';
   }
 
   static DateTime? _parseDate(Object? raw) {
     if (raw == null) return null;
     return DateTime.tryParse(raw.toString());
-  }
-
-  static String? _deltaFromApi(double? value) {
-    if (value == null || value.abs() < 0.01) return null;
-    final sign = value > 0 ? '+' : '';
-    final abs = value.abs();
-    final formatted =
-        abs == abs.roundToDouble()
-            ? abs.toStringAsFixed(0)
-            : abs.toStringAsFixed(1).replaceAll('.', ',');
-    return '$sign$formatted kg';
   }
 }
 
@@ -119,6 +122,51 @@ class ProgressaoAceitarResponse {
       cargaAplicada: json['cargaAplicada'] == true,
       treinoExercicioId: _parseApiInt(json['treinoExercicioId']),
       mensagem: json['mensagem'] as String? ?? 'Sugestão processada.',
+    );
+  }
+}
+
+class ProgressaoAceitarTodasResponse {
+  const ProgressaoAceitarTodasResponse({
+    required this.aplicadas,
+    required this.naoEncontradas,
+  });
+
+  final int aplicadas;
+  final int naoEncontradas;
+
+  factory ProgressaoAceitarTodasResponse.fromApi(Map<String, dynamic> json) {
+    return ProgressaoAceitarTodasResponse(
+      aplicadas: _parseApiInt(json['aplicadas']) ?? 0,
+      naoEncontradas: _parseApiInt(json['naoEncontradas']) ?? 0,
+    );
+  }
+}
+
+/// Resumo do que a IA vai ler (treino ativo + execuções das últimas 4 semanas).
+class ProgressaoContextoResumo {
+  const ProgressaoContextoResumo({
+    required this.treinos,
+    required this.exercicios,
+    required this.exerciciosComHistorico,
+    required this.sessoes4Semanas,
+  });
+
+  final List<String> treinos;
+  final int exercicios;
+  final int exerciciosComHistorico;
+  final int sessoes4Semanas;
+
+  factory ProgressaoContextoResumo.fromApi(Map<String, dynamic> json) {
+    final treinos = json['treinos'];
+    return ProgressaoContextoResumo(
+      treinos:
+          treinos is List
+              ? treinos.map((t) => t.toString()).toList(growable: false)
+              : const [],
+      exercicios: _parseApiInt(json['exercicios']) ?? 0,
+      exerciciosComHistorico: _parseApiInt(json['exerciciosComHistorico']) ?? 0,
+      sessoes4Semanas: _parseApiInt(json['sessoes4Semanas']) ?? 0,
     );
   }
 }

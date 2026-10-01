@@ -53,15 +53,4 @@ void main() {
     expect(api, contains('status >= 200 && status < 400'));
     expect(api, contains('etag'));
   });
-
-  test('CONTRATO §9 documenta snappy UX pareado com backend #75', () {
-    final contrato =
-        File('docs/CONTRATO_APP_BACKEND.md').readAsStringSync();
-    expect(contrato, contains('backend #75'));
-    expect(contrato, contains('historicoResumo'));
-    expect(contrato, contains('coachPendentes'));
-    expect(contrato, contains('max-age=60'));
-    expect(contrato, contains('max-age=90'));
-    expect(contrato, contains('If-None-Match'));
-  });
 }

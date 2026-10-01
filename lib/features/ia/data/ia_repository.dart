@@ -121,8 +121,8 @@ class IaRepository {
 
   Future<IaProgressaoCargaResult> progressaoCarga(
     int alunoId, {
-    String? objetivo,
-    String? historicoTreinos,
+    required String objetivo,
+    String? observacoes,
   }) async {
     return _withIaErrorContext(() async {
       final r = await _dio.post(
@@ -130,12 +130,25 @@ class IaRepository {
         options: _iaOpts,
         data: {
           'alunoId': alunoId,
-          if (objetivo != null && objetivo.isNotEmpty) 'objetivo': objetivo,
-          if (historicoTreinos != null && historicoTreinos.isNotEmpty)
-            'historicoTreinos': historicoTreinos,
+          'objetivo': objetivo,
+          if (observacoes != null && observacoes.isNotEmpty)
+            'observacoes': observacoes,
         },
       );
       return IaProgressaoCargaResult.fromApi(
+        Map<String, dynamic>.from(r.data as Map),
+        geradoEm: DateTime.now(),
+      );
+    });
+  }
+
+  Future<ProgressaoContextoResumo> progressaoContexto(int alunoId) async {
+    return _withIaErrorContext(() async {
+      final r = await _dio.get(
+        '/api/ia/progressao/contexto',
+        queryParameters: {'alunoId': alunoId},
+      );
+      return ProgressaoContextoResumo.fromApi(
         Map<String, dynamic>.from(r.data as Map),
       );
     });
@@ -272,6 +285,18 @@ class IaRepository {
     return const ProgressaoAceitarResponse(
       cargaAplicada: true,
       mensagem: 'Sugestão aceita.',
+    );
+  }
+
+  Future<ProgressaoAceitarTodasResponse> aceitarTodasSugestoes(
+    int alunoId,
+  ) async {
+    final r = await _dio.post(
+      '/api/ia/progressao/sugestoes/aceitar-todas',
+      queryParameters: {'alunoId': alunoId},
+    );
+    return ProgressaoAceitarTodasResponse.fromApi(
+      Map<String, dynamic>.from(r.data as Map),
     );
   }
 

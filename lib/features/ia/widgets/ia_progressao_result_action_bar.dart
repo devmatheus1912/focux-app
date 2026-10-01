@@ -8,17 +8,13 @@ class IaProgressaoResultActionBar extends StatelessWidget {
     super.key,
     required this.onCopy,
     this.onExportPdf,
-    this.onApplyTreino,
     this.onReviewSuggestions,
-    this.showApplyTreino = true,
     this.pendingSuggestions = 0,
   });
 
   final VoidCallback onCopy;
   final VoidCallback? onExportPdf;
-  final VoidCallback? onApplyTreino;
   final VoidCallback? onReviewSuggestions;
-  final bool showApplyTreino;
   final int pendingSuggestions;
 
   @override
@@ -28,14 +24,14 @@ class IaProgressaoResultActionBar extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showApplyTreino && onApplyTreino != null) ...[
+        if (onReviewSuggestions != null && pendingSuggestions > 0) ...[
           Semantics(
             button: true,
-            label: 'Ver treinos do aluno para conferir cargas',
+            label: progressaoAceitarSemanticsLabel(pendingSuggestions),
             child: FilledButton.icon(
-              onPressed: onApplyTreino,
-              icon: const Icon(Icons.fitness_center_rounded, size: 18),
-              label: const Text('Ver treinos do aluno'),
+              onPressed: onReviewSuggestions,
+              icon: const Icon(Icons.fact_check_outlined, size: 18),
+              label: const Text(progressaoRevisarAplicar),
               style: FilledButton.styleFrom(
                 backgroundColor: primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -73,18 +69,6 @@ class IaProgressaoResultActionBar extends StatelessWidget {
             ],
           ],
         ),
-        if (onReviewSuggestions != null) ...[
-          const SizedBox(height: TokensStrip.s2),
-          Semantics(
-            button: true,
-            label: progressaoAceitarSemanticsLabel(pendingSuggestions),
-            child: TextButton.icon(
-              onPressed: onReviewSuggestions,
-              icon: const Icon(Icons.fact_check_outlined, size: 18),
-              label: Text(progressaoPendingReviewLabel(pendingSuggestions)),
-            ),
-          ),
-        ],
       ],
     );
   }

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 
-/// Corpo de erro padrão do backend (`ApiErrorResponse`), conforme §2 do
-/// contrato pareado em `docs/CONTRATO_APP_BACKEND.md`.
+/// Corpo de erro padrão do backend (`ApiErrorResponse`).
 ///
 /// O campo da mensagem chama `erro` — não `mensagem`. E `codigo`, `detalhes` e
 /// `upgradePlano` chegam sob `@JsonInclude(NON_NULL)` no servidor, então
