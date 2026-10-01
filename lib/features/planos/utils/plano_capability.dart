@@ -35,8 +35,8 @@ class PlanoCapability {
         return features.equipeRbac;
       case 'lojaDigital':
         return features.lojaDigital;
-      case 'poseCoach':
-        return features.poseCoach;
+      case 'feedbackVideo':
+        return features.feedbackVideo;
       // Tier-only no BE (sem bool em /planos/me.features).
       case 'leads':
         return features.plano.canAccess(SubscriptionPlan.PRO);

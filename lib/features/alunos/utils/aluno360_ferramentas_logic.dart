@@ -390,7 +390,7 @@ abstract final class Aluno360FerramentasLogic {
   static String? gatedModuleCapability(Aluno360FerramentasGatedModule module) {
     return switch (module) {
       Aluno360FerramentasGatedModule.iaProgresso => 'iaCopiloto',
-      Aluno360FerramentasGatedModule.feedbackVideo => 'poseCoach',
+      Aluno360FerramentasGatedModule.feedbackVideo => 'feedbackVideo',
     };
   }
 

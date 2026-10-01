@@ -45,7 +45,7 @@ void main() {
     expect(view.selectedColumnLabel, 'Enterprise');
     expect(paywallTabLabel(SubscriptionPlan.ENTERPRISE), 'Enterprise');
 
-    final pose = view.rows.firstWhere((r) => r.feature == 'Pose Coach');
+    final pose = view.rows.firstWhere((r) => r.feature == 'Feedback em vídeo');
     expect(pose.selected, '✓');
     expect(view.rows.any((r) => r.feature.contains('✦')), isFalse);
   });

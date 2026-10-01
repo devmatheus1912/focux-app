@@ -19,9 +19,11 @@ void main() {
     expect(find.text('Nenhum fluxo ativo'), findsOneWidget);
   });
 
-  test('pose e loja digital seguem na matriz free vs pro', () {
+  test('feedback em vídeo e loja digital seguem na matriz free vs pro', () {
     expect(
-      PaywallCatalog.comparisonFreeVsPro.any((r) => r.feature.contains('Pose')),
+      PaywallCatalog.comparisonFreeVsPro.any(
+        (r) => r.feature == 'Feedback em vídeo' && r.paid == '✓',
+      ),
       isTrue,
     );
     expect(

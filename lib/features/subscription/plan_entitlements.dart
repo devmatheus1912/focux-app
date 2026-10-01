@@ -10,7 +10,7 @@ class PlanEntitlements {
 
   static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
 
-  /// Converte o enum de `detalhes.feature` do backend (`POSE_COACH`,
+  /// Converte o enum de `detalhes.feature` do backend (`FEEDBACK_VIDEO`,
   /// `IA_COPILOTO`, …) para a capability camelCase que o paywall já conhece.
   ///
   /// Sem este mapa a sheet não sabe qual copy mostrar, e `upgradePlano`
@@ -29,7 +29,7 @@ class PlanEntitlements {
       'COMUNIDADE_GRUPOS': 'comunidadeGrupos',
       'EQUIPE_RBAC': 'equipeRbac',
       'LOJA_DIGITAL': 'lojaDigital',
-      'POSE_COACH': 'poseCoach',
+      'FEEDBACK_VIDEO': 'feedbackVideo',
       'FINANCEIRO': 'financeiro',
       'RELATORIOS': 'relatorios',
       'AGENDA': 'agenda',
@@ -54,7 +54,7 @@ class PlanEntitlements {
       'COMUNIDADE_GRUPOS': 'Desafios e grupos',
       'EQUIPE_RBAC': 'Equipe / RBAC',
       'LOJA_DIGITAL': 'Loja digital',
-      'POSE_COACH': 'Pose Coach',
+      'FEEDBACK_VIDEO': 'Feedback em vídeo',
       'FINANCEIRO': 'Financeiro',
       'RELATORIOS': 'Relatórios',
       'AGENDA': 'Agenda',
@@ -81,7 +81,7 @@ class PlanEntitlements {
         lower.contains('receita passiva')) {
       return 'lojaDigital';
     }
-    if (lower.contains('pose coach')) return 'poseCoach';
+    if (lower.contains('feedback em vídeo')) return 'feedbackVideo';
     if (lower.contains('white-label') ||
         lower.contains('marca própria') ||
         lower.contains('marca propria')) {
@@ -134,7 +134,6 @@ class PlanEntitlements {
     switch (capability) {
       case 'landingCompleta':
       case 'lojaDigital':
-      case 'poseCoach':
       case 'automacoesAvancadas':
       case 'nfse':
         return SubscriptionPlan.ENTERPRISE;
@@ -151,6 +150,7 @@ class PlanEntitlements {
       case 'migracaoFoto':
       case 'agenda':
       case 'leads':
+      case 'feedbackVideo':
         return SubscriptionPlan.PRO;
       default:
         return fallback;
@@ -193,7 +193,7 @@ class PlanEntitlements {
       'comunidadeGrupos' => 'Desafios e grupos com ranking',
       'equipeRbac' => 'Equipe com permissões granulares',
       'lojaDigital' => 'Loja digital com checkout PIX',
-      'poseCoach' => 'Pose Coach — análise de postura ML',
+      'feedbackVideo' => 'Corrija a execução pelo vídeo do aluno',
       'leads' => 'CRM de leads sem teto do Free',
       'nfse' => 'Nota fiscal no fluxo de cobrança',
       _ => 'Desbloqueie $featureName',
@@ -233,8 +233,9 @@ class PlanEntitlements {
         'Convide assistentes com permissões granulares no Enterprise (até 5 seats).',
       'lojaDigital' =>
         'Venda programas digitais com checkout PIX no Enterprise.',
-      'poseCoach' =>
-        'Análise de postura por ML em tempo real no Enterprise.',
+      'feedbackVideo' =>
+        'O aluno envia o vídeo do exercício e você responde com a correção. '
+            'Faz parte do plano $planLabel.',
       'leads' =>
         'CRM de leads ilimitado faz parte do plano $planLabel. '
             'O Free segura 5; no Pro o funil não tem esse teto.',
@@ -348,21 +349,21 @@ class PlanEntitlements {
           detail: 'Nome, preço e o que está incluso',
         ),
       ],
-      'poseCoach' => const [
-        UpgradeSalesBenefit(
-          icon: Icons.accessibility_new_rounded,
-          label: 'Análise de postura ML',
-          detail: 'Feedback visual em tempo real',
-        ),
+      'feedbackVideo' => const [
         UpgradeSalesBenefit(
           icon: Icons.videocam_outlined,
-          label: 'Form check com evidência',
-          detail: 'Menos lesão, mais qualidade',
+          label: 'Vídeo do exercício',
+          detail: 'O aluno grava e envia pelo app',
+        ),
+        UpgradeSalesBenefit(
+          icon: Icons.rate_review_outlined,
+          label: 'Sua correção por escrito',
+          detail: 'Fica salva junto do vídeo',
         ),
         UpgradeSalesBenefit(
           icon: Icons.school_outlined,
           label: 'Aluno aprende mais rápido',
-          detail: 'Correção clara no treino',
+          detail: 'Correção clara entre as aulas',
         ),
       ],
       _ => [

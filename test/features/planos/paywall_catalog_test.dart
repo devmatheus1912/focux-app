@@ -4,7 +4,7 @@ import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
   test('comparisons binárias batem com a spec', () {
-    expect(PaywallCatalog.comparisonFreeVsPro.length, 6);
+    expect(PaywallCatalog.comparisonFreeVsPro.length, 7);
     expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 9);
   });
 
@@ -58,8 +58,8 @@ void main() {
   });
 
   test('parseFeatureLabel strips pro markers', () {
-    final a = PaywallCatalog.parseFeatureLabel('Pose Coach ML ✦');
-    expect(a.label, 'Pose Coach ML');
+    final a = PaywallCatalog.parseFeatureLabel('Feedback em vídeo ML ✦');
+    expect(a.label, 'Feedback em vídeo ML');
     expect(a.pro, isTrue);
     final b = PaywallCatalog.parseFeatureLabel('30 alunos ativos');
     expect(b.pro, isFalse);

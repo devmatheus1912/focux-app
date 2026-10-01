@@ -24,12 +24,12 @@ void main() {
       _dio(
         data: {
           'erro':
-              'O recurso POSE_COACH requer plano ENTERPRISE ou superior. Faca upgrade.',
+              'O recurso FEEDBACK_VIDEO requer plano ENTERPRISE ou superior. Faca upgrade.',
           'status': 403,
           'requestId': 'a1b2c3',
           'codigo': 'PLANO_FEATURE_REQUER_UPGRADE',
           'upgradePlano': 'ENTERPRISE',
-          'detalhes': {'feature': 'POSE_COACH'},
+          'detalhes': {'feature': 'FEEDBACK_VIDEO'},
         },
       ),
     );
@@ -37,8 +37,8 @@ void main() {
     expect(parsed, isNotNull);
     expect(parsed!.codigo, 'PLANO_FEATURE_REQUER_UPGRADE');
     expect(parsed.upgradePlano, 'ENTERPRISE');
-    expect(parsed.feature, 'POSE_COACH');
-    expect(parsed.mensagem, contains('POSE_COACH'));
+    expect(parsed.feature, 'FEEDBACK_VIDEO');
+    expect(parsed.mensagem, contains('FEEDBACK_VIDEO'));
     expect(isPlanGateError(_dio(data: {
       'erro': parsed.mensagem,
       'codigo': parsed.codigo,
@@ -126,7 +126,7 @@ void main() {
     final error = _dio(
       data: {
         'erro':
-            'O recurso POSE_COACH requer plano ENTERPRISE ou superior. Faca upgrade.',
+            'O recurso FEEDBACK_VIDEO requer plano ENTERPRISE ou superior. Faca upgrade.',
       },
     );
 

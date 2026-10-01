@@ -8,16 +8,19 @@ void main() {
     expect(feedbackVideoLabel(null), 'Feedback');
   });
 
-  test('feedbackVideo score e ícone', () {
-    expect(feedbackVideoValue(null), 'Vídeo');
-    expect(feedbackVideoValue(80), '80');
-    expect(feedbackVideoFxIcon(null), 'spark');
-    expect(feedbackVideoFxIcon(80), 'circle-check');
-    expect(feedbackVideoFxIcon(50), 'trend');
-    expect(feedbackVideoFxIcon(10), 'alert-triangle');
-    expect(feedbackVideoDanger(39), isTrue);
-    expect(feedbackVideoDanger(40), isFalse);
-    expect(feedbackVideoDanger(null), isFalse);
+  test('status mostra se o personal já respondeu, sem nota de IA', () {
+    final dia = DateTime(2026, 9, 30);
+    expect(
+      feedbackVideoSubtitle(criadoEm: dia, respondido: false),
+      endsWith('Aguardando sua resposta'),
+    );
+    expect(
+      feedbackVideoSubtitle(criadoEm: dia, respondido: true),
+      endsWith('Respondido'),
+    );
+    expect(feedbackVideoStatusLabel(respondido: false), 'Novo');
+    expect(feedbackVideoResponderLabel(respondido: true), 'Editar resposta');
+    expect(feedbackVideoHelpTip, isNot(contains('IA')));
   });
 
   test('feedbackVideoCountLabel e query', () {

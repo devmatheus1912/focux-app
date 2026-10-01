@@ -76,8 +76,9 @@ class PaywallCatalog {
       free: '—',
       paid: '✓',
     ),
+    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'White-label / landing / loja / Pose / NFSe / equipe',
+      feature: 'White-label / landing / loja / NFSe / equipe',
       free: '—',
       paid: '—',
     ),
@@ -99,7 +100,7 @@ class PaywallCatalog {
       paid: '✓',
     ),
     PaywallComparisonRow(feature: 'Landing + loja', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Pose Coach', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'NFSe + equipe (5)', free: '—', paid: '✓'),
   ];
 

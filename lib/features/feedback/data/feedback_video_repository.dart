@@ -10,9 +10,11 @@ class FeedbackVideo {
   final String videoUrl;
   final String comentario;
   final DateTime criadoEm;
-  final String? aiAnalise;
-  final int? aiScore;
-  final String? statusAnalise;
+  final String? respostaPersonal;
+  final DateTime? respondidoEm;
+  final String? status;
+
+  bool get respondido => (respostaPersonal ?? '').trim().isNotEmpty;
 
   FeedbackVideo({
     required this.id,
@@ -22,9 +24,9 @@ class FeedbackVideo {
     required this.videoUrl,
     required this.comentario,
     required this.criadoEm,
-    this.aiAnalise,
-    this.aiScore,
-    this.statusAnalise,
+    this.respostaPersonal,
+    this.respondidoEm,
+    this.status,
   });
 
   factory FeedbackVideo.fromJson(Map<String, dynamic> j) => FeedbackVideo(
@@ -35,9 +37,11 @@ class FeedbackVideo {
     videoUrl: j['videoUrl'] as String,
     comentario: j['comentario'] as String? ?? '',
     criadoEm: DateTime.parse(j['criadoEm'] as String),
-    aiAnalise: j['aiAnalise'] as String?,
-    aiScore: j['aiScore'] as int?,
-    statusAnalise: j['statusAnalise'] as String?,
+    respostaPersonal: j['respostaPersonal'] as String?,
+    respondidoEm: j['respondidoEm'] == null
+        ? null
+        : DateTime.parse(j['respondidoEm'] as String),
+    status: j['status'] as String?,
   );
 }
 
@@ -118,6 +122,14 @@ class FeedbackVideoRepository {
       },
     );
     return FeedbackVideo.fromJson(r.data);
+  }
+
+  Future<FeedbackVideo> responder(int id, String resposta) async {
+    final r = await _dio.put(
+      '/api/feedback-videos/$id/resposta',
+      data: {'resposta': resposta},
+    );
+    return FeedbackVideo.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
   Future<void> deletar(int id) async {

@@ -46,8 +46,8 @@ void main() {
 
   test('capabilityFromBackendFeature mapeia o enum do contrato', () {
     expect(
-      PlanEntitlements.capabilityFromBackendFeature('POSE_COACH'),
-      'poseCoach',
+      PlanEntitlements.capabilityFromBackendFeature('FEEDBACK_VIDEO'),
+      'feedbackVideo',
     );
     expect(
       PlanEntitlements.capabilityFromBackendFeature('ia_copiloto'),
@@ -60,23 +60,23 @@ void main() {
   });
 
   test('upgradePlano do servidor vence o mapa local de capability', () {
-    // Pose Coach é Enterprise no mapa local. Se o servidor mandar PRO,
+    // Loja digital é Enterprise no mapa local. Se o servidor mandar PRO,
     // a sheet oferece PRO — senão o app ignora o campo que o contrato
     // existe para carregar.
     final fromServer = PlanEntitlements.lockedOffer(
-      featureName: 'Pose Coach',
-      capability: 'poseCoach',
+      featureName: 'Loja digital',
+      capability: 'lojaDigital',
       upgradePlano: SubscriptionPlan.PRO,
     );
     expect(fromServer.targetPlan, SubscriptionPlan.PRO);
   });
 
-  test('sem upgradePlano, poseCoach continua Enterprise e LEADS/NFSE seguem o contrato', () {
-    final pose = PlanEntitlements.lockedOffer(
-      featureName: 'Pose Coach',
-      capability: 'poseCoach',
+  test('sem upgradePlano, feedbackVideo é Pro e LEADS/NFSE seguem o contrato', () {
+    final feedback = PlanEntitlements.lockedOffer(
+      featureName: 'Feedback em vídeo',
+      capability: 'feedbackVideo',
     );
-    expect(pose.targetPlan, SubscriptionPlan.ENTERPRISE);
+    expect(feedback.targetPlan, SubscriptionPlan.PRO);
 
     expect(
       PlanEntitlements.targetPlan(capability: 'leads'),
@@ -104,7 +104,7 @@ void main() {
       'comunidadeGrupos',
       'equipeRbac',
       'lojaDigital',
-      'poseCoach',
+      'feedbackVideo',
       'leads',
       'nfse',
     ];

@@ -8,29 +8,17 @@ String feedbackVideoLabel(String? comentario) {
 
 String feedbackVideoSubtitle({
   required DateTime criadoEm,
-  int? aiScore,
-  String? statusAnalise,
+  required bool respondido,
 }) {
   final date = fxDateShort(criadoEm);
-  if (aiScore == null) return date;
-  final status = statusAnalise?.trim();
-  if (status == null || status.isEmpty) return '$date · IA $aiScore/100';
-  return '$date · IA $aiScore/100 · $status';
+  return respondido ? '$date · Respondido' : '$date · Aguardando sua resposta';
 }
 
-String feedbackVideoValue(int? aiScore) {
-  if (aiScore == null) return 'Vídeo';
-  return '$aiScore';
-}
+String feedbackVideoStatusLabel({required bool respondido}) =>
+    respondido ? 'Respondido' : 'Novo';
 
-String feedbackVideoFxIcon(int? aiScore) {
-  if (aiScore == null) return 'spark';
-  if (aiScore >= 70) return 'circle-check';
-  if (aiScore >= 40) return 'trend';
-  return 'alert-triangle';
-}
-
-bool feedbackVideoDanger(int? aiScore) => aiScore != null && aiScore < 40;
+String feedbackVideoResponderLabel({required bool respondido}) =>
+    respondido ? 'Editar resposta' : 'Responder';
 
 String feedbackVideoCountLabel(int count) {
   if (count == 1) return '1 feedback';
@@ -38,7 +26,8 @@ String feedbackVideoCountLabel(int count) {
 }
 
 const feedbackVideoHelpTip =
-    'Feedback de vídeo usa Pose Coach (Enterprise). Escolha o exercício do treino ativo do aluno e cole a URL do vídeo.';
+    'O aluno envia o vídeo do exercício e você responde com a correção. '
+    'Disponível no Pro e no Enterprise.';
 
 bool feedbackVideoMatchesQuery({
   required String comentario,

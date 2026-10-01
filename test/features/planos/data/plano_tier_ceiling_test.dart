@@ -42,6 +42,7 @@ void main() {
       expect(f.lojaDigital, isFalse);
       expect(f.landingCompleta, isFalse);
       expect(f.whiteLabel, isFalse);
+      expect(f.feedbackVideo, isTrue);
     });
 
     test('ENTERPRISE — marca, loja, landing e equipe', () {
@@ -52,7 +53,7 @@ void main() {
       expect(f.whiteLabel, isTrue);
       expect(f.lojaDigital, isTrue);
       expect(f.landingCompleta, isTrue);
-      expect(f.poseCoach, isTrue);
+      expect(f.feedbackVideo, isTrue);
       expect(f.automacoesAvancadas, isTrue);
       expect(f.limiteAssistentes, 5);
     });
@@ -68,7 +69,7 @@ void main() {
         migracaoFoto: false,
         landingCompleta: false,
         lojaDigital: false,
-        poseCoach: false,
+        feedbackVideo: false,
         automacoes: false,
       );
 
@@ -77,7 +78,7 @@ void main() {
       expect(f.financeiro, isTrue);
       expect(f.landingCompleta, isTrue);
       expect(f.lojaDigital, isTrue);
-      expect(f.poseCoach, isTrue);
+      expect(f.feedbackVideo, isTrue);
       expect(f.automacoes, isTrue);
       expect(f.automacoesAvancadas, isTrue);
       expect(f.equipeRbac, isTrue);

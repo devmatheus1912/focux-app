@@ -56,7 +56,7 @@ void main() {
 
     final roi = PaywallCatalog.roiTagForPlan(SubscriptionPlan.PRO);
     expect(roi, isNotNull);
-    expect(find.text(roi!), findsOneWidget);
+    expect(find.text(roi!, skipOffstage: false), findsOneWidget);
 
     final freeW = tester.getSize(find.byKey(const ValueKey('paywall-tab-FREE'))).width;
     final proW = tester.getSize(find.byKey(const ValueKey('paywall-tab-PRO'))).width;

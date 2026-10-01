@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/safe_external_launch.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -40,7 +39,7 @@ import '../utils/feedback_video_display.dart';
 
 part 'feedback_video_screen_form.part.dart';
 
-enum _FeedbackVideoAcao { abrir, deletar }
+enum _FeedbackVideoAcao { abrir, responder, deletar }
 
 class FeedbackVideoScreen extends ConsumerStatefulWidget {
   final int? alunoId;
@@ -166,14 +165,22 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     final picked = await showFxInsetPickerSheet<_FeedbackVideoAcao>(
       context,
       title: feedbackVideoLabel(item.comentario),
-      items: const [
-        FxInsetPickerSheetItem(
+      subtitle: item.respondido ? item.respostaPersonal : null,
+      items: [
+        const FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.abrir,
           label: 'Assistir vídeo',
+          icon: Icons.play_circle_outline_rounded,
         ),
         FxInsetPickerSheetItem(
+          value: _FeedbackVideoAcao.responder,
+          label: feedbackVideoResponderLabel(respondido: item.respondido),
+          icon: Icons.rate_review_outlined,
+        ),
+        const FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.deletar,
           label: 'Remover',
+          icon: Icons.delete_outline_rounded,
         ),
       ],
     );
@@ -181,8 +188,50 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
     switch (picked) {
       case _FeedbackVideoAcao.abrir:
         await _abrirVideo(item.videoUrl);
+      case _FeedbackVideoAcao.responder:
+        await _responder(item);
       case _FeedbackVideoAcao.deletar:
         await _deletar(item);
+    }
+  }
+
+  Future<void> _responder(FeedbackVideo item) async {
+    final ctrl = TextEditingController(text: item.respostaPersonal ?? '');
+    try {
+      final ok = await showFxFormSheet(
+        context,
+        title: feedbackVideoResponderLabel(respondido: item.respondido),
+        subtitle: feedbackVideoLabel(item.comentario),
+        icon: Icons.rate_review_outlined,
+        confirmLabel: 'Enviar ao aluno',
+        child: AlunoInsetFormField(
+          controller: ctrl,
+          label: 'Sua correção',
+          icon: Icons.notes_outlined,
+          hint: 'Ex.: desça mais devagar e mantenha o joelho alinhado.',
+          maxLines: 5,
+          showDivider: false,
+        ),
+      );
+      if (ok != true || !mounted) return;
+      final texto = ctrl.text.trim();
+      if (texto.isEmpty) {
+        FeedbackHelper.showError(context, 'Escreva a resposta para o aluno.');
+        return;
+      }
+      final atualizado = await FeedbackVideoRepository(
+        ref.read(apiClientProvider),
+      ).responder(item.id, texto);
+      if (!mounted) return;
+      setState(() {
+        final i = _feedbacks.indexWhere((f) => f.id == item.id);
+        if (i >= 0) _feedbacks[i] = atualizado;
+      });
+      FeedbackHelper.showSuccess(context, 'Resposta enviada.');
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      ctrl.dispose();
     }
   }
 
@@ -402,21 +451,17 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
             subtitle: Text(
               feedbackVideoSubtitle(
                 criadoEm: item.criadoEm,
-                aiScore: item.aiScore,
-                statusAnalise: item.statusAnalise,
+                respondido: item.respondido,
               ),
             ),
             trailing: Text(
-              feedbackVideoValue(item.aiScore),
+              feedbackVideoStatusLabel(respondido: item.respondido),
               style: FocuxHubTypography.bodyMuted(
-                color:
-                    feedbackVideoDanger(item.aiScore)
-                        ? EagleTokens.bad
-                        : fxScreenMute(context),
+                color: item.respondido ? fxScreenMute(context) : primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            accent: feedbackVideoDanger(item.aiScore) ? EagleTokens.bad : null,
+            accent: item.respondido ? null : primary,
             onTap: () => _abrirAcoes(item),
           );
         },

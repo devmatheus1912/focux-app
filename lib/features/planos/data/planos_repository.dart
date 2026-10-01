@@ -176,7 +176,7 @@ class PlanoFeatures {
   final bool comunidadeGrupos;
   final bool equipeRbac;
   final bool lojaDigital;
-  final bool poseCoach;
+  final bool feedbackVideo;
   final int? limiteAssistentes;
   final int alunosAtivos;
   final int iaUsadaMes;
@@ -209,7 +209,7 @@ class PlanoFeatures {
     this.comunidadeGrupos = false,
     this.equipeRbac = false,
     this.lojaDigital = false,
-    this.poseCoach = false,
+    this.feedbackVideo = false,
     this.limiteAssistentes,
     this.alunosAtivos = 0,
     this.iaUsadaMes = 0,
@@ -277,7 +277,7 @@ class PlanoFeatures {
       comunidadeGrupos: f['comunidadeGrupos'] as bool? ?? false,
       equipeRbac: f['equipeRbac'] as bool? ?? false,
       lojaDigital: f['lojaDigital'] as bool? ?? false,
-      poseCoach: f['poseCoach'] as bool? ?? false,
+      feedbackVideo: f['feedbackVideo'] as bool? ?? false,
       limiteAssistentes: (j['limiteAssistentes'] as num?)?.toInt(),
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
@@ -338,7 +338,7 @@ class PlanoFeatures {
       comunidadeGrupos: comunidadeGrupos,
       equipeRbac: equipeRbac,
       lojaDigital: lojaDigital,
-      poseCoach: poseCoach,
+      feedbackVideo: feedbackVideo,
       limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
@@ -366,7 +366,7 @@ class PlanoFeatures {
         'comunidadeGrupos': off,
         'equipeRbac': off,
         'lojaDigital': off,
-        'poseCoach': off,
+        'feedbackVideo': off,
       },
       SubscriptionPlan.PRO => {
         'financeiro': on,
@@ -383,7 +383,7 @@ class PlanoFeatures {
         'comunidadeGrupos': off,
         'equipeRbac': off,
         'lojaDigital': off,
-        'poseCoach': off,
+        'feedbackVideo': on,
       },
       SubscriptionPlan.ENTERPRISE => {
         'financeiro': on,
@@ -400,7 +400,7 @@ class PlanoFeatures {
         'comunidadeGrupos': on,
         'equipeRbac': on,
         'lojaDigital': on,
-        'poseCoach': on,
+        'feedbackVideo': on,
       },
     };
   }
@@ -435,7 +435,7 @@ class PlanoFeatures {
       comunidadeGrupos: caps['comunidadeGrupos']!,
       equipeRbac: caps['equipeRbac']!,
       lojaDigital: caps['lojaDigital']!,
-      poseCoach: caps['poseCoach']!,
+      feedbackVideo: caps['feedbackVideo']!,
       limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
@@ -472,7 +472,7 @@ class PlanoFeatures {
       'comunidadeGrupos': comunidadeGrupos,
       'equipeRbac': equipeRbac,
       'lojaDigital': lojaDigital,
-      'poseCoach': poseCoach,
+      'feedbackVideo': feedbackVideo,
     },
   };
 
@@ -505,7 +505,7 @@ class PlanoFeatures {
       comunidadeGrupos: comunidadeGrupos,
       equipeRbac: equipeRbac,
       lojaDigital: lojaDigital,
-      poseCoach: poseCoach,
+      feedbackVideo: feedbackVideo,
       limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
@@ -545,7 +545,7 @@ class PlanoFeatures {
     comunidadeGrupos: false,
     equipeRbac: false,
     lojaDigital: false,
-    poseCoach: false,
+    feedbackVideo: false,
   );
 
   static const optimisticEnterprise = PlanoFeatures(
@@ -568,7 +568,7 @@ class PlanoFeatures {
     comunidadeGrupos: true,
     equipeRbac: true,
     lojaDigital: true,
-    poseCoach: true,
+    feedbackVideo: true,
     limiteAssistentes: 5,
     limiteMigracaoFotoMensal: 80,
   );

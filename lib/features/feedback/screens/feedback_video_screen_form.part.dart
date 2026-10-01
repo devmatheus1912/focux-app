@@ -4,12 +4,12 @@ extension on _FeedbackVideoScreenState {
   Future<void> _novoFeedback() async {
     HapticFeedback.selectionClick();
     final features = ref.read(planoFeaturesProvider).value;
-    if (features == null || !PlanoCapability.has(features, 'poseCoach')) {
+    if (features == null || !PlanoCapability.has(features, 'feedbackVideo')) {
       if (!mounted) return;
       await UpgradePromptSheet.show(
         context: context,
-        featureName: 'Pose Coach — feedback de vídeo',
-        capability: 'poseCoach',
+        featureName: 'Feedback em vídeo',
+        capability: 'feedbackVideo',
       );
       return;
     }
@@ -69,8 +69,8 @@ extension on _FeedbackVideoScreenState {
       if (isPlanGateError(e)) {
         await UpgradePromptSheet.show(
           context: context,
-          featureName: 'Pose Coach — feedback de vídeo',
-          capability: 'poseCoach',
+          featureName: 'Feedback em vídeo',
+          capability: 'feedbackVideo',
         );
         return;
       }
@@ -132,8 +132,8 @@ extension on _FeedbackVideoScreenState {
       if (isPlanGateError(e)) {
         await UpgradePromptSheet.show(
           context: context,
-          featureName: 'Pose Coach — feedback de vídeo',
-          capability: 'poseCoach',
+          featureName: 'Feedback em vídeo',
+          capability: 'feedbackVideo',
         );
         return;
       }
