@@ -25,6 +25,13 @@ List<_StudentToolAction> _alunoTools(S s) => [
     group: _StudentToolGroup.treino,
   ),
   _StudentToolAction(
+    icon: Icons.videocam_outlined,
+    title: s.alunoFerramentaFeedbackVideoTitulo,
+    subtitle: s.alunoFerramentaFeedbackVideoDetalhe,
+    route: alunoFeedbackVideoRoute,
+    group: _StudentToolGroup.treino,
+  ),
+  _StudentToolAction(
     icon: Icons.flag_outlined,
     title: s.alunoFerramentaDesafiosTitulo,
     subtitle: s.alunoFerramentaDesafiosDetalhe,

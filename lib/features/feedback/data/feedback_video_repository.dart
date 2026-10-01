@@ -1,12 +1,20 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/api/media_upload_service.dart';
 import '../../../core/api/pagina.dart';
+import '../../auth/providers/auth_provider.dart';
+
+final feedbackVideoRepositoryProvider = Provider<FeedbackVideoRepository>(
+  (ref) => FeedbackVideoRepository(ref.read(apiClientProvider)),
+);
 
 class FeedbackVideo {
   final int id;
   final int alunoId;
   final int? personalId;
   final int exercicioId;
+  final String? exercicioNome;
   final String videoUrl;
   final String comentario;
   final DateTime criadoEm;
@@ -21,6 +29,7 @@ class FeedbackVideo {
     required this.alunoId,
     this.personalId,
     required this.exercicioId,
+    this.exercicioNome,
     required this.videoUrl,
     required this.comentario,
     required this.criadoEm,
@@ -33,7 +42,8 @@ class FeedbackVideo {
     id: j['id'] as int,
     alunoId: j['alunoId'] as int,
     personalId: j['personalId'] as int?,
-    exercicioId: j['exercicioId'] as int,
+    exercicioId: (j['exercicioId'] as num?)?.toInt() ?? 0,
+    exercicioNome: j['exercicioNome'] as String?,
     videoUrl: j['videoUrl'] as String,
     comentario: j['comentario'] as String? ?? '',
     criadoEm: DateTime.parse(j['criadoEm'] as String),
@@ -47,8 +57,33 @@ class FeedbackVideo {
 
 class FeedbackVideoRepository {
   final Dio _dio;
+  final MediaUploadService _uploads;
 
-  FeedbackVideoRepository(ApiClient client) : _dio = client.dio;
+  FeedbackVideoRepository(ApiClient client)
+    : _dio = client.dio,
+      _uploads = MediaUploadService(client);
+
+  /// Sobe o vídeo na pasta `feedback/videos` e devolve a URL https.
+  Future<String> subirVideo({
+    required String filename,
+    String? path,
+    List<int>? bytes,
+  }) {
+    if (path != null && path.isNotEmpty) {
+      return _uploads.uploadFile(
+        path: path,
+        filename: filename,
+        folder: 'feedback/videos',
+        resourceType: 'video',
+      );
+    }
+    return _uploads.uploadBytes(
+      bytes: bytes ?? const [],
+      filename: filename,
+      folder: 'feedback/videos',
+      resourceType: 'video',
+    );
+  }
 
   Future<Pagina<FeedbackVideo>> listarPagina({
     int page = 0,
@@ -123,6 +158,30 @@ class FeedbackVideoRepository {
   Future<List<ExercicioOpcao>> exerciciosDisponiveisParaAluno(int alunoId) async {
     final r = await _dio.get('/api/feedback-videos/aluno/$alunoId/exercicios');
     return _parseExercicioOpcoes(r.data);
+  }
+
+  Future<Pagina<FeedbackVideo>> listarMeus({int page = 0, int size = 20}) =>
+      _pagina('/api/feedback-videos/me', page: page, size: size);
+
+  Future<List<ExercicioOpcao>> meusExercicios() async {
+    final r = await _dio.get('/api/feedback-videos/me/exercicios-disponiveis');
+    return _parseExercicioOpcoes(r.data);
+  }
+
+  Future<FeedbackVideo> enviarMeu({
+    required int exercicioId,
+    required String videoUrl,
+    String comentario = '',
+  }) async {
+    final r = await _dio.post(
+      '/api/feedback-videos/me',
+      data: {
+        'exercicioId': exercicioId,
+        'videoUrl': videoUrl,
+        'comentario': comentario,
+      },
+    );
+    return FeedbackVideo.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
   List<ExercicioOpcao> _parseExercicioOpcoes(Object? data) {

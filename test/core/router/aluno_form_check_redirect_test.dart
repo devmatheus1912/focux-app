@@ -4,13 +4,18 @@ import 'package:focux_app/core/router/app_router_redirect.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('aluno form-check redireciona para home (§38 hide)', () {
+  test('form-check antigo cai nos vídeos do aluno', () {
     final routes = readScreenSourceBundle(
       'lib/core/router/app_router_aluno_routes.dart',
     );
     expect(routes, contains("path: '/aluno/form-check'"));
-    expect(routes, contains("redirect: (context, state) => '/dashboard/aluno'"));
-    expect(routes, isNot(contains('FeedbackAlunoScreen')));
+    expect(
+      routes,
+      contains("redirect: (context, state) => '/aluno/feedback-videos'"),
+    );
+    expect(routes, contains("path: '/aluno/feedback-videos'"));
+    expect(routes, contains('AlunoFeedbackVideoScreen()'));
+    expect(isAlunoOnlyLocation('/aluno/feedback-videos'), isTrue);
   });
 
   test('ia/aluno removido — IA só personal', () {

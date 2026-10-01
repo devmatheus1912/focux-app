@@ -164,8 +164,11 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   Future<void> _abrirAcoes(FeedbackVideo item) async {
     final picked = await showFxInsetPickerSheet<_FeedbackVideoAcao>(
       context,
-      title: feedbackVideoLabel(item.comentario),
-      subtitle: item.respondido ? item.respostaPersonal : null,
+      title: feedbackVideoTitulo(
+        exercicioNome: item.exercicioNome,
+        comentario: item.comentario,
+      ),
+      subtitle: item.comentario.trim().isEmpty ? null : item.comentario.trim(),
       items: [
         const FxInsetPickerSheetItem(
           value: _FeedbackVideoAcao.abrir,
@@ -447,7 +450,10 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
           }
           final item = visible[i];
           return FxSatelliteListTile(
-            title: feedbackVideoLabel(item.comentario),
+            title: feedbackVideoTitulo(
+              exercicioNome: item.exercicioNome,
+              comentario: item.comentario,
+            ),
             subtitle: Text(
               feedbackVideoSubtitle(
                 criadoEm: item.criadoEm,

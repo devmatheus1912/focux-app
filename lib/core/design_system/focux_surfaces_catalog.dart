@@ -118,11 +118,15 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: _alunoHome,
   ),
-  // Deep link legado (§38 hide) — redirect-only, sem superfície.
+  // Deep link legado do Pose Coach — redirect-only, sem superfície.
   '/aluno/form-check': FocuxSurfaceSpec(
     type: _s1,
     logicalParent: _alunoHome,
-    redirectTo: _alunoHome,
+    redirectTo: '/aluno/feedback-videos',
+  ),
+  '/aluno/feedback-videos': FocuxSurfaceSpec(
+    type: _s3,
+    logicalParent: _alunoHome,
   ),
   '/aluno/anamnese': FocuxSurfaceSpec(
     type: _s5,

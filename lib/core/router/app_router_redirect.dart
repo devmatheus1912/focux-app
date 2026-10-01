@@ -103,6 +103,7 @@ bool isAlunoOnlyLocation(String path) {
     '/aluno/recorrencia',
     '/aluno/grupo-aulas',
     '/aluno/form-check',
+    '/aluno/feedback-videos',
     '/evolucao',
     '/chat/aluno',
     '/financeiro/aluno',

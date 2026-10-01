@@ -10,6 +10,7 @@ import 'aluno_today_action.dart';
 
 const alunoHomeRoute = '/dashboard/aluno';
 const alunoFinanceiroRoute = '/financeiro/aluno';
+const alunoFeedbackVideoRoute = '/aluno/feedback-videos';
 
 /// Atalhos da Home em ordem de prioridade. Sem rotas do dock (Hoje, Treinos,
 /// Saúde, Chat, Perfil): o dock já leva a elas.
@@ -29,6 +30,7 @@ const alunoFerramentaRecurso = {
   '/agenda/aluno': 'AGENDA',
   '/aluno/habitos': 'HABIT_COACHING',
   '/aluno/desafios': 'COMUNIDADE_GRUPOS',
+  alunoFeedbackVideoRoute: 'FEEDBACK_VIDEO',
 };
 
 bool alunoFerramentaLiberada(String rota, Set<String> indisponiveis) =>

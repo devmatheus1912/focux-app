@@ -19,6 +19,7 @@ import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
 import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
+import '../../features/feedback/screens/aluno_feedback_video_screen.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
 
@@ -132,10 +133,16 @@ List<RouteBase> buildAlunoRoutes() {
         path: '/aluno/grupo-aulas',
         builder: (context, state) => const FxRouteChrome(child: GrupoAulasAlunoScreen()),
       ),
-      // §38 hide: form-check fora do catálogo; deep link antigo → home aluno.
+      // Deep link antigo (Pose Coach) cai nos vídeos do aluno.
       GoRoute(
         path: '/aluno/form-check',
-        redirect: (context, state) => '/dashboard/aluno',
+        redirect: (context, state) => '/aluno/feedback-videos',
+      ),
+      GoRoute(
+        path: '/aluno/feedback-videos',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: AlunoFeedbackVideoScreen()),
       ),
       GoRoute(
         path: '/aluno/perfil/editar',
