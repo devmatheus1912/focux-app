@@ -42,15 +42,15 @@ class FeedbackHelper {
     return EdgeInsets.fromLTRB(16, 0, 16, bottomMargin);
   }
 
-  static void showSnackBar(
+  static ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? showSnackBar(
     BuildContext context,
     SnackBar snackBar, {
     double reserveBottom = 0,
     FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
-    if (!context.mounted) return;
+    if (!context.mounted) return null;
     final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
+    if (messenger == null) return null;
     final margin = _snackMargin(
       context,
       reserveBottom: reserveBottom,
@@ -59,7 +59,7 @@ class FeedbackHelper {
     final useFloating =
         placement == FeedbackPlacement.operacaoTop || reserveBottom > 0;
     messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
+    return messenger.showSnackBar(
       SnackBar(
         content: snackBar.content,
         action: snackBar.action,
@@ -68,6 +68,7 @@ class FeedbackHelper {
             useFloating ? SnackBarBehavior.floating : snackBar.behavior,
         shape: snackBar.shape,
         duration: snackBar.duration,
+        persist: snackBar.persist,
         elevation: snackBar.elevation,
         margin: useFloating ? margin : snackBar.margin,
         dismissDirection:

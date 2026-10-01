@@ -1,3 +1,5 @@
+import 'data/notificacoes_repository.dart';
+
 const notificacaoComoCalculamos =
     'Avisos operacionais do estúdio: mensalidade, feed, trial e Radar. Mensagens de chat ficam só na inbox de chat.';
 
@@ -13,6 +15,40 @@ String notificacaoSearchEmptyTitle(String query) =>
 String notificacaoSearchEmptySubtitle(String query) => query.trim().isEmpty
     ? 'Alertas financeiros, novidades do feed e sinais do Radar aparecem aqui.'
     : 'Nada com esse texto nesta caixa.';
+
+String notificacaoVazioTitle({required String query, required bool soNaoLidas}) {
+  if (query.trim().isEmpty && soNaoLidas) return 'Nada pendente';
+  return notificacaoSearchEmptyTitle(query);
+}
+
+String notificacaoVazioSubtitle({
+  required String query,
+  required bool soNaoLidas,
+}) {
+  if (query.trim().isEmpty && soNaoLidas) {
+    return 'Você leu todos os avisos. As lidas continuam em Todas.';
+  }
+  return notificacaoSearchEmptySubtitle(query);
+}
+
+String notificacaoRemovidasLabel(int n) {
+  if (n <= 0) return 'Nada para limpar.';
+  if (n == 1) return '1 notificação apagada.';
+  return '$n notificações apagadas.';
+}
+
+String notificacaoFiltroNaoLidasLabel(int unread) =>
+    unread > 0 ? 'Não lidas · $unread' : 'Não lidas';
+
+List<NotificacaoApp> notificacoesVisiveis(
+  List<NotificacaoApp> items, {
+  Set<int> ocultas = const {},
+  bool soNaoLidas = false,
+}) {
+  return items
+      .where((n) => !ocultas.contains(n.id) && (!soNaoLidas || !n.lida))
+      .toList();
+}
 
 const _nameParticles = {'de', 'da', 'do', 'dos', 'das', 'e'};
 

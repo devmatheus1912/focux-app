@@ -77,6 +77,33 @@ class _NotificacaoTile extends StatelessWidget {
   }
 }
 
+class _ApagarFundo extends StatelessWidget {
+  const _ApagarFundo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: TokensStrip.s4),
+      decoration: BoxDecoration(
+        color: EagleTokens.bad,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Apagar',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          SizedBox(width: TokensStrip.s2),
+          Icon(Icons.delete_outline_rounded, color: Colors.white),
+        ],
+      ),
+    );
+  }
+}
+
 class _HubRow {
   const _HubRow({required this.item, required this.dayGroup});
 

@@ -32,5 +32,11 @@ void main() {
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxHubFreshness.joinCount'));
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
+    expect(screen, contains('Dismissible'));
+    expect(screen, contains("'Desfazer'"));
+    expect(screen, contains("'Limpar lidas'"));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('notificacaoFiltroNaoLidasLabel'));
+    expect(screen, contains("'notificacao-nao-lida'"));
   });
 }

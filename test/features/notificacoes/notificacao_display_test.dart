@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/notificacoes/data/notificacoes_repository.dart';
 import 'package:focux_app/features/notificacoes/notificacao_display.dart';
 import 'package:focux_app/features/notificacoes/widgets/notificacao_badge_button.dart';
 
@@ -38,5 +39,54 @@ void main() {
     expect(notificacaoSearchEmptyTitle(''), 'Tudo em ordem');
     expect(notificacaoSearchEmptyTitle('treino'), 'Nenhum aviso encontrado');
     expect(notificacaoSearchEmptySubtitle('treino'), contains('texto'));
+  });
+
+  test('rótulos de limpeza e filtro', () {
+    expect(notificacaoRemovidasLabel(0), 'Nada para limpar.');
+    expect(notificacaoRemovidasLabel(1), '1 notificação apagada.');
+    expect(notificacaoRemovidasLabel(5), '5 notificações apagadas.');
+    expect(notificacaoFiltroNaoLidasLabel(0), 'Não lidas');
+    expect(notificacaoFiltroNaoLidasLabel(3), 'Não lidas · 3');
+    expect(notificacaoVazioTitle(query: '', soNaoLidas: true), 'Nada pendente');
+    expect(notificacaoVazioTitle(query: '', soNaoLidas: false), 'Tudo em ordem');
+    expect(
+      notificacaoVazioTitle(query: 'pix', soNaoLidas: true),
+      'Nenhum aviso encontrado',
+    );
+  });
+
+  test('notificacoesVisiveis esconde apagadas e filtra não lidas', () {
+    const lida = NotificacaoApp(
+      id: 1,
+      titulo: 'A',
+      mensagem: '',
+      tipo: 'INFO',
+      lida: true,
+    );
+    const nova = NotificacaoApp(
+      id: 2,
+      titulo: 'B',
+      mensagem: '',
+      tipo: 'INFO',
+      lida: false,
+    );
+    const outra = NotificacaoApp(
+      id: 3,
+      titulo: 'C',
+      mensagem: '',
+      tipo: 'INFO',
+      lida: false,
+    );
+    final todas = [lida, nova, outra];
+
+    expect(notificacoesVisiveis(todas).map((n) => n.id), [1, 2, 3]);
+    expect(
+      notificacoesVisiveis(todas, ocultas: {2}).map((n) => n.id),
+      [1, 3],
+    );
+    expect(
+      notificacoesVisiveis(todas, soNaoLidas: true).map((n) => n.id),
+      [2, 3],
+    );
   });
 }

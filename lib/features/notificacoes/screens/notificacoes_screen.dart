@@ -8,6 +8,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/fcm/fcm_tap_route.dart';
 import '../../../core/router/role_home.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -15,6 +16,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -22,6 +24,7 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -44,6 +47,8 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
   final _searchFocus = FocusNode();
   Timer? _debounce;
   DateTime? _fetchedAt;
+  final _ocultas = <int>{};
+  var _soNaoLidas = false;
   var _viewTracked = false;
   var _ttvTracked = false;
 
@@ -162,6 +167,68 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       }
     }
 
+    Future<void> apagar(NotificacaoApp item) async {
+      setState(() => _ocultas.add(item.id));
+      final controller = FeedbackHelper.showSnackBar(
+        context,
+        SnackBar(
+          content: const Text('Notificação apagada.'),
+          duration: const Duration(seconds: 4),
+          persist: false,
+          action: SnackBarAction(label: 'Desfazer', onPressed: () {}),
+        ),
+      );
+      final reason = await controller?.closed;
+      if (reason == SnackBarClosedReason.action) {
+        if (mounted) setState(() => _ocultas.remove(item.id));
+        return;
+      }
+      try {
+        await repo.apagar(item.id);
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _ocultas.remove(item.id));
+        FeedbackHelper.showError(this.context, friendlyError(e));
+        return;
+      }
+      if (!mounted) return;
+      if (item.lida) {
+        ref.invalidate(notificacoesProvider);
+      } else {
+        afterRead();
+      }
+    }
+
+    Future<void> limparLidas() async {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: 'Limpar lidas?',
+        message: 'As notificações já lidas saem da lista. As não lidas ficam.',
+        confirmLabel: 'Limpar lidas',
+        icon: Icons.delete_sweep_outlined,
+        destructive: true,
+      );
+      if (!ok || !context.mounted) return;
+      final int removidas;
+      try {
+        removidas = await repo.apagarLidas();
+      } catch (e) {
+        if (context.mounted) {
+          FeedbackHelper.showError(context, friendlyError(e));
+        }
+        return;
+      }
+      ref.invalidate(notificacoesProvider);
+      if (!context.mounted) return;
+      FeedbackHelper.showSuccess(context, notificacaoRemovidasLabel(removidas));
+    }
+
+    final lidasCount =
+        async.value?.items
+            .where((n) => n.lida && !_ocultas.contains(n.id))
+            .length ??
+        0;
+
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return fxScreenA11yScope(
       label: 'Notificações',
@@ -213,6 +280,10 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                       'Não lidas',
                       'Têm ponto e título em negrito. Ler todas zera o sino da Home.',
                     ),
+                    FxHelpTip(
+                      'Apagar',
+                      'Arraste para a esquerda para apagar uma. Limpar lidas tira todas as já vistas.',
+                    ),
                   ],
                 );
               },
@@ -244,6 +315,12 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                   },
                   child: const Text('Ler todas'),
                 ),
+              ),
+            if (lidasCount > 0)
+              IconButton(
+                tooltip: 'Limpar lidas',
+                icon: const Icon(Icons.delete_sweep_outlined),
+                onPressed: limparLidas,
               ),
           ],
         ),
@@ -289,6 +366,32 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                0,
+                TokensStrip.s4,
+                TokensStrip.s1,
+              ),
+              child: Row(
+                children: [
+                  FxToggleChip(
+                    label: 'Todas',
+                    selected: !_soNaoLidas,
+                    isDark: isDark,
+                    onTap: () => setState(() => _soNaoLidas = false),
+                  ),
+                  const SizedBox(width: TokensStrip.s2),
+                  FxToggleChip(
+                    key: const ValueKey('notificacoes-filtro-nao-lidas'),
+                    label: notificacaoFiltroNaoLidasLabel(unreadCount),
+                    selected: _soNaoLidas,
+                    isDark: isDark,
+                    onTap: () => setState(() => _soNaoLidas = true),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: async.when(
           loading:
@@ -305,8 +408,15 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
               ),
           data: (inbox) {
             final items = inbox.items;
-            final rows = _buildNotificationRows(items);
+            final rows = _buildNotificationRows(
+              notificacoesVisiveis(
+                items,
+                ocultas: _ocultas,
+                soNaoLidas: _soNaoLidas,
+              ),
+            );
             if (rows.isEmpty) {
+              final verTodas = query.isEmpty && _soNaoLidas;
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
@@ -315,11 +425,23 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                   const SizedBox(height: 48),
                   FxEmptyState(
                     icon: query.isEmpty ? 'circle-check' : 'search',
-                    title: notificacaoSearchEmptyTitle(query),
-                    subtitle: notificacaoSearchEmptySubtitle(query),
+                    title: notificacaoVazioTitle(
+                      query: query,
+                      soNaoLidas: _soNaoLidas,
+                    ),
+                    subtitle: notificacaoVazioSubtitle(
+                      query: query,
+                      soNaoLidas: _soNaoLidas,
+                    ),
                     action: FxEmptyAction(
-                      label: query.isEmpty ? 'Ir para o Hoje' : 'Limpar busca',
-                      onTap: query.isEmpty
+                      label: verTodas
+                          ? 'Ver todas'
+                          : query.isEmpty
+                          ? 'Ir para o Hoje'
+                          : 'Limpar busca',
+                      onTap: verTodas
+                          ? () => setState(() => _soNaoLidas = false)
+                          : query.isEmpty
                           ? () => goToRoleHome(context, ref)
                           : () {
                               _debounce?.cancel();
@@ -380,10 +502,16 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                           ),
                           child: DashboardSectionHeader(title: row.dayGroup),
                         ),
-                      _NotificacaoTile(
-                        item: row.item,
-                        temDestino: destinoDe(row.item) != null,
-                        onTap: () => openItem(row.item),
+                      Dismissible(
+                        key: ValueKey('notificacao-${row.item.id}'),
+                        direction: DismissDirection.endToStart,
+                        background: const _ApagarFundo(),
+                        onDismissed: (_) => apagar(row.item),
+                        child: _NotificacaoTile(
+                          item: row.item,
+                          temDestino: destinoDe(row.item) != null,
+                          onTap: () => openItem(row.item),
+                        ),
                       ),
                     ],
                   );

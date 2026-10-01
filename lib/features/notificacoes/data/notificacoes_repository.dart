@@ -181,4 +181,15 @@ class NotificacoesRepository {
   Future<void> marcarTodasLidas() async {
     await _dio.put('/api/notificacoes/ler-todas');
   }
+
+  Future<void> apagar(int id) async {
+    await _dio.delete('/api/notificacoes/$id');
+  }
+
+  Future<int> apagarLidas() async {
+    final response = await _dio.delete('/api/notificacoes/lidas');
+    final data = response.data;
+    if (data is! Map) return 0;
+    return (data['removidas'] as num?)?.toInt() ?? 0;
+  }
 }
