@@ -24,22 +24,16 @@ void main() {
     );
   });
 
-  test('Info.plist tem GIDClientID + reversed URL scheme (anti-SIGABRT)', () {
+  test('Info.plist não commita client Web como Google Sign-In', () {
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
-    expect(plist, contains('<key>GIDClientID</key>'));
+    const webClient =
+        '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com';
+    expect(plist, isNot(contains('<key>GIDClientID</key>')));
+    expect(plist, isNot(contains(webClient)));
     expect(
-      plist,
-      contains(
-        '868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs.apps.googleusercontent.com',
-      ),
+      File('tools/ios/patch_google_signin_from_env.sh').readAsStringSync(),
+      contains('GOOGLE_IOS_CLIENT_ID'),
     );
-    expect(
-      plist,
-      contains(
-        'com.googleusercontent.apps.868715549357-kjut1ja3ab79j6pp3pquk2nha48atbcs',
-      ),
-    );
-    expect(plist, contains('com.focux.focuxApp'));
   });
 
   test('login/register usam GoogleSignInService (sem Web clientId no iOS)', () {
@@ -58,7 +52,7 @@ void main() {
 
     expect(login, contains('GoogleSignInService().signInForIdToken()'));
     expect(register, contains('GoogleSignInService().signInForIdToken()'));
-    expect(service, contains('Env.googleIosClientIdOrNull'));
+    expect(service, contains('Env.googleIosNativeClientId'));
     expect(service, contains('serverClientId: Env.googleWebClientId'));
     expect(service, isNot(contains('clientId: Env.googleWebClientId')));
     expect(login, isNot(contains('GoogleSignIn(')));

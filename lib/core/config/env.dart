@@ -114,6 +114,13 @@ class Env {
     return id.isEmpty ? null : id;
   }
 
+  /// OAuth nativo iOS (≠ Web). Web como `clientId` gera 400 "Custom scheme URIs… WEB".
+  static String? get googleIosNativeClientId {
+    final id = googleIosClientIdOrNull;
+    if (id == null || id == googleWebClientId) return null;
+    return id;
+  }
+
   /// Returns the websocket URL. If `WS_URL` is set, uses it verbatim. Otherwise
   /// converts `https://` → `wss://` and `http://` → `ws://` from [apiUrl].
   static String get wsUrl {

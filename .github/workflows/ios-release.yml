@@ -153,6 +153,11 @@ jobs:
             echo "::error::Secret API_CERT_PINS obrigatório (tools/release/fetch-api-cert-pin.ps1)."
             exit 1
           fi
+          if [[ -z "${GOOGLE_IOS_CLIENT_ID:-}" ]]; then
+            echo "::error::Secret GOOGLE_IOS_CLIENT_ID obrigatório (OAuth client iOS — não use o client Web)."
+            exit 1
+          fi
+          bash tools/ios/patch_google_signin_from_env.sh
 
           API_URL="${API_URL:-$API_URL_DEFAULT}"
           PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-$PUBLIC_WEB_URL_DEFAULT}"

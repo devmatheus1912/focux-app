@@ -29,8 +29,8 @@ class GoogleSignInService {
     final isAndroid = !kIsWeb && Platform.isAndroid;
     return GoogleSignIn(
       // Android: default from google-services.json.
-      // iOS: null → Info.plist GIDClientID / GoogleService-Info.plist CLIENT_ID.
-      clientId: isAndroid ? null : Env.googleIosClientIdOrNull,
+      // iOS: client OAuth tipo iOS; Web só em serverClientId (idToken pro backend).
+      clientId: isAndroid ? null : Env.googleIosNativeClientId,
       serverClientId: Env.googleWebClientId,
       scopes: const ['email', 'profile'],
     );
@@ -41,6 +41,7 @@ class GoogleSignInService {
   /// “passar” e estourar no nativo quando dá para detectar antes).
   Future<GoogleSignInIdToken?> signInForIdToken() async {
     _assertServerClientConfigured();
+    _assertIosNativeClientConfigured();
     final google = _buildClient();
     try {
       try {
@@ -83,5 +84,21 @@ class GoogleSignInService {
             'Regenere o IPA com o dart-define correto.',
       );
     }
+  }
+
+  void _assertIosNativeClientConfigured() {
+    if (kIsWeb || !Platform.isIOS) return;
+    final ios = Env.googleIosNativeClientId;
+    if (ios != null) return;
+    final hadIosDefine = Env.googleIosClientIdOrNull != null;
+    throw PlatformException(
+      code: 'google_sign_in_config',
+      message: hadIosDefine
+          ? 'GOOGLE_IOS_CLIENT_ID igual ao Web — use o OAuth client iOS '
+              '(bundle com.focux.focuxApp) no build e no Info.plist.'
+          : 'GOOGLE_IOS_CLIENT_ID ausente neste build iOS. '
+              'Cadastre OAuth iOS no Google Cloud / Firebase, '
+              'preencha o secret no CI e regenere o IPA.',
+    );
   }
 }

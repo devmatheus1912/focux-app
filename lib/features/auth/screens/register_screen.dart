@@ -21,6 +21,7 @@ import '../providers/auth_provider.dart';
 import '../data/auth_repository.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/auth_http_debug.dart';
+import '../utils/google_sign_in_availability.dart';
 import '../utils/register_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_legal_consent_text.dart';
@@ -98,7 +99,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       } catch (_) {}
       final caps = await ref.read(authRepositoryProvider).capabilities();
       if (!mounted) return;
-      final showGoogle = Env.googleWebClientId.isNotEmpty;
+      final showGoogle = googleSignInConfiguredInApp();
       final appleOffered = resolveAppleSignInOffered(
         capabilitiesEnabled: caps.appleSignInEnabled,
         environmentStatus: status,
@@ -114,7 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       try {
         status = await ref.read(authRepositoryProvider).environmentStatus();
       } catch (_) {}
-      final showGoogle = Env.googleWebClientId.isNotEmpty;
+      final showGoogle = googleSignInConfiguredInApp();
       final appleOffered = resolveAppleSignInOffered(
         capabilitiesEnabled: false,
         environmentStatus: status,

@@ -26,6 +26,7 @@ import '../data/auth_repository.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
 import '../utils/auth_error_messages.dart';
+import '../utils/google_sign_in_availability.dart';
 import '../utils/auth_http_debug.dart';
 import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
@@ -144,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         capabilitiesEnabled: capsApple,
         environmentStatus: status,
       );
-      final appClientConfigured = Env.googleWebClientId.isNotEmpty;
+      final appClientConfigured = googleSignInConfiguredInApp();
       // Ambos sociais quando o ambiente permite — iPhone também usa Gmail.
       final showGoogle = appClientConfigured;
       setState(() {
@@ -153,10 +154,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _googleEnabled = showGoogle;
         if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
-          _googleStatusNote =
-              'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
-          _googleStatusAction =
-              'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
+          _googleStatusNote = Env.googleWebClientId.isEmpty
+              ? 'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.'
+              : 'No iPhone, o build precisa do GOOGLE_IOS_CLIENT_ID (OAuth iOS, nao Web).';
+          _googleStatusAction = Env.googleWebClientId.isEmpty
+              ? 'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.'
+              : 'Regenerar o IPA com GOOGLE_IOS_CLIENT_ID e URL scheme no Info.plist.';
         } else if (status.googleSignInReady) {
           _googleStatusTitle = null;
           _googleStatusNote = null;
@@ -187,7 +190,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         capabilitiesEnabled: capsApple,
         environmentStatus: status,
       );
-      final appClientConfigured = Env.googleWebClientId.isNotEmpty;
+      final appClientConfigured = googleSignInConfiguredInApp();
       final showGoogle = appClientConfigured;
       setState(() {
         _appleEnabled =
@@ -199,10 +202,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _googleStatusAction = null;
         } else if (!appClientConfigured) {
           _googleStatusTitle = 'Google pendente no app';
-          _googleStatusNote =
-              'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.';
-          _googleStatusAction =
-              'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.';
+          _googleStatusNote = Env.googleWebClientId.isEmpty
+              ? 'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.'
+              : 'No iPhone, o build precisa do GOOGLE_IOS_CLIENT_ID (OAuth iOS, nao Web).';
+          _googleStatusAction = Env.googleWebClientId.isEmpty
+              ? 'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.'
+              : 'Regenerar o IPA com GOOGLE_IOS_CLIENT_ID e URL scheme no Info.plist.';
         } else {
           _googleStatusTitle = null;
           _googleStatusNote = null;
