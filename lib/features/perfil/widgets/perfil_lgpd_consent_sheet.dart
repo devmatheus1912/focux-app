@@ -34,28 +34,37 @@ Future<void> showPerfilLgpdConsentSheet(
         size: 22,
       ),
       title: 'Consentimentos',
-      subtitle:
-          'Aceite registra a versão ${FocuxLegal.consentDocumentVersion} '
-          '(LGPD). Você pode ler o documento antes de confirmar.',
-      child: _PerfilLgpdConsentSheet(tipos: tipos),
+      subtitle: 'Leia cada documento e confirme o aceite (LGPD).',
+      child: PerfilLgpdConsentBody(tipos: tipos),
     ),
   );
 }
 
-class _PerfilLgpdConsentSheet extends ConsumerStatefulWidget {
-  const _PerfilLgpdConsentSheet({required this.tipos});
-
-  final List<String> tipos;
-
-  @override
-  ConsumerState<_PerfilLgpdConsentSheet> createState() =>
-      _PerfilLgpdConsentSheetState();
+Future<void> _abrirDocPadrao(String tipo) async {
+  if (tipo == 'TERMOS') {
+    await FocuxLegal.openTerms();
+  } else {
+    await FocuxLegal.openPrivacy();
+  }
 }
 
-class _PerfilLgpdConsentSheetState
-    extends ConsumerState<_PerfilLgpdConsentSheet> {
-  LgpdConsent? _ultimo;
-  final Set<String> _aceitosNaSessao = {};
+class PerfilLgpdConsentBody extends ConsumerStatefulWidget {
+  const PerfilLgpdConsentBody({
+    super.key,
+    required this.tipos,
+    this.onAbrirDoc = _abrirDocPadrao,
+  });
+
+  final List<String> tipos;
+  final Future<void> Function(String tipo) onAbrirDoc;
+
+  @override
+  ConsumerState<PerfilLgpdConsentBody> createState() =>
+      _PerfilLgpdConsentBodyState();
+}
+
+class _PerfilLgpdConsentBodyState extends ConsumerState<PerfilLgpdConsentBody> {
+  Map<String, LgpdConsent> _aceites = const {};
   var _loading = true;
   String? _erro;
   String? _busyTipo;
@@ -66,11 +75,10 @@ class _PerfilLgpdConsentSheetState
     _carregar();
   }
 
-  bool _foiAceito(String tipo) {
-    final key = tipo.toUpperCase();
-    if (_aceitosNaSessao.contains(key)) return true;
-    return _ultimo?.tipo.toUpperCase() == key;
-  }
+  LgpdConsentEstado _estado(String tipo) => lgpdConsentEstado(
+    _aceites[tipo.toUpperCase()],
+    FocuxLegal.consentDocumentVersion,
+  );
 
   Future<void> _carregar() async {
     setState(() {
@@ -78,13 +86,11 @@ class _PerfilLgpdConsentSheetState
       _erro = null;
     });
     try {
-      final ultimo = await ref.read(lgpdConsentRepositoryProvider).ultimo();
+      final aceites =
+          await ref.read(lgpdConsentRepositoryProvider).ultimosPorTipo();
       if (!mounted) return;
       setState(() {
-        _ultimo = ultimo;
-        if (ultimo != null) {
-          _aceitosNaSessao.add(ultimo.tipo.toUpperCase());
-        }
+        _aceites = aceites;
         _loading = false;
       });
     } catch (e) {
@@ -96,44 +102,32 @@ class _PerfilLgpdConsentSheetState
     }
   }
 
-  Future<void> _abrirDoc(String tipo) async {
-    if (tipo == 'TERMOS') {
-      await FocuxLegal.openTerms();
-    } else if (tipo == 'PRIVACIDADE') {
-      await FocuxLegal.openPrivacy();
-    }
-  }
-
-  Future<void> _registrar(String tipo) async {
+  Future<void> _lerEAceitar(String tipo) async {
     if (_busyTipo != null) return;
     final label = lgpdConsentTipoLabel(tipo);
+    await widget.onAbrirDoc(tipo);
+    if (!mounted) return;
     final confirmed = await showFxConfirmSheet(
       context,
-      title: 'Confirmar aceite',
+      title: 'Aceitar $label?',
       message:
-          'Confirma o aceite de $label (versão '
-          '${FocuxLegal.consentDocumentVersion})?',
+          'Registra seu aceite da versão ${FocuxLegal.consentDocumentVersion}.',
       confirmLabel: 'Aceitar',
-      cancelLabel: 'Cancelar',
+      cancelLabel: 'Agora não',
     );
     if (confirmed != true || !mounted) return;
 
     setState(() => _busyTipo = tipo);
     try {
-      await _abrirDoc(tipo);
       final saved = await ref
           .read(lgpdConsentRepositoryProvider)
           .registrar(tipo: tipo);
       if (!mounted) return;
       setState(() {
-        _ultimo = saved;
-        _aceitosNaSessao.add(tipo.toUpperCase());
+        _aceites = {..._aceites, saved.tipo: saved};
         _busyTipo = null;
       });
-      FeedbackHelper.showSuccess(
-        context,
-        '$label aceito · v${saved.versao}',
-      );
+      FeedbackHelper.showSuccess(context, '$label aceito.');
     } catch (e) {
       if (!mounted) return;
       setState(() => _busyTipo = null);
@@ -146,70 +140,96 @@ class _PerfilLgpdConsentSheetState
     final chrome = ShellChrome.of(context);
     final mute = chrome.mute;
     final ink = chrome.ink;
-    final primary = Theme.of(context).colorScheme.primary;
+
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: TokensStrip.s4),
+        child: Center(child: FxLoading()),
+      );
+    }
+    if (_erro != null) {
+      return Text(_erro!, style: FocuxHubTypography.bodyMuted(color: mute));
+    }
+
+    final aceitos =
+        widget.tipos.where((t) => _estado(t) == LgpdConsentEstado.aceito).length;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_loading)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: TokensStrip.s4),
-            child: Center(child: FxLoading()),
-          )
-        else if (_erro != null)
-          Text(
-            _erro!,
-            style: FocuxHubTypography.bodyMuted(color: mute),
-          )
-        else
-          Text(
-            lgpdConsentStatusLine(_ultimo),
-            style: FocuxHubTypography.bodyMuted(color: mute),
-          ),
-        const SizedBox(height: TokensStrip.s3),
-        for (final tipo in widget.tipos) ...[
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              lgpdConsentTipoLabel(tipo),
-              style: FocuxHubTypography.cardTitle(color: ink),
-            ),
-            subtitle: Text(
-              _foiAceito(tipo)
-                  ? 'Aceito nesta conta'
-                  : 'Toque para ler e confirmar o aceite',
-              style: FocuxHubTypography.bodyMuted(color: mute),
-            ),
-            trailing: _busyTipo == tipo
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: FxLoading(),
-                  )
-                : _foiAceito(tipo)
-                ? Icon(Icons.check_circle_rounded, color: EagleTokens.good, size: 22)
-                : Icon(Icons.chevron_right, color: mute, size: 20),
-            onTap: _busyTipo != null || _loading
-                ? null
-                : () => _registrar(tipo),
-          ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: _busyTipo != null ? null : () => _abrirDoc(tipo),
-              style: TextButton.styleFrom(
-                foregroundColor: primary,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(0, 36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        Text(
+          lgpdConsentResumo(aceitos, widget.tipos.length),
+          style: FocuxHubTypography.bodyMuted(color: mute),
+        ),
+        const SizedBox(height: TokensStrip.s2),
+        for (final tipo in widget.tipos)
+          _ConsentRow(
+            titulo: lgpdConsentTipoLabel(tipo),
+            subtitulo: switch (_estado(tipo)) {
+              LgpdConsentEstado.aceito => lgpdConsentAceitoLabel(
+                _aceites[tipo.toUpperCase()]!,
               ),
-              child: Text('Só ler ${lgpdConsentTipoLabel(tipo).toLowerCase()}'),
-            ),
+              LgpdConsentEstado.versaoAntiga => 'Nova versão disponível',
+              LgpdConsentEstado.pendente => 'Ainda não aceito',
+            },
+            aceito: _estado(tipo) == LgpdConsentEstado.aceito,
+            busy: _busyTipo == tipo,
+            ink: ink,
+            mute: mute,
+            onAbrir: () => widget.onAbrirDoc(tipo),
+            onAceitar: _busyTipo != null ? null : () => _lerEAceitar(tipo),
           ),
-          const SizedBox(height: TokensStrip.s2),
-        ],
       ],
+    );
+  }
+}
+
+class _ConsentRow extends StatelessWidget {
+  const _ConsentRow({
+    required this.titulo,
+    required this.subtitulo,
+    required this.aceito,
+    required this.busy,
+    required this.ink,
+    required this.mute,
+    required this.onAbrir,
+    required this.onAceitar,
+  });
+
+  final String titulo;
+  final String subtitulo;
+  final bool aceito;
+  final bool busy;
+  final Color ink;
+  final Color mute;
+  final VoidCallback onAbrir;
+  final VoidCallback? onAceitar;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget trailing;
+    if (busy) {
+      trailing = const SizedBox(width: 22, height: 22, child: FxLoading());
+    } else if (aceito) {
+      trailing = const Icon(
+        Icons.check_circle_rounded,
+        color: EagleTokens.good,
+        size: 22,
+      );
+    } else {
+      trailing = FilledButton.tonal(
+        onPressed: onAceitar,
+        child: const Text('Ler e aceitar'),
+      );
+    }
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      onTap: onAbrir,
+      title: Text(titulo, style: FocuxHubTypography.cardTitle(color: ink)),
+      subtitle: Text(subtitulo, style: FocuxHubTypography.bodyMuted(color: mute)),
+      trailing: trailing,
     );
   }
 }

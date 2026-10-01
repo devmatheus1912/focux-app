@@ -1,4 +1,3 @@
-import '../../../core/legal/focux_legal.dart';
 import '../data/lgpd_consent_repository.dart';
 
 String lgpdConsentTipoLabel(String tipo) => switch (tipo.toUpperCase()) {
@@ -8,16 +7,24 @@ String lgpdConsentTipoLabel(String tipo) => switch (tipo.toUpperCase()) {
   _ => tipo,
 };
 
-String lgpdConsentStatusLine(LgpdConsent? consent) {
-  if (consent == null) {
-    return 'Nenhum registro ainda · docs ${FocuxLegal.consentDocumentVersion}';
-  }
-  final tipo = lgpdConsentTipoLabel(consent.tipo);
-  final quando = consent.aceitoEm.trim();
-  if (quando.isEmpty) {
-    return '$tipo · v${consent.versao}';
-  }
-  return '$tipo · v${consent.versao} · $quando';
+enum LgpdConsentEstado { aceito, versaoAntiga, pendente }
+
+LgpdConsentEstado lgpdConsentEstado(LgpdConsent? consent, String versaoAtual) {
+  if (consent == null) return LgpdConsentEstado.pendente;
+  return consent.versao == versaoAtual
+      ? LgpdConsentEstado.aceito
+      : LgpdConsentEstado.versaoAntiga;
+}
+
+String lgpdConsentResumo(int aceitos, int total) =>
+    '$aceitos de $total ${total == 1 ? 'aceito' : 'aceitos'}';
+
+String lgpdConsentAceitoLabel(LgpdConsent consent) {
+  final data = DateTime.tryParse(consent.aceitoEm.trim());
+  if (data == null) return 'Aceito · v${consent.versao}';
+  String dd(int n) => n.toString().padLeft(2, '0');
+  return 'Aceito em ${dd(data.day)}/${dd(data.month)}/${data.year} '
+      '· v${consent.versao}';
 }
 
 const lgpdConsentTiposPersonal = ['TERMOS', 'PRIVACIDADE'];

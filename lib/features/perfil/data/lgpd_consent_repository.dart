@@ -45,6 +45,22 @@ class LgpdConsentRepository {
     }
   }
 
+  /// Aceite mais recente de cada tipo (chave em maiúsculas).
+  Future<Map<String, LgpdConsent>> ultimosPorTipo() async {
+    try {
+      final response = await _dio.get<List<dynamic>>('/api/lgpd/me/consents');
+      return {
+        for (final item in response.data ?? const [])
+          if (item is Map<String, dynamic>)
+            LgpdConsent.fromJson(item).tipo: LgpdConsent.fromJson(item),
+      };
+    } catch (error) {
+      if (ApiError.from(error)?.status != 404) rethrow;
+      final ultimo = await this.ultimo();
+      return {if (ultimo != null) ultimo.tipo: ultimo};
+    }
+  }
+
   Future<LgpdConsent> registrar({
     required String tipo,
     String versao = FocuxLegal.consentDocumentVersion,
