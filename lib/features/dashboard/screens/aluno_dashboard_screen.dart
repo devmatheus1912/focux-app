@@ -391,10 +391,9 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         (
           TokensStrip.s4,
           AlunoEvolutionCard(
-            forcaPorSemana: home.forcaPorSemana,
-            forcaDeltaPercent: home.forcaDeltaPercent,
+            destaque: home.destaqueExercicio,
             ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
-            recordeRecente: view.recordeRecente,
+            recordesMes: home.recordesMes,
           ),
         ),
       if (view.ofertas.isNotEmpty)

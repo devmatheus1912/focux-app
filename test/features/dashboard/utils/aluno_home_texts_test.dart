@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_texts.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
@@ -225,7 +224,7 @@ void main() {
         volumeKg: 12445,
       );
       expect(alunoTreinosSemanaValor(_pt, w), '6 treinos');
-      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 2 batida');
+      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta de 2 treinos');
       expect(
         alunoWeekSemantics(_pt, w),
         '6 treinos nesta semana, meta de 2 batida, sequência de 1 semana, '
@@ -241,7 +240,7 @@ void main() {
         volumeKg: null,
       );
       expect(alunoTreinosSemanaValor(_pt, w), '3 treinos');
-      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta 3 batida');
+      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta de 3 treinos');
     });
 
     test('abaixo da meta: "2 de 3" e rótulo padrão', () {
@@ -268,20 +267,7 @@ void main() {
   test('números seguem o locale', () {
     expect(alunoForcaDeltaTexto(_pt, 4.2), '+4,2%');
     expect(alunoForcaDeltaTexto(_en, -1.5), '-1.5%');
-    expect(alunoRecordeTexto(_pt, 'Supino', 102.5), 'Supino · 102,5 kg');
-    expect(alunoRecordeTexto(_pt, 'Supino', 100), 'Supino · 100 kg');
-    expect(alunoRecordeTexto(_pt, 'Supino', null), 'Supino');
-    expect(alunoRecordeTexto(_pt, 'supino', 50), 'Supino · 50 kg');
-    expect(alunoRecordeTexto(_pt, ' leg press 45°', null), 'Leg press 45°');
-    expect(alunoRecordeTexto(_pt, 'Leg Press', 80), 'Leg Press · 80 kg');
     expect(alunoVolumeTexto(_en, 3200), '3,200 kg');
-  });
-
-  test('queda de força em tom de atenção', () {
-    expect(alunoForcaDeltaTom(-1.5), EagleTokens.warn);
-    expect(alunoForcaDeltaTom(-0.04), EagleTokens.good);
-    expect(alunoForcaDeltaTom(0), EagleTokens.good);
-    expect(alunoForcaDeltaTom(4.2), EagleTokens.good);
   });
 
   test('alunoPrimeiroNome', () {

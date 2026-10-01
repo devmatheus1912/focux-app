@@ -425,6 +425,10 @@ Pareado com `focux-backend` PR #75 e `focux-app` snappy UX.
 | `historico` | Tipicamente `[]` quando `historicoResumo` está presente. App: se a chave `historicoResumo` veio (mesmo vazia), **não** parseia dump rico. |
 | Caps | `medidas` ≤5, `coachMensagens` ≤5, `upsellPendentes` ≤5 (server + rede de segurança no client). |
 | `chat` | Resumo (`possuiMensagemDoAluno`, `ultimaMensagemAlunoEm`, `naoLidasDoPersonal`) — sem lista de mensagens. |
+| `destaqueExercicio` | Nullable. Exercício mais treinado nas últimas 8 semanas: `nome`, `serieSemanal` (melhor 1RM estimado por semana, só semanas com o exercício), `inicialKg`, `atualKg`, `deltaPercent` (pode ser negativo), `semanas`. App desenha a curva com ≥3 pontos; ausente → estado vazio. |
+| `recordesMes` | Int ≥0: recordes com data no mês corrente. |
+| `forcaPorSemana` / `forcaDeltaPercent` | Legado: continuam no payload para apps antigos; o app atual não lê. |
+| `recovery.recoveryScore` | Nullable (também `recoveryLabel`/`recoveryHint`): sem sono nem FC o servidor não dá nota. Null é "indisponível", nunca 0. |
 | Cache | TTL **60s**; nome sugerido `dashboard-aluno-home`. |
 | HTTP | `ETag` + `Cache-Control: private, max-age=60`; `If-None-Match` → **304** sem body. |
 

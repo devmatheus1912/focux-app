@@ -79,7 +79,16 @@ Map<String, dynamic> _payload() => {
     'recoveryHint': 'Boa noite de sono',
     'sincronizadoEm': '2026-08-16T07:10:00',
   },
-  'forcaDeltaPercent': 4.5,
+  'recordesMes': 2,
+  'destaqueExercicio': {
+    'exercicioId': 5,
+    'nome': 'Supino reto',
+    'serieSemanal': [40, 45.5, 50],
+    'inicialKg': 40,
+    'atualKg': 50,
+    'deltaPercent': 25.0,
+    'semanas': 6,
+  },
   'recoveryStale': false,
   'insight': {
     'tipo': 'VOLUME_SUBINDO',
@@ -121,7 +130,11 @@ void main() {
       expect(bundle.volumeSemanaKg, 240);
       expect(bundle.concluidosSemanaIso, 2);
       expect(bundle.frequenciaDias, 4);
-      expect(bundle.forcaDeltaPercent, 4.5);
+      expect(bundle.recordesMes, 2);
+      expect(bundle.destaqueExercicio?.nome, 'Supino reto');
+      expect(bundle.destaqueExercicio?.serieSemanal, [40, 45.5, 50]);
+      expect(bundle.destaqueExercicio?.temCurva, isTrue);
+      expect(bundle.destaqueExercicio?.semanas, 6);
       expect(bundle.recoveryStale, isFalse);
       expect(bundle.insight?.tipo, AlunoInsightTipo.volumeSubindo);
       expect(bundle.recursosIndisponiveis, {'HABIT_COACHING'});
@@ -149,7 +162,8 @@ void main() {
             ..remove('volumeSemanaKg')
             ..remove('concluidosSemanaIso')
             ..remove('frequenciaDias')
-            ..remove('forcaDeltaPercent')
+            ..remove('recordesMes')
+            ..remove('destaqueExercicio')
             ..remove('recoveryStale')
             ..remove('insight')
             ..remove('recursosIndisponiveis');
@@ -170,7 +184,8 @@ void main() {
       expect(bundle.volumeSemanaKg, 0);
       expect(bundle.concluidosSemanaIso, isNull);
       expect(bundle.frequenciaDias, isNull);
-      expect(bundle.forcaDeltaPercent, isNull);
+      expect(bundle.recordesMes, 0);
+      expect(bundle.destaqueExercicio, isNull);
       expect(bundle.recoveryStale, isFalse);
       expect(bundle.insight, isNull);
       expect(bundle.recursosIndisponiveis, isEmpty);
@@ -198,11 +213,13 @@ void main() {
       () {
         final json =
             _payload()
-              ..['forcaDeltaPercent'] = '4.5'
+              ..['recordesMes'] = '2'
+              ..['destaqueExercicio'] = {'nome': 'Supino', 'serieSemanal': 'x'}
               ..['recoveryStale'] = 'sim'
               ..['concluidosSemanaIso'] = 'x';
         final bundle = AlunoDashboardHomeBundle.fromJson(json);
-        expect(bundle.forcaDeltaPercent, isNull);
+        expect(bundle.recordesMes, 0);
+        expect(bundle.destaqueExercicio, isNull);
         expect(bundle.recoveryStale, isFalse);
         expect(bundle.concluidosSemanaIso, isNull);
         expect(bundle.aluno.nome, 'Ana Souza');

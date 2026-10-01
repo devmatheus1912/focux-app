@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/auth/session_invalidator.dart';
 import 'package:focux_app/core/money/fx_money.dart';
-import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/core/widgets/fx_rive_player.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
+import 'package:focux_app/features/dashboard/data/aluno_destaque_exercicio.dart';
 import 'package:focux_app/features/dashboard/data/aluno_home_insight.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_autonomy_analytics.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_view.dart';
@@ -191,7 +191,7 @@ void main() {
         ),
       );
       expect(find.text('6 treinos'), findsOneWidget);
-      expect(find.text('META 2 BATIDA'), findsOneWidget);
+      expect(find.text('META DE 2 TREINOS'), findsOneWidget);
       expect(find.text('6 de 2'), findsNothing);
       expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
     });
@@ -414,85 +414,135 @@ void main() {
   });
 
   group('AlunoEvolutionCard', () {
-    testWidgets('só força: sem volume no gráfico', (tester) async {
+    const supino = AlunoDestaqueExercicio(
+      nome: 'supino reto',
+      serieSemanal: [40, 45, 50],
+      inicialKg: 40,
+      atualKg: 50,
+      deltaPercent: 25,
+      semanas: 6,
+    );
+
+    testWidgets('3+ semanas: de → até, ganho e curva do exercício', (
+      tester,
+    ) async {
+      await _pump(tester, const AlunoEvolutionCard(destaque: supino));
+      expect(find.text('Supino reto'), findsOneWidget);
+      expect(find.text('40 → 50 kg'), findsOneWidget);
+      expect(find.text('+25% em 6 semanas'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(
+          'Gráfico de 6 semanas: 1RM estimado de supino reto, de 40 a 50 kg',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('queda aparece com sinal, sem esconder', (tester) async {
       await _pump(
         tester,
         const AlunoEvolutionCard(
-          forcaPorSemana: [0, 80, 82, 0, 85, 86, 88, 90],
-          forcaDeltaPercent: 2.3,
+          destaque: AlunoDestaqueExercicio(
+            nome: 'Supino reto',
+            serieSemanal: [60, 55, 50],
+            inicialKg: 60,
+            atualKg: 50,
+            deltaPercent: -16.7,
+            semanas: 3,
+          ),
         ),
       );
-      expect(find.text('Força (1RM est.)'), findsOneWidget);
-      expect(find.text('Volume'), findsNothing);
-      expect(
-        find.bySemanticsLabel(
-          'Gráfico das últimas 8 semanas: força (1RM estimado)',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('-16,7% em 3 semanas'), findsOneWidget);
     });
 
-    testWidgets('uma semana de força sem tile: sem gráfico, texto da curva', (
-      tester,
-    ) async {
+    testWidgets('1–2 semanas: carga atual e aviso da curva', (tester) async {
       await _pump(
         tester,
-        const AlunoEvolutionCard(forcaPorSemana: [0, 0, 0, 0, 0, 0, 0, 90]),
-      );
-      expect(find.text('Força (1RM est.)'), findsNothing);
-      expect(
-        find.text(
-          'Sua curva de força aparece a partir da segunda semana com carga.',
+        const AlunoEvolutionCard(
+          destaque: AlunoDestaqueExercicio(
+            nome: 'Supino reto',
+            serieSemanal: [45, 50],
+            inicialKg: 45,
+            atualKg: 50,
+            deltaPercent: 11.1,
+            semanas: 2,
+          ),
         ),
+      );
+      expect(find.text('50 kg'), findsOneWidget);
+      expect(
+        find.text('Sua curva aparece a partir da 3ª semana de treino.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('→'), findsNothing);
+    });
+
+    testWidgets('sem destaque: estado vazio', (tester) async {
+      await _pump(tester, const AlunoEvolutionCard());
+      expect(
+        find.text('Registre a carga das séries para ver sua evolução aqui.'),
         findsOneWidget,
       );
     });
 
-    testWidgets('uma semana com recorde: só o tile, sem área vazia', (
-      tester,
-    ) async {
+    RecordePessoal recorde(String data) => RecordePessoal(
+      id: 1,
+      exercicioId: 1,
+      exercicioNome: 'Supino',
+      data: data,
+      cargaKg: 50,
+    );
+
+    testWidgets('rodapé conta os recordes do mês', (tester) async {
       await _pump(
         tester,
         AlunoEvolutionCard(
-          forcaPorSemana: const [0, 0, 0, 0, 0, 0, 0, 90],
-          ultimoRecorde: RecordePessoal(
-            id: 1,
-            exercicioId: 1,
-            exercicioNome: 'Supino',
-            data: '2026-09-25',
-            cargaKg: 50,
-          ),
-          recordeRecente: true,
+          destaque: supino,
+          ultimoRecorde: recorde('2026-09-24'),
+          recordesMes: 2,
         ),
       );
-      expect(find.text('Força (1RM est.)'), findsNothing);
-      expect(find.textContaining('Sua curva'), findsNothing);
-      expect(find.text('Supino · 50 kg'), findsOneWidget);
       expect(
-        tester.getTopLeft(find.byType(OperationalMetricTile)).dx,
-        tester.getTopLeft(find.byType(AlunoEvolutionCard)).dx,
-        reason: 'sem gráfico, o tile não fica dentro de outro card',
+        find.text('2 recordes este mês · último em 24/09'),
+        findsOneWidget,
       );
     });
 
-    testWidgets('recorde com nome longo mostra a carga', (tester) async {
+    testWidgets('rodapé no singular e sem recorde no mês', (tester) async {
+      await _pump(
+        tester,
+        AlunoEvolutionCard(
+          ultimoRecorde: recorde('2026-09-24'),
+          recordesMes: 1,
+        ),
+      );
+      expect(find.text('1 recorde este mês · último em 24/09'), findsOneWidget);
+
+      await _pump(
+        tester,
+        AlunoEvolutionCard(ultimoRecorde: recorde('2026-08-02')),
+      );
+      expect(find.text('Último recorde em 02/08'), findsOneWidget);
+    });
+
+    testWidgets('nome longo não corta com fonte grande', (tester) async {
       await _pumpEstreito(
         tester,
-        escala: 1,
+        escala: 1.5,
         AlunoEvolutionCard(
-          forcaPorSemana: const [],
-          forcaDeltaPercent: 2.3,
-          ultimoRecorde: RecordePessoal(
-            id: 1,
-            exercicioId: 1,
-            exercicioNome: 'Agachamento livre',
-            data: '2026-09-25',
-            cargaKg: 100,
+          destaque: const AlunoDestaqueExercicio(
+            nome: 'Agachamento livre com barra',
+            serieSemanal: [80, 90, 100],
+            inicialKg: 80,
+            atualKg: 100,
+            deltaPercent: 25,
+            semanas: 3,
           ),
+          ultimoRecorde: recorde('2026-09-24'),
+          recordesMes: 3,
         ),
       );
       _expectNadaCortado(tester);
-      expect(find.textContaining('100'), findsOneWidget);
     });
   });
 

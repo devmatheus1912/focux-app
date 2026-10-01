@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// FxIcon — stroke-based monoline icon set (ported from design `tokens.jsx`).
@@ -339,6 +341,63 @@ class _FxIconPainter extends CustomPainter {
             ..moveTo(14, 7)
             ..lineTo(21, 7)
             ..lineTo(21, 14),
+          paint,
+        );
+        break;
+
+      case 'heart-pulse':
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 21)
+            ..lineTo(5, 14)
+            ..cubicTo(3.5, 12.55, 2, 10.8, 2, 8.5)
+            ..cubicTo(2, 5.46, 4.46, 3, 7.5, 3)
+            ..cubicTo(9.26, 3, 10.5, 3.5, 12, 5)
+            ..cubicTo(13.5, 3.5, 14.74, 3, 16.5, 3)
+            ..cubicTo(19.54, 3, 22, 5.46, 22, 8.5)
+            ..cubicTo(22, 10.8, 20.5, 12.55, 19, 14)
+            ..close(),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(3.2, 12)
+            ..lineTo(9.5, 12)
+            ..lineTo(10, 11)
+            ..lineTo(12, 15.5)
+            ..lineTo(14, 8.5)
+            ..lineTo(15.5, 12)
+            ..lineTo(20.8, 12),
+          paint,
+        );
+        break;
+
+      case 'refresh-cw':
+        const ring = Rect.fromLTWH(3, 3, 18, 18);
+        canvas.drawPath(
+          Path()
+            ..addArc(ring, math.pi, math.pi * 0.75)
+            ..lineTo(21, 8),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(21, 3)
+            ..lineTo(21, 8)
+            ..lineTo(16, 8),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..addArc(ring, 0, math.pi * 0.75)
+            ..lineTo(3, 16),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(8, 16)
+            ..lineTo(3, 16)
+            ..lineTo(3, 21),
           paint,
         );
         break;

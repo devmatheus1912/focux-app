@@ -1,6 +1,3 @@
-import 'package:flutter/painting.dart';
-
-import '../../../core/theme/design_tokens.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/utils/treino_atribuicao_prazo.dart';
 import '../data/aluno_home_anamnese.dart';
@@ -184,18 +181,27 @@ String alunoForcaDeltaTexto(S s, double pct) {
       : s.alunoForcaDeltaPositivo(umaCasa);
 }
 
-/// Queda de força em tom de atenção; estável ou subindo, em tom positivo.
-Color alunoForcaDeltaTom(double pct) =>
-    _umaCasa(pct) < 0 ? EagleTokens.warn : EagleTokens.good;
-
-String alunoRecordeTexto(S s, String exercicio, double? cargaKg) {
-  final nome = _inicialMaiuscula(exercicio.trim());
-  if (cargaKg == null || cargaKg <= 0) return nome;
-  return s.alunoEvolucaoRecordeValor(nome, _umaCasa(cargaKg));
+String alunoInicialMaiuscula(String t) {
+  final limpo = t.trim();
+  return limpo.isEmpty ? limpo : limpo[0].toUpperCase() + limpo.substring(1);
 }
 
-String _inicialMaiuscula(String t) =>
-    t.isEmpty ? t : t[0].toUpperCase() + t.substring(1);
+/// "2026-09-24" → "24/09"; null se a data não for ISO.
+String? alunoDiaMes(String? iso) {
+  final d = iso == null ? null : DateTime.tryParse(iso);
+  if (d == null) return null;
+  String dois(int v) => v.toString().padLeft(2, '0');
+  return '${dois(d.day)}/${dois(d.month)}';
+}
+
+/// Rodapé de recordes do card Evolução; null sem recorde.
+String? alunoRecordesRodape(S s, {required int recordesMes, String? ultimaData}) {
+  final dia = alunoDiaMes(ultimaData);
+  if (dia == null) return null;
+  return recordesMes > 0
+      ? s.alunoEvolucaoRecordesMes(recordesMes, dia)
+      : s.alunoEvolucaoUltimoRecordeEm(dia);
+}
 
 double _umaCasa(double v) => (v * 10).round() / 10;
 

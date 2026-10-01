@@ -31,7 +31,7 @@ class FxDockItems {
   static List<FxDockItem> aluno({int chatUnread = 0}) => [
     const FxDockItem(icon: 'home', label: 'Hoje'),
     const FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    const FxDockItem(icon: 'trend', label: 'Saúde'),
+    const FxDockItem(icon: 'heart-pulse', label: 'Saúde'),
     FxDockItem(
       icon: 'chat',
       label: 'Chat',

@@ -94,8 +94,8 @@ void main() {
         ).readAsStringSync();
 
     expect(screen, contains('AlunoEvolutionCard('));
-    expect(card, contains('forcaDeltaPercent'));
+    expect(card, contains('AlunoDestaqueExercicio'));
     expect(card, contains('ultimoRecorde'));
-    expect(card, contains('alunoTrendPlot'));
+    expect(card, contains('recordesMes'));
   });
 }

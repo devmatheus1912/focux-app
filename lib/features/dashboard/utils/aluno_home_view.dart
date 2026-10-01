@@ -71,9 +71,6 @@ class AlunoHomeView {
   final bool chatNoCabecalho;
   final Set<String> recursosIndisponiveis;
 
-  /// O último recorde é dos últimos [alunoRecordeNovoDias] dias.
-  final bool recordeRecente;
-
   /// Próximo horário de hoje ou amanhã ([alunoHorarioNoFoco]).
   final DateTime? horarioNoFoco;
 
@@ -92,7 +89,6 @@ class AlunoHomeView {
     this.prontidaoBaixa = false,
     this.ofertas = const [],
     this.recursosIndisponiveis = const {},
-    this.recordeRecente = false,
     this.horarioNoFoco,
   });
 
@@ -180,10 +176,6 @@ AlunoHomeView buildAlunoHomeView(
     ),
     chatNoCabecalho: home.personalBrand.nomePersonal.trim().isNotEmpty,
     recursosIndisponiveis: home.recursosIndisponiveis,
-    recordeRecente: alunoRecordeRecente(
-      home.recordes.isEmpty ? null : home.recordes.first.data,
-      agora,
-    ),
     horarioNoFoco: alunoHorarioNoFoco(home.agendaProximoInicio, agora),
   );
 }
@@ -228,16 +220,6 @@ bool alunoProntidaoBaixa({
       prontidaoVisivel &&
       score != null &&
       score < alunoProntidaoBaixaAbaixoDe;
-}
-
-const alunoRecordeNovoDias = 7;
-
-bool alunoRecordeRecente(String? data, DateTime now) {
-  final dia = data == null ? null : DateTime.tryParse(data);
-  if (dia == null) return false;
-  final hoje = DateTime(now.year, now.month, now.day);
-  final dias = hoje.difference(DateTime(dia.year, dia.month, dia.day)).inDays;
-  return dias >= 0 && dias <= alunoRecordeNovoDias;
 }
 
 /// Prontidão de hoje com histórico de wearable, ou o convite para sincronizar

@@ -51,8 +51,14 @@ AlunoDashboardHomeBundle _home({
   'concluidosSemanaIso': 2,
   'frequenciaDias': 3,
   'hasWearableHistory': false,
-  'forcaPorSemana': [0, 60, 62, 0, 64, 66, 70, 72],
-  'forcaDeltaPercent': 2.9,
+  'destaqueExercicio': {
+    'nome': 'Supino reto',
+    'serieSemanal': [60, 64, 72],
+    'inicialKg': 60,
+    'atualKg': 72,
+    'deltaPercent': 20.0,
+    'semanas': 5,
+  },
   'anamnesePendente': anamnesePendente,
 });
 
@@ -74,7 +80,8 @@ void main() {
     expect(find.text('Sua semana'), findsOneWidget);
     expect(find.text('2 de 3'), findsOneWidget);
     expect(find.text('Evolução'), findsOneWidget);
-    expect(find.text('+2,9%'), findsOneWidget);
+    expect(find.text('60 → 72 kg'), findsOneWidget);
+    expect(find.text('+20% em 5 semanas'), findsOneWidget);
     expect(find.text('Pendências'), findsOneWidget);
     expect(find.text('Completar perfil'), findsOneWidget);
     expect(find.text('Adicionar foto'), findsNothing);

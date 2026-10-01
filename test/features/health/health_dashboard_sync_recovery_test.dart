@@ -226,6 +226,56 @@ void main() {
   );
 
   testWidgets(
+    'sem sono nem FC: pede os dados, blocos vazios com -- e conexão discreta',
+    (tester) async {
+      await _pumpDashboard(
+        tester,
+        screen: HealthDashboardScreen(
+          checkAuthorization: () async => true,
+          loadTodaySummary:
+              () async => const HealthSummary(
+                steps: 4000,
+                caloriesBurned: 0,
+                avgHeartRate: 0,
+                sleepHours: 0,
+              ),
+          syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 4000}),
+          updateHomeWidgetRecovery: ({
+            required int recoveryScore,
+            required String recoveryLabel,
+            required String recoveryHint,
+            required int steps,
+          }) async {},
+          clearHomeWidgetRecoveryScore: ({required int? steps}) async {},
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(saudeSemScoreMensagem), findsOneWidget);
+      expect(
+        find.textContaining(saudeSemScoreAcao, findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('4000'), findsOneWidget);
+      expect(find.textContaining('kcal'), findsNothing);
+      expect(find.text(saudeSemDadosHoje), findsOneWidget);
+      expect(find.text(saudeSemBatimento), findsOneWidget);
+      expect(find.text(saudeSemSono), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text(saudeGerenciarConexaoLabel),
+        200,
+      );
+      expect(find.text(saudeGerenciarConexaoLabel), findsOneWidget);
+      expect(find.text(saudeDesconectarLabel()), findsNothing);
+    },
+  );
+
+  test('zero do wearable vira --', () {
+    expect(saudeValorOuTraco(0, (v) => '$v kcal'), '--');
+    expect(saudeValorOuTraco(320, (v) => '$v kcal'), '320 kcal');
+  });
+
+  testWidgets(
     'sync sem rede não apaga a nota do widget da Home',
     (tester) async {
       var homeWidgetClears = 0;

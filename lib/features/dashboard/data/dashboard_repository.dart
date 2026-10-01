@@ -13,9 +13,9 @@ import '../../monetizacao/data/upsell_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
-import '../utils/aluno_performance_evolution.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_client_cache.dart';
+import 'aluno_destaque_exercicio.dart';
 import 'aluno_home_anamnese.dart';
 import 'aluno_home_insight.dart';
 import 'command_center_data.dart';
@@ -373,14 +373,14 @@ class AlunoDashboardHomeBundle {
 
   /// Sessões concluídas na semana ISO (BFF); null em backend antigo ou falha.
   final int? concluidosSemanaIso;
-  final List<double> forcaPorSemana;
   final List<RecordePessoal> recordes;
+
+  /// Recordes com data no mês corrente.
+  final int recordesMes;
+  final AlunoDestaqueExercicio? destaqueExercicio;
 
   /// Meta da semana em sessões (fichas do rodízio); null sem rodízio — SSOT do BFF.
   final int? frequenciaDias;
-
-  /// e1RM médio, semana atual vs anterior (só exercícios em comum); null = sem base.
-  final double? forcaDeltaPercent;
 
   /// Última prontidão tem mais de 1 dia: o BFF manda `recovery: null` + true.
   final bool recoveryStale;
@@ -413,10 +413,10 @@ class AlunoDashboardHomeBundle {
     this.streakAtual = 0,
     this.volumeSemanaKg = 0,
     this.concluidosSemanaIso,
-    this.forcaPorSemana = const [],
     this.recordes = const [],
+    this.recordesMes = 0,
+    this.destaqueExercicio,
     this.frequenciaDias,
-    this.forcaDeltaPercent,
     this.recoveryStale = false,
     this.insight,
     this.anamnesePendente,
@@ -443,10 +443,10 @@ class AlunoDashboardHomeBundle {
         streakAtual: streakAtual,
         volumeSemanaKg: volumeSemanaKg,
         concluidosSemanaIso: concluidosSemanaIso,
-        forcaPorSemana: forcaPorSemana,
         recordes: recordes,
+        recordesMes: recordesMes,
+        destaqueExercicio: destaqueExercicio,
         frequenciaDias: frequenciaDias,
-        forcaDeltaPercent: forcaDeltaPercent,
         recoveryStale: recoveryStale,
         insight: insight,
         anamnesePendente: anamnesePendente,
@@ -539,13 +539,15 @@ class AlunoDashboardHomeBundle {
         final num v => v.toInt(),
         _ => null,
       },
-      forcaPorSemana: parseAlunoHomeSeries(json['forcaPorSemana']),
       recordes: parseRecordes(json['recordes']),
-      frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
-      forcaDeltaPercent: switch (json['forcaDeltaPercent']) {
-        final num v => v.toDouble(),
-        _ => null,
+      recordesMes: switch (json['recordesMes']) {
+        final num v when v > 0 => v.toInt(),
+        _ => 0,
       },
+      destaqueExercicio: AlunoDestaqueExercicio.tryParse(
+        json['destaqueExercicio'],
+      ),
+      frequenciaDias: (json['frequenciaDias'] as num?)?.toInt(),
       recoveryStale: json['recoveryStale'] == true,
       insight: AlunoHomeInsight.tryParse(json['insight']),
       anamnesePendente: AlunoAnamnesePendente.tryParse(

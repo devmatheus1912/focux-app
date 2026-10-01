@@ -318,7 +318,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     ),
                     FxHelpTip(
                       'Desconectar',
-                      'Revogue o acesso no fim da tela.',
+                      'Em "$saudeGerenciarConexaoLabel", no fim da tela.',
                     ),
                   ],
                 );
@@ -466,6 +466,17 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                     recovery.recoveryHint,
                     style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
+                ] else if (recovery != null) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  Text(
+                    saudeSemScoreMensagem,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                  FxConversionTextLink(
+                    text: '',
+                    actionText: saudeSemScoreAcao,
+                    onTap: _requestAccess,
+                  ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
                 Align(
@@ -493,8 +504,8 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               Expanded(
                 child: OperationalMetricTile(
                   label: 'Passos',
-                  value: '${s.steps}',
-                  hint: 'Hoje',
+                  value: saudeValorOuTraco(s.steps, (v) => '$v'),
+                  hint: s.steps > 0 ? 'Hoje' : saudeSemDadosHoje,
                   color: EagleTokens.good,
                   isDark: isDark,
                 ),
@@ -503,8 +514,14 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
               Expanded(
                 child: OperationalMetricTile(
                   label: 'Calorias',
-                  value: '${s.caloriesBurned.toInt()} kcal',
-                  hint: 'Gasto estimado',
+                  value: saudeValorOuTraco(
+                    s.caloriesBurned.toInt(),
+                    (v) => '$v kcal',
+                  ),
+                  hint:
+                      s.caloriesBurned >= 1
+                          ? 'Gasto estimado'
+                          : saudeSemDadosHoje,
                   color: EagleTokens.warn,
                   isDark: isDark,
                 ),
@@ -521,7 +538,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                       s.avgHeartRate > 0
                           ? '${s.avgHeartRate.toInt()} bpm'
                           : '--',
-                  hint: 'Frequência',
+                  hint: s.avgHeartRate > 0 ? 'Frequência' : saudeSemBatimento,
                   color: EagleTokens.bad,
                   isDark: isDark,
                 ),
@@ -534,18 +551,23 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
                       s.sleepHours > 0
                           ? '${formatBrDecimal(s.sleepHours)}h'
                           : '--',
-                  hint: 'Última noite',
+                  hint: s.sleepHours > 0 ? 'Última noite' : saudeSemSono,
                   color: EagleTokens.purple,
                   isDark: isDark,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: TokensStrip.s5),
-          FxConversionTextLink(
-            text: '',
-            actionText: saudeDesconectarLabel(),
-            onTap: _desconectar,
+          const SizedBox(height: TokensStrip.s6),
+          Center(
+            child: TextButton(
+              onPressed: _desconectar,
+              style: TextButton.styleFrom(foregroundColor: chrome.mute),
+              child: Text(
+                saudeGerenciarConexaoLabel,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            ),
           ),
         ],
       ),

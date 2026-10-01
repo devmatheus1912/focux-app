@@ -27,7 +27,6 @@ AlunoDashboardHomeBundle _bundle({
   Object? insight,
   String nomePersonal = '',
   List<String> recursosIndisponiveis = const [],
-  String? recordeEm,
   int ofertas = 0,
   int fichas = 0,
   String? concluidoEm,
@@ -71,10 +70,7 @@ AlunoDashboardHomeBundle _bundle({
   'insight': insight,
   'personalBrand': {'nomePersonal': nomePersonal},
   'recursosIndisponiveis': recursosIndisponiveis,
-  'recordes': [
-    if (recordeEm != null)
-      {'id': 1, 'exercicioId': 2, 'exercicioNome': 'Supino', 'data': recordeEm},
-  ],
+  'recordes': const [],
 });
 
 CoachMensagem _coach(String tipo) => CoachMensagem(
@@ -407,38 +403,6 @@ void main() {
       final view = buildAlunoHomeView(_bundle(coach: 2), agendaReviewed: true);
       expect(view.coach, hasLength(2));
       expect(view.aviso, AlunoHomeAviso.coach);
-    });
-  });
-
-  group('alunoRecordeRecente', () {
-    final hoje = DateTime(2026, 9, 27, 15);
-
-    test('até 7 dias é novo; depois ou data ruim não', () {
-      expect(alunoRecordeRecente('2026-09-27', hoje), isTrue);
-      expect(alunoRecordeRecente('2026-09-20', hoje), isTrue);
-      expect(alunoRecordeRecente('2026-09-19', hoje), isFalse);
-      expect(alunoRecordeRecente('2026-09-28', hoje), isFalse);
-      expect(alunoRecordeRecente('x', hoje), isFalse);
-      expect(alunoRecordeRecente(null, hoje), isFalse);
-    });
-
-    test('view marca o recorde recente', () {
-      expect(
-        buildAlunoHomeView(
-          _bundle(recordeEm: '2026-09-25'),
-          agendaReviewed: true,
-          now: hoje,
-        ).recordeRecente,
-        isTrue,
-      );
-      expect(
-        buildAlunoHomeView(
-          _bundle(),
-          agendaReviewed: true,
-          now: hoje,
-        ).recordeRecente,
-        isFalse,
-      );
     });
   });
 
