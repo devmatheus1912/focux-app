@@ -109,8 +109,57 @@ void main() {
     expect(find.text('Aceitar'), findsNothing);
     expect(find.text('Abrir treino'), findsOneWidget);
     expect(find.text('Descartar'), findsOneWidget);
-    expect(find.textContaining('Não achei no treino'), findsOneWidget);
+    expect(find.textContaining('Fora do treino ativo'), findsOneWidget);
     expect(find.textContaining('Aceitar todas'), findsNothing);
+    expect(find.text('1 sugestão fora do treino ativo'), findsOneWidget);
+    expect(find.text('Tentar de novo'), findsOneWidget);
+    expect(find.text('Descartar todas'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('pendentes vêm antes das que estão fora do treino', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const ProgressaoAceitarScreen(),
+        ),
+      ],
+    );
+    router.go(
+      '/',
+      extra: const ProgressaoAceitarRouteArgs(alunoId: 12, alunoNome: 'Beatriz').toExtra(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          progressaoSugestoesProvider(12).overrideWith(
+            (ref) async => [
+              const ProgressaoSugestao(
+                id: 2,
+                alunoId: 12,
+                exercicio: 'Remada',
+                cargaAtual: '40 kg · 3×10',
+                cargaSugerida: '42,5 kg · 3×10',
+                status: ProgressaoSugestao.statusNaoEncontrada,
+              ),
+              sugestao,
+            ],
+          ),
+        ],
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final supino = tester.getTopLeft(find.text('Supino')).dy;
+    final remada = tester.getTopLeft(find.text('Remada')).dy;
+    expect(supino, lessThan(remada));
+    expect(find.text('Aceitar 1 sugestão'), findsOneWidget);
   });
 }

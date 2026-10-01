@@ -245,9 +245,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pending =
+    final abertas =
         ref.watch(progressaoSugestoesProvider(widget.alunoId)).value ??
         const [];
+    final pending = abertas.where((s) => !s.naoEncontrada).toList();
     final contexto = ref.watch(progressaoContextoProvider(widget.alunoId));
     final semTreino = isSemTreinoAtivo(contexto.error);
     final resultado = _resultado;
@@ -308,10 +309,10 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                               spacing: TokensStrip.s2,
                               runSpacing: TokensStrip.s2,
                               children: [
-                                if (pending.isNotEmpty)
+                                if (abertas.isNotEmpty)
                                   FxActionChip(
                                     label: progressaoPendingReviewLabel(
-                                      pending.length,
+                                      abertas.length,
                                     ),
                                     accent: primary,
                                     isDark: isDark,

@@ -72,9 +72,9 @@ const progressaoSemTreinoAtivo =
     'Sem treino ativo. Monte um treino para pedir progressão.';
 const progressaoObservacoesLabel = 'Observações (opcional)';
 const progressaoObservacoesHint = 'Ex.: dor no ombro, semana de deload';
-const progressaoNaoEncontrada = 'Não achei no treino';
+const progressaoNaoEncontrada = 'Fora do treino ativo';
 const progressaoNaoEncontradaHint =
-    'O exercício saiu do treino ativo. Ajuste direto no treino.';
+    'O exercício mudou ou saiu do treino. Ajuste no treino ou descarte.';
 const progressaoAbrirTreino = 'Abrir treino';
 const progressaoRevisarAplicar = 'Revisar e aplicar';
 const progressaoErroManteveResultado =
@@ -89,13 +89,30 @@ String progressaoAceitarTodasConfirm(int count) =>
         : 'As $count sugestões vão para o treino ativo (carga, séries e repetições).';
 
 String progressaoAceitarTodasSnack(ProgressaoAceitarTodasResponse r) {
-  final aplicadas =
-      r.aplicadas == 1
-          ? '1 sugestão aplicada'
-          : '${r.aplicadas} sugestões aplicadas';
+  final aplicadas = switch (r.aplicadas) {
+    0 => 'Nenhuma sugestão aplicada',
+    1 => '1 sugestão aplicada',
+    final n => '$n sugestões aplicadas',
+  };
   if (r.naoEncontradas == 0) return '$aplicadas no treino.';
-  return '$aplicadas. ${r.naoEncontradas} não estão mais no treino.';
+  return '$aplicadas. ${r.naoEncontradas} fora do treino ativo.';
 }
+
+String progressaoForaDoTreinoResumo(int count) =>
+    count == 1
+        ? '1 sugestão fora do treino ativo'
+        : '$count sugestões fora do treino ativo';
+
+const progressaoTentarDeNovo = 'Tentar de novo';
+const progressaoDescartarTodas = 'Descartar todas';
+
+String progressaoDescartarForaConfirm(int count) =>
+    count == 1
+        ? 'A sugestão fora do treino ativo será removida.'
+        : 'As $count sugestões fora do treino ativo serão removidas.';
+
+String progressaoDescartadasSnack(int count) =>
+    count == 1 ? '1 sugestão descartada.' : '$count sugestões descartadas.';
 
 String _doisDigitos(int n) => n.toString().padLeft(2, '0');
 

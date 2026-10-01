@@ -300,6 +300,14 @@ class IaRepository {
     );
   }
 
+  Future<int> descartarSugestoesNaoEncontradas(int alunoId) async {
+    final r = await _dio.post(
+      '/api/ia/progressao/sugestoes/descartar-nao-encontradas',
+      queryParameters: {'alunoId': alunoId},
+    );
+    return ((r.data as Map?)?['descartadas'] as num?)?.toInt() ?? 0;
+  }
+
   Future<void> rejeitarSugestao(int id) async {
     await _dio.post('/api/ia/progressao/sugestoes/$id/rejeitar');
   }

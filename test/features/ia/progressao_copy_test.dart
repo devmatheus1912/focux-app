@@ -63,8 +63,26 @@ void main() {
       progressaoAceitarTodasSnack(
         const ProgressaoAceitarTodasResponse(aplicadas: 1, naoEncontradas: 2),
       ),
-      '1 sugestão aplicada. 2 não estão mais no treino.',
+      '1 sugestão aplicada. 2 fora do treino ativo.',
     );
+    expect(
+      progressaoAceitarTodasSnack(
+        const ProgressaoAceitarTodasResponse(aplicadas: 0, naoEncontradas: 16),
+      ),
+      'Nenhuma sugestão aplicada. 16 fora do treino ativo.',
+    );
+  });
+
+  test('sugestões fora do treino têm resumo, descarte em lote e snack', () {
+    expect(progressaoNaoEncontrada, 'Fora do treino ativo');
+    expect(progressaoForaDoTreinoResumo(1), '1 sugestão fora do treino ativo');
+    expect(progressaoForaDoTreinoResumo(16), '16 sugestões fora do treino ativo');
+    expect(
+      progressaoDescartarForaConfirm(16),
+      'As 16 sugestões fora do treino ativo serão removidas.',
+    );
+    expect(progressaoDescartadasSnack(1), '1 sugestão descartada.');
+    expect(progressaoDescartadasSnack(16), '16 sugestões descartadas.');
   });
 
   test('data e nome do PDF', () {

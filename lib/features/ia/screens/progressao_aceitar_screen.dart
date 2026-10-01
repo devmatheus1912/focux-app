@@ -113,11 +113,16 @@ class _ProgressaoAceitarScreenState
                       progressaoSugestoesProvider(args.alunoId),
                     ),
               ),
-          data: (lista) {
-            if (lista.isEmpty) return _empty(args, firstName);
+          data: (bruta) {
+            if (bruta.isEmpty) return _empty(args, firstName);
 
             final alunoId = args.alunoId;
+            final lista = [
+              ...bruta.where((s) => !s.naoEncontrada),
+              ...bruta.where((s) => s.naoEncontrada),
+            ];
             final pendentes = lista.where((s) => !s.naoEncontrada).length;
+            final fora = lista.length - pendentes;
             return Aluno360Layout.operacaoContentWidthLimiter(
               child: ListView(
                 padding: const EdgeInsets.all(TokensStrip.s4),
@@ -157,6 +162,15 @@ class _ProgressaoAceitarScreenState
                             minimumSize: const Size.fromHeight(48),
                           ),
                         ),
+                      ),
+                      const SizedBox(height: TokensStrip.s4),
+                    ],
+                    if (fora > 0) ...[
+                      _ForaDoTreinoPanel(
+                        count: fora,
+                        busy: _busy,
+                        onRetry: () => _aplicarTodas(alunoId),
+                        onDiscard: () => _descartarFora(alunoId, fora),
                       ),
                       const SizedBox(height: TokensStrip.s4),
                     ],
@@ -369,6 +383,11 @@ class _ProgressaoAceitarScreenState
       confirmLabel: 'Aplicar',
     );
     if (!ok || !mounted) return;
+    await _aplicarTodas(alunoId);
+  }
+
+  Future<void> _aplicarTodas(int alunoId) async {
+    if (_busy) return;
     setState(() => _aceitandoTodas = true);
     try {
       final r = await IaRepository(
@@ -376,15 +395,51 @@ class _ProgressaoAceitarScreenState
       ).aceitarTodasSugestoes(alunoId);
       _refreshAfterApply(alunoId);
       if (!mounted) return;
-      unawaited(HapticFeedback.mediumImpact());
       final msg = progressaoAceitarTodasSnack(r);
-      setState(() => _successBanner = msg);
-      FeedbackHelper.showSuccess(context, msg);
+      if (r.aplicadas > 0) {
+        unawaited(HapticFeedback.mediumImpact());
+        setState(() => _successBanner = msg);
+        FeedbackHelper.showSuccess(context, msg);
+      } else {
+        setState(() => _successBanner = null);
+        FeedbackHelper.showInfo(context, msg);
+      }
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(
           context,
           friendlyError(e, fallback: 'Não foi possível aplicar as sugestões.'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _aceitandoTodas = false);
+    }
+  }
+
+  Future<void> _descartarFora(int alunoId, int count) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: progressaoDescartarTodas,
+      message: progressaoDescartarForaConfirm(count),
+      icon: Icons.delete_sweep_rounded,
+      confirmLabel: 'Descartar',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    setState(() => _aceitandoTodas = true);
+    try {
+      final n = await IaRepository(
+        ref.read(apiClientProvider),
+      ).descartarSugestoesNaoEncontradas(alunoId);
+      ref.invalidate(progressaoSugestoesProvider(alunoId));
+      if (mounted) {
+        FeedbackHelper.showSuccess(context, progressaoDescartadasSnack(n));
+      }
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(
+          context,
+          friendlyError(e, fallback: 'Não foi possível descartar as sugestões.'),
         );
       }
     } finally {
@@ -475,6 +530,77 @@ class _AlunoHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _ForaDoTreinoPanel extends StatelessWidget {
+  const _ForaDoTreinoPanel({
+    required this.count,
+    required this.busy,
+    required this.onRetry,
+    required this.onDiscard,
+  });
+
+  final int count;
+  final bool busy;
+  final VoidCallback onRetry;
+  final VoidCallback onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(TokensStrip.s3),
+      decoration: BoxDecoration(
+        color: EagleTokens.warn.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        border: Border.all(color: EagleTokens.warn.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.search_off_rounded, size: 18, color: EagleTokens.warn),
+              const SizedBox(width: TokensStrip.s2),
+              Expanded(
+                child: Text(
+                  progressaoForaDoTreinoResumo(count),
+                  style: FocuxHubTypography.body(
+                    color: ShellChrome.of(context).ink,
+                  ).copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: busy ? null : onDiscard,
+                  icon: const Icon(Icons.delete_sweep_rounded, size: 18),
+                  label: const Text(progressaoDescartarTodas),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: EagleTokens.bad,
+                    side: BorderSide(color: EagleTokens.bad.withValues(alpha: 0.55)),
+                    minimumSize: const Size(48, 48),
+                  ),
+                ),
+              ),
+              const SizedBox(width: TokensStrip.s3),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: busy ? null : onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text(progressaoTentarDeNovo),
+                  style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
