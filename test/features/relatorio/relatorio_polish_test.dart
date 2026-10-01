@@ -25,10 +25,9 @@ void main() {
     expect(screen, isNot(contains('dashboardHeroCaptionOnTeal')));
     expect(screen, isNot(contains('_PeriodPill')));
 
-    expect(pdf, contains('_pdfHeader'));
-    expect(pdf, contains('FOCUX'));
-    expect(pdf, contains('relatorioPdfBrandLabel'));
-    expect(pdf, contains('_pdfBrand'));
+    expect(pdf, contains('focuxPdfPage'));
+    expect(pdf, contains('FocuxPdfBrand.from'));
+    expect(pdf, isNot(contains('PdfColor.fromInt')));
 
     expect(global, contains('fxScreenA11yScope'));
     expect(global, isNot(contains('FxSettingsGroup')));

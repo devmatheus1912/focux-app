@@ -34,6 +34,7 @@ import '../providers/progressao_sugestoes_provider.dart';
 import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
 import '../utils/progressao_pdf_builder.dart';
+import '../../../core/pdf/focux_pdf_kit.dart';
 import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_pedido_card.dart';
 import '../widgets/ia_progressao_result_view.dart';
@@ -95,7 +96,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         result: resultado,
         alunoNome: widget.alunoNome,
         personalNome: ref.read(personalNameProvider),
-        assets: await ProgressaoPdfAssets.load(),
+        assets: await FocuxPdfAssets.load(),
         agora: agora,
       );
       await Printing.sharePdf(

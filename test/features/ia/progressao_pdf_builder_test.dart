@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/pdf/focux_pdf_kit.dart';
 import 'package:focux_app/features/ia/models/ia_progressao_carga_result.dart';
 import 'package:focux_app/features/ia/utils/progressao_pdf_builder.dart';
 
@@ -22,7 +23,7 @@ void main() {
       ],
     });
 
-    final assets = await ProgressaoPdfAssets.load();
+    final assets = await FocuxPdfAssets.load();
     final bytes = await buildProgressaoPdf(
       result: result,
       alunoNome: 'Ana',

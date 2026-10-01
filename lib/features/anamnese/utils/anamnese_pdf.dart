@@ -1,128 +1,110 @@
-import 'package:pdf/pdf.dart';
+import 'dart:typed_data';
+
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../core/pdf/focux_pdf_kit.dart';
 import '../data/anamnese_repository.dart';
 import 'anamnese_display.dart';
 
 class AnamnesePdfSnapshot {
-  const AnamnesePdfSnapshot({required this.anamnese});
+  const AnamnesePdfSnapshot({required this.anamnese, this.alunoNome});
 
   final Anamnese anamnese;
+  final String? alunoNome;
 }
 
-Future<void> exportAnamnesePdf(AnamnesePdfSnapshot s) async {
+Future<Uint8List> buildAnamnesePdf(
+  AnamnesePdfSnapshot s, {
+  required FocuxPdfAssets assets,
+  DateTime? agora,
+}) {
   final a = s.anamnese;
-  final doc = pw.Document();
+  final nome = s.alunoNome?.trim();
+  final doc = pw.Document(title: 'Ficha de anamnese', theme: focuxPdfTheme(assets));
   doc.addPage(
-    pw.MultiPage(
-      pageFormat: PdfPageFormat.a4,
-      margin: const pw.EdgeInsets.all(32),
-      build:
-          (ctx) => [
-            pw.Text(
-              'Ficha de Anamnese',
-              style: pw.TextStyle(
-                fontSize: 22,
-                fontWeight: pw.FontWeight.bold,
-              ),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              'Status: ${anamneseStatusLabel(a.status)} · '
-              'Gerado em: ${DateTime.now().toString().substring(0, 16)}',
-              style: const pw.TextStyle(fontSize: 10),
-            ),
-            if (a.alertas.isNotEmpty) ...[
-              pw.SizedBox(height: 8),
-              _campo('Alertas', a.alertas.join(' · ')),
-            ],
-            pw.SizedBox(height: 16),
-            _secao('PAR-Q+'),
+    focuxPdfPage(
+      assets: assets,
+      brand: FocuxPdfBrand.focux(),
+      titulo: 'Ficha de anamnese',
+      subtitulo: (nome == null || nome.isEmpty) ? null : nome,
+      linhasMeta: ['Status: ${anamneseStatusLabel(a.status)}'],
+      geradoLabel: focuxPdfGeradoLabel(agora ?? DateTime.now()),
+      build: (_) => [
+        if (a.alertas.isNotEmpty) ...[
+          focuxPdfCallout('Alertas: ${a.alertas.join(' · ')}', alerta: true),
+          pw.SizedBox(height: 14),
+        ],
+        ...focuxPdfSection(
+          'PAR-Q+',
+          focuxPdfFieldPairs([
             for (final q in anamneseParqPerguntas)
-              _campo(q.label, anamneseBoolLabel(anamneseParqValue(a, q.key))),
-            if (a.parqOutraRazaoDetalhe?.trim().isNotEmpty == true)
-              _campo('Detalhe (outra razão)', a.parqOutraRazaoDetalhe!),
-            pw.SizedBox(height: 12),
-            _secao('Saúde'),
-            _campo('Histórico médico', a.historicoMedico ?? ''),
-            _campo('Cirurgias', a.cirurgias ?? ''),
-            _campo('Dores crônicas', a.doresCronicas ?? ''),
-            _campo('Lesões / limitações', a.lesoes ?? ''),
-            _campo('Medicamentos', a.medicamentos ?? ''),
-            _campo('Alergias', a.alergias ?? ''),
-            _campo('Gestação / pós-parto', a.gestacaoPosParto ?? ''),
-            _campo(
-              'Histórico familiar CV',
-              anamneseBoolLabel(a.historicoFamiliarCv),
-            ),
-            _campo('Sintomas CV', a.sintomasCv ?? ''),
-            pw.SizedBox(height: 12),
-            _secao('Hábitos'),
-            _campo('Sono', anamneseSonoHorasLabel(a.sonoHoras)),
-            _campo('Qualidade do sono', a.qualidadeSono ?? ''),
-            _campo('Nível de estresse', a.nivelEstresse ?? ''),
-            _campo('Tabagismo', a.tabagismo ?? ''),
-            _campo('Álcool', a.alcool ?? ''),
-            _campo('Observações', a.observacoes ?? ''),
-            pw.SizedBox(height: 12),
-            _secao('Treino e objetivos'),
-            _campo('Objetivo', a.objetivo ?? ''),
-            _campo('Objetivo detalhado', a.objetivoDetalhado ?? ''),
-            _campo(
+              (q.label, anamneseBoolLabel(anamneseParqValue(a, q.key))),
+            ('Detalhe (outra razão)', a.parqOutraRazaoDetalhe ?? ''),
+          ]),
+        ),
+        ...focuxPdfSection(
+          'Saúde',
+          focuxPdfFieldPairs([
+            ('Histórico médico', a.historicoMedico ?? ''),
+            ('Cirurgias', a.cirurgias ?? ''),
+            ('Dores crônicas', a.doresCronicas ?? ''),
+            ('Lesões / limitações', a.lesoes ?? ''),
+            ('Medicamentos', a.medicamentos ?? ''),
+            ('Alergias', a.alergias ?? ''),
+            ('Gestação / pós-parto', a.gestacaoPosParto ?? ''),
+            ('Histórico familiar CV', anamneseBoolLabel(a.historicoFamiliarCv)),
+            ('Sintomas CV', a.sintomasCv ?? ''),
+          ]),
+        ),
+        ...focuxPdfSection(
+          'Hábitos',
+          focuxPdfFieldPairs([
+            ('Sono', anamneseSonoHorasLabel(a.sonoHoras)),
+            ('Qualidade do sono', a.qualidadeSono ?? ''),
+            ('Nível de estresse', a.nivelEstresse ?? ''),
+            ('Tabagismo', a.tabagismo ?? ''),
+            ('Álcool', a.alcool ?? ''),
+            ('Observações', a.observacoes ?? ''),
+          ]),
+        ),
+        ...focuxPdfSection(
+          'Treino e objetivos',
+          focuxPdfFieldPairs([
+            ('Objetivo', a.objetivo ?? ''),
+            ('Objetivo detalhado', a.objetivoDetalhado ?? ''),
+            (
               'Disponibilidade semanal',
               a.disponibilidadeSemanal == null
                   ? ''
                   : anamneseDisponibilidadeLabel(a.disponibilidadeSemanal!),
             ),
-            _campo('Preferências de treino', a.preferenciasTreino ?? ''),
-            _campo('Restrições alimentares', a.restricoesAlimentares ?? ''),
-            _campo('Histórico de atividade', a.historicoAtividade ?? ''),
-            _campo('Motivo de interrupções', a.motivoInterrupcoes ?? ''),
-            _campo('Motivação atual', a.motivacaoAtual ?? ''),
-            _campo('Algo mais', a.algoMais ?? ''),
-            if (a.nivelAtividade != null) ...[
-              pw.SizedBox(height: 8),
-              _campo('Nível de atividade (legado)', anamneseNivelLabel(a.nivelAtividade)),
-            ],
-            if ((a.notasProfissional ?? '').trim().isNotEmpty ||
-                (a.atestadoObs ?? '').trim().isNotEmpty) ...[
-              pw.SizedBox(height: 12),
-              _secao('Revisão do personal'),
-              _campo('Notas profissionais', a.notasProfissional ?? ''),
-              _campo('Observação de atestado', a.atestadoObs ?? ''),
-            ],
-          ],
-    ),
-  );
-  await Printing.layoutPdf(onLayout: (_) async => doc.save());
-}
-
-pw.Widget _secao(String titulo) => pw.Padding(
-  padding: const pw.EdgeInsets.only(bottom: 4),
-  child: pw.Text(
-    titulo,
-    style: pw.TextStyle(
-      fontSize: 14,
-      fontWeight: pw.FontWeight.bold,
-      color: PdfColors.blueGrey700,
-    ),
-  ),
-);
-
-pw.Widget _campo(String label, String value) {
-  if (value.trim().isEmpty || value.trim() == '—') return pw.SizedBox();
-  return pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 6, left: 8),
-    child: pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          label,
-          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+            ('Preferências de treino', a.preferenciasTreino ?? ''),
+            ('Restrições alimentares', a.restricoesAlimentares ?? ''),
+            ('Histórico de atividade', a.historicoAtividade ?? ''),
+            ('Motivo de interrupções', a.motivoInterrupcoes ?? ''),
+            ('Motivação atual', a.motivacaoAtual ?? ''),
+            ('Algo mais', a.algoMais ?? ''),
+            if (a.nivelAtividade != null)
+              ('Nível de atividade', anamneseNivelLabel(a.nivelAtividade)),
+          ]),
         ),
-        pw.Text(value, style: const pw.TextStyle(fontSize: 11)),
+        if ((a.notasProfissional ?? '').trim().isNotEmpty ||
+            (a.atestadoObs ?? '').trim().isNotEmpty)
+          ...focuxPdfSection(
+            'Revisão do personal',
+            focuxPdfFieldPairs([
+              ('Notas profissionais', a.notasProfissional ?? ''),
+              ('Observação de atestado', a.atestadoObs ?? ''),
+            ]),
+          ),
       ],
     ),
   );
+  return doc.save();
+}
+
+Future<void> exportAnamnesePdf(AnamnesePdfSnapshot s) async {
+  final bytes = await buildAnamnesePdf(s, assets: await FocuxPdfAssets.load());
+  await Printing.layoutPdf(onLayout: (_) async => bytes);
 }
