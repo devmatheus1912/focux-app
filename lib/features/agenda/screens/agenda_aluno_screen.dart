@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -357,7 +355,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                         )
                       : FxEmptyAction(
                           label: 'Abrir chat',
-                          onTap: () => context.push('/chat/aluno'),
+                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
                         ),
                 ),
               ],

@@ -109,6 +109,12 @@ void invalidateAlunoDashboardHome(WidgetRef ref) {
   ref.invalidate(alunoDashboardHomeProvider);
 }
 
+/// Personal: write que muda a Home (ex.: ler notificações → sino).
+void invalidatePersonalDashboardHome(WidgetRef ref) {
+  DashboardHomeClientCache.clear();
+  ref.invalidate(dashboardHomeProvider);
+}
+
 /// Puxar para atualizar: busca o bundle novo sem apagar o atual (mantém o
 /// ETag). Sem rede, lança antes de mexer no cache e a Home segue como estava.
 Future<void> refreshAlunoDashboardHome(WidgetRef ref) async {

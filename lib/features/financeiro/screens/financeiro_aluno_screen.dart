@@ -431,7 +431,7 @@ class _FinanceiroAlunoScreenState extends ConsumerState<FinanceiroAlunoScreen> {
                   ),
                   child: FxLiquidPrimaryButton(
                     label: 'Falar com o personal',
-                    onPressed: () => context.push('/chat/aluno'),
+                    onPressed: () => openAlunoRoute(context, '/chat/aluno'),
                   ),
                 ),
               ),

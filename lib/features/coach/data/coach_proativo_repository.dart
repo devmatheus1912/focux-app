@@ -35,16 +35,26 @@ class CoachHomeItem {
     required this.rota,
     required this.lido,
     required this.criadoEm,
+    this.motivo = '',
+    this.alertas = 1,
   });
 
   final int id;
   final int alunoId;
   final String alunoNome;
   final String tipo;
+
+  /// Texto que o aluno já recebeu por push.
   final String mensagem;
   final String rota;
   final bool lido;
   final String criadoEm;
+
+  /// Motivo escrito para o personal, ex.: "9 dias sem treinar".
+  final String motivo;
+
+  /// Alertas em aberto deste aluno (agrupados num item só).
+  final int alertas;
 
   factory CoachHomeItem.fromJson(Map<String, dynamic> j) => CoachHomeItem(
     id: (j['id'] as num).toInt(),
@@ -55,6 +65,8 @@ class CoachHomeItem {
     rota: j['rota'] as String? ?? '',
     lido: j['lido'] as bool? ?? false,
     criadoEm: j['criadoEm'] as String? ?? '',
+    motivo: j['motivo'] as String? ?? '',
+    alertas: (j['alertas'] as num?)?.toInt() ?? 1,
   );
 }
 
@@ -140,5 +152,10 @@ class CoachProativoRepository {
 
   Future<void> marcarLido(int id) async {
     await _dio.post('/api/coach-proativo/mensagens/$id/lido');
+  }
+
+  /// Personal agiu sobre o aluno: fecha todos os alertas dele (o aluno segue vendo a mensagem).
+  Future<void> resolverAluno(int alunoId) async {
+    await _dio.post('/api/coach-proativo/alunos/$alunoId/resolver');
   }
 }

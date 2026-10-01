@@ -21,4 +21,18 @@ void main() {
     expect(screen, isNot(contains('Abrir sinais do Radar Focux')));
     expect(screen, isNot(contains("freshnessLabel ?? 'INBOX'")));
   });
+
+  test('lidas: destaque real, contagem de não lidas e sino da Home', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/notificacoes/screens/notificacoes_screen.dart',
+    );
+    expect(screen, contains('titleCase: false'));
+    expect(screen, contains('muted: !unread'));
+    expect(screen, contains("ValueKey('notificacao-nao-lida')"));
+    expect(screen, contains('notificacaoNaoLidasLabel(unreadCount)'));
+    expect(screen, isNot(contains('inbox.total),')));
+    expect(screen, contains('invalidateAlunoDashboardHome(ref)'));
+    expect(screen, contains('invalidatePersonalDashboardHome(ref)'));
+    expect(screen, contains('item.ctaLabel'));
+  });
 }

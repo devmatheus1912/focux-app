@@ -144,7 +144,7 @@ class _StudentToolsSection extends StatelessWidget {
                   mute: chrome.mute,
                   line: chrome.line,
                   showDivider: i < featured.length - 1,
-                  onTap: () => context.push(featured[i].route),
+                  onTap: () => openAlunoRoute(context, featured[i].route),
                 ),
             ],
           ),
@@ -223,7 +223,7 @@ Widget _alunoCatalogGroup({
             showDivider: i < items.length - 1,
             onTap: () {
               Navigator.pop(sheetContext);
-              context.push(items[i].route);
+              openAlunoRoute(context, items[i].route);
             },
           ),
       ],

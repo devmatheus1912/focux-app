@@ -378,7 +378,11 @@ class FxSatelliteListTile extends StatelessWidget {
     this.isThreeLine = false,
     this.titleCase = true,
     this.titleMaxLines,
+    this.muted = false,
   });
+
+  /// Item já visto (ex.: notificação lida): título mais leve e apagado.
+  final bool muted;
 
   final String title;
   final Widget? subtitle;
@@ -417,8 +421,11 @@ class FxSatelliteListTile extends StatelessWidget {
           softWrap: true,
           overflow: TextOverflow.ellipsis,
           style: FocuxHubTypography.body(
-            color: ink,
-          ).copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.15),
+            color: muted ? mute : ink,
+          ).copyWith(
+            fontWeight: muted ? FontWeight.w500 : FontWeight.w700,
+            letterSpacing: -0.15,
+          ),
         ),
         subtitle:
             subtitle == null

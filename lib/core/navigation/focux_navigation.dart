@@ -36,6 +36,15 @@ abstract final class FocuxNavigation {
     '/ia/copiloto',
   ];
 
+  /// Branches do [AlunoShell]; ordem = índice do dock.
+  static const List<String> alunoShellTabPaths = [
+    '/dashboard/aluno',
+    '/checkin/treinos',
+    '/saude',
+    '/chat/aluno',
+    '/aluno/perfil',
+  ];
+
   static const List<String> automatedGates = [
     'test/core/router/routes_pillar_contract_test.dart',
     'test/core/design_system/navigation_architecture_pillar_contract_test.dart',

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -164,7 +165,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
           subtitle: s.treinosHubVazioSubtitulo,
           action: FxEmptyAction(
             label: s.treinosHubVazioCta,
-            onTap: () => context.push('/chat/aluno'),
+            onTap: () => openAlunoRoute(context, '/chat/aluno'),
           ),
         ),
       ];

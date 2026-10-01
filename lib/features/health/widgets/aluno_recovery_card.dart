@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -61,7 +60,7 @@ class AlunoRecoveryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(TokensStrip.rCard),
           onTap: () {
             HapticFeedback.selectionClick();
-            context.push('/saude');
+            openAlunoRoute(context, '/saude');
           },
           child: Ink(
             decoration: fxListCardDecoration(context, accent: primary),

@@ -170,7 +170,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                 label: 'Ir aos treinos',
                 onPressed: () {
                   FxHomeSheetChrome.dismissAndPop(sheetContext);
-                  context.push('/checkin/treinos');
+                  openAlunoRoute(context, '/checkin/treinos');
                 },
               ),
             ],
@@ -270,7 +270,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                       label: 'Ir aos treinos',
                       onPressed: () {
                         FxKeyboardDismissScope.dismiss();
-                        context.push('/checkin/treinos');
+                        openAlunoRoute(context, '/checkin/treinos');
                       },
                     ),
                   ),
@@ -324,7 +324,7 @@ class _AlunoTrilhasScreenState extends ConsumerState<AlunoTrilhasScreen> {
                       label: 'Chat',
                       accent: primary,
                       isDark: isDark,
-                      onPressed: () => context.push('/chat/aluno'),
+                      onPressed: () => openAlunoRoute(context, '/chat/aluno'),
                     ),
                   ],
                 ),

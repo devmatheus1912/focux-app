@@ -154,7 +154,7 @@ class _RecorrenciaAlunoScreenState
       RecorrenciaAlunoStickyKind.autorizar => _autorizar,
       RecorrenciaAlunoStickyKind.pausar => _pausar,
       RecorrenciaAlunoStickyKind.retomar => _retomar,
-      RecorrenciaAlunoStickyKind.chat => () => context.push('/chat/aluno'),
+      RecorrenciaAlunoStickyKind.chat => () => openAlunoRoute(context, '/chat/aluno'),
     };
   }
 
@@ -179,7 +179,7 @@ class _RecorrenciaAlunoScreenState
           label: 'Chat',
           accent: primary,
           isDark: isDark,
-          onPressed: () => context.push('/chat/aluno'),
+          onPressed: () => openAlunoRoute(context, '/chat/aluno'),
         ),
       ],
     );

@@ -307,7 +307,7 @@ class _DesafiosAlunoScreenState extends ConsumerState<DesafiosAlunoScreen> {
                         )
                       : FxEmptyAction(
                           label: 'Abrir chat',
-                          onTap: () => context.push('/chat/aluno'),
+                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
                         ),
                 ),
               ],

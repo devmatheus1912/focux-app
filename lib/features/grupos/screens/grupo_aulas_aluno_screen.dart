@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -316,7 +314,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                       ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
                       : FxEmptyAction(
                           label: 'Abrir chat',
-                          onTap: () => context.push('/chat/aluno'),
+                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
                         ),
                 ),
               ],

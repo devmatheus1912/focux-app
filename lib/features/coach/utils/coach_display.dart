@@ -1,17 +1,44 @@
 import '../data/coach_proativo_repository.dart';
 
 const coachComoCalculamos =
-    'Treino parado, sono curto ou sequência quebrada. O catálogo pagina as não lidas. Abrir o aluno fecha o job.';
+    'Todo dia às 8h checamos treino parado há 5 dias, sono abaixo de 5h e sequência quebrada. '
+    'Quando bate, o aluno já recebe um push motivacional. Aqui fica o aviso para você.';
 
-const coachEmptyTitle = 'Nada para o coach dizer';
+const coachComoResolver =
+    'Abrir o aluno, escrever ou agendar tira ele da lista. O alerta também some quando ele volta a treinar ou depois de 7 dias.';
+
+const coachEmptyTitle = 'Nenhum aluno precisa de atenção';
 
 const coachEmptySubtitle =
-    'Ele só dispara com aluno ativo e sinal recente: treino parado há 5 dias, sono curto ou streak quebrada. Sem check-in, a fila fica vazia.';
+    'Aparece aqui quem ficou 5 dias sem treinar, dormiu pouco ou quebrou a sequência. Depende do check-in dos treinos.';
 
 String? coachPendingChipLabel(int pending) {
   if (pending <= 0) return null;
-  if (pending == 1) return '1 recado do coach';
-  return '$pending recados do coach';
+  if (pending == 1) return '1 aluno pede atenção';
+  return '$pending alunos pedem atenção';
+}
+
+String coachPendingTitulo(int pending) {
+  if (pending <= 0) return 'Ninguém precisa de atenção';
+  if (pending == 1) return '1 aluno precisa de atenção';
+  return '$pending alunos precisam de atenção';
+}
+
+String coachMotivo(CoachHomeItem item) {
+  final motivo = item.motivo.trim();
+  if (motivo.isNotEmpty) return motivo;
+  return switch (item.tipo.trim().toUpperCase()) {
+    'SEM_TREINO_5D' => 'Alguns dias sem treinar',
+    'STREAK_QUEBRADO' => 'Parou de treinar nesta semana',
+    'SONO_BAIXO' => 'Dormiu menos de 5h',
+    _ => 'Precisa de atenção',
+  };
+}
+
+String? coachJaAvisado(CoachHomeItem item) {
+  final msg = item.mensagem.trim();
+  if (msg.isEmpty) return null;
+  return 'Já avisamos o aluno: “$msg”';
 }
 
 String coachRota(CoachHomeItem item) {
@@ -58,5 +85,5 @@ String coachFocusActionLabel(CoachFocusActionId id) => switch (id) {
   CoachFocusActionId.open => 'Abrir aluno',
   CoachFocusActionId.chat => 'Escrever',
   CoachFocusActionId.agenda => 'Agenda',
-  CoachFocusActionId.ack => 'Entendi',
+  CoachFocusActionId.ack => 'Arquivar',
 };

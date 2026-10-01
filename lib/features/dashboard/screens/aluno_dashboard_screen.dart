@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -219,7 +220,11 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     if (task != null) {
       AlunoAutonomyAnalytics.clicked(ref.read(alunoRepositoryProvider), task);
     }
-    context.push(action.route, extra: action.routeExtra);
+    if (isAlunoShellTabLocation(action.route)) {
+      context.go(action.route);
+    } else {
+      context.push(action.route, extra: action.routeExtra);
+    }
   }
 
   void _openPendencia(AlunoPendencia p) {
@@ -227,7 +232,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       ref.read(alunoRepositoryProvider),
       AlunoAutonomyAnalytics.forPendencia(p),
     );
-    context.push(p.tipo.route);
+    openAlunoRoute(context, p.tipo.route);
   }
 
   void _pendenciaShown(AlunoPendencia p) {
@@ -342,7 +347,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           alunoNome: home.aluno.nome,
           nomePersonal: home.personalBrand.nomePersonal,
           logoUrl: home.personalBrand.logoUrl,
-          onOpenChat: () => context.push('/chat/aluno'),
+          onOpenChat: () => openAlunoRoute(context, '/chat/aluno'),
         ),
       ),
       (

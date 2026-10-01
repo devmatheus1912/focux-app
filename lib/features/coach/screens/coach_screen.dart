@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,24 @@ class CoachScreen extends ConsumerWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final home = ref.watch(coachHomeProvider);
 
+    /// Qualquer ação sobre o aluno tira ele da lista (o aluno segue vendo o push).
+    Future<void> resolver(CoachHomeItem item) async {
+      try {
+        await CoachProativoRepository(
+          ref.read(apiClientProvider),
+        ).resolverAluno(item.alunoId);
+      } catch (_) {
+        return;
+      }
+      ref.invalidate(coachHomeProvider);
+      invalidatePersonalDashboardHome(ref);
+    }
+
+    void abrirAluno(CoachHomeItem item) {
+      unawaited(resolver(item));
+      context.push(coachRota(item));
+    }
+
     return fxScreenA11yScope(
       label: 'Coach proativo',
       child: FxShellScaffold(
@@ -59,16 +79,13 @@ class CoachScreen extends ConsumerWidget {
                   () => showFxHelpSheet(
                     context,
                     title: 'Coach',
-                    subtitle: 'O que merece atenção agora.',
+                    subtitle: 'Alunos que pedem um contato seu.',
                     tips: const [
                       FxHelpTip('Como calculamos', coachComoCalculamos),
+                      FxHelpTip('Como resolver', coachComoResolver),
                       FxHelpTip(
-                        'Pendente',
-                        'O card do topo é a próxima orientação.',
-                      ),
-                      FxHelpTip(
-                        'Abrir aluno',
-                        'O job é ir ao aluno. Entendi só arquiva a fila.',
+                        'Arquivar',
+                        'Tira o aluno da lista sem abrir nada. Ele continua vendo o aviso dele.',
                       ),
                     ],
                   ),
@@ -119,6 +136,10 @@ class CoachScreen extends ConsumerWidget {
               );
             }
             final focus = data.focus ?? data.fila.first;
+            final outros = data.fila
+                .where((item) => item.alunoId != focus.alunoId)
+                .toList(growable: false);
+            final verTodos = data.hasNext || data.totalItens > data.fila.length;
             return RefreshIndicator(
               color: primary,
               onRefresh: () async {
@@ -136,55 +157,51 @@ class CoachScreen extends ConsumerWidget {
                       focus: focus,
                       pending: data.pending,
                       isDark: isDark,
-                      onOpen: () {
-                        context.push(coachRota(focus));
-                      },
+                      onOpen: () => abrirAluno(focus),
                       onChat: () {
+                        unawaited(resolver(focus));
                         context.push(coachChatRota(focus));
                       },
                       onAgenda: () {
                         final rota = coachAgendaRota(focus);
                         if (rota == null) return;
+                        unawaited(resolver(focus));
                         goPersonalShellTab(context, rota);
                       },
-                      onAck: () async {
+                      onAck: () {
                         AnalyticsService.instance.track(
                           ProductEvents.homeCoachDismissed,
                         );
-                        await CoachProativoRepository(
-                          ref.read(apiClientProvider),
-                        ).marcarLido(focus.id);
-                        ref.invalidate(coachHomeProvider);
-                        invalidateAlunoDashboardHome(ref);
+                        unawaited(resolver(focus));
                       },
                     ),
-                    const SizedBox(height: TokensStrip.s4),
-                    DashboardSectionHeader(
-                      title: 'Fila',
-                      actionLabel:
-                          data.hasNext || data.totalItens > 3
-                              ? 'Ver todos'
-                              : null,
-                      onAction:
-                          data.hasNext || data.totalItens > 3
-                              ? () {
-                                showCoachCatalogSheet(
-                                  context,
-                                  firstPage: data,
-                                  repo: CoachProativoRepository(
-                                    ref.read(apiClientProvider),
-                                  ),
-                                );
-                              }
-                              : null,
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                    for (final item in data.fila)
-                      FxSatelliteListTile(
-                        title: item.alunoNome,
-                        subtitle: Text(item.mensagem),
-                        onTap: () => context.push(coachRota(item)),
+                    if (outros.isNotEmpty || verTodos) ...[
+                      const SizedBox(height: TokensStrip.s4),
+                      DashboardSectionHeader(
+                        title: 'Outros alunos',
+                        actionLabel: verTodos ? 'Ver todos' : null,
+                        onAction:
+                            verTodos
+                                ? () {
+                                  showCoachCatalogSheet(
+                                    context,
+                                    firstPage: data,
+                                    repo: CoachProativoRepository(
+                                      ref.read(apiClientProvider),
+                                    ),
+                                    onOpen: abrirAluno,
+                                  );
+                                }
+                                : null,
                       ),
+                      const SizedBox(height: TokensStrip.s2),
+                      for (final item in outros)
+                        FxSatelliteListTile(
+                          title: item.alunoNome,
+                          subtitle: Text(coachMotivo(item)),
+                          onTap: () => abrirAluno(item),
+                        ),
+                    ],
                   ],
                 ),
               ),
@@ -250,36 +267,37 @@ class _CoachFocusCard extends StatelessWidget {
       run(chosen)();
     }
 
+    final jaAvisado = coachJaAvisado(focus);
     return FxStripCard(
       emphasize: true,
-      semanticsLabel: 'Próxima orientação. $pending pendentes.',
+      semanticsLabel:
+          '${coachPendingTitulo(pending)}. ${focus.alunoNome}: ${coachMotivo(focus)}.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            pending == 0 ? 'Em dia' : 'Pendente',
+            coachPendingTitulo(pending),
             style: FocuxHubTypography.chip(chrome.mute),
           ),
-          const SizedBox(height: 6),
-          Text(
-            '$pending',
-            style: FocuxHubTypography.kpi(
-              color: chrome.ink,
-              fontSize: FocuxHubTypography.metricLg,
-            ),
-          ),
-          const SizedBox(height: 6),
+          const SizedBox(height: TokensStrip.s2),
           Text(
             focus.alunoNome,
-            style: FocuxHubTypography.body(
-              color: chrome.ink,
-            ).copyWith(fontWeight: FontWeight.w700),
+            style: FocuxHubTypography.cardTitle(color: chrome.ink),
           ),
           const SizedBox(height: 4),
           Text(
-            focus.mensagem,
-            style: FocuxHubTypography.body(color: chrome.mute),
+            coachMotivo(focus),
+            style: FocuxHubTypography.body(
+              color: chrome.ink,
+            ).copyWith(fontWeight: FontWeight.w600),
           ),
+          if (jaAvisado != null) ...[
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              jaAvisado,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+            ),
+          ],
           const SizedBox(height: TokensStrip.s3),
           Wrap(
             spacing: TokensStrip.s2,

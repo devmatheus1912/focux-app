@@ -1,5 +1,82 @@
 part of 'notificacoes_screen.dart';
 
+/// Não lida: ponto + título forte + borda da marca. Lida: título leve, borda neutra.
+class _NotificacaoTile extends StatelessWidget {
+  const _NotificacaoTile({
+    required this.item,
+    required this.temDestino,
+    required this.onTap,
+  });
+
+  final NotificacaoApp item;
+  final bool temDestino;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    final chrome = ShellChrome.of(context);
+    final unread = !item.lida;
+    final cta = item.ctaLabel?.trim() ?? '';
+    final subtitle = notificationSubtitle(item);
+    return Semantics(
+      label: unread ? 'Não lida' : null,
+      child: FxSatelliteListTile(
+        title: notificationHumanTitle(item),
+        titleCase: false,
+        muted: !unread,
+        isThreeLine: temDestino && cta.isNotEmpty,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(subtitle),
+            if (temDestino && cta.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: TokensStrip.s1),
+                child: Text(
+                  '$cta ›',
+                  style: FocuxHubTypography.bodyMuted(
+                    color: primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              notificationTimeLabel(item.criadaEm),
+              style: FocuxHubTypography.bodyMuted(
+                color: chrome.mute,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (unread) ...[
+              const SizedBox(height: TokensStrip.s1),
+              Container(
+                key: const ValueKey('notificacao-nao-lida'),
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ],
+        ),
+        accent: unread ? primary : chrome.mute,
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
 class _HubRow {
   const _HubRow({required this.item, required this.dayGroup});
 

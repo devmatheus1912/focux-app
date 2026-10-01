@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -15,11 +14,16 @@ Future<void> showCoachCatalogSheet(
   BuildContext context, {
   required CoachHome firstPage,
   required CoachProativoRepository repo,
+  required void Function(CoachHomeItem item) onOpen,
 }) {
   return showFxHomeSheet<void>(
     context,
     builder:
-        (ctx) => _CoachCatalogSheet(firstPage: firstPage, repo: repo),
+        (ctx) => _CoachCatalogSheet(
+          firstPage: firstPage,
+          repo: repo,
+          onOpen: onOpen,
+        ),
   );
 }
 
@@ -27,10 +31,12 @@ class _CoachCatalogSheet extends StatefulWidget {
   const _CoachCatalogSheet({
     required this.firstPage,
     required this.repo,
+    required this.onOpen,
   });
 
   final CoachHome firstPage;
   final CoachProativoRepository repo;
+  final void Function(CoachHomeItem item) onOpen;
 
   @override
   State<_CoachCatalogSheet> createState() => _CoachCatalogSheetState();
@@ -98,8 +104,8 @@ class _CoachCatalogSheetState extends State<_CoachCatalogSheet> {
         shrinkWrap: true,
         children: [
           FxHomeSheetHeader(
-            title: 'Fila do coach',
-            subtitle: '$_total orientações neste recorte.',
+            title: 'Alunos que pedem atenção',
+            subtitle: _total == 1 ? '1 aluno nesta lista.' : '$_total alunos nesta lista.',
             leading: Icon(Icons.auto_awesome_outlined, size: 18, color: primary),
           ),
           Padding(
@@ -126,17 +132,17 @@ class _CoachCatalogSheetState extends State<_CoachCatalogSheet> {
           if (_itens.isEmpty)
             const FxEmptyState(
               icon: 'spark',
-              title: 'Nenhuma orientação nessa busca',
+              title: 'Nenhum aluno nessa busca',
               subtitle: 'Tente outro nome ou limpe o filtro.',
             )
           else ...[
             for (final item in _itens)
               FxSatelliteListTile(
                 title: item.alunoNome,
-                subtitle: Text(item.mensagem),
+                subtitle: Text(coachMotivo(item)),
                 onTap: () {
                   Navigator.of(context).pop();
-                  context.push(coachRota(item));
+                  widget.onOpen(item);
                 },
               ),
             if (_hasNext)

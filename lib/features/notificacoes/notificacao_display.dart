@@ -1,10 +1,10 @@
 const notificacaoComoCalculamos =
     'Avisos operacionais do estúdio: mensalidade, feed, trial e Radar. Mensagens de chat ficam só na inbox de chat.';
 
-String notificacaoCountLabel(int count) {
-  if (count <= 0) return 'Nenhuma';
-  if (count == 1) return '1 aviso';
-  return '$count avisos';
+String notificacaoNaoLidasLabel(int unread) {
+  if (unread <= 0) return 'Tudo lido';
+  if (unread == 1) return '1 não lida';
+  return '$unread não lidas';
 }
 
 String notificacaoSearchEmptyTitle(String query) =>

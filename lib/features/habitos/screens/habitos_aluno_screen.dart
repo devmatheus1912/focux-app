@@ -295,7 +295,7 @@ class _HabitosAlunoScreenState extends ConsumerState<HabitosAlunoScreen> {
                       ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
                       : FxEmptyAction(
                           label: 'Abrir chat',
-                          onTap: () => context.push('/chat/aluno'),
+                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
                         ),
                 ),
               ],

@@ -57,6 +57,23 @@ void goPersonalShellTab(BuildContext context, String location) {
   openPersonalRoute(context, location);
 }
 
+/// Dock tabs of the aluno shell (query string ignored).
+bool isAlunoShellTabLocation(String location) {
+  final path = Uri.tryParse(location)?.path ?? location;
+  return FocuxNavigation.alunoShellTabPaths.contains(path);
+}
+
+/// Aluno: dock tab → `go` (troca de aba, dock some no chat); resto → `push`.
+/// `push` de uma aba empilha sobre a aba atual e o shell mantém o dock dela.
+void openAlunoRoute(BuildContext context, String location) {
+  if (!context.mounted) return;
+  if (isAlunoShellTabLocation(location)) {
+    context.go(location);
+  } else {
+    context.push(location);
+  }
+}
+
 /// Dock tab → `go`; any other screen → `push`, so Voltar returns to origin.
 void openPersonalRoute(BuildContext context, String location) {
   if (!context.mounted) return;

@@ -34,7 +34,6 @@ import '../../features/financeiro/screens/financeiro_screen.dart';
 import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
-import '../../features/chat/screens/chat_aluno_screen.dart';
 import '../../features/chat/screens/chat_inbox_screen.dart';
 import '../../features/ia/screens/ia_chat_screen.dart';
 import '../../features/leads/screens/leads_list_screen.dart';
@@ -579,11 +578,6 @@ RouteBase buildChromeShellRoute() {
             path: '/chat/inbox',
             builder: (context, state) => const ChatInboxScreen(),
           ),
-          GoRoute(
-            path: '/chat/aluno',
-            builder: (context, state) => const ChatAlunoScreen(),
-          ),
-
           // Financeiro sub-routes
           GoRoute(
             path: '/financeiro/aluno',

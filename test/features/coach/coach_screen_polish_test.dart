@@ -37,5 +37,10 @@ void main() {
     expect(screen, contains('Como calculamos'));
     expect(screen, contains('ShellChrome.forBrightness'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
+    expect(screen, contains('resolverAluno'));
+    expect(screen, contains('coachJaAvisado'));
+    expect(screen, contains('Outros alunos'));
+    expect(screen, isNot(contains("title: 'Fila'")));
+    expect(screen, isNot(contains('invalidateAlunoDashboardHome')));
   });
 }
