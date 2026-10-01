@@ -15,7 +15,7 @@ void main() {
 
   test('enterprise promo usa loja no app nativo', () {
     final promo = File(
-      'lib/features/planos/screens/enterprise_promo_screen.dart',
+      'lib/features/planos/screens/pro_promo_screen.dart',
     ).readAsStringSync();
 
     expect(promo, contains('subscriptionUsesNativeStore'));

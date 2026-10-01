@@ -26,17 +26,17 @@ import '../../../features/subscription/subscription_products.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/planos_repository.dart';
 import '../paywall/paywall_price.dart';
-import '../utils/enterprise_promo_copy.dart';
+import '../utils/pro_promo_copy.dart';
 
-class EnterprisePromoScreen extends ConsumerStatefulWidget {
-  const EnterprisePromoScreen({super.key});
+class ProPromoScreen extends ConsumerStatefulWidget {
+  const ProPromoScreen({super.key});
 
   @override
-  ConsumerState<EnterprisePromoScreen> createState() =>
-      _EnterprisePromoScreenState();
+  ConsumerState<ProPromoScreen> createState() =>
+      _ProPromoScreenState();
 }
 
-class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
+class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
   bool _starting = false;
   String? _error;
 
@@ -69,7 +69,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       if (subscriptionUsesNativeStore) {
         await context.push(
           '/assinatura',
-          extra: SubscriptionPlan.ENTERPRISE.apiName,
+          extra: kTrialPlan.apiName,
         );
         return;
       }
@@ -77,7 +77,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
       await PlanosRepository(ref.read(apiClientProvider)).startTrial(
         payload:
             buildLocalSubscriptionMetadata(
-              productId: SubscriptionProducts.enterpriseMonthly,
+              productId: SubscriptionProducts.proMonthly,
             ).toTrialPayload(),
       );
       ref.invalidate(perfilProvider);
@@ -85,7 +85,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
 
       FeedbackHelper.showSuccess(
         context,
-        'Trial Enterprise ativado. Aproveite os próximos $kPaywallMaxPlanTrialDays dias.',
+        'Teste do PRO ativado. Aproveite os próximos $kTrialDays dias.',
       );
       context.go('/dashboard/personal');
     } catch (error) {
@@ -107,16 +107,16 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     final trialFim =
         useStore
             ? null
-            : enterprisePromoTrialFimTexto(
+            : proPromoTrialFimTexto(
               l10n,
               DateTime.now().add(
-                const Duration(days: kPaywallMaxPlanTrialDays),
+                const Duration(days: kTrialDays),
               ),
             );
     final precoPosTeste =
         useStore
             ? null
-            : enterprisePromoPrecoPosTesteTexto(
+            : proPromoPrecoPosTesteTexto(
               l10n,
               ref.watch(planosProvider).value,
             );
@@ -125,11 +125,11 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
     const mute = EagleTokens.darkInkMute;
 
     return fxScreenA11yScope(
-      label: 'Promoção Enterprise',
+      label: 'Promoção PRO',
       child: FxShellScaffold(
         useMesh: true,
         appBar: const FxShellAppBar(
-          title: 'Enterprise',
+          title: 'PRO',
           fallbackLocation: '/planos',
         ),
         body: Container(
@@ -165,8 +165,8 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           const SizedBox(height: TokensStrip.s5),
                           Text(
                             useStore
-                                ? 'Enterprise com 30 dias grátis\n${subscriptionChannelWith(ChannelPreposition.em)}'
-                                : 'Transforme seu negócio.\nExperimente o Enterprise.',
+                                ? 'PRO com $kTrialDays dias grátis\n${subscriptionChannelWith(ChannelPreposition.em)}'
+                                : 'Cresça e cobre no app.\nExperimente o PRO.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,
@@ -174,11 +174,11 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s8),
                           ...[
-                            'Alunos ilimitados',
-                            '${PlanoIaLimits.enterprise} interações de IA/mês',
-                            'Marca própria com sua marca',
-                            'Identidade visual premium',
-                            'Automações para escalar a operação',
+                            'Até 30 alunos',
+                            '${PlanoIaLimits.pro} interações de IA/mês',
+                            'Cobrança PIX dos alunos no app',
+                            'CRM de leads',
+                            'Command Center com risco e fila do dia',
                           ].map(
                             (feature) => Padding(
                               padding: const EdgeInsets.only(
@@ -223,8 +223,8 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                     const SizedBox(width: TokensStrip.s2),
                                     Text(
                                       useStore
-                                          ? '30 dias grátis na loja'
-                                          : '$kPaywallMaxPlanTrialDays dias grátis',
+                                          ? '$kTrialDays dias grátis na loja'
+                                          : '$kTrialDays dias grátis',
                                       style: FocuxHubTypography.sectionTitle(
                                         context,
                                         color: EagleTokens.goldStar,
@@ -235,7 +235,7 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   useStore
-                                      ? 'O período grátis só entra se a oferta introdutória de 30 dias estiver ligada no App Store Connect e no Play Console. Sem isso a loja cobra o preço cheio.'
+                                      ? 'A loja mostra o período grátis e o valor antes de você confirmar. Cancele quando quiser nas assinaturas do aparelho.'
                                       : trialFim!,
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
@@ -259,13 +259,13 @@ class _EnterprisePromoScreenState extends ConsumerState<EnterprisePromoScreen> {
                             button: true,
                             label:
                                 useStore
-                                    ? 'Começar 30 dias grátis na loja'
-                                    : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
+                                    ? 'Começar $kTrialDays dias grátis na loja'
+                                    : 'Experimentar $kTrialDays dias grátis',
                             child: FxLiquidPrimaryButton(
                               label:
                                   useStore
-                                      ? 'Começar 30 dias grátis'
-                                      : 'Experimentar $kPaywallMaxPlanTrialDays dias grátis',
+                                      ? 'Começar $kTrialDays dias grátis'
+                                      : 'Experimentar $kTrialDays dias grátis',
                               loading: _starting,
                               onPressed: _starting ? null : _continueToCheckout,
                             ),

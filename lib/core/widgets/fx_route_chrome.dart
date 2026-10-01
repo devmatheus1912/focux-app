@@ -9,7 +9,7 @@ import 'mesh_scope.dart';
 /// Routes that keep their own immersive / marketing background (no mesh wrap).
 const _immersiveRoutePrefixes = [
   '/checkin/executar',
-  '/promo-enterprise',
+  '/promo-pro',
 ];
 
 bool _fxRouteUsesImmersiveChrome(String path) {

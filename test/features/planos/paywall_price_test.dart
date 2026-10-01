@@ -46,37 +46,39 @@ void main() {
     expect(copy.primary, 'R\$ 89,90/mês');
   });
 
-  test('30 dias só no Enterprise para conta FREE', () {
+  test('30 dias só no PRO para conta FREE', () {
     expect(
-      paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE,
+      paywallShowsTrial(
+        selected: SubscriptionPlan.PRO,
         current: SubscriptionPlan.FREE,
       ),
       isTrue,
     );
     expect(
-      paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.PRO,
+      paywallShowsTrial(
+        selected: SubscriptionPlan.ENTERPRISE,
         current: SubscriptionPlan.FREE,
+        trialEligible: true,
       ),
       isFalse,
     );
     expect(
-      paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE,
+      paywallShowsTrial(
+        selected: SubscriptionPlan.PRO,
         current: SubscriptionPlan.PRO,
       ),
       isFalse,
     );
     expect(
-      paywallShowsMaxPlanTrial(
-        selected: SubscriptionPlan.ENTERPRISE,
+      paywallShowsTrial(
+        selected: SubscriptionPlan.PRO,
         current: SubscriptionPlan.FREE,
         trialEligible: false,
       ),
       isFalse,
     );
-    expect(kPaywallMaxPlanTrialDays, 30);
+    expect(kTrialDays, 30);
+    expect(kTrialPlan, SubscriptionPlan.PRO);
   });
 
   test('CTA sticky leva o preço; trial não mostra valor no botão', () {
@@ -84,8 +86,8 @@ void main() {
       paywallStickyCtaLabel(
         trialOffer: true,
         isUpgrade: true,
-        planName: 'ENTERPRISE',
-        pricePrimary: 'R\$ 199,90/mês',
+        planName: 'PRO',
+        pricePrimary: 'R\$ 99,90/mês',
       ),
       'Começar 30 dias grátis',
     );

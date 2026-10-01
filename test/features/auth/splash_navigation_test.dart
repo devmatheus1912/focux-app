@@ -25,7 +25,7 @@ void main() {
   test('personal FREE sem promo cai na oferta; o resto na Home', () {
     expect(
       splashPersonalTarget(promoShown: false, trialUsed: false, plano: 'free'),
-      '/promo-enterprise',
+      '/promo-pro',
     );
     expect(
       splashPersonalTarget(promoShown: true, trialUsed: false, plano: 'FREE'),

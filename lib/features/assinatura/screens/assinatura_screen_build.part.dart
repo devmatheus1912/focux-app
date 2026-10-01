@@ -131,12 +131,12 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         ctaEnabled =
             !_loadingCheckout &&
             (kIsWeb || !subscriptionUsesNativeStore || _storeAvailable);
-        final trialOffer = paywallShowsMaxPlanTrial(
+        final trialOffer = paywallShowsTrial(
           selected: selectedPlan,
           current: currentPlan,
           trialEligible: _trialStatus?.trialEligible,
         );
-        const trialDays = kPaywallMaxPlanTrialDays;
+        const trialDays = kTrialDays;
         final isUpgrade = selectedPlan.level > currentPlan.level;
         final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
         ctaLabel =
@@ -156,7 +156,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       }
     }
 
-    final trialOffer = paywallShowsMaxPlanTrial(
+    final trialOffer = paywallShowsTrial(
       selected: selectedPlan,
       current: currentPlan,
       trialEligible: _trialStatus?.trialEligible,

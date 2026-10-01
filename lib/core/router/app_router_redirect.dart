@@ -168,7 +168,7 @@ bool isPersonalOnlyLocation(String path) {
     '/migracao-magica',
     '/migracao-focux',
     '/growth/migracao',
-    '/promo-enterprise',
+    '/promo-pro',
     '/ranking',
     '/coach',
     '/galeria',

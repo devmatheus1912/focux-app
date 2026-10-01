@@ -16,7 +16,7 @@ String splashPersonalTarget({
   required String plano,
 }) {
   final free = plano.trim().toUpperCase() == 'FREE';
-  if (!promoShown && !trialUsed && free) return '/promo-enterprise';
+  if (!promoShown && !trialUsed && free) return '/promo-pro';
   return '/dashboard/personal';
 }
 

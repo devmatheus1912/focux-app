@@ -5,22 +5,22 @@ import '../../subscription/subscription_products.dart';
 import '../paywall/paywall_price.dart';
 
 /// O trial do checkout web não cobra: ao vencer, a conta volta para o Free.
-String enterprisePromoTrialFimTexto(S l10n, DateTime fimTeste) {
+String proPromoTrialFimTexto(S l10n, DateTime fimTeste) {
   final dia = fimTeste.day.toString().padLeft(2, '0');
   final mes = fimTeste.month.toString().padLeft(2, '0');
-  return l10n.enterprisePromoTrialFim('$dia/$mes/${fimTeste.year}');
+  return l10n.proPromoTrialFim('$dia/$mes/${fimTeste.year}');
 }
 
-/// Preço mensal do Enterprise vindo da API, como referência pós-teste.
+/// Preço mensal do plano do trial vindo da API, como referência pós-teste.
 /// Nulo quando a API não mandou preço — a linha some.
-String? enterprisePromoPrecoPosTesteTexto(S l10n, List<Plano>? planos) {
-  final enterprise = planos
-      ?.where((p) => subscriptionPlanFromApi(p.nome) == SubscriptionPlan.ENTERPRISE)
+String? proPromoPrecoPosTesteTexto(S l10n, List<Plano>? planos) {
+  final plano = planos
+      ?.where((p) => subscriptionPlanFromApi(p.nome) == kTrialPlan)
       .firstOrNull;
-  if (enterprise == null || enterprise.precoMensal <= 0) return null;
+  if (plano == null || plano.precoMensal <= 0) return null;
   final preco = buildPaywallPriceCopy(
-    precoMensal: enterprise.precoMensal,
+    precoMensal: plano.precoMensal,
     period: SubscriptionBillingPeriod.monthly,
   ).primary;
-  return l10n.enterprisePromoPrecoPosTeste(preco);
+  return l10n.proPromoPrecoPosTeste(preco);
 }

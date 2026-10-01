@@ -490,12 +490,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         ref.read(perfilProvider).value?.plano,
       );
       final trialNote =
-          paywallShowsMaxPlanTrial(
+          paywallShowsTrial(
                 selected: plan,
                 current: billingPlan,
                 trialEligible: _trialStatus?.trialEligible,
               )
-              ? '$kPaywallMaxPlanTrialDays dias grátis no Enterprise com cadastro de cartão. '
+              ? '$kTrialDays dias grátis no PRO com cadastro de cartão. '
                   'A loja confirma o valor após o período.'
               : null;
       final confirmed = await context.push<bool>(

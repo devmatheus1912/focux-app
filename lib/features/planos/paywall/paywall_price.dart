@@ -1,8 +1,9 @@
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/subscription_products.dart';
 
-/// 30 dias grátis só no Enterprise, na primeira assinatura (cadastro de cartão).
-const kPaywallMaxPlanTrialDays = 30;
+/// 30 dias grátis só no PRO, na primeira assinatura.
+const kTrialDays = 30;
+const kTrialPlan = SubscriptionPlan.PRO;
 
 class PaywallPriceCopy {
   const PaywallPriceCopy({required this.primary, this.secondary});
@@ -81,13 +82,12 @@ String? _yearlySecondary(
   return parts.join(' · ');
 }
 
-/// 30 dias grátis só no Enterprise, na primeira assinatura (cadastro de cartão).
-bool paywallShowsMaxPlanTrial({
+bool paywallShowsTrial({
   required SubscriptionPlan selected,
   required SubscriptionPlan current,
   bool? trialEligible,
 }) {
-  if (selected != SubscriptionPlan.ENTERPRISE) return false;
+  if (selected != kTrialPlan) return false;
   if (current != SubscriptionPlan.FREE) return false;
   return trialEligible != false;
 }
@@ -95,7 +95,7 @@ bool paywallShowsMaxPlanTrial({
 /// CTA sticky no estilo ChatGPT: preço só no botão, nunca no hero.
 String paywallStickyCtaLabel({
   required bool trialOffer,
-  int trialDays = kPaywallMaxPlanTrialDays,
+  int trialDays = kTrialDays,
   required bool isUpgrade,
   required String planName,
   String? pricePrimary,

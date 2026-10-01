@@ -478,7 +478,12 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     logicalParent: _perfil,
     redirectTo: '/migracao-magica',
   ),
-  '/promo-enterprise': FocuxSurfaceSpec(type: _s6, logicalParent: '/planos'),
+  '/promo-pro': FocuxSurfaceSpec(type: _s6, logicalParent: '/planos'),
+  '/promo-enterprise': FocuxSurfaceSpec(
+    type: _s6,
+    logicalParent: '/planos',
+    redirectTo: '/promo-pro',
+  ),
   '/ranking': FocuxSurfaceSpec(
     type: _s4,
     hasInput: true,

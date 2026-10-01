@@ -80,7 +80,7 @@ import '../../features/admin/screens/rbac_screen.dart';
 import '../../features/depoimentos/screens/depoimento_aluno_screen.dart';
 import '../../features/depoimentos/screens/depoimentos_personal_screen.dart';
 import '../../features/galeria/screens/galeria_screen.dart';
-import '../../features/planos/screens/enterprise_promo_screen.dart';
+import '../../features/planos/screens/pro_promo_screen.dart';
 import '../../features/referral/screens/referral_screen.dart';
 import '../../features/retencao/screens/churn_dashboard_screen.dart';
 import '../../features/monetizacao/screens/ofertas_upsell_screen.dart';
@@ -882,8 +882,12 @@ RouteBase buildChromeShellRoute() {
             redirect: (context, state) => '/migracao-magica',
           ),
           GoRoute(
+            path: '/promo-pro',
+            builder: (context, state) => const ProPromoScreen(),
+          ),
+          GoRoute(
             path: '/promo-enterprise',
-            builder: (context, state) => const EnterprisePromoScreen(),
+            redirect: (context, state) => '/promo-pro',
           ),
 
           // Misc
