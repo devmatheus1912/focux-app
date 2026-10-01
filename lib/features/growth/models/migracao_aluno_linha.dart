@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../utils/migracao_linha_classifier.dart';
+
 /// Linha de aluno na pré-visualização da migração mágica.
 class MigracaoAlunoLinha {
   const MigracaoAlunoLinha({
@@ -9,8 +11,10 @@ class MigracaoAlunoLinha {
     this.objetivo,
     this.observacao,
     this.duplicado = false,
+    this.status = MigracaoLinhaStatus.valido,
+    bool? selecionado,
     this.raw = const {},
-  });
+  }) : selecionado = selecionado ?? status == MigracaoLinhaStatus.valido;
 
   final String nome;
   final String? email;
@@ -18,7 +22,13 @@ class MigracaoAlunoLinha {
   final String? objetivo;
   final String? observacao;
   final bool duplicado;
+  final MigracaoLinhaStatus status;
+
+  /// Entra no salvamento. Duvidosos começam desmarcados.
+  final bool selecionado;
   final Map<String, dynamic> raw;
+
+  bool get entraNoSalvamento => selecionado && !duplicado;
 
   factory MigracaoAlunoLinha.fromJson(Map<String, dynamic> json) {
     return MigracaoAlunoLinha(
@@ -28,6 +38,7 @@ class MigracaoAlunoLinha {
       objetivo: json['objetivo']?.toString(),
       observacao: json['observacao']?.toString(),
       duplicado: json['duplicado'] == true || json['duplicate'] == true,
+      status: migracaoLinhaStatusFromApi(json['status']),
       raw: Map<String, dynamic>.from(json),
     );
   }
@@ -48,15 +59,35 @@ class MigracaoAlunoLinha {
     String? objetivo,
     String? observacao,
     bool? duplicado,
+    MigracaoLinhaStatus? status,
+    bool? selecionado,
   }) {
-    final next = toJson()
-      ..['nome'] = nome ?? this.nome
-      ..['email'] = email ?? this.email
-      ..['telefone'] = telefone ?? this.telefone
-      ..['objetivo'] = objetivo ?? this.objetivo
-      ..['observacao'] = observacao ?? this.observacao
-      ..['duplicado'] = duplicado ?? this.duplicado;
-    return MigracaoAlunoLinha.fromJson(next);
+    return MigracaoAlunoLinha(
+      nome: nome ?? this.nome,
+      email: email ?? this.email,
+      telefone: telefone ?? this.telefone,
+      objetivo: objetivo ?? this.objetivo,
+      observacao: observacao ?? this.observacao,
+      duplicado: duplicado ?? this.duplicado,
+      status: status ?? this.status,
+      selecionado: selecionado ?? this.selecionado,
+      raw: raw,
+    );
+  }
+
+  /// O preview do servidor não devolve status/seleção: reaplica por posição.
+  static List<MigracaoAlunoLinha> mesclarPreview(
+    List<MigracaoAlunoLinha> originais,
+    List<MigracaoAlunoLinha> preview,
+  ) {
+    if (preview.length != originais.length) return preview;
+    return [
+      for (var i = 0; i < preview.length; i++)
+        preview[i].copyWith(
+          status: originais[i].status,
+          selecionado: originais[i].selecionado,
+        ),
+    ];
   }
 
   static List<MigracaoAlunoLinha>? parseLista(dynamic data) {
@@ -68,25 +99,46 @@ class MigracaoAlunoLinha {
         .toList();
   }
 
-  static List<MigracaoAlunoLinha>? parseResultado(dynamic data) {
+  static List<MigracaoAlunoLinha> fromPreviewResponse(dynamic data) {
+    if (data is! Map || data['alunos'] is! List) return const [];
+    return parseLista(data['alunos']) ?? const [];
+  }
+}
+
+/// Resultado de `/migracao/texto`: alunos + linhas descartadas.
+class MigracaoTextoResultado {
+  const MigracaoTextoResultado({
+    required this.alunos,
+    this.ignorados = 0,
+    this.amostrasIgnoradas = const [],
+  });
+
+  final List<MigracaoAlunoLinha> alunos;
+  final int ignorados;
+  final List<String> amostrasIgnoradas;
+
+  static MigracaoTextoResultado? parse(dynamic data) {
     if (data == null) return null;
     if (data is String) {
       try {
-        return parseResultado(jsonDecode(data));
+        return parse(jsonDecode(data));
       } catch (_) {
         return null;
       }
     }
-    if (data is Map && data.containsKey('alunos')) {
-      final lista = data['alunos'];
-      if (lista is List) return parseLista(lista);
+    if (data is List) {
+      return MigracaoTextoResultado(alunos: MigracaoAlunoLinha.parseLista(data) ?? []);
     }
-    if (data is List) return parseLista(data);
+    if (data is Map && data['alunos'] is List) {
+      final ign = data['ignorados'];
+      return MigracaoTextoResultado(
+        alunos: MigracaoAlunoLinha.parseLista(data['alunos']) ?? [],
+        ignorados: ign is Map ? (ign['total'] as num?)?.toInt() ?? 0 : 0,
+        amostrasIgnoradas: ign is Map && ign['amostras'] is List
+            ? [for (final s in ign['amostras'] as List) s.toString()]
+            : const [],
+      );
+    }
     return null;
-  }
-
-  static List<MigracaoAlunoLinha> fromPreviewResponse(dynamic data) {
-    if (data is! Map || data['alunos'] is! List) return const [];
-    return parseLista(data['alunos']) ?? const [];
   }
 }

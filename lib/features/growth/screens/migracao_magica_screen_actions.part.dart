@@ -67,14 +67,17 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
   }
 
   Future<void> _finalizarProcessamento(
-    List<MigracaoAlunoLinha>? parsed, {
+    MigracaoTextoResultado? resultado, {
     String successSuffix = '',
   }) async {
-    parsed = await _enriquecerComPreview(parsed);
+    final parsed = await _enriquecerComPreview(resultado?.alunos);
     if (!mounted) return;
     setState(() {
       _alunosEncontrados = parsed;
       _emptyResult = parsed == null || parsed.isEmpty;
+      _ignorados = resultado?.ignorados ?? 0;
+      _amostrasIgnoradas = resultado?.amostrasIgnoradas ?? const [];
+      _planilha = null;
     });
 
     if (parsed != null && parsed.isNotEmpty && mounted) {
@@ -252,6 +255,9 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
           _controller.clear();
           _alunosEncontrados = alunos;
           _emptyResult = alunos.isEmpty;
+          _ignorados = parsed.ignorados;
+          _amostrasIgnoradas = const [];
+          _planilha = parsed.colunas == null ? null : parsed;
         });
         if (alunos.isNotEmpty) {
           FeedbackHelper.showSuccess(
@@ -331,8 +337,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       );
 
       if (!mounted) return;
-      final parsed = _parsarResultado(response.data['resultadoEstruturado']);
-      await _finalizarProcessamento(parsed, successSuffix: successSuffix);
+      final resultado = MigracaoTextoResultado.parse(
+        response.data['resultadoEstruturado'],
+      );
+      await _finalizarProcessamento(resultado, successSuffix: successSuffix);
     } catch (e) {
       if (mounted) {
         FeedbackHelper.showError(context, friendlyError(e));
@@ -358,11 +366,12 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final alunos = _alunosEncontrados;
     if (alunos == null || alunos.isEmpty) return;
 
-    final toSave = alunos.where((a) => !a.duplicado).toList(growable: false);
+    final toSave =
+        alunos.where((a) => a.entraNoSalvamento).toList(growable: false);
     if (toSave.isEmpty) {
       FeedbackHelper.showError(
         context,
-        'Todos os alunos já estão cadastrados. Remova duplicados ou edite e-mails.',
+        'Marque ao menos um aluno novo para importar.',
       );
       return;
     }
@@ -443,12 +452,57 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
-  void _removerAluno(int index) {
+  void _alternarSelecao(int index, bool selecionado) {
     final alunos = _alunosEncontrados;
-    if (alunos == null) return;
+    if (alunos == null || index < 0 || index >= alunos.length) return;
     setState(() {
-      alunos.removeAt(index);
-      if (alunos.isEmpty) _alunosEncontrados = null;
+      alunos[index] = alunos[index].copyWith(selecionado: selecionado);
+    });
+  }
+
+  Future<void> _trocarColuna(String campo) async {
+    final planilha = _planilha;
+    final atual = planilha?.colunas;
+    if (planilha == null || atual == null) return;
+    final selecionadoAtual = switch (campo) {
+          'nome' => atual.nome,
+          'email' => atual.email,
+          'telefone' => atual.telefone,
+          _ => atual.objetivo,
+        } ??
+        -1;
+    final escolha = await showFxInsetPickerSheet<int>(
+      context,
+      title: 'Coluna de ${migracaoCampoLabel(campo)}',
+      headerIcon: Icons.table_chart_outlined,
+      items: [
+        const FxInsetPickerSheetItem(value: -1, label: 'Não importar'),
+        for (var i = 0; i < planilha.headers.length; i++)
+          FxInsetPickerSheetItem(
+            value: i,
+            label: planilha.headers[i].isEmpty
+                ? 'Coluna ${i + 1}'
+                : planilha.headers[i],
+          ),
+      ],
+      selected: selecionadoAtual,
+    );
+    if (escolha == null || !mounted) return;
+    final idx = escolha < 0 ? null : escolha;
+    final novas = MigracaoColunas(
+      nome: campo == 'nome' ? idx : atual.nome,
+      email: campo == 'email' ? idx : atual.email,
+      telefone: campo == 'telefone' ? idx : atual.telefone,
+      objetivo: campo == 'objetivo' ? idx : atual.objetivo,
+    );
+    final remapeado = MigracaoFileParser.reaplicarColunas(planilha, novas);
+    final alunos = await _enriquecerComPreview(remapeado.directAlunos) ?? [];
+    if (!mounted) return;
+    setState(() {
+      _planilha = remapeado;
+      _alunosEncontrados = alunos;
+      _ignorados = remapeado.ignorados;
+      _emptyResult = alunos.isEmpty;
     });
   }
 
@@ -534,7 +588,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     final updated = MigracaoAlunoLinha(
       nome:
           nomeCtrl.text.trim().isEmpty
-              ? 'Aluno importado'
+              ? 'Aluno sem nome'
               : nomeCtrl.text.trim(),
       email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
       telefone: telCtrl.text.trim().isEmpty ? null : telCtrl.text.trim(),
@@ -563,15 +617,14 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
         data: {'alunos': alunos.map((a) => a.toJson()).toList()},
       );
       final preview = MigracaoAlunoLinha.fromPreviewResponse(response.data);
-      if (preview.isNotEmpty) return preview;
+      if (preview.isNotEmpty) {
+        return MigracaoAlunoLinha.mesclarPreview(alunos, preview);
+      }
     } catch (_) {
       // Preview é enriquecimento; fallback mantém lista local.
     }
     return alunos;
   }
-
-  List<MigracaoAlunoLinha>? _parsarResultado(dynamic data) =>
-      MigracaoAlunoLinha.parseResultado(data);
 
   Future<bool> _confirmDiscard() {
     return showFxConfirmSheet(

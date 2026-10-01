@@ -10,6 +10,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   Uint8List? _importedPhotoBytes;
   List<MigracaoAlunoLinha>? _alunosEncontrados;
   bool _emptyResult = false;
+  int _ignorados = 0;
+  List<String> _amostrasIgnoradas = const [];
+  MigracaoFileParseResult? _planilha;
   MigracaoFonte _fonte = MigracaoFonte.texto;
   MigracaoImportacaoResumo? _importResumo;
 
@@ -68,6 +71,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
       _alunosEncontrados = null;
       _emptyResult = false;
       _importResumo = null;
+      _ignorados = 0;
+      _amostrasIgnoradas = const [];
+      _planilha = null;
     });
   }
 
@@ -177,7 +183,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           ? migracaoSalvandoLabel()
                           : migracaoSalvarLabel(
                             (alunos ?? const [])
-                                .where((a) => !a.duplicado)
+                                .where((a) => a.entraNoSalvamento)
                                 .length,
                           ))
                       : migracaoContinueCaptureLabel(
@@ -449,13 +455,23 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
         context,
         key: key,
         index: 4,
-        child: const Padding(
-          padding: EdgeInsets.only(top: TokensStrip.s4),
-          child: FxEmptyState(
-            icon: 'search',
-            title: 'Nenhum aluno identificado',
-            subtitle:
-                'Revise o texto colado e tente novamente com mais linhas ou campos visíveis.',
+        child: Padding(
+          padding: const EdgeInsets.only(top: TokensStrip.s4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_planilha != null) ...[
+                _buildColunasCard(ink: ink, mute: mute, brand: brand),
+                const SizedBox(height: TokensStrip.s3),
+              ],
+              FxEmptyState(
+                icon: 'search',
+                title: migracaoVazioTitle(),
+                subtitle: _ignorados > 0
+                    ? '${migracaoIgnoradasLabel(_ignorados)}. ${migracaoVazioDica()}'
+                    : migracaoVazioDica(),
+              ),
+            ],
           ),
         ),
       );
@@ -490,7 +506,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Toque para editar · remova duplicados antes de salvar',
+                    'Toque para editar · desmarque quem não entra',
                     style: FocuxHubTypography.bodyMuted(color: mute),
                   ),
                   const SizedBox(height: TokensStrip.s2),
@@ -498,7 +514,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     builder: (context) {
                       final plano = ref.watch(planoFeaturesProvider).value;
                       final novos =
-                          alunos.where((a) => !a.duplicado).length;
+                          alunos.where((a) => a.entraNoSalvamento).length;
                       final atuais = plano?.alunosAtivos ?? 0;
                       final hint = migracaoVagasHint(
                         limiteAlunos: plano?.limiteAlunos,
@@ -529,6 +545,10 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               ),
             ),
             const SizedBox(height: TokensStrip.s3),
+            if (_planilha != null) ...[
+              _buildColunasCard(ink: ink, mute: mute, brand: brand),
+              const SizedBox(height: TokensStrip.s3),
+            ],
             ...alunos.asMap().entries.map((entry) {
               final index = entry.key;
               final aluno = entry.value;
@@ -537,6 +557,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               final telefone = aluno.telefone ?? '';
               final objetivo = aluno.objetivo ?? '';
               final duplicado = aluno.duplicado;
+              final confira = aluno.status == MigracaoLinhaStatus.duvidoso;
               final meta = [
                 if (email.isNotEmpty) email,
                 if (telefone.isNotEmpty) telefone,
@@ -612,40 +633,25 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
-                                  if (duplicado) ...[
+                                  if (duplicado || confira) ...[
                                     const SizedBox(height: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: EagleTokens.warnSoft,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'Já cadastrado',
-                                        style: TextStyle(
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700,
-                                          color: EagleTokens.warn,
-                                        ),
-                                      ),
+                                    _badge(
+                                      duplicado
+                                          ? 'Já cadastrado'
+                                          : 'Confira o nome',
                                     ),
                                   ],
                                 ],
                               ),
                             ),
-                            IconButton(
-                              tooltip: 'Remover da lista',
-                              onPressed: () => _removerAluno(index),
-                              icon: Icon(
-                                Icons.close_rounded,
-                                size: 20,
-                                color: mute,
-                              ),
+                            Checkbox(
+                              value: aluno.entraNoSalvamento,
+                              onChanged:
+                                  duplicado
+                                      ? null
+                                      : (v) =>
+                                          _alternarSelecao(index, v ?? false),
+                              semanticLabel: 'Importar $nome',
                             ),
                           ],
                         ),
@@ -655,9 +661,137 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               );
             }),
+            if (_ignorados > 0)
+              Theme(
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(
+                    migracaoIgnoradasLabel(_ignorados),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: mute,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Não pareciam alunos',
+                    style: TextStyle(fontSize: 11.5, color: mute),
+                  ),
+                  children: [
+                    for (final linha in _amostrasIgnoradas)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            linha,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11.5, color: mute),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             const SizedBox(height: TokensStrip.s3),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _badge(String texto) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: EagleTokens.warnSoft,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        texto,
+        style: TextStyle(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: EagleTokens.warn,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColunasCard({
+    required Color ink,
+    required Color mute,
+    required Color brand,
+  }) {
+    final planilha = _planilha!;
+    final colunas = planilha.colunas!;
+    String nomeColuna(int? i) {
+      if (i == null || i >= planilha.headers.length) return 'Não importar';
+      final h = planilha.headers[i];
+      return h.isEmpty ? 'Coluna ${i + 1}' : h;
+    }
+
+    final campos = <(String, int?)>[
+      ('nome', colunas.nome),
+      ('email', colunas.email),
+      ('telefone', colunas.telefone),
+      ('objetivo', colunas.objetivo),
+    ];
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 6, 6),
+      decoration: fxListCardDecoration(context, accent: brand),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Colunas reconhecidas',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: ink,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Toque para trocar se algo veio na coluna errada.',
+            style: TextStyle(fontSize: 11.5, color: mute),
+          ),
+          for (final (campo, idx) in campos)
+            InkWell(
+              onTap: () => _trocarColuna(campo),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 76,
+                      child: Text(
+                        migracaoCampoLabel(campo),
+                        style: TextStyle(fontSize: 12.5, color: mute),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        nomeColuna(idx),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: idx == null ? mute : ink,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.unfold_more_rounded, size: 18, color: mute),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

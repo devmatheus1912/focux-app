@@ -7,8 +7,27 @@ String migracaoIniciarConfirmTitle() => 'Analisar este texto?';
 String migracaoIniciarConfirmMessage() =>
     'Estrutura os alunos localmente. Nada é salvo ainda.';
 
-String migracaoSalvarLabel(int count) =>
-    count == 1 ? 'Confirmar 1 aluno' : 'Confirmar e salvar $count';
+String migracaoSalvarLabel(int count) => switch (count) {
+  0 => 'Selecione alunos',
+  1 => 'Importar 1 aluno',
+  _ => 'Importar $count alunos',
+};
+
+String migracaoIgnoradasLabel(int count) =>
+    count == 1 ? '1 linha ignorada' : '$count linhas ignoradas';
+
+String migracaoCampoLabel(String campo) => switch (campo) {
+  'nome' => 'Nome',
+  'email' => 'E-mail',
+  'telefone' => 'Telefone',
+  _ => 'Objetivo',
+};
+
+String migracaoVazioTitle() => 'Não encontramos alunos aqui';
+
+String migracaoVazioDica() =>
+    'Use uma planilha com colunas Nome, Telefone e E-mail. '
+    'Ou envie o print da sua lista de contatos.';
 
 String migracaoSalvandoLabel() => 'Salvando alunos...';
 

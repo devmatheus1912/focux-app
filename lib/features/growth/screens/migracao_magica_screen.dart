@@ -45,6 +45,8 @@ import '../models/migracao_aluno_linha.dart';
 import '../models/migracao_importacao_resumo.dart';
 import '../utils/migracao_file_parser.dart';
 import '../utils/migracao_foto_limits.dart';
+import '../utils/migracao_linha_classifier.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../utils/migracao_ocr_service.dart';
 import '../utils/migracao_texto_normalizer.dart';
 import 'package:url_launcher/url_launcher.dart';

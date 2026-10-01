@@ -49,6 +49,71 @@ void main() {
       expect(result.textForIa, contains('Maria Souza'));
     });
 
+    test('cabeçalho casa palavra inteira, não pedaço', () {
+      const csv = 'Nome,Hotel preferido,Telefone celular\n'
+          'Ana Silva,Ibis,11999998888\n';
+
+      final result = MigracaoFileParser.parse(
+        bytes: Uint8List.fromList(utf8.encode(csv)),
+        filename: 'alunos.csv',
+      );
+
+      expect(result.colunas!.telefone, 2);
+      expect(result.directAlunos!.single.telefone, '11999998888');
+    });
+
+    test('Tel. abreviado é telefone', () {
+      const csv = 'Nome,Tel.,E-mail\nAna Silva,11999998888,ana@example.com\n';
+
+      final result = MigracaoFileParser.parse(
+        bytes: Uint8List.fromList(utf8.encode(csv)),
+        filename: 'alunos.csv',
+      );
+
+      expect(result.colunas!.telefone, 1);
+      expect(result.colunas!.email, 2);
+    });
+
+    test('reaplicar colunas troca o mapeamento', () {
+      const csv = 'Aluno,Contato,Obs\nAna Silva,11999998888,Treina cedo\n';
+      final result = MigracaoFileParser.parse(
+        bytes: Uint8List.fromList(utf8.encode(csv)),
+        filename: 'alunos.csv',
+      );
+
+      final remapeado = MigracaoFileParser.reaplicarColunas(
+        result,
+        const MigracaoColunas(nome: 0, telefone: 1, objetivo: 2),
+      );
+
+      expect(remapeado.directAlunos!.single.telefone, '11999998888');
+      expect(remapeado.directAlunos!.single.objetivo, 'Treina cedo');
+    });
+
+    test('linhas de documento sem cabeçalho não viram alunos', () {
+      const csv = 'EMENTA: Conforme art. 10, Medida\nde janeiro de 2002, Código Civil\n';
+
+      final result = MigracaoFileParser.parse(
+        bytes: Uint8List.fromList(utf8.encode(csv)),
+        filename: 'doc.csv',
+      );
+
+      expect(result.usesDirectParse, isFalse);
+    });
+
+    test('linha duvidosa entra desmarcada', () {
+      const csv = 'nome,email\nAna,\nBruno Costa,bruno@example.com\n';
+
+      final result = MigracaoFileParser.parse(
+        bytes: Uint8List.fromList(utf8.encode(csv)),
+        filename: 'alunos.csv',
+      );
+
+      final ana = result.directAlunos!.firstWhere((a) => a.nome == 'Ana');
+      expect(ana.selecionado, isFalse);
+      expect(result.directAlunos!.last.selecionado, isTrue);
+    });
+
     test('CSV sem colunas reconhecíveis cai para texto IA', () {
       const csv = 'coluna_a,coluna_b\nfoo,bar';
 
