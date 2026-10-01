@@ -145,9 +145,9 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                               if (treino.isNotEmpty) ...[
                                 Text(
                                   'Treino & evolução',
-                                  style: Aluno360Layout.metaStyle(ctx).copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                  style: Aluno360Layout.metaStyle(
+                                    ctx,
+                                  ).copyWith(fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
                                 for (final module in treino)
@@ -166,9 +166,9 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                                   const SizedBox(height: TokensStrip.s4),
                                 Text(
                                   'Perfil & gestão',
-                                  style: Aluno360Layout.metaStyle(ctx).copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                  style: Aluno360Layout.metaStyle(
+                                    ctx,
+                                  ).copyWith(fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(height: TokensStrip.s2),
                                 for (final module in perfil)
@@ -197,6 +197,20 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     );
   }
 
+  Widget _icone(
+    Aluno360FerramentasModule module, {
+    required bool iaLocked,
+    required bool feedbackLocked,
+  }) {
+    final locked =
+        (module == Aluno360FerramentasModule.iaProgresso && iaLocked) ||
+        (module == Aluno360FerramentasModule.feedbackVideo && feedbackLocked);
+    return Icon(
+      locked ? Icons.lock_outline : Aluno360FerramentasLogic.moduleIcon(module),
+      color: primary,
+    );
+  }
+
   Widget _moduleTile(
     BuildContext host, {
     BuildContext? sheetContext,
@@ -221,10 +235,11 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
 
     final evolucaoComparativo = '/alunos/$alunoId/evolucao-comparativo';
     final aderenciaPercent = (aluno.aderenciaPercent ?? 0).toDouble();
-    final composicaoPending = Aluno360FerramentasLogic.composicaoCorporalPending(
-      bf: bf,
-      massaMagra: massaMagra,
-    );
+    final composicaoPending =
+        Aluno360FerramentasLogic.composicaoCorporalPending(
+          bf: bf,
+          massaMagra: massaMagra,
+        );
     final aderenciaAttention = Aluno360FerramentasLogic.aderenciaNeedsAttention(
       aluno: aluno,
       aderenciaSemanal: aderenciaSemanal,
@@ -233,9 +248,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
       aderenciaSemanal,
     );
     final sparklineSemantics =
-        Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(
-          aderenciaSemanal,
-        );
+        Aluno360FerramentasLogic.aderenciaSparkSemanticsLabel(aderenciaSemanal);
 
     return switch (module) {
       Aluno360FerramentasModule.treinos => FxSatelliteListTile(
@@ -249,13 +262,16 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               ? '${aluno.diasSemTreino} dias sem treino'
               : 'Ativo recentemente',
         ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap:
             () => go(
-              () => host.push(
-                '/alunos/$alunoId/treinos-list',
-                extra: aluno.nome,
-              ),
+              () =>
+                  host.push('/alunos/$alunoId/treinos-list', extra: aluno.nome),
             ),
       ),
       Aluno360FerramentasModule.equipamentos => FxSatelliteListTile(
@@ -267,6 +283,11 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               ? 'Sem restrição cadastrada'
               : '${aluno.equipamentosDisponiveis.length} marcados',
         ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap: () => go(() => host.push('/alunos/$alunoId/equipamentos')),
       ),
@@ -277,9 +298,10 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         subtitle: Text(
           iaLocked ? 'Disponível no $iaPlan' : 'Carga sugerida pela IA',
         ),
-        leading: Icon(
-          iaLocked ? Icons.lock_outline : Icons.auto_awesome_outlined,
-          color: primary,
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
         ),
         accent: primary,
         onTap:
@@ -312,11 +334,14 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             massaMagra: massaMagra,
           ),
         ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: composicaoPending ? EagleTokens.warn : primary,
         onTap:
-            () => go(
-              () => host.push(evolucaoComparativo, extra: aluno.nome),
-            ),
+            () => go(() => host.push(evolucaoComparativo, extra: aluno.nome)),
       ),
       Aluno360FerramentasModule.aderencia => FxSatelliteListTile(
         margin: _moduleMargin,
@@ -342,13 +367,15 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             Text('${aderenciaPercent.toInt()}%'),
           ],
         ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: aderenciaAttention ? EagleTokens.warn : primary,
         onTap:
             () => go(
-              () => host.push(
-                '/alunos/$alunoId/relatorio',
-                extra: aluno.nome,
-              ),
+              () => host.push('/alunos/$alunoId/relatorio', extra: aluno.nome),
             ),
       ),
       Aluno360FerramentasModule.planoSucesso => FxSatelliteListTile(
@@ -356,6 +383,11 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         titleCase: false,
         title: 'Plano de sucesso',
         subtitle: const Text('Metas e marcos do aluno'),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap:
             () => go(
@@ -370,13 +402,15 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         titleCase: false,
         title: 'Trilhas',
         subtitle: const Text('Metas com etapas e progresso'),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap:
             () => go(
-              () => host.push(
-                '/alunos/$alunoId/trilhas',
-                extra: aluno.nome,
-              ),
+              () => host.push('/alunos/$alunoId/trilhas', extra: aluno.nome),
             ),
       ),
       Aluno360FerramentasModule.engajamento => FxSatelliteListTile(
@@ -384,13 +418,16 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         titleCase: false,
         title: 'Engajamento',
         subtitle: const Text('Treinos, medidas e mensagens'),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap:
             () => go(
-              () => host.push(
-                '/alunos/$alunoId/engajamento',
-                extra: aluno.nome,
-              ),
+              () =>
+                  host.push('/alunos/$alunoId/engajamento', extra: aluno.nome),
             ),
       ),
       Aluno360FerramentasModule.anamnese => FxSatelliteListTile(
@@ -406,6 +443,11 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           anamneseLoading
               ? '…'
               : Aluno360FerramentasLogic.anamneseValue(anamneseStatus),
+        ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
         ),
         accent:
             anamneseLoading
@@ -429,6 +471,11 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         trailing: Text(
           aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK',
         ),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent:
             aluno.statusFinanceiro == 'INADIMPLENTE'
                 ? EagleTokens.bad
@@ -440,14 +487,15 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         titleCase: false,
         title: 'Chat',
         subtitle: const Text('Conversa direta com o aluno'),
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
+        ),
         accent: primary,
         onTap:
-            () => go(
-              () => host.push(
-                '/alunos/$alunoId/chat',
-                extra: aluno.nome,
-              ),
-            ),
+            () =>
+                go(() => host.push('/alunos/$alunoId/chat', extra: aluno.nome)),
       ),
       Aluno360FerramentasModule.feedbackVideo => FxSatelliteListTile(
         margin: _moduleMargin,
@@ -456,11 +504,12 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         subtitle: Text(
           feedbackLocked
               ? 'Disponível no $feedbackPlan'
-              : 'Correções e análise de execução',
+              : 'Vídeos do aluno · você responde',
         ),
-        leading: Icon(
-          feedbackLocked ? Icons.lock_outline : Icons.videocam_outlined,
-          color: primary,
+        leading: _icone(
+          module,
+          iaLocked: iaLocked,
+          feedbackLocked: feedbackLocked,
         ),
         accent: primary,
         onTap:
@@ -538,6 +587,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               subtitle: Text(
                 '${split.overflow.length} no catálogo · sem repetir o sticky',
               ),
+              leading: Icon(Icons.apps_outlined, color: primary),
               accent: primary,
               onTap:
                   () => _openMaisFerramentas(

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
@@ -94,6 +96,24 @@ abstract final class Aluno360FerramentasLogic {
       Aluno360FerramentasModule.chat ||
       Aluno360FerramentasModule.feedbackVideo =>
         Aluno360FerramentasModuleGroup.perfil,
+    };
+  }
+
+  static IconData moduleIcon(Aluno360FerramentasModule module) {
+    return switch (module) {
+      Aluno360FerramentasModule.treinos => Icons.fitness_center_outlined,
+      Aluno360FerramentasModule.equipamentos => Icons.handyman_outlined,
+      Aluno360FerramentasModule.iaProgresso => Icons.auto_awesome_outlined,
+      Aluno360FerramentasModule.composicao => Icons.monitor_weight_outlined,
+      Aluno360FerramentasModule.aderencia => Icons.event_available_outlined,
+      Aluno360FerramentasModule.planoSucesso => Icons.flag_outlined,
+      Aluno360FerramentasModule.trilhas => Icons.route_outlined,
+      Aluno360FerramentasModule.engajamento =>
+        Icons.local_fire_department_outlined,
+      Aluno360FerramentasModule.anamnese => Icons.assignment_outlined,
+      Aluno360FerramentasModule.mensalidades => Icons.payments_outlined,
+      Aluno360FerramentasModule.chat => Icons.chat_bubble_outline_rounded,
+      Aluno360FerramentasModule.feedbackVideo => Icons.videocam_outlined,
     };
   }
 

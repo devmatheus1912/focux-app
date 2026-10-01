@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_ferramentas_logic.dart';
@@ -15,6 +17,27 @@ void main() {
     test('spacing tokens keep sections visually grouped', () {
       expect(Aluno360FerramentasLogic.sectionHeaderGap, lessThan(12));
       expect(Aluno360FerramentasLogic.sectionDividerGap, greaterThan(16));
+    });
+
+    test('cada ferramenta tem ícone próprio', () {
+      final icones = Aluno360FerramentasModule.values
+          .map(Aluno360FerramentasLogic.moduleIcon)
+          .toSet();
+      expect(icones, hasLength(Aluno360FerramentasModule.values.length));
+    });
+
+    test('todo tile do grid mostra ícone', () {
+      final grid = File(
+        'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
+      ).readAsStringSync();
+      final tiles = RegExp(
+        r'Aluno360FerramentasModule\.\w+ => FxSatelliteListTile\(',
+      ).allMatches(grid).length;
+      expect(tiles, Aluno360FerramentasModule.values.length);
+      expect(
+        RegExp(r'leading: _icone\(\s*module').allMatches(grid).length,
+        tiles,
+      );
     });
 
     test('aderenciaSparklineValues maps weekly checkins', () {
