@@ -48,37 +48,9 @@ List<Agendamento> _parseAgendamentos(dynamic raw) =>
         .map((e) => Agendamento.fromJson(e as Map<String, dynamic>))
         .toList();
 
-class AgendaHomeBundle {
-  final List<Agendamento> proximos;
-  final List<Agendamento> semana;
-
-  const AgendaHomeBundle({required this.proximos, required this.semana});
-
-  factory AgendaHomeBundle.fromJson(Map<String, dynamic> j) => AgendaHomeBundle(
-    proximos: _parseAgendamentos(j['proximos']),
-    semana: _parseAgendamentos(j['semana']),
-  );
-
-  /// First paint do hub: próximos + itens da semana corrente ainda não listados.
-  List<Agendamento> get firstPaintItems {
-    if (semana.isEmpty) return proximos;
-    final seen = {for (final ag in proximos) ag.id};
-    final extra = semana.where((ag) => !seen.contains(ag.id)).toList();
-    if (extra.isEmpty) return proximos;
-    return [...proximos, ...extra]
-      ..sort((a, b) => a.inicio.compareTo(b.inicio));
-  }
-}
-
 class AgendaRepository {
   final Dio _dio;
   AgendaRepository(ApiClient c) : _dio = c.dio;
-
-  /// BFF tipado — first paint da Agenda (próximos + semana corrente).
-  Future<AgendaHomeBundle> getHome() async {
-    final r = await _dio.get('/api/agenda/home');
-    return AgendaHomeBundle.fromJson(r.data as Map<String, dynamic>);
-  }
 
   Future<Agendamento> criar(
     int alunoId,

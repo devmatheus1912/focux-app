@@ -113,6 +113,26 @@ class FeedbackHelper {
     );
   }
 
+  /// Aviso com "Desfazer". Resolve `true` só se o usuário tocar na ação.
+  static Future<bool> showUndo(
+    BuildContext context,
+    String message, {
+    String actionLabel = 'Desfazer',
+    Duration duration = const Duration(seconds: 4),
+  }) async {
+    final controller = showSnackBar(
+      context,
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+        persist: false,
+        action: SnackBarAction(label: actionLabel, onPressed: () {}),
+      ),
+    );
+    if (controller == null) return false;
+    return await controller.closed == SnackBarClosedReason.action;
+  }
+
   static void showInfo(
     BuildContext context,
     String message, {

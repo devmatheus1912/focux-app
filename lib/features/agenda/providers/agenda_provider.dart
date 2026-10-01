@@ -10,11 +10,6 @@ final agendaRepositoryProvider = Provider<AgendaRepository>(
   (ref) => AgendaRepository(ref.read(apiClientProvider)),
 );
 
-final agendaHomeProvider = FutureProvider<AgendaHomeBundle>((ref) async {
-  return ref.read(agendaRepositoryProvider).getHome();
-});
-
 void invalidateAgendaCaches(WidgetRef ref) {
   AgendaWeekClientCache.clear();
-  ref.invalidate(agendaHomeProvider);
 }

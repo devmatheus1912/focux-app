@@ -169,17 +169,11 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
 
     Future<void> apagar(NotificacaoApp item) async {
       setState(() => _ocultas.add(item.id));
-      final controller = FeedbackHelper.showSnackBar(
+      final desfeito = await FeedbackHelper.showUndo(
         context,
-        SnackBar(
-          content: const Text('Notificação apagada.'),
-          duration: const Duration(seconds: 4),
-          persist: false,
-          action: SnackBarAction(label: 'Desfazer', onPressed: () {}),
-        ),
+        'Notificação apagada.',
       );
-      final reason = await controller?.closed;
-      if (reason == SnackBarClosedReason.action) {
+      if (desfeito) {
         if (mounted) setState(() => _ocultas.remove(item.id));
         return;
       }

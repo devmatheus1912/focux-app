@@ -63,22 +63,6 @@ class FeedbackVideoRepository {
     return _pagina(path, page: page, size: size, q: q);
   }
 
-  Future<List<FeedbackVideo>> listar() async {
-    return (await listarPagina()).content;
-  }
-
-  Future<List<FeedbackVideo>> listarPorAluno(int alunoId) async {
-    return (await listarPagina(alunoId: alunoId)).content;
-  }
-
-  Future<Pagina<FeedbackVideo>> listarMeus({
-    int page = 0,
-    int size = 20,
-    String? q,
-  }) {
-    return _pagina('/api/feedback-videos/me', page: page, size: size, q: q);
-  }
-
   Future<Pagina<FeedbackVideo>> _pagina(
     String path, {
     int page = 0,
