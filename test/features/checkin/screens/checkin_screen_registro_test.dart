@@ -381,7 +381,7 @@ void main() {
         expect(find.text('Finalizando…'), findsWidgets);
         expect(find.text('Registrar série'), findsNothing);
 
-        await tester.tap(find.text('Finalizando…'), warnIfMissed: false);
+        await tester.tap(find.text('Finalizando…').first, warnIfMissed: false);
         await tester.tap(find.text('Sair'), warnIfMissed: false);
         await tester.pump();
         expect(repo.registros, 0);
