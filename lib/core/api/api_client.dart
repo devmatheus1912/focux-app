@@ -45,6 +45,7 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          if (options.data is FormData) applyUploadPolicy(options);
           if (options.method.toUpperCase() == 'GET' &&
               options.extra['fxSkipEtag'] != true) {
             final key = ApiEtagStore.keyFor(
@@ -493,18 +494,38 @@ class ApiClient {
     return false;
   }
 
-  static bool _isLikelySessionAuthFailure(DioException e) {
-    final data = e.response?.data;
+  /// Vídeo/foto no 4G não sobe em 30 s, e FormData já enviado não pode ser
+  /// reenviado pelo retry ("FormData has already been finalized").
+  @visibleForTesting
+  static void applyUploadPolicy(RequestOptions options) {
+    const envio = Duration(minutes: 5);
+    const resposta = Duration(minutes: 2);
+    if ((options.sendTimeout ?? Duration.zero) < envio) options.sendTimeout = envio;
+    if ((options.receiveTimeout ?? Duration.zero) < resposta) {
+      options.receiveTimeout = resposta;
+    }
+    options.extra['fxNoRetry'] = true;
+  }
+
+  static bool _isLikelySessionAuthFailure(DioException e) =>
+      isLikelySessionAuthFailure403(e.response?.data);
+
+  /// 403 com `codigo` é regra de negócio (plano, senha provisória, aluno
+  /// bloqueado): nunca derruba a sessão. Palavra solta na mensagem
+  /// ("token de IA", "assinatura expirada") também não.
+  @visibleForTesting
+  static bool isLikelySessionAuthFailure403(Object? data) {
     if (data == null) return true;
+    if (data is Map) {
+      final codigo = data['codigo'];
+      if (codigo is String && codigo.trim().isNotEmpty) return false;
+    }
     final text = data.toString().toLowerCase();
     if (text.isEmpty) return true;
     return text.contains('full authentication') ||
-        text.contains('unauthorized') ||
-        text.contains('forbidden') ||
-        text.contains('token') ||
         text.contains('jwt') ||
-        text.contains('expir') ||
-        text.contains('autentic');
+        text.contains('invalid token') ||
+        text.contains('token inválido');
   }
 
   static bool _isAuthPath(String path) {
