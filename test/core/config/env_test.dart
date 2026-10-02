@@ -22,16 +22,8 @@ void main() {
     expect(Env.isProd, isTrue);
   });
 
-  test('apiCertPins inclui leaf pins em host de produção default', () {
-    expect(Env.targetsKnownProdApi, isTrue);
-    expect(Env.apiCertPins.length, greaterThanOrEqualTo(2));
-    expect(
-      Env.apiCertPins.any((p) => p.contains('56ZylJhguSmnkPgt0hUNGj')),
-      isTrue,
-    );
-    expect(
-      Env.apiCertPins.any((p) => p.contains('BWjzG+rPlj+2cnDnbI+4LLj9z1h')),
-      isTrue,
-    );
+  test('sem pins embutidos: renovação do certificado não derruba o app', () {
+    expect(Env.apiCertPins, isEmpty);
+    expect(Env.requireApiCertPins, isFalse);
   });
 }

@@ -7,18 +7,8 @@ cd "$ROOT"
 API_URL="${API_URL:-https://api.focuxpersonal.com}"
 PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-https://focuxpersonal.com}"
 
-if [[ -z "${API_CERT_PINS:-}" ]]; then
-  echo "ERROR: API_CERT_PINS obrigatório no release (SHA-256 do cert da API)."
-  echo "Ex.: export API_CERT_PINS='sha256/<base64>,sha256/<backup>'"
-  exit 1
-fi
-
 echo "==> Focux iOS release build"
 echo "    API_URL=$API_URL"
-echo "    API_CERT_PINS set (${#API_CERT_PINS} chars)"
-
-# Garante que o secret + builtins cobrem o leaf TLS ao vivo (evita IPA morto).
-bash "$ROOT/tools/release/verify-api-cert-pins.sh"
 
 flutter pub get
 (cd ios && pod install)
@@ -46,8 +36,6 @@ fi
 flutter build ipa --release \
   --dart-define=API_URL="$API_URL" \
   --dart-define=PUBLIC_WEB_URL="$PUBLIC_WEB_URL" \
-  --dart-define=API_CERT_PINS="$API_CERT_PINS" \
-  --dart-define=REQUIRE_API_CERT_PINS=true \
   "${EXTRA_DEFINES[@]}" \
   --export-options-plist=ios/ExportOptions.plist
 

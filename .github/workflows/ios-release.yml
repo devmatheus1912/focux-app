@@ -1,10 +1,9 @@
 name: iOS Release
 
-# Build IPA assinado (TestFlight) com certificate pinning.
+# Build IPA assinado (TestFlight).
 # Assinatura = App Store Connect API (igual Codemagic Automatic) — sem Mac local / sem .p12.
 #
 # Secrets obrigatórios:
-#   API_CERT_PINS
 #   APP_STORE_CONNECT_API_KEY_ID
 #   APP_STORE_CONNECT_API_ISSUER_ID
 #   APP_STORE_CONNECT_API_KEY_BASE64
@@ -140,19 +139,14 @@ jobs:
           plutil -lint ios/ExportOptions.ci.plist
           cat ios/ExportOptions.ci.plist
 
-      - name: Build IPA (release + cert pins)
+      - name: Build IPA (release)
         env:
-          API_CERT_PINS: ${{ secrets.API_CERT_PINS }}
           API_URL: ${{ secrets.API_URL }}
           PUBLIC_WEB_URL: ${{ secrets.PUBLIC_WEB_URL }}
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           GOOGLE_IOS_CLIENT_ID: ${{ secrets.GOOGLE_IOS_CLIENT_ID }}
         run: |
           set -euo pipefail
-          if [[ -z "${API_CERT_PINS:-}" ]]; then
-            echo "::error::Secret API_CERT_PINS obrigatório (tools/release/fetch-api-cert-pin.ps1)."
-            exit 1
-          fi
           if [[ -z "${GOOGLE_IOS_CLIENT_ID:-}" ]]; then
             echo "::error::Secret GOOGLE_IOS_CLIENT_ID obrigatório (OAuth client iOS — não use o client Web)."
             exit 1
@@ -161,8 +155,6 @@ jobs:
 
           API_URL="${API_URL:-$API_URL_DEFAULT}"
           PUBLIC_WEB_URL="${PUBLIC_WEB_URL:-$PUBLIC_WEB_URL_DEFAULT}"
-
-          bash tools/release/verify-api-cert-pins.sh
 
           EXTRA=()
           if [[ -n "${GOOGLE_WEB_CLIENT_ID:-}" ]]; then
@@ -184,8 +176,6 @@ jobs:
           flutter build ipa --release \
             --dart-define=API_URL="$API_URL" \
             --dart-define=PUBLIC_WEB_URL="$PUBLIC_WEB_URL" \
-            --dart-define=API_CERT_PINS="$API_CERT_PINS" \
-            --dart-define=REQUIRE_API_CERT_PINS=true \
             ${EXTRA[@]+"${EXTRA[@]}"} \
             --export-options-plist=ios/ExportOptions.ci.plist
 

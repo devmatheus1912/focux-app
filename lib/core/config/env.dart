@@ -14,65 +14,31 @@ class Env {
   /// HTTP base URL for the Focux backend (no trailing slash).
   ///
   /// Prefer the brand API host. Railway continua válido via `--dart-define=API_URL=...`.
-  /// Em hosts de produção conhecidos, [apiCertPins] une pins built-in dos dois
-  /// leafs para o release não quebrar se o secret e a URL divergirem de host.
   static const String apiUrl = String.fromEnvironment(
     'API_URL',
     defaultValue: 'https://api.focuxpersonal.com',
   );
 
-  /// SHA-256 pins (`sha256/<base64>` ou só base64), separados por vírgula.
-  /// Ex.: `--dart-define=API_CERT_PINS=sha256/abc...,sha256/def...`
+  /// SHA-256 pins opcionais (`sha256/<base64>` ou só base64), separados por vírgula.
+  /// Sem pins o app usa a validação TLS padrão do sistema. O pin compara o DER
+  /// do leaf, que muda a cada renovação do certificado — não usar em build de loja.
   static const String _apiCertPinsRaw = String.fromEnvironment(
     'API_CERT_PINS',
     defaultValue: '',
   );
 
-  /// Leaf pins atuais (2026-09-18) — Railway + api.focuxpersonal.com.
-  /// Só entram quando [apiUrl] aponta a um desses hosts de produção; staging/
-  /// tunnel sem `API_CERT_PINS` continua sem pinning (como antes).
-  static const List<String> _builtinApiCertPins = [
-    // focux-backend-production.up.railway.app
-    'sha256/56ZylJhguSmnkPgt0hUNGj/AjFqCOm0Px/OmO5WdBRE=',
-    // api.focuxpersonal.com
-    'sha256/BWjzG+rPlj+2cnDnbI+4LLj9z1hOazfNYvbzUZMkazA=',
-  ];
-
-  static const Set<String> _knownProdApiHosts = {
-    'api.focuxpersonal.com',
-    'focux-backend-production.up.railway.app',
-  };
-
-  /// True quando [apiUrl] é um dos hosts oficiais de produção.
-  static bool get targetsKnownProdApi {
-    final host = Uri.tryParse(apiUrl)?.host.toLowerCase() ?? '';
-    return _knownProdApiHosts.contains(host);
-  }
-
   static List<String> get apiCertPins {
-    final fromDefine =
-        _apiCertPinsRaw.isEmpty
-            ? const <String>[]
-            : _apiCertPinsRaw
-                .split(',')
-                .map((p) => p.trim())
-                .where((p) => p.isNotEmpty)
-                .toList();
-    // Staging / tunnel / README custom backend: só pins explícitos.
-    if (!targetsKnownProdApi) return fromDefine;
-    // Produção: dart-define ∪ builtins (Railway vs brand host).
-    if (fromDefine.isEmpty) return List<String>.from(_builtinApiCertPins);
-    final merged = <String>{
-      ...fromDefine,
-      ..._builtinApiCertPins,
-    };
-    return merged.where((p) => p.isNotEmpty).toList();
+    if (_apiCertPinsRaw.isEmpty) return const <String>[];
+    return _apiCertPinsRaw
+        .split(',')
+        .map((p) => p.trim())
+        .where((p) => p.isNotEmpty)
+        .toList();
   }
 
-  /// Em release store: falha sem pins. Preferir `true` nos scripts build-*.sh.
   static const bool requireApiCertPins = bool.fromEnvironment(
     'REQUIRE_API_CERT_PINS',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   /// Public URL used for shareable landing links (`/p/{slug}`, `/c/{slug}`).
