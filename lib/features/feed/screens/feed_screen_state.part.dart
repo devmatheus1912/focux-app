@@ -233,10 +233,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                           searching
                               ? 'Ajuste a busca para achar outra publicação.'
                               : 'Compartilhe novidades, vídeos e conquistas com seus alunos.',
-                      action: FxEmptyAction(
-                        label: searching ? 'Limpar filtros' : 'Criar publicação',
-                        onTap: searching ? _clearFilters : _abrirFormulario,
-                      ),
+                      action: searching
+                          ? FxEmptyAction(
+                              label: 'Limpar filtros',
+                              onTap: _clearFilters,
+                            )
+                          : null,
                     ),
                   ),
                 ),

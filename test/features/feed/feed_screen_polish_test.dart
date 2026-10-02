@@ -53,6 +53,7 @@ void main() {
     expect(screen, isNot(contains('OutlinedButton')));
     expect(screen, isNot(contains('showModalBottomSheet')));
     expect(screen, isNot(contains('FloatingActionButton')));
+    expect(screen, isNot(contains("'Criar publicação'")));
     expect(screen, isNot(contains('DropdownButton')));
     expect(screen, isNot(contains('_FeedListHeader')));
     expect(screen, isNot(contains(r'showError(context, $e)')));
