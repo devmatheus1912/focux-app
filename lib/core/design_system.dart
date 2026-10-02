@@ -103,5 +103,3 @@ export 'widgets/cinematic_mesh_background.dart' show CinematicMeshBackground;
 export 'widgets/mesh_scope.dart' show MeshScope;
 export 'widgets/fx_icon.dart' show FxIcon;
 export 'widgets/fx_screen_a11y.dart';
-export 'widgets/fx_settings_grouped_list.dart' show FxSettingsGroupedList;
-export 'widgets/loading_shimmer.dart' show ShimmerListLoading;

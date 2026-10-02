@@ -133,8 +133,6 @@ flutter:
     - assets/images/logo_oficial_fundo_claro.png
     - assets/images/logo_oficial_fundo_escuro.png
     - assets/images/logo_icon_arm.png
-    - assets/images/logo_splash.png
-    - assets/images/logo_splash_icon.png
     - assets/animations/confetti_success.riv
     - assets/animations/confetti_burst.riv
     - assets/animations/cdn_heart.riv

@@ -118,9 +118,6 @@ class _FxInteractiveGlowState extends State<FxInteractiveGlow>
   }
 }
 
-/// Back-compat alias for premium glow wrappers.
-typedef FxGlowSurface = FxInteractiveGlow;
-
 /// Liquid Glass primary button with gradient + glow.
 class FxLiquidPrimaryButton extends StatelessWidget {
   const FxLiquidPrimaryButton({

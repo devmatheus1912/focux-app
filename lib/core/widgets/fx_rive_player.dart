@@ -89,24 +89,6 @@ Fit _riveFit(BoxFit fit) => switch (fit) {
   BoxFit.contain => Fit.contain,
 };
 
-/// Full-screen celebration confetti (Avinash_Narayanan — Rive community).
-class FxRiveCelebration extends StatelessWidget {
-  const FxRiveCelebration({super.key, this.fallback});
-
-  final Widget? fallback;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: FxRivePlayer(
-        asset: FxRiveAssets.confettiSuccess,
-        fit: BoxFit.cover,
-        fallback: fallback,
-      ),
-    );
-  }
-}
-
 /// Sparkle overlay for earned gamification badges.
 class FxRiveBadgeGlow extends StatelessWidget {
   const FxRiveBadgeGlow({super.key, required this.size, this.fallback});
