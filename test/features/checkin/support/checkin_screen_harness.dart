@@ -52,6 +52,9 @@ class FakeCheckinRepo implements CheckinRepository {
   /// Segura a resposta de `registrarSerie` até completar.
   Completer<void>? travaSerie;
 
+  /// Segura a resposta de `concluir` até completar.
+  Completer<void>? travaConcluir;
+
   /// Lançado por `concluir` enquanto não for nulo.
   Object? erroConcluir;
   bool concluirSemEvolucao = false;
@@ -118,6 +121,7 @@ class FakeCheckinRepo implements CheckinRepository {
     int? presencialAlunoId,
   }) async {
     concluidos++;
+    await travaConcluir?.future;
     final erro = erroConcluir;
     if (erro != null) throw erro;
     return ExecucaoTreino.fromJson({
