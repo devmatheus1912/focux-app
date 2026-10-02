@@ -60,13 +60,12 @@
 		<string>Usado para gravar áudios no chat e vídeos de exercícios com áudio.</string>
 		<!-- HealthKit -->
 		<key>NSHealthShareUsageDescription</key>
-		<string>Usado para ler dados de saude e acompanhar sua evolucao no Focux.</string>
+		<string>Usado para ler dados de saúde e acompanhar sua evolução no Focux.</string>
 		<key>NSHealthUpdateUsageDescription</key>
-		<string>Usado para registrar dados de saude relacionados aos seus treinos no Focux.</string>
+		<string>Usado para registrar dados de saúde relacionados aos seus treinos no Focux.</string>
 		<!-- FCM background notifications -->
 		<key>UIBackgroundModes</key>
 		<array>
-			<string>fetch</string>
 			<string>remote-notification</string>
 		</array>
 		<!-- Google Sign-In: GIDClientID + URL scheme = OAuth client iOS (nunca Web).
