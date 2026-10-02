@@ -11,7 +11,8 @@ bool checkinConclusaoJaFeita(Object erro) {
   final api = ApiError.from(erro);
   if (api?.status != 400 || api!.hasCodigo) return false;
   final texto = (api.mensagem ?? '').toLowerCase();
-  return texto.contains('já foi concluído') || texto.contains('ja foi concluido');
+  return texto.contains('já foi concluído') ||
+      texto.contains('ja foi concluido');
 }
 
 /// Concluir tolerante a retry. `null` = já estava concluído, sem resposta
@@ -104,45 +105,6 @@ ExecucaoTreino checkinAplicarPendentes(
     }
   }
   return atual;
-}
-
-ExecucaoTreino checkinComSessaoEvolucao(
-  ExecucaoTreino treino,
-  SessaoEvolucaoDto evo,
-) {
-  if (checkinEvolucoesParaCelebrar(treino).isNotEmpty) return treino;
-  if ((evo.destaqueExercicio == null || evo.destaqueExercicio!.isEmpty) &&
-      evo.recordes <= 0) {
-    return treino;
-  }
-  return ExecucaoTreino(
-    id: treino.id,
-    treinoId: treino.treinoId,
-    treinoNome: treino.treinoNome,
-    status: treino.status,
-    iniciadoEm: treino.iniciadoEm,
-    concluidoEm: treino.concluidoEm,
-    dataInicio: treino.dataInicio,
-    dataFim: treino.dataFim,
-    evolucoesCarga: treino.evolucoesCarga,
-    evolucoesPerformance: [
-      EvolucaoPerformance(
-        tipo: 'CARGA',
-        exercicioId: 0,
-        exercicioNome: evo.destaqueExercicio != null &&
-                evo.destaqueExercicio!.isNotEmpty
-            ? evo.destaqueExercicio!
-            : (treino.treinoNome.isEmpty ? 'Treino' : treino.treinoNome),
-        valorAnterior: evo.volumeAnteriorKg ?? 0,
-        valorAtual: evo.volumeKg ?? 0,
-        diferenca: evo.destaqueDeltaKg ?? 0,
-        unidade: 'kg',
-        mensagem: evo.sinalLabel,
-      ),
-    ],
-    exerciciosCount: treino.exerciciosCount,
-    exercicios: treino.exercicios,
-  );
 }
 
 int checkinPendentesDaExecucao(List<CheckinSeriePendente> fila, int? id) =>

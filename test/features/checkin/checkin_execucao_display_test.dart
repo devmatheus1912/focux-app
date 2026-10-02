@@ -96,16 +96,7 @@ void main() {
     );
   });
 
-  test('checkinElapsedSince e rest sobrevivem background', () {
-    final started = DateTime(2026, 9, 7, 18, 0, 0);
-    expect(
-      checkinElapsedSince(
-        started.toIso8601String(),
-        started.add(const Duration(minutes: 8)),
-      ),
-      const Duration(minutes: 8),
-    );
-    expect(checkinElapsedSince(null), Duration.zero);
+  test('descanso restante sobrevive background', () {
     final ends = DateTime.utc(2026, 9, 7, 18, 1, 0);
     expect(
       checkinRestRemaining(

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/fx_celebration_overlay.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
-import '../utils/checkin_execucao_estado.dart';
 
 /// Finalizar com exercício faltando pede confirmação; `true` finaliza.
 Future<bool> showCheckinFinalizarIncompleto(
@@ -52,30 +49,6 @@ Future<bool> showCheckinDescartarTreino(BuildContext context) {
   );
 }
 
-/// Evolução quando houver; senão a celebração de treino concluído.
-///
-/// [concluida] nulo ou sem evoluções (retry de concluir só devolve evolução
-/// na primeira resposta) cai na celebração, que não afirma recorde nenhum.
-Future<void> showCheckinResultado(
-  BuildContext context, {
-  required ExecucaoTreino? concluida,
-}) {
-  final evolucoes =
-      concluida == null
-          ? const <EvolucaoPerformance>[]
-          : checkinEvolucoesParaCelebrar(concluida);
-  if (evolucoes.isNotEmpty) {
-    return showCheckinEvolucaoSheet(context, evolucoes: evolucoes);
-  }
-  final s = S.of(context);
-  return FxCelebrationOverlay.show(
-    context,
-    title: s.checkinConcluidoTitulo,
-    subtitle: s.checkinConcluidoTexto,
-    icon: Icons.check_circle_rounded,
-  );
-}
-
 String checkinEvolucaoValorLabel(double value, String unidade) {
   final base = checkinKgLabel(value);
   if (unidade.isEmpty) return base;
@@ -112,7 +85,8 @@ Future<int?> showCheckinFilaSheet(
   );
 }
 
-String _evolucaoLinha(S s, EvolucaoPerformance e) {
+/// "Carga em Supino: 20 kg → 22,5 kg (+13%)".
+String checkinEvolucaoLinha(S s, EvolucaoPerformance e) {
   final tipo = checkinEvolucaoTipoLabel(s, e.tipo);
   final antes = checkinEvolucaoValorLabel(e.valorAnterior, e.unidade);
   final depois = checkinEvolucaoValorLabel(e.valorAtual, e.unidade);
@@ -120,41 +94,4 @@ String _evolucaoLinha(S s, EvolucaoPerformance e) {
   return pct == null
       ? s.checkinEvolucaoLinha(tipo, e.exercicioNome, antes, depois)
       : s.checkinEvolucaoLinhaPct(tipo, e.exercicioNome, antes, depois, pct);
-}
-
-Future<void> showCheckinEvolucaoSheet(
-  BuildContext context, {
-  required List<EvolucaoPerformance> evolucoes,
-}) {
-  final s = S.of(context);
-  final primary = Theme.of(context).colorScheme.primary;
-  return showFxNoticeSheet(
-    context,
-    title: s.checkinEvolucaoTitulo,
-    icon: Icons.trending_up_rounded,
-    actionLabel: s.checkinEvolucaoContinuar,
-    message: s.checkinEvolucaoTexto,
-    body: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final evolucao in evolucoes.take(4))
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.trending_up_rounded, color: primary, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _evolucaoLinha(s, evolucao),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    ),
-  );
 }

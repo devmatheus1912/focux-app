@@ -197,6 +197,11 @@ Future<CheckinHarness> pumpCheckin(
         path: '/checkin/executar',
         builder: (context, state) => const CheckinScreen(treinoId: 5),
       ),
+      GoRoute(
+        path: '/checkin/historico/:id',
+        builder:
+            (context, state) => Text('historico ${state.pathParameters['id']}'),
+      ),
     ],
   );
   await tester.pumpWidget(
@@ -206,9 +211,7 @@ Future<CheckinHarness> pumpCheckin(
         checkinConexaoVoltouProvider.overrideWithValue(h.conexao.stream),
         checkinDescansoAlertaProvider.overrideWithValue(h.alerta),
         checkinRelogioProvider.overrideWithValue(() => h.agora),
-        checkinSessaoAtivaProvider.overrideWithValue(
-          () async => h.sessaoAtiva,
-        ),
+        checkinSessaoAtivaProvider.overrideWithValue(() async => h.sessaoAtiva),
       ],
       child: MaterialApp.router(
         locale: const Locale('pt'),

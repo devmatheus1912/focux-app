@@ -41,7 +41,10 @@ void main() {
     expect(find.text('Pular descanso'), findsOneWidget);
     expect(find.text('1 série esperando conexão'), findsOneWidget);
     expect(
-      tester.widget<Text>(find.text('1 série esperando conexão')).style?.fontSize,
+      tester
+          .widget<Text>(find.text('1 série esperando conexão'))
+          .style
+          ?.fontSize,
       checkinPendentesAvisoFonte,
     );
     expect((await fila.ler()).single.numero, 1);
@@ -142,7 +145,7 @@ void main() {
     await pumpSheet(tester);
     expect(repo.concluidos, 1);
 
-    await tester.tap(find.text('Continuar'));
+    await tester.tap(find.text('Concluir'));
     await pumpSheet(tester);
     expect(find.text('treinos'), findsOneWidget);
   });
@@ -171,8 +174,25 @@ void main() {
 
     expect(find.textContaining('Falta'), findsNothing);
     expect(repo.concluidos, 1);
-    await tester.tap(find.text('Continuar'));
+    expect(find.text('Treino concluído'), findsOneWidget);
+    expect(find.text('Recordes de hoje'), findsOneWidget);
+    expect(find.textContaining('Supino'), findsWidgets);
+    await tester.tap(find.text('Concluir'));
     await pumpSheet(tester);
+    expect(find.text('treinos'), findsOneWidget);
+  });
+
+  testWidgets('Ver detalhes do resumo abre o histórico da sessão', (
+    tester,
+  ) async {
+    final repo = FakeCheckinRepo(feitas: [3, 3]);
+    await pumpCheckin(tester, repo);
+
+    await tester.tap(find.text('Finalizar treino'));
+    await pumpSheet(tester);
+    await tester.tap(find.text('Ver detalhes'));
+    await pumpSheet(tester);
+    expect(find.text('historico 1'), findsOneWidget);
   });
 
   testWidgets('fim do descanso com app aberto toca e volta à série', (

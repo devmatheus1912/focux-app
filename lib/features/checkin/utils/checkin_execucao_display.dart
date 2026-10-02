@@ -53,18 +53,6 @@ double checkinMediaPreviaAltura({
   return preferida < teto ? preferida : teto;
 }
 
-Duration checkinElapsedSince(String? iniciadoEm, [DateTime? now]) {
-  final origin = now ?? DateTime.now();
-  if (iniciadoEm == null || iniciadoEm.isEmpty) {
-    return Duration.zero;
-  }
-  try {
-    return origin.difference(DateTime.parse(iniciadoEm).toLocal());
-  } catch (_) {
-    return Duration.zero;
-  }
-}
-
 int checkinRestRemaining({required DateTime endsAt, DateTime? now}) {
   final left = endsAt.difference(now ?? DateTime.now()).inSeconds;
   return left < 0 ? 0 : left;

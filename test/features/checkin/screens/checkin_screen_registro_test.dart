@@ -334,7 +334,7 @@ void main() {
   });
 
   group('concluir idempotente', () {
-    testWidgets('retry sem evolução celebra sem inventar recorde', (
+    testWidgets('retry sem evolução mostra o resumo sem inventar recorde', (
       tester,
     ) async {
       final repo = FakeCheckinRepo(feitas: [3, 3])..concluirSemEvolucao = true;
@@ -343,8 +343,8 @@ void main() {
       await tester.tap(find.text('Finalizar treino'));
       await pumpSheet(tester);
 
-      expect(find.text('Treino concluído!'), findsOneWidget);
-      expect(find.text('Evolução registrada'), findsNothing);
+      expect(find.text('Treino concluído'), findsOneWidget);
+      expect(find.text('Recordes de hoje'), findsNothing);
     });
 
     testWidgets('backend antigo "já foi concluído" segue como sucesso', (
@@ -362,8 +362,8 @@ void main() {
       await pumpSheet(tester);
 
       expect(find.text('Este treino já foi concluído.'), findsNothing);
-      expect(find.text('Treino concluído!'), findsOneWidget);
-      expect(find.text('Evolução registrada'), findsNothing);
+      expect(find.text('Treino concluído'), findsOneWidget);
+      expect(find.text('Recordes de hoje'), findsNothing);
     });
 
     testWidgets('timeout mostra erro e o 2º toque conclui', (tester) async {
@@ -378,7 +378,7 @@ void main() {
       await tester.tap(find.text('Finalizar treino'));
       await pumpSheet(tester);
       expect(find.text('Conexão lenta. Verifique sua internet.'), findsOneWidget);
-      expect(find.text('Treino concluído!'), findsNothing);
+      expect(find.text('Treino concluído'), findsNothing);
 
       repo
         ..erroConcluir = null
@@ -386,7 +386,7 @@ void main() {
       await tester.tap(find.text('Finalizar treino'));
       await pumpSheet(tester);
       expect(repo.concluidos, 2);
-      expect(find.text('Treino concluído!'), findsOneWidget);
+      expect(find.text('Treino concluído'), findsOneWidget);
     });
   });
 

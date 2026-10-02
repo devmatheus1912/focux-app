@@ -28,13 +28,16 @@ import '../utils/checkin_descanso_relogio.dart';
 import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
+import '../utils/checkin_resumo.dart';
 import '../utils/checkin_serie_input.dart';
 import '../utils/checkin_series_fila.dart';
 import '../utils/checkin_sessao_aberta.dart';
+import '../utils/historico_detalhe_view.dart';
 import '../widgets/checkin_execucao_estados.dart';
 import '../widgets/checkin_execucao_sheets.dart';
 import '../widgets/checkin_exercise_widgets.dart';
 import '../widgets/checkin_header_widgets.dart';
+import '../widgets/checkin_resumo_view.dart';
 import '../widgets/checkin_serie_campos_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_sessao_aberta_state.dart';
@@ -381,26 +384,29 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     try {
       final id = _execucao!.id!;
       var concluida = await checkinConcluir(() => _repo.concluir(id));
-      if (concluida != null &&
-          checkinEvolucoesParaCelebrar(concluida).isEmpty) {
-        try {
-          concluida = checkinComSessaoEvolucao(
-            concluida,
-            await _repo.evolucaoSessao(id),
-          );
-        } catch (_) {}
-      }
       if (concluida == null) {
         try {
-          final detalhe = await _repo.detalhe(id);
-          final evo = await _repo.evolucaoSessao(id);
-          concluida = checkinComSessaoEvolucao(detalhe, evo);
+          concluida = await _repo.detalhe(id);
         } catch (_) {}
       }
+      SessaoEvolucaoDto? evolucao;
+      try {
+        evolucao = await _repo.evolucaoSessao(id);
+      } catch (_) {}
       _invalidateSessaoCaches();
       if (!mounted) return;
-      await showCheckinResultado(context, concluida: concluida);
-      if (mounted) safePopOrGo(context, '/checkin/treinos');
+      final resumo = buildCheckinResumo(
+        concluida: concluida,
+        evolucao: evolucao,
+        treinoNomeLocal: _execucao!.treinoNome,
+      );
+      final acao = await showCheckinResumo(context, resumo: resumo);
+      if (!mounted) return;
+      if (acao == CheckinResumoAcao.detalhes) {
+        context.pushReplacement(historicoDetalhePath(id));
+      } else {
+        safePopOrGo(context, '/checkin/treinos');
+      }
     } catch (e) {
       if (mounted) _erro(friendlyError(e));
     } finally {
