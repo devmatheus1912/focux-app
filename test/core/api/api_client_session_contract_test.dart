@@ -17,6 +17,8 @@ void main() {
     expect(apiClient, contains('SessionInvalidator.invalidate'));
     expect(apiClient, contains('SessionRefreshCoordinator.ensureFreshAccess'));
     expect(apiClient, contains('fxAuthRetried'));
+    expect(apiClient, contains('canReplayAfterAuthRefresh'));
+    expect(apiClient, contains('shouldInvalidateAfterAuthReplayFailure'));
     expect(apiClient, contains('if (queued)'));
     expect(apiClient, contains('OfflineSyncService.isSensitivePath'));
     expect(apiClient, contains("!_isAuthPath(e.requestOptions.path)"));
