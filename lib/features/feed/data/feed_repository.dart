@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/pagina.dart';
 
 class FeedPost {
@@ -163,19 +164,23 @@ class FeedRepository {
         if (midiaUrl != null) 'midiaUrl': midiaUrl,
       },
     );
+    throwIfQueuedOffline(r);
     return FeedPost.fromJson(r.data);
   }
 
-  Future<void> deletar(int id) => _client.dio.delete('/api/feed/$id');
+  Future<void> deletar(int id) async =>
+      throwIfQueuedOffline(await _client.dio.delete('/api/feed/$id'));
 
   Future<FeedPost> toggleFixar(int id) async {
     final r = await _client.dio.patch('/api/feed/$id/fixar');
+    throwIfQueuedOffline(r);
     return FeedPost.fromJson(r.data);
   }
 
   Future<int> toggleCurtida(int postId) async {
     final r = await _client.dio.post('/api/feed/$postId/curtir');
-    return r.data['totalCurtidas'];
+    throwIfQueuedOffline(r);
+    return (r.data['totalCurtidas'] as num).toInt();
   }
 
   Future<FeedComentario> comentar(int postId, String texto) async {
@@ -183,8 +188,21 @@ class FeedRepository {
       '/api/feed/$postId/comentarios',
       data: {'conteudo': texto, 'texto': texto},
     );
+    throwIfQueuedOffline(r);
     return FeedComentario.fromJson(r.data);
   }
+
+  Future<void> apagarComentario(int comentarioId) async => throwIfQueuedOffline(
+    await _client.dio.delete('/api/feed/comentarios/$comentarioId'),
+  );
+
+  Future<void> denunciarComentario(int comentarioId) async => throwIfQueuedOffline(
+    await _client.dio.post('/api/feed/comentarios/$comentarioId/denunciar'),
+  );
+
+  Future<void> bloquearAluno(int alunoId) async => throwIfQueuedOffline(
+    await _client.dio.post('/api/feed/alunos/$alunoId/bloquear'),
+  );
 
   Future<Pagina<FeedComentario>> listarComentarios(
     int postId, {

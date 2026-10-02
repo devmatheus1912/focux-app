@@ -10,6 +10,10 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../l10n/app_localizations.dart';
+
+enum _AcaoComentario { apagar, denunciar, bloquear }
 
 class FeedCommentsSheet extends StatefulWidget {
   final int postId;
@@ -99,6 +103,85 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
       setState(() => _sending = false);
       FeedbackHelper.showError(context, friendlyError(e));
     }
+  }
+
+  /// Personal (sem compor) modera tudo; aluno apaga o próprio e denuncia/bloqueia o dos outros.
+  List<_AcaoComentario> _acoesPara(FeedComentario c) {
+    final moderador = !widget.canCompose;
+    final meu = widget.currentAlunoId != null && widget.currentAlunoId == c.alunoId;
+    if (moderador || meu) return const [_AcaoComentario.apagar];
+    if (widget.currentAlunoId == null) return const [];
+    return const [_AcaoComentario.denunciar, _AcaoComentario.bloquear];
+  }
+
+  Future<void> _executar(_AcaoComentario acao, FeedComentario c) async {
+    final l10n = S.of(context);
+    final (titulo, mensagem) = switch (acao) {
+      _AcaoComentario.apagar => (l10n.feedComentarioApagar, l10n.feedComentarioApagarConfirma),
+      _AcaoComentario.denunciar => (l10n.feedComentarioDenunciar, l10n.feedComentarioDenunciarConfirma),
+      _AcaoComentario.bloquear => (l10n.feedComentarioBloquear(c.alunoNome), l10n.feedComentarioBloquearConfirma),
+    };
+    final ok = await showFxConfirmSheet(
+      context,
+      title: titulo,
+      message: mensagem,
+      confirmLabel: titulo,
+      destructive: true,
+      icon: Icons.flag_outlined,
+    );
+    if (!ok || !mounted) return;
+    try {
+      switch (acao) {
+        case _AcaoComentario.apagar:
+          await widget.repo.apagarComentario(c.id);
+        case _AcaoComentario.denunciar:
+          await widget.repo.denunciarComentario(c.id);
+        case _AcaoComentario.bloquear:
+          await widget.repo.bloquearAluno(c.alunoId);
+      }
+      if (!mounted) return;
+      setState(() {
+        if (acao == _AcaoComentario.bloquear) {
+          _comentarios.removeWhere((x) => x.alunoId == c.alunoId);
+        } else {
+          _comentarios.removeWhere((x) => x.id == c.id);
+        }
+      });
+      widget.onComentou(_comentarios.length);
+      FeedbackHelper.showSuccess(
+        context,
+        switch (acao) {
+          _AcaoComentario.apagar => l10n.feedComentarioApagado,
+          _AcaoComentario.denunciar => l10n.feedComentarioDenunciado,
+          _AcaoComentario.bloquear => l10n.feedComentarioBloqueado,
+        },
+      );
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Widget _menu(FeedComentario c, Color mute) {
+    final acoes = _acoesPara(c);
+    if (acoes.isEmpty) return const SizedBox.shrink();
+    final l10n = S.of(context);
+    return PopupMenuButton<_AcaoComentario>(
+      tooltip: l10n.feedComentarioOpcoes,
+      icon: Icon(Icons.more_vert_rounded, size: 18, color: mute),
+      padding: EdgeInsets.zero,
+      onSelected: (a) => _executar(a, c),
+      itemBuilder: (_) => [
+        for (final a in acoes)
+          PopupMenuItem(
+            value: a,
+            child: Text(switch (a) {
+              _AcaoComentario.apagar => l10n.feedComentarioApagar,
+              _AcaoComentario.denunciar => l10n.feedComentarioDenunciar,
+              _AcaoComentario.bloquear => l10n.feedComentarioBloquear(c.alunoNome),
+            }),
+          ),
+      ],
+    );
   }
 
   @override
@@ -226,6 +309,7 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                                   ),
                                 ),
                               ),
+                              _menu(c, mute),
                             ],
                           ),
                         );
