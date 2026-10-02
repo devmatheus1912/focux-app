@@ -21,14 +21,14 @@ void main() {
     expect(screen, contains('showFxFormSheet'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('alunosHomeProvider'));
-    expect(screen, contains('exerciciosDisponiveis'));
+    expect(screen, isNot(contains('Novo feedback')));
+    expect(screen, isNot(contains('.registrar(')));
+    expect(screen, contains('onTap: () => _responder(item)'));
     expect(screen, isNot(contains('listarPickerPagina')));
     expect(screen, isNot(contains('busca: _query')));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('q: _query'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('viewInsetsOf'));

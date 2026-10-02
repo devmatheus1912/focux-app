@@ -17,27 +17,17 @@ import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../planos/providers/plano_features_provider.dart';
-import '../../planos/utils/plano_capability.dart';
-import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../features/alunos/providers/alunos_provider.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../chat/utils/aluno_picker_list.dart';
 import '../data/feedback_video_repository.dart';
 import '../utils/feedback_video_display.dart';
-
-part 'feedback_video_screen_form.part.dart';
 
 enum _FeedbackVideoAcao { abrir, responder, deletar }
 
@@ -199,21 +189,42 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
   }
 
   Future<void> _responder(FeedbackVideo item) async {
+    HapticFeedback.selectionClick();
     final ctrl = TextEditingController(text: item.respostaPersonal ?? '');
+    final comentario = item.comentario.trim();
     try {
       final ok = await showFxFormSheet(
         context,
         title: feedbackVideoResponderLabel(respondido: item.respondido),
-        subtitle: feedbackVideoLabel(item.comentario),
+        subtitle: feedbackVideoTitulo(
+          exercicioNome: item.exercicioNome,
+          comentario: item.comentario,
+        ),
         icon: Icons.rate_review_outlined,
         confirmLabel: 'Enviar ao aluno',
-        child: AlunoInsetFormField(
-          controller: ctrl,
-          label: 'Sua correção',
-          icon: Icons.notes_outlined,
-          hint: 'Ex.: desça mais devagar e mantenha o joelho alinhado.',
-          maxLines: 5,
-          showDivider: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FxSatelliteListTile(
+              title: 'Assistir vídeo',
+              subtitle:
+                  comentario.isEmpty
+                      ? null
+                      : Text(feedbackVideoComentarioAluno(comentario)),
+              leading: const Icon(Icons.play_circle_outline_rounded),
+              onTap: () => _abrirVideo(item.videoUrl),
+            ),
+            const SizedBox(height: TokensStrip.s2),
+            AlunoInsetFormField(
+              controller: ctrl,
+              label: 'Sua correção',
+              icon: Icons.notes_outlined,
+              hint: 'Ex.: desça mais devagar e mantenha o joelho alinhado.',
+              maxLines: 5,
+              showDivider: false,
+            ),
+          ],
         ),
       );
       if (ok != true || !mounted) return;
@@ -360,22 +371,6 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                         )
                         : FxContentWidthLimiter(child: _buildBody(visible)),
               ),
-              if (!_loading && _erro == null)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s2,
-                      FxSettingsLayout.pageInset,
-                      TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
-                    ),
-                    child: FxLiquidPrimaryButton(
-                      label: 'Novo feedback',
-                      onPressed: _novoFeedback,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
@@ -419,8 +414,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 title: 'Nenhum feedback de vídeo',
                 subtitle:
                     widget.alunoNome != null
-                        ? 'Peça a ${satelliteFirstName(widget.alunoNome)} um vídeo de execução ou use Novo feedback abaixo.'
-                        : 'Use Novo feedback abaixo para registrar o primeiro comentário técnico.',
+                        ? 'Quando ${satelliteFirstName(widget.alunoNome)} enviar um vídeo de execução, ele aparece aqui para você corrigir.'
+                        : 'Quando um aluno enviar um vídeo de execução, ele aparece aqui para você corrigir.',
               ),
           ],
         ),
@@ -468,7 +463,8 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
               ),
             ),
             accent: item.respondido ? null : primary,
-            onTap: () => _abrirAcoes(item),
+            onTap: () => _responder(item),
+            onLongPress: () => _abrirAcoes(item),
           );
         },
       ),

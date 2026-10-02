@@ -20,6 +20,9 @@ String feedbackVideoStatusLabel({required bool respondido}) =>
 String feedbackVideoResponderLabel({required bool respondido}) =>
     respondido ? 'Editar resposta' : 'Responder';
 
+String feedbackVideoComentarioAluno(String comentario) =>
+    'Aluno: "${comentario.trim()}"';
+
 String feedbackVideoCountLabel(int count) {
   if (count == 1) return '1 feedback';
   return '$count feedbacks';
@@ -69,7 +72,8 @@ String? feedbackVideoTamanhoErro(int bytes) {
 }
 
 const feedbackVideoHelpTip =
-    'O aluno envia o vídeo do exercício e você responde com a correção. '
+    'O aluno envia o vídeo do exercício e você responde com a correção: '
+    'toque no vídeo para assistir e escrever. Segure para remover. '
     'Disponível no Pro e no Enterprise.';
 
 bool feedbackVideoMatchesQuery({

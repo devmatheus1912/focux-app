@@ -125,24 +125,6 @@ class FeedbackVideoRepository {
     );
   }
 
-  Future<FeedbackVideo> registrar({
-    required int alunoId,
-    required int exercicioId,
-    required String videoUrl,
-    required String comentario,
-  }) async {
-    final r = await _dio.post(
-      '/api/feedback-videos',
-      data: {
-        'alunoId': alunoId,
-        'exercicioId': exercicioId,
-        'videoUrl': videoUrl,
-        'comentario': comentario,
-      },
-    );
-    return FeedbackVideo.fromJson(r.data);
-  }
-
   Future<FeedbackVideo> responder(int id, String resposta) async {
     final r = await _dio.put(
       '/api/feedback-videos/$id/resposta',
@@ -153,11 +135,6 @@ class FeedbackVideoRepository {
 
   Future<void> deletar(int id) async {
     await _dio.delete('/api/feedback-videos/$id');
-  }
-
-  Future<List<ExercicioOpcao>> exerciciosDisponiveisParaAluno(int alunoId) async {
-    final r = await _dio.get('/api/feedback-videos/aluno/$alunoId/exercicios');
-    return _parseExercicioOpcoes(r.data);
   }
 
   Future<Pagina<FeedbackVideo>> listarMeus({int page = 0, int size = 20}) =>
