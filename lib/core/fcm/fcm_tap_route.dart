@@ -1,5 +1,28 @@
 import '../router/app_router_redirect.dart';
 
+const _raizesDeAba = {
+  '/dashboard',
+  '/dashboard/aluno',
+  '/checkin/treinos',
+  '/saude',
+  '/chat/aluno',
+  '/aluno/perfil',
+  '/dashboard/personal',
+  '/alunos',
+  '/treinos',
+  '/agenda',
+  '/ia/copiloto',
+};
+
+/// Raiz de aba vai com `go`: `push` empilharia um segundo shell por cima.
+bool fcmTapUsaGo(String route) {
+  final path = Uri.tryParse(route)?.path ?? route;
+  final normalizado = path.length > 1 && path.endsWith('/')
+      ? path.substring(0, path.length - 1)
+      : path;
+  return _raizesDeAba.contains(normalizado);
+}
+
 /// Resolve a rota do toque FCM a partir de `message.data`.
 ///
 /// Usa `route` quando vem no payload. Sem rota, cai nos `type` já

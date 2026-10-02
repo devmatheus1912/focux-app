@@ -8,6 +8,7 @@ import '../api/api_client.dart';
 import '../api/offline_sync_service.dart';
 import '../router/app_router.dart';
 import '../storage/secure_storage.dart';
+import '../widgets/feedback_helper.dart';
 import 'fcm_tap_route.dart';
 
 @pragma('vm:entry-point')
@@ -27,32 +28,59 @@ class FcmService {
   static Future<void> init(ApiClient apiClient) async {
     final messaging = FirebaseMessaging.instance;
 
-    await messaging.requestPermission(alert: true, badge: true, sound: true);
-
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    final token = await messaging.getToken();
-    if (token != null) {
-      await _registrarToken(token, apiClient);
-    }
-    messaging.onTokenRefresh.listen(
-      (newToken) => _registrarToken(newToken, apiClient),
-    );
-
-    // Mensagem em foreground: notificação automática + deep link no tap manual.
+    // Listeners e mensagem inicial antes de qualquer await que possa falhar:
+    // getToken lança sem APNs/rede e o toque que abriu o app se perderia.
     FirebaseMessaging.onMessage.listen((message) {
       if (kDebugMode) debugPrint('[FCM] foreground: ${message.messageId}');
       unawaited(_dispatchPlanSync(message.data));
+      _avisarEmPrimeiroPlano(message);
     });
-
-    // Tap em notificação enquanto o app estava em background.
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
-
-    // App foi aberto a partir de uma notificação (terminated state).
-    final initial = await messaging.getInitialMessage();
-    if (initial != null) {
-      _handleNotificationTap(initial);
+    try {
+      final initial = await messaging.getInitialMessage();
+      if (initial != null) _handleNotificationTap(initial);
+    } catch (e) {
+      if (kDebugMode) debugPrint('[FCM] initial message error: $e');
     }
+
+    try {
+      await messaging.requestPermission(alert: true, badge: true, sound: true);
+      // iOS só mostra banner com o app aberto se pedirmos.
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (e) {
+      if (kDebugMode) debugPrint('[FCM] permission error: $e');
+    }
+
+    messaging.onTokenRefresh.listen(
+      (newToken) => _registrarToken(newToken, apiClient),
+    );
+    try {
+      final token = await messaging.getToken();
+      if (token != null) await _registrarToken(token, apiClient);
+    } catch (e) {
+      // Sem APNs ainda ou offline: onTokenRefresh entrega depois.
+      if (kDebugMode) debugPrint('[FCM] getToken error: $e');
+    }
+  }
+
+  /// Android não exibe notificação com o app aberto; iOS já mostra o banner.
+  static void _avisarEmPrimeiroPlano(RemoteMessage message) {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    final n = message.notification;
+    if (n == null) return;
+    final titulo = n.title?.trim() ?? '';
+    final corpo = n.body?.trim() ?? '';
+    final texto = [titulo, corpo].where((s) => s.isNotEmpty).join(' — ');
+    if (texto.isEmpty) return;
+    final ctx = AppRouter.router.routerDelegate.navigatorKey.currentContext;
+    if (ctx == null || !ctx.mounted) return;
+    FeedbackHelper.showInfo(ctx, texto);
   }
 
   /// Roteia o toque via [resolveFcmTapRoute]: `route` explícita, senão
@@ -86,7 +114,11 @@ class FcmService {
       // Apenas rotas internas: rejeita absolutas (proteção contra phishing
       // através de notificações com URL externa).
       if (!route.startsWith('/')) return;
-      AppRouter.router.push(route);
+      if (fcmTapUsaGo(route)) {
+        AppRouter.router.go(route);
+      } else {
+        AppRouter.router.push(route);
+      }
     } catch (e) {
       if (kDebugMode) debugPrint('[FCM] tap handler error: $e');
     }

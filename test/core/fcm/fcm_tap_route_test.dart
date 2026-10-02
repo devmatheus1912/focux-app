@@ -111,4 +111,13 @@ void main() {
     expect(resolveFcmTapRoute({'route': 'https://evil.test'}), isNull);
     expect(resolveFcmTapRoute({'route': '//evil.test'}), isNull);
   });
+
+  test('raiz de aba usa go; tela interna usa push', () {
+    expect(fcmTapUsaGo('/dashboard/aluno'), isTrue);
+    expect(fcmTapUsaGo('/chat/aluno?x=1'), isTrue);
+    expect(fcmTapUsaGo('/alunos/'), isTrue);
+    expect(fcmTapUsaGo('/alunos/42'), isFalse);
+    expect(fcmTapUsaGo('/feed/aluno'), isFalse);
+    expect(fcmTapUsaGo('/checkin/executar/7'), isFalse);
+  });
 }
