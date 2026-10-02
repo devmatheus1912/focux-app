@@ -108,8 +108,7 @@ String _alunoDetailLibrarySource() {
   final copilotCard = File(copilotCardFile).readAsStringSync();
   final copilotLockedSection =
       File(copilotLockedSectionFile).readAsStringSync();
-  final copilotUpgradeSheet =
-      File(copilotUpgradeSheetFile).readAsStringSync();
+  final copilotUpgradeSheet = File(copilotUpgradeSheetFile).readAsStringSync();
   final operationalSection = File(operationalSectionFile).readAsStringSync();
   final copilotSupport = File(copilotSupportFile).readAsStringSync();
   final stickyCta = File(stickyCtaFile).readAsStringSync();
@@ -161,10 +160,7 @@ void main() {
     expect(screen, isNot(contains('alertasConfigProvider')));
     expect(screen, contains('buscarAluno360'));
     expect(screen, contains('class Timeline360Tile'));
-    expect(
-      screen,
-      contains("hint: expandable ? 'Mostra o conteúdo completo'"),
-    );
+    expect(screen, contains("hint: expandable ? 'Mostra o conteúdo completo'"));
     expect(screen, contains('final interactive = expandable || hasRoute'));
     expect(screen, contains('alunoCopilotoActionProvider'));
     expect(screen, contains('proximaAcao(alunoId)'));
@@ -260,109 +256,130 @@ void main() {
     );
   });
 
-  test('aluno 360 progressive: first paint /360/operacao, idle prefetch, lazy tabs', () {
-    final screen = _alunoDetailLibrarySource();
-    final providers =
-        File('lib/features/alunos/providers/aluno_detail_providers.dart')
-            .readAsStringSync();
-    final resolution =
-        File('lib/features/alunos/utils/aluno_detail_aluno_resolution.dart')
-            .readAsStringSync();
-    final cache =
-        File('lib/features/alunos/utils/aluno360_client_cache.dart')
-            .readAsStringSync();
-    final skeleton =
-        File('lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart')
-            .readAsStringSync();
-    final state =
-        File('lib/features/alunos/screens/aluno_detail_screen_state.part.dart')
-            .readAsStringSync();
-    final repo =
-        File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync();
-    final repoLib = [
-      repo,
-      File('lib/features/alunos/data/aluno_core_models.dart').readAsStringSync(),
-      File('lib/features/alunos/data/aluno_360_models.dart').readAsStringSync(),
-      File('lib/features/alunos/data/aluno_home_models.dart').readAsStringSync(),
-    ].join('\n');
-    final sticky =
-        File('lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart')
-            .readAsStringSync();
+  test(
+    'aluno 360 progressive: first paint /360/operacao, idle prefetch, lazy tabs',
+    () {
+      final screen = _alunoDetailLibrarySource();
+      final providers =
+          File(
+            'lib/features/alunos/providers/aluno_detail_providers.dart',
+          ).readAsStringSync();
+      final resolution =
+          File(
+            'lib/features/alunos/utils/aluno_detail_aluno_resolution.dart',
+          ).readAsStringSync();
+      final cache =
+          File(
+            'lib/features/alunos/utils/aluno360_client_cache.dart',
+          ).readAsStringSync();
+      final skeleton =
+          File(
+            'lib/features/alunos/widgets/aluno_detail_loading_skeleton.dart',
+          ).readAsStringSync();
+      final state =
+          File(
+            'lib/features/alunos/screens/aluno_detail_screen_state.part.dart',
+          ).readAsStringSync();
+      final repo =
+          File(
+            'lib/features/alunos/data/aluno_repository.dart',
+          ).readAsStringSync();
+      final repoLib = [
+        repo,
+        File(
+          'lib/features/alunos/data/aluno_core_models.dart',
+        ).readAsStringSync(),
+        File(
+          'lib/features/alunos/data/aluno_360_models.dart',
+        ).readAsStringSync(),
+        File(
+          'lib/features/alunos/data/aluno_home_models.dart',
+        ).readAsStringSync(),
+      ].join('\n');
+      final sticky =
+          File(
+            'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
+          ).readAsStringSync();
 
-    expect(repoLib, contains('buscarAluno360Operacao'));
-    expect(repoLib, contains('/360/operacao'));
-    expect(repoLib, contains('buscarAluno360Evolucao'));
-    expect(repoLib, contains('buscarAluno360Ferramentas'));
-    expect(repoLib, contains('evolucaoHome'));
-    expect(repoLib, contains('composicaoResumo'));
-    expect(repoLib, contains('anamneseResumo'));
-    expect(repoLib, contains('Aluno360AnamneseResumo'));
-    expect(repoLib, contains('Aluno360ComposicaoResumo'));
-    expect(
-      File('lib/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart')
-          .readAsStringSync(),
-      allOf(
-        contains('composicaoResumo'),
-        contains('aluno360FerramentasBundleProvider'),
+      expect(repoLib, contains('buscarAluno360Operacao'));
+      expect(repoLib, contains('/360/operacao'));
+      expect(repoLib, contains('buscarAluno360Evolucao'));
+      expect(repoLib, contains('buscarAluno360Ferramentas'));
+      expect(repoLib, contains('evolucaoHome'));
+      expect(repoLib, contains('composicaoResumo'));
+      expect(repoLib, contains('anamneseResumo'));
+      expect(repoLib, contains('Aluno360AnamneseResumo'));
+      expect(repoLib, contains('Aluno360ComposicaoResumo'));
+      expect(
+        File(
+          'lib/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart',
+        ).readAsStringSync(),
+        allOf(
+          contains('composicaoResumo'),
+          contains('aluno360FerramentasBundleProvider'),
+          isNot(contains('alunoMedidasResumoProvider')),
+          isNot(contains('/avaliacoes/comparativo')),
+        ),
+      );
+
+      expect(
+        File(
+          'lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart',
+        ).readAsStringSync(),
+        allOf(
+          contains('anamneseStatus'),
+          isNot(contains('alunoAnamneseProvider')),
+          isNot(contains('anamnese_provider.dart')),
+        ),
+      );
+      expect(
+        File(
+          'lib/features/alunos/providers/aluno_detail_providers.dart',
+        ).readAsStringSync(),
         isNot(contains('alunoMedidasResumoProvider')),
-        isNot(contains('/avaliacoes/comparativo')),
-      ),
-    );
-
-    expect(
-      File('lib/features/alunos/widgets/aluno360_ferramentas_modules_grid.dart')
-          .readAsStringSync(),
-      allOf(
-        contains('anamneseStatus'),
-        isNot(contains('alunoAnamneseProvider')),
-        isNot(contains('anamnese_provider.dart')),
-      ),
-    );
-    expect(
-      File('lib/features/alunos/providers/aluno_detail_providers.dart')
-          .readAsStringSync(),
-      isNot(contains('alunoMedidasResumoProvider')),
-    );
-    expect(
-      File('lib/features/alunos/providers/aluno_detail_providers.dart')
-          .readAsStringSync(),
-      contains('_hydrateEvolucaoHomeFromFerramentas'),
-    );
-    expect(
-      File('lib/features/evolucao/providers/evolucao_home_provider.dart')
-          .readAsStringSync(),
-      contains('EvolucaoHomeClientCache.getIfFresh'),
-    );
-    expect(providers, contains('aluno360OperacaoBundleProvider'));
-    expect(providers, contains('buscarAluno360Operacao'));
-    expect(providers, contains('prefetchAluno360SecondaryTabs'));
-    expect(providers, contains('aluno360EvolucaoBundleProvider'));
-    expect(providers, contains('aluno360FerramentasBundleProvider'));
-    expect(providers, contains("endpoint': 'operacao'"));
-    expect(cache, contains('ttl = Duration(seconds: 45)'));
-    expect(cache, contains('getOperacaoIfFresh'));
-    expect(resolution, contains('shouldWatchAlunoRecoverySidecar'));
-    expect(resolution, contains('return false;'));
-    expect(resolution, contains('resolveAlunoDetailListPreview'));
-    expect(resolution, contains('Aluno360Operacao'));
-    expect(state, isNot(contains('ref.watch(aluno360Provider')));
-    expect(state, contains('aluno360OperacaoBundleProvider'));
-    expect(state, contains('prefetchAluno360SecondaryTabs'));
-    expect(state, contains('Priority.idle'));
-    expect(state, contains("source': 'operacao'"));
-    expect(state, contains('ProductEvents.aluno360FirstPaint'));
-    expect(state, contains('_openedTabs'));
-    expect(state, contains('resolveAlunoDetailListPreview'));
-    expect(state, contains('listPreview: listPreview'));
-    expect(skeleton, contains('listPreview'));
-    expect(skeleton, contains('AlunoAvatar'));
-    expect(screen, contains('listPreview'));
-    expect(screen, contains("extra: aluno"));
-    expect(state, isNot(contains('alunoCopilotoForceIaProvider')));
-    expect(sticky, contains('never sidecar GET'));
-    expect(sticky, isNot(contains('ref.watch(alunoOpenIaActionsProvider')));
-  });
-
+      );
+      expect(
+        File(
+          'lib/features/alunos/providers/aluno_detail_providers.dart',
+        ).readAsStringSync(),
+        contains('_hydrateEvolucaoHomeFromFerramentas'),
+      );
+      expect(
+        File(
+          'lib/features/evolucao/providers/evolucao_home_provider.dart',
+        ).readAsStringSync(),
+        contains('EvolucaoHomeClientCache.getIfFresh'),
+      );
+      expect(providers, contains('aluno360OperacaoBundleProvider'));
+      expect(providers, contains('buscarAluno360Operacao'));
+      expect(providers, contains('prefetchAluno360SecondaryTabs'));
+      expect(providers, contains('aluno360EvolucaoBundleProvider'));
+      expect(providers, contains('aluno360FerramentasBundleProvider'));
+      expect(providers, contains("endpoint': 'operacao'"));
+      expect(cache, contains('ttl = Duration(seconds: 45)'));
+      expect(cache, contains('getOperacaoIfFresh'));
+      expect(resolution, contains('shouldWatchAlunoRecoverySidecar'));
+      expect(resolution, contains('return false;'));
+      expect(resolution, contains('resolveAlunoDetailListPreview'));
+      expect(resolution, contains('Aluno360Operacao'));
+      expect(state, isNot(contains('ref.watch(aluno360Provider')));
+      expect(state, contains('aluno360OperacaoBundleProvider'));
+      expect(state, contains('prefetchAluno360SecondaryTabs'));
+      expect(state, contains('Priority.idle'));
+      expect(state, contains("source': 'operacao'"));
+      expect(state, contains('ProductEvents.aluno360FirstPaint'));
+      expect(state, contains('_openedTabs'));
+      expect(state, contains('resolveAlunoDetailListPreview'));
+      expect(state, contains('listPreview: listPreview'));
+      expect(skeleton, contains('listPreview'));
+      expect(skeleton, contains('AlunoAvatar'));
+      expect(screen, contains('listPreview'));
+      expect(screen, contains("extra: aluno"));
+      expect(state, isNot(contains('alunoCopilotoForceIaProvider')));
+      expect(sticky, contains('never sidecar GET'));
+      expect(sticky, isNot(contains('ref.watch(alunoOpenIaActionsProvider')));
+    },
+  );
 
   test(
     'aluno 360 polish: tabs, unified status, refresh, altura, sparkline',
@@ -409,7 +426,12 @@ void main() {
       expect(screen, contains('friendlyError'));
       expect(screen, contains('class Aluno360OperacaoTab'));
       expect(screen, contains('class Aluno360CompositeHeaderDelegate'));
-      expect(screen, contains("static const _labels = ['Operação', 'Evolução', 'Ferramentas']"));
+      expect(
+        screen,
+        contains(
+          "static const _labels = ['Operação', 'Evolução', 'Ferramentas']",
+        ),
+      );
       expect(screen, contains('class Aluno360DetailOperacaoTab'));
       expect(screen, contains('class Aluno360DetailEvolucaoTab'));
       expect(screen, contains('class Aluno360DetailFerramentasTab'));
@@ -480,10 +502,7 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_ferramentas_tab.dart',
       ).readAsStringSync(),
-      allOf(
-        contains("'Medidas'"),
-        contains('DashboardSectionHeader'),
-      ),
+      allOf(contains("'Medidas'"), contains('DashboardSectionHeader')),
     );
     expect(
       File(
@@ -534,9 +553,7 @@ void main() {
       ),
     );
     expect(
-      File(
-        'lib/features/alunos/utils/aluno360_a11y.dart',
-      ).readAsStringSync(),
+      File('lib/features/alunos/utils/aluno360_a11y.dart').readAsStringSync(),
       contains('aluno360ModuleTileSemantics'),
     );
     expect(
@@ -670,6 +687,9 @@ void main() {
     );
     expect(screen, contains('class Aluno360StudentQuickActions'));
     expect(screen, contains('AlunoOperacaoAdherenceLegend'));
+    expect(screen, contains("label: 'Sem treino previsto'"));
+    expect(screen, contains('shouldShowOperacaoAdherenceLegend(points:'));
+    expect(screen, contains("if (status != null) 'status': status"));
     expect(screen, contains('fonteLabel'));
     expect(screen, contains('AderenciaSemanalBundle'));
     expect(screen, contains('recoverySnapshot'));
@@ -687,7 +707,10 @@ void main() {
       File(
         'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
       ).readAsStringSync(),
-      allOf(contains('CommandActionTile'), contains('Aluno360CopilotUpgradeSheet.show')),
+      allOf(
+        contains('CommandActionTile'),
+        contains('Aluno360CopilotUpgradeSheet.show'),
+      ),
     );
     expect(screen, contains('operacaoContentWidthLimiter'));
     expect(screen, contains('ValueKey(\'aluno360_follow_up\')'));
@@ -765,8 +788,12 @@ void main() {
     );
     expect(
       [
-        File('lib/features/alunos/data/aluno_repository.dart').readAsStringSync(),
-        File('lib/features/alunos/data/aluno_core_models.dart').readAsStringSync(),
+        File(
+          'lib/features/alunos/data/aluno_repository.dart',
+        ).readAsStringSync(),
+        File(
+          'lib/features/alunos/data/aluno_core_models.dart',
+        ).readAsStringSync(),
       ].join('\n'),
       allOf(
         contains('buscarTimeline360Page'),

@@ -296,19 +296,29 @@ class AderenciaDia {
   final String labelDia;
   final int checkins;
 
-  const AderenciaDia({this.data = '', this.labelDia = '', this.checkins = 0});
+  /// TREINOU · FALTOU · SEM_PLANO · HOJE (null em backend antigo).
+  final String? status;
+
+  const AderenciaDia({
+    this.data = '',
+    this.labelDia = '',
+    this.checkins = 0,
+    this.status,
+  });
 
   factory AderenciaDia.fromJson(Map<String, dynamic> json) => AderenciaDia(
     // Contrato novo: dia/weekday · legado: data/labelDia.
     data: json['data'] as String? ?? json['dia'] as String? ?? '',
     labelDia: json['labelDia'] as String? ?? json['weekday'] as String? ?? '',
     checkins: (json['checkins'] as num?)?.toInt() ?? 0,
+    status: (json['status'] as String?)?.trim().toUpperCase(),
   );
 
   Map<String, dynamic> toMap() => {
     'data': data,
     'labelDia': labelDia,
     'checkins': checkins,
+    if (status != null) 'status': status,
   };
 }
 

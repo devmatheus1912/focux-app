@@ -25,7 +25,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            alunoOpenIaActionsProvider(42).overrideWith((ref) async => const []),
+            alunoOpenIaActionsProvider(
+              42,
+            ).overrideWith((ref) async => const []),
             alunoRecoveryProvider(42).overrideWith((ref) async => null),
             aluno360OperacaoProvider(42).overrideWith(
               (ref) => resolveAluno360OperacaoSnapshot(
@@ -68,12 +70,16 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.byKey(const ValueKey('aluno360_operacao_sticky_cta')), findsOneWidget);
-      final semanticsNodes = tester.widgetList<Semantics>(find.byType(Semantics));
+      expect(
+        find.byKey(const ValueKey('aluno360_operacao_sticky_cta')),
+        findsOneWidget,
+      );
+      final semanticsNodes = tester.widgetList<Semantics>(
+        find.byType(Semantics),
+      );
       expect(
         semanticsNodes.any(
-          (node) =>
-              node.properties.label == 'Ações rápidas da aba operação',
+          (node) => node.properties.label == 'Ações rápidas da aba operação',
         ),
         isTrue,
       );
@@ -98,7 +104,7 @@ void main() {
       expect(
         tester.getSemantics(find.byType(AlunoOperacaoAdherenceLegend)),
         matchesSemantics(
-          label: 'Legenda: check-in, sem registro, hoje',
+          label: 'Legenda: treinou, faltou, sem treino previsto, hoje',
         ),
       );
     });

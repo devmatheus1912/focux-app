@@ -52,12 +52,7 @@ enum OperacaoStatusCardKind {
   checkins7d,
 }
 
-enum OperacaoStatusCardDestination {
-  chat,
-  engajamento,
-  treinos,
-  noop,
-}
+enum OperacaoStatusCardDestination { chat, engajamento, treinos, noop }
 
 /// Resolve destino do card. Não usar treinos como default para Foco/Risco/Aderência.
 OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
@@ -89,10 +84,7 @@ OperacaoStatusCardDestination resolveOperacaoStatusCardDestination({
 }
 
 /// `go_router` extra for engajamento — nome alone or `{nome, section}`.
-Object operacaoEngajamentoRouteExtra(
-  String alunoNome, {
-  String? section,
-}) {
+Object operacaoEngajamentoRouteExtra(String alunoNome, {String? section}) {
   if (section == null || section.isEmpty) return alunoNome;
   return <String, String>{'nome': alunoNome, 'section': section};
 }
@@ -169,14 +161,41 @@ class OperacaoDominantMetric {
   final String? riscoNivel;
 }
 
+/// Estado visual de um dia na semana de aderência.
+enum AderenciaDiaStatus { treinou, faltou, semPlano, hoje }
+
+/// Contrato BE: TREINOU · FALTOU · SEM_PLANO · HOJE. Desconhecido → null.
+AderenciaDiaStatus? parseAderenciaDiaStatus(String? raw) {
+  switch (raw?.trim().toUpperCase()) {
+    case 'TREINOU':
+      return AderenciaDiaStatus.treinou;
+    case 'FALTOU':
+      return AderenciaDiaStatus.faltou;
+    case 'SEM_PLANO':
+      return AderenciaDiaStatus.semPlano;
+    case 'HOJE':
+      return AderenciaDiaStatus.hoje;
+    default:
+      return null;
+  }
+}
+
 class AderenciaWeekPoint {
-  const AderenciaWeekPoint({required this.checkins, this.date, this.dayLetter});
+  const AderenciaWeekPoint({
+    required this.checkins,
+    this.date,
+    this.dayLetter,
+    this.status,
+  });
 
   final double checkins;
   final String? date;
 
   /// Optional API label (ignored na UI — exibimos via [adherenceDayLetter]).
   final String? dayLetter;
+
+  /// Null = backend antigo ou dia preenchido localmente.
+  final AderenciaDiaStatus? status;
 }
 
 class AderenciaWeekSummary {

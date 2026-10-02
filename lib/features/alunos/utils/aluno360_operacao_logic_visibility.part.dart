@@ -45,12 +45,11 @@ List<AderenciaWeekPoint> parseAderenciaSemanal(
       .map(
         (point) => AderenciaWeekPoint(
           checkins: (point['checkins'] as num?)?.toDouble() ?? 0,
-          date:
-              point['data'] as String? ??
-              point['dia'] as String?,
+          date: point['data'] as String? ?? point['dia'] as String?,
           dayLetter:
               (point['labelDia'] as String?)?.trim() ??
               (point['weekday'] as String?)?.trim(),
+          status: parseAderenciaDiaStatus(point['status'] as String?),
         ),
       )
       .toList(growable: false);
@@ -61,11 +60,11 @@ List<AderenciaWeekPoint> parseAderenciaSemanal(
 List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
   List<AderenciaWeekPoint> points,
 ) {
-  final byDate = <String, double>{};
+  final byDate = <String, AderenciaWeekPoint>{};
   for (final point in points) {
     final date = point.date;
     if (date == null || date.isEmpty) continue;
-    byDate[date] = point.checkins;
+    byDate[date] = point;
   }
   final today = DateTime.now();
   final anchor = DateTime(today.year, today.month, today.day);
@@ -75,9 +74,31 @@ List<AderenciaWeekPoint> padAderenciaWeekToSevenDays(
         '${day.year.toString().padLeft(4, '0')}-'
         '${day.month.toString().padLeft(2, '0')}-'
         '${day.day.toString().padLeft(2, '0')}';
-    return AderenciaWeekPoint(checkins: byDate[iso] ?? 0, date: iso);
+    final source = byDate[iso];
+    return AderenciaWeekPoint(
+      checkins: source?.checkins ?? 0,
+      date: iso,
+      status: source?.status,
+    );
   });
 }
+
+/// Check-in vence; sem status do BE nunca pinta falta (vermelho exige agendamento).
+AderenciaDiaStatus resolveAderenciaDiaStatus(AderenciaWeekPoint point) {
+  if (point.checkins > 0) return AderenciaDiaStatus.treinou;
+  final status = point.status;
+  if (status != null) return status;
+  return isIsoDateToday(point.date)
+      ? AderenciaDiaStatus.hoje
+      : AderenciaDiaStatus.semPlano;
+}
+
+String aderenciaDiaStatusLabel(AderenciaDiaStatus status) => switch (status) {
+  AderenciaDiaStatus.treinou => 'treinou',
+  AderenciaDiaStatus.faltou => 'faltou',
+  AderenciaDiaStatus.semPlano => 'sem treino previsto',
+  AderenciaDiaStatus.hoje => 'hoje',
+};
 
 AderenciaWeekSummary summarizeAderenciaWeek(
   List<AderenciaWeekPoint> points, {
@@ -98,9 +119,10 @@ AderenciaWeekSummary summarizeAderenciaWeek(
     totalCheckins: total.round(),
     hasAnyCheckin: hasAny,
     daysWithCheckin: bundle?.diasComCheckin,
-    totalSemana: bundle == null
-        ? null
-        : (bundle.totalSemana > 0 ? bundle.totalSemana : 7),
+    totalSemana:
+        bundle == null
+            ? null
+            : (bundle.totalSemana > 0 ? bundle.totalSemana : 7),
     resumo: bundle?.resumo ?? '',
   );
 }
@@ -208,7 +230,8 @@ bool resolveOperacaoContactPriority({
   required Aluno aluno,
   ProximaAcaoResumo? proximaAcao,
   OperacaoUiHints? uiHints,
-}) => uiHints?.contactPriority ??
+}) =>
+    uiHints?.contactPriority ??
     isOperacaoContatoPrioritario(aluno: aluno, proximaAcao: proximaAcao);
 
 /// Hide copilot lacunas when hero/sticky already covers the same action.
@@ -258,8 +281,7 @@ bool shouldHideCopilotPrescriptionWhenMatchesSticky({
 /// Sticky chat already owns contact — hide push / marcar-risco executar row.
 bool shouldHideCopilotExecutarWhenStickyChat({
   required OperacaoStickyAction sticky,
-}) =>
-    sticky.isChatAction;
+}) => sticky.isChatAction;
 
 /// Hide copilot primary CTA when sticky already covers the same command/commitment.
 bool shouldHideCopilotPrimaryCtaWhenMatchesSticky({

@@ -103,11 +103,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     final homeInitialized = ref.exists(alunosHomeProvider);
     final cachedDias =
         homeInitialized
-            ? ref
-                .watch(alunosHomeProvider)
-                .value
-                ?.alertasConfig
-                .diasSemTreino
+            ? ref.watch(alunosHomeProvider).value?.alertasConfig.diasSemTreino
             : null;
     final diasLimite = resolveDiasSemTreinoLimiteFromHome(
       alunosHomeInitialized: homeInitialized,
@@ -150,9 +146,6 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
     final semTreinoSubtitle = semTreinoOperacaoSubtitle(dias);
     final semTreinoAccent =
         (dias ?? 0) >= diasLimite ? EagleTokens.warn : fxScreenMute(context);
-    final showLegend = shouldShowOperacaoAdherenceLegend(
-      weekHasAnyCheckin: week.hasAnyCheckin,
-    );
     final weekPoints =
         week.points.isNotEmpty
             ? week.points
@@ -160,6 +153,7 @@ class Aluno360OperationalStatusSection extends ConsumerWidget {
               padAderenciaWeekToSevenDays(const []),
               bundle: aderenciaBundle,
             ).points;
+    final showLegend = shouldShowOperacaoAdherenceLegend(points: weekPoints);
     final weekValue = week.weekRatioLabel;
 
     final mute = fxScreenMute(context);

@@ -195,9 +195,14 @@ class OperacaoAdherenceEmptyState {
   }
 }
 
-/// Legend only when the week has at least one check-in (empty week is self-evident).
-bool shouldShowOperacaoAdherenceLegend({required bool weekHasAnyCheckin}) =>
-    weekHasAnyCheckin;
+/// Legend only when some day treinou or faltou (neutral-only week is self-evident).
+bool shouldShowOperacaoAdherenceLegend({
+  required List<AderenciaWeekPoint> points,
+}) => points.any((point) {
+  final status = resolveAderenciaDiaStatus(point);
+  return status == AderenciaDiaStatus.treinou ||
+      status == AderenciaDiaStatus.faltou;
+});
 
 OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
   required AderenciaWeekSummary week,
@@ -211,10 +216,7 @@ OperacaoAdherenceEmptyState? resolveOperacaoAdherenceEmptyState({
           : 'Nenhum check-in nos últimos 7 dias.';
 
   if (operacao?.showPrepareMessage == true) {
-    return OperacaoAdherenceEmptyState(
-      message: message,
-      showCheckinCta: false,
-    );
+    return OperacaoAdherenceEmptyState(message: message, showCheckinCta: false);
   }
 
   return OperacaoAdherenceEmptyState(
@@ -241,4 +243,3 @@ String semTreinoOperacaoSubtitle(int? dias) {
   if (dias <= 0) return 'Treinou recentemente';
   return '$dias ${dias == 1 ? 'dia' : 'dias'} sem treinar';
 }
-

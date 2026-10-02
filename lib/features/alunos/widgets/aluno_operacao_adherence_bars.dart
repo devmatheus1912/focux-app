@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/utils/motion_preferences.dart';
+import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 import '../utils/aluno360_operacao_logic.dart';
 
@@ -67,41 +68,38 @@ class _AdherenceWeekCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasActivity = point.checkins > 0;
-    final isToday = isIsoDateToday(point.date);
+    final status = resolveAderenciaDiaStatus(point);
+    final hasActivity = status == AderenciaDiaStatus.treinou;
+    final isToday = status == AderenciaDiaStatus.hoje;
     final dayLabel = adherenceDayCellLabel(point);
     final weekday = weekdayNameFromIso(point.date);
-    final semanticsValue = hasActivity ? 'Com check-in' : 'Sem registro';
+    final semanticsValue = aderenciaDiaStatusLabel(status);
     final tooltip =
-        weekday.isEmpty
-            ? semanticsValue
-            : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}';
+        weekday.isEmpty ? semanticsValue : '$weekday · $semanticsValue';
+    final mute = fxScreenMute(context);
 
-    // Sem check-in → missColor (legenda laranja), não idle cinza.
-    final emptyFill = missColor.withValues(alpha: 0.14);
-    final emptyBorder = missColor.withValues(alpha: 0.55);
-    final fill =
-        hasActivity
-            ? activeColor.withValues(alpha: 0.18)
-            : emptyFill;
-    final borderColor =
-        isToday
-            ? todayRingColor
-            : hasActivity
-            ? activeColor.withValues(alpha: 0.42)
-            : emptyBorder;
-    final numberColor =
-        isToday
-            ? todayRingColor
-            : hasActivity
-            ? activeColor
-            : missColor;
+    // Vermelho só quando havia treino agendado; sem plano/hoje ficam neutros.
+    final fill = switch (status) {
+      AderenciaDiaStatus.treinou => activeColor.withValues(alpha: 0.18),
+      AderenciaDiaStatus.faltou => missColor.withValues(alpha: 0.14),
+      AderenciaDiaStatus.semPlano ||
+      AderenciaDiaStatus.hoje => Colors.transparent,
+    };
+    final borderColor = switch (status) {
+      AderenciaDiaStatus.treinou => activeColor.withValues(alpha: 0.42),
+      AderenciaDiaStatus.faltou => missColor.withValues(alpha: 0.55),
+      AderenciaDiaStatus.semPlano => mute.withValues(alpha: 0.28),
+      AderenciaDiaStatus.hoje => todayRingColor,
+    };
+    final numberColor = switch (status) {
+      AderenciaDiaStatus.treinou => activeColor,
+      AderenciaDiaStatus.faltou => missColor,
+      AderenciaDiaStatus.semPlano => mute,
+      AderenciaDiaStatus.hoje => todayRingColor,
+    };
 
     return Semantics(
-      label:
-          weekday.isEmpty
-              ? semanticsValue
-              : '$weekday · $semanticsValue${isToday ? ' · hoje' : ''}',
+      label: tooltip,
       child: Tooltip(
         message: tooltip,
         child: Material(

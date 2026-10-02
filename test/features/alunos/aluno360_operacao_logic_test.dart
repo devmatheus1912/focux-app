@@ -223,7 +223,10 @@ void main() {
         heroShowsRisco: true,
       );
       expect(subtitle, isNotNull);
-      expect(subtitle, 'Resumo · aderência de 30 dias e check-ins dos últimos 7 dias');
+      expect(
+        subtitle,
+        'Resumo · aderência de 30 dias e check-ins dos últimos 7 dias',
+      );
       expect(subtitle, isNot(contains('semana')));
       expect(subtitle, isNot(contains('priorize contato')));
       expect(subtitle, isNot(contains('risco alto')));
@@ -268,17 +271,20 @@ void main() {
       hasAnyCheckin: false,
     );
 
-    test('returns guidance without check-in CTA when copilot owns outreach', () {
-      final state = resolveOperacaoAdherenceEmptyState(
-        week: emptyWeek,
-        operacao: contactSnapshot(prepareMessage: true),
-      );
-      expect(state, isNotNull);
-      expect(state!.message, contains('Nenhum check-in'));
-      expect(state.compactLine, contains('Nenhum check-in'));
-      expect(state.compactLine, isNot(contains('Prioridade do dia')));
-      expect(state.showCheckinCta, isFalse);
-    });
+    test(
+      'returns guidance without check-in CTA when copilot owns outreach',
+      () {
+        final state = resolveOperacaoAdherenceEmptyState(
+          week: emptyWeek,
+          operacao: contactSnapshot(prepareMessage: true),
+        );
+        expect(state, isNotNull);
+        expect(state!.message, contains('Nenhum check-in'));
+        expect(state.compactLine, contains('Nenhum check-in'));
+        expect(state.compactLine, isNot(contains('Prioridade do dia')));
+        expect(state.showCheckinCta, isFalse);
+      },
+    );
 
     test('offers check-in CTA when operacao snapshot is null', () {
       final state = resolveOperacaoAdherenceEmptyState(
@@ -403,10 +409,7 @@ void main() {
 
     test('shows when no operacao snapshot and empty week', () {
       expect(
-        shouldShowOperacaoCheckinCta(
-          operacao: null,
-          weekHasAnyCheckin: false,
-        ),
+        shouldShowOperacaoCheckinCta(operacao: null, weekHasAnyCheckin: false),
         isTrue,
       );
     });
@@ -569,12 +572,7 @@ void main() {
     test('shows when contact gap remains after hero objective cta', () {
       expect(
         shouldShowCopilotProfileGapsButton(
-          Aluno(
-            id: 1,
-            nome: 'Teste',
-            email: 't@test.com',
-            status: 'ATIVO',
-          ),
+          Aluno(id: 1, nome: 'Teste', email: 't@test.com', status: 'ATIVO'),
           50,
         ),
         isTrue,
@@ -584,12 +582,7 @@ void main() {
     test('hides when sticky already routes to evolucao (mapa corporal)', () {
       expect(
         shouldShowCopilotProfileGapsButton(
-          Aluno(
-            id: 1,
-            nome: 'Beatriz',
-            email: 'b@test.com',
-            status: 'ATIVO',
-          ),
+          Aluno(id: 1, nome: 'Beatriz', email: 'b@test.com', status: 'ATIVO'),
           50,
           sticky: const OperacaoStickyAction(
             label: 'Completar mapa corporal',
@@ -604,12 +597,7 @@ void main() {
     test('hides when sticky routes to edit for perfil gaps', () {
       expect(
         shouldShowCopilotProfileGapsButton(
-          Aluno(
-            id: 1,
-            nome: 'Teste',
-            email: 't@test.com',
-            status: 'ATIVO',
-          ),
+          Aluno(id: 1, nome: 'Teste', email: 't@test.com', status: 'ATIVO'),
           50,
           sticky: const OperacaoStickyAction(
             label: 'Definir objetivo',
@@ -661,41 +649,47 @@ void main() {
       );
     });
 
-    test('shows secondary chat on open task when follow-up due and CC primary', () {
-      const sticky = OperacaoStickyAction(
-        label: 'Ver tarefa',
-        icon: Icons.dashboard_outlined,
-        destination: OperacaoStickyDestination.commandCenter,
-      );
-      expect(
-        shouldShowStickySecondaryChat(
-          sticky: sticky,
-          hasOpenTask: true,
-          followUpDue: true,
-          proximaAcaoText: null,
-        ),
-        isTrue,
-      );
-    });
+    test(
+      'shows secondary chat on open task when follow-up due and CC primary',
+      () {
+        const sticky = OperacaoStickyAction(
+          label: 'Ver tarefa',
+          icon: Icons.dashboard_outlined,
+          destination: OperacaoStickyDestination.commandCenter,
+        );
+        expect(
+          shouldShowStickySecondaryChat(
+            sticky: sticky,
+            hasOpenTask: true,
+            followUpDue: true,
+            proximaAcaoText: null,
+          ),
+          isTrue,
+        );
+      },
+    );
   });
 
   group('shouldShowCopilotPrescriptionBlock', () {
-    test('hides clone even after IA refresh when sticky already owns the action', () {
-      final aluno = _aluno();
-      const sticky = OperacaoStickyAction(
-        label: 'Completar mapa corporal',
-        icon: Icons.monitor_weight_outlined,
-        destination: OperacaoStickyDestination.evolucao,
-      );
-      expect(
-        shouldShowCopilotPrescriptionBlock(
-          sticky: sticky,
-          aluno: aluno,
-          proximaAcaoRaw: 'Completar mapa corporal no radar',
-        ),
-        isFalse,
-      );
-    });
+    test(
+      'hides clone even after IA refresh when sticky already owns the action',
+      () {
+        final aluno = _aluno();
+        const sticky = OperacaoStickyAction(
+          label: 'Completar mapa corporal',
+          icon: Icons.monitor_weight_outlined,
+          destination: OperacaoStickyDestination.evolucao,
+        );
+        expect(
+          shouldShowCopilotPrescriptionBlock(
+            sticky: sticky,
+            aluno: aluno,
+            proximaAcaoRaw: 'Completar mapa corporal no radar',
+          ),
+          isFalse,
+        );
+      },
+    );
 
     test('hides duplicate when sticky matches 360', () {
       final aluno = _aluno();
@@ -888,17 +882,14 @@ void main() {
 
   group('alunoChatRouteExtra', () {
     test('includes draft for chat route', () {
-      expect(
-        alunoChatRouteExtra(nome: 'Ana', draft: 'Oi, Ana.'),
-        {'nome': 'Ana', 'draft': 'Oi, Ana.'},
-      );
+      expect(alunoChatRouteExtra(nome: 'Ana', draft: 'Oi, Ana.'), {
+        'nome': 'Ana',
+        'draft': 'Oi, Ana.',
+      });
     });
 
     test('omits empty draft', () {
-      expect(
-        alunoChatRouteExtra(nome: 'Ana', draft: '  '),
-        {'nome': 'Ana'},
-      );
+      expect(alunoChatRouteExtra(nome: 'Ana', draft: '  '), {'nome': 'Ana'});
     });
   });
 
@@ -1161,12 +1152,143 @@ void main() {
   });
 
   group('shouldShowOperacaoAdherenceLegend', () {
-    test('shows legend only when week has check-ins', () {
-      expect(shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: true), isTrue);
+    test('shows legend when any day treinou or faltou', () {
       expect(
-        shouldShowOperacaoAdherenceLegend(weekHasAnyCheckin: false),
+        shouldShowOperacaoAdherenceLegend(
+          points: const [AderenciaWeekPoint(checkins: 1, date: '2026-06-01')],
+        ),
+        isTrue,
+      );
+      expect(
+        shouldShowOperacaoAdherenceLegend(
+          points: const [
+            AderenciaWeekPoint(
+              checkins: 0,
+              date: '2026-06-01',
+              status: AderenciaDiaStatus.faltou,
+            ),
+          ],
+        ),
+        isTrue,
+      );
+    });
+
+    test('hides legend when week is only sem plano / hoje', () {
+      expect(
+        shouldShowOperacaoAdherenceLegend(
+          points: const [
+            AderenciaWeekPoint(
+              checkins: 0,
+              date: '2026-06-01',
+              status: AderenciaDiaStatus.semPlano,
+            ),
+            AderenciaWeekPoint(checkins: 0, date: '2026-06-02'),
+          ],
+        ),
         isFalse,
       );
+      expect(
+        shouldShowOperacaoAdherenceLegend(
+          points: padAderenciaWeekToSevenDays(const []),
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('AderenciaDiaStatus', () {
+    test('parses backend values case-insensitively', () {
+      expect(parseAderenciaDiaStatus('TREINOU'), AderenciaDiaStatus.treinou);
+      expect(parseAderenciaDiaStatus('faltou'), AderenciaDiaStatus.faltou);
+      expect(parseAderenciaDiaStatus('SEM_PLANO'), AderenciaDiaStatus.semPlano);
+      expect(parseAderenciaDiaStatus(' HOJE '), AderenciaDiaStatus.hoje);
+      expect(parseAderenciaDiaStatus(null), isNull);
+      expect(parseAderenciaDiaStatus('OUTRO'), isNull);
+    });
+
+    test('AderenciaDia round-trips status and omits when absent', () {
+      final dia = AderenciaDia.fromJson({
+        'data': '2026-06-01',
+        'labelDia': 'S',
+        'checkins': 0,
+        'status': 'FALTOU',
+      });
+      expect(dia.status, 'FALTOU');
+      expect(dia.toMap()['status'], 'FALTOU');
+
+      final legado = AderenciaDia.fromJson({'data': '2026-06-01'});
+      expect(legado.status, isNull);
+      expect(legado.toMap().containsKey('status'), isFalse);
+    });
+
+    test('parseAderenciaSemanal carries status through padding', () {
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+      final ontem = anchor.subtract(const Duration(days: 1));
+      final points = parseAderenciaSemanal([
+        {'data': _isoDay(ontem), 'checkins': 0, 'status': 'FALTOU'},
+        {'data': _isoDay(anchor), 'checkins': 0, 'status': 'HOJE'},
+      ]);
+      expect(points.length, 7);
+      expect(points[5].status, AderenciaDiaStatus.faltou);
+      expect(points[6].status, AderenciaDiaStatus.hoje);
+      expect(points.first.status, isNull);
+    });
+
+    test('resolve: check-in vence, sem status nunca vira falta', () {
+      final today = DateTime.now();
+      final anchor = DateTime(today.year, today.month, today.day);
+      final hojeIso = _isoDay(anchor);
+      final ontemIso = _isoDay(anchor.subtract(const Duration(days: 1)));
+
+      expect(
+        resolveAderenciaDiaStatus(
+          AderenciaWeekPoint(
+            checkins: 2,
+            date: ontemIso,
+            status: AderenciaDiaStatus.faltou,
+          ),
+        ),
+        AderenciaDiaStatus.treinou,
+      );
+      expect(
+        resolveAderenciaDiaStatus(
+          AderenciaWeekPoint(
+            checkins: 0,
+            date: ontemIso,
+            status: AderenciaDiaStatus.faltou,
+          ),
+        ),
+        AderenciaDiaStatus.faltou,
+      );
+      expect(
+        resolveAderenciaDiaStatus(
+          AderenciaWeekPoint(checkins: 0, date: ontemIso),
+        ),
+        AderenciaDiaStatus.semPlano,
+      );
+      expect(
+        resolveAderenciaDiaStatus(
+          AderenciaWeekPoint(checkins: 0, date: hojeIso),
+        ),
+        AderenciaDiaStatus.hoje,
+      );
+      expect(
+        padAderenciaWeekToSevenDays(
+          const [],
+        ).map(resolveAderenciaDiaStatus).contains(AderenciaDiaStatus.faltou),
+        isFalse,
+      );
+    });
+
+    test('semantics labels em PT', () {
+      expect(aderenciaDiaStatusLabel(AderenciaDiaStatus.treinou), 'treinou');
+      expect(aderenciaDiaStatusLabel(AderenciaDiaStatus.faltou), 'faltou');
+      expect(
+        aderenciaDiaStatusLabel(AderenciaDiaStatus.semPlano),
+        'sem treino previsto',
+      );
+      expect(aderenciaDiaStatusLabel(AderenciaDiaStatus.hoje), 'hoje');
     });
   });
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../constants/aluno_360_layout.dart';
 
-/// Legend for weekly adherence chart (check-in / miss / today).
+/// Legend for weekly adherence chart (treinou / faltou / sem plano / hoje).
 class AlunoOperacaoAdherenceLegend extends StatelessWidget {
   const AlunoOperacaoAdherenceLegend({
     super.key,
@@ -20,7 +20,7 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     final mute = fxScreenMute(context);
     return Semantics(
-      label: 'Legenda: check-in, sem registro, hoje',
+      label: 'Legenda: treinou, faltou, sem treino previsto, hoje',
       child: ExcludeSemantics(
         child: Wrap(
           spacing: 12,
@@ -28,15 +28,21 @@ class AlunoOperacaoAdherenceLegend extends StatelessWidget {
           children: [
             _LegendItem(
               color: activeColor,
-              label: 'Check-in',
+              label: 'Treinou',
               mute: mute,
               filled: true,
             ),
             _LegendItem(
               color: missColor,
-              label: 'Sem registro',
+              label: 'Faltou',
               mute: mute,
               hollow: true,
+            ),
+            _LegendItem(
+              color: mute.withValues(alpha: 0.5),
+              label: 'Sem treino previsto',
+              mute: mute,
+              ring: true,
             ),
             _LegendItem(
               color: todayRingColor,
