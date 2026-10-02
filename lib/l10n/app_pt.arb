@@ -710,5 +710,40 @@
   "ativacaoTreinoCta": "Criar primeiro treino",
   "ativacaoFinanceiroTitulo": "Lance a primeira mensalidade",
   "ativacaoFinanceiroCorpo": "Registre a cobrança e acompanhe o pagamento",
-  "ativacaoFinanceiroCta": "Abrir financeiro"
+  "ativacaoFinanceiroCta": "Abrir financeiro",
+  "excluirContaSenhaLabel": "Senha atual",
+  "excluirContaCodigoLabel": "Código de 6 dígitos",
+  "excluirContaConfirmLabel": "Digite EXCLUIR",
+  "excluirContaPedirCodigo": "Entrou com Google ou Apple? Receber código por e-mail",
+  "excluirContaReenviarCodigo": "Reenviar código",
+  "excluirContaUsarSenha": "Prefiro usar minha senha",
+  "excluirContaCodigoEnviado": "Código enviado para {email}.",
+  "@excluirContaCodigoEnviado": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "excluirContaDigiteExcluir": "Digite EXCLUIR para confirmar.",
+  "excluirContaInformeCredencial": "Informe a senha ou o código que chegou no e-mail.",
+  "excluirContaExcluindo": "Excluindo conta…",
+  "excluirContaAvisoAssinatura": "Assinatura feita pela App Store ou Google Play não é cancelada aqui. Cancele na loja para parar a cobrança.",
+  "feedComentarioOpcoes": "Opções do comentário",
+  "feedComentarioApagar": "Apagar comentário",
+  "feedComentarioApagarConfirma": "O comentário some para todos.",
+  "feedComentarioApagado": "Comentário apagado.",
+  "feedComentarioDenunciar": "Denunciar comentário",
+  "feedComentarioDenunciarConfirma": "Seu personal vai revisar. O comentário some do seu feed.",
+  "feedComentarioDenunciado": "Denúncia enviada. Obrigado por avisar.",
+  "feedComentarioBloquear": "Bloquear {nome}",
+  "@feedComentarioBloquear": {
+    "placeholders": {
+      "nome": {
+        "type": "String"
+      }
+    }
+  },
+  "feedComentarioBloquearConfirma": "Você deixa de ver os comentários dessa pessoa no feed.",
+  "feedComentarioBloqueado": "Pronto. Você não verá mais os comentários dessa pessoa."
 }
