@@ -494,6 +494,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 selected: plan,
                 current: billingPlan,
                 trialEligible: _trialStatus?.trialEligible,
+                period: _billingPeriod,
               )
               ? '$kTrialDays dias grátis no PRO com cadastro de cartão. '
                   'A loja confirma o valor após o período.'

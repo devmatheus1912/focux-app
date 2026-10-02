@@ -112,10 +112,15 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     planoFromHome?.landingCompleta ??
                     ref.watch(planoFeaturesProvider).value?.landingCompleta ??
                     false;
+                final onboardingHidden = setupStepsHiddenFor(
+                  (planoFromHome ?? ref.watch(planoFeaturesProvider).value)
+                      ?.normalizeForTier(),
+                );
                 final onboardingIncomplete =
                     onboardingFromHome != null &&
                     !onboardingFromHome.ativacaoCompleta(
                       includeLinkBio: landingCompleta,
+                      hiddenSteps: onboardingHidden,
                     );
                 final primeiroTreinoCriado =
                     onboardingFromHome?.primeiroTreinoCriado ?? false;
@@ -270,6 +275,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 onboardingCompleto:
                                     onboardingFromHome?.ativacaoCompleta(
                                       includeLinkBio: landingCompleta,
+                                      hiddenSteps: onboardingHidden,
                                     ) ??
                                     false,
                                 toolsSectionKey: _toolsSectionKey,

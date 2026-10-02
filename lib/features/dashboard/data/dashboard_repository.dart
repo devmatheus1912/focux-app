@@ -392,6 +392,9 @@ class AlunoDashboardHomeBundle {
   /// Recursos do plano do personal que o aluno não tem (`HABIT_COACHING`, …).
   final Set<String> recursosIndisponiveis;
 
+  /// `recursos` do plano do personal, quando o BFF manda (null em backend antigo).
+  final PlanoFeatures? planoFeatures;
+
   /// Início do próximo horário não cancelado em 7 dias, com a agenda no plano
   /// do personal; null sem horário (ou backend antigo).
   final DateTime? agendaProximoInicio;
@@ -421,6 +424,7 @@ class AlunoDashboardHomeBundle {
     this.insight,
     this.anamnesePendente,
     this.recursosIndisponiveis = const {},
+    this.planoFeatures,
     this.agendaProximoInicio,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
@@ -451,6 +455,7 @@ class AlunoDashboardHomeBundle {
         insight: insight,
         anamnesePendente: anamnesePendente,
         recursosIndisponiveis: recursosIndisponiveis,
+        planoFeatures: planoFeatures,
         agendaProximoInicio: agendaProximoInicio,
         fetchedAt: at,
       );
@@ -556,6 +561,10 @@ class AlunoDashboardHomeBundle {
       recursosIndisponiveis: {
         ...(json['recursosIndisponiveis'] as List? ?? const [])
             .whereType<String>(),
+      },
+      planoFeatures: switch (json['planoFeatures']) {
+        final Map raw => PlanoFeatures.fromJson(Map<String, dynamic>.from(raw)),
+        _ => null,
       },
       agendaProximoInicio: switch (json['agendaProximoInicio']) {
         final String iso => DateTime.tryParse(iso),

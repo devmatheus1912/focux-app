@@ -5,10 +5,9 @@ enum SubscriptionPlan { FREE, PRO, ENTERPRISE }
 SubscriptionPlan subscriptionPlanFromApi(String? value) {
   final raw = (value ?? '').trim().toUpperCase().replaceAll(' ', '_');
   switch (raw) {
-    case 'ENTERPRISE_PRO':
-    case 'ENTERPRISEPRO':
     case 'ENTERPRISE':
       return SubscriptionPlan.ENTERPRISE;
+    // Assinaturas antigas: o backend ainda pode devolver PREMIUM.
     case 'PREMIUM':
     case 'PRO':
       return SubscriptionPlan.PRO;

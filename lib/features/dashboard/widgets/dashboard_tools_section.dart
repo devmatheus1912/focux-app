@@ -15,6 +15,7 @@ import '../utils/dashboard_haptic.dart';
 import '../utils/dashboard_microcopy.dart';
 import '../utils/dashboard_shortcut_navigation.dart';
 import 'dashboard_section_header.dart';
+import 'dashboard_tool_shortcut_group.dart';
 import 'dashboard_tools_catalog_sheet.dart';
 
 export 'dashboard_tools_catalog_sheet.dart';
@@ -110,6 +111,14 @@ class DashboardHomeToolsSection extends ConsumerWidget {
             features,
           );
           final featuredCount = featuredShortcuts.length;
+          final leadsTeaser =
+              hideFeaturedTools
+                  ? null
+                  : DashboardToolShortcutGroup.watchLeadsTeaser(
+                    ref,
+                    featuredShortcuts,
+                    features,
+                  );
           final hideFeatured = hideFeaturedTools;
           final caption =
               hideFeatured
@@ -168,6 +177,12 @@ class DashboardHomeToolsSection extends ConsumerWidget {
                       subtitle:
                           featuredShortcuts[i].isUnlocked(features)
                               ? (featuredShortcuts[i].entrada.subtitulo ?? '')
+                              : DashboardToolShortcutGroup.isLockedLeads(
+                                    featuredShortcuts[i],
+                                    features,
+                                  ) &&
+                                  leadsTeaser != null
+                              ? leadsTeaser
                               : 'Requer ${featuredShortcuts[i].tierBadgeLabel()}',
                       route: featuredShortcuts[i].route ?? '',
                       tone: CommandActionTone.primary,

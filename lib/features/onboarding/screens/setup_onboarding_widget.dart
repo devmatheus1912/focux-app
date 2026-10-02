@@ -36,6 +36,9 @@ class SetupOnboardingWidget extends ConsumerWidget {
             : ref.watch(onboardingStatusProvider);
     final landingCompleta =
         ref.watch(planoFeaturesProvider).value?.landingCompleta ?? false;
+    final hidden = setupStepsHiddenFor(
+      ref.watch(planoFeaturesProvider).value?.normalizeForTier(),
+    );
 
     return statusAsync.when(
       loading: () => const Padding(
@@ -56,13 +59,26 @@ class SetupOnboardingWidget extends ConsumerWidget {
                     ),
                   ),
       data: (data) {
-        if (data.ativacaoCompleta(includeLinkBio: landingCompleta)) {
+        if (data.ativacaoCompleta(
+          includeLinkBio: landingCompleta,
+          hiddenSteps: hidden,
+        )) {
           return const SizedBox.shrink();
         }
 
-        final next = nextSetupStep(data, landingCompleta: landingCompleta);
-        final feitas = data.etapasFeitas(includeLinkBio: landingCompleta);
-        final total = data.etapasTotal(includeLinkBio: landingCompleta);
+        final next = nextSetupStep(
+          data,
+          landingCompleta: landingCompleta,
+          hidden: hidden,
+        );
+        final feitas = data.etapasFeitas(
+          includeLinkBio: landingCompleta,
+          hiddenSteps: hidden,
+        );
+        final total = data.etapasTotal(
+          includeLinkBio: landingCompleta,
+          hiddenSteps: hidden,
+        );
         final nextTitle = next?.title ?? 'Continuar setup';
         final semantics =
             'Sua ativação, $feitas de $total. '

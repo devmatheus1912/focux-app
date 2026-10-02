@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../ferramentas/data/ferramentas_catalogo_models.dart';
-import '../../planos/utils/effective_plano_features.dart';
-import '../data/dashboard_tool_shortcuts.dart';
-import '../utils/dashboard_shortcut_navigation.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 
-/// Atalhos de crescimento no Perfil — lista fixa (sem BFF de catálogo).
+/// Atalhos de crescimento no Perfil — trava pelo `recursos` do plano.
 class GatedProfileShortcuts extends ConsumerWidget {
   const GatedProfileShortcuts({super.key, required this.tileBuilder});
 
@@ -27,71 +27,72 @@ class GatedProfileShortcuts extends ConsumerWidget {
       label: 'Automações',
       value: 'Fluxos',
       rotaApp: '/automacoes',
-      featureGate: 'AUTOMACOES',
-      legacyIds: ['automacoes'],
+      recurso: PlanoRecursoKeys.automacoes,
     ),
     _ProfileToolEntry(
       icon: Icons.storefront_outlined,
       label: 'Loja digital',
       value: 'Vitrine PIX',
       rotaApp: '/loja',
-      featureGate: 'LOJA_DIGITAL',
-      legacyIds: ['loja'],
+      recurso: PlanoRecursoKeys.loja,
     ),
     _ProfileToolEntry(
       icon: Icons.groups_outlined,
       label: 'Equipe',
       value: 'Em breve',
       rotaApp: '/perfil/equipe',
-      featureGate: 'EQUIPE_RBAC',
-      legacyIds: ['equipe'],
+      recurso: PlanoRecursoKeys.equipe,
     ),
     _ProfileToolEntry(
       icon: Icons.track_changes_outlined,
       label: 'Hábitos',
       value: 'Coaching diário',
       rotaApp: '/habitos',
-      featureGate: 'HABIT_COACHING',
-      legacyIds: ['habitos'],
+      recurso: PlanoRecursoKeys.habitos,
     ),
     _ProfileToolEntry(
       icon: Icons.flag_outlined,
       label: 'Desafios',
       value: 'Campanhas',
       rotaApp: '/desafios',
-      featureGate: 'COMUNIDADE_GRUPOS',
-      legacyIds: ['desafios'],
+      recurso: PlanoRecursoKeys.desafios,
     ),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final features = effectivePlanoFeatures(ref);
-
     return Column(
       children: [
         for (var i = 0; i < _seed.length; i++)
           () {
             final entry = _seed[i];
-            final entrada = CatalogoEntrada(
-              id: entry.legacyIds.first,
-              titulo: entry.label,
-              rotaApp: entry.rotaApp,
-              featureGate: entry.featureGate,
-              unlocked: true,
-              legacyIds: entry.legacyIds,
-            );
-            final shortcut = DashboardToolShortcut.fromEntrada(entrada);
-            final locked = !shortcut.isUnlocked(features);
-            final tier = locked ? shortcut.tierBadgeLabel() : null;
+            final recurso = PlanGate.watch(ref, entry.recurso);
+            final tier = PlanGate.tierLabel(recurso.planoMinimo);
             return tileBuilder(
               icon: entry.icon,
               label: entry.label,
-              value: locked ? 'Plano $tier' : entry.value,
-              locked: locked,
+              value: recurso.liberado ? entry.value : 'Plano $tier',
+              locked: !recurso.liberado,
               showDivider: i != _seed.length - 1,
-              upgradeTierLabel: tier,
-              onTap: () => openDashboardShortcut(context, ref, shortcut),
+              upgradeTierLabel: recurso.liberado ? null : tier,
+              onTap: PlanGate.tap(
+                context,
+                ref,
+                entry.recurso,
+                featureName: entry.label,
+                source: 'perfil_ferramentas',
+                action: () {
+                  AnalyticsService.instance.track(
+                    'dashboard_shortcut_open',
+                    props: {
+                      'label': entry.label,
+                      'route': entry.rotaApp,
+                      'source': 'perfil_ferramentas',
+                    },
+                  );
+                  context.push(entry.rotaApp);
+                },
+              ),
             );
           }(),
       ],
@@ -105,14 +106,12 @@ class _ProfileToolEntry {
     required this.label,
     required this.value,
     required this.rotaApp,
-    required this.featureGate,
-    required this.legacyIds,
+    required this.recurso,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final String rotaApp;
-  final String featureGate;
-  final List<String> legacyIds;
+  final String recurso;
 }

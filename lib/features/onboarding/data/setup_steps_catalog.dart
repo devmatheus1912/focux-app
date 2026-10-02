@@ -1,3 +1,4 @@
+import '../../planos/data/planos_repository.dart';
 import 'onboarding_status_data.dart';
 
 class SetupStepCatalogEntry {
@@ -10,6 +11,7 @@ class SetupStepCatalogEntry {
     required this.estimatedMinutes,
     required this.isDone,
     this.requiresLandingCompleta = false,
+    this.recurso,
   });
 
   final String id;
@@ -22,6 +24,9 @@ class SetupStepCatalogEntry {
 
   /// Passo de marketing (link/landing) — só no checklist com capability.
   final bool requiresLandingCompleta;
+
+  /// Recurso do plano exigido; trancado → passo some do checklist.
+  final String? recurso;
 }
 
 /// Ordem de ativação: aluno → treino → perfil operacional → PIX → pacote →
@@ -63,6 +68,7 @@ final setupStepCatalog = [
     actionRoute: '/perfil/wallet',
     estimatedMinutes: 1,
     isDone: (d) => d.pagamentoConfigurado,
+    recurso: PlanoRecursoKeys.carteira,
   ),
   SetupStepCatalogEntry(
     id: 'pacote',
@@ -72,6 +78,7 @@ final setupStepCatalog = [
     actionRoute: '/pacotes',
     estimatedMinutes: 2,
     isDone: (d) => d.pacoteCriado,
+    recurso: PlanoRecursoKeys.loja,
   ),
   SetupStepCatalogEntry(
     id: 'habito',
@@ -81,6 +88,7 @@ final setupStepCatalog = [
     actionRoute: '/habitos',
     estimatedMinutes: 2,
     isDone: (d) => d.habitoConfigurado,
+    recurso: PlanoRecursoKeys.habitos,
   ),
   SetupStepCatalogEntry(
     id: 'link-bio',
@@ -91,16 +99,33 @@ final setupStepCatalog = [
     estimatedMinutes: 2,
     isDone: (d) => d.linkBioConfigurado,
     requiresLandingCompleta: true,
+    recurso: PlanoRecursoKeys.landing,
   ),
 ];
 
-/// Passos visíveis no plano atual (esconde link-bio sem capability).
+/// Ids de passo cujo recurso não está liberado no plano atual.
+Set<String> setupStepsHiddenByPlan(bool Function(String recurso) liberado) => {
+  for (final step in setupStepCatalog)
+    if (step.recurso != null && !liberado(step.recurso!)) step.id,
+};
+
+/// Plano desconhecido não esconde nada (a tela de destino tem gate).
+Set<String> setupStepsHiddenFor(PlanoFeatures? features) =>
+    features == null
+        ? const {}
+        : setupStepsHiddenByPlan((k) => features.recurso(k).liberado);
+
+/// Passos visíveis no plano atual (esconde link-bio sem capability e
+/// passos em [hidden]).
 List<SetupStepCatalogEntry> visibleSetupSteps({
   required bool landingCompleta,
+  Set<String> hidden = const {},
 }) {
   return setupStepCatalog
       .where(
-        (step) => !step.requiresLandingCompleta || landingCompleta,
+        (step) =>
+            (!step.requiresLandingCompleta || landingCompleta) &&
+            !hidden.contains(step.id),
       )
       .toList(growable: false);
 }
@@ -108,8 +133,12 @@ List<SetupStepCatalogEntry> visibleSetupSteps({
 SetupStepCatalogEntry? nextSetupStep(
   OnboardingStatusData data, {
   bool landingCompleta = false,
+  Set<String> hidden = const {},
 }) {
-  for (final step in visibleSetupSteps(landingCompleta: landingCompleta)) {
+  for (final step in visibleSetupSteps(
+    landingCompleta: landingCompleta,
+    hidden: hidden,
+  )) {
     if (!step.isDone(data)) return step;
   }
   return null;

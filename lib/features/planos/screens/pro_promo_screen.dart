@@ -9,7 +9,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -17,16 +16,10 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
-import '../../../features/auth/providers/auth_provider.dart';
-import '../../../features/assinatura/providers/assinatura_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
-import '../../../features/subscription/subscription_products.dart';
-import '../../../l10n/app_localizations.dart';
-import '../data/planos_repository.dart';
 import '../paywall/paywall_price.dart';
-import '../utils/pro_promo_copy.dart';
 
 class ProPromoScreen extends ConsumerStatefulWidget {
   const ProPromoScreen({super.key});
@@ -65,29 +58,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
     try {
       await _markPromoAsSeen();
       if (!mounted) return;
-
-      if (subscriptionUsesNativeStore) {
-        await context.push(
-          '/assinatura',
-          extra: kTrialPlan.apiName,
-        );
-        return;
-      }
-
-      await PlanosRepository(ref.read(apiClientProvider)).startTrial(
-        payload:
-            buildLocalSubscriptionMetadata(
-              productId: SubscriptionProducts.proMonthly,
-            ).toTrialPayload(),
-      );
-      ref.invalidate(perfilProvider);
-      if (!mounted) return;
-
-      FeedbackHelper.showSuccess(
-        context,
-        'Teste do PRO ativado. Aproveite os próximos $kTrialDays dias.',
-      );
-      context.go('/dashboard/personal');
+      await context.push('/assinatura', extra: kTrialPlan.apiName);
     } catch (error) {
       if (!mounted) return;
       setState(() => _error = friendlyError(error));
@@ -102,24 +73,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
     final primary = BrandPalette.softened(
       Theme.of(context).colorScheme.primary,
     );
-    final l10n = S.of(context);
     final useStore = subscriptionUsesNativeStore;
-    final trialFim =
-        useStore
-            ? null
-            : proPromoTrialFimTexto(
-              l10n,
-              DateTime.now().add(
-                const Duration(days: kTrialDays),
-              ),
-            );
-    final precoPosTeste =
-        useStore
-            ? null
-            : proPromoPrecoPosTesteTexto(
-              l10n,
-              ref.watch(planosProvider).value,
-            );
     // Promo surface is always cinematic dark — force readable ink.
     const ink = EagleTokens.darkInk;
     const mute = EagleTokens.darkInkMute;
@@ -166,7 +120,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                           Text(
                             useStore
                                 ? 'PRO com $kTrialDays dias grátis\n${subscriptionChannelWith(ChannelPreposition.em)}'
-                                : 'Cresça e cobre no app.\nExperimente o PRO.',
+                                : 'Cresça e cobre no app.\nAssine o PRO.',
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,
@@ -178,7 +132,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                             '${PlanoIaLimits.pro} interações de IA/mês',
                             'Cobrança PIX dos alunos no app',
                             'CRM de leads',
-                            'Command Center com risco e fila do dia',
+                            'Relatórios, hábitos e feedback em vídeo',
                           ].map(
                             (feature) => Padding(
                               padding: const EdgeInsets.only(
@@ -224,7 +178,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                                     Text(
                                       useStore
                                           ? '$kTrialDays dias grátis na loja'
-                                          : '$kTrialDays dias grátis',
+                                          : 'Plano PRO',
                                       style: FocuxHubTypography.sectionTitle(
                                         context,
                                         color: EagleTokens.goldStar,
@@ -236,21 +190,10 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                                 Text(
                                   useStore
                                       ? 'A loja mostra o período grátis e o valor antes de você confirmar. Cancele quando quiser nas assinaturas do aparelho.'
-                                      : trialFim!,
+                                      : 'Checkout seguro via Mercado Pago. Cancele quando quiser.',
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
                                 ),
-                                if (precoPosTeste != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Text(
-                                      precoPosTeste,
-                                      textAlign: TextAlign.center,
-                                      style: TokensStrip.bodyMuted(
-                                        color: mute,
-                                      ).copyWith(fontSize: 12),
-                                    ),
-                                  ),
                               ],
                             ),
                           ),
@@ -260,12 +203,12 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                             label:
                                 useStore
                                     ? 'Começar $kTrialDays dias grátis na loja'
-                                    : 'Experimentar $kTrialDays dias grátis',
+                                    : 'Assinar o PRO',
                             child: FxLiquidPrimaryButton(
                               label:
                                   useStore
                                       ? 'Começar $kTrialDays dias grátis'
-                                      : 'Experimentar $kTrialDays dias grátis',
+                                      : 'Assinar o PRO',
                               loading: _starting,
                               onPressed: _starting ? null : _continueToCheckout,
                             ),

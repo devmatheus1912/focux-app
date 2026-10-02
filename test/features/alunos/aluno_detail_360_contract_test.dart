@@ -34,10 +34,6 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_outreach_message_sheet.dart';
   const copilotCardFile =
       'lib/features/alunos/widgets/aluno360_copilot_card.dart';
-  const copilotLockedSectionFile =
-      'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart';
-  const copilotUpgradeSheetFile =
-      'lib/features/alunos/widgets/aluno360_copilot_upgrade_sheet.dart';
   const operationalSectionFile =
       'lib/features/alunos/widgets/aluno360_operational_status_section.dart';
   const copilotSupportFile =
@@ -106,9 +102,6 @@ String _alunoDetailLibrarySource() {
   final outreachDisplay = File(outreachDisplayFile).readAsStringSync();
   final outreachSheet = File(outreachSheetFile).readAsStringSync();
   final copilotCard = File(copilotCardFile).readAsStringSync();
-  final copilotLockedSection =
-      File(copilotLockedSectionFile).readAsStringSync();
-  final copilotUpgradeSheet = File(copilotUpgradeSheetFile).readAsStringSync();
   final operationalSection = File(operationalSectionFile).readAsStringSync();
   final copilotSupport = File(copilotSupportFile).readAsStringSync();
   final stickyCta = File(stickyCtaFile).readAsStringSync();
@@ -139,7 +132,7 @@ String _alunoDetailLibrarySource() {
   final alunoCoreModels = File(alunoCoreModelsFile).readAsStringSync();
   final aluno360Models = File(aluno360ModelsFile).readAsStringSync();
   final alunoHomeModels = File(alunoHomeModelsFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$copilotLockedSection\n$copilotUpgradeSheet\n$operationalSection\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$operationalSection\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$financeBanner\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$quickActions\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailOperacaoTab\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
 }
 
 void main() {
@@ -471,7 +464,6 @@ void main() {
       expect(screen, contains('class AlunoDetailHeroCard'));
       expect(screen, contains('aluno360_hero_card'));
       expect(screen, contains('_HeroRiskNotice'));
-      expect(screen, contains('Aluno360CopilotUpgradeSheet'));
       expect(screen, contains('Aluno360HeroRiskStyle'));
       expect(screen, contains('copySensitiveToClipboard'));
       expect(screen, isNot(contains('Aluno360OperacaoFocusModeToggle')));
@@ -626,12 +618,6 @@ void main() {
     );
     expect(
       File(
-        'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
-      ).readAsStringSync(),
-      contains('Aluno360CopilotUpgradeSheet.show'),
-    );
-    expect(
-      File(
         'lib/features/alunos/widgets/aluno360_student_quick_actions.dart',
       ).readAsStringSync(),
       allOf(
@@ -701,15 +687,6 @@ void main() {
         contains('Agendar follow-up'),
         contains('DashboardSectionHeader'),
         contains('operacaoOutlinedButtonStyle'),
-      ),
-    );
-    expect(
-      File(
-        'lib/features/alunos/widgets/aluno360_copilot_locked_section.dart',
-      ).readAsStringSync(),
-      allOf(
-        contains('CommandActionTile'),
-        contains('Aluno360CopilotUpgradeSheet.show'),
       ),
     );
     expect(screen, contains('operacaoContentWidthLimiter'));

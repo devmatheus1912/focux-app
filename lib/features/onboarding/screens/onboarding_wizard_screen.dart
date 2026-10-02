@@ -32,6 +32,7 @@ import '../../planos/data/plano_features_bff_cache.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../data/onboarding_repository.dart';
 import '../data/onboarding_wizard_client_cache.dart';
+import '../data/setup_steps_catalog.dart';
 import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';
 import '../utils/setup_action_navigation.dart';
@@ -82,6 +83,9 @@ class _OnboardingWizardScreenState
             : normalizeOnboardingWizard(
               cachedRaw,
               landingCompleta: landingCompleta,
+              hidden: setupStepsHiddenFor(
+                ref.read(planoFeaturesProvider).value?.normalizeForTier(),
+              ),
             );
     final keepFold = silent && _wizard != null;
     if (!keepFold) {
@@ -109,6 +113,9 @@ class _OnboardingWizardScreenState
       final w = normalizeOnboardingWizard(
         raw,
         landingCompleta: liveLanding,
+        hidden: setupStepsHiddenFor(
+          ref.read(planoFeaturesProvider).value?.normalizeForTier(),
+        ),
       );
       OnboardingWizardClientCache.put(raw);
       final completed = w.completedCount;

@@ -23,6 +23,7 @@ import 'core/fcm/fcm_service.dart';
 import 'core/fcm/plan_sync_coordinator.dart';
 import 'features/subscription/providers/iap_store_health_provider.dart';
 import 'features/subscription/widgets/iap_purchase_sync_scope.dart';
+import 'features/subscription/widgets/upgrade_prompt_sheet.dart';
 import 'core/health/home_widget_service.dart';
 import 'core/widgets/fx_connectivity_banner.dart';
 import 'core/router/app_router.dart';
@@ -227,6 +228,16 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       unawaited(_bootstrapDeferredServices());
       bindAnalyticsFunnelPoster(ref.read(apiClientProvider));
       PlanSyncCoordinator.bind(ProviderScope.containerOf(context));
+      UpgradePromptSheet.registerGlobalPresenter(
+        isPersonal:
+            () =>
+                ref.read(authProvider.notifier).currentRole ==
+                UserRole.personal,
+        rootContext: () {
+          final nav = AppRouter.router.routerDelegate.navigatorKey.currentState;
+          return nav?.overlay?.context ?? nav?.context;
+        },
+      );
       _loadCustomTheme();
       if (!kIsWeb) {
         // IAP health: atrasar 5s para não competir com splash/home.

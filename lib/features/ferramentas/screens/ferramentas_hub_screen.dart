@@ -14,8 +14,11 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 import '../data/ferramentas_catalogo_models.dart';
 import '../providers/ferramentas_catalogo_provider.dart';
+import '../utils/ferramentas_gates.dart';
 import '../utils/ferramentas_tab_screens.dart';
 import '../widgets/hub_embed_scope.dart';
 
@@ -97,6 +100,15 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
       return sub;
     }
     return null;
+  }
+
+  bool _abaLocked(CatalogoEntrada aba) {
+    if (!aba.unlocked) return true;
+    final cap = capabilityFromEntrada(aba);
+    if (cap == null || PlanoRecursoKeys.fromCapability(cap) == null) {
+      return false;
+    }
+    return !PlanGate.watch(ref, cap).liberado;
   }
 
   String _hubTabLabel(CatalogoEntrada aba) {
@@ -209,7 +221,22 @@ class _FerramentasHubScreenState extends ConsumerState<FerramentasHubScreen>
                           ).copyWith(fontWeight: FontWeight.w700),
                           tabs: [
                             for (final aba in _abas)
-                              Tab(text: _hubTabLabel(aba)),
+                              _abaLocked(aba)
+                                  ? Tab(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(_hubTabLabel(aba)),
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.lock_rounded,
+                                          size: 13,
+                                          semanticLabel: 'Bloqueado no plano',
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  : Tab(text: _hubTabLabel(aba)),
                           ],
                         );
                       },

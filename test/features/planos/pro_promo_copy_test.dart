@@ -41,9 +41,10 @@ void main() {
       'lib/features/planos/screens/pro_promo_screen.dart',
     ).readAsStringSync();
     expect(screen, contains('PRO com \$kTrialDays dias grátis'));
-    expect(screen, contains('SubscriptionProducts.proMonthly'));
-    expect(screen, contains('kTrialPlan.apiName'));
-    expect(screen, contains('Teste do PRO ativado'));
+    expect(screen, contains("context.push('/assinatura', extra: kTrialPlan.apiName)"));
+    // Grátis só pela oferta introdutória da loja; o app não inicia trial.
+    expect(screen, isNot(contains('startTrial')));
+    expect(screen, isNot(contains('Teste do PRO ativado')));
     expect(screen, isNot(contains('Enterprise')));
     expect(screen, isNot(contains('App Store Connect')));
     expect(screen, isNot(contains('Play Console')));

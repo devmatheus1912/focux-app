@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/money/fx_money.dart';
@@ -11,27 +10,9 @@ import '../../../core/planos/plano_cache_policy.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_sync_service.dart';
 import '../../subscription/models/subscription_plan.dart';
+import 'plano_recurso.dart';
 
-class TrialStartPayload {
-  final String? subscriptionToken;
-  final String? platform;
-  final String? productId;
-  final String? transactionId;
-
-  const TrialStartPayload({
-    this.subscriptionToken,
-    this.platform,
-    this.productId,
-    this.transactionId,
-  });
-
-  Map<String, dynamic> toJson() => {
-    if (_hasValue(subscriptionToken)) 'subscriptionToken': subscriptionToken,
-    if (_hasValue(platform)) 'platform': platform,
-    if (_hasValue(productId)) 'productId': productId,
-    if (_hasValue(transactionId)) 'transactionId': transactionId,
-  };
-}
+export 'plano_recurso.dart';
 
 class TrialStatus {
   final bool trialUsed;
@@ -95,27 +76,6 @@ class EnterpriseUpgradePreview {
         diasRestantes: (j['diasRestantes'] as num?)?.toInt() ?? 0,
         cobrancaImediata: j['cobrancaImediata'] as bool? ?? false,
       );
-}
-
-class SubscriptionMetadata {
-  final String platform;
-  final String productId;
-  final String subscriptionToken;
-  final String transactionId;
-
-  const SubscriptionMetadata({
-    required this.platform,
-    required this.productId,
-    required this.subscriptionToken,
-    required this.transactionId,
-  });
-
-  TrialStartPayload toTrialPayload() => TrialStartPayload(
-    subscriptionToken: subscriptionToken,
-    platform: platform,
-    productId: productId,
-    transactionId: transactionId,
-  );
 }
 
 /// Microcopy para avisos de sync/cache no paywall e gates de plano.
@@ -184,6 +144,9 @@ class PlanoFeatures {
   final int migracaoFotosUsadasMes;
   final String? displayName;
 
+  /// `recursos` do backend. Vazio em backend antigo → matriz [PlanoRecursoKeys.matrix].
+  final Map<String, PlanoRecurso> recursos;
+
   const PlanoFeatures({
     required this.plano,
     this.planoNomeOriginal,
@@ -215,7 +178,12 @@ class PlanoFeatures {
     this.iaUsadaMes = 0,
     this.limiteMigracaoFotoMensal,
     this.migracaoFotosUsadasMes = 0,
+    this.recursos = const {},
   });
+
+  /// Servidor vence; sem a chave, cai na matriz de produto pelo tier.
+  PlanoRecurso recurso(String key) =>
+      recursos[key] ?? PlanoRecursoKeys.fallbackFor(key, plano);
 
   bool get migracaoFotoPermitida =>
       migracaoFoto &&
@@ -255,9 +223,7 @@ class PlanoFeatures {
       planoNomeOriginal: j['planoNomeOriginal'] as String?,
       displayName: j['displayName'] as String?,
       limiteAlunos: (j['limiteAlunos'] as num?)?.toInt(),
-      limiteLeads:
-          (j['limiteLeads'] as num?)?.toInt() ??
-          (plano == SubscriptionPlan.FREE ? 5 : null),
+      limiteLeads: (j['limiteLeads'] as num?)?.toInt(),
       limiteIaMensal: (j['limiteIaMensal'] as num?)?.toInt(),
       validoAte: _parseDateTime(j['validoAte']),
       fromCache: j['fromCache'] as bool? ?? false,
@@ -285,12 +251,23 @@ class PlanoFeatures {
           (j['limiteMigracaoFotoMensal'] as num?)?.toInt(),
       migracaoFotosUsadasMes:
           (j['migracaoFotosUsadasMes'] as num?)?.toInt() ?? 0,
+      recursos: _parseRecursos(j['recursos']),
     ).normalizeForTier();
   }
 
-  /// Perfil canônico de capabilities por tier (matriz V130 + landing Pro).
-  /// Aplica teto (não ultrapassa o plano) e piso (Pro recebe o mínimo do tier).
-  PlanoFeatures normalizeForTier() => _applyCanonical(_canonicalCapsFor(plano));
+  static Map<String, PlanoRecurso> _parseRecursos(Object? raw) {
+    if (raw is! Map) return const {};
+    final out = <String, PlanoRecurso>{};
+    raw.forEach((key, value) {
+      final parsed = PlanoRecurso.tryParse(value);
+      if (parsed != null) out[key.toString()] = parsed;
+    });
+    return Map.unmodifiable(out);
+  }
+
+  /// Flags legadas derivadas de [recurso]: `recursos` do servidor vence;
+  /// sem eles, vale a matriz de produto do tier.
+  PlanoFeatures normalizeForTier() => _applyCanonical(_canonicalCaps());
 
   /// Quando `/me` está atrás da assinatura (loja/perfil), eleva flags ao tier de cobrança.
   PlanoFeatures alignedToBilling(SubscriptionPlan billing) {
@@ -316,7 +293,7 @@ class PlanoFeatures {
       displayName: displayName,
       limiteAlunos: limiteAlunosEff,
       limiteLeads: switch (billing) {
-        SubscriptionPlan.FREE => limiteLeads ?? 5,
+        SubscriptionPlan.FREE => limiteLeads,
         _ => null,
       },
       limiteIaMensal: limiteIaEff,
@@ -347,63 +324,30 @@ class PlanoFeatures {
     ).normalizeForTier();
   }
 
-  static Map<String, bool> _canonicalCapsFor(SubscriptionPlan plan) {
-    const off = false;
-    const on = true;
-    return switch (plan) {
-      SubscriptionPlan.FREE => {
-        'financeiro': off,
-        'agenda': on,
-        'relatorios': off,
-        'whiteLabel': off,
-        'iaCopiloto': off,
-        'migracaoFoto': off,
-        'landingCompleta': off,
-        'habitCoaching': off,
-        'comunidadePrivada': off,
-        'automacoes': off,
-        'automacoesAvancadas': off,
-        'comunidadeGrupos': off,
-        'equipeRbac': off,
-        'lojaDigital': off,
-        'feedbackVideo': off,
-      },
-      SubscriptionPlan.PRO => {
-        'financeiro': on,
-        'agenda': on,
-        'relatorios': on,
-        'whiteLabel': off,
-        'iaCopiloto': on,
-        'migracaoFoto': on,
-        'landingCompleta': off,
-        'habitCoaching': on,
-        'comunidadePrivada': on,
-        'automacoes': off,
-        'automacoesAvancadas': off,
-        'comunidadeGrupos': off,
-        'equipeRbac': off,
-        'lojaDigital': off,
-        'feedbackVideo': on,
-      },
-      SubscriptionPlan.ENTERPRISE => {
-        'financeiro': on,
-        'agenda': on,
-        'relatorios': on,
-        'whiteLabel': on,
-        'iaCopiloto': on,
-        'migracaoFoto': on,
-        'landingCompleta': on,
-        'habitCoaching': on,
-        'comunidadePrivada': on,
-        'automacoes': on,
-        'automacoesAvancadas': on,
-        'comunidadeGrupos': on,
-        'equipeRbac': on,
-        'lojaDigital': on,
-        'feedbackVideo': on,
-      },
-    };
-  }
+  /// Capabilities legadas → chave de `recursos`. `agenda` é sempre Free;
+  /// comunidade privada não existe no produto.
+  static const legacyCapabilityToRecurso = <String, String>{
+    'financeiro': PlanoRecursoKeys.financeiro,
+    'relatorios': PlanoRecursoKeys.relatorios,
+    'whiteLabel': PlanoRecursoKeys.whiteLabel,
+    'iaCopiloto': PlanoRecursoKeys.ia,
+    'migracaoFoto': PlanoRecursoKeys.importacaoFoto,
+    'landingCompleta': PlanoRecursoKeys.landing,
+    'habitCoaching': PlanoRecursoKeys.habitos,
+    'automacoes': PlanoRecursoKeys.automacoes,
+    'automacoesAvancadas': PlanoRecursoKeys.automacoes,
+    'comunidadeGrupos': PlanoRecursoKeys.desafios,
+    'equipeRbac': PlanoRecursoKeys.equipe,
+    'lojaDigital': PlanoRecursoKeys.loja,
+    'feedbackVideo': PlanoRecursoKeys.feedbackVideo,
+  };
+
+  Map<String, bool> _canonicalCaps() => {
+    for (final e in legacyCapabilityToRecurso.entries)
+      e.key: recurso(e.value).liberado,
+    'agenda': true,
+    'comunidadePrivada': false,
+  };
 
   PlanoFeatures _applyCanonical(Map<String, bool> caps) {
     final limiteAssistentes = switch (plano) {
@@ -441,6 +385,7 @@ class PlanoFeatures {
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
       migracaoFotosUsadasMes: migracaoFotosUsadasMes,
+      recursos: recursos,
     );
   }
 
@@ -474,6 +419,8 @@ class PlanoFeatures {
       'lojaDigital': lojaDigital,
       'feedbackVideo': feedbackVideo,
     },
+    if (recursos.isNotEmpty)
+      'recursos': {for (final e in recursos.entries) e.key: e.value.toJson()},
   };
 
   PlanoFeatures copyWithOperationalState({
@@ -511,13 +458,13 @@ class PlanoFeatures {
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
       migracaoFotosUsadasMes: migracaoFotosUsadasMes,
+      recursos: recursos,
     );
   }
 
   static const free = PlanoFeatures(
     plano: SubscriptionPlan.FREE,
     limiteAlunos: 3,
-    limiteLeads: 5,
     financeiro: false,
     agenda: true,
     relatorios: false,
@@ -527,9 +474,9 @@ class PlanoFeatures {
     limiteMigracaoFotoMensal: 0,
   );
 
-  /// Fallback conservador para aluno — não concede Enterprise completo.
+  /// Fallback do aluno quando o plano do personal não confirma: Free.
   static const optimisticAluno = PlanoFeatures(
-    plano: SubscriptionPlan.PRO,
+    plano: SubscriptionPlan.FREE,
     fromCache: true,
     syncWarning: PlanoFeaturesSyncCopy.optimisticAluno,
     financeiro: false,
@@ -538,7 +485,7 @@ class PlanoFeatures {
     whiteLabel: false,
     iaCopiloto: false,
     migracaoFoto: false,
-    habitCoaching: true,
+    habitCoaching: false,
     comunidadePrivada: false,
     automacoes: false,
     automacoesAvancadas: false,
@@ -664,15 +611,6 @@ class PlanosRepository {
     }
   }
 
-  Future<TrialStatus> startTrial({TrialStartPayload? payload}) async {
-    final hasPayload = payload != null && payload.toJson().isNotEmpty;
-    final r = await _dio.post(
-      '/api/personal/trial/start',
-      data: hasPayload ? payload.toJson() : null,
-    );
-    return TrialStatus.fromJson(r.data as Map<String, dynamic>);
-  }
-
   Future<EnterpriseUpgradePreview> previewEnterpriseUpgrade() async {
     final r = await _dio.get('/api/personal/trial/enterprise/preview');
     return EnterpriseUpgradePreview.fromJson(r.data as Map<String, dynamic>);
@@ -682,37 +620,4 @@ class PlanosRepository {
 DateTime? _parseDateTime(dynamic value) {
   if (value == null) return null;
   return DateTime.tryParse(value.toString());
-}
-
-bool _hasValue(String? value) => value != null && value.trim().isNotEmpty;
-
-String inferPlatformName() {
-  if (kIsWeb) return 'WEB';
-  switch (defaultTargetPlatform) {
-    case TargetPlatform.iOS:
-      return 'IOS';
-    case TargetPlatform.android:
-      return 'ANDROID';
-    case TargetPlatform.macOS:
-      return 'MACOS';
-    case TargetPlatform.windows:
-      return 'WINDOWS';
-    case TargetPlatform.linux:
-      return 'LINUX';
-    case TargetPlatform.fuchsia:
-      return 'FUCHSIA';
-  }
-}
-
-SubscriptionMetadata buildLocalSubscriptionMetadata({
-  required String productId,
-  String prefix = 'trial',
-}) {
-  final now = DateTime.now();
-  return SubscriptionMetadata(
-    platform: inferPlatformName(),
-    productId: productId,
-    subscriptionToken: '$prefix-${now.millisecondsSinceEpoch}',
-    transactionId: '$prefix-${now.microsecondsSinceEpoch}',
-  );
 }

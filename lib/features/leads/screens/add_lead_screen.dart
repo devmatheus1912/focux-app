@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/alunos/widgets/aluno_inset_form_field.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/lead_repository.dart';
 import '../utils/lead_display.dart';
 
@@ -82,8 +83,8 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
           icon: 'users',
         ),
         FxHelpTip(
-          'Plano Free',
-          'O Free segura 5 leads. No Pro o CRM não tem esse teto.',
+          'Plano Pro',
+          'O CRM de leads faz parte do plano Pro.',
           icon: 'spark',
         ),
       ],
@@ -161,13 +162,15 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
     } catch (e) {
       if (mounted) {
         if (e is DioException && e.response?.statusCode == 403) {
-          final msg = e.response?.data?.toString() ?? '';
-          FeedbackHelper.showInfo(
+          final surfaced = await UpgradePromptSheet.showFromError(
             context,
-            msg.contains('Limite')
-                ? 'Limite de 5 leads no plano Free. Assine o Pro para CRM ilimitado.'
-                : 'Recurso disponível no Pro.',
+            e,
+            fallbackFeatureName: 'Leads',
+            fallbackCapability: 'leads',
           );
+          if (!surfaced && mounted) {
+            FeedbackHelper.showInfo(context, 'Recurso disponível no Pro.');
+          }
         } else {
           FeedbackHelper.showError(
             context,

@@ -82,12 +82,15 @@ String? _yearlySecondary(
   return parts.join(' · ');
 }
 
+/// O grátis vem da oferta introdutória do Pro mensal na loja.
 bool paywallShowsTrial({
   required SubscriptionPlan selected,
   required SubscriptionPlan current,
   bool? trialEligible,
+  SubscriptionBillingPeriod period = SubscriptionBillingPeriod.monthly,
 }) {
   if (selected != kTrialPlan) return false;
+  if (period != SubscriptionBillingPeriod.monthly) return false;
   if (current != SubscriptionPlan.FREE) return false;
   return trialEligible != false;
 }

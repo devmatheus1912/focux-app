@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -71,6 +73,7 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
 
   Future<void> _openMaisAcoes(BuildContext context, WidgetRef ref) async {
     final firstName = aluno.nome.split(' ').first;
+    final ia = PlanGate.read(ref, PlanoRecursoKeys.ia);
     final items = <FxInsetPickerSheetItem<VoidCallback>>[
       if (onLista != null)
         FxInsetPickerSheetItem(
@@ -98,10 +101,20 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
         icon: Icons.password_rounded,
       ),
       FxInsetPickerSheetItem(
-        value: onEvolve,
+        value: PlanGate.tap(
+          context,
+          ref,
+          PlanoRecursoKeys.ia,
+          featureName: 'IA Progresso',
+          source: 'aluno360_mais_acoes',
+          action: onEvolve,
+        ),
         label: 'Evoluir com IA',
-        subtitle: 'Sugestão de carga e progressão',
-        icon: Icons.auto_awesome_outlined,
+        subtitle:
+            ia.liberado
+                ? 'Sugestão de carga e progressão'
+                : 'Disponível no ${PlanGate.tierLabel(ia.planoMinimo)}',
+        icon: ia.liberado ? Icons.auto_awesome_outlined : Icons.lock_outline,
       ),
       FxInsetPickerSheetItem(
         value: onEdit,

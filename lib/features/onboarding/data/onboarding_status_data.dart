@@ -20,36 +20,68 @@ class OnboardingStatusData {
   });
 
   /// Ordem canônica: aluno → treino → perfil → PIX → pacote → hábito → link.
-  List<bool> etapasConcluidas({bool includeLinkBio = true}) => [
-    primeiroAlunoAdicionado,
-    primeiroTreinoCriado,
-    perfilCompleto,
-    pagamentoConfigurado,
-    pacoteCriado,
-    habitoConfigurado,
-    if (includeLinkBio) linkBioConfigurado,
+  /// [hiddenSteps]: ids de passo fora do plano atual (não contam).
+  List<bool> etapasConcluidas({
+    bool includeLinkBio = true,
+    Set<String> hiddenSteps = const {},
+  }) => [
+    for (final (id, done) in [
+      ('primeiro-aluno', primeiroAlunoAdicionado),
+      ('primeiro-treino', primeiroTreinoCriado),
+      ('perfil', perfilCompleto),
+      ('pagamento', pagamentoConfigurado),
+      ('pacote', pacoteCriado),
+      ('habito', habitoConfigurado),
+      if (includeLinkBio) ('link-bio', linkBioConfigurado),
+    ])
+      if (!hiddenSteps.contains(id)) done,
   ];
 
-  int etapasTotal({bool includeLinkBio = true}) =>
-      etapasConcluidas(includeLinkBio: includeLinkBio).length;
-
-  int etapasFeitas({bool includeLinkBio = true}) =>
+  int etapasTotal({
+    bool includeLinkBio = true,
+    Set<String> hiddenSteps = const {},
+  }) =>
       etapasConcluidas(
         includeLinkBio: includeLinkBio,
+        hiddenSteps: hiddenSteps,
+      ).length;
+
+  int etapasFeitas({
+    bool includeLinkBio = true,
+    Set<String> hiddenSteps = const {},
+  }) =>
+      etapasConcluidas(
+        includeLinkBio: includeLinkBio,
+        hiddenSteps: hiddenSteps,
       ).where((done) => done).length;
 
   /// Progresso derivado das etapas exibidas (evita % divergente da UI).
-  int progressoExibido({bool includeLinkBio = true}) {
-    final total = etapasTotal(includeLinkBio: includeLinkBio);
+  int progressoExibido({
+    bool includeLinkBio = true,
+    Set<String> hiddenSteps = const {},
+  }) {
+    final total = etapasTotal(
+      includeLinkBio: includeLinkBio,
+      hiddenSteps: hiddenSteps,
+    );
     if (total == 0) return 0;
-    return (etapasFeitas(includeLinkBio: includeLinkBio) * 100 / total).round();
+    return (etapasFeitas(
+              includeLinkBio: includeLinkBio,
+              hiddenSteps: hiddenSteps,
+            ) *
+            100 /
+            total)
+        .round();
   }
 
   /// Fez todas as etapas **ou** encerrou o wizard (pular gated / concluir).
-  bool ativacaoCompleta({bool includeLinkBio = true}) =>
+  bool ativacaoCompleta({
+    bool includeLinkBio = true,
+    Set<String> hiddenSteps = const {},
+  }) =>
       wizardCompleto ||
-      etapasFeitas(includeLinkBio: includeLinkBio) >=
-          etapasTotal(includeLinkBio: includeLinkBio);
+      etapasFeitas(includeLinkBio: includeLinkBio, hiddenSteps: hiddenSteps) >=
+          etapasTotal(includeLinkBio: includeLinkBio, hiddenSteps: hiddenSteps);
 
   factory OnboardingStatusData.fromJson(Map<String, dynamic> json) {
     return OnboardingStatusData(

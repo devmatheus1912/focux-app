@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../growth/utils/migracao_foto_limits.dart';
+import '../planos/data/plano_recurso.dart';
 import '../subscription/models/subscription_plan.dart';
 import '../subscription/utils/plano_ia_limits.dart';
 
@@ -131,6 +132,8 @@ class PlanEntitlements {
     String? capability,
     SubscriptionPlan fallback = SubscriptionPlan.PRO,
   }) {
+    final recurso = PlanoRecursoKeys.fromCapability(capability);
+    if (recurso != null) return PlanoRecursoKeys.matrix[recurso]!;
     switch (capability) {
       case 'landingCompleta':
       case 'lojaDigital':
@@ -163,12 +166,14 @@ class PlanEntitlements {
     SubscriptionPlan? requiredPlan,
     SubscriptionPlan? upgradePlano,
   }) {
+    final rawCapability = capability;
+    capability = PlanoRecursoKeys.toCopyCapability(capability);
     // `upgradePlano` do servidor é a fonte da verdade quando veio no erro.
     // Sem ele, o mapa local de capability continua valendo — é o caminho das
     // telas que gateiam antes de chamar a API.
     final plan = upgradePlano ??
         targetPlan(
-          capability: capability,
+          capability: rawCapability,
           fallback: requiredPlan ?? SubscriptionPlan.PRO,
         );
     final planLabel = switch (plan) {
@@ -187,14 +192,14 @@ class PlanEntitlements {
       'migracaoFoto' => 'Importe alunos por foto ou print',
       'agenda' => 'Agenda completa para sua operação',
       'habitCoaching' => 'Habit coaching diário para retenção',
-      'comunidadePrivada' => 'Comunidade privada de alunos',
+      'alunos' => 'Você chegou ao limite de alunos do plano',
       'automacoes' => 'Automações sequenciais para escalar',
       'automacoesAvancadas' => 'Automações avançadas com ramificações',
       'comunidadeGrupos' => 'Desafios e grupos com ranking',
       'equipeRbac' => 'Equipe com permissões granulares',
       'lojaDigital' => 'Loja digital com checkout PIX',
       'feedbackVideo' => 'Corrija a execução pelo vídeo do aluno',
-      'leads' => 'CRM de leads sem teto do Free',
+      'leads' => 'CRM de leads para converter mais',
       'nfse' => 'Nota fiscal no fluxo de cobrança',
       _ => 'Desbloqueie $featureName',
     };
@@ -221,8 +226,9 @@ class PlanEntitlements {
       'habitCoaching' =>
         'Hábitos diários (água, sono, passos) fazem parte do plano $planLabel — '
             'você acompanha a rotina de cada aluno entre os treinos.',
-      'comunidadePrivada' =>
-        'Comunidade privada fechada para seus alunos está no $planLabel.',
+      'alunos' =>
+        'O Free inclui até 3 alunos ativos. O Pro libera até 30 e o '
+            'Enterprise não tem limite.',
       'automacoes' =>
         'Automações sequenciais (onboarding, winback) exigem Enterprise.',
       'automacoesAvancadas' =>
@@ -237,8 +243,8 @@ class PlanEntitlements {
         'O aluno envia o vídeo do exercício e você responde com a correção. '
             'Faz parte do plano $planLabel.',
       'leads' =>
-        'CRM de leads ilimitado faz parte do plano $planLabel. '
-            'O Free segura 5; no Pro o funil não tem esse teto.',
+        'O CRM de leads faz parte do plano $planLabel: funil, follow-up '
+            'e conversão sem sair do app.',
       'nfse' =>
         'Emissão de nota fiscal no fluxo de cobrança exige Enterprise.',
       _ =>
@@ -263,7 +269,7 @@ class PlanEntitlements {
     required SubscriptionPlan plan,
   }) {
     final planLabel = displayPlanName(plan);
-    return switch (capability) {
+    return switch (PlanoRecursoKeys.toCopyCapability(capability)) {
       'iaCopiloto' => const [
         UpgradeSalesBenefit(
           icon: Icons.bolt_rounded,
@@ -318,7 +324,7 @@ class PlanEntitlements {
       'leads' => const [
         UpgradeSalesBenefit(
           icon: Icons.people_outline,
-          label: 'CRM sem teto do Free',
+          label: 'CRM completo',
           detail: 'Pipeline completo de prospects',
         ),
         UpgradeSalesBenefit(

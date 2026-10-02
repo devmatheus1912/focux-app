@@ -8,6 +8,10 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../ia/data/ia_repository.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
+import '../../subscription/models/subscription_plan.dart';
+import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -109,8 +113,53 @@ class Aluno360CopilotIaRefreshButtonState
     return false;
   }
 
+  Future<void> _openUpgrade(SubscriptionPlan plano) {
+    return UpgradePromptSheet.show(
+      context: context,
+      featureName: 'Prioridade do dia com IA',
+      capability: PlanoRecursoKeys.ia,
+      requiredPlan: plano,
+      upgradePlano: plano,
+      source: 'aluno360_copilot_ia',
+    );
+  }
+
+  Widget _buildLocked(BuildContext context, PlanoRecurso ia) {
+    final tier = PlanGate.tierLabel(ia.planoMinimo);
+    final label = 'Gerar com IA · disponível no $tier';
+    if (widget.prominent) {
+      return Semantics(
+        button: true,
+        label: label,
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _openUpgrade(ia.planoMinimo),
+            icon: const Icon(Icons.lock_rounded, size: 18),
+            label: Text('Gerar com IA · $tier'),
+          ),
+        ),
+      );
+    }
+    return Semantics(
+      button: true,
+      label: label,
+      child: IconButton(
+        key: const ValueKey('aluno360_copilot_ia_locked'),
+        onPressed: () => _openUpgrade(ia.planoMinimo),
+        constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+        icon: Icon(Icons.lock_rounded, size: 18, color: widget.primary),
+        tooltip: label,
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ia = PlanGate.watch(ref, PlanoRecursoKeys.ia);
+    if (!ia.liberado) return _buildLocked(context, ia);
+
     if (widget.prominent) {
       return Semantics(
         button: true,

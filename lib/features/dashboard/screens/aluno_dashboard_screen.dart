@@ -407,7 +407,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         TokensStrip.s4,
         _StudentToolsSection(
           atalhos: view.atalhos,
-          recursosIndisponiveis: view.recursosIndisponiveis,
+          liberada: view.ferramentaLiberada,
         ),
       ),
     ];

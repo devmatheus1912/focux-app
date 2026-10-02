@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../../subscription/utils/landing_editor_access.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -20,9 +22,14 @@ Future<void> openCatalogoEntrada(
   String? preferredAbaId,
   String source = 'catalogo',
 }) async {
-  final capability = capabilityFromFeatureGate(entrada.featureGate);
+  final capability = capabilityFromEntrada(entrada);
+  final planLocked =
+      !entrada.isHubComAbas &&
+      capability != null &&
+      PlanoRecursoKeys.fromCapability(capability) != null &&
+      !PlanGate.read(ref, capability).liberado;
 
-  if (!entrada.unlocked) {
+  if (!entrada.unlocked || planLocked) {
     AnalyticsService.instance.track(
       'dashboard_shortcut_locked_tap',
       props: {

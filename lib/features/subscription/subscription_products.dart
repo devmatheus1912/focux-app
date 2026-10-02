@@ -11,7 +11,8 @@ class SubscriptionProducts {
   static const String enterpriseMonthly = 'focux_enterprise_monthly';
   static const String enterpriseYearly = 'focux_enterprise_yearly';
 
-  /// Anual = mensal × 10 (2 meses grátis).
+  /// 1/6 de desconto sobre 12 mensalidades: anual = mensal × 12 × 5/6 =
+  /// mensal × 10 (2 meses grátis).
   static const double annualDiscountRate = 1 / 6;
 
   static const Set<String> allStoreProductIds = {
@@ -38,11 +39,8 @@ class SubscriptionProducts {
 
   static SubscriptionPlan? planForProductId(String productId) {
     final id = productId.toLowerCase();
-    if (id.contains('enterprise_pro') || id.contains('enterprise')) {
-      return SubscriptionPlan.ENTERPRISE;
-    }
-    if (id.contains('premium') ||
-        id.contains('_pro_') ||
+    if (id.contains('enterprise')) return SubscriptionPlan.ENTERPRISE;
+    if (id.contains('_pro_') ||
         id.endsWith('_pro') ||
         id.contains('.pro.')) {
       return SubscriptionPlan.PRO;

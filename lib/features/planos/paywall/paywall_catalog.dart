@@ -68,17 +68,23 @@ class PaywallCatalog {
 
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
-    PaywallComparisonRow(feature: 'PIX / financeiro', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '200'),
-    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(
       feature: FocuxMicrocopy.commandCenterPlusScoreCompact,
+      free: '✓',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Financeiro / recorrência PIX / carteira',
       free: '—',
       paid: '✓',
     ),
+    PaywallComparisonRow(feature: 'Relatórios', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Hábitos', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '200'),
+    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'White-label / landing / loja / NFSe / equipe',
+      feature: 'Landing / white-label / loja / NFSe / equipe',
       free: '—',
       paid: '—',
     ),
@@ -86,21 +92,32 @@ class PaywallCatalog {
 
   static const List<PaywallComparisonRow> comparisonFreeVsEnterprise = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '∞'),
-    PaywallComparisonRow(feature: 'PIX / financeiro', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '600'),
-    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(
       feature: FocuxMicrocopy.commandCenterPlusScoreCompact,
+      free: '✓',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Financeiro / recorrência PIX / carteira',
       free: '—',
       paid: '✓',
     ),
+    PaywallComparisonRow(feature: 'Relatórios + hábitos', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '600'),
+    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Landing pública', free: '—', paid: '✓'),
     PaywallComparisonRow(
       feature: 'White-label + domínio',
       free: '—',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'Landing + loja', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Loja + pacotes', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Automações + win-back + desafios',
+      free: '—',
+      paid: '✓',
+    ),
     PaywallComparisonRow(feature: 'NFSe + equipe (5)', free: '—', paid: '✓'),
   ];
 

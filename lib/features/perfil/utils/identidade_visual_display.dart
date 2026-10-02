@@ -6,8 +6,7 @@ bool identidadeHasWhiteLabel({
   required String plano,
 }) {
   if (featureWhiteLabel != null) return featureWhiteLabel;
-  final plan = plano.trim().toUpperCase();
-  return plan == 'ENTERPRISE' || plan == 'ENTERPRISE_PRO';
+  return plano.trim().toUpperCase() == 'ENTERPRISE';
 }
 
 String identidadeSalvarLabel({required bool isSetup}) =>

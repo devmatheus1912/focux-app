@@ -29,10 +29,10 @@ void main() {
     expect(features.limiteLeads, isNull);
   });
 
-  test('PlanoFeatures lê limiteLeads e fallback Free', () {
+  test('PlanoFeatures lê limiteLeads; Free sem cota inventada', () {
     expect(
       PlanoFeatures.fromJson({'plano': 'FREE', 'features': {}}).limiteLeads,
-      5,
+      isNull,
     );
     expect(
       PlanoFeatures.fromJson({

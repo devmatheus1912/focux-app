@@ -7,11 +7,15 @@ import '../data/setup_steps_catalog.dart';
 OnboardingWizard normalizeOnboardingWizard(
   OnboardingWizard raw, {
   required bool landingCompleta,
+  Set<String> hidden = const {},
 }) {
   final byId = <String, OnboardingStep>{
     for (final step in raw.steps) step.id: step,
   };
-  final visible = visibleSetupSteps(landingCompleta: landingCompleta);
+  final visible = visibleSetupSteps(
+    landingCompleta: landingCompleta,
+    hidden: hidden,
+  );
   final steps = <OnboardingStep>[
     for (final entry in visible)
       OnboardingStep(

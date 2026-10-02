@@ -153,9 +153,10 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
     final home = ref.read(alunosHomeProvider).value;
     final plano =
         home?.planoFeatures ?? ref.read(planoFeaturesProvider).value;
-    final limite = plano?.limiteAlunos;
-    final total = home?.stats.total ?? 0;
-    if (limite != null && limite > 0 && total >= limite) {
+    if (alunoVagasEsgotadas(
+      limiteAlunos: plano?.limiteAlunos,
+      stats: home?.stats,
+    )) {
       final upgrade = upgradePlanoParaMaisVagas(plano?.plano);
       await UpgradePromptSheet.show(
         context: context,

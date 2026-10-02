@@ -12,6 +12,7 @@ import '../planos/plano_cache_policy.dart';
 import '../storage/secure_storage.dart';
 import 'offline_queued_ack.dart';
 import 'offline_sync_service.dart';
+import 'plan_upgrade_error_hub.dart';
 import 'tls_certificate_pinning.dart';
 
 class ApiClient {
@@ -214,6 +215,8 @@ class ApiClient {
               );
             }
           }
+
+          PlanUpgradeErrorHub.onDioError(e);
 
           // ── Error Reporter (best-effort, gated) ────────────────
           if (_tryReserveErrorReportSlot(e)) {

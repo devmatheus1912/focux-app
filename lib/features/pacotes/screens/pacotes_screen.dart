@@ -242,9 +242,9 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
     return fxScreenA11yScope(
       label: 'Pacotes',
       child: FeatureGate(
-        featureName: 'Loja Digital',
+        featureName: 'Pacotes',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
-        capability: 'lojaDigital',
+        capability: 'loja',
         child: PopScope(
         canPop: !keyboardOpen && !_searchFocus.hasFocus,
         onPopInvokedWithResult: (didPop, _) {

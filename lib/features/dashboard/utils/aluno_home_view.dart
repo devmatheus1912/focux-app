@@ -2,6 +2,7 @@ import '../../checkin/utils/treino_ficha_status.dart';
 import '../../coach/data/coach_proativo_repository.dart';
 import '../../health/data/health_repository.dart';
 import '../../monetizacao/data/upsell_repository.dart';
+import '../../planos/data/planos_repository.dart';
 import '../data/aluno_home_insight.dart';
 import '../data/dashboard_repository.dart';
 import 'aluno_home_week.dart';
@@ -31,10 +32,35 @@ const alunoFerramentaRecurso = {
   '/aluno/habitos': 'HABIT_COACHING',
   '/aluno/desafios': 'COMUNIDADE_GRUPOS',
   alunoFeedbackVideoRoute: 'FEEDBACK_VIDEO',
+  alunoFinanceiroRoute: 'FINANCEIRO',
+  '/aluno/recorrencia': 'FINANCEIRO',
 };
 
-bool alunoFerramentaLiberada(String rota, Set<String> indisponiveis) =>
-    !indisponiveis.contains(alunoFerramentaRecurso[rota]);
+/// Mesmas ferramentas pela matriz de `recursos` do plano do personal.
+const alunoFerramentaPlanoRecurso = {
+  '/aluno/habitos': PlanoRecursoKeys.habitos,
+  '/aluno/desafios': PlanoRecursoKeys.desafios,
+  alunoFeedbackVideoRoute: PlanoRecursoKeys.feedbackVideo,
+  alunoFinanceiroRoute: PlanoRecursoKeys.financeiro,
+  '/aluno/recorrencia': PlanoRecursoKeys.recorrencia,
+};
+
+/// [plano] nulo (ainda carregando) não esconde nada além do BFF.
+bool alunoFerramentaLiberada(
+  String rota,
+  Set<String> indisponiveis, {
+  PlanoFeatures? plano,
+}) {
+  if (indisponiveis.contains(alunoFerramentaRecurso[rota])) return false;
+  final recurso = alunoFerramentaPlanoRecurso[rota];
+  if (recurso == null) return true;
+  if (indisponiveis.contains(recurso)) return false;
+  return plano == null || plano.recurso(recurso).liberado;
+}
+
+/// Ofertas de pacote só com a loja liberada no plano do personal.
+bool alunoOfertasLiberadas(PlanoFeatures? plano) =>
+    plano == null || plano.recurso(PlanoRecursoKeys.loja).liberado;
 
 /// Tudo que a Home do aluno deriva do BFF, calculado uma vez por bundle.
 class AlunoHomeView {
@@ -73,6 +99,9 @@ class AlunoHomeView {
   final bool chatNoCabecalho;
   final Set<String> recursosIndisponiveis;
 
+  /// Plano do personal: esconde ferramentas cujo recurso não está liberado.
+  final PlanoFeatures? planoPersonal;
+
   /// Próximo horário de hoje ou amanhã ([alunoHorarioNoFoco]).
   final DateTime? horarioNoFoco;
 
@@ -91,6 +120,7 @@ class AlunoHomeView {
     this.prontidaoBaixa = false,
     this.ofertas = const [],
     this.recursosIndisponiveis = const {},
+    this.planoPersonal,
     this.horarioNoFoco,
   });
 
@@ -106,12 +136,11 @@ class AlunoHomeView {
     for (final p in pendencias) Uri.parse(p.tipo.route).path,
   };
 
+  bool ferramentaLiberada(String rota) =>
+      alunoFerramentaLiberada(rota, recursosIndisponiveis, plano: planoPersonal);
+
   List<String> get atalhos => alunoAtalhosPrioridade
-      .where(
-        (r) =>
-            !rotasNoTopo.contains(r) &&
-            alunoFerramentaLiberada(r, recursosIndisponiveis),
-      )
+      .where((r) => !rotasNoTopo.contains(r) && ferramentaLiberada(r))
       .take(alunoAtalhosMax)
       .toList(growable: false);
 }
@@ -129,6 +158,7 @@ AlunoHomeView buildAlunoHomeView(
     now: agora,
   );
   final inadimplente = home.aluno.inadimplente;
+  final plano = home.planoFeatures?.normalizeForTier();
   final abertas = listAlunoPendenciasAbertas(
     aluno: home.aluno,
     medidas: home.medidas,
@@ -151,7 +181,12 @@ AlunoHomeView buildAlunoHomeView(
   return AlunoHomeView(
     action: action,
     insight: alunoInsightNoFoco(home.insight, action.mode),
-    ofertas: inadimplente ? const [] : home.upsellPendentes,
+    ofertas:
+        inadimplente ||
+                home.recursosIndisponiveis.contains('LOJA_DIGITAL') ||
+                !alunoOfertasLiberadas(plano)
+            ? const []
+            : home.upsellPendentes,
     pendenciasAbertas: abertas,
     pendencias: alunoPendenciasVisiveis(abertas, action.mode),
     coach: coach,
@@ -178,6 +213,7 @@ AlunoHomeView buildAlunoHomeView(
     ),
     chatNoCabecalho: home.personalBrand.nomePersonal.trim().isNotEmpty,
     recursosIndisponiveis: home.recursosIndisponiveis,
+    planoPersonal: plano,
     horarioNoFoco: alunoHorarioNoFoco(home.agendaProximoInicio, agora),
   );
 }

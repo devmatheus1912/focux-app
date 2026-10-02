@@ -113,20 +113,17 @@ List<_StudentToolAction> _alunoTools(S s) => [
 /// Atalhos ([AlunoHomeView.atalhos]) + catálogo do que o plano do
 /// personal libera.
 class _StudentToolsSection extends StatelessWidget {
-  const _StudentToolsSection({
-    required this.atalhos,
-    required this.recursosIndisponiveis,
-  });
+  const _StudentToolsSection({required this.atalhos, required this.liberada});
 
   final List<String> atalhos;
-  final Set<String> recursosIndisponiveis;
+  final bool Function(String rota) liberada;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final tools = _alunoTools(s)
-        .where((t) => alunoFerramentaLiberada(t.route, recursosIndisponiveis))
-        .toList(growable: false);
+    final tools = _alunoTools(
+      s,
+    ).where((t) => liberada(t.route)).toList(growable: false);
     final featured = [
       for (final rota in atalhos) ...tools.where((t) => t.route == rota),
     ];

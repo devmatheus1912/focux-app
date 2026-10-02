@@ -2,27 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../planos/providers/plano_features_provider.dart';
-import '../models/subscription_plan.dart';
-import '../widgets/upgrade_prompt_sheet.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 
-/// Abre o editor de landing ou paywall de upgrade (somente Enterprise).
+/// Abre o editor de landing ou paywall de upgrade (recurso `landing`).
 Future<void> openLandingEditorOrUpgrade(
   BuildContext context,
   WidgetRef ref,
 ) async {
-  final features = ref.read(planoFeaturesProvider).value;
-  if (features?.landingCompleta == true) {
-    if (context.mounted) context.push('/perfil/landing-editor');
-    return;
-  }
-  if (!context.mounted) return;
   // Tap explícito no Perfil — sempre mostra (sem cooldown silencioso).
-  await UpgradePromptSheet.show(
-    context: context,
+  final ok = await PlanGate.guard(
+    context,
+    ref,
+    PlanoRecursoKeys.landing,
     featureName: 'Landing page completa',
-    capability: 'landingCompleta',
-    requiredPlan: SubscriptionPlan.ENTERPRISE,
     source: 'perfil_personalizar',
   );
+  if (ok && context.mounted) context.push('/perfil/landing-editor');
 }

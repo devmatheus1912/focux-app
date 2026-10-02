@@ -32,13 +32,27 @@ class DashboardToolShortcut {
 
   bool isUnlocked(PlanoFeatures features) {
     if (!entrada.unlocked) return false;
-    if (capability == null) return true;
+    if (capability == null) {
+      // Hub com abas: trancado só quando nenhuma aba está liberada.
+      if (!entrada.isHubComAbas) return true;
+      return entrada.abas.any((aba) => _abaUnlocked(aba, features));
+    }
     return PlanoCapability.has(features, capability!);
+  }
+
+  static bool _abaUnlocked(CatalogoEntrada aba, PlanoFeatures features) {
+    if (!aba.unlocked) return false;
+    final cap = capabilityFromEntrada(aba);
+    return cap == null || PlanoCapability.has(features, cap);
   }
 
   SubscriptionPlan targetPlan() {
     if (entrada.upgradePlano != null && entrada.upgradePlano!.isNotEmpty) {
       return subscriptionPlanFromApi(entrada.upgradePlano);
+    }
+    if (capability == null && entrada.isHubComAbas) {
+      final plans = [for (final aba in entrada.abas) upgradePlanFromEntrada(aba)];
+      return plans.reduce((a, b) => a.level <= b.level ? a : b);
     }
     return PlanEntitlements.targetPlan(
       capability: capability,
@@ -58,7 +72,7 @@ class DashboardToolShortcut {
     CatalogoEntrada entrada, {
     String? preferredAbaId,
   }) {
-    final capability = capabilityFromFeatureGate(entrada.featureGate);
+    final capability = capabilityFromEntrada(entrada);
     final route =
         entrada.isHubComAbas
             ? ferramentasHubLocation(entrada.id, abaId: preferredAbaId)

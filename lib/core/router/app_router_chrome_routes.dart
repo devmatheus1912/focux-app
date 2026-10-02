@@ -108,6 +108,8 @@ import '../../features/anamnese/screens/anamnese_screen.dart';
 import '../../features/ia/screens/ia_progressao_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../../features/perfil/screens/wallet_screen.dart';
+import '../../features/subscription/models/subscription_plan.dart';
+import '../widgets/feature_gate.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'app_router_redirect.dart';
 import 'fx_page_transition.dart';
@@ -123,7 +125,13 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/dashboard/command-center/copiloto',
-            builder: (context, state) => const CopilotActionsScreen(),
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'Copiloto IA',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'ia',
+                  child: CopilotActionsScreen(),
+                ),
           ),
 
           // Alunos sub-routes (specific before parameterized)
@@ -266,9 +274,14 @@ RouteBase buildChromeShellRoute() {
                 (context, state) =>
                     intPathParam(state, 'id') == null ? '/alunos' : null,
             builder:
-                (context, state) => IaProgressaoScreen(
-                  alunoId: intPathParam(state, 'id')!,
-                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                (context, state) => FeatureGate(
+                  featureName: 'IA Progresso',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'ia',
+                  child: IaProgressaoScreen(
+                    alunoId: intPathParam(state, 'id')!,
+                    alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                  ),
                 ),
           ),
           GoRoute(
@@ -566,7 +579,13 @@ RouteBase buildChromeShellRoute() {
           // IA sub-routes
           GoRoute(
             path: '/ia/chat',
-            builder: (context, state) => const IaChatScreen(),
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'Chat com IA',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'ia',
+                  child: IaChatScreen(),
+                ),
           ),
           GoRoute(
             path: '/ia/checkin',
@@ -585,7 +604,13 @@ RouteBase buildChromeShellRoute() {
           // Financeiro sub-routes
           GoRoute(
             path: '/financeiro/aluno',
-            builder: (context, state) => const FinanceiroAlunoScreen(),
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'Mensalidades',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'financeiro',
+                  child: FinanceiroAlunoScreen(),
+                ),
           ),
           GoRoute(
             path: '/financeiro/mensalidades/:id',
@@ -851,7 +876,13 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/winback',
-            builder: (context, state) => const WinbackScreen(),
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'Win-back',
+                  requiredPlan: SubscriptionPlan.ENTERPRISE,
+                  capability: 'winback',
+                  child: WinbackScreen(),
+                ),
           ),
           GoRoute(
             path: '/relatorio/business',
@@ -859,7 +890,13 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/recorrencia',
-            builder: (context, state) => const RecorrenciaScreen(),
+            builder:
+                (context, state) => const FeatureGate(
+                  featureName: 'Recorrência PIX',
+                  requiredPlan: SubscriptionPlan.PRO,
+                  capability: 'recorrencia',
+                  child: RecorrenciaScreen(),
+                ),
           ),
           GoRoute(
             path: '/nps',

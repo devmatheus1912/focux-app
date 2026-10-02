@@ -21,7 +21,7 @@ void main() {
     expect(screen, contains('FxKeyboardDismissScope.dismiss'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('FeatureGate'));
-    expect(screen, contains('lojaDigital'));
+    expect(screen, contains("capability: 'loja'"));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('/financeiro'));
     expect(screen, contains('ListView.builder'));

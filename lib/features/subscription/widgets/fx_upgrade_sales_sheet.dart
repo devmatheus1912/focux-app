@@ -7,6 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../planos/data/plano_recurso.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
@@ -235,7 +236,7 @@ abstract final class FxUpgradeSalesSheet {
       plan: plan,
     );
     final bodyOverride = PaywallCatalog.modalMessageFor(
-      capability: capability,
+      capability: PlanoRecursoKeys.toCopyCapability(capability),
       featureName: featureName,
     );
     final enriched = LockedOffer(

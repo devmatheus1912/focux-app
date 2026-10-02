@@ -78,6 +78,18 @@ class LeadInteracao {
   );
 }
 
+class LeadsContagem {
+  final int total;
+  final int novos;
+
+  const LeadsContagem({required this.total, required this.novos});
+
+  factory LeadsContagem.fromJson(Map<String, dynamic> j) => LeadsContagem(
+    total: (j['total'] as num?)?.toInt() ?? 0,
+    novos: (j['novos'] as num?)?.toInt() ?? 0,
+  );
+}
+
 class LeadRepository {
   final Dio _dio;
   LeadRepository(ApiClient c) : _dio = c.dio;
@@ -115,6 +127,12 @@ class LeadRepository {
 
   Future<List<Lead>> listar({String? status}) async {
     return (await listarPagina(status: status, page: 0, size: 100)).content;
+  }
+
+  /// Teaser do Free: `GET /api/leads/contagem` não tem gate de plano.
+  Future<LeadsContagem> contagem() async {
+    final r = await _dio.get('/api/leads/contagem');
+    return LeadsContagem.fromJson(Map<String, dynamic>.from(r.data as Map));
   }
 
   /// BFF tipado — first paint do Funil de Leads (mesmo SSOT de [listar]).

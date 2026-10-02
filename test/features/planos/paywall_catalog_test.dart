@@ -4,8 +4,8 @@ import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
   test('comparisons binárias batem com a spec', () {
-    expect(PaywallCatalog.comparisonFreeVsPro.length, 7);
-    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 9);
+    expect(PaywallCatalog.comparisonFreeVsPro.length, 9);
+    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 12);
   });
 
   test('upgradeTriggers match reference', () {

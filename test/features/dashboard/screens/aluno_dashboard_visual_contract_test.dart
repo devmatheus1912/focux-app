@@ -33,10 +33,7 @@ void main() {
     expect(screen, contains('horario: view.horarioNoFoco'));
     expect(screen, contains('if (featured.isNotEmpty)'));
     expect(screen, isNot(contains('volumePorSemana')));
-    expect(
-      screen,
-      contains('recursosIndisponiveis: view.recursosIndisponiveis'),
-    );
+    expect(screen, contains('liberada: view.ferramentaLiberada'));
     expect(screen, contains('coachMensagens: view.coach'));
     expect(screen, contains('insight: view.insight'));
     expect(screen, contains('view.semanaVisivel'));

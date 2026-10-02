@@ -1,6 +1,6 @@
 part of 'perfil_screen.dart';
 
-class _PerfilVitrineTiles extends StatelessWidget {
+class _PerfilVitrineTiles extends ConsumerWidget {
   const _PerfilVitrineTiles({
     required this.slug,
     required this.mute,
@@ -16,7 +16,9 @@ class _PerfilVitrineTiles extends StatelessWidget {
   final VoidCallback onOpenPublicLink;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final marca = PlanGate.watch(ref, PlanoRecursoKeys.whiteLabel);
+    final landing = PlanGate.watch(ref, PlanoRecursoKeys.landing);
     final normalizedSlug = slug?.trim();
     final hasSlug = normalizedSlug != null && normalizedSlug.isNotEmpty;
     final linkValue =
@@ -34,7 +36,16 @@ class _PerfilVitrineTiles extends StatelessWidget {
           value: '',
           mute: mute,
           line: line,
-          onTap: () => context.push('/identidade-visual'),
+          locked: !marca.liberado,
+          upgradeTierLabel: PlanGate.tierLabel(marca.planoMinimo),
+          onTap: PlanGate.tap(
+            context,
+            ref,
+            PlanoRecursoKeys.whiteLabel,
+            featureName: 'Marca própria',
+            source: 'perfil_marca',
+            action: () => context.push('/identidade-visual'),
+          ),
         ),
         if (!hasSlug)
           FxSettingsTile(
@@ -43,6 +54,8 @@ class _PerfilVitrineTiles extends StatelessWidget {
             value: '',
             mute: mute,
             line: line,
+            locked: !landing.liberado,
+            upgradeTierLabel: PlanGate.tierLabel(landing.planoMinimo),
             showDivider: false,
             onTap: onOpenEditor,
           )
@@ -61,6 +74,8 @@ class _PerfilVitrineTiles extends StatelessWidget {
             value: '',
             mute: mute,
             line: line,
+            locked: !landing.liberado,
+            upgradeTierLabel: PlanGate.tierLabel(landing.planoMinimo),
             showDivider: false,
             onTap: onOpenEditor,
           ),

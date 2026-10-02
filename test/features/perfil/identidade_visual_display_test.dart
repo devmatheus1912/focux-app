@@ -13,8 +13,12 @@ void main() {
       isFalse,
     );
     expect(
-      identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'enterprise_pro'),
+      identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'enterprise'),
       isTrue,
+    );
+    expect(
+      identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'ENTERPRISE_PRO'),
+      isFalse,
     );
     expect(
       identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'PRO'),

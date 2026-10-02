@@ -11,8 +11,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/data/command_center_data.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../planos/utils/effective_plano_features.dart';
-import '../../planos/utils/plano_capability.dart';
+import '../../planos/data/plano_recurso.dart';
+import '../../planos/utils/plan_gate.dart';
 import '../../treinos/providers/treinos_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -25,7 +25,6 @@ import '../widgets/aluno360_copilot_ia_refresh_button.dart';
 import '../widgets/aluno360_copilot_prescription.dart';
 import '../widgets/aluno360_copilot_support.dart';
 import 'aluno360_help_sheets.dart';
-import 'aluno360_copilot_locked_section.dart';
 import 'aluno360_copilot_ia_prompt_section.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
 
@@ -110,12 +109,12 @@ class Aluno360CopilotCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final primary = Theme.of(context).colorScheme.primary;
-    final features = effectivePlanoFeatures(ref);
-    if (!PlanoCapability.has(features, 'iaCopiloto')) {
-      return Aluno360CopilotLockedSection(primary: primary);
-    }
+    // Prioridade por regra (/360 proximaAcao + fallback) é Free; só a geração
+    // com IA fica trancada (botão com cadeado no header).
+    final iaLiberado = PlanGate.watch(ref, PlanoRecursoKeys.ia).liberado;
 
-    final forceIa = ref.watch(alunoCopilotoForceIaProvider(aluno.id));
+    final forceIa =
+        iaLiberado && ref.watch(alunoCopilotoForceIaProvider(aluno.id));
     final iaAsync =
         forceIa ? ref.watch(alunoCopilotoActionProvider(aluno.id)) : null;
     final bundleAsync = ref.watch(aluno360OperacaoBundleProvider(aluno.id));
@@ -153,7 +152,7 @@ class Aluno360CopilotCard extends ConsumerWidget {
     );
     // Prompt only when there is no /360 proximaAcao and no IA yet.
     // IA is never fetched on Operação mount — only via Atualizar / Gerar.
-    if (!hasPriorityContent && !iaLoading) {
+    if (!hasPriorityContent && !iaLoading && iaLiberado) {
       return Aluno360CopilotIaPromptSection(
         alunoId: alunoId,
         primary: primary,

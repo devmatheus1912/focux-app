@@ -8,7 +8,9 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../planos/data/plano_recurso.dart';
 import '../../planos/utils/effective_plano_features.dart';
+import '../../planos/utils/plan_gate.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
@@ -71,6 +73,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     required bool feedbackLocked,
     required String iaPlan,
     required String feedbackPlan,
+    required Map<Aluno360FerramentasModule, (String, PlanoRecurso)> planLocks,
   }) async {
     if (overflow.isEmpty) return;
     final treino = overflow
@@ -159,6 +162,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                                     feedbackLocked: feedbackLocked,
                                     iaPlan: iaPlan,
                                     feedbackPlan: feedbackPlan,
+                                    planLocks: planLocks,
                                   ),
                               ],
                               if (perfil.isNotEmpty) ...[
@@ -180,6 +184,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                                     feedbackLocked: feedbackLocked,
                                     iaPlan: iaPlan,
                                     feedbackPlan: feedbackPlan,
+                                    planLocks: planLocks,
                                   ),
                               ],
                             ],
@@ -201,10 +206,12 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     Aluno360FerramentasModule module, {
     required bool iaLocked,
     required bool feedbackLocked,
+    required Map<Aluno360FerramentasModule, (String, PlanoRecurso)> planLocks,
   }) {
     final locked =
         (module == Aluno360FerramentasModule.iaProgresso && iaLocked) ||
-        (module == Aluno360FerramentasModule.feedbackVideo && feedbackLocked);
+        (module == Aluno360FerramentasModule.feedbackVideo && feedbackLocked) ||
+        planLocks[module]?.$2.liberado == false;
     return Icon(
       locked ? Icons.lock_outline : Aluno360FerramentasLogic.moduleIcon(module),
       color: primary,
@@ -219,6 +226,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     required bool feedbackLocked,
     required String iaPlan,
     required String feedbackPlan,
+    required Map<Aluno360FerramentasModule, (String, PlanoRecurso)> planLocks,
   }) {
     void go(VoidCallback action) {
       HapticFeedback.selectionClick();
@@ -231,6 +239,22 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
         return;
       }
       action();
+    }
+
+    final planLock = planLocks[module];
+    final planLocked = planLock != null && !planLock.$2.liberado;
+    void goPlan(String featureName, VoidCallback action) {
+      if (!planLocked) return go(action);
+      go(
+        () => UpgradePromptSheet.show(
+          context: host,
+          featureName: featureName,
+          capability: planLock.$1,
+          requiredPlan: planLock.$2.planoMinimo,
+          upgradePlano: planLock.$2.planoMinimo,
+          source: 'aluno360_ferramentas',
+        ),
+      );
     }
 
     final evolucaoComparativo = '/alunos/$alunoId/evolucao-comparativo';
@@ -266,6 +290,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -287,6 +312,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap: () => go(() => host.push('/alunos/$alunoId/equipamentos')),
@@ -302,6 +328,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -338,6 +365,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: composicaoPending ? EagleTokens.warn : primary,
         onTap:
@@ -353,7 +381,9 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
             aderenciaSemanal: aderenciaSemanal,
           ),
         ),
-        trailing: Row(
+        trailing: planLocked
+            ? PlanGate.lockBadge(planLock.$2, brand: primary)
+            : Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (sparklineValues.isNotEmpty) ...[
@@ -371,10 +401,12 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: aderenciaAttention ? EagleTokens.warn : primary,
         onTap:
-            () => go(
+            () => goPlan(
+              'Relatório de aderência',
               () => host.push('/alunos/$alunoId/relatorio', extra: aluno.nome),
             ),
       ),
@@ -387,6 +419,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -406,6 +439,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -422,6 +456,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -448,6 +483,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent:
             anamneseLoading
@@ -468,19 +504,24 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               ? 'Pagamento em atraso'
               : 'Em dia',
         ),
-        trailing: Text(
-          aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK',
-        ),
+        trailing: planLocked
+            ? PlanGate.lockBadge(planLock.$2, brand: primary)
+            : Text(aluno.statusFinanceiro == 'INADIMPLENTE' ? 'Ação' : 'OK'),
         leading: _icone(
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent:
             aluno.statusFinanceiro == 'INADIMPLENTE'
                 ? EagleTokens.bad
                 : primary,
-        onTap: () => go(() => host.push('/financeiro?alunoId=$alunoId')),
+        onTap:
+            () => goPlan(
+              'Mensalidades',
+              () => host.push('/financeiro?alunoId=$alunoId'),
+            ),
       ),
       Aluno360FerramentasModule.chat => FxSatelliteListTile(
         margin: _moduleMargin,
@@ -491,6 +532,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -510,6 +552,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
           module,
           iaLocked: iaLocked,
           feedbackLocked: feedbackLocked,
+          planLocks: planLocks,
         ),
         accent: primary,
         onTap:
@@ -548,6 +591,16 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
     final feedbackPlan = Aluno360FerramentasLogic.gatedModulePlanLabel(
       Aluno360FerramentasGatedModule.feedbackVideo,
     );
+    final planLocks = <Aluno360FerramentasModule, (String, PlanoRecurso)>{
+      Aluno360FerramentasModule.mensalidades: (
+        PlanoRecursoKeys.financeiro,
+        PlanGate.watch(ref, PlanoRecursoKeys.financeiro),
+      ),
+      Aluno360FerramentasModule.aderencia: (
+        PlanoRecursoKeys.relatorios,
+        PlanGate.watch(ref, PlanoRecursoKeys.relatorios),
+      ),
+    };
     final split = Aluno360FerramentasLogic.splitModulesForFold(
       aluno: aluno,
       bf: bf,
@@ -579,6 +632,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
               feedbackLocked: feedbackLocked,
               iaPlan: iaPlan,
               feedbackPlan: feedbackPlan,
+              planLocks: planLocks,
             ),
           if (split.overflow.isNotEmpty)
             FxSatelliteListTile(
@@ -598,6 +652,7 @@ class Aluno360FerramentasModulesGrid extends ConsumerWidget {
                     feedbackLocked: feedbackLocked,
                     iaPlan: iaPlan,
                     feedbackPlan: feedbackPlan,
+                    planLocks: planLocks,
                   ),
             ),
         ],

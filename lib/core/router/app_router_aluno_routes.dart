@@ -20,6 +20,8 @@ import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
 import '../../features/anamnese/screens/anamnese_aluno_screen.dart';
 import '../../features/trilhas/screens/aluno_trilhas_screen.dart';
 import '../../features/feedback/screens/aluno_feedback_video_screen.dart';
+import '../../features/subscription/models/subscription_plan.dart';
+import '../widgets/feature_gate.dart';
 import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
 
@@ -127,7 +129,15 @@ List<RouteBase> buildAlunoRoutes() {
       ),
       GoRoute(
         path: '/aluno/recorrencia',
-        builder: (context, state) => const FxRouteChrome(child: RecorrenciaAlunoScreen()),
+        builder:
+            (context, state) => const FxRouteChrome(
+              child: FeatureGate(
+                featureName: 'Recorrência',
+                requiredPlan: SubscriptionPlan.PRO,
+                capability: 'recorrencia',
+                child: RecorrenciaAlunoScreen(),
+              ),
+            ),
       ),
       GoRoute(
         path: '/aluno/grupo-aulas',
@@ -142,7 +152,14 @@ List<RouteBase> buildAlunoRoutes() {
         path: '/aluno/feedback-videos',
         builder:
             (context, state) =>
-                const FxRouteChrome(child: AlunoFeedbackVideoScreen()),
+                const FxRouteChrome(
+                  child: FeatureGate(
+                    featureName: 'Feedback em vídeo',
+                    requiredPlan: SubscriptionPlan.PRO,
+                    capability: 'feedbackVideo',
+                    child: AlunoFeedbackVideoScreen(),
+                  ),
+                ),
       ),
       GoRoute(
         path: '/aluno/perfil/editar',

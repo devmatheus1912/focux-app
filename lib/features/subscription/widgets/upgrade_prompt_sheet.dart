@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/api/api_error.dart';
+import '../../../core/api/plan_upgrade_error_hub.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
@@ -29,6 +30,20 @@ class UpgradePromptSheet {
     respectCooldown: false,
   );
 
+  /// Liga o [PlanUpgradeErrorHub]: erro de plano em qualquer chamada vira
+  /// sheet de upgrade (só para personal — aluno nunca vê paywall).
+  static void registerGlobalPresenter({
+    required bool Function() isPersonal,
+    required BuildContext? Function() rootContext,
+  }) {
+    PlanUpgradeErrorHub.presenter = (context, error) async {
+      if (!isPersonal()) return false;
+      final target = context ?? rootContext();
+      if (target == null || !target.mounted) return false;
+      return showFromError(target, error, source: 'api_error_global');
+    };
+  }
+
   /// Abre a sheet a partir de um erro de entitlement do contrato.
   static Future<bool> showFromError(
     BuildContext context,
@@ -37,31 +52,39 @@ class UpgradePromptSheet {
     String? fallbackCapability,
     String source = 'api_error',
   }) async {
-    if (!isPlanGateError(error)) return false;
+    if (!isPlanGateError(error) && !PlanUpgradeErrorHub.isUpgradeError(error)) {
+      return false;
+    }
     final api = ApiError.from(error);
+    final limiteAlunos = api?.codigo == PlanUpgradeErrorHub.limiteAlunos;
     final feature = api?.feature;
     final capability =
-        PlanEntitlements.capabilityFromBackendFeature(feature) ??
-        fallbackCapability;
+        limiteAlunos
+            ? 'alunos'
+            : PlanEntitlements.capabilityFromBackendFeature(feature) ??
+                fallbackCapability;
     final featureName =
-        fallbackFeatureName ??
-        PlanEntitlements.featureNameFromBackendFeature(
-          feature,
-          fallback: 'recurso',
-        );
+        limiteAlunos
+            ? (fallbackFeatureName ?? 'Mais vagas de alunos')
+            : fallbackFeatureName ??
+                PlanEntitlements.featureNameFromBackendFeature(
+                  feature,
+                  fallback: 'recurso',
+                );
     final upgradePlano =
         api?.upgradePlano != null && api!.upgradePlano!.trim().isNotEmpty
             ? subscriptionPlanFromApi(api.upgradePlano)
             : null;
     if (!context.mounted) return false;
-    await show(
-      context: context,
-      featureName: featureName,
-      capability: capability,
-      upgradePlano: upgradePlano,
-      source: source,
+    return PlanUpgradeErrorHub.run(
+      () => show(
+        context: context,
+        featureName: featureName,
+        capability: capability,
+        upgradePlano: upgradePlano,
+        source: source,
+      ),
     );
-    return true;
   }
 
   static Future<void> showIfAllowed({

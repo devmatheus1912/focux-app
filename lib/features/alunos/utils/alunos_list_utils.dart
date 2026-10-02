@@ -177,6 +177,12 @@ List<Aluno> alunosListVisiveis(
   return alunos;
 }
 
+/// Vagas do plano esgotadas? Inativos/bloqueados não ocupam vaga.
+bool alunoVagasEsgotadas({required int? limiteAlunos, AlunosStats? stats}) {
+  if (limiteAlunos == null || limiteAlunos <= 0) return false;
+  return (stats?.totalOcupandoVaga ?? 0) >= limiteAlunos;
+}
+
 /// Contagem do chip Inativos; `null` quando a lista carregada não basta.
 int? alunosInativosCount({
   required int? totalInativos,

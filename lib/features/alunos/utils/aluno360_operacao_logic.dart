@@ -11,6 +11,7 @@ import 'aluno_hero_signal.dart';
 part 'aluno360_operacao_logic_format.part.dart';
 part 'aluno360_operacao_logic_visibility.part.dart';
 part 'aluno360_operacao_logic_snapshot.part.dart';
+part 'aluno360_operacao_logic_sticky.part.dart';
 
 enum OperacaoStickyDestination {
   chat,

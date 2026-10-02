@@ -32,7 +32,9 @@ AlunoDashboardHomeBundle _bundle({
   String? concluidoEm,
   int? concluidosSemana,
   String? agendaInicio,
+  Map<String, dynamic>? planoFeatures,
 }) => AlunoDashboardHomeBundle.fromJson({
+  if (planoFeatures != null) 'planoFeatures': planoFeatures,
   'aluno': {
     'id': 7,
     'nome': 'Ana',
@@ -338,6 +340,61 @@ void main() {
       expect(
         alunoFerramentaLiberada('/agenda/aluno', {'HABIT_COACHING'}),
         isTrue,
+      );
+    });
+
+    test('recursos do plano do personal escondem ferramentas trancadas', () {
+      final free = buildAlunoHomeView(
+        _bundle(planoFeatures: {'plano': 'FREE'}, ofertas: 1),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(free.atalhos, isNot(contains('/aluno/habitos')));
+      expect(free.atalhos, isNot(contains('/aluno/desafios')));
+      expect(free.atalhos, isNot(contains(alunoFinanceiroRoute)));
+      for (final rota in [
+        '/aluno/habitos',
+        '/aluno/desafios',
+        alunoFeedbackVideoRoute,
+        alunoFinanceiroRoute,
+        '/aluno/recorrencia',
+      ]) {
+        expect(free.ferramentaLiberada(rota), isFalse, reason: rota);
+      }
+      expect(free.ferramentaLiberada('/aluno/anamnese'), isTrue);
+      expect(free.ferramentaLiberada('/aluno/trilhas'), isTrue);
+      expect(free.ofertas, isEmpty);
+
+      final pro = buildAlunoHomeView(
+        _bundle(planoFeatures: {'plano': 'PRO'}, ofertas: 1),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(pro.ferramentaLiberada('/aluno/habitos'), isTrue);
+      expect(pro.ferramentaLiberada(alunoFinanceiroRoute), isTrue);
+      expect(pro.ferramentaLiberada('/aluno/desafios'), isFalse);
+      expect(pro.ofertas, isEmpty);
+
+      final enterprise = buildAlunoHomeView(
+        _bundle(planoFeatures: {'plano': 'ENTERPRISE'}, ofertas: 1),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(enterprise.ferramentaLiberada('/aluno/desafios'), isTrue);
+      expect(enterprise.ofertas, hasLength(1));
+    });
+
+    test('sem plano no bundle só o BFF decide', () {
+      final view = buildAlunoHomeView(
+        _bundle(ofertas: 1),
+        agendaReviewed: true,
+        now: DateTime(2026, 9, 27),
+      );
+      expect(view.ferramentaLiberada('/aluno/habitos'), isTrue);
+      expect(view.ofertas, hasLength(1));
+      expect(
+        alunoFerramentaLiberada('/aluno/recorrencia', {'recorrencia'}),
+        isFalse,
       );
     });
 

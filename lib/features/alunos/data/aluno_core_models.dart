@@ -158,6 +158,10 @@ class AlunosStats {
     this.totalInativos,
   });
 
+  /// Alunos que ocupam vaga do plano (o backend conta só ATIVO).
+  int get totalOcupandoVaga =>
+      (total - (totalInativos ?? 0)).clamp(0, total).toInt();
+
   factory AlunosStats.fromJson(Map<String, dynamic> json) => AlunosStats(
     total: (json['total'] as num?)?.toInt() ?? 0,
     totalAtivos: (json['totalAtivos'] as num?)?.toInt() ?? 0,

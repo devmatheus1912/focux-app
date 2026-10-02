@@ -135,6 +135,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           selected: selectedPlan,
           current: currentPlan,
           trialEligible: _trialStatus?.trialEligible,
+          period: _billingPeriod,
         );
         const trialDays = kTrialDays;
         final isUpgrade = selectedPlan.level > currentPlan.level;
@@ -160,6 +161,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       selected: selectedPlan,
       current: currentPlan,
       trialEligible: _trialStatus?.trialEligible,
+      period: _billingPeriod,
     );
     final selectedStorePrice =
         selectedBackendPlan == null

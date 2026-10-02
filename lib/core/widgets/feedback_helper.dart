@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../features/alunos/constants/aluno_360_layout.dart';
 import '../../l10n/app_localizations.dart';
 import '../api/offline_queued_ack.dart';
+import '../api/plan_upgrade_error_hub.dart';
 import '../theme/design_tokens.dart';
 import '../utils/friendly_error.dart';
 
@@ -102,6 +105,8 @@ class FeedbackHelper {
     double reserveBottom = 0,
     FeedbackPlacement placement = FeedbackPlacement.standard,
   }) {
+    // A sheet de upgrade já explica o erro de plano; toast por baixo é ruído.
+    if (PlanUpgradeErrorHub.isShowing) return;
     HapticFeedback.heavyImpact();
     _showSnackbar(
       context,
@@ -177,6 +182,17 @@ class FeedbackHelper {
   }) {
     if (error is OfflineQueuedException) {
       showWarn(context, S.of(context).acaoEnfileiradaOffline);
+      return;
+    }
+    if (PlanUpgradeErrorHub.presenter != null &&
+        PlanUpgradeErrorHub.isUpgradeError(error)) {
+      unawaited(
+        PlanUpgradeErrorHub.present(error, context: context).then((shown) {
+          if (!shown && context.mounted) {
+            showError(context, friendlyError(error, fallback: fallback));
+          }
+        }),
+      );
       return;
     }
     showError(context, friendlyError(error, fallback: fallback));
