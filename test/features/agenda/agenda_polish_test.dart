@@ -23,7 +23,9 @@ void main() {
     expect(screen, contains('FxHomeSheetSurface'));
     expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, contains('AgendaMonthGrid'));
-    expect(screen, contains('AgendaMonthBar'));
+    expect(screen, isNot(contains('AgendaMonthBar')));
+    expect(screen, contains('AgendaTodayPill'));
+    expect(screen, contains('agendaVisibleByDay'));
     expect(screen, isNot(contains('AgendaWeekBar')));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));

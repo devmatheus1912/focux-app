@@ -4,10 +4,8 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/utils/dashboard_readability.dart';
-import '../utils/agenda_month.dart';
 
 class AgendaHubHeader extends StatelessWidget {
   const AgendaHubHeader({
@@ -15,14 +13,12 @@ class AgendaHubHeader extends StatelessWidget {
     required this.freshnessLabel,
     required this.onHelp,
     required this.onIcal,
-    this.onToday,
     this.onNew,
   });
 
   final String? freshnessLabel;
   final VoidCallback onHelp;
   final VoidCallback onIcal;
-  final VoidCallback? onToday;
   final VoidCallback? onNew;
 
   @override
@@ -95,40 +91,6 @@ class AgendaHubHeader extends StatelessWidget {
                   onIcal();
                 },
               ),
-              if (onToday != null) ...[
-                const SizedBox(width: FxHelpChrome.gap),
-                Semantics(
-                  button: true,
-                  label: 'Ir para hoje',
-                  child: Tooltip(
-                    message: 'Ir para hoje',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          onToday!();
-                        },
-                        borderRadius: BorderRadius.circular(
-                          FxHelpChrome.iconSize / 2,
-                        ),
-                        child: Container(
-                          width: FxHelpChrome.iconSize,
-                          height: FxHelpChrome.iconSize,
-                          decoration: chrome.headerAction(
-                            radius: FxHelpChrome.iconSize / 2,
-                          ),
-                          child: Icon(
-                            Icons.today_outlined,
-                            color: primary,
-                            size: FxHelpChrome.iconSize * 0.48,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
               if (onNew != null) ...[
                 const SizedBox(width: FxHelpChrome.gap),
                 ShellHeaderIconButton(
@@ -144,72 +106,6 @@ class AgendaHubHeader extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class AgendaMonthBar extends StatelessWidget {
-  const AgendaMonthBar({
-    super.key,
-    required this.month,
-    required this.onPrev,
-    required this.onNext,
-  });
-
-  final DateTime month;
-  final VoidCallback onPrev;
-  final VoidCallback onNext;
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        0,
-        TokensStrip.s4,
-        TokensStrip.s1,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            tooltip: 'Mês anterior',
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              onPrev();
-            },
-            constraints: const BoxConstraints(
-              minWidth: FxHomeSheetChrome.touchTarget,
-              minHeight: FxHomeSheetChrome.touchTarget,
-            ),
-            icon: Icon(Icons.chevron_left, color: chrome.mute),
-          ),
-          Expanded(
-            child: Semantics(
-              header: true,
-              liveRegion: true,
-              child: Text(
-                agendaMonthLabel(month),
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.cardTitle(color: chrome.ink),
-              ),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Próximo mês',
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              onNext();
-            },
-            constraints: const BoxConstraints(
-              minWidth: FxHomeSheetChrome.touchTarget,
-              minHeight: FxHomeSheetChrome.touchTarget,
-            ),
-            icon: Icon(Icons.chevron_right, color: chrome.mute),
-          ),
-        ],
       ),
     );
   }

@@ -34,10 +34,22 @@ void main() {
     expect(agendaShiftMonth(DateTime(2026, 1), -1), DateTime(2025, 12));
   });
 
-  test('rótulo omite o ano corrente', () {
-    final now = DateTime(2026, 10, 1);
-    expect(agendaMonthLabel(DateTime(2026, 10), now: now), 'Outubro');
-    expect(agendaMonthLabel(DateTime(2027, 1), now: now), 'Janeiro 2027');
+  test('rótulo do mês leva o ano', () {
+    expect(agendaMonthLabel(DateTime(2027, 1)), 'Janeiro 2027');
+  });
+
+  test('só as semanas com dias do mês', () {
+    expect(agendaMonthWeeks(DateTime(2026, 10)), 5);
+    expect(agendaMonthWeeks(DateTime(2027, 2)), 4);
+    expect(agendaMonthWeeks(DateTime(2026, 8)), 6);
+  });
+
+  test('chip: hora curta e primeiro nome', () {
+    expect(agendaChipLabel(_ag(1, DateTime(2026, 10, 2, 9))), '9h Aluno');
+    expect(
+      agendaChipLabel(_ag(1, DateTime(2026, 10, 2, 18, 30))),
+      '18h30 Aluno',
+    );
   });
 
   test('dia inicial: hoje no mês atual, dia 1 nos outros', () {
@@ -59,7 +71,9 @@ void main() {
       _ag(3, DateTime(2026, 10, 2, 12), status: 'CANCELADO'),
       _ag(4, DateTime(2026, 10, 5, 7)),
     ];
-    expect(agendaVisibleCountByDay(items), {'2026-10-02': 2, '2026-10-05': 1});
+    final byDay = agendaVisibleByDay(items);
+    expect(byDay.keys, ['2026-10-02', '2026-10-05']);
+    expect(byDay['2026-10-02']!.map((a) => a.id), [1, 2]);
     expect(agendaEventsOn(items, DateTime(2026, 10, 2)).map((a) => a.id), [
       1,
       2,

@@ -30,8 +30,6 @@ String agendaEventTitle({required String alunoNome, String? titulo}) {
   return name.isEmpty ? (titulo?.trim().isNotEmpty == true ? titulo!.trim() : 'Atendimento') : name;
 }
 
-String? agendaEventNote(String? titulo) => agendaEventSessionNote(titulo);
-
 const _trivialSessionNotes = {'oi', 'ok', 'teste', 'test', '-', '.', 'x'};
 
 /// Nota de sessão só quando ajuda o personal (ignora placeholder curto).
@@ -62,11 +60,6 @@ String agendaIsoDate(DateTime d) {
   final m = d.month.toString().padLeft(2, '0');
   final day = d.day.toString().padLeft(2, '0');
   return '$y-$m-$day';
-}
-
-DateTime agendaWeekStart(DateTime d) {
-  final day = DateTime(d.year, d.month, d.day);
-  return day.subtract(Duration(days: day.weekday - 1));
 }
 
 String agendaHm(DateTime date) =>

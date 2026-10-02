@@ -36,7 +36,7 @@ void main() {
     );
     expect(agendaEventSessionNote('oi'), isNull);
     expect(agendaEventSessionNote('Avaliação'), 'Avaliação');
-    expect(agendaEventNote('  '), isNull);
+    expect(agendaEventSessionNote('  '), isNull);
     expect(agendaEventTitle(alunoNome: '  ', titulo: 'Avaliação'), 'Avaliação');
   });
 
@@ -51,9 +51,8 @@ void main() {
     );
   });
 
-  test('iso date e segunda da semana', () {
+  test('iso date e hora', () {
     expect(agendaIsoDate(DateTime(2026, 8, 19)), '2026-08-19');
-    expect(agendaWeekStart(DateTime(2026, 8, 19)), DateTime(2026, 8, 17));
     expect(agendaHm(DateTime(2026, 8, 19, 8, 30)), '08:30');
   });
 

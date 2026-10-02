@@ -22,6 +22,7 @@ import '../widgets/agenda_month_grid.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_hub_header.dart';
 import '../widgets/agenda_next_banner.dart';
+import '../widgets/agenda_today_pill.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -196,161 +197,179 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         body: SafeArea(
           bottom: false,
           child: FxContentWidthLimiter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: Stack(
               children: [
-                AgendaHubHeader(
-                  freshnessLabel: freshnessLabel,
-                  onHelp: () {
-                    AnalyticsService.instance.track(
-                      ProductEvents.agendaHelpOpened,
-                    );
-                    showAgendaHelpSheet(context);
-                  },
-                  onIcal: _copyIcalLink,
-                  onToday: _isTodayVisible ? null : _goToday,
-                  onNew: () => _novoAgendamento(),
-                ),
-                AgendaMonthBar(
-                  month: _mes,
-                  onPrev: () => _changeMonth(-1),
-                  onNext: () => _changeMonth(1),
-                ),
-                AgendaMonthGrid(
-                  month: _mes,
-                  selected: _dia,
-                  counts: agendaVisibleCountByDay(_ags),
-                  onSelect: _selectDay,
-                  onSwipe: _changeMonth,
-                ),
-                if (nextOpen != null && _isTodayVisible)
-                  AgendaNextBanner(
-                    agendamento: nextOpen,
-                    photoUrl: _photoFor(nextOpen.alunoId),
-                    onTap: () => _openAgendamentoDetails(nextOpen),
-                  )
-                else if (!_loading && _erro == null && visible.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      0,
-                      TokensStrip.s4,
-                      TokensStrip.s2,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AgendaHubHeader(
+                      freshnessLabel: freshnessLabel,
+                      onHelp: () {
+                        AnalyticsService.instance.track(
+                          ProductEvents.agendaHelpOpened,
+                        );
+                        showAgendaHelpSheet(context);
+                      },
+                      onIcal: _copyIcalLink,
+                      onNew: () => _novoAgendamento(),
                     ),
-                    child: DashboardSectionHeader(title: dayHeading),
-                  ),
-                Expanded(
-                  child:
-                      _erro != null
-                          ? FxErrorState(
-                            chromeOnDark: isDark,
-                            primary: primary,
-                            message: friendlyError(_erro!),
-                            onRetry: () => _load(force: true),
-                          )
-                          : _loading
-                          ? const SkeletonList(count: 4)
-                          : RefreshIndicator(
-                            color: primary,
-                            onRefresh: () {
-                              AnalyticsService.instance.track(
-                                ProductEvents.agendaRefreshed,
-                              );
-                              return _load(force: true);
-                            },
-                            child:
-                                visible.isEmpty
-                                    ? CustomScrollView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      keyboardDismissBehavior:
-                                          ScrollViewKeyboardDismissBehavior
-                                              .onDrag,
-                                      slivers: [
-                                        SliverPadding(
-                                          padding: EdgeInsets.fromLTRB(
-                                            TokensStrip.s4,
-                                            TokensStrip.s1,
-                                            TokensStrip.s4,
+                    AgendaMonthGrid(
+                      month: _mes,
+                      selected: _dia,
+                      eventsByDay: agendaVisibleByDay(_ags),
+                      onSelect: _selectDay,
+                      onSwipe: _changeMonth,
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
+                    if (nextOpen != null && _isTodayVisible)
+                      AgendaNextBanner(
+                        agendamento: nextOpen,
+                        photoUrl: _photoFor(nextOpen.alunoId),
+                        onTap: () => _openAgendamentoDetails(nextOpen),
+                      )
+                    else if (!_loading && _erro == null && visible.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s4,
+                          0,
+                          TokensStrip.s4,
+                          TokensStrip.s2,
+                        ),
+                        child: DashboardSectionHeader(title: dayHeading),
+                      ),
+                    Expanded(
+                      child:
+                          _erro != null
+                              ? FxErrorState(
+                                chromeOnDark: isDark,
+                                primary: primary,
+                                message: friendlyError(_erro!),
+                                onRetry: () => _load(force: true),
+                              )
+                              : _loading
+                              ? const SkeletonList(count: 4)
+                              : RefreshIndicator(
+                                color: primary,
+                                onRefresh: () {
+                                  AnalyticsService.instance.track(
+                                    ProductEvents.agendaRefreshed,
+                                  );
+                                  return _load(force: true);
+                                },
+                                child:
+                                    visible.isEmpty
+                                        ? CustomScrollView(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          keyboardDismissBehavior:
+                                              ScrollViewKeyboardDismissBehavior
+                                                  .onDrag,
+                                          slivers: [
+                                            SliverPadding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                TokensStrip.s4,
+                                                TokensStrip.s1,
+                                                TokensStrip.s4,
+                                                DashboardLayout
+                                                    .bottomDockClearance,
+                                              ),
+                                              sliver: SliverToBoxAdapter(
+                                                child: AgendaDayEmptyPanel(
+                                                  dayLabel: dayHeading,
+                                                  onNew:
+                                                      () => _novoAgendamento(),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                        : ListView(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          keyboardDismissBehavior:
+                                              ScrollViewKeyboardDismissBehavior
+                                                  .onDrag,
+                                          padding: const EdgeInsets.fromLTRB(
+                                            FxSettingsLayout.pageInset,
+                                            0,
+                                            FxSettingsLayout.pageInset,
                                             DashboardLayout.bottomDockClearance,
                                           ),
-                                          sliver: SliverToBoxAdapter(
-                                            child: AgendaDayEmptyPanel(
-                                              dayLabel: dayHeading,
-                                              onNew: () => _novoAgendamento(),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                    : ListView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      keyboardDismissBehavior:
-                                          ScrollViewKeyboardDismissBehavior
-                                              .onDrag,
-                                      padding: const EdgeInsets.fromLTRB(
-                                        FxSettingsLayout.pageInset,
-                                        0,
-                                        FxSettingsLayout.pageInset,
-                                        DashboardLayout.bottomDockClearance,
-                                      ),
-                                      children: [
-                                        for (var i = 0; i < lane.length; i++)
-                                          if (lane[i] is AgendaLaneGap)
-                                            AgendaGapTile(
-                                              label: agendaGapLabel(
-                                                (lane[i] as AgendaLaneGap)
-                                                    .duration,
-                                              ),
-                                              onTap:
-                                                  () => _novoAgendamento(
-                                                    slot:
-                                                        (lane[i]
-                                                                as AgendaLaneGap)
-                                                            .from,
-                                                  ),
+                                          children: [
+                                            for (
+                                              var i = 0;
+                                              i < lane.length;
+                                              i++
                                             )
-                                          else
-                                            AgendaEventCard(
-                                              agendamento:
-                                                  (lane[i] as AgendaLaneEvent)
-                                                      .agendamento,
-                                              photoUrl: _photoFor(
-                                                (lane[i] as AgendaLaneEvent)
-                                                    .agendamento
-                                                    .alunoId,
-                                              ),
-                                              emphasized:
-                                                  (lane[i] as AgendaLaneEvent)
-                                                      .next,
-                                              onTap:
-                                                  () => _openAgendamentoDetails(
-                                                    (lane[i] as AgendaLaneEvent)
-                                                        .agendamento,
+                                              if (lane[i] is AgendaLaneGap)
+                                                AgendaGapTile(
+                                                  label: agendaGapLabel(
+                                                    (lane[i] as AgendaLaneGap)
+                                                        .duration,
                                                   ),
-                                            ),
-                                        if (cancelled > 0) ...[
-                                          const SizedBox(
-                                            height:
-                                                FxSettingsLayout
-                                                    .footerAfterGroup,
-                                          ),
-                                          Text(
-                                            cancelled == 1
-                                                ? '1 horário cancelado oculto'
-                                                : '$cancelled horários cancelados ocultos',
-                                            textAlign: TextAlign.center,
-                                            style: FocuxHubTypography.bodyMuted(
-                                              color: chrome.mute,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                          ),
+                                                  onTap:
+                                                      () => _novoAgendamento(
+                                                        slot:
+                                                            (lane[i]
+                                                                    as AgendaLaneGap)
+                                                                .from,
+                                                      ),
+                                                )
+                                              else
+                                                AgendaEventCard(
+                                                  agendamento:
+                                                      (lane[i]
+                                                              as AgendaLaneEvent)
+                                                          .agendamento,
+                                                  photoUrl: _photoFor(
+                                                    (lane[i] as AgendaLaneEvent)
+                                                        .agendamento
+                                                        .alunoId,
+                                                  ),
+                                                  emphasized:
+                                                      (lane[i]
+                                                              as AgendaLaneEvent)
+                                                          .next,
+                                                  onTap:
+                                                      () => _openAgendamentoDetails(
+                                                        (lane[i]
+                                                                as AgendaLaneEvent)
+                                                            .agendamento,
+                                                      ),
+                                                ),
+                                            if (cancelled > 0) ...[
+                                              const SizedBox(
+                                                height:
+                                                    FxSettingsLayout
+                                                        .footerAfterGroup,
+                                              ),
+                                              Text(
+                                                cancelled == 1
+                                                    ? '1 horário cancelado oculto'
+                                                    : '$cancelled horários cancelados ocultos',
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    FocuxHubTypography.bodyMuted(
+                                                      color: chrome.mute,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                              ),
+                    ),
+                  ],
                 ),
+                if (!_isTodayVisible)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom:
+                        MediaQuery.paddingOf(context).bottom + TokensStrip.s4,
+                    child: Center(child: AgendaTodayPill(onTap: _goToday)),
+                  ),
               ],
             ),
           ),

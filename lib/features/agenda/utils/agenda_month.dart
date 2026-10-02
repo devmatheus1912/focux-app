@@ -27,10 +27,14 @@ DateTime agendaMonthOf(DateTime d) => DateTime(d.year, d.month);
 DateTime agendaShiftMonth(DateTime month, int delta) =>
     DateTime(month.year, month.month + delta);
 
-String agendaMonthLabel(DateTime month, {DateTime? now}) {
-  final n = now ?? DateTime.now();
-  final name = agendaMonthNames[month.month];
-  return month.year == n.year ? name : '$name ${month.year}';
+String agendaMonthLabel(DateTime month) =>
+    '${agendaMonthNames[month.month]} ${month.year}';
+
+/// Semanas da grade que têm algum dia do mês (4 a 6).
+int agendaMonthWeeks(DateTime month) {
+  final offset = DateTime(month.year, month.month).weekday - 1;
+  final dias = DateTime(month.year, month.month + 1, 0).day;
+  return ((offset + dias) / 7).ceil();
 }
 
 /// Segunda-feira da semana que contém o dia 1; a grade cobre 6 semanas.
@@ -60,13 +64,22 @@ List<Agendamento> agendaEventsOn(List<Agendamento> items, DateTime day) =>
     items.where((a) => agendaSameDay(a.inicio, day)).toList()
       ..sort((a, b) => a.inicio.compareTo(b.inicio));
 
-Map<String, int> agendaVisibleCountByDay(List<Agendamento> items) {
-  final counts = <String, int>{};
+/// Atendimentos não cancelados por dia (chave ISO), em ordem de horário.
+Map<String, List<Agendamento>> agendaVisibleByDay(List<Agendamento> items) {
+  final byDay = <String, List<Agendamento>>{};
   for (final ag in agendaVisibleEvents(items)) {
-    final key = agendaIsoDate(ag.inicio);
-    counts[key] = (counts[key] ?? 0) + 1;
+    (byDay[agendaIsoDate(ag.inicio)] ??= []).add(ag);
   }
-  return counts;
+  return byDay;
+}
+
+/// Chip da célula: "9h Ana" / "9h30 Ana".
+String agendaChipLabel(Agendamento a) {
+  final h = a.inicio.hour;
+  final m = a.inicio.minute;
+  final hora = m == 0 ? '${h}h' : '${h}h${m.toString().padLeft(2, '0')}';
+  final nome = a.alunoNome.trim().split(RegExp(r'\s+')).first;
+  return nome.isEmpty ? hora : '$hora $nome';
 }
 
 String agendaMonthDayA11y({
