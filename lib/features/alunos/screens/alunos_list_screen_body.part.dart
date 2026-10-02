@@ -10,13 +10,21 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final primary = Theme.of(context).colorScheme.primary;
               final ink = chrome.ink;
               final mute = chrome.mute;
-              final alunos = [
-                ...home.alunos,
-                ...ref.watch(alunosHomeTailProvider).alunos,
-              ];
+              final tail = ref.watch(alunosHomeTailProvider);
+              final alunos = [...home.alunos, ...tail.alunos];
               final stats = home.stats;
               final diasLimite = home.alertasConfig.diasSemTreino;
-              final filtrados = alunos;
+              final filtrados = alunosListVisiveis(
+                alunos,
+                filtro: _filtro,
+                ordenacao: _ordenacao,
+              );
+              final inativosCount = alunosInativosCount(
+                totalInativos: stats.totalInativos,
+                carregados: alunos,
+                filtro: _filtro,
+                temMaisPaginas: tail.hasNext,
+              );
               if (!_operacaoWarmScheduled && filtrados.isNotEmpty) {
                 _operacaoWarmScheduled = true;
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,7 +70,6 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                 context,
                 stickyVisible: showStickyCreate,
               );
-              final tail = ref.watch(alunosHomeTailProvider);
 
               return FxContentWidthLimiter(
                 child: Column(
@@ -74,6 +81,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                       inadCount: inadCount,
                       riscoCount: riscoCount,
                       novosCount: novosCount,
+                      inativosCount: inativosCount,
                       isDark: isDark,
                       primary: primary,
                       ink: ink,

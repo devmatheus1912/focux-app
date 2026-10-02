@@ -18,7 +18,7 @@ Future<void> showAlunosListHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Filtros e busca',
-        'Chips Ativo, Inativo e Bloqueado. A busca cobre nome e objetivo.',
+        'Chips de contato, ativos, risco, convites e inativos (pausados ou bloqueados). A busca cobre nome e objetivo.',
         icon: 'search',
       ),
       FxHelpTip(
@@ -28,7 +28,7 @@ Future<void> showAlunosListHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Seleção',
-        'Segure um card para ações em lote. Pagar e outras sobem na barra de baixo.',
+        'Segure um card e use Ações na barra de baixo: pagar, pausar, bloquear, reativar ou excluir.',
         icon: 'circle-check',
       ),
     ],

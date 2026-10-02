@@ -15,9 +15,11 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
+import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../widgets/aluno_delete_confirm_sheet.dart';
 import 'aluno_invite_copy.dart';
+import 'aluno_status.dart';
 
 String alunoDeleteConfirmToken(String nome) {
   final trimmed = nome.trim();
@@ -42,6 +44,8 @@ Future<void> confirmarExclusaoAlunoDetail(
   try {
     await AlunoRepository(ref.read(apiClientProvider)).excluirAluno(aluno.id);
     if (context.mounted) {
+      // Antes do pop: o ref da ficha morre com a rota.
+      invalidateAlunosCaches(ref);
       FeedbackHelper.showSuccess(context, 'Aluno excluído.');
       safePopOrGo(context, '/alunos');
     }
@@ -50,6 +54,48 @@ Future<void> confirmarExclusaoAlunoDetail(
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }
+}
+
+Future<void> confirmarAlteracaoStatusAlunoDetail(
+  BuildContext context,
+  WidgetRef ref,
+  Aluno aluno,
+  String novoStatus,
+) async {
+  final confirm = await showFxConfirmSheet(
+    context,
+    title: alunoStatusConfirmTitle(novoStatus, aluno.nome),
+    message: alunoStatusConfirmMessage(novoStatus),
+    icon: alunoStatusIcon(novoStatus),
+    confirmIcon: alunoStatusIcon(novoStatus),
+    confirmLabel: alunoStatusConfirmLabel(novoStatus),
+    destructive: novoStatus == AlunoStatus.bloqueado,
+  );
+  if (!confirm || !context.mounted) return;
+  try {
+    await AlunoRepository(
+      ref.read(apiClientProvider),
+    ).atualizarStatusLote([aluno.id], novoStatus);
+    if (!context.mounted) return;
+    invalidateAlunosCaches(ref);
+    FeedbackHelper.showSuccess(
+      context,
+      alunoStatusAlteradoMessage(
+        novoStatus,
+        nome: aluno.nome,
+        genero: aluno.genero,
+      ),
+    );
+  } catch (e) {
+    if (context.mounted) {
+      FeedbackHelper.showError(context, friendlyError(e));
+    }
+    return;
+  }
+  // Falha do refetch aparece no estado da ficha, não como erro do status.
+  try {
+    await invalidateAluno360Providers(ref, aluno.id);
+  } catch (_) {}
 }
 
 Future<void> confirmarGerarSenhaAlunoDetail(
@@ -163,10 +209,9 @@ void showAlunoNovaSenhaProvisoriaSheet(
                     Text(
                       'Compartilhe só com $firstName.',
                       textAlign: TextAlign.center,
-                      style: Aluno360Layout.captionStyle(ctx).copyWith(
-                        color: mute,
-                        height: 1.35,
-                      ),
+                      style: Aluno360Layout.captionStyle(
+                        ctx,
+                      ).copyWith(color: mute, height: 1.35),
                     ),
                   ],
                 ),
@@ -181,10 +226,7 @@ void showAlunoNovaSenhaProvisoriaSheet(
                     'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
                   );
                   if (await canLaunchUrl(uri)) {
-                    await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
                     if (ctx.mounted) Navigator.of(ctx).pop();
                     return;
                   }
@@ -204,7 +246,9 @@ void showAlunoNovaSenhaProvisoriaSheet(
                 hasWhatsapp ? Icons.send_rounded : Icons.copy_rounded,
                 size: 18,
               ),
-              label: Text(hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite'),
+              label: Text(
+                hasWhatsapp ? 'Enviar no WhatsApp' : 'Copiar convite',
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: primary,
                 foregroundColor: Colors.white,

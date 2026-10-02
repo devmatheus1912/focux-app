@@ -83,6 +83,7 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
   final int count;
   final bool isDark;
   final bool mostrarMarcarPago;
+  final String? statusAtual;
   final VoidCallback onMarcarPagos;
   final void Function(String status) onAtualizarStatus;
   final VoidCallback onExcluir;
@@ -91,6 +92,7 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
     required this.count,
     required this.isDark,
     required this.mostrarMarcarPago,
+    this.statusAtual,
     required this.onMarcarPagos,
     required this.onAtualizarStatus,
     required this.onExcluir,
@@ -102,13 +104,18 @@ class _AlunosBulkActionsSheet extends StatefulWidget {
 }
 
 class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
-  String _statusSelecionado = 'ATIVO';
+  String? _statusSelecionado;
 
   static const _statusOptions = <({String value, String label})>[
     (value: 'ATIVO', label: 'Ativo'),
     (value: 'INATIVO', label: 'Inativo'),
     (value: 'BLOQUEADO', label: 'Bloqueado'),
   ];
+
+  String? _statusSubtitle(String status) {
+    if (status == widget.statusAtual) return 'Status atual';
+    return alunoStatusExplicacao(status);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +140,7 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             ],
             FxSettingsGroup(
               header: 'Status',
-              caption: 'Escolha e confirme abaixo.',
+              caption: 'Escolha um status e confirme.',
               edgeToEdgeRows: true,
               accent: Theme.of(context).colorScheme.primary,
               children: FxInsetPickerOption.list(
@@ -144,11 +151,8 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
                   for (var i = 0; i < _statusOptions.length; i++)
                     FxInsetPickerOptionSpec(
                       label: _statusOptions[i].label,
-                      icon: switch (_statusOptions[i].value) {
-                        'INATIVO' => Icons.pause_circle_outline_rounded,
-                        'BLOQUEADO' => Icons.block_rounded,
-                        _ => Icons.check_circle_outline_rounded,
-                      },
+                      subtitle: _statusSubtitle(_statusOptions[i].value),
+                      icon: alunoStatusIcon(_statusOptions[i].value),
                       selected: _statusSelecionado == _statusOptions[i].value,
                       onTap:
                           () => setState(
@@ -161,7 +165,11 @@ class _AlunosBulkActionsSheetState extends State<_AlunosBulkActionsSheet> {
             const SizedBox(height: FxSettingsLayout.groupGap),
             FxLiquidPrimaryButton(
               label: 'Aplicar status',
-              onPressed: () => widget.onAtualizarStatus(_statusSelecionado),
+              onPressed:
+                  _statusSelecionado == null ||
+                          _statusSelecionado == widget.statusAtual
+                      ? null
+                      : () => widget.onAtualizarStatus(_statusSelecionado!),
             ),
             const SizedBox(height: FxSettingsLayout.groupGap),
             _DestructiveSheetButton(

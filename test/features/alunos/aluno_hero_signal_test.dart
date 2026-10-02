@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno_hero_signal.dart';
 
 void main() {
@@ -33,10 +34,7 @@ void main() {
     test('keeps metric label for other signals', () {
       expect(
         alunoHeroContextLine(
-          const AlunoHeroPrimarySignal(
-            label: 'Sem treino',
-            value: '5',
-          ),
+          const AlunoHeroPrimarySignal(label: 'Sem treino', value: '5'),
           '5 dias parado — vale check-in',
         ),
         'Sem treino · 5 dias parado — vale check-in',
@@ -78,6 +76,49 @@ void main() {
           contextLine: 'Priorize contato hoje',
         ),
         'Priorize contato hoje',
+      );
+    });
+  });
+
+  group('alunoHeroStatusVisual', () {
+    Aluno aluno(String status, {bool inad = false, bool risco = false}) =>
+        Aluno(
+          id: 1,
+          nome: 'Nathalia Abrantes',
+          email: '',
+          status: status,
+          inadimplente: inad,
+          emRisco: risco,
+          riscoNivel: risco ? 'ALTO' : null,
+        );
+
+    test('Bloqueado vence inadimplência e risco', () {
+      expect(
+        alunoHeroStatusVisual(
+          aluno('BLOQUEADO', inad: true, risco: true),
+        ).label,
+        'Bloqueado',
+      );
+    });
+
+    test('Inativo não mostra Em risco', () {
+      expect(
+        alunoHeroStatusVisual(aluno('INATIVO', risco: true)).label,
+        'Inativo',
+      );
+    });
+
+    test('Ativo em risco segue Em risco', () {
+      expect(
+        alunoHeroStatusVisual(aluno('ATIVO', risco: true)).label,
+        'Em risco',
+      );
+    });
+
+    test('sinal principal ignora risco de não ativo', () {
+      expect(
+        alunoHeroPrimarySignal(aluno('INATIVO', risco: true)).label,
+        isNot(riscoOperacionalLabel),
       );
     });
   });

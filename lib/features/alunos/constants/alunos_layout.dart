@@ -50,6 +50,9 @@ abstract final class AlunosLayout {
 
   static const double listItemGap = 10;
 
+  /// Pausados e bloqueados: legíveis, mas recuados frente aos ativos.
+  static const double mutedCardOpacity = 0.62;
+
   static const double listItemGapCompact = 8;
 
   static const double listGapTop = TokensStrip.s2;
@@ -69,8 +72,7 @@ abstract final class AlunosLayout {
   static double listBottomPad(
     BuildContext context, {
     required bool stickyVisible,
-  }) =>
-      stickyVisible ? TokensStrip.s2 : listBottomGap(context);
+  }) => stickyVisible ? TokensStrip.s2 : listBottomGap(context);
 
   static const double formBottomBarHeight = 48;
 

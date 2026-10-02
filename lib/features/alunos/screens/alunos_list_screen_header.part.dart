@@ -7,6 +7,7 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
     required int inadCount,
     required int riscoCount,
     required int novosCount,
+    required int? inativosCount,
     required bool isDark,
     required Color primary,
     required Color ink,
@@ -217,6 +218,13 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                         count: novosCount,
                         isDark: isDark,
                       ),
+                      const SizedBox(width: 8),
+                      _alunosFilterChip(
+                        filtro: AlunoFiltro.inativos,
+                        label: 'Inativos',
+                        count: inativosCount,
+                        isDark: isDark,
+                      ),
                       const SizedBox(width: AlunosLayout.filterRowEndInset),
                     ],
                   ),
@@ -232,13 +240,13 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
   Widget _alunosFilterChip({
     required AlunoFiltro filtro,
     required String label,
-    required int count,
+    required int? count,
     required bool isDark,
   }) {
     return KeyedSubtree(
       key: _chipKeys[filtro],
       child: FxToggleChip(
-        label: '$label $count',
+        label: count == null ? label : '$label $count',
         selected: _filtro == filtro,
         isDark: isDark,
         filledWhenSelected: true,

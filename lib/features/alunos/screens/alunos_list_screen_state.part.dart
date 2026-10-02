@@ -278,18 +278,26 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
     final repo = AlunoRepository(ref.read(apiClientProvider));
     int sucesso = 0;
+    Object? primeiroErro;
     for (final id in List<int>.from(_selecionados)) {
       try {
         await repo.excluirAluno(id);
         sucesso++;
-      } catch (_) {}
+      } catch (e) {
+        primeiroErro ??= e;
+      }
     }
     if (mounted) {
       invalidateAlunosCaches(ref);
       if (sucesso < total) {
         FeedbackHelper.showError(
           context,
-          '${total - sucesso} de $total não puderam ser excluídos.',
+          alunosExclusaoFalhaMessage(
+            falhas: total - sucesso,
+            total: total,
+            primeiroErro:
+                primeiroErro == null ? null : friendlyError(primeiroErro),
+          ),
         );
       }
       if (sucesso > 0) {
@@ -358,6 +366,17 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
 
   Future<void> _atualizarStatusSelecionados(String novoStatus) async {
     if (_selecionados.isEmpty) return;
+    final qtd = _selecionados.length;
+    final confirmar = await showFxConfirmSheet(
+      context,
+      title: alunosStatusConfirmTitle(novoStatus, qtd),
+      message: alunoStatusConfirmMessage(novoStatus, count: qtd),
+      icon: alunoStatusIcon(novoStatus),
+      confirmIcon: alunoStatusIcon(novoStatus),
+      confirmLabel: alunoStatusConfirmLabel(novoStatus),
+      destructive: novoStatus == AlunoStatus.bloqueado,
+    );
+    if (!confirmar || !mounted) return;
     final repo = AlunoRepository(ref.read(apiClientProvider));
     try {
       await repo.atualizarStatusLote(_selecionados.toList(), novoStatus);
@@ -365,7 +384,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
         invalidateAlunosCaches(ref);
         FeedbackHelper.showSuccess(
           context,
-          alunosAtualizadosMessage(_selecionados.length),
+          alunosStatusAlteradosMessage(novoStatus, qtd),
         );
         setState(() {
           _modoSelecao = false;
@@ -392,8 +411,9 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
       ...?home?.alunos,
       ...ref.read(alunosHomeTailProvider).alunos,
     ];
+    final selecionados = alunos.where((a) => _selecionados.contains(a.id));
     final mostrarMarcarPago = showAlunosBulkPayCta(
-      alunos.where((a) => _selecionados.contains(a.id)),
+      selecionados,
       temFinanceiro: _temFinanceiro,
     );
     showFxHomeSheet<void>(
@@ -403,6 +423,7 @@ class _AlunosListScreenState extends ConsumerState<AlunosListScreen> {
             count: qtd,
             isDark: isDark,
             mostrarMarcarPago: mostrarMarcarPago,
+            statusAtual: alunosStatusComum(selecionados),
             onMarcarPagos: () {
               Navigator.pop(sheetContext);
               _marcarPagosSelecionados();

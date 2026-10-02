@@ -333,6 +333,18 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     ref,
                                     aluno,
                                   ),
+                              statusActions: alunoStatusAcoesDisponiveis(
+                                aluno.status,
+                              ),
+                              onStatusAction: (status) async {
+                                await confirmarAlteracaoStatusAlunoDetail(
+                                  context,
+                                  ref,
+                                  aluno,
+                                  status,
+                                );
+                                _markFetched();
+                              },
                             ),
                           ),
                           SliverToBoxAdapter(

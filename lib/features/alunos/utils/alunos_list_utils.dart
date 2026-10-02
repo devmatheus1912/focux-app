@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_repository.dart';
+import 'aluno_status.dart';
+
+export 'aluno_status.dart';
 
 /// Texto secundário da lista — contraste WCAG AA em fundos de card.
 Color alunoListSecondaryInk(bool isDark) =>
@@ -41,8 +44,7 @@ bool alunoListIsOverdue(Aluno aluno) =>
 bool showAlunosBulkPayCta(
   Iterable<Aluno> selected, {
   required bool temFinanceiro,
-}) =>
-    temFinanceiro && selected.any(alunoListIsOverdue);
+}) => temFinanceiro && selected.any(alunoListIsOverdue);
 
 /// Banner de contato — some se a base inteira já é o foco (eco do chip).
 bool showAlunosContatoBanner({
@@ -156,11 +158,54 @@ bool shouldShowAlunoListOpsLine({
       filtro: filtro,
     ).isNotEmpty;
 
+/// O BFF ainda não filtra por status: `inativos` cai em todos e o recorte
+/// é feito aqui. Em Prioridade, pausados e bloqueados vão para o fim.
+List<Aluno> alunosListVisiveis(
+  List<Aluno> alunos, {
+  required AlunoFiltro filtro,
+  AlunoOrdenacao ordenacao = AlunoOrdenacao.prioridade,
+}) {
+  if (filtro == AlunoFiltro.inativos) {
+    return alunos.where((a) => !alunoStatusAtivo(a)).toList(growable: false);
+  }
+  if (filtro == AlunoFiltro.todos && ordenacao == AlunoOrdenacao.prioridade) {
+    return [
+      ...alunos.where(alunoStatusAtivo),
+      ...alunos.where((a) => !alunoStatusAtivo(a)),
+    ];
+  }
+  return alunos;
+}
+
+/// Contagem do chip Inativos; `null` quando a lista carregada não basta.
+int? alunosInativosCount({
+  required int? totalInativos,
+  required List<Aluno> carregados,
+  required AlunoFiltro filtro,
+  required bool temMaisPaginas,
+}) {
+  if (totalInativos != null) return totalInativos;
+  if (temMaisPaginas) return null;
+  if (filtro != AlunoFiltro.todos && filtro != AlunoFiltro.inativos) {
+    return null;
+  }
+  return carregados.where((a) => !alunoStatusAtivo(a)).length;
+}
+
 /// Badge de status do card — lógica fora da UI.
+/// Bloqueado > Inadimplente > Inativo > risco (só ATIVO) > Ativo.
 ({String label, Color fill, Color foreground}) alunoListStatusBadge(
   Aluno aluno,
   bool isDark,
 ) {
+  final status = alunoStatusNormalizado(aluno.status);
+  if (status == AlunoStatus.bloqueado) {
+    return (
+      label: 'Bloqueado',
+      fill: EagleTokens.badSoft,
+      foreground: EagleTokens.bad,
+    );
+  }
   if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
     return (
       label: 'Inadimplente',
@@ -168,19 +213,20 @@ bool shouldShowAlunoListOpsLine({
       foreground: EagleTokens.bad,
     );
   }
-  if (aluno.status == 'INATIVO') {
+  if (status == AlunoStatus.inativo) {
     return (
       label: 'Inativo',
       fill: EagleTokens.warnSoft,
       foreground: EagleTokens.warn,
     );
   }
-  if (aluno.emRisco) {
+  if (aluno.emRisco && status == AlunoStatus.ativo) {
     final nivel = (aluno.riscoNivel ?? '').toUpperCase();
     final isAlto = nivel == 'ALTO';
-    final riscoColors = isAlto
-        ? alunoRiscoAltoBadgeColors(isDark)
-        : alunoRiscoMedioBadgeColors(isDark);
+    final riscoColors =
+        isAlto
+            ? alunoRiscoAltoBadgeColors(isDark)
+            : alunoRiscoMedioBadgeColors(isDark);
     return (
       label: isAlto ? 'Atenção alta' : 'Atenção média',
       fill: riscoColors.$2,

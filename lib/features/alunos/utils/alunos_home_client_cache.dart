@@ -22,6 +22,7 @@ class AlunosHomeQuery {
     AlunoFiltro.inadimplentes => 'inadimplentes',
     AlunoFiltro.risco => 'risco',
     AlunoFiltro.novos => 'novos',
+    AlunoFiltro.inativos => 'inativos',
   };
 
   String get ordenacaoApi => switch (ordenacao) {

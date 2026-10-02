@@ -1,4 +1,14 @@
-enum AlunoFiltro { todos, contatoHoje, ativos, inadimplentes, risco, novos }
+enum AlunoFiltro {
+  todos,
+  contatoHoje,
+  ativos,
+  inadimplentes,
+  risco,
+  novos,
+
+  /// INATIVO (pausado) e BLOQUEADO.
+  inativos,
+}
 
 String alunosListCountLabel(int total) {
   if (total <= 0) return 'Nenhum aluno';
@@ -81,14 +91,25 @@ String mensalidadesPagasMessage(int count) =>
         ? '1 mensalidade marcada como paga'
         : '$count mensalidades marcadas como pagas';
 
-String alunosAtualizadosMessage(int count) =>
-    count == 1 ? '1 aluno atualizado' : '$count alunos atualizados';
-
 String alunosExcluidosMessage(int count) => switch (count) {
   0 => 'Nenhum aluno foi excluído.',
   1 => '1 aluno excluído.',
   _ => '$count alunos excluídos.',
 };
+
+/// Falha parcial ou total da exclusão em lote, com o primeiro motivo.
+String alunosExclusaoFalhaMessage({
+  required int falhas,
+  required int total,
+  String? primeiroErro,
+}) {
+  final base =
+      falhas == 1
+          ? '1 de $total não pôde ser excluído'
+          : '$falhas de $total não puderam ser excluídos';
+  final motivo = primeiroErro?.trim() ?? '';
+  return motivo.isEmpty ? '$base.' : '$base: $motivo';
+}
 
 String alunosSelectionSummary(int count) => switch (count) {
   0 => 'Selecione os alunos',
@@ -103,4 +124,5 @@ String alunoFiltroLabel(AlunoFiltro filtro) => switch (filtro) {
   AlunoFiltro.inadimplentes => 'em atraso',
   AlunoFiltro.risco => 'em risco',
   AlunoFiltro.novos => 'convites pendentes',
+  AlunoFiltro.inativos => 'inativos',
 };

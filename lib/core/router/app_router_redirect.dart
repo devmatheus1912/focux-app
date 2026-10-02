@@ -278,6 +278,7 @@ AlunoFiltro alunoFiltroFromQuery(String? value) {
     'risco' => AlunoFiltro.risco,
     'contato' || 'contato-hoje' || 'contatohoje' => AlunoFiltro.contatoHoje,
     'novos' => AlunoFiltro.novos,
+    'inativos' => AlunoFiltro.inativos,
     _ => AlunoFiltro.todos,
   };
 }

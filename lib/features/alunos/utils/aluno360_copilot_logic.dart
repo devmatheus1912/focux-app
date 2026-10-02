@@ -56,6 +56,20 @@ class CopilotPrescriptionContent {
   final String reason;
 }
 
+/// Contato prioritário esconde título e ação; sem motivo, o card fica vazio.
+bool copilotPrescriptionHasVisibleContent(
+  CopilotPrescriptionContent content, {
+  required bool showTitle,
+  required bool showAction,
+  bool hasPrepareMessage = false,
+}) {
+  if (showTitle && content.title.trim().isNotEmpty) return true;
+  if (showAction && (content.action.trim().isNotEmpty || hasPrepareMessage)) {
+    return true;
+  }
+  return content.reason.trim().isNotEmpty;
+}
+
 int copilotProfileCompletion(Aluno aluno) {
   final fields = [
     aluno.nome,
@@ -97,9 +111,10 @@ Map<String, dynamic> copilotActionFrom360(ProximaAcaoResumo proxima) => {
 Map<String, dynamic> copilotActionFromIa(IaCopilotProximaAcao action) {
   final raw = action.rawAcaoOrFallback;
   final acao = normalizeIaCopilotAcao(raw);
-  final motivoRaw = action.motivo.isEmpty
-      ? 'Gerado com base nos sinais atuais do aluno.'
-      : action.motivo;
+  final motivoRaw =
+      action.motivo.isEmpty
+          ? 'Gerado com base nos sinais atuais do aluno.'
+          : action.motivo;
   return {
     'titulo': 'Sugestão IA',
     'acao': acao.isEmpty ? cleanCopilotText(raw) : acao,
@@ -220,10 +235,7 @@ CopilotPriorityCardState resolveCopilotPriorityCardState({
 }) {
   final iaInFlight =
       iaRefreshing ||
-      (forceIa &&
-          iaAsync != null &&
-          iaAsync.isLoading &&
-          !iaAsync.hasValue);
+      (forceIa && iaAsync != null && iaAsync.isLoading && !iaAsync.hasValue);
 
   if (iaInFlight) {
     return CopilotPriorityCardState.refreshingAi;
@@ -602,9 +614,10 @@ String resolveCopilotAcao({
   if (forceIa && iaAsync != null) {
     return iaAsync.maybeWhen(
       data: (action) {
-        final raw = action.rawAcaoOrFallback.isEmpty
-            ? fallback
-            : action.rawAcaoOrFallback;
+        final raw =
+            action.rawAcaoOrFallback.isEmpty
+                ? fallback
+                : action.rawAcaoOrFallback;
         final normalized = normalizeIaCopilotAcao(raw);
         return cleanCopilotText(normalized.isEmpty ? raw : normalized);
       },

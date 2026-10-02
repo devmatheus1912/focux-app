@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +9,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
+import '../utils/aluno_status.dart';
 
 /// Tab bar for Aluno 360 (Operação · Evolução · Ferramentas).
 class Aluno360DetailTabBar extends StatelessWidget {
@@ -52,9 +54,7 @@ class Aluno360DetailTabBar extends StatelessWidget {
                   alpha: tabBackdropOpaque ? 0.92 : 0.55,
                 ),
                 borderRadius: BorderRadius.circular(TokensStrip.rMd),
-                border: Border.all(
-                  color: line.withValues(alpha: 0.45),
-                ),
+                border: Border.all(color: line.withValues(alpha: 0.45)),
               ),
               child: Row(
                 children: [
@@ -159,6 +159,8 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     this.freshnessLabel,
     this.onDelete,
     this.onHelp,
+    this.statusActions = const [],
+    this.onStatusAction,
     this.actionsEnabled = true,
   });
 
@@ -169,6 +171,10 @@ class Aluno360HeaderToolbar extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback? onDelete;
   final VoidCallback? onHelp;
+
+  /// Status de destino (ATIVO / INATIVO / BLOQUEADO) oferecidos no menu.
+  final List<String> statusActions;
+  final ValueChanged<String>? onStatusAction;
   final bool actionsEnabled;
 
   @override
@@ -225,9 +231,36 @@ class Aluno360HeaderToolbar extends StatelessWidget {
         else
           const Spacer(),
         if (onHelp != null && actionsEnabled)
-          FxHelpIconButton(
-            tooltip: 'Ajuda sobre esta aba',
-            onTap: onHelp!,
+          FxHelpIconButton(tooltip: 'Ajuda sobre esta aba', onTap: onHelp!),
+        if (onStatusAction != null &&
+            statusActions.isNotEmpty &&
+            actionsEnabled)
+          PopupMenuButton<String>(
+            tooltip: 'Status do aluno',
+            position: PopupMenuPosition.under,
+            icon: Icon(Icons.more_vert_rounded, color: ink),
+            onSelected: onStatusAction,
+            itemBuilder:
+                (_) => [
+                  for (final status in statusActions)
+                    PopupMenuItem(
+                      value: status,
+                      child: Row(
+                        children: [
+                          Icon(
+                            alunoStatusIcon(status),
+                            size: 20,
+                            color:
+                                status == AlunoStatus.bloqueado
+                                    ? EagleTokens.bad
+                                    : null,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(alunoStatusAcaoLabel(status)),
+                        ],
+                      ),
+                    ),
+                ],
           ),
         if (onDelete != null && actionsEnabled)
           IconButton(
@@ -265,6 +298,8 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.freshnessLabel,
     this.onDelete,
     this.onHelp,
+    this.statusActions = const [],
+    this.onStatusAction,
     this.actionsEnabled = true,
   });
 
@@ -282,6 +317,8 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback onBack;
   final VoidCallback? onDelete;
   final VoidCallback? onHelp;
+  final List<String> statusActions;
+  final ValueChanged<String>? onStatusAction;
   final bool actionsEnabled;
 
   @override
@@ -341,6 +378,8 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     onBack: onBack,
                     onDelete: onDelete,
                     onHelp: onHelp,
+                    statusActions: statusActions,
+                    onStatusAction: onStatusAction,
                     actionsEnabled: actionsEnabled,
                   ),
                 ),
@@ -403,6 +442,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         ink != oldDelegate.ink ||
         isDark != oldDelegate.isDark ||
         actionsEnabled != oldDelegate.actionsEnabled ||
-        onHelp != oldDelegate.onHelp;
+        onHelp != oldDelegate.onHelp ||
+        !listEquals(statusActions, oldDelegate.statusActions);
   }
 }

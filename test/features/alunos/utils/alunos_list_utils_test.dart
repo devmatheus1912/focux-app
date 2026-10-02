@@ -6,10 +6,7 @@ import 'package:focux_app/features/alunos/utils/alunos_list_utils.dart';
 void main() {
   group('shouldShowAlunoListBadge', () {
     test('oculta Ativo sempre', () {
-      expect(
-        shouldShowAlunoListBadge('Ativo', AlunoFiltro.todos),
-        isFalse,
-      );
+      expect(shouldShowAlunoListBadge('Ativo', AlunoFiltro.todos), isFalse);
     });
 
     test('oculta Atenção alta quando filtro risco', () {
@@ -96,6 +93,149 @@ void main() {
         true,
       );
       expect(badge.label, 'Atenção média');
+    });
+
+    test('Bloqueado vence inadimplência e risco', () {
+      final badge = alunoListStatusBadge(
+        Aluno(
+          id: 4,
+          nome: 'Duda',
+          email: 'd@test.com',
+          status: 'BLOQUEADO',
+          inadimplente: true,
+          statusFinanceiro: 'INADIMPLENTE',
+          emRisco: true,
+          riscoNivel: 'ALTO',
+        ),
+        false,
+      );
+      expect(badge.label, 'Bloqueado');
+    });
+
+    test('Inativo nunca mostra risco', () {
+      final badge = alunoListStatusBadge(
+        Aluno(
+          id: 5,
+          nome: 'Edu',
+          email: 'e@test.com',
+          status: 'INATIVO',
+          emRisco: true,
+          riscoNivel: 'ALTO',
+        ),
+        false,
+      );
+      expect(badge.label, 'Inativo');
+    });
+
+    test('Inadimplente ainda vence Inativo', () {
+      final badge = alunoListStatusBadge(
+        Aluno(
+          id: 6,
+          nome: 'Fê',
+          email: 'f@test.com',
+          status: 'INATIVO',
+          inadimplente: true,
+        ),
+        false,
+      );
+      expect(badge.label, 'Inadimplente');
+    });
+  });
+
+  group('alunosListVisiveis', () {
+    final ativo = Aluno(id: 1, nome: 'Ana', email: '', status: 'ATIVO');
+    final pausado = Aluno(id: 2, nome: 'Bia', email: '', status: 'INATIVO');
+    final bloqueado = Aluno(
+      id: 3,
+      nome: 'Caio',
+      email: '',
+      status: 'BLOQUEADO',
+    );
+    final ativo2 = Aluno(id: 4, nome: 'Davi', email: '', status: 'ATIVO');
+
+    test('Inativos traz pausados e bloqueados', () {
+      expect(
+        alunosListVisiveis([
+          ativo,
+          pausado,
+          bloqueado,
+          ativo2,
+        ], filtro: AlunoFiltro.inativos).map((a) => a.id),
+        [2, 3],
+      );
+    });
+
+    test('Todos em prioridade manda não ativos para o fim', () {
+      expect(
+        alunosListVisiveis([
+          pausado,
+          ativo,
+          bloqueado,
+          ativo2,
+        ], filtro: AlunoFiltro.todos).map((a) => a.id),
+        [1, 4, 2, 3],
+      );
+    });
+
+    test('Nome A-Z mantém a ordem do servidor', () {
+      expect(
+        alunosListVisiveis(
+          [pausado, ativo],
+          filtro: AlunoFiltro.todos,
+          ordenacao: AlunoOrdenacao.nome,
+        ).map((a) => a.id),
+        [2, 1],
+      );
+    });
+
+    test('contagem do chip usa stats ou a lista completa', () {
+      expect(
+        alunosInativosCount(
+          totalInativos: 7,
+          carregados: [ativo],
+          filtro: AlunoFiltro.ativos,
+          temMaisPaginas: true,
+        ),
+        7,
+      );
+      expect(
+        alunosInativosCount(
+          totalInativos: null,
+          carregados: [ativo, pausado, bloqueado],
+          filtro: AlunoFiltro.todos,
+          temMaisPaginas: false,
+        ),
+        2,
+      );
+      expect(
+        alunosInativosCount(
+          totalInativos: null,
+          carregados: [ativo],
+          filtro: AlunoFiltro.ativos,
+          temMaisPaginas: false,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('alunosExclusaoFalhaMessage', () {
+    test('singular com motivo', () {
+      expect(
+        alunosExclusaoFalhaMessage(
+          falhas: 1,
+          total: 1,
+          primeiroErro: 'Sem conexão.',
+        ),
+        '1 de 1 não pôde ser excluído: Sem conexão.',
+      );
+    });
+
+    test('plural sem motivo', () {
+      expect(
+        alunosExclusaoFalhaMessage(falhas: 2, total: 3),
+        '2 de 3 não puderam ser excluídos.',
+      );
     });
   });
 

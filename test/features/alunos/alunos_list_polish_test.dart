@@ -27,6 +27,12 @@ void main() {
     expect(screen, contains("label: 'Ativo'"));
     expect(screen, contains("label: 'Inativo'"));
     expect(screen, contains("label: 'Bloqueado'"));
+    expect(screen, contains('alunosExclusaoFalhaMessage'));
+    expect(screen, isNot(contains('catch (_) {}')));
+    expect(screen, contains('alunosStatusAlteradosMessage'));
+    expect(screen, contains('showFxConfirmSheet'));
+    expect(screen, contains('AlunoFiltro.inativos'));
+    expect(screen, contains('alunosListVisiveis'));
     expect(screen, contains('FxSettingsGroup'));
     expect(screen, contains('AlunosMicrocopy.densityTitle'));
     expect(screen, contains('showFxHomeSheet'));

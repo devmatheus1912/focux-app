@@ -439,6 +439,8 @@ void main() {
       expect(screen, isNot(contains('Pulso operacional')));
       expect(screen, isNot(contains('Score API')));
       expect(screen, contains('confirmarExclusaoAlunoDetail'));
+      expect(screen, contains('confirmarAlteracaoStatusAlunoDetail'));
+      expect(screen, contains('alunoStatusAcoesDisponiveis'));
       expect(screen, contains('riscoMetricIcon'));
       expect(screen, contains('FxSettingsTile'));
       expect(screen, contains('copySensitiveToClipboard'));

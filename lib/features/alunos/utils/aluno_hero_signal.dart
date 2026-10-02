@@ -4,8 +4,10 @@ import '../../../core/theme/design_tokens.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
+import 'aluno_status.dart';
 import 'risco_labels.dart';
 
+export 'aluno_status.dart';
 export 'risco_labels.dart';
 
 /// `aderenciaPercent` do servidor cobre os últimos 30 dias.
@@ -51,10 +53,16 @@ bool alunoHeroShouldShowStatusBadge({
   return true;
 }
 
-AlunoHeroStatusVisual alunoHeroStatusVisual(
-  Aluno aluno, {
-  bool isDark = true,
-}) {
+AlunoHeroStatusVisual alunoHeroStatusVisual(Aluno aluno, {bool isDark = true}) {
+  final status = alunoStatusNormalizado(aluno.status);
+  if (status == AlunoStatus.bloqueado) {
+    return AlunoHeroStatusVisual(
+      label: 'Bloqueado',
+      background:
+          isDark ? Colors.white.withValues(alpha: 0.14) : EagleTokens.badSoft,
+      foreground: isDark ? EagleTokens.riskCoralLight : EagleTokens.bad,
+    );
+  }
   if (aluno.statusFinanceiro == 'INADIMPLENTE' || aluno.inadimplente) {
     return AlunoHeroStatusVisual(
       label: 'Inadimplente',
@@ -63,7 +71,7 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(
       foreground: isDark ? EagleTokens.riskCoralLight : EagleTokens.bad,
     );
   }
-  if (aluno.status == 'INATIVO') {
+  if (status == AlunoStatus.inativo) {
     return AlunoHeroStatusVisual(
       label: 'Inativo',
       background:
@@ -71,7 +79,7 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(
       foreground: isDark ? EagleTokens.warmPeach : EagleTokens.warn,
     );
   }
-  if (aluno.emRisco) {
+  if (aluno.emRisco && status == AlunoStatus.ativo) {
     return AlunoHeroStatusVisual(
       label: 'Em risco',
       background: EagleTokens.dangerBrown,
@@ -90,18 +98,17 @@ AlunoHeroStatusVisual alunoHeroStatusVisual(
 AlunoHeroPrimarySignal alunoHeroPrimarySignal(Aluno aluno) {
   final dias = aluno.diasSemTreino;
   final ader = aluno.aderenciaPercent;
+  final emRisco = aluno.emRisco && alunoStatusAtivo(aluno);
   final diasCritico =
       dias != null && dias >= AlunoFollowUpStore.diasSemTreinoLimite;
   final priorizarDias =
-      aluno.emRisco ||
+      emRisco ||
       aluno.inadimplente ||
       aluno.statusFinanceiro == 'INADIMPLENTE' ||
       diasCritico ||
       (dias != null && dias >= 3);
 
-  if (aluno.emRisco &&
-      (dias == null || dias == 0) &&
-      (ader == null || ader == 0)) {
+  if (emRisco && (dias == null || dias == 0) && (ader == null || ader == 0)) {
     return AlunoHeroPrimarySignal(
       label: riscoOperacionalLabel,
       value: formatRiscoNivel(aluno.riscoNivel),

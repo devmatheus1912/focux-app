@@ -117,17 +117,16 @@ class Aluno {
     snoozedUntil: json['snoozedUntil'] as String?,
     ultimoContato: json['ultimoContato'] as String?,
     operacaoFocusMode: json['operacaoFocusMode'] as bool?,
-    aderenciaSparkline:
-        ((json['aderenciaSparkline'] as List?) ?? const [])
-            .map((e) {
-              final n = (e as num?)?.toDouble();
-              if (n == null || !n.isFinite || n <= 0) return 0.0;
-              if (n > alunosListSparklineMaxCheckinsPerDay) {
-                return alunosListSparklineMaxCheckinsPerDay;
-              }
-              return n;
-            })
-            .toList(growable: false),
+    aderenciaSparkline: ((json['aderenciaSparkline'] as List?) ?? const [])
+        .map((e) {
+          final n = (e as num?)?.toDouble();
+          if (n == null || !n.isFinite || n <= 0) return 0.0;
+          if (n > alunosListSparklineMaxCheckinsPerDay) {
+            return alunosListSparklineMaxCheckinsPerDay;
+          }
+          return n;
+        })
+        .toList(growable: false),
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,
@@ -146,6 +145,9 @@ class AlunosStats {
   final int totalConvites;
   final int totalContatoHoje;
 
+  /// INATIVO + BLOQUEADO. `null` enquanto o BFF não manda o campo.
+  final int? totalInativos;
+
   const AlunosStats({
     required this.total,
     required this.totalAtivos,
@@ -153,6 +155,7 @@ class AlunosStats {
     required this.totalRiscoAlto,
     required this.totalConvites,
     this.totalContatoHoje = 0,
+    this.totalInativos,
   });
 
   factory AlunosStats.fromJson(Map<String, dynamic> json) => AlunosStats(
@@ -162,6 +165,7 @@ class AlunosStats {
     totalRiscoAlto: (json['totalRiscoAlto'] as num?)?.toInt() ?? 0,
     totalConvites: (json['totalConvites'] as num?)?.toInt() ?? 0,
     totalContatoHoje: (json['totalContatoHoje'] as num?)?.toInt() ?? 0,
+    totalInativos: (json['totalInativos'] as num?)?.toInt(),
   );
 }
 
@@ -292,22 +296,12 @@ class AderenciaDia {
   final String labelDia;
   final int checkins;
 
-  const AderenciaDia({
-    this.data = '',
-    this.labelDia = '',
-    this.checkins = 0,
-  });
+  const AderenciaDia({this.data = '', this.labelDia = '', this.checkins = 0});
 
   factory AderenciaDia.fromJson(Map<String, dynamic> json) => AderenciaDia(
     // Contrato novo: dia/weekday · legado: data/labelDia.
-    data:
-        json['data'] as String? ??
-        json['dia'] as String? ??
-        '',
-    labelDia:
-        json['labelDia'] as String? ??
-        json['weekday'] as String? ??
-        '',
+    data: json['data'] as String? ?? json['dia'] as String? ?? '',
+    labelDia: json['labelDia'] as String? ?? json['weekday'] as String? ?? '',
     checkins: (json['checkins'] as num?)?.toInt() ?? 0,
   );
 
@@ -336,25 +330,31 @@ class AderenciaSemanalBundle {
   List<Map<String, dynamic>> get diasMaps =>
       dias.map((d) => d.toMap()).toList(growable: false);
 
-  factory AderenciaSemanalBundle.fromJson(Map<String, dynamic> json) =>
-      AderenciaSemanalBundle(
-        dias:
-            (json['dias'] as List<dynamic>? ?? const [])
-                .map((e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)))
-                .toList(),
-        totalSemana: (json['totalSemana'] as num?)?.toInt() ?? 0,
-        streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
-        diasComCheckin: (json['diasComCheckin'] as num?)?.toInt() ?? 0,
-        resumo: json['resumo'] as String? ?? '',
-      );
+  factory AderenciaSemanalBundle.fromJson(
+    Map<String, dynamic> json,
+  ) => AderenciaSemanalBundle(
+    dias:
+        (json['dias'] as List<dynamic>? ?? const [])
+            .map(
+              (e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList(),
+    totalSemana: (json['totalSemana'] as num?)?.toInt() ?? 0,
+    streakAtual: (json['streakAtual'] as num?)?.toInt() ?? 0,
+    diasComCheckin: (json['diasComCheckin'] as num?)?.toInt() ?? 0,
+    resumo: json['resumo'] as String? ?? '',
+  );
 
-  factory AderenciaSemanalBundle.fromLegacyList(List<dynamic> raw) =>
-      AderenciaSemanalBundle(
-        dias:
-            raw
-                .map((e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)))
-                .toList(),
-      );
+  factory AderenciaSemanalBundle.fromLegacyList(
+    List<dynamic> raw,
+  ) => AderenciaSemanalBundle(
+    dias:
+        raw
+            .map(
+              (e) => AderenciaDia.fromJson(Map<String, dynamic>.from(e as Map)),
+            )
+            .toList(),
+  );
 
   static AderenciaSemanalBundle parse(dynamic raw) {
     if (raw is Map<String, dynamic>) {
@@ -430,10 +430,10 @@ class OperacaoUiHints {
     required this.compactFollowUp,
   });
 
-  factory OperacaoUiHints.fromJson(Map<String, dynamic> json) => OperacaoUiHints(
-    contactPriority: json['contactPriority'] as bool? ?? false,
-    defaultFocusMode: json['defaultFocusMode'] as bool? ?? false,
-    compactFollowUp: json['compactFollowUp'] as bool? ?? false,
-  );
+  factory OperacaoUiHints.fromJson(Map<String, dynamic> json) =>
+      OperacaoUiHints(
+        contactPriority: json['contactPriority'] as bool? ?? false,
+        defaultFocusMode: json['defaultFocusMode'] as bool? ?? false,
+        compactFollowUp: json['compactFollowUp'] as bool? ?? false,
+      );
 }
-

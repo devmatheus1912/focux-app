@@ -105,6 +105,8 @@ class AlunoListCard extends ConsumerWidget {
     final objetivo = prettyAlunoObjective(aluno.objetivo);
     final status = alunoListStatusBadge(aluno, isDark);
     final statusText = status.label;
+    final statusExplicacao = alunoStatusExplicacao(aluno.status);
+    final muted = !alunoStatusAtivo(aluno);
     final avatarColor = alunoAvatarFallbackColor(primary: primary);
     final sparkline = alunosListSparklineMetrics(
       points: alunosListSparklinePointsFromRaw(aluno.aderenciaSparkline),
@@ -157,18 +159,20 @@ class AlunoListCard extends ConsumerWidget {
       button: true,
       selected: isSelected,
       label:
-          '$displayName, $statusText, $aderenciaLabel'
+          '$displayName, $statusText'
+          '${statusExplicacao == null ? '' : ', $statusExplicacao'}'
+          ', $aderenciaLabel'
           '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
       child: InkWell(
         onTap:
             modoSelecao
-            ? onToggle
-            : () {
-              // Kick /360/operacao before the route builds (cuts skeleton wait).
-              // ignore: unawaited_futures
-              ref.read(aluno360OperacaoBundleProvider(aluno.id).future);
-              context.push('/alunos/${aluno.id}', extra: aluno);
-            },
+                ? onToggle
+                : () {
+                  // Kick /360/operacao before the route builds (cuts skeleton wait).
+                  // ignore: unawaited_futures
+                  ref.read(aluno360OperacaoBundleProvider(aluno.id).future);
+                  context.push('/alunos/${aluno.id}', extra: aluno);
+                },
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
         child: AnimatedContainer(
@@ -185,193 +189,199 @@ class AlunoListCard extends ConsumerWidget {
             accent: primary,
             radius: FxSettingsLayout.groupRadius,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  if (modoSelecao) ...[
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 150),
-                      child: Icon(
-                        isSelected
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                        key: ValueKey(isSelected),
-                        color:
-                            isSelected
-                                ? primary
-                                : (isDark
-                                    ? EagleTokens.darkInkMute
-                                    : TokensStrip.textSecondary),
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  AlunoAvatar(
-                    name: displayName,
-                    photoUrl: aluno.fotoUrl,
-                    fallbackColor: avatarColor,
-                    variant:
-                        compact
-                            ? AlunoAvatarVariant.strip
-                            : AlunoAvatarVariant.list,
-                  ),
-                  SizedBox(width: avatarGap),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                displayName,
-                                style: FocuxHubTypography.body(color: ink).copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -0.15,
-                                  height: 1.2,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (shouldShowAlunoListBadge(
-                              statusText,
-                              activeFiltro,
-                              triageContextActive: triageContextActive,
-                            )) ...[
-                              SizedBox(width: compact ? 6 : 8),
-                              AlunoStatusPill(
-                                label: statusText,
-                                fill: status.fill,
-                                foreground: status.foreground,
-                                compact: compact,
-                              ),
-                            ],
-                          ],
+          child: Opacity(
+            opacity: muted ? AlunosLayout.mutedCardOpacity : 1,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    if (modoSelecao) ...[
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150),
+                        child: Icon(
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          key: ValueKey(isSelected),
+                          color:
+                              isSelected
+                                  ? primary
+                                  : (isDark
+                                      ? EagleTokens.darkInkMute
+                                      : TokensStrip.textSecondary),
+                          size: 22,
                         ),
-                        if (!compact) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            '$objetivo · ${maskEmailForList(aluno.email)}',
-                            style: FocuxHubTypography.bodyMuted(
-                              color: secondaryInk,
-                              height: 1.25,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ] else ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            objetivo,
-                            style: FocuxHubTypography.bodyMuted(
-                              color: secondaryInk,
-                              height: 1.25,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                        if (showOpsLine) ...[
-                          SizedBox(height: compact ? 4 : 6),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    AlunoAvatar(
+                      name: displayName,
+                      photoUrl: aluno.fotoUrl,
+                      fallbackColor: avatarColor,
+                      variant:
+                          compact
+                              ? AlunoAvatarVariant.strip
+                              : AlunoAvatarVariant.list,
+                    ),
+                    SizedBox(width: avatarGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Row(
                             children: [
-                              Container(
-                                width: compact ? 5 : 6,
-                                height: compact ? 5 : 6,
-                                decoration: BoxDecoration(
-                                  color:
-                                      opsIsDays
-                                          ? (isDark
-                                              ? EagleTokens.warnAccentSoft
-                                              : EagleTokens.warnDeep)
-                                          : aderColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 5),
                               Flexible(
                                 child: Text(
-                                  opsText,
-                                  style:
-                                      opsIsDays
-                                          ? FocuxHubTypography.bodyMuted(
-                                            color:
-                                                isDark
-                                                    ? EagleTokens.warnAccentSoft
-                                                    : EagleTokens.warnDeep,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1.15,
-                                          )
-                                          : AppTypography.mono(
-                                            fontSize: compact ? 11.5 : 12.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: aderColor,
-                                            height: 1.1,
-                                          ),
-                                  maxLines: 1,
+                                  displayName,
+                                  style: FocuxHubTypography.body(
+                                    color: ink,
+                                  ).copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.15,
+                                    height: 1.2,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
+                              if (shouldShowAlunoListBadge(
+                                statusText,
+                                activeFiltro,
+                                triageContextActive: triageContextActive,
+                              )) ...[
+                                SizedBox(width: compact ? 6 : 8),
+                                AlunoStatusPill(
+                                  label: statusText,
+                                  fill: status.fill,
+                                  foreground: status.foreground,
+                                  compact: compact,
+                                ),
+                              ],
                             ],
                           ),
+                          if (!compact) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              '$objetivo · ${maskEmailForList(aluno.email)}',
+                              style: FocuxHubTypography.bodyMuted(
+                                color: secondaryInk,
+                                height: 1.25,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              objetivo,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: secondaryInk,
+                                height: 1.25,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          if (showOpsLine) ...[
+                            SizedBox(height: compact ? 4 : 6),
+                            Row(
+                              children: [
+                                Container(
+                                  width: compact ? 5 : 6,
+                                  height: compact ? 5 : 6,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        opsIsDays
+                                            ? (isDark
+                                                ? EagleTokens.warnAccentSoft
+                                                : EagleTokens.warnDeep)
+                                            : aderColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    opsText,
+                                    style:
+                                        opsIsDays
+                                            ? FocuxHubTypography.bodyMuted(
+                                              color:
+                                                  isDark
+                                                      ? EagleTokens
+                                                          .warnAccentSoft
+                                                      : EagleTokens.warnDeep,
+                                              fontWeight: FontWeight.w600,
+                                              height: 1.15,
+                                            )
+                                            : AppTypography.mono(
+                                              fontSize: compact ? 11.5 : 12.5,
+                                              fontWeight: FontWeight.w700,
+                                              color: aderColor,
+                                              height: 1.1,
+                                            ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ),
-                  if (!modoSelecao && needsOutreach)
-                    outreach
-                  else if (!modoSelecao && (compact || triageContextActive))
-                    ExcludeSemantics(
-                      child: Icon(
-                        Icons.chevron_right_rounded,
-                        size: 17,
-                        color: secondaryInk.withValues(alpha: 0.9),
                       ),
-                    )
-                  else if (!modoSelecao)
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (sparkValues.isNotEmpty) ...[
-                          FxSparkline(
-                            data: sparkValues,
-                            color: aderColor,
-                            width: sparkWidth,
-                            height: compact ? 18 : 22,
-                            strokeWidth: 1.8,
-                          ),
-                          const SizedBox(height: 2),
-                          ExcludeSemantics(
-                            child: SizedBox(
+                    ),
+                    if (!modoSelecao && needsOutreach)
+                      outreach
+                    else if (!modoSelecao && (compact || triageContextActive))
+                      ExcludeSemantics(
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 17,
+                          color: secondaryInk.withValues(alpha: 0.9),
+                        ),
+                      )
+                    else if (!modoSelecao)
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (sparkValues.isNotEmpty) ...[
+                            FxSparkline(
+                              data: sparkValues,
+                              color: aderColor,
                               width: sparkWidth,
-                              child: Text(
-                                alunoListSparklineLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.right,
-                                style: FocuxHubTypography.chip(secondaryInk),
+                              height: compact ? 18 : 22,
+                              strokeWidth: 1.8,
+                            ),
+                            const SizedBox(height: 2),
+                            ExcludeSemantics(
+                              child: SizedBox(
+                                width: sparkWidth,
+                                child: Text(
+                                  alunoListSparklineLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.right,
+                                  style: FocuxHubTypography.chip(secondaryInk),
+                                ),
                               ),
                             ),
+                          ] else
+                            const SizedBox(height: 3),
+                          const SizedBox(height: 6),
+                          ExcludeSemantics(
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              size: 17,
+                              color: secondaryInk.withValues(alpha: 0.9),
+                            ),
                           ),
-                        ] else
-                          const SizedBox(height: 3),
-                        const SizedBox(height: 6),
-                        ExcludeSemantics(
-                          child: Icon(
-                            Icons.chevron_right_rounded,
-                            size: 17,
-                            color: secondaryInk.withValues(alpha: 0.9),
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ],
+                        ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

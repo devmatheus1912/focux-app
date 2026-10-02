@@ -47,6 +47,8 @@ Future<void> _warmFilterVariants(
     if (filtro == AlunoFiltro.inadimplentes && !includeFinanceFilter) {
       continue;
     }
+    // Recorte client-side sobre todos — não vale um GET extra no warm.
+    if (filtro == AlunoFiltro.inativos) continue;
     if (filtro == base.filtro && base.q.isEmpty) continue;
     final query = AlunosHomeQuery(
       q: base.q,

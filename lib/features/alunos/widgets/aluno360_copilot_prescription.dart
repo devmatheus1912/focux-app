@@ -448,33 +448,49 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     final hasIaValue = forceIa && (iaAsync?.hasValue ?? false);
 
     // Never Stack skeleton over an existing prescription (deterministic or IA).
-    final child = switch (displayState) {
-      CopilotPriorityCardState.refreshingAi =>
-        hasIaValue
-            ? _iaContent(iaAsync!.value!)
-            : hasSeed
-            ? _deterministicContent()
-            : Aluno360CopilotPrescriptionLoading(color: primary),
-      CopilotPriorityCardState.showingAi =>
-        hasIaValue
-            ? _iaContent(iaAsync!.value!)
-            : hasSeed
-            ? _deterministicContent()
-            : _fromContent(offlineCopilotPrescription(fallback)),
-      CopilotPriorityCardState.errorAi =>
-        hasSeed
-            ? _deterministicContent()
-            : _fromContent(
-              iaErrorCopilotPrescription(fallback),
-              isIaSuggestion: false,
-            ),
-      CopilotPriorityCardState.showingDeterministic => _deterministicContent(),
-      CopilotPriorityCardState.idle =>
-        (bundleLoading || resumoLoading) &&
-                copilotPriorityCardAllowsSkeleton(displayState)
+    // `null` = skeleton.
+    final ({CopilotPrescriptionContent content, bool isIa})? resolved =
+        switch (displayState) {
+          CopilotPriorityCardState.refreshingAi =>
+            hasIaValue
+                ? _iaContent(iaAsync!.value!)
+                : hasSeed
+                ? _deterministicContent()
+                : null,
+          CopilotPriorityCardState.showingAi =>
+            hasIaValue
+                ? _iaContent(iaAsync!.value!)
+                : hasSeed
+                ? _deterministicContent()
+                : (content: offlineCopilotPrescription(fallback), isIa: false),
+          CopilotPriorityCardState.errorAi =>
+            hasSeed
+                ? _deterministicContent()
+                : (content: iaErrorCopilotPrescription(fallback), isIa: false),
+          CopilotPriorityCardState.showingDeterministic =>
+            _deterministicContent(),
+          CopilotPriorityCardState.idle =>
+            (bundleLoading || resumoLoading) &&
+                    copilotPriorityCardAllowsSkeleton(displayState)
+                ? null
+                : (content: offlineCopilotPrescription(fallback), isIa: false),
+        };
+
+    if (resolved != null &&
+        !copilotPrescriptionHasVisibleContent(
+          resolved.content,
+          showTitle: !contactPriority,
+          showAction: !hideDuplicateContactAction,
+          hasPrepareMessage:
+              !hideDuplicateContactAction && onPrepareMessage != null,
+        )) {
+      return const SizedBox.shrink();
+    }
+
+    final child =
+        resolved == null
             ? Aluno360CopilotPrescriptionLoading(color: primary)
-            : _fromContent(offlineCopilotPrescription(fallback)),
-    };
+            : _fromContent(resolved.content, isIaSuggestion: resolved.isIa);
 
     final iaAccent =
         displayState == CopilotPriorityCardState.showingAi ||
@@ -493,32 +509,36 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
     );
   }
 
-  Widget _deterministicContent() {
+  ({CopilotPrescriptionContent content, bool isIa}) _deterministicContent() {
     final seedAcao = (seed360!['acao'] ?? '').toString();
     final useContactPriority =
         preferContactPriority && !forceIa && !acaoSugereChat(seedAcao);
-    return _fromContent(
-      useContactPriority
-          ? contactPriorityPrescriptionContent(
-            aluno,
-            statusMetricsVisible: statusMetricsVisible,
-            hideMetricFooter: hideMetricFooter,
-          )
-          : resolveCopilotPrescriptionFromAction(
-            aluno,
-            seed360!,
-            fallback,
-            wearableRelevant: wearableRelevant,
-            contactPriority: contactPriority,
-            statusMetricsVisible: statusMetricsVisible,
-            hideMetricFooter: hideMetricFooter,
-          ),
+    return (
+      content:
+          useContactPriority
+              ? contactPriorityPrescriptionContent(
+                aluno,
+                statusMetricsVisible: statusMetricsVisible,
+                hideMetricFooter: hideMetricFooter,
+              )
+              : resolveCopilotPrescriptionFromAction(
+                aluno,
+                seed360!,
+                fallback,
+                wearableRelevant: wearableRelevant,
+                contactPriority: contactPriority,
+                statusMetricsVisible: statusMetricsVisible,
+                hideMetricFooter: hideMetricFooter,
+              ),
+      isIa: false,
     );
   }
 
-  Widget _iaContent(IaCopilotProximaAcao action) {
-    return _fromContent(
-      resolveCopilotPrescriptionFromAction(
+  ({CopilotPrescriptionContent content, bool isIa}) _iaContent(
+    IaCopilotProximaAcao action,
+  ) {
+    return (
+      content: resolveCopilotPrescriptionFromAction(
         aluno,
         copilotActionFromIa(action),
         fallback,
@@ -527,7 +547,7 @@ class Aluno360CopilotPrescriptionBody extends StatelessWidget {
         statusMetricsVisible: statusMetricsVisible,
         hideMetricFooter: hideMetricFooter,
       ),
-      isIaSuggestion: true,
+      isIa: true,
     );
   }
 

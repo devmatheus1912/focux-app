@@ -50,6 +50,7 @@ import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 
 export '../constants/alunos_list_filters.dart';
 

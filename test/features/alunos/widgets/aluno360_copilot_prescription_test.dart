@@ -98,12 +98,53 @@ void main() {
       );
       await tester.pump();
 
-      expect(
-        find.textContaining('Retomar contato com Nathalia'),
-        findsWidgets,
-      );
+      expect(find.textContaining('Retomar contato com Nathalia'), findsWidgets);
       expect(find.text('Preparar mensagem'), findsOneWidget);
       expect(find.byType(Aluno360CopilotPrescriptionLoading), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'contact priority with sticky chat and redundant reason renders nothing',
+    (tester) async {
+      final aluno = Aluno(
+        id: 7,
+        nome: 'Nathalia Abrantes',
+        email: 'n@test.com',
+        status: 'ATIVO',
+        emRisco: true,
+        riscoNivel: 'MEDIO',
+        aderenciaPercent: 23,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Aluno360CopilotPrescriptionBody(
+              aluno: aluno,
+              primary: BrandPalette.defaultPrimary,
+              fallback: 'Fallback',
+              seed360: const {
+                'acao': 'Retomar contato com Nathalia.',
+                'motivo': 'Aderência 23% nos últimos 30 dias · sem check-in',
+                'fonte': 'RADAR',
+              },
+              forceIa: false,
+              iaAsync: null,
+              resumoLoading: false,
+              preferContactPriority: true,
+              contactPriority: true,
+              statusMetricsVisible: true,
+              hideDuplicateContactAction: true,
+              onPrepareMessage: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(Aluno360CopilotPrescription), findsNothing);
+      expect(find.byType(Container), findsNothing);
     },
   );
 }
