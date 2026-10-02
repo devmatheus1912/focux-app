@@ -215,7 +215,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     Future<ExecucaoExercicio> Function(int execucaoId) chamada,
   ) async {
     final id = _execucao?.id;
-    if (id == null || !await _filaLimpa()) return;
+    if (id == null || _concluindo || !await _filaLimpa()) return;
     try {
       HapticFeedback.selectionClick();
       final updated = await chamada(id);
@@ -246,7 +246,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   Future<void> _registrarSerieRapida(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
-    if (id == null || _registrando || _pedindoRpe) return;
+    if (id == null || _concluindo || _registrando || _pedindoRpe) return;
     final draft = _rascunhos.de(ee);
     int? rpe;
     if (ee.rpeAlvo != null) {
@@ -273,7 +273,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
 
   Future<void> _registrarSerieDetalhada(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
-    if (id == null || _registrando) return;
+    if (id == null || _concluindo || _registrando) return;
     final numero = _proximoNumero(ee);
     final payload = await showCheckinSerieDetalhe(
       context,
@@ -368,7 +368,9 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   }
 
   Future<void> _finalizar() async {
-    if (_execucao == null || !await _filaLimpa() || !mounted) return;
+    if (_concluindo || _execucao == null || !await _filaLimpa() || !mounted) {
+      return;
+    }
     final faltam = checkinExerciciosFaltando(_execucao!.exercicios);
     if (faltam > 0 &&
         !await showCheckinFinalizarIncompleto(context, faltam: faltam)) {
@@ -380,6 +382,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   /// Concluir é idempotente: retry depois de timeout volta 200 sem evolução
   /// (ou o 400 "já foi concluído" do backend antigo) e segue como sucesso.
   Future<void> _concluir() async {
+    if (_concluindo) return;
     setState(() => _concluindo = true);
     try {
       final id = _execucao!.id!;

@@ -27,6 +27,7 @@ extension _CheckinSaida on _CheckinScreenState {
   }
 
   Future<void> _sair() async {
+    if (_concluindo) return;
     FxKeyboardDismissScope.dismiss();
     final exercicios = _execucao?.exercicios ?? [];
     final choice = await showFxExecutionLeaveSheet(

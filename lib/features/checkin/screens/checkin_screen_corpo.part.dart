@@ -131,8 +131,9 @@ extension _CheckinCorpo on _CheckinScreenState {
       CheckinRodape.nenhum => null,
       CheckinRodape.registrar => CheckinRodapeBar(
         label: checkinRegistrarLabel(s, first: current!.seriesFeitas <= 0),
-        loading: _registrando,
-        loadingLabel: s.checkinSalvandoSerie,
+        loading: _registrando || _concluindo,
+        loadingLabel:
+            _concluindo ? s.checkinFinalizando : s.checkinSalvandoSerie,
         onPressed: () => _registrarSerieRapida(current),
       ),
       CheckinRodape.finalizar => CheckinRodapeBar(
@@ -197,7 +198,7 @@ extension _CheckinCorpo on _CheckinScreenState {
   ) {
     final draft = _rascunhos.de(current);
     // Mexer em série já gravada durante um envio embaralha a numeração.
-    final livre = !_registrando;
+    final livre = !_registrando && !_concluindo;
     final faltaSerie =
         livre &&
         current.series != null &&

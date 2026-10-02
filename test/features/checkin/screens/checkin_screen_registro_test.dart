@@ -366,6 +366,34 @@ void main() {
       expect(find.text('Recordes de hoje'), findsNothing);
     });
 
+    testWidgets(
+      'durante concluir, Registrar e Sair não disparam outra mutação',
+      (tester) async {
+        final repo = FakeCheckinRepo()..travaConcluir = Completer<void>();
+        await pumpCheckin(tester, repo);
+
+        await tester.tap(find.text('Finalizar treino'));
+        await pumpSheet(tester);
+        await tester.tap(find.text('Finalizar'));
+        await tester.pump();
+
+        expect(repo.concluidos, 1);
+        expect(find.text('Finalizando…'), findsWidgets);
+        expect(find.text('Registrar série'), findsNothing);
+
+        await tester.tap(find.text('Finalizando…').first, warnIfMissed: false);
+        await tester.tap(find.text('Sair'), warnIfMissed: false);
+        await tester.pump();
+        expect(repo.registros, 0);
+        expect(repo.descartes, 0);
+        expect(repo.concluidos, 1);
+
+        repo.travaConcluir!.complete();
+        await pumpSheet(tester);
+        expect(find.text('Treino concluído'), findsOneWidget);
+      },
+    );
+
     testWidgets('timeout mostra erro e o 2º toque conclui', (tester) async {
       final repo =
           FakeCheckinRepo(feitas: [3, 3])
