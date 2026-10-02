@@ -173,12 +173,23 @@ class ApiClient {
               final token = await SecureStorage.getToken();
               if (token != null) {
                 e.requestOptions.headers['Authorization'] = 'Bearer $token';
+                // FormData já enviado não pode ser refeito. Marcar
+                // fxAuthRetried e cair no catch derrubava a sessão mesmo
+                // com refresh ok (wipe da fila offline + séries).
+                if (!canReplayAfterAuthRefresh(e.requestOptions)) {
+                  handler.next(e);
+                  return;
+                }
                 e.requestOptions.extra['fxAuthRetried'] = true;
                 try {
                   final retryResp = await _dio.fetch(e.requestOptions);
                   return handler.resolve(retryResp);
-                } catch (_) {
-                  // fall through to invalidate if still 401
+                } catch (retryErr) {
+                  if (!shouldInvalidateAfterAuthReplayFailure(retryErr)) {
+                    handler.next(retryErr is DioException ? retryErr : e);
+                    return;
+                  }
+                  // still 401 after refresh — fall through to invalidate
                 }
               }
             }
@@ -496,6 +507,7 @@ class ApiClient {
 
   /// Vídeo/foto no 4G não sobe em 30 s, e FormData já enviado não pode ser
   /// reenviado pelo retry ("FormData has already been finalized").
+  /// `fxNoRetry` também impede o replay após 401 — ver [canReplayAfterAuthRefresh].
   @visibleForTesting
   static void applyUploadPolicy(RequestOptions options) {
     const envio = Duration(minutes: 5);
@@ -505,6 +517,21 @@ class ApiClient {
       options.receiveTimeout = resposta;
     }
     options.extra['fxNoRetry'] = true;
+  }
+
+  /// Multipart já enviado (e qualquer `fxNoRetry`) não pode ser refeito com o
+  /// Bearer novo. O refresh vale; o caller recebe o 401 e reenvia o arquivo.
+  @visibleForTesting
+  static bool canReplayAfterAuthRefresh(RequestOptions options) {
+    if (options.extra['fxNoRetry'] == true) return false;
+    return options.data is! FormData;
+  }
+
+  /// Replay após refresh só invalida se ainda veio 401. Rede, 5xx ou FormData
+  /// finalizado não são falha de sessão — o token novo já está gravado.
+  @visibleForTesting
+  static bool shouldInvalidateAfterAuthReplayFailure(Object error) {
+    return error is DioException && error.response?.statusCode == 401;
   }
 
   static bool _isLikelySessionAuthFailure(DioException e) =>
