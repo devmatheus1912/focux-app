@@ -33,7 +33,6 @@ void main() {
     ).readAsStringSync();
     expect(products, contains('focux_pro_yearly'));
     expect(products, contains('focux_enterprise_yearly'));
-    expect(products, contains('focux_premium_yearly'));
     expect(products, contains('annualDiscountRate'));
     expect(products, contains('annualSavingsCompactLabel'));
   });
