@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/api/api_client.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class WhiteLabelConfig {
   final String? slug;
@@ -111,7 +111,7 @@ class WhiteLabelRepository {
 }
 
 final whiteLabelRepositoryProvider = Provider<WhiteLabelRepository>((ref) {
-  return WhiteLabelRepository(ApiClient().dio);
+  return WhiteLabelRepository(ref.watch(apiClientProvider).dio);
 });
 
 final whiteLabelConfigProvider = FutureProvider.autoDispose<WhiteLabelConfig>((

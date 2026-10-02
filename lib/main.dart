@@ -248,7 +248,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     }
     if (kIsWeb) return;
     try {
-      await FcmService.init(ApiClient());
+      await FcmService.init(ref.read(apiClientProvider));
     } catch (error, stack) {
       debugPrint('[Focux] FCM deferred init error: $error');
       reportUncaughtZoneError(error, stack);

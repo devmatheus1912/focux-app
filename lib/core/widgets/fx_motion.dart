@@ -15,7 +15,7 @@ class FxInteractiveGlow extends StatefulWidget {
     this.enabled = true,
     this.intensity = 1,
     this.borderRadius = TokensStrip.rMd,
-    this.pulse = true,
+    this.pulse = false,
   });
 
   final Widget child;
@@ -42,12 +42,21 @@ class _FxInteractiveGlowState extends State<FxInteractiveGlow>
       duration: const Duration(milliseconds: 2400),
     );
     _pulse = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
-    if (widget.enabled && widget.pulse) _ctrl.repeat(reverse: true);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPulse();
   }
 
   @override
   void didUpdateWidget(covariant FxInteractiveGlow oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _syncPulse();
+  }
+
+  void _syncPulse() {
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     if (widget.enabled && widget.pulse && !reduceMotion && !_ctrl.isAnimating) {
       _ctrl.repeat(reverse: true);
@@ -71,24 +80,40 @@ class _FxInteractiveGlowState extends State<FxInteractiveGlow>
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AnimatedBuilder(
-      animation: _pulse,
-      builder: (context, child) {
-        final pulse = widget.pulse ? _pulse.value : 0.0;
-        final shadows = TokensStrip.interactiveGlow(
-          widget.color,
-          intensity: widget.intensity * (0.85 + pulse * 0.15),
-          dark: isDark,
-        );
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: shadows,
+    if (!widget.pulse) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          boxShadow: TokensStrip.interactiveGlow(
+            widget.color,
+            intensity: widget.intensity * 0.85,
+            dark: isDark,
           ),
-          child: child,
-        );
-      },
-      child: widget.child,
+        ),
+        child: widget.child,
+      );
+    }
+
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, child) {
+          final pulse = widget.pulse ? _pulse.value : 0.0;
+          final shadows = TokensStrip.interactiveGlow(
+            widget.color,
+            intensity: widget.intensity * (0.85 + pulse * 0.15),
+            dark: isDark,
+          );
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              boxShadow: shadows,
+            ),
+            child: child,
+          );
+        },
+        child: widget.child,
+      ),
     );
   }
 }
@@ -112,6 +137,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool loading;
+
   /// Shown beside the spinner while [loading] is true (e.g. "Agendando…").
   final String? loadingLabel;
   final bool expand;
@@ -137,9 +163,7 @@ class FxLiquidPrimaryButton extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: TokensStrip.primaryButtonGradient(primary),
               borderRadius: BorderRadius.circular(TokensStrip.rButton),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.22),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: TokensStrip.s5,
@@ -365,10 +389,7 @@ class _FxSpringButtonState extends State<FxSpringButton>
   @override
   Widget build(BuildContext context) {
     if (reduceMotionOf(context)) {
-      return GestureDetector(
-        onTap: widget.onTap,
-        child: widget.child,
-      );
+      return GestureDetector(onTap: widget.onTap, child: widget.child);
     }
 
     return GestureDetector(

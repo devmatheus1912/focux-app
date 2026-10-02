@@ -132,7 +132,7 @@ void main() {
 
   test('excluir conta aluno sheet: onTapOutside dismiss', () {
     final src = readScreenSourceBundle(
-      'lib/features/dashboard/utils/aluno_delete_account.dart',
+      'lib/core/account/excluir_conta_flow.dart',
     );
     expect(src, contains('showFxFormSheet'));
     expect(src, contains('onTapOutside'));
