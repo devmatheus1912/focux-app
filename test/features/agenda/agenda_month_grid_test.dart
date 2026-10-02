@@ -14,7 +14,7 @@ Agendamento _ag(int id, int hora, String nome) => Agendamento(
   status: 'AGENDADO',
 );
 
-Future<List<int>> _pump(WidgetTester tester) async {
+Future<List<int>> _pump(WidgetTester tester, {bool expand = false}) async {
   tester.view.physicalSize = const Size(390, 844);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -33,6 +33,7 @@ Future<List<int>> _pump(WidgetTester tester) async {
           ]),
           onSelect: (_) {},
           onSwipe: swipes.add,
+          expand: expand,
         ),
       ),
     ),
@@ -44,6 +45,33 @@ Future<List<int>> _pump(WidgetTester tester) async {
 void main() {
   setUp(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  test('chips por altura: mínimo 2, máximo 5', () {
+    expect(AgendaMonthGrid.chipsFor(AgendaMonthGrid.cellHeight), 2);
+    expect(AgendaMonthGrid.chipsFor(95), 4);
+    expect(AgendaMonthGrid.chipsFor(400), 5);
+  });
+
+  testWidgets('tela inteira: semanas esticam e cabem todos os chips', (
+    tester,
+  ) async {
+    await _pump(tester, expand: true);
+    expect(find.text('7h Ana'), findsOneWidget);
+    expect(find.text('9h Bruno'), findsOneWidget);
+    expect(find.text('18h Carla'), findsOneWidget);
+    expect(find.text('+1'), findsNothing);
+    final cell = tester.getSize(
+      find.bySemanticsLabel(
+        agendaMonthDayA11y(
+          day: DateTime(2026, 10, 7),
+          count: 3,
+          isToday: false,
+        ),
+      ),
+    );
+    expect(cell.height, greaterThan(AgendaMonthGrid.cellHeight));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('dois chips por dia e +N do resto', (tester) async {
     await _pump(tester);
     expect(find.text('7h Ana'), findsOneWidget);
@@ -53,7 +81,11 @@ void main() {
     expect(find.text('Outubro 2026'), findsOneWidget);
     expect(
       find.bySemanticsLabel(
-        agendaMonthDayA11y(day: DateTime(2026, 10, 7), count: 3, isToday: false),
+        agendaMonthDayA11y(
+          day: DateTime(2026, 10, 7),
+          count: 3,
+          isToday: false,
+        ),
       ),
       findsOneWidget,
     );

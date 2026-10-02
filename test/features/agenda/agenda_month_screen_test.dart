@@ -5,6 +5,7 @@ import 'package:focux_app/features/agenda/data/agenda_repository.dart';
 import 'package:focux_app/features/agenda/providers/agenda_provider.dart';
 import 'package:focux_app/features/agenda/screens/agenda_screen.dart';
 import 'package:focux_app/features/agenda/utils/agenda_month.dart';
+import 'package:focux_app/features/agenda/utils/agenda_schedule.dart';
 import 'package:focux_app/features/agenda/widgets/agenda_month_grid.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
@@ -86,6 +87,31 @@ void main() {
     await _settle(tester);
 
     expect(find.text('Aluno Calendário'), findsOneWidget);
+  });
+
+  testWidgets('dia vazio abre a folha com Dia livre e Agendar no dia', (
+    tester,
+  ) async {
+    await _pump(tester);
+    final hoje = DateTime.now();
+    final vazio = DateTime(hoje.year, hoje.month, hoje.day == 20 ? 21 : 20);
+    final rotulo = agendaDayShortLabel(vazio);
+
+    expect(find.textContaining('Agendar em'), findsNothing);
+    expect(find.text('Dia livre'), findsNothing);
+    expect(find.byTooltip('Ir para hoje'), findsNothing);
+
+    await tester.tap(
+      find.bySemanticsLabel(
+        agendaMonthDayA11y(day: vazio, count: 0, isToday: false),
+      ),
+    );
+    await _settle(tester);
+
+    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.text('Dia livre'), findsWidgets);
+    expect(find.text('Agendar em $rotulo'), findsOneWidget);
+    expect(find.byTooltip('Ir para hoje'), findsOneWidget);
   });
 
   testWidgets('arrastar o calendário troca o mês e Hoje volta', (tester) async {

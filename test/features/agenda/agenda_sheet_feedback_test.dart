@@ -6,7 +6,8 @@ import 'package:focux_app/core/api/offline_queued_ack.dart';
 import 'package:focux_app/features/agenda/data/agenda_repository.dart';
 import 'package:focux_app/features/agenda/providers/agenda_provider.dart';
 import 'package:focux_app/features/agenda/screens/agenda_screen.dart';
-import 'package:focux_app/features/agenda/widgets/agenda_next_banner.dart';
+import 'package:focux_app/features/agenda/utils/agenda_month.dart';
+import 'package:focux_app/features/agenda/widgets/agenda_event_card.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -95,7 +96,18 @@ Future<void> _pumpAgenda(WidgetTester tester, AgendaRepository repo) async {
 }
 
 Future<void> _openSheet(WidgetTester tester) async {
-  await tester.tap(find.byType(AgendaNextBanner));
+  final now = DateTime.now();
+  await tester.tap(
+    find.bySemanticsLabel(
+      agendaMonthDayA11y(
+        day: DateTime(now.year, now.month, now.day),
+        count: 1,
+        isToday: true,
+      ),
+    ),
+  );
+  await _settle(tester);
+  await tester.tap(find.byType(AgendaEventCard));
   await _settle(tester);
 }
 

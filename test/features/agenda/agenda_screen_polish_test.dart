@@ -33,18 +33,6 @@ void main() {
         contains('ref.invalidate'),
       ),
     );
-    expect(
-      screen,
-      anyOf(
-        contains('FxLoading'),
-        contains('SkeletonLoader'),
-        contains('SkeletonList'),
-        contains('DashboardShimmer'),
-        contains('Shimmer'),
-        contains('IaCopilotInsightsLoading'),
-        contains('_loading'),
-      ),
-    );
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 
@@ -55,8 +43,12 @@ void main() {
 
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxErrorState'));
-    expect(screen, contains('AgendaDayEmptyPanel'));
-    expect(screen, contains('SkeletonList'));
+    // O mês aparece na hora; os chips chegam quando a rede responde.
+    expect(screen, isNot(contains('SkeletonList')));
+    expect(screen, isNot(contains('AgendaDayEmptyPanel')));
+    expect(screen, isNot(contains('AgendaTodayPill')));
+    expect(screen, contains('expand: true'));
+    expect(screen, contains('AgendaDaySheet'));
     expect(screen, contains('FxHubFreshness.fromFetchedAt'));
     expect(screen, isNot(contains('class _AgendaEmptyState')));
     expect(
@@ -66,11 +58,17 @@ void main() {
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('onNew:'));
     expect(screen, contains('constrainWidth: false'));
-    expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, contains('DashboardSectionHeader'));
+    final daySheet =
+        File(
+          'lib/features/agenda/widgets/agenda_day_sheet.dart',
+        ).readAsStringSync();
+    expect(daySheet, contains('FxEmptyState'));
+    expect(daySheet, contains('RefreshIndicator'));
+    expect(daySheet, contains('agendaAgendarNoDia'));
     expect(
-      File('lib/features/agenda/widgets/agenda_help_sheet.dart')
-          .readAsStringSync(),
+      File(
+        'lib/features/agenda/widgets/agenda_help_sheet.dart',
+      ).readAsStringSync(),
       contains('Como calculamos'),
     );
     expect(
@@ -80,12 +78,16 @@ void main() {
   });
 
   test('validação do novo agendamento não usa estilo de sucesso', () {
-    final novo = File(
-      'lib/features/agenda/screens/novo_agendamento_screen.dart',
-    ).readAsStringSync();
+    final novo =
+        File(
+          'lib/features/agenda/screens/novo_agendamento_screen.dart',
+        ).readAsStringSync();
     final salvar = novo.substring(
       novo.indexOf('Future<void> _salvar()'),
-      novo.indexOf('showFxConfirmSheet(', novo.indexOf('Future<void> _salvar()')),
+      novo.indexOf(
+        'showFxConfirmSheet(',
+        novo.indexOf('Future<void> _salvar()'),
+      ),
     );
     expect(salvar, isNot(contains('showSuccess')));
   });

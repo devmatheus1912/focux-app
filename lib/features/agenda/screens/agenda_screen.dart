@@ -12,17 +12,13 @@ import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
 import '../data/agenda_repository.dart';
 import '../providers/agenda_provider.dart';
-import '../utils/agenda_day_lane.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_status.dart';
 import '../utils/agenda_month.dart';
-import '../widgets/agenda_day_empty_panel.dart';
-import '../widgets/agenda_event_card.dart';
+import '../widgets/agenda_day_sheet.dart';
 import '../widgets/agenda_month_grid.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_hub_header.dart';
-import '../widgets/agenda_next_banner.dart';
-import '../widgets/agenda_today_pill.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -35,11 +31,9 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../widgets/agenda_form_sheets.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -54,7 +48,7 @@ class AgendaScreen extends ConsumerStatefulWidget {
 
 class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   List<Agendamento> _ags = [];
-  bool _loading = true;
+  final _agsLive = ValueNotifier<List<Agendamento>>(const []);
   Object? _erro;
   DateTime? _fetchedAt;
   late DateTime _mes;
@@ -72,6 +66,17 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _agsLive.dispose();
+    super.dispose();
+  }
+
+  void _setAgs(List<Agendamento> items) {
+    _ags = items;
+    _agsLive.value = items;
+  }
+
   Future<void> _load({bool force = false}) async {
     final keepStale = _ags.isNotEmpty;
     final mes = _mes;
@@ -81,43 +86,32 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       final cached = force ? null : AgendaWeekClientCache.get(cacheKey);
       if (cached != null) {
         setState(() {
-          _ags = cached;
-          _loading = false;
+          _setAgs(cached);
           _erro = null;
           _fetchedAt = DateTime.now();
         });
         return;
       }
-      if (!keepStale) {
-        setState(() {
-          _loading = true;
-          _erro = null;
-        });
-      }
+      if (!keepStale && _erro != null) setState(() => _erro = null);
       final items = await ref
           .read(agendaRepositoryProvider)
           .listarMes(mes.year, mes.month);
       AgendaWeekClientCache.put(cacheKey, items);
       if (!mounted || mes != _mes) return;
       setState(() {
-        _ags = items;
-        _loading = false;
+        _setAgs(items);
         _erro = null;
         _fetchedAt = DateTime.now();
       });
     } catch (e) {
       if (!mounted || mes != _mes) return;
       if (keepStale) {
-        setState(() => _loading = false);
         FeedbackHelper.showError(
           context,
           friendlyError(e, fallback: 'Não foi possível atualizar a agenda.'),
         );
       } else {
-        setState(() {
-          _loading = false;
-          _erro = e;
-        });
+        setState(() => _erro = e);
       }
     }
   }
@@ -137,10 +131,35 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
       _dia = day;
       if (mudouMes) {
         _mes = mes;
-        _ags = [];
+        _setAgs(const []);
       }
     });
     if (mudouMes) _load();
+  }
+
+  Future<void> _openDay(DateTime day) async {
+    _selectDay(day);
+    await showFxHomeSheet<void>(
+      context,
+      builder:
+          (_) => AgendaDaySheet(
+            day: day,
+            agendamentos: _agsLive,
+            photoFor: _photoFor,
+            onRefresh: () {
+              AnalyticsService.instance.track(ProductEvents.agendaRefreshed);
+              return _load(force: true);
+            },
+            onOpen: (ag) {
+              _popRootOverlay();
+              _openAgendamentoDetails(ag);
+            },
+            onNew: (slot) {
+              _popRootOverlay();
+              _novoAgendamento(slot: slot ?? day);
+            },
+          ),
+    );
   }
 
   void _goToday() =>
@@ -170,23 +189,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
-    final dailyEvents = agendaEventsOn(_ags, _dia);
-    final visible = agendaVisibleEvents(dailyEvents);
-    final nextOpen = agendaNextOpen(visible);
-    final showNextBanner = nextOpen != null && _isTodayVisible;
-    final lane = agendaBuildDayLane(
-      dailyEvents,
-      excludeNextFromLane: showNextBanner,
-    );
-    final cancelled = agendaCancelledCount(dailyEvents);
     final freshnessLabel = FxHubFreshness.fromFetchedAt(_fetchedAt);
-    final dayHeading = agendaDayHeading(
-      weekdayLabel: agendaWeekdayShort(_dia.weekday),
-      date: _dia,
-      visibleCount: visible.length,
-    );
+    final showError = _erro != null && _ags.isEmpty;
     return fxScreenA11yScope(
       label: 'Agenda',
       child: FxShellScaffold(
@@ -197,179 +202,44 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
         body: SafeArea(
           bottom: false,
           child: FxContentWidthLimiter(
-            child: Stack(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    AgendaHubHeader(
-                      freshnessLabel: freshnessLabel,
-                      onHelp: () {
-                        AnalyticsService.instance.track(
-                          ProductEvents.agendaHelpOpened,
-                        );
-                        showAgendaHelpSheet(context);
-                      },
-                      onIcal: _copyIcalLink,
-                      onNew: () => _novoAgendamento(),
-                    ),
-                    AgendaMonthGrid(
-                      month: _mes,
-                      selected: _dia,
-                      eventsByDay: agendaVisibleByDay(_ags),
-                      onSelect: _selectDay,
-                      onSwipe: _changeMonth,
-                    ),
-                    const SizedBox(height: TokensStrip.s3),
-                    if (nextOpen != null && _isTodayVisible)
-                      AgendaNextBanner(
-                        agendamento: nextOpen,
-                        photoUrl: _photoFor(nextOpen.alunoId),
-                        onTap: () => _openAgendamentoDetails(nextOpen),
-                      )
-                    else if (!_loading && _erro == null && visible.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          0,
-                          TokensStrip.s4,
-                          TokensStrip.s2,
-                        ),
-                        child: DashboardSectionHeader(title: dayHeading),
-                      ),
-                    Expanded(
-                      child:
-                          _erro != null
-                              ? FxErrorState(
-                                chromeOnDark: isDark,
-                                primary: primary,
-                                message: friendlyError(_erro!),
-                                onRetry: () => _load(force: true),
-                              )
-                              : _loading
-                              ? const SkeletonList(count: 4)
-                              : RefreshIndicator(
-                                color: primary,
-                                onRefresh: () {
-                                  AnalyticsService.instance.track(
-                                    ProductEvents.agendaRefreshed,
-                                  );
-                                  return _load(force: true);
-                                },
-                                child:
-                                    visible.isEmpty
-                                        ? CustomScrollView(
-                                          physics:
-                                              const AlwaysScrollableScrollPhysics(),
-                                          keyboardDismissBehavior:
-                                              ScrollViewKeyboardDismissBehavior
-                                                  .onDrag,
-                                          slivers: [
-                                            SliverPadding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                TokensStrip.s4,
-                                                TokensStrip.s1,
-                                                TokensStrip.s4,
-                                                DashboardLayout
-                                                    .bottomDockClearance,
-                                              ),
-                                              sliver: SliverToBoxAdapter(
-                                                child: AgendaDayEmptyPanel(
-                                                  dayLabel: dayHeading,
-                                                  onNew:
-                                                      () => _novoAgendamento(),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                        : ListView(
-                                          physics:
-                                              const AlwaysScrollableScrollPhysics(),
-                                          keyboardDismissBehavior:
-                                              ScrollViewKeyboardDismissBehavior
-                                                  .onDrag,
-                                          padding: const EdgeInsets.fromLTRB(
-                                            FxSettingsLayout.pageInset,
-                                            0,
-                                            FxSettingsLayout.pageInset,
-                                            DashboardLayout.bottomDockClearance,
-                                          ),
-                                          children: [
-                                            for (
-                                              var i = 0;
-                                              i < lane.length;
-                                              i++
-                                            )
-                                              if (lane[i] is AgendaLaneGap)
-                                                AgendaGapTile(
-                                                  label: agendaGapLabel(
-                                                    (lane[i] as AgendaLaneGap)
-                                                        .duration,
-                                                  ),
-                                                  onTap:
-                                                      () => _novoAgendamento(
-                                                        slot:
-                                                            (lane[i]
-                                                                    as AgendaLaneGap)
-                                                                .from,
-                                                      ),
-                                                )
-                                              else
-                                                AgendaEventCard(
-                                                  agendamento:
-                                                      (lane[i]
-                                                              as AgendaLaneEvent)
-                                                          .agendamento,
-                                                  photoUrl: _photoFor(
-                                                    (lane[i] as AgendaLaneEvent)
-                                                        .agendamento
-                                                        .alunoId,
-                                                  ),
-                                                  emphasized:
-                                                      (lane[i]
-                                                              as AgendaLaneEvent)
-                                                          .next,
-                                                  onTap:
-                                                      () => _openAgendamentoDetails(
-                                                        (lane[i]
-                                                                as AgendaLaneEvent)
-                                                            .agendamento,
-                                                      ),
-                                                ),
-                                            if (cancelled > 0) ...[
-                                              const SizedBox(
-                                                height:
-                                                    FxSettingsLayout
-                                                        .footerAfterGroup,
-                                              ),
-                                              Text(
-                                                cancelled == 1
-                                                    ? '1 horário cancelado oculto'
-                                                    : '$cancelled horários cancelados ocultos',
-                                                textAlign: TextAlign.center,
-                                                style:
-                                                    FocuxHubTypography.bodyMuted(
-                                                      color: chrome.mute,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                              ),
-                                            ],
-                                          ],
-                                        ),
-                              ),
-                    ),
-                  ],
+                AgendaHubHeader(
+                  freshnessLabel: freshnessLabel,
+                  onHelp: () {
+                    AnalyticsService.instance.track(
+                      ProductEvents.agendaHelpOpened,
+                    );
+                    showAgendaHelpSheet(context);
+                  },
+                  onIcal: _copyIcalLink,
+                  onNew: () => _novoAgendamento(),
                 ),
-                if (!_isTodayVisible)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom:
-                        MediaQuery.paddingOf(context).bottom + TokensStrip.s4,
-                    child: Center(child: AgendaTodayPill(onTap: _goToday)),
-                  ),
+                Expanded(
+                  child:
+                      showError
+                          ? FxErrorState(
+                            chromeOnDark: chrome.isDark,
+                            primary: primary,
+                            message: friendlyError(_erro!),
+                            onRetry: () => _load(force: true),
+                          )
+                          : Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: DashboardLayout.bottomDockClearance,
+                            ),
+                            child: AgendaMonthGrid(
+                              month: _mes,
+                              selected: _dia,
+                              eventsByDay: agendaVisibleByDay(_ags),
+                              onSelect: _openDay,
+                              onSwipe: _changeMonth,
+                              onToday: _isTodayVisible ? null : _goToday,
+                              expand: true,
+                            ),
+                          ),
+                ),
               ],
             ),
           ),

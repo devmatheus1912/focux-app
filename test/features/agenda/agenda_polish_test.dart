@@ -24,15 +24,15 @@ void main() {
     expect(screen, contains('FxHomeSheetHeader'));
     expect(screen, contains('AgendaMonthGrid'));
     expect(screen, isNot(contains('AgendaMonthBar')));
-    expect(screen, contains('AgendaTodayPill'));
+    expect(screen, isNot(contains('AgendaTodayPill')));
+    expect(screen, contains('onToday:'));
     expect(screen, contains('agendaVisibleByDay'));
     expect(screen, isNot(contains('AgendaWeekBar')));
     expect(screen, contains('showAgendaHelpSheet'));
     expect(screen, contains('agendaEventTitle'));
     expect(screen, contains('AgendaHubHeader'));
-    expect(screen, contains('AgendaNextBanner'));
-    expect(screen, contains('agendaBuildDayLane'));
-    expect(screen, contains('agendaDayHeading'));
+    expect(screen, isNot(contains('AgendaNextBanner')));
+    expect(screen, contains('AgendaDaySheet'));
     expect(screen, contains('DashboardLayout.bottomDockClearance'));
     expect(
       screen,
@@ -41,7 +41,6 @@ void main() {
     expect(screen, isNot(contains('arrow_back')));
     expect(screen, isNot(contains('LayoutBuilder(')));
     expect(screen, contains('listarMes'));
-    expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('agendaEventSessionNote'));
     expect(screen, isNot(contains('maskEmailForList')));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
@@ -55,11 +54,10 @@ void main() {
     expect(screen, contains('constrainWidth: false'));
     expect(
       File(
-        'lib/features/agenda/widgets/agenda_next_banner.dart',
+        'lib/features/agenda/widgets/agenda_day_sheet.dart',
       ).readAsStringSync(),
       allOf(
-        contains('FxStripCard'),
-        contains('emphasize: true'),
+        contains('FxHomeSheetSurface'),
         contains('FxSatelliteListTile'),
       ),
     );
@@ -71,9 +69,9 @@ void main() {
     );
     expect(
       File(
-        'lib/features/agenda/widgets/agenda_day_empty_panel.dart',
+        'lib/features/agenda/widgets/agenda_day_sheet.dart',
       ).readAsStringSync(),
-      allOf(contains('FxEmptyState'), contains('FxEmptyAction')),
+      allOf(contains('FxEmptyState'), isNot(contains('FxEmptyAction'))),
     );
     expect(screen, contains('_eventActions'));
     expect(screen, contains('_danger'));

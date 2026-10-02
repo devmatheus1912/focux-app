@@ -43,7 +43,7 @@ void main() {
     expect(agendaGapLabel(const Duration(hours: 2, minutes: 15)), '2h 15min livres');
   });
 
-  test('excludeNextFromLane remove o próximo do listado', () {
+  test('o próximo horário em aberto vem marcado na lane', () {
     final now = DateTime(2026, 8, 19, 7, 0);
     final items = agendaBuildDayLane(
       [
@@ -51,10 +51,9 @@ void main() {
         _ag(id: 2, inicio: DateTime(2026, 8, 19, 10, 0)),
       ],
       now: now,
-      excludeNextFromLane: true,
     );
-    expect(items.whereType<AgendaLaneEvent>().map((e) => e.agendamento.id), [
-      2,
-    ]);
+    final events = items.whereType<AgendaLaneEvent>().toList();
+    expect(events.map((e) => e.agendamento.id), [1, 2]);
+    expect(events.where((e) => e.next).map((e) => e.agendamento.id), [1]);
   });
 }

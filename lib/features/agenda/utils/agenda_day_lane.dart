@@ -28,21 +28,14 @@ List<Agendamento> agendaVisibleEvents(List<Agendamento> events) {
   return visible;
 }
 
-/// Monta a lane do dia. Com [excludeNextFromLane], o evento do banner
-/// "Próximo" não se repete como card "Confirmado" abaixo.
+/// Monta a lane do dia; o próximo horário em aberto vem marcado.
 List<AgendaLaneItem> agendaBuildDayLane(
   List<Agendamento> events, {
   DateTime? now,
   int minGapMinutes = 20,
-  bool excludeNextFromLane = false,
 }) {
-  final visible = agendaVisibleEvents(events);
-  final next = agendaNextOpen(visible, now: now);
-  final laneEvents =
-      excludeNextFromLane && next != null
-          ? visible.where((e) => e.id != next.id).toList(growable: false)
-          : visible;
-  final markNext = excludeNextFromLane ? null : next;
+  final laneEvents = agendaVisibleEvents(events);
+  final markNext = agendaNextOpen(laneEvents, now: now);
   final items = <AgendaLaneItem>[];
   for (var i = 0; i < laneEvents.length; i++) {
     if (i > 0) {

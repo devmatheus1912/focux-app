@@ -125,6 +125,10 @@ String agendaDayHeading({
   return '$datePart · $countLabel';
 }
 
+/// "sex, 23 out" — rótulo curto do dia no botão de agendar.
+String agendaDayShortLabel(DateTime date) =>
+    '${agendaWeekdayShort(date.weekday).toLowerCase()}, ${date.day} ${agendaMonthShort[date.month]}';
+
 String agendaEmptyDayHint() =>
     'Encaixe avaliação, retorno ou sessão.';
 

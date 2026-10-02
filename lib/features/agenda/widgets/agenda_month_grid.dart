@@ -6,13 +6,17 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
 
 /// Mês no formato do Calendário do iPhone: título grande, grade de borda a
-/// borda com hairline por semana e até dois atendimentos por dia.
+/// borda com hairline por semana e atendimentos em chips.
 /// Arrastar (vertical ou horizontal) troca o mês.
+///
+/// Com [expand], as semanas dividem a altura disponível e cada dia mostra
+/// quantos chips couberem (mínimo [maxChips]).
 class AgendaMonthGrid extends StatelessWidget {
   const AgendaMonthGrid({
     super.key,
@@ -21,20 +25,34 @@ class AgendaMonthGrid extends StatelessWidget {
     required this.eventsByDay,
     required this.onSelect,
     required this.onSwipe,
+    this.onToday,
+    this.expand = false,
     this.now,
   });
 
-  /// Célula de altura fixa: a fonte da grade não escala (o leitor de tela
+  /// Altura mínima da célula: a fonte da grade não escala (o leitor de tela
   /// lê o rótulo completo do dia).
   static const double cellHeight = 66;
   static const int maxChips = 2;
+  static const int _maxChipsExpanded = 5;
+  static const double _chipSlot = 13;
+  static const double _cellChrome = 3 + 24 + 2 + 11;
 
   final DateTime month;
   final DateTime selected;
   final Map<String, List<Agendamento>> eventsByDay;
   final ValueChanged<DateTime> onSelect;
   final ValueChanged<int> onSwipe;
+
+  /// Botão "Hoje" na linha do título; nulo esconde.
+  final VoidCallback? onToday;
+  final bool expand;
   final DateTime? now;
+
+  static int chipsFor(double height) {
+    final fit = ((height - _cellChrome) / _chipSlot).floor();
+    return fit.clamp(maxChips, _maxChipsExpanded);
+  }
 
   void _swipe(double? velocity) {
     final v = velocity ?? 0;
@@ -50,95 +68,111 @@ class AgendaMonthGrid extends StatelessWidget {
     final days = agendaMonthGrid(month);
     final weeks = agendaMonthWeeks(month);
 
+    Widget weekRows(double height, int chips) => AnimatedSwitcher(
+      duration: fxMotionDuration(
+        context,
+        normal: const Duration(milliseconds: 180),
+      ),
+      child: Column(
+        key: ValueKey(agendaIsoDate(month)),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var w = 0; w < weeks; w++)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: chrome.line, width: 0.5)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var d = 0; d < 7; d++)
+                    Expanded(
+                      child: _MonthDayCell(
+                        day: days[w * 7 + d],
+                        inMonth: days[w * 7 + d].month == month.month,
+                        selected: agendaSameDay(days[w * 7 + d], selected),
+                        isToday: agendaSameDay(days[w * 7 + d], today),
+                        events:
+                            eventsByDay[agendaIsoDate(days[w * 7 + d])] ??
+                            const [],
+                        height: height,
+                        maxChips: chips,
+                        onTap: () => onSelect(days[w * 7 + d]),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+
+    final grid =
+        expand
+            ? Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final h =
+                      constraints.maxHeight.isFinite
+                          ? (constraints.maxHeight / weeks).floorToDouble()
+                          : cellHeight;
+                  final height = h < cellHeight ? cellHeight : h;
+                  return SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: weekRows(height, chipsFor(height)),
+                  );
+                },
+              ),
+            )
+            : weekRows(cellHeight, maxChips);
+
+    final body = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragEnd: (d) => _swipe(d.primaryVelocity),
+      onHorizontalDragEnd: (d) => _swipe(d.primaryVelocity),
+      child: MediaQuery.withNoTextScaling(
+        child: Column(
+          mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s1),
+              child: Row(
+                children: [
+                  for (final (i, label) in agendaWeekdayInitials.indexed)
+                    Expanded(
+                      child: ExcludeSemantics(
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: FocuxHubTypography.chip(
+                            i >= 5
+                                ? chrome.mute.withValues(alpha: 0.6)
+                                : chrome.mute,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            grid,
+          ],
+        ),
+      ),
+    );
+
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _MonthTitle(
           month: month,
           onPrev: () => onSwipe(-1),
           onNext: () => onSwipe(1),
+          onToday: onToday,
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onVerticalDragEnd: (d) => _swipe(d.primaryVelocity),
-          onHorizontalDragEnd: (d) => _swipe(d.primaryVelocity),
-          child: MediaQuery.withNoTextScaling(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: TokensStrip.s1),
-                  child: Row(
-                    children: [
-                      for (final (i, label) in agendaWeekdayInitials.indexed)
-                        Expanded(
-                          child: ExcludeSemantics(
-                            child: Text(
-                              label,
-                              textAlign: TextAlign.center,
-                              style: FocuxHubTypography.chip(
-                                i >= 5
-                                    ? chrome.mute.withValues(alpha: 0.6)
-                                    : chrome.mute,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                AnimatedSwitcher(
-                  duration: fxMotionDuration(
-                    context,
-                    normal: const Duration(milliseconds: 180),
-                  ),
-                  child: Column(
-                    key: ValueKey(agendaIsoDate(month)),
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (var w = 0; w < weeks; w++)
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(color: chrome.line, width: 0.5),
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (var d = 0; d < 7; d++)
-                                Expanded(
-                                  child: _MonthDayCell(
-                                    day: days[w * 7 + d],
-                                    inMonth:
-                                        days[w * 7 + d].month == month.month,
-                                    selected: agendaSameDay(
-                                      days[w * 7 + d],
-                                      selected,
-                                    ),
-                                    isToday: agendaSameDay(
-                                      days[w * 7 + d],
-                                      today,
-                                    ),
-                                    events:
-                                        eventsByDay[agendaIsoDate(
-                                          days[w * 7 + d],
-                                        )] ??
-                                        const [],
-                                    onTap: () => onSelect(days[w * 7 + d]),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        if (expand) Expanded(child: body) else body,
       ],
     );
   }
@@ -149,11 +183,13 @@ class _MonthTitle extends StatelessWidget {
     required this.month,
     required this.onPrev,
     required this.onNext,
+    this.onToday,
   });
 
   final DateTime month;
   final VoidCallback onPrev;
   final VoidCallback onNext;
+  final VoidCallback? onToday;
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +245,32 @@ class _MonthTitle extends StatelessWidget {
               ),
             ),
           ),
+          if (onToday != null)
+            Tooltip(
+              message: S.of(context).agendaIrParaHoje,
+              child: TextButton(
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  onToday!();
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: primary,
+                  minimumSize: const Size(
+                    FxHomeSheetChrome.touchTarget,
+                    FxHomeSheetChrome.touchTarget,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: TokensStrip.s2,
+                  ),
+                ),
+                child: Text(
+                  S.of(context).agendaHoje,
+                  style: FocuxHubTypography.body(
+                    color: primary,
+                  ).copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
           seta(Icons.chevron_left_rounded, 'Mês anterior', onPrev),
           seta(Icons.chevron_right_rounded, 'Próximo mês', onNext),
         ],
@@ -224,6 +286,8 @@ class _MonthDayCell extends StatelessWidget {
     required this.selected,
     required this.isToday,
     required this.events,
+    required this.height,
+    required this.maxChips,
     required this.onTap,
   });
 
@@ -232,6 +296,8 @@ class _MonthDayCell extends StatelessWidget {
   final bool selected;
   final bool isToday;
   final List<Agendamento> events;
+  final double height;
+  final int maxChips;
   final VoidCallback onTap;
 
   @override
@@ -241,12 +307,12 @@ class _MonthDayCell extends StatelessWidget {
     final weekend = day.weekday >= DateTime.saturday;
     final Color circle;
     final Color numberColor;
-    if (isToday) {
-      circle = primary;
-      numberColor = Colors.white;
-    } else if (selected) {
-      circle = chrome.ink;
-      numberColor = chrome.isDark ? Colors.black : Colors.white;
+    if (selected) {
+      circle = isToday ? primary : chrome.ink;
+      numberColor = isToday || !chrome.isDark ? Colors.white : Colors.black;
+    } else if (isToday) {
+      circle = Colors.transparent;
+      numberColor = primary;
     } else {
       circle = Colors.transparent;
       numberColor =
@@ -256,7 +322,7 @@ class _MonthDayCell extends StatelessWidget {
               ? chrome.mute
               : chrome.ink;
     }
-    final chips = events.take(AgendaMonthGrid.maxChips).toList();
+    final chips = events.take(maxChips).toList();
     final extra = events.length - chips.length;
 
     return Semantics(
@@ -274,7 +340,7 @@ class _MonthDayCell extends StatelessWidget {
           onTap();
         },
         child: SizedBox(
-          height: AgendaMonthGrid.cellHeight,
+          height: height,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(1.5, 3, 1.5, 0),
             child: Column(

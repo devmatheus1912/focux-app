@@ -745,5 +745,14 @@
     }
   },
   "feedComentarioBloquearConfirma": "Você deixa de ver os comentários dessa pessoa no feed.",
-  "feedComentarioBloqueado": "Pronto. Você não verá mais os comentários dessa pessoa."
+  "feedComentarioBloqueado": "Pronto. Você não verá mais os comentários dessa pessoa.",
+  "agendaDiaLivre": "Dia livre",
+  "agendaAgendarNoDia": "Agendar em {dia}",
+  "@agendaAgendarNoDia": {
+    "placeholders": {
+      "dia": {
+        "type": "String"
+      }
+    }
+  }
 }
