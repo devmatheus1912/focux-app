@@ -14,26 +14,7 @@ class SubscriptionDeviceGuard {
     }
   }
 
-  /// Modo desenvolvedor (USB debugging) — não equivale a jailbreak.
-  /// Bloqueia só a compra, não a navegação em Planos.
-  static Future<bool> isDeveloperMode() async {
-    if (kIsWeb) return false;
-    try {
-      return await FlutterJailbreakDetection.developerMode;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  /// Comprometido para pagamento = jailbreak OU developer mode.
-  static Future<bool> isCompromised() async {
-    if (kIsWeb) return false;
-    try {
-      final jailbroken = await isJailbroken();
-      final devMode = await isDeveloperMode();
-      return jailbroken || devMode;
-    } catch (_) {
-      return false;
-    }
-  }
+  /// Só jailbreak/root bloqueia a compra. Modo desenvolvedor é comum em
+  /// aparelho normal (e nos de revisão da loja); o recibo é validado no backend.
+  static Future<bool> isCompromised() => isJailbroken();
 }

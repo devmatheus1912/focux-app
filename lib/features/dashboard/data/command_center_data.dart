@@ -215,10 +215,10 @@ class AgendamentoResumo {
 
   factory AgendamentoResumo.fromJson(Map<String, dynamic> json) =>
       AgendamentoResumo(
-        id: json['id'] as int,
-        nomeAluno: json['nomeAluno'] as String,
-        horario: json['horario'] as String,
-        status: json['status'] as String,
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        nomeAluno: json['nomeAluno'] as String? ?? '',
+        horario: json['horario'] as String? ?? '',
+        status: json['status'] as String? ?? '',
       );
 }
 
@@ -238,8 +238,8 @@ class AlertaResumo {
   });
 
   factory AlertaResumo.fromJson(Map<String, dynamic> json) => AlertaResumo(
-    id: json['id'] as int,
-    nomeAluno: json['nomeAluno'] as String,
+    id: (json['id'] as num?)?.toInt() ?? 0,
+    nomeAluno: json['nomeAluno'] as String? ?? '',
     motivo: json['motivo'] as String? ?? '',
     nivelRisco: json['nivelRisco'] as String? ?? '',
     proximaAcao: json['proximaAcao'] as String?,
@@ -298,11 +298,11 @@ class FilaAcaoResumo {
   });
 
   factory FilaAcaoResumo.fromJson(Map<String, dynamic> json) => FilaAcaoResumo(
-    tipo: json['tipo'] as String,
-    actionKey: json['actionKey'] as String? ?? json['tipo'] as String,
+    tipo: json['tipo'] as String? ?? '',
+    actionKey: json['actionKey'] as String? ?? json['tipo'] as String? ?? '',
     titulo: json['titulo'] as String? ?? json['descricao'] as String? ?? '',
-    descricao: json['descricao'] as String,
-    acaoUrl: json['acaoUrl'] as String,
+    descricao: json['descricao'] as String? ?? '',
+    acaoUrl: json['acaoUrl'] as String? ?? '',
     prioridade: json['prioridade'] as String? ?? 'P2',
     severidade: json['severidade'] as String? ?? 'MEDIA',
     responsavel: json['responsavel'] as String? ?? 'Personal',
@@ -408,9 +408,9 @@ class MensalidadeResumo {
 
   factory MensalidadeResumo.fromJson(Map<String, dynamic> json) =>
       MensalidadeResumo(
-        id: json['id'] as int,
-        nomeAluno: json['nomeAluno'] as String,
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        nomeAluno: json['nomeAluno'] as String? ?? '',
         valor: FxMoney.reais(json['valor']),
-        dataVencimento: json['dataVencimento'] as String,
+        dataVencimento: json['dataVencimento'] as String? ?? '',
       );
 }

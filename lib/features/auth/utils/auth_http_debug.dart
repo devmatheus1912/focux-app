@@ -6,6 +6,7 @@ import '../../../core/config/env.dart';
 
 /// Logs de diagnóstico para fluxos de auth (nunca imprime tokens).
 void logAuthApiUrl(String tag) {
+  if (!kDebugMode) return;
   debugPrint('[$tag] Env.apiUrl=${Env.apiUrl}');
 }
 
@@ -17,6 +18,7 @@ void logAuthHttpCall(
   bool? hasPersonalSlug,
   int? identityTokenLen,
 }) {
+  if (!kDebugMode) return;
   debugPrint(
     '[$tag] BEFORE $method $path apiUrl=${Env.apiUrl}'
     '${isAluno == null ? '' : ' isAluno=$isAluno'}'
@@ -26,6 +28,7 @@ void logAuthHttpCall(
 }
 
 void logAuthHttpError(String tag, Object error, {String? path}) {
+  if (!kDebugMode) return;
   if (error is DioException) {
     debugPrint(
       '[$tag] AFTER statusCode=${error.response?.statusCode} '
@@ -54,6 +57,7 @@ void logAuthHttpError(String tag, Object error, {String? path}) {
 }
 
 void logAuthHttpOk(String tag, {required String path, int? statusCode}) {
+  if (!kDebugMode) return;
   debugPrint(
     '[$tag] AFTER ok statusCode=${statusCode ?? 200} '
     'path=$path apiUrl=${Env.apiUrl}',

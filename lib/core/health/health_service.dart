@@ -24,10 +24,19 @@ class HealthService {
 
   static final _permissions = _types.map((_) => HealthDataAccess.READ).toList();
 
+  static Future<void>? _configured;
+
+  static Future<void> _ensureConfigured() =>
+      _configured ??= _health.configure().catchError((Object e) {
+        _configured = null;
+        throw e;
+      });
+
   /// Request authorization to read health data.
   /// Returns true if access was granted.
   static Future<bool> requestAuthorization() async {
     try {
+      await _ensureConfigured();
       final granted = await _health.requestAuthorization(
         _types,
         permissions: _permissions,
@@ -52,6 +61,7 @@ class HealthService {
     try {
       final now = DateTime.now();
       final midnight = DateTime(now.year, now.month, now.day);
+      await _ensureConfigured();
       final steps = await _health.getTotalStepsInInterval(midnight, now);
       return steps ?? 0;
     } catch (e) {
@@ -67,6 +77,7 @@ class HealthService {
     List<HealthDataType>? types,
   }) async {
     try {
+      await _ensureConfigured();
       final data = await _health.getHealthDataFromTypes(
         types: types ?? _types,
         startTime: start,
@@ -93,7 +104,9 @@ class HealthService {
     double sleepMinutes = 0;
 
     for (final point in data) {
-      final value = (point.value as NumericHealthValue).numericValue;
+      final raw = point.value;
+      if (raw is! NumericHealthValue) continue;
+      final value = raw.numericValue;
       switch (point.type) {
         case HealthDataType.ACTIVE_ENERGY_BURNED:
           calories += value.toDouble();
@@ -121,6 +134,7 @@ class HealthService {
   /// Revoke access and clear stored preference.
   static Future<void> revokeAccess() async {
     try {
+      await _ensureConfigured();
       await _health.revokePermissions();
     } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
