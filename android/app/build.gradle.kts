@@ -54,7 +54,7 @@ android {
     defaultConfig {
         applicationId = "com.focux.focux_app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -65,6 +65,7 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             }
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -87,8 +88,4 @@ tasks.configureEach {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    implementation("com.google.android.play:core:1.10.3")
 }

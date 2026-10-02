@@ -19,6 +19,9 @@
 -dontwarn android.support.**
 -dontwarn androidx.**
 
+# Deferred components do embedding referenciam Play Core (não usado; lib deprecated)
+-dontwarn com.google.android.play.core.**
+
 # ML Kit text recognition — scripts opcionais não bundled no APK
 -dontwarn com.google.mlkit.vision.text.chinese.**
 -dontwarn com.google.mlkit.vision.text.devanagari.**

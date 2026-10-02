@@ -9,7 +9,10 @@ void main() {
     expect(manifest, contains('android:autoVerify="true"'));
     expect(manifest, contains('android:host="focuxpersonal.com"'));
     expect(manifest, contains('android:pathPrefix="/convite"'));
-    expect(manifest, contains('android:pathPrefix="/p"'));
+    // Barra final: "/p" sozinho capturaria /privacidade e /precos.
+    expect(manifest, contains('android:pathPrefix="/p/"'));
+    expect(manifest, isNot(contains('android:pathPrefix="/p"')));
+    expect(manifest, isNot(contains('android:pathPrefix="/c"')));
     expect(manifest, contains('android:pathPrefix="/login"'));
     expect(manifest, contains('android:scheme="focux"'));
     expect(manifest, contains('flutter_deeplinking_enabled'));
@@ -24,6 +27,7 @@ void main() {
         File('ios/Runner/Runner.entitlements').readAsStringSync();
     expect(entitlements, contains('applinks:focuxpersonal.com'));
     expect(entitlements, contains('applinks:www.focuxpersonal.com'));
+    expect(entitlements, contains('<key>aps-environment</key>'));
 
     final plist = File('ios/Runner/Info.plist').readAsStringSync();
     expect(plist, contains('<string>focux</string>'));

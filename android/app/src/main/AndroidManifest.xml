@@ -6,12 +6,9 @@
     <!-- Câmera e mídia para upload de GIF/vídeo de exercícios -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <!-- Notificações (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- Health Connect (Android 14+) — leitura de métricas de saúde -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
@@ -20,7 +17,6 @@
     <uses-permission android:name="android.permission.health.READ_EXERCISE"/>
     <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
     <uses-permission android:name="android.permission.health.READ_HEIGHT"/>
-    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <application
         android:label="Focux"
@@ -63,18 +59,16 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/p"/>
-                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/c"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/p/"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/convite"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/login"/>
                 <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/resetar-senha"/>
-                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/aluno"/>
-                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/p"/>
-                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/c"/>
+                <data android:scheme="https" android:host="focuxpersonal.com" android:pathPrefix="/aluno/"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/p/"/>
                 <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/convite"/>
                 <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/login"/>
                 <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/resetar-senha"/>
-                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/aluno"/>
+                <data android:scheme="https" android:host="www.focuxpersonal.com" android:pathPrefix="/aluno/"/>
             </intent-filter>
         </activity>
         <meta-data
@@ -150,6 +144,10 @@
         <intent>
             <action android:name="android.intent.action.VIEW"/>
             <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="tel"/>
         </intent>
     </queries>
 </manifest>

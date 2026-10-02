@@ -30,6 +30,7 @@ platform :ios do
     )
 
     revoke_orphan_distribution_certs!(api_key)
+    ensure_push_capability!(ENV.fetch("APP_BUNDLE_ID", "com.focux.focuxApp"))
 
     cert(
       api_key: api_key,
@@ -54,6 +55,20 @@ platform :ios do
 
     UI.success("Signing ready: #{ENV['SIGH_NAME']} (#{ENV['SIGH_UUID']})")
   end
+end
+
+# Runner.entitlements declara aps-environment; o profile só inclui se o App ID
+# tiver Push Notifications. Requer Spaceship::ConnectAPI.token já definido.
+def ensure_push_capability!(identifier)
+  push = Spaceship::ConnectAPI::BundleIdCapability::Type::PUSH_NOTIFICATIONS
+  bundle = Spaceship::ConnectAPI::BundleId.find(identifier)
+  UI.user_error!("App ID #{identifier} não encontrado") if bundle.nil?
+  if bundle.get_capabilities.any? { |c| c.capability_type == push }
+    UI.message("Push Notifications já habilitado em #{identifier}.")
+    return
+  end
+  UI.important("Habilitando Push Notifications em #{identifier}...")
+  bundle.create_capability(push)
 end
 
 def revoke_orphan_distribution_certs!(api_key)
