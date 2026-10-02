@@ -11,12 +11,6 @@ class SubscriptionProducts {
   static const String enterpriseMonthly = 'focux_enterprise_monthly';
   static const String enterpriseYearly = 'focux_enterprise_yearly';
 
-  /// SKUs legados ainda em voo (restore / receipts).
-  static const String premiumMonthlyLegacy = 'focux_premium_monthly';
-  static const String premiumYearlyLegacy = 'focux_premium_yearly';
-  static const String enterpriseProMonthlyLegacy = 'focux_enterprise_pro_monthly';
-  static const String enterpriseProYearlyLegacy = 'focux_enterprise_pro_yearly';
-
   /// Anual = mensal × 10 (2 meses grátis).
   static const double annualDiscountRate = 1 / 6;
 
@@ -25,10 +19,6 @@ class SubscriptionProducts {
     proYearly,
     enterpriseMonthly,
     enterpriseYearly,
-    premiumMonthlyLegacy,
-    premiumYearlyLegacy,
-    enterpriseProMonthlyLegacy,
-    enterpriseProYearlyLegacy,
   };
 
   static String productIdFor(
