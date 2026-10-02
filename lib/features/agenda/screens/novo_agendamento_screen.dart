@@ -25,15 +25,21 @@ import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
+import '../data/agenda_novo_args.dart';
+import '../data/agenda_repository.dart';
 import '../providers/agenda_provider.dart';
+import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
+import '../utils/agenda_slots.dart';
 import '../widgets/agenda_form_sheets.dart';
 import '../widgets/agenda_help_sheet.dart';
+import '../widgets/agenda_slot_picker_sheet.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
-  const NovoAgendamentoScreen({super.key, this.seedDay});
+  const NovoAgendamentoScreen({super.key, this.seedDay, this.args});
 
   final DateTime? seedDay;
+  final AgendaNovoArgs? args;
 
   @override
   ConsumerState<NovoAgendamentoScreen> createState() =>
@@ -41,20 +47,23 @@ class NovoAgendamentoScreen extends ConsumerStatefulWidget {
 }
 
 class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
+  static var _ultimaDuracao = agendaDuracaoPadraoMin;
+
   final _titulo = TextEditingController();
+  final _meses = <DateTime, List<Agendamento>>{};
+  late final AgendaNovoArgs _args;
   int? _alunoId;
   Aluno? _alunoSelecionado;
   DateTime? _inicio;
-  DateTime? _fim;
+  late int _duracao;
   bool _saving = false;
 
-  bool get _canSave => _alunoId != null && _inicio != null && _fim != null;
+  DateTime? get _fim => _inicio?.add(Duration(minutes: _duracao));
+
+  bool get _canSave => _alunoId != null && _inicio != null;
 
   bool get _dirty =>
-      _alunoId != null ||
-      _inicio != null ||
-      _fim != null ||
-      _titulo.text.trim().isNotEmpty;
+      _alunoId != null || _inicio != null || _titulo.text.trim().isNotEmpty;
 
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
@@ -76,10 +85,15 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     _titulo.addListener(() {
       if (mounted) setState(() {});
     });
-    final seed = widget.seedDay;
-    if (seed != null && (seed.hour != 0 || seed.minute != 0)) {
-      _inicio = seed;
-      _fim = seed.add(const Duration(hours: 1));
+    _args = widget.args ?? AgendaNovoArgs.fromSeed(widget.seedDay);
+    _duracao = _args.duracaoMin ?? _ultimaDuracao;
+    final ags = _args.agendamentos;
+    if (ags != null) _meses[agendaMonthOf(_args.day)] = ags;
+    final inicio = _args.inicio;
+    if (inicio != null &&
+        agendaSlotFitsDay(inicio, _duracao) &&
+        agendaSlotLocalError(inicio, _duracao, ags ?? const []) == null) {
+      _inicio = inicio;
     }
   }
 
@@ -89,34 +103,45 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     super.dispose();
   }
 
-  Future<void> _pickDateTime(bool isInicio) async {
-    final seed = widget.seedDay ?? DateTime.now();
-    final base =
-        isInicio
-            ? (_inicio ?? agendaDefaultSlot(seed))
-            : (_fim ??
-                (_inicio ?? agendaDefaultSlot(seed)).add(
-                  const Duration(hours: 1),
-                ));
-    final dt = await showFxHomeSheet<DateTime>(
+  Future<List<Agendamento>> _loadMonth(DateTime month) async {
+    final cached = _meses[month];
+    if (cached != null) return cached;
+    final items = await ref
+        .read(agendaRepositoryProvider)
+        .listarMes(month.year, month.month);
+    _meses[month] = items;
+    return items;
+  }
+
+  Future<void> _pickHorario({String? aviso}) async {
+    final day = _inicio ?? _args.day;
+    final pick = await showAgendaSlotPicker(
       context,
-      builder:
-          (_) => AgendaDateTimeSheet(
-            title: isInicio ? 'Início' : 'Fim',
-            initial: base,
-          ),
+      title: 'Início do atendimento',
+      day: day,
+      inicio: _inicio ?? _args.inicio,
+      duracaoMin: _duracao,
+      agendamentos: _meses[agendaMonthOf(day)],
+      loadMonth: _loadMonth,
+      aviso: aviso,
     );
-    if (dt == null || !mounted) return;
+    if (pick == null || !mounted) return;
     setState(() {
-      if (isInicio) {
-        _inicio = dt;
-        if (_fim == null || !_fim!.isAfter(dt)) {
-          _fim = dt.add(const Duration(hours: 1));
-        }
-      } else {
-        _fim = dt;
-      }
+      _inicio = pick.inicio;
+      _duracao = pick.duracaoMin;
+      _ultimaDuracao = pick.duracaoMin;
     });
+  }
+
+  /// Horário recusado (local ou servidor): reabre a grade com o motivo. Do
+  /// servidor, o mês é buscado de novo para mostrar quem ocupou.
+  Future<void> _repick(String message, {bool refresh = false}) async {
+    final inicio = _inicio;
+    if (refresh) {
+      invalidateAgendaCaches(ref);
+      if (inicio != null) _meses.remove(agendaMonthOf(inicio));
+    }
+    await _pickHorario(aviso: message);
   }
 
   Future<void> _showAlunoSheet(List<Aluno> alunos) async {
@@ -136,7 +161,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     if (!_canSave) {
       FeedbackHelper.showError(
         context,
-        'Selecione aluno, início e fim para agendar.',
+        'Selecione aluno e horário para agendar.',
       );
       return;
     }
@@ -147,8 +172,13 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     }
     final inicio = _inicio!;
     final fim = _fim!;
-    if (!fim.isAfter(inicio)) {
-      FeedbackHelper.showWarn(context, 'Fim deve ser após início.');
+    final localError = agendaSlotLocalError(
+      inicio,
+      _duracao,
+      _meses[agendaMonthOf(inicio)] ?? const [],
+    );
+    if (localError != null) {
+      await _repick(localError);
       return;
     }
     final ok = await showFxConfirmSheet(
@@ -178,20 +208,28 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
     } on OfflineQueuedException {
       if (mounted) leaveWithQueuedNotice(context, '/agenda');
     } catch (e) {
-      if (mounted) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      final slotError = agendaSlotErrorMessage(e);
+      if (slotError != null) {
+        await _repick(slotError, refresh: true);
+      } else {
         FeedbackHelper.showError(
           context,
           friendlyError(e, fallback: 'Erro ao agendar. Tente novamente.'),
         );
       }
+      return;
     }
     if (mounted) setState(() => _saving = false);
   }
 
-  String _fmtDt(DateTime? dt) =>
-      dt == null
-          ? 'Selecionar'
-          : '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')} · ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  String _horarioLabel() {
+    final inicio = _inicio;
+    final fim = _fim;
+    if (inicio == null || fim == null) return 'Selecionar';
+    return '${agendaDayShortLabel(inicio)} · ${agendaHm(inicio)}–${agendaHm(fim)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,117 +241,114 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
         dirty: _dirty,
         onCancel: _cancel,
         child: FxShellScaffold(
-        useMesh: true,
-        appBar: FxShellAppBar(
-          title: 'Novo agendamento',
-          subtitle: 'AGENDA',
-          leadingWidth: 92,
-          leading: TextButton(
-            onPressed: _cancel,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          useMesh: true,
+          appBar: FxShellAppBar(
+            title: 'Novo agendamento',
+            subtitle: 'AGENDA',
+            leadingWidth: 92,
+            leading: TextButton(
+              onPressed: _cancel,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: const Text('Cancelar'),
             ),
-            child: const Text('Cancelar'),
           ),
-        ),
-        bottomNavigationBar: FxFormStickyBar(
-          child: FxLiquidPrimaryButton(
-            label: agendaNovoTileLabel(),
-            loading: _saving,
-            loadingLabel: 'Agendando…',
-            onPressed: _saving ? null : _salvar,
+          bottomNavigationBar: FxFormStickyBar(
+            child: FxLiquidPrimaryButton(
+              label: agendaNovoTileLabel(),
+              loading: _saving,
+              loadingLabel: 'Agendando…',
+              onPressed: _saving ? null : _salvar,
+            ),
           ),
-        ),
-        body: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.fromLTRB(
-            FxSettingsLayout.pageInset,
-            8,
-            FxSettingsLayout.pageInset,
-            24,
-          ),
-          children: [
-            alunosAsync.maybeWhen(
-              error:
-                  (e, _) => Padding(
-                    padding: const EdgeInsets.only(bottom: TokensStrip.s3),
-                    child: FxErrorState(
-                      chromeOnDark: ShellChrome.of(context).isDark,
-                      primary: Theme.of(context).colorScheme.primary,
-                      message: friendlyError(
-                        e,
-                        fallback: 'Não foi possível carregar alunos.',
+          body: ListView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              8,
+              FxSettingsLayout.pageInset,
+              24,
+            ),
+            children: [
+              alunosAsync.maybeWhen(
+                error:
+                    (e, _) => Padding(
+                      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+                      child: FxErrorState(
+                        chromeOnDark: ShellChrome.of(context).isDark,
+                        primary: Theme.of(context).colorScheme.primary,
+                        message: friendlyError(
+                          e,
+                          fallback: 'Não foi possível carregar alunos.',
+                        ),
+                        onRetry: () => ref.invalidate(alunosProvider),
                       ),
-                      onRetry: () => ref.invalidate(alunosProvider),
                     ),
+                orElse: () => const SizedBox.shrink(),
+              ),
+              FxSettingsGroup(
+                header: 'Atendimento',
+                children: [
+                  FxSettingsTile(
+                    fxIcon: 'users',
+                    label: 'Aluno',
+                    subtitle:
+                        _alunoSelecionado == null
+                            ? 'Selecione quem será atendido'
+                            : maskEmailForList(_alunoSelecionado!.email),
+                    value:
+                        alunosAsync.isLoading
+                            ? 'Carregando…'
+                            : (_alunoSelecionado?.nome ?? 'Selecionar'),
+                    picker: true,
+                    onTap: () {
+                      final alunos = alunosAsync.value;
+                      if (alunos == null) {
+                        ref.invalidate(alunosProvider);
+                        return;
+                      }
+                      _showAlunoSheet(alunos);
+                    },
                   ),
-              orElse: () => const SizedBox.shrink(),
-            ),
-            FxSettingsGroup(
-              header: 'Atendimento',
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'users',
-                  label: 'Aluno',
-                  subtitle:
-                      _alunoSelecionado == null
-                          ? 'Selecione quem será atendido'
-                          : maskEmailForList(_alunoSelecionado!.email),
-                  value:
-                      alunosAsync.isLoading
-                          ? 'Carregando…'
-                          : (_alunoSelecionado?.nome ?? 'Selecionar'),
-                  picker: true,
-                  onTap: () {
-                    final alunos = alunosAsync.value;
-                    if (alunos == null) {
-                      ref.invalidate(alunosProvider);
-                      return;
-                    }
-                    _showAlunoSheet(alunos);
-                  },
-                ),
-                AlunoInsetFormField(
-                  controller: _titulo,
-                  label: 'Título (opcional)',
-                  icon: Icons.title_outlined,
-                  hint: 'Avaliação, retorno, foco da sessão…',
-                  textCapitalization: TextCapitalization.sentences,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(agendaTituloMax),
-                  ],
-                  showDivider: false,
-                ),
-              ],
-            ),
-            const SizedBox(height: TokensStrip.s3),
-            FxSettingsGroup(
-              header: 'Horário',
-              helpTooltip: 'Como o fim é sugerido',
-              onHelpTap: () => showAgendaHelpSheet(context),
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'calendar',
-                  label: 'Início',
-                  value: _fmtDt(_inicio),
-                  picker: true,
-                  onTap: () => _pickDateTime(true),
-                ),
-                FxSettingsTile(
-                  fxIcon: 'calendar',
-                  label: 'Fim',
-                  value: _fmtDt(_fim),
-                  picker: true,
-                  showDivider: false,
-                  onTap: () => _pickDateTime(false),
-                ),
-              ],
-            ),
-          ],
+                  AlunoInsetFormField(
+                    controller: _titulo,
+                    label: 'Título (opcional)',
+                    icon: Icons.title_outlined,
+                    hint: 'Avaliação, retorno, foco da sessão…',
+                    textCapitalization: TextCapitalization.sentences,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(agendaTituloMax),
+                    ],
+                    showDivider: false,
+                  ),
+                ],
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              FxSettingsGroup(
+                header: 'Horário',
+                helpTooltip: 'Como usar a agenda',
+                onHelpTap: () => showAgendaHelpSheet(context),
+                children: [
+                  FxSettingsTile(
+                    fxIcon: 'calendar',
+                    label: 'Quando',
+                    subtitle:
+                        _inicio == null
+                            ? 'Dia, horário e duração'
+                            : agendaDuracaoLabel(_duracao),
+                    value: _horarioLabel(),
+                    picker: true,
+                    showDivider: false,
+                    onTap: _pickHorario,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

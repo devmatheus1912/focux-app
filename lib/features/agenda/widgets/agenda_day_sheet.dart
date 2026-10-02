@@ -13,6 +13,7 @@ import '../data/agenda_repository.dart';
 import '../utils/agenda_day_lane.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
+import '../utils/agenda_slots.dart';
 import 'agenda_event_card.dart';
 
 /// Folha do dia tocado no mês: horários, intervalos livres e o botão de
@@ -34,8 +35,8 @@ class AgendaDaySheet extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final ValueChanged<Agendamento> onOpen;
 
-  /// Horário sugerido; nulo agenda no dia sem hora definida.
-  final ValueChanged<DateTime?> onNew;
+  /// Início e duração sugeridos pela lacuna; nulos agendam no dia sem hora.
+  final void Function(DateTime? inicio, int? duracaoMin) onNew;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,7 @@ class AgendaDaySheet extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
+    final pastDay = agendaDayIsPast(day);
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -95,11 +97,7 @@ class AgendaDaySheet extends StatelessWidget {
                       else
                         for (final item in lane)
                           switch (item) {
-                            AgendaLaneGap(:final from, :final duration) =>
-                              AgendaGapTile(
-                                label: agendaGapLabel(duration),
-                                onTap: () => onNew(from),
-                              ),
+                            AgendaLaneGap() => _gapTile(item),
                             AgendaLaneEvent(:final agendamento, :final next) =>
                               AgendaEventCard(
                                 agendamento: agendamento,
@@ -127,24 +125,44 @@ class AgendaDaySheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: TokensStrip.s3),
-              FxLiquidPrimaryButton(
-                label: s.agendaAgendarNoDia(agendaDayShortLabel(day)),
-                icon: Icons.add_rounded,
-                onPressed: () => onNew(null),
-              ),
+              if (pastDay)
+                Text(
+                  s.agendaDiaPassado,
+                  textAlign: TextAlign.center,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: chrome.mute,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              else
+                FxLiquidPrimaryButton(
+                  label: s.agendaAgendarNoDia(agendaDayShortLabel(day)),
+                  icon: Icons.add_rounded,
+                  onPressed: () => onNew(null, null),
+                ),
             ],
           );
         },
       ),
     );
   }
+
+  Widget _gapTile(AgendaLaneGap gap) {
+    final seed = agendaGapSeed(gap);
+    return AgendaGapTile(
+      label: agendaGapLabel(gap.duration),
+      onTap: seed == null ? null : () => onNew(seed.inicio, seed.duracaoMin),
+    );
+  }
 }
 
 class AgendaGapTile extends StatelessWidget {
-  const AgendaGapTile({super.key, required this.label, required this.onTap});
+  const AgendaGapTile({super.key, required this.label, this.onTap});
 
   final String label;
-  final VoidCallback onTap;
+
+  /// Nulo quando a lacuna já passou ou não comporta 30 min.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -152,13 +170,17 @@ class AgendaGapTile extends StatelessWidget {
     return FxSatelliteListTile(
       title: label,
       subtitle: const Text('Horário livre'),
-      trailing: Text(
-        'Encaixar',
-        style: FocuxHubTypography.bodyMuted(
-          color: mute,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+      muted: onTap == null,
+      trailing:
+          onTap == null
+              ? null
+              : Text(
+                'Encaixar',
+                style: FocuxHubTypography.bodyMuted(
+                  color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
       onTap: onTap,
     );
   }

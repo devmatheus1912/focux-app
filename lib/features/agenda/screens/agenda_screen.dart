@@ -10,9 +10,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../features/alunos/data/aluno_contact_utils.dart';
 import '../../../features/alunos/data/aluno_repository.dart';
 import '../../../features/alunos/providers/alunos_provider.dart';
+import '../data/agenda_novo_args.dart';
 import '../data/agenda_repository.dart';
 import '../providers/agenda_provider.dart';
 import '../utils/agenda_schedule.dart';
+import '../utils/agenda_slots.dart';
 import '../utils/agenda_status.dart';
 import '../utils/agenda_month.dart';
 import '../widgets/agenda_day_sheet.dart';
@@ -34,7 +36,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'package:focux_app/core/widgets/fx_shell_scaffold.dart';
 import '../../dashboard/constants/dashboard_layout.dart';
-import '../widgets/agenda_form_sheets.dart';
+import '../widgets/agenda_slot_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 
 part 'agenda_screen_actions.part.dart';
@@ -116,10 +118,30 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
     }
   }
 
-  Future<void> _novoAgendamento({DateTime? slot}) async {
-    await context.push('/agenda/novo', extra: slot ?? _dia);
+  /// Dia passado não agenda: o "+" cai em hoje.
+  Future<void> _novoAgendamento({
+    DateTime? day,
+    DateTime? slot,
+    int? duracaoMin,
+  }) async {
+    var target = slot ?? day ?? _dia;
+    if (agendaDayIsPast(target)) target = agendaDayStart(DateTime.now());
+    final args = AgendaNovoArgs(
+      day: target,
+      inicio: slot,
+      duracaoMin: duracaoMin,
+      agendamentos: agendaMonthOf(target) == _mes ? _ags : null,
+    );
+    await context.push('/agenda/novo', extra: args);
     if (!mounted) return;
     _load(force: true);
+  }
+
+  Future<List<Agendamento>> _loadMonth(DateTime month) {
+    if (month == _mes && _ags.isNotEmpty) return Future.value(_ags);
+    return ref
+        .read(agendaRepositoryProvider)
+        .listarMes(month.year, month.month);
   }
 
   bool get _isTodayVisible => agendaSameDay(_dia, DateTime.now());
@@ -154,9 +176,9 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               _popRootOverlay();
               _openAgendamentoDetails(ag);
             },
-            onNew: (slot) {
+            onNew: (slot, duracaoMin) {
               _popRootOverlay();
-              _novoAgendamento(slot: slot ?? day);
+              _novoAgendamento(day: day, slot: slot, duracaoMin: duracaoMin);
             },
           ),
     );

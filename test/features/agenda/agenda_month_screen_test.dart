@@ -37,6 +37,16 @@ class _FakeRepo implements AgendaRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Dia sem atendimento que ainda não passou; no último dia do mês, hoje.
+DateTime _diaFuturoVazio(DateTime hoje) {
+  final ocupado = hoje.day == 15 ? 16 : 15;
+  final ultimo = DateTime(hoje.year, hoje.month + 1, 0).day;
+  for (var d = hoje.day + 1; d <= ultimo; d++) {
+    if (d != ocupado) return DateTime(hoje.year, hoje.month, d);
+  }
+  return DateTime(hoje.year, hoje.month, hoje.day);
+}
+
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 10; i++) {
     await tester.pump(const Duration(milliseconds: 100));
@@ -94,7 +104,8 @@ void main() {
   ) async {
     await _pump(tester);
     final hoje = DateTime.now();
-    final vazio = DateTime(hoje.year, hoje.month, hoje.day == 20 ? 21 : 20);
+    final vazio = _diaFuturoVazio(hoje);
+    final ehHoje = vazio.day == hoje.day;
     final rotulo = agendaDayShortLabel(vazio);
 
     expect(find.textContaining('Agendar em'), findsNothing);
@@ -103,7 +114,7 @@ void main() {
 
     await tester.tap(
       find.bySemanticsLabel(
-        agendaMonthDayA11y(day: vazio, count: 0, isToday: false),
+        agendaMonthDayA11y(day: vazio, count: 0, isToday: ehHoje),
       ),
     );
     await _settle(tester);
@@ -111,7 +122,10 @@ void main() {
     expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.text('Dia livre'), findsWidgets);
     expect(find.text('Agendar em $rotulo'), findsOneWidget);
-    expect(find.byTooltip('Ir para hoje'), findsOneWidget);
+    expect(
+      find.byTooltip('Ir para hoje'),
+      ehHoje ? findsNothing : findsOneWidget,
+    );
   });
 
   testWidgets('arrastar o calendário troca o mês e Hoje volta', (tester) async {

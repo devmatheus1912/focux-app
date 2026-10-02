@@ -45,6 +45,13 @@ class _Adapter implements HttpClientAdapter {
               : q['data'] == '2026-10-05'
               ? [_ag(1, '2026-10-02T08:00:00'), _ag(2, '2026-10-06T08:00:00')]
               : <Object>[];
+    } else if (options.path == '/api/agenda/aluno/meus') {
+      body = {
+        'content': [_ag(3, '2026-10-02T08:00:00')],
+        'hasNext': false,
+        'page': 0,
+        'totalElements': 1,
+      };
     }
     return ResponseBody.fromString(
       jsonEncode(body),
@@ -92,5 +99,14 @@ void main() {
       '/api/agenda/semana?2026-10-26',
       '/api/agenda/semana?2026-11-02',
     ]);
+  });
+
+  test('agenda do aluno pede o escopo', () async {
+    final adapter = _Adapter(temMes: true);
+    final pagina = await _repo(
+      adapter,
+    ).meusAgendamentosPagina(escopo: 'proximas', status: 'AGENDADO');
+    expect(pagina.content.map((a) => a.id), [3]);
+    expect(adapter.chamadas, ['/api/agenda/aluno/meus?0,20,AGENDADO,proximas']);
   });
 }

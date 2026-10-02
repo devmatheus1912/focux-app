@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -10,11 +9,8 @@ import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../alunos/data/aluno_contact_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
-import '../utils/agenda_schedule.dart';
-import 'agenda_day_chip.dart';
 
 class _AgendaAlunoAvatar extends StatelessWidget {
   final Aluno? aluno;
@@ -74,7 +70,11 @@ class AgendaAlunoSheet extends StatefulWidget {
   final List<Aluno> alunos;
   final int? selectedId;
 
-  const AgendaAlunoSheet({super.key, required this.alunos, required this.selectedId});
+  const AgendaAlunoSheet({
+    super.key,
+    required this.alunos,
+    required this.selectedId,
+  });
 
   @override
   State<AgendaAlunoSheet> createState() => _AgendaAlunoSheetState();
@@ -241,8 +241,7 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
                                       selected
                                           ? Icons.check_circle
                                           : Icons.check_circle_outline,
-                                      color:
-                                          selected ? primary : chrome.mute,
+                                      color: selected ? primary : chrome.mute,
                                     ),
                                   ],
                                 ),
@@ -257,233 +256,4 @@ class _AgendaAlunoSheetState extends State<AgendaAlunoSheet> {
       ),
     );
   }
-}
-
-class AgendaDateTimeSheet extends StatefulWidget {
-  final String title;
-  final DateTime initial;
-
-  const AgendaDateTimeSheet({
-    super.key,
-    required this.title,
-    required this.initial,
-  });
-
-  @override
-  State<AgendaDateTimeSheet> createState() => _AgendaDateTimeSheetState();
-}
-
-class _AgendaDateTimeSheetState extends State<AgendaDateTimeSheet> {
-  late DateTime _selectedDay;
-  late TimeOfDay _selectedTime;
-
-  @override
-  void initState() {
-    super.initState();
-    final now = DateTime.now();
-    var day = DateTime(
-      widget.initial.year,
-      widget.initial.month,
-      widget.initial.day,
-    );
-    final today = DateTime(now.year, now.month, now.day);
-    if (day.isBefore(today)) {
-      day = today;
-    }
-    _selectedDay = day;
-    var time = _snapToSlot(
-      TimeOfDay(hour: widget.initial.hour, minute: widget.initial.minute),
-    );
-    if (!agendaSlotSelectable(day, time.hour, time.minute, now: now)) {
-      final def = agendaDefaultSlot(day, now: now);
-      time = TimeOfDay(hour: def.hour, minute: def.minute);
-    }
-    _selectedTime = time;
-  }
-
-  /// Grade só tem :00 e :30 — sem snap o botão nunca fica “selecionado”.
-  static TimeOfDay _snapToSlot(TimeOfDay raw) {
-    var hour = raw.hour;
-    var minute = raw.minute;
-    if (minute < 15) {
-      minute = 0;
-    } else if (minute < 45) {
-      minute = 30;
-    } else {
-      hour += 1;
-      minute = 0;
-    }
-    if (hour < 6) {
-      hour = 6;
-      minute = 0;
-    }
-    if (hour > 22 || (hour == 22 && minute > 0)) {
-      hour = 22;
-      minute = 0;
-    }
-    return TimeOfDay(hour: hour, minute: minute);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final days = List.generate(
-      14,
-      (i) => DateTime.now().add(Duration(days: i)),
-    );
-    final slots = <TimeOfDay>[
-      for (var hour = 6; hour <= 22; hour++)
-        for (final minute in const [0, 30])
-          TimeOfDay(hour: hour, minute: minute),
-    ];
-
-    return Semantics(
-      scopesRoute: true,
-      namesRoute: true,
-      explicitChildNodes: true,
-      label: 'Selecionar ${widget.title.toLowerCase()}',
-      child: FxHomeSheetSurface(
-        isDark: chrome.isDark,
-        expand: true,
-        maxHeight: MediaQuery.sizeOf(context).height * 0.82,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: chrome.isDark),
-            SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: chrome.isDark,
-              title: widget.title,
-              subtitle: 'Escolha o dia e o horário.',
-              leading: Icon(Icons.schedule_outlined, color: primary, size: 18),
-            ),
-            SizedBox(height: TokensStrip.s3),
-            SizedBox(
-              height: 74,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: days.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (_, index) {
-                  final day = days[index];
-                  return AgendaDayChip(
-                    weekdayLabel: agendaWeekdayShort(day.weekday),
-                    dayNumber: day.day,
-                    selected: agendaSameDay(day, _selectedDay),
-                    isToday: agendaSameDay(day, DateTime.now()),
-                    onTap: () => setState(() => _selectedDay = day),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: TokensStrip.s4),
-            Expanded(
-              child: GridView.builder(
-                itemCount: slots.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  childAspectRatio: 1.8,
-                ),
-                itemBuilder: (_, index) {
-                  final slot = slots[index];
-                  final selected =
-                      slot.hour == _selectedTime.hour &&
-                      slot.minute == _selectedTime.minute;
-                  final selectable = agendaSlotSelectable(
-                    _selectedDay,
-                    slot.hour,
-                    slot.minute,
-                  );
-                  final onPrimary =
-                      Theme.of(context).colorScheme.onPrimary;
-                  return Semantics(
-                    button: selectable,
-                    selected: selected,
-                    enabled: selectable,
-                    label: 'Horário ${_timeLabel(slot)}',
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap:
-                            selectable
-                                ? () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() => _selectedTime = slot);
-                                }
-                                : null,
-                        borderRadius: BorderRadius.circular(14),
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            color:
-                                selected
-                                    ? primary
-                                    : chrome.cardFill.withValues(
-                                      alpha: selectable ? 1 : 0.45,
-                                    ),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color:
-                                  selected
-                                      ? primary
-                                      : chrome.lineStrong.withValues(
-                                        alpha: selectable ? 1 : 0.4,
-                                      ),
-                              width: selected ? 2 : 1,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              _timeLabel(slot),
-                              style: FocuxHubTypography.cardTitle(
-                                color:
-                                    selected
-                                        ? onPrimary
-                                        : chrome.ink.withValues(
-                                          alpha: selectable ? 1 : 0.35,
-                                        ),
-                              ).copyWith(
-                                fontWeight:
-                                    selected
-                                        ? FontWeight.w800
-                                        : FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Divider(height: 1, color: chrome.line.withValues(alpha: 0.8)),
-            SizedBox(height: TokensStrip.s3),
-            FxLiquidPrimaryButton(
-              label:
-                  '${agendaHorarioConfirmLabel()} · ${_timeLabel(_selectedTime)}',
-              onPressed: () {
-                final picked = DateTime(
-                  _selectedDay.year,
-                  _selectedDay.month,
-                  _selectedDay.day,
-                  _selectedTime.hour,
-                  _selectedTime.minute,
-                );
-                if (agendaDateTimeIsInPast(picked)) {
-                  return;
-                }
-                Navigator.pop(context, picked);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _timeLabel(TimeOfDay time) =>
-      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 }

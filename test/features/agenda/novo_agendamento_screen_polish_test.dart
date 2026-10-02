@@ -18,10 +18,13 @@ void main() {
     expect(screen, contains('Selecione quem será atendido'));
     expect(screen, contains('picker: true'));
     expect(screen, contains('AgendaAlunoSheet'));
-    expect(screen, contains('AgendaDateTimeSheet'));
+    expect(screen, contains('showAgendaSlotPicker'));
+    expect(screen, contains('agendaSlotLocalError'));
+    expect(screen, contains('agendaSlotErrorMessage'));
+    expect(screen, isNot(contains("label: 'Fim'")));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains("label: 'Aluno'"));
-    expect(screen, contains("label: 'Início'"));
+    expect(screen, contains("label: 'Quando'"));
     expect(screen, contains('maskEmailForList'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains('agendaNovoSalvarTooltip')));
@@ -31,11 +34,15 @@ void main() {
     final sheets = readScreenSourceBundle(
       'lib/features/agenda/widgets/agenda_form_sheets.dart',
     );
-    expect(sheets, contains('FxLiquidPrimaryButton'));
-    expect(sheets, contains('agendaHorarioConfirmLabel()'));
-    expect(sheets, isNot(contains('ElevatedButton')));
+    final picker = readScreenSourceBundle(
+      'lib/features/agenda/widgets/agenda_slot_picker_sheet.dart',
+    );
+    expect(picker, contains('FxLiquidPrimaryButton'));
+    expect(picker, contains('agendaHorarioConfirmLabel()'));
+    expect(picker, isNot(contains('ElevatedButton')));
+    expect(picker, contains('class AgendaSlotPickerSheet'));
     expect(sheets, contains('class AgendaAlunoSheet'));
-    expect(sheets, contains('class AgendaDateTimeSheet'));
+    expect(sheets, isNot(contains('AgendaDateTimeSheet')));
     expect(sheets, contains('maskEmailForList'));
   });
 }

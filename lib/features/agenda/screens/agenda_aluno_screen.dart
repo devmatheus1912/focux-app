@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/api/pagina.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/config/env.dart';
 import '../../../core/router/safe_navigation.dart';
@@ -13,6 +14,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -25,8 +27,10 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../dashboard/data/aluno_onboarding_prefs.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_display.dart';
 import '../utils/agenda_status.dart';
@@ -37,17 +41,42 @@ class AgendaAlunoScreen extends ConsumerStatefulWidget {
   ConsumerState<AgendaAlunoScreen> createState() => _AgendaAlunoScreenState();
 }
 
+/// Uma lista paginada por escopo (próximas / anteriores).
+class _Secao {
+  _Secao(this.escopo);
+
+  final String escopo;
+  List<Agendamento> items = [];
+  var page = 0;
+  var hasMore = false;
+  var total = 0;
+  var loadingMore = false;
+
+  void reset(Pagina<Agendamento> pagina) {
+    items = pagina.content;
+    page = pagina.page ?? 0;
+    hasMore = pagina.hasNext;
+    total = pagina.totalElements ?? pagina.content.length;
+  }
+
+  void append(Pagina<Agendamento> pagina) {
+    final seen = items.map((a) => a.id).toSet();
+    items = [...items, ...pagina.content.where((a) => seen.add(a.id))];
+    page = pagina.page ?? (page + 1);
+    hasMore = pagina.hasNext;
+    total = pagina.totalElements ?? items.length;
+  }
+}
+
 class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
   final _searchCtrl = TextEditingController();
   final _searchFocus = FocusNode();
+  final _proximas = _Secao(agendaAlunoEscopoProximas);
+  final _anteriores = _Secao(agendaAlunoEscopoAnteriores);
   Timer? _debounce;
-  List<Agendamento> _ags = [];
   var _query = '';
   var _chip = AgendaAlunoChip.todos;
-  var _page = 0;
-  var _hasMore = false;
-  var _total = 0;
-  var _loadingMore = false;
+  var _anterioresAbertas = false;
   var _loading = true;
   String? _erro;
   DateTime? _fetchedAt;
@@ -90,24 +119,28 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     _load();
   }
 
+  Future<Pagina<Agendamento>> _fetch(_Secao secao, {int page = 0}) =>
+      AgendaRepository(ref.read(apiClientProvider)).meusAgendamentosPagina(
+        page: page,
+        q: _query,
+        status: agendaAlunoChipStatus(_chip),
+        escopo: secao.escopo,
+      );
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
       _erro = null;
     });
     try {
-      final pagina = await AgendaRepository(
-        ref.read(apiClientProvider),
-      ).meusAgendamentosPagina(
-        q: _query,
-        status: agendaAlunoChipStatus(_chip),
-      );
+      final paginas = await Future.wait([
+        _fetch(_proximas),
+        _fetch(_anteriores),
+      ]);
       if (!mounted) return;
       setState(() {
-        _ags = pagina.content;
-        _page = pagina.page ?? 0;
-        _hasMore = pagina.hasNext;
-        _total = pagina.totalElements ?? pagina.content.length;
+        _proximas.reset(paginas[0]);
+        _anteriores.reset(paginas[1]);
         _loading = false;
         _fetchedAt = DateTime.now();
       });
@@ -120,29 +153,19 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     }
   }
 
-  Future<void> _carregarMais() async {
-    if (_loadingMore || !_hasMore) return;
-    setState(() => _loadingMore = true);
+  Future<void> _carregarMais(_Secao secao) async {
+    if (secao.loadingMore || !secao.hasMore) return;
+    setState(() => secao.loadingMore = true);
     try {
-      final pagina = await AgendaRepository(
-        ref.read(apiClientProvider),
-      ).meusAgendamentosPagina(
-        page: _page + 1,
-        q: _query,
-        status: agendaAlunoChipStatus(_chip),
-      );
+      final pagina = await _fetch(secao, page: secao.page + 1);
       if (!mounted) return;
-      final seen = _ags.map((a) => a.id).toSet();
       setState(() {
-        _ags = [..._ags, ...pagina.content.where((a) => seen.add(a.id))];
-        _page = pagina.page ?? (_page + 1);
-        _hasMore = pagina.hasNext;
-        _total = pagina.totalElements ?? _ags.length;
-        _loadingMore = false;
+        secao.append(pagina);
+        secao.loadingMore = false;
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _loadingMore = false);
+      setState(() => secao.loadingMore = false);
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }
@@ -179,45 +202,51 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
     }
   }
 
-  Future<void> _onAgTap(Agendamento ag) async {
-    final title = agendaAlunoDefaultTitle(ag.titulo);
-    final when = agendaAlunoWhenLabel(ag.inicio, ag.fim);
-    final status = agendaStatusLabel(ag.status);
+  Future<void> _confirmar(Agendamento ag) async {
+    final ok = await showFxConfirmSheet(
+      context,
+      title: 'Confirmar presença?',
+      subtitle: agendaAlunoDefaultTitle(ag.titulo),
+      message: agendaAlunoDiaLabel(ag.inicio, ag.fim),
+      confirmLabel: 'Confirmar',
+      confirmIcon: Icons.check_rounded,
+      icon: Icons.event_available_rounded,
+    );
+    if (!ok || !mounted) return;
+    try {
+      final atualizado = await AgendaRepository(
+        ref.read(apiClientProvider),
+      ).confirmarPresenca(ag.id);
+      if (!mounted) return;
+      setState(() {
+        _proximas.items = [
+          for (final item in _proximas.items)
+            item.id == atualizado.id ? atualizado : item,
+        ];
+      });
+      FeedbackHelper.showSuccess(context, 'Presença confirmada!');
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showApiFailure(context, e);
+    }
+  }
 
-    if (agendaStatusNeedsConfirm(ag.status)) {
-      final ok = await showFxConfirmSheet(
-        context,
-        title: 'Confirmar presença?',
-        subtitle: title,
-        message: when,
-        confirmLabel: 'Confirmar',
-        confirmIcon: Icons.check_rounded,
-        icon: Icons.event_available_rounded,
-      );
-      if (!ok || !mounted) return;
-      try {
-        await AgendaRepository(
-          ref.read(apiClientProvider),
-        ).confirmarPresenca(ag.id);
-        if (!mounted) return;
-        FeedbackHelper.showSuccess(context, 'Presença confirmada!');
-        await _load();
-      } catch (e) {
-        if (!mounted) return;
-        FeedbackHelper.showApiFailure(context, e);
-      }
+  Future<void> _onAgTap(Agendamento ag) async {
+    if (agendaAlunoPodeConfirmar(ag)) {
+      await _confirmar(ag);
       return;
     }
-
     await showFxNoticeSheet(
       context,
-      title: title,
-      message: '$when\n$status',
+      title: agendaAlunoDefaultTitle(ag.titulo),
+      message:
+          '${agendaAlunoDiaLabel(ag.inicio, ag.fim)}\n${agendaAlunoStatusLabel(ag)}',
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     final freshness = FxHubFreshness.fromFetchedAt(_fetchedAt);
@@ -242,7 +271,9 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
           appBar: FxShellAppBar(
             title: 'Minha Agenda',
             subtitle: FxHubFreshness.joinCount(
-              agendaAlunoCountLabel(_loading ? 0 : _total),
+              _loading
+                  ? s.agendaAlunoCarregando
+                  : agendaAlunoCountLabel(_proximas.total + _anteriores.total),
               _loading ? null : freshness,
             ),
             onBack: () {
@@ -251,164 +282,223 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
             },
             actions: [
               IconButton(
-                tooltip: 'Exportar iCal',
-                icon: const Icon(Icons.calendar_month_outlined),
+                tooltip: s.agendaAlunoAdicionarCalendario,
+                icon: const Icon(Icons.edit_calendar_outlined),
                 onPressed: _copyIcalLink,
               ),
             ],
           ),
-          body: _loading
-              ? const Padding(
-                  padding: EdgeInsets.all(FxSettingsLayout.pageInset),
-                  child: SkeletonList(count: 4),
-                )
-              : _erro != null
-              ? FxErrorState(
-                  chromeOnDark: chrome.isDark,
-                  primary: primary,
-                  title: FocuxMicrocopy.naoFoiPossivelCarregar,
-                  message: _erro!,
-                  onRetry: _load,
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                      ),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        focusNode: _searchFocus,
-                        textInputAction: TextInputAction.search,
-                        onChanged: _onQueryChanged,
-                        onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-                        decoration: InputDecoration(
-                          hintText: 'Buscar sessão',
-                          prefixIcon: const Icon(Icons.search_rounded),
-                          border: FxInputDeco.outlineBorder(
-                            borderRadius: BorderRadius.circular(16),
+          body: FxContentWidthLimiter(
+            child:
+                _loading
+                    ? const Padding(
+                      padding: EdgeInsets.all(FxSettingsLayout.pageInset),
+                      child: SkeletonList(count: 4),
+                    )
+                    : _erro != null
+                    ? FxErrorState(
+                      chromeOnDark: chrome.isDark,
+                      primary: primary,
+                      title: FocuxMicrocopy.naoFoiPossivelCarregar,
+                      message: _erro!,
+                      onRetry: _load,
+                    )
+                    : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s2,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s2,
+                          ),
+                          child: TextField(
+                            controller: _searchCtrl,
+                            focusNode: _searchFocus,
+                            textInputAction: TextInputAction.search,
+                            onChanged: _onQueryChanged,
+                            onTapOutside:
+                                (_) => FxKeyboardDismissScope.dismiss(),
+                            decoration: InputDecoration(
+                              hintText: 'Buscar sessão',
+                              prefixIcon: const Icon(Icons.search_rounded),
+                              border: FxInputDeco.outlineBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            0,
+                            FxSettingsLayout.pageInset,
+                            TokensStrip.s2,
+                          ),
+                          child: Wrap(
+                            spacing: TokensStrip.s2,
+                            runSpacing: TokensStrip.s2,
+                            children: [
+                              for (final chip in AgendaAlunoChip.values)
+                                FxToggleChip(
+                                  label: agendaAlunoChipLabel(chip),
+                                  selected: _chip == chip,
+                                  isDark: chrome.isDark,
+                                  onTap: () {
+                                    if (_chip == chip) return;
+                                    setState(() => _chip = chip);
+                                    _load();
+                                  },
+                                ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildList(s, searching, chrome, primary),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        TokensStrip.s4,
-                        0,
-                        TokensStrip.s4,
-                        TokensStrip.s2,
-                      ),
-                      child: Wrap(
-                        spacing: TokensStrip.s2,
-                        runSpacing: TokensStrip.s2,
-                        children: [
-                          for (final chip in AgendaAlunoChip.values)
-                            FxToggleChip(
-                              label: agendaAlunoChipLabel(chip),
-                              selected: _chip == chip,
-                              isDark: chrome.isDark,
-                              onTap: () {
-                                if (_chip == chip) return;
-                                setState(() => _chip = chip);
-                                _load();
-                              },
-                            ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: FxContentWidthLimiter(
-                        child: _buildList(searching, chrome.isDark, primary),
-                      ),
-                    ),
-                  ],
-                ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildList(bool searching, bool isDark, Color primary) {
-    return RefreshIndicator(
-      onRefresh: _load,
-      child: _ags.isEmpty
-          ? ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              children: [
-                const SizedBox(height: 48),
-                FxEmptyState(
-                  icon: searching ? 'search' : 'calendar',
-                  title: searching
+  Widget _buildList(S s, bool searching, ShellPalette chrome, Color primary) {
+    final proximas = agendaAlunoProximas(_proximas.items);
+    final anteriores = agendaAlunoAnteriores(_anteriores.items);
+    if (proximas.isEmpty && anteriores.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            const SizedBox(height: 48),
+            FxEmptyState(
+              icon: searching ? 'search' : 'calendar',
+              title:
+                  searching
                       ? 'Nenhum compromisso encontrado'
                       : 'Nenhuma sessão marcada',
-                  subtitle: searching
+              subtitle:
+                  searching
                       ? 'Ajuste a busca ou o filtro para achar outra sessão.'
                       : 'Seu personal ainda não agendou nada com você. Quando marcar, aparece aqui.',
-                  action: searching
+              action:
+                  searching
                       ? FxEmptyAction(
-                          label: 'Limpar filtros',
-                          onTap: _clearFilters,
-                        )
+                        label: 'Limpar filtros',
+                        onTap: _clearFilters,
+                      )
                       : FxEmptyAction(
-                          label: 'Abrir chat',
-                          onTap: () => openAlunoRoute(context, '/chat/aluno'),
-                        ),
-                ),
-              ],
-            )
-          : ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.fromLTRB(
-                FxSettingsLayout.pageInset,
-                TokensStrip.s2,
-                FxSettingsLayout.pageInset,
-                TokensStrip.s5,
-              ),
-              itemCount: _ags.length + (_hasMore ? 1 : 0),
-              itemBuilder: (_, i) {
-                if (i >= _ags.length) {
-                  return FxSatelliteListTile(
-                    title: _loadingMore ? 'Carregando…' : 'Carregar mais',
-                    onTap: _loadingMore ? null : _carregarMais,
-                  );
-                }
-                final ag = _ags[i];
-                final cor = agendaStatusColor(
-                  ag.status,
-                  isDark: isDark,
-                  primary: primary,
-                );
-                final needsConfirm = agendaStatusNeedsConfirm(ag.status);
-                return FxSatelliteListTile(
-                  title: agendaAlunoDefaultTitle(ag.titulo),
-                  titleCase: false,
-                  accent: cor,
-                  subtitle: Text(agendaAlunoWhenLabel(ag.inicio, ag.fim)),
-                  trailing:
-                      needsConfirm
-                          ? Text(
-                            'Confirmar',
-                            style: FocuxHubTypography.chip(primary).copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: primary,
-                            ),
-                          )
-                          : Text(
-                            agendaStatusLabel(ag.status),
-                            style: FocuxHubTypography.bodyMuted(
-                              color: cor,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  onTap: () => _onAgTap(ag),
-                );
-              },
+                        label: 'Abrir chat',
+                        onTap: () => openAlunoRoute(context, '/chat/aluno'),
+                      ),
             ),
+          ],
+        ),
+      );
+    }
+
+    final rows = <Widget>[
+      DashboardSectionHeader(title: s.agendaAlunoProximas),
+      if (proximas.isEmpty)
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+          child: Text(
+            s.agendaAlunoSemProximas,
+            style: FocuxHubTypography.bodyMuted(
+              color: chrome.mute,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      for (var i = 0; i < proximas.length; i++)
+        _tile(s, proximas[i], chrome, primary, next: i == 0),
+      if (_proximas.hasMore) _loadMoreTile(s, _proximas),
+      if (anteriores.isNotEmpty) ...[
+        const SizedBox(height: TokensStrip.s3),
+        DashboardSectionHeader(
+          title: s.agendaAlunoAnteriores,
+          actionLabel:
+              _anterioresAbertas
+                  ? s.agendaAlunoOcultarAnteriores
+                  : s.agendaAlunoVerAnteriores,
+          onAction:
+              () => setState(() => _anterioresAbertas = !_anterioresAbertas),
+        ),
+        if (_anterioresAbertas) ...[
+          for (final ag in anteriores) _tile(s, ag, chrome, primary),
+          if (_anteriores.hasMore) _loadMoreTile(s, _anteriores),
+        ],
+      ],
+    ];
+
+    return RefreshIndicator(
+      onRefresh: _load,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(
+          FxSettingsLayout.pageInset,
+          TokensStrip.s2,
+          FxSettingsLayout.pageInset,
+          TokensStrip.s5,
+        ),
+        itemCount: rows.length,
+        itemBuilder: (_, i) => rows[i],
+      ),
+    );
+  }
+
+  Widget _loadMoreTile(S s, _Secao secao) => FxSatelliteListTile(
+    title:
+        secao.loadingMore ? s.agendaAlunoCarregando : s.agendaAlunoCarregarMais,
+    onTap: secao.loadingMore ? null : () => _carregarMais(secao),
+  );
+
+  Widget _tile(
+    S s,
+    Agendamento ag,
+    ShellPalette chrome,
+    Color primary, {
+    bool next = false,
+  }) {
+    final passou = agendaAlunoJaPassou(ag);
+    final atendimento = ag.statusAtendimento?.trim().toUpperCase();
+    final cor =
+        passou && atendimento == null && agendaStatusIsActionable(ag.status)
+            ? chrome.mute
+            : agendaStatusColor(
+              passou ? (atendimento ?? ag.status) : ag.status,
+              isDark: chrome.isDark,
+              primary: primary,
+            );
+    return FxSatelliteListTile(
+      title: agendaAlunoDefaultTitle(ag.titulo),
+      titleCase: false,
+      muted: passou,
+      accent: next ? primary : null,
+      subtitle: Text(agendaAlunoDiaLabel(ag.inicio, ag.fim)),
+      trailing:
+          agendaAlunoPodeConfirmar(ag)
+              ? FxActionChip(
+                label: s.agendaAlunoConfirmar,
+                accent: primary,
+                isDark: chrome.isDark,
+                solid: next,
+                onPressed: () => _confirmar(ag),
+              )
+              : Text(
+                agendaAlunoStatusLabel(ag),
+                style: FocuxHubTypography.bodyMuted(
+                  color: cor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+      onTap: () => _onAgTap(ag),
     );
   }
 }

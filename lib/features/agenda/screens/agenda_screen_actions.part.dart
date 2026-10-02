@@ -69,29 +69,53 @@ extension on _AgendaScreenState {
     },
   );
 
-  Future<void> _reschedule(Agendamento ag) async {
-    final dt = await showFxHomeSheet<DateTime>(
+  /// Horário recusado pelo servidor (passado/conflito): avisa, recarrega o mês
+  /// e reabre a grade, já fora da sheet do atendimento.
+  Future<void> _reschedule(
+    Agendamento ag, {
+    bool fromSheet = true,
+    String? aviso,
+  }) async {
+    final pick = await showAgendaSlotPicker(
       context,
-      builder:
-          (_) => AgendaDateTimeSheet(
-            title: 'Novo início',
-            initial: ag.inicio,
-          ),
+      title: 'Remarcar ${agendaPrimeiroNome(ag.alunoNome)}',
+      day: ag.inicio,
+      inicio: ag.inicio,
+      duracaoMin: ag.fim.difference(ag.inicio).inMinutes,
+      agendamentos: agendaMonthOf(ag.inicio) == _mes ? _ags : null,
+      loadMonth: _loadMonth,
+      excludeId: ag.id,
+      aviso: aviso,
     );
-    if (dt == null || !mounted) return;
-    final fim = dt.add(ag.fim.difference(ag.inicio));
-    await _runSheetMutation(
-      () => ref
+    if (pick == null || !mounted) return;
+    Object? failure;
+    try {
+      await ref
           .read(agendaRepositoryProvider)
-          .atualizarHorario(ag.id, dt, fim, titulo: ag.titulo),
-      failureFallback: S.of(context).agendaRemarcarFalhou,
-      onSuccess: () async {
-        await _load(force: true);
-        if (!mounted) return;
-        AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
-        FeedbackHelper.showSuccess(context, 'Horário remarcado.');
-      },
-    );
+          .atualizarHorario(ag.id, pick.inicio, pick.fim, titulo: ag.titulo);
+    } catch (e) {
+      failure = e;
+    }
+    if (!mounted) return;
+    if (fromSheet) _popRootOverlay();
+    if (failure == null) {
+      await _load(force: true);
+      if (!mounted) return;
+      AnalyticsService.instance.track(ProductEvents.agendaRescheduled);
+      FeedbackHelper.showSuccess(context, 'Horário remarcado.');
+      return;
+    }
+    final slotError = agendaSlotErrorMessage(failure);
+    if (slotError == null) {
+      FeedbackHelper.showApiFailure(
+        context,
+        failure,
+        fallback: S.of(context).agendaRemarcarFalhou,
+      );
+      return;
+    }
+    await _load(force: true);
+    if (mounted) await _reschedule(ag, fromSheet: false, aviso: slotError);
   }
 
   /// Combina `Env.apiUrl` (https://host[/api]) com um path relativo (/api/...) sem
@@ -176,8 +200,7 @@ extension on _AgendaScreenState {
                 agendaStatusNeedsConfirm(ag.status)
                     ? () => _setStatus(ag, 'CONFIRMADO')
                     : null,
-            onComplete:
-                actionable ? () => _setStatus(ag, 'CONCLUIDO') : null,
+            onComplete: actionable ? () => _setStatus(ag, 'CONCLUIDO') : null,
             onCancel:
                 actionable
                     ? () async {

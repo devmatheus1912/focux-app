@@ -136,10 +136,13 @@ class AgendaRepository {
     ];
   }
 
+  /// [escopo]: `proximas` (fim >= agora, crescente) ou `anteriores`
+  /// (fim < agora, decrescente). Nulo devolve tudo.
   Future<Pagina<Agendamento>> meusAgendamentosPagina({
     int page = 0,
     String q = '',
     String? status,
+    String? escopo,
   }) async {
     final query = q.trim();
     final statusKey = status?.trim() ?? '';
@@ -150,6 +153,7 @@ class AgendaRepository {
         'size': 20,
         if (query.isNotEmpty) 'q': query,
         if (statusKey.isNotEmpty) 'status': statusKey,
+        if (escopo != null) 'escopo': escopo,
       },
     );
     final data = r.data;

@@ -1,6 +1,7 @@
 DateTime agendaDefaultSlot(DateTime day, {DateTime? now}) {
   final n = now ?? DateTime.now();
-  final sameDay = day.year == n.year && day.month == n.month && day.day == n.day;
+  final sameDay =
+      day.year == n.year && day.month == n.month && day.day == n.day;
   if (!sameDay) {
     return DateTime(day.year, day.month, day.day, 8, 30);
   }
@@ -27,7 +28,9 @@ String agendaWeekdayShort(int weekday) =>
 
 String agendaEventTitle({required String alunoNome, String? titulo}) {
   final name = alunoNome.trim();
-  return name.isEmpty ? (titulo?.trim().isNotEmpty == true ? titulo!.trim() : 'Atendimento') : name;
+  return name.isEmpty
+      ? (titulo?.trim().isNotEmpty == true ? titulo!.trim() : 'Atendimento')
+      : name;
 }
 
 const _trivialSessionNotes = {'oi', 'ok', 'teste', 'test', '-', '.', 'x'};
@@ -72,22 +75,6 @@ bool agendaDateTimeIsInPast(DateTime value, {DateTime? now}) {
   return value.isBefore(floor);
 }
 
-bool agendaSlotSelectable(
-  DateTime day,
-  int hour,
-  int minute, {
-  DateTime? now,
-}) {
-  final candidate = DateTime(
-    day.year,
-    day.month,
-    day.day,
-    hour,
-    minute,
-  );
-  return !agendaDateTimeIsInPast(candidate, now: now);
-}
-
 String agendaWhatsappReminder({
   required String alunoNome,
   required DateTime inicio,
@@ -118,7 +105,8 @@ String agendaDayHeading({
   required DateTime date,
   required int visibleCount,
 }) {
-  final datePart = '$weekdayLabel · ${date.day} ${agendaMonthShort[date.month]}';
+  final datePart =
+      '$weekdayLabel · ${date.day} ${agendaMonthShort[date.month]}';
   if (visibleCount <= 0) return datePart;
   final countLabel =
       visibleCount == 1 ? '1 atendimento' : '$visibleCount atendimentos';
@@ -129,8 +117,7 @@ String agendaDayHeading({
 String agendaDayShortLabel(DateTime date) =>
     '${agendaWeekdayShort(date.weekday).toLowerCase()}, ${date.day} ${agendaMonthShort[date.month]}';
 
-String agendaEmptyDayHint() =>
-    'Encaixe avaliação, retorno ou sessão.';
+String agendaEmptyDayHint() => 'Encaixe avaliação, retorno ou sessão.';
 
 const agendaTituloMax = 120;
 
