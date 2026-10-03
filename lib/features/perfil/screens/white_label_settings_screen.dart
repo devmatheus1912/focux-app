@@ -215,25 +215,27 @@ class _WhiteLabelSettingsScreenState
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como funciona a marca própria',
-                onTap: () => showFxHelpSheet(
-                  context,
-                  title: 'Marca própria',
-                  subtitle: 'Seu nome no app do aluno e nos links de venda.',
-                  tips: const [
-                    FxHelpTip(
-                      'App do aluno',
-                      'Depois do login o aluno vê sua marca. Login e ícone da loja seguem Focux.',
+                onTap:
+                    () => showFxHelpSheet(
+                      context,
+                      title: 'Marca própria',
+                      subtitle:
+                          'Seu nome no app do aluno e nos links de venda.',
+                      tips: const [
+                        FxHelpTip(
+                          'App do aluno',
+                          'Depois do login o aluno vê sua marca. Login e ícone da loja seguem Focux.',
+                        ),
+                        FxHelpTip(
+                          'Links',
+                          'Toque num link para copiar e mande no WhatsApp ou Instagram.',
+                        ),
+                        FxHelpTip(
+                          'Checklist',
+                          'Itens pendentes abrem a tela certa para completar.',
+                        ),
+                      ],
                     ),
-                    FxHelpTip(
-                      'Links',
-                      'Toque num link para copiar e mande no WhatsApp ou Instagram.',
-                    ),
-                    FxHelpTip(
-                      'Checklist',
-                      'Itens pendentes abrem a tela certa para completar.',
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -262,8 +264,8 @@ class _WhiteLabelSettingsScreenState
                             chromeOnDark: isDark,
                             primary: Theme.of(context).colorScheme.primary,
                             message: friendlyError(configAsync.error!),
-                            onRetry: () =>
-                                ref.invalidate(whiteLabelConfigProvider),
+                            onRetry:
+                                () => ref.invalidate(whiteLabelConfigProvider),
                           )
                           : const SkeletonList(count: 4))
                       : ListView(
@@ -312,120 +314,115 @@ class _WhiteLabelSettingsScreenState
                             ],
                           ),
                           const SizedBox(height: FxSettingsLayout.groupGap),
-                          if (!config.dominioDisponivel)
-                            const FxSettingsGroup(
+                          if (config.dominioDisponivel) ...[
+                            FxSettingsGroup(
                               header: 'Domínio próprio',
-                              caption: whiteLabelDominioEmBreveCaption,
-                              children: [
-                                FxSettingsTile(
-                                  icon: Icons.language_outlined,
-                                  label: 'Seu domínio',
-                                  value: 'Em breve',
-                                  showDivider: false,
-                                ),
-                              ],
-                            )
-                          else
-                          FxSettingsGroup(
-                            header: 'Domínio próprio',
-                            caption: whiteLabelCnameHint(
-                              _domainCtrl.text,
-                              verificacaoToken: config.dominioVerificacaoToken,
-                            ),
-                            footer:
-                                whiteLabelDnsSteps(config.dnsInstrucoes).isEmpty
-                                    ? null
-                                    : Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: FxSettingsLayout.groupPadH,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          for (final step in whiteLabelDnsSteps(
-                                            config.dnsInstrucoes,
-                                          ))
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                bottom: 4,
-                                              ),
-                                              child: Text(
-                                                '• ${whiteLabelDnsStepShort(step)}',
-                                                style:
-                                                    FocuxHubTypography.bodyMuted(
-                                                      color: chrome.mute,
-                                                      height: 1.3,
-                                                    ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: TokensStrip.s1,
-                                  bottom: TokensStrip.s1,
-                                ),
-                                child: TextField(
-                                  controller: _domainCtrl,
-                                  decoration: FxInputDeco.build(
-                                    context,
-                                    'Domínio',
-                                    hint: 'treino.seudominio.com.br',
-                                  ),
-                                  autocorrect: false,
-                                  keyboardType: TextInputType.url,
-                                  textInputAction: TextInputAction.done,
-                                  onTapOutside:
-                                      (_) => FxKeyboardDismissScope.dismiss(),
-                                  onSubmitted:
-                                      (_) => FxKeyboardDismissScope.dismiss(),
-                                ),
+                              caption: whiteLabelCnameHint(
+                                _domainCtrl.text,
+                                verificacaoToken:
+                                    config.dominioVerificacaoToken,
                               ),
-                              if (config.dominioVerificado)
-                                FxSettingsTile(
-                                  icon: Icons.verified_rounded,
-                                  label: 'Domínio verificado',
-                                  value: '',
-                                  accent: EagleTokens.success,
-                                  showDivider: false,
-                                ),
-                              if (whiteLabelCanVerifyDomain(
-                                domainDraft: _domainCtrl.text,
-                                dominioSalvo: config.dominioCustomizado,
-                                dominioVerificado: config.dominioVerificado,
-                              ))
+                              footer:
+                                  whiteLabelDnsSteps(
+                                        config.dnsInstrucoes,
+                                      ).isEmpty
+                                      ? null
+                                      : Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal:
+                                              FxSettingsLayout.groupPadH,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            for (final step
+                                                in whiteLabelDnsSteps(
+                                                  config.dnsInstrucoes,
+                                                ))
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 4,
+                                                ),
+                                                child: Text(
+                                                  '• ${whiteLabelDnsStepShort(step)}',
+                                                  style:
+                                                      FocuxHubTypography.bodyMuted(
+                                                        color: chrome.mute,
+                                                        height: 1.3,
+                                                      ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                              children: [
                                 Padding(
                                   padding: const EdgeInsets.only(
                                     top: TokensStrip.s1,
                                     bottom: TokensStrip.s1,
                                   ),
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: OutlinedButton.icon(
-                                      onPressed:
-                                          _verificando
-                                              ? null
-                                              : _verificarDominio,
-                                      icon:
-                                          _verificando
-                                              ? const SizedBox(
-                                                width: 16,
-                                                height: 16,
-                                                child: FxLoading(
-                                                  strokeWidth: 2,
-                                                ),
-                                              )
-                                              : const Icon(Icons.dns_outlined),
-                                      label: const Text('Verificar domínio'),
+                                  child: TextField(
+                                    controller: _domainCtrl,
+                                    decoration: FxInputDeco.build(
+                                      context,
+                                      'Domínio',
+                                      hint: 'treino.seudominio.com.br',
                                     ),
+                                    autocorrect: false,
+                                    keyboardType: TextInputType.url,
+                                    textInputAction: TextInputAction.done,
+                                    onTapOutside:
+                                        (_) => FxKeyboardDismissScope.dismiss(),
+                                    onSubmitted:
+                                        (_) => FxKeyboardDismissScope.dismiss(),
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: FxSettingsLayout.groupGap),
+                                if (config.dominioVerificado)
+                                  FxSettingsTile(
+                                    icon: Icons.verified_rounded,
+                                    label: 'Domínio verificado',
+                                    value: '',
+                                    accent: EagleTokens.success,
+                                    showDivider: false,
+                                  ),
+                                if (whiteLabelCanVerifyDomain(
+                                  domainDraft: _domainCtrl.text,
+                                  dominioSalvo: config.dominioCustomizado,
+                                  dominioVerificado: config.dominioVerificado,
+                                ))
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: TokensStrip.s1,
+                                      bottom: TokensStrip.s1,
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: OutlinedButton.icon(
+                                        onPressed:
+                                            _verificando
+                                                ? null
+                                                : _verificarDominio,
+                                        icon:
+                                            _verificando
+                                                ? const SizedBox(
+                                                  width: 16,
+                                                  height: 16,
+                                                  child: FxLoading(
+                                                    strokeWidth: 2,
+                                                  ),
+                                                )
+                                                : const Icon(
+                                                  Icons.dns_outlined,
+                                                ),
+                                        label: const Text('Verificar domínio'),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: FxSettingsLayout.groupGap),
+                          ],
                           FxSettingsGroup(
                             header: 'Como você vende',
                             caption: whiteLabelLandingCaption(_landingModo),
@@ -508,9 +505,11 @@ class _WhiteLabelSettingsScreenState
                               children: [
                                 FxSettingsGroup(
                                   children: [
-                                    for (var i = 0;
-                                        i < config.checklist.length;
-                                        i++)
+                                    for (
+                                      var i = 0;
+                                      i < config.checklist.length;
+                                      i++
+                                    )
                                       FxSettingsTile(
                                         icon:
                                             config.checklist[i].done

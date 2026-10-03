@@ -26,7 +26,5 @@ void applyLegacyPasswordResetRedirect(GoRouter router) {
   if (!kIsWeb) return;
   final path = legacyPasswordResetPathFromUri(Uri.base);
   if (path == null) return;
-  // ignore: avoid_print
-  debugPrint('[Focux] legacy hash reset → $path');
   router.go(path);
 }

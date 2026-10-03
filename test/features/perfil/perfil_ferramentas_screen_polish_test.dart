@@ -41,10 +41,11 @@ void main() {
     expect(gated, contains("rotaApp: '/habitos'"));
     expect(gated, contains("rotaApp: '/desafios'"));
     expect(gated, contains("label: 'Desafios'"));
-    expect(gated, contains("rotaApp: '/perfil/equipe'"));
+    expect(gated, isNot(contains("rotaApp: '/perfil/equipe'")));
+    expect(gated, isNot(contains('Em breve')));
     expect(gated, isNot(contains('ferramentasCatalogoProvider')));
     expect(gated, isNot(contains('SizedBox.shrink()')));
     expect("'Automações'".allMatches(gated).length, greaterThanOrEqualTo(1));
-    expect(RegExp(r"label: '").allMatches(gated).length, 5);
+    expect(RegExp(r"label: '").allMatches(gated).length, 4);
   });
 }

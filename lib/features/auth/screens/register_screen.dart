@@ -92,40 +92,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _loadCapabilities() async {
+    final appleOnDevice = await AppleSignInService.isAvailableOnDevice();
+    bool? emailDelivery;
     try {
-      AuthEnvironmentStatus? status;
-      try {
-        status = await ref.read(authRepositoryProvider).environmentStatus();
-      } catch (_) {}
       final caps = await ref.read(authRepositoryProvider).capabilities();
-      if (!mounted) return;
-      final showGoogle = googleSignInConfiguredInApp();
-      final appleOffered = resolveAppleSignInOffered(
-        capabilitiesEnabled: caps.appleSignInEnabled,
-        environmentStatus: status,
-      );
-      setState(() {
-        _emailDeliveryAvailable = caps.passwordResetEmailAvailable;
-        _appleEnabled = appleOffered && AppleSignInService.isSupportedPlatform;
-        _googleEnabled = showGoogle;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      AuthEnvironmentStatus? status;
-      try {
-        status = await ref.read(authRepositoryProvider).environmentStatus();
-      } catch (_) {}
-      final showGoogle = googleSignInConfiguredInApp();
-      final appleOffered = resolveAppleSignInOffered(
-        capabilitiesEnabled: false,
-        environmentStatus: status,
-      );
-      setState(() {
-        _emailDeliveryAvailable = null;
-        _appleEnabled = appleOffered && AppleSignInService.isSupportedPlatform;
-        _googleEnabled = showGoogle;
-      });
-    }
+      emailDelivery = caps.passwordResetEmailAvailable;
+    } catch (_) {}
+    if (!mounted) return;
+    setState(() {
+      _emailDeliveryAvailable = emailDelivery;
+      _appleEnabled = appleOnDevice;
+      _googleEnabled = googleSignInConfiguredInApp();
+    });
   }
 
   void _startResendCountdown() {
@@ -334,6 +312,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   return null;
                                 },
                                 suffix: IconButton(
+                                  tooltip: 'Mostrar ou ocultar senha',
                                   onPressed: () {
                                     setState(() {
                                       _showPassword = !_showPassword;

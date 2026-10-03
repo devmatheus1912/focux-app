@@ -841,6 +841,7 @@ class _VideoPlayerState extends State<_VideoPlayer> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
+              tooltip: controller.value.isPlaying ? 'Pausar' : 'Reproduzir',
               icon: Icon(
                 controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
               ),

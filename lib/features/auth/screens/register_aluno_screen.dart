@@ -355,6 +355,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                     return null;
                                   },
                                   suffix: IconButton(
+                                    tooltip: 'Mostrar ou ocultar senha',
                                     onPressed: () {
                                       setState(
                                         () => _senhaVisivel = !_senhaVisivel,

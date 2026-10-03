@@ -229,6 +229,8 @@ extension on _LoginScreenState {
             fullName: credential.fullName,
             email: credential.email,
             personalSlug: _isAluno ? _effectivePersonalSlug : null,
+            authorizationCode: credential.authorizationCode,
+            rawNonce: credential.rawNonce,
           );
       if (!mounted) return;
       logAuthHttpOk('login/apple', path: '/api/auth/apple');

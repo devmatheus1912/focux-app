@@ -639,6 +639,7 @@ class _InputsPanel extends StatelessWidget {
             hint: 'Password',
           ).copyWith(
             suffixIcon: IconButton(
+              tooltip: obscure ? 'Mostrar senha' : 'Ocultar senha',
               onPressed: onToggleObscure,
               icon: Icon(
                 obscure

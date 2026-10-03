@@ -48,7 +48,7 @@ class Mensalidade {
     required this.id,
     required this.alunoId,
     required this.alunoNome,
-    required Object valor,
+    required Object? valor,
     required this.mesReferencia,
     required this.status,
     this.pagoEm,
@@ -72,16 +72,17 @@ class Mensalidade {
       status: j['status']?.toString() ?? '',
       pagoEm: j['pagoEm']?.toString(),
       vencimento: j['vencimento']?.toString(),
-      contatos: raw is List
-          ? raw
-              .whereType<Map>()
-              .map(
-                (e) => MensalidadeContato.fromJson(
-                  Map<String, dynamic>.from(e),
-                ),
-              )
-              .toList()
-          : null,
+      contatos:
+          raw is List
+              ? raw
+                  .whereType<Map>()
+                  .map(
+                    (e) => MensalidadeContato.fromJson(
+                      Map<String, dynamic>.from(e),
+                    ),
+                  )
+                  .toList()
+              : null,
     );
   }
 }
@@ -121,20 +122,20 @@ class VencimentoItem {
     required this.mensalidadeId,
     this.alunoId,
     required this.alunoNome,
-    required Object valor,
+    required Object? valor,
     required this.mesReferencia,
     required this.status,
     this.vencimento,
   }) : valor = FxMoney.parse(valor);
 
   factory VencimentoItem.fromJson(Map<String, dynamic> j) => VencimentoItem(
-    mensalidadeId: j['mensalidadeId'] as int,
+    mensalidadeId: (j['mensalidadeId'] as num?)?.toInt() ?? 0,
     alunoId: (j['alunoId'] as num?)?.toInt(),
-    alunoNome: j['alunoNome'] as String,
+    alunoNome: j['alunoNome'] as String? ?? '',
     valor: j['valor'],
-    mesReferencia: j['mesReferencia'] as String,
+    mesReferencia: j['mesReferencia'] as String? ?? '',
     vencimento: j['vencimento'] as String?,
-    status: j['status'] as String,
+    status: j['status'] as String? ?? '',
   );
 }
 
@@ -146,12 +147,12 @@ class TopAlunoItem {
   TopAlunoItem({
     required this.alunoId,
     required this.alunoNome,
-    required Object totalPago,
+    required Object? totalPago,
   }) : totalPago = FxMoney.parse(totalPago);
 
   factory TopAlunoItem.fromJson(Map<String, dynamic> j) => TopAlunoItem(
-    alunoId: j['alunoId'] as int,
-    alunoNome: j['alunoNome'] as String,
+    alunoId: (j['alunoId'] as num?)?.toInt() ?? 0,
+    alunoNome: j['alunoNome'] as String? ?? '',
     totalPago: j['totalPago'],
   );
 }
@@ -160,11 +161,14 @@ class EvolucaoMensalItem {
   final String mes;
   final FxMoney recebido;
 
-  EvolucaoMensalItem({required this.mes, required Object recebido})
+  EvolucaoMensalItem({required this.mes, required Object? recebido})
     : recebido = FxMoney.parse(recebido);
 
   factory EvolucaoMensalItem.fromJson(Map<String, dynamic> j) =>
-      EvolucaoMensalItem(mes: j['mes'] as String, recebido: j['recebido']);
+      EvolucaoMensalItem(
+        mes: j['mes'] as String? ?? '',
+        recebido: j['recebido'],
+      );
 }
 
 class FinanceiroDashboard {
@@ -179,11 +183,11 @@ class FinanceiroDashboard {
   final String? zeroCta;
 
   FinanceiroDashboard({
-    required Object receitaMes,
-    required Object receitaAcumulada,
-    required Object ticketMedio,
+    required Object? receitaMes,
+    required Object? receitaAcumulada,
+    required Object? ticketMedio,
     required this.totalInadimplentes,
-    required Object previsaoReceita,
+    required Object? previsaoReceita,
     required this.vencimentosProximos,
     required this.topAlunos,
     required this.evolucaoMensal,
@@ -226,11 +230,11 @@ class ResumoMensal {
   final FxMoney acumuladoAnual;
 
   ResumoMensal({
-    required Object totalRecebido,
-    required Object totalPrevisto,
+    required Object? totalRecebido,
+    required Object? totalPrevisto,
     required this.inadimplentes,
-    required Object ticketMedio,
-    required Object acumuladoAnual,
+    required Object? ticketMedio,
+    required Object? acumuladoAnual,
   }) : totalRecebido = FxMoney.parse(totalRecebido),
        totalPrevisto = FxMoney.parse(totalPrevisto),
        ticketMedio = FxMoney.parse(ticketMedio),
@@ -251,7 +255,11 @@ class FinanceiroRepository {
   final Dio _dio;
   FinanceiroRepository(ApiClient c) : _dio = c.dio;
 
-  Future<List<Mensalidade>> listarPorAluno(int alunoId, {int page = 0, int size = 100}) async {
+  Future<List<Mensalidade>> listarPorAluno(
+    int alunoId, {
+    int page = 0,
+    int size = 100,
+  }) async {
     final r = await _dio.get(
       '/api/alunos/$alunoId/historico-mensalidades',
       queryParameters: {'page': page, 'size': size},
@@ -289,9 +297,7 @@ class FinanceiroRepository {
     );
     return (r.data as List)
         .whereType<Map>()
-        .map(
-          (e) => MensalidadeContato.fromJson(Map<String, dynamic>.from(e)),
-        )
+        .map((e) => MensalidadeContato.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 
@@ -352,7 +358,9 @@ class FinanceiroRepository {
       },
       // Aluno + mês já identificam a mensalidade: duas submissões são a
       // mesma intenção, não duas cobranças.
-      options: ApiClient.idempotent('mensalidade-criar-$alunoId-$mesReferencia'),
+      options: ApiClient.idempotent(
+        'mensalidade-criar-$alunoId-$mesReferencia',
+      ),
     );
     return Mensalidade.fromJson(r.data);
   }
@@ -429,7 +437,10 @@ class FinanceiroRepository {
     return data?.toString() ?? 'Cobrança enviada!';
   }
 
-  Future<MensalidadesPage> minhasMensalidades({int page = 0, int size = 20}) async {
+  Future<MensalidadesPage> minhasMensalidades({
+    int page = 0,
+    int size = 20,
+  }) async {
     final r = await _dio.get(
       '/api/financeiro/mensalidades/aluno/minhas',
       queryParameters: {'page': page, 'size': size},
@@ -481,9 +492,7 @@ class MensalidadesPage {
     mensalidades:
         (j['mensalidades'] as List? ?? const [])
             .whereType<Map>()
-            .map(
-              (e) => Mensalidade.fromJson(Map<String, dynamic>.from(e)),
-            )
+            .map((e) => Mensalidade.fromJson(Map<String, dynamic>.from(e)))
             .toList(),
     page: (j['page'] as num?)?.toInt() ?? 0,
     size: (j['size'] as num?)?.toInt() ?? 20,

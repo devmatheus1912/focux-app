@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Integrates with Apple Health (iOS) and Google Fit (Android).
 ///
-/// Syncs: steps, heart rate, calories burned, sleep, workouts.
+/// Syncs: steps, heart rate, calories burned, sleep.
 /// Data is cached locally and optionally sent to the backend.
 class HealthService {
   HealthService._();
@@ -17,9 +17,6 @@ class HealthService {
     HealthDataType.HEART_RATE,
     HealthDataType.ACTIVE_ENERGY_BURNED,
     HealthDataType.SLEEP_ASLEEP,
-    HealthDataType.WORKOUT,
-    HealthDataType.WEIGHT,
-    HealthDataType.HEIGHT,
   ];
 
   static final _permissions = _types.map((_) => HealthDataAccess.READ).toList();

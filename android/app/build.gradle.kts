@@ -7,12 +7,14 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     // Applied below only when google-services.json is present (gitignored; copy from *.example).
     id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics") apply false
 }
 
 // Real Firebase config stays out of git. Local/CI provide the file via *.example copy or secrets.
 val googleServicesJson = file("google-services.json")
 if (googleServicesJson.exists()) {
     apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 // Release signing uses android/key.properties only. Never fall back to debug keys.
@@ -66,6 +68,9 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -80,6 +85,11 @@ tasks.configureEach {
             if (!keystorePropertiesFile.exists()) {
                 throw org.gradle.api.GradleException(
                     "Release signing requires android/key.properties with keyAlias, keyPassword, storeFile, and storePassword. Debug signing fallback is disabled."
+                )
+            }
+            if (!googleServicesJson.exists()) {
+                throw org.gradle.api.GradleException(
+                    "Release builds require android/app/google-services.json (Firebase push/Crashlytics). Copy it from the Firebase console; never commit it."
                 )
             }
         }

@@ -39,6 +39,19 @@ String subscriptionChannelWith(
   return '$prefixo $label';
 }
 
+/// Onde o usuário cancela: "em Ajustes > Assinaturas", "no Google Play…".
+String subscriptionCancelWhere({
+  TargetPlatform? platform,
+  bool isWeb = kIsWeb,
+}) {
+  if (isWeb) return 'na área de cobrança';
+  return switch (platform ?? defaultTargetPlatform) {
+    TargetPlatform.iOS => 'em Ajustes > Assinaturas',
+    TargetPlatform.android => 'no Google Play, em Pagamentos e assinaturas',
+    _ => 'na área de cobrança',
+  };
+}
+
 Future<bool> openNativeSubscriptionManagement() async {
   if (!subscriptionUsesNativeStore) return false;
 

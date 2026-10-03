@@ -47,7 +47,11 @@ class _AuthLegalConsentTextState extends State<AuthLegalConsentText> {
               style: link,
               recognizer: _privacidade,
             ),
-            const TextSpan(text: '.'),
+            const TextSpan(
+              text:
+                  '. Conteúdo ofensivo ou abusivo não é tolerado: denúncias '
+                  'são analisadas em até 24 horas e a conta pode ser removida.',
+            ),
           ],
         ),
         textAlign: TextAlign.center,

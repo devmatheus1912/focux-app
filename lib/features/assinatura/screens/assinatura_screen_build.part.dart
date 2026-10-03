@@ -134,7 +134,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
         final trialOffer = paywallShowsTrial(
           selected: selectedPlan,
           current: currentPlan,
-          trialEligible: _trialStatus?.trialEligible,
+          trialEligible: _paywallTrialEligible,
           period: _billingPeriod,
         );
         const trialDays = kTrialDays;
@@ -151,8 +151,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 ? ''
                 : subscriptionUsesNativeStore
                 ? (_billingPeriod == SubscriptionBillingPeriod.yearly
-                    ? 'Anual · 2 meses grátis. Cancele na loja quando quiser.'
-                    : 'Renova na loja. Cancele quando quiser.')
+                    ? 'Anual · renova automaticamente. Cancele ${subscriptionCancelWhere()}.'
+                    : 'Mensal · renova automaticamente. Cancele ${subscriptionCancelWhere()}.')
                 : 'Checkout seguro via Mercado Pago.';
       }
     }
@@ -160,7 +160,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
     final trialOffer = paywallShowsTrial(
       selected: selectedPlan,
       current: currentPlan,
-      trialEligible: _trialStatus?.trialEligible,
+      trialEligible: _paywallTrialEligible,
       period: _billingPeriod,
     );
     final selectedStorePrice =
@@ -209,7 +209,9 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       if (trialOffer) {
         final price = selectedPrice?.primary.trim();
         if (price != null && price.isNotEmpty && price != 'Grátis') {
-          footnote = 'Depois $price. Cancele quando quiser.';
+          footnote =
+              'Depois $price, renova automaticamente. '
+              'Cancele ${subscriptionCancelWhere()}.';
         }
       }
     }
@@ -231,8 +233,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       ctaLabel = 'Compras bloqueadas no aparelho';
       ctaEnabled = false;
       footnote =
-          'Opções de desenvolvedor ou root detectadas. '
-          'Desligue para testar compras. Conta FREE segue ativa.';
+          'Por segurança, compras ficam indisponíveis em aparelhos com root '
+          'ou jailbreak. Seu plano atual segue ativo.';
     }
 
     // Sem tier acima (ex.: Enterprise): superfície de gestão, não paywall.
@@ -257,10 +259,9 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                 onPressed: () => context.push('/cancel-save'),
                 child: Text(
                   'Cancelar',
-                  style: TokensStrip.body(color: primary).copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                  style: TokensStrip.body(
+                    color: primary,
+                  ).copyWith(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ),
             ),
@@ -312,25 +313,25 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                                   ? () => context.go('/dashboard/personal')
                                   : _openSubscriptionManagement,
                           onRestore:
-                              ctaMode == _AssinaturaCtaMode.manageStore &&
-                                      subscriptionUsesNativeStore
+                              subscriptionUsesNativeStore &&
+                                      ctaMode != _AssinaturaCtaMode.syncing
                                   ? _restorePurchases
                                   : null,
                           restoringPurchases: _restoringPurchases,
                           onBillingDetails:
                               ctaMode == _AssinaturaCtaMode.manageStore
                                   ? () => _showAssinaturaTermosSheet(
-                                        context,
-                                        mute: mute,
-                                        primary: primary,
-                                        showStoreBillingNote:
-                                            subscriptionUsesNativeStore,
-                                        restoring: _restoringPurchases,
-                                        onRestore:
-                                            subscriptionUsesNativeStore
-                                                ? _restorePurchases
-                                                : null,
-                                      )
+                                    context,
+                                    mute: mute,
+                                    primary: primary,
+                                    showStoreBillingNote:
+                                        subscriptionUsesNativeStore,
+                                    restoring: _restoringPurchases,
+                                    onRestore:
+                                        subscriptionUsesNativeStore
+                                            ? _restorePurchases
+                                            : null,
+                                  )
                                   : null,
                         ),
                       ),

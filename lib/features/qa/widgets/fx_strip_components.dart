@@ -282,6 +282,7 @@ class FxStripToast extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: 'Fechar',
             onPressed: onClose,
             icon: Icon(
               Icons.close_rounded,
@@ -531,12 +532,14 @@ class FxStripPagination extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
+          tooltip: 'Página anterior',
           onPressed: page > 1 ? () => onPage(page - 1) : null,
           icon: const Icon(Icons.chevron_left_rounded),
         ),
         for (var i = 1; i <= totalPages.clamp(1, 5); i++) pageBtn(i),
         if (totalPages > 5) Text('…', style: TextStyle(color: mute)),
         IconButton(
+          tooltip: 'Próxima página',
           onPressed: page < totalPages ? () => onPage(page + 1) : null,
           icon: const Icon(Icons.chevron_right_rounded),
         ),

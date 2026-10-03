@@ -36,10 +36,12 @@ Future<void> reportFlutterErrorToCrashlytics(FlutterErrorDetails details) {
 }
 
 void reportUncaughtZoneError(Object error, StackTrace stack) {
-  debugPrint('[Focux] Uncaught async error: $error');
-  debugPrint('$stack');
+  if (kDebugMode) {
+    debugPrint('[Focux] Uncaught async error: $error');
+    debugPrint('$stack');
+  }
   if (isNonFatalFlutterFrameworkError(error, stack)) return;
   try {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
   } catch (_) {}
 }

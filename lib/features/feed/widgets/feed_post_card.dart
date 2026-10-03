@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_cached_network_image.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
 
@@ -28,6 +29,7 @@ class FeedPostCard extends StatelessWidget {
     this.onCurtir,
     this.onFixar,
     this.onExcluir,
+    this.onDenunciar,
   });
 
   final FeedPost post;
@@ -39,8 +41,10 @@ class FeedPostCard extends StatelessWidget {
   final VoidCallback onComentar;
   final VoidCallback? onFixar;
   final VoidCallback? onExcluir;
+  final VoidCallback? onDenunciar;
 
-  bool get _canManage => onFixar != null || onExcluir != null;
+  bool get _canManage =>
+      onFixar != null || onExcluir != null || onDenunciar != null;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +94,7 @@ class FeedPostCard extends StatelessWidget {
                       onSelected: (val) {
                         if (val == 'fixar') onFixar?.call();
                         if (val == 'excluir') onExcluir?.call();
+                        if (val == 'denunciar') onDenunciar?.call();
                       },
                       itemBuilder: (ctx) => [
                         if (onFixar != null)
@@ -127,6 +132,17 @@ class FeedPostCard extends StatelessWidget {
                                   'Excluir',
                                   style: TextStyle(color: EagleTokens.bad),
                                 ),
+                              ],
+                            ),
+                          ),
+                        if (onDenunciar != null)
+                          PopupMenuItem(
+                            value: 'denunciar',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.flag_outlined, size: 20),
+                                const SizedBox(width: 8),
+                                Text(S.of(ctx).moderacaoDenunciarPost),
                               ],
                             ),
                           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
@@ -128,6 +129,14 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                         context,
                         tipos: lgpdConsentTiposAluno,
                       ),
+                    ),
+                    FxSettingsTile(
+                      icon: Icons.person_remove_outlined,
+                      label: 'Como excluir sua conta',
+                      value: '',
+                      mute: chrome.mute,
+                      line: chrome.line,
+                      onTap: () => FocuxLegal.openDeleteAccount(),
                     ),
                     FxSettingsTile(
                       icon: Icons.assignment_outlined,

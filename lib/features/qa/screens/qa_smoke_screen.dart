@@ -160,6 +160,7 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
                           _areaChip(route.area, isDark),
                           const SizedBox(width: 8),
                           IconButton(
+                            tooltip: 'Abrir',
                             icon: const Icon(Icons.open_in_new, size: 18),
                             onPressed:
                                 _running

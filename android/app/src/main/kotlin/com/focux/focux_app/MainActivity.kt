@@ -1,6 +1,8 @@
 package com.focux.focux_app
 
-import android.graphics.Color
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -11,11 +13,34 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = Color.TRANSPARENT
-        window.navigationBarColor = Color.parseColor("#0B0E14")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
+        if (savedInstanceState == null && openPrivacyPolicyIfRequested(intent)) {
+            finish()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openPrivacyPolicyIfRequested(intent)
+    }
+
+    private fun openPrivacyPolicyIfRequested(intent: Intent?): Boolean {
+        val action = intent?.action ?: return false
+        if (action != ACTION_SHOW_PERMISSIONS_RATIONALE &&
+            action != ACTION_VIEW_PERMISSION_USAGE
+        ) {
+            return false
+        }
+        try {
+            startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_URL))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        } catch (_: ActivityNotFoundException) {
+        }
+        return true
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -39,5 +64,14 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
+    }
+
+    private companion object {
+        // Mesmo valor de FocuxLegal.privacyUrl (lib/core/legal/focux_legal.dart).
+        const val PRIVACY_URL = "https://focuxpersonal.com/privacidade"
+        const val ACTION_SHOW_PERMISSIONS_RATIONALE =
+            "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"
+        const val ACTION_VIEW_PERMISSION_USAGE =
+            "android.intent.action.VIEW_PERMISSION_USAGE"
     }
 }

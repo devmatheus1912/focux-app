@@ -54,7 +54,7 @@ class PlanEntitlements {
       'AUTOMACOES_AVANCADAS': 'Automações avançadas',
       'COMUNIDADE_GRUPOS': 'Desafios e grupos',
       'EQUIPE_RBAC': 'Equipe / RBAC',
-      'LOJA_DIGITAL': 'Loja digital',
+      'LOJA_DIGITAL': 'Loja de pacotes',
       'FEEDBACK_VIDEO': 'Feedback em vídeo',
       'FINANCEIRO': 'Financeiro',
       'RELATORIOS': 'Relatórios',
@@ -197,7 +197,7 @@ class PlanEntitlements {
       'automacoesAvancadas' => 'Automações avançadas com ramificações',
       'comunidadeGrupos' => 'Desafios e grupos com ranking',
       'equipeRbac' => 'Equipe com permissões granulares',
-      'lojaDigital' => 'Loja digital com checkout PIX',
+      'lojaDigital' => 'Loja de pacotes de treino com PIX',
       'feedbackVideo' => 'Corrija a execução pelo vídeo do aluno',
       'leads' => 'CRM de leads para converter mais',
       'nfse' => 'Nota fiscal no fluxo de cobrança',
@@ -238,7 +238,7 @@ class PlanEntitlements {
       'equipeRbac' =>
         'Convide assistentes com permissões granulares no Enterprise (até 5 seats).',
       'lojaDigital' =>
-        'Venda programas digitais com checkout PIX no Enterprise.',
+        'Venda pacotes de treino e acompanhamento com cobrança PIX no Enterprise.',
       'feedbackVideo' =>
         'O aluno envia o vídeo do exercício e você responde com a correção. '
             'Faz parte do plano $planLabel.',

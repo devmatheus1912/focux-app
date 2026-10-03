@@ -47,14 +47,15 @@ class _AssinaturaStickyGlassBar extends StatelessWidget {
         ),
       ),
       child: ClipRect(
-        child: reduceMotion
-            ? fill
-            : BackdropFilter(
-              filter: TokensStrip.blurFilter(
-                isDark ? TokensStrip.blurMedium : TokensStrip.blurLight,
-              ),
-              child: fill,
-            ),
+        child:
+            reduceMotion
+                ? fill
+                : BackdropFilter(
+                  filter: TokensStrip.blurFilter(
+                    isDark ? TokensStrip.blurMedium : TokensStrip.blurLight,
+                  ),
+                  child: fill,
+                ),
       ),
     );
   }
@@ -217,26 +218,35 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.bodyMuted(
-              color: secondary,
-              height: 1.35,
-            ),
+            style: FocuxHubTypography.bodyMuted(color: secondary, height: 1.35),
           ),
         ],
-        if (onRestore != null) ...[
+        if (onRestore != null && mode == _AssinaturaCtaMode.manageStore) ...[
           const SizedBox(height: TokensStrip.s2),
           Semantics(
             button: true,
             label:
-                restoringPurchases ? 'Restaurando compras' : 'Restaurar compras',
+                restoringPurchases
+                    ? 'Restaurando compras'
+                    : 'Restaurar compras',
             child: FxLiquidSecondaryButton(
-              label:
-                  restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
+              label: restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
               icon: Icons.restore_rounded,
               onPressed: restoringPurchases ? null : onRestore,
             ),
           ),
-        ],
+        ] else if (onRestore != null)
+          TextButton(
+            onPressed: restoringPurchases ? null : onRestore,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 44),
+              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
+            ),
+            child: Text(
+              restoringPurchases ? 'Restaurando compras…' : 'Restaurar compras',
+              style: FocuxHubTypography.chip(tierAccent ?? primary),
+            ),
+          ),
         if (onBillingDetails != null) ...[
           const SizedBox(height: TokensStrip.s1),
           TextButton(
@@ -311,9 +321,7 @@ Future<void> _showAssinaturaTermosSheet(
                                 : 'Restaurar compras',
                         child: FxLiquidSecondaryButton(
                           label:
-                              restoring
-                                  ? 'Restaurando…'
-                                  : 'Restaurar compras',
+                              restoring ? 'Restaurando…' : 'Restaurar compras',
                           icon: Icons.restore_rounded,
                           onPressed: restoring ? null : onRestore,
                         ),
@@ -323,7 +331,7 @@ Future<void> _showAssinaturaTermosSheet(
                       const SizedBox(height: TokensStrip.s3),
                       Text(
                         'Cobrança e renovação automática ${subscriptionChannelWith(ChannelPreposition.por)}. '
-                        'Cancele quando quiser nas configurações do dispositivo.',
+                        'Cancele quando quiser ${subscriptionCancelWhere()}.',
                         textAlign: TextAlign.center,
                         style: TokensStrip.bodyMuted(color: mute),
                       ),

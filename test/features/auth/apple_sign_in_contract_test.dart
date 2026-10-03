@@ -26,7 +26,6 @@ void main() {
       contains("json['appleSignInEnabled'] as bool? ?? false"),
     );
     expect(repo, contains('appleSignInReady'));
-    expect(repo, contains('resolveAppleSignInOffered'));
     expect(repo, contains('appleSignInOffered'));
     expect(repo, contains("'fullName'"));
     expect(repo, contains("'personalSlug'"));

@@ -214,6 +214,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
           ],
         ),
         leading: IconButton(
+          tooltip: 'Voltar',
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),

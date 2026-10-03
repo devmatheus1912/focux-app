@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +34,7 @@ import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/apple_sign_in_button.dart';
+import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 
@@ -133,88 +135,40 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _loadCapabilities() async {
+    // Apple aparece sempre que o aparelho suporta (guideline 4.8), sem
+    // depender de chamada ao backend.
+    final appleOnDevice = await AppleSignInService.isAvailableOnDevice();
+    AuthEnvironmentStatus? status;
     try {
-      final status = await ref.read(authRepositoryProvider).environmentStatus();
-      bool capsApple = false;
-      try {
-        final caps = await ref.read(authRepositoryProvider).capabilities();
-        capsApple = caps.appleSignInEnabled;
-      } catch (_) {}
-      if (!mounted) return;
-      final appleOffered = resolveAppleSignInOffered(
-        capabilitiesEnabled: capsApple,
-        environmentStatus: status,
-      );
-      final appClientConfigured = googleSignInConfiguredInApp();
-      // Ambos sociais quando o ambiente permite — iPhone também usa Gmail.
-      final showGoogle = appClientConfigured;
-      setState(() {
-        _appleEnabled =
-            appleOffered && AppleSignInService.isSupportedPlatform;
-        _googleEnabled = showGoogle;
-        if (!appClientConfigured) {
-          _googleStatusTitle = 'Google pendente no app';
-          _googleStatusNote = Env.googleWebClientId.isEmpty
-              ? 'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.'
-              : 'No iPhone, o build precisa do GOOGLE_IOS_CLIENT_ID (OAuth iOS, nao Web).';
-          _googleStatusAction = Env.googleWebClientId.isEmpty
-              ? 'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.'
-              : 'Regenerar o IPA com GOOGLE_IOS_CLIENT_ID e URL scheme no Info.plist.';
-        } else if (status.googleSignInReady) {
-          _googleStatusTitle = null;
-          _googleStatusNote = null;
-          _googleStatusAction = null;
-        } else {
-          final issue = status.firstIssueFor('google');
-          _googleStatusTitle = issue?.title ?? 'Google pendente no ambiente';
-          _googleStatusNote =
-              issue?.detail.isNotEmpty == true
-                  ? issue!.detail
-                  : 'Login Google ainda nao esta pronto neste ambiente.';
-          _googleStatusAction = issue?.action;
-        }
-      });
-    } catch (_) {
-      if (!mounted) return;
-      AuthEnvironmentStatus? status;
-      bool capsApple = false;
-      try {
-        status = await ref.read(authRepositoryProvider).environmentStatus();
-      } catch (_) {}
-      try {
-        final caps = await ref.read(authRepositoryProvider).capabilities();
-        capsApple = caps.appleSignInEnabled;
-      } catch (_) {}
-      if (!mounted) return;
-      final appleOffered = resolveAppleSignInOffered(
-        capabilitiesEnabled: capsApple,
-        environmentStatus: status,
-      );
-      final appClientConfigured = googleSignInConfiguredInApp();
-      final showGoogle = appClientConfigured;
-      setState(() {
-        _appleEnabled =
-            appleOffered && AppleSignInService.isSupportedPlatform;
-        _googleEnabled = showGoogle;
-        if (showGoogle) {
-          _googleStatusTitle = null;
-          _googleStatusNote = null;
-          _googleStatusAction = null;
-        } else if (!appClientConfigured) {
-          _googleStatusTitle = 'Google pendente no app';
-          _googleStatusNote = Env.googleWebClientId.isEmpty
-              ? 'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.'
-              : 'No iPhone, o build precisa do GOOGLE_IOS_CLIENT_ID (OAuth iOS, nao Web).';
-          _googleStatusAction = Env.googleWebClientId.isEmpty
-              ? 'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.'
-              : 'Regenerar o IPA com GOOGLE_IOS_CLIENT_ID e URL scheme no Info.plist.';
-        } else {
-          _googleStatusTitle = null;
-          _googleStatusNote = null;
-          _googleStatusAction = null;
-        }
-      });
-    }
+      status = await ref.read(authRepositoryProvider).environmentStatus();
+    } catch (_) {}
+    if (!mounted) return;
+    final appClientConfigured = googleSignInConfiguredInApp();
+    setState(() {
+      _appleEnabled = appleOnDevice;
+      _googleEnabled = appClientConfigured;
+      _googleStatusTitle = null;
+      _googleStatusNote = null;
+      _googleStatusAction = null;
+      if (!kDebugMode) return;
+      if (!appClientConfigured) {
+        _googleStatusTitle = 'Google pendente no app';
+        _googleStatusNote = Env.googleWebClientId.isEmpty
+            ? 'Este build ainda nao recebeu o GOOGLE_WEB_CLIENT_ID, entao o botao fica bloqueado mesmo com o backend online.'
+            : 'No iPhone, o build precisa do GOOGLE_IOS_CLIENT_ID (OAuth iOS, nao Web).';
+        _googleStatusAction = Env.googleWebClientId.isEmpty
+            ? 'Gerar o build com GOOGLE_WEB_CLIENT_ID e validar em staging.'
+            : 'Regenerar o IPA com GOOGLE_IOS_CLIENT_ID e URL scheme no Info.plist.';
+      } else if (status != null && !status.googleSignInReady) {
+        final issue = status.firstIssueFor('google');
+        _googleStatusTitle = issue?.title ?? 'Google pendente no ambiente';
+        _googleStatusNote =
+            issue?.detail.isNotEmpty == true
+                ? issue!.detail
+                : 'Login Google ainda nao esta pronto neste ambiente.';
+        _googleStatusAction = issue?.action;
+      }
+    });
   }
 
   @override
@@ -434,6 +388,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         isLoading: _loadingGoogle,
                                         dark: true,
                                       ),
+                                    ],
+                                    if (_appleEnabled || _googleEnabled) ...[
+                                      const SizedBox(height: 12),
+                                      AuthLegalConsentText(primary: primary),
                                     ],
                                     if (_googleStatusNote != null) ...[
                                       if (_googleEnabled)

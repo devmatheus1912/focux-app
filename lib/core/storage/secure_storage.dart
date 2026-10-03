@@ -7,6 +7,7 @@ class SecureStorage {
   static const _keyRefreshToken = 'jwt_refresh_token';
   static const _keyRole = 'user_role';
   static const _keyRequiresPasswordChange = 'requires_password_change';
+  static const _keyApplePendingName = 'apple_pending_full_name';
 
   /// Memória no web (evita JWT em localStorage). Nativo: Keystore/Keychain.
   static String? _webAccessToken;
@@ -194,7 +195,30 @@ class SecureStorage {
       await prefs.remove(_keyRequiresPasswordChange);
       return;
     }
+    // Cache "carregado e vazio" antes do delete: leitura concorrente não pode
+    // recachear o token antigo do Keychain.
     _clearNativeMemory();
+    _memAccessLoaded = true;
+    _memRefreshLoaded = true;
+    _memRoleLoaded = true;
+    _memRequiresLoaded = true;
     await _storage.deleteAll();
+  }
+
+  /// A Apple manda o nome só na primeira autorização; guardado até o login
+  /// no backend dar certo.
+  static Future<void> saveApplePendingName(String name) async {
+    if (kIsWeb) return;
+    await _storage.write(key: _keyApplePendingName, value: name);
+  }
+
+  static Future<String?> getApplePendingName() async {
+    if (kIsWeb) return null;
+    return _storage.read(key: _keyApplePendingName);
+  }
+
+  static Future<void> deleteApplePendingName() async {
+    if (kIsWeb) return;
+    await _storage.delete(key: _keyApplePendingName);
   }
 }

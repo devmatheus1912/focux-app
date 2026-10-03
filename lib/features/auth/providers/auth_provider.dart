@@ -147,6 +147,8 @@ class AuthNotifier extends Notifier<AuthStatus> {
     String? fullName,
     String? email,
     String? personalSlug,
+    String? authorizationCode,
+    String? rawNonce,
   }) async {
     final result = await _repo.loginApple(
       identityToken: identityToken,
@@ -154,6 +156,8 @@ class AuthNotifier extends Notifier<AuthStatus> {
       fullName: fullName,
       email: email,
       personalSlug: personalSlug,
+      authorizationCode: authorizationCode,
+      rawNonce: rawNonce,
     );
     if (result.mfaRequired) return result;
     _currentRole = isAluno ? UserRole.aluno : UserRole.personal;
@@ -222,12 +226,17 @@ class AuthNotifier extends Notifier<AuthStatus> {
   }
 
   Future<void> logout() async {
-    await _repo.logout();
-    ApiClient.resetIdempotencyScopes();
-    await SessionInvalidator.invalidate(reason: 'logout manual');
-    _currentRole = null;
-    _requiresPasswordChange = false;
-    state = AuthStatus.unauthenticated;
+    try {
+      await _repo.logout();
+    } catch (_) {
+      // Sem rede: a sessão local sai do mesmo jeito.
+    } finally {
+      ApiClient.resetIdempotencyScopes();
+      await SessionInvalidator.invalidate(reason: 'logout manual');
+      _currentRole = null;
+      _requiresPasswordChange = false;
+      state = AuthStatus.unauthenticated;
+    }
   }
 }
 

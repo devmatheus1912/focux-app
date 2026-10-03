@@ -100,7 +100,7 @@ class PaywallBillingLegalPanel extends StatelessWidget {
         if (showStoreBillingNote)
           Text(
             'Cobrança e renovação automática ${subscriptionChannelWith(ChannelPreposition.por)}. '
-            'Cancele quando quiser nas configurações do dispositivo.',
+            'Cancele quando quiser ${subscriptionCancelWhere()}.',
             textAlign: TextAlign.center,
             style: TokensStrip.bodyMuted(color: secondary),
           ),
@@ -135,7 +135,7 @@ class PaywallTrustFooter extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'Sem fidelidade · Cancele quando quiser nas configurações do app',
+          'Sem fidelidade · Cancele quando quiser ${subscriptionCancelWhere()}',
           textAlign: TextAlign.center,
           style: TokensStrip.bodyMuted(color: mute),
         ),

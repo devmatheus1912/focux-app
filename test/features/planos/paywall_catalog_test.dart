@@ -5,7 +5,7 @@ import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 void main() {
   test('comparisons binárias batem com a spec', () {
     expect(PaywallCatalog.comparisonFreeVsPro.length, 9);
-    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 12);
+    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 11);
   });
 
   test('upgradeTriggers match reference', () {
@@ -33,7 +33,7 @@ void main() {
     );
     expect(
       PaywallCatalog.roiTagForPlan(SubscriptionPlan.ENTERPRISE),
-      'Marca própria, landing, loja e até 5 assistentes além de você',
+      'Marca própria, landing completa, loja e 600 usos de IA/mês',
     );
     expect(PaywallCatalog.roiTagForPlan(SubscriptionPlan.FREE), isNull);
   });

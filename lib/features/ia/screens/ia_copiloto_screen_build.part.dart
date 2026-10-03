@@ -417,6 +417,40 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                         brand: brand,
                                         mute: mute,
                                       ),
+                                    const SizedBox(height: TokensStrip.s2),
+                                    const IaSafetyDisclaimer(compact: true),
+                                    Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: TextButton.icon(
+                                        onPressed: () => showDenunciarSheet(
+                                          context,
+                                          repo: ModeracaoRepository(
+                                            ref.read(apiClientProvider),
+                                          ),
+                                          tipo: DenunciaTipo.iaResposta,
+                                          conteudo: insights
+                                              .map(
+                                                (i) =>
+                                                    '${i.titulo}: ${i.detalhe}',
+                                              )
+                                              .join('\n'),
+                                        ),
+                                        icon: const Icon(
+                                          Icons.flag_outlined,
+                                          size: 16,
+                                        ),
+                                        label: Text(
+                                          S.of(context).moderacaoDenunciarIa,
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: mute,
+                                          visualDensity: VisualDensity.compact,
+                                          textStyle: const TextStyle(
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               );

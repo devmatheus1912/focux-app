@@ -55,7 +55,26 @@ abstract final class SessionRefreshCoordinator {
   }) {
     final existing = _flight;
     if (existing != null) return existing.future;
-    return _run(force: force, skew: skew);
+    // Trava antes de qualquer await: dois 401 simultâneos não podem mandar o
+    // mesmo refresh token duas vezes (o backend trata reuso como roubo).
+    final completer = Completer<SessionRefreshOutcome>();
+    _flight = completer;
+    _run(force: force, skew: skew).then(
+      (outcome) {
+        if (!completer.isCompleted) completer.complete(outcome);
+      },
+      onError: (Object e) {
+        if (kDebugMode) {
+          debugPrint('[SessionRefresh] unexpected: $e');
+        }
+        if (!completer.isCompleted) {
+          completer.complete(SessionRefreshOutcome.failedRetryable);
+        }
+      },
+    ).whenComplete(() {
+      if (identical(_flight, completer)) _flight = null;
+    });
+    return completer.future;
   }
 
   static Future<SessionRefreshOutcome> _run({
@@ -76,22 +95,7 @@ abstract final class SessionRefreshCoordinator {
       return SessionRefreshOutcome.failedFatal;
     }
 
-    final completer = Completer<SessionRefreshOutcome>();
-    _flight = completer;
-    try {
-      final outcome = await _performRefresh(refresh);
-      if (!completer.isCompleted) completer.complete(outcome);
-      return outcome;
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('[SessionRefresh] unexpected: $e');
-      }
-      const outcome = SessionRefreshOutcome.failedRetryable;
-      if (!completer.isCompleted) completer.complete(outcome);
-      return outcome;
-    } finally {
-      if (identical(_flight, completer)) _flight = null;
-    }
+    return _performRefresh(refresh);
   }
 
   static Future<SessionRefreshOutcome> _performRefresh(

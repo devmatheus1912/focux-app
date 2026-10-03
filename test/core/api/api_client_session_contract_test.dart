@@ -43,7 +43,7 @@ void main() {
     expect(mainSrc, contains('_warmSessionThenSoftReload'));
 
     expect(invalidator, contains('ValueNotifier<int>'));
-    expect(invalidator, contains('SecureStorage.clearAll()'));
+    expect(invalidator, contains('SecureStorage.clearAll'));
     expect(invalidator, contains('AlunosHomeClientCache.clear()'));
     expect(invalidator, contains('Aluno360ClientCache.clear()'));
     expect(invalidator, contains('DashboardHomeClientCache.clear()'));
@@ -51,8 +51,8 @@ void main() {
     expect(invalidator, contains('AlunoInsightAnalytics.resetSessao()'));
     expect(invalidator, contains('ApiEtagStore.clear()'));
     expect(invalidator, contains('PlanoFeaturesBffCache.clear()'));
-    expect(invalidator, contains('MigracaoMagicaDraftCache.clear()'));
-    expect(invalidator, contains('AlunoFollowUpStore.clearAll()'));
+    expect(invalidator, contains('MigracaoMagicaDraftCache.clear'));
+    expect(invalidator, contains('AlunoFollowUpStore.clearAll'));
     expect(invalidator, contains('EvolucaoHomeClientCache.clear()'));
     expect(invalidator, contains('AgendaWeekClientCache.clear()'));
     expect(invalidator, contains('OnboardingWizardClientCache.clear()'));

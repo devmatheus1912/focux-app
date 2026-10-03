@@ -54,7 +54,7 @@ class PaywallCatalog {
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.FREE => 'Para começar',
     SubscriptionPlan.PRO => 'Para crescer e cobrar',
-    SubscriptionPlan.ENTERPRISE => 'Sua marca. Seu time. Seu crescimento.',
+    SubscriptionPlan.ENTERPRISE => 'Sua marca. Seu crescimento.',
   };
 
   /// Resumo factual do plano (limites reais), sem promessa de retorno.
@@ -62,7 +62,7 @@ class PaywallCatalog {
     SubscriptionPlan.PRO =>
       'Até 30 alunos, ${PlanoIaLimits.pro} usos de IA/mês e cobrança PIX',
     SubscriptionPlan.ENTERPRISE =>
-      'Marca própria, landing, loja e até 5 assistentes além de você',
+      'Marca própria, landing completa, loja e ${PlanoIaLimits.enterprise} usos de IA/mês',
     _ => null,
   };
 
@@ -84,7 +84,7 @@ class PaywallCatalog {
     PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'Landing / white-label / loja / NFSe / equipe',
+      feature: 'Landing / white-label / loja',
       free: '—',
       paid: '—',
     ),
@@ -107,18 +107,13 @@ class PaywallCatalog {
     PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Landing pública', free: '—', paid: '✓'),
-    PaywallComparisonRow(
-      feature: 'White-label + domínio',
-      free: '—',
-      paid: '✓',
-    ),
+    PaywallComparisonRow(feature: 'Marca própria', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Loja + pacotes', free: '—', paid: '✓'),
     PaywallComparisonRow(
       feature: 'Automações + win-back + desafios',
       free: '—',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'NFSe + equipe (5)', free: '—', paid: '✓'),
   ];
 
   /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).
@@ -208,7 +203,7 @@ class PaywallCatalog {
       title: '110+ interações de IA no mês',
       transition: 'PRO → ENTERPRISE',
       message:
-          'Você está chegando no limite de IA. Enterprise dá 600/mês + landing, loja e equipe.',
+          'Você está chegando no limite de IA. Enterprise dá 600/mês + landing e loja.',
     ),
     PaywallUpgradeTrigger(
       number: '07',

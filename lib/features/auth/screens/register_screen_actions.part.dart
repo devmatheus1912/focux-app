@@ -247,6 +247,8 @@ extension on _RegisterScreenState {
             isAluno: false,
             fullName: credential.fullName,
             email: credential.email,
+            authorizationCode: credential.authorizationCode,
+            rawNonce: credential.rawNonce,
           );
 
       if (!mounted) return;

@@ -115,6 +115,7 @@ class ConversationReplyComposerBar extends StatelessWidget {
             ),
           ),
           IconButton(
+            tooltip: 'Fechar',
             onPressed: onClose,
             icon: const Icon(Icons.close_rounded, size: 18),
             splashRadius: 18,

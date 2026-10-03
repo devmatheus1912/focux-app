@@ -41,11 +41,28 @@ class _FakeStore implements IapStore {
   }
 
   final bought = <ProductDetails>[];
+  final boughtTokens = <String?>[];
+  final replaced = <PurchaseDetails?>[];
+  PurchaseDetails? active;
 
   @override
-  Future<void> buyNonConsumable(ProductDetails product) async {
+  Future<void> buyNonConsumable(
+    ProductDetails product, {
+    String? accountToken,
+    PurchaseDetails? replacing,
+  }) async {
     bought.add(product);
+    boughtTokens.add(accountToken);
+    replaced.add(replacing);
   }
+
+  @override
+  Future<PurchaseDetails?> activeAndroidSubscription(
+    bool Function(String productId) isSupported,
+  ) async => active;
+
+  @override
+  Future<bool?> introOfferEligible(String productId) async => null;
 }
 
 DioException _dio({int? status, DioExceptionType? type}) {
@@ -143,6 +160,36 @@ void main() {
     );
     expect(await coordinator.start(), isTrue);
     expect(store.restoreCalls, 1);
+  });
+
+  test('Android: upgrade troca a assinatura ativa e vincula a conta', () async {
+    await coordinator.dispose();
+    coordinator = IapPurchaseCoordinator(
+      store: store,
+      verify: (p) => verify(p),
+      isAndroid: true,
+    );
+    final ativa = _compra(produto: SubscriptionProducts.proMonthly);
+    store.active = ativa;
+    final enterprise = ProductDetails(
+      id: SubscriptionProducts.enterpriseMonthly,
+      title: 'Enterprise',
+      description: 'Enterprise mensal',
+      price: r'R$ 199,90',
+      rawPrice: 199.9,
+      currencyCode: 'BRL',
+    );
+
+    expect(await coordinator.buy(enterprise, accountToken: 'conta-1'), isTrue);
+
+    expect(store.replaced.single, ativa);
+    expect(store.boughtTokens.single, 'conta-1');
+  });
+
+  test('iOS: compra não consulta assinatura ativa', () async {
+    store.active = _compra();
+    await coordinator.buy(_produto);
+    expect(store.replaced.single, isNull);
   });
 
   group('conclusão depois de verify com erro', () {

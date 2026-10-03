@@ -35,22 +35,36 @@ class SessionInvalidator {
   ];
 
   static Future<void> invalidate({String? reason}) async {
-    clearTenantMemoryCaches();
+    try {
+      clearTenantMemoryCaches();
+    } catch (_) {}
+    // Uma limpeza que falhe não pode impedir as outras nem o aviso de sessão.
     await Future.wait([
-      AlunoCopilotIaCacheStore.clearAll(),
-      SecureStorage.clearAll(),
-      OfflineCache.clearAll(),
-      LocalCache.clearAll(),
-      OfflineSyncService.clearQueue(),
-      CheckinSeriesPendentesStore.limpar(),
-      _clearSessionPrefs(),
-      MigracaoMagicaDraftCache.clear(),
-      AlunoFollowUpStore.clearAll(),
-      _clearHealthSession(),
+      for (final task in <Future<void> Function()>[
+        AlunoCopilotIaCacheStore.clearAll,
+        SecureStorage.clearAll,
+        OfflineCache.clearAll,
+        LocalCache.clearAll,
+        OfflineSyncService.clearQueue,
+        CheckinSeriesPendentesStore.limpar,
+        _clearSessionPrefs,
+        MigracaoMagicaDraftCache.clear,
+        AlunoFollowUpStore.clearAll,
+        _clearHealthSession,
+      ])
+        _safely(task),
     ]);
     _notifier.value++;
     if (kDebugMode && reason != null && reason.isNotEmpty) {
       debugPrint('[SessionInvalidator] $reason');
+    }
+  }
+
+  static Future<void> _safely(Future<void> Function() task) async {
+    try {
+      await task();
+    } catch (error) {
+      if (kDebugMode) debugPrint('[SessionInvalidator] limpeza falhou: $error');
     }
   }
 

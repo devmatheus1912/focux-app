@@ -311,16 +311,6 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
             'abas': [],
           },
           {
-            'id': 'equipe',
-            'titulo': 'Equipe',
-            'rotaApp': '/perfil/equipe',
-            'featureGate': 'EQUIPE_RBAC',
-            'unlocked': true,
-            'papel': 'studio',
-            'legacyIds': ['equipe'],
-            'abas': [],
-          },
-          {
             'id': 'grupo',
             'titulo': 'Grupo',
             'rotaApp': '/grupo-aulas',

@@ -56,7 +56,19 @@ class _FakeStore implements IapStore {
   Future<void> restorePurchases() async {}
 
   @override
-  Future<void> buyNonConsumable(ProductDetails product) async {}
+  Future<void> buyNonConsumable(
+    ProductDetails product, {
+    String? accountToken,
+    PurchaseDetails? replacing,
+  }) async {}
+
+  @override
+  Future<PurchaseDetails?> activeAndroidSubscription(
+    bool Function(String productId) isSupported,
+  ) async => null;
+
+  @override
+  Future<bool?> introOfferEligible(String productId) async => null;
 }
 
 PurchaseDetails _compra(String id) => PurchaseDetails(

@@ -44,4 +44,13 @@ void main() {
       isFalse,
     );
   });
+
+  test('dois 401 ao mesmo tempo dividem um só refresh', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    final a = SessionRefreshCoordinator.ensureFreshAccess(force: true);
+    final b = SessionRefreshCoordinator.ensureFreshAccess(force: true);
+    expect(identical(a, b), isTrue);
+    SessionRefreshCoordinator.resetStuckLock();
+    expect(await a, await b);
+  });
 }

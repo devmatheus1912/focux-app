@@ -115,6 +115,9 @@ class PerfilPersonal {
   final bool needsBrandPublicIdentity;
   final ResumoMensal? resumoMensal;
 
+  /// Vincula a compra na loja a esta conta (appAccountToken / obfuscatedAccountId).
+  final String? iapAccountToken;
+
   PerfilPersonal({
     required this.id,
     required this.nome,
@@ -167,6 +170,7 @@ class PerfilPersonal {
     this.slugEditable = false,
     this.needsBrandPublicIdentity = false,
     this.resumoMensal,
+    this.iapAccountToken,
   });
 
   factory PerfilPersonal.fromJson(Map<String, dynamic> json) => PerfilPersonal(
@@ -243,6 +247,7 @@ class PerfilPersonal {
               Map<String, dynamic>.from(json['resumoMensal'] as Map),
             )
             : null,
+    iapAccountToken: json['iapAccountToken'] as String?,
   );
 }
 

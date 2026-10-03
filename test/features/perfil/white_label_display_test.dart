@@ -92,8 +92,7 @@ void main() {
     expect(whiteLabelNeedsLandingCompleta('site'), isTrue);
   });
 
-  test('domínio próprio fica em breve até o BE liberar', () {
-    expect(whiteLabelDominioEmBreveCaption, contains('Em breve'));
+  test('domínio próprio fica oculto até o BE liberar', () {
     expect(WhiteLabelConfig.fromJson({}).dominioDisponivel, isFalse);
     expect(
       WhiteLabelConfig.fromJson({'dominioDisponivel': true}).dominioDisponivel,

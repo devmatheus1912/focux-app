@@ -45,8 +45,9 @@ class FcmService {
       if (kDebugMode) debugPrint('[FCM] initial message error: $e');
     }
 
+    // Permissão só pós-login (requestPermissionIfNeeded); quem já concedeu
+    // segue recebendo com o token registrado abaixo.
     try {
-      await messaging.requestPermission(alert: true, badge: true, sound: true);
       // iOS só mostra banner com o app aberto se pedirmos.
       await messaging.setForegroundNotificationPresentationOptions(
         alert: true,
@@ -54,7 +55,7 @@ class FcmService {
         sound: true,
       );
     } catch (e) {
-      if (kDebugMode) debugPrint('[FCM] permission error: $e');
+      if (kDebugMode) debugPrint('[FCM] presentation options error: $e');
     }
 
     messaging.onTokenRefresh.listen(
@@ -100,9 +101,7 @@ class FcmService {
     unawaited(_handleNotificationTapAsync(message));
   }
 
-  static Future<void> _handleNotificationTapAsync(
-    RemoteMessage message,
-  ) async {
+  static Future<void> _handleNotificationTapAsync(RemoteMessage message) async {
     try {
       final data = message.data;
       if (data['type'] == 'plan_sync') {
@@ -130,7 +129,7 @@ class FcmService {
       if (jwtToken == null) return;
       await apiClient.dio.post('/api/fcm/token', data: {'token': token});
     } catch (e) {
-      debugPrint('[Focux] FCM register error: $e');
+      if (kDebugMode) debugPrint('[Focux] FCM register error: $e');
     }
   }
 
@@ -143,8 +142,34 @@ class FcmService {
       if (token == null) return;
       await _registrarToken(token, apiClient);
     } catch (e) {
-      debugPrint('[Focux] FCM post-login register error: $e');
+      if (kDebugMode) debugPrint('[Focux] FCM post-login register error: $e');
     }
+  }
+
+  static Future<void>? _permissionInFlight;
+
+  /// Pede permissão de notificação (prompt só na primeira vez) e registra o
+  /// token. Chamar com sessão ativa — nunca no boot deslogado.
+  static Future<void> requestPermissionIfNeeded(ApiClient apiClient) {
+    if (kIsWeb) return Future.value();
+    return _permissionInFlight ??= _requestPermissionAndRegister(
+      apiClient,
+    ).whenComplete(() => _permissionInFlight = null);
+  }
+
+  static Future<void> _requestPermissionAndRegister(ApiClient apiClient) async {
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (settings.authorizationStatus == AuthorizationStatus.denied) return;
+    } catch (e) {
+      if (kDebugMode) debugPrint('[FCM] permission error: $e');
+      return;
+    }
+    await registrarSeAutenticado(apiClient);
   }
 
   /// Desfaz o vínculo do dispositivo com a conta que está saindo.

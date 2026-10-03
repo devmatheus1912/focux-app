@@ -159,6 +159,7 @@ class _DefinirSenhaAlunoScreenState
                                   return null;
                                 },
                                 suffix: IconButton(
+                                  tooltip: 'Mostrar ou ocultar senha',
                                   onPressed: () {
                                     setState(
                                       () => _showSenhaAtual = !_showSenhaAtual,
@@ -193,6 +194,7 @@ class _DefinirSenhaAlunoScreenState
                                   return null;
                                 },
                                 suffix: IconButton(
+                                  tooltip: 'Mostrar ou ocultar senha',
                                   onPressed: () {
                                     setState(
                                       () => _showNovaSenha = !_showNovaSenha,

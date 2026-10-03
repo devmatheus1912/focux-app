@@ -33,25 +33,24 @@ class Lead {
   });
 
   factory Lead.fromJson(Map<String, dynamic> j) => Lead(
-    id: (j['id'] as num).toInt(),
-    nome: j['nome'] as String,
+    id: (j['id'] as num?)?.toInt() ?? 0,
+    nome: j['nome'] as String? ?? '',
     telefone: j['telefone'] as String?,
     origem: j['origem'] as String?,
     objetivo: j['objetivo'] as String?,
     observacoes: j['observacoes'] as String?,
-    status: j['status'] as String,
-    criadoEm: (j['criadoEm'] as String).substring(0, 10),
-    convertidoEm:
-        j['convertidoEm'] != null
-            ? (j['convertidoEm'] as String).substring(0, 10)
-            : null,
-    proximoContato:
-        j['proximoContato'] != null
-            ? (j['proximoContato'] as String).substring(0, 10)
-            : null,
+    status: j['status'] as String? ?? '',
+    criadoEm: _dateOnly(j['criadoEm']) ?? '',
+    convertidoEm: _dateOnly(j['convertidoEm']),
+    proximoContato: _dateOnly(j['proximoContato']),
     email: j['email'] as String?,
     alunoId: (j['alunoId'] as num?)?.toInt(),
   );
+
+  static String? _dateOnly(Object? raw) {
+    if (raw is! String) return null;
+    return raw.length >= 10 ? raw.substring(0, 10) : raw;
+  }
 }
 
 class LeadInteracao {

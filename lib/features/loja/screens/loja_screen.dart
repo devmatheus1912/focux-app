@@ -172,7 +172,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
     }
 
     return fxScreenA11yScope(
-      label: 'Loja digital',
+      label: 'Loja de pacotes',
       child: FeatureGate(
         featureName: 'Loja Digital',
         requiredPlan: SubscriptionPlan.ENTERPRISE,
@@ -192,7 +192,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
             dismissKeyboard: true,
             constrainWidth: false,
             appBar: FxShellAppBar(
-              title: 'Loja digital',
+              title: 'Loja de pacotes',
               subtitle: FxHubFreshness.joinCount(
                 lojaCountLabel(view: _view, count: visibleCount),
                 FxHubFreshness.fromFetchedAt(_fetchedAt),
@@ -203,7 +203,7 @@ class _LojaScreenState extends ConsumerState<LojaScreen> {
                   tooltip: 'Como usar a loja',
                   onTap: () => showFxHelpSheet(
                     context,
-                    title: 'Loja digital',
+                    title: 'Loja de pacotes',
                     subtitle: 'Vitrine com PIX e pedidos do comprador.',
                     tips: const [
                       FxHelpTip(

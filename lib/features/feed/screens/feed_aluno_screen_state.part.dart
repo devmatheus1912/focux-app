@@ -43,6 +43,19 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     });
   }
 
+  Future<void> _denunciarPost(FeedPost p) async {
+    final enviada = await showDenunciarSheet(
+      context,
+      repo: ModeracaoRepository(ref.read(apiClientProvider)),
+      tipo: DenunciaTipo.feedPost,
+      alvoId: '${p.id}',
+      conteudo: '${p.titulo}\n${p.conteudo}',
+    );
+    if (enviada && mounted) {
+      setState(() => _posts = _posts.where((x) => x.id != p.id).toList());
+    }
+  }
+
   void _clearQuery() {
     _searchDebounce?.cancel();
     _searchController.clear();
@@ -231,6 +244,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             comentarios: _comentariosLocais[p.id] ?? p.totalComentarios,
             onCurtir: () => _curtir(p.id),
             onComentar: () => _abrirComentarios(p.id),
+            onDenunciar: () => _denunciarPost(p),
           );
         },
       ),

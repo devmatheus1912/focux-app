@@ -19,11 +19,13 @@ class IaProgressaoResultView extends StatelessWidget {
     this.alunoNome,
     this.onExportPdf,
     this.onReviewSuggestions,
+    this.onReport,
   });
 
   final IaProgressaoCargaResult result;
   final String? alunoNome;
   final VoidCallback? onExportPdf;
+  final VoidCallback? onReport;
   final VoidCallback? onReviewSuggestions;
 
   Future<void> _copy(BuildContext context) async {
@@ -120,6 +122,7 @@ class IaProgressaoResultView extends StatelessWidget {
             onExportPdf: onExportPdf,
             onReviewSuggestions: onReviewSuggestions,
             pendingSuggestions: result.sugestoesRegistradas,
+            onReport: onReport,
           ),
         ],
       ),

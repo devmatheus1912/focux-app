@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -94,7 +95,6 @@ import '../../features/desafios/data/desafio_repository.dart';
 import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_screen.dart';
 import '../../features/loja/screens/loja_screen.dart';
-import '../../features/perfil/screens/equipe_screen.dart';
 import '../../features/pacotes/screens/pacotes_screen.dart';
 import '../../features/recorrencia/screens/recorrencia_screen.dart';
 import '../../features/nps/screens/nps_dashboard_screen.dart';
@@ -763,6 +763,7 @@ RouteBase buildChromeShellRoute() {
             path: '/assinatura/success',
             redirect: (context, state) {
               if (state.extra is AssinaturaSuccessRouteArgs) return null;
+              if (!kIsWeb) return '/assinatura';
               final plan = subscriptionPlanFromRouteName(
                 state.uri.queryParameters['plano'],
               );
@@ -845,7 +846,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/perfil/equipe',
-            builder: (context, state) => const EquipeScreen(),
+            redirect: (context, state) => '/perfil/ferramentas',
           ),
           GoRoute(
             path: '/pacotes',

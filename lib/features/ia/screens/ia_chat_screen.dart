@@ -11,6 +11,9 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/ia_safety_disclaimer.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../moderacao/data/moderacao_repository.dart';
+import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/ia_repository.dart';
 import '../utils/ia_chat_display.dart';
 import '../widgets/ia_chat_composer.dart';
@@ -21,7 +24,8 @@ import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 class _IaMsg {
   final String texto;
   final bool isUser;
-  _IaMsg({required this.texto, required this.isUser});
+  final bool fromIa;
+  _IaMsg({required this.texto, required this.isUser, this.fromIa = false});
 }
 
 class IaChatScreen extends ConsumerStatefulWidget {
@@ -61,7 +65,9 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
         ref.read(apiClientProvider),
       ).chat(text);
       if (mounted) {
-        setState(() => _msgs.add(_IaMsg(texto: resposta, isUser: false)));
+        setState(
+          () => _msgs.add(_IaMsg(texto: resposta, isUser: false, fromIa: true)),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -196,7 +202,7 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                             );
                           }
                           final m = _msgs[i];
-                          return Align(
+                          final bubble = Align(
                             alignment:
                                 m.isUser
                                     ? Alignment.centerRight
@@ -229,6 +235,30 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                                 ),
                               ),
                             ),
+                          );
+                          if (!m.fromIa) return bubble;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              bubble,
+                              TextButton.icon(
+                                onPressed: () => showDenunciarSheet(
+                                  context,
+                                  repo: ModeracaoRepository(
+                                    ref.read(apiClientProvider),
+                                  ),
+                                  tipo: DenunciaTipo.iaResposta,
+                                  conteudo: m.texto,
+                                ),
+                                icon: const Icon(Icons.flag_outlined, size: 16),
+                                label: Text(S.of(context).moderacaoDenunciarIa),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: chrome.mute,
+                                  visualDensity: VisualDensity.compact,
+                                  textStyle: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),

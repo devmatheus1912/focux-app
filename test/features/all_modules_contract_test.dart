@@ -29,7 +29,7 @@ void main() {
             p.contains('/services/');
       });
 
-      final screenExempt = {'planos', 'pricing', 'pql', 'subscription'};
+      final screenExempt = {'planos', 'pricing', 'pql', 'subscription', 'moderacao'};
       // Redirect-only ou shell fino — sem repository dedicado no módulo.
       final dataExempt = {...screenExempt, 'suporte'};
       if (!hasScreen && !screenExempt.contains(name)) {

@@ -9,6 +9,11 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
     final canCopy = msg.deletedAt == null;
     final canEdit = _canEditMessage(msg);
     final canDelete = _canDeleteMessage(msg);
+    final canReport =
+        msg.id != null &&
+        msg.deletedAt == null &&
+        !_isMine(msg) &&
+        !chatIsSistema(msg.remetente, msg.tipoMidia);
     showFxHomeSheet<void>(
       context,
       builder:
@@ -116,6 +121,27 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
                       onTap: () {
                         Navigator.pop(sheetContext);
                         _deleteMessage(msg);
+                      },
+                    ),
+                  if (canReport)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.flag_outlined,
+                        color: EagleTokens.bad,
+                      ),
+                      title: Text(S.of(context).moderacaoDenunciarMensagem),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        showDenunciarSheet(
+                          context,
+                          repo: ModeracaoRepository(
+                            ref.read(apiClientProvider),
+                          ),
+                          tipo: DenunciaTipo.chatMensagem,
+                          alvoId: '${msg.id}',
+                          conteudo: formatChatTextForDisplay(msg.conteudo),
+                        );
                       },
                     ),
                 ],

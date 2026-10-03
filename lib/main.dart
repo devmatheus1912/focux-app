@@ -56,8 +56,9 @@ void main() {
     _bootStopwatch.start();
     WidgetsFlutterBinding.ensureInitialized();
     LicenseRegistry.addLicense(() async* {
-      final license =
-          await rootBundle.loadString('assets/google_fonts/OFL.txt');
+      final license = await rootBundle.loadString(
+        'assets/google_fonts/OFL.txt',
+      );
       yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
     });
     GoogleFonts.config.allowRuntimeFetching = kDebugMode;
@@ -69,7 +70,7 @@ void main() {
       TlsCertificatePinning.installGlobalOverrides();
     } catch (error, stack) {
       // Pin ausente não pode prender a splash nativa — o app ainda sobe.
-      debugPrint('[Focux] TLS pinning init error: $error');
+      if (kDebugMode) debugPrint('[Focux] TLS pinning init error: $error');
       reportUncaughtZoneError(error, stack);
     }
     // HomeWidget + FCM: defer pós-primeiro-frame (ver FocuxApp._bootstrapDeferredServices).
@@ -94,15 +95,16 @@ void main() {
             debugPrint('[Focux] framework noise (not sent): $error');
             return true;
           }
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: false);
           return true;
         };
       }
     } catch (error) {
-      debugPrint('[Focux] Firebase init error: $error');
+      if (kDebugMode) debugPrint('[Focux] Firebase init error: $error');
       // Firebase ainda não está configurado em todos os ambientes.
       // Fallback: captura erros localmente sem Crashlytics.
       FlutterError.onError = (FlutterErrorDetails details) {
+        if (!kDebugMode) return;
         debugPrint('[Focux] FlutterError: ${details.exceptionAsString()}');
         debugPrint('${details.stack}');
       };
@@ -115,8 +117,6 @@ void main() {
       if (!isNonFatalFlutterFrameworkError(details.exception, details.stack)) {
         unawaited(reportFlutterErrorToCrashlytics(details));
       }
-      debugPrint('[Focux] WidgetFault: ${details.exceptionAsString()}');
-      debugPrint('${details.stack}');
       return Material(
         color: const Color(0xFF080C10),
         child: Builder(
@@ -192,7 +192,7 @@ Future<void> _initRiveNative() async {
   try {
     await RiveNative.init();
   } catch (error) {
-    debugPrint('[Focux] Rive native init error: $error');
+    if (kDebugMode) debugPrint('[Focux] Rive native init error: $error');
   }
 }
 
@@ -254,16 +254,29 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     try {
       await HomeWidgetService.init();
     } catch (error, stack) {
-      debugPrint('[Focux] HomeWidget deferred init error: $error');
+      if (kDebugMode) {
+        debugPrint('[Focux] HomeWidget deferred init error: $error');
+      }
       reportUncaughtZoneError(error, stack);
     }
     if (kIsWeb) return;
     try {
       await FcmService.init(ref.read(apiClientProvider));
     } catch (error, stack) {
-      debugPrint('[Focux] FCM deferred init error: $error');
+      if (kDebugMode) debugPrint('[Focux] FCM deferred init error: $error');
       reportUncaughtZoneError(error, stack);
     }
+    if (!mounted) return;
+    if (ref.read(authProvider) == AuthStatus.authenticated) {
+      _requestPushPermission();
+    }
+  }
+
+  void _requestPushPermission() {
+    if (kIsWeb) return;
+    unawaited(
+      FcmService.requestPermissionIfNeeded(ref.read(apiClientProvider)),
+    );
   }
 
   @override
@@ -283,9 +296,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     if (state != AppLifecycleState.resumed) return;
     final pausedAt = _pausedAt;
     _pausedAt = null;
-    final away = pausedAt == null
-        ? Duration.zero
-        : DateTime.now().difference(pausedAt);
+    final away =
+        pausedAt == null ? Duration.zero : DateTime.now().difference(pausedAt);
     _onAppResumed(away);
   }
 
@@ -356,7 +368,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       ref.read(personalNameProvider.notifier).value = perfil.nome;
       return;
     } catch (error) {
-      debugPrint('[Focux] personal theme load failed: $error');
+      if (kDebugMode) debugPrint('[Focux] personal theme load failed: $error');
     }
 
     if (role == 'PERSONAL') return;
@@ -397,7 +409,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       ref.read(appDisplayNameProvider.notifier).value =
           data['appDisplayName'] as String?;
     } catch (error) {
-      debugPrint('[Focux] aluno theme load failed: $error');
+      if (kDebugMode) debugPrint('[Focux] aluno theme load failed: $error');
     }
   }
 
@@ -433,6 +445,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
           previous != AuthStatus.authenticated) {
         invalidateSessionUserCaches(ref);
         _loadCustomTheme();
+        _requestPushPermission();
       } else if (next == AuthStatus.unauthenticated &&
           previous == AuthStatus.authenticated) {
         invalidateSessionUserCaches(ref);

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
 
@@ -93,5 +94,26 @@ void main() {
     expect(repo, contains('alunosAtivos'));
     expect(repo, contains('agenda: true'));
     expect(repo, contains('limiteAlunos: 3'));
+  });
+
+  test('Play: preço vem da oferta paga e trial só se a loja devolver', () {
+    ProductDetails p(double raw) => ProductDetails(
+      id: SubscriptionProducts.proMonthly,
+      title: 'PRO',
+      description: 'PRO mensal',
+      price: raw == 0 ? 'Grátis' : r'R$ 49,90',
+      rawPrice: raw,
+      currencyCode: 'BRL',
+    );
+    final trial = p(0);
+    final paga = p(49.9);
+
+    expect(SubscriptionProducts.displayById([trial, paga]).values.single, paga);
+    expect(SubscriptionProducts.displayById([paga, trial]).values.single, paga);
+    expect(
+      SubscriptionProducts.freeTrialOffersById([trial, paga]),
+      {SubscriptionProducts.proMonthly: trial},
+    );
+    expect(SubscriptionProducts.freeTrialOffersById([paga]), isEmpty);
   });
 }

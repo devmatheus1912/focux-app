@@ -32,9 +32,9 @@ class FeedPost {
   });
 
   factory FeedPost.fromJson(Map<String, dynamic> json) => FeedPost(
-    id: json['id'],
-    titulo: json['titulo'],
-    conteudo: json['conteudo'],
+    id: (json['id'] as num?)?.toInt() ?? 0,
+    titulo: json['titulo'] as String? ?? '',
+    conteudo: json['conteudo'] as String? ?? '',
     imagemUrl: json['imagemUrl'],
     midiaUrl: json['midiaUrl'],
     tipoPost: json['tipoPost'],
@@ -50,9 +50,9 @@ class FeedPost {
         json['personalLogoUrl'] ??
         json['logoUrl'] ??
         json['criadoPorAvatarUrl'],
-    fixado: json['fixado'] ?? false,
-    totalCurtidas: json['totalCurtidas'] ?? 0,
-    totalComentarios: json['totalComentarios'] ?? 0,
+    fixado: json['fixado'] == true,
+    totalCurtidas: (json['totalCurtidas'] as num?)?.toInt() ?? 0,
+    totalComentarios: (json['totalComentarios'] as num?)?.toInt() ?? 0,
     criadoEm: json['criadoEm'] ?? '',
   );
 }
@@ -75,9 +75,9 @@ class FeedComentario {
   });
 
   factory FeedComentario.fromJson(Map<String, dynamic> json) => FeedComentario(
-    id: json['id'],
-    alunoId: json['alunoId'],
-    alunoNome: json['alunoNome'],
+    id: (json['id'] as num?)?.toInt() ?? 0,
+    alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
+    alunoNome: json['alunoNome'] as String? ?? '',
     alunoFotoUrl:
         json['alunoFotoUrl'] ??
         json['fotoUrl'] ??
@@ -180,7 +180,7 @@ class FeedRepository {
   Future<int> toggleCurtida(int postId) async {
     final r = await _client.dio.post('/api/feed/$postId/curtir');
     throwIfQueuedOffline(r);
-    return (r.data['totalCurtidas'] as num).toInt();
+    return (r.data['totalCurtidas'] as num?)?.toInt() ?? 0;
   }
 
   Future<FeedComentario> comentar(int postId, String texto) async {

@@ -45,8 +45,8 @@ List<String> assinaturaReviewTopFeatures(SubscriptionPlan plan) =>
     switch (plan) {
       SubscriptionPlan.ENTERPRISE => const [
         'Landing page completa com depoimentos e FAQ',
-        'Marca própria e domínio customizado',
-        'Alunos ilimitados + IA 600/mês + equipe (5)',
+        'Marca própria no app e na landing',
+        'Alunos ilimitados + IA 600/mês',
       ],
       SubscriptionPlan.PRO => [
         'Até 30 alunos ativos',
@@ -64,7 +64,7 @@ String assinaturaReviewLegalBody({
   final freq = assinaturaReviewFrequency(period);
   return 'Ao confirmar, você autoriza a cobrança de $price na forma de pagamento '
       '${subscriptionChannelWith(ChannelPreposition.de)}. A assinatura renova automaticamente ($freq) até ser cancelada. '
-      'Cancele quando quiser em Ajustes > Assinaturas.\n\n'
+      'Cancele quando quiser ${subscriptionCancelWhere()}, até 24 horas antes da renovação.\n\n'
       'Base legal (LGPD): execução de contrato para processar pagamento e entregar o serviço. '
       'Dados de pagamento são processados ${subscriptionChannelWith(ChannelPreposition.por)} — a Focux não armazena número de cartão.';
 }

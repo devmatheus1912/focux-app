@@ -66,7 +66,6 @@ void main() {
     expect(styles, contains('Theme.Black.NoTitleBar'));
     expect(styles, isNot(contains('Theme.Light.NoTitleBar')));
     expect(styles, contains('focux_cinematic_bg'));
-    expect(styles, contains('navigationBarColor'));
     expect(launchBg, contains('@color/focux_cinematic_bg'));
     expect(launchBg, isNot(contains('@drawable/background')));
   });

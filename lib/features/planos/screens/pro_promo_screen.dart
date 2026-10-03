@@ -189,7 +189,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
                                   useStore
-                                      ? 'A loja mostra o período grátis e o valor antes de você confirmar. Cancele quando quiser nas assinaturas do aparelho.'
+                                      ? 'A loja mostra o período grátis e o valor antes de você confirmar. Renova automaticamente; cancele quando quiser ${subscriptionCancelWhere()}.'
                                       : 'Checkout seguro via Mercado Pago. Cancele quando quiser.',
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),

@@ -13,9 +13,9 @@ class MarcoModel {
   final bool concluido;
 
   factory MarcoModel.fromJson(Map<String, dynamic> json) => MarcoModel(
-    id: json['id'] as int,
+    id: (json['id'] as num?)?.toInt() ?? 0,
     titulo: (json['titulo'] ?? '').toString(),
-    ordem: json['ordem'] as int? ?? 0,
+    ordem: (json['ordem'] as num?)?.toInt() ?? 0,
     concluido: json['concluido'] as bool? ?? false,
   );
 }
@@ -50,13 +50,12 @@ class TrilhaModel {
   final List<MarcoModel> marcos;
 
   factory TrilhaModel.fromJson(Map<String, dynamic> json) => TrilhaModel(
-    id: json['id'] as int,
-    alunoId: json['alunoId'] as int,
+    id: (json['id'] as num?)?.toInt() ?? 0,
+    alunoId: (json['alunoId'] as num?)?.toInt() ?? 0,
     titulo: (json['titulo'] ?? '').toString(),
     descricao: json['descricao']?.toString(),
     metaTipo: (json['metaTipo'] ?? 'TREINOS').toString(),
-    metaValor:
-        json['metaValor'] != null ? (json['metaValor'] as num).toDouble() : null,
+    metaValor: (json['metaValor'] as num?)?.toDouble(),
     valorAtual: (json['valorAtual'] as num?)?.toDouble() ?? 0,
     percentualConclusao: (json['percentualConclusao'] as num?)?.toDouble() ?? 0,
     concluida: json['concluida'] as bool? ?? false,

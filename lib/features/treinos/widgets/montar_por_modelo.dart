@@ -39,6 +39,7 @@ Future<void> openMontarPorModelo({
               ],
             ),
             leading: IconButton(
+              tooltip: 'Voltar',
               icon: const Icon(Icons.arrow_back),
               onPressed: () => Navigator.pop(routeContext, false),
             ),

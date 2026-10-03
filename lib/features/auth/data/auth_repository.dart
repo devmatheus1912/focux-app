@@ -204,15 +204,6 @@ class AuthEnvironmentStatus {
   }
 }
 
-/// Une capabilities + environment-status (podem divergir no backend).
-bool resolveAppleSignInOffered({
-  required bool capabilitiesEnabled,
-  AuthEnvironmentStatus? environmentStatus,
-}) {
-  if (capabilitiesEnabled) return true;
-  return environmentStatus?.appleSignInOffered ?? false;
-}
-
 class AuthRepository {
   final Dio _dio;
   final ApiClient _client;
@@ -340,22 +331,36 @@ class AuthRepository {
     String? fullName,
     String? email,
     String? personalSlug,
+    String? authorizationCode,
+    String? rawNonce,
   }) async {
+    final informedName = fullName?.trim();
+    if (informedName != null && informedName.isNotEmpty) {
+      await SecureStorage.saveApplePendingName(informedName);
+    }
+    final name =
+        (informedName != null && informedName.isNotEmpty)
+            ? informedName
+            : await SecureStorage.getApplePendingName();
     final data = <String, dynamic>{
       'identityToken': identityToken,
       'role': isAluno ? 'ALUNO' : 'PERSONAL',
-      if (fullName != null && fullName.trim().isNotEmpty)
-        'fullName': fullName.trim(),
+      if (name != null && name.isNotEmpty) 'fullName': name,
       if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+      if (authorizationCode != null && authorizationCode.isNotEmpty)
+        'authorizationCode': authorizationCode,
+      if (rawNonce != null && rawNonce.isNotEmpty) 'nonce': rawNonce,
     };
     if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
       data['personalSlug'] = personalSlug.trim();
     }
     final response = await _authPost('/api/auth/apple', data: data);
-    return _consumeAuthResponse(
+    final result = await _consumeAuthResponse(
       response.data as Map<String, dynamic>,
       fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
     );
+    await SecureStorage.deleteApplePendingName();
+    return result;
   }
 
   /// Login intermediário MFA — `POST /api/auth/mfa/verify`.

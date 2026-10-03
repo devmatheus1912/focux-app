@@ -31,17 +31,10 @@ class GatedProfileShortcuts extends ConsumerWidget {
     ),
     _ProfileToolEntry(
       icon: Icons.storefront_outlined,
-      label: 'Loja digital',
+      label: 'Loja de pacotes',
       value: 'Vitrine PIX',
       rotaApp: '/loja',
       recurso: PlanoRecursoKeys.loja,
-    ),
-    _ProfileToolEntry(
-      icon: Icons.groups_outlined,
-      label: 'Equipe',
-      value: 'Em breve',
-      rotaApp: '/perfil/equipe',
-      recurso: PlanoRecursoKeys.equipe,
     ),
     _ProfileToolEntry(
       icon: Icons.track_changes_outlined,

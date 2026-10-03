@@ -113,10 +113,14 @@ class CatalogoHub {
                   .map(
                     (e) => CatalogoEntrada.fromJson(Map<String, dynamic>.from(e)),
                   )
+                  .where((e) => !_rotasOcultas.contains(e.rotaApp))
                   .toList(growable: false)
               : const [],
     );
   }
+
+  /// Superfícies ainda não lançadas — fora do hub mesmo se o BFF listar.
+  static const _rotasOcultas = {'/perfil/equipe'};
 }
 
 /// Item do hub, atalho da home ou aba — mesmo shape do BFF.

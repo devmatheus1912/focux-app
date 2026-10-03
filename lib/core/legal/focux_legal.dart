@@ -7,6 +7,8 @@ abstract class FocuxLegal {
   static const String termsUrl = 'https://focuxpersonal.com/termos';
   static const String privacyUrl = 'https://focuxpersonal.com/privacidade';
   static const String supportUrl = 'https://focuxpersonal.com/suporte';
+  static const String deleteAccountUrl =
+      'https://focuxpersonal.com/excluir-conta';
 
   /// Versão dos docs enviada em `POST /api/lgpd/me/consent`.
   static const String consentDocumentVersion = '2026-09';
@@ -16,6 +18,8 @@ abstract class FocuxLegal {
   static Future<bool> openPrivacy() => _open(privacyUrl);
 
   static Future<bool> openSupport() => _open(supportUrl);
+
+  static Future<bool> openDeleteAccount() => _open(deleteAccountUrl);
 
   static Future<bool> _open(String url) async {
     final uri = Uri.parse(url);

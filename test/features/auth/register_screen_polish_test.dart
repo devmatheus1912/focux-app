@@ -66,9 +66,7 @@ void main() {
     expect(screen, contains('GoogleSignInButton'));
     expect(screen, contains('AppleSignInButton'));
     expect(screen, contains('_submitApple'));
-    expect(screen, contains('appleSignInEnabled'));
-    expect(screen, contains('resolveAppleSignInOffered'));
-    expect(screen, contains('environmentStatus'));
+    expect(screen, contains('AppleSignInService.isAvailableOnDevice'));
     expect(screen, contains('_googleEnabled'));
     expect(screen, isNot(contains('!Platform.isIOS')));
     expect(screen, contains('AuthLegalConsentText'));

@@ -28,6 +28,8 @@ import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../features/alunos/constants/aluno_360_layout.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../moderacao/data/moderacao_repository.dart';
+import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_progressao_carga_result.dart';
 import '../providers/progressao_sugestoes_provider.dart';
@@ -374,6 +376,14 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
                                             ? null
                                             : () => _exportarPdf(resultado),
                                     onReviewSuggestions: _abrirAceitar,
+                                    onReport: () => showDenunciarSheet(
+                                      context,
+                                      repo: ModeracaoRepository(
+                                        ref.read(apiClientProvider),
+                                      ),
+                                      tipo: DenunciaTipo.iaResposta,
+                                      conteudo: resultado.resposta,
+                                    ),
                                   ),
                                 ),
                               ),

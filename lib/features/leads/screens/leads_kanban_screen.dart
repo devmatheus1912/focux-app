@@ -226,6 +226,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
                           ),
                         ),
                         IconButton(
+                          tooltip: 'Fechar',
                           onPressed: _dismissIntro,
                           icon: Icon(Icons.close, color: mute, size: 18),
                         ),

@@ -53,4 +53,19 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     }
   });
+
+  test('cancelamento aponta para o lugar certo de cada loja', () {
+    expect(
+      subscriptionCancelWhere(platform: TargetPlatform.iOS, isWeb: false),
+      'em Ajustes > Assinaturas',
+    );
+    expect(
+      subscriptionCancelWhere(platform: TargetPlatform.android, isWeb: false),
+      'no Google Play, em Pagamentos e assinaturas',
+    );
+    expect(
+      subscriptionCancelWhere(platform: TargetPlatform.iOS, isWeb: true),
+      'na área de cobrança',
+    );
+  });
 }

@@ -23,6 +23,8 @@ import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../moderacao/data/moderacao_repository.dart';
+import '../../moderacao/widgets/denunciar_sheet.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
 import '../widgets/feed_comments_sheet.dart';

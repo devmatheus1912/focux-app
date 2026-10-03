@@ -45,7 +45,6 @@ import '../../planos/paywall/paywall_components.dart';
 import '../../planos/paywall/paywall_price.dart';
 import '../../planos/paywall/paywall_vitrine.dart';
 import '../../subscription/plan_entitlements.dart';
-import '../services/subscription_biometric_gate.dart';
 import '../services/subscription_device_guard.dart';
 import '../assinatura_route_args.dart';
 import '../utils/assinatura_checkout_events.dart';
@@ -141,6 +140,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   String? _checkoutProductId;
   bool _storeAvailable = false;
   Map<String, ProductDetails> _productDetails = const {};
+  Map<String, ProductDetails> _trialOffers = const {};
+  bool? _storeTrialEligible;
   EnterpriseUpgradePreview? _enterprisePreview;
   bool _enterprisePreviewRequested = false;
   bool _initialSelectionApplied = false;
@@ -304,30 +305,81 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
+  /// Na loja, o grátis aparece só se a própria loja confirmar a elegibilidade.
+  bool? get _paywallTrialEligible =>
+      subscriptionUsesNativeStore
+          ? (_storeTrialEligible ?? false)
+          : _trialStatus?.trialEligible;
+
   Future<void> _initializeStore() async {
     if (kIsWeb) {
       if (mounted) setState(() => _storeAvailable = false);
       return;
     }
 
-    final available = await InAppPurchase.instance.isAvailable();
-    if (!mounted) return;
+    try {
+      final available = await InAppPurchase.instance.isAvailable();
+      if (!mounted) return;
 
-    setState(() => _storeAvailable = available);
+      setState(() => _storeAvailable = available);
 
-    if (!available) return;
+      if (!available) return;
 
-    final response = await InAppPurchase.instance.queryProductDetails(
-      SubscriptionProducts.allStoreProductIds,
-    );
+      final response = await InAppPurchase.instance.queryProductDetails(
+        SubscriptionProducts.allStoreProductIds,
+      );
+      if (!mounted) return;
 
-    if (!mounted) return;
+      final trialProductId = SubscriptionProducts.productIdFor(
+        kTrialPlan,
+        SubscriptionBillingPeriod.monthly,
+      );
+      final trialOffers = SubscriptionProducts.freeTrialOffersById(
+        response.productDetails,
+      );
+      final bool? trialEligible =
+          defaultTargetPlatform == TargetPlatform.android
+              ? trialOffers.containsKey(trialProductId)
+              : await ref
+                  .read(iapPurchaseCoordinatorProvider)
+                  .introOfferEligible(trialProductId);
+      if (!mounted) return;
 
-    setState(() {
-      _productDetails = {
-        for (final item in response.productDetails) item.id: item,
-      };
-    });
+      setState(() {
+        _productDetails = SubscriptionProducts.displayById(
+          response.productDetails,
+        );
+        _trialOffers = trialOffers;
+        _storeTrialEligible = trialEligible;
+      });
+    } catch (_) {
+      // Sem catálogo da loja: o checkout consulta o produto de novo.
+    }
+  }
+
+  /// Produto com preço da loja; null se a loja não devolver o item.
+  Future<ProductDetails?> _storeProduct(String productId) async {
+    final cached = _productDetails[productId];
+    if (cached != null) return cached;
+    try {
+      final response = await InAppPurchase.instance.queryProductDetails({
+        productId,
+      });
+      if (!mounted || response.productDetails.isEmpty) return null;
+      final display = SubscriptionProducts.displayById(response.productDetails);
+      final product = display[productId];
+      if (product == null) return null;
+      setState(() {
+        _productDetails = {..._productDetails, productId: product};
+        _trialOffers = {
+          ..._trialOffers,
+          ...SubscriptionProducts.freeTrialOffersById(response.productDetails),
+        };
+      });
+      return product;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Só a compra iniciada nesta tela mexe na UI; renovação e restore passam
@@ -371,9 +423,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
             isAndroid: defaultTargetPlatform == TargetPlatform.android,
           ),
         );
-      case IapPurchasePending() ||
-          IapPurchaseBatchProcessed() ||
-          IapPurchaseStreamFailed():
+      case IapPurchasePending():
+        _checkoutProductId = null;
+        setState(() {
+          _loadingCheckout = false;
+          _syncingPurchase = false;
+        });
+        FeedbackHelper.showInfo(
+          context,
+          'Compra aguardando aprovação. Assim que for aprovada, '
+          'o plano é liberado automaticamente.',
+        );
+      case IapPurchaseBatchProcessed() || IapPurchaseStreamFailed():
         break;
     }
   }
@@ -474,18 +535,23 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       },
     );
 
+    ProductDetails? storeProduct;
     if (!kIsWeb && subscriptionUsesNativeStore) {
-      final biometricOk = await SubscriptionBiometricGate.confirmSubscription(
-        planName: plan.apiName,
-      );
-      if (!mounted || !biometricOk) return;
+      final productId = SubscriptionProducts.productIdFor(plan, _billingPeriod);
+      storeProduct = productId.isEmpty ? null : await _storeProduct(productId);
+      if (!mounted) return;
+      if (storeProduct == null) {
+        _finishPurchaseFlowWithError(
+          'Não conseguimos carregar o preço na loja. Tente de novo em instantes.',
+        );
+        return;
+      }
 
-      final product =
-          _productDetails[SubscriptionProducts.productIdFor(
-            plan,
-            _billingPeriod,
-          )];
-      final priceDisplay = _formatPrice(backendPlan, product, _billingPeriod);
+      final priceDisplay = _formatPrice(
+        backendPlan,
+        storeProduct,
+        _billingPeriod,
+      );
       final billingPlan = subscriptionPlanFromApi(
         ref.read(perfilProvider).value?.plano,
       );
@@ -493,11 +559,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           paywallShowsTrial(
                 selected: plan,
                 current: billingPlan,
-                trialEligible: _trialStatus?.trialEligible,
+                trialEligible: _paywallTrialEligible,
                 period: _billingPeriod,
               )
-              ? '$kTrialDays dias grátis no PRO com cadastro de cartão. '
-                  'A loja confirma o valor após o período.'
+              ? '$kTrialDays dias grátis no ${PaywallCatalog.displayPlanName(plan)}. '
+                  'Depois, renova automaticamente pelo valor acima. '
+                  'Cancele ${subscriptionCancelWhere()} até 24 horas antes do fim do teste para não ser cobrado.'
               : null;
       final confirmed = await context.push<bool>(
         '/assinatura/review',
@@ -546,25 +613,28 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
 
-    ProductDetails? product = _productDetails[productId];
+    final product = storeProduct ?? await _storeProduct(productId);
+    if (!mounted) return;
     if (product == null) {
-      final response = await InAppPurchase.instance.queryProductDetails({
-        productId,
-      });
-      if (!mounted) return;
-      if (response.productDetails.isEmpty) {
-        _finishPurchaseFlowWithError(
-          'Produto ainda não configurado na loja para este plano.',
-        );
-        return;
-      }
-      product = response.productDetails.first;
-      setState(
-        () => _productDetails = {..._productDetails, productId: product!},
+      _finishPurchaseFlowWithError(
+        'Produto ainda não configurado na loja para este plano.',
       );
+      return;
     }
 
-    final productToBuy = product;
+    final trialOffer =
+        defaultTargetPlatform == TargetPlatform.android &&
+                paywallShowsTrial(
+                  selected: plan,
+                  current: subscriptionPlanFromApi(
+                    ref.read(perfilProvider).value?.plano,
+                  ),
+                  trialEligible: _paywallTrialEligible,
+                  period: _billingPeriod,
+                )
+            ? _trialOffers[productId]
+            : null;
+    final productToBuy = trialOffer ?? product;
     setState(() {
       _loadingCheckout = true;
       _checkoutProductId = productToBuy.id;
@@ -573,7 +643,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     try {
       final opened = await ref
           .read(iapPurchaseCoordinatorProvider)
-          .buy(productToBuy);
+          .buy(
+            productToBuy,
+            accountToken: ref.read(perfilProvider).value?.iapAccountToken,
+          );
       if (opened) return;
       if (!mounted) return;
       _finishPurchaseFlowWithError(

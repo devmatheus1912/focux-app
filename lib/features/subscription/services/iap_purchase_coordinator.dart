@@ -90,7 +90,9 @@ class IapPurchaseCoordinator {
         try {
           await _store.restorePurchases();
         } catch (error) {
-          debugPrint('[IAP] restore Android na abertura falhou: ${_failureReason(error)}');
+          debugPrint(
+            '[IAP] restore Android na abertura falhou: ${_failureReason(error)}',
+          );
         }
       }
       return true;
@@ -118,12 +120,35 @@ class IapPurchaseCoordinator {
   }
 
   /// Abre a compra só com o listener ativo; `false` = loja indisponível e a
-  /// compra não é aberta.
-  Future<bool> buy(ProductDetails product) async {
+  /// compra não é aberta. No Android, uma assinatura ativa é trocada pela nova
+  /// (sem cobrar as duas).
+  Future<bool> buy(ProductDetails product, {String? accountToken}) async {
     if (!await start()) return false;
-    await _store.buyNonConsumable(product);
+    PurchaseDetails? replacing;
+    if (_isAndroid) {
+      try {
+        final active = await _store.activeAndroidSubscription(
+          _isSupportedProduct,
+        );
+        if (active != null && active.productID != product.id) {
+          replacing = active;
+        }
+      } catch (error) {
+        debugPrint(
+          '[IAP] consulta da assinatura ativa falhou: ${_failureReason(error)}',
+        );
+      }
+    }
+    await _store.buyNonConsumable(
+      product,
+      accountToken: accountToken,
+      replacing: replacing,
+    );
     return true;
   }
+
+  Future<bool?> introOfferEligible(String productId) =>
+      _store.introOfferEligible(productId);
 
   Future<IapRestoreResult> restore({
     Duration timeout = const Duration(seconds: 8),

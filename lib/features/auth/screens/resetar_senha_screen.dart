@@ -190,6 +190,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                                   return null;
                                 },
                                 suffix: IconButton(
+                                  tooltip: 'Mostrar ou ocultar senha',
                                   onPressed: () {
                                     setState(() {
                                       _showPassword = !_showPassword;

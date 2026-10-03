@@ -270,6 +270,7 @@ class Aluno360HeaderToolbar extends StatelessWidget {
           )
         else if (onDelete != null)
           IconButton(
+            tooltip: 'Excluir aluno',
             onPressed: null,
             icon: Icon(
               Icons.delete_outline_rounded,

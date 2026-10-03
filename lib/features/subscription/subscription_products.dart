@@ -1,3 +1,5 @@
+import 'package:in_app_purchase/in_app_purchase.dart';
+
 import 'models/subscription_plan.dart';
 
 /// IDs oficiais para App Store Connect e Google Play Console.
@@ -60,6 +62,29 @@ class SubscriptionProducts {
     if (id.contains('monthly')) return SubscriptionBillingPeriod.monthly;
     return null;
   }
+
+  /// No Google Play cada oferta chega como um item com o mesmo id; o preço de
+  /// vitrine é o do plano base (primeira fase paga).
+  static Map<String, ProductDetails> displayById(
+    Iterable<ProductDetails> items,
+  ) {
+    final out = <String, ProductDetails>{};
+    for (final item in items) {
+      final current = out[item.id];
+      if (current == null || (current.rawPrice <= 0 && item.rawPrice > 0)) {
+        out[item.id] = item;
+      }
+    }
+    return out;
+  }
+
+  /// Ofertas grátis que o Google Play devolve só para quem tem direito.
+  static Map<String, ProductDetails> freeTrialOffersById(
+    Iterable<ProductDetails> items,
+  ) => {
+    for (final item in items)
+      if (item.rawPrice <= 0) item.id: item,
+  };
 
   static double annualSavingsAmount(double monthlyPrice) => monthlyPrice * 2;
 

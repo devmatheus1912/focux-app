@@ -14,9 +14,6 @@
     <uses-permission android:name="android.permission.health.READ_HEART_RATE"/>
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
     <uses-permission android:name="android.permission.health.READ_SLEEP"/>
-    <uses-permission android:name="android.permission.health.READ_EXERCISE"/>
-    <uses-permission android:name="android.permission.health.READ_WEIGHT"/>
-    <uses-permission android:name="android.permission.health.READ_HEIGHT"/>
 
     <application
         android:label="Focux"
@@ -88,7 +85,7 @@
         </service>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher"/>
+            android:resource="@drawable/ic_stat_focux"/>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/notification_color"/>
@@ -100,11 +97,17 @@
             android:name="androidx.health.connect.client.PermissionController$PermissionActivity"
             android:exported="true"
             android:taskAffinity=""
-            tools:replace="android:taskAffinity">
+            tools:replace="android:taskAffinity" />
+        <!-- Health Connect: rationale e uso de permissões abrem a política de privacidade (MainActivity). -->
+        <activity-alias
+            android:name="ShowPermissionsRationaleActivity"
+            android:exported="true"
+            android:taskAffinity=""
+            android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
             </intent-filter>
-        </activity>
+        </activity-alias>
         <!-- url_launcher: mitiga StrandHogg 2.0 no WebView in-app -->
         <activity
             android:name="io.flutter.plugins.urllauncher.WebViewActivity"
