@@ -300,6 +300,22 @@ void main() {
     expect(store.completed, [compra]);
   });
 
+  test('SKU premium legado: valida no servidor e conclui', () async {
+    await coordinator.start();
+    final compra = _compra(
+      produto: 'focux_premium_yearly',
+      status: PurchaseStatus.restored,
+    );
+
+    store.entregar([compra]);
+    await _drenar();
+
+    expect(verificadas, [compra]);
+    expect(eventos.whereType<IapPurchaseUnsupported>(), isEmpty);
+    expect(eventos.whereType<IapPurchaseVerified>(), hasLength(1));
+    expect(store.completed, [compra]);
+  });
+
   test('pendente e cancelada não chamam o servidor', () async {
     await coordinator.start();
 

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
 
 import '../../support/screen_source_bundle.dart';
@@ -35,6 +36,25 @@ void main() {
     expect(products, contains('focux_enterprise_yearly'));
     expect(products, contains('annualDiscountRate'));
     expect(products, contains('annualSavingsCompactLabel'));
+  });
+
+  test('SKUs premium legados ainda mapeiam para PRO no restore', () {
+    expect(
+      SubscriptionProducts.planForProductId('focux_premium_monthly'),
+      SubscriptionPlan.PRO,
+    );
+    expect(
+      SubscriptionProducts.planForProductId('focux_premium_yearly'),
+      SubscriptionPlan.PRO,
+    );
+    expect(
+      SubscriptionProducts.planForProductId('focux_pro_monthly'),
+      SubscriptionPlan.PRO,
+    );
+    expect(
+      SubscriptionProducts.planForProductId('sku_desconhecido'),
+      isNull,
+    );
   });
 
   test('segmento anual sem hifen duplo no subtexto', () {

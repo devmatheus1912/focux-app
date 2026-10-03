@@ -40,7 +40,9 @@ class SubscriptionProducts {
   static SubscriptionPlan? planForProductId(String productId) {
     final id = productId.toLowerCase();
     if (id.contains('enterprise')) return SubscriptionPlan.ENTERPRISE;
-    if (id.contains('_pro_') ||
+    // SKUs legados ainda em voo (restore / receipts): focux_premium_*.
+    if (id.contains('premium') ||
+        id.contains('_pro_') ||
         id.endsWith('_pro') ||
         id.contains('.pro.')) {
       return SubscriptionPlan.PRO;
