@@ -140,9 +140,11 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
         ),
       );
 
-      if (aceitar &&
-          (resposta.requiresStoreAction || _oferta!.requiresStoreAction) &&
-          subscriptionUsesNativeStore) {
+      // Só a loja cancela ou troca a assinatura: o app leva até a tela dela.
+      final abrirLoja =
+          resposta.requiresStoreAction ||
+          (aceitar && _oferta!.requiresStoreAction);
+      if (abrirLoja && subscriptionUsesNativeStore) {
         await openNativeSubscriptionManagement();
       }
 
@@ -166,7 +168,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
   Future<void> _showResultado(CancelSaveResposta r) async {
     await showFxNoticeSheet(
       context,
-      title: r.aceita ? 'Oferta registrada' : 'Cancelamento registrado',
+      title: cancelSaveResultadoTitulo(r),
       message: r.mensagem,
       icon: r.aceita ? Icons.celebration_rounded : Icons.exit_to_app_rounded,
       actionLabel: 'Continuar',
@@ -273,6 +275,7 @@ class _CancelSaveScreenState extends ConsumerState<CancelSaveScreen> {
                           primary: primary,
                           isDark: isDark,
                           onAceitar: () => _responder(true),
+                          onManter: () => context.go('/assinatura'),
                           onRecusar: () => _responder(false),
                           onFeedback: (txt) => _feedback = txt,
                         )
@@ -374,6 +377,7 @@ class _OfertaCard extends StatelessWidget {
     super.key,
     required this.oferta,
     required this.onAceitar,
+    required this.onManter,
     required this.onRecusar,
     required this.onFeedback,
     required this.enviando,
@@ -385,6 +389,7 @@ class _OfertaCard extends StatelessWidget {
 
   final CancelSaveOferta oferta;
   final VoidCallback onAceitar;
+  final VoidCallback onManter;
   final VoidCallback onRecusar;
   final ValueChanged<String> onFeedback;
   final bool enviando;
@@ -417,7 +422,9 @@ class _OfertaCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.local_offer_outlined,
+                  oferta.temOferta
+                      ? Icons.local_offer_outlined
+                      : Icons.event_available_outlined,
                   color: primary,
                   size: 22,
                 ),
@@ -438,7 +445,7 @@ class _OfertaCard extends StatelessWidget {
                     if (oferta.requiresStoreAction) ...[
                       const SizedBox(height: 6),
                       Text(
-                        'Conclusão ${subscriptionChannelWith(ChannelPreposition.em)}',
+                        'Finalize ${subscriptionChannelWith(ChannelPreposition.em)}',
                         style: TokensStrip.bodyMuted(
                           color: secondary,
                         ).copyWith(fontSize: 12, fontWeight: FontWeight.w600),
@@ -473,17 +480,24 @@ class _OfertaCard extends StatelessWidget {
             onChanged: onFeedback,
           ),
           const SizedBox(height: 16),
-          FxLiquidPrimaryButton(
-            label: oferta.ctaLabel,
-            icon: Icons.check_rounded,
-            loading: enviando,
-            loadingLabel: 'Salvando…',
-            onPressed: enviando ? null : onAceitar,
-          ),
+          if (oferta.temOferta)
+            FxLiquidPrimaryButton(
+              label: oferta.ctaLabel!,
+              icon: Icons.check_rounded,
+              loading: enviando,
+              loadingLabel: 'Salvando…',
+              onPressed: enviando ? null : onAceitar,
+            )
+          else
+            FxLiquidPrimaryButton(
+              label: 'Manter meu plano',
+              icon: Icons.favorite_border_rounded,
+              onPressed: enviando ? null : onManter,
+            ),
           const SizedBox(height: 10),
           FxConversionTextLink(
             text: '',
-            actionText: 'Cancelar mesmo assim',
+            actionText: oferta.cancelLabel,
             onTap: enviando ? null : onRecusar,
             actionColor: primary,
           ),
@@ -491,6 +505,11 @@ class _OfertaCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String cancelSaveResultadoTitulo(CancelSaveResposta r) {
+  if (r.aceita) return 'Oferta registrada';
+  return r.requiresStoreAction ? 'Falta um passo' : 'Cancelamento registrado';
 }
 
 class _Motivo {

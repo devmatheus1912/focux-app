@@ -12,9 +12,12 @@ class CancelSaveOferta {
   final String tipo;
   final String titulo;
   final String descricao;
-  final String ctaLabel;
+
+  /// Nulo quando não há troca a oferecer (tipo `NENHUMA`).
+  final String? ctaLabel;
   final String billingChannel;
   final bool requiresStoreAction;
+  final String cancelLabel;
 
   CancelSaveOferta({
     required this.tipo,
@@ -23,16 +26,25 @@ class CancelSaveOferta {
     required this.ctaLabel,
     required this.billingChannel,
     required this.requiresStoreAction,
+    this.cancelLabel = 'Cancelar mesmo assim',
   });
 
-  factory CancelSaveOferta.fromJson(Map<String, dynamic> j) => CancelSaveOferta(
-    tipo: j['tipo'] as String? ?? '',
-    titulo: j['titulo'] as String? ?? '',
-    descricao: j['descricao'] as String? ?? '',
-    ctaLabel: j['ctaLabel'] as String? ?? 'Aceitar oferta',
-    billingChannel: j['billingChannel'] as String? ?? 'MERCADO_PAGO',
-    requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
-  );
+  bool get temOferta =>
+      tipo != 'NENHUMA' && (ctaLabel?.trim().isNotEmpty ?? false);
+
+  factory CancelSaveOferta.fromJson(Map<String, dynamic> j) {
+    final cancel = (j['cancelLabel'] as String?)?.trim();
+    return CancelSaveOferta(
+      tipo: j['tipo'] as String? ?? '',
+      titulo: j['titulo'] as String? ?? '',
+      descricao: j['descricao'] as String? ?? '',
+      ctaLabel: (j['ctaLabel'] as String?)?.trim(),
+      billingChannel: j['billingChannel'] as String? ?? 'MERCADO_PAGO',
+      requiresStoreAction: j['requiresStoreAction'] as bool? ?? false,
+      cancelLabel:
+          cancel == null || cancel.isEmpty ? 'Cancelar mesmo assim' : cancel,
+    );
+  }
 }
 
 class CancelSaveResposta {

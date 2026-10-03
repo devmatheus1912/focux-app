@@ -13,8 +13,6 @@ Future<void> main() async {
   ));
 
   const assets = <String, String>{
-    'confetti_success.riv':
-        'https://public.rive.app/community/runtime-files/7184-13803-success-confetti-animation.riv',
     'confetti_burst.riv':
         'https://public.rive.app/community/runtime-files/15318-28910-confetti-animation.riv',
     'star_sparkle.riv':

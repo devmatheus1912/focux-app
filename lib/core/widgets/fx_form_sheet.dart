@@ -212,8 +212,8 @@ class _FxNoticeSheet extends StatelessWidget {
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight: maxHeight,
-      expand: true,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FxHomeSheetHandle(isDark: isDark),
@@ -224,7 +224,7 @@ class _FxNoticeSheet extends StatelessWidget {
             leading: Icon(icon, color: primary, size: 18),
           ),
           SizedBox(height: TokensStrip.s3),
-          Expanded(
+          Flexible(
             child: SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: Column(

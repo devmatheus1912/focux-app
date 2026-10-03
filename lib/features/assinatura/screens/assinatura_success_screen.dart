@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/animations/fx_rive_assets.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_rive_player.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../planos/paywall/paywall_catalog.dart';
@@ -43,11 +41,7 @@ class AssinaturaSuccessScreen extends StatelessWidget {
                 Semantics(
                   image: true,
                   label: 'Confirmação da assinatura',
-                  child: const FxRivePlayer(
-                    asset: FxRiveAssets.confettiSuccess,
-                    height: 160,
-                    width: 160,
-                  ),
+                  child: _SuccessBadge(accent: accent),
                 ),
                 const SizedBox(height: TokensStrip.s2),
                 Semantics(
@@ -162,4 +156,37 @@ class AssinaturaSuccessScreen extends StatelessWidget {
     ],
     _ => ['Explore o dashboard e cadastre seus alunos.'],
   };
+}
+
+class _SuccessBadge extends StatelessWidget {
+  const _SuccessBadge({required this.accent});
+
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduced = TokensStrip.prefersReducedMotion(context);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: reduced ? 1 : 0.6, end: 1),
+      duration: reduced ? Duration.zero : const Duration(milliseconds: 520),
+      curve: Curves.easeOutBack,
+      builder:
+          (context, scale, child) => Transform.scale(scale: scale, child: child),
+      child: Container(
+        width: 112,
+        height: 112,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: accent.withValues(alpha: 0.14),
+        ),
+        alignment: Alignment.center,
+        child: Container(
+          width: 76,
+          height: 76,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: accent),
+          child: const Icon(Icons.check_rounded, color: Colors.white, size: 44),
+        ),
+      ),
+    );
+  }
 }
