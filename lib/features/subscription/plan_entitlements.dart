@@ -9,7 +9,7 @@ import '../subscription/utils/plano_ia_limits.dart';
 class PlanEntitlements {
   PlanEntitlements._();
 
-  static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
+  static String displayPlanName(SubscriptionPlan plan) => plan.label;
 
   /// Converte o enum de `detalhes.feature` do backend (`FEEDBACK_VIDEO`,
   /// `IA_COPILOTO`, …) para a capability camelCase que o paywall já conhece.
@@ -176,11 +176,7 @@ class PlanEntitlements {
           capability: rawCapability,
           fallback: requiredPlan ?? SubscriptionPlan.PRO,
         );
-    final planLabel = switch (plan) {
-      SubscriptionPlan.ENTERPRISE => 'Enterprise',
-      SubscriptionPlan.PRO => 'Pro',
-      _ => 'Pro',
-    };
+    final planLabel = plan == SubscriptionPlan.FREE ? 'Pro' : displayPlanName(plan);
 
     final headline = switch (capability) {
       'financeiro' => 'Cobre seus alunos com controle total',
@@ -196,11 +192,9 @@ class PlanEntitlements {
       'automacoes' => 'Automações sequenciais para escalar',
       'automacoesAvancadas' => 'Automações avançadas com ramificações',
       'comunidadeGrupos' => 'Desafios e grupos com ranking',
-      'equipeRbac' => 'Equipe com permissões granulares',
       'lojaDigital' => 'Loja de pacotes de treino com PIX',
       'feedbackVideo' => 'Corrija a execução pelo vídeo do aluno',
       'leads' => 'CRM de leads para converter mais',
-      'nfse' => 'Nota fiscal no fluxo de cobrança',
       _ => 'Desbloqueie $featureName',
     };
 
@@ -235,8 +229,6 @@ class PlanEntitlements {
         'Ramificações e automações avançadas exigem Enterprise.',
       'comunidadeGrupos' =>
         'Desafios com ranking e grupos exigem Enterprise ou superior.',
-      'equipeRbac' =>
-        'Convide assistentes com permissões granulares no Enterprise (até 5 seats).',
       'lojaDigital' =>
         'Venda pacotes de treino e acompanhamento com cobrança PIX no Enterprise.',
       'feedbackVideo' =>
@@ -245,8 +237,6 @@ class PlanEntitlements {
       'leads' =>
         'O CRM de leads faz parte do plano $planLabel: funil, follow-up '
             'e conversão sem sair do app.',
-      'nfse' =>
-        'Emissão de nota fiscal no fluxo de cobrança exige Enterprise.',
       _ =>
         '"$featureName" faz parte do plano $planLabel. Faça upgrade em um passo.',
     };

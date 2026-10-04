@@ -177,7 +177,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: false,
       ),
       'Servidor indisponível, tente novamente',
     );
@@ -194,7 +193,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: false,
       ),
       contains('ainda não está ativo'),
     );
@@ -211,7 +209,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: false,
       ),
       'Nao foi possivel validar o token Apple.',
     );
@@ -226,7 +223,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: true,
       ),
       'Audience Apple invalida',
     );
@@ -240,7 +236,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: false,
       ),
       contains('Apple'),
     );
@@ -254,7 +249,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: true,
       ),
       contains('e-mail'),
     );
@@ -269,12 +263,11 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: true,
       ),
       'Personal não encontrado',
     );
     expect(
-      mapAppleSignInError(dio(401), isAluno: false),
+      mapAppleSignInError(dio(401)),
       isNot(contains('Sem conexão')),
     );
     expect(
@@ -283,7 +276,6 @@ void main() {
           requestOptions: RequestOptions(path: '/api/auth/apple'),
           type: DioExceptionType.connectionError,
         ),
-        isAluno: false,
       ),
       'Sem conexão com o servidor.',
     );
@@ -294,7 +286,6 @@ void main() {
           type: DioExceptionType.unknown,
           error: OSError('Connection reset by peer', 54),
         ),
-        isAluno: false,
       ),
       'Sem conexão com o servidor.',
     );
@@ -304,7 +295,6 @@ void main() {
           requestOptions: RequestOptions(path: '/api/auth/apple'),
           type: DioExceptionType.badCertificate,
         ),
-        isAluno: false,
       ),
       contains('conexão segura'),
     );
@@ -315,7 +305,6 @@ void main() {
           type: DioExceptionType.unknown,
           error: const TlsException('Certificate pin mismatch'),
         ),
-        isAluno: false,
       ),
       contains('conexão segura'),
     );
@@ -353,16 +342,6 @@ void main() {
     );
   });
 
-  test('mapAppleSignInError exige personalSlug para aluno', () {
-    expect(
-      mapAppleSignInError(
-        StateError('PERSONAL_SLUG_REQUIRED'),
-        isAluno: true,
-      ),
-      contains('?p=slug'),
-    );
-  });
-
   test('mapAppleSignInError expõe PlatformException nativa em vez de genérico', () {
     expect(
       mapAppleSignInError(
@@ -370,14 +349,12 @@ void main() {
           code: 'apple_sign_in_failed',
           message: 'The operation couldn’t be completed.',
         ),
-        isAluno: false,
       ),
       contains('apple_sign_in_failed'),
     );
     expect(
       mapAppleSignInError(
         PlatformException(code: 'apple_sign_in_failed'),
-        isAluno: false,
       ),
       contains('Bundle ID'),
     );
@@ -392,7 +369,6 @@ void main() {
           ),
           type: DioExceptionType.badResponse,
         ),
-        isAluno: false,
       ),
       'Nao foi possivel validar o token Apple.',
     );

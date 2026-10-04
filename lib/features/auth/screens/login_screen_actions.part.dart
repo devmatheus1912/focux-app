@@ -152,34 +152,16 @@ extension on _LoginScreenState {
     try {
       final google = await GoogleSignInService().signInForIdToken();
       if (google == null) return;
-      final idToken = google.idToken;
-      if (_isAluno &&
-          (_effectivePersonalSlug == null ||
-              _effectivePersonalSlug!.isEmpty)) {
-        throw StateError('PERSONAL_SLUG_REQUIRED');
-      }
       final result = await ref
           .read(authProvider.notifier)
-          .loginGoogle(
-            idToken: idToken,
-            isAluno: _isAluno,
-            personalSlug: _isAluno ? _effectivePersonalSlug : null,
-          );
+          .loginGoogle(idToken: google.idToken, isAluno: false);
       if (!mounted) return;
-      if (!_isAluno && await _maybeOpenMfa(result, method: 'google')) {
-        return;
-      }
+      if (await _maybeOpenMfa(result, method: 'google')) return;
       if (!mounted) return;
       _trackLogin(success: true, method: 'google');
-      if (_isAluno) {
-        await _prefetchAlunoAfterLogin();
-        if (!mounted) return;
-        context.go(_postLoginRedirect(context, isAluno: true));
-      } else {
-        await _prefetchPersonalAfterLogin();
-        if (!mounted) return;
-        context.go(await _personalPostLoginDestination());
-      }
+      await _prefetchPersonalAfterLogin();
+      if (!mounted) return;
+      context.go(await _personalPostLoginDestination());
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
@@ -188,7 +170,7 @@ extension on _LoginScreenState {
         method: 'google',
         codigo: ApiError.from(error)?.codigo,
       );
-      setState(() => _error = mapGoogleSignInError(error, isAluno: _isAluno));
+      setState(() => _error = mapGoogleSignInError(error));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);
     }
@@ -205,49 +187,31 @@ extension on _LoginScreenState {
       logAuthApiUrl('login/apple');
       final credential = await const AppleSignInService().signIn();
       if (credential == null) return;
-      if (_isAluno &&
-          (_effectivePersonalSlug == null ||
-              _effectivePersonalSlug!.isEmpty)) {
-        throw StateError('PERSONAL_SLUG_REQUIRED');
-      }
       logAuthHttpCall(
         'login/apple',
         path: '/api/auth/apple',
         method: 'POST',
-        isAluno: _isAluno,
-        hasPersonalSlug:
-            _isAluno &&
-            _effectivePersonalSlug != null &&
-            _effectivePersonalSlug!.isNotEmpty,
+        isAluno: false,
         identityTokenLen: credential.identityToken.length,
       );
       final result = await ref
           .read(authProvider.notifier)
           .loginApple(
             identityToken: credential.identityToken,
-            isAluno: _isAluno,
+            isAluno: false,
             fullName: credential.fullName,
             email: credential.email,
-            personalSlug: _isAluno ? _effectivePersonalSlug : null,
             authorizationCode: credential.authorizationCode,
             rawNonce: credential.rawNonce,
           );
       if (!mounted) return;
       logAuthHttpOk('login/apple', path: '/api/auth/apple');
-      if (!_isAluno && await _maybeOpenMfa(result, method: 'apple')) {
-        return;
-      }
+      if (await _maybeOpenMfa(result, method: 'apple')) return;
       if (!mounted) return;
       _trackLogin(success: true, method: 'apple');
-      if (_isAluno) {
-        await _prefetchAlunoAfterLogin();
-        if (!mounted) return;
-        context.go(_postLoginRedirect(context, isAluno: true));
-      } else {
-        await _prefetchPersonalAfterLogin();
-        if (!mounted) return;
-        context.go(await _personalPostLoginDestination());
-      }
+      await _prefetchPersonalAfterLogin();
+      if (!mounted) return;
+      context.go(await _personalPostLoginDestination());
     } catch (error) {
       HapticFeedback.heavyImpact();
       if (!mounted) return;
@@ -257,7 +221,7 @@ extension on _LoginScreenState {
         method: 'apple',
         codigo: ApiError.from(error)?.codigo,
       );
-      setState(() => _error = mapAppleSignInError(error, isAluno: _isAluno));
+      setState(() => _error = mapAppleSignInError(error));
     } finally {
       if (mounted) setState(() => _loadingApple = false);
     }

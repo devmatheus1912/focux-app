@@ -19,7 +19,7 @@
           "codeOffers" : [],
           "displayPrice" : "99.90",
           "familyShareable" : false,
-          "groupNumber" : 1,
+          "groupNumber" : 2,
           "internalID" : "pro_monthly",
           "introductoryOffer" : {
             "displayPrice" : "0.00",
@@ -47,7 +47,7 @@
           "codeOffers" : [],
           "displayPrice" : "999.00",
           "familyShareable" : false,
-          "groupNumber" : 1,
+          "groupNumber" : 2,
           "internalID" : "pro_yearly",
           "introductoryOffer" : null,
           "localizations" : [
@@ -68,7 +68,7 @@
           "codeOffers" : [],
           "displayPrice" : "199.90",
           "familyShareable" : false,
-          "groupNumber" : 2,
+          "groupNumber" : 1,
           "internalID" : "enterprise_monthly",
           "introductoryOffer" : null,
           "localizations" : [
@@ -89,7 +89,7 @@
           "codeOffers" : [],
           "displayPrice" : "1999.00",
           "familyShareable" : false,
-          "groupNumber" : 2,
+          "groupNumber" : 1,
           "internalID" : "enterprise_yearly",
           "introductoryOffer" : null,
           "localizations" : [

@@ -64,9 +64,10 @@ void main() {
     expect(screen, isNot(contains('debugPrint')));
     expect(screen, isNot(contains('idToken.length')));
 
-    // Google aluno exige tenant (?p=slug).
-    expect(screen, contains("_personalSlug"));
-    expect(screen, contains('PERSONAL_SLUG_REQUIRED'));
+    // Aluno entra só com e-mail + senha na conta criada pelo personal.
+    expect(screen, contains('_appleEnabled && !_isAluno'));
+    expect(screen, contains('_googleEnabled && !_isAluno'));
+    expect(screen, isNot(contains('PERSONAL_SLUG_REQUIRED')));
 
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));

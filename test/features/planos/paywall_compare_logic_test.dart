@@ -31,7 +31,7 @@ void main() {
     expect(pix.selected, '✓');
 
     final extra = view.rows.firstWhere(
-      (r) => r.feature.toLowerCase().contains('white-label'),
+      (r) => r.feature.toLowerCase().contains('marca própria'),
     );
     expect(extra.selected, '—');
   });

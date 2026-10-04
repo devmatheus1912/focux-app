@@ -382,20 +382,18 @@ String mapSignupCodeError(Object error) {
 ///
 /// Nunca inclui token, e-mail ou payload bruto do erro na mensagem exibida
 /// ao usuário — apenas o texto de erro do backend, quando presente.
-String mapGoogleSignInError(Object error, {required bool isAluno}) {
+String mapGoogleSignInError(Object error) {
   final offline = _offlineIfTransport(error);
   if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 401) {
       return _backendMessage(error) ??
-          (isAluno
-              ? 'Este Google não está vinculado a um aluno.'
-              : 'Não foi possível validar sua conta Google.');
+          'Não foi possível validar sua conta Google.';
     }
     if (statusCode == 403) {
       return _backendMessage(error) ??
-          'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+          'Conta sem permissão para entrar como personal.';
     }
     if (statusCode == 404) {
       return _backendMessage(error) ?? 'Recurso não encontrado.';
@@ -445,9 +443,6 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
     }
   }
   if (error is StateError) {
-    if (error.message == 'PERSONAL_SLUG_REQUIRED') {
-      return 'Abra o link do seu personal (?p=slug) para entrar com Google como aluno.';
-    }
     return 'Google não retornou o token de acesso. Verifique a configuração do app.';
   }
   return 'Não foi possível entrar com Google agora.';
@@ -458,26 +453,21 @@ String mapGoogleSignInError(Object error, {required bool isAluno}) {
 /// Em 401 prioriza `erro` do JSON (audience inválida, token inválido, etc.).
 /// Nunca engole PlatformException nativa com copy genérica — a causa real
 /// (failed / invalidResponse / unknown) precisa aparecer na UI.
-String mapAppleSignInError(Object error, {required bool isAluno}) {
+String mapAppleSignInError(Object error) {
   final offline = _offlineIfTransport(error);
   if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
     if (statusCode == 401) {
       return _backendMessage(error) ??
-          (isAluno
-              ? 'Este Apple ID não está vinculado a um aluno.'
-              : 'Não foi possível validar sua conta Apple.');
+          'Não foi possível validar sua conta Apple.';
     }
     if (statusCode == 403) {
       return _backendMessage(error) ??
-          'Conta sem permissão para entrar como ${isAluno ? "aluno" : "personal"}.';
+          'Conta sem permissão para entrar como personal.';
     }
     if (statusCode == 404) {
-      return _backendMessage(error) ??
-          (isAluno
-              ? 'Personal não encontrado. Confira o link (?p=slug).'
-              : 'Recurso não encontrado.');
+      return _backendMessage(error) ?? 'Recurso não encontrado.';
     }
     if (statusCode == 503) {
       return 'Entrar com Apple ainda não está ativo neste ambiente. Use e-mail e senha por enquanto.';
@@ -537,9 +527,6 @@ String mapAppleSignInError(Object error, {required bool isAluno}) {
     return 'Apple Sign-In falhou ($code). Tente de novo ou use e-mail e senha.';
   }
   if (error is StateError) {
-    if (error.message == 'PERSONAL_SLUG_REQUIRED') {
-      return 'Abra o link do seu personal (?p=slug) para entrar com Apple como aluno.';
-    }
     return 'Apple: ${error.message}';
   }
   return 'Não foi possível entrar com Apple agora '

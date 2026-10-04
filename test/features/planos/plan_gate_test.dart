@@ -106,7 +106,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(aberto, 0);
-    expect(find.text('Desbloqueie no ENTERPRISE'), findsOneWidget);
+    expect(find.text('Desbloqueie no Enterprise'), findsOneWidget);
   });
 
   testWidgets('liberado: sem cadeado, segue direto', (tester) async {

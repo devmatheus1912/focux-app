@@ -214,7 +214,7 @@ extension on _RegisterScreenState {
           props: {'role': 'personal', 'method': 'google'},
         ),
       );
-      setState(() => _error = mapGoogleSignInError(error, isAluno: false));
+      setState(() => _error = mapGoogleSignInError(error));
     } finally {
       if (mounted) setState(() => _loadingGoogle = false);
     }
@@ -282,7 +282,7 @@ extension on _RegisterScreenState {
           props: {'role': 'personal', 'method': 'apple'},
         ),
       );
-      setState(() => _error = mapAppleSignInError(error, isAluno: false));
+      setState(() => _error = mapAppleSignInError(error));
     } finally {
       if (mounted) setState(() => _loadingApple = false);
     }

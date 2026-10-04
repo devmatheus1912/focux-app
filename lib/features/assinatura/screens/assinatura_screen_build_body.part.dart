@@ -122,16 +122,7 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                       usage: usage,
                       blockedFeatureLabel: widget.blockedFeature,
                       blockedCapability: widget.blockedCapability,
-                      ink: ink,
                       mute: mute,
-                      onCta: () {
-                        final target = PlanEntitlements.resolveUpgradeTarget(
-                          usage: usage,
-                          blockedFeatureLabel: widget.blockedFeature,
-                          blockedCapability: widget.blockedCapability,
-                        );
-                        _selectPlan(target);
-                      },
                     ),
                   Expanded(
                     child: PaywallCompareStage(

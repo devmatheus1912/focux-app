@@ -133,7 +133,7 @@ void main() {
       find.text('Você chegou ao limite de alunos do plano'),
       findsOneWidget,
     );
-    expect(find.text('Desbloqueie no PRO'), findsOneWidget);
+    expect(find.text('Desbloqueie no Pro'), findsOneWidget);
   });
 
   testWidgets('showApiFailure troca o toast pela sheet', (tester) async {

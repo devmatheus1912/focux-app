@@ -12,11 +12,11 @@ void main() {
     expect(PaywallCatalog.upgradeTriggers.length, 8);
   });
 
-  test('displayPlanName usa o nome canônico', () {
-    expect(PaywallCatalog.displayPlanName(SubscriptionPlan.PRO), 'PRO');
+  test('displayPlanName usa o nome de vitrine', () {
+    expect(PaywallCatalog.displayPlanName(SubscriptionPlan.PRO), 'Pro');
     expect(
       PaywallCatalog.displayPlanName(SubscriptionPlan.ENTERPRISE),
-      'ENTERPRISE',
+      'Enterprise',
     );
   });
 

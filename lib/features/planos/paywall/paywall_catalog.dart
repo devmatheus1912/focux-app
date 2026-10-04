@@ -49,7 +49,7 @@ class PaywallCatalog {
     };
   }
 
-  static String displayPlanName(SubscriptionPlan plan) => plan.apiName;
+  static String displayPlanName(SubscriptionPlan plan) => plan.label;
 
   static String subtitleForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.FREE => 'Para começar',
@@ -84,7 +84,7 @@ class PaywallCatalog {
     PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'Landing / white-label / loja',
+      feature: 'Marca própria / landing / loja',
       free: '—',
       paid: '—',
     ),

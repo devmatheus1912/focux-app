@@ -174,6 +174,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
+    // Aluno só entra em conta criada pelo personal (e-mail + senha).
+    final showApple = _appleEnabled && !_isAluno;
+    final showGoogle = _googleEnabled && !_isAluno;
+    final showGoogleNote = _googleStatusNote != null && !_isAluno;
     return fxScreenA11yScope(
       label: 'Entrar no Focux',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -360,16 +364,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                               ? null
                                               : _submit,
                                     ),
-                                    if (_appleEnabled ||
-                                        _googleEnabled ||
-                                        _googleStatusNote != null) ...[
+                                    if (showApple ||
+                                        showGoogle ||
+                                        showGoogleNote) ...[
                                       const SizedBox(height: 12),
                                       const FxConversionDivider(
                                         label: 'ou continue com',
                                       ),
                                       const SizedBox(height: 12),
                                     ],
-                                    if (_appleEnabled) ...[
+                                    if (showApple) ...[
                                       AppleSignInButton(
                                         onPressed:
                                             _loadingApple || _loading || _loadingGoogle
@@ -377,9 +381,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                 : _submitApple,
                                         isLoading: _loadingApple,
                                       ),
-                                      if (_googleEnabled) const SizedBox(height: 10),
+                                      if (showGoogle) const SizedBox(height: 10),
                                     ],
-                                    if (_googleEnabled) ...[
+                                    if (showGoogle) ...[
                                       GoogleSignInButton(
                                         onPressed:
                                             _loadingGoogle
@@ -389,12 +393,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         dark: true,
                                       ),
                                     ],
-                                    if (_appleEnabled || _googleEnabled) ...[
+                                    if (showApple || showGoogle) ...[
                                       const SizedBox(height: 12),
                                       AuthLegalConsentText(primary: primary),
                                     ],
-                                    if (_googleStatusNote != null) ...[
-                                      if (_googleEnabled)
+                                    if (showGoogleNote) ...[
+                                      if (showGoogle)
                                         const SizedBox(height: 12),
                                       AuthOperationalNotice(
                                         icon: Icons.g_mobiledata_rounded,

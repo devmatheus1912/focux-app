@@ -162,7 +162,9 @@ class DashboardData {
   final int totalAlunos;
   final int alunosAtivos;
   final String planoAtual;
-  final int limiteAlunos;
+
+  /// `null` = ilimitado (Enterprise).
+  final int? limiteAlunos;
   final String? nomePersonal;
   final String? logoUrl;
   final String? corPrimaria;
@@ -187,7 +189,7 @@ class DashboardData {
     totalAlunos: json['totalAlunos'] as int,
     alunosAtivos: json['alunosAtivos'] as int,
     planoAtual: json['planoAtual'] as String,
-    limiteAlunos: json['limiteAlunos'] as int,
+    limiteAlunos: (json['limiteAlunos'] as num?)?.toInt(),
     nomePersonal: json['nomePersonal'] as String?,
     logoUrl: json['logoUrl'] as String?,
     corPrimaria: json['corPrimaria'] as String?,

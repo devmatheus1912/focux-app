@@ -52,7 +52,7 @@ void main() {
         blockedFeatureLabel: 'PIX',
         target: SubscriptionPlan.PRO,
       ),
-      'Você tentou usar PIX. Disponível no plano PRO.',
+      'PIX está no plano Pro.',
     );
   });
 }

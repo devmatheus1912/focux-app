@@ -30,6 +30,12 @@ extension SubscriptionPlanExt on SubscriptionPlan {
 
   String get apiName => name.toUpperCase();
 
+  String get label => switch (this) {
+    SubscriptionPlan.FREE => 'Free',
+    SubscriptionPlan.PRO => 'Pro',
+    SubscriptionPlan.ENTERPRISE => 'Enterprise',
+  };
+
   bool canAccess(SubscriptionPlan requiredPlan) {
     return level >= requiredPlan.level;
   }

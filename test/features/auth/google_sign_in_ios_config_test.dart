@@ -18,7 +18,6 @@ void main() {
           code: 'google_sign_in_config',
           message: 'Missing client id / URL scheme',
         ),
-        isAluno: false,
       ),
       contains('não está configurado'),
     );

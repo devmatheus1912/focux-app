@@ -16,7 +16,6 @@ import '../../monetizacao/screens/ofertas_upsell_screen.dart';
 import '../../nps/screens/nps_dashboard_screen.dart';
 import '../../onboarding/screens/onboarding_wizard_screen.dart';
 import '../../pacotes/screens/pacotes_screen.dart';
-import '../../perfil/screens/equipe_screen.dart';
 import '../../perfil/screens/landing_editor_screen.dart';
 import '../../perfil/screens/white_label_settings_screen.dart';
 import '../../recorrencia/screens/recorrencia_screen.dart';
@@ -69,8 +68,6 @@ Widget? buildFerramentasTabScreen(String? rotaApp) {
       return const WhiteLabelSettingsScreen();
     case '/automacoes':
       return const AutomacoesScreen();
-    case '/perfil/equipe':
-      return const EquipeScreen();
     case '/grupo-aulas':
       return const GrupoAulasPersonalScreen();
     case '/onboarding/wizard':

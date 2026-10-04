@@ -8,8 +8,8 @@ String? paywallContextMessage({
   required SubscriptionPlan target,
 }) {
   if (blockedFeatureLabel != null && blockedFeatureLabel.isNotEmpty) {
-    return 'Você tentou usar $blockedFeatureLabel. '
-        'Disponível no plano ${PlanEntitlements.displayPlanName(target)}.';
+    return '$blockedFeatureLabel está no plano '
+        '${PlanEntitlements.displayPlanName(target)}.';
   }
   if (usage.alunosAtLimit && usage.limiteAlunos != null) {
     final proximo = target == SubscriptionPlan.ENTERPRISE
@@ -38,22 +38,20 @@ String? paywallContextMessage({
   return null;
 }
 
+/// Uma linha dizendo por que a pessoa caiu em Planos. O plano alvo já vem
+/// selecionado, então não tem CTA.
 class PaywallContextBanner extends StatelessWidget {
   final PlanoUsageSnapshot usage;
   final String? blockedFeatureLabel;
   final String? blockedCapability;
-  final Color ink;
   final Color mute;
-  final VoidCallback? onCta;
 
   const PaywallContextBanner({
     super.key,
     required this.usage,
     this.blockedFeatureLabel,
     this.blockedCapability,
-    required this.ink,
     required this.mute,
-    this.onCta,
   });
 
   @override
@@ -72,37 +70,18 @@ class PaywallContextBanner extends StatelessWidget {
 
     final accent = PaywallCatalog.accentForPlan(target);
 
-    return PaywallGlassCard(
-      accent: accent,
-      glow: false,
-      blur: false,
-      elevationLevel: 6,
-      padding: const EdgeInsets.all(14),
-      margin: const EdgeInsets.only(bottom: 20),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.bolt_rounded, color: accent, size: 22),
-          const SizedBox(width: TokensStrip.s3),
+          Icon(Icons.lock_open_rounded, color: accent, size: 16),
+          const SizedBox(width: TokensStrip.s2),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(msg, style: TokensStrip.body(color: ink).copyWith(height: 1.4)),
-                if (onCta != null)
-                  TextButton(
-                    onPressed: onCta,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 40),
-                      padding: const EdgeInsets.only(top: TokensStrip.s1),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(
-                      'Ver ${PlanEntitlements.displayPlanName(target)}',
-                      style: FocuxHubTypography.chip(accent),
-                    ),
-                  ),
-              ],
+            child: Text(
+              msg,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TokensStrip.body(color: mute),
             ),
           ),
         ],
