@@ -424,6 +424,40 @@ void main() {
       expect(result.hasFailures, isTrue);
     });
 
+    test('transação substituída por upgrade: conclui sem contar falha', () async {
+      final req = RequestOptions(path: '/api/iap/verify');
+      verify = (p) async {
+        if (p.purchaseID == 'antiga') {
+          throw DioException(
+            requestOptions: req,
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: req,
+              statusCode: 400,
+              data: {'codigo': 'IAP_TRANSACAO_SUBSTITUIDA'},
+            ),
+          );
+        }
+        return {'status': 'PROCESSADO'};
+      };
+      store.onRestore =
+          () => store.entregar([
+            _compra(id: 'antiga', status: PurchaseStatus.restored),
+            _compra(id: 'vigente', status: PurchaseStatus.restored),
+          ]);
+
+      final result = await coordinator.restore(
+        timeout: const Duration(milliseconds: 200),
+        quietPeriod: const Duration(milliseconds: 10),
+      );
+
+      expect(result.verifiedCount, 1);
+      expect(result.hasFailures, isFalse);
+      expect(store.completed, hasLength(2));
+      expect(eventos.whereType<IapPurchaseSuperseded>(), hasLength(1));
+      expect(eventos.whereType<IapPurchaseVerifyFailed>(), isEmpty);
+    });
+
     test('nada a restaurar termina no timeout', () async {
       final result = await coordinator.restore(
         timeout: const Duration(milliseconds: 20),

@@ -52,6 +52,13 @@ final class IapPurchaseVerifyFailed extends IapPurchaseEvent {
   final Object error;
 }
 
+/// Transação antiga trocada por upgrade: concluída na loja sem mexer no plano.
+final class IapPurchaseSuperseded extends IapPurchaseEvent {
+  const IapPurchaseSuperseded(this.purchase);
+  @override
+  final PurchaseDetails purchase;
+}
+
 /// Lote do stream da loja terminou de ser processado.
 final class IapPurchaseBatchProcessed extends IapPurchaseEvent {
   const IapPurchaseBatchProcessed();

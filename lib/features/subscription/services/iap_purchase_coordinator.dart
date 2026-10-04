@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import '../../../core/api/api_error.dart';
 import '../subscription_products.dart';
 import '../utils/iap_completion_policy.dart';
 import 'iap_purchase_event.dart';
@@ -183,7 +184,8 @@ class IapPurchaseCoordinator {
           finishAfter(Duration.zero);
         case IapPurchasePending() ||
             IapPurchaseCanceled() ||
-            IapPurchaseUnsupported():
+            IapPurchaseUnsupported() ||
+            IapPurchaseSuperseded():
           break;
       }
     });
@@ -249,6 +251,10 @@ class IapPurchaseCoordinator {
       if (session == _session) _emit(IapPurchaseVerified(purchase, response));
       return true;
     } catch (error) {
+      if (ApiError.from(error)?.codigo == ApiErrorCodes.iapSuperseded) {
+        if (session == _session) _emit(IapPurchaseSuperseded(purchase));
+        return true;
+      }
       final complete = iapShouldCompleteAfterVerifyFailure(
         error: error,
         isAndroid: _isAndroid,

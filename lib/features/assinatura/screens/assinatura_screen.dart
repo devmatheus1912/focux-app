@@ -393,7 +393,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
     switch (event) {
-      case IapPurchaseCanceled():
+      case IapPurchaseCanceled() || IapPurchaseSuperseded():
         setState(() {
           _loadingCheckout = false;
           _syncingPurchase = false;
