@@ -14,6 +14,15 @@ abstract final class Aluno360ClientCache {
       <int, ({Aluno360Ferramentas bundle, DateTime at})>{};
   static final _operacaoRefreshing = <int>{};
 
+  /// Mapa ordenado por inserção: re-put move p/ o fim, estouro tira o mais velho.
+  static const maxEntries = 40;
+
+  static void _put<T>(Map<int, T> map, int alunoId, T value) {
+    map.remove(alunoId);
+    map[alunoId] = value;
+    if (map.length > maxEntries) map.remove(map.keys.first);
+  }
+
   static Aluno360Operacao? getOperacaoIfFresh(int alunoId, {DateTime? now}) {
     final hit = _operacao[alunoId];
     if (hit == null) return null;
@@ -45,7 +54,7 @@ abstract final class Aluno360ClientCache {
       _operacaoRefreshing.remove(alunoId);
 
   static void putOperacao(int alunoId, Aluno360Operacao bundle, {DateTime? now}) {
-    _operacao[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
+    _put(_operacao, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
   static Aluno360Evolucao? getEvolucaoIfFresh(int alunoId, {DateTime? now}) {
@@ -59,7 +68,7 @@ abstract final class Aluno360ClientCache {
   }
 
   static void putEvolucao(int alunoId, Aluno360Evolucao bundle, {DateTime? now}) {
-    _evolucao[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
+    _put(_evolucao, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
   static Aluno360Ferramentas? getFerramentasIfFresh(
@@ -80,7 +89,7 @@ abstract final class Aluno360ClientCache {
     Aluno360Ferramentas bundle, {
     DateTime? now,
   }) {
-    _ferramentas[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
+    _put(_ferramentas, alunoId, (bundle: bundle, at: now ?? DateTime.now()));
   }
 
   static void invalidate(int alunoId) {

@@ -344,14 +344,18 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     }
 
     try {
-      // Use direct dio.get with no-invalidation flags to avoid clearing
-      // the aluno session when /api/personal/perfil returns 401 (expected)
-      final dio = ref.read(apiClientProvider).dio;
-      final r = await dio.get(
-        '/api/personal/perfil',
-        options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
-      );
-      final perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
+      // PERSONAL: mesmo fetch do splash/resume (perfilProvider), 1 GET só.
+      // Papel desconhecido: dio direto sem invalidar (401 esperado p/ aluno).
+      final PerfilPersonal perfil;
+      if (role == 'PERSONAL') {
+        perfil = await ref.read(perfilProvider.future);
+      } else {
+        final r = await ref.read(apiClientProvider).dio.get(
+          '/api/personal/perfil',
+          options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
+        );
+        perfil = PerfilPersonal.fromJson(r.data as Map<String, dynamic>);
+      }
       if (!mounted) return;
       final primary = _safePrimaryColor(perfil.corPrimaria);
       ref.read(primaryColorProvider.notifier).value = primary;

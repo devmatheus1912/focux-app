@@ -25,7 +25,7 @@ class ApiClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: _baseUrl,
-        connectTimeout: const Duration(seconds: 30),
+        connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
         // 304 Not Modified = sucesso (ETag / If-None-Match).
@@ -104,14 +104,14 @@ class ApiClient {
           handler.next(response);
         },
         onError: (DioException e, handler) async {
-          if (_isTransportFailure(e)) {
+          if (_isTransportFailure(e) || _isGatewayFailure(e)) {
             ApiTransportCircuit.recordTransportFailure();
           }
 
           if (_shouldRetry(e)) {
             final attempt =
                 (e.requestOptions.extra['fxRetryAttempt'] as int?) ?? 0;
-            if (attempt < 2) {
+            if (attempt < 1) {
               e.requestOptions.extra['fxRetryAttempt'] = attempt + 1;
               final jitter = _idempotencyRandom.nextInt(200);
               await Future.delayed(
@@ -402,20 +402,35 @@ class ApiClient {
     return null;
   }
 
+  @visibleForTesting
+  static bool shouldRetryForTest(DioException e) => _shouldRetry(e);
+
+  /// Backend fora/sobrecarregado: circuito aberto não multiplica tráfego.
+  /// Mutação só repete se nem chegou no servidor; 5xx/timeout só em GET.
   static bool _shouldRetry(DioException e) {
     if (e.requestOptions.extra['fxNoRetry'] == true) return false;
     if (_isAuthPath(e.requestOptions.path)) return false;
     if (e.requestOptions.path == '/api/suporte/analisar-erro') return false;
+    if (ApiTransportCircuit.isOpen) return false;
+    final isGet = e.requestOptions.method.toUpperCase() == 'GET';
     if (e.response != null) {
       final status = e.response?.statusCode ?? 0;
       // Never auto-retry 429 — amplifies rate-limit storms on the BE.
-      return status == 408 || status >= 500;
+      return isGet && (status == 408 || status >= 500);
     }
-    return e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.receiveTimeout ||
-        e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.unknown;
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout) {
+      return true;
+    }
+    return isGet &&
+        (e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.sendTimeout ||
+            e.type == DioExceptionType.unknown);
+  }
+
+  static bool _isGatewayFailure(DioException e) {
+    final status = e.response?.statusCode;
+    return status == 502 || status == 503 || status == 504;
   }
 
   static const int _errorReportMaxPerWindow = 5;

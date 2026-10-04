@@ -149,7 +149,7 @@ class FxDock extends StatelessWidget {
     );
     if (reduceMotion) return body;
     return BackdropFilter(
-      filter: TokensStrip.blurFilter(TokensStrip.blurHeavy),
+      filter: TokensStrip.blurFilter(TokensStrip.blurLight),
       child: body,
     );
   }

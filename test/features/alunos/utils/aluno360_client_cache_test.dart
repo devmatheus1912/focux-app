@@ -70,6 +70,17 @@ void main() {
     expect(Aluno360ClientCache.getEvolucaoIfFresh(1), isNull);
   });
 
+  test('estouro de maxEntries descarta o aluno mais antigo', () {
+    for (var id = 1; id <= Aluno360ClientCache.maxEntries; id++) {
+      Aluno360ClientCache.putOperacao(id, _operacao);
+    }
+    Aluno360ClientCache.putOperacao(1, _operacao);
+    Aluno360ClientCache.putOperacao(999, _operacao);
+    expect(Aluno360ClientCache.getOperacaoIfFresh(1), same(_operacao));
+    expect(Aluno360ClientCache.getOperacaoIfFresh(2), isNull);
+    expect(Aluno360ClientCache.getOperacaoIfFresh(999), same(_operacao));
+  });
+
   test('operacao stale window serves after TTL until staleTtl', () {
     final now = DateTime(2026, 1, 1, 12);
     Aluno360ClientCache.putOperacao(1, _operacao, now: now);

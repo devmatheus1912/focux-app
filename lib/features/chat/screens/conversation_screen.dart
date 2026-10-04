@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show File;
+import 'dart:math' show Random;
 import '../../../core/utils/friendly_error.dart';
 
 import 'package:flutter/foundation.dart';
@@ -327,6 +328,8 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _stomp = StompClient(
       config: StompConfig(
         url: url,
+        // Reconnect é só nosso (_scheduleWsReconnect); o da lib corria junto.
+        reconnectDelay: Duration.zero,
         onConnect: (frame) => _onConnect(frame, alunoId),
         beforeConnect: () async {},
         onStompError: (_) => _scheduleWsReconnect(),
@@ -350,7 +353,9 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
       return;
     }
     final exp = _wsReconnectAttempt.clamp(0, 6);
-    final delayMs = (600 * (1 << exp)).clamp(600, 30000);
+    final baseMs = (600 * (1 << exp)).clamp(600, 30000);
+    // Jitter: restart do backend não derruba todos reconectando no mesmo ms.
+    final delayMs = baseMs + Random().nextInt(baseMs ~/ 2 + 1);
     _wsReconnectAttempt++;
     _wsReconnectTimer = Timer(Duration(milliseconds: delayMs), () async {
       if (_wsLifecycleEnded || !mounted || _wsAlunoId == null) {

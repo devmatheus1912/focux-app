@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/state/fx_value_notifier.dart';
@@ -23,9 +25,18 @@ import '../../../core/utils/pt_br_display.dart';
 
 export 'aluno_timeline360_paged_provider.dart';
 
+/// Prefetch via `ref.read` sobrevive [d]; depois o aluno sai da memória
+/// quando ninguém mais escuta (antes: 1 entrada por aluno aberto, pra sempre).
+void _keepFor(Ref ref, [Duration d = const Duration(minutes: 5)]) {
+  final link = ref.keepAlive();
+  final timer = Timer(d, link.close);
+  ref.onDispose(timer.cancel);
+}
+
 /// Critical path — GET `/api/alunos/{id}/360/operacao` only.
 final aluno360OperacaoBundleProvider =
-    FutureProvider.family<Aluno360Operacao, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<Aluno360Operacao, int>((ref, alunoId) async {
+  _keepFor(ref);
   final cached = Aluno360ClientCache.getOperacaoIfFresh(alunoId);
   if (cached != null) {
     if (kDebugMode) {
@@ -87,7 +98,8 @@ final aluno360OperacaoBundleProvider =
 
 /// Prefetch / lazy — GET `/api/alunos/{id}/360/evolucao`.
 final aluno360EvolucaoBundleProvider =
-    FutureProvider.family<Aluno360Evolucao, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<Aluno360Evolucao, int>((ref, alunoId) async {
+  _keepFor(ref);
   final cached = Aluno360ClientCache.getEvolucaoIfFresh(alunoId);
   if (cached != null) return cached;
   final sw = Stopwatch()..start();
@@ -107,7 +119,8 @@ final aluno360EvolucaoBundleProvider =
 
 /// Prefetch / lazy — GET `/api/alunos/{id}/360/ferramentas`.
 final aluno360FerramentasBundleProvider =
-    FutureProvider.family<Aluno360Ferramentas, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<Aluno360Ferramentas, int>((ref, alunoId) async {
+  _keepFor(ref);
   final cached = Aluno360ClientCache.getFerramentasIfFresh(alunoId);
   if (cached != null) {
     _hydrateEvolucaoHomeFromFerramentas(alunoId, cached);
@@ -164,10 +177,11 @@ void warmAluno360OperacaoList(WidgetRef ref, Iterable<int> alunoIds) {
   }
 }
 
-final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
+final alunoRecoveryProvider = FutureProvider.autoDispose.family<RecoverySnapshot?, int>((
   ref,
   alunoId,
 ) async {
+  _keepFor(ref);
   try {
     final bundled =
         (await ref.watch(aluno360OperacaoBundleProvider(alunoId).future))
@@ -194,7 +208,8 @@ final alunoCopilotIaSkipCacheProvider = fxValueAutoDisposeFamily<bool>(false);
 final alunoCopilotIaRefreshingProvider = fxValueAutoDisposeFamily<bool>(false);
 
 final alunoCopilotoActionProvider =
-    FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
+  _keepFor(ref);
       final skipCache = ref.watch(alunoCopilotIaSkipCacheProvider(alunoId));
       if (!skipCache) {
         final cached = await AlunoCopilotIaCacheStore.loadIfFresh(alunoId);
@@ -210,7 +225,7 @@ final alunoCopilotoActionProvider =
 
 /// Unified Operação snapshot (sticky + copilot + outreach).
 final aluno360OperacaoProvider =
-    Provider.family<Aluno360OperacaoSnapshot?, int>((ref, alunoId) {
+    Provider.autoDispose.family<Aluno360OperacaoSnapshot?, int>((ref, alunoId) {
       final bundle = ref.watch(aluno360OperacaoBundleProvider(alunoId)).value;
       if (bundle == null) return null;
       final aluno = bundle.aluno;
@@ -242,7 +257,8 @@ final aluno360OperacaoProvider =
     });
 
 final alunoOpenIaActionsProvider =
-    FutureProvider.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<List<FilaAcaoResumo>, int>((ref, alunoId) async {
+  _keepFor(ref);
       try {
         final bundle =
             await ref.watch(aluno360OperacaoBundleProvider(alunoId).future);
@@ -258,7 +274,8 @@ final alunoOpenIaActionsProvider =
     });
 
 final alunoEvolucaoInteligenteProvider =
-    FutureProvider.family<EvolucaoInteligente, int>((ref, alunoId) async {
+    FutureProvider.autoDispose.family<EvolucaoInteligente, int>((ref, alunoId) async {
+  _keepFor(ref);
       final raw = await AlunoRepository(
         ref.read(apiClientProvider),
       ).buscarEvolucaoInteligente(alunoId);
@@ -297,10 +314,11 @@ bool _hasUltimoPr(EvolucaoInteligente ev) {
 }
 
 final alunoAderenciaSemanalProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, int>((
+    FutureProvider.autoDispose.family<List<Map<String, dynamic>>, int>((
       ref,
       alunoId,
     ) async {
+  _keepFor(ref);
       try {
         final operacao =
             await ref.watch(aluno360OperacaoBundleProvider(alunoId).future);
@@ -313,10 +331,11 @@ final alunoAderenciaSemanalProvider =
     });
 
 /// Last weight measurements from avaliações físicas (up to 7 points, chronological).
-final alunoPesoHistoricoProvider = FutureProvider.family<List<double>, int>((
+final alunoPesoHistoricoProvider = FutureProvider.autoDispose.family<List<double>, int>((
   ref,
   alunoId,
 ) async {
+  _keepFor(ref);
   return AvaliacaoRepository(
     ref.read(apiClientProvider),
   ).listarPesoHistorico(alunoId);
