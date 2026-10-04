@@ -164,19 +164,6 @@ void warmAluno360OperacaoList(WidgetRef ref, Iterable<int> alunoIds) {
   }
 }
 
-/// @Deprecated monolito `/360` — não usar no first paint.
-final aluno360Provider = FutureProvider.family<Aluno360, int>((
-  ref,
-  alunoId,
-) async {
-  final cached = Aluno360ClientCache.getIfFresh(alunoId);
-  if (cached != null) return cached;
-  final bundle =
-      await AlunoRepository(ref.read(apiClientProvider)).buscarAluno360(alunoId);
-  Aluno360ClientCache.put(alunoId, bundle);
-  return bundle;
-});
-
 final alunoRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
   ref,
   alunoId,
@@ -342,8 +329,6 @@ Future<void> invalidateAluno360Providers(WidgetRef ref, int alunoId) async {
   ref.invalidate(aluno360OperacaoBundleProvider(alunoId));
   ref.invalidate(aluno360EvolucaoBundleProvider(alunoId));
   ref.invalidate(aluno360FerramentasBundleProvider(alunoId));
-  // Monolito /360 — só se ainda houver listener (legado).
-  ref.invalidate(aluno360Provider(alunoId));
   ref.invalidate(alunoProvider(alunoId));
   ref.invalidate(alunoRecoveryProvider(alunoId));
   ref.invalidate(alunoAutonomiaResumoProvider(alunoId));

@@ -97,6 +97,25 @@ class ApiError {
   }
 }
 
+/// Pin rejeitado / certificado inválido — não é "sem conexão" e pede app
+/// atualizado. Handshake genérico (rede instável, captive portal) não conta.
+bool isTlsOrPinFailure(Object error) {
+  if (error is DioException) {
+    if (error.type == DioExceptionType.badCertificate) return true;
+    final haystack =
+        '${error.message ?? ''} ${error.error ?? ''} '
+                '${error.error?.runtimeType ?? ''}'
+            .toLowerCase();
+    return haystack.contains('certificate pin') ||
+        haystack.contains('pin mismatch') ||
+        haystack.contains('certificate_verify_failed') ||
+        haystack.contains('bad certificate') ||
+        (haystack.contains('tlsexception') && haystack.contains('pin'));
+  }
+  return error.runtimeType.toString().contains('TlsException') &&
+      error.toString().toLowerCase().contains('pin');
+}
+
 /// Catálogo de códigos acordado em §2.3 do contrato pareado.
 ///
 /// Agrupado por como o app reage, não por status HTTP: é a reação que decide
@@ -115,6 +134,13 @@ abstract final class ApiErrorCodes {
     'PLANO_LIMITE_ALUNOS_ATINGIDO',
     'PLANO_LIMITE_ASSISTENTES_ATINGIDO',
     'MIGRACAO_FOTO_QUOTA_ESGOTADA',
+  };
+
+  /// Abrem a sheet genérica de upgrade sozinhos. IA e importação por foto
+  /// ficam de fora: têm oferta própria na tela.
+  static const upgradeSheet = <String>{
+    'PLANO_FEATURE_REQUER_UPGRADE',
+    'PLANO_LIMITE_ALUNOS_ATINGIDO',
   };
 
   /// Conflito por recurso já existente — o usuário precisa mudar o dado, não
@@ -141,6 +167,9 @@ abstract final class ApiErrorCodes {
     'SENHA_ATUAL_INVALIDA',
   };
 
+  /// Transação da App Store trocada por upgrade — não é falha de compra.
+  static const iapSuperseded = 'IAP_TRANSACAO_SUBSTITUIDA';
+
   /// Se o código está no catálogo que este app conhece.
   ///
   /// Existe para separar "código conhecido que não é gate" — decisão fechada —
@@ -153,5 +182,6 @@ abstract final class ApiErrorCodes {
       alreadyExists.contains(codigo) ||
       rateLimited.contains(codigo) ||
       credentials.contains(codigo) ||
-      passwordChallenge.contains(codigo);
+      passwordChallenge.contains(codigo) ||
+      codigo == iapSuperseded;
 }

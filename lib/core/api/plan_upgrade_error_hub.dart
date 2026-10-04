@@ -13,10 +13,7 @@ typedef PlanUpgradePresenter =
 /// toast: interceptor do [ApiClient], `FeedbackHelper.showApiFailure` e
 /// `UpgradePromptSheet.showFromError` passam por aqui, e só uma sheet abre.
 abstract final class PlanUpgradeErrorHub {
-  static const upgradeCodes = <String>{
-    'PLANO_FEATURE_REQUER_UPGRADE',
-    'PLANO_LIMITE_ALUNOS_ATINGIDO',
-  };
+  static const upgradeCodes = ApiErrorCodes.upgradeSheet;
 
   static const limiteAlunos = 'PLANO_LIMITE_ALUNOS_ATINGIDO';
 

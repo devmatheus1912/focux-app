@@ -73,15 +73,7 @@ String friendlyError(Object error, {String? fallback}) {
           '${error.message ?? ''} ${error.error ?? ''} '
                   '${error.error?.runtimeType ?? ''}'
               .toLowerCase();
-      // Pin / badCertificate → copy de segurança. Handshake genérico = rede.
-      final isPinOrBadCert =
-          error.type == DioExceptionType.badCertificate ||
-          hay.contains('certificate pin') ||
-          hay.contains('pin mismatch') ||
-          hay.contains('certificate_verify_failed') ||
-          hay.contains('bad certificate') ||
-          (hay.contains('tlsexception') && hay.contains('pin'));
-      if (isPinOrBadCert) {
+      if (isTlsOrPinFailure(error)) {
         return 'Falha na conexão segura com o servidor. Atualize o app e tente de novo.';
       }
       switch (error.type) {

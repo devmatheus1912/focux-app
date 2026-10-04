@@ -154,7 +154,7 @@ extension on _LoginScreenState {
       if (google == null) return;
       final result = await ref
           .read(authProvider.notifier)
-          .loginGoogle(idToken: google.idToken, isAluno: false);
+          .loginGoogle(idToken: google.idToken);
       if (!mounted) return;
       if (await _maybeOpenMfa(result, method: 'google')) return;
       if (!mounted) return;
@@ -198,7 +198,6 @@ extension on _LoginScreenState {
           .read(authProvider.notifier)
           .loginApple(
             identityToken: credential.identityToken,
-            isAluno: false,
             fullName: credential.fullName,
             email: credential.email,
             authorizationCode: credential.authorizationCode,

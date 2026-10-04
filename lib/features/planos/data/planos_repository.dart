@@ -137,7 +137,6 @@ class PlanoFeatures {
   final bool equipeRbac;
   final bool lojaDigital;
   final bool feedbackVideo;
-  final int? limiteAssistentes;
   final int alunosAtivos;
   final int iaUsadaMes;
   final int? limiteMigracaoFotoMensal;
@@ -173,7 +172,6 @@ class PlanoFeatures {
     this.equipeRbac = false,
     this.lojaDigital = false,
     this.feedbackVideo = false,
-    this.limiteAssistentes,
     this.alunosAtivos = 0,
     this.iaUsadaMes = 0,
     this.limiteMigracaoFotoMensal,
@@ -244,7 +242,6 @@ class PlanoFeatures {
       equipeRbac: f['equipeRbac'] as bool? ?? false,
       lojaDigital: f['lojaDigital'] as bool? ?? false,
       feedbackVideo: f['feedbackVideo'] as bool? ?? false,
-      limiteAssistentes: (j['limiteAssistentes'] as num?)?.toInt(),
       alunosAtivos: (j['alunosAtivos'] as num?)?.toInt() ?? 0,
       iaUsadaMes: (j['iaUsadaMes'] as num?)?.toInt() ?? 0,
       limiteMigracaoFotoMensal:
@@ -316,7 +313,6 @@ class PlanoFeatures {
       equipeRbac: equipeRbac,
       lojaDigital: lojaDigital,
       feedbackVideo: feedbackVideo,
-      limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
@@ -324,9 +320,10 @@ class PlanoFeatures {
     ).normalizeForTier();
   }
 
-  /// Capabilities legadas → chave de `recursos`. `agenda` é sempre Free;
-  /// comunidade privada não existe no produto.
+  /// Capabilities legadas → chave de `recursos`.
   static const legacyCapabilityToRecurso = <String, String>{
+    'agenda': PlanoRecursoKeys.agenda,
+    'comunidadePrivada': PlanoRecursoKeys.comunidadePrivada,
     'financeiro': PlanoRecursoKeys.financeiro,
     'relatorios': PlanoRecursoKeys.relatorios,
     'whiteLabel': PlanoRecursoKeys.whiteLabel,
@@ -345,15 +342,9 @@ class PlanoFeatures {
   Map<String, bool> _canonicalCaps() => {
     for (final e in legacyCapabilityToRecurso.entries)
       e.key: recurso(e.value).liberado,
-    'agenda': true,
-    'comunidadePrivada': false,
   };
 
   PlanoFeatures _applyCanonical(Map<String, bool> caps) {
-    final limiteAssistentes = switch (plano) {
-      SubscriptionPlan.ENTERPRISE => 5,
-      _ => null,
-    };
     return PlanoFeatures(
       plano: plano,
       planoNomeOriginal: planoNomeOriginal,
@@ -380,7 +371,6 @@ class PlanoFeatures {
       equipeRbac: caps['equipeRbac']!,
       lojaDigital: caps['lojaDigital']!,
       feedbackVideo: caps['feedbackVideo']!,
-      limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
@@ -453,7 +443,6 @@ class PlanoFeatures {
       equipeRbac: equipeRbac,
       lojaDigital: lojaDigital,
       feedbackVideo: feedbackVideo,
-      limiteAssistentes: limiteAssistentes,
       alunosAtivos: alunosAtivos,
       iaUsadaMes: iaUsadaMes,
       limiteMigracaoFotoMensal: limiteMigracaoFotoMensal,
@@ -516,7 +505,6 @@ class PlanoFeatures {
     equipeRbac: true,
     lojaDigital: true,
     feedbackVideo: true,
-    limiteAssistentes: 5,
     limiteMigracaoFotoMensal: 80,
   );
 }

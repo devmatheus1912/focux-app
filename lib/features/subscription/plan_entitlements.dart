@@ -133,31 +133,7 @@ class PlanEntitlements {
     SubscriptionPlan fallback = SubscriptionPlan.PRO,
   }) {
     final recurso = PlanoRecursoKeys.fromCapability(capability);
-    if (recurso != null) return PlanoRecursoKeys.matrix[recurso]!;
-    switch (capability) {
-      case 'landingCompleta':
-      case 'lojaDigital':
-      case 'automacoesAvancadas':
-      case 'nfse':
-        return SubscriptionPlan.ENTERPRISE;
-      case 'whiteLabel':
-      case 'automacoes':
-      case 'comunidadeGrupos':
-      case 'equipeRbac':
-        return SubscriptionPlan.ENTERPRISE;
-      case 'habitCoaching':
-      case 'comunidadePrivada':
-      case 'financeiro':
-      case 'relatorios':
-      case 'iaCopiloto':
-      case 'migracaoFoto':
-      case 'agenda':
-      case 'leads':
-      case 'feedbackVideo':
-        return SubscriptionPlan.PRO;
-      default:
-        return fallback;
-    }
+    return recurso == null ? fallback : PlanoRecursoKeys.matrix[recurso]!;
   }
 
   static LockedOffer lockedOffer({

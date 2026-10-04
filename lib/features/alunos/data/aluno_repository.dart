@@ -110,12 +110,7 @@ class AlunoRepository {
     return Aluno.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<Aluno360> buscarAluno360(int id) async {
-    final response = await _dio.get('/api/alunos/$id/360');
-    return Aluno360.fromJson(response.data as Map<String, dynamic>);
-  }
-
-  /// Critical path — Operação first paint. Do not call legacy `/360` here.
+  /// Critical path — Operação first paint.
   Future<Aluno360Operacao> buscarAluno360Operacao(int id) async {
     final response = await _dio.get('/api/alunos/$id/360/operacao');
     return Aluno360Operacao.fromJson(response.data as Map<String, dynamic>);

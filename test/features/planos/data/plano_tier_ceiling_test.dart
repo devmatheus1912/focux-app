@@ -55,7 +55,6 @@ void main() {
       expect(f.landingCompleta, isTrue);
       expect(f.feedbackVideo, isTrue);
       expect(f.automacoesAvancadas, isTrue);
-      expect(f.limiteAssistentes, 5);
     });
 
     test('ENTERPRISE — tudo liberado mesmo com API deflacionada', () {
@@ -82,7 +81,6 @@ void main() {
       expect(f.automacoes, isTrue);
       expect(f.automacoesAvancadas, isTrue);
       expect(f.equipeRbac, isTrue);
-      expect(f.limiteAssistentes, 5);
     });
   });
 

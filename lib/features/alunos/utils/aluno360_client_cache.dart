@@ -14,9 +14,6 @@ abstract final class Aluno360ClientCache {
       <int, ({Aluno360Ferramentas bundle, DateTime at})>{};
   static final _operacaoRefreshing = <int>{};
 
-  /// Legacy monolito `/360` — kept for invalidate compatibility only.
-  static final _legacy = <int, ({Aluno360 bundle, DateTime at})>{};
-
   static Aluno360Operacao? getOperacaoIfFresh(int alunoId, {DateTime? now}) {
     final hit = _operacao[alunoId];
     if (hit == null) return null;
@@ -86,27 +83,10 @@ abstract final class Aluno360ClientCache {
     _ferramentas[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
   }
 
-  @Deprecated('Use getOperacaoIfFresh — monolito /360 saiu do first paint')
-  static Aluno360? getIfFresh(int alunoId, {DateTime? now}) {
-    final hit = _legacy[alunoId];
-    if (hit == null) return null;
-    if ((now ?? DateTime.now()).difference(hit.at) > ttl) {
-      _legacy.remove(alunoId);
-      return null;
-    }
-    return hit.bundle;
-  }
-
-  @Deprecated('Use putOperacao — monolito /360 saiu do first paint')
-  static void put(int alunoId, Aluno360 bundle, {DateTime? now}) {
-    _legacy[alunoId] = (bundle: bundle, at: now ?? DateTime.now());
-  }
-
   static void invalidate(int alunoId) {
     _operacao.remove(alunoId);
     _evolucao.remove(alunoId);
     _ferramentas.remove(alunoId);
-    _legacy.remove(alunoId);
     _operacaoRefreshing.remove(alunoId);
   }
 
@@ -114,7 +94,6 @@ abstract final class Aluno360ClientCache {
     _operacao.clear();
     _evolucao.clear();
     _ferramentas.clear();
-    _legacy.clear();
     _operacaoRefreshing.clear();
   }
 }

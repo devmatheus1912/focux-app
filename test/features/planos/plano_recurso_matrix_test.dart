@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/utils/plano_capability.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+import 'package:focux_app/features/subscription/plan_entitlements.dart';
 
 PlanoFeatures _tier(SubscriptionPlan plano) =>
     PlanoFeatures.fromJson({'plano': plano.name});
@@ -9,6 +10,7 @@ PlanoFeatures _tier(SubscriptionPlan plano) =>
 void main() {
   test('matriz de fallback é a matriz de produto', () {
     expect(PlanoRecursoKeys.matrix, const {
+      'agenda': SubscriptionPlan.FREE,
       'financeiro': SubscriptionPlan.PRO,
       'recorrencia': SubscriptionPlan.PRO,
       'carteira': SubscriptionPlan.PRO,
@@ -18,6 +20,7 @@ void main() {
       'ia': SubscriptionPlan.PRO,
       'importacaoFoto': SubscriptionPlan.PRO,
       'leads': SubscriptionPlan.PRO,
+      'comunidadePrivada': SubscriptionPlan.PRO,
       'landing': SubscriptionPlan.ENTERPRISE,
       'whiteLabel': SubscriptionPlan.ENTERPRISE,
       'loja': SubscriptionPlan.ENTERPRISE,
@@ -99,6 +102,12 @@ void main() {
 
   test('PREMIUM do servidor continua virando Pro', () {
     expect(subscriptionPlanFromApi('PREMIUM'), SubscriptionPlan.PRO);
-    expect(subscriptionPlanFromApi('ENTERPRISE_PRO'), SubscriptionPlan.FREE);
+    expect(subscriptionPlanFromApi('ENTERPRISE_PRO'), SubscriptionPlan.ENTERPRISE);
+  });
+
+  test('upsell da agenda não pede upgrade: é Free como no servidor', () {
+    expect(PlanEntitlements.targetPlan(capability: 'agenda'), SubscriptionPlan.FREE);
+    expect(PlanEntitlements.targetPlan(capability: 'comunidadePrivada'), SubscriptionPlan.PRO);
+    expect(PlanEntitlements.targetPlan(capability: 'lojaDigital'), SubscriptionPlan.ENTERPRISE);
   });
 }

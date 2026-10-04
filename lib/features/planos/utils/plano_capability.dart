@@ -6,12 +6,6 @@ class PlanoCapability {
   PlanoCapability._();
 
   static bool has(PlanoFeatures features, String capability) {
-    switch (capability) {
-      case 'agenda':
-        return true;
-      case 'comunidadePrivada':
-        return false;
-    }
     final key = PlanoRecursoKeys.fromCapability(capability);
     if (key == null) return false;
     return features.recurso(key).liberado;

@@ -13,7 +13,6 @@ import '../../ia/data/ia_repository.dart';
 import '../../treinos/providers/treinos_provider.dart';
 import '../constants/aluno_360_layout.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../providers/alunos_provider.dart';
 import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_ia_upgrade.dart';
 import 'aluno360_copilot_executar_confirm.dart';
@@ -40,8 +39,7 @@ class _Aluno360CopilotExecutarAcaoButtonState
   var _executing = false;
 
   void _invalidateAfterExecutar(String backendTipo) {
-    ref.invalidate(aluno360Provider(widget.alunoId));
-    ref.invalidate(alunoProvider(widget.alunoId));
+    unawaited(invalidateAluno360Providers(ref, widget.alunoId));
     if (backendTipo == 'REDUZIR_CARGA') {
       invalidateTreinosDoAluno(ref, widget.alunoId);
     }

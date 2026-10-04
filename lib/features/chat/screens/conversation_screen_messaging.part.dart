@@ -428,7 +428,6 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     final alunoId = _alunoId ?? widget.alunoId;
     if (alunoId == null) return;
     ref.invalidate(alunoTimeline360PagedProvider(alunoId));
-    ref.invalidate(aluno360Provider(alunoId));
   }
 
   void _setReply(ChatMsg msg) {

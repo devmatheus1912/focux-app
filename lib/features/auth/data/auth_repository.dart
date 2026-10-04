@@ -260,15 +260,9 @@ class AuthRepository {
           'emailCodigo': emailCodigo,
       },
     );
-    final token = response.data['token'] as String;
-    final refreshToken = response.data['refreshToken'] as String?;
-    await SecureStorage.saveToken(token);
-    if (refreshToken != null) {
-      await SecureStorage.saveRefreshToken(refreshToken);
-    }
-    await SecureStorage.saveRole('PERSONAL');
-    await FcmService.registrarSeAutenticado(_client);
-    return token;
+    final body = response.data as Map<String, dynamic>;
+    await _persistAuthResponse(body, fallbackRole: 'PERSONAL');
+    return body['token'] as String;
   }
 
   Future<EnviarCodigoEmailResult> enviarCodigoEmail(String email) async {
@@ -291,46 +285,28 @@ class AuthRepository {
       data['personalSlug'] = personalSlug.trim();
     }
     final response = await _authPost('/api/auth/login/aluno', data: data);
-    final token = response.data['token'] as String;
-    final refreshToken = response.data['refreshToken'] as String?;
-    final requiresPasswordChange =
-        response.data['requiresPasswordChange'] as bool? ?? false;
-    await SecureStorage.saveToken(token);
-    if (refreshToken != null) {
-      await SecureStorage.saveRefreshToken(refreshToken);
-    }
-    await SecureStorage.saveRole('ALUNO');
-    await SecureStorage.saveRequiresPasswordChange(requiresPasswordChange);
-    await FcmService.registrarSeAutenticado(_client);
-    return requiresPasswordChange;
+    final body = response.data as Map<String, dynamic>;
+    await _persistAuthResponse(body, fallbackRole: 'ALUNO');
+    return body['requiresPasswordChange'] as bool? ?? false;
   }
 
-  Future<AuthLoginResult> loginGoogle({
-    required String idToken,
-    required bool isAluno,
-    String? personalSlug,
-  }) async {
-    final data = <String, dynamic>{
-      'idToken': idToken,
-      'role': isAluno ? 'ALUNO' : 'PERSONAL',
-    };
-    if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
-      data['personalSlug'] = personalSlug.trim();
-    }
-    final response = await _authPost('/api/auth/google', data: data);
+  /// Login social é só do personal; aluno entra pelo link do personal.
+  Future<AuthLoginResult> loginGoogle({required String idToken}) async {
+    final response = await _authPost(
+      '/api/auth/google',
+      data: {'idToken': idToken, 'role': 'PERSONAL'},
+    );
     return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
-      fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
+      fallbackRole: 'PERSONAL',
     );
   }
 
   /// Sign in with Apple — `POST /api/auth/apple`.
   Future<AuthLoginResult> loginApple({
     required String identityToken,
-    required bool isAluno,
     String? fullName,
     String? email,
-    String? personalSlug,
     String? authorizationCode,
     String? rawNonce,
   }) async {
@@ -344,20 +320,17 @@ class AuthRepository {
             : await SecureStorage.getApplePendingName();
     final data = <String, dynamic>{
       'identityToken': identityToken,
-      'role': isAluno ? 'ALUNO' : 'PERSONAL',
+      'role': 'PERSONAL',
       if (name != null && name.isNotEmpty) 'fullName': name,
       if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
       if (authorizationCode != null && authorizationCode.isNotEmpty)
         'authorizationCode': authorizationCode,
       if (rawNonce != null && rawNonce.isNotEmpty) 'nonce': rawNonce,
     };
-    if (isAluno && personalSlug != null && personalSlug.trim().isNotEmpty) {
-      data['personalSlug'] = personalSlug.trim();
-    }
     final response = await _authPost('/api/auth/apple', data: data);
     final result = await _consumeAuthResponse(
       response.data as Map<String, dynamic>,
-      fallbackRole: isAluno ? 'ALUNO' : 'PERSONAL',
+      fallbackRole: 'PERSONAL',
     );
     await SecureStorage.deleteApplePendingName();
     return result;
@@ -477,16 +450,9 @@ class AuthRepository {
       '/api/auth/register/aluno',
       data: requestBody,
     );
-    final token = response.data['token'] as String;
-    final refreshToken = response.data['refreshToken'] as String?;
-    await SecureStorage.saveToken(token);
-    if (refreshToken != null) {
-      await SecureStorage.saveRefreshToken(refreshToken);
-    }
-    await SecureStorage.saveRole('ALUNO');
-    await SecureStorage.saveRequiresPasswordChange(false);
-    await FcmService.registrarSeAutenticado(_client);
-    return token;
+    final body = response.data as Map<String, dynamic>;
+    await _persistAuthResponse(body, fallbackRole: 'ALUNO');
+    return body['token'] as String;
   }
 
   Future<void> definirSenhaDefinitivaAluno(

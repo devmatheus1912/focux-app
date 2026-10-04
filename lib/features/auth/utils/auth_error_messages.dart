@@ -78,7 +78,7 @@ String _validationCopy(DioException error, ApiError? api) {
 bool _isAuthTransportFailure(DioException error) {
   // Se chegou status HTTP, nunca é "sem conexão".
   if (error.response?.statusCode != null) return false;
-  if (_isTlsOrPinFailure(error)) return false;
+  if (isTlsOrPinFailure(error)) return false;
   switch (error.type) {
     case DioExceptionType.connectionTimeout:
     case DioExceptionType.sendTimeout:
@@ -97,37 +97,8 @@ bool _isAuthTransportFailure(DioException error) {
   }
 }
 
-bool _isTlsOrPinFailure(Object error) {
-  if (error is DioException) {
-    // badCertificate = validateCertificate / pin rejeitado.
-    if (error.type == DioExceptionType.badCertificate) return true;
-    final haystack =
-        '${error.message ?? ''} ${error.error ?? ''} '
-                '${error.error?.runtimeType ?? ''}'
-            .toLowerCase();
-    // Só mismatch de pin / verify — NÃO HandshakeException genérico
-    // (rede instável / captive portal).
-    if (haystack.contains('certificate pin') ||
-        haystack.contains('pin mismatch') ||
-        haystack.contains('certificate_verify_failed') ||
-        haystack.contains('bad certificate')) {
-      return true;
-    }
-    if (haystack.contains('tlsexception') && haystack.contains('pin')) {
-      return true;
-    }
-    return false;
-  }
-  final name = error.runtimeType.toString();
-  final msg = error.toString().toLowerCase();
-  if (name.contains('TlsException') && msg.contains('pin')) return true;
-  return false;
-}
-
-String? _tlsFailureCopy(Object error) {
-  if (_isTlsOrPinFailure(error)) return _tlsCopy;
-  return null;
-}
+String? _tlsFailureCopy(Object error) =>
+    isTlsOrPinFailure(error) ? _tlsCopy : null;
 
 bool _looksLikeSocketFailure(Object? error) {
   if (error == null) return false;
@@ -206,65 +177,52 @@ String _humanizeProxyTimeout(String raw) {
   return raw;
 }
 
-/// Pedido de código para recuperar senha.
-String mapEsqueciSenhaError(Object error) {
+/// Formato comum dos fluxos de código/senha: transporte → copy por status
+/// (com `erro` do backend na frente) → indisponível → `erro` → genérico.
+String _mapPorStatus(
+  Object error, {
+  required String rateLimit,
+  required String badRequest,
+  required String generico,
+}) {
   final offline = _offlineIfTransport(error);
   if (offline != null) return offline;
   if (error is DioException) {
     final statusCode = error.response?.statusCode;
-    if (statusCode == 429) {
-      return _backendMessage(error) ?? _rateLimitCopy;
+    if (statusCode == 429) return _backendMessage(error) ?? rateLimit;
+    if (statusCode == 400) return _backendMessage(error) ?? badRequest;
+    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
+      return _unavailableCopy;
     }
-    if (statusCode == 400) {
-      return _backendMessage(error) ??
-          'Não foi possível enviar o código. Confira o e-mail e o papel.';
-    }
-    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
     final msg = _backendMessage(error);
     if (msg != null) return msg;
   }
-  return 'Não foi possível enviar o código agora.';
+  return generico;
 }
+
+/// Pedido de código para recuperar senha.
+String mapEsqueciSenhaError(Object error) => _mapPorStatus(
+  error,
+  rateLimit: _rateLimitCopy,
+  badRequest: 'Não foi possível enviar o código. Confira o e-mail e o papel.',
+  generico: 'Não foi possível enviar o código agora.',
+);
 
 /// Validação do código de 6 dígitos no reset de senha.
-String mapResetCodigoError(Object error) {
-  final offline = _offlineIfTransport(error);
-  if (offline != null) return offline;
-  if (error is DioException) {
-    final statusCode = error.response?.statusCode;
-    if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Muitas tentativas. Aguarde e peça um novo código.';
-    }
-    if (statusCode == 400) {
-      return _backendMessage(error) ?? 'Código inválido ou expirado.';
-    }
-    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
-    final msg = _backendMessage(error);
-    if (msg != null) return msg;
-  }
-  return 'Código inválido ou expirado.';
-}
+String mapResetCodigoError(Object error) => _mapPorStatus(
+  error,
+  rateLimit: 'Muitas tentativas. Aguarde e peça um novo código.',
+  badRequest: 'Código inválido ou expirado.',
+  generico: 'Código inválido ou expirado.',
+);
 
 /// Confirmação da nova senha após o OTP.
-String mapResetSenhaError(Object error) {
-  final offline = _offlineIfTransport(error);
-  if (offline != null) return offline;
-  if (error is DioException) {
-    final statusCode = error.response?.statusCode;
-    if (statusCode == 429) {
-      return _backendMessage(error) ?? _rateLimitCopy;
-    }
-    if (statusCode == 400) {
-      return _backendMessage(error) ??
-          'Código ou senha recusados. Solicite um novo código se expirou.';
-    }
-    if (statusCode == 502 || statusCode == 503) return _unavailableCopy;
-    final msg = _backendMessage(error);
-    if (msg != null) return msg;
-  }
-  return 'Código ou senha recusados. Solicite um novo código se expirou.';
-}
+String mapResetSenhaError(Object error) => _mapPorStatus(
+  error,
+  rateLimit: _rateLimitCopy,
+  badRequest: 'Código ou senha recusados. Solicite um novo código se expirou.',
+  generico: 'Código ou senha recusados. Solicite um novo código se expirou.',
+);
 
 /// Troca da senha provisória do aluno após o primeiro login.
 String mapDefinirSenhaError(Object error) {
@@ -356,27 +314,12 @@ String mapRegisterAlunoError(Object error) {
 }
 
 /// Envio do código de verificação no cadastro.
-String mapSignupCodeError(Object error) {
-  final offline = _offlineIfTransport(error);
-  if (offline != null) return offline;
-  if (error is DioException) {
-    final statusCode = error.response?.statusCode;
-    if (statusCode == 502 || statusCode == 503 || statusCode == 504) {
-      return _unavailableCopy;
-    }
-    if (statusCode == 429) {
-      return _backendMessage(error) ??
-          'Aguarde um minuto antes de pedir outro código.';
-    }
-    if (statusCode == 400) {
-      return _backendMessage(error) ??
-          'Não foi possível enviar o código. Tente de novo ou use Google.';
-    }
-    final msg = _backendMessage(error);
-    if (msg != null) return msg;
-  }
-  return 'Não foi possível enviar o código agora.';
-}
+String mapSignupCodeError(Object error) => _mapPorStatus(
+  error,
+  rateLimit: 'Aguarde um minuto antes de pedir outro código.',
+  badRequest: 'Não foi possível enviar o código. Tente de novo ou use Google.',
+  generico: 'Não foi possível enviar o código agora.',
+);
 
 /// Mapeia erros do fluxo de login/cadastro via Google para mensagens em pt-BR.
 ///

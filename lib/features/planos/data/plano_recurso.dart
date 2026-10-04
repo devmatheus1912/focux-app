@@ -59,8 +59,11 @@ abstract final class PlanoRecursoKeys {
   static const desafios = 'desafios';
   static const equipe = 'equipe';
   static const nfse = 'nfse';
+  static const agenda = 'agenda';
+  static const comunidadePrivada = 'comunidadePrivada';
 
   static const matrix = <String, SubscriptionPlan>{
+    agenda: SubscriptionPlan.FREE,
     financeiro: SubscriptionPlan.PRO,
     recorrencia: SubscriptionPlan.PRO,
     carteira: SubscriptionPlan.PRO,
@@ -70,6 +73,7 @@ abstract final class PlanoRecursoKeys {
     ia: SubscriptionPlan.PRO,
     importacaoFoto: SubscriptionPlan.PRO,
     leads: SubscriptionPlan.PRO,
+    comunidadePrivada: SubscriptionPlan.PRO,
     landing: SubscriptionPlan.ENTERPRISE,
     whiteLabel: SubscriptionPlan.ENTERPRISE,
     loja: SubscriptionPlan.ENTERPRISE,

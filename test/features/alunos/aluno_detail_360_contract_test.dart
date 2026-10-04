@@ -143,7 +143,7 @@ void main() {
     expect(screen, contains('Aluno 360'));
     expect(screen, contains('class Aluno360TimelineCard'));
     expect(screen, contains("'Linha do tempo 360'"));
-    expect(screen, contains('aluno360Provider'));
+    expect(screen, isNot(contains('aluno360Provider(')));
     expect(screen, contains('shouldWatchAlunoDetailFallback'));
     expect(screen, contains('shouldWatchAlunoRecoverySidecar'));
     expect(screen, contains('shouldWatchAluno360Tab1Sidecars'));
@@ -151,7 +151,7 @@ void main() {
     expect(screen, contains('resolveDiasSemTreinoLimiteFromHome'));
     expect(screen, contains('ref.exists(alunosHomeProvider)'));
     expect(screen, isNot(contains('alertasConfigProvider')));
-    expect(screen, contains('buscarAluno360'));
+    expect(screen, contains('buscarAluno360Operacao'));
     expect(screen, contains('class Timeline360Tile'));
     expect(screen, contains("hint: expandable ? 'Mostra o conteúdo completo'"));
     expect(screen, contains('final interactive = expandable || hasRoute'));

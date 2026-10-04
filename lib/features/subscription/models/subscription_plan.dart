@@ -6,6 +6,7 @@ SubscriptionPlan subscriptionPlanFromApi(String? value) {
   final raw = (value ?? '').trim().toUpperCase().replaceAll(' ', '_');
   switch (raw) {
     case 'ENTERPRISE':
+    case 'ENTERPRISE_PRO':
       return SubscriptionPlan.ENTERPRISE;
     // Assinaturas antigas: o backend ainda pode devolver PREMIUM.
     case 'PREMIUM':
