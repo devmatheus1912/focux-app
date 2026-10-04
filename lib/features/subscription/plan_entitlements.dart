@@ -448,7 +448,7 @@ class PlanEntitlements {
     if (usage.alunosNearLimit) {
       final left = (usage.limiteAlunos! - usage.alunosAtivos).clamp(0, 999);
       return 'Você usa $left de ${usage.limiteAlunos} vagas no ${usage.planoLabel}. '
-          'Pro libera até 30 alunos.';
+          'Pro libera até ${PlanoAlunosLimits.pro} alunos.';
     }
     if (usage.iaAtLimit) {
       return 'Cota de IA esgotada (${usage.limiteIaMensal}/mês). '

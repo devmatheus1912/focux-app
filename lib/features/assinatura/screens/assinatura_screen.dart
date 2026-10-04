@@ -165,7 +165,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (_restoringPurchases || !subscriptionUsesNativeStore) return;
 
     setState(() => _restoringPurchases = true);
-    FeedbackHelper.showInfo(context, 'Verificando compras anteriores...');
+    FeedbackHelper.showInfo(context, S.of(context).assinaturaVerificandoCompras);
 
     try {
       final result = await ref.read(iapPurchaseCoordinatorProvider).restore();
@@ -175,13 +175,13 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       if (!result.storeAvailable) {
         FeedbackHelper.showError(
           context,
-          'A loja do dispositivo não está disponível.',
+          S.of(context).assinaturaLojaDispositivoIndisponivel,
         );
         return;
       }
 
       if (result.hasVerifiedPurchases) {
-        FeedbackHelper.showSuccess(context, 'Compras restauradas com sucesso.');
+        FeedbackHelper.showSuccess(context, S.of(context).assinaturaComprasRestauradas);
         return;
       }
 
@@ -193,12 +193,12 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         return;
       }
 
-      FeedbackHelper.showInfo(context, 'Nenhuma compra anterior encontrada.');
+      FeedbackHelper.showInfo(context, S.of(context).assinaturaNenhumaCompraAnterior);
     } catch (error) {
       if (!mounted) return;
       FeedbackHelper.showError(
         context,
-        friendlyError(error, fallback: 'Erro ao restaurar compras.'),
+        friendlyError(error, fallback: S.of(context).assinaturaErroRestaurar),
       );
     } finally {
       if (mounted) setState(() => _restoringPurchases = false);
@@ -232,7 +232,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         setState(() => _paywallFetchedAt = DateTime.now());
       });
     }, fireImmediately: true);
-    if (widget.initialPlan?.trim().toUpperCase() == 'ENTERPRISE') {
+    if (subscriptionPlanFromApi(widget.initialPlan) == SubscriptionPlan.ENTERPRISE) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _loadEnterprisePreview();
       });
@@ -405,7 +405,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           reason: 'iap_store',
         );
       case IapPurchaseUnsupported():
-        _finishPurchaseFlowWithError('Produto recebido não é suportado.');
+        _finishPurchaseFlowWithError(S.of(context).assinaturaProdutoNaoSuportado);
       case IapPurchaseVerifying(:final purchase):
         final plan = _planForProductId(purchase.productID);
         setState(() {
@@ -431,8 +431,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         });
         FeedbackHelper.showInfo(
           context,
-          'Compra aguardando aprovação. Assim que for aprovada, '
-          'o plano é liberado automaticamente.',
+          S.of(context).assinaturaCompraAguardandoAprovacao,
         );
       case IapPurchaseBatchProcessed() || IapPurchaseStreamFailed():
         break;
@@ -617,7 +616,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     if (!mounted) return;
     if (product == null) {
       _finishPurchaseFlowWithError(
-        'Produto ainda não configurado na loja para este plano.',
+        S.of(context).assinaturaProdutoNaoConfigurado,
       );
       return;
     }

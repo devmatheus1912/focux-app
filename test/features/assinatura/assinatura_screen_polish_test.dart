@@ -165,7 +165,7 @@ void main() {
     ).readAsStringSync();
     expect(footer, contains('_showAssinaturaTermosSheet'));
     expect(footer, contains('FxLiquidSecondaryButton'));
-    expect(footer, contains('Restaurar compras'));
+    expect(footer, contains('assinaturaRestaurarCompras'));
     expect(footer, contains('Termos e cobrança'));
     expect(build, contains('_showAssinaturaTermosSheet'));
     expect(build, isNot(contains('PaywallUpgradeLegalCompact.showBillingSheet')));

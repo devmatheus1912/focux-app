@@ -227,10 +227,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             button: true,
             label:
                 restoringPurchases
-                    ? 'Restaurando compras'
-                    : 'Restaurar compras',
+                    ? S.of(context).assinaturaRestaurandoCompras
+                    : S.of(context).assinaturaRestaurarCompras,
             child: FxLiquidSecondaryButton(
-              label: restoringPurchases ? 'Restaurando…' : 'Restaurar compras',
+              label: restoringPurchases
+                  ? S.of(context).assinaturaRestaurando
+                  : S.of(context).assinaturaRestaurarCompras,
               icon: Icons.restore_rounded,
               onPressed: restoringPurchases ? null : onRestore,
             ),
@@ -243,7 +245,9 @@ class _AssinaturaStickyFooter extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
             ),
             child: Text(
-              restoringPurchases ? 'Restaurando compras…' : 'Restaurar compras',
+              restoringPurchases
+                  ? S.of(context).assinaturaRestaurandoCompras
+                  : S.of(context).assinaturaRestaurarCompras,
               style: FocuxHubTypography.chip(tierAccent ?? primary),
             ),
           ),
@@ -317,11 +321,13 @@ Future<void> _showAssinaturaTermosSheet(
                         button: true,
                         label:
                             restoring
-                                ? 'Restaurando compras'
-                                : 'Restaurar compras',
+                                ? S.of(ctx).assinaturaRestaurandoCompras
+                                : S.of(ctx).assinaturaRestaurarCompras,
                         child: FxLiquidSecondaryButton(
                           label:
-                              restoring ? 'Restaurando…' : 'Restaurar compras',
+                              restoring
+                                  ? S.of(ctx).assinaturaRestaurando
+                                  : S.of(ctx).assinaturaRestaurarCompras,
                           icon: Icons.restore_rounded,
                           onPressed: restoring ? null : onRestore,
                         ),

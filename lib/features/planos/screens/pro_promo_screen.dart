@@ -128,7 +128,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s8),
                           ...[
-                            'Até 30 alunos',
+                            'Até ${PlanoAlunosLimits.pro} alunos',
                             '${PlanoIaLimits.pro} interações de IA/mês',
                             'Cobrança PIX dos alunos no app',
                             'CRM de leads',

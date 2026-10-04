@@ -89,7 +89,9 @@ class PaywallBillingLegalPanel extends StatelessWidget {
           TextButton(
             onPressed: restoring ? null : onRestore,
             child: Text(
-              restoring ? 'Restaurando compras…' : 'Restaurar compras',
+              restoring
+                  ? S.of(context).assinaturaRestaurandoCompras
+                  : S.of(context).assinaturaRestaurarCompras,
               style: TextStyle(
                 fontSize: 14,
                 color: ink.withValues(alpha: 0.82),

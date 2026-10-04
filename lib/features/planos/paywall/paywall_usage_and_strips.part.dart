@@ -14,7 +14,7 @@ String? paywallContextMessage({
   if (usage.alunosAtLimit && usage.limiteAlunos != null) {
     final proximo = target == SubscriptionPlan.ENTERPRISE
         ? 'Enterprise libera alunos ilimitados.'
-        : 'O Pro libera até 30 alunos.';
+        : 'O Pro libera até ${PlanoAlunosLimits.pro} alunos.';
     return 'Você atingiu ${usage.limiteAlunos} alunos, o limite do seu plano. '
         '$proximo';
   }
@@ -32,7 +32,7 @@ String? paywallContextMessage({
         'Enterprise dá mais folga no Copiloto.';
   }
   if (usage.plano == SubscriptionPlan.FREE) {
-    return 'O Pro libera até 30 alunos, cobrança PIX e '
+    return 'O Pro libera até ${PlanoAlunosLimits.pro} alunos, cobrança PIX e '
         '${PlanoIaLimits.pro} usos de IA por mês.';
   }
   return null;

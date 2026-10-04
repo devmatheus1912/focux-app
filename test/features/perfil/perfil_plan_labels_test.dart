@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/perfil/utils/perfil_plan_labels.dart';
 
 void main() {
-  test('alias legado ENTERPRISE_PRO não é mais plano', () {
-    expect(perfilPlanPillLabel('ENTERPRISE_PRO'), 'FREE');
+  test('alias legado ENTERPRISE_PRO cai no Enterprise, como no backend', () {
+    expect(perfilPlanPillLabel('ENTERPRISE_PRO'), 'ENTERPRISE');
   });
 
   test('PREMIUM alias cai no pill PRO', () {

@@ -1,3 +1,4 @@
+import '../../subscription/utils/plano_ia_limits.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -49,7 +50,7 @@ List<String> assinaturaReviewTopFeatures(SubscriptionPlan plan) =>
         'Alunos ilimitados + IA 600/mês',
       ],
       SubscriptionPlan.PRO => [
-        'Até 30 alunos ativos',
+        'Até ${PlanoAlunosLimits.pro} alunos ativos',
         'PIX e financeiro no app',
         'IA Copiloto e ${FocuxMicrocopy.commandCenter}',
         'Agenda e relatórios avançados',

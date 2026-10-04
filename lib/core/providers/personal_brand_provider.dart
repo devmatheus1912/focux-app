@@ -1,3 +1,4 @@
+import '../../features/subscription/models/subscription_plan.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_provider.dart';
 
@@ -54,7 +55,8 @@ class PersonalBrand {
     capturaUrl: j['capturaUrl'] as String?,
   );
 
-  bool get isEnterprise => plano == 'ENTERPRISE';
+  bool get isEnterprise =>
+      subscriptionPlanFromApi(plano) == SubscriptionPlan.ENTERPRISE;
 }
 
 final personalBrandProvider = FutureProvider.autoDispose<PersonalBrand>((

@@ -60,7 +60,7 @@ class PaywallCatalog {
   /// Resumo factual do plano (limites reais), sem promessa de retorno.
   static String? roiTagForPlan(SubscriptionPlan plan) => switch (plan) {
     SubscriptionPlan.PRO =>
-      'Até 30 alunos, ${PlanoIaLimits.pro} usos de IA/mês e cobrança PIX',
+      'Até ${PlanoAlunosLimits.pro} alunos, ${PlanoIaLimits.pro} usos de IA/mês e cobrança PIX',
     SubscriptionPlan.ENTERPRISE =>
       'Marca própria, landing completa, loja e ${PlanoIaLimits.enterprise} usos de IA/mês',
     _ => null,
@@ -166,7 +166,7 @@ class PaywallCatalog {
       title: '2 alunos cadastrados (não 3)',
       transition: 'FREE → PRO',
       message:
-          'Você está a 1 aluno do limite do Free. O Pro libera até 30 alunos.',
+          'Você está a 1 aluno do limite do Free. O Pro libera até ${PlanoAlunosLimits.pro} alunos.',
     ),
     PaywallUpgradeTrigger(
       number: '02',

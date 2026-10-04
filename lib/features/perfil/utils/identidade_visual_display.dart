@@ -1,3 +1,4 @@
+import '../../subscription/models/subscription_plan.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 
@@ -6,7 +7,7 @@ bool identidadeHasWhiteLabel({
   required String plano,
 }) {
   if (featureWhiteLabel != null) return featureWhiteLabel;
-  return plano.trim().toUpperCase() == 'ENTERPRISE';
+  return subscriptionPlanFromApi(plano) == SubscriptionPlan.ENTERPRISE;
 }
 
 String identidadeSalvarLabel({required bool isSetup}) =>

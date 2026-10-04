@@ -18,7 +18,7 @@ void main() {
     );
     expect(
       identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'ENTERPRISE_PRO'),
-      isFalse,
+      isTrue,
     );
     expect(
       identidadeHasWhiteLabel(featureWhiteLabel: null, plano: 'PRO'),
