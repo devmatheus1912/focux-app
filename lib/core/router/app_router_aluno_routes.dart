@@ -14,6 +14,7 @@ import '../../features/habitos/data/habito_repository.dart';
 import '../../features/desafios/data/desafio_repository.dart';
 import '../../features/desafios/screens/desafio_detail_screen.dart';
 import '../../features/desafios/screens/desafios_aluno_screen.dart';
+import '../observability/sentry_performance.dart';
 import 'app_router_redirect.dart';
 import '../../features/recorrencia/screens/recorrencia_aluno_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_aluno_screen.dart';
@@ -36,6 +37,7 @@ List<RouteBase> buildAlunoRoutes() {
                 AlunoShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
+            observers: sentryNavObservers(),
             routes: [
               GoRoute(
                 path: '/dashboard/aluno',
@@ -44,6 +46,7 @@ List<RouteBase> buildAlunoRoutes() {
             ],
           ),
           StatefulShellBranch(
+            observers: sentryNavObservers(),
             routes: [
               GoRoute(
                 path: '/checkin/treinos',
@@ -52,6 +55,7 @@ List<RouteBase> buildAlunoRoutes() {
             ],
           ),
           StatefulShellBranch(
+            observers: sentryNavObservers(),
             routes: [
               GoRoute(
                 path: '/saude',
@@ -60,6 +64,7 @@ List<RouteBase> buildAlunoRoutes() {
             ],
           ),
           StatefulShellBranch(
+            observers: sentryNavObservers(),
             routes: [
               GoRoute(
                 path: '/chat/aluno',
@@ -68,6 +73,7 @@ List<RouteBase> buildAlunoRoutes() {
             ],
           ),
           StatefulShellBranch(
+            observers: sentryNavObservers(),
             routes: [
               GoRoute(
                 path: '/aluno/perfil',

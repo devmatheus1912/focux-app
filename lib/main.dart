@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rive/rive.dart' show RiveNative;
+import 'package:sentry_flutter/sentry_flutter.dart'
+    show SentryWidgetsFlutterBinding;
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
@@ -17,6 +19,7 @@ import 'core/analytics/analytics_service.dart';
 import 'core/auth/session_cache_evictor.dart';
 import 'core/config/env.dart';
 import 'core/crash/flutter_error_reporting.dart';
+import 'core/observability/sentry_performance.dart';
 import 'core/router/safe_navigation.dart';
 import 'package:go_router/go_router.dart';
 import 'core/fcm/fcm_service.dart';
@@ -54,7 +57,7 @@ void main() {
   // layout/hit-test failures across the entire widget tree.
   runZonedGuarded(() async {
     _bootStopwatch.start();
-    WidgetsFlutterBinding.ensureInitialized();
+    SentryWidgetsFlutterBinding.ensureInitialized();
     LicenseRegistry.addLicense(() async* {
       final license = await rootBundle.loadString(
         'assets/google_fonts/OFL.txt',
@@ -81,6 +84,13 @@ void main() {
 
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(FocuxSystemChrome.dark);
+
+    try {
+      // Antes dos handlers abaixo: eles sobrescrevem os do Sentry (erros → Crashlytics).
+      await initSentryPerformance();
+    } catch (error) {
+      if (kDebugMode) debugPrint('[Focux] Sentry init error: $error');
+    }
 
     try {
       if (!kIsWeb) {

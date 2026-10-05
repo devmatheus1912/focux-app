@@ -111,12 +111,14 @@ import '../../features/perfil/screens/wallet_screen.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../widgets/feature_gate.dart';
 import '../widgets/fx_route_chrome.dart';
+import '../observability/sentry_performance.dart';
 import 'app_router_redirect.dart';
 import 'fx_page_transition.dart';
 
 /// Pushed routes with FxRouteChrome.
 RouteBase buildChromeShellRoute() {
   return ShellRoute(
+        observers: sentryNavObservers(),
         builder: (context, state, child) => FxRouteChrome(child: child),
         routes: [
           GoRoute(

@@ -1,6 +1,7 @@
 ﻿import 'package:go_router/go_router.dart';
 
 import '../auth/session_invalidator.dart';
+import '../observability/sentry_performance.dart';
 import 'app_router_auth_routes.dart';
 import 'app_router_aluno_routes.dart';
 import 'app_router_personal_shell_routes.dart';
@@ -12,6 +13,7 @@ import 'role_home.dart';
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/',
+    observers: sentryNavObservers(),
     errorBuilder: (context, state) => const HomeRedirectScreen(),
     refreshListenable: SessionInvalidator.listenable,
     redirect: (context, state) async => authRedirect(state),

@@ -41,6 +41,21 @@ class Env {
     defaultValue: false,
   );
 
+  /// DSN do Sentry (só traces de desempenho). Vazio = Sentry desligado.
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
+
+  static final double sentryTracesSampleRate =
+      double.tryParse(
+        const String.fromEnvironment(
+          'SENTRY_TRACES_SAMPLE_RATE',
+          defaultValue: '1.0',
+        ),
+      ) ??
+      0;
+
   /// Public URL used for shareable landing links (`/p/{slug}`, `/c/{slug}`).
   ///
   /// Canonical brand host is [publicWebDisplayHost] (`focuxpersonal.com`).

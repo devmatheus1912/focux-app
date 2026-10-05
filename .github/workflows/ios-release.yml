@@ -8,7 +8,7 @@ name: iOS Release
 #   APP_STORE_CONNECT_API_ISSUER_ID
 #   APP_STORE_CONNECT_API_KEY_BASE64
 #
-# Opcionais: API_URL, PUBLIC_WEB_URL, GOOGLE_*
+# Opcionais: API_URL, PUBLIC_WEB_URL, GOOGLE_*, SENTRY_DSN
 
 on:
   workflow_dispatch:
@@ -145,6 +145,7 @@ jobs:
           PUBLIC_WEB_URL: ${{ secrets.PUBLIC_WEB_URL }}
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
           GOOGLE_IOS_CLIENT_ID: ${{ secrets.GOOGLE_IOS_CLIENT_ID }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           set -euo pipefail
           if [[ -z "${GOOGLE_IOS_CLIENT_ID:-}" ]]; then
@@ -162,6 +163,9 @@ jobs:
           fi
           if [[ -n "${GOOGLE_IOS_CLIENT_ID:-}" ]]; then
             EXTRA+=(--dart-define=GOOGLE_IOS_CLIENT_ID="$GOOGLE_IOS_CLIENT_ID")
+          fi
+          if [[ -n "${SENTRY_DSN:-}" ]]; then
+            EXTRA+=(--dart-define=SENTRY_DSN="$SENTRY_DSN")
           fi
 
           # Assinatura via xcconfig — args depois de "--" o Flutter trata como -t (target file).

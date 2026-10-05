@@ -10,6 +10,7 @@ Page<T> fxTransitionPage<T>({
 }) {
   return CustomTransitionPage<T>(
     key: state.pageKey,
+    name: state.name ?? state.path,
     child: child,
     transitionDuration: const Duration(milliseconds: 320),
     reverseTransitionDuration: const Duration(milliseconds: 260),

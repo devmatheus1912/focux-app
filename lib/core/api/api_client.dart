@@ -8,6 +8,7 @@ import 'api_transport_circuit.dart';
 import '../auth/session_invalidator.dart';
 import '../auth/session_refresh_coordinator.dart';
 import '../config/env.dart';
+import '../observability/sentry_performance.dart';
 import '../planos/plano_cache_policy.dart';
 import '../storage/secure_storage.dart';
 import 'offline_queued_ack.dart';
@@ -37,6 +38,8 @@ class ApiClient {
     TlsCertificatePinning.apply(_dio);
     configureHttpConnectionPool(_dio);
 
+    // Primeiro: fecha o span antes do interceptor principal resolver/retentar.
+    _dio.interceptors.add(SentryHttpSpanInterceptor());
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -252,6 +255,7 @@ class ApiClient {
       ),
     );
     TlsCertificatePinning.apply(d);
+    d.interceptors.add(SentryHttpSpanInterceptor());
     return d;
   }
 
