@@ -50,6 +50,7 @@ void main() {
       isFalse,
     );
     expect(shouldLeavePreLoginGate('/register', const {}), isFalse);
+    expect(shouldLeavePreLoginGate('/cadastro', const {'ref': 'ABC123'}), isTrue);
     expect(homePathForRole('ALUNO'), '/dashboard/aluno');
     expect(homePathForRole('PERSONAL'), '/dashboard/personal');
   });

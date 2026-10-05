@@ -65,7 +65,7 @@ String homePathForRole(String? role) {
 
 /// Com token: `/onboarding` sempre; `/login` só se não houver `from` (deep-link).
 bool shouldLeavePreLoginGate(String path, Map<String, String> query) {
-  if (path == '/onboarding') return true;
+  if (path == '/onboarding' || path == '/cadastro') return true;
   if (path == '/login' && !query.containsKey('from')) return true;
   return false;
 }
