@@ -74,7 +74,7 @@ dependencies:
   qr_flutter: ^4.1.0
   wakelock_plus: ^1.7.0
   webview_flutter: ^4.10.0
-  cached_network_image: ^4.0.4
+  cached_network_image: ^4.0.3
   sentry_flutter: ^8.14.2
 
 dev_dependencies:
