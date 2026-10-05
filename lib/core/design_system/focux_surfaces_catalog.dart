@@ -40,6 +40,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: '/login',
   ),
+  '/cadastro': FocuxSurfaceSpec(
+    type: _s6,
+    hasInput: true,
+    logicalParent: '/login',
+  ),
   '/register/aluno': FocuxSurfaceSpec(
     type: _s6,
     hasInput: true,

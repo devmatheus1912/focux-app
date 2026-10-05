@@ -32,6 +32,7 @@ import '../widgets/apple_sign_in_button.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../l10n/app_localizations.dart';
 
 part 'register_screen_actions.part.dart';
 
@@ -51,7 +52,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
+  late final _referralController = TextEditingController(
+    text: widget.referralCodigo?.trim() ?? '',
+  );
   final _passwordFocus = FocusNode();
+
+  String? get _referralCodigo {
+    final codigo = _referralController.text.trim();
+    return codigo.isEmpty ? null : codigo;
+  }
   bool _loading = false;
   bool _loadingGoogle = false;
   bool _loadingApple = false;
@@ -87,6 +96,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _passwordController.dispose();
     _phoneController.dispose();
     _codeController.dispose();
+    _referralController.dispose();
     _passwordFocus.dispose();
     super.dispose();
   }
@@ -348,6 +358,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 inputFormatters: [BrPhone.formatter()],
                                 validator: BrPhone.validateOptional,
                                 onFieldSubmitted: (_) => _pedirCriarConta(),
+                              ),
+                              const SizedBox(height: 10),
+                              AuthField(
+                                label: S.of(context).registerIndicacaoLabel,
+                                controller: _referralController,
+                                hintText: S.of(context).registerIndicacaoHint,
+                                icon: Icons.card_giftcard_outlined,
+                                textInputAction: TextInputAction.done,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp('[A-Za-z0-9-]'),
+                                  ),
+                                  LengthLimitingTextInputFormatter(32),
+                                ],
                               ),
                               const SizedBox(height: 22),
                               if (_error != null) ...[

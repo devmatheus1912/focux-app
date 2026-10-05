@@ -124,8 +124,14 @@ class AuthNotifier extends Notifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
-  Future<AuthLoginResult> loginGoogle({required String idToken}) async {
-    final result = await _repo.loginGoogle(idToken: idToken);
+  Future<AuthLoginResult> loginGoogle({
+    required String idToken,
+    String? referralCodigo,
+  }) async {
+    final result = await _repo.loginGoogle(
+      idToken: idToken,
+      referralCodigo: referralCodigo,
+    );
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;
     _requiresPasswordChange = false;
@@ -139,6 +145,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
     String? email,
     String? authorizationCode,
     String? rawNonce,
+    String? referralCodigo,
   }) async {
     final result = await _repo.loginApple(
       identityToken: identityToken,
@@ -146,6 +153,7 @@ class AuthNotifier extends Notifier<AuthStatus> {
       email: email,
       authorizationCode: authorizationCode,
       rawNonce: rawNonce,
+      referralCodigo: referralCodigo,
     );
     if (result.mfaRequired) return result;
     _currentRole = UserRole.personal;

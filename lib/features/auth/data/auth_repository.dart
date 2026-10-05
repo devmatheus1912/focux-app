@@ -291,10 +291,18 @@ class AuthRepository {
   }
 
   /// Login social é só do personal; aluno entra pelo link do personal.
-  Future<AuthLoginResult> loginGoogle({required String idToken}) async {
+  Future<AuthLoginResult> loginGoogle({
+    required String idToken,
+    String? referralCodigo,
+  }) async {
     final response = await _authPost(
       '/api/auth/google',
-      data: {'idToken': idToken, 'role': 'PERSONAL'},
+      data: {
+        'idToken': idToken,
+        'role': 'PERSONAL',
+        if (referralCodigo != null && referralCodigo.isNotEmpty)
+          'referralCodigo': referralCodigo,
+      },
     );
     return _consumeAuthResponse(
       response.data as Map<String, dynamic>,
@@ -309,6 +317,7 @@ class AuthRepository {
     String? email,
     String? authorizationCode,
     String? rawNonce,
+    String? referralCodigo,
   }) async {
     final informedName = fullName?.trim();
     if (informedName != null && informedName.isNotEmpty) {
@@ -326,6 +335,8 @@ class AuthRepository {
       if (authorizationCode != null && authorizationCode.isNotEmpty)
         'authorizationCode': authorizationCode,
       if (rawNonce != null && rawNonce.isNotEmpty) 'nonce': rawNonce,
+      if (referralCodigo != null && referralCodigo.isNotEmpty)
+        'referralCodigo': referralCodigo,
     };
     final response = await _authPost('/api/auth/apple', data: data);
     final result = await _consumeAuthResponse(

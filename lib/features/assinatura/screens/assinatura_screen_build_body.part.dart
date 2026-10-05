@@ -148,7 +148,10 @@ extension AssinaturaScreenBuildBody on _AssinaturaScreenState {
                                     'source': 'compare_tabs',
                                   },
                                 );
-                                setState(() => _billingPeriod = period);
+                                setState(() {
+                                  _billingPeriod = period;
+                                  _billingPeriodTouched = true;
+                                });
                                 _selectPlan(selPlan);
                               }
                               : null,

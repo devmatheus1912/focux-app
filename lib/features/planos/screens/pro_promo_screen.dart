@@ -19,7 +19,9 @@ import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
+import '../../../l10n/app_localizations.dart';
 import '../paywall/paywall_price.dart';
+import '../paywall/trial_eligibility_provider.dart';
 
 class ProPromoScreen extends ConsumerStatefulWidget {
   const ProPromoScreen({super.key});
@@ -74,6 +76,9 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
       Theme.of(context).colorScheme.primary,
     );
     final useStore = subscriptionUsesNativeStore;
+    final trial =
+        useStore && (ref.watch(storeTrialEligibleProvider).value ?? false);
+    final l10n = S.of(context);
     // Promo surface is always cinematic dark — force readable ink.
     const ink = EagleTokens.darkInk;
     const mute = EagleTokens.darkInkMute;
@@ -118,9 +123,12 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                           ),
                           const SizedBox(height: TokensStrip.s5),
                           Text(
-                            useStore
-                                ? 'PRO com $kTrialDays dias grátis\n${subscriptionChannelWith(ChannelPreposition.em)}'
-                                : 'Cresça e cobre no app.\nAssine o PRO.',
+                            trial
+                                ? l10n.proPromoTituloTrial(
+                                  kTrialDays,
+                                  subscriptionChannelWith(ChannelPreposition.em),
+                                )
+                                : l10n.proPromoTitulo,
                             textAlign: TextAlign.center,
                             style: TokensStrip.h1(
                               color: ink,
@@ -176,9 +184,9 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                                     ),
                                     const SizedBox(width: TokensStrip.s2),
                                     Text(
-                                      useStore
-                                          ? '$kTrialDays dias grátis na loja'
-                                          : 'Plano PRO',
+                                      trial
+                                          ? l10n.proPromoSeloTrial(kTrialDays)
+                                          : l10n.proPromoSelo,
                                       style: FocuxHubTypography.sectionTitle(
                                         context,
                                         color: EagleTokens.goldStar,
@@ -188,9 +196,11 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                                 ),
                                 const SizedBox(height: TokensStrip.s1),
                                 Text(
-                                  useStore
-                                      ? 'A loja mostra o período grátis e o valor antes de você confirmar. Renova automaticamente; cancele quando quiser ${subscriptionCancelWhere()}.'
-                                      : 'Checkout seguro via Mercado Pago. Cancele quando quiser.',
+                                  trial
+                                      ? l10n.proPromoTextoTrial(subscriptionCancelWhere())
+                                      : useStore
+                                      ? l10n.proPromoTextoLoja(subscriptionCancelWhere())
+                                      : l10n.proPromoTextoWeb,
                                   textAlign: TextAlign.center,
                                   style: TokensStrip.bodyMuted(color: mute),
                                 ),
@@ -201,14 +211,14 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                           Semantics(
                             button: true,
                             label:
-                                useStore
-                                    ? 'Começar $kTrialDays dias grátis na loja'
-                                    : 'Assinar o PRO',
+                                trial
+                                    ? l10n.proPromoCtaTrial(kTrialDays)
+                                    : l10n.proPromoCta,
                             child: FxLiquidPrimaryButton(
                               label:
-                                  useStore
-                                      ? 'Começar $kTrialDays dias grátis'
-                                      : 'Assinar o PRO',
+                                  trial
+                                      ? l10n.proPromoCtaTrial(kTrialDays)
+                                      : l10n.proPromoCta,
                               loading: _starting,
                               onPressed: _starting ? null : _continueToCheckout,
                             ),
@@ -216,7 +226,7 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                           const SizedBox(height: TokensStrip.s3),
                           FxConversionTextLink(
                             text: '',
-                            actionText: 'Agora não',
+                            actionText: l10n.proPromoAgoraNao,
                             onTap: _dismiss,
                             actionColor: mute,
                           ),

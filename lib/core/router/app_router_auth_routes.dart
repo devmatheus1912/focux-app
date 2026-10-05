@@ -58,6 +58,18 @@ List<RouteBase> buildAuthRoutes() {
         );
       },
     ),
+    // Link de indicação do site (`/cadastro?ref=`) abre o cadastro no app.
+    GoRoute(
+      path: '/cadastro',
+      redirect:
+          (_, state) => Uri(
+            path: '/register',
+            queryParameters:
+                state.uri.queryParameters.isEmpty
+                    ? null
+                    : state.uri.queryParameters,
+          ).toString(),
+    ),
     GoRoute(
       path: '/register',
       builder:

@@ -136,7 +136,7 @@ extension on _RegisterScreenState {
             _nameController.text.trim(),
             _emailController.text.trim(),
             _passwordController.text,
-            referralCodigo: widget.referralCodigo,
+            referralCodigo: _referralCodigo,
             telefone: BrPhone.normalizeOrNull(_phoneController.text),
             emailCodigo: _codeController.text.trim(),
           );
@@ -192,7 +192,7 @@ extension on _RegisterScreenState {
 
       final loginResult = await ref
           .read(authProvider.notifier)
-          .loginGoogle(idToken: idToken);
+          .loginGoogle(idToken: idToken, referralCodigo: _referralCodigo);
 
       if (!mounted) return;
       if (await _maybeOpenMfa(loginResult, method: 'google')) return;
@@ -248,6 +248,7 @@ extension on _RegisterScreenState {
             email: credential.email,
             authorizationCode: credential.authorizationCode,
             rawNonce: credential.rawNonce,
+            referralCodigo: _referralCodigo,
           );
 
       if (!mounted) return;

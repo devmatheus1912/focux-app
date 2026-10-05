@@ -78,6 +78,7 @@ bool isPublicLocation(String path) {
       path == '/login' ||
       path == '/login/mfa' ||
       path == '/register' ||
+      path == '/cadastro' ||
       path == '/register/aluno' ||
       path == '/onboarding' ||
       path == '/esqueci-senha' ||

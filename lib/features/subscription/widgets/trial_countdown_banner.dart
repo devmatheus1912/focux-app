@@ -9,7 +9,9 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../planos/data/planos_repository.dart';
 import '../../planos/paywall/paywall_catalog.dart';
 import '../../planos/providers/plano_features_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../models/subscription_plan.dart';
+import '../store_subscription_policy.dart';
 
 final _trialStatusProvider = FutureProvider.autoDispose<TrialStatus>(
   (ref) => ref.read(planosRepositoryProvider).getTrialStatus(),
@@ -67,7 +69,11 @@ class TrialCountdownBanner extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Assine para manter IA, PIX e Command Center.',
+                        trial.subscriptionTokenPresent
+                            ? S.of(context).trialBannerRenovaLoja(
+                              subscriptionCancelWhere(),
+                            )
+                            : 'Assine para manter IA, PIX e Command Center.',
                         style: FocuxHubTypography.bodyMuted(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

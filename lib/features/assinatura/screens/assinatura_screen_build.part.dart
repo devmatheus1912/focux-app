@@ -137,15 +137,8 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           trialEligible: _paywallTrialEligible,
           period: _billingPeriod,
         );
-        const trialDays = kTrialDays;
-        final isUpgrade = selectedPlan.level > currentPlan.level;
-        final selectedLabel = PaywallCatalog.displayPlanName(selectedPlan);
-        ctaLabel =
-            trialOffer
-                ? 'Começar $trialDays dias grátis'
-                : isUpgrade
-                ? 'Confirmar upgrade'
-                : 'Continuar com $selectedLabel';
+        // Rótulo final (com teste grátis) vem de paywallStickyCtaLabel abaixo.
+        ctaLabel = '';
         footnote =
             trialOffer
                 ? ''
@@ -209,9 +202,10 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
       if (trialOffer) {
         final price = selectedPrice?.primary.trim();
         if (price != null && price.isNotEmpty && price != 'Grátis') {
-          footnote =
-              'Depois $price, renova automaticamente. '
-              'Cancele ${subscriptionCancelWhere()}.';
+          footnote = S.of(context).assinaturaTrialRodape(
+            price,
+            subscriptionCancelWhere(),
+          );
         }
       }
     }

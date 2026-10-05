@@ -152,8 +152,8 @@ void main() {
     ).readAsStringSync();
     expect(screen, contains('_enterprisePreviewFootnote'));
     expect(build, contains('paywallStickyCtaLabel'));
-    expect(build, contains('Começar \$trialDays dias grátis'));
-    expect(build, contains('Confirmar upgrade'));
+    expect(build, contains('assinaturaTrialRodape'));
+    expect(build, isNot(contains('dias grátis')));
     expect(build, contains('FxKeyboardDismissScope.dismiss'));
     expect(build, contains("safePopOrGo(context, '/perfil')"));
     expect(build, isNot(contains('— \$selectedLabel')));

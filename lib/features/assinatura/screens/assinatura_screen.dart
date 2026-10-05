@@ -151,7 +151,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _restoringPurchases = false;
   bool _paymentBlocked = false;
   bool _planReconcileAttempted = false;
+  /// Anual por padrão; vira mensal quando a loja confirma o teste grátis (só existe no PRO mensal).
   SubscriptionBillingPeriod _billingPeriod = SubscriptionBillingPeriod.yearly;
+  bool _billingPeriodTouched = false;
   DateTime? _paywallFetchedAt;
   ProviderSubscription<AsyncValue<PaywallHomeBundle>>? _paywallFreshnessSub;
 
@@ -351,6 +353,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         );
         _trialOffers = trialOffers;
         _storeTrialEligible = trialEligible;
+        if (trialEligible == true && !_billingPeriodTouched) {
+          _billingPeriod = SubscriptionBillingPeriod.monthly;
+        }
       });
     } catch (_) {
       // Sem catálogo da loja: o checkout consulta o produto de novo.
@@ -393,12 +398,20 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
     switch (event) {
-      case IapPurchaseCanceled() || IapPurchaseSuperseded():
+      case IapPurchaseCanceled():
         setState(() {
           _loadingCheckout = false;
           _syncingPurchase = false;
           _checkoutProductId = null;
         });
+      case IapPurchaseSuperseded():
+        // A loja devolveu a transação antiga em vez de abrir a compra.
+        setState(() {
+          _loadingCheckout = false;
+          _syncingPurchase = false;
+          _checkoutProductId = null;
+        });
+        FeedbackHelper.showInfo(context, S.of(context).assinaturaJaExisteNaLoja);
       case IapPurchaseStoreError():
         _finishPurchaseFlowWithError(
           assinaturaStoreFailureCopy(),
@@ -561,9 +574,11 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 trialEligible: _paywallTrialEligible,
                 period: _billingPeriod,
               )
-              ? '$kTrialDays dias grátis no ${PaywallCatalog.displayPlanName(plan)}. '
-                  'Depois, renova automaticamente pelo valor acima. '
-                  'Cancele ${subscriptionCancelWhere()} até 24 horas antes do fim do teste para não ser cobrado.'
+              ? S.of(context).assinaturaTrialNota(
+                  kTrialDays,
+                  PaywallCatalog.displayPlanName(plan),
+                  subscriptionCancelWhere(),
+                )
               : null;
       final confirmed = await context.push<bool>(
         '/assinatura/review',
