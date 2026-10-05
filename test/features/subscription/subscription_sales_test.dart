@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/billing_client_wrappers.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 import 'package:focux_app/features/subscription/subscription_products.dart';
 
@@ -115,5 +117,45 @@ void main() {
       {SubscriptionProducts.proMonthly: trial},
     );
     expect(SubscriptionProducts.freeTrialOffersById([paga]), isEmpty);
+  });
+
+  test('Play: oferta de indicação não vira vitrine nem teste grátis', () {
+    PricingPhaseWrapper fase(int micros) => PricingPhaseWrapper(
+      billingCycleCount: 1,
+      billingPeriod: 'P1M',
+      formattedPrice: 'R\$ ${micros / 1000000}',
+      priceAmountMicros: micros,
+      priceCurrencyCode: 'BRL',
+      recurrenceMode: RecurrenceMode.finiteRecurring,
+    );
+    SubscriptionOfferDetailsWrapper oferta(List<String> tags, int micros) =>
+        SubscriptionOfferDetailsWrapper(
+          basePlanId: 'mensal',
+          offerTags: tags,
+          offerIdToken: 'tok-${tags.join()}-$micros',
+          pricingPhases: [fase(micros)],
+        );
+    final itens = GooglePlayProductDetails.fromProductDetails(
+      ProductDetailsWrapper(
+        description: '',
+        name: 'PRO',
+        productId: SubscriptionProducts.proMonthly,
+        productType: ProductType.subs,
+        title: 'PRO',
+        subscriptionOfferDetails: [
+          oferta(const [SubscriptionProducts.referralOfferTag], 0),
+          oferta(const [], 0),
+          oferta(const [], 79900000),
+        ],
+      ),
+    );
+
+    final indicacao = SubscriptionProducts.referralOffersById(itens);
+    final trial = SubscriptionProducts.freeTrialOffersById(itens);
+    final vitrine = SubscriptionProducts.displayById(itens);
+
+    expect(indicacao[SubscriptionProducts.proMonthly], same(itens[0]));
+    expect(trial[SubscriptionProducts.proMonthly], same(itens[1]));
+    expect(vitrine[SubscriptionProducts.proMonthly], same(itens[2]));
   });
 }

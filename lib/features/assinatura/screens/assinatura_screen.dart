@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/analytics/analytics_service.dart';
@@ -17,6 +18,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/fx_empty_state.dart';
@@ -31,6 +33,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/planos/data/planos_repository.dart';
 import '../../../features/planos/providers/plano_features_provider.dart';
+import '../../../features/referral/data/referral_repository.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
 import '../../../features/subscription/services/iap_purchase_coordinator.dart';
 import '../../../features/subscription/services/iap_purchase_event.dart';
@@ -141,6 +144,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   bool _storeAvailable = false;
   Map<String, ProductDetails> _productDetails = const {};
   Map<String, ProductDetails> _trialOffers = const {};
+  Map<String, ProductDetails> _referralOffers = const {};
+  /// Desconto de indicado ainda não usado (só mensais).
+  int? _referralPct;
   bool? _storeTrialEligible;
   EnterpriseUpgradePreview? _enterprisePreview;
   bool _enterprisePreviewRequested = false;
@@ -226,6 +232,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
     _initializeStore();
     _loadTrialStatus();
+    _loadReferralDiscount();
     _checkDeviceSecurity();
     _paywallFreshnessSub = ref.listenManual(paywallHomeProvider, (_, next) {
       if (!next.hasValue || next.isLoading || next.hasError) return;
@@ -307,6 +314,57 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
+  Future<void> _loadReferralDiscount() async {
+    try {
+      final pct = await ReferralRepository(
+        ref.read(apiClientProvider),
+      ).descontoPendentePct();
+      if (mounted && pct != null && pct > 0) {
+        setState(() => _referralPct = pct);
+      }
+    } catch (_) {
+      // Sem desconto: checkout no preço normal.
+    }
+  }
+
+  /// iPhone: abre o resgate do código de oferta da Apple (20% no primeiro mês
+  /// pago). false = sem código; segue a compra normal.
+  Future<bool> _redeemAppleReferralCode(String productId) async {
+    final l10n = S.of(context);
+    try {
+      final codigo = await ReferralRepository(
+        ref.read(apiClientProvider),
+      ).codigoApple(productId);
+      if (!mounted) return true;
+      final code = codigo.codigo;
+      if (code == null) {
+        FeedbackHelper.showInfo(context, l10n.assinaturaIndicacaoSemCodigo);
+        return false;
+      }
+      _checkoutProductId = productId;
+      final url = codigo.urlResgate;
+      if (url != null &&
+          await launchUrl(
+            Uri.parse(url),
+            mode: LaunchMode.externalApplication,
+          )) {
+        return true;
+      }
+      await copySensitiveToClipboard(code);
+      if (!mounted) return true;
+      FeedbackHelper.showInfo(context, l10n.assinaturaIndicacaoCodigoCopiado);
+      await InAppPurchase.instance
+          .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>()
+          .presentCodeRedemptionSheet();
+      return true;
+    } catch (_) {
+      if (mounted) {
+        FeedbackHelper.showInfo(context, l10n.assinaturaIndicacaoSemCodigo);
+      }
+      return false;
+    }
+  }
+
   /// Na loja, o grátis aparece só se a própria loja confirmar a elegibilidade.
   bool? get _paywallTrialEligible =>
       subscriptionUsesNativeStore
@@ -352,6 +410,9 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
           response.productDetails,
         );
         _trialOffers = trialOffers;
+        _referralOffers = SubscriptionProducts.referralOffersById(
+          response.productDetails,
+        );
         _storeTrialEligible = trialEligible;
         if (trialEligible == true && !_billingPeriodTouched) {
           _billingPeriod = SubscriptionBillingPeriod.monthly;
@@ -636,6 +697,17 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
 
+    final referralDiscount =
+        _referralPct != null &&
+        SubscriptionProducts.referralDiscountProductIds.contains(productId);
+    if (referralDiscount && defaultTargetPlatform == TargetPlatform.iOS) {
+      if (await _redeemAppleReferralCode(productId)) return;
+      if (!mounted) return;
+    }
+    final referralOffer =
+        referralDiscount && defaultTargetPlatform == TargetPlatform.android
+            ? _referralOffers[productId]
+            : null;
     final trialOffer =
         defaultTargetPlatform == TargetPlatform.android &&
                 paywallShowsTrial(
@@ -648,7 +720,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                 )
             ? _trialOffers[productId]
             : null;
-    final productToBuy = trialOffer ?? product;
+    final productToBuy = referralOffer ?? trialOffer ?? product;
     setState(() {
       _loadingCheckout = true;
       _checkoutProductId = productToBuy.id;

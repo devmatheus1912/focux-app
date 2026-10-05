@@ -1,4 +1,5 @@
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import 'models/subscription_plan.dart';
 
@@ -63,6 +64,22 @@ class SubscriptionProducts {
     return null;
   }
 
+  /// Tag da oferta de indicação no Play Console (20% no primeiro mês pago).
+  static const String referralOfferTag = 'indicacao';
+
+  static const Set<String> referralDiscountProductIds = {
+    proMonthly,
+    enterpriseMonthly,
+  };
+
+  static bool _isReferralOffer(ProductDetails item) {
+    if (item is! GooglePlayProductDetails) return false;
+    final index = item.subscriptionIndex;
+    final offers = item.productDetails.subscriptionOfferDetails;
+    if (index == null || offers == null || index >= offers.length) return false;
+    return offers[index].offerTags.contains(referralOfferTag);
+  }
+
   /// No Google Play cada oferta chega como um item com o mesmo id; o preço de
   /// vitrine é o do plano base (primeira fase paga).
   static Map<String, ProductDetails> displayById(
@@ -70,6 +87,7 @@ class SubscriptionProducts {
   ) {
     final out = <String, ProductDetails>{};
     for (final item in items) {
+      if (_isReferralOffer(item)) continue;
       final current = out[item.id];
       if (current == null || (current.rawPrice <= 0 && item.rawPrice > 0)) {
         out[item.id] = item;
@@ -83,7 +101,16 @@ class SubscriptionProducts {
     Iterable<ProductDetails> items,
   ) => {
     for (final item in items)
-      if (item.rawPrice <= 0) item.id: item,
+      if (item.rawPrice <= 0 && !_isReferralOffer(item)) item.id: item,
+  };
+
+  /// Oferta de indicação do Google Play (o Play devolve para todos; o backend
+  /// decide quem é indicado).
+  static Map<String, ProductDetails> referralOffersById(
+    Iterable<ProductDetails> items,
+  ) => {
+    for (final item in items)
+      if (_isReferralOffer(item)) item.id: item,
   };
 
   static double annualSavingsAmount(double monthlyPrice) => monthlyPrice * 2;

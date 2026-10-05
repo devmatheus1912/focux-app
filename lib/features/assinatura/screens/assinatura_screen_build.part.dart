@@ -208,6 +208,14 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
           );
         }
       }
+      final pct = _referralPct;
+      if (pct != null &&
+          SubscriptionProducts.referralDiscountProductIds.contains(
+            SubscriptionProducts.productIdFor(selectedPlan, _billingPeriod),
+          )) {
+        final selo = S.of(context).assinaturaIndicacaoSelo(pct);
+        footnote = footnote.isEmpty ? selo : '$selo. $footnote';
+      }
     }
     if (_enterprisePreview != null) {
       final note = _enterprisePreviewFootnote(

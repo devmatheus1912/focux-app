@@ -39,51 +39,36 @@ void main() {
     expect(referralTemLink(null), isFalse);
   });
 
-  test('desconto do indicado só aparece fora da loja nativa', () {
-    expect(referralMostraDescontoIndicado(_info(), lojaNativa: false), isTrue);
-    expect(referralMostraDescontoIndicado(_info(), lojaNativa: true), isFalse);
-    expect(
-      referralMostraDescontoIndicado(_info(desconto: 0), lojaNativa: false),
-      isFalse,
-    );
-    expect(
-      referralMostraDescontoIndicado(
-        _info(campanhaAtiva: false),
-        lojaNativa: false,
-      ),
-      isFalse,
-    );
+  test('desconto do indicado aparece com campanha e percentual', () {
+    expect(referralMostraDescontoIndicado(_info()), isTrue);
+    expect(referralMostraDescontoIndicado(_info(desconto: 0)), isFalse);
+    expect(referralMostraDescontoIndicado(_info(campanhaAtiva: false)), isFalse);
   });
 
-  test('convite usa o desconto que o servidor mandou no checkout web', () {
+  test('convite usa o desconto que o servidor mandou', () {
     expect(
-      referralInviteText(pt, _info(), lojaNativa: false),
-      'Use meu código ABCD234567 e ganhe 20% off na 1ª cobrança do Focux Personal.\n'
+      referralInviteText(pt, _info()),
+      'Use meu código ABCD234567 e ganhe 20% no primeiro mês pago do Focux Personal.\n'
       'https://focux.app/cadastro?ref=ABCD234567',
     );
     expect(
-      referralInviteText(pt, _info(desconto: 0), lojaNativa: false),
+      referralInviteText(pt, _info(desconto: 0)),
       'Use meu código ABCD234567 no cadastro do Focux Personal.\n'
       'https://focux.app/cadastro?ref=ABCD234567',
     );
     expect(
-      referralInviteText(pt, _info(campanhaAtiva: false), lojaNativa: false),
+      referralInviteText(pt, _info(campanhaAtiva: false)),
       startsWith('Use meu código ABCD234567 no cadastro'),
     );
   });
 
-  test('na loja nativa o convite não promete desconto', () {
+  test('copy combinada: 20% no primeiro mês pago, dias após 30 dias pagos', () {
+    expect(referralDiscountLine(pt, _info()), 'Seu colega ganha 20% no primeiro mês pago');
     expect(
-      referralInviteText(pt, _info(), lojaNativa: true),
-      'Use meu código ABCD234567 no cadastro do Focux Personal.\n'
-      'https://focux.app/cadastro?ref=ABCD234567',
+      referralRewardHeadline(pt, _info()),
+      'Você ganha 30 dias quando seu colega completar 30 dias de assinatura paga',
     );
-    expect(referralDiscountLine(pt, _info(), lojaNativa: true), isNull);
-  });
-
-  test('regras de ajuda não falam de reembolso', () {
-    expect(pt.referralHelpRulesBody, isNot(contains('Reembolso')));
-    expect(pt.referralHelpRulesBody, contains('Só pagamento real confirmado conta.'));
+    expect(pt.referralHelpRulesBody, contains('30 dias pagos'));
   });
 
   test('subtitulo do hub segue a campanha e junta freshness', () {
@@ -107,11 +92,8 @@ void main() {
     expect(referralRewardsProgress(pt, pausada), isNull);
     expect(referralDaysProgress(pt, pausada), '30');
     expect(referralRewardHeadline(pt, pausada), isNull);
-    expect(referralDiscountLine(pt, pausada, lojaNativa: false), isNull);
-    expect(
-      referralDiscountLine(pt, _info(), lojaNativa: false),
-      contains('20% off'),
-    );
+    expect(referralDiscountLine(pt, pausada), isNull);
+    expect(referralDiscountLine(pt, _info()), contains('20%'));
   });
 
   test('banner prioriza campanha pausada, depois analise, depois limite', () {
@@ -128,7 +110,7 @@ void main() {
     expect(referralBannerText(pt, _info()), isNull);
     expect(
       referralBannerText(pt, _info(emAnalise: 2)),
-      startsWith('2 recompensas em análise'),
+      startsWith('2 recompensas aguardando 30 dias'),
     );
   });
 
@@ -166,7 +148,7 @@ void main() {
     final passos = referralComoFuncionaPassos(pt, _info());
     expect(passos, hasLength(3));
     expect(passos.last.titulo, '3. Você ganha 30 dias');
-    expect(passos.last.detalhe, 'Até 3 recompensas, no máximo 90 dias no total.');
+    expect(passos.last.detalhe, endsWith('Até 3 recompensas, no máximo 90 dias no total.'));
     final generico = referralComoFuncionaPassos(pt, _info(campanhaAtiva: false));
     expect(generico.last.titulo, '3. Você ganha dias extras');
   });

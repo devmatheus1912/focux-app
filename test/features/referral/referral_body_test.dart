@@ -9,7 +9,6 @@ Future<void> _pump(
   WidgetTester tester,
   ReferralInfo info, {
   VoidCallback? onShare,
-  bool lojaNativa = false,
 }) {
   return tester.pumpWidget(
     MaterialApp(
@@ -21,7 +20,6 @@ Future<void> _pump(
         body: ReferralBody(
           info: info,
           isDark: false,
-          lojaNativa: lojaNativa,
           onShare: onShare ?? () {},
           onCopyLink: () {},
         ),
@@ -68,19 +66,13 @@ void main() {
     expect(find.text('30 de 90 dias'), findsOneWidget);
     expect(find.text('Maria L.'), findsOneWidget);
     expect(find.text('+30 dias no seu plano'), findsOneWidget);
-    expect(find.text('Em análise de segurança'), findsOneWidget);
-    expect(find.textContaining('1 recompensa em análise'), findsOneWidget);
-    expect(find.textContaining('20% off'), findsOneWidget);
+    expect(find.text('Assinou · libera após 30 dias pagos'), findsOneWidget);
+    expect(find.textContaining('1 recompensa aguardando 30 dias'), findsOneWidget);
+    expect(find.text('Seu colega ganha 20% no primeiro mês pago'), findsOneWidget);
 
     await tester.tap(find.text('Copiar convite'));
     expect(compartilhou, isTrue);
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('na loja nativa o painel não mostra desconto do indicado', (tester) async {
-    await _pump(tester, _ativa, lojaNativa: true);
-    expect(find.textContaining('% off'), findsNothing);
-    expect(find.text('ABCD234567'), findsOneWidget);
   });
 
   testWidgets('sem indicacoes mostra estado vazio', (tester) async {

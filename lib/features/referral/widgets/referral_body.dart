@@ -32,16 +32,12 @@ class ReferralBody extends StatelessWidget {
     super.key,
     required this.info,
     required this.isDark,
-    required this.lojaNativa,
     required this.onShare,
     required this.onCopyLink,
   });
 
   final ReferralInfo info;
   final bool isDark;
-
-  /// Compra pela App Store / Google Play: sem desconto do indicado.
-  final bool lojaNativa;
   final VoidCallback onShare;
   final VoidCallback onCopyLink;
 
@@ -69,7 +65,6 @@ class ReferralBody extends StatelessWidget {
         _ReferralCodeCard(
           info: info,
           isDark: isDark,
-          lojaNativa: lojaNativa,
           onShare: onShare,
           onCopyLink: onCopyLink,
         ),
@@ -168,14 +163,12 @@ class _ReferralCodeCard extends StatelessWidget {
   const _ReferralCodeCard({
     required this.info,
     required this.isDark,
-    required this.lojaNativa,
     required this.onShare,
     required this.onCopyLink,
   });
 
   final ReferralInfo info;
   final bool isDark;
-  final bool lojaNativa;
   final VoidCallback onShare;
   final VoidCallback onCopyLink;
 
@@ -186,7 +179,7 @@ class _ReferralCodeCard extends StatelessWidget {
     final primary = Theme.of(context).colorScheme.primary;
     final codigo = referralCodigoLabel(info.codigo);
     final headline = referralRewardHeadline(l10n, info);
-    final desconto = referralDiscountLine(l10n, info, lojaNativa: lojaNativa);
+    final desconto = referralDiscountLine(l10n, info);
     return FxStripCard(
       emphasize: true,
       semanticsLabel: l10n.referralCodeSemantics(codigo),
