@@ -216,7 +216,7 @@ class _AssinaturaStickyFooter extends StatelessWidget {
           Text(
             footnote,
             textAlign: TextAlign.center,
-            maxLines: 2,
+            maxLines: 4,
             overflow: TextOverflow.ellipsis,
             style: FocuxHubTypography.bodyMuted(color: secondary, height: 1.35),
           ),

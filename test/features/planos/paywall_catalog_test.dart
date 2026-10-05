@@ -4,8 +4,14 @@ import 'package:focux_app/features/subscription/models/subscription_plan.dart';
 
 void main() {
   test('comparisons binárias batem com a spec', () {
-    expect(PaywallCatalog.comparisonFreeVsPro.length, 9);
-    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 11);
+    expect(PaywallCatalog.comparisonFreeVsPro.length, 11);
+    expect(PaywallCatalog.comparisonFreeVsEnterprise.length, 14);
+    final rotulos = [
+      ...PaywallCatalog.comparisonFreeVsPro,
+      ...PaywallCatalog.comparisonFreeVsEnterprise,
+    ].map((r) => r.feature).join(' | ');
+    expect(rotulos, isNot(contains('CRM')));
+    expect(rotulos, contains('Centro de Comando + Índice Focux'));
   });
 
   test('upgradeTriggers match reference', () {

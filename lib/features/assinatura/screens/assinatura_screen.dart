@@ -147,6 +147,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
   Map<String, ProductDetails> _referralOffers = const {};
   /// Desconto de indicado ainda não usado (só mensais).
   int? _referralPct;
+  /// Segundo toque no iPhone vai para a compra normal (código já resgatado ou recusado).
+  bool _appleReferralCodeOpened = false;
   bool? _storeTrialEligible;
   EnterpriseUpgradePreview? _enterprisePreview;
   bool _enterprisePreviewRequested = false;
@@ -327,10 +329,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
   }
 
+  /// Desconto de indicação aplicável a este produto (Android: só com a oferta da Play carregada).
+  bool _referralApplies(String productId) =>
+      _referralPct != null &&
+      SubscriptionProducts.referralDiscountProductIds.contains(productId) &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          _referralOffers.containsKey(productId));
+
   /// iPhone: abre o resgate do código de oferta da Apple (20% no primeiro mês
   /// pago). false = sem código; segue a compra normal.
   Future<bool> _redeemAppleReferralCode(String productId) async {
     final l10n = S.of(context);
+    setState(() => _loadingCheckout = true);
     try {
       final codigo = await ReferralRepository(
         ref.read(apiClientProvider),
@@ -341,7 +351,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         FeedbackHelper.showInfo(context, l10n.assinaturaIndicacaoSemCodigo);
         return false;
       }
-      _checkoutProductId = productId;
+      setState(() {
+        _checkoutProductId = productId;
+        _appleReferralCodeOpened = true;
+      });
       final url = codigo.urlResgate;
       if (url != null &&
           await launchUrl(
@@ -362,6 +375,8 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         FeedbackHelper.showInfo(context, l10n.assinaturaIndicacaoSemCodigo);
       }
       return false;
+    } finally {
+      if (mounted) setState(() => _loadingCheckout = false);
     }
   }
 
@@ -440,6 +455,10 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
         _trialOffers = {
           ..._trialOffers,
           ...SubscriptionProducts.freeTrialOffersById(response.productDetails),
+        };
+        _referralOffers = {
+          ..._referralOffers,
+          ...SubscriptionProducts.referralOffersById(response.productDetails),
         };
       });
       return product;
@@ -641,13 +660,17 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
                   subscriptionCancelWhere(),
                 )
               : null;
+      final referralNote = _referralApplies(productId)
+          ? '${S.of(context).assinaturaIndicacaoSelo(_referralPct!)}.'
+          : null;
+      final reviewNote = [trialNote, referralNote].nonNulls.join(' ');
       final confirmed = await context.push<bool>(
         '/assinatura/review',
         extra: AssinaturaReviewRouteArgs(
           plan: plan,
           billingPeriod: _billingPeriod,
           priceDisplay: priceDisplay,
-          trialNote: trialNote,
+          trialNote: reviewNote.isEmpty ? null : reviewNote,
         ),
       );
       if (!mounted || confirmed != true) return;
@@ -697,12 +720,18 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
       return;
     }
 
-    final referralDiscount =
-        _referralPct != null &&
-        SubscriptionProducts.referralDiscountProductIds.contains(productId);
-    if (referralDiscount && defaultTargetPlatform == TargetPlatform.iOS) {
+    final referralDiscount = _referralApplies(productId);
+    if (referralDiscount &&
+        defaultTargetPlatform == TargetPlatform.iOS &&
+        !_appleReferralCodeOpened) {
       if (await _redeemAppleReferralCode(productId)) return;
       if (!mounted) return;
+    }
+    if (!referralDiscount &&
+        _referralPct != null &&
+        defaultTargetPlatform == TargetPlatform.android &&
+        SubscriptionProducts.referralDiscountProductIds.contains(productId)) {
+      FeedbackHelper.showInfo(context, S.of(context).assinaturaIndicacaoSemCodigo);
     }
     final referralOffer =
         referralDiscount && defaultTargetPlatform == TargetPlatform.android

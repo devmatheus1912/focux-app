@@ -73,7 +73,7 @@ class TrialCountdownBanner extends ConsumerWidget {
                             ? S.of(context).trialBannerRenovaLoja(
                               subscriptionCancelWhere(),
                             )
-                            : 'Assine para manter IA, PIX e Command Center.',
+                            : 'Assine para manter IA, PIX e relatórios.',
                         style: FocuxHubTypography.bodyMuted(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),

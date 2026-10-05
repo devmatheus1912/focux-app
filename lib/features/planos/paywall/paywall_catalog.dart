@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -66,23 +65,38 @@ class PaywallCatalog {
     _ => null,
   };
 
+  /// Reserva offline; o paywall usa a tabela do backend (mesmos rótulos do site).
   static const List<PaywallComparisonRow> comparisonFreeVsPro = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '30'),
     PaywallComparisonRow(
-      feature: FocuxMicrocopy.commandCenterPlusScoreCompact,
+      feature: 'Centro de Comando + Índice Focux',
       free: '✓',
       paid: '✓',
     ),
     PaywallComparisonRow(
-      feature: 'Financeiro / recorrência PIX / carteira',
+      feature: 'Importação por planilha',
+      free: '✓',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(
+      feature: 'Financeiro e mensalidades com PIX',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Copiloto IA / mês', free: '—', paid: '200'),
+    PaywallComparisonRow(
+      feature: 'Interessados e captação',
       free: '—',
       paid: '✓',
     ),
     PaywallComparisonRow(feature: 'Relatórios', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Hábitos', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '200'),
-    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
     PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Importação por foto / mês',
+      free: '—',
+      paid: '25',
+    ),
     PaywallComparisonRow(
       feature: 'Marca própria / landing / loja',
       free: '—',
@@ -93,27 +107,46 @@ class PaywallCatalog {
   static const List<PaywallComparisonRow> comparisonFreeVsEnterprise = [
     PaywallComparisonRow(feature: 'Alunos', free: '3', paid: '∞'),
     PaywallComparisonRow(
-      feature: FocuxMicrocopy.commandCenterPlusScoreCompact,
+      feature: 'Centro de Comando + Índice Focux',
       free: '✓',
       paid: '✓',
     ),
     PaywallComparisonRow(
-      feature: 'Financeiro / recorrência PIX / carteira',
-      free: '—',
+      feature: 'Importação por planilha',
+      free: '✓',
       paid: '✓',
     ),
-    PaywallComparisonRow(feature: 'Relatórios + hábitos', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'IA / mês', free: '—', paid: '600'),
-    PaywallComparisonRow(feature: 'CRM / leads', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Landing pública', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Marca própria', free: '—', paid: '✓'),
-    PaywallComparisonRow(feature: 'Loja + pacotes', free: '—', paid: '✓'),
     PaywallComparisonRow(
-      feature: 'Automações + win-back + desafios',
+      feature: 'Financeiro e mensalidades com PIX',
       free: '—',
       paid: '✓',
     ),
+    PaywallComparisonRow(feature: 'Copiloto IA / mês', free: '—', paid: '600'),
+    PaywallComparisonRow(
+      feature: 'Interessados e captação',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Relatórios e hábitos', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Feedback em vídeo', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Importação por foto / mês',
+      free: '—',
+      paid: '80',
+    ),
+    PaywallComparisonRow(
+      feature: 'Marca própria e ocultar marca Focux',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Editor de landing page', free: '—', paid: '✓'),
+    PaywallComparisonRow(
+      feature: 'Loja de pacotes com PIX',
+      free: '—',
+      paid: '✓',
+    ),
+    PaywallComparisonRow(feature: 'Desafios com ranking', free: '—', paid: '✓'),
+    PaywallComparisonRow(feature: 'Automações e win-back', free: '—', paid: '✓'),
   ];
 
   /// Mensagem do catálogo de gatilhos para modal in-app (não usar na vitrine Planos).
