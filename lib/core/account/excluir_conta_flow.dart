@@ -99,13 +99,17 @@ Future<void> excluirContaFlow(
     useRootNavigator: true,
     builder: (_) => PopScope(
       canPop: false,
-      child: AlertDialog(
-        content: Row(
-          children: [
-            const FxLoading(size: 24),
-            const SizedBox(width: 16),
-            Expanded(child: Text(l10n.excluirContaExcluindo)),
-          ],
+      child: Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const FxLoading(size: 24),
+              const SizedBox(width: 16),
+              Flexible(child: Text(l10n.excluirContaExcluindo)),
+            ],
+          ),
         ),
       ),
     ),

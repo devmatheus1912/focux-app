@@ -1,9 +1,7 @@
 part of 'perfil_screen.dart';
 
-Future<void> _showDeleteAccountDialog(
-  BuildContext context, {
-  required Future<void> Function() onSessionCleared,
-}) {
+Future<void> _showDeleteAccountDialog(BuildContext context) {
+  final auth = ProviderScope.containerOf(context).read(authProvider.notifier);
   return excluirContaFlow(
     context,
     dio: ApiClient().dio,
@@ -13,7 +11,13 @@ Future<void> _showDeleteAccountDialog(
         'conforme legislação fiscal.\n\n'
         'Digite sua senha (ou peça o código por e-mail) e EXCLUIR para confirmar.',
     avisoAssinatura: true,
-    aposExcluir: onSessionCleared,
+    // Conta já excluída no backend: sair sem pedir confirmação.
+    aposExcluir: () async {
+      await auth.logout();
+      if (!context.mounted) return;
+      FeedbackHelper.showSuccess(context, 'Conta excluída com sucesso.');
+      context.go('/login');
+    },
   );
 }
 

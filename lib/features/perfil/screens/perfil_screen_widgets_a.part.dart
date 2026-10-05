@@ -263,10 +263,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                                 onLogout();
                               },
                               onDeleteAccount:
-                                  () => _showDeleteAccountDialog(
-                                    context,
-                                    onSessionCleared: onLogout,
-                                  ),
+                                  () => _showDeleteAccountDialog(context),
                             ),
                           ),
                         ],
