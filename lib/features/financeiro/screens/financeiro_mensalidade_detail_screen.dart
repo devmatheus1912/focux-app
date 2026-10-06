@@ -11,6 +11,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -28,6 +29,7 @@ import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_mensalidade_help_sheet.dart';
+import '../../../l10n/app_localizations.dart';
 
 class FinanceiroMensalidadeDetailScreen extends ConsumerStatefulWidget {
   const FinanceiroMensalidadeDetailScreen({
@@ -150,6 +152,58 @@ class _FinanceiroMensalidadeDetailScreenState
     _apply(updated);
   }
 
+  Future<void> _mudarStatus({
+    required String title,
+    required String message,
+    required String confirmLabel,
+    required String successMessage,
+    required Future<Mensalidade> Function(int id) action,
+    bool destructive = false,
+  }) async {
+    final m = _mensalidade;
+    if (m == null) return;
+    final ok = await showFxConfirmSheet(
+      context,
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+      destructive: destructive,
+    );
+    if (!ok || !mounted) return;
+    try {
+      final updated = await action(m.id);
+      if (!mounted) return;
+      HapticFeedback.mediumImpact();
+      FeedbackHelper.showSuccess(context, successMessage);
+      _apply(updated);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
+  Future<void> _cancelar() {
+    final s = S.of(context);
+    return _mudarStatus(
+      title: s.mensalidadeCancelarTitulo,
+      message: s.mensalidadeCancelarTexto,
+      confirmLabel: s.mensalidadeCancelarConfirma,
+      successMessage: s.mensalidadeCanceladaOk,
+      action: mensalidadeRepo(ref).cancelar,
+      destructive: true,
+    );
+  }
+
+  Future<void> _desfazerPagamento() {
+    final s = S.of(context);
+    return _mudarStatus(
+      title: s.mensalidadeDesfazerPagamentoTitulo,
+      message: s.mensalidadeDesfazerPagamentoTexto,
+      confirmLabel: s.mensalidadeDesfazerPagamentoConfirma,
+      successMessage: s.mensalidadeDesfazerPagamentoOk,
+      action: mensalidadeRepo(ref).desfazerPagamento,
+    );
+  }
+
   Future<void> _contato() async {
     final m = _mensalidade;
     if (m == null) return;
@@ -236,6 +290,8 @@ class _FinanceiroMensalidadeDetailScreenState
                           m: m,
                         ),
                     onContato: _contato,
+                    onCancelar: _cancelar,
+                    onDesfazerPagamento: _desfazerPagamento,
                   ),
         ),
       ),
@@ -256,6 +312,8 @@ class _DetailBody extends StatelessWidget {
     required this.onPix,
     required this.onChat,
     required this.onContato,
+    required this.onCancelar,
+    required this.onDesfazerPagamento,
   });
 
   final Mensalidade mensalidade;
@@ -269,9 +327,15 @@ class _DetailBody extends StatelessWidget {
   final VoidCallback onPix;
   final VoidCallback onChat;
   final VoidCallback onContato;
+  final VoidCallback onCancelar;
+  final VoidCallback onDesfazerPagamento;
 
   Future<void> _openMais(BuildContext context) async {
-    final actions = mensalidadeDetailMaisActions(pending: pending);
+    final s = S.of(context);
+    final actions = mensalidadeDetailMaisActions(
+      pending: pending,
+      pago: mensalidade.status == 'PAGO',
+    );
     final chosen = await showFxInsetPickerSheet<MensalidadeDetailActionId>(
       context,
       title: mensalidadeDetailMaisSheetTitle(),
@@ -279,7 +343,7 @@ class _DetailBody extends StatelessWidget {
         for (final id in actions)
           FxInsetPickerSheetItem(
             value: id,
-            label: mensalidadeDetailActionLabel(id),
+            label: mensalidadeDetailActionLabel(id, s),
           ),
       ],
     );
@@ -297,6 +361,10 @@ class _DetailBody extends StatelessWidget {
         onChat();
       case MensalidadeDetailActionId.contato:
         onContato();
+      case MensalidadeDetailActionId.cancelar:
+        onCancelar();
+      case MensalidadeDetailActionId.desfazerPagamento:
+        onDesfazerPagamento();
     }
   }
 

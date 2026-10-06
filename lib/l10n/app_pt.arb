@@ -825,5 +825,23 @@
         "type": "String"
       }
     }
-  }
+  },
+  "financeiroFiltroAbertas": "Em aberto",
+  "financeiroFiltroAtrasadas": "Atrasadas",
+  "financeiroFiltroPagas": "Pagas",
+  "financeiroFiltroTodas": "Todas",
+  "financeiroVazioAbertasTitulo": "Nada em aberto",
+  "financeiroVazioAbertasTexto": "Tudo recebido. As pagas ficam no filtro Pagas.",
+  "financeiroVazioFiltroTitulo": "Nada neste filtro",
+  "financeiroVazioFiltroTexto": "Troque o filtro ou a busca para ver outras mensalidades.",
+  "mensalidadeCancelarAcao": "Cancelar mensalidade",
+  "mensalidadeCancelarTitulo": "Cancelar esta mensalidade?",
+  "mensalidadeCancelarTexto": "Ela sai da lista em aberto e do faturamento. O registro continua em Todas.",
+  "mensalidadeCancelarConfirma": "Cancelar mensalidade",
+  "mensalidadeCanceladaOk": "Mensalidade cancelada.",
+  "mensalidadeDesfazerPagamentoAcao": "Desfazer pagamento",
+  "mensalidadeDesfazerPagamentoTitulo": "Desfazer o pagamento?",
+  "mensalidadeDesfazerPagamentoTexto": "A mensalidade volta para pendente. Use se marcou como paga por engano.",
+  "mensalidadeDesfazerPagamentoConfirma": "Desfazer pagamento",
+  "mensalidadeDesfazerPagamentoOk": "Pagamento desfeito."
 }
