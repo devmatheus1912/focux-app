@@ -8,6 +8,7 @@ import '../providers/dashboard_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../notificacoes/data/notificacoes_repository.dart';
 import '../../onboarding/data/onboarding_repository.dart';
+import '../../onboarding/data/onboarding_wizard_client_cache.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/feedback_helper.dart';

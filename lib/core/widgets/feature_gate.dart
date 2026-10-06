@@ -7,6 +7,7 @@ import '../../features/planos/utils/plano_capability.dart';
 import '../../features/subscription/models/subscription_plan.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/onboarding/data/onboarding_repository.dart';
+import '../../features/onboarding/data/onboarding_wizard_client_cache.dart';
 import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/planos/providers/plano_features_provider.dart';
 import '../../features/planos/data/planos_repository.dart';
@@ -372,6 +373,7 @@ class _LockedScreenState extends ConsumerState<_LockedScreen> {
     setState(() => _skipping = true);
     try {
       await OnboardingRepository(ref.read(apiClientProvider)).marcarCompleto();
+      OnboardingWizardClientCache.clear();
       DashboardHomeClientCache.clear();
       ref.invalidate(dashboardHomeProvider);
       ref.invalidate(onboardingStatusProvider);

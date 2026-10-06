@@ -22,9 +22,35 @@ abstract final class OnboardingWizardClientCache {
     _fetchedAt = now ?? DateTime.now();
   }
 
+  static Future<OnboardingWizard>? _inflight;
+  static int _generation = 0;
+
+  /// Fresh cache, else one shared in-flight fetch for concurrent callers.
+  static Future<OnboardingWizard> load(
+    Future<OnboardingWizard> Function() fetch,
+  ) {
+    final fresh = getIfFresh();
+    if (fresh != null) return Future.value(fresh);
+    final existing = _inflight;
+    if (existing != null) return existing;
+    final gen = _generation;
+    late final Future<OnboardingWizard> run;
+    run = fetch()
+        .then((w) {
+          if (gen == _generation) put(w);
+          return w;
+        })
+        .whenComplete(() {
+          if (identical(_inflight, run)) _inflight = null;
+        });
+    return _inflight = run;
+  }
+
   static void clear() {
     _wizard = null;
     _fetchedAt = null;
+    _inflight = null;
+    _generation++;
   }
 
   static DateTime? get fetchedAt => _fetchedAt;

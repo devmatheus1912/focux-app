@@ -38,4 +38,33 @@ void main() {
       isNull,
     );
   });
+
+  test('chamadas simultâneas compartilham um único GET', () async {
+    var calls = 0;
+    Future<OnboardingWizard> fetch() async {
+      calls++;
+      await Future<void>.delayed(Duration.zero);
+      return wizard();
+    }
+
+    final results = await Future.wait([
+      OnboardingWizardClientCache.load(fetch),
+      OnboardingWizardClientCache.load(fetch),
+    ]);
+    expect(calls, 1);
+    expect(identical(results[0], results[1]), isTrue);
+
+    await OnboardingWizardClientCache.load(fetch);
+    expect(calls, 1, reason: 'cache fresco evita novo GET');
+  });
+
+  test('logout durante o GET não grava wizard do usuário anterior', () async {
+    final pending = OnboardingWizardClientCache.load(() async {
+      await Future<void>.delayed(Duration.zero);
+      return wizard();
+    });
+    OnboardingWizardClientCache.clear();
+    await pending;
+    expect(OnboardingWizardClientCache.getIfFresh(), isNull);
+  });
 }

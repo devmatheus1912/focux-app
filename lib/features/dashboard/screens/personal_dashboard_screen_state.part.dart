@@ -224,8 +224,8 @@ class _PersonalDashboardScreenState
 
   Future<void> _maybeShowOnboardingWizard() async {
     try {
-      final w =
-          await OnboardingRepository(ref.read(apiClientProvider)).wizard();
+      final repo = OnboardingRepository(ref.read(apiClientProvider));
+      final w = await OnboardingWizardClientCache.load(repo.wizard);
       if (!mounted) return;
       if (!dashboardShouldOpenOnboardingWizard(
         wizardCompleto: w.wizardCompleto,
