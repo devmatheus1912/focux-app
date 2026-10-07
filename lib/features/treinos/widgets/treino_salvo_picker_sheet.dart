@@ -65,12 +65,17 @@ class _TreinoSalvoPickerSheetState
   late Future<List<Treino>> _planos = _carregar('');
 
   Future<List<Treino>> _carregar(String q) async {
-    final bundle = await ref.read(treinoRepositoryProvider).getHome(q: q);
-    return planosSalvosParaEscolha(
-      bundle.treinos,
-      excluirIds: widget.excluirIds,
-    );
+    final repo = ref.read(treinoRepositoryProvider);
+    final treinos = <Treino>[];
+    for (var page = 0; page < _maxPaginas; page++) {
+      final bundle = await repo.getHome(q: q, page: page);
+      treinos.addAll(bundle.treinos);
+      if (!bundle.hasNext) break;
+    }
+    return planosSalvosParaEscolha(treinos, excluirIds: widget.excluirIds);
   }
+
+  static const _maxPaginas = 10;
 
   void _onBusca(String value) {
     _debounce?.cancel();
