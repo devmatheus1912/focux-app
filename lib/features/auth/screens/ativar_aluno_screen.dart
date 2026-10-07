@@ -37,9 +37,12 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
+  final _codigoCtrl = TextEditingController();
   AtivacaoAluno? _ativacao;
+  String? _codigoEnviadoPara;
   bool _validando = true;
   bool _enviando = false;
+  bool _enviandoCodigo = false;
   bool _senhaVisivel = false;
   String? _erro;
 
@@ -56,6 +59,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
   void dispose() {
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
+    _codigoCtrl.dispose();
     super.dispose();
   }
 
@@ -87,9 +91,39 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
     });
   }
 
+  String get _emailDigitado => _emailCtrl.text.trim().toLowerCase();
+
+  Future<void> _enviarCodigo() async {
+    final s = S.of(context);
+    final email = _emailDigitado;
+    if (!addAlunoEmailValido(email)) {
+      setState(() => _erro = s.ativarEmailInvalido);
+      return;
+    }
+    setState(() {
+      _enviandoCodigo = true;
+      _erro = null;
+    });
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .enviarCodigoAtivacao(token: widget.token.trim(), email: email);
+      if (mounted) setState(() => _codigoEnviadoPara = email);
+    } catch (e) {
+      if (mounted) setState(() => _erro = mapRegisterAlunoError(e));
+    } finally {
+      if (mounted) setState(() => _enviandoCodigo = false);
+    }
+  }
+
   Future<void> _submit() async {
     final form = _formKey.currentState;
     if (form == null || !form.validate()) return;
+    final precisaEmail = _ativacao?.precisaEmail == true;
+    if (precisaEmail && _codigoEnviadoPara != _emailDigitado) {
+      setState(() => _erro = S.of(context).ativarCodigoPrimeiro);
+      return;
+    }
     setState(() {
       _enviando = true;
       _erro = null;
@@ -101,7 +135,8 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
           .ativarAluno(
             token: widget.token.trim(),
             senha: _senhaCtrl.text,
-            email: _ativacao?.precisaEmail == true ? _emailCtrl.text : null,
+            email: precisaEmail ? _emailDigitado : null,
+            codigoEmail: precisaEmail ? _codigoCtrl.text : null,
           );
       if (!mounted) return;
       HapticFeedback.heavyImpact();
@@ -234,6 +269,39 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                                 ? null
                                 : s.ativarEmailInvalido,
                   ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed:
+                          _enviando || _enviandoCodigo ? null : _enviarCodigo,
+                      child: Text(
+                        _codigoEnviadoPara == null
+                            ? s.ativarEnviarCodigo
+                            : s.ativarReenviarCodigo,
+                      ),
+                    ),
+                  ),
+                  if (_codigoEnviadoPara != null) ...[
+                    Text(
+                      s.ativarCodigoEnviado(_codigoEnviadoPara!),
+                      style: authSubtitleStyle(),
+                    ),
+                    const SizedBox(height: 8),
+                    AuthField(
+                      label: s.ativarCodigoLabel,
+                      controller: _codigoCtrl,
+                      hintText: '000000',
+                      icon: Icons.pin_outlined,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.oneTimeCode],
+                      validator:
+                          (v) =>
+                              RegExp(r'^\d{6}$').hasMatch((v ?? '').trim())
+                                  ? null
+                                  : s.ativarCodigoInvalido,
+                    ),
+                  ],
                   const SizedBox(height: 10),
                 ],
                 AuthField(

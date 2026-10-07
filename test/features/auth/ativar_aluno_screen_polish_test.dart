@@ -16,4 +16,14 @@ void main() {
     expect(screen, contains('PersonalSlugStore.save'));
     expect(screen, contains("context.go('/dashboard/aluno')"));
   });
+
+  test('e-mail novo do aluno importado só entra com código', () {
+    final screen = readScreenSourceBundle(
+      'lib/features/auth/screens/ativar_aluno_screen.dart',
+    );
+    expect(screen, contains('enviarCodigoAtivacao'));
+    expect(screen, contains('AutofillHints.oneTimeCode'));
+    expect(screen, contains('codigoEmail:'));
+    expect(screen, contains('ativarCodigoPrimeiro'));
+  });
 }

@@ -502,11 +502,23 @@ class AuthRepository {
     return AtivacaoAluno.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Aluno importado confirma o e-mail novo com código antes de ativar.
+  Future<void> enviarCodigoAtivacao({
+    required String token,
+    required String email,
+  }) async {
+    await _dio.post(
+      '/api/auth/aluno/ativacao/${Uri.encodeComponent(token)}/codigo-email',
+      data: {'email': email.trim()},
+    );
+  }
+
   /// Link de ativação: cria a senha (e troca o e-mail provisório) e já entra.
   Future<void> ativarAluno({
     required String token,
     required String senha,
     String? email,
+    String? codigoEmail,
   }) async {
     final response = await _dio.post(
       '/api/auth/aluno/ativar',
@@ -514,6 +526,8 @@ class AuthRepository {
         'token': token,
         'senha': senha,
         if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+        if (codigoEmail != null && codigoEmail.trim().isNotEmpty)
+          'codigoEmail': codigoEmail.trim(),
         'aceitouTermos': true,
         'versaoTermos': FocuxLegal.consentDocumentVersion,
       },

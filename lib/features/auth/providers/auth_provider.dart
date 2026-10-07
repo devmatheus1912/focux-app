@@ -14,11 +14,7 @@ void bindAnalyticsFunnelPoster(ApiClient client) {
   AnalyticsService.instance.funnelPoster = (tipoEvento, alunoId) async {
     await client.dio.post(
       '/api/analytics/evento',
-      data: {
-        'alunoId': alunoId,
-        'tipoEvento': tipoEvento,
-        'canal': 'APP',
-      },
+      data: {'alunoId': alunoId, 'tipoEvento': tipoEvento, 'canal': 'APP'},
     );
   };
 }
@@ -216,8 +212,14 @@ class AuthNotifier extends Notifier<AuthStatus> {
     required String token,
     required String senha,
     String? email,
+    String? codigoEmail,
   }) async {
-    await _repo.ativarAluno(token: token, senha: senha, email: email);
+    await _repo.ativarAluno(
+      token: token,
+      senha: senha,
+      email: email,
+      codigoEmail: codigoEmail,
+    );
     _currentRole = UserRole.aluno;
     _requiresPasswordChange = false;
     state = AuthStatus.authenticated;
