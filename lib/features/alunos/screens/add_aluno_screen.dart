@@ -261,7 +261,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
             .gerarLinkAtivacao(novoAluno.id);
       } catch (_) {
         if (mounted) {
-          FeedbackHelper.showError(context, S.of(context).alunoReenviarLinkErro);
+          FeedbackHelper.showError(context, S.of(context).alunoCadastradoSemLink);
         }
       }
       if (!mounted) return;

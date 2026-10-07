@@ -868,6 +868,7 @@
   "@alunoReenviarLinkTexto": { "placeholders": { "nome": { "type": "String" } } },
   "alunoReenviarLinkConfirma": "Gerar link",
   "alunoReenviarLinkErro": "Não foi possível gerar o link.",
+  "alunoCadastradoSemLink": "Aluno cadastrado, mas o link não foi gerado. Abra o perfil dele e toque em Reenviar link de acesso.",
   "ativarA11y": "Criar senha do aluno",
   "ativarValidando": "Abrindo seu convite…",
   "ativarChip": "Convite do seu personal",
