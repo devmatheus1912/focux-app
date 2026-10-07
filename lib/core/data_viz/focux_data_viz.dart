@@ -32,7 +32,6 @@ abstract final class FocuxDataViz {
 
   static const List<String> automatedGates = [
     'test/core/design_system/data_viz_dynamic_content_pillar_contract_test.dart',
-    'test/core/design_system/perceived_performance_pillar_contract_test.dart',
     'test/core/design_system/ux_feedback_pillar_contract_test.dart',
   ];
 

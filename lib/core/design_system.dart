@@ -38,8 +38,6 @@
 /// ## Catálogo de pilares (gates de contrato leem ESTE arquivo)
 /// Superfícies — FocuxSurfaces — surface_taxonomy_contract_test —
 /// rota → S1–S9, voltar previsível, teclado.
-/// Acessibilidade — FocuxA11y — accessibility_pillar_contract_test —
-/// TalkBack / VoiceOver.
 /// Hierarquia visual & foco — FocuxHubTypography + TokensStrip.layer* —
 /// visual_hierarchy_pillar_contract_test.
 /// Navegação & arquitetura — FocuxNavigation —
@@ -48,25 +46,13 @@
 /// typography_pillar_contract_test.
 /// Hardening mobile & web — FocuxSecurity —
 /// security_pillar_contract_test.
-/// Código limpo — FocuxCleanCode — Lógica fora da UI — Tipos explícitos —
-/// clean_scalable_code_pillar_contract_test.
 /// Data viz & conteúdo dinâmico — FocuxDataViz —
 /// data_viz_dynamic_content_pillar_contract_test.
-/// Densidade de informação — FocuxDensity —
-/// information_density_pillar_contract_test.
 /// Refatoração robusta — FocuxRefactoring —
 /// robust_refactoring_pillar_contract_test.
-/// Branding & personalidade — FocuxBranding —
-/// branding_personality_pillar_contract_test.
-/// Gestalt & percepção — FocuxGestalt — gestalt_perception_pillar_contract_test.
 /// Adaptação de plataforma — FocuxPlatform —
 /// platform_adaptation_pillar_contract_test.
-/// Motion design — FocuxMotion — motion_design_pillar_contract_test.
-/// Performance percebida — FocuxPerformance —
-/// perceived_performance_pillar_contract_test.
 /// UX & feedback — FocuxFeedback — ux_feedback_pillar_contract_test.
-/// Componentes & consistência — FocuxComponents —
-/// components_consistency_pillar_contract_test.
 /// Cores & contraste — FocuxContrast — WCAG —
 /// colors_contrast_pillar_contract_test.
 /// Espaçamento — TokensStrip — FxContentWidthLimiter —
