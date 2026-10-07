@@ -1,4 +1,14 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+// flutter_jailbreak_detection traz RootBeer 0.1.0, cuja .so não é alinhada a 16 KB (exigência da Play).
+allprojects {
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            substitute module("com.github.scottyab:rootbeer") using module("com.scottyab:rootbeer-lib:0.1.2")
+        }
+    }
+}
 
 // Namespace AGP 8+ para plugins que não declaram (ex.: flutter_jailbreak_detection).
 subprojects { subproject ->
@@ -18,6 +28,16 @@ subprojects { subproject ->
                         namespace = fallback
                     }
                 }
+            }
+        }
+    }
+
+    // sentry_flutter 8.x fixa languageVersion 1.6, que o Kotlin 2.2 não compila mais.
+    if (subproject.name == "sentry_flutter") {
+        subproject.afterEvaluate {
+            subproject.tasks.withType(KotlinCompile).configureEach {
+                compilerOptions.languageVersion.set(KotlinVersion.KOTLIN_1_8)
+                compilerOptions.apiVersion.set(KotlinVersion.KOTLIN_1_8)
             }
         }
     }
