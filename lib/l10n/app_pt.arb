@@ -666,6 +666,7 @@
   "assinaturaProdutoNaoSuportado": "Produto recebido não é suportado.",
   "assinaturaCompraAguardandoAprovacao": "Compra aguardando aprovação. Assim que for aprovada, o plano é liberado automaticamente.",
   "assinaturaProdutoNaoConfigurado": "Produto ainda não configurado na loja para este plano.",
+  "assinaturaWebAssinePeloApp": "Assine pelo app Focux no celular, pela App Store ou pelo Google Play.",
   "assinaturaTrialRodape": "Depois {preco}, renova automaticamente. Cancele {onde}.",
   "@assinaturaTrialRodape": {
     "placeholders": { "preco": { "type": "String" }, "onde": { "type": "String" } }
