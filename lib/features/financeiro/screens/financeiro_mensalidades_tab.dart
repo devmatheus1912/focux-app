@@ -67,6 +67,7 @@ class _FinanceiroMensalidadesTabState
   var _homePage = 0;
   var _hasMore = false;
   var _homeHasMore = false;
+  MensalidadeFiltro? _homeFiltro;
   var _loading = true;
   var _carregandoMais = false;
   String? _erro;
@@ -131,6 +132,11 @@ class _FinanceiroMensalidadesTabState
     _debounce?.cancel();
     final query = _searchCtrl.text.trim();
     if (query.isEmpty) {
+      if (_homeFiltro != _filtro) {
+        _buscaAtiva = '';
+        _load();
+        return;
+      }
       setState(() {
         _buscaAtiva = '';
         _items = _homeItems;
@@ -142,16 +148,20 @@ class _FinanceiroMensalidadesTabState
     _debounce = Timer(const Duration(milliseconds: 500), () => _buscar(query));
   }
 
+  bool _buscaMudou(String query, MensalidadeFiltro filtro) =>
+      filtro != _filtro || _searchCtrl.text.trim() != query;
+
   Future<void> _buscar(String query) async {
+      final filtro = _filtro;
       try {
         final results = await FinanceiroRepository(
           ref.read(apiClientProvider),
         ).listarPagina(
           nomeAluno: query,
           alunoId: widget.initialAlunoId,
-          filtro: _filtro,
+          filtro: filtro,
         );
-        if (!mounted) return;
+        if (!mounted || _buscaMudou(query, filtro)) return;
         setState(() {
           _buscaAtiva = query;
           _items = results.mensalidades;
@@ -159,7 +169,7 @@ class _FinanceiroMensalidadesTabState
           _hasMore = results.hasMore;
         });
       } catch (e) {
-        if (!mounted) return;
+        if (!mounted || _buscaMudou(query, filtro)) return;
         setState(() {
           _buscaAtiva = query;
           _items =
@@ -183,6 +193,7 @@ class _FinanceiroMensalidadesTabState
       _homeItems = page.mensalidades;
       _homePage = page.page;
       _homeHasMore = page.hasMore;
+      _homeFiltro = _filtro;
       _buscaAtiva = '';
       _loading = false;
     });
@@ -242,16 +253,22 @@ class _FinanceiroMensalidadesTabState
   Future<void> _carregarMais() async {
     if (_carregandoMais || !_hasMore) return;
     setState(() => _carregandoMais = true);
+    final filtro = _filtro;
+    final busca = _buscaAtiva;
     try {
       final next = await FinanceiroRepository(
         ref.read(apiClientProvider),
       ).listarPagina(
         page: _page + 1,
-        nomeAluno: _buscaAtiva.isEmpty ? null : _buscaAtiva,
+        nomeAluno: busca.isEmpty ? null : busca,
         alunoId: widget.initialAlunoId,
-        filtro: _filtro,
+        filtro: filtro,
       );
       if (!mounted) return;
+      if (filtro != _filtro || busca != _buscaAtiva) {
+        setState(() => _carregandoMais = false);
+        return;
+      }
       final seen = _items.map((m) => m.id).toSet();
       final merged = [
         ..._items,
