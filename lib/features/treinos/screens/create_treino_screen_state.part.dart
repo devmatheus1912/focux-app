@@ -15,6 +15,8 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   /// Treino já criado cuja atribuição ao aluno falhou: reenviar só atribui.
   int? _treinoCriadoId;
 
+  bool _planoSalvoEmAndamento = false;
+
   @override
   void initState() {
     super.initState();
@@ -155,6 +157,16 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   }
 
   Future<void> _usarPlanoSalvo() async {
+    if (_planoSalvoEmAndamento) return;
+    _planoSalvoEmAndamento = true;
+    try {
+      await _escolherPlanoSalvo();
+    } finally {
+      _planoSalvoEmAndamento = false;
+    }
+  }
+
+  Future<void> _escolherPlanoSalvo() async {
     FxKeyboardDismissScope.dismiss();
     final s = S.of(context);
     final repo = ref.read(treinoRepositoryProvider);
