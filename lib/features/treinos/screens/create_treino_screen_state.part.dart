@@ -154,6 +154,102 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
     }
   }
 
+  Future<void> _usarPlanoSalvo() async {
+    FxKeyboardDismissScope.dismiss();
+    final s = S.of(context);
+    final repo = ref.read(treinoRepositoryProvider);
+    final alunoId = widget.alunoId;
+    var jaVinculados = <int>{};
+    if (alunoId != null) {
+      try {
+        final page = await repo.listarTreinosDoAlunoPagina(alunoId, size: 100);
+        jaVinculados = page.treinos.map((t) => t.id).toSet();
+      } catch (_) {}
+      if (!mounted) return;
+    }
+    final plano = await showTreinoSalvoPicker(
+      context,
+      excluirIds: jaVinculados,
+    );
+    if (plano == null || !mounted) return;
+
+    bool? copiar;
+    if (alunoId != null) {
+      copiar = await showFxInsetPickerSheet<bool>(
+        context,
+        title: s.treinoPlanoSalvoComoAplicar,
+        headerIcon: Icons.person_add_alt_1_rounded,
+        items: [
+          FxInsetPickerSheetItem(
+            value: true,
+            label: s.treinoPlanoSalvoCopiar,
+            subtitle: s.treinoDetalheCopiarSubtitulo,
+            icon: Icons.copy_rounded,
+          ),
+          FxInsetPickerSheetItem(
+            value: false,
+            label: s.treinoPlanoSalvoVincular,
+            subtitle: s.treinoDetalheAtribuirSubtitulo,
+            icon: Icons.link_rounded,
+          ),
+        ],
+      );
+      if (copiar == null || !mounted) return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      if (alunoId == null) {
+        final base = await repo.duplicar(plano.id);
+        invalidateTreinosCaches(ref);
+        if (!mounted) return;
+        context.pushReplacement(
+          '/treinos/${base.id}',
+          extra: const TreinoRouteExtra(recemCriado: true).toExtra(),
+        );
+        return;
+      }
+      if (copiar!) {
+        final copia = await repo.clonarParaAluno(plano.id, alunoId);
+        invalidateTreinosCaches(ref);
+        invalidateTreinosDoAluno(ref, alunoId);
+        if (!mounted) return;
+        FeedbackHelper.showSuccess(context, s.treinoPlanoSalvoCopiado);
+        context.pushReplacement(
+          '/treinos/${copia.id}',
+          extra:
+              TreinoRouteExtra(
+                alunoId: alunoId,
+                alunoNome: widget.alunoNome,
+              ).toExtra(),
+        );
+        return;
+      }
+      await repo.atribuirAluno(plano.id, alunoId);
+      invalidateTreinosCaches(ref);
+      invalidateTreinosDoAluno(ref, alunoId);
+      if (!mounted) return;
+      FeedbackHelper.showSuccess(context, s.treinoPlanoSalvoVinculado);
+      if (context.canPop()) {
+        context.pop(true);
+      } else {
+        safePopOrGo(context, '/treinos');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      FeedbackHelper.showApiFailure(
+        context,
+        e,
+        fallback:
+            alunoId == null
+                ? s.treinoPlanoSalvoDuplicarFalhou
+                : s.treinoPlanoSalvoAplicarFalhou,
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   void _applyPreset(TreinoCreatePreset preset) {
     HapticFeedback.selectionClick();
     setState(() {
@@ -292,7 +388,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                                 ],
                               ),
                             ),
-                            if (widget.alunoId == null) ...[
+                            if (!soAtribuir) ...[
                               const SizedBox(
                                 height: FxSettingsLayout.groupGap,
                               ),
@@ -302,14 +398,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                                   FxSettingsTile(
                                     icon: Icons.grid_view_rounded,
                                     accent: soft,
-                                    label: 'Abrir biblioteca',
-                                    subtitle:
-                                        'Planos já salvos na sua conta',
+                                    label: s.treinoPlanoSalvoUsar,
+                                    subtitle: s.treinoPlanoSalvoUsarSubtitulo,
                                     value: '',
                                     showDivider: false,
-                                    onTap:
-                                        () =>
-                                            safePopOrGo(context, '/treinos'),
+                                    onTap: _loading ? null : _usarPlanoSalvo,
                                   ),
                                 ],
                               ),

@@ -45,6 +45,7 @@ void main() {
     expect(screen, contains("child: const Text('Cancelar')"));
     expect(screen, contains("soAtribuir ? s.treinoAtribuindo : 'Criando…'"));
     expect(screen, contains('FxInsetPickerOption.list'));
-    expect(screen, contains("label: 'Abrir biblioteca'"));
+    expect(screen, contains('label: s.treinoPlanoSalvoUsar'));
+    expect(screen, contains('repo.clonarParaAluno'));
   });
 }
