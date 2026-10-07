@@ -15,7 +15,8 @@ String esqueciHelpTitle() => 'Recuperar senha';
 
 bool esqueciMostraCodigo({required bool isAluno}) => !isAluno;
 
-String esqueciAlunoPedePersonalBody() => 'Peça uma senha nova ao seu personal.';
+String esqueciAlunoPedePersonalBody() =>
+    'Peça um novo link de acesso ao seu personal.';
 
 String esqueciPageSubtitle({required bool isAluno}) =>
     isAluno
@@ -24,7 +25,7 @@ String esqueciPageSubtitle({required bool isAluno}) =>
 
 String esqueciHelpSubtitle({bool isAluno = false}) =>
     isAluno
-        ? 'O personal gera uma senha provisória. Não há código por e-mail.'
+        ? 'O personal envia um link para criar uma senha nova. Não há código por e-mail.'
         : 'Código no e-mail. Válido por 10 minutos.';
 
 String esqueciHelpCodigoBody() =>
@@ -32,7 +33,7 @@ String esqueciHelpCodigoBody() =>
 
 String esqueciHelpPapelBody({bool isAluno = false}) =>
     isAluno
-        ? 'Peça ao personal uma senha provisória nova. Depois entre pelo link ?p=slug.'
+        ? 'Peça ao personal um novo link de acesso. Pelo link você cria a senha e já entra.'
         : 'O código vale para a conta personal deste e-mail.';
 
 String? esqueciAlunoOtpRedirect({required bool isAluno, String? personalSlug}) {

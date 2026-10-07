@@ -15,6 +15,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
   MigracaoFileParseResult? _planilha;
   MigracaoFonte _fonte = MigracaoFonte.texto;
   MigracaoImportacaoResumo? _importResumo;
+  final Map<int, MigracaoAcessoStatus> _acessoStatus = {};
 
   bool get _isReviewing =>
       _importResumo == null &&
@@ -226,15 +227,16 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
               ),
               const SizedBox(height: TokensStrip.s2),
               Text(
-                migracaoQuestionCaption(_etapa),
+                migracaoQuestionCaption(_etapa, S.of(context)),
                 style: FocuxHubTypography.bodyMuted(color: mute),
               ),
               if (_isAcesso) ...[
                 const SizedBox(height: TokensStrip.s4),
                 _MigracaoImportacaoResumoBody(
                   data: _importResumo!,
-                  personalSlug:
-                      ref.watch(perfilProvider).value?.slug,
+                  status: _acessoStatus,
+                  onStatus: (id, status) =>
+                      setState(() => _acessoStatus[id] = status),
                 ),
               ] else if (!_isReviewing) ...[
               const SizedBox(height: FxSettingsLayout.headerToGroup),
@@ -633,11 +635,15 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
-                                  if (duplicado || confira) ...[
+                                  if (duplicado ||
+                                      aluno.possivelDuplicado ||
+                                      confira) ...[
                                     const SizedBox(height: 6),
                                     _badge(
                                       duplicado
                                           ? 'Já cadastrado'
+                                          : aluno.possivelDuplicado
+                                          ? S.of(context).migracaoPossivelDuplicado
                                           : 'Confira o nome',
                                     ),
                                   ],

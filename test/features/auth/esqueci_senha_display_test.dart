@@ -22,12 +22,12 @@ void main() {
     expect(esqueciMostraCodigo(isAluno: true), isFalse);
     expect(
       esqueciAlunoPedePersonalBody(),
-      'Peça uma senha nova ao seu personal.',
+      'Peça um novo link de acesso ao seu personal.',
     );
     expect(esqueciPageSubtitle(isAluno: false), contains('6 dígitos'));
     expect(esqueciPageSubtitle(isAluno: true), esqueciAlunoPedePersonalBody());
     expect(esqueciHelpSubtitle(isAluno: false), contains('10 minutos'));
-    expect(esqueciHelpSubtitle(isAluno: true), contains('senha provisória'));
+    expect(esqueciHelpSubtitle(isAluno: true), contains('link'));
     expect(esqueciHelpSubtitle(isAluno: true), isNot(contains('mesmo fluxo')));
     expect(esqueciAlunoOtpRedirect(isAluno: false), isNull);
     expect(

@@ -48,4 +48,20 @@ void main() {
     expect(m.last.duplicado, isTrue);
     expect(m.last.entraNoSalvamento, isFalse);
   });
+
+  test('possível duplicado chega desmarcado, mas pode ser marcado', () {
+    final m = MigracaoAlunoLinha.mesclarPreview(
+      [const MigracaoAlunoLinha(nome: 'Ana Souza')],
+      [
+        MigracaoAlunoLinha.fromJson({
+          'nome': 'Ana Souza',
+          'possivelDuplicado': true,
+        }),
+      ],
+    );
+
+    expect(m.single.possivelDuplicado, isTrue);
+    expect(m.single.entraNoSalvamento, isFalse);
+    expect(m.single.copyWith(selecionado: true).entraNoSalvamento, isTrue);
+  });
 }

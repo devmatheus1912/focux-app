@@ -212,6 +212,17 @@ class AuthNotifier extends Notifier<AuthStatus> {
     state = AuthStatus.authenticated;
   }
 
+  Future<void> ativarAluno({
+    required String token,
+    required String senha,
+    String? email,
+  }) async {
+    await _repo.ativarAluno(token: token, senha: senha, email: email);
+    _currentRole = UserRole.aluno;
+    _requiresPasswordChange = false;
+    state = AuthStatus.authenticated;
+  }
+
   Future<void> definirSenhaDefinitivaAluno(
     String senhaAtual,
     String novaSenha,

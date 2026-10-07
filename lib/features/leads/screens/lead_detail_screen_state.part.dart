@@ -107,9 +107,8 @@ class _LeadDetailScreenState extends ConsumerState<LeadDetailScreen> {
 
   Future<void> _whatsapp() async {
     if (_activeLead.telefone == null) return;
-    final tel = _activeLead.telefone!.replaceAll(RegExp(r'\D'), '');
-    final uri = Uri.parse('https://wa.me/55$tel');
-    if (await canLaunchUrl(uri)) {
+    final uri = BrPhone.whatsAppUri(_activeLead.telefone);
+    if (uri != null && await canLaunchUrl(uri)) {
       launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }

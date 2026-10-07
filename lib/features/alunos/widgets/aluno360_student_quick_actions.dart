@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../planos/data/plano_recurso.dart';
 import '../../planos/utils/plan_gate.dart';
 import '../constants/aluno_360_layout.dart';
@@ -96,9 +97,9 @@ class Aluno360StudentQuickActions extends ConsumerWidget {
       ),
       FxInsetPickerSheetItem(
         value: onPassword,
-        label: 'Senha de acesso',
-        subtitle: 'Gerar ou reenviar para $firstName',
-        icon: Icons.password_rounded,
+        label: S.of(context).alunoReenviarLinkAcao,
+        subtitle: 'Novo link para $firstName criar a senha',
+        icon: Icons.link_rounded,
       ),
       FxInsetPickerSheetItem(
         value: PlanGate.tap(

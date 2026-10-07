@@ -34,9 +34,9 @@ String addAlunoConfirmTitle(String firstName) => 'Cadastrar $firstName?';
 
 String addAlunoConfirmMessage({required bool hasWhatsapp}) {
   if (hasWhatsapp) {
-    return 'O aluno entra na lista com senha provisória. O convite abre pronto no WhatsApp.';
+    return 'O aluno entra na lista e recebe um link para criar a senha. O convite abre pronto no WhatsApp.';
   }
-  return 'O aluno entra na lista com senha provisória. Você copia o convite em seguida.';
+  return 'O aluno entra na lista e recebe um link para criar a senha. Você copia o convite em seguida.';
 }
 
 String addAlunoConfirmLabel() => 'Cadastrar';
@@ -46,7 +46,7 @@ String addAlunoAfterSubmitCopy({
   required bool hasWhatsapp,
 }) {
   if (hasWhatsapp) {
-    return '$firstName entra na lista com senha provisória e WhatsApp pronto pra enviar.';
+    return '$firstName entra na lista e o link de acesso fica pronto no WhatsApp.';
   }
-  return '$firstName entra na lista com senha provisória. Você copia o convite.';
+  return '$firstName entra na lista. Você copia o link de acesso.';
 }

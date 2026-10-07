@@ -8,6 +8,7 @@ import 'package:focux_app/features/growth/utils/migracao_foto_limits.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/planos/providers/plano_features_provider.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../support/riverpod_seeds.dart';
 import '../../support/screen_source_bundle.dart';
@@ -57,6 +58,9 @@ void main() {
           ),
         ],
         child: const MaterialApp(
+          locale: Locale('pt'),
+          localizationsDelegates: S.localizationsDelegates,
+          supportedLocales: S.supportedLocales,
           home: MeshScope(
             active: true,
             child: MigracaoMagicaScreen(),

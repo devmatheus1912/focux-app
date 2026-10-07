@@ -11,12 +11,12 @@ void main() {
     expect(screen, anyOf(contains('FxContentWidthLimiter'), isNot(contains('constrainWidth: false'))));
     expect(screen, anyOf(contains('friendlyError'), contains('DashboardErrorState'), contains('FxEmptyState'), contains('_erro'), contains('_TrainingEmptyState'), contains('ref.invalidate')));
     expect(screen, anyOf(contains('FxLoading'), contains('SkeletonLoader'), contains('SkeletonList'), contains('DashboardShimmer'), contains('Shimmer'), contains('IaCopilotInsightsLoading'), contains('_loading')));
-    expect(screen, contains('showAddAlunoSenhaSheet'));
-    final senha = readScreenSourceBundle(
-      'lib/features/alunos/widgets/add_aluno_senha_sheet.dart',
+    expect(screen, contains('showAlunoLinkAtivacaoSheet'));
+    final link = readScreenSourceBundle(
+      'lib/features/alunos/widgets/aluno_link_ativacao_sheet.dart',
     );
-    expect(senha, contains('copySensitiveToClipboard'));
-    expect(senha, contains('FxLiquidPrimaryButton'));
+    expect(link, contains('copySensitiveToClipboard'));
+    expect(link, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('Outro objetivo'));
     expect(screen, isNot(contains('ShellHeaderIconButton')));
     expect(screen, isNot(contains("icon: 'circle-check'")));

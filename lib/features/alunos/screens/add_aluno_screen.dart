@@ -27,10 +27,11 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../providers/alunos_provider.dart';
 import '../utils/add_aluno_display.dart';
-import '../../perfil/providers/perfil_provider.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../widgets/add_aluno_help_sheet.dart';
-import '../widgets/add_aluno_senha_sheet.dart';
+import '../widgets/aluno_link_ativacao_sheet.dart';
 import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
 import '../../leads/providers/leads_provider.dart';
@@ -253,11 +254,23 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
           },
         ),
       );
-      if (novoAluno.senhaProvisoria != null) {
-        await showAddAlunoSenhaSheet(
+      String? link;
+      try {
+        link = await ref
+            .read(alunoRepositoryProvider)
+            .gerarLinkAtivacao(novoAluno.id);
+      } catch (_) {
+        if (mounted) {
+          FeedbackHelper.showError(context, S.of(context).alunoReenviarLinkErro);
+        }
+      }
+      if (!mounted) return;
+      if (link != null) {
+        await showAlunoLinkAtivacaoSheet(
           context: context,
-          aluno: novoAluno,
-          personalSlug: ref.read(perfilProvider).value?.slug,
+          nome: novoAluno.nome,
+          link: link,
+          whatsapp: novoAluno.whatsapp,
           onDone: () {
             if (mounted) context.pop(true);
           },

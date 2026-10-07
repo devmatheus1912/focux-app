@@ -70,6 +70,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: '/login',
   ),
+  '/aluno/ativar/:token': FocuxSurfaceSpec(
+    type: _s6,
+    hasInput: true,
+    logicalParent: '/login',
+  ),
   '/onboarding': _s9Root,
   '/onboarding/wizard': FocuxSurfaceSpec(
     type: _s9,

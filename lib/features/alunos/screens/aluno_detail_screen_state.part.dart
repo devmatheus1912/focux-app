@@ -415,7 +415,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                       }
                                     },
                                     onPassword:
-                                        () => confirmarGerarSenhaAlunoDetail(
+                                        () => confirmarReenviarLinkAlunoDetail(
                                           context,
                                           ref,
                                           aluno,

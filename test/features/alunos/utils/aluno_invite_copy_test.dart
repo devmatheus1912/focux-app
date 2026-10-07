@@ -1,39 +1,35 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno_invite_copy.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
-  test('convite usa primeiro nome, e-mail e senha', () {
-    final text = alunoInviteMessage(
-      nome: 'Nathalia Costa',
-      email: 'nathalia@test.com',
-      senhaProvisoria: 'AB12CD',
-    );
+  final s = lookupS(const Locale('pt'));
+  const link = 'https://example.com/aluno/ativar/abc';
+
+  test('convite usa primeiro nome e link, sem senha', () {
+    final text = alunoAtivacaoMessage(s, nome: 'Nathalia Costa', link: link);
     expect(text, contains('Olá Nathalia!'));
-    expect(text, contains('nathalia@test.com'));
-    expect(text, contains('AB12CD'));
-    expect(text, contains('primeiro acesso'));
-    expect(text, contains('?p=slug'));
+    expect(text, contains(link));
+    expect(text, contains('7 dias'));
+    expect(text.toLowerCase(), isNot(contains('senha provisória')));
   });
 
-  test('convite com slug inclui link de login do aluno', () {
-    final text = alunoInviteMessage(
+  test('reenvio avisa que é um novo link', () {
+    final text = alunoAtivacaoMessage(
+      s,
       nome: 'Nathalia Costa',
-      email: 'nathalia@test.com',
-      senhaProvisoria: 'AB12CD',
-      personalSlug: 'nath-coach',
+      link: link,
+      reenvio: true,
     );
-    expect(text, contains('/p/nath-coach'));
-    expect(text, isNot(contains('Peça ao personal o link')));
+    expect(text, contains('novo link'));
+    expect(text, contains(link));
   });
 
-  test('senha provisória com slug inclui link', () {
-    final text = alunoSenhaProvisoriaMessage(
-      nome: 'Nathalia Costa',
-      email: 'nathalia@test.com',
-      senha: 'XY99',
-      personalSlug: 'studio-x',
+  test('sem nome usa saudação genérica', () {
+    expect(
+      alunoAtivacaoMessage(s, nome: ' ', link: link),
+      contains('Olá aluno!'),
     );
-    expect(text, contains('/p/studio-x'));
-    expect(text, contains('XY99'));
   });
 }

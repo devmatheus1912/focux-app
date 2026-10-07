@@ -8,6 +8,15 @@ void main() {
     expect(isPublicLocation('/resetar-senha'), isTrue);
     expect(isPublicLocation('/resetar-senha/verificar-codigo'), isTrue);
     expect(isPublicLocation('/dashboard/personal'), isFalse);
+    expect(isPublicLocation('/aluno/ativar/abc'), isTrue);
+    expect(
+      passwordChangeRedirect(
+        requiresPasswordChange: true,
+        role: 'ALUNO',
+        path: '/aluno/ativar/abc',
+      ),
+      isNull,
+    );
   });
 
   test('personal-only routes block aluno shell paths', () {

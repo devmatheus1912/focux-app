@@ -30,7 +30,7 @@ void main() {
     );
     expect(
       addAlunoAfterSubmitCopy(firstName: 'Beatriz', hasWhatsapp: false),
-      contains('copia o convite'),
+      contains('copia o link'),
     );
     expect(addAlunoTiposConsultoria, containsAll(['ONLINE', 'HIBRIDO']));
   });

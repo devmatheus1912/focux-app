@@ -54,7 +54,9 @@ String? passwordChangeRedirect({
   required String path,
 }) {
   if (!requiresPasswordChange || role != 'ALUNO') return null;
-  if (path == '/aluno/definir-senha') return null;
+  if (path == '/aluno/definir-senha' || isAtivacaoAlunoLocation(path)) {
+    return null;
+  }
   return '/aluno/definir-senha';
 }
 
@@ -86,8 +88,12 @@ bool isPublicLocation(String path) {
       path.startsWith('/resetar-senha/') ||
       path.startsWith('/p/') ||
       path.startsWith('/convite/') ||
+      isAtivacaoAlunoLocation(path) ||
       (kDebugMode && path.startsWith('/qa/'));
 }
+
+/// Link de ativação do aluno: abre com ou sem sessão no aparelho.
+bool isAtivacaoAlunoLocation(String path) => path.startsWith('/aluno/ativar/');
 
 bool isAlunoOnlyLocation(String path) {
   const alunoOnly = {
@@ -227,9 +233,10 @@ String? stringRouteExtra(GoRouterState state) {
     return (
       alunoNome:
           nome is String && nome.trim().isNotEmpty ? nome.trim() : 'Aluno',
-      section: section is String && section.trim().isNotEmpty
-          ? section.trim()
-          : null,
+      section:
+          section is String && section.trim().isNotEmpty
+              ? section.trim()
+              : null,
     );
   }
   final nome = stringRouteExtra(state);
