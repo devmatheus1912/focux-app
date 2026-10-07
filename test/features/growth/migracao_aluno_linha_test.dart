@@ -64,4 +64,17 @@ void main() {
     expect(m.single.entraNoSalvamento, isFalse);
     expect(m.single.copyWith(selecionado: true).entraNoSalvamento, isTrue);
   });
+
+  test('possível duplicado fica desmarcado mesmo se o preview mudar de tamanho', () {
+    final m = MigracaoAlunoLinha.mesclarPreview(
+      [const MigracaoAlunoLinha(nome: 'Ana Souza')],
+      [
+        MigracaoAlunoLinha.fromJson({'nome': 'Ana Souza', 'possivelDuplicado': true}),
+        MigracaoAlunoLinha.fromJson({'nome': 'Bruno Costa'}),
+      ],
+    );
+
+    expect(m.first.entraNoSalvamento, isFalse);
+    expect(m.last.entraNoSalvamento, isTrue);
+  });
 }

@@ -15,7 +15,9 @@ class MigracaoAlunoLinha {
     this.status = MigracaoLinhaStatus.valido,
     bool? selecionado,
     this.raw = const {},
-  }) : selecionado = selecionado ?? status == MigracaoLinhaStatus.valido;
+  }) : selecionado =
+           selecionado ??
+           (status == MigracaoLinhaStatus.valido && !possivelDuplicado);
 
   final String nome;
   final String? email;
@@ -83,7 +85,7 @@ class MigracaoAlunoLinha {
   }
 
   /// O preview do servidor não devolve status/seleção: reaplica por posição.
-  /// Possível duplicado chega desmarcado.
+  /// Possível duplicado chega desmarcado (também quando as listas divergem).
   static List<MigracaoAlunoLinha> mesclarPreview(
     List<MigracaoAlunoLinha> originais,
     List<MigracaoAlunoLinha> preview,
