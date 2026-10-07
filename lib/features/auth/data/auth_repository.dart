@@ -19,6 +19,35 @@ class PasswordResetRequestResult {
   }
 }
 
+/// `GET /api/auth/aluno/ativacao/{token}`.
+class AtivacaoAluno {
+  const AtivacaoAluno({
+    required this.valido,
+    this.alunoPrimeiroNome,
+    this.personalNome,
+    this.personalSlug,
+    this.precisaEmail = false,
+  });
+
+  final bool valido;
+  final String? alunoPrimeiroNome;
+  final String? personalNome;
+  final String? personalSlug;
+
+  /// E-mail da importação é provisório: pedir o real.
+  final bool precisaEmail;
+
+  factory AtivacaoAluno.fromJson(Map<String, dynamic> json) {
+    return AtivacaoAluno(
+      valido: json['valido'] == true,
+      alunoPrimeiroNome: json['alunoPrimeiroNome'] as String?,
+      personalNome: json['personalNome'] as String?,
+      personalSlug: json['personalSlug'] as String?,
+      precisaEmail: json['precisaEmail'] == true,
+    );
+  }
+}
+
 class AuthCapabilities {
   final bool passwordResetEmailAvailable;
   final bool appleSignInEnabled;
@@ -464,6 +493,35 @@ class AuthRepository {
     final body = response.data as Map<String, dynamic>;
     await _persistAuthResponse(body, fallbackRole: 'ALUNO');
     return body['token'] as String;
+  }
+
+  Future<AtivacaoAluno> validarAtivacao(String token) async {
+    final response = await _dio.get(
+      '/api/auth/aluno/ativacao/${Uri.encodeComponent(token)}',
+    );
+    return AtivacaoAluno.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  /// Link de ativação: cria a senha (e troca o e-mail provisório) e já entra.
+  Future<void> ativarAluno({
+    required String token,
+    required String senha,
+    String? email,
+  }) async {
+    final response = await _dio.post(
+      '/api/auth/aluno/ativar',
+      data: {
+        'token': token,
+        'senha': senha,
+        if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+        'aceitouTermos': true,
+        'versaoTermos': FocuxLegal.consentDocumentVersion,
+      },
+    );
+    await _persistAuthResponse(
+      response.data as Map<String, dynamic>,
+      fallbackRole: 'ALUNO',
+    );
   }
 
   Future<void> definirSenhaDefinitivaAluno(

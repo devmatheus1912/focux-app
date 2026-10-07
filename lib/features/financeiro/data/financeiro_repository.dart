@@ -316,7 +316,10 @@ class FinanceiroRepository {
 
   /// BFF first paint — dashboard + primeira página + resumo + planoFeatures.
   Future<FinanceiroHomeBundle> getHome() async {
-    final r = await _dio.get('/api/financeiro/home');
+    final r = await _dio.get(
+      '/api/financeiro/home',
+      queryParameters: {'status': MensalidadeFiltro.abertas.wire},
+    );
     return FinanceiroHomeBundle.fromJson(r.data as Map<String, dynamic>);
   }
 
@@ -325,18 +328,35 @@ class FinanceiroRepository {
     int size = 20,
     String? nomeAluno,
     int? alunoId,
+    MensalidadeFiltro filtro = MensalidadeFiltro.todas,
   }) async {
     final r = await _dio.get(
       '/api/financeiro/mensalidades',
       queryParameters: {
         'page': page,
         'size': size,
+        'status': filtro.wire,
         if (nomeAluno != null && nomeAluno.trim().isNotEmpty)
           'nomeAluno': nomeAluno.trim(),
         if (alunoId != null) 'alunoId': alunoId,
       },
     );
     return MensalidadesPage.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<Mensalidade> cancelar(int id) async {
+    final r = await _dio.put(
+      '/api/financeiro/mensalidades/$id/cancelar',
+      options: ApiClient.idempotent('mensalidade-cancelar-$id'),
+    );
+    return Mensalidade.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<Mensalidade> desfazerPagamento(int id) async {
+    final r = await _dio.put(
+      '/api/financeiro/mensalidades/$id/desfazer-pagamento',
+    );
+    return Mensalidade.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<Mensalidade> buscar(int id) async {
@@ -472,6 +492,17 @@ class FinanceiroRepository {
       hasMore: atual.hasMore,
     );
   }
+}
+
+/// Chips da lista do personal → `status` de `GET /api/financeiro/mensalidades`.
+enum MensalidadeFiltro {
+  abertas('ABERTAS'),
+  atrasadas('ATRASADAS'),
+  pagas('PAGAS'),
+  todas('TODAS');
+
+  const MensalidadeFiltro(this.wire);
+  final String wire;
 }
 
 /// Página de `GET /api/financeiro/mensalidades` e `.../aluno/minhas`.

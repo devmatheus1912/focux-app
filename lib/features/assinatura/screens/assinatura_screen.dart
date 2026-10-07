@@ -681,18 +681,7 @@ class _AssinaturaScreenState extends ConsumerState<AssinaturaScreen> {
     }
 
     if (kIsWeb) {
-      setState(() => _loadingCheckout = true);
-      try {
-        final checkoutUrl = await ref
-            .read(assinaturaRepositoryProvider)
-            .criarPreferencia(backendPlan.id);
-        final uri = Uri.parse(checkoutUrl);
-        await launchUrl(uri, webOnlyWindowName: '_self');
-      } catch (error) {
-        _finishPurchaseFlowWithError(
-          friendlyError(error, fallback: 'Erro ao gerar checkout web.'),
-        );
-      }
+      _finishPurchaseFlowWithError(S.of(context).assinaturaWebAssinePeloApp);
       return;
     }
 

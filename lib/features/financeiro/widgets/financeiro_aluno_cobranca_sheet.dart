@@ -29,7 +29,7 @@ Future<void> showFinanceiroAlunoCobrancaSheet(
       FxHelpTip(
         'Como pagar',
         podePix
-            ? 'Gere o PIX aqui. Depois que o pagamento confirmar, o status atualiza sozinho.'
+            ? 'Gere o PIX aqui. Depois de pagar, avise o personal pelo app para ele confirmar.'
             : item.status == 'PAGO'
             ? 'Esta cobrança já está quitada.'
             : 'Fale com o personal se precisar de ajuda com o pagamento.',

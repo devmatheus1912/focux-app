@@ -1,3 +1,5 @@
+import '../../../l10n/app_localizations.dart';
+
 String migracaoIniciarLabel() => 'Analisar texto';
 
 String migracaoIniciarAnalisandoLabel() => 'Analisando texto...';
@@ -78,13 +80,12 @@ String migracaoQuestionTitle(MigracaoEtapa etapa) => switch (etapa) {
   MigracaoEtapa.acesso => 'Enviar acesso',
 };
 
-String migracaoQuestionCaption(MigracaoEtapa etapa) => switch (etapa) {
+String migracaoQuestionCaption(MigracaoEtapa etapa, S s) => switch (etapa) {
   MigracaoEtapa.captura =>
     'Uma fonte por vez. Você revisa antes de gravar fichas.',
   MigracaoEtapa.revisao =>
     'Toque para editar. Remova duplicados antes de salvar.',
-  MigracaoEtapa.acesso =>
-    'Copie ou mande no WhatsApp um aluno por vez. Eles trocam a senha no primeiro acesso.',
+  MigracaoEtapa.acesso => s.migracaoAcessoCaption,
 };
 
 String migracaoFonteLabel(MigracaoFonte fonte) {
@@ -116,7 +117,3 @@ String migracaoContinueCaptureLabel({
 String migracaoVoltarLabel() => 'Voltar';
 
 String migracaoIrParaListaLabel() => 'Ir para lista';
-
-String migracaoCopiarConviteLabel() => 'Copiar convite';
-
-String migracaoWhatsAppLabel() => 'WhatsApp';

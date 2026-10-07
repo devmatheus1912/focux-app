@@ -44,7 +44,7 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <!-- Deep link: retorno do MercadoPago -->
+            <!-- Deep link focux:// (custom scheme) -->
             <!-- Custom scheme (não usar autoVerify — só HTTPS App Links). -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>

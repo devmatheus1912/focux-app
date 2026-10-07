@@ -358,8 +358,7 @@ abstract final class Aluno360FerramentasLogic {
   }
 
   static bool anamneseNeedsAttention(String? status) {
-    return status == 'SOLICITADA' ||
-        status == 'PREENCHIDA' ||
+    return status == 'PREENCHIDA' ||
         status == 'PRECISA_ATESTADO' ||
         status == null ||
         status == 'NAO_INICIADA';

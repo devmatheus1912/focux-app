@@ -25,8 +25,8 @@ Future<void> showAddAlunoHelpSheet(BuildContext context) {
         icon: 'flag',
       ),
       FxHelpTip(
-        'Senha provisória',
-        'Depois do cadastro, copie o convite ou envie no WhatsApp. O aluno troca a senha no primeiro acesso.',
+        'Link de acesso',
+        'Depois do cadastro, envie o link no WhatsApp ou copie. O aluno cria a própria senha. Vale 7 dias.',
         icon: 'key',
       ),
     ],

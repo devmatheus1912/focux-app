@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import 'aluno_followup_store.dart';
@@ -119,10 +120,8 @@ Future<void> openAlunoWhatsappOutreach(
       (emRisco
           ? 'Oi $firstName, tudo bem? Vi que faz um tempo sem registrarmos treino. Posso te ajudar a retomar a rotina?'
           : 'Oi $firstName, tudo bem? Passando para alinhar sua mensalidade pendente.');
-  final uri = Uri.parse(
-    'https://wa.me/55$whatsappNumber?text=${Uri.encodeComponent(mensagem)}',
-  );
-  if (await canLaunchUrl(uri)) {
+  final uri = BrPhone.whatsAppUri(whatsappNumber, text: mensagem);
+  if (uri != null && await canLaunchUrl(uri)) {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
     return;
   }

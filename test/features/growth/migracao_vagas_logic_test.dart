@@ -94,21 +94,21 @@ void main() {
   });
 
   group('MigracaoImportacaoDetalhe', () {
-    test('parse senha email telefone alunoId', () {
+    test('parse link email telefone alunoId', () {
       final d = MigracaoImportacaoDetalhe.fromJson({
         'nome': 'Ana',
         'status': 'IMPORTADO',
         'alunoId': 42,
         'email': 'ana@test.com',
         'telefone': '1199999',
-        'senhaProvisoria': 'Ab12Cd34',
+        'linkAtivacao': 'https://example.com/aluno/ativar/t',
       });
       expect(d.alunoId, 42);
       expect(d.email, 'ana@test.com');
-      expect(d.senhaProvisoria, 'Ab12Cd34');
+      expect(d.linkAtivacao, 'https://example.com/aluno/ativar/t');
     });
 
-    test('importadosComAcesso filtra só com senha', () {
+    test('importadosComAcesso filtra só com link', () {
       final resumo = MigracaoImportacaoResumo.fromJson({
         'importados': 2,
         'duplicados': 0,
@@ -117,7 +117,7 @@ void main() {
           {
             'nome': 'A',
             'status': 'IMPORTADO',
-            'senhaProvisoria': 'x',
+            'linkAtivacao': 'x',
             'email': 'a@t.com',
           },
           {'nome': 'B', 'status': 'DUPLICADO', 'motivo': 'dup'},

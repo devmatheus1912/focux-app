@@ -311,7 +311,7 @@ class _GrupoAulasAlunoScreenState extends ConsumerState<GrupoAulasAlunoScreen> {
                       ? 'Tente outro nome ou local.'
                       : 'Quando seu personal abrir uma aula em grupo, ela aparece aqui. Dúvida? Fale no chat.',
                   action: searching
-                      ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                      ? FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: _clearQuery)
                       : FxEmptyAction(
                           label: 'Abrir chat',
                           onTap: () => openAlunoRoute(context, '/chat/aluno'),

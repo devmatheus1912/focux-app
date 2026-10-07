@@ -11,6 +11,8 @@ String financeiroMensalidadeStatusLabel(String status) {
       return 'Pendente';
     case 'ATRASADO':
       return 'Atrasado';
+    case 'CANCELADO':
+      return 'Cancelada';
     default:
       return status;
   }

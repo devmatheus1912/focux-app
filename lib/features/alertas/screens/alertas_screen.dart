@@ -441,6 +441,7 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                                             'Ajuste a busca para achar outro aluno em risco.',
                                         action: FxEmptyAction(
                                           label: 'Limpar busca',
+                                          secondary: true,
                                           onTap: _clearQuery,
                                         ),
                                       ),

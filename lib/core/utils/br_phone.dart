@@ -36,6 +36,15 @@ abstract final class BrPhone {
   }
 
   static TextInputFormatter formatter() => const BrPhoneInputFormatter();
+
+  /// wa.me com DDI 55 (sem duplicar se já vier); null sem telefone.
+  static Uri? whatsAppUri(String? raw, {String? text}) {
+    var digits = digitsOnly(raw ?? '');
+    if (digits.isEmpty) return null;
+    if (!(digits.startsWith('55') && digits.length >= 12)) digits = '55$digits';
+    final query = text == null ? '' : '?text=${Uri.encodeComponent(text)}';
+    return Uri.parse('https://wa.me/$digits$query');
+  }
 }
 
 class BrPhoneInputFormatter extends TextInputFormatter {

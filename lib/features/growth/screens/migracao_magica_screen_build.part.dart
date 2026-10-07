@@ -3,11 +3,15 @@ part of 'migracao_magica_screen.dart';
 class _MigracaoImportacaoResumoBody extends StatelessWidget {
   const _MigracaoImportacaoResumoBody({
     required this.data,
-    this.personalSlug,
+    required this.status,
+    required this.onStatus,
   });
 
   final MigracaoImportacaoResumo data;
-  final String? personalSlug;
+
+  /// alunoId → enviado/copiado nesta tela.
+  final Map<int, MigracaoAcessoStatus> status;
+  final void Function(int alunoId, MigracaoAcessoStatus status) onStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -55,20 +59,15 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
         if (comAcesso.isNotEmpty) ...[
           SizedBox(height: TokensStrip.s4),
           Text(
-            'Envie o acesso',
-            style: FocuxHubTypography.sectionTitle(context, color: ink),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Um aluno por vez. Eles trocam a senha no primeiro login.',
+            S.of(context).migracaoAcessoValidade,
             style: FocuxHubTypography.bodyMuted(color: mute),
           ),
           SizedBox(height: TokensStrip.s3),
           for (final item in comAcesso)
             _MigracaoConviteTile(
               item: item,
-              personalSlug: personalSlug,
-              isDark: isDark,
+              status: status[item.alunoId],
+              onStatus: (s) => onStatus(item.alunoId!, s),
               ink: ink,
               mute: mute,
               brand: brand,
@@ -128,100 +127,133 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
   }
 }
 
+enum MigracaoAcessoStatus { enviado, copiado }
+
 class _MigracaoConviteTile extends StatelessWidget {
   const _MigracaoConviteTile({
     required this.item,
-    required this.personalSlug,
-    required this.isDark,
+    required this.status,
+    required this.onStatus,
     required this.ink,
     required this.mute,
     required this.brand,
   });
 
   final MigracaoImportacaoDetalhe item;
-  final String? personalSlug;
-  final bool isDark;
+  final MigracaoAcessoStatus? status;
+  final ValueChanged<MigracaoAcessoStatus> onStatus;
   final Color ink;
   final Color mute;
   final Color brand;
 
-  String get _convite => alunoInviteMessage(
-    nome: item.nome,
-    email: item.email ?? '',
-    senhaProvisoria: item.senhaProvisoria ?? '',
-    personalSlug: personalSlug,
-  );
+  String _convite(S s) =>
+      alunoAtivacaoMessage(s, nome: item.nome, link: item.linkAtivacao ?? '');
 
-  Future<void> _copiar(BuildContext context) async {
-    await copySensitiveToClipboard(_convite);
+  /// E-mail gerado na importação não é do aluno: não mostra.
+  String? get _emailVisivel {
+    final email = item.email?.trim();
+    if (email == null || email.isEmpty || email.endsWith('@focux.importado')) {
+      return null;
+    }
+    return email;
+  }
+
+  Future<void> _copiar(BuildContext context, {String? aviso}) async {
+    final s = S.of(context);
+    await copySensitiveToClipboard(_convite(s));
     HapticFeedback.mediumImpact();
+    onStatus(MigracaoAcessoStatus.copiado);
     if (context.mounted) {
-      FeedbackHelper.showSuccess(context, 'Convite copiado');
+      FeedbackHelper.showSuccess(context, aviso ?? s.alunoLinkCopiado);
     }
   }
 
-  Future<void> _whatsapp(BuildContext context) async {
-    final digits = (item.telefone ?? '').replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) {
-      await _copiar(context);
-      return;
-    }
-    final uri = Uri.parse(
-      'https://wa.me/$digits?text=${Uri.encodeComponent(_convite)}',
-    );
+  Future<void> _whatsapp(BuildContext context, Uri uri) async {
+    final s = S.of(context);
+    HapticFeedback.mediumImpact();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!ok && context.mounted) {
-      FeedbackHelper.showError(context, 'Não foi possível abrir o WhatsApp');
+    if (!context.mounted) return;
+    if (ok) {
+      onStatus(MigracaoAcessoStatus.enviado);
+    } else {
+      await _copiar(context, aviso: s.alunoLinkWhatsAppFalhou);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasWhatsapp =
-        (item.telefone ?? '').replaceAll(RegExp(r'\D'), '').isNotEmpty;
+    final s = S.of(context);
+    final whatsAppUri = BrPhone.whatsAppUri(item.telefone, text: _convite(s));
+    final email = _emailVisivel;
+    final feito = status != null;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s3),
       child: Container(
         padding: const EdgeInsets.all(TokensStrip.s3),
-        decoration: fxListCardDecoration(context, accent: brand),
+        decoration: fxListCardDecoration(
+          context,
+          accent: feito ? EagleTokens.good : brand,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              item.nome,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: ink,
-                fontSize: 14,
-              ),
-            ),
-            if ((item.email ?? '').isNotEmpty)
-              Text(
-                item.email!,
-                style: TextStyle(fontSize: 12, color: mute, height: 1.35),
-              ),
-            const SizedBox(height: TokensStrip.s2),
             Row(
               children: [
                 Expanded(
-                  child: FxLiquidSecondaryButton(
-                    label: migracaoCopiarConviteLabel(),
-                    onPressed: () => _copiar(context),
+                  child: Text(
+                    item.nome,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: ink,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: FxLiquidPrimaryButton(
-                    label:
-                        hasWhatsapp
-                            ? migracaoWhatsAppLabel()
-                            : migracaoCopiarConviteLabel(),
-                    onPressed: () => _whatsapp(context),
+                if (feito)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle_rounded,
+                        size: 16,
+                        color: EagleTokens.good,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        status == MigracaoAcessoStatus.enviado
+                            ? s.migracaoAcessoEnviado
+                            : s.migracaoAcessoCopiado,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: EagleTokens.good,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
               ],
             ),
+            if (email != null)
+              Text(
+                email,
+                style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+              ),
+            const SizedBox(height: TokensStrip.s2),
+            if (whatsAppUri != null) ...[
+              FxLiquidPrimaryButton(
+                label: s.alunoLinkEnviarWhatsApp,
+                onPressed: () => _whatsapp(context, whatsAppUri),
+              ),
+              TextButton(
+                onPressed: () => _copiar(context),
+                child: Text(s.alunoLinkCopiar),
+              ),
+            ] else
+              FxLiquidPrimaryButton(
+                label: s.alunoLinkCopiar,
+                onPressed: () => _copiar(context),
+              ),
           ],
         ),
       ),

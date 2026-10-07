@@ -390,6 +390,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
                   searching
                       ? FxEmptyAction(
                         label: 'Limpar filtros',
+                        secondary: true,
                         onTap: _clearFilters,
                       )
                       : FxEmptyAction(

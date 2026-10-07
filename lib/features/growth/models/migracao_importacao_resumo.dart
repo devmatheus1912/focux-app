@@ -19,7 +19,7 @@ class MigracaoImportacaoResumo {
           .where(
             (d) =>
                 d.status == 'IMPORTADO' &&
-                (d.senhaProvisoria?.isNotEmpty ?? false),
+                (d.linkAtivacao?.isNotEmpty ?? false),
           )
           .toList(growable: false);
 
@@ -58,7 +58,7 @@ class MigracaoImportacaoDetalhe {
     this.alunoId,
     this.email,
     this.telefone,
-    this.senhaProvisoria,
+    this.linkAtivacao,
   });
 
   final String nome;
@@ -67,7 +67,7 @@ class MigracaoImportacaoDetalhe {
   final int? alunoId;
   final String? email;
   final String? telefone;
-  final String? senhaProvisoria;
+  final String? linkAtivacao;
 
   factory MigracaoImportacaoDetalhe.fromJson(Map<String, dynamic> json) {
     int? asId(dynamic value) {
@@ -82,7 +82,7 @@ class MigracaoImportacaoDetalhe {
       alunoId: asId(json['alunoId']),
       email: json['email']?.toString(),
       telefone: json['telefone']?.toString(),
-      senhaProvisoria: json['senhaProvisoria']?.toString(),
+      linkAtivacao: json['linkAtivacao']?.toString(),
     );
   }
 }

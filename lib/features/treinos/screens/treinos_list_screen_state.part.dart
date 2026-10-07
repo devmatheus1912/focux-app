@@ -740,6 +740,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                           : 'Ajuste a busca para encontrar outro treino do aluno.',
                                   action: FxEmptyAction(
                                     label: 'Limpar busca',
+                                    secondary: true,
                                     onTap: _clearQuery,
                                   ),
                                 ),

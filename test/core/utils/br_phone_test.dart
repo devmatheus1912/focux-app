@@ -20,5 +20,21 @@ void main() {
       expect(BrPhone.formatDisplay('11999990000'), '(11) 99999-0000');
       expect(BrPhone.formatDisplay(null), '');
     });
+
+    test('whatsAppUri põe DDI 55 uma vez só', () {
+      expect(
+        BrPhone.whatsAppUri('(11) 99999-0000')!.toString(),
+        'https://wa.me/5511999990000',
+      );
+      expect(
+        BrPhone.whatsAppUri('+55 11 99999-0000')!.toString(),
+        'https://wa.me/5511999990000',
+      );
+      expect(
+        BrPhone.whatsAppUri('11999990000', text: 'oi a')!.toString(),
+        'https://wa.me/5511999990000?text=oi%20a',
+      );
+      expect(BrPhone.whatsAppUri(''), isNull);
+    });
   });
 }

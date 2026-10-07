@@ -747,7 +747,7 @@ void main() {
     expect(screen, contains('Quando houver check-in ou chat'));
     expect(
       screen,
-      contains('friendlyError(e, fallback: \'Não foi possível gerar senha.\')'),
+      contains('friendlyError(e, fallback: s.alunoReenviarLinkErro)'),
     );
     expect(screen, contains('alunoTimeline360PagedProvider'));
     expect(screen, contains('reduceMotionOf(context)'));

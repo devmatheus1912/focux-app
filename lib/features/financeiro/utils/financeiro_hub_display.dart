@@ -1,5 +1,6 @@
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
+import '../data/financeiro_repository.dart';
 
 /// Hub financeiro — P0 = lista de mensalidades (A30 / §0.1).
 /// Panorama = read model único (mês + KPIs/charts).
@@ -90,19 +91,24 @@ enum MensalidadeDetailActionId {
   pix,
   chat,
   contato,
+  cancelar,
+  desfazerPagamento,
 }
 
 List<MensalidadeDetailActionId> mensalidadeDetailMaisActions({
   required bool pending,
+  bool pago = false,
 }) =>
     [
       MensalidadeDetailActionId.edit,
       if (pending) MensalidadeDetailActionId.pix,
       if (pending) MensalidadeDetailActionId.chat,
       MensalidadeDetailActionId.contato,
+      if (pending) MensalidadeDetailActionId.cancelar,
+      if (pago) MensalidadeDetailActionId.desfazerPagamento,
     ];
 
-String mensalidadeDetailActionLabel(MensalidadeDetailActionId id) =>
+String mensalidadeDetailActionLabel(MensalidadeDetailActionId id, S s) =>
     switch (id) {
       MensalidadeDetailActionId.aluno => 'Abrir aluno',
       MensalidadeDetailActionId.financeiro => 'Lista de mensalidades',
@@ -110,7 +116,26 @@ String mensalidadeDetailActionLabel(MensalidadeDetailActionId id) =>
       MensalidadeDetailActionId.pix => 'PIX',
       MensalidadeDetailActionId.chat => 'Cobrar no chat',
       MensalidadeDetailActionId.contato => 'Registrar contato',
+      MensalidadeDetailActionId.cancelar => s.mensalidadeCancelarAcao,
+      MensalidadeDetailActionId.desfazerPagamento =>
+        s.mensalidadeDesfazerPagamentoAcao,
     };
+
+String mensalidadeFiltroLabel(MensalidadeFiltro f, S s) => switch (f) {
+      MensalidadeFiltro.abertas => s.financeiroFiltroAbertas,
+      MensalidadeFiltro.atrasadas => s.financeiroFiltroAtrasadas,
+      MensalidadeFiltro.pagas => s.financeiroFiltroPagas,
+      MensalidadeFiltro.todas => s.financeiroFiltroTodas,
+    };
+
+/// Cabeçalho de grupo da lista: "Outubro 2026" a partir de `yyyy-MM[-dd]`.
+String financeiroMesCabecalho(String mesReferencia) {
+  final raw = mesReferencia.trim();
+  final ano = raw.length >= 4 ? int.tryParse(raw.substring(0, 4)) : null;
+  final mes = raw.length >= 7 ? int.tryParse(raw.substring(5, 7)) : null;
+  if (ano == null || mes == null) return financeiroMensalidadeMesLabel(raw);
+  return financeiroMesTitulo(mes, ano);
+}
 
 /// Sheet secundário — distinto do sticky P0 (pagar / abrir aluno).
 String mensalidadeDetailMaisSheetTitle() => 'Outras ações';
@@ -452,8 +477,10 @@ String financeiroSalvarMensalidadeTileLabel() => 'Salvar';
 
 String financeiroLancarMensalidadeTileLabel() => 'Lançar';
 
-bool financeiroStatusAberto(String status) =>
-    status.trim().toUpperCase() != 'PAGO';
+bool financeiroStatusAberto(String status) {
+  final s = status.trim().toUpperCase();
+  return s == 'PENDENTE' || s == 'ATRASADO';
+}
 
 String financeiroLotePagoChipLabel({
   required bool modoSelecao,

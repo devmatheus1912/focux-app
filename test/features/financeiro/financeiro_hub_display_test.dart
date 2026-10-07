@@ -55,9 +55,19 @@ void main() {
       mensalidadeDetailMaisActions(pending: false),
       isNot(contains(MensalidadeDetailActionId.pix)),
     );
+    final s = lookupS(const Locale('pt'));
     expect(
-      mensalidadeDetailActionLabel(MensalidadeDetailActionId.financeiro),
+      mensalidadeDetailActionLabel(MensalidadeDetailActionId.financeiro, s),
       'Lista de mensalidades',
+    );
+    expect(mais, contains(MensalidadeDetailActionId.cancelar));
+    expect(mais, isNot(contains(MensalidadeDetailActionId.desfazerPagamento)));
+    final paga = mensalidadeDetailMaisActions(pending: false, pago: true);
+    expect(paga, contains(MensalidadeDetailActionId.desfazerPagamento));
+    expect(paga, isNot(contains(MensalidadeDetailActionId.cancelar)));
+    expect(
+      mensalidadeDetailActionLabel(MensalidadeDetailActionId.cancelar, s),
+      'Cancelar mensalidade',
     );
   });
 
@@ -228,6 +238,9 @@ void main() {
     expect(financeiroStatusAberto('ATRASADO'), isTrue);
     expect(financeiroStatusAberto('PENDENTE'), isTrue);
     expect(financeiroStatusAberto('pago'), isFalse);
+    expect(financeiroStatusAberto('CANCELADO'), isFalse);
+    expect(financeiroMesCabecalho('2026-10-01'), 'Outubro 2026');
+    expect(financeiroMesCabecalho('2025-12'), 'Dezembro 2025');
     expect(
       financeiroLotePagoChipLabel(modoSelecao: false, selecionados: 0),
       'Marcar lote',

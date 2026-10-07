@@ -26,6 +26,9 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -73,6 +76,23 @@ class _FinanceiroMensalidadesTabState
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
   int _handledNovaToken = 0;
+  late var _filtro = widget.initialAlunoId == null
+      ? MensalidadeFiltro.abertas
+      : MensalidadeFiltro.todas;
+
+  /// Primeira página em aberto já vem no BFF da home; os outros chips paginam direto.
+  bool get _usaHome =>
+      widget.initialAlunoId == null && _filtro == MensalidadeFiltro.abertas;
+
+  void _trocarFiltro(MensalidadeFiltro f) {
+    if (f == _filtro) return;
+    setState(() => _filtro = f);
+    if (_searchCtrl.text.trim().isEmpty) {
+      _load();
+    } else {
+      _buscar(_searchCtrl.text.trim());
+    }
+  }
 
   @override
   void initState() {
@@ -119,13 +139,17 @@ class _FinanceiroMensalidadesTabState
       });
       return;
     }
-    _debounce = Timer(const Duration(milliseconds: 500), () async {
+    _debounce = Timer(const Duration(milliseconds: 500), () => _buscar(query));
+  }
+
+  Future<void> _buscar(String query) async {
       try {
         final results = await FinanceiroRepository(
           ref.read(apiClientProvider),
         ).listarPagina(
           nomeAluno: query,
           alunoId: widget.initialAlunoId,
+          filtro: _filtro,
         );
         if (!mounted) return;
         setState(() {
@@ -149,19 +173,16 @@ class _FinanceiroMensalidadesTabState
           _hasMore = false;
         });
       }
-    });
   }
 
-  Future<void> _applyPage(MensalidadesPage page, {required bool fromHome}) async {
+  Future<void> _applyPage(MensalidadesPage page) async {
     setState(() {
       _items = page.mensalidades;
       _page = page.page;
       _hasMore = page.hasMore;
-      if (fromHome || widget.initialAlunoId != null) {
-        _homeItems = page.mensalidades;
-        _homePage = page.page;
-        _homeHasMore = page.hasMore;
-      }
+      _homeItems = page.mensalidades;
+      _homePage = page.page;
+      _homeHasMore = page.hasMore;
       _buscaAtiva = '';
       _loading = false;
     });
@@ -178,17 +199,17 @@ class _FinanceiroMensalidadesTabState
       if (force) {
         invalidateFinanceiroCaches(ref);
       }
-      final alunoFilter = widget.initialAlunoId;
-      if (alunoFilter != null) {
+      if (!_usaHome) {
+        final filtro = _filtro;
         final page = await FinanceiroRepository(
           ref.read(apiClientProvider),
-        ).listarPagina(alunoId: alunoFilter);
-        if (!mounted) return;
-        await _applyPage(page, fromHome: false);
+        ).listarPagina(alunoId: widget.initialAlunoId, filtro: filtro);
+        if (!mounted || filtro != _filtro) return;
+        await _applyPage(page);
         return;
       }
       final home = await ref.read(financeiroHomeProvider.future);
-      if (!mounted) return;
+      if (!mounted || !_usaHome) return;
       await _applyPage(
         MensalidadesPage(
           mensalidades: home.mensalidades,
@@ -196,7 +217,6 @@ class _FinanceiroMensalidadesTabState
           size: home.size,
           hasMore: home.hasMore,
         ),
-        fromHome: true,
       );
     } catch (e) {
       if (!mounted) return;
@@ -229,6 +249,7 @@ class _FinanceiroMensalidadesTabState
         page: _page + 1,
         nomeAluno: _buscaAtiva.isEmpty ? null : _buscaAtiva,
         alunoId: widget.initialAlunoId,
+        filtro: _filtro,
       );
       if (!mounted) return;
       final seen = _items.map((m) => m.id).toSet();
@@ -324,6 +345,27 @@ class _FinanceiroMensalidadesTabState
                 ),
                 isDense: true,
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              FxSettingsLayout.pageInset,
+              TokensStrip.s2,
+              FxSettingsLayout.pageInset,
+              0,
+            ),
+            child: Wrap(
+              spacing: TokensStrip.s2,
+              runSpacing: TokensStrip.s2,
+              children: [
+                for (final f in MensalidadeFiltro.values)
+                  FxToggleChip(
+                    label: mensalidadeFiltroLabel(f, S.of(context)),
+                    selected: _filtro == f,
+                    isDark: chrome.isDark,
+                    onTap: () => _trocarFiltro(f),
+                  ),
+              ],
             ),
           ),
           Expanded(
@@ -484,18 +526,29 @@ class _FinanceiroMensalidadesTabState
                                         final item = _items[i];
                                         final overdue =
                                             item.status == 'ATRASADO';
+                                        final cancelada =
+                                            item.status == 'CANCELADO';
                                         final selected = _selecionados.contains(
                                           item.id,
                                         );
                                         final aberto = financeiroStatusAberto(
                                           item.status,
                                         );
-                                        return FxSatelliteListTile(
+                                        final cabecalho =
+                                            financeiroMesCabecalho(
+                                              item.mesReferencia,
+                                            );
+                                        final novoMes =
+                                            i == 0 ||
+                                            financeiroMesCabecalho(
+                                                  _items[i - 1].mesReferencia,
+                                                ) !=
+                                                cabecalho;
+                                        final tile = FxSatelliteListTile(
                                           title: item.alunoNome,
                                           subtitle: Text(
-                                            financeiroMensalidadeSubtitle(
+                                            financeiroMensalidadeStatusLabel(
                                               item.status,
-                                              item.mesReferencia,
                                             ),
                                           ),
                                           onTap: () => _modoSelecao
@@ -512,6 +565,8 @@ class _FinanceiroMensalidadesTabState
                                           accent:
                                               overdue
                                                   ? EagleTokens.bad
+                                                  : cancelada
+                                                  ? mute
                                                   : primary,
                                           leading: FxIcon(
                                             name:
@@ -521,11 +576,15 @@ class _FinanceiroMensalidadesTabState
                                                     ? 'alert-triangle'
                                                     : item.status == 'PAGO'
                                                     ? 'circle-check'
+                                                    : cancelada
+                                                    ? 'x'
                                                     : 'coin',
                                             size: 18,
                                             color:
                                                 overdue
                                                     ? EagleTokens.bad
+                                                    : cancelada
+                                                    ? mute
                                                     : primary,
                                           ),
                                           trailing: Text(
@@ -538,6 +597,36 @@ class _FinanceiroMensalidadesTabState
                                               ],
                                             ),
                                           ),
+                                        );
+                                        if (!novoMes) return tile;
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                4,
+                                                i == 0
+                                                    ? TokensStrip.s2
+                                                    : TokensStrip.s4,
+                                                4,
+                                                TokensStrip.s2,
+                                              ),
+                                              child: Semantics(
+                                                header: true,
+                                                child: Text(
+                                                  cabecalho,
+                                                  style: TextStyle(
+                                                    color: mute,
+                                                    fontSize: 13,
+                                                    fontWeight:
+                                                        FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            tile,
+                                          ],
                                         );
                                       },
                                     ),

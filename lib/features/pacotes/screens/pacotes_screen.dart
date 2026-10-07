@@ -472,6 +472,7 @@ class _PacotesScreenState extends ConsumerState<PacotesScreen> {
                     subtitle: 'Ajuste a busca ou o filtro.',
                     action: FxEmptyAction(
                       label: 'Limpar filtros',
+                      secondary: true,
                       onTap: _limparFiltros,
                     ),
                   )

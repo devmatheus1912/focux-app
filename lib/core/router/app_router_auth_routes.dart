@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/screens/ativar_aluno_screen.dart';
 import '../../features/auth/screens/definir_senha_aluno_screen.dart';
 import '../../features/auth/screens/esqueci_senha_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
@@ -102,6 +103,13 @@ List<RouteBase> buildAuthRoutes() {
       builder:
           (context, state) => ResetarSenhaScreen(
             resetNonce: state.uri.queryParameters['resetNonce'],
+          ),
+    ),
+    GoRoute(
+      path: '/aluno/ativar/:token',
+      builder:
+          (context, state) => AtivarAlunoScreen(
+            token: state.pathParameters['token']?.trim() ?? '',
           ),
     ),
     GoRoute(

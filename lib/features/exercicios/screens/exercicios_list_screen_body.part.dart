@@ -60,6 +60,7 @@ extension on _ExerciciosListScreenState {
                 'Ajuste os filtros ou a busca para ver outros exercícios.',
             action: FxEmptyAction(
               label: 'Limpar filtros',
+              secondary: true,
               onTap: () {
                 setState(() => _filter = const ExerciciosUiFilter());
                 _fetchPage(reset: true);

@@ -11,6 +11,7 @@ class MigracaoAlunoLinha {
     this.objetivo,
     this.observacao,
     this.duplicado = false,
+    this.possivelDuplicado = false,
     this.status = MigracaoLinhaStatus.valido,
     bool? selecionado,
     this.raw = const {},
@@ -22,6 +23,9 @@ class MigracaoAlunoLinha {
   final String? objetivo;
   final String? observacao;
   final bool duplicado;
+
+  /// Telefone ou nome igual a um aluno existente: começa desmarcado.
+  final bool possivelDuplicado;
   final MigracaoLinhaStatus status;
 
   /// Entra no salvamento. Duvidosos começam desmarcados.
@@ -38,6 +42,7 @@ class MigracaoAlunoLinha {
       objetivo: json['objetivo']?.toString(),
       observacao: json['observacao']?.toString(),
       duplicado: json['duplicado'] == true || json['duplicate'] == true,
+      possivelDuplicado: json['possivelDuplicado'] == true,
       status: migracaoLinhaStatusFromApi(json['status']),
       raw: Map<String, dynamic>.from(json),
     );
@@ -59,6 +64,7 @@ class MigracaoAlunoLinha {
     String? objetivo,
     String? observacao,
     bool? duplicado,
+    bool? possivelDuplicado,
     MigracaoLinhaStatus? status,
     bool? selecionado,
   }) {
@@ -69,6 +75,7 @@ class MigracaoAlunoLinha {
       objetivo: objetivo ?? this.objetivo,
       observacao: observacao ?? this.observacao,
       duplicado: duplicado ?? this.duplicado,
+      possivelDuplicado: possivelDuplicado ?? this.possivelDuplicado,
       status: status ?? this.status,
       selecionado: selecionado ?? this.selecionado,
       raw: raw,
@@ -76,6 +83,7 @@ class MigracaoAlunoLinha {
   }
 
   /// O preview do servidor não devolve status/seleção: reaplica por posição.
+  /// Possível duplicado chega desmarcado.
   static List<MigracaoAlunoLinha> mesclarPreview(
     List<MigracaoAlunoLinha> originais,
     List<MigracaoAlunoLinha> preview,
@@ -85,7 +93,8 @@ class MigracaoAlunoLinha {
       for (var i = 0; i < preview.length; i++)
         preview[i].copyWith(
           status: originais[i].status,
-          selecionado: originais[i].selecionado,
+          selecionado:
+              originais[i].selecionado && !preview[i].possivelDuplicado,
         ),
     ];
   }

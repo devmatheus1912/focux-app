@@ -273,6 +273,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       setState(() {
         _importedFileLabel = parsed.sourceLabel;
         _importedPhotoBytes = null;
+        _fonte = MigracaoFonte.texto;
         _controller.text = text;
         _alunosEncontrados = null;
         _emptyResult = false;
@@ -282,7 +283,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       } else {
         FeedbackHelper.showSuccess(
           context,
-          'Texto carregado de ${file.name}. Toque Iniciar migração.',
+          S.of(context).migracaoTextoCarregado(file.name),
         );
       }
     } catch (e) {
@@ -419,6 +420,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
       );
       setState(() {
         _importResumo = resumo;
+        _acessoStatus.clear();
         _alunosEncontrados = null;
         _emptyResult = false;
         _limparImportacaoVisual();
@@ -444,7 +446,24 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     }
   }
 
-  void _irParaListaAlunos() {
+  Future<void> _irParaListaAlunos() async {
+    final pendentes =
+        _importResumo?.importadosComAcesso
+            .where((d) => !_acessoStatus.containsKey(d.alunoId))
+            .length ??
+        0;
+    if (pendentes > 0) {
+      final s = S.of(context);
+      final sair = await showFxConfirmSheet(
+        context,
+        title: s.migracaoAcessoSairTitulo,
+        message: s.migracaoAcessoSairTexto(pendentes),
+        confirmLabel: s.migracaoAcessoSairConfirma,
+        cancelLabel: s.migracaoAcessoSairCancela,
+      );
+      if (!sair || !mounted) return;
+    }
+    if (!mounted) return;
     if (context.canPop()) {
       context.pop(true);
     } else {

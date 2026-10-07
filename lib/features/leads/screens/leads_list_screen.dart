@@ -376,6 +376,7 @@ class _LeadsListScreenState extends ConsumerState<LeadsListScreen> {
                   subtitle: 'Ajuste a busca para ver outros prospects.',
                   action: FxEmptyAction(
                     label: 'Limpar busca',
+                    secondary: true,
                     onTap: () {
                       _searchDebounce?.cancel();
                       _searchCtrl.clear();

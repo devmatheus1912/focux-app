@@ -232,7 +232,7 @@ extension on _LojaScreenState {
                   ? 'Ajuste a busca.'
                   : 'Crie pacotes em Pacotes para vender pela loja.',
               action: filtered
-                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                  ? FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: _clearQuery)
                   : FxEmptyAction(
                       label: 'Ir para pacotes',
                       onTap: () => context.push('/pacotes'),
@@ -307,7 +307,7 @@ extension on _LojaScreenState {
                   ? 'Ajuste a busca.'
                   : 'Gere um PIX na vitrine para ver pedidos aqui.',
               action: filtered
-                  ? FxEmptyAction(label: 'Limpar busca', onTap: _clearQuery)
+                  ? FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: _clearQuery)
                   : null,
             ),
           ],

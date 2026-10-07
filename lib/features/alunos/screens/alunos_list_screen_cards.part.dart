@@ -135,9 +135,9 @@ class _EmptyAlunosState extends StatelessWidget {
 
     FxEmptyAction? action;
     if (onClearFilter != null) {
-      action = FxEmptyAction(label: 'Limpar filtro', onTap: onClearFilter!);
+      action = FxEmptyAction(label: 'Limpar filtro', secondary: true, onTap: onClearFilter!);
     } else if (onClear != null) {
-      action = FxEmptyAction(label: 'Limpar busca', onTap: onClear!);
+      action = FxEmptyAction(label: 'Limpar busca', secondary: true, onTap: onClear!);
     }
     // Create fica só no sticky — evita dois CTAs iguais no vazio.
 

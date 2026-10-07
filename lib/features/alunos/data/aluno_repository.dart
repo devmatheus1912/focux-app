@@ -215,9 +215,10 @@ class AlunoRepository {
     return Timeline360Page.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<String> gerarSenhaProvisoria(int id) async {
-    final response = await _dio.post('/api/alunos/$id/gerar-senha-provisoria');
-    return response.data['senhaProvisoria'] as String;
+  /// Novo link invalida os anteriores. Devolve a URL web (abre o app).
+  Future<String> gerarLinkAtivacao(int id) async {
+    final response = await _dio.post('/api/alunos/$id/link-ativacao');
+    return response.data['webLink'] as String;
   }
 
   Future<Aluno> me() async {
