@@ -201,7 +201,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
                           ? 'Ajuste a busca ou o filtro para achar outra publicação.'
                           : 'Quando seu personal publicar no feed, as novidades aparecem aqui.',
                       action: searching
-                          ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearFilters)
+                          ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearFilters)
                           : FxEmptyAction(
                               label: 'Voltar ao início',
                               onTap: _leave,

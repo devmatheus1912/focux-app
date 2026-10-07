@@ -26,7 +26,7 @@ extension on _AutomacoesScreenState {
                   ? 'Ajuste a busca ou o filtro.'
                   : 'Templates aparecem aqui para você ativar o primeiro fluxo.',
               action: filtered
-                  ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearQuery)
+                  ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearQuery)
                   : (_templates.isNotEmpty
                       ? FxEmptyAction(
                         label: 'Ativar ${_templates.first.nome}',

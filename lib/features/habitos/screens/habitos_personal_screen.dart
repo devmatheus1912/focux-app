@@ -411,6 +411,7 @@ class _HabitosPersonalScreenState extends ConsumerState<HabitosPersonalScreen> {
                   ? null
                   : FxEmptyAction(
                     label: 'Limpar busca',
+                    secondary: true,
                     onTap: () {
                       _searchCtrl.clear();
                       setState(() => _query = '');

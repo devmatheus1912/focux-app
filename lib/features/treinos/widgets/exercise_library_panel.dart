@@ -514,6 +514,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                         _committedQuery.isNotEmpty
                             ? 'Limpar busca'
                             : 'Limpar filtros',
+                    secondary: true,
                     onTap: () {
                       if (_committedQuery.isNotEmpty) {
                         _searchCtrl.clear();

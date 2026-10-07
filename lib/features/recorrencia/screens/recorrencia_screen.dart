@@ -305,6 +305,7 @@ class _RecorrenciaScreenState extends ConsumerState<RecorrenciaScreen> {
                       ? null
                       : FxEmptyAction(
                           label: 'Limpar filtros',
+                          secondary: true,
                           onTap: () {
                             _searchCtrl.clear();
                             setState(() {

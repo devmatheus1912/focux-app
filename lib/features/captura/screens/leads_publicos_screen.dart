@@ -419,6 +419,7 @@ class _LeadsPublicosScreenState extends ConsumerState<LeadsPublicosScreen> {
                   action: filtered
                       ? FxEmptyAction(
                           label: 'Limpar filtros',
+                          secondary: true,
                           onTap: _clearFiltros,
                         )
                       : null,

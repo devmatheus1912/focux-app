@@ -576,6 +576,7 @@ class _GrupoAulasPersonalScreenState
               action: filtered
                   ? FxEmptyAction(
                       label: 'Limpar filtros',
+                      secondary: true,
                       onTap: _clearFilters,
                     )
                   : null,

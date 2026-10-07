@@ -399,6 +399,7 @@ class _FeedbackVideoScreenState extends ConsumerState<FeedbackVideoScreen> {
                 subtitle: 'Ajuste a busca para ver outros comentários.',
                 action: FxEmptyAction(
                   label: 'Limpar busca',
+                  secondary: true,
                   onTap: () {
                     _searchDebounce?.cancel();
                     _searchCtrl.clear();

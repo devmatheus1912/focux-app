@@ -331,6 +331,7 @@ class _DesafiosScreenState extends ConsumerState<DesafiosScreen> {
                     action: searching
                         ? FxEmptyAction(
                           label: 'Limpar filtros',
+                          secondary: true,
                           onTap: _clearFilters,
                         )
                         : null,

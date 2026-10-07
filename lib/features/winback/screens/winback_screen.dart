@@ -295,6 +295,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                               )
                             : FxEmptyAction(
                                 label: 'Limpar busca',
+                                secondary: true,
                                 onTap: () {
                                   _searchCtrl.clear();
                                   _query = '';

@@ -432,7 +432,7 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                   ? 'Ajuste a busca ou o filtro.'
                   : 'Quando os alunos enviarem, eles aparecem aqui para aprovação.',
               action: filtered
-                  ? FxEmptyAction(label: 'Limpar filtros', onTap: _clearQuery)
+                  ? FxEmptyAction(label: 'Limpar filtros', secondary: true, onTap: _clearQuery)
                   : null,
             ),
           ],

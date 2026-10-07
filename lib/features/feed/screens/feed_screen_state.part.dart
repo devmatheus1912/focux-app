@@ -236,6 +236,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       action: searching
                           ? FxEmptyAction(
                               label: 'Limpar filtros',
+                              secondary: true,
                               onTap: _clearFilters,
                             )
                           : null,
