@@ -280,7 +280,7 @@ abstract final class Aluno360FerramentasLogic {
         subtitle:
             alturaOk
                 ? '${(aluno.altura! * 100).round()} cm'
-                : 'Cadastrar no perfil',
+                : 'Informar altura',
         value: pendingFieldValue(complete: alturaOk),
         complete: alturaOk,
         highlight: !alturaOk,

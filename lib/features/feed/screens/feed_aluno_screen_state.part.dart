@@ -56,6 +56,29 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
     }
   }
 
+  Future<void> _bloquearAutor() async {
+    final l10n = S.of(context);
+    final ok = await showFxConfirmSheet(
+      context,
+      title: l10n.chatBloquearConfirmaTitulo,
+      message: l10n.chatBloquearConfirmaAluno,
+      confirmLabel: l10n.feedBloquearAutor,
+      destructive: true,
+      icon: Icons.block_rounded,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ChatRepository(
+        ref.read(apiClientProvider),
+      ).definirBloqueio(bloquear: true);
+      if (!mounted) return;
+      setState(() => _posts = []);
+      FeedbackHelper.showSuccess(context, l10n.feedAutorBloqueado);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   void _clearQuery() {
     _searchDebounce?.cancel();
     _searchController.clear();
@@ -245,6 +268,7 @@ class _FeedAlunoScreenState extends ConsumerState<FeedAlunoScreen> {
             onCurtir: () => _curtir(p.id),
             onComentar: () => _abrirComentarios(p.id),
             onDenunciar: () => _denunciarPost(p),
+            onBloquearAutor: _bloquearAutor,
           );
         },
       ),

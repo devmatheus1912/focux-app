@@ -140,9 +140,12 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
   Timer? _recordTimer;
   Duration _recordDuration = Duration.zero;
   DateTime? _recordStartedAt;
+  ChatBloqueio _bloqueio = const ChatBloqueio();
 
   bool get _isAlunoMode => widget.mode == ConversationMode.aluno;
   bool get _isPersonalMode => widget.mode == ConversationMode.personal;
+  bool get _bloqueadoPorMim =>
+      _isAlunoMode ? _bloqueio.peloAluno : _bloqueio.peloPersonal;
 
   @override
   void initState() {
@@ -157,8 +160,20 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     _ctrl.addListener(_handleComposerChange);
     _scroll.addListener(_handleScroll);
     _loadHistorico();
+    unawaited(_loadBloqueio());
     if (_alunoId != null) {
       _connectWs(_alunoId!);
+    }
+  }
+
+  Future<void> _loadBloqueio() async {
+    try {
+      final bloqueio = await ChatRepository(
+        ref.read(apiClientProvider),
+      ).bloqueio(alunoId: _isAlunoMode ? null : widget.alunoId);
+      if (mounted) setState(() => _bloqueio = bloqueio);
+    } catch (_) {
+      // Sem estado: o backend ainda recusa envio em conversa bloqueada.
     }
   }
 
@@ -610,6 +625,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                             },
                           ),
                 ),
+                if (_bloqueio.ativo)
+                  _ConversationBlockedBar(
+                    message: _bloqueadoPorMim
+                        ? S.of(context).chatBloqueadaPorMim
+                        : S.of(context).chatBloqueadaPeloOutro,
+                  )
+                else
                 ConversationMessageComposer(
                   isDark: isDark,
                   uploading: _uploading,
@@ -662,6 +684,37 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final la = a.toLocal();
     final lb = b.toLocal();
     return la.year == lb.year && la.month == lb.month && la.day == lb.day;
+  }
+}
+
+class _ConversationBlockedBar extends StatelessWidget {
+  const _ConversationBlockedBar({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = ShellChrome.of(context).mute;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        TokensStrip.s3,
+        TokensStrip.s4,
+        TokensStrip.s4,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.block_rounded, size: 18, color: mute),
+          const SizedBox(width: TokensStrip.s2),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: mute, fontSize: 13, height: 1.35),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

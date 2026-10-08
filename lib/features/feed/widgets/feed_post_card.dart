@@ -30,6 +30,7 @@ class FeedPostCard extends StatelessWidget {
     this.onFixar,
     this.onExcluir,
     this.onDenunciar,
+    this.onBloquearAutor,
   });
 
   final FeedPost post;
@@ -42,9 +43,13 @@ class FeedPostCard extends StatelessWidget {
   final VoidCallback? onFixar;
   final VoidCallback? onExcluir;
   final VoidCallback? onDenunciar;
+  final VoidCallback? onBloquearAutor;
 
   bool get _canManage =>
-      onFixar != null || onExcluir != null || onDenunciar != null;
+      onFixar != null ||
+      onExcluir != null ||
+      onDenunciar != null ||
+      onBloquearAutor != null;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +100,7 @@ class FeedPostCard extends StatelessWidget {
                         if (val == 'fixar') onFixar?.call();
                         if (val == 'excluir') onExcluir?.call();
                         if (val == 'denunciar') onDenunciar?.call();
+                        if (val == 'bloquear') onBloquearAutor?.call();
                       },
                       itemBuilder: (ctx) => [
                         if (onFixar != null)
@@ -143,6 +149,17 @@ class FeedPostCard extends StatelessWidget {
                                 const Icon(Icons.flag_outlined, size: 20),
                                 const SizedBox(width: 8),
                                 Text(S.of(ctx).moderacaoDenunciarPost),
+                              ],
+                            ),
+                          ),
+                        if (onBloquearAutor != null)
+                          PopupMenuItem(
+                            value: 'bloquear',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.block_rounded, size: 20),
+                                const SizedBox(width: 8),
+                                Text(S.of(ctx).feedBloquearAutor),
                               ],
                             ),
                           ),

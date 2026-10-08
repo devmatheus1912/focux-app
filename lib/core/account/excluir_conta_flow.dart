@@ -105,7 +105,7 @@ Future<void> excluirContaFlow(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const FxLoading(size: 24),
+              const SizedBox.square(dimension: 24, child: FxLoading(size: 24)),
               const SizedBox(width: 16),
               Flexible(child: Text(l10n.excluirContaExcluindo)),
             ],

@@ -194,6 +194,20 @@ class ChatPage {
   );
 }
 
+class ChatBloqueio {
+  final bool peloPersonal;
+  final bool peloAluno;
+
+  const ChatBloqueio({this.peloPersonal = false, this.peloAluno = false});
+
+  bool get ativo => peloPersonal || peloAluno;
+
+  factory ChatBloqueio.fromJson(Map<String, dynamic> j) => ChatBloqueio(
+    peloPersonal: j['blockedByPersonal'] as bool? ?? false,
+    peloAluno: j['blockedByAluno'] as bool? ?? false,
+  );
+}
+
 class ChatRepository {
   final Dio _dio;
 
@@ -330,6 +344,29 @@ class ChatRepository {
       data: {'action': action},
     );
     return r.data as Map<String, dynamic>;
+  }
+
+  /// Bloqueio da conversa. Sem [alunoId] = lado do aluno logado.
+  Future<ChatBloqueio> bloqueio({int? alunoId}) async {
+    final r = await _dio.get(
+      alunoId == null
+          ? '/api/chat/aluno/conversa/state'
+          : '/api/chat/conversas/$alunoId/state',
+    );
+    return ChatBloqueio.fromJson(r.data as Map<String, dynamic>);
+  }
+
+  Future<ChatBloqueio> definirBloqueio({
+    int? alunoId,
+    required bool bloquear,
+  }) async {
+    final r = await _dio.post(
+      alunoId == null
+          ? '/api/chat/aluno/conversa/action'
+          : '/api/chat/conversas/$alunoId/action',
+      data: {'action': bloquear ? 'block' : 'unblock'},
+    );
+    return ChatBloqueio.fromJson(r.data as Map<String, dynamic>);
   }
 
   Future<Pagina<ChatInboxItem>> inboxArchivedPage({
