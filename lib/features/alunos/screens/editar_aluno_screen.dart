@@ -25,6 +25,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../dashboard/utils/birth_date_api_format.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
@@ -48,6 +50,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   late final TextEditingController _telefone;
   late final TextEditingController _whatsapp;
   late final TextEditingController _objetivo;
+  late final TextEditingController _nascimento;
+  late final TextEditingController _altura;
   String? _genero;
   String? _tipoConsultoria;
   bool _salvando = false;
@@ -59,6 +63,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
       _telefone.text.trim() != (widget.aluno.telefone ?? '').trim() ||
       _whatsapp.text.trim() != (widget.aluno.whatsapp ?? '').trim() ||
       _objetivo.text.trim() != (widget.aluno.objetivo ?? '').trim() ||
+      _nascimento.text.trim() !=
+          formatBirthDateForDisplay(widget.aluno.dataNascimento) ||
+      _altura.text.trim() != _alturaInicial ||
       _genero != widget.aluno.genero ||
       _tipoConsultoria != (widget.aluno.tipoConsultoria ?? 'ONLINE');
 
@@ -84,6 +91,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _telefone = TextEditingController(text: widget.aluno.telefone ?? '');
     _whatsapp = TextEditingController(text: widget.aluno.whatsapp ?? '');
     _objetivo = TextEditingController(text: widget.aluno.objetivo ?? '');
+    _nascimento = TextEditingController(
+      text: formatBirthDateForDisplay(widget.aluno.dataNascimento),
+    );
+    _altura = TextEditingController(text: _alturaInicial);
     _genero = widget.aluno.genero;
     _tipoConsultoria = widget.aluno.tipoConsultoria ?? 'ONLINE';
     _nome.addListener(_onFormChanged);
@@ -91,6 +102,13 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _telefone.addListener(_onFormChanged);
     _whatsapp.addListener(_onFormChanged);
     _objetivo.addListener(_onFormChanged);
+    _nascimento.addListener(_onFormChanged);
+    _altura.addListener(_onFormChanged);
+  }
+
+  String get _alturaInicial {
+    final m = widget.aluno.altura;
+    return m == null ? '' : '${(m * 100).round()}';
   }
 
   void _onFormChanged() {
@@ -104,6 +122,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _telefone.removeListener(_onFormChanged);
     _whatsapp.removeListener(_onFormChanged);
     _objetivo.removeListener(_onFormChanged);
+    _nascimento.removeListener(_onFormChanged);
+    _altura.removeListener(_onFormChanged);
+    _nascimento.dispose();
+    _altura.dispose();
     _nome.dispose();
     _email.dispose();
     _telefone.dispose();
@@ -141,6 +163,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
             _objetivo.text.trim().isEmpty ? null : _objetivo.text.trim(),
         'genero': _genero,
         'tipoConsultoria': _tipoConsultoria ?? 'ONLINE',
+        if (_nascimento.text.trim().isNotEmpty)
+          'dataNascimento': normalizeBirthDateForApi(_nascimento.text),
+        if (_altura.text.trim().isNotEmpty)
+          'altura': editarAlunoAlturaCm(_altura.text),
       });
       if (!mounted) return;
       invalidateAlunosCaches(ref);
@@ -395,6 +421,30 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                 addAlunoObjetivoMax,
                               ),
                             ],
+                          ),
+                          AlunoInsetFormField(
+                            controller: _nascimento,
+                            label: S.of(context).editarAlunoNascimento,
+                            hint: 'DD-MM-AAAA',
+                            icon: Icons.cake_outlined,
+                            keyboardType: TextInputType.datetime,
+                            validator: (v) => editarAlunoNascimentoValido(v)
+                                ? null
+                                : S.of(context).editarAlunoNascimentoInvalido,
+                          ),
+                          AlunoInsetFormField(
+                            controller: _altura,
+                            label: S.of(context).editarAlunoAltura,
+                            hint: 'Ex.: 175',
+                            icon: Icons.height_outlined,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(3),
+                            ],
+                            validator: (v) => editarAlunoAlturaValida(v)
+                                ? null
+                                : S.of(context).editarAlunoAlturaInvalida,
                           ),
                           AlunoChoiceSection(
                             label: 'Gênero',

@@ -2,6 +2,7 @@ part of 'conversation_screen.dart';
 
 extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
   Future<void> _showChatMenu() async {
+    final l10n = S.of(context);
     final items = <FxInsetPickerSheetItem<String>>[
       if (_isPersonalMode)
         const FxInsetPickerSheetItem(
@@ -28,12 +29,36 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
         subtitle: 'Recarregar mensagens',
         icon: Icons.refresh_rounded,
       ),
-      const FxInsetPickerSheetItem(
-        value: 'emoji',
-        label: 'Adicionar emoji',
-        subtitle: 'Inserir no campo de mensagem',
-        icon: Icons.emoji_emotions_outlined,
-      ),
+      if (!_bloqueio.ativo)
+        const FxInsetPickerSheetItem(
+          value: 'emoji',
+          label: 'Adicionar emoji',
+          subtitle: 'Inserir no campo de mensagem',
+          icon: Icons.emoji_emotions_outlined,
+        ),
+      if (_ultimaRecebida() != null)
+        FxInsetPickerSheetItem(
+          value: 'denunciar',
+          label: l10n.chatDenunciarConversa,
+          subtitle: l10n.chatDenunciarConversaSubtitulo,
+          icon: Icons.flag_outlined,
+        ),
+      if (_bloqueadoPorMim)
+        FxInsetPickerSheetItem(
+          value: 'desbloquear',
+          label: l10n.chatDesbloquear,
+          subtitle: l10n.chatDesbloquearSubtitulo,
+          icon: Icons.lock_open_rounded,
+        )
+      else
+        FxInsetPickerSheetItem(
+          value: 'bloquear',
+          label: l10n.chatBloquear,
+          subtitle: _isAlunoMode
+              ? l10n.chatBloquearSubtituloAluno
+              : l10n.chatBloquearSubtituloPersonal,
+          icon: Icons.block_rounded,
+        ),
     ];
     final chosen = await showFxInsetPickerSheet<String>(
       context,
@@ -55,6 +80,66 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
         _loadHistorico();
       case 'emoji':
         _showEmojiSheet();
+      case 'denunciar':
+        final msg = _ultimaRecebida();
+        if (msg == null) return;
+        showDenunciarSheet(
+          context,
+          repo: ModeracaoRepository(ref.read(apiClientProvider)),
+          tipo: DenunciaTipo.chatMensagem,
+          alvoId: '${msg.id}',
+          conteudo: formatChatTextForDisplay(msg.conteudo),
+        );
+      case 'bloquear':
+        await _definirBloqueio(true);
+      case 'desbloquear':
+        await _definirBloqueio(false);
+    }
+  }
+
+  ChatMsg? _ultimaRecebida() {
+    for (final msg in _msgs.reversed) {
+      if (msg.id != null &&
+          msg.deletedAt == null &&
+          !_isMine(msg) &&
+          !chatIsSistema(msg.remetente, msg.tipoMidia)) {
+        return msg;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _definirBloqueio(bool bloquear) async {
+    final l10n = S.of(context);
+    if (bloquear) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: l10n.chatBloquearConfirmaTitulo,
+        message: _isAlunoMode
+            ? l10n.chatBloquearConfirmaAluno
+            : l10n.chatBloquearConfirmaPersonal,
+        confirmLabel: l10n.chatBloquear,
+        destructive: true,
+        icon: Icons.block_rounded,
+      );
+      if (!ok || !mounted) return;
+    }
+    try {
+      final estado = await ChatRepository(
+        ref.read(apiClientProvider),
+      ).definirBloqueio(
+        alunoId: _isAlunoMode ? null : widget.alunoId,
+        bloquear: bloquear,
+      );
+      if (!mounted) return;
+      setState(() => _bloqueio = estado);
+      if (_isAlunoMode) invalidateAlunoDashboardHome(ref);
+      FeedbackHelper.showSuccess(
+        context,
+        bloquear ? l10n.chatBloqueadoOk : l10n.chatDesbloqueadoOk,
+      );
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
   }
 

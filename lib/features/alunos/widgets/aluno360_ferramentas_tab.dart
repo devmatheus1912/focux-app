@@ -38,19 +38,14 @@ class Aluno360FerramentasTab extends StatelessWidget {
 
   void _openMeasurementField(
     BuildContext context,
-    Aluno360MeasurementField field, {
-    required bool complete,
-  }) {
+    Aluno360MeasurementField field,
+  ) {
     final editarRoute = '/alunos/$alunoId/editar';
     final evolucaoRoute = '/alunos/$alunoId/evolucao';
     switch (field) {
       case Aluno360MeasurementField.idade:
       case Aluno360MeasurementField.altura:
-        if (!complete) {
-          context.push(editarRoute, extra: aluno);
-          return;
-        }
-        context.push(evolucaoRoute, extra: aluno.nome);
+        context.push(editarRoute, extra: aluno);
       case Aluno360MeasurementField.gordura:
       case Aluno360MeasurementField.massaMagra:
         // Composição corporal registra na Evolução (nova medida).
@@ -145,11 +140,7 @@ class Aluno360FerramentasTab extends StatelessWidget {
                 leading: Icon(_measurementIcon(row.field), color: primary),
                 accent: row.highlight ? primary : null,
                 onTap:
-                    () => _openMeasurementField(
-                      context,
-                      row.field,
-                      complete: row.complete,
-                    ),
+                    () => _openMeasurementField(context, row.field),
               ),
             ),
         ],
