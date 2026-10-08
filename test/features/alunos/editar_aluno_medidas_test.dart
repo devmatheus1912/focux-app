@@ -19,6 +19,14 @@ void main() {
       expect(editarAlunoAlturaValida('99'), isFalse);
       expect(editarAlunoAlturaValida('251'), isFalse);
     });
+
+    test('não deixa apagar altura já cadastrada', () {
+      expect(editarAlunoAlturaValida('', obrigatorio: true), isFalse);
+    });
+
+    test('envia em metros', () {
+      expect(editarAlunoAlturaMetros('175'), 1.75);
+    });
   });
 
   group('editarAlunoNascimentoValido', () {

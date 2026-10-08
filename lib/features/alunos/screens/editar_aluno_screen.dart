@@ -166,7 +166,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
         if (_nascimento.text.trim().isNotEmpty)
           'dataNascimento': normalizeBirthDateForApi(_nascimento.text),
         if (_altura.text.trim().isNotEmpty)
-          'altura': editarAlunoAlturaCm(_altura.text),
+          'altura': editarAlunoAlturaMetros(_altura.text),
       });
       if (!mounted) return;
       invalidateAlunosCaches(ref);
@@ -428,7 +428,11 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                             hint: 'DD-MM-AAAA',
                             icon: Icons.cake_outlined,
                             keyboardType: TextInputType.datetime,
-                            validator: (v) => editarAlunoNascimentoValido(v)
+                            validator: (v) => editarAlunoNascimentoValido(
+                                  v,
+                                  obrigatorio:
+                                      widget.aluno.dataNascimento != null,
+                                )
                                 ? null
                                 : S.of(context).editarAlunoNascimentoInvalido,
                           ),
@@ -442,7 +446,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                               FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(3),
                             ],
-                            validator: (v) => editarAlunoAlturaValida(v)
+                            validator: (v) => editarAlunoAlturaValida(
+                                  v,
+                                  obrigatorio: widget.aluno.altura != null,
+                                )
                                 ? null
                                 : S.of(context).editarAlunoAlturaInvalida,
                           ),
