@@ -1,7 +1,15 @@
+import 'package:amplitude_flutter/amplitude.dart';
+import 'package:amplitude_flutter/autocapture/attribution.dart';
+import 'package:amplitude_flutter/autocapture/autocapture.dart';
+import 'package:amplitude_flutter/configuration.dart';
+import 'package:amplitude_flutter/events/base_event.dart';
+import 'package:amplitude_flutter/tracking_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
+import '../config/env.dart';
+import 'amplitude_props.dart';
 import 'product_funnel.dart';
 
 /// Camada única de analytics + crash reporting do app.
@@ -13,9 +21,8 @@ import 'product_funnel.dart';
 /// - breadcrumbs do Crashlytics para correlacionar exceções com a jornada.
 /// - logging condicionado a debug: nada vai pra prod sem motivo.
 ///
-/// Implementação atual: Crashlytics breadcrumbs + debug log. Trocar para
-/// Sentry/Amplitude/PostHog é uma implementação por método sem mexer
-/// nos callsites.
+/// Implementação atual: Crashlytics breadcrumbs + Amplitude (se houver
+/// `AMPLITUDE_API_KEY`) + debug log.
 typedef AnalyticsFunnelPoster =
     Future<void> Function(String tipoEvento, int alunoId);
 
@@ -27,6 +34,38 @@ class AnalyticsService {
   AnalyticsFunnelPoster? funnelPoster;
 
   bool _userIdSet = false;
+
+  Amplitude? _amplitude;
+
+  /// Sem `AMPLITUDE_API_KEY` no build não faz nada. Identidade só por
+  /// device id anônimo; sem IP, cidade, localização nem advertising id.
+  Future<void> initAmplitude() async {
+    final apiKey = Env.amplitudeApiKey.trim();
+    if (apiKey.isEmpty || kIsWeb || _amplitude != null) return;
+    try {
+      final amplitude = Amplitude(
+        Configuration(
+          apiKey: apiKey,
+          locationListening: false,
+          autocapture: const AutocaptureOptions(
+            sessions: true,
+            appLifecycles: true,
+            attribution: AttributionDisabled(),
+          ),
+          trackingOptions: TrackingOptions(
+            ipAddress: false,
+            city: false,
+            latLag: false,
+            carrier: false,
+            adid: false,
+          ),
+        ),
+      );
+      if (await amplitude.isBuilt) _amplitude = amplitude;
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Analytics] Amplitude init failed: $e');
+    }
+  }
 
   Future<void> setUser({required String id, String? role, String? plan}) async {
     if (_userIdSet) return;
@@ -59,6 +98,16 @@ class AnalyticsService {
           '${props == null ? '' : props.entries.map((e) => '${e.key}=${e.value}').join(' ')}',
         );
       } catch (_) {}
+    }
+    final amplitude = _amplitude;
+    if (amplitude != null) {
+      try {
+        await amplitude.track(
+          BaseEvent(event, eventProperties: amplitudeSafeProps(props)),
+        );
+      } catch (e) {
+        if (kDebugMode) debugPrint('[Analytics] Amplitude track failed: $e');
+      }
     }
     final tipo = productEventToFunnelTipo(event);
     final alunoId = funnelAlunoIdFromProps(props);

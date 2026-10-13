@@ -76,6 +76,7 @@ dependencies:
   webview_flutter: ^4.10.0
   cached_network_image: ^4.0.3
   sentry_flutter: ^8.14.2
+  amplitude_flutter: ^4.7.3
 
 dev_dependencies:
   flutter_test:
