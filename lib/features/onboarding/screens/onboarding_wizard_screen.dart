@@ -96,6 +96,11 @@ class _OnboardingWizardScreenState
           _erro = null;
           _previousCompleted = cached.completedCount;
         });
+        if (!silent && OnboardingWizardClientCache.getIfJustFetched() != null) {
+          _trackViewedOnce(cached);
+          _trackTtvOnce();
+          return;
+        }
       } else {
         setState(() {
           _loading = true;

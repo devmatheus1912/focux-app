@@ -17,6 +17,18 @@ abstract final class OnboardingWizardClientCache {
     return wizard;
   }
 
+  /// Janela em que a tela do wizard reaproveita o GET recém-feito pela Home
+  /// sem revalidar. Curta porque criar aluno/treino não limpa este cache.
+  static const handoffWindow = Duration(seconds: 10);
+
+  static OnboardingWizard? getIfJustFetched({DateTime? now}) {
+    final at = _fetchedAt;
+    if (at == null) return null;
+    final age = (now ?? DateTime.now()).difference(at);
+    if (age > handoffWindow) return null;
+    return _wizard;
+  }
+
   static void put(OnboardingWizard wizard, {DateTime? now}) {
     _wizard = wizard;
     _fetchedAt = now ?? DateTime.now();

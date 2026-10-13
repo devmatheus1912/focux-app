@@ -39,6 +39,24 @@ void main() {
     );
   });
 
+  test('handoff da Home vale só por 10s', () {
+    final t0 = DateTime(2026, 8, 25, 20);
+    expect(OnboardingWizardClientCache.getIfJustFetched(now: t0), isNull);
+    OnboardingWizardClientCache.put(wizard(), now: t0);
+    expect(
+      OnboardingWizardClientCache.getIfJustFetched(
+        now: t0.add(const Duration(seconds: 9)),
+      ),
+      isNotNull,
+    );
+    expect(
+      OnboardingWizardClientCache.getIfJustFetched(
+        now: t0.add(const Duration(seconds: 11)),
+      ),
+      isNull,
+    );
+  });
+
   test('chamadas simultâneas compartilham um único GET', () async {
     var calls = 0;
     Future<OnboardingWizard> fetch() async {
