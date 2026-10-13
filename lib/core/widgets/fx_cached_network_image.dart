@@ -1,11 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+/// URL assinada (CloudFront) muda a assinatura periodicamente; o cache usa a
+/// URL sem query para não baixar a mesma imagem de novo.
+String mediaCacheKey(String url) {
+  final q = url.indexOf('?');
+  if (q < 0) return url;
+  final params = Uri.tryParse(url)?.queryParameters ?? const {};
+  final assinada =
+      params.containsKey('Signature') && params.containsKey('Key-Pair-Id');
+  return assinada ? url.substring(0, q) : url;
+}
+
 /// ImageProvider com cache em disco — para [CircleAvatar.backgroundImage].
 ImageProvider fxCachedNetworkImageProvider(String url, {int? maxWidth}) {
   return CachedNetworkImageProvider(
     url,
     maxWidth: maxWidth,
+    cacheKey: mediaCacheKey(url),
   );
 }
 
@@ -49,6 +61,7 @@ class FxCachedNetworkImage extends StatelessWidget {
 
     return CachedNetworkImage(
       imageUrl: imageUrl,
+      cacheKey: mediaCacheKey(imageUrl),
       width: width,
       height: height,
       fit: fit,
