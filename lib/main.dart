@@ -120,6 +120,8 @@ void main() {
       };
     }
 
+    unawaited(AnalyticsService.instance.initAmplitude());
+
     // ── Global Red-Screen killer ──────────────────────────────────
     // Replaces Flutter's red error screen with a friendly message in release/profile.
     ErrorWidget.builder = (FlutterErrorDetails details) {

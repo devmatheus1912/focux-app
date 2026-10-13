@@ -32,6 +32,9 @@ fi
 if [[ -n "$GOOGLE_IOS_CLIENT_ID" ]]; then
   EXTRA_DEFINES+=(--dart-define=GOOGLE_IOS_CLIENT_ID="$GOOGLE_IOS_CLIENT_ID")
 fi
+if [[ -n "${AMPLITUDE_API_KEY:-}" ]]; then
+  EXTRA_DEFINES+=(--dart-define=AMPLITUDE_API_KEY="$AMPLITUDE_API_KEY")
+fi
 
 flutter build ipa --release \
   --dart-define=API_URL="$API_URL" \

@@ -47,6 +47,12 @@ class Env {
     defaultValue: '',
   );
 
+  /// API key do projeto Amplitude (client-side). Vazio = Amplitude desligado.
+  static const String amplitudeApiKey = String.fromEnvironment(
+    'AMPLITUDE_API_KEY',
+    defaultValue: '',
+  );
+
   static final double sentryTracesSampleRate =
       double.tryParse(
         const String.fromEnvironment(
