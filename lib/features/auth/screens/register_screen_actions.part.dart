@@ -263,12 +263,7 @@ extension on _RegisterScreenState {
         ),
       );
       try {
-        final perfil = await ref.read(perfilProvider.future);
-        if (!mounted) return;
-        if (perfil.needsBrandPublicIdentity) {
-          context.go('/perfil/link-publico');
-          return;
-        }
+        await ref.read(perfilProvider.future);
       } catch (_) {}
       if (!mounted) return;
       context.go('/dashboard/personal');

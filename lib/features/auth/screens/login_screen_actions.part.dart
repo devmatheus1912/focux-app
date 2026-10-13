@@ -235,12 +235,6 @@ extension on _LoginScreenState {
   }
 
   Future<String> _personalPostLoginDestination() async {
-    try {
-      final perfil = ref.read(perfilProvider).value;
-      if (perfil?.needsBrandPublicIdentity == true) {
-        return '/perfil/link-publico';
-      }
-    } catch (_) {}
     return _postLoginRedirect(context, isAluno: false);
   }
 
