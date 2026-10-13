@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/offline_sync_service.dart';
+import '../../../core/auth/jwt_session_identity.dart';
+import '../../../core/auth/session_invalidator.dart';
 import '../../../core/fcm/fcm_service.dart';
 import '../../../core/legal/focux_legal.dart';
 import '../../../core/storage/secure_storage.dart';
@@ -459,6 +461,11 @@ class AuthRepository {
     final role = body['role'] as String? ?? fallbackRole;
     final requiresPasswordChange =
         body['requiresPasswordChange'] as bool? ?? false;
+    final anterior = await SecureStorage.getToken();
+    if (JwtSessionIdentity.isDifferentAccount(anterior, token)) {
+      ApiClient.resetIdempotencyScopes();
+      await SessionInvalidator.invalidate(reason: 'troca de conta');
+    }
     await SecureStorage.saveToken(token);
     if (refreshToken != null) {
       await SecureStorage.saveRefreshToken(refreshToken);

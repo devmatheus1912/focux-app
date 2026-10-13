@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/pagina.dart';
 import '../../../core/brand/focux_microcopy.dart';
@@ -11,6 +10,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -190,7 +190,7 @@ class _AgendaAlunoScreenState extends ConsumerState<AgendaAlunoScreen> {
       final info =
           await AgendaRepository(ref.read(apiClientProvider)).icalTokenAluno();
       final fullUrl = _resolveAbsoluteApiUrl(info.url);
-      await Clipboard.setData(ClipboardData(text: fullUrl));
+      await copySensitiveToClipboard(fullUrl);
       if (!mounted) return;
       FeedbackHelper.showSuccess(
         context,

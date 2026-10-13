@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../data/auth_repository.dart';
 import '../providers/auth_provider.dart';
@@ -220,7 +221,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
   }
 
   Future<void> _copy(String value, String label) async {
-    await Clipboard.setData(ClipboardData(text: value));
+    await copySensitiveToClipboard(value);
     if (!mounted) return;
     FeedbackHelper.showSuccess(context, '$label copiado.');
   }
