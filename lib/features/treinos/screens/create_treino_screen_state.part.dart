@@ -111,6 +111,12 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
           formNonce: _formNonce,
         )).id;
         invalidateTreinosCaches(ref);
+        unawaited(
+          AnalyticsService.instance.track(
+            ProductEvents.treinoCreated,
+            props: {'for_aluno': widget.alunoId != null},
+          ),
+        );
       }
       if (widget.alunoId != null) {
         _treinoCriadoId = treinoId;
