@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:amplitude_flutter/amplitude.dart';
 import 'package:amplitude_flutter/autocapture/attribution.dart';
 import 'package:amplitude_flutter/autocapture/autocapture.dart';
@@ -9,6 +11,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 import '../config/env.dart';
+import 'ad_attribution.dart';
 import 'amplitude_props.dart';
 import 'product_funnel.dart';
 
@@ -22,7 +25,8 @@ import 'product_funnel.dart';
 /// - logging condicionado a debug: nada vai pra prod sem motivo.
 ///
 /// Implementação atual: Crashlytics breadcrumbs + Amplitude (se houver
-/// `AMPLITUDE_API_KEY`) + debug log.
+/// `AMPLITUDE_API_KEY`) + eventos-chave de atribuição ([AdAttribution]) +
+/// debug log.
 typedef AnalyticsFunnelPoster =
     Future<void> Function(String tipoEvento, int alunoId);
 
@@ -99,6 +103,7 @@ class AnalyticsService {
         );
       } catch (_) {}
     }
+    unawaited(AdAttribution.forward(event, props));
     final amplitude = _amplitude;
     if (amplitude != null) {
       try {

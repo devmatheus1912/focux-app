@@ -28,6 +28,19 @@ fun requireKeystoreProperty(name: String): String =
     keystoreProperties.getProperty(name)
         ?: throw org.gradle.api.GradleException("Missing '$name' in android/key.properties for release signing.")
 
+// Meta SDK: env (CI) ou android/local.properties (gitignored). "0" mantém o SDK
+// inicializado sem enviar nada — sem App ID o plugin derruba o app na abertura.
+val localProperties = Properties()
+rootProject.file("local.properties").takeIf { it.exists() }?.let {
+    localProperties.load(FileInputStream(it))
+}
+fun metaConfig(env: String, local: String): String =
+    System.getenv(env)?.takeIf { it.isNotBlank() }
+        ?: localProperties.getProperty(local)?.takeIf { it.isNotBlank() }
+        ?: "0"
+val facebookAppId = metaConfig("FACEBOOK_APP_ID", "facebook.appId")
+val facebookClientToken = metaConfig("FACEBOOK_CLIENT_TOKEN", "facebook.clientToken")
+
 android {
     namespace = "com.focux.focux_app"
     compileSdk = 36
@@ -59,6 +72,12 @@ android {
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue("string", "facebook_app_id", facebookAppId)
+        resValue("string", "facebook_client_token", facebookClientToken)
+    }
+
+    buildFeatures {
+        resValues = true
     }
 
     buildTypes {

@@ -94,6 +94,13 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="focux_channel"/>
+        <!-- Meta App Events: valores vêm do build (FACEBOOK_APP_ID / FACEBOOK_CLIENT_TOKEN). -->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token"/>
         <!-- Health Connect: declara atividade de permissões de saúde -->
         <activity
             android:name="androidx.health.connect.client.PermissionController$PermissionActivity"

@@ -8,7 +8,8 @@ name: iOS Release
 #   APP_STORE_CONNECT_API_ISSUER_ID
 #   APP_STORE_CONNECT_API_KEY_BASE64
 #
-# Opcionais: API_URL, PUBLIC_WEB_URL, GOOGLE_*, SENTRY_DSN, AMPLITUDE_API_KEY
+# Opcionais: API_URL, PUBLIC_WEB_URL, GOOGLE_*, SENTRY_DSN, AMPLITUDE_API_KEY,
+#   FACEBOOK_APP_ID, FACEBOOK_CLIENT_TOKEN
 
 on:
   workflow_dispatch:
@@ -88,6 +89,20 @@ jobs:
           echo -n "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/Runner/GoogleService-Info.plist
           chmod +x tools/ios/sync_google_signin_url_scheme.sh || true
           tools/ios/sync_google_signin_url_scheme.sh || true
+
+      - name: Write Meta.xcconfig (optional)
+        env:
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_CLIENT_TOKEN: ${{ secrets.FACEBOOK_CLIENT_TOKEN }}
+        run: |
+          if [[ -z "${FACEBOOK_APP_ID:-}" || -z "${FACEBOOK_CLIENT_TOKEN:-}" ]]; then
+            echo "::warning::Sem FACEBOOK_APP_ID/FACEBOOK_CLIENT_TOKEN — Meta App Events fica sem envio neste build."
+            exit 0
+          fi
+          {
+            echo "FACEBOOK_APP_ID=${FACEBOOK_APP_ID}"
+            echo "FACEBOOK_CLIENT_TOKEN=${FACEBOOK_CLIENT_TOKEN}"
+          } > ios/Flutter/Meta.xcconfig
 
       - name: Install CocoaPods
         run: |

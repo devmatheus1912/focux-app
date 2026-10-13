@@ -62,6 +62,31 @@
 		<string>Usado para ler dados de saúde e acompanhar sua evolução no Focux.</string>
 		<key>NSHealthUpdateUsageDescription</key>
 		<string>Usado para registrar dados de saúde relacionados aos seus treinos no Focux.</string>
+		<!-- ATT: pedido só no painel do personal (AdAttribution). -->
+		<key>NSUserTrackingUsageDescription</key>
+		<string>Usamos esse acesso para saber qual anúncio trouxe você ao Focux. Dados de alunos e de saúde não são usados em publicidade.</string>
+		<!-- Meta App Events: valores em Flutter/Meta.xcconfig (gitignored) ou "0" (SDK sem envio). -->
+		<key>FacebookAppID</key>
+		<string>$(FACEBOOK_APP_ID)</string>
+		<key>FacebookClientToken</key>
+		<string>$(FACEBOOK_CLIENT_TOKEN)</string>
+		<key>FacebookDisplayName</key>
+		<string>Focux Personal</string>
+		<key>FacebookAutoLogAppEventsEnabled</key>
+		<true/>
+		<key>FacebookAdvertiserIDCollectionEnabled</key>
+		<true/>
+		<key>SKAdNetworkItems</key>
+		<array>
+			<dict>
+				<key>SKAdNetworkIdentifier</key>
+				<string>v9wttpbfk9.skadnetwork</string>
+			</dict>
+			<dict>
+				<key>SKAdNetworkIdentifier</key>
+				<string>n38lu8286q.skadnetwork</string>
+			</dict>
+		</array>
 		<!-- FCM background notifications -->
 		<key>UIBackgroundModes</key>
 		<array>
