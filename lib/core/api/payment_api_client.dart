@@ -42,7 +42,11 @@ class PaymentApiClient {
                 await SessionRefreshCoordinator.ensureFreshAccess(force: true);
             if (SessionRefreshCoordinator.shouldRetryRequest(outcome)) {
               final token = await SecureStorage.getToken();
-              if (token != null) {
+              if (token != null &&
+                  SessionRefreshCoordinator.canReplayAs(
+                    e.requestOptions.headers['Authorization'],
+                    token,
+                  )) {
                 e.requestOptions.headers['Authorization'] = 'Bearer $token';
                 e.requestOptions.extra['fxAuthRetried'] = true;
                 try {

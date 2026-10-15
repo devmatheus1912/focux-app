@@ -29,12 +29,18 @@ class SessionInvalidator {
 
   static Listenable get listenable => _notifier;
 
+  /// Sobe a cada logout/invalidação. Refresh iniciado numa geração anterior
+  /// não pode gravar token nem derrubar a sessão da conta seguinte.
+  static int get generation => _generation;
+  static int _generation = 0;
+
   static const _sessionPrefKeys = [
     'focux_plano_features_cache_v2',
     ...alunoOnboardingPrefKeys,
   ];
 
   static Future<void> invalidate({String? reason}) async {
+    _generation++;
     try {
       clearTenantMemoryCaches();
     } catch (_) {}

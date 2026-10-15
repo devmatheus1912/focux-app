@@ -8,6 +8,7 @@ import '../api/tls_certificate_pinning.dart';
 import '../config/env.dart';
 import '../storage/secure_storage.dart';
 import 'jwt_access_exp.dart';
+import 'jwt_session_identity.dart';
 import 'session_invalidator.dart';
 
 /// Resultado de um refresh (ou skip) de access token.
@@ -30,6 +31,7 @@ abstract final class SessionRefreshCoordinator {
   SessionRefreshCoordinator._();
 
   static Completer<SessionRefreshOutcome>? _flight;
+  static int _flightGeneration = 0;
   static final Random _jitter = Random();
 
   /// Testes / resume: destrava Completer órfão sem invalidar.
@@ -54,11 +56,15 @@ abstract final class SessionRefreshCoordinator {
     Duration skew = const Duration(minutes: 5),
   }) {
     final existing = _flight;
-    if (existing != null) return existing.future;
+    final generation = SessionInvalidator.generation;
+    if (existing != null && _flightGeneration == generation) {
+      return existing.future;
+    }
     // Trava antes de qualquer await: dois 401 simultâneos não podem mandar o
     // mesmo refresh token duas vezes (o backend trata reuso como roubo).
     final completer = Completer<SessionRefreshOutcome>();
     _flight = completer;
+    _flightGeneration = generation;
     _run(force: force, skew: skew).then(
       (outcome) {
         if (!completer.isCompleted) completer.complete(outcome);
@@ -81,6 +87,7 @@ abstract final class SessionRefreshCoordinator {
     required bool force,
     required Duration skew,
   }) async {
+    final generation = SessionInvalidator.generation;
     final access = await SecureStorage.getToken();
     if (access == null || access.isEmpty) {
       return SessionRefreshOutcome.failedFatal;
@@ -91,15 +98,37 @@ abstract final class SessionRefreshCoordinator {
 
     final refresh = await SecureStorage.getRefreshToken();
     if (refresh == null || refresh.isEmpty) {
+      if (generation != SessionInvalidator.generation) {
+        return SessionRefreshOutcome.failedRetryable;
+      }
       await SessionInvalidator.invalidate(reason: 'refresh token ausente');
       return SessionRefreshOutcome.failedFatal;
     }
 
-    return _performRefresh(refresh);
+    return _performRefresh(refresh, generation);
+  }
+
+  /// Logout, troca de conta ou outro refresh trocou a sessão durante o await:
+  /// a resposta é de uma sessão que já não é a atual.
+  static Future<bool> _isStale(String refreshToken, int generation) async {
+    if (generation != SessionInvalidator.generation) return true;
+    return await SecureStorage.getRefreshToken() != refreshToken;
+  }
+
+  /// O 401 veio de um token de outra conta: replay com o Bearer atual
+  /// mandaria a request da conta anterior em nome da nova.
+  static bool canReplayAs(Object? sentAuthorization, String currentToken) {
+    if (sentAuthorization is! String ||
+        !sentAuthorization.startsWith('Bearer ')) {
+      return false;
+    }
+    final sent = JwtSessionIdentity.of(sentAuthorization.substring(7));
+    return sent != null && sent == JwtSessionIdentity.of(currentToken);
   }
 
   static Future<SessionRefreshOutcome> _performRefresh(
     String refreshToken,
+    int generation,
   ) async {
     final dio = Dio(
       BaseOptions(
@@ -134,6 +163,9 @@ abstract final class SessionRefreshCoordinator {
         }
       }
 
+      if (await _isStale(refreshToken, generation)) {
+        return SessionRefreshOutcome.failedRetryable;
+      }
       final status = resp.statusCode ?? 0;
       if (status == 401 || status == 403) {
         await SessionInvalidator.invalidate(
@@ -159,6 +191,9 @@ abstract final class SessionRefreshCoordinator {
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       if (status == 401 || status == 403) {
+        if (await _isStale(refreshToken, generation)) {
+          return SessionRefreshOutcome.failedRetryable;
+        }
         await SessionInvalidator.invalidate(
           reason: 'refresh Dio $status',
         );

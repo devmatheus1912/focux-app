@@ -176,6 +176,13 @@ class ApiClient {
             if (SessionRefreshCoordinator.shouldRetryRequest(outcome)) {
               final token = await SecureStorage.getToken();
               if (token != null) {
+                if (!SessionRefreshCoordinator.canReplayAs(
+                  e.requestOptions.headers['Authorization'],
+                  token,
+                )) {
+                  handler.next(e);
+                  return;
+                }
                 e.requestOptions.headers['Authorization'] = 'Bearer $token';
                 // FormData já enviado não pode ser refeito. Marcar
                 // fxAuthRetried e cair no catch derrubava a sessão mesmo
