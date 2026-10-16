@@ -21,9 +21,31 @@ class _CaptureAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-class _NoOpTransport implements Transport {
+/// Transport que captura transações enviadas (SentryId não nulo = enviou).
+class _CapturingTransport implements Transport {
+  final List<SentryEnvelope> envelopes = [];
+
   @override
-  Future<SentryId?> send(SentryEnvelope envelope) async => null;
+  Future<SentryId?> send(SentryEnvelope envelope) async {
+    envelopes.add(envelope);
+    return SentryId.newId();
+  }
+}
+
+Future<void> _initSentry({
+  required void Function(SentryOptions o) configure,
+}) async {
+  // Garantir que qualquer instância anterior foi fechada antes de reinicializar.
+  await Sentry.close();
+  await Sentry.init((o) {
+    o.dsn = 'https://key@o0.ingest.sentry.io/0';
+    o.tracesSampleRate = 1.0;
+    // SDK v10 usa traceLifecycle=stream por padrão, que torna startTransaction
+    // um no-op. Usar static para manter compatibilidade com testes existentes.
+    o.traceLifecycle = SentryTraceLifecycle.static;
+    o.automatedTestMode = true;
+    configure(o);
+  });
 }
 
 void main() {
@@ -33,10 +55,8 @@ void main() {
 
   setUp(() async {
     sent = null;
-    await Sentry.init((o) {
-      o.dsn = 'https://key@o0.ingest.sentry.io/0';
-      o.tracesSampleRate = 1.0;
-      o.transport = _NoOpTransport();
+    await _initSentry(configure: (o) {
+      o.transport = _CapturingTransport();
       o.beforeSendTransaction = (tx, hint) => sent = stripRouteArguments(tx);
     });
     adapter = _CaptureAdapter();
@@ -66,7 +86,8 @@ void main() {
     expect(adapter.requests.single.headers, isNot(contains('sentry-trace')));
   });
 
-  test('com transação propaga só para o host da API, sem query no span', () async {
+  test('com transação propaga só para o host da API, sem query no span',
+      () async {
     final tx = Sentry.startTransaction('t', 'ui.load', bindToScope: true);
 
     await dio.get('/api/x?q=texto');

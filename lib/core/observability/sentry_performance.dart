@@ -61,13 +61,9 @@ Future<void> initSentryPerformance() async {
 /// Remove dados sensíveis antes de enviar a transação ao Sentry.
 @visibleForTesting
 SentryTransaction stripRouteArguments(SentryTransaction tx) {
-  final trace = tx.contexts.trace;
-  final data = trace?.data;
-  if (trace != null && data != null && data.containsKey(_kRouteArgs)) {
-    tx.contexts.trace = SentryTraceContext.fromJson(
-      trace.toJson()..['data'] = (Map.of(data)..remove(_kRouteArgs)),
-    );
-  }
+  tx.contexts.trace?.data?.remove(_kRouteArgs);
+  // ignore: deprecated_member_use
+  tx.extra?.remove(_kRouteArgs);
   return tx;
 }
 
