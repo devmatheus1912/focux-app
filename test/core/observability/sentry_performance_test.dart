@@ -43,7 +43,6 @@ Future<void> _initSentry({
     // SDK v10 usa traceLifecycle=stream por padrão, que torna startTransaction
     // um no-op. Usar static para manter compatibilidade com testes existentes.
     o.traceLifecycle = SentryTraceLifecycle.static;
-    o.automatedTestMode = true;
     configure(o);
   });
 }
