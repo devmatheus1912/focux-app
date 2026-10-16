@@ -75,7 +75,7 @@ dependencies:
   wakelock_plus: ^1.7.0
   webview_flutter: ^4.10.0
   cached_network_image: ^4.0.4
-  sentry_flutter: ^8.14.2
+  sentry_flutter: ^10.1.0
   amplitude_flutter: ^4.7.3
   firebase_analytics: ^12.6.0
   facebook_app_events: ^0.30.5

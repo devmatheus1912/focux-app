@@ -10,7 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rive/rive.dart' show RiveNative;
 import 'package:sentry_flutter/sentry_flutter.dart'
-    show SentryWidgetsFlutterBinding;
+    show SentryWidgetsFlutterBinding, SentryWidget;
 
 import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
@@ -194,7 +194,7 @@ void main() {
     applyLegacyPasswordResetRedirect(AppRouter.router);
     runApp(
       // Retry fica no ApiClient (fxNoRetry); retry do provider dobraria 4xx.
-      ProviderScope(retry: (_, _) => null, child: const FocuxApp()),
+      ProviderScope(retry: (_, _) => null, child: SentryWidget(child: const FocuxApp())),
     );
   }, reportUncaughtZoneError);
 }
