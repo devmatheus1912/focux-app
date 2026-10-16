@@ -37,7 +37,7 @@ void main() {
       o.dsn = 'https://key@o0.ingest.sentry.io/0';
       o.tracesSampleRate = 1.0;
       o.transport = _NoOpTransport();
-      o.beforeSendTransaction = (tx) => sent = stripRouteArguments(tx);
+      o.beforeSendTransaction = (tx, hint) => sent = stripRouteArguments(tx);
     });
     adapter = _CaptureAdapter();
     dio = Dio(BaseOptions(baseUrl: Env.apiUrl))

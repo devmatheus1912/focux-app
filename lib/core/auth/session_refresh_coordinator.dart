@@ -32,7 +32,7 @@ abstract final class SessionRefreshCoordinator {
 
   static Completer<SessionRefreshOutcome>? _flight;
   static int _flightGeneration = 0;
-  static final Random _jitter = Random();
+  static final Random _jitter = Random.secure();
 
   /// Testes / resume: destrava Completer órfão sem invalidar.
   static void resetStuckLock() {

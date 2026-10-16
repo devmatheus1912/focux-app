@@ -20,7 +20,7 @@ class _FxConfettiBurstState extends State<FxConfettiBurst>
   @override
   void initState() {
     super.initState();
-    final rnd = math.Random();
+    final rnd = math.Random.secure();
     _particles = List.generate(28, (i) {
       return _Particle(
         angle: rnd.nextDouble() * math.pi * 2,

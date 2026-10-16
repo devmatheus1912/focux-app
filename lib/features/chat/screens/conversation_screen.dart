@@ -370,7 +370,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     final exp = _wsReconnectAttempt.clamp(0, 6);
     final baseMs = (600 * (1 << exp)).clamp(600, 30000);
     // Jitter: restart do backend não derruba todos reconectando no mesmo ms.
-    final delayMs = baseMs + Random().nextInt(baseMs ~/ 2 + 1);
+    final delayMs = baseMs + Random.secure().nextInt(baseMs ~/ 2 + 1);
     _wsReconnectAttempt++;
     _wsReconnectTimer = Timer(Duration(milliseconds: delayMs), () async {
       if (_wsLifecycleEnded || !mounted || _wsAlunoId == null) {
