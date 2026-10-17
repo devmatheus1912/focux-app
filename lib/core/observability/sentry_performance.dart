@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -8,8 +7,7 @@ import '../config/env.dart';
 const _kRouteArgs = 'route_settings_arguments';
 const _kSpanExtra = 'fxSentrySpan';
 
-/// Inicializa o Sentry com: erros, tracing, session replay (só em crashes),
-/// logs estruturados e captura de falhas HTTP 5xx.
+/// Inicializa o Sentry com: erros, tracing e captura de falhas HTTP 5xx.
 Future<void> initSentryPerformance() async {
   if (Env.sentryDsn.isEmpty) return;
 
@@ -27,33 +25,11 @@ Future<void> initSentryPerformance() async {
     o.captureFailedRequests = true;
     o.maxRequestBodySize = MaxRequestBodySize.small;
 
-    // ── Session Replay: só grava 30s antes de um crash (sem custo contínuo) ──
-    // sessionSampleRate = 0 → não grava sessão inteira.
-    // onErrorSampleRate = 1.0 → sempre grava quando houver erro.
-    // Não disponível em Web — ignorado automaticamente pelo SDK.
-    if (!kIsWeb) {
-      o.replay.sessionSampleRate = 0.0;
-      o.replay.onErrorSampleRate = 1.0;
-    }
-
-    // ── Logs estruturados ─────────────────────────────────────────────────────
-    // Habilitados por padrão no SDK v10. beforeSendLog filtra níveis de dev.
-    if (Env.isProd) {
-      o.beforeSendLog = (log, hint) {
-        // Descartar debug/trace em produção para não inflar cota de logs.
-        if (log.level == SentryLogLevel.debug ||
-            log.level == SentryLogLevel.trace) {
-          return null;
-        }
-        return log;
-      };
-    }
-
     // ── Preservar comportamento de crashes: Crashlytics continua como handler ─
     // enableNativeCrashHandling = false evita duplicata com Crashlytics.
     o.enableNativeCrashHandling = false;
 
-    o.beforeSendTransaction = (tx, hint) => stripRouteArguments(tx);
+    o.beforeSendTransaction = (tx) async => stripRouteArguments(tx);
   });
 }
 
