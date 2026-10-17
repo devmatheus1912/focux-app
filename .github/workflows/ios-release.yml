@@ -71,14 +71,7 @@ jobs:
           cache: true
 
       - name: Enable Swift Package Manager
-        run: |
-          FLUTTER_SETTINGS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/flutter"
-          mkdir -p "$FLUTTER_SETTINGS_DIR"
-          echo '{"enable-swift-package-manager":true}' > "$FLUTTER_SETTINGS_DIR/settings"
-          echo "=== settings file ==="
-          cat "$FLUTTER_SETTINGS_DIR/settings"
-          echo "=== flutter config list ==="
-          flutter config --list || true
+        run: flutter config --enable-swift-package-manager
 
       - name: Flutter pub get
         run: flutter pub get
@@ -120,12 +113,7 @@ jobs:
       # 2) O .flutter-plugins-dependencies macOS exclua sentry_flutter do Podfile
       # 3) pod install não tente instalar um pacote sem podspec
       - name: Configure Xcode project (SPM migration)
-        run: |
-          echo "=== SPM flag check before build ==="
-          cat "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings" 2>/dev/null || echo "(settings file not found)"
-          flutter config --list | grep -i swift || echo "(swift flag not in config list)"
-          echo "=== running flutter build --config-only ==="
-          flutter build ios --config-only --no-codesign --verbose 2>&1 | tail -100
+        run: flutter build ios --config-only --no-codesign
 
       - name: Install CocoaPods
         run: |
