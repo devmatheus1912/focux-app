@@ -125,7 +125,7 @@ jobs:
           cat "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings" 2>/dev/null || echo "(settings file not found)"
           flutter config --list | grep -i swift || echo "(swift flag not in config list)"
           echo "=== running flutter build --config-only ==="
-          flutter build ios --config-only --no-codesign
+          flutter build ios --config-only --no-codesign --verbose 2>&1 | tail -100
 
       - name: Install CocoaPods
         run: |
