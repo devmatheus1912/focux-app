@@ -107,6 +107,13 @@ jobs:
             echo "FACEBOOK_CLIENT_TOKEN=${FACEBOOK_CLIENT_TOKEN}"
           } > ios/Flutter/Meta.xcconfig
 
+      # Força a migração do Xcode project para SPM (adiciona
+      # FlutterGeneratedPluginSwiftPackage ao project.pbxproj).
+      # Deve rodar antes do pod install para que o Podfile gerado
+      # já exclua plugins SPM-only (ex: sentry_flutter v10).
+      - name: Migrate Xcode project to SPM
+        run: flutter build ios --config-only --no-codesign
+
       - name: Install CocoaPods
         run: |
           cd ios
