@@ -115,7 +115,15 @@ jobs:
       # 3) pod install não tente instalar um pacote sem podspec
       - name: Configure Xcode project (SPM migration)
         run: |
+          mkdir -p "$HOME/.config/flutter"
+          printf '{"enable-swift-package-manager":true}' > "$HOME/.flutter_settings"
+          printf '{"enable-swift-package-manager":true}' > "$HOME/.config/flutter/settings"
           flutter config --enable-swift-package-manager
+          echo "=== which flutter / version ===" && which flutter && flutter --version
+          echo "=== config list ===" && flutter config --list | grep -i swift
+          echo "=== settings files ===" \
+            && cat "$HOME/.flutter_settings" \
+            && cat "$HOME/.config/flutter/settings"
           flutter build ios --config-only --no-codesign
 
       - name: Install CocoaPods
