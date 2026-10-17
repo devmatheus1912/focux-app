@@ -72,22 +72,9 @@ jobs:
 
       - name: Enable Swift Package Manager
         run: |
-          # flutter config pode não persistir entre steps em alguns runners.
-          # Escreve o settings file diretamente para garantir.
           FLUTTER_SETTINGS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/flutter"
           mkdir -p "$FLUTTER_SETTINGS_DIR"
-          # Lê valor atual (pode existir ou não)
-          EXISTING="{}"
-          if [[ -f "$FLUTTER_SETTINGS_DIR/settings" ]]; then
-            EXISTING="$(cat "$FLUTTER_SETTINGS_DIR/settings")"
-          fi
-          # Python para fazer merge seguro do JSON
-          python3 -c "
-import json, sys
-d = json.loads(sys.argv[1])
-d['enable-swift-package-manager'] = True
-print(json.dumps(d))
-" "$EXISTING" > "$FLUTTER_SETTINGS_DIR/settings"
+          echo '{"enable-swift-package-manager":true}' > "$FLUTTER_SETTINGS_DIR/settings"
           echo "=== settings file ==="
           cat "$FLUTTER_SETTINGS_DIR/settings"
           echo "=== flutter config list ==="
