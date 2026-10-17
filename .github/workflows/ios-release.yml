@@ -71,9 +71,6 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Enable Swift Package Manager
-        run: flutter config --enable-swift-package-manager
-
       - name: Flutter pub get
         run: flutter pub get
 
@@ -108,23 +105,6 @@ jobs:
             echo "FACEBOOK_CLIENT_TOKEN=${FACEBOOK_CLIENT_TOKEN}"
           } > ios/Flutter/Meta.xcconfig
 
-      # sentry_flutter v10 é SPM-only (sem podspec). Roda flutter build --config-only
-      # ANTES do pod install para que:
-      # 1) A migração SPM gere FlutterGeneratedPluginSwiftPackage/Package.swift real
-      # 2) O .flutter-plugins-dependencies macOS exclua sentry_flutter do Podfile
-      # 3) pod install não tente instalar um pacote sem podspec
-      - name: Configure Xcode project (SPM migration)
-        run: |
-          mkdir -p "$HOME/.config/flutter"
-          printf '{"enable-swift-package-manager":true}' > "$HOME/.flutter_settings"
-          printf '{"enable-swift-package-manager":true}' > "$HOME/.config/flutter/settings"
-          flutter config --enable-swift-package-manager
-          echo "=== which flutter / version ===" && which flutter && flutter --version
-          echo "=== config list ===" && flutter config --list | grep -i swift
-          echo "=== settings files ===" \
-            && cat "$HOME/.flutter_settings" \
-            && cat "$HOME/.config/flutter/settings"
-          flutter build ios --config-only --no-codesign
 
       - name: Install CocoaPods
         run: |
