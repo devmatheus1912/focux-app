@@ -1,6 +1,5 @@
-// Generated file. Do not edit.
-// This file is overwritten by Flutter during build.
 // swift-tools-version: 5.9
+// Generated file. Do not edit. Overwritten by Flutter during build.
 import PackageDescription
 
 let package = Package(
