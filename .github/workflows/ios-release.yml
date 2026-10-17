@@ -72,11 +72,26 @@ jobs:
 
       - name: Enable Swift Package Manager
         run: |
-          flutter config --enable-swift-package-manager
-          echo "=== flutter config list ==="
-          flutter config --list | grep -i swift || true
+          # flutter config pode não persistir entre steps em alguns runners.
+          # Escreve o settings file diretamente para garantir.
+          FLUTTER_SETTINGS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/flutter"
+          mkdir -p "$FLUTTER_SETTINGS_DIR"
+          # Lê valor atual (pode existir ou não)
+          EXISTING="{}"
+          if [[ -f "$FLUTTER_SETTINGS_DIR/settings" ]]; then
+            EXISTING="$(cat "$FLUTTER_SETTINGS_DIR/settings")"
+          fi
+          # Python para fazer merge seguro do JSON
+          python3 -c "
+import json, sys
+d = json.loads(sys.argv[1])
+d['enable-swift-package-manager'] = True
+print(json.dumps(d))
+" "$EXISTING" > "$FLUTTER_SETTINGS_DIR/settings"
           echo "=== settings file ==="
-          cat "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings" 2>/dev/null || cat "$HOME/.flutter_tool_state" 2>/dev/null || echo "config file not found"
+          cat "$FLUTTER_SETTINGS_DIR/settings"
+          echo "=== flutter config list ==="
+          flutter config --list || true
 
       - name: Flutter pub get
         run: flutter pub get
@@ -118,7 +133,12 @@ jobs:
       # 2) O .flutter-plugins-dependencies macOS exclua sentry_flutter do Podfile
       # 3) pod install não tente instalar um pacote sem podspec
       - name: Configure Xcode project (SPM migration)
-        run: flutter build ios --config-only --no-codesign
+        run: |
+          echo "=== SPM flag check before build ==="
+          cat "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings" 2>/dev/null || echo "(settings file not found)"
+          flutter config --list | grep -i swift || echo "(swift flag not in config list)"
+          echo "=== running flutter build --config-only ==="
+          flutter build ios --config-only --no-codesign
 
       - name: Install CocoaPods
         run: |
