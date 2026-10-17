@@ -67,19 +67,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.x'
           channel: stable
           cache: true
 
       - name: Enable Swift Package Manager
-        run: |
-          flutter config --enable-swift-package-manager
-          # Flutter prefere ~/.flutter_settings (legado) se existir — garante a flag nos dois paths.
-          for f in "$HOME/.flutter_settings" "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings"; do
-            mkdir -p "$(dirname "$f")"
-            [[ -f "$f" ]] || printf '{}' > "$f"
-            jq '. + {"enable-swift-package-manager": true}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
-          done
-          flutter config --list | grep -i swift
+        run: flutter config --enable-swift-package-manager
 
       - name: Flutter pub get
         run: flutter pub get
@@ -121,7 +114,9 @@ jobs:
       # 2) O .flutter-plugins-dependencies macOS exclua sentry_flutter do Podfile
       # 3) pod install não tente instalar um pacote sem podspec
       - name: Configure Xcode project (SPM migration)
-        run: flutter build ios --config-only --no-codesign
+        run: |
+          flutter config --enable-swift-package-manager
+          flutter build ios --config-only --no-codesign
 
       - name: Install CocoaPods
         run: |
