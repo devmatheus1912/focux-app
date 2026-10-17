@@ -117,6 +117,13 @@ jobs:
           cd ios
           pod install --repo-update
 
+      - name: Debug pbxproj after pod install
+        run: |
+          echo "=== FlutterGeneratedPluginSwiftPackage in pbxproj ==="
+          grep -c "FlutterGeneratedPluginSwiftPackage" ios/Runner.xcodeproj/project.pbxproj || echo "0"
+          echo "=== SPM config ==="
+          flutter config --list | grep swift || echo "not set"
+
       # sentry_flutter v10 é SPM-only. Migra o project.pbxproj para
       # adicionar FlutterGeneratedPluginSwiftPackage. Deve rodar após
       # pod install (workspace precisa existir para a migração ocorrer).
@@ -125,7 +132,7 @@ jobs:
           FLUTTER_SWIFT_PACKAGE_MANAGER: true
         run: |
           git checkout -- ios/Flutter/FlutterGeneratedPluginSwiftPackage/
-          flutter build ios --config-only --no-codesign
+          flutter build ios --config-only --no-codesign --no-pub
 
       - name: Install Fastlane
         run: gem install fastlane --no-document
