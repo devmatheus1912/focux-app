@@ -71,7 +71,12 @@ jobs:
           cache: true
 
       - name: Enable Swift Package Manager
-        run: flutter config --enable-swift-package-manager
+        run: |
+          flutter config --enable-swift-package-manager
+          echo "=== flutter config list ==="
+          flutter config --list | grep -i swift || true
+          echo "=== settings file ==="
+          cat "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings" 2>/dev/null || cat "$HOME/.flutter_tool_state" 2>/dev/null || echo "config file not found"
 
       - name: Flutter pub get
         run: flutter pub get
@@ -116,6 +121,8 @@ jobs:
       # adicionar FlutterGeneratedPluginSwiftPackage. Deve rodar após
       # pod install (workspace precisa existir para a migração ocorrer).
       - name: Migrate Xcode project to SPM
+        env:
+          FLUTTER_SWIFT_PACKAGE_MANAGER: true
         run: flutter build ios --config-only --no-codesign
 
       - name: Install Fastlane
