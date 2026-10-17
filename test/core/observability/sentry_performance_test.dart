@@ -40,9 +40,6 @@ Future<void> _initSentry({
   await Sentry.init((o) {
     o.dsn = 'https://key@o0.ingest.sentry.io/0';
     o.tracesSampleRate = 1.0;
-    // SDK v10 usa traceLifecycle=stream por padrão, que torna startTransaction
-    // um no-op. Usar static para manter compatibilidade com testes existentes.
-    o.traceLifecycle = SentryTraceLifecycle.static;
     configure(o);
   });
 }
@@ -56,7 +53,7 @@ void main() {
     sent = null;
     await _initSentry(configure: (o) {
       o.transport = _CapturingTransport();
-      o.beforeSendTransaction = (tx, hint) => sent = stripRouteArguments(tx);
+      o.beforeSendTransaction = (tx) => sent = stripRouteArguments(tx);
     });
     adapter = _CaptureAdapter();
     dio = Dio(BaseOptions(baseUrl: Env.apiUrl))
