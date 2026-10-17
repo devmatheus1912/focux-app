@@ -112,27 +112,18 @@ jobs:
             echo "FACEBOOK_CLIENT_TOKEN=${FACEBOOK_CLIENT_TOKEN}"
           } > ios/Flutter/Meta.xcconfig
 
+      # sentry_flutter v10 é SPM-only (sem podspec). Roda flutter build --config-only
+      # ANTES do pod install para que:
+      # 1) A migração SPM gere FlutterGeneratedPluginSwiftPackage/Package.swift real
+      # 2) O .flutter-plugins-dependencies macOS exclua sentry_flutter do Podfile
+      # 3) pod install não tente instalar um pacote sem podspec
+      - name: Configure Xcode project (SPM migration)
+        run: flutter build ios --config-only --no-codesign
+
       - name: Install CocoaPods
         run: |
           cd ios
           pod install --repo-update
-
-      - name: Debug pbxproj after pod install
-        run: |
-          echo "=== FlutterGeneratedPluginSwiftPackage in pbxproj ==="
-          grep -c "FlutterGeneratedPluginSwiftPackage" ios/Runner.xcodeproj/project.pbxproj || echo "0"
-          echo "=== SPM config ==="
-          flutter config --list | grep swift || echo "not set"
-
-      # sentry_flutter v10 é SPM-only. Migra o project.pbxproj para
-      # adicionar FlutterGeneratedPluginSwiftPackage. Deve rodar após
-      # pod install (workspace precisa existir para a migração ocorrer).
-      - name: Migrate Xcode project to SPM
-        env:
-          FLUTTER_SWIFT_PACKAGE_MANAGER: true
-        run: |
-          git checkout -- ios/Flutter/FlutterGeneratedPluginSwiftPackage/
-          flutter build ios --config-only --no-codesign --no-pub
 
       - name: Install Fastlane
         run: gem install fastlane --no-document

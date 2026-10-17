@@ -21,6 +21,7 @@ Flutter/Flutter.podspec
 Flutter/Generated.xcconfig
 Flutter/Meta.xcconfig
 Flutter/ephemeral/
+Flutter/FlutterGeneratedPluginSwiftPackage/
 Flutter/app.flx
 Flutter/app.zip
 Flutter/flutter_assets/
