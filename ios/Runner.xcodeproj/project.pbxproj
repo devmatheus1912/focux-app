@@ -212,7 +212,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			packageReferences = (
-				A1B2C3D4E5F60001A1B2C3D4 /* XCLocalSwiftPackageReference "Flutter/FlutterGeneratedPluginSwiftPackage" */,
+				A1B2C3D4E5F60001A1B2C3D4 /* XCLocalSwiftPackageReference "../Flutter/FlutterGeneratedPluginSwiftPackage" */,
 			);
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
@@ -222,9 +222,9 @@
 /* End PBXProject section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		A1B2C3D4E5F60001A1B2C3D4 /* XCLocalSwiftPackageReference "Flutter/FlutterGeneratedPluginSwiftPackage" */ = {
+		A1B2C3D4E5F60001A1B2C3D4 /* XCLocalSwiftPackageReference "../Flutter/FlutterGeneratedPluginSwiftPackage" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Flutter/FlutterGeneratedPluginSwiftPackage;
+			relativePath = ../Flutter/FlutterGeneratedPluginSwiftPackage;
 		};
 /* End XCLocalSwiftPackageReference section */
 
