@@ -71,7 +71,24 @@ jobs:
           cache: true
 
       - name: Enable Swift Package Manager
-        run: flutter config --enable-swift-package-manager
+        run: |
+          flutter config --enable-swift-package-manager
+          # Flutter prefere ~/.flutter_settings (legado) se o arquivo existir.
+          # Garante a flag nos dois paths que o macOS runner pode usar.
+          for settings_file in \
+            "$HOME/.flutter_settings" \
+            "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings"; do
+            python3 - "$settings_file" <<'PY'
+import json, pathlib, sys
+p = pathlib.Path(sys.argv[1])
+data = json.loads(p.read_text()) if p.exists() else {}
+data['enable-swift-package-manager'] = True
+p.parent.mkdir(parents=True, exist_ok=True)
+p.write_text(json.dumps(data))
+print(f"SPM written to {p}")
+PY
+          done
+          flutter config --list | grep -i swift
 
       - name: Flutter pub get
         run: flutter pub get
