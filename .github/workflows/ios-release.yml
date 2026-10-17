@@ -124,28 +124,7 @@ jobs:
         env:
           FLUTTER_SWIFT_PACKAGE_MANAGER: true
         run: |
-          # Garante que o diretório exista — flutter pub get ou pod install pode removê-lo
-          PKG="ios/Flutter/FlutterGeneratedPluginSwiftPackage"
-          SRC="$PKG/Sources/FlutterGeneratedPluginSwiftPackage"
-          mkdir -p "$SRC"
-          cat > "$PKG/Package.swift" << 'EOF'
-// swift-tools-version: 5.9
-// Generated file. Do not edit. Overwritten by Flutter during build.
-import PackageDescription
-
-let package = Package(
-    name: "FlutterGeneratedPluginSwiftPackage",
-    platforms: [ .iOS("15.5") ],
-    products: [
-        .library(name: "FlutterGeneratedPluginSwiftPackage", targets: ["FlutterGeneratedPluginSwiftPackage"]),
-    ],
-    dependencies: [],
-    targets: [
-        .target(name: "FlutterGeneratedPluginSwiftPackage", dependencies: []),
-    ]
-)
-EOF
-          touch "$SRC/FlutterGeneratedPluginSwiftPackage.swift"
+          git checkout -- ios/Flutter/FlutterGeneratedPluginSwiftPackage/
           flutter build ios --config-only --no-codesign
 
       - name: Install Fastlane
