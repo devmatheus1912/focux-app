@@ -76,15 +76,8 @@ jobs:
           # Flutter prefere ~/.flutter_settings (legado) se existir — garante a flag nos dois paths.
           for f in "$HOME/.flutter_settings" "${XDG_CONFIG_HOME:-$HOME/.config}/flutter/settings"; do
             mkdir -p "$(dirname "$f")"
-            python3 -c "
-import json, pathlib, sys
-p = pathlib.Path(sys.argv[1])
-d = json.loads(p.read_text()) if p.exists() else {}
-d['enable-swift-package-manager'] = True
-p.parent.mkdir(parents=True, exist_ok=True)
-p.write_text(json.dumps(d))
-print('written:', p)
-" "$f"
+            [[ -f "$f" ]] || printf '{}' > "$f"
+            jq '. + {"enable-swift-package-manager": true}' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
           done
           flutter config --list | grep -i swift
 
