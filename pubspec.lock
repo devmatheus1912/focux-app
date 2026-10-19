@@ -285,10 +285,10 @@ packages:
     dependency: "direct main"
     description:
       name: facebook_app_events
-      sha256: "422a94108edc53106298739182d2c5002eb60f209ca87ee20e4c69fd4b9a3bc7"
+      sha256: "212a389584b0065754f48e8758de3c982b87e9c2eba66d80e2be772606e8b13c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.30.5"
+    version: "0.31.0"
   fake_async:
     dependency: transitive
     description:
@@ -643,10 +643,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: "530dcbb298dc7c319aea9e3b7c580a61effb2abee2c93825d2dd8d5af0e230f1"
+      sha256: "8b05bc90a4f8f8d579db351e2bd6bac566813e12953494dc2a9d7461e7c6dbe7"
       url: "https://pub.dev"
     source: hosted
-    version: "18.0.2"
+    version: "18.1.0"
   google_fonts:
     dependency: "direct main"
     description:
@@ -851,10 +851,10 @@ packages:
     dependency: "direct main"
     description:
       name: in_app_purchase_android
-      sha256: f7327b5fd70d8dc1b419fb4cd5c17520175c4059441afd985e8a9c3fa2cefed9
+      sha256: eac857f7408769a68194be99ceb233ad4e3599e55ccd6422afaf0c7fd5066738
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.3"
+    version: "0.5.4"
   in_app_purchase_platform_interface:
     dependency: transitive
     description:
