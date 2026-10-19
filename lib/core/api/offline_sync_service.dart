@@ -88,7 +88,9 @@ class OfflineSyncService {
         p.contains('/ia') ||
         p.contains('/comunidade') ||
         p.contains('/fcm') ||
-        p.contains('/upload');
+        p.contains('/upload') ||
+        p.contains('/feed') ||       // impede replay de posts em conta errada
+        p.contains('/broadcasts');   // idem para broadcasts
   }
 
   static dynamic _sanitizeQueueData(String path, dynamic data) {
@@ -160,6 +162,7 @@ class OfflineSyncService {
         continue;
       }
       if (!req.isReadyToRetry) break;
+      if (generation != _generation) return; // abortado por clearQueue durante a drenagem
       final error = await _replay(dio, req);
       if (generation != _generation) return;
       switch (decideReplayOutcome(req, error)) {
