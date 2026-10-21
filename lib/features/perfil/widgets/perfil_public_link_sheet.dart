@@ -24,18 +24,23 @@ Future<void> showPerfilPublicLinkSheet(
     builder: (ctx) => FxHomeSheetScaffold(
       isDark: isDark,
       leading: Icon(Icons.link_outlined, color: primary, size: 22),
-      title: 'Link público',
-      subtitle: 'Copie ou abra a landing no ar.',
-      child: _PerfilPublicLinkBody(url: url, label: label),
+      title: 'Link de acesso',
+      subtitle: 'Compartilhe com seus alunos para eles entrarem no app com seu código já preenchido.',
+      child: _PerfilPublicLinkBody(url: url, label: label, slug: slug),
     ),
   );
 }
 
 class _PerfilPublicLinkBody extends StatelessWidget {
-  const _PerfilPublicLinkBody({required this.url, required this.label});
+  const _PerfilPublicLinkBody({
+    required this.url,
+    required this.label,
+    required this.slug,
+  });
 
   final String url;
   final String label;
+  final String slug;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +57,17 @@ class _PerfilPublicLinkBody extends StatelessWidget {
         Text(
           url,
           style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+        const SizedBox(height: TokensStrip.s3),
+        Text(
+          'Código: $slug',
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+        ),
+        const SizedBox(height: TokensStrip.s1),
+        Text(
+          'Para adicionar um aluno novo, use o link de convite em Alunos.',
+          style: FocuxHubTypography.bodyMuted(color: chrome.mute)
+              .copyWith(fontSize: 12),
         ),
         const SizedBox(height: TokensStrip.s4),
         FxLiquidPrimaryButton(

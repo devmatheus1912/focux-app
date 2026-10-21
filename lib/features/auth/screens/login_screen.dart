@@ -105,12 +105,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _slugController.text = slug;
       // ignore: unawaited_futures
       PersonalSlugStore.save(slug);
-    } else if (_isAluno) {
+    } else {
+      // Sem p= na URL: tenta ler slug salvo de sessão anterior.
+      // Se encontrar, auto-seleciona role aluno para o aluno não precisar
+      // trocar manualmente após logout (gap-3 fix).
       // ignore: unawaited_futures
       PersonalSlugStore.read().then((stored) {
         if (!mounted || stored == null || stored.isEmpty) return;
         if (_slugController.text.trim().isNotEmpty) return;
         setState(() {
+          _isAluno = true;
           _personalSlug = stored;
           _slugController.text = stored;
         });
