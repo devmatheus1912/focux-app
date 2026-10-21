@@ -29,6 +29,7 @@ class Aluno {
   final String? ultimoContato;
   final bool? operacaoFocusMode;
   final List<double> aderenciaSparkline;
+  final bool contaAtiva;
 
   Aluno({
     required this.id,
@@ -58,6 +59,7 @@ class Aluno {
     this.ultimoContato,
     this.operacaoFocusMode,
     this.aderenciaSparkline = const [],
+    this.contaAtiva = false,
   });
 
   DateTime? get followUpDate {
@@ -127,6 +129,7 @@ class Aluno {
           return n;
         })
         .toList(growable: false),
+    contaAtiva: json['contaAtiva'] as bool? ?? false,
     equipamentosDisponiveis:
         parseEnumCsv(
           Equipamento.values,
