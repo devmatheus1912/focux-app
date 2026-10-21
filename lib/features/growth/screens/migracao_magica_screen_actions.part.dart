@@ -19,6 +19,9 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
         lower.endsWith('.webp');
   }
 
+  bool _isPdfFilename(String filename) =>
+      filename.toLowerCase().endsWith('.pdf');
+
   Future<bool> _verificarAcessoFoto() async {
     final plano = _plano;
     if (plano == null) {
@@ -166,7 +169,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
                 isDark: isDark,
                 title: 'Subir foto ou print',
                 subtitle:
-                    'Screenshot de MFIT, Trainerize, planilha ou lista no WhatsApp.',
+                    'Tire foto só da lista de alunos, sem menus.\nFunciona com MFIT, Trainerize, planilha ou lista no WhatsApp.',
                 leading: Icon(
                   Icons.add_a_photo_outlined,
                   color: primary,
@@ -196,20 +199,167 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     setState(() => _isImportingFile = true);
 
     try {
-      final file = await ImagePicker().pickImage(
-        source: source,
-        maxWidth: 1920,
-        imageQuality: 85,
-      );
-      if (file == null || !mounted) return;
-
-      final bytes = await file.readAsBytes();
-      final label = file.name.isNotEmpty ? file.name : 'print.jpg';
-      await _processarImagem(bytes, label);
+      if (source == ImageSource.gallery) {
+        final files = await ImagePicker().pickMultiImage(
+          maxWidth: 1920,
+          imageQuality: 85,
+        );
+        if (files.isEmpty || !mounted) return;
+        await _processarMultiplasImagens(files);
+      } else {
+        final file = await ImagePicker().pickImage(
+          source: source,
+          maxWidth: 1920,
+          imageQuality: 85,
+        );
+        if (file == null || !mounted) return;
+        final bytes = await file.readAsBytes();
+        final label = file.name.isNotEmpty ? file.name : 'print.jpg';
+        await _processarImagem(bytes, label);
+      }
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     } finally {
       if (mounted) setState(() => _isImportingFile = false);
+    }
+  }
+
+  /// OCR em múltiplos prints — concatena os textos e processa de uma vez.
+  Future<void> _processarMultiplasImagens(List<XFile> files) async {
+    if (!MigracaoOcrService.disponivel) {
+      FeedbackHelper.showError(
+        context,
+        'Leitura de foto disponível no app mobile. Cole o texto ou use planilha.',
+      );
+      return;
+    }
+    if (!await _verificarAcessoFoto()) return;
+
+    final count = files.length;
+    setState(() {
+      _isLoading = true;
+      _emptyResult = false;
+      _alunosEncontrados = null;
+      _importedPhotoBytes = null;
+      _importedFileLabel = count == 1 ? files.first.name : '$count prints';
+      _controller.clear();
+    });
+
+    try {
+      final partes = <String>[];
+      for (final f in files) {
+        final bytes = await f.readAsBytes();
+        final texto = await MigracaoOcrService.extrairTextoDeBytes(
+          bytes,
+          filename: f.name,
+        );
+        if (texto.length >= 8) partes.add(texto);
+      }
+
+      if (partes.isEmpty) {
+        if (!mounted) return;
+        FeedbackHelper.showError(
+          context,
+          'Pouco texto legível nos prints. Tente fotos mais nítidas ou cole o texto.',
+        );
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+        return;
+      }
+
+      await _registrarUsoFoto();
+
+      final textoTotal = partes.join('\n\n');
+      if (!mounted) return;
+      setState(() => _controller.text = textoTotal);
+      final suffix = count == 1 ? ' no print' : ' nos $count prints';
+      await _processarTextoMigracao(textoTotal, successSuffix: suffix);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  /// Extrai texto de PDF via pdfx: renderiza cada página como imagem e passa pelo OCR.
+  Future<void> _processarPdf(Uint8List bytes, String filename) async {
+    if (!MigracaoOcrService.disponivel) {
+      FeedbackHelper.showError(
+        context,
+        'Leitura de PDF disponível no app mobile. Cole o texto ou use planilha.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _emptyResult = false;
+      _alunosEncontrados = null;
+      _importedPhotoBytes = null;
+      _importedFileLabel = filename;
+      _controller.clear();
+    });
+
+    try {
+      final doc = await PdfDocument.openData(bytes);
+      final partes = <String>[];
+
+      for (var i = 1; i <= doc.pagesCount; i++) {
+        final page = await doc.getPage(i);
+        final rendered = await page.render(
+          width: page.width * 2,
+          height: page.height * 2,
+          format: PdfPageImageFormat.png,
+        );
+        await page.close();
+        if (rendered?.bytes != null) {
+          final texto = await MigracaoOcrService.extrairTextoDeBytes(
+            rendered!.bytes,
+            filename: 'pagina_$i.png',
+          );
+          if (texto.length >= 8) partes.add(texto);
+        }
+      }
+      await doc.close();
+
+      if (partes.isEmpty) {
+        if (!mounted) return;
+        FeedbackHelper.showError(
+          context,
+          'Não foi possível ler o conteúdo desse PDF. '
+          'Tente copiar o texto do PDF e colar aqui.',
+        );
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+        return;
+      }
+
+      await _registrarUsoFoto();
+      final textoTotal = partes.join('\n\n');
+      if (!mounted) return;
+      setState(() => _controller.text = textoTotal);
+      final suffix = doc.pagesCount == 1 ? ' no PDF' : ' no PDF (${doc.pagesCount} páginas)';
+      await _processarTextoMigracao(textoTotal, successSuffix: suffix);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showError(context, friendlyError(e));
+        setState(() {
+          _emptyResult = false;
+          _limparImportacaoVisual();
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -221,7 +371,7 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     try {
       final file = await FilePicker.pickFile(
         type: FileType.custom,
-        allowedExtensions: ['csv', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'webp'],
+        allowedExtensions: ['csv', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'webp', 'pdf'],
       );
       if (file == null) return;
 
@@ -232,6 +382,11 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
           context,
           'Não foi possível ler o arquivo selecionado.',
         );
+        return;
+      }
+
+      if (_isPdfFilename(file.name)) {
+        await _processarPdf(bytes, file.name);
         return;
       }
 

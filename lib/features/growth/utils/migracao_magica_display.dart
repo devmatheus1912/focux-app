@@ -27,9 +27,11 @@ String migracaoCampoLabel(String campo) => switch (campo) {
 
 String migracaoVazioTitle() => 'Não encontramos alunos aqui';
 
-String migracaoVazioDica() =>
-    'Use uma planilha com colunas Nome, Telefone e E-mail. '
-    'Ou envie o print da sua lista de contatos.';
+String migracaoVazioDica({bool deFoto = false}) => deFoto
+    ? 'Pouco identificado nesse print. Tente tirar foto só da lista de alunos, '
+        'sem menus ou outros elementos — ou cole o texto diretamente.'
+    : 'Use uma planilha com colunas Nome, Telefone e E-mail. '
+        'Ou envie o print da sua lista de contatos.';
 
 String migracaoSalvandoLabel() => 'Salvando alunos...';
 
