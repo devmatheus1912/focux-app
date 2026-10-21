@@ -2,7 +2,7 @@
 
 Cliente Flutter (Android, iOS e web) para personal trainers e alunos. Conecta-se à API do repositório **privado** `focux-backend`.
 
-> **Repositório público no GitHub ≠ software livre.** Código proprietário: consulta permitida; cópia, execução em produção, modificação e distribuição **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
+> **Repositório privado.** Código proprietário: cópia, execução em produção, modificação e distribuição **proibidas** sem autorização por escrito. Ver [LICENSE](LICENSE).
 
 ## Perfis
 
@@ -26,7 +26,7 @@ Autenticação JWT, rotas por papel (GoRouter) e design system próprio. Catálo
 
 | Repositório | Visibilidade | Papel |
 |-------------|--------------|--------|
-| `focux-app` | Público | Este cliente |
+| `focux-app` | Privado | Este cliente |
 | `focux-backend` | **Privado** | API REST, WebSocket e regras de negócio |
 | Site | Externo | [focuxpersonal.com](https://focuxpersonal.com) |
 

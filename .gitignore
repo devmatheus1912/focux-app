@@ -155,3 +155,7 @@ fastlane/Preview.html
 # Local worktrees and session scratch
 .worktrees/
 .superpowers/
+
+# Cursor IDE
+.ua/
+docs/
