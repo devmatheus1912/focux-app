@@ -159,3 +159,6 @@ fastlane/Preview.html
 # Cursor IDE
 .ua/
 docs/
+
+# Intercom keys
+lib/core/support/intercom_config.dart

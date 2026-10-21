@@ -16,6 +16,7 @@ import 'package:dio/dio.dart';
 import 'core/api/api_client.dart';
 import 'core/api/tls_certificate_pinning.dart';
 import 'core/analytics/analytics_service.dart';
+import 'core/support/intercom_service.dart';
 import 'core/auth/session_cache_evictor.dart';
 import 'core/config/env.dart';
 import 'core/crash/flutter_error_reporting.dart';
@@ -121,6 +122,7 @@ void main() {
     }
 
     unawaited(AnalyticsService.instance.initAmplitude());
+    unawaited(IntercomService.init());
 
     // ── Global Red-Screen killer ──────────────────────────────────
     // Replaces Flutter's red error screen with a friendly message in release/profile.
@@ -281,6 +283,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     if (!mounted) return;
     if (ref.read(authProvider) == AuthStatus.authenticated) {
       _requestPushPermission();
+      _syncIntercomUser();
     }
   }
 
@@ -289,6 +292,18 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     unawaited(
       FcmService.requestPermissionIfNeeded(ref.read(apiClientProvider)),
     );
+  }
+
+  void _syncIntercomUser() {
+    if (kIsWeb) return;
+    // shortcut: usa perfilProvider (personal); alunos ficam anônimos por ora
+    ref.read(perfilProvider.future).then((perfil) {
+      unawaited(IntercomService.loginUser(
+        userId: '${perfil.id}',
+        email: perfil.email,
+        name: perfil.nome,
+      ));
+    }).catchError((_) {}); // silencioso — suporte funciona mesmo sem identificação
   }
 
   @override
@@ -462,10 +477,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
         invalidateSessionUserCaches(ref);
         _loadCustomTheme();
         _requestPushPermission();
+        _syncIntercomUser();
       } else if (next == AuthStatus.unauthenticated &&
           previous == AuthStatus.authenticated) {
         invalidateSessionUserCaches(ref);
         _resetCustomTheme();
+        unawaited(IntercomService.logout());
       }
     });
 
