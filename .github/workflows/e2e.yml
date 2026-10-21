@@ -43,6 +43,11 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Create Intercom config stub
+        run: |
+          echo "abstract class IntercomConfig { static const String appId = ''; static const String androidApiKey = ''; static const String iosApiKey = ''; }" \
+            > lib/core/support/intercom_config.dart
+
       - name: Build flutter web
         env:
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
