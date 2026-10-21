@@ -74,6 +74,20 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Write Intercom config
+        env:
+          INTERCOM_APP_ID: ${{ secrets.INTERCOM_APP_ID }}
+          INTERCOM_ANDROID_API_KEY: ${{ secrets.INTERCOM_ANDROID_API_KEY }}
+          INTERCOM_IOS_API_KEY: ${{ secrets.INTERCOM_IOS_API_KEY }}
+        run: |
+          cat > lib/core/support/intercom_config.dart << EOF
+          abstract class IntercomConfig {
+            static const String appId = '${INTERCOM_APP_ID:-}';
+            static const String androidApiKey = '${INTERCOM_ANDROID_API_KEY:-}';
+            static const String iosApiKey = '${INTERCOM_IOS_API_KEY:-}';
+          }
+          EOF
+
       # A build phase do pod roda `dart run` dentro de ios/Pods (sem pubspec) e
       # quebra o archive. Rodando da raiz, o marker fica pronto e a fase pula.
       - name: Rive native setup (iOS)
