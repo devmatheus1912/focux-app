@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/legal/focux_legal.dart';
+import '../../../core/support/intercom_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 
-/// Conta e segurança — grupo + sair em card separado (ChatGPT).
+/// Conta e segurança — grupo + sair em card separado.
 ///
-/// Ajuda: site público de suporte (pré-lançamento — sem ticket/chat no app).
+/// Ajuda: abre o Messenger do Intercom como overlay.
 class PerfilContaSegurancaSection extends StatelessWidget {
   const PerfilContaSegurancaSection({
     super.key,
@@ -39,10 +40,10 @@ class PerfilContaSegurancaSection extends StatelessWidget {
             FxSettingsTile(
               icon: Icons.support_agent_outlined,
               label: 'Ajuda e suporte',
-              value: 'focuxpersonal.com/suporte',
+              value: '',
               mute: mute,
               line: line,
-              onTap: () => FocuxLegal.openSupport(),
+              onTap: () => IntercomService.openMessenger(),
             ),
             FxSettingsTile(
               icon: Icons.person_remove_outlined,

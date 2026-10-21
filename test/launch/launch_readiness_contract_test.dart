@@ -60,7 +60,7 @@ void main() {
     expect(routes, contains("path: '/white-label'"));
   });
 
-  test('suporte pré-lançamento redireciona ao site', () {
+  test('suporte abre Intercom Messenger', () {
     final routes = readRouterSourceBundle();
     expect(routes, contains("path: '/suporte'"));
     expect(routes, contains('SuporteWebRedirectScreen'));
@@ -68,7 +68,7 @@ void main() {
       'lib/features/suporte/screens/suporte_web_redirect_screen.dart',
     );
     expect(redirect.existsSync(), isTrue);
-    expect(redirect.readAsStringSync(), contains('FocuxLegal.openSupport'));
+    expect(redirect.readAsStringSync(), contains('IntercomService.openMessenger'));
     expect(
       Directory('lib/features/suporte')
           .listSync(recursive: true)
