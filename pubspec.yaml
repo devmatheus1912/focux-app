@@ -81,6 +81,7 @@ dependencies:
   firebase_analytics: ^12.6.0
   facebook_app_events: ^0.30.5
   app_tracking_transparency: ^2.0.7
+  pdfx: ^2.11.0
 
 dev_dependencies:
   flutter_test:
