@@ -1,0 +1,23 @@
+---
+description: Fluxo git obrigatório — branch → testes → main → build
+alwaysApply: true
+---
+
+# Fluxo git: branch → testes → main → produção
+
+Toda alteração de código segue este fluxo, sem exceção:
+
+1. **Branch nova** — nunca commitar direto em `main`. Nome curto e descritivo (`feat/nome`, `fix/nome`).
+2. **Testes** — rodar a suíte relevante antes de qualquer merge. Se falhar, corrigir na branch.
+3. **Merge para main** — só após testes verdes. PR preferível; merge direto só se o usuário pedir explicitamente.
+4. **Build de produção** — só disparar após main atualizada e testes passando.
+
+## Exceções únicas (pedir confirmação antes)
+
+- Hotfix crítico de produção: pode ir para main direto SE o usuário confirmar e os testes passarem.
+- Patch de docs puro (sem código): usuário decide.
+
+## Proibido
+
+- Nunca fazer `push --force` em `main` sem pedido explícito.
+- Nunca subir para produção com testes falhando.
