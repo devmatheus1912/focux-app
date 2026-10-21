@@ -23,6 +23,24 @@ class MigracaoImportacaoResumo {
           )
           .toList(growable: false);
 
+  /// Alunos que tiveram e-mail de convite enviado automaticamente.
+  List<MigracaoImportacaoDetalhe> get emailEnviadoAutomaticamente =>
+      importadosComAcesso
+          .where((d) => d.emailEnviado)
+          .toList(growable: false);
+
+  /// Alunos sem e-mail automático mas com WhatsApp — enviar via broadcast.
+  List<MigracaoImportacaoDetalhe> get enviarViaWhatsapp =>
+      importadosComAcesso
+          .where((d) => !d.emailEnviado && (d.telefone?.isNotEmpty ?? false))
+          .toList(growable: false);
+
+  /// Alunos sem e-mail automático e sem telefone — copiar link manualmente.
+  List<MigracaoImportacaoDetalhe> get enviarManualmente =>
+      importadosComAcesso
+          .where((d) => !d.emailEnviado && (d.telefone?.isEmpty ?? true))
+          .toList(growable: false);
+
   factory MigracaoImportacaoResumo.fromJson(Map<String, dynamic> json) {
     final detalhesRaw = json['detalhes'];
     final detalhes =
@@ -59,6 +77,7 @@ class MigracaoImportacaoDetalhe {
     this.email,
     this.telefone,
     this.linkAtivacao,
+    this.emailEnviado = false,
   });
 
   final String nome;
@@ -68,6 +87,7 @@ class MigracaoImportacaoDetalhe {
   final String? email;
   final String? telefone;
   final String? linkAtivacao;
+  final bool emailEnviado;
 
   factory MigracaoImportacaoDetalhe.fromJson(Map<String, dynamic> json) {
     int? asId(dynamic value) {
@@ -83,6 +103,7 @@ class MigracaoImportacaoDetalhe {
       email: json['email']?.toString(),
       telefone: json['telefone']?.toString(),
       linkAtivacao: json['linkAtivacao']?.toString(),
+      emailEnviado: json['emailEnviado'] == true,
     );
   }
 }

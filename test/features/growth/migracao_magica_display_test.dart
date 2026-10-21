@@ -13,4 +13,24 @@ void main() {
     expect(migracaoIrParaListaLabel(), 'Ir para lista');
     expect(migracaoDiscardConfirmLabel(), 'Sair');
   });
+
+  // M2 — mensagem de empty state diferencia foto de planilha/texto
+  group('migracaoVazioDica', () {
+    test('sem foto: orienta planilha ou print', () {
+      final dica = migracaoVazioDica(deFoto: false);
+      expect(dica, contains('planilha'));
+      expect(dica, isNot(contains('Pouco identificado')));
+    });
+
+    test('de foto: orienta tirar foto só da lista', () {
+      final dica = migracaoVazioDica(deFoto: true);
+      expect(dica, contains('Pouco identificado'));
+      expect(dica, contains('lista de alunos'));
+      expect(dica, isNot(contains('planilha')));
+    });
+
+    test('default deFoto é false', () {
+      expect(migracaoVazioDica(), equals(migracaoVazioDica(deFoto: false)));
+    });
+  });
 }

@@ -1,0 +1,45 @@
+---
+description: Atualizar banco Notion "🚀 Próximo Build" após todo merge no main
+alwaysApply: true
+---
+
+# Notion — Changelog do Próximo Build (obrigatório)
+
+Banco Notion: **🚀 Próximo Build**
+URL: https://app.notion.com/p/4420bec2240944638d6fdf116cd4133d
+Data Source ID: `64b14bd2-eaec-4285-a3b1-51c34849be1f`
+
+## Quando atualizar
+
+**Sempre que um merge/push for feito no `main`**, antes de terminar a sessão:
+
+1. Listar os commits novos desde o merge anterior que ainda não têm entrada no banco.
+2. Para cada commit relevante (excluir `ci:`, `chore:`, `merge:` sem mudança de produto):
+   - Criar uma linha nova com `notion-create-pages` no banco acima.
+   - Escrever o campo **"O que foi feito"** em PT-BR, **sem jargão técnico**, máximo 1 frase curta.
+   - Preencher **Tipo**: `Novidade` / `Melhoria` / `Correcao` / `Infra`.
+   - **Status**: sempre `Aguardando build`.
+   - **Data**: data do commit (ISO `YYYY-MM-DD`).
+
+## Quando marcar "Em produção"
+
+Só quando o usuário confirmar que **subiu um build** para a loja (TestFlight / Play Console / produção).
+Nesse momento, atualizar todas as linhas com `Status = Aguardando build` para `Em producao`
+e preencher o campo **Build** com o número de versão (ex: `1.2.0+45`).
+
+## Tipos de entrada
+
+| Tipo | Quando usar |
+|---|---|
+| Novidade | Funcionalidade nova que o usuário/aluno verá |
+| Melhoria | Ajuste em algo que já existia |
+| Correcao | Bug fix / comportamento errado corrigido |
+| Infra | CI, dependências, infraestrutura (omitir se não relevante pro produto) |
+
+## Linguagem
+
+- Escrever como se explicasse para alguém não técnico.
+- ❌ "refactor provider injection on AuthNotifier"
+- ✅ "Tela de login carrega mais rápido"
+- ❌ "fix: golden test timeout"
+- ✅ (omitir — infra pura, sem impacto pro usuário)

@@ -63,22 +63,72 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
             style: FocuxHubTypography.bodyMuted(color: mute),
           ),
           SizedBox(height: TokensStrip.s3),
-          // C1 — Enviar todos via transmissão WhatsApp
-          _MigracaoEnviarTodosButton(
-            data: comAcesso,
-            brand: brand,
-            mute: mute,
-          ),
-          SizedBox(height: TokensStrip.s3),
-          for (final item in comAcesso)
-            _MigracaoConviteTile(
-              item: item,
-              status: status[item.alunoId],
-              onStatus: (s) => onStatus(item.alunoId!, s),
+          // ── Grupo 1: E-mail enviado automaticamente ─────────────────────
+          if (data.emailEnviadoAutomaticamente.isNotEmpty) ...[
+            _MigracaoGrupoHeader(
+              icon: Icons.mark_email_read_rounded,
+              color: EagleTokens.good,
+              titulo: 'E-mail enviado automaticamente',
+              subtitulo:
+                  'Esses alunos já receberam o convite no e-mail. Nenhuma ação necessária.',
+              count: data.emailEnviadoAutomaticamente.length,
               ink: ink,
               mute: mute,
-              brand: brand,
             ),
+            for (final item in data.emailEnviadoAutomaticamente)
+              _MigracaoEmailEnviadoTile(item: item, ink: ink, mute: mute),
+            SizedBox(height: TokensStrip.s3),
+          ],
+          // ── Grupo 2: Envie via WhatsApp ──────────────────────────────────
+          if (data.enviarViaWhatsapp.isNotEmpty) ...[
+            _MigracaoGrupoHeader(
+              icon: Icons.send_rounded,
+              color: const Color(0xFF25D366),
+              titulo: 'Envie via WhatsApp',
+              subtitulo: 'Copie todos de uma vez ou envie individualmente.',
+              count: data.enviarViaWhatsapp.length,
+              ink: ink,
+              mute: mute,
+            ),
+            _MigracaoEnviarTodosButton(
+              data: data.enviarViaWhatsapp,
+              brand: brand,
+              mute: mute,
+            ),
+            SizedBox(height: TokensStrip.s2),
+            for (final item in data.enviarViaWhatsapp)
+              _MigracaoConviteTile(
+                item: item,
+                status: status[item.alunoId],
+                onStatus: (s) => onStatus(item.alunoId!, s),
+                ink: ink,
+                mute: mute,
+                brand: brand,
+              ),
+            SizedBox(height: TokensStrip.s3),
+          ],
+          // ── Grupo 3: Envie manualmente (só nome, sem contato) ────────────
+          if (data.enviarManualmente.isNotEmpty) ...[
+            _MigracaoGrupoHeader(
+              icon: Icons.link_rounded,
+              color: mute,
+              titulo: 'Envie manualmente',
+              subtitulo:
+                  'Esses alunos não têm telefone nem e-mail. Copie o link e envie pelo canal que preferir.',
+              count: data.enviarManualmente.length,
+              ink: ink,
+              mute: mute,
+            ),
+            for (final item in data.enviarManualmente)
+              _MigracaoConviteTile(
+                item: item,
+                status: status[item.alunoId],
+                onStatus: (s) => onStatus(item.alunoId!, s),
+                ink: ink,
+                mute: mute,
+                brand: brand,
+              ),
+          ],
         ] else if (data.detalhes.isNotEmpty) ...[
           SizedBox(height: TokensStrip.s4),
           for (final item in data.detalhes)
@@ -260,6 +310,153 @@ class _MigracaoConviteTile extends StatelessWidget {
                 label: s.alunoLinkCopiar,
                 onPressed: () => _copiar(context),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Grupos do Step 3
+// ---------------------------------------------------------------------------
+
+class _MigracaoGrupoHeader extends StatelessWidget {
+  const _MigracaoGrupoHeader({
+    required this.icon,
+    required this.color,
+    required this.titulo,
+    required this.subtitulo,
+    required this.count,
+    required this.ink,
+    required this.mute,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String titulo;
+  final String subtitulo;
+  final int count;
+  final Color ink;
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        titulo,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: ink,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitulo,
+                  style: TextStyle(fontSize: 12, color: mute, height: 1.35),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tile somente-leitura para alunos que já receberam e-mail — sem botão de ação.
+class _MigracaoEmailEnviadoTile extends StatelessWidget {
+  const _MigracaoEmailEnviadoTile({
+    required this.item,
+    required this.ink,
+    required this.mute,
+  });
+
+  final MigracaoImportacaoDetalhe item;
+  final Color ink;
+  final Color mute;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: TokensStrip.s3, vertical: 10),
+        decoration: fxListCardDecoration(context, accent: EagleTokens.good),
+        child: Row(
+          children: [
+            Icon(Icons.check_circle_rounded,
+                size: 16, color: EagleTokens.good),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.nome,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: ink,
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (item.email != null && item.email!.isNotEmpty)
+                    Text(
+                      item.email!,
+                      style:
+                          TextStyle(fontSize: 11.5, color: mute, height: 1.3),
+                    ),
+                ],
+              ),
+            ),
+            Text(
+              'E-mail enviado',
+              style: TextStyle(
+                  fontSize: 11,
+                  color: EagleTokens.good,
+                  fontWeight: FontWeight.w600),
+            ),
           ],
         ),
       ),
