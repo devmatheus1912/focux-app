@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/legal/focux_legal.dart';
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/support/intercom_service.dart';
 import '../../../core/theme/shell_chrome.dart';
-import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 
-/// Pré-lançamento: suporte oficial é o site (e-mail / WhatsApp).
-/// Deep link `/suporte` abre a web e volta — sem ticket/chat no app.
+/// Abre o Messenger do Intercom como overlay e retorna ao perfil.
 class SuporteWebRedirectScreen extends StatefulWidget {
   const SuporteWebRedirectScreen({super.key});
 
@@ -20,7 +18,8 @@ class SuporteWebRedirectScreen extends StatefulWidget {
       _SuporteWebRedirectScreenState();
 }
 
-class _SuporteWebRedirectScreenState extends State<SuporteWebRedirectScreen> {
+class _SuporteWebRedirectScreenState
+    extends State<SuporteWebRedirectScreen> {
   String? _error;
 
   @override
@@ -33,19 +32,12 @@ class _SuporteWebRedirectScreenState extends State<SuporteWebRedirectScreen> {
     if (!mounted) return;
     setState(() => _error = null);
     try {
-      final opened = await FocuxLegal.openSupport();
+      await IntercomService.openMessenger();
       if (!mounted) return;
-      if (!opened) {
-        const message =
-            'Não abrimos o site de suporte. Tente de novo em breve.';
-        setState(() => _error = message);
-        FeedbackHelper.showError(context, message);
-        return;
-      }
       safePopOrGo(context, '/perfil');
     } catch (e) {
       if (!mounted) return;
-      final message = friendlyError(e);
+      const message = 'Não conseguimos abrir o suporte. Tente novamente.';
       setState(() => _error = message);
       FeedbackHelper.showError(context, message);
     }
@@ -63,12 +55,12 @@ class _SuporteWebRedirectScreenState extends State<SuporteWebRedirectScreen> {
         appBar: const FxShellAppBar(title: 'Suporte'),
         body: _error != null
             ? FxErrorState(
-              chromeOnDark: chrome.isDark,
-              primary: primary,
-              title: 'Suporte no site',
-              message: _error!,
-              onRetry: _openSupport,
-            )
+                chromeOnDark: chrome.isDark,
+                primary: primary,
+                title: 'Suporte indisponível',
+                message: _error!,
+                onRetry: _openSupport,
+              )
             : const Center(child: FxLoading()),
       ),
     );

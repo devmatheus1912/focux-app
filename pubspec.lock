@@ -876,6 +876,22 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  intercom_flutter:
+    dependency: "direct main"
+    description:
+      name: intercom_flutter
+      sha256: fb114ff6c83c8ee21e7a1b151f70445e35b9b0236b6c2d8a1b3c25bfe8f1025c
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
+  intercom_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: intercom_flutter_platform_interface
+      sha256: ba17de736d2aefd762c3338f1f2e50ade17c8c212a44abb554960a31ecf74e40
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   intl:
     dependency: transitive
     description:
