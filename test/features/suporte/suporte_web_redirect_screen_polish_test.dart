@@ -8,22 +8,22 @@ void main() {
       'lib/features/suporte/screens/suporte_web_redirect_screen.dart',
     );
     expect(screen, contains('fxScreenA11yScope'));
-    expect(screen, contains('FocuxLegal.openSupport'));
+    expect(screen, contains('IntercomService.openMessenger'));
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, contains('FxErrorState'));
-    expect(screen, contains('friendlyError'));
+    expect(screen, contains('FeedbackHelper.showError'));
     expect(screen, isNot(contains('SuporteRepository')));
     expect(screen, isNot(contains('/api/suporte/tickets')));
     expect(screen, isNot(contains('/api/suporte/chat')));
   });
 
-  test('perfil aponta suporte para o site', () {
+  test('perfil abre suporte via Intercom', () {
     final perfil = readScreenSourceBundle(
       'lib/features/perfil/widgets/perfil_conta_seguranca_section.dart',
     );
-    expect(perfil, contains('FocuxLegal.openSupport'));
-    expect(perfil, contains('focuxpersonal.com/suporte'));
+    expect(perfil, contains('IntercomService.openMessenger'));
+    expect(perfil, isNot(contains('FocuxLegal.openSupport')));
     expect(perfil, isNot(contains("push('/suporte')")));
     expect(perfil, isNot(contains('Central no app')));
   });
