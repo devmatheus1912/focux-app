@@ -270,6 +270,26 @@ class AlunoListCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            if (!aluno.contaAtiva && alunoStatusAtivo(aluno)) ...[
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.schedule_rounded,
+                                    size: 11,
+                                    color: EagleTokens.warn,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    'Aguardando ativação',
+                                    style: FocuxHubTypography.bodyMuted(
+                                      color: EagleTokens.warn,
+                                      height: 1.2,
+                                    ).copyWith(fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ] else ...[
                             const SizedBox(height: 2),
                             Text(
