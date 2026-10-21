@@ -9,7 +9,7 @@ Toda alteração de código segue este fluxo, sem exceção:
 
 1. **Branch nova** — nunca commitar direto em `main`. Nome curto e descritivo (`feat/nome`, `fix/nome`).
 2. **Testes** — rodar a suíte relevante antes de qualquer merge. Se falhar, corrigir na branch.
-3. **Merge para main** — só após testes verdes. PR preferível; merge direto só se o usuário pedir explicitamente.
+3. **Merge para main** — só após testes verdes **e autorização explícita do usuário**. PR preferível; merge direto só se o usuário pedir explicitamente.
 4. **Build de produção** — só disparar após main atualizada e testes passando.
 
 ## Exceções únicas (pedir confirmação antes)
