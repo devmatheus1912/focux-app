@@ -470,8 +470,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 icon: 'search',
                 title: migracaoVazioTitle(),
                 subtitle: _ignorados > 0
-                    ? '${migracaoIgnoradasLabel(_ignorados)}. ${migracaoVazioDica()}'
-                    : migracaoVazioDica(),
+                    ? '${migracaoIgnoradasLabel(_ignorados)}. ${migracaoVazioDica(deFoto: _fonte == MigracaoFonte.foto)}'
+                    : migracaoVazioDica(deFoto: _fonte == MigracaoFonte.foto),
               ),
             ],
           ),
