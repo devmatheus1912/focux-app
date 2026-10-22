@@ -296,14 +296,22 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
 
   void _syncIntercomUser() {
     if (kIsWeb) return;
-    // shortcut: usa perfilProvider (personal); alunos ficam anônimos por ora
-    ref.read(perfilProvider.future).then((perfil) {
-      unawaited(IntercomService.loginUser(
-        userId: '${perfil.id}',
-        email: perfil.email,
-        name: perfil.nome,
-      ));
-    }).catchError((_) {}); // silencioso — suporte funciona mesmo sem identificação
+    // Busca userId (JWT sub) + HMAC-SHA256 do backend para Identity Verification.
+    // Qualquer falha é silenciosa — suporte continua funcional sem identificação.
+    ref.read(apiClientProvider).dio.get('/api/auth/intercom-hash').then((r) {
+      final data = r.data as Map<String, dynamic>;
+      final userId = data['userId'] as String?;
+      final hash   = data['hash']   as String?;
+      if (userId == null || hash == null) return;
+      ref.read(perfilProvider.future).then((perfil) {
+        unawaited(IntercomService.loginUser(
+          userId: userId,
+          userHash: hash,
+          email: perfil.email,
+          name: perfil.nome,
+        ));
+      }).catchError((_) {});
+    }).catchError((_) {});
   }
 
   @override
