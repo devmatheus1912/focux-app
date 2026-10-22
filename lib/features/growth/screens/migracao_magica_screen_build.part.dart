@@ -83,7 +83,7 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
           if (data.enviarViaWhatsapp.isNotEmpty) ...[
             _MigracaoGrupoHeader(
               icon: Icons.send_rounded,
-              color: const Color(0xFF25D366),
+              color: EagleTokens.whatsapp,
               titulo: 'Envie via WhatsApp',
               subtitulo: 'Copie todos de uma vez ou envie individualmente.',
               count: data.enviarViaWhatsapp.length,
