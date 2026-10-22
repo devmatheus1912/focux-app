@@ -18,12 +18,18 @@ class IntercomService {
   }
 
   /// Identifica o usuário logado no Intercom (personal ou aluno).
+  ///
+  /// [userId] deve ser o JWT subject (`personal:<id>` ou `aluno:<id>`).
+  /// [userHash] é o HMAC-SHA256 do [userId] gerado pelo backend
+  /// (`GET /api/auth/intercom-hash`) — obrigatório para Identity Verification.
   static Future<void> loginUser({
     required String userId,
+    required String userHash,
     String? email,
     String? name,
   }) async {
     if (kIsWeb) return;
+    await Intercom.setUserHash(userHash);
     await Intercom.registerIdentifiedUser(userId: userId);
     if (email != null || name != null) {
       await Intercom.updateUser(email: email, name: name);
