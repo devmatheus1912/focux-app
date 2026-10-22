@@ -47,6 +47,7 @@ Future<void> _dispatchTreinoDetailAction({
                 alunos: alunos,
                 isDark: isDark,
                 includePrazo: true,
+                includePosicao: true,
               ),
         );
         if (selected == null) return;
@@ -54,6 +55,7 @@ Future<void> _dispatchTreinoDetailAction({
           treinoId,
           selected.alunoId,
           dataFim: selected.dataFim,
+          posicaoNaRotina: selected.posicaoNaRotina,
         );
         AnalyticsService.instance.track(
           ProductEvents.treinosAssigned,

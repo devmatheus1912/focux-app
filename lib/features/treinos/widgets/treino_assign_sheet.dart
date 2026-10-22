@@ -14,12 +14,19 @@ import '../constants/treinos_layout.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import 'treino_home_sheet.dart';
 
-/// Resultado do sheet de escolher aluno (+ prazo soft opcional).
+/// Resultado do sheet de escolher aluno (+ prazo soft opcional + posição na rotina).
 class TreinoAtribuicaoResult {
-  const TreinoAtribuicaoResult({required this.alunoId, this.dataFim});
+  const TreinoAtribuicaoResult({
+    required this.alunoId,
+    this.dataFim,
+    this.posicaoNaRotina,
+  });
 
   final int alunoId;
   final DateTime? dataFim;
+
+  /// Posição na rotina (1, 2, 3…). Nulo = sem ordem definida.
+  final int? posicaoNaRotina;
 }
 
 /// Sheet único de atribuição — substitui as duas cópias privadas legadas.
@@ -29,6 +36,7 @@ class TreinoAssignSheet extends StatefulWidget {
     required this.alunos,
     required this.isDark,
     this.includePrazo = false,
+    this.includePosicao = false,
     this.title = 'Atribuir treino',
     this.subtitleWhenEmpty = 'Cadastre um aluno antes.',
     this.subtitleWhenReady = 'Escolha quem recebe este plano.',
@@ -38,6 +46,7 @@ class TreinoAssignSheet extends StatefulWidget {
   final List<Aluno> alunos;
   final bool isDark;
   final bool includePrazo;
+  final bool includePosicao;
   final String title;
   final String subtitleWhenEmpty;
   final String subtitleWhenReady;
@@ -51,11 +60,25 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
   int? selectedAlunoId;
   _PrazoPreset _prazo = _PrazoPreset.none;
   DateTime? _customDate;
+  final TextEditingController _posicaoController = TextEditingController();
+
+  @override
+  void dispose() {
+    _posicaoController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     selectedAlunoId = widget.alunos.isEmpty ? null : widget.alunos.first.id;
+  }
+
+  int? get _posicaoNaRotina {
+    if (!widget.includePosicao) return null;
+    final text = _posicaoController.text.trim();
+    if (text.isEmpty) return null;
+    return int.tryParse(text);
   }
 
   DateTime? get _resolvedPrazo {
@@ -208,6 +231,43 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
               style: FxSettingsLayout.subhead(color: mute),
             ),
           ],
+          if (widget.includePosicao && widget.alunos.isNotEmpty) ...[
+            const SizedBox(height: FxSettingsLayout.groupGap),
+            Text(
+              'Posição na rotina (opcional)',
+              style: FxSettingsLayout.sectionHeader(color: mute),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _posicaoController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: const TextStyle(fontSize: 15),
+              decoration: InputDecoration(
+                hintText: 'Ex: 1, 2, 3…',
+                hintStyle: TextStyle(color: mute, fontSize: 14),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.12),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: primary),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Define a ordem que este treino aparece na rotina do aluno.',
+              style: FxSettingsLayout.subhead(color: mute),
+            ),
+          ],
           const SizedBox(height: FxSettingsLayout.groupGap),
           FxLiquidPrimaryButton(
             label: widget.confirmLabel,
@@ -219,6 +279,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                       TreinoAtribuicaoResult(
                         alunoId: selectedAlunoId!,
                         dataFim: _resolvedPrazo,
+                        posicaoNaRotina: _posicaoNaRotina,
                       ),
                     ),
           ),

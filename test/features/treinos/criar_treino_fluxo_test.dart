@@ -54,6 +54,7 @@ class _FakeTreinoRepository extends TreinoRepository {
     int treinoId,
     int alunoId, {
     DateTime? dataFim,
+    int? posicaoNaRotina,
   }) async {
     tentativasAtribuir.add(treinoId);
     if (falhasAtribuir > 0) {
