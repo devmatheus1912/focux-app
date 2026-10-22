@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -17,7 +15,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/perfil/providers/perfil_provider.dart';
 import '../../../features/subscription/models/subscription_plan.dart';
-import '../../../features/subscription/utils/plano_ia_limits.dart';
 import '../../../features/subscription/store_subscription_policy.dart';
 import '../../../l10n/app_localizations.dart';
 import '../paywall/paywall_price.dart';
@@ -72,16 +69,13 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.of(context);
-    final primary = BrandPalette.softened(
-      Theme.of(context).colorScheme.primary,
-    );
+    final primary = Theme.of(context).colorScheme.primary;
     final useStore = subscriptionUsesNativeStore;
     final trial =
         useStore && (ref.watch(storeTrialEligibleProvider).value ?? false);
     final l10n = S.of(context);
-    // Promo surface is always cinematic dark — force readable ink.
-    const ink = EagleTokens.darkInk;
-    const mute = EagleTokens.darkInkMute;
+    final ink = chrome.ink;
+    final mute = chrome.mute;
 
     return fxScreenA11yScope(
       label: 'Promoção PRO',
@@ -91,21 +85,13 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
           title: 'PRO',
           fallbackLocation: '/planos',
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [EagleTokens.cinematicBgHi, EagleTokens.cinematicBg],
-            ),
-          ),
-          child: SafeArea(
+        body: SafeArea(
             child:
                 _starting
                     ? const SkeletonList(count: 4)
                     : _error != null
                     ? FxErrorState(
-                      chromeOnDark: true,
+                      chromeOnDark: chrome.isDark,
                       primary: primary,
                       title: 'Não foi possível continuar',
                       message: _error!,
@@ -114,99 +100,38 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                     : Padding(
                       padding: const EdgeInsets.all(TokensStrip.s7),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Spacer(),
-                          Icon(
-                            Icons.workspace_premium_outlined,
-                            color: primary,
-                            size: 56,
-                          ),
-                          const SizedBox(height: TokensStrip.s5),
                           Text(
                             trial
                                 ? l10n.proPromoTituloTrial(
                                   kTrialDays,
-                                  subscriptionChannelWith(ChannelPreposition.em),
+                                  subscriptionChannelWith(
+                                    ChannelPreposition.em,
+                                  ),
                                 )
                                 : l10n.proPromoTitulo,
-                            textAlign: TextAlign.center,
-                            style: TokensStrip.h1(
+                            style: FocuxHubTypography.pageTitle(
+                              context,
                               color: ink,
-                            ).copyWith(fontSize: 26, height: 1.2),
-                          ),
-                          const SizedBox(height: TokensStrip.s8),
-                          ...[
-                            'Até ${PlanoAlunosLimits.pro} alunos',
-                            '${PlanoIaLimits.pro} interações de IA/mês',
-                            'Cobrança PIX dos alunos no app',
-                            'CRM de leads',
-                            'Relatórios, hábitos e feedback em vídeo',
-                          ].map(
-                            (feature) => Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: TokensStrip.s3,
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: EagleTokens.good,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: TokensStrip.s3),
-                                  Expanded(
-                                    child: Text(
-                                      feature,
-                                      style: TokensStrip.body(color: ink),
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                          Text(
+                            trial
+                                ? l10n.proPromoTextoTrial(
+                                  subscriptionCancelWhere(),
+                                )
+                                : useStore
+                                ? l10n.proPromoTextoLoja(
+                                  subscriptionCancelWhere(),
+                                )
+                                : l10n.proPromoTextoWeb,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: FocuxHubTypography.bodyMuted(color: mute),
                           ),
                           const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.all(TokensStrip.s4),
-                            decoration: chrome.panel(
-                              accent: EagleTokens.goldStar,
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      useStore
-                                          ? Icons.storefront_outlined
-                                          : Icons.card_giftcard,
-                                      color: EagleTokens.goldStar,
-                                      size: 22,
-                                    ),
-                                    const SizedBox(width: TokensStrip.s2),
-                                    Text(
-                                      trial
-                                          ? l10n.proPromoSeloTrial(kTrialDays)
-                                          : l10n.proPromoSelo,
-                                      style: FocuxHubTypography.sectionTitle(
-                                        context,
-                                        color: EagleTokens.goldStar,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: TokensStrip.s1),
-                                Text(
-                                  trial
-                                      ? l10n.proPromoTextoTrial(subscriptionCancelWhere())
-                                      : useStore
-                                      ? l10n.proPromoTextoLoja(subscriptionCancelWhere())
-                                      : l10n.proPromoTextoWeb,
-                                  textAlign: TextAlign.center,
-                                  style: TokensStrip.bodyMuted(color: mute),
-                                ),
-                              ],
-                            ),
-                          ),
                           const SizedBox(height: TokensStrip.s5),
                           Semantics(
                             button: true,
@@ -234,9 +159,8 @@ class _ProPromoScreenState extends ConsumerState<ProPromoScreen> {
                         ],
                       ),
                     ),
-          ),
+            ),
         ),
-      ),
     );
   }
 }

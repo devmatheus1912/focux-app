@@ -10,14 +10,19 @@ String splashAlunoTarget({
   return activationSeen ? '/dashboard/aluno' : '/aluno/ativacao';
 }
 
-String splashPersonalTarget({
+String splashPersonalTarget() => '/dashboard/personal';
+
+/// A oferta do teste só aparece depois do primeiro aluno ou do primeiro treino.
+bool deveOferecerTestePro({
   required bool promoShown,
   required bool trialUsed,
   required String plano,
+  required int alunos,
+  required int treinos,
 }) {
-  final free = plano.trim().toUpperCase() == 'FREE';
-  if (!promoShown && !trialUsed && free) return '/promo-pro';
-  return '/dashboard/personal';
+  if (promoShown || trialUsed) return false;
+  if (plano.trim().toUpperCase() != 'FREE') return false;
+  return alunos > 0 || treinos > 0;
 }
 
 class SplashMotionBudget {

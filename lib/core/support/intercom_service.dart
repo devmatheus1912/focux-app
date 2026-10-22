@@ -25,15 +25,18 @@ class IntercomService {
   static Future<void> loginUser({
     required String userId,
     required String userHash,
+    required String papel,
     String? email,
     String? name,
   }) async {
     if (kIsWeb) return;
     await Intercom.setUserHash(userHash);
     await Intercom.registerIdentifiedUser(userId: userId);
-    if (email != null || name != null) {
-      await Intercom.updateUser(email: email, name: name);
-    }
+    await Intercom.updateUser(
+      email: email,
+      name: name,
+      customAttributes: {'papel': papel},
+    );
   }
 
   /// Chama no logout do app.

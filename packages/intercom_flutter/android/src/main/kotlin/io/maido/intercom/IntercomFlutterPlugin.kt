@@ -205,6 +205,8 @@ class IntercomFlutterPlugin : FlutterPlugin, MethodCallHandler, EventChannel.Str
       }
     }
 
+    userAttributes.withLanguageOverride("pt")
+
     val seconds: Long? = signedUpAt?.toString()?.toLongOrNull()
     if (seconds != null)
       userAttributes.withSignedUpAt(seconds)

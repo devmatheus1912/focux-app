@@ -39,7 +39,7 @@ String migracaoSalvarConfirmTitle(int count) =>
     count == 1 ? 'Salvar 1 aluno?' : 'Salvar $count alunos?';
 
 String migracaoSalvarConfirmMessage() =>
-    'Cria as fichas agora. Depois você envia o acesso um a um.';
+    'Quem tem e-mail recebe o convite sozinho. Quem só tem telefone fica para o WhatsApp.';
 
 String migracaoPlanilhaLabel() => 'Planilha';
 

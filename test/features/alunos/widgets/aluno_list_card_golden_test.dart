@@ -11,6 +11,7 @@ import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/features/alunos/constants/alunos_list_filters.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_list_card.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../../support/tolerant_golden_comparator.dart';
 
@@ -31,6 +32,7 @@ void main() {
     aderenciaPercent: 72,
     diasSemTreino: 0,
     emRisco: true,
+    contaAtiva: true,
   );
 
   Widget cardHarness({
@@ -51,6 +53,8 @@ void main() {
           ),
           useMaterial3: true,
         ),
+        localizationsDelegates: S.localizationsDelegates,
+        supportedLocales: S.supportedLocales,
         home: MediaQuery(
           data: MediaQueryData(
             size: size,
@@ -118,6 +122,7 @@ void main() {
           diasSemTreino: 12,
           emRisco: true,
           whatsapp: '11999999999',
+          contaAtiva: true,
         ),
       ),
     );
@@ -167,6 +172,7 @@ void main() {
           aderenciaPercent: 72,
           diasSemTreino: 0,
           aderenciaSparkline: const [1, 0, 1, 0, 1, 0, 0],
+          contaAtiva: true,
         ),
       ),
     );
@@ -197,6 +203,7 @@ void main() {
           aderenciaPercent: 72,
           diasSemTreino: 0,
           aderenciaSparkline: const [1, 0, 1, 0, 1, 0, 0],
+          contaAtiva: true,
         ),
       ),
     );
@@ -236,6 +243,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Beatriz Carvalho'), findsOneWidget);
+    expect(find.text('Ainda não entrou.'), findsOneWidget);
+    expect(find.text('Reenviar convite'), findsOneWidget);
     expect(find.text('0%'), findsNothing);
     expect(find.text('Risco alto'), findsNothing);
   });

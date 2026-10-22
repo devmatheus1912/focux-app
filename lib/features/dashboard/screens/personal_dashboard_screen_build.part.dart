@@ -31,6 +31,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
               data: (home) {
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
+                _maybeOfferTrial(data.totalAlunos);
                 final coachPending = home.pulse?.coachPendentes ?? 0;
 
                 if (_homeFetchedAt == null) {

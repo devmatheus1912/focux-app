@@ -304,9 +304,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
       final hash   = data['hash']   as String?;
       if (userId == null || hash == null) return;
       ref.read(perfilProvider.future).then((perfil) {
+        final papel =
+            ref.read(userRoleProvider) == UserRole.aluno ? 'aluno' : 'personal';
         unawaited(IntercomService.loginUser(
           userId: userId,
           userHash: hash,
+          papel: papel,
           email: perfil.email,
           name: perfil.nome,
         ));

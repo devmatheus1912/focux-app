@@ -23,6 +23,7 @@ class _PersonalDashboardScreenState
   bool _coachSeen = true;
   bool _coachLoaded = false;
   bool _deepLinkApplied = false;
+  bool _trialOfferChecked = false;
 
   late AnimationController _entryCtrl;
   late Animation<double> _kpiFade;
@@ -67,6 +68,40 @@ class _PersonalDashboardScreenState
     AnalyticsService.instance.track(ProductEvents.homeCoachDismissed);
     if (!mounted) return;
     setState(() => _coachSeen = true);
+  }
+
+  void _maybeOfferTrial(int totalAlunos) {
+    if (_trialOfferChecked) return;
+    final perfil = ref.read(perfilProvider).value;
+    if (perfil == null) return;
+    _trialOfferChecked = true;
+    unawaited(_abrirOfertaSeCouber(perfil, totalAlunos));
+  }
+
+  Future<void> _abrirOfertaSeCouber(PerfilPersonal perfil, int alunos) async {
+    final prefs = await SharedPreferences.getInstance();
+    final shown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
+    var treinos = 0;
+    final free = perfil.plano.trim().toUpperCase() == 'FREE';
+    if (!shown && !(perfil.trialUsed ?? false) && free && alunos <= 0) {
+      try {
+        final biblioteca = await ref
+            .read(treinoRepositoryProvider)
+            .getHome(size: 1);
+        treinos = biblioteca.totalElements;
+      } catch (_) {}
+    }
+    if (!mounted) return;
+    if (!deveOferecerTestePro(
+      promoShown: shown,
+      trialUsed: perfil.trialUsed ?? false,
+      plano: perfil.plano,
+      alunos: alunos,
+      treinos: treinos,
+    )) {
+      return;
+    }
+    context.push('/promo-pro');
   }
 
   void _applyHomeDeepLinkOnce(BuildContext context) {

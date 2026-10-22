@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../auth/utils/splash_navigation.dart';
+import '../../perfil/data/perfil_repository.dart';
+import '../../perfil/providers/perfil_provider.dart';
+import '../../treinos/providers/treinos_provider.dart';
 import '../../coach/utils/coach_display.dart';
 import '../providers/dashboard_provider.dart';
 import '../../financeiro/data/financeiro_repository.dart';

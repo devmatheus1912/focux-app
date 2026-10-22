@@ -163,6 +163,8 @@ id unread;
         attributes.customAttributes = customAttributes;
     }
     
+    attributes.languageOverride = @"pt";
+
     NSNumber *signedUpAt = call.arguments[@"signedUpAt"];
     if(signedUpAt != (id)[NSNull null]) {
         attributes.signedUpAt = [NSDate dateWithTimeIntervalSince1970: signedUpAt.doubleValue];

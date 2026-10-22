@@ -217,21 +217,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         );
       }).catchError((_) {}),
     );
-    try {
-      final perfil = await ref
-          .read(perfilProvider.future)
-          .timeout(const Duration(milliseconds: 450));
-      if (!mounted) return '/dashboard/personal';
-      final prefs = await SharedPreferences.getInstance();
-      final promoShown = prefs.getBool('promo_shown_${perfil.id}') ?? false;
-      return splashPersonalTarget(
-        promoShown: promoShown,
-        trialUsed: perfil.trialUsed ?? false,
-        plano: perfil.plano,
-      );
-    } catch (_) {
-      return '/dashboard/personal';
-    }
+    return splashPersonalTarget();
   }
 
   Future<String> _unauthenticatedTarget() async {

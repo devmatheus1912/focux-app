@@ -10,11 +10,13 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sparkline.dart';
+import '../../../l10n/app_localizations.dart';
 import '../constants/alunos_layout.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_contact_utils.dart';
 import '../data/aluno_followup_store.dart';
 import '../data/aluno_repository.dart';
+import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/alunos_list_sparkline_logic.dart';
 import '../providers/aluno_detail_providers.dart';
@@ -135,6 +137,8 @@ class AlunoListCard extends ConsumerWidget {
     final needsOutreach =
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
     final showOpsLine = opsText.isNotEmpty;
+    final aguardandoEntrada = !aluno.contaAtiva && alunoStatusAtivo(aluno);
+    final s = S.of(context);
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
     final hasWhatsapp = whatsappNumber.isNotEmpty;
     final outreach = AlunoListOutreachActions(
@@ -160,6 +164,7 @@ class AlunoListCard extends ConsumerWidget {
       selected: isSelected,
       label:
           '$displayName, $statusText'
+          '${aguardandoEntrada ? ', ${s.alunoAindaNaoEntrou}' : ''}'
           '${statusExplicacao == null ? '' : ', $statusExplicacao'}'
           ', $aderenciaLabel'
           '${adherenceLabel.isEmpty ? '' : ', $adherenceLabel'}',
@@ -270,30 +275,6 @@ class AlunoListCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (!aluno.contaAtiva && alunoStatusAtivo(aluno)) ...[
-                              const SizedBox(height: 3),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.schedule_rounded,
-                                    size: 11,
-                                    color: EagleTokens.warn,
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Flexible(
-                                    child: Text(
-                                    'Aguardando ativação',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: FocuxHubTypography.bodyMuted(
-                                      color: EagleTokens.warn,
-                                      height: 1.2,
-                                    ).copyWith(fontSize: 11),
-                                  ),
-                                  ),
-                                ],
-                              ),
-                            ],
                           ] else ...[
                             const SizedBox(height: 2),
                             Text(
@@ -305,6 +286,35 @@ class AlunoListCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                          ],
+                          if (aguardandoEntrada) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              s.alunoAindaNaoEntrou,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: EagleTokens.warn,
+                                height: 1.2,
+                              ),
+                            ),
+                            if (!modoSelecao)
+                              TextButton(
+                                onPressed: () => confirmarReenviarLinkAlunoDetail(
+                                  context,
+                                  ref,
+                                  aluno,
+                                  aindaNaoEntrou: true,
+                                ),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: primary,
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  alignment: Alignment.centerLeft,
+                                ),
+                                child: Text(s.alunoReenviarConviteAcao),
+                              ),
                           ],
                           if (showOpsLine) ...[
                             SizedBox(height: compact ? 4 : 6),

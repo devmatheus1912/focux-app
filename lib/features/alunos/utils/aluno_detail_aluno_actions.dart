@@ -95,13 +95,17 @@ Future<void> confirmarAlteracaoStatusAlunoDetail(
 Future<void> confirmarReenviarLinkAlunoDetail(
   BuildContext context,
   WidgetRef ref,
-  Aluno aluno,
-) async {
+  Aluno aluno, {
+  bool aindaNaoEntrou = false,
+}) async {
   final s = S.of(context);
   final confirm = await showFxConfirmSheet(
     context,
-    title: s.alunoReenviarLinkTitulo,
-    message: s.alunoReenviarLinkTexto(aluno.nome),
+    title: aindaNaoEntrou ? s.alunoReenviarConviteTitulo : s.alunoReenviarLinkTitulo,
+    message:
+        aindaNaoEntrou
+            ? s.alunoReenviarConviteTexto
+            : s.alunoReenviarLinkTexto(aluno.nome),
     icon: Icons.link_rounded,
     confirmIcon: Icons.link_rounded,
     confirmLabel: s.alunoReenviarLinkConfirma,

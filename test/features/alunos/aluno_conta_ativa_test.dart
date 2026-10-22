@@ -46,7 +46,8 @@ void main() {
     final source = readScreenSourceBundle(
         'lib/features/alunos/widgets/aluno_list_card.dart');
     expect(source, contains('contaAtiva'));
-    expect(source, contains('Aguardando ativação'));
+    expect(source, contains('alunoAindaNaoEntrou'));
+    expect(source, contains('alunoReenviarConviteAcao'));
     // badge só aparece para ATIVO sem conta ativa
     expect(source, contains('alunoStatusAtivo'));
   });
