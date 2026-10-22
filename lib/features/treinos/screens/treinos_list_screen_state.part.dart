@@ -117,7 +117,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               alunos: alunos,
               isDark: Theme.of(context).brightness == Brightness.dark,
               includePrazo: true,
-              includePosicao: true,
             ),
       );
       if (selected == null) return;
@@ -128,12 +127,16 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             treino.id,
             selected.alunoId,
             dataFim: selected.dataFim,
-            posicaoNaRotina: selected.posicaoNaRotina,
           );
       invalidateTreinosCaches(ref);
       invalidateTreinosDoAluno(ref, selected.alunoId);
       if (!mounted) return;
-      FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
+      ref.invalidate(alunoRotinaProvider(selected.alunoId));
+      avisarEntrouNoFim(
+        context,
+        alunoId: selected.alunoId,
+        nome: selected.alunoNome,
+      );
       AnalyticsService.instance.track(
         ProductEvents.treinosAssigned,
         props: _analyticsScope,
@@ -685,6 +688,21 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                     primary: primary,
                                     onQueryChanged: _onQueryChanged,
                                     onClearQuery: _clearQuery,
+                                  ),
+                                ),
+                              ),
+                            if (fromAluno && !_selectionMode)
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    TreinosLayout.screenPadding,
+                                    0,
+                                    TreinosLayout.screenPadding,
+                                    12,
+                                  ),
+                                  child: AlunoRotinaLinha(
+                                    alunoId: widget.alunoId!,
+                                    alunoNome: widget.alunoNome ?? '',
                                   ),
                                 ),
                               ),

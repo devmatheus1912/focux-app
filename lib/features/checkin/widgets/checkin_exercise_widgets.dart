@@ -34,6 +34,7 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onMinusCarga;
   final VoidCallback? onPlusReps;
   final VoidCallback? onMinusReps;
+  final String? concluidoFrase;
 
   const CheckinSerieCard({
     super.key,
@@ -50,6 +51,7 @@ class CheckinSerieCard extends StatelessWidget {
     this.onMinusCarga,
     this.onPlusReps,
     this.onMinusReps,
+    this.concluidoFrase,
   });
 
   @override
@@ -111,7 +113,7 @@ class CheckinSerieCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.sectionTitle(
+                  style: FocuxHubTypography.pageTitle(
                     context,
                     color: chrome.ink,
                   ),
@@ -121,19 +123,24 @@ class CheckinSerieCard extends StatelessWidget {
                   Text(
                     trocarHint,
                     textAlign: TextAlign.center,
-                    style: FocuxHubTypography.bodyMuted(
-                    color: brand,
-                    fontWeight: FontWeight.w600,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
+                  TextButton(
+                    onPressed: onTrocar,
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(s.checkinTrocarExercicio),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
                 Text(
                   checkinSerieKpiLabel(ee.seriesFeitas, ee.series),
                   textAlign: TextAlign.center,
-                  style: FocuxHubTypography.kpi(
+                  style: FocuxHubTypography.metric(
                     color: brand,
-                    fontSize: TokensStrip.fontH1 + 4,
+                    fontSize: FocuxHubTypography.metricLg,
                     fontWeight: FontWeight.w800,
                   ).copyWith(
                     height: 1.05,
@@ -307,7 +314,7 @@ class CheckinSerieCard extends StatelessWidget {
                 vertical: TokensStrip.s4,
               ),
               child: Text(
-                s.checkinExercicioConcluido,
+                concluidoFrase ?? s.checkinExercicioConcluido,
                 textAlign: TextAlign.center,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),

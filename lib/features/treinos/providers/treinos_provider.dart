@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/treino_repository.dart';
+import '../models/rotina_fila.dart';
 
 class TreinosHomeQuery {
   const TreinosHomeQuery({this.q = ''});
@@ -123,6 +124,10 @@ class TreinosHomeTailNotifier extends Notifier<TreinosHomeTailState> {
 
 final treinoRepositoryProvider = Provider<TreinoRepository>(
   (ref) => TreinoRepository(ref.read(apiClientProvider)),
+);
+
+final alunoRotinaProvider = FutureProvider.autoDispose.family<RotinaFila, int>(
+  (ref, alunoId) => ref.watch(treinoRepositoryProvider).buscarRotina(alunoId),
 );
 
 final treinosHomeQueryProvider = fxValueProvider<TreinosHomeQuery>(

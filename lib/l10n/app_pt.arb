@@ -387,6 +387,88 @@
   "treinosPlanoTitulo": "Seu plano",
   "treinosUltimosTitulo": "Últimos treinos",
   "treinosVerHistorico": "Ver histórico",
+  "treinosAgora": "Agora",
+  "treinosProntoHoje": "Pronto por hoje",
+  "treinosComecar": "Começar",
+  "treinosContinuar": "Continuar",
+  "treinosFazerMaisUm": "Fazer mais um",
+  "treinosVerRotina": "Ver rotina",
+  "treinosOrdemDepois": "{ordem} de {total} · depois vem {treino}",
+  "@treinosOrdemDepois": {
+    "placeholders": {
+      "ordem": {"type": "int"},
+      "total": {"type": "int"},
+      "treino": {"type": "String"}
+    }
+  },
+  "treinosQuandoQuiser": "Quando quiser: {treino}",
+  "@treinosQuandoQuiser": {
+    "placeholders": {
+      "treino": {"type": "String"}
+    }
+  },
+  "treinosAmanhaDescanso": "Amanhã é descanso. Depois vem {treino}.",
+  "@treinosAmanhaDescanso": {
+    "placeholders": {
+      "treino": {"type": "String"}
+    }
+  },
+  "treinosAmanhaDescansoSem": "Amanhã é descanso.",
+  "treinosHojeDescanso": "Hoje é descanso",
+  "treinosQuandoVoltar": "Quando voltar: {treino}",
+  "@treinosQuandoVoltar": {
+    "placeholders": {
+      "treino": {"type": "String"}
+    }
+  },
+  "treinosContinuaLa": "O treino continua lá.",
+  "treinosTreinarMesmoAssim": "Treinar mesmo assim",
+  "treinosEntrouNoFim": "Entrou no fim da rotina de {nome}.",
+  "@treinosEntrouNoFim": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "treinosEntrouNoFimSemNome": "Entrou no fim da rotina.",
+  "rotinaLinha": "Rotina",
+  "rotinaDe": "Rotina de {nome}",
+  "@rotinaDe": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "rotinaAbreVe": "{nome} abre o app e vê: {eyebrow}, {titulo}.",
+  "@rotinaAbreVe": {
+    "placeholders": {
+      "nome": {"type": "String"},
+      "eyebrow": {"type": "String"},
+      "titulo": {"type": "String"}
+    }
+  },
+  "rotinaPorDescanso": "Pôr um descanso",
+  "rotinaDescanso": "Descanso",
+  "rotinaAvisar": "Avisar para não vir",
+  "rotinaAvisoLinha": "No dia marcado, ele vê descanso ao abrir e recebe um aviso. O treino continua lá.",
+  "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
+  "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
+  "rotinaDiaSeg": "Seg",
+  "rotinaDiaTer": "Ter",
+  "rotinaDiaQua": "Qua",
+  "rotinaDiaQui": "Qui",
+  "rotinaDiaSex": "Sex",
+  "rotinaDiaSab": "Sáb",
+  "rotinaDiaDom": "Dom",
+  "historicoIntro": "Aqui fica o que você já fez.",
+  "checkinTudoFeitoFrase": "Tudo feito. Falta finalizar para contar o treino.",
+  "checkinExercicioAcabou": "Este exercício acabou. O próximo é {nome}.",
+  "@checkinExercicioAcabou": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "checkinProximoExercicio": "Próximo exercício",
+  "checkinNaoSalvou": "Não salvou. Tente de novo.",
+  "checkinTrocarExercicio": "Trocar exercício",
   "treinosDiaHoje": "Hoje",
   "treinosDiaOntem": "Ontem",
   "treinosDiaData": "{data}",

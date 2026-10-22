@@ -52,13 +52,12 @@ void main() {
     await _pump(tester, _home());
 
     expect(find.text('Treinos'), findsWidgets);
-    expect(find.text('Próximo treino'), findsOneWidget);
+    expect(find.text('Agora'), findsOneWidget);
     expect(find.text('Treino A'), findsOneWidget);
-    expect(find.text('6 exercícios'), findsWidgets);
-    expect(find.text('Iniciar treino'), findsOneWidget);
-    expect(find.text('Seu plano'), findsOneWidget);
-    expect(find.text('Treino B'), findsOneWidget);
-    expect(find.text('Treino C'), findsOneWidget);
+    expect(find.text('1 de 3 · depois vem Treino B'), findsOneWidget);
+    expect(find.text('Começar'), findsOneWidget);
+    expect(find.text('Ver rotina'), findsOneWidget);
+    expect(find.text('Seu plano'), findsNothing);
     expect(find.text('Últimos treinos'), findsNothing);
     expect(find.textContaining('min'), findsNothing);
     expect(find.textContaining('vídeo'), findsNothing);
@@ -66,8 +65,14 @@ void main() {
     expect(find.textContaining('kg'), findsNothing);
     expect(find.text('Fiz o treino'), findsNothing);
     expect(find.text('Já fiz este treino'), findsNothing);
+    expect(find.text('Ver rotina'), findsOneWidget);
+    await tester.tap(find.text('Ver rotina'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seu plano'), findsOneWidget);
+    expect(find.text('Treino B'), findsOneWidget);
+    expect(find.text('Treino C'), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Próximo treino')).dy,
+      tester.getTopLeft(find.text('Agora')).dy,
       lessThan(tester.getTopLeft(find.text('Seu plano')).dy),
     );
     expect(tester.takeException(), isNull);
@@ -95,9 +100,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Em andamento'), findsOneWidget);
+    expect(find.text('Continuar'), findsWidgets);
     expect(find.text('4 de 6 exercícios'), findsOneWidget);
-    expect(find.text('Continuar treino'), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
@@ -131,11 +135,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Concluído hoje'), findsOneWidget);
-    expect(find.text('52 min'), findsOneWidget);
-    expect(find.text('Ver treino'), findsOneWidget);
-    expect(find.text('Depois'), findsOneWidget);
-    expect(find.text('Iniciar'), findsOneWidget);
+    expect(find.text('Pronto por hoje'), findsOneWidget);
+    expect(find.text('Quando quiser: Treino B'), findsOneWidget);
+    expect(find.text('Fazer mais um'), findsOneWidget);
+    expect(find.text('Depois'), findsNothing);
+    expect(find.text('Iniciar'), findsNothing);
     expect(find.text('Últimos treinos'), findsOneWidget);
     expect(find.textContaining('Sem séries registradas'), findsOneWidget);
     expect(find.text('Ver histórico'), findsOneWidget);
@@ -162,7 +166,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.bySemanticsLabel('Carregando seus treinos'), findsOneWidget);
-    expect(find.text('Próximo treino'), findsNothing);
+    expect(find.text('Agora'), findsNothing);
     handle.dispose();
   });
 
@@ -172,7 +176,7 @@ void main() {
     await _pump(tester, null);
 
     expect(find.byType(FxErrorState), findsOneWidget);
-    expect(find.text('Próximo treino'), findsNothing);
+    expect(find.text('Agora'), findsNothing);
   });
 
   testWidgets('toque na linha abre a prévia; nada inicia sem o botão', (
@@ -180,16 +184,18 @@ void main() {
   ) async {
     await _pump(tester, _home());
 
+    await tester.tap(find.text('Ver rotina'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Treino B'));
     await tester.pumpAndSettle();
     expect(find.text('previa 2'), findsOneWidget);
     expect(find.text('executar'), findsNothing);
   });
 
-  testWidgets('Iniciar treino abre a execução do próximo', (tester) async {
+  testWidgets('Começar abre a execução do próximo', (tester) async {
     await _pump(tester, _home());
 
-    await tester.tap(find.text('Iniciar treino'));
+    await tester.tap(find.text('Começar'));
     await tester.pumpAndSettle();
     expect(find.text('executar 1'), findsOneWidget);
   });
@@ -207,6 +213,9 @@ void main() {
       ),
     );
 
+    expect(find.text('Em preparação'), findsNothing);
+    await tester.tap(find.text('Ver rotina'));
+    await tester.pumpAndSettle();
     expect(find.text('Em preparação'), findsOneWidget);
     await tester.tap(find.text('Treino B'));
     await tester.pump();
@@ -235,11 +244,13 @@ void main() {
     await _pump(tester, _home());
     await tester.pump(const Duration(seconds: 1));
 
+    await tester.tap(find.text('Ver rotina'));
+    await tester.pumpAndSettle();
     final linha = find.bySemanticsLabel('Treino B, 6 exercícios');
     expect(linha, findsOneWidget);
     expect(tester.getSize(linha).height, greaterThanOrEqualTo(48));
     expect(
-      find.bySemanticsLabel('Próximo treino: Treino A, 6 exercícios'),
+      find.bySemanticsLabel('Agora: Treino A, 1 de 3 · depois vem Treino B'),
       findsOneWidget,
     );
     handle.dispose();

@@ -4,6 +4,7 @@ import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../models/rotina_fila.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import '../utils/treinos_list_labels.dart';
 
@@ -450,5 +451,31 @@ class TreinoRepository {
 
   Future<void> desvincularAluno(int alunoId, int treinoId) async {
     await _dio.delete('/api/alunos/$alunoId/treinos/$treinoId');
+  }
+
+  Future<RotinaFila> buscarRotina(int alunoId) async {
+    final response = await _dio.get('/api/alunos/$alunoId/rotina');
+    return RotinaFila.fromJson(response.data);
+  }
+
+  Future<RotinaFila> reordenarRotina(int alunoId, List<int> ids) async {
+    final response = await _dio.put(
+      '/api/alunos/$alunoId/rotina/ordem',
+      data: {'ids': ids},
+    );
+    return RotinaFila.fromJson(response.data);
+  }
+
+  Future<RotinaFila> porDescanso(int alunoId) async {
+    final response = await _dio.post('/api/alunos/$alunoId/rotina/descanso');
+    return RotinaFila.fromJson(response.data);
+  }
+
+  Future<RotinaFila> definirAvisos(int alunoId, List<int> dias) async {
+    final response = await _dio.put(
+      '/api/alunos/$alunoId/rotina/avisos',
+      data: {'dias': dias},
+    );
+    return RotinaFila.fromJson(response.data);
   }
 }

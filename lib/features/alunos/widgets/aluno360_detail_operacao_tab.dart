@@ -13,6 +13,7 @@ import 'aluno360_operacao_tab.dart';
 import 'aluno360_operational_status_section.dart';
 import 'aluno360_recovery_insight_card.dart';
 import 'aluno360_student_quick_actions.dart';
+import '../../treinos/screens/aluno_rotina_screen.dart';
 
 class Aluno360DetailOperacaoTab extends ConsumerWidget {
   const Aluno360DetailOperacaoTab({
@@ -101,6 +102,10 @@ class Aluno360DetailOperacaoTab extends ConsumerWidget {
                 primary: primary,
               )
               : null,
+      rotinaLinha: AlunoRotinaLinha(
+        alunoId: alunoId,
+        alunoNome: aluno.nome,
+      ),
       quickActions: Aluno360StudentQuickActions(
         aluno: aluno,
         onPassword: onPassword,

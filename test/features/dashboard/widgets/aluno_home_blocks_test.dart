@@ -358,7 +358,7 @@ void main() {
           'Corpo pedindo descanso: se treinar, vá leve ou faça mobilidade.',
         ),
       );
-      expect(find.text('Treinar agora'), findsOneWidget);
+      expect(find.text('Começar'), findsOneWidget);
     });
 
     testWidgets('descrição longa e insight inteiros com fonte 2x', (

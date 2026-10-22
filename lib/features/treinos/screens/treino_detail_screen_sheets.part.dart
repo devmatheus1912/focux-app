@@ -47,7 +47,6 @@ Future<void> _dispatchTreinoDetailAction({
                 alunos: alunos,
                 isDark: isDark,
                 includePrazo: true,
-                includePosicao: true,
               ),
         );
         if (selected == null) return;
@@ -55,7 +54,6 @@ Future<void> _dispatchTreinoDetailAction({
           treinoId,
           selected.alunoId,
           dataFim: selected.dataFim,
-          posicaoNaRotina: selected.posicaoNaRotina,
         );
         AnalyticsService.instance.track(
           ProductEvents.treinosAssigned,
@@ -66,7 +64,12 @@ Future<void> _dispatchTreinoDetailAction({
         invalidateTreinosDoAluno(ref, selected.alunoId);
         onAssigned?.call();
         if (context.mounted) {
-          FeedbackHelper.showSuccess(context, 'Treino atribuído ao aluno.');
+          ref.invalidate(alunoRotinaProvider(selected.alunoId));
+          avisarEntrouNoFim(
+            context,
+            alunoId: selected.alunoId,
+            nome: selected.alunoNome,
+          );
         }
       } catch (e) {
         if (context.mounted) {

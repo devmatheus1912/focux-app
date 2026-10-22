@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/a11y_announce.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -81,6 +83,23 @@ class _HistoricoCheckinScreenState
         ),
         body: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s4,
+                TokensStrip.s4,
+                0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  s.historicoIntro,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: ShellChrome.of(context).mute,
+                  ),
+                ),
+              ),
+            ),
             if (fichas.isNotEmpty)
               HistoricoFiltroFichas(
                 fichas: fichas,

@@ -4,7 +4,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
@@ -20,23 +19,36 @@ class TreinosDestaqueCard extends StatelessWidget {
     required this.hoje,
     required this.onAction,
     this.onOpen,
+    this.proximoNome,
+    this.ordem,
+    this.ordemTotal,
   });
 
   final TreinosDestaque destaque;
   final DateTime hoje;
   final VoidCallback onAction;
-
-  /// Null em preparação: não há prévia a abrir.
   final VoidCallback? onOpen;
+  final String? proximoNome;
+  final int? ordem;
+  final int? ordemTotal;
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final texto = treinosDestaqueTexto(s, destaque, hoje: hoje);
+    final texto = treinosDestaqueTexto(
+      s,
+      destaque,
+      hoje: hoje,
+      proximoNome: proximoNome,
+      ordem: ordem,
+      ordemTotal: ordemTotal,
+      proximoEhDescanso: destaque.proximoEhDescanso,
+    );
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final concluido = destaque.tipo == TreinosDestaqueTipo.concluidoHoje;
+    final secundaria =
+        concluido || destaque.tipo == TreinosDestaqueTipo.descansoHoje;
 
     final corpo = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,15 +120,24 @@ class TreinosDestaqueCard extends StatelessWidget {
           ),
           if (texto.cta case final cta?) ...[
             const SizedBox(height: TokensStrip.s3),
-            if (concluido)
+            if (secundaria)
               Align(
                 alignment: Alignment.centerLeft,
-                child: FxActionChip(
-                  label: cta,
-                  accent: primary,
-                  isDark: isDark,
+                child: TextButton(
                   onPressed: onAction,
-                  maxLines: 2,
+                  style: TextButton.styleFrom(
+                    foregroundColor: chrome.ink,
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(48, 48),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    cta,
+                    style: FocuxHubTypography.bodyMuted(
+                      color: chrome.ink,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               )
             else

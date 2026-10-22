@@ -46,7 +46,8 @@ void main() {
       final t = alunoTodayTexto(_pt, _treino(), hoje: _hoje);
       expect(t.titulo, 'Treino A');
       expect(t.descricao, '6 exercícios no treino de hoje');
-      expect(t.cta, 'Treinar agora');
+      expect(t.cta, 'Começar');
+      expect(t.eyebrow, 'Agora');
     });
 
     test('retomada muda título e CTA', () {
@@ -68,10 +69,11 @@ void main() {
         ),
       );
       final comProximo = feito('Treino B');
-      expect(comProximo.eyebrow, 'Treino de hoje feito');
+      expect(comProximo.eyebrow, 'Pronto por hoje');
       expect(comProximo.titulo, 'Treino A');
-      expect(comProximo.descricao, 'Próximo: Treino B');
-      expect(comProximo.cta, 'Ver resumo');
+      expect(comProximo.descricao, 'Quando quiser: Treino B');
+      expect(comProximo.cta, 'Fazer mais um');
+      expect(comProximo.ctaPrimario, isFalse);
       expect(feito(null).descricao, startsWith('Descanse'));
     });
 
@@ -99,7 +101,7 @@ void main() {
         'Corpo pedindo descanso: se treinar, vá leve ou faça mobilidade.',
       );
       expect(t.prazo, 'Vence hoje');
-      expect(t.cta, 'Treinar agora');
+      expect(t.cta, 'Começar');
     });
 
     test('horário no foco: hoje ou amanhã', () {

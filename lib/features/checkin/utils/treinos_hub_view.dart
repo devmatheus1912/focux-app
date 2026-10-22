@@ -1,7 +1,15 @@
+import '../../treinos/models/rotina_fila.dart';
 import '../data/checkin_repository.dart';
+import 'rotina_decisao.dart';
 import 'treino_ficha_status.dart';
 
-enum TreinosDestaqueTipo { emAndamento, concluidoHoje, proximo, emPreparacao }
+enum TreinosDestaqueTipo {
+  emAndamento,
+  concluidoHoje,
+  proximo,
+  descansoHoje,
+  emPreparacao,
+}
 
 /// Card principal da aba Treinos. [treino] é a ficha; em [concluidoHoje] é a
 /// execução do histórico (a ficha pode ter saído do plano).
@@ -11,6 +19,10 @@ class TreinosDestaque {
     required this.treino,
     this.exerciciosFeitos,
     this.duracao,
+    this.ordem = 0,
+    this.ordemTotal = 0,
+    this.depoisNome,
+    this.proximoEhDescanso = false,
   });
 
   final TreinosDestaqueTipo tipo;
@@ -21,6 +33,11 @@ class TreinosDestaque {
 
   /// Concluído hoje: duração real ([treinoDuracaoReal]).
   final Duration? duracao;
+
+  final int ordem;
+  final int ordemTotal;
+  final String? depoisNome;
+  final bool proximoEhDescanso;
 }
 
 class TreinoRecente {
@@ -69,10 +86,23 @@ TreinosHubView buildTreinosHubView({
   required List<ExecucaoTreino> treinos,
   required List<ExecucaoTreino> historico,
   required DateTime now,
+  RotinaFila? rotina,
 }) {
-  final destaque = _destaque(treinos, historico, now);
-  final depois =
-      destaque?.tipo == TreinosDestaqueTipo.concluidoHoje
+  final decisao = rotina == null || rotina.itens.isEmpty
+      ? null
+      : decisaoDaRotina(
+          itens: rotina.itens,
+          diasAviso: rotina.diasAviso,
+          treinos: treinos,
+          historico: historico,
+          agora: now,
+        );
+  final destaque = decisao == null
+      ? _destaque(treinos, historico, now)
+      : _destaqueDaDecisao(decisao, historico);
+  final depois = decisao != null
+      ? (decisao.momento == RotinaMomento.pronto ? decisao.depois : null)
+      : destaque?.tipo == TreinosDestaqueTipo.concluidoHoje
           ? proximoTreinoParaHoje(treinos: treinos, historico: historico)
           : null;
 
@@ -99,6 +129,47 @@ TreinosHubView buildTreinosHubView({
     ),
     validaAte: DateTime(now.year, now.month, now.day + 1),
   );
+}
+
+TreinosDestaque _destaqueDaDecisao(
+  RotinaDecisao decisao,
+  List<ExecucaoTreino> historico,
+) {
+  final foco = decisao.foco;
+  return switch (decisao.momento) {
+    RotinaMomento.continuar => TreinosDestaque(
+      tipo: TreinosDestaqueTipo.emAndamento,
+      treino: foco,
+      exerciciosFeitos:
+          decisao.exerciciosFeitos ??
+          _sessaoAberta(historico, foco.treinoId)?.exerciciosConcluidos,
+      ordem: decisao.ordem,
+      ordemTotal: decisao.ordemTotal,
+      depoisNome: decisao.depoisNome,
+    ),
+    RotinaMomento.pronto => TreinosDestaque(
+      tipo: TreinosDestaqueTipo.concluidoHoje,
+      treino: foco,
+      duracao: treinoDuracaoReal(foco.iniciadoEm, foco.concluidoEm),
+      proximoEhDescanso: decisao.proximoEhDescanso,
+      depoisNome: decisao.depoisNome,
+    ),
+    RotinaMomento.agora => TreinosDestaque(
+      tipo: TreinosDestaqueTipo.proximo,
+      treino: foco,
+      ordem: decisao.ordem,
+      ordemTotal: decisao.ordemTotal,
+      depoisNome: decisao.depoisNome,
+    ),
+    RotinaMomento.descansoDia => TreinosDestaque(
+      tipo: TreinosDestaqueTipo.descansoHoje,
+      treino: foco,
+    ),
+    RotinaMomento.preparacao => TreinosDestaque(
+      tipo: TreinosDestaqueTipo.emPreparacao,
+      treino: foco,
+    ),
+  };
 }
 
 TreinosDestaque? _destaque(

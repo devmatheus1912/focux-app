@@ -178,6 +178,18 @@ void main() {
       );
     });
 
+    test('exercício em foco já feito oferece o próximo', () {
+      expect(
+        checkinRodape(
+          descansando: false,
+          tudoFeito: false,
+          atual: _ee(feitas: 3, concluido: true),
+          temProximo: true,
+        ),
+        CheckinRodape.proximo,
+      );
+    });
+
     test('exercício em foco já feito não oferece Registrar', () {
       expect(
         checkinRodape(

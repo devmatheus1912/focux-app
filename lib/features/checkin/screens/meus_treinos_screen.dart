@@ -38,6 +38,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   ({AlunoDashboardHomeBundle home, TreinosHubView view})? _memo;
   Timer? _virada;
   var _abrindo = false;
+  var _verRotina = false;
 
   @override
   void dispose() {
@@ -57,6 +58,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       treinos: home.treinos,
       historico: home.historico,
       now: now,
+      rotina: home.rotina,
     );
     _memo = (home: home, view: view);
     _virada?.cancel();
@@ -170,7 +172,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
         ),
       ];
     } else {
-      blocos = _blocos(s, _viewFor(home, now), now);
+      blocos = _blocos(s, _viewFor(home, now), now, home.treinos);
     }
 
     return RefreshIndicator(
@@ -193,15 +195,25 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     );
   }
 
-  /// Só entra bloco com conteúdo: nenhum espaçamento sobra quando um some.
-  List<Widget> _blocos(S s, TreinosHubView view, DateTime now) {
+  List<Widget> _blocos(
+    S s,
+    TreinosHubView view,
+    DateTime now,
+    List<ExecucaoTreino> treinos,
+  ) {
     final destaque = view.destaque;
-    final depois = view.depois;
+    final ordem = destaque != null && destaque.ordemTotal > 1
+        ? (destaque.ordem, destaque.ordemTotal)
+        : _ordem(destaque, treinos);
+    final proximoNome = destaque?.depoisNome ?? _proximoNome(view, treinos);
     return [
       if (destaque != null)
         TreinosDestaqueCard(
           destaque: destaque,
           hoje: now,
+          proximoNome: proximoNome,
+          ordem: ordem?.$1,
+          ordemTotal: ordem?.$2,
           onOpen: switch (destaque.tipo) {
             TreinosDestaqueTipo.concluidoHoje =>
               () => _abrirExecucao(destaque.treino),
@@ -209,23 +221,28 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
             _ => () => _abrirPrevia(destaque.treino),
           },
           onAction: switch (destaque.tipo) {
+            TreinosDestaqueTipo.concluidoHoje
+                when view.depois != null =>
+              () => _executar(view.depois!),
             TreinosDestaqueTipo.concluidoHoje =>
               () => _abrirExecucao(destaque.treino),
             _ => () => _executar(destaque.treino),
           },
         ),
-      if (depois != null)
-        TreinosHubSecao(
-          titulo: s.treinosDepoisTitulo,
-          linhas: [
-            TreinoDepoisRow(
-              treino: depois,
-              onTap: () => _abrirPrevia(depois),
-              onIniciar: () => _executar(depois),
-            ),
-          ],
-        ),
       if (view.plano.isNotEmpty)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => setState(() => _verRotina = !_verRotina),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 48),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(s.treinosVerRotina),
+          ),
+        ),
+      if (_verRotina && view.plano.isNotEmpty)
         TreinosHubSecao(
           titulo: s.treinosPlanoTitulo,
           linhas: [
@@ -248,5 +265,28 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
           ],
         ),
     ];
+  }
+
+  (int, int)? _ordem(TreinosDestaque? destaque, List<ExecucaoTreino> treinos) {
+    if (destaque == null || destaque.tipo != TreinosDestaqueTipo.proximo) {
+      return null;
+    }
+    final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
+    if (idx < 0 || treinos.length < 2) return null;
+    return (idx + 1, treinos.length);
+  }
+
+  String? _proximoNome(TreinosHubView view, List<ExecucaoTreino> treinos) {
+    final destaque = view.destaque;
+    if (destaque == null) return null;
+    if (destaque.tipo == TreinosDestaqueTipo.concluidoHoje) {
+      return view.depois?.treinoNome;
+    }
+    if (destaque.tipo != TreinosDestaqueTipo.proximo || treinos.length < 2) {
+      return null;
+    }
+    final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
+    if (idx < 0) return null;
+    return treinos[(idx + 1) % treinos.length].treinoNome;
   }
 }

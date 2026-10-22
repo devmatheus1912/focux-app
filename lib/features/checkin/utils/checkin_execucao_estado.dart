@@ -1,4 +1,5 @@
 import '../../../core/api/api_error.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../data/checkin_series_pendentes.dart';
 
@@ -118,21 +119,32 @@ bool checkinPodeRegistrar(ExecucaoExercicio ee) {
   return !ee.concluido && !(total > 0 && ee.seriesFeitas >= total);
 }
 
-enum CheckinRodape { nenhum, registrar, finalizar }
+enum CheckinRodape { nenhum, registrar, proximo, finalizar }
 
-/// Zona do polegar: a ação da série atual; Finalizar só quando tudo foi
-/// feito. Descanso mantém o rodapé que já tinha (nenhum).
+/// Zona do polegar: a ação da série atual; o próximo exercício quando este
+/// acabou; Finalizar só quando tudo foi feito.
 CheckinRodape checkinRodape({
   required bool descansando,
   required bool tudoFeito,
   required ExecucaoExercicio? atual,
+  bool temProximo = false,
 }) {
   if (descansando) return CheckinRodape.nenhum;
   if (tudoFeito) return CheckinRodape.finalizar;
   if (atual != null && checkinPodeRegistrar(atual)) {
     return CheckinRodape.registrar;
   }
+  if (temProximo) return CheckinRodape.proximo;
   return CheckinRodape.nenhum;
+}
+
+/// O aviso genérico de persistência vira uma frase que pede para tentar de novo.
+String checkinErroTexto(S s, String friendly) {
+  final t = friendly.toLowerCase();
+  if (t.contains('persistencia') || t.contains('persistência')) {
+    return s.checkinNaoSalvou;
+  }
+  return friendly;
 }
 
 /// Performance primeiro; builds antigos do backend só mandam carga.

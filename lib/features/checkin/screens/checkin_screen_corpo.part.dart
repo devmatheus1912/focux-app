@@ -26,7 +26,7 @@ extension _CheckinCorpo on _CheckinScreenState {
   /// Erro flutua acima do rodapé e do aviso de pendentes.
   void _erro(String mensagem) => FeedbackHelper.showError(
     context,
-    mensagem,
+    checkinErroTexto(S.of(context), mensagem),
     reserveBottom: checkinRodapeReserva(
       comPendentes: _pendentes > 0,
       textScaler: MediaQuery.textScalerOf(context),
@@ -72,7 +72,12 @@ extension _CheckinCorpo on _CheckinScreenState {
         exercicios.isNotEmpty && checkinExerciciosFaltando(exercicios) == 0;
     final onTrocar =
         exercicios.length > 1 ? () => _abrirFila(exercicios) : null;
-    final rodape = _rodape(s, current, tudoFeito: tudoFeito);
+    final rodape = _rodape(
+      s,
+      current,
+      exercicios,
+      tudoFeito: tudoFeito,
+    );
 
     return Column(
       children: [
@@ -121,11 +126,19 @@ extension _CheckinCorpo on _CheckinScreenState {
     );
   }
 
-  Widget? _rodape(S s, ExecucaoExercicio? current, {required bool tudoFeito}) {
+  Widget? _rodape(
+    S s,
+    ExecucaoExercicio? current,
+    List<ExecucaoExercicio> exercicios, {
+    required bool tudoFeito,
+  }) {
+    final proximo =
+        current == null ? null : _proximoIncompleto(exercicios, current);
     final rodape = checkinRodape(
       descansando: _descanso.ativo,
       tudoFeito: tudoFeito,
       atual: current,
+      temProximo: proximo != null,
     );
     return switch (rodape) {
       CheckinRodape.nenhum => null,
@@ -135,6 +148,16 @@ extension _CheckinCorpo on _CheckinScreenState {
         loadingLabel:
             _concluindo ? s.checkinFinalizando : s.checkinSalvandoSerie,
         onPressed: () => _registrarSerieRapida(current),
+      ),
+      CheckinRodape.proximo => CheckinRodapeBar(
+        label: s.checkinProximoExercicio,
+        icon: Icons.arrow_forward_rounded,
+        loading: false,
+        loadingLabel: s.checkinProximoExercicio,
+        onPressed: () {
+          if (current == null) return;
+          _focarProximo(exercicios, current);
+        },
       ),
       CheckinRodape.finalizar => CheckinRodapeBar(
         label: s.checkinFinalizarTreino,
@@ -173,7 +196,7 @@ extension _CheckinCorpo on _CheckinScreenState {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _card(current, currentIndex, exercicios.length, onTrocar),
+            _card(current, currentIndex, exercicios, onTrocar),
             if (checkinExerciciosFaltando(exercicios) > 0)
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -193,23 +216,30 @@ extension _CheckinCorpo on _CheckinScreenState {
   Widget _card(
     ExecucaoExercicio current,
     int currentIndex,
-    int total,
+    List<ExecucaoExercicio> exercicios,
     VoidCallback? onTrocar,
   ) {
     final draft = _rascunhos.de(current);
-    // Mexer em série já gravada durante um envio embaralha a numeração.
     final livre = !_registrando && !_concluindo;
     final faltaSerie =
         livre &&
         current.series != null &&
         current.seriesFeitas < current.series!;
+    final proximo = _proximoIncompleto(exercicios, current);
+    final s = S.of(context);
     return CheckinSerieCard(
       key: ValueKey(current.treinoExercicioId),
       ee: current,
       index: currentIndex,
-      total: total,
+      total: exercicios.length,
       draftCargaKg: draft.cargaKg,
       draftReps: draft.reps,
+      concluidoFrase:
+          current.concluido
+              ? (proximo == null
+                  ? s.checkinTudoFeitoFrase
+                  : s.checkinExercicioAcabou(proximo.exercicioNome))
+              : null,
       onPlusCarga:
           () => _mexerRascunho(() => _rascunhos.somarCarga(current, 2.5)),
       onMinusCarga:
@@ -224,5 +254,31 @@ extension _CheckinCorpo on _CheckinScreenState {
       onDesfazer:
           livre && current.seriesFeitas > 0 ? () => _desfazer(current) : null,
     );
+  }
+
+  ExecucaoExercicio? _proximoIncompleto(
+    List<ExecucaoExercicio> exercicios,
+    ExecucaoExercicio atual,
+  ) {
+    final inicio = exercicios.indexWhere(
+      (e) => e.treinoExercicioId == atual.treinoExercicioId,
+    );
+    if (inicio < 0) return null;
+    for (var i = 1; i <= exercicios.length; i++) {
+      final cand = exercicios[(inicio + i) % exercicios.length];
+      if (!cand.concluido && cand.treinoExercicioId != atual.treinoExercicioId) {
+        return cand;
+      }
+    }
+    return null;
+  }
+
+  void _focarProximo(
+    List<ExecucaoExercicio> exercicios,
+    ExecucaoExercicio atual,
+  ) {
+    final proximo = _proximoIncompleto(exercicios, atual);
+    if (proximo == null) return;
+    setState(() => _focoTreinoExercicioId = proximo.treinoExercicioId);
   }
 }

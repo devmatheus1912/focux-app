@@ -17,6 +17,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
   final DateTime hoje;
   final bool isDark;
   final VoidCallback onAction;
+  final VoidCallback? onOpen;
   final AlunoHomeInsight? insight;
 
   /// Próximo horário de hoje ou amanhã (`alunoHorarioNoFoco`).
@@ -29,6 +30,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
     required this.hoje,
     required this.isDark,
     required this.onAction,
+    this.onOpen,
     this.insight,
     this.horario,
     this.prontidaoBaixa = false,
@@ -53,21 +55,32 @@ class AlunoTodayFocusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            texto.eyebrow,
-            style: FocuxHubTypography.eyebrow(context, color: mute),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            texto.titulo,
-            style: FocuxHubTypography.pageTitle(context, color: chrome.ink),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            texto.descricao,
-            style: FocuxHubTypography.bodyMuted(color: mute),
+          InkWell(
+            onTap: onOpen,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texto.eyebrow,
+                  style: FocuxHubTypography.eyebrow(context, color: mute),
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  texto.titulo,
+                  style: FocuxHubTypography.pageTitle(
+                    context,
+                    color: chrome.ink,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                Text(
+                  texto.descricao,
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
+              ],
+            ),
           ),
           if (texto.prazo case final prazo?) ...[
             const SizedBox(height: TokensStrip.s1),
@@ -88,13 +101,34 @@ class AlunoTodayFocusCard extends StatelessWidget {
             AlunoHomeInsightLine(insight: insight, onPrimary: mute),
           ],
           const SizedBox(height: TokensStrip.s3),
-          FxActionChip(
-            label: texto.cta,
-            accent: primary,
-            isDark: isDark,
-            onPressed: onAction,
-            maxLines: 2,
-          ),
+          if (texto.ctaPrimario)
+            FxActionChip(
+              label: texto.cta,
+              accent: primary,
+              isDark: isDark,
+              onPressed: onAction,
+              maxLines: 2,
+            )
+          else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: onAction,
+                style: TextButton.styleFrom(
+                  foregroundColor: mute,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(48, 48),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  texto.cta,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: chrome.ink,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

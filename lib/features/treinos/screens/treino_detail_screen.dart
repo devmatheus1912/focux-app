@@ -33,6 +33,7 @@ import '../constants/treinos_layout.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
+import '../utils/rotina_aviso.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_detail_help_sheet.dart';

@@ -359,7 +359,21 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           horario: view.horarioNoFoco,
           prontidaoBaixa: view.prontidaoBaixa,
           isDark: isDark,
-          onAction: () => _openToday(action),
+          onAction: () {
+            if (action.mode == AlunoTodayMode.workoutDone &&
+                action.proximoTreinoId != null) {
+              context.push(
+                '/checkin/executar',
+                extra: action.proximoTreinoId,
+              );
+              return;
+            }
+            _openToday(action);
+          },
+          onOpen:
+              action.mode == AlunoTodayMode.workoutDone
+                  ? () => _openToday(action)
+                  : null,
         ),
       ),
       if (view.aviso != AlunoHomeAviso.nenhum)

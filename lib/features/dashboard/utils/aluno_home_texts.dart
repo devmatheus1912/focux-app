@@ -12,6 +12,7 @@ typedef AlunoTodayTexto =
       String descricao,
       String? prazo,
       String cta,
+      bool ctaPrimario,
     });
 
 AlunoTodayTexto alunoTodayTexto(
@@ -21,24 +22,42 @@ AlunoTodayTexto alunoTodayTexto(
   bool prontidaoBaixa = false,
 }) => switch (a.mode) {
   AlunoTodayMode.workoutDone => (
-    eyebrow: s.alunoHojeFeitoEyebrow,
+    eyebrow: s.treinosProntoHoje,
     titulo: _nomeOu(a.treinoNome, s.alunoHojeFeitoTitulo),
-    descricao: switch (a.proximoTreinoNome?.trim()) {
-      final String proximo when proximo.isNotEmpty => s.alunoHojeFeitoProximo(
+    descricao: switch ((a.proximoEhDescanso, a.proximoTreinoNome?.trim())) {
+      (true, final String proximo) when proximo.isNotEmpty =>
+        s.treinosAmanhaDescanso(proximo),
+      (true, _) => s.treinosAmanhaDescansoSem,
+      (_, final String proximo) when proximo.isNotEmpty => s.treinosQuandoQuiser(
         proximo,
       ),
       _ => s.alunoHojeFeitoDescanso,
     },
     prazo: null,
-    cta: s.alunoHojeFeitoCta,
+    cta:
+        (a.proximoTreinoNome?.trim().isNotEmpty ?? false)
+            ? s.treinosFazerMaisUm
+            : s.alunoHojeFeitoCta,
+    ctaPrimario: false,
   ),
   AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje, prontidaoBaixa),
+  AlunoTodayMode.descansoHoje => (
+    eyebrow: s.treinosHojeDescanso,
+    titulo: (a.treinoNome?.trim().isNotEmpty ?? false)
+        ? s.treinosQuandoVoltar(a.treinoNome!.trim())
+        : s.treinosContinuaLa,
+    descricao: s.treinosContinuaLa,
+    prazo: null,
+    cta: s.treinosTreinarMesmoAssim,
+    ctaPrimario: false,
+  ),
   AlunoTodayMode.awaitingRelease => (
     eyebrow: s.alunoHojeAguardandoEyebrow,
     titulo: _nomeOu(a.treinoNome, s.alunoHojeAguardandoTitulo),
     descricao: s.alunoHojeAguardandoDescricao,
     prazo: null,
     cta: s.alunoHojeAguardandoCta,
+    ctaPrimario: true,
   ),
   AlunoTodayMode.profileSetup => (
     eyebrow: s.alunoHojePerfilEyebrow,
@@ -46,6 +65,7 @@ AlunoTodayTexto alunoTodayTexto(
     descricao: s.alunoHojePerfilDescricao,
     prazo: null,
     cta: s.alunoHojePerfilCta,
+    ctaPrimario: true,
   ),
   AlunoTodayMode.noWorkout => (
     eyebrow: s.alunoHojeSemTreinoEyebrow,
@@ -53,6 +73,7 @@ AlunoTodayTexto alunoTodayTexto(
     descricao: s.alunoHojeSemTreinoDescricao,
     prazo: null,
     cta: s.alunoHojeSemTreinoCta,
+    ctaPrimario: true,
   ),
 };
 
@@ -65,18 +86,44 @@ AlunoTodayTexto _treinoTexto(
   bool prontidaoBaixa,
 ) {
   final nome = _nomeOu(a.treinoNome, s.alunoHojeTreinoEyebrow);
+  if (a.continuar) {
+    final total = a.exerciseCount;
+    final feitos = a.exerciciosFeitos;
+    final detalhe = feitos != null && total > 0
+        ? s.treinosExerciciosProgresso(feitos.clamp(0, total), total)
+        : total > 0
+        ? s.treinosExercicios(total)
+        : s.alunoHojeTreinoDescricaoSemExercicios;
+    return (
+      eyebrow: s.treinosContinuar,
+      titulo: nome,
+      descricao: detalhe,
+      prazo: null,
+      cta: s.treinosContinuar,
+      ctaPrimario: true,
+    );
+  }
+  final depois = a.depoisNome?.trim();
+  final comOrdem =
+      !prontidaoBaixa &&
+      a.ordemTotal > 1 &&
+      depois != null &&
+      depois.isNotEmpty;
   final base =
       prontidaoBaixa
           ? s.alunoHojeProntidaoBaixa
+          : comOrdem
+          ? s.treinosOrdemDepois(a.ordem, a.ordemTotal, depois)
           : a.exerciseCount > 0
           ? s.alunoHojeTreinoDescricao(a.exerciseCount)
           : s.alunoHojeTreinoDescricaoSemExercicios;
   return (
-    eyebrow: a.comeback ? s.alunoHojeRetomarEyebrow : s.alunoHojeTreinoEyebrow,
+    eyebrow: a.comeback ? s.alunoHojeRetomarEyebrow : s.treinosAgora,
     titulo: a.comeback ? s.alunoHojeRetomarTitulo(nome) : nome,
     descricao: base,
     prazo: alunoPrazoTexto(s, a.prazoFim, hoje: hoje),
-    cta: a.comeback ? s.alunoHojeRetomarCta : s.alunoHojeTreinoCta,
+    cta: a.comeback ? s.alunoHojeRetomarCta : s.treinosComecar,
+    ctaPrimario: true,
   );
 }
 

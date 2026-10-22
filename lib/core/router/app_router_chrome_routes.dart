@@ -26,6 +26,7 @@ import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
+import '../../features/treinos/screens/aluno_rotina_screen.dart';
 import '../../features/treinos/screens/treinos_list_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
 import '../../features/treinos/screens/create_treino_screen.dart';
@@ -268,6 +269,17 @@ RouteBase buildChromeShellRoute() {
                 (context, state) => TreinosListScreen(
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state),
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/rotina',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => AlunoRotinaScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  alunoNome: stringRouteExtra(state) ?? '',
                 ),
           ),
           GoRoute(

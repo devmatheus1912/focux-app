@@ -60,6 +60,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
     required this.onEntrancePlayed,
     this.financeRiskBanner,
     this.recoveryCard,
+    this.rotinaLinha,
   });
 
   final int alunoId;
@@ -70,6 +71,7 @@ class Aluno360OperacaoTab extends ConsumerWidget {
   final Widget operationalSection;
   final Widget copilotCard;
   final Widget? recoveryCard;
+  final Widget? rotinaLinha;
   final Widget quickActions;
   final bool animateEntrance;
   final VoidCallback onEntrancePlayed;
@@ -125,6 +127,10 @@ class Aluno360OperacaoTab extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (rotinaLinha != null) ...[
+              section(0, rotinaLinha!),
+              const SizedBox(height: Aluno360Layout.sectionGap),
+            ],
             if (showFinanceRisk && financeRiskBanner != null) ...[
               section(0, financeRiskBanner!),
               const SizedBox(height: Aluno360Layout.sectionGap),

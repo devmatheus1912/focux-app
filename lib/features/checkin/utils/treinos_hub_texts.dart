@@ -20,6 +20,10 @@ TreinosDestaqueTexto treinosDestaqueTexto(
   S s,
   TreinosDestaque d, {
   required DateTime hoje,
+  String? proximoNome,
+  int? ordem,
+  int? ordemTotal,
+  bool proximoEhDescanso = false,
 }) {
   final t = d.treino;
   final prazo = alunoPrazoTexto(
@@ -27,25 +31,52 @@ TreinosDestaqueTexto treinosDestaqueTexto(
     TreinoAtribuicaoPrazo.parseIsoDate(t.dataFim),
     hoje: hoje,
   );
+  final depois = proximoNome?.trim();
+  final comOrdem =
+      ordem != null &&
+      ordemTotal != null &&
+      ordemTotal > 1 &&
+      depois != null &&
+      depois.isNotEmpty;
   return switch (d.tipo) {
     TreinosDestaqueTipo.emAndamento => _emAndamento(s, d, prazo),
     TreinosDestaqueTipo.concluidoHoje => (
-      eyebrow: s.treinosDestaqueConcluidoHoje,
+      eyebrow: s.treinosProntoHoje,
       titulo: t.treinoNome,
-      detalhe: switch (d.duracao) {
-        final Duration dur => treinosDuracaoTexto(s, dur),
-        null => _semDuracao(s, t.exerciciosConcluidos ?? 0),
-      },
+      detalhe:
+          proximoEhDescanso
+              ? (depois != null && depois.isNotEmpty
+                  ? s.treinosAmanhaDescanso(depois)
+                  : s.treinosAmanhaDescansoSem)
+              : depois != null && depois.isNotEmpty
+              ? s.treinosQuandoQuiser(depois)
+              : switch (d.duracao) {
+                final Duration dur => treinosDuracaoTexto(s, dur),
+                null => _semDuracao(s, t.exerciciosConcluidos ?? 0),
+              },
       prazo: null,
-      cta: s.treinosVerTreinoCta,
+      cta: depois != null && depois.isNotEmpty
+          ? s.treinosFazerMaisUm
+          : s.treinosVerTreinoCta,
+      progresso: null,
+    ),
+    TreinosDestaqueTipo.descansoHoje => (
+      eyebrow: s.treinosHojeDescanso,
+      titulo: s.treinosQuandoVoltar(t.treinoNome),
+      detalhe: s.treinosContinuaLa,
+      prazo: null,
+      cta: s.treinosTreinarMesmoAssim,
       progresso: null,
     ),
     TreinosDestaqueTipo.proximo => (
-      eyebrow: s.treinosDestaqueProximo,
+      eyebrow: s.treinosAgora,
       titulo: t.treinoNome,
-      detalhe: s.treinosExercicios(t.totalExercicios),
+      detalhe:
+          comOrdem
+              ? s.treinosOrdemDepois(ordem, ordemTotal, depois)
+              : s.treinosExercicios(t.totalExercicios),
       prazo: prazo,
-      cta: s.treinosIniciarCta,
+      cta: s.treinosComecar,
       progresso: null,
     ),
     TreinosDestaqueTipo.emPreparacao => (
@@ -65,14 +96,14 @@ TreinosDestaqueTexto _emAndamento(S s, TreinosDestaque d, String? prazo) {
   final feitos = d.exerciciosFeitos;
   final comProgresso = feitos != null && total > 0;
   return (
-    eyebrow: s.treinosDestaqueEmAndamento,
+    eyebrow: s.treinosContinuar,
     titulo: d.treino.treinoNome,
     detalhe:
         comProgresso
             ? s.treinosExerciciosProgresso(feitos.clamp(0, total), total)
             : s.treinosExercicios(total),
     prazo: prazo,
-    cta: s.treinosContinuarCta,
+    cta: s.treinosContinuar,
     progresso: comProgresso ? feitos.clamp(0, total) / total : null,
   );
 }

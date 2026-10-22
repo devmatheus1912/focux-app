@@ -155,6 +155,7 @@ AlunoHomeView buildAlunoHomeView(
     aluno: home.aluno,
     treinos: home.treinos,
     historico: home.historico,
+    rotina: home.rotina,
     now: agora,
   );
   final inadimplente = home.aluno.inadimplente;

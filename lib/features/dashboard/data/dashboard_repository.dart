@@ -12,6 +12,7 @@ import '../../health/data/health_repository.dart';
 import '../../monetizacao/data/upsell_repository.dart';
 import '../../onboarding/data/onboarding_status_data.dart';
 import '../../planos/data/planos_repository.dart';
+import '../../treinos/models/rotina_fila.dart';
 import '../utils/aluno_dashboard_home_client_cache.dart';
 import '../utils/dashboard_day_focus.dart';
 import '../utils/dashboard_home_client_cache.dart';
@@ -400,6 +401,9 @@ class AlunoDashboardHomeBundle {
   /// Início do próximo horário não cancelado em 7 dias, com a agenda no plano
   /// do personal; null sem horário (ou backend antigo).
   final DateTime? agendaProximoInicio;
+
+  /// Fila do aluno. Vazia em backend antigo: a Home segue a ordem que já vinha.
+  final RotinaFila rotina;
   final DateTime fetchedAt;
 
   AlunoDashboardHomeBundle({
@@ -428,6 +432,7 @@ class AlunoDashboardHomeBundle {
     this.recursosIndisponiveis = const {},
     this.planoFeatures,
     this.agendaProximoInicio,
+    this.rotina = RotinaFila.vazia,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
 
@@ -459,6 +464,7 @@ class AlunoDashboardHomeBundle {
         recursosIndisponiveis: recursosIndisponiveis,
         planoFeatures: planoFeatures,
         agendaProximoInicio: agendaProximoInicio,
+        rotina: rotina,
         fetchedAt: at,
       );
 
@@ -572,6 +578,7 @@ class AlunoDashboardHomeBundle {
         final String iso => DateTime.tryParse(iso),
         _ => null,
       },
+      rotina: RotinaFila.fromJson(json['rotina']),
     );
   }
 }
