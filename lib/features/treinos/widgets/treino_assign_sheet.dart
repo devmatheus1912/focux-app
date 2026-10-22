@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -242,24 +243,10 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
               controller: _posicaoController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: const TextStyle(fontSize: 15),
-              decoration: InputDecoration(
-                hintText: 'Ex: 1, 2, 3…',
-                hintStyle: TextStyle(color: mute, fontSize: 14),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.12)
-                        : Colors.black.withValues(alpha: 0.12),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: primary),
-                ),
+              decoration: FxInputDeco.build(
+                context,
+                'Posição na rotina',
+                hint: 'Ex: 1, 2, 3…',
               ),
             ),
             const SizedBox(height: 6),
