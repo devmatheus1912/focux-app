@@ -117,6 +117,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               alunos: alunos,
               isDark: Theme.of(context).brightness == Brightness.dark,
               includePrazo: true,
+              includePosicao: true,
             ),
       );
       if (selected == null) return;
@@ -127,6 +128,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             treino.id,
             selected.alunoId,
             dataFim: selected.dataFim,
+            posicaoNaRotina: selected.posicaoNaRotina,
           );
       invalidateTreinosCaches(ref);
       invalidateTreinosDoAluno(ref, selected.alunoId);

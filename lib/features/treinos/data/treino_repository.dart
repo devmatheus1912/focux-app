@@ -382,12 +382,14 @@ class TreinoRepository {
     int treinoId,
     int alunoId, {
     DateTime? dataFim,
+    int? posicaoNaRotina,
   }) async {
     await _dio.post(
       '/api/treinos/$treinoId/alunos/$alunoId',
       data: {
         'dataFim':
             dataFim == null ? null : TreinoAtribuicaoPrazo.toIsoDate(dataFim),
+        'posicaoNaRotina': posicaoNaRotina,
       },
     );
   }
