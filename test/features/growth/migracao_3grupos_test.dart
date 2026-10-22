@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/growth/models/migracao_importacao_resumo.dart';
 
 void main() {
-  MigracaoImportacaoDetalhe _aluno({
+  MigracaoImportacaoDetalhe aluno({
     required String nome,
     String? email,
     String? telefone,
@@ -24,9 +24,9 @@ void main() {
         duplicados: 0,
         erros: 0,
         detalhes: [
-          _aluno(nome: 'Ana', email: 'ana@email.com', emailEnviado: true),
-          _aluno(nome: 'Carlos', telefone: '11999990000', emailEnviado: false),
-          _aluno(nome: 'Pedro', emailEnviado: false),
+          aluno(nome: 'Ana', email: 'ana@email.com', emailEnviado: true),
+          aluno(nome: 'Carlos', telefone: '11999990000', emailEnviado: false),
+          aluno(nome: 'Pedro', emailEnviado: false),
         ],
       );
 
@@ -40,7 +40,7 @@ void main() {
         importados: 1,
         duplicados: 0,
         erros: 0,
-        detalhes: [_aluno(nome: 'Marcos')],
+        detalhes: [aluno(nome: 'Marcos')],
       );
 
       expect(resumo.enviarManualmente, hasLength(1));
@@ -54,7 +54,7 @@ void main() {
         duplicados: 0,
         erros: 0,
         detalhes: [
-          _aluno(
+          aluno(
             nome: 'Lucia',
             email: 'lucia@email.com',
             emailEnviado: false,
@@ -68,16 +68,16 @@ void main() {
 
     test('grupos somam corretamente com mix de 10 alunos', () {
       final detalhes = [
-        _aluno(nome: 'A1', email: 'a1@e.com', emailEnviado: true),
-        _aluno(nome: 'A2', email: 'a2@e.com', emailEnviado: true),
-        _aluno(nome: 'A3', email: 'a3@e.com', emailEnviado: true),
-        _aluno(nome: 'A4', email: 'a4@e.com', emailEnviado: true),
-        _aluno(nome: 'A5', email: 'a5@e.com', emailEnviado: true),
-        _aluno(nome: 'B1', telefone: '11999990001'),
-        _aluno(nome: 'B2', telefone: '11999990002'),
-        _aluno(nome: 'B3', telefone: '11999990003'),
-        _aluno(nome: 'C1'),
-        _aluno(nome: 'C2'),
+        aluno(nome: 'A1', email: 'a1@e.com', emailEnviado: true),
+        aluno(nome: 'A2', email: 'a2@e.com', emailEnviado: true),
+        aluno(nome: 'A3', email: 'a3@e.com', emailEnviado: true),
+        aluno(nome: 'A4', email: 'a4@e.com', emailEnviado: true),
+        aluno(nome: 'A5', email: 'a5@e.com', emailEnviado: true),
+        aluno(nome: 'B1', telefone: '11999990001'),
+        aluno(nome: 'B2', telefone: '11999990002'),
+        aluno(nome: 'B3', telefone: '11999990003'),
+        aluno(nome: 'C1'),
+        aluno(nome: 'C2'),
       ];
       final resumo = MigracaoImportacaoResumo(
         importados: 10,
