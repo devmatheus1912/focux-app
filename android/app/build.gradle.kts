@@ -88,7 +88,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             ndk {
-                debugSymbolLevel = "FULL"
+                // SYMBOL_TABLE inclui tabela de símbolos dentro do .so (Crashlytics pode ler).
+                // FULL gerava arquivo externo e o Flutter tools rejeitava o AAB.
+                debugSymbolLevel = "SYMBOL_TABLE"
             }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

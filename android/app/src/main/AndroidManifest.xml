@@ -85,6 +85,15 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+        <!-- Intercom FCM: exported=false obrigatório para Android 12+ -->
+        <service
+            android:name="io.intercom.android.sdk.fcm.IntercomFcmMessengerService"
+            android:exported="false"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_focux"/>

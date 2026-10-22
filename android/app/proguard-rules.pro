@@ -27,3 +27,12 @@
 -dontwarn com.google.mlkit.vision.text.devanagari.**
 -dontwarn com.google.mlkit.vision.text.japanese.**
 -dontwarn com.google.mlkit.vision.text.korean.**
+
+# Intercom SDK
+-keep class io.intercom.** { *; }
+-keep class com.intercom.** { *; }
+-dontwarn io.intercom.**
+-dontwarn com.intercom.**
+# Intercom bundled shimmer (facebook)
+-keep class io.intercom.com.facebook.shimmer.** { *; }
+-dontwarn io.intercom.com.facebook.shimmer.**
