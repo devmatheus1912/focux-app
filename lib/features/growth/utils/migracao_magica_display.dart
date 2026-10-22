@@ -41,6 +41,16 @@ String migracaoSalvarConfirmTitle(int count) =>
 String migracaoSalvarConfirmMessage() =>
     'Quem tem e-mail recebe o convite sozinho. Quem só tem telefone fica para o WhatsApp.';
 
+String migracaoWhatsappGrupo() => 'Estes só têm telefone.';
+
+String migracaoWhatsappFolha() =>
+    'Estes só têm telefone. O texto já está copiado.';
+
+String migracaoWhatsappAbrirLabel() => 'Abrir WhatsApp';
+
+String migracaoCopiarConvitesLabel(int count) =>
+    count == 1 ? 'Copiar o convite' : 'Copiar os $count convites';
+
 String migracaoPlanilhaLabel() => 'Planilha';
 
 String migracaoPlanilhaLendoLabel() => 'Lendo...';

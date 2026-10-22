@@ -85,15 +85,13 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
               icon: Icons.send_rounded,
               color: EagleTokens.whatsapp,
               titulo: 'Envie via WhatsApp',
-              subtitulo: 'Copie todos de uma vez ou envie individualmente.',
+              subtitulo: migracaoWhatsappGrupo(),
               count: data.enviarViaWhatsapp.length,
               ink: ink,
               mute: mute,
             ),
             _MigracaoEnviarTodosButton(
               data: data.enviarViaWhatsapp,
-              brand: brand,
-              mute: mute,
             ),
             SizedBox(height: TokensStrip.s2),
             for (final item in data.enviarViaWhatsapp)
@@ -464,26 +462,16 @@ class _MigracaoEmailEnviadoTile extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// C1 — Botão "Enviar todos de uma vez" + sheet de instrução de transmissão
-// ---------------------------------------------------------------------------
-
 class _MigracaoEnviarTodosButton extends StatelessWidget {
-  const _MigracaoEnviarTodosButton({
-    required this.data,
-    required this.brand,
-    required this.mute,
-  });
+  const _MigracaoEnviarTodosButton({required this.data});
 
   final List<MigracaoImportacaoDetalhe> data;
-  final Color brand;
-  final Color mute;
 
   String _blocoConvites(S s) => data
       .map((d) => alunoAtivacaoMessage(s, nome: d.nome, link: d.linkAtivacao ?? ''))
       .join('\n\n');
 
-  Future<void> _copiarEMostrarInstrucoes(BuildContext context) async {
+  Future<void> _copiarEAbrir(BuildContext context) async {
     final s = S.of(context);
     final bloco = _blocoConvites(s);
     await copySensitiveToClipboard(bloco);
@@ -503,30 +491,11 @@ class _MigracaoEnviarTodosButton extends StatelessWidget {
               SizedBox(height: TokensStrip.s4),
               FxHomeSheetHeader(
                 isDark: isDark,
-                title: 'Convites copiados!',
-                subtitle:
-                    'Para enviar para todos de uma vez, use a transmissão do WhatsApp:',
-                leading: Icon(Icons.check_circle_outline_rounded,
-                    color: EagleTokens.good, size: 18),
+                title: migracaoWhatsappFolha(),
               ),
-              SizedBox(height: TokensStrip.s3),
-              _PassoTransmissao(
-                  isDark: isDark, numero: '1', texto: 'Abra o WhatsApp'),
-              _PassoTransmissao(
-                  isDark: isDark,
-                  numero: '2',
-                  texto: 'Toque em ⋮ (Android) ou Listas (iOS) → Nova transmissão'),
-              _PassoTransmissao(
-                  isDark: isDark,
-                  numero: '3',
-                  texto: 'Adicione os alunos da lista'),
-              _PassoTransmissao(
-                  isDark: isDark,
-                  numero: '4',
-                  texto: 'Cole o texto e envie — cada aluno recebe em privado'),
               SizedBox(height: TokensStrip.s4),
               FxLiquidPrimaryButton(
-                label: 'Abrir WhatsApp',
+                label: migracaoWhatsappAbrirLabel(),
                 onPressed: () async {
                   Navigator.pop(ctx);
                   await launchUrl(
@@ -534,10 +503,6 @@ class _MigracaoEnviarTodosButton extends StatelessWidget {
                     mode: LaunchMode.externalApplication,
                   );
                 },
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Fechar'),
               ),
             ],
           ),
@@ -548,62 +513,10 @@ class _MigracaoEnviarTodosButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = data.length;
     return OutlinedButton.icon(
       icon: const Icon(Icons.send_rounded, size: 16),
-      label: Text(
-        count == 1 ? 'Enviar convite de uma vez' : 'Enviar todos ($count) de uma vez',
-      ),
-      onPressed: () => _copiarEMostrarInstrucoes(context),
-    );
-  }
-}
-
-class _PassoTransmissao extends StatelessWidget {
-  const _PassoTransmissao({
-    required this.isDark,
-    required this.numero,
-    required this.texto,
-  });
-
-  final bool isDark;
-  final String numero;
-  final String texto;
-
-  @override
-  Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 22,
-            height: 22,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              numero,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              texto,
-              style: TextStyle(fontSize: 13, color: ink, height: 1.4),
-            ),
-          ),
-        ],
-      ),
+      label: Text(migracaoCopiarConvitesLabel(data.length)),
+      onPressed: () => _copiarEAbrir(context),
     );
   }
 }

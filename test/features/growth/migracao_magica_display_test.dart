@@ -9,6 +9,18 @@ void main() {
     expect(migracaoSalvarLabel(0), 'Selecione alunos');
     expect(migracaoIgnoradasLabel(7), '7 linhas ignoradas');
     expect(migracaoSalvarConfirmTitle(3), contains('3 alunos'));
+    expect(
+      migracaoSalvarConfirmMessage(),
+      'Quem tem e-mail recebe o convite sozinho. Quem só tem telefone fica para o WhatsApp.',
+    );
+    expect(
+      migracaoWhatsappFolha(),
+      'Estes só têm telefone. O texto já está copiado.',
+    );
+    expect(migracaoWhatsappAbrirLabel(), 'Abrir WhatsApp');
+    expect(migracaoCopiarConvitesLabel(1), 'Copiar o convite');
+    expect(migracaoCopiarConvitesLabel(4), 'Copiar os 4 convites');
+    expect(migracaoSalvarConfirmMessage(), isNot(contains('um a um')));
     expect(migracaoEtapaLabel(MigracaoEtapa.acesso), 'Etapa 3 de 3');
     expect(migracaoIrParaListaLabel(), 'Ir para lista');
     expect(migracaoDiscardConfirmLabel(), 'Sair');

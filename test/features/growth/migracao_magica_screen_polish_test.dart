@@ -48,14 +48,17 @@ void main() {
     expect(actions, contains('PdfDocument'));
   });
 
-  // C1 — botão de envio em lote com guia WhatsApp
-  test('tela de acesso tem botão de envio em lote e guia de transmissão', () {
+  test('whatsapp da migração copia e abre, sem guia de transmissão', () {
     final build = readScreenSourceBundle(
         'lib/features/growth/screens/migracao_magica_screen_build.part.dart');
+    final state = readScreenSourceBundle(
+        'lib/features/growth/screens/migracao_magica_screen_state.part.dart');
     expect(build, contains('_MigracaoEnviarTodosButton'));
-    expect(build, contains('transmissão'));
+    expect(build, contains('migracaoWhatsappFolha'));
     expect(build, contains('whatsapp://'));
-    expect(build, contains('_PassoTransmissao'));
+    expect(build, isNot(contains('_PassoTransmissao')));
+    expect(build, isNot(contains('transmissão')));
+    expect(state, isNot(contains('um a um')));
   });
 
   // M4 — dica de orientação no sheet de foto

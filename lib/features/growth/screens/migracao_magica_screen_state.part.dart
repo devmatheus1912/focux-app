@@ -160,7 +160,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     ),
                     FxHelpTip(
                       'Acesso',
-                      'Depois do save, envie o convite um a um (copiar ou WhatsApp).',
+                      migracaoSalvarConfirmMessage(),
                     ),
                   ],
                 ),
