@@ -280,12 +280,16 @@ class AlunoListCard extends ConsumerWidget {
                                     color: EagleTokens.warn,
                                   ),
                                   const SizedBox(width: 3),
-                                  Text(
+                                  Flexible(
+                                    child: Text(
                                     'Aguardando ativação',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: FocuxHubTypography.bodyMuted(
                                       color: EagleTokens.warn,
                                       height: 1.2,
                                     ).copyWith(fontSize: 11),
+                                  ),
                                   ),
                                 ],
                               ),
