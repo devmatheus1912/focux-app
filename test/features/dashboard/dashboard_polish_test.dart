@@ -44,30 +44,24 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-      'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
-      'lib/features/dashboard/widgets/command_action_panel.dart',
       'lib/features/dashboard/widgets/command_action_tile.dart',
-      'lib/features/dashboard/widgets/command_priorities_sheet.dart',
-      'lib/features/dashboard/widgets/command_status_tile.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
       'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
       'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
       'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
-      'lib/features/dashboard/widgets/dashboard_home_secondary_block.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
+      'lib/features/dashboard/utils/dashboard_command_copy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
-      'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/widgets/dashboard_section_header.dart',
       'lib/features/dashboard/utils/dashboard_a11y.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
       'lib/features/dashboard/utils/dashboard_readability.dart',
-      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
@@ -90,7 +84,6 @@ void main() {
     expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('showPrioritiesLink'));
     expect(screen, contains('verPrioridades'));
-    expect(screen, contains('CommandPrioritiesSheet'));
     expect(screen, contains('Ações por aluno'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('dashboard_entry_motion.dart'));
@@ -127,7 +120,6 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('ShellThemeToggle')));
     expect(screen, contains('FxHelpChrome.iconSize'));
-    expect(screen, contains('DashboardAttentionRail'));
     expect(screen, contains('checkinsPulseLabel'));
     expect(screen, contains('utilityOnly'));
     expect(screen, contains('hideEmptyTrend'));
@@ -215,24 +207,14 @@ void main() {
     final tile = File(
       'lib/features/dashboard/widgets/command_action_tile.dart',
     ).readAsStringSync();
-    final panel = File(
-      'lib/features/dashboard/widgets/command_action_panel.dart',
-    ).readAsStringSync();
     final finance = File(
       'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
-    ).readAsStringSync();
-    final aderencia = File(
-      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
     ).readAsStringSync();
     expect(tile, contains('FxSettingsLayout.rowMinHeight'));
     expect(tile, isNot(contains('fxStripCardDecoration')));
     expect(tile, isNot(contains('entranceIndex')));
-    expect(panel, contains('CommandActionTile'));
-    expect(panel, isNot(contains('FxSettingsGroup')));
     expect(finance, contains('OperationalMetricTile'));
     expect(finance, isNot(contains('FxActionChip')));
-    expect(aderencia, contains('FxSatelliteListTile'));
-    expect(aderencia, isNot(contains('FxActionChip')));
   });
 
   test('pulso operacional é um grupo inset, sem cards KPI', () {

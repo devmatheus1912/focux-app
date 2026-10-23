@@ -8,15 +8,11 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_state.part.dart',
-      'lib/features/dashboard/widgets/dashboard_command_center_section.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
-      'lib/features/dashboard/widgets/command_action_panel.dart',
       'lib/features/dashboard/widgets/command_action_tile.dart',
-      'lib/features/dashboard/widgets/command_priorities_sheet.dart',
-      'lib/features/dashboard/widgets/command_status_tile.dart',
       'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-      'lib/features/dashboard/widgets/dashboard_aderencia_semana_widget.dart',
+      'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
       'lib/features/dashboard/widgets/dashboard_tools_section.dart',
       'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
@@ -26,7 +22,6 @@ void main() {
       'lib/features/dashboard/utils/dashboard_command_copy.dart',
       'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
-      'lib/features/dashboard/widgets/dashboard_attention_rail.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
       'lib/features/dashboard/data/dashboard_repository.dart',
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
@@ -36,25 +31,18 @@ void main() {
     ];
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
-    expect(widget, contains('class DashboardCommandCenterSection'));
-    expect(widget, contains('commandCenterProvider'));
     expect(widget, contains('commandCenterTitle'));
-    expect(widget, contains('class CommandActionPanel'));
     expect(widget, contains('class CommandActionTile'));
-    expect(widget, contains('showCommandActionsSheet'));
-    expect(widget, contains('FxSatelliteListTile'));
     expect(widget, contains('message-circle'));
     expect(widget, isNot(contains('atalhoKicker')));
     expect(widget, contains('if (hasTrend)'));
     expect(widget, contains('expand: true'));
     expect(widget, contains('Shimmer.fromColors'));
-    expect(widget, contains('maxLines: 2'));
+    expect(widget, contains('maxLines: 1'));
     expect(widget, contains('TextOverflow.ellipsis'));
     expect(widget, contains('class DashboardDayPulseStrip'));
-    expect(widget, contains('FxSatelliteListTile'));
     expect(widget, contains('pulsoOperacional'));
     expect(widget, isNot(contains('hideRiscoChip')));
-    expect(widget, contains('dashboardAttentionSplit'));
     expect(widget, contains('class DashboardPrioritiesOverlay'));
     expect(widget, contains('dashboardPanelIsOffscreen'));
     expect(
@@ -118,9 +106,7 @@ void main() {
     expect(widget, isNot(contains('inboxUnread: 0')));
     expect(widget, isNot(contains('inboxReady: false')));
     expect(widget, isNot(contains('DashboardDayFocus.resolve(')));
-    expect(widget, contains('prioritiesActionLabel'));
     expect(widget, contains('showPrioritiesLink'));
-    expect(widget, contains('CommandPrioritiesSheet'));
     expect(widget, contains('Ações por aluno'));
     expect(widget, contains('isRadarStudent'));
     expect(widget, contains('priorityBadge'));
@@ -141,16 +127,13 @@ void main() {
     expect(widget, contains('DashboardHomeFocusRules'));
     expect(widget, contains('DashboardAderenciaCopy'));
     expect(widget, isNot(contains('_RiskWaveBanner')));
-    expect(widget, contains('DashboardAderenciaSemanaEmptyCard'));
     expect(widget, contains('isRiskEchoCopy'));
     expect(widget, contains('BrandPalette.sectionHeading'));
     expect(widget, contains('BrandPalette.sectionLink'));
 
-    // Central de Comando é apresentacional — a fila é computada uma vez só.
-    expect(widget, contains('required this.nextActions'));
+    // A fila da Home é computada uma vez e só apresentada.
     expect(widget, contains('required this.prioritiesSheetActions'));
     expect(widget, contains('required this.showPrioritiesLink'));
-    expect(widget, contains('final nextActions = widget.nextActions'));
     expect(widget, contains('riskOwnedByDayFocus'));
   });
 }
