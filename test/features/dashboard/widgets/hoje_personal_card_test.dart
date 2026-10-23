@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/dashboard/data/command_action_item.dart';
 import 'package:focux_app/features/dashboard/utils/hoje_personal_card.dart';
+import 'package:focux_app/features/dashboard/utils/hoje_personal_dia.dart';
 import 'package:focux_app/features/dashboard/widgets/hoje_personal_card_view.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,6 +38,32 @@ void main() {
     expect(find.widgetWithText(FxLiquidPrimaryButton, 'Ver o painel'), findsNothing);
   });
 
+  testWidgets('o dia aparece em linhas e não vira segundo botão preenchido', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _harness(
+        card: const HojePersonalCard(
+          titulo: 'Hugo',
+          frase: 'Contato agora',
+          botao: 'Hugo',
+          rota: '/alunos/1',
+        ),
+        linhas: const [
+          HojePersonalLinha(texto: '2 compromissos hoje', rota: '/agenda'),
+          HojePersonalLinha(
+            texto: '1 mensalidade em aberto',
+            rota: '/financeiro',
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('2 compromissos hoje'), findsOneWidget);
+    expect(find.text('1 mensalidade em aberto'), findsOneWidget);
+    expect(find.byType(FxLiquidPrimaryButton), findsOneWidget);
+  });
+
   testWidgets('fila vazia não tem botão preenchido', (tester) async {
     await tester.pumpWidget(
       _harness(
@@ -55,7 +82,10 @@ void main() {
   });
 }
 
-Widget _harness({required HojePersonalCard card}) {
+Widget _harness({
+  required HojePersonalCard card,
+  List<HojePersonalLinha> linhas = const [],
+}) {
   return MaterialApp(
     localizationsDelegates: S.localizationsDelegates,
     supportedLocales: S.supportedLocales,
@@ -63,6 +93,8 @@ Widget _harness({required HojePersonalCard card}) {
     home: Scaffold(
       body: HojePersonalCardView(
         card: card,
+        linhas: linhas,
+        onLinha: (_) {},
         onAction: () {},
         onVerPainel: () {},
       ),

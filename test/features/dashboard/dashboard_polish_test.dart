@@ -94,7 +94,7 @@ void main() {
     expect(screen, contains('Ações por aluno'));
     expect(screen, contains('DashboardSectionHeader'));
     expect(screen, contains('dashboard_entry_motion.dart'));
-    expect(screen, contains('DashboardDayFocusBanner'));
+    expect(screen, contains('HojePersonalCardView'));
     expect(screen, contains('DashboardHomeFocusRules'));
     expect(screen, contains('groupCatalogoHubs'));
     expect(screen, contains('buscarFerramenta'));

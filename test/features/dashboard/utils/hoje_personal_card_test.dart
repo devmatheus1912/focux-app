@@ -54,6 +54,27 @@ void main() {
     expect(card.rota, '/alunos/1');
   });
 
+  test('com aluno, criar oportunidade não ocupa a Hoje', () {
+    final card = hojePersonalCard(
+      acoes: [
+        const CommandActionItem(
+          icon: 'plus',
+          title: 'Criar próxima oportunidade',
+          subtitle: 'Aluno, treino ou lead antes do pico',
+          route: '/alunos/novo',
+          tone: CommandActionTone.primary,
+          actionKey: kCommandActionCriarOportunidade,
+        ),
+      ],
+      temAluno: true,
+      proximoPasso: _passo(),
+    );
+
+    expect(card.titulo, 'Operação sob controle');
+    expect(card.frase, 'Nada para fazer agora.');
+    expect(card.botao, isNull);
+  });
+
   test('fila vazia não tem botão', () {
     final card = hojePersonalCard(
       acoes: const [],

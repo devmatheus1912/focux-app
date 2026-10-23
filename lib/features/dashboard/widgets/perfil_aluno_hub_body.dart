@@ -16,6 +16,9 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../perfil/utils/lgpd_consent_display.dart';
 import '../../perfil/widgets/perfil_lgpd_consent_sheet.dart';
 import '../../perfil/widgets/perfil_sticky_bar.dart';
+import '../providers/dashboard_provider.dart';
+import '../utils/aluno_home_view.dart';
+import '../widgets/aluno_ferramentas_catalogo.dart';
 import '../utils/aluno_confirm_logout.dart';
 import '../utils/aluno_delete_account.dart';
 import '../utils/aluno_perfil_completion.dart';
@@ -34,6 +37,16 @@ class PerfilAlunoHubBody extends ConsumerWidget {
     final score = home.completionPercent ?? alunoPerfilCompletionScore(aluno);
     final photo = aluno.fotoUrl?.trim();
     final hasPhoto = photo != null && photo.isNotEmpty;
+
+    final dash = ref.watch(alunoDashboardHomeProvider).asData?.value;
+    final catalogo = dash == null
+        ? const SizedBox.shrink()
+        : AlunoFerramentasCatalogo(
+            liberada: buildAlunoHomeView(
+              dash,
+              agendaReviewed: false,
+            ).ferramentaLiberada,
+          );
 
     return Stack(
       children: [
@@ -151,6 +164,7 @@ class PerfilAlunoHubBody extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: FxSettingsLayout.groupGap),
+              catalogo,
               FxStaggerItem(
                 index: 2,
                 child: FxSettingsGroup(

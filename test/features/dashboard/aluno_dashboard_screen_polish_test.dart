@@ -54,9 +54,9 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('AlunoTodayFocusCard('));
-    expect(screen, contains('AlunoWeekSummaryCard'));
-    expect(screen, contains('AlunoEvolutionCard'));
     expect(screen, contains('AlunoPendenciasBlock'));
+    expect(screen, isNot(contains('AlunoWeekSummaryCard')));
+    expect(screen, isNot(contains('AlunoEvolutionCard')));
     expect(screen, isNot(contains('_StreakFoldBadge')));
     expect(screen, isNot(contains('Ver plano completo')));
     expect(screen, isNot(contains('Seu score Focux')));
@@ -65,17 +65,26 @@ void main() {
     expect(screen, contains('AlunoHomeSkeleton()'));
     expect(screen, contains('fxAnnounce('));
     expect(screen, contains('s.alunoHomeAjudaCalculo'));
-    expect(screen, contains('FxSettingsGroup'));
-    expect(screen, contains('FxSettingsTile'));
-    expect(screen, contains('s.alunoFerramentasSubtitulo'));
     expect(screen, isNot(contains('/ia/aluno')));
     expect(screen, isNot(contains('/aluno/form-check')));
-    expect(screen, contains('/aluno/desafios'));
-    expect(screen, contains('/aluno/trilhas'));
-    expect(screen, contains('/aluno/grupo-aulas'));
     expect(screen, isNot(contains('/gamificacao')));
     expect(screen, isNot(contains('FxSatelliteListTile')));
     expect(screen, isNot(contains('class _AlunoProfileCard')));
+    final catalogo = File(
+      'lib/features/dashboard/widgets/aluno_ferramentas_catalogo.dart',
+    ).readAsStringSync();
+    expect(catalogo, contains('FxSettingsGroup'));
+    expect(catalogo, contains('/aluno/desafios'));
+    expect(catalogo, contains('/aluno/trilhas'));
+    expect(catalogo, contains('/aluno/grupo-aulas'));
+    final treinos = File(
+      'lib/features/checkin/screens/meus_treinos_screen.dart',
+    ).readAsStringSync();
+    final historico = File(
+      'lib/features/checkin/screens/historico_screen.dart',
+    ).readAsStringSync();
+    expect(treinos, contains('AlunoRitmoCard'));
+    expect(historico, contains('AlunoRitmoCard'));
   });
 
   test('Home do aluno fica certa no tempo e barata de redesenhar', () {

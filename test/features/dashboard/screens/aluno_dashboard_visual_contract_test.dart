@@ -24,20 +24,16 @@ void main() {
     expect(at('AlunoHomeHeader('), lessThan(at('AlunoTodayFocusCard(')));
     expect(at('AlunoTodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
     expect(at('_AlunoHomeAviso('), lessThan(at('hojeAlunoMais')));
-    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoWeekSummaryCard(')));
-    expect(at('AlunoWeekSummaryCard('), lessThan(at('AlunoRecoveryCard(')));
-    expect(at('AlunoRecoveryCard('), lessThan(at('AlunoEvolutionCard(')));
-    expect(at('AlunoEvolutionCard('), lessThan(at('AlunoUpsellCarousel(')));
-    expect(at('AlunoUpsellCarousel('), lessThan(at('_alunoCatalogGroup(')));
-    expect(screen, contains('mostrarDica: !view.prontidaoBaixa'));
+    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(screen, isNot(contains('AlunoWeekSummaryCard')));
+    expect(screen, isNot(contains('AlunoRecoveryCard')));
+    expect(screen, isNot(contains('AlunoEvolutionCard')));
+    expect(screen, isNot(contains('_alunoCatalogGroup')));
     expect(screen, contains('horario: view.horarioNoFoco'));
     expect(screen, isNot(contains('_StudentToolsSection')));
     expect(screen, isNot(contains('volumePorSemana')));
-    expect(screen, contains('view.ferramentaLiberada'));
     expect(screen, contains('coachMensagens: view.coach'));
     expect(screen, contains('insight: view.insight'));
-    expect(screen, contains('view.semanaVisivel'));
-    expect(screen, contains('view.prontidaoVisivel'));
 
     expect(screen, contains('s.alunoHomeTitulo'));
     expect(screen, isNot(contains('_AlunoAppBarAvatar')));

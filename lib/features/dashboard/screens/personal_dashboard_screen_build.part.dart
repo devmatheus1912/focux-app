@@ -201,9 +201,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                               if (rota != null) context.push(rota);
                             },
                             painelExtra: [
-                              DashboardHomeSecondaryBlock(
-                                focusRules: focusRules,
-                                isDark: themeDark,
+                              DashboardFinancialHeroSection(
                                 mes: mes,
                                 receitaAtual: receitaAtual,
                                 pendente: pendente,
@@ -211,8 +209,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 metaSuperada: metaSuperada,
                                 loadingFin: false,
                                 finData: home.financeiro,
-                                topAderencia: home.topAderencia,
-                                alunosScore: home.commandCenter.alunosScore,
+                              ),
+                              DashboardHomeToolsSection(
+                                isDark: themeDark,
                                 homePlanoFeatures: home.planoFeatures,
                                 onboardingCompleto:
                                     onboardingFromHome?.ativacaoCompleta(
@@ -220,9 +219,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                       hiddenSteps: onboardingHidden,
                                     ) ??
                                     false,
-                                toolsSectionKey: _toolsSectionKey,
-                                onOpenRelatorio:
-                                    () => context.push('/relatorios/global'),
                               ),
                             ],
                             context: context,

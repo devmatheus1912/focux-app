@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/aluno_home_insight.dart';
@@ -45,8 +45,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
       hoje: hoje,
       prontidaoBaixa: prontidaoBaixa,
     );
-    final primary = Theme.of(context).colorScheme.primary;
-    final chrome = ShellChrome.of(context);
+    final chrome = ShellChrome.forBrightness(context, isDark);
     final mute = chrome.mute;
 
     return FxStripCard(
@@ -102,13 +101,7 @@ class AlunoTodayFocusCard extends StatelessWidget {
           ],
           const SizedBox(height: TokensStrip.s3),
           if (texto.ctaPrimario)
-            FxActionChip(
-              label: texto.cta,
-              accent: primary,
-              isDark: isDark,
-              onPressed: onAction,
-              maxLines: 2,
-            )
+            FxLiquidPrimaryButton(label: texto.cta, onPressed: onAction)
           else
             Align(
               alignment: Alignment.centerLeft,

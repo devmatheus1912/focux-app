@@ -17,6 +17,9 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/utils/aluno_home_week.dart';
+import '../../dashboard/utils/aluno_ritmo_linha.dart';
+import '../../dashboard/widgets/aluno_ritmo_card.dart';
 import '../data/checkin_repository.dart';
 import '../utils/historico_detalhe_view.dart';
 import '../utils/treino_ficha_status.dart';
@@ -175,6 +178,19 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       blocos = _blocos(s, _viewFor(home, now), now, home.treinos);
     }
 
+    final semana = alunoSemanaLinha(
+      s,
+      buildAlunoWeekSummary(
+        concluidosSemanaIso: home.concluidosSemanaIso,
+        frequenciaDias: home.frequenciaDias,
+        streakAtual: home.streakAtual,
+        volumeSemanaKg: home.volumeSemanaKg,
+      ),
+    );
+    final jaTreinou = home.historico.any(
+      (h) => normalizeTreinoStatus(h.status) == treinoStatusConcluido,
+    );
+
     return RefreshIndicator(
       onRefresh: _refresh,
       child: FxContentWidthLimiter(
@@ -184,6 +200,10 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (jaTreinou && semana != null) ...[
+                AlunoRitmoCard(linha: semana),
+                const SizedBox(height: TokensStrip.s4),
+              ],
               for (final (i, bloco) in blocos.indexed) ...[
                 if (i > 0) const SizedBox(height: TokensStrip.s4),
                 bloco,

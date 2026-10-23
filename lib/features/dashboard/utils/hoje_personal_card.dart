@@ -39,7 +39,12 @@ HojePersonalCard hojePersonalCard({
       rota: proximoPasso.actionRoute,
     );
   }
-  if (acoes.isEmpty) {
+  final fila = temAluno
+      ? acoes
+          .where((a) => a.actionKey != kCommandActionCriarOportunidade)
+          .toList()
+      : acoes;
+  if (fila.isEmpty) {
     return const HojePersonalCard(
       titulo: 'Operação sob controle',
       frase: 'Nada para fazer agora.',
@@ -47,7 +52,7 @@ HojePersonalCard hojePersonalCard({
       rota: null,
     );
   }
-  final primeira = acoes.first;
+  final primeira = fila.first;
   final rota = primeira.route.trim();
   return HojePersonalCard(
     titulo: primeira.title,

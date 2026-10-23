@@ -88,8 +88,7 @@ void main() {
     }
   });
 
-  test('personal dashboard exposes day focus banner', () {
-    // Banner de foco vive nos slivers extraídos da Home.
+  test('personal dashboard abre no dia, sem o banner de foco', () {
     final source =
         readScreenSourceBundle(
           'lib/features/dashboard/screens/personal_dashboard_screen.dart',
@@ -97,8 +96,10 @@ void main() {
         File(
           'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
         ).readAsStringSync();
-    expect(source, contains('DashboardDayFocusBanner'));
-    expect(source, contains('dashboard_day_focus.dart'));
+    expect(source, contains('HojePersonalCardView'));
+    expect(source, contains('hoje_personal_dia.dart'));
+    expect(source, isNot(contains('DashboardDayFocusBanner')));
+    expect(source, isNot(contains('DashboardAderenciaSemanaWidget')));
   });
 
   test('aluno detail keeps sticky CTA without operacao focus toggle', () {

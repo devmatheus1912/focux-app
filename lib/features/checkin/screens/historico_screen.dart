@@ -16,6 +16,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../dashboard/utils/aluno_ritmo_linha.dart';
+import '../../dashboard/widgets/aluno_ritmo_card.dart';
 import '../data/checkin_repository.dart';
 import '../providers/historico_provider.dart';
 import '../utils/historico_detalhe_view.dart';
@@ -60,9 +62,16 @@ class _HistoricoCheckinScreenState
   Widget build(BuildContext context) {
     final s = S.of(context);
     final listaAsync = ref.watch(historicoListaProvider(_treinoId));
-    final fichas = historicoFichasFiltro(
-      ref.watch(alunoDashboardHomeProvider).value?.treinos ?? const [],
-    );
+    final home = ref.watch(alunoDashboardHomeProvider).value;
+    final ganho = home == null
+        ? null
+        : alunoEvolucaoLinha(
+            s,
+            destaque: home.destaqueExercicio,
+            recordesMes: home.recordesMes,
+            ultimaData: home.recordes.isEmpty ? null : home.recordes.first.data,
+          );
+    final fichas = historicoFichasFiltro(home?.treinos ?? const []);
 
     return fxScreenA11yScope(
       label: s.historicoTitulo,
@@ -100,6 +109,16 @@ class _HistoricoCheckinScreenState
                 ),
               ),
             ),
+            if (ganho != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  TokensStrip.s4,
+                  TokensStrip.s3,
+                  TokensStrip.s4,
+                  0,
+                ),
+                child: AlunoRitmoCard(linha: ganho),
+              ),
             if (fichas.isNotEmpty)
               HistoricoFiltroFichas(
                 fichas: fichas,

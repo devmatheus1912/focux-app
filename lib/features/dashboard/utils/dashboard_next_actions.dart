@@ -166,6 +166,7 @@ List<CommandActionItem> buildDashboardNextActions({
         subtitle: 'Aluno, treino ou lead antes do pico',
         route: '/alunos/novo',
         tone: CommandActionTone.primary,
+        actionKey: kCommandActionCriarOportunidade,
       ),
     );
   }

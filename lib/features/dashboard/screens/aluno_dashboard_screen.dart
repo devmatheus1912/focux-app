@@ -16,14 +16,10 @@ import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../coach/data/coach_proativo_repository.dart';
-import '../../coach/widgets/coach_proativo_card.dart';
-import '../../health/widgets/aluno_recovery_card.dart';
 import '../../monetizacao/widgets/aluno_upsell_carousel.dart';
 import '../../notificacoes/widgets/notificacao_badge_button.dart';
 import '../../nps/widgets/nps_prompt_dialog.dart';
@@ -37,12 +33,10 @@ import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_home_view.dart';
 import '../utils/aluno_pendencias.dart';
 import '../utils/aluno_today_action.dart';
-import '../widgets/aluno_evolution_card.dart';
 import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_pendencias_block.dart';
 import '../widgets/aluno_today_focus_card.dart';
-import '../widgets/aluno_week_summary_card.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 part 'aluno_dashboard_screen_tools.part.dart';
@@ -384,28 +378,28 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onFinanceiro: _openFinanceiro,
           ),
         ),
-      (
-        TokensStrip.s2,
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: () => abrirHomeAlunoMais(
-              context,
-              view: view,
-              home: home,
-              hoje: now,
-              onPendencia: _openPendencia,
-              onPendenciaShown: _pendenciaShown,
+      if (view.pendencias.isNotEmpty || view.ofertas.isNotEmpty)
+        (
+          TokensStrip.s2,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: () => abrirHomeAlunoMais(
+                context,
+                view: view,
+                hoje: now,
+                onPendencia: _openPendencia,
+                onPendenciaShown: _pendenciaShown,
+              ),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(S.of(context).hojeAlunoMais),
             ),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(48, 48),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(S.of(context).hojeAlunoMais),
           ),
         ),
-      ),
     ];
 
     return RefreshIndicator(

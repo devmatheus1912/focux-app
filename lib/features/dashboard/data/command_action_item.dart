@@ -1,5 +1,9 @@
 enum CommandActionTone { primary, hot, money }
 
+/// Enchimento da fila quando o dia não tem ação. A Hoje do personal ignora
+/// isto se já existe aluno: criar gente não é o estado do dia.
+const String kCommandActionCriarOportunidade = 'criar-oportunidade';
+
 class CommandActionItem {
   final String icon;
   final String title;
