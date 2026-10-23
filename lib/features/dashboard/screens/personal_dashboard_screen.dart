@@ -35,16 +35,16 @@ import '../utils/dashboard_scroll_logic.dart';
 import '../utils/dashboard_onboarding_logic.dart';
 import '../constants/dashboard_layout.dart';
 import '../widgets/dashboard_shimmer_loading.dart';
-import '../widgets/dashboard_command_center_section.dart';
 import '../widgets/dashboard_error_state.dart';
 import '../widgets/dashboard_home_primary_slivers.dart';
 import '../widgets/dashboard_home_secondary_block.dart';
 import '../widgets/dashboard_quick_search_sheet.dart';
 import '../widgets/dashboard_home_help_sheet.dart';
 import '../widgets/dashboard_tools_section.dart';
-import '../widgets/dashboard_command_center_sticky_header.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import '../utils/dashboard_home_client_cache.dart';
+import '../utils/hoje_personal_card.dart';
+import '../utils/open_dashboard_command_action.dart';
 
 part 'personal_dashboard_screen_state.part.dart';
 part 'personal_dashboard_screen_build.part.dart';

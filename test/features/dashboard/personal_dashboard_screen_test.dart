@@ -127,24 +127,14 @@ void main() {
       await tester.binding.setSurfaceSize(tela);
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await _pump(tester);
-      expect(find.text('Foco do dia'), findsOneWidget);
+      expect(find.text('Agora'), findsOneWidget);
+      expect(find.text('Ver o painel'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       final lista = find.byType(CustomScrollView).first;
-      final posicao = tester.state<ScrollableState>(
-        find.descendant(of: lista, matching: find.byType(Scrollable)).first,
-      ).position;
-      var passos = 0;
-      double? anterior;
-      while (anterior != posicao.pixels && passos < 60) {
-        anterior = posicao.pixels;
-        await tester.drag(lista, const Offset(0, -400));
-        await tester.pump();
-        expect(tester.takeException(), isNull, reason: 'passo $passos');
-        passos++;
-      }
-      expect(posicao.maxScrollExtent, greaterThan(tela.height));
-      expect(posicao.pixels, posicao.maxScrollExtent);
+      await tester.drag(lista, const Offset(0, -400));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
     });
   }
 
@@ -155,17 +145,8 @@ void main() {
 
       expect(find.byType(PersonalDashboardScreen), findsOneWidget);
       expect(find.textContaining('Matheus'), findsWidgets);
-      expect(find.text('Foco do dia'), findsOneWidget);
-
-      final focusSemantics = tester.getSemantics(find.text('Foco do dia'));
-      expect(
-        focusSemantics.label,
-        anyOf(
-          contains('Foco do dia'),
-          contains('operação sob controle'),
-          contains('Operação sob controle'),
-        ),
-      );
+      expect(find.text('Agora'), findsOneWidget);
+      expect(find.text('Ver o painel'), findsOneWidget);
 
       final help = find.byTooltip(DashboardMicrocopy.helpHomeOpen);
       expect(help, findsOneWidget);

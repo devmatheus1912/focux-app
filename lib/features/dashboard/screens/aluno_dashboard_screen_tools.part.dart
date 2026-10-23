@@ -112,55 +112,51 @@ List<_StudentToolAction> _alunoTools(S s) => [
 
 /// Atalhos ([AlunoHomeView.atalhos]) + catálogo do que o plano do
 /// personal libera.
-class _StudentToolsSection extends StatelessWidget {
-  const _StudentToolsSection({required this.atalhos, required this.liberada});
-
-  final List<String> atalhos;
-  final bool Function(String rota) liberada;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final tools = _alunoTools(
-      s,
-    ).where((t) => liberada(t.route)).toList(growable: false);
-    final featured = [
-      for (final rota in atalhos) ...tools.where((t) => t.route == rota),
-    ];
-    final chrome = ShellChrome.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        DashboardSectionHeader(
-          title: s.alunoAtalhosTitulo,
-          actionLabel: s.alunoAtalhosVerTodos,
-          onAction: () => _showAlunoToolsCatalog(context, tools: tools),
+void abrirHomeAlunoMais(
+  BuildContext context, {
+  required AlunoHomeView view,
+  required AlunoDashboardHomeBundle home,
+  required DateTime hoje,
+  required ValueChanged<AlunoPendencia> onPendencia,
+  required void Function(AlunoPendencia) onPendenciaShown,
+}) {
+  final s = S.of(context);
+  final tools =
+      _alunoTools(s).where((t) => view.ferramentaLiberada(t.route)).toList();
+  _showAlunoToolsCatalog(
+    context,
+    tools: tools,
+    antes: [
+      if (view.pendencias.isNotEmpty)
+        AlunoPendenciasBlock(
+          pendencias: view.pendencias,
+          hoje: hoje,
+          onTap: onPendencia,
+          onShown: onPendenciaShown,
         ),
-        if (featured.isNotEmpty) ...[
-          const SizedBox(height: FxSettingsLayout.headerToGroup),
-          FxSettingsGroup(
-            children: [
-              for (var i = 0; i < featured.length; i++)
-                FxSettingsTile(
-                  icon: featured[i].icon,
-                  label: featured[i].title,
-                  value: featured[i].subtitle,
-                  mute: chrome.mute,
-                  line: chrome.line,
-                  showDivider: i < featured.length - 1,
-                  onTap: () => openAlunoRoute(context, featured[i].route),
-                ),
-            ],
-          ),
-        ],
-      ],
-    );
-  }
+      if (view.semanaVisivel) AlunoWeekSummaryCard(summary: view.semana),
+      if (view.prontidaoVisivel)
+        AlunoRecoveryCard(
+          snapshot: home.recovery,
+          mostrarDica: !view.prontidaoBaixa,
+        ),
+      if (view.jaTreinou)
+        AlunoEvolutionCard(
+          destaque: home.destaqueExercicio,
+          ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
+          recordesMes: home.recordesMes,
+        ),
+      if (view.ofertas.isNotEmpty) AlunoUpsellCarousel(ofertas: view.ofertas),
+      if (view.aviso == AlunoHomeAviso.coach && view.coach.isNotEmpty)
+        CoachProativoCard(mensagens: view.coach),
+    ],
+  );
 }
 
 void _showAlunoToolsCatalog(
   BuildContext context, {
   required List<_StudentToolAction> tools,
+  List<Widget> antes = const [],
 }) {
   final s = S.of(context);
   final primary = Theme.of(context).colorScheme.primary;
@@ -185,6 +181,7 @@ void _showAlunoToolsCatalog(
               subtitle: s.alunoFerramentasSubtitulo,
               leading: Icon(Icons.apps_outlined, size: 18, color: primary),
             ),
+            ...antes,
             for (final (group, header) in sections)
               _alunoCatalogGroup(
                 context: context,

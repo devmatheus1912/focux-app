@@ -50,7 +50,8 @@ void main() {
     expect(screen, contains('Positioned('));
     expect(screen, contains('Stack('));
     expect(screen, contains('if (!_gerado)'));
-    expect(screen, contains('IaCopilotReadinessCard'));
+    expect(screen, contains('CopilotoCardView'));
+    expect(screen, isNot(contains('Tarefas IA')));
     expect(actionsPart, contains('explicitChildNodes: true'));
     expect(shellWidgets, contains('Como funciona'));
     expect(
@@ -85,7 +86,7 @@ void main() {
     expect(screen, isNot(contains('BrandPalette.deep')));
     expect(actionsPart, contains('showIaCopilotCreateTaskSheet'));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('iaCopilotoGerarConfirmTitle'));
+    expect(screen, contains('copilotoConfirmarTitulo'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('FxLiquidPrimaryButton')));
     expect(shellWidgets, isNot(contains('chevron_right')));

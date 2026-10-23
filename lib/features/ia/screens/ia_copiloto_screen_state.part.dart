@@ -23,42 +23,6 @@ class _IaCopilotoScreenState extends ConsumerState<IaCopilotoScreen>
   String get _mode => _modes[_modeIdx];
   String get _modeDisplay => _mode == 'Progressão' ? 'Progresso' : _mode;
 
-  IconData get _modeIcon {
-    switch (_mode) {
-      case 'Progressão':
-        return Icons.trending_up_outlined;
-      default:
-        return Icons.fitness_center_outlined;
-    }
-  }
-
-  String get _readinessHeadline {
-    switch (_mode) {
-      case 'Progressão':
-        return 'Recomendações · Progresso';
-      default:
-        return 'Recomendações · Treino';
-    }
-  }
-
-  String get _modePromise {
-    switch (_mode) {
-      case 'Progressão':
-        return 'Lê os treinos do plano e a aderência para sugerir ajuste de carga, volume ou frequência — você decide o que aplicar.';
-      default:
-        return 'Analisa objetivo, nível, equipamentos e treinos do plano. Você monta e edita os treinos na aba Treinos.';
-    }
-  }
-
-  List<String> get _modeChecks {
-    switch (_mode) {
-      case 'Progressão':
-        return ['Treinos do plano', 'Prontidão wearable', 'Próxima ação'];
-      default:
-        return ['Objetivo e nível', 'Foco de volume', 'Próxima ação sugerida'];
-    }
-  }
-
   IaCopilotoApplySpec? get _applySpec => iaCopilotoApplySpec(
         tipoAcao: _proximaAcao?.tipoAcao,
         mensagemSugerida: _proximaAcao?.mensagemSugerida,

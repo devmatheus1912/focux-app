@@ -4,7 +4,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
   Widget buildPersonalDashboardBody(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final homeAsync = ref.watch(dashboardHomeProvider);
-    final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final themeDark = Theme.of(context).brightness == Brightness.dark;
     final chromeOnDark = themeDark;
 
@@ -147,29 +146,18 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                 }
                 const commandCenterSubtitle =
                     DashboardMicrocopy.commandCenterSubtitle;
-
-                // Sticky: painel off-screen, com prioridades, e tools fora da
-                // faixa do chip (não cobre catálogo / grid).
-                final showStickyPrioritiesAction =
-                    dashboardShowsStickyPrioritiesAction(
-                      panelOffscreen: _prioritiesPanelOffscreen,
-                      showPrioritiesLink: showPrioritiesLink,
-                      toolsBlocksSticky: _toolsBlocksSticky,
-                    );
-                final stickyCommandActionsLabel =
-                    showStickyPrioritiesAction
-                        ? DashboardMicrocopy.verPrioridades
-                        : null;
-
-                void openCommandQuickActions() {
-                  if (!showPrioritiesLink) return;
-                  showCommandActionsSheet(
-                    context,
-                    isDark: themeDark,
-                    primary: primary,
-                    actions: prioritiesSheetActions,
-                  );
-                }
+                final hojeCard = hojePersonalCard(
+                  acoes: dashboardNextActions,
+                  temAluno: data.totalAlunos > 0,
+                  proximoPasso:
+                      onboardingFromHome == null
+                          ? null
+                          : nextSetupStep(
+                            onboardingFromHome,
+                            landingCompleta: landingCompleta,
+                            hidden: onboardingHidden,
+                          ),
+                );
 
                 return RefreshIndicator(
                   onRefresh: () async {
@@ -197,6 +185,46 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
                           ...buildDashboardHomePrimarySlivers(
+                            card: hojeCard,
+                            onCard: () {
+                              final item = hojeCard.acao;
+                              if (item != null) {
+                                openDashboardCommandAction(
+                                  context: context,
+                                  ref: ref,
+                                  item: item,
+                                  source: 'hoje_card',
+                                );
+                                return;
+                              }
+                              final rota = hojeCard.rota;
+                              if (rota != null) context.push(rota);
+                            },
+                            painelExtra: [
+                              DashboardHomeSecondaryBlock(
+                                focusRules: focusRules,
+                                isDark: themeDark,
+                                mes: mes,
+                                receitaAtual: receitaAtual,
+                                pendente: pendente,
+                                progressRaw: progressRaw,
+                                metaSuperada: metaSuperada,
+                                loadingFin: false,
+                                finData: home.financeiro,
+                                topAderencia: home.topAderencia,
+                                alunosScore: home.commandCenter.alunosScore,
+                                homePlanoFeatures: home.planoFeatures,
+                                onboardingCompleto:
+                                    onboardingFromHome?.ativacaoCompleta(
+                                      includeLinkBio: landingCompleta,
+                                      hiddenSteps: onboardingHidden,
+                                    ) ??
+                                    false,
+                                toolsSectionKey: _toolsSectionKey,
+                                onOpenRelatorio:
+                                    () => context.push('/relatorios/global'),
+                              ),
+                            ],
                             context: context,
                             snap: snap,
                             focusRules: focusRules,
@@ -221,7 +249,7 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                             onboardingIncomplete: onboardingIncomplete,
                             primeiroTreinoCriado: primeiroTreinoCriado,
                             onboardingFromHome: onboardingFromHome,
-                            prioritiesChipVisible: showStickyPrioritiesAction,
+                            prioritiesChipVisible: false,
                             pulseEmptyHint: home.pulse?.emptyHint,
                             notificacoesNaoLidasOverride:
                                 home.notificacoesNaoLidas,
@@ -258,73 +286,14 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                 ),
                             onHelp: () => showDashboardHomeHelpSheet(context),
                           ),
-                          if (!focusRules.omitSecondarySections)
-                            SliverToBoxAdapter(
-                              child: DashboardHomeSecondaryBlock(
-                                focusRules: focusRules,
-                                isDark: themeDark,
-                                mes: mes,
-                                receitaAtual: receitaAtual,
-                                pendente: pendente,
-                                progressRaw: progressRaw,
-                                metaSuperada: metaSuperada,
-                                loadingFin: false,
-                                finData: home.financeiro,
-                                topAderencia: home.topAderencia,
-                                alunosScore: home.commandCenter.alunosScore,
-                                homePlanoFeatures: home.planoFeatures,
-                                onboardingCompleto:
-                                    onboardingFromHome?.ativacaoCompleta(
-                                      includeLinkBio: landingCompleta,
-                                      hiddenSteps: onboardingHidden,
-                                    ) ??
-                                    false,
-                                toolsSectionKey: _toolsSectionKey,
-                                onOpenRelatorio:
-                                    () =>
-                                        context.push('/relatorios/global'),
-                              ),
-                            ),
                           SliverToBoxAdapter(
                             child: SizedBox(
                               height:
                                   MediaQuery.of(context).padding.bottom +
-                                  DashboardLayout.bottomDockClearance +
-                                  (showStickyPrioritiesAction
-                                      ? DashboardLayout.prioritiesOverlayReserve
-                                      : 0),
+                                  DashboardLayout.bottomDockClearance,
                             ),
                           ),
                         ],
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: AnimatedSwitcher(
-                            duration: reduceMotion
-                                ? Duration.zero
-                                : const Duration(milliseconds: 220),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            child:
-                                showStickyPrioritiesAction
-                                    ? DashboardPrioritiesOverlay(
-                                      key: const ValueKey('priorities-overlay'),
-                                      isDark: themeDark,
-                                      primary: primary,
-                                      label:
-                                          stickyCommandActionsLabel ??
-                                          DashboardMicrocopy.verPrioridades,
-                                      onTap: openCommandQuickActions,
-                                    )
-                                    : const SizedBox.shrink(
-                                      key: ValueKey('priorities-overlay-off'),
-                                    ),
-                          ),
-                        ),
                       ),
                     ],
                   ),

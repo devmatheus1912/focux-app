@@ -19,64 +19,34 @@ class _AlunoHomeAviso extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final pendente = anamnese;
-    return switch (aviso) {
-      AlunoHomeAviso.financeiro => _AvisoBanner(
-        titulo: s.alunoAvisoFinanceiroTitulo,
-        detalhe: s.alunoAvisoFinanceiroDetalhe,
-        tone: FxBannerTone.warn,
-        onTap: onFinanceiro,
-      ),
+    final frase = switch (aviso) {
+      AlunoHomeAviso.financeiro =>
+        '${s.alunoAvisoFinanceiroTitulo} ${s.alunoAvisoFinanceiroDetalhe}',
       AlunoHomeAviso.atestado ||
-      AlunoHomeAviso.anamnese when pendente != null => _anamnese(
-        context,
-        pendente,
-      ),
-      AlunoHomeAviso.coach => CoachProativoCard(mensagens: coachMensagens),
-      _ => const SizedBox.shrink(),
+      AlunoHomeAviso.anamnese when pendente != null =>
+        () {
+          final texto = alunoAnamneseAvisoTexto(s, pendente);
+          return '${texto.titulo} ${texto.detalhe}';
+        }(),
+      AlunoHomeAviso.coach when coachMensagens.isNotEmpty =>
+        coachMensagens.first.mensagem,
+      _ => null,
     };
-  }
-
-  Widget _anamnese(BuildContext context, AlunoAnamnesePendente pendente) {
-    final texto = alunoAnamneseAvisoTexto(S.of(context), pendente);
-    return _AvisoBanner(
-      titulo: texto.titulo,
-      detalhe: texto.detalhe,
-      tone:
-          pendente == AlunoAnamnesePendente.precisaAtestado
-              ? FxBannerTone.warn
-              : FxBannerTone.info,
-      onTap: () => context.push('/aluno/anamnese'),
+    if (frase == null) return const SizedBox.shrink();
+    final onTap = switch (aviso) {
+      AlunoHomeAviso.financeiro => onFinanceiro,
+      AlunoHomeAviso.atestado || AlunoHomeAviso.anamnese =>
+        () => context.push('/aluno/anamnese'),
+      _ => null,
+    };
+    final chrome = ShellChrome.of(context);
+    final text = Text(
+      frase,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: FocuxHubTypography.bodyMuted(color: chrome.mute),
     );
-  }
-}
-
-class _AvisoBanner extends StatelessWidget {
-  final String titulo;
-  final String detalhe;
-  final FxBannerTone tone;
-  final VoidCallback onTap;
-
-  const _AvisoBanner({
-    required this.titulo,
-    required this.detalhe,
-    required this.tone,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '$titulo. $detalhe',
-      excludeSemantics: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-          onTap: onTap,
-          child: FxStatusBanner(title: titulo, body: detalhe, tone: tone),
-        ),
-      ),
-    );
+    if (onTap == null) return text;
+    return InkWell(onTap: onTap, child: text);
   }
 }

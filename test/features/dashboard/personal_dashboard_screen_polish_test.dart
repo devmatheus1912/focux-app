@@ -42,7 +42,8 @@ void main() {
     expect(screen, contains('buildDashboardHomePrimarySlivers'));
     expect(screen, isNot(contains('coachHomeProvider')));
     expect(screen, contains('coachPending'));
-    expect(screen, contains('DashboardPrioritiesOverlay'));
+    expect(screen, contains('hojeCard'));
+    expect(screen, isNot(contains('DashboardPrioritiesOverlay')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, isNot(contains('onBack:')));

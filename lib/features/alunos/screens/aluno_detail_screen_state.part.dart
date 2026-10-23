@@ -163,8 +163,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
 
     final proximaAcao360 = operacaoAsync.value?.proximaAcao;
     final showOperacaoSticky =
-        (_tabController.index == 0 || _tabController.index == 1) &&
-        resolvedAlunoAsync.hasValue;
+        _tabController.index == 1 && resolvedAlunoAsync.hasValue;
     final showErrorChrome =
         !loadingPrimary &&
         !loadingFallback &&

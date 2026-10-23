@@ -62,4 +62,26 @@ void main() {
       isFalse,
     );
   });
+
+  test('card pede o aluno ou gera no modo escolhido', () {
+    final semAluno = copilotoCard(alunoNome: '  ', modo: 'Treino');
+    expect(semAluno.titulo, 'Escolha o aluno');
+    expect(semAluno.botao, 'Escolher aluno');
+    expect(semAluno.frase, 'Gera um treino. Nada entra sem a sua revisão.');
+    expect(semAluno.escolherAluno, isTrue);
+
+    final treino = copilotoCard(alunoNome: ' Ana ', modo: 'Treino');
+    expect(treino.titulo, 'Ana');
+    expect(treino.botao, 'Gerar treino');
+    expect(treino.frase, 'Gera um treino para Ana. Nada entra sem a sua revisão.');
+    expect(treino.escolherAluno, isFalse);
+
+    final progresso = copilotoCard(alunoNome: 'Ana', modo: 'Progressão');
+    expect(progresso.titulo, 'Ana');
+    expect(progresso.botao, 'Gerar progressão');
+    expect(
+      progresso.frase,
+      'Gera a progressão de Ana. Nada entra sem a sua revisão.',
+    );
+  });
 }

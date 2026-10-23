@@ -77,9 +77,9 @@ void main() {
         'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       ).readAsStringSync(),
       allOf(
-        contains('bottom: 0'),
-        contains('DashboardPrioritiesOverlay'),
-        contains('Alignment.bottomCenter'),
+        contains('hojeCard'),
+        contains("source: 'hoje_card'"),
+        isNot(contains('DashboardPrioritiesOverlay')),
       ),
     );
     expect(

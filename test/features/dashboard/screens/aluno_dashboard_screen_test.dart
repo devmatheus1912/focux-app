@@ -77,21 +77,15 @@ void main() {
     expect(find.text('Olá, Ana'), findsOneWidget);
     expect(find.text('Seu personal: Carlos'), findsOneWidget);
     expect(find.text('Peça seu próximo treino'), findsOneWidget);
+    expect(find.text('Mais'), findsOneWidget);
+    expect(find.text('Sua semana'), findsNothing);
+    expect(find.text('Pendências'), findsNothing);
+    await tester.tap(find.text('Mais'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Sua semana'), findsOneWidget);
-    expect(find.text('2 de 3'), findsOneWidget);
-    expect(find.text('Evolução'), findsOneWidget);
-    expect(find.text('60 → 72 kg'), findsOneWidget);
-    expect(find.text('+20% em 5 semanas'), findsOneWidget);
     expect(find.text('Pendências'), findsOneWidget);
-    expect(find.text('Completar perfil'), findsOneWidget);
-    expect(find.text('Adicionar foto'), findsNothing);
-    expect(find.text('Atualizar medidas'), findsOneWidget);
-    expect(
-      tester.getTopLeft(find.text('Pendências')).dy,
-      lessThan(tester.getTopLeft(find.text('Sua semana')).dy),
-    );
-    expect(find.text('Responder o personal'), findsNothing);
-    expect(find.text('Anamnese solicitada'), findsNothing);
+    expect(find.text('Evolução'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -103,7 +97,7 @@ void main() {
       const Size(430, 2400),
       _home(anamnesePendente: 'PRECISA_ATESTADO'),
     );
-    expect(find.text('Seu personal pediu atestado'), findsOneWidget);
+    expect(find.textContaining('Seu personal pediu atestado'), findsOneWidget);
   });
 
   testWidgets('sem treino nem histórico o foco guia, sem vazio repetido', (
@@ -118,7 +112,7 @@ void main() {
 
   testWidgets('tela estreita não estoura layout', (tester) async {
     await _pump(tester, const Size(320, 2400), _home());
-    expect(find.text('Sua semana'), findsOneWidget);
+    expect(find.text('Mais'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

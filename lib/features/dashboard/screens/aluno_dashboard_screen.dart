@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
@@ -19,7 +19,6 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_status_banner.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../coach/data/coach_proativo_repository.dart';
@@ -44,7 +43,6 @@ import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_pendencias_block.dart';
 import '../widgets/aluno_today_focus_card.dart';
 import '../widgets/aluno_week_summary_card.dart';
-import '../widgets/dashboard_section_header.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 part 'aluno_dashboard_screen_tools.part.dart';
@@ -386,42 +384,26 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onFinanceiro: _openFinanceiro,
           ),
         ),
-      if (view.pendencias.isNotEmpty)
-        (
-          TokensStrip.s4,
-          AlunoPendenciasBlock(
-            pendencias: view.pendencias,
-            hoje: now,
-            onTap: _openPendencia,
-            onShown: _pendenciaShown,
-          ),
-        ),
-      if (view.semanaVisivel)
-        (TokensStrip.s4, AlunoWeekSummaryCard(summary: view.semana)),
-      if (view.prontidaoVisivel)
-        (
-          view.semanaVisivel ? TokensStrip.s3 : TokensStrip.s4,
-          AlunoRecoveryCard(
-            snapshot: home.recovery,
-            mostrarDica: !view.prontidaoBaixa,
-          ),
-        ),
-      if (view.jaTreinou)
-        (
-          TokensStrip.s4,
-          AlunoEvolutionCard(
-            destaque: home.destaqueExercicio,
-            ultimoRecorde: home.recordes.isEmpty ? null : home.recordes.first,
-            recordesMes: home.recordesMes,
-          ),
-        ),
-      if (view.ofertas.isNotEmpty)
-        (TokensStrip.s4, AlunoUpsellCarousel(ofertas: view.ofertas)),
       (
-        TokensStrip.s4,
-        _StudentToolsSection(
-          atalhos: view.atalhos,
-          liberada: view.ferramentaLiberada,
+        TokensStrip.s2,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => abrirHomeAlunoMais(
+              context,
+              view: view,
+              home: home,
+              hoje: now,
+              onPendencia: _openPendencia,
+              onPendenciaShown: _pendenciaShown,
+            ),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 48),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(S.of(context).hojeAlunoMais),
+          ),
         ),
       ),
     ];

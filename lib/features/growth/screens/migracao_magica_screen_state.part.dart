@@ -149,7 +149,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   context,
                   title: 'Migração Focux',
                   subtitle: 'Importe alunos e revise antes de salvar.',
-                  tips: const [
+                  tips: [
                     FxHelpTip(
                       'Importar',
                       'Planilha, texto colado ou foto. A análise de texto não cria ficha ainda.',

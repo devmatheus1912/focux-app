@@ -101,168 +101,79 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                       children: [
                     SizedBox(height: TokensStrip.s3),
 
-                    FxStaggerItem(
-                      index: 0,
-                      child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        0,
-                        FxSettingsLayout.pageInset,
-                        12,
-                      ),
-                      child:
-                          homeAsync.hasError
-                              ? FxErrorState(
-                                chromeOnDark: dark,
-                                primary: brand,
-                                message: friendlyError(
-                                  homeAsync.error!,
-                                  fallback:
-                                      'Não foi possível carregar alunos e cota.',
-                                ),
-                                onRetry:
-                                    () =>
-                                        ref.invalidate(iaCopilotoHomeProvider),
-                              )
-                              : IaCopilotStudentSelector(
-                                alunoNome: _selectedAlunoNome,
-                                onTap: _selecionarAluno,
-                              ),
-                    ),
-                    ),
-
-                    FxStaggerItem(
-                      index: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          FxSettingsLayout.pageInset,
-                          0,
-                          FxSettingsLayout.pageInset,
-                          12,
-                        ),
-                        child: FxSatelliteListTile(
-                          title: 'Tarefas IA',
-                          subtitle: const Text(
-                            'Fila aberta, adiadas e concluídas',
-                          ),
-                          accent: brand,
-                          leading: Icon(Icons.checklist_rounded, color: brand),
-                          onTap:
-                              () => context.push(
-                                '/dashboard/command-center/copiloto',
-                              ),
-                        ),
-                      ),
-                    ),
-
-                    // Mode selector
-                    FxStaggerItem(
-                      index: 2,
-                      child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        0,
-                        FxSettingsLayout.pageInset,
-                        14,
-                      ),
-                      child: IaCopilotModeSelector(
-                        modes: _modes,
-                        selectedIndex: _modeIdx,
-                        dark: dark,
-                        onSelect: (index) {
-                          if (index == _modeIdx) return;
-                          AnalyticsService.instance.track(
-                            ProductEvents.iaCopilotoModeChanged,
-                            props: {'from': _mode, 'to': _modes[index]},
-                          );
-                          setState(() => _modeIdx = index);
-                        },
-                      ),
-                    ),
-                    ),
-
-                    // Pre-gerar: contexto + disclaimer (somem após resultado — fold livre p/ Insights).
                     if (!_gerado) ...[
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
-                          0,
-                          16,
-                          14,
+                      if (homeAsync.hasError)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            FxSettingsLayout.pageInset,
+                            0,
+                            FxSettingsLayout.pageInset,
+                            12,
+                          ),
+                          child: FxErrorState(
+                            chromeOnDark: dark,
+                            primary: brand,
+                            message: friendlyError(
+                              homeAsync.error!,
+                              fallback:
+                                  'Não foi possível carregar alunos e cota.',
+                            ),
+                            onRetry:
+                                () => ref.invalidate(iaCopilotoHomeProvider),
+                          ),
+                        )
+                      else
+                        Semantics(
+                          hint: _howItWorksPreview,
+                          child: CopilotoCardView(
+                            card: copilotoCard(
+                              alunoNome: _selectedAlunoNome,
+                              modo: _mode,
+                            ),
+                            modo: _mode,
+                            onModo: (modo) {
+                              final index = _modes.indexOf(modo);
+                              if (index < 0 || index == _modeIdx) return;
+                              AnalyticsService.instance.track(
+                                ProductEvents.iaCopilotoModeChanged,
+                                props: {'from': _mode, 'to': modo},
+                              );
+                              setState(() => _modeIdx = index);
+                            },
+                            onAction: () {
+                              final card = copilotoCard(
+                                alunoNome: _selectedAlunoNome,
+                                modo: _mode,
+                              );
+                              if (card.escolherAluno) {
+                                _selecionarAluno();
+                                return;
+                              }
+                              _gerar();
+                            },
+                            onVerTarefas:
+                                () => context.push(
+                                  '/dashboard/command-center/copiloto',
+                                ),
+                          ),
                         ),
-                        child: IaCopilotReadinessCard(
-                          headline: _readinessHeadline,
-                          modeDisplay: _modeDisplay,
-                          icon: _modeIcon,
-                          promise: _modePromise,
-                          checks: _modeChecks,
-                          alunoNome: _selectedAlunoNome,
-                          recoveryAsync:
-                              _selectedAlunoId == null
-                                  ? null
-                                  : ref.watch(
-                                    copilotRecoveryProvider(_selectedAlunoId!),
-                                  ),
-                          onRetryRecovery:
-                              _selectedAlunoId == null
-                                  ? null
-                                  : () => ref.invalidate(
-                                    copilotRecoveryProvider(_selectedAlunoId!),
-                                  ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          FxSettingsLayout.pageInset,
-                          0,
-                          FxSettingsLayout.pageInset,
-                          12,
-                        ),
-                        child: IaCopilotSafetyNote(
-                          mute: mute,
-                        ),
-                      ),
                     ],
 
-                    // Gerar (P0 pré-resultado) / progresso / status compacto pós-gerar
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        0,
-                        FxSettingsLayout.pageInset,
-                        18,
-                      ),
-                      child:
-                          !_gerado && !_gerando
-                              ? IaCopilotPrimaryAction(
-                                label: iaCopilotoGerarLabel(_modeDisplay),
-                                brand: brand,
-                                onTap: _gerar,
-                              )
-                              : IaCopilotGenerationStatus(
-                                gerando: _gerando,
-                                gerado: _gerado,
-                                elapsedMs: _geracaoMs,
-                                ink: ink,
-                                mute: mute,
-                                wash: wash,
-                              ),
-                    ),
-
-                    if (!_gerado && !_gerando && _erro == null)
+                    if (_gerando || _gerado)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          TokensStrip.s4,
+                          FxSettingsLayout.pageInset,
                           0,
-                          16,
+                          FxSettingsLayout.pageInset,
                           18,
                         ),
-                        child: IaCopilotPreviewCard(
-                          howItWorks: _howItWorksPreview,
-                          brand: brand,
+                        child: IaCopilotGenerationStatus(
+                          gerando: _gerando,
+                          gerado: _gerado,
+                          elapsedMs: _geracaoMs,
                           ink: ink,
                           mute: mute,
-                          checks: _modeChecks,
+                          wash: wash,
                         ),
                       ),
 

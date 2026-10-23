@@ -54,7 +54,8 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('FxEmptyState'));
-    expect(screen, contains('IaCopilotSafetyNote'));
+    expect(screen, contains('CopilotoCardView'));
+    expect(screen, contains('não monta fichas de treino'));
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, isNot(contains('FxSettingsTile')));

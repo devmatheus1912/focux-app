@@ -1020,5 +1020,14 @@
   "migracaoAcessoSairConfirma": "Sair mesmo assim",
   "migracaoAcessoSairCancela": "Continuar enviando",
   "migracaoTextoCarregado": "Texto carregado de {arquivo}. Toque em Analisar texto.",
-  "@migracaoTextoCarregado": { "placeholders": { "arquivo": { "type": "String" } } }
+  "@migracaoTextoCarregado": { "placeholders": { "arquivo": { "type": "String" } } },
+  "hojePersonalAgora": "Agora",
+  "hojePersonalVerPainel": "Ver o painel",
+  "hojePersonalEmDiaTitulo": "Operação sob controle",
+  "hojePersonalEmDiaFrase": "Nada para fazer agora.",
+  "hojeAlunoMais": "Mais",
+  "fichaOperacaoAgora": "Agora",
+  "fichaOperacaoVerFicha": "Ver a ficha",
+  "copilotoSobrancelha": "Copiloto",
+  "copilotoVerTarefas": "Ver tarefas"
 }

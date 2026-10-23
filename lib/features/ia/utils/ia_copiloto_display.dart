@@ -27,6 +27,45 @@ String iaCopilotoAbrirAlunoLabel() => 'Abrir aluno';
 
 String iaCopilotoRevisarProgressaoLabel() => 'Revisar progressão';
 
+/// Card da abertura do Copiloto, antes de existir um resultado.
+class CopilotoCard {
+  const CopilotoCard({
+    required this.titulo,
+    required this.frase,
+    required this.botao,
+    required this.escolherAluno,
+  });
+
+  final String titulo;
+  final String frase;
+  final String botao;
+  final bool escolherAluno;
+}
+
+CopilotoCard copilotoCard({required String? alunoNome, required String modo}) {
+  final nome = alunoNome?.trim() ?? '';
+  if (nome.isEmpty) {
+    return const CopilotoCard(
+      titulo: 'Escolha o aluno',
+      frase: 'Gera um treino. Nada entra sem a sua revisão.',
+      botao: 'Escolher aluno',
+      escolherAluno: true,
+    );
+  }
+  final progressao = modo == 'Progressão';
+  return CopilotoCard(
+    titulo: nome,
+    frase:
+        progressao
+            ? 'Gera a progressão de $nome. Nada entra sem a sua revisão.'
+            : 'Gera um treino para $nome. Nada entra sem a sua revisão.',
+    botao: progressao ? 'Gerar progressão' : 'Gerar treino',
+    escolherAluno: false,
+  );
+}
+
+String copilotoConfirmarTitulo(String botao) => '$botao com IA?';
+
 class IaCopilotoApplySpec {
   const IaCopilotoApplySpec({
     required this.backendTipo,

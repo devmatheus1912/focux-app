@@ -272,11 +272,12 @@ extension IaCopilotScreenActions on _IaCopilotoScreenState {
     if (!mounted) return;
     if (!await IaQuotaUpgrade.guardBeforeRequest(context, ref)) return;
     if (!mounted) return;
+    final card = copilotoCard(alunoNome: _selectedAlunoNome, modo: _mode);
     final ok = await showFxConfirmSheet(
       context,
-      title: iaCopilotoGerarConfirmTitle(_modeDisplay),
+      title: copilotoConfirmarTitulo(card.botao),
       message: iaCopilotoGerarConfirmMessage(),
-      confirmLabel: iaCopilotoGerarConfirmLabel(_modeDisplay),
+      confirmLabel: card.botao,
     );
     if (!ok || !mounted) return;
 

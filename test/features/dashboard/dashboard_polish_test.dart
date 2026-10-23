@@ -121,7 +121,7 @@ void main() {
     expect(screen, isNot(contains('retornoRapido')));
     expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
     expect(screen, contains('DashboardMicrocopy.commandCenterSubtitle'));
-    expect(screen, contains('DashboardMicrocopy.verPrioridades'));
+    expect(screen, contains('verPrioridades'));
     expect(screen, contains('verCatalogoCompleto'));
     expect(screen, contains('omitSecondarySections'));
     expect(screen, contains('FxHelpIconButton'));
@@ -204,6 +204,10 @@ void main() {
       slivers.indexOf('DashboardHomeHeader'),
       lessThan(slivers.indexOf('SetupOnboardingWidget')),
     );
+    final primeiraTela = slivers.split('return [').last;
+    expect(primeiraTela, contains('HojePersonalCardView'));
+    expect(primeiraTela, isNot(contains('TrialCountdownBanner')));
+    expect(primeiraTela, isNot(contains('SetupOnboardingWidget')));
     expect(slivers, contains('DashboardLayout.foldCard'));
   });
 
