@@ -99,6 +99,30 @@ class FeedbackHelper {
     );
   }
 
+  /// Sucesso com uma ação, como abrir a rotina depois de entrar no fim da fila.
+  static void showSuccessAction(
+    BuildContext context,
+    String message, {
+    required String actionLabel,
+    required VoidCallback onAction,
+    Duration duration = const Duration(seconds: 4),
+  }) {
+    HapticFeedback.mediumImpact();
+    showSnackBar(
+      context,
+      SnackBar(
+        content: Text(message),
+        backgroundColor: EagleTokens.good,
+        duration: duration,
+        action: SnackBarAction(
+          label: actionLabel,
+          textColor: Colors.white,
+          onPressed: onAction,
+        ),
+      ),
+    );
+  }
+
   static void showError(
     BuildContext context,
     String message, {

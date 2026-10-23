@@ -279,6 +279,6 @@ extension _CheckinCorpo on _CheckinScreenState {
   ) {
     final proximo = _proximoIncompleto(exercicios, atual);
     if (proximo == null) return;
-    setState(() => _focoTreinoExercicioId = proximo.treinoExercicioId);
+    _mexerRascunho(() => _focoTreinoExercicioId = proximo.treinoExercicioId);
   }
 }

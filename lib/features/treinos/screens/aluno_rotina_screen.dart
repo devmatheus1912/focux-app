@@ -6,7 +6,9 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../l10n/app_localizations.dart';
@@ -145,18 +147,21 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     final nome = widget.alunoNome.trim();
     final titulo = nome.isEmpty ? s.rotinaLinha : s.rotinaDe(nome);
 
-    return FxShellScaffold(
-      appBar: FxShellAppBar(title: s.rotinaLinha),
-      body: _carregando
-          ? const Center(child: CircularProgressIndicator())
-          : _falhou || _rotina == null
-          ? Center(
-              child: TextButton(
-                onPressed: _carregar,
-                child: Text(s.rotinaNaoAbriu),
-              ),
-            )
-          : _corpo(s, chrome, isDark, titulo, _rotina!),
+    return fxScreenA11yScope(
+      label: s.rotinaLinha,
+      child: FxShellScaffold(
+        appBar: FxShellAppBar(title: s.rotinaLinha),
+        body: _carregando
+            ? const Center(child: FxLoading())
+            : _falhou || _rotina == null
+            ? Center(
+                child: TextButton(
+                  onPressed: _carregar,
+                  child: Text(s.rotinaNaoAbriu),
+                ),
+              )
+            : _corpo(s, chrome, isDark, titulo, _rotina!),
+      ),
     );
   }
 

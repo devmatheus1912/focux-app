@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -12,22 +11,10 @@ void avisarEntrouNoFim(
 }) {
   final s = S.of(context);
   final limpo = nome.trim();
-  FeedbackHelper.showSnackBar(
+  FeedbackHelper.showSuccessAction(
     context,
-    SnackBar(
-      content: Text(
-        limpo.isEmpty ? s.treinosEntrouNoFimSemNome : s.treinosEntrouNoFim(limpo),
-      ),
-      backgroundColor: EagleTokens.good,
-      duration: const Duration(seconds: 4),
-      action: SnackBarAction(
-        label: s.treinosVerRotina,
-        textColor: Colors.white,
-        onPressed: () => context.push(
-          '/alunos/$alunoId/rotina',
-          extra: limpo,
-        ),
-      ),
-    ),
+    limpo.isEmpty ? s.treinosEntrouNoFimSemNome : s.treinosEntrouNoFim(limpo),
+    actionLabel: s.treinosVerRotina,
+    onAction: () => context.push('/alunos/$alunoId/rotina', extra: limpo),
   );
 }
