@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../screens/aluno_shell.dart';
@@ -27,7 +28,9 @@ import '../widgets/fx_route_chrome.dart';
 import 'fx_lazy_shell_container.dart';
 
 /// Aluno shell and push routes.
-List<RouteBase> buildAlunoRoutes() {
+List<RouteBase> buildAlunoRoutes({
+  GlobalKey<NavigatorState>? rootNavigatorKey,
+}) {
   return [
       // ── Aluno (student) dashboard — not part of personal trainer shell ────────
       StatefulShellRoute(
@@ -169,6 +172,7 @@ List<RouteBase> buildAlunoRoutes() {
       ),
       GoRoute(
         path: '/aluno/perfil/editar',
+        parentNavigatorKey: rootNavigatorKey,
         builder:
             (context, state) => FxRouteChrome(
               child: PerfilAlunoEditarScreen(

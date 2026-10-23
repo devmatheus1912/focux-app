@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/legal/focux_legal.dart';
+import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/perfil/data/lgpd_consent_repository.dart';
 import 'package:focux_app/features/perfil/utils/lgpd_consent_display.dart';
 import 'package:focux_app/features/perfil/widgets/perfil_lgpd_consent_sheet.dart';
@@ -45,7 +46,7 @@ Future<List<String>> _pump(
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  await tester.pump();
   return abertos;
 }
 
@@ -97,5 +98,30 @@ void main() {
     await tester.pump();
 
     expect(abertos, ['SAUDE']);
+  });
+
+  testWidgets('o nome fica na horizontal e o botão embaixo', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final abertos = await _pump(
+      tester,
+      tipos: lgpdConsentTiposPersonal,
+      aceites: const {},
+    );
+
+    final titulo = tester.getRect(find.text('Termos de uso'));
+    final botao = tester.getRect(find.byType(FxLiquidPrimaryButton).first);
+    expect(titulo.width, greaterThan(160));
+    expect(titulo.height, lessThan(96));
+    expect(botao.top, greaterThan(titulo.bottom));
+    expect(botao.width, greaterThan(300));
+
+    await tester.tap(find.text('Ler e aceitar').first);
+    await tester.pump();
+    expect(abertos, ['TERMOS']);
+    expect(find.text('Aceitar Termos de uso?'), findsOneWidget);
   });
 }

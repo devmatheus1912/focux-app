@@ -1,4 +1,5 @@
-﻿import 'package:go_router/go_router.dart';
+﻿import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 
 import '../auth/session_invalidator.dart';
 import '../observability/sentry_performance.dart';
@@ -11,7 +12,10 @@ import 'qa_routes.dart' if (dart.vm.product) 'qa_routes_stub.dart';
 import 'role_home.dart';
 
 class AppRouter {
+  static final rootNavigatorKey = GlobalKey<NavigatorState>();
+
   static final GoRouter router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     observers: sentryNavObservers(),
     errorBuilder: (context, state) => const HomeRedirectScreen(),
@@ -19,7 +23,7 @@ class AppRouter {
     redirect: (context, state) async => authRedirect(state),
     routes: [
       ...buildAuthRoutes(),
-      ...buildAlunoRoutes(),
+      ...buildAlunoRoutes(rootNavigatorKey: rootNavigatorKey),
       buildPersonalShellRoute(),
       buildChromeShellRoute(),
       ...buildQaRoutes(),

@@ -8,6 +8,8 @@ void main() {
     expect(editarAlunoConfirmLabel(), 'Salvar');
     expect(editarAlunoConfirmTitle('Beatriz'), 'Salvar Beatriz?');
     expect(editarAlunoConfirmMessage(), contains('360'));
+    expect(editarAlunoConfirmMessage().toLowerCase(), isNot(contains('e-mail')));
+    expect(editarAlunoEmailFrase(), 'O aluno entra no app com este e-mail.');
     expect(editarAlunoTelefoneMax, 20);
     expect(addAlunoFirstName('Beatriz Andrade'), 'Beatriz');
     expect(addAlunoEmailValido('a@b.com'), isTrue);

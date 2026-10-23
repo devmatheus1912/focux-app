@@ -17,7 +17,9 @@ String editarAlunoSalvarTooltip() => 'Salvar';
 String editarAlunoConfirmTitle(String firstName) => 'Salvar $firstName?';
 
 String editarAlunoConfirmMessage() =>
-    'Nome, contato e perfil entram no 360 e na prescrição.';
+    'Nome, telefone e perfil entram no 360 e na prescrição.';
+
+String editarAlunoEmailFrase() => 'O aluno entra no app com este e-mail.';
 
 String editarAlunoConfirmLabel() => 'Salvar';
 

@@ -24,7 +24,6 @@ import '../../../core/widgets/fx_premium_entrance.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/birth_date_api_format.dart';
 import '../data/aluno_repository.dart';
@@ -46,7 +45,6 @@ class EditarAlunoScreen extends ConsumerStatefulWidget {
 class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nome;
-  late final TextEditingController _email;
   late final TextEditingController _telefone;
   late final TextEditingController _whatsapp;
   late final TextEditingController _objetivo;
@@ -59,7 +57,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
 
   bool get _dirty =>
       _nome.text.trim() != widget.aluno.nome.trim() ||
-      _email.text.trim() != widget.aluno.email.trim() ||
       _telefone.text.trim() != (widget.aluno.telefone ?? '').trim() ||
       _whatsapp.text.trim() != (widget.aluno.whatsapp ?? '').trim() ||
       _objetivo.text.trim() != (widget.aluno.objetivo ?? '').trim() ||
@@ -87,7 +84,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   void initState() {
     super.initState();
     _nome = TextEditingController(text: widget.aluno.nome);
-    _email = TextEditingController(text: widget.aluno.email);
     _telefone = TextEditingController(text: widget.aluno.telefone ?? '');
     _whatsapp = TextEditingController(text: widget.aluno.whatsapp ?? '');
     _objetivo = TextEditingController(text: widget.aluno.objetivo ?? '');
@@ -98,7 +94,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _genero = widget.aluno.genero;
     _tipoConsultoria = widget.aluno.tipoConsultoria ?? 'ONLINE';
     _nome.addListener(_onFormChanged);
-    _email.addListener(_onFormChanged);
     _telefone.addListener(_onFormChanged);
     _whatsapp.addListener(_onFormChanged);
     _objetivo.addListener(_onFormChanged);
@@ -118,7 +113,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
   @override
   void dispose() {
     _nome.removeListener(_onFormChanged);
-    _email.removeListener(_onFormChanged);
     _telefone.removeListener(_onFormChanged);
     _whatsapp.removeListener(_onFormChanged);
     _objetivo.removeListener(_onFormChanged);
@@ -127,7 +121,6 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
     _nascimento.dispose();
     _altura.dispose();
     _nome.dispose();
-    _email.dispose();
     _telefone.dispose();
     _whatsapp.dispose();
     _objetivo.dispose();
@@ -151,10 +144,9 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
       _error = null;
     });
     try {
-      final repo = AlunoRepository(ref.read(apiClientProvider));
+      final repo = ref.read(alunoRepositoryProvider);
       await repo.atualizarAluno(widget.aluno.id, {
         'nome': _nome.text.trim(),
-        'email': _email.text.trim(),
         'telefone':
             _telefone.text.trim().isEmpty ? null : _telefone.text.trim(),
         'whatsapp':
@@ -357,26 +349,10 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                                         ? 'Informe o nome'
                                         : null,
                           ),
-                          AlunoInsetFormField(
-                            controller: _email,
-                            label: 'E-mail',
-                            hint: 'aluno@email.com',
-                            icon: Icons.alternate_email_rounded,
-                            keyboardType: TextInputType.emailAddress,
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(
-                                addAlunoEmailMax,
-                              ),
-                            ],
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'Informe o e-mail';
-                              }
-                              if (!addAlunoEmailValido(v)) {
-                                return 'E-mail inválido';
-                              }
-                              return null;
-                            },
+                          _EmailSomenteLeitura(
+                            email: widget.aluno.email,
+                            mute: chrome.mute,
+                            ink: chrome.ink,
                           ),
                           AlunoInsetFormField(
                             controller: _telefone,
@@ -520,6 +496,67 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
         ),
       ),
       ),
+    );
+  }
+}
+
+class _EmailSomenteLeitura extends StatelessWidget {
+  const _EmailSomenteLeitura({
+    required this.email,
+    required this.mute,
+    required this.ink,
+  });
+
+  final String email;
+  final Color mute;
+  final Color ink;
+
+  @override
+  Widget build(BuildContext context) {
+    final line = ShellChrome.of(context).line;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: TokensStrip.s3),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: FxSettingsLayout.insetPrefixWidth,
+                child: Icon(
+                  Icons.alternate_email_rounded,
+                  color: mute,
+                  size: 20,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'E-mail',
+                      style: FxSettingsLayout.subhead(color: mute),
+                    ),
+                    const SizedBox(height: TokensStrip.s1),
+                    Text(email, style: FxSettingsLayout.rowLabel(color: ink)),
+                    const SizedBox(height: TokensStrip.s1),
+                    Text(
+                      editarAlunoEmailFrase(),
+                      style: FocuxHubTypography.bodyMuted(color: mute),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Divider(
+          height: 1,
+          thickness: FxSettingsLayout.dividerThickness,
+          color: line,
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/enums.dart';
@@ -10,6 +11,9 @@ class AlunoRepository {
   final Dio _dio;
 
   AlunoRepository(ApiClient client) : _dio = client.dio;
+
+  @visibleForTesting
+  AlunoRepository.dio(this._dio);
 
   /// Primeira página no envelope do contrato. A lista de produto usa o BFF
   /// `/home`; este GET é picker e tela que ainda não migrou.

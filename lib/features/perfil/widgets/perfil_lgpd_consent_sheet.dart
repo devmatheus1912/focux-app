@@ -11,6 +11,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/lgpd_consent_repository.dart';
 import '../utils/lgpd_consent_display.dart';
@@ -208,28 +209,60 @@ class _ConsentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget trailing;
-    if (busy) {
-      trailing = const SizedBox(width: 22, height: 22, child: FxLoading());
-    } else if (aceito) {
-      trailing = const Icon(
-        Icons.check_circle_rounded,
-        color: EagleTokens.good,
-        size: 22,
-      );
-    } else {
-      trailing = FilledButton.tonal(
-        onPressed: onAceitar,
-        child: const Text('Ler e aceitar'),
-      );
-    }
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      onTap: onAbrir,
-      title: Text(titulo, style: FocuxHubTypography.cardTitle(color: ink)),
-      subtitle: Text(subtitulo, style: FocuxHubTypography.bodyMuted(color: mute)),
-      trailing: trailing,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: onAbrir,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  titulo,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: FocuxHubTypography.cardTitle(color: ink),
+                ),
+                const SizedBox(height: TokensStrip.s1),
+                Text(
+                  subtitulo,
+                  style: FocuxHubTypography.bodyMuted(color: mute),
+                ),
+              ],
+            ),
+          ),
+          if (busy)
+            const Padding(
+              padding: EdgeInsets.only(top: TokensStrip.s2),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SizedBox(width: 22, height: 22, child: FxLoading()),
+              ),
+            )
+          else if (aceito)
+            const Padding(
+              padding: EdgeInsets.only(top: TokensStrip.s2),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  color: EagleTokens.good,
+                  size: 22,
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: TokensStrip.s2),
+              child: FxLiquidPrimaryButton(
+                label: 'Ler e aceitar',
+                onPressed: onAceitar,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
