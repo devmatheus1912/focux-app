@@ -42,7 +42,17 @@ class IntercomFlutterPlugin : FlutterPlugin, MethodCallHandler, EventChannel.Str
       call.method == "initialize" -> {
         val apiKey = call.argument<String>("androidApiKey")
         val appId = call.argument<String>("appId")
-        Intercom.initialize(application, apiKey, appId)
+        try {
+          Intercom.initialize(application, apiKey, appId)
+        } catch (_: Throwable) {
+          // FocuxApplication já inicializou. A segunda chamada só segue se o cliente existe.
+          try {
+            Intercom.client()
+          } catch (_: Throwable) {
+            result.error("INTERCOM_INIT", "Intercom initialize failed", null)
+            return
+          }
+        }
         result.success("Intercom initialized")
       }
       call.method == "setBottomPadding" -> {

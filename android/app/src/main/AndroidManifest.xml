@@ -144,6 +144,14 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
             </intent-filter>
         </activity-alias>
+        <!-- home_widget puxa o Glance, e este app não tem lista Glance.
+             No Android 11 o trampoline abre sem o intent e mata o processo. -->
+        <activity
+            android:name="androidx.glance.appwidget.action.InvisibleActionTrampolineActivity"
+            tools:node="remove" />
+        <activity
+            android:name="androidx.glance.appwidget.action.ActionTrampolineActivity"
+            tools:node="remove" />
         <receiver
             android:name=".FocuxRecoveryWidgetProvider"
             android:exported="true"

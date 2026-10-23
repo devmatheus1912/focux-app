@@ -23,3 +23,13 @@ plugins {
 }
 
 include(":app")
+
+// gradle.properties é local. O Flutter lê esta propriedade antes de montar o manifesto.
+gradle.beforeProject { project ->
+    if (project.path == ":app") {
+        project.extensions.extraProperties.set(
+            "base-application-name",
+            "com.focux.focux_app.FocuxApplication",
+        )
+    }
+}
