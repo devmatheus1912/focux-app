@@ -1,18 +1,10 @@
 part of 'add_exercicio_to_treino_screen.dart';
 
+// A faixa global saiu. Os métodos antigos ficam até a próxima limpeza do arquivo.
+// ignore_for_file: unused_element
+
 extension _AddExercicioToTreinoScreenActions
     on _AddExercicioToTreinoScreenState {
-  String _prescriptionSummaryLine() {
-    final preset = workoutBuilderPresetById(_presetId);
-    return formatActivePrescriptionLine(
-      presetLabel: preset.label,
-      series: _seriesCtrl.text,
-      repeticoes: _repCtrl.text,
-      descansoSegundos: _descansoCtrl.text,
-      tipoSerie: _tipoSerie,
-    );
-  }
-
   Widget? _alunoFilterHeader(bool isDark, Color primary) {
     if (_alunoFilterWarning != null) {
       return Padding(
@@ -213,29 +205,39 @@ extension _AddExercicioToTreinoScreenActions
 
   Future<void> _adicionarRapido(Exercicio exercicio) async {
     if (_loading) return;
-    final prescription = _resolvePrescriptionOrSetError();
-    if (prescription == null) return;
+    final deste = await ExercisePrescriptionMemoryStore.loadFor(exercicio.id);
+    final global = await ExercisePrescriptionMemoryStore.loadGlobalSeries();
+    final linhas = seriesIniciais(desteExercicio: deste, ultimaGlobal: global);
+    final validas = linhas.where((linha) => !linha.aquecimento).toList();
+    final base = validas.isEmpty ? linhas.first : validas.first;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final exercicioId = exercicio.id;
-      await ref
+      final treino = await ref
           .read(treinoRepositoryProvider)
           .adicionarExercicio(
             widget.treinoId,
-            exercicioId,
-            series: prescription.series,
-            repeticoes: prescription.repeticoes,
-            descanso: prescription.descansoSegundos,
-            cargaKg: prescription.cargaKg,
-            rpeAlvo: prescription.rpeAlvo,
-            observacoes: prescription.observacoes,
-            tipoSerie: prescription.tipoSerie,
-            grupoSuperset: prescription.grupoSuperset,
+            exercicio.id,
+            series: linhas.length,
+            repeticoes: base.repeticoes,
+            descanso: prescricaoHipertrofiaDescanso,
+            cargaKg: base.cargaKg,
           );
-      await _persistAfterAdd(exercicioId);
+      final item = treino.exercicios
+          .where((linha) => linha.exercicio.id == exercicio.id)
+          .fold<TreinoExercicioItem?>(null, (atual, linha) => atual == null || linha.id > atual.id ? linha : atual);
+      if (item != null) {
+        await ref.read(treinoRepositoryProvider).salvarSeries(
+          widget.treinoId,
+          item.id,
+          linhas: linhas,
+          bloco: widget.bloco,
+          descansoSegundos: prescricaoHipertrofiaDescanso,
+        );
+      }
+      await ExercisePrescriptionMemoryStore.saveFor(exercicio.id, linhas);
       AnalyticsService.instance.track(
         'quick_add_exercicio',
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
@@ -249,23 +251,12 @@ extension _AddExercicioToTreinoScreenActions
           '${exercicio.nomeDisplay} adicionado.',
         );
       }
-    } on OfflineQueuedException {
+    } catch (error) {
       if (mounted) {
-        leaveWithQueuedNotice(context, '/treinos/${widget.treinoId}');
-      }
-    } catch (e) {
-      if (mounted) {
-        HapticFeedback.lightImpact();
-        setState(() {
-          _error = friendlyError(e, fallback: 'Erro ao adicionar exercício.');
-        });
+        setState(() => _error = friendlyError(error, fallback: 'Não adicionou o exercício.'));
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
+      if (mounted) setState(() => _loading = false);
     }
   }
 

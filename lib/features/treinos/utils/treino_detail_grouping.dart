@@ -1,5 +1,6 @@
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../data/treino_repository.dart';
+import '../utils/prescricao_serie.dart';
 import '../../../core/utils/pt_br_display.dart';
 
 String treinoDetailContextLabel(Treino treino, String? alunoNome) {
@@ -99,6 +100,12 @@ String treinoDetailMetaLine(List<TreinoExercicioItem> items) {
 
 /// Prescrição numa linha — o que o personal precisa escanear.
 String treinoDetailExerciseLine(TreinoExercicioItem te) {
+  if (te.seriesLinhas.isNotEmpty) {
+    return resumoSeries(
+      te.seriesLinhas,
+      descansoSegundos: te.descansoSegundos ?? 75,
+    );
+  }
   final parts = <String>['${te.series}×${te.repeticoes}'];
   final load = formatTreinoLoadKg(te.cargaKg);
   if (load != '—') parts.add(load);

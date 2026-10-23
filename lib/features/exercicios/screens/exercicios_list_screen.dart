@@ -55,6 +55,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   int _page = 0;
   int _totalElements = 0;
   String? _error;
+  String _aba = 'FOCUX';
 
   List<Exercicio> get _visibleItems => _items;
 
@@ -109,6 +110,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             dificuldade: enumQueryParam(_filter.dificuldade),
             favoritos: _filter.favoritos ? true : null,
             hasVideo: _hasVideoFilter,
+            aba: _aba,
             page: _page,
           );
       if (!mounted) return;
@@ -422,6 +424,23 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
                   onFavorite: _favoriteBatch,
                   onDelete: _deleteBatch,
                 ),
+              Row(
+                children: [
+                  for (final aba in const [
+                    ('FOCUX', 'Biblioteca'),
+                    ('MEUS', 'Meus exercícios'),
+                  ])
+                    TextButton(
+                      onPressed: _aba == aba.$1
+                          ? null
+                          : () {
+                              setState(() => _aba = aba.$1);
+                              _fetchPage(reset: true);
+                            },
+                      child: Text(aba.$2),
+                    ),
+                ],
+              ),
               ExerciciosFilterBar(
                 filter: _filter,
                 onChanged: (value) {

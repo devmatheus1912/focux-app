@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/screens/widgets/substituir_exercicio_bottom_sheet.dart';
 import '../data/treino_repository.dart';
+import '../utils/prescricao_serie.dart';
 import '../providers/treinos_provider.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
@@ -217,6 +218,8 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
 }
 
 class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
+  String _bloco = 'TRABALHO';
+
   Future<void> _refresh() async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailRefreshed,
@@ -248,6 +251,8 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       onAssigned: widget.onAssigned,
       onRefresh: _refresh,
       ref: ref,
+      bloco: _bloco,
+      onBloco: (bloco) => setState(() => _bloco = bloco),
     );
   }
 }

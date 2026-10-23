@@ -407,6 +407,7 @@ RouteBase buildChromeShellRoute() {
                 treinoId: intPathParam(state, 'id')!,
                 alunoId: extra.alunoId,
                 recemCriado: extra.recemCriado,
+                bloco: extra.bloco ?? 'TRABALHO',
               );
             },
           ),

@@ -7,6 +7,7 @@ import '../../../../core/widgets/fx_shell_scaffold.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
+import '../../utils/biblioteca_aba.dart';
 import '../../data/exercicio_taxonomy_labels.dart';
 import '../../providers/exercicios_provider.dart';
 import 'exercise_media_thumb.dart';
@@ -16,6 +17,7 @@ class ExercicioCard extends ConsumerWidget {
   final VoidCallback onFavoritoToggle;
   final VoidCallback onUploadVideo;
   final VoidCallback onDelete;
+  final VoidCallback? onCriarMeu;
   final VoidCallback? onTapOverride;
   final VoidCallback? onLongPress;
   final bool selected;
@@ -27,6 +29,7 @@ class ExercicioCard extends ConsumerWidget {
     required this.onFavoritoToggle,
     required this.onUploadVideo,
     required this.onDelete,
+    this.onCriarMeu,
     this.onTapOverride,
     this.onLongPress,
     this.selected = false,
@@ -118,11 +121,20 @@ class ExercicioCard extends ConsumerWidget {
               constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
               icon: Icon(Icons.more_vert_rounded, color: mute, size: 20),
               onSelected: (value) {
+                if (value == 'criar') onCriarMeu?.call();
                 if (value == 'video') onUploadVideo();
                 if (value == 'delete') onDelete();
               },
-              itemBuilder:
-                  (_) => [
+              itemBuilder: (_) {
+                if (videoFocuxIntocado(exercicio)) {
+                  return const [
+                    PopupMenuItem(
+                      value: 'criar',
+                      child: Text('Criar o meu a partir deste'),
+                    ),
+                  ];
+                }
+                return [
                     PopupMenuItem(
                       value: 'video',
                       child: Row(
@@ -158,7 +170,8 @@ class ExercicioCard extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  ],
+                  ];
+              },
             ),
         ],
       ),

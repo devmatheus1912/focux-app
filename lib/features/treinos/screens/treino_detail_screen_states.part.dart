@@ -114,6 +114,29 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         grupoSuperset:
             _tipoSerie == 'SUPERSET' ? int.tryParse(_supersetCtrl.text) : null,
       );
+      final carga = double.tryParse(_cargaCtrl.text.replaceAll(',', '.'));
+      final reps = _repCtrl.text.trim();
+      final aquecimento = widget.item.seriesLinhas.where((linha) => linha.aquecimento).toList();
+      final validasAtuais = widget.item.seriesLinhas.where((linha) => !linha.aquecimento).toList();
+      final quantidadeValidas = (series - aquecimento.length).clamp(1, 20).toInt();
+      final validas = [
+        for (var i = 0; i < quantidadeValidas; i++)
+          SeriePrescrita(
+            numero: i + 1,
+            repeticoes: reps.isEmpty ? (i < validasAtuais.length ? validasAtuais[i].repeticoes : '8-12') : reps,
+            cargaKg: carga ?? (i < validasAtuais.length ? validasAtuais[i].cargaKg : null),
+          ),
+      ];
+      final linhas = [...aquecimento, ...validas];
+      await widget.repo.salvarSeries(
+        widget.treinoId,
+        widget.item.id,
+        linhas: [
+          for (var i = 0; i < linhas.length; i++) linhas[i].comNumero(i + 1),
+        ],
+        bloco: widget.item.bloco,
+        descansoSegundos: descansoSegundos,
+      );
       AnalyticsService.instance.track(
         ProductEvents.treinoPrescriptionSaved,
         props: {

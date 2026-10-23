@@ -10,11 +10,12 @@ import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/rotina_fila.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/rotina_frase.dart';
+import '../utils/semana_da_fila.dart';
+import '../../alunos/providers/alunos_provider.dart';
 
 /// Linha da ficha de treinos do aluno. O subtítulo é a fila numa frase.
 class AlunoRotinaLinha extends ConsumerWidget {
@@ -87,6 +88,7 @@ class AlunoRotinaScreen extends ConsumerStatefulWidget {
 
 class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   RotinaFila? _rotina;
+  List<DiaDaSemana> _dias = const [];
   var _carregando = true;
   var _falhou = false;
   var _salvando = false;
@@ -109,6 +111,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       if (!mounted) return;
       setState(() {
         _rotina = fila;
+        _dias = semanaDaFila(fila);
         _carregando = false;
       });
     } catch (_) {
@@ -129,6 +132,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       if (!mounted) return;
       setState(() {
         _rotina = fila;
+        _dias = semanaDaFila(fila);
         _salvando = false;
       });
     } catch (_) {
@@ -143,7 +147,6 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final nome = widget.alunoNome.trim();
     final titulo = nome.isEmpty ? s.rotinaLinha : s.rotinaDe(nome);
 
@@ -160,7 +163,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                   child: Text(s.rotinaNaoAbriu),
                 ),
               )
-            : _corpo(s, chrome, isDark, titulo, _rotina!),
+            : _corpo(s, chrome, titulo, _rotina!),
       ),
     );
   }
@@ -168,7 +171,6 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   Widget _corpo(
     S s,
     ShellPalette chrome,
-    bool isDark,
     String titulo,
     RotinaFila rotina,
   ) {
@@ -178,7 +180,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       rotina: rotina,
       agora: DateTime.now(),
     );
-    final dias = [
+    final nomes = [
       s.rotinaDiaSeg,
       s.rotinaDiaTer,
       s.rotinaDiaQua,
@@ -187,6 +189,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       s.rotinaDiaSab,
       s.rotinaDiaDom,
     ];
+    final vazia = _dias.every((dia) => dia.sessoes.isEmpty);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -207,7 +210,9 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
               ),
               const SizedBox(height: TokensStrip.s2),
               Text(
-                frase ?? s.rotinaVazia,
+                vazia
+                    ? 'Nenhum treino ainda. Toque um dia e dê o nome da sessão.'
+                    : (frase ?? s.rotinaVazia),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
@@ -217,38 +222,55 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         ),
         const SizedBox(height: TokensStrip.s4),
         Expanded(
-          child: rotina.itens.isEmpty
-              ? const SizedBox.shrink()
-              : ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
-                  itemCount: rotina.itens.length,
-                  onReorderItem: (oldIndex, newIndex) {
-                    if (_salvando) return;
-                    final itens = [...rotina.itens];
-                    final item = itens.removeAt(oldIndex);
-                    itens.insert(newIndex, item);
-                    setState(() => _rotina = _copia(rotina, itens: itens));
-                    _aplicar(
-                      () => ref.read(treinoRepositoryProvider).reordenarRotina(
-                        widget.alunoId,
-                        itens.map((item) => item.id).toList(),
-                      ),
-                    );
-                  },
-                  itemBuilder: (context, index) {
-                    final item = rotina.itens[index];
-                    return ReorderableDragStartListener(
-                      key: ValueKey(item.id),
-                      index: index,
-                      child: _Cartao(
-                        item: item,
-                        chrome: chrome,
-                        descanso: s.rotinaDescanso,
-                      ),
-                    );
-                  },
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
+            itemCount: _dias.length,
+            itemBuilder: (context, index) {
+              final dia = _dias[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                child: DecoratedBox(
+                  decoration: chrome.panel(radius: 20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(TokensStrip.s3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nomes[index],
+                          style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                        ),
+                        if (dia.sessoes.isNotEmpty)
+                          for (final sessao in dia.sessoes)
+                            Text(
+                              sessao.nome,
+                              style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+                            )
+                        else if (dia.descanso)
+                          Text(
+                            s.rotinaDescanso,
+                            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                          ),
+                        TextButton(
+                          onPressed: _salvando ? null : () => _nomear(index),
+                          child: Text(
+                            dia.sessoes.isEmpty
+                                ? 'Toque para nomear'
+                                : 'Mais um neste dia',
+                          ),
+                        ),
+                        if (dia.sessoes.isNotEmpty)
+                          TextButton(
+                            onPressed: _salvando ? null : () => _marcarDescanso(index),
+                            child: Text(s.rotinaDescanso),
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
+              );
+            },
+          ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(
@@ -260,59 +282,17 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                s.rotinaAvisar,
-                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              TextButton(
+                onPressed: _salvando ? null : _usarEmOutro,
+                child: const Text('Usar em outro aluno'),
               ),
               const SizedBox(height: TokensStrip.s2),
-              Wrap(
-                spacing: TokensStrip.s2,
-                runSpacing: TokensStrip.s2,
-                children: [
-                  for (var dia = 1; dia <= 7; dia++)
-                    FxToggleChip(
-                      label: dias[dia - 1],
-                      selected: rotina.diasAviso.contains(dia),
-                      isDark: isDark,
-                      onTap: _salvando
-                          ? null
-                          : () {
-                              final proximos = {...rotina.diasAviso};
-                              if (!proximos.add(dia)) proximos.remove(dia);
-                              setState(
-                                () => _rotina = _copia(rotina, dias: proximos),
-                              );
-                              _aplicar(
-                                () => ref
-                                    .read(treinoRepositoryProvider)
-                                    .definirAvisos(
-                                      widget.alunoId,
-                                      proximos.toList()..sort(),
-                                    ),
-                              );
-                            },
-                    ),
-                ],
+              FxLiquidPrimaryButton(
+                label: 'Pronto',
+                loading: _salvando,
+                loadingLabel: 'Pronto',
+                onPressed: _salvando ? null : () => context.pop(),
               ),
-              const SizedBox(height: TokensStrip.s2),
-              Text(
-                s.rotinaAvisoLinha,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-              const SizedBox(height: TokensStrip.s4),
-              if (rotina.temTreino)
-                FxLiquidPrimaryButton(
-                  label: s.rotinaPorDescanso,
-                  loading: _salvando,
-                  loadingLabel: s.rotinaPorDescanso,
-                  onPressed: _salvando
-                      ? null
-                      : () => _aplicar(
-                          () => ref
-                              .read(treinoRepositoryProvider)
-                              .porDescanso(widget.alunoId),
-                        ),
-                ),
             ],
           ),
         ),
@@ -320,62 +300,85 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     );
   }
 
-  RotinaFila _copia(
-    RotinaFila rotina, {
-    List<RotinaItem>? itens,
-    Set<int>? dias,
-  }) => RotinaFila(
-    itens: itens ?? rotina.itens,
-    diasAviso: dias ?? rotina.diasAviso,
-    sessaoAbertaTreinoId: rotina.sessaoAbertaTreinoId,
-    ultimoTreinoId: rotina.ultimoTreinoId,
-    concluiuHoje: rotina.concluiuHoje,
-  );
-}
+  Future<void> _persistir(List<DiaDaSemana> dias) {
+    return _aplicar(
+      () => ref.read(treinoRepositoryProvider).gravarSemana(widget.alunoId, dias),
+    );
+  }
 
-class _Cartao extends StatelessWidget {
-  const _Cartao({
-    required this.item,
-    required this.chrome,
-    required this.descanso,
-  });
-
-  final RotinaItem item;
-  final ShellPalette chrome;
-  final String descanso;
-
-  @override
-  Widget build(BuildContext context) {
-    final quieto = item.descanso;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-      child: DecoratedBox(
-        decoration: chrome.panel(radius: 20),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 56),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TokensStrip.s4,
-              vertical: TokensStrip.s2,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.rotulo(descanso),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: quieto
-                        ? FocuxHubTypography.bodyMuted(color: chrome.mute)
-                        : FocuxHubTypography.cardTitle(color: chrome.ink),
-                  ),
-                ),
-                Icon(Icons.drag_handle_rounded, color: chrome.mute),
-              ],
-            ),
-          ),
+  Future<void> _nomear(int index) async {
+    final controle = TextEditingController();
+    final nome = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Nome da sessão'),
+        content: TextField(
+          controller: controle,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: 'Peito'),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controle.text.trim()),
+            child: const Text('Pronto'),
+          ),
+        ],
       ),
+    );
+    controle.dispose();
+    if (nome == null || nome.isEmpty || !mounted) return;
+    final dias = [
+      for (var i = 0; i < _dias.length; i++)
+        i == index
+            ? _dias[i].copyWith(
+                descanso: false,
+                sessoes: [
+                  ..._dias[i].sessoes,
+                  SessaoDaSemana(nome: nome),
+                ],
+              )
+            : _dias[i],
+    ];
+    setState(() => _dias = dias);
+    await _persistir(dias);
+  }
+
+  Future<void> _marcarDescanso(int index) async {
+    final dias = [
+      for (var i = 0; i < _dias.length; i++)
+        i == index
+            ? DiaDaSemana(dia: _dias[i].dia, descanso: true)
+            : _dias[i],
+    ];
+    setState(() => _dias = dias);
+    await _persistir(dias);
+  }
+
+  Future<void> _usarEmOutro() async {
+    final alunos = await ref.read(alunosProvider.future);
+    if (!mounted) return;
+    final destino = await showDialog<int>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Usar em outro aluno'),
+        children: [
+          for (final aluno in alunos)
+            if (aluno.id != widget.alunoId)
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, aluno.id),
+                child: Text(aluno.nome),
+              ),
+        ],
+      ),
+    );
+    if (destino == null) return;
+    await _aplicar(
+      () => ref.read(treinoRepositoryProvider).copiarSemana(widget.alunoId, destino),
     );
   }
 }
+

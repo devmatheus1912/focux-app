@@ -16,6 +16,7 @@ class ExerciciosListView extends StatelessWidget {
     required this.onFavorite,
     required this.onUploadVideo,
     required this.onDelete,
+    this.onCriarMeu,
     this.controller,
     this.accent,
     this.loadingMore = false,
@@ -31,6 +32,7 @@ class ExerciciosListView extends StatelessWidget {
   final ValueChanged<Exercicio> onFavorite;
   final ValueChanged<Exercicio> onUploadVideo;
   final ValueChanged<Exercicio> onDelete;
+  final ValueChanged<Exercicio>? onCriarMeu;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +75,7 @@ class ExerciciosListView extends StatelessWidget {
           onFavoritoToggle: () => onFavorite(item),
           onUploadVideo: () => onUploadVideo(item),
           onDelete: () => onDelete(item),
+          onCriarMeu: onCriarMeu == null ? null : () => onCriarMeu!(item),
         );
       },
     );

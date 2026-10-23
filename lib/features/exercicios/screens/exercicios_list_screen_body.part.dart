@@ -1,6 +1,26 @@
 part of 'exercicios_list_screen.dart';
 
 extension on _ExerciciosListScreenState {
+  Future<void> _criarMeu(Exercicio exercicio) async {
+    final grupo = exercicio.grupoMuscularPrimario;
+    if (grupo == null) {
+      FeedbackHelper.showError(context, 'Esse exercício não tem grupo muscular.');
+      return;
+    }
+    try {
+      final criado = await ref.read(exercicioRepositoryProvider).criar(
+        nome: exercicio.nome,
+        grupoMuscularPrimario: grupo,
+      );
+      if (!mounted) return;
+      await context.push('/exercicios/${criado.id}');
+      _fetchPage(reset: true);
+    } catch (error) {
+      if (!mounted) return;
+      FeedbackHelper.showError(context, 'Não criou o exercício.');
+    }
+  }
+
   Widget _libraryBody({
     required bool isDark,
     required Color primary,
@@ -27,6 +47,21 @@ extension on _ExerciciosListScreenState {
     required Color primary,
     required List<Exercicio> visible,
   }) {
+    if (_totalElements == 0 && !_filter.hasActive && _aba == 'MEUS') {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          FxEmptyState(
+            icon: 'dumbbell',
+            title: 'Nenhum exercício seu ainda.',
+            action: FxEmptyAction(
+              label: 'Criar exercício',
+              onTap: () => context.push('/exercicios/novo'),
+            ),
+          ),
+        ],
+      );
+    }
     if (_totalElements == 0 && !_filter.hasActive) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -91,6 +126,7 @@ extension on _ExerciciosListScreenState {
       onFavorite: _favorite,
       onUploadVideo: _uploadVideo,
       onDelete: _deleteOne,
+      onCriarMeu: _criarMeu,
     );
   }
 }

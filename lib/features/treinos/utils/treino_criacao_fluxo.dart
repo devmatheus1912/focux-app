@@ -5,6 +5,7 @@ class TreinoRouteExtra {
     this.alunoId,
     this.alunoNome,
     this.recemCriado = false,
+    this.bloco,
   });
 
   factory TreinoRouteExtra.parse(Object? extra) {
@@ -17,6 +18,7 @@ class TreinoRouteExtra {
               : int.tryParse(rawAlunoId?.toString() ?? ''),
       alunoNome: extra['alunoNome']?.toString(),
       recemCriado: extra['recemCriado'] == true,
+      bloco: extra['bloco']?.toString(),
     );
   }
 
@@ -25,13 +27,17 @@ class TreinoRouteExtra {
 
   /// Treino acabou de nascer no fluxo "Novo treino" desta sessão.
   final bool recemCriado;
+  final String? bloco;
 
   Map<String, Object>? toExtra() {
-    if (alunoId == null && alunoNome == null && !recemCriado) return null;
+    if (alunoId == null && alunoNome == null && !recemCriado && bloco == null) {
+      return null;
+    }
     return {
       if (alunoId != null) 'alunoId': alunoId!,
       if (alunoNome != null) 'alunoNome': alunoNome!,
       if (recemCriado) 'recemCriado': true,
+      if (bloco != null) 'bloco': bloco!,
     };
   }
 }

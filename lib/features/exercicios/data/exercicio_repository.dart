@@ -461,6 +461,7 @@ class ExercicioRepository {
     String? grupoMuscularPrimario,
     String? modalidade,
     String? dificuldade,
+    String? aba,
     int page = 0,
     int size = 40,
   }) async {
@@ -489,6 +490,7 @@ class ExercicioRepository {
     put('grupoMuscularPrimario', grupoMuscularPrimario);
     put('modalidade', modalidade);
     put('dificuldade', dificuldade);
+    put('aba', aba);
     if (hasVideo != null) {
       queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
     }
@@ -519,6 +521,7 @@ class ExercicioRepository {
     String? equipamentos,
     bool? hasVideo,
     bool? favoritos,
+    String? aba,
     int page = 0,
     int size = 30,
   }) async {
@@ -539,6 +542,7 @@ class ExercicioRepository {
     put('espaco', espaco);
     put('equipamento', equipamento);
     put('equipamentos', equipamentos);
+    put('aba', aba);
     if (hasVideo != null) {
       queryParams['hasVideo'] = hasVideo ? 'true' : 'false';
     }

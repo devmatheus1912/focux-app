@@ -96,6 +96,8 @@ class _TreinoDetailBody extends StatelessWidget {
   final VoidCallback onAssigned;
   final Future<void> Function() onRefresh;
   final WidgetRef ref;
+  final String bloco;
+  final ValueChanged<String> onBloco;
   const _TreinoDetailBody({
     required this.treino,
     required this.treinoId,
@@ -106,6 +108,8 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.onAssigned,
     required this.onRefresh,
     required this.ref,
+    required this.bloco,
+    required this.onBloco,
   });
 
   @override
@@ -117,6 +121,9 @@ class _TreinoDetailBody extends StatelessWidget {
     final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
+    final doBloco = orderedExercises
+        .where((item) => item.bloco == bloco)
+        .toList();
 
     Future<void> openEditPrescription(TreinoExercicioItem item) async {
       HapticFeedback.selectionClick();
@@ -145,7 +152,7 @@ class _TreinoDetailBody extends StatelessWidget {
       );
       final added = await context.push<bool>(
         '/treinos/$treinoId/exercicios/add',
-        extra: TreinoRouteExtra(alunoId: alunoId).toExtra(),
+        extra: TreinoRouteExtra(alunoId: alunoId, bloco: bloco).toExtra(),
       );
       if (added == true) {
         ref.invalidate(treinoProvider(treinoId));
@@ -246,6 +253,31 @@ class _TreinoDetailBody extends StatelessWidget {
               ),
             ),
 
+            if (treino.exercicios.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Wrap(
+                    spacing: 8,
+                    children: [
+                      for (final bloco in const [
+                        ('AQUECIMENTO', 'Aquecimento'),
+                        ('AJUSTE', 'Ajuste'),
+                        ('ALONGAMENTO', 'Alongamento'),
+                        ('TRABALHO', 'Trabalho'),
+                      ])
+                        TextButton(
+                          onPressed: () => onBloco(bloco.$1),
+                          child: Text(
+                            orderedExercises.every((item) => item.bloco != bloco.$1)
+                                ? '${bloco.$2} · Pular'
+                                : bloco.$2,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             if (treino.exercicios.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -266,7 +298,7 @@ class _TreinoDetailBody extends StatelessWidget {
               )
             else
               _TreinoExerciseReorderList(
-                exercises: orderedExercises,
+                exercises: doBloco,
                 treinoId: treinoId,
                 alunoId: alunoId,
                 isDark: isDark,

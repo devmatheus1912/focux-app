@@ -84,7 +84,9 @@ class _ExercicioRow extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                te.exercicio.nomeDisplay,
+                                te.exercicio.isPersonalUpload
+                                    ? '${te.exercicio.nomeDisplay} · Meu'
+                                    : te.exercicio.nomeDisplay,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: FocuxHubTypography.cardTitle(color: ink),

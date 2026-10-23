@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -21,12 +20,10 @@ import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/queued_offline_exit.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/data/enums.dart';
@@ -45,6 +42,7 @@ import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../utils/add_exercise_prescription_input.dart';
 import '../utils/exercise_picker_filter.dart';
+import '../utils/prescricao_serie.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/workout_prescription_display.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
@@ -57,11 +55,13 @@ class AddExercicioToTreinoScreen extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
   final bool recemCriado;
+  final String bloco;
   const AddExercicioToTreinoScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
     this.recemCriado = false,
+    this.bloco = 'TRABALHO',
   });
 
   @override
@@ -91,20 +91,15 @@ class _AddExercicioToTreinoScreenState
 
   Future<void> _cancel() async {
     FxKeyboardDismissScope.dismiss();
-    safePopOrGo(context, '/treinos/${widget.treinoId}');
-  }
-
-  void _concluir() {
     final destino = addExercicioConcluirDestino(
       treinoId: widget.treinoId,
       recemCriado: widget.recemCriado,
       alunoId: widget.alunoId,
     );
     if (destino == null) {
-      _cancel();
+      safePopOrGo(context, '/treinos/${widget.treinoId}');
       return;
     }
-    FxKeyboardDismissScope.dismiss();
     context.pushReplacement(
       destino,
       extra: const TreinoRouteExtra(recemCriado: true).toExtra(),
@@ -178,16 +173,6 @@ class _AddExercicioToTreinoScreenState
               ),
             ],
           ),
-          bottomNavigationBar: FxFormStickyBar(
-            child: Semantics(
-              button: true,
-              label: 'Concluir adição de exercícios',
-              child: FxLiquidPrimaryButton(
-                label: 'Concluir',
-                onPressed: _concluir,
-              ),
-            ),
-          ),
           body: SafeArea(
             bottom: false,
             child: CallbackShortcuts(
@@ -199,20 +184,6 @@ class _AddExercicioToTreinoScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ListenableBuilder(
-                      listenable: Listenable.merge([
-                        _seriesCtrl,
-                        _repCtrl,
-                        _descansoCtrl,
-                      ]),
-                      builder:
-                          (context, _) => _PrescriptionActiveStrip(
-                            summary: _prescriptionSummaryLine(),
-                            primary: primary,
-                            isDark: isDark,
-                            onTap: _openPrescriptionEditor,
-                          ),
-                    ),
                     ListenableBuilder(
                       listenable: BibliotecaSyncStatus.instance,
                       builder: (context, _) {

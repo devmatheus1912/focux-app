@@ -16,10 +16,9 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxShellScaffold'));
     expect(screen, isNot(contains('centerTitle: true')));
-    expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains("child: const Text('Cancelar')"));
-    expect(screen, contains("label: 'Concluir'"));
+    expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, isNot(contains('FxActionChip.solidBackground')));
     expect(
       screen,
@@ -62,10 +61,7 @@ void main() {
       expect(screen, contains('treinoPickerHomeProvider'));
       expect(screen, contains('ExerciseLibraryPanel'));
       expect(screen, contains('_adicionarRapido'));
-      expect(screen, contains('showPrescriptionEditorSheet'));
-      expect(screen, contains('formatActivePrescriptionLine'));
-      expect(screen, contains('_PrescriptionActiveStrip'));
-      expect(screen, contains('Prescrição padrão'));
+      expect(screen, contains('seriesIniciais'));
       expect(screen, isNot(contains('_PrescriptionAppBarChip')));
       expect(screen, contains('FxSettingsLayout.pageInset'));
       expect(screen, isNot(contains('_SelectedExerciseInsetGroup')));

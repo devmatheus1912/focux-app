@@ -5,6 +5,8 @@ import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../models/rotina_fila.dart';
+import '../utils/prescricao_serie.dart';
+import '../utils/semana_da_fila.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import '../utils/treinos_list_labels.dart';
 
@@ -22,6 +24,8 @@ class TreinoExercicioItem {
   final String? observacoes;
   final String tipoSerie;
   final int? grupoSuperset;
+  final String bloco;
+  final List<SeriePrescrita> seriesLinhas;
 
   TreinoExercicioItem({
     required this.id,
@@ -35,6 +39,8 @@ class TreinoExercicioItem {
     this.observacoes,
     this.tipoSerie = 'NORMAL',
     this.grupoSuperset,
+    this.bloco = 'TRABALHO',
+    this.seriesLinhas = const [],
   });
 
   factory TreinoExercicioItem.fromJson(Map<String, dynamic> json) =>
@@ -52,6 +58,11 @@ class TreinoExercicioItem {
         observacoes: json['observacoes'] as String?,
         tipoSerie: json['tipoSerie'] as String? ?? 'NORMAL',
         grupoSuperset: json['grupoSuperset'] as int?,
+        bloco: (json['bloco'] as String?) ?? 'TRABALHO',
+        seriesLinhas: (json['seriesLinhas'] as List? ?? const [])
+            .whereType<Map>()
+            .map((linha) => SeriePrescrita.fromJson(Map<String, dynamic>.from(linha)))
+            .toList(),
       );
 }
 
@@ -475,6 +486,36 @@ class TreinoRepository {
     final response = await _dio.put(
       '/api/alunos/$alunoId/rotina/avisos',
       data: {'dias': dias},
+    );
+    return RotinaFila.fromJson(response.data);
+  }
+
+  Future<RotinaFila> gravarSemana(int alunoId, List<DiaDaSemana> dias) async {
+    final response = await _dio.put(
+      '/api/alunos/$alunoId/rotina/semana',
+      data: {
+        'dias': [
+          for (final dia in dias)
+            {
+              'dia': dia.dia,
+              'descanso': dia.descanso || dia.sessoes.isEmpty,
+              'sessoes': [
+                for (final sessao in dia.sessoes)
+                  {
+                    'nome': sessao.nome,
+                    if (sessao.treinoId != null) 'treinoId': sessao.treinoId,
+                  },
+              ],
+            },
+        ],
+      },
+    );
+    return RotinaFila.fromJson(response.data);
+  }
+
+  Future<RotinaFila> copiarSemana(int alunoId, int destinoId) async {
+    final response = await _dio.post(
+      '/api/alunos/$alunoId/rotina/copiar/$destinoId',
     );
     return RotinaFila.fromJson(response.data);
   }

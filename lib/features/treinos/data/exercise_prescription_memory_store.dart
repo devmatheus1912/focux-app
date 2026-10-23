@@ -3,12 +3,65 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'exercise_prescription_memory.dart';
+import '../utils/prescricao_serie.dart';
 
 /// Persiste a última prescrição usada ao adicionar exercício.
 class ExercisePrescriptionMemoryStore {
   ExercisePrescriptionMemoryStore._();
 
   static const _key = 'last_exercise_prescription_v1';
+
+  static Future<void> saveFor(int exercicioId, List<SeriePrescrita> series) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'exercise_prescription_v1_$exercicioId',
+      jsonEncode([for (final serie in series) serie.toJson()]),
+    );
+    if (series.isEmpty) return;
+    final valida = series.firstWhere(
+      (serie) => serie.papel != 'AQUECIMENTO',
+      orElse: () => series.first,
+    );
+    await save(
+      ExercisePrescriptionMemory(
+        presetId: 'hypertrophy',
+        series: series.length,
+        repeticoes: valida.repeticoes,
+        descansoSegundos: prescricaoHipertrofiaDescanso,
+        tipoSerie: 'NORMAL',
+        cargaKg: valida.cargaKg,
+        observacoes: '',
+      ),
+    );
+  }
+
+  static Future<List<SeriePrescrita>?> loadFor(int exercicioId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('exercise_prescription_v1_$exercicioId');
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final list = jsonDecode(raw) as List;
+      return list
+          .whereType<Map>()
+          .map((item) => SeriePrescrita.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<List<SeriePrescrita>?> loadGlobalSeries() async {
+    final memory = await load();
+    if (memory == null || memory.series < 1) return null;
+    return [
+      for (var n = 1; n <= memory.series; n++)
+        SeriePrescrita(
+          numero: n,
+          repeticoes: memory.repeticoes,
+          cargaKg: memory.cargaKg,
+        ),
+    ];
+  }
 
   static Future<void> save(ExercisePrescriptionMemory memory) async {
     final prefs = await SharedPreferences.getInstance();

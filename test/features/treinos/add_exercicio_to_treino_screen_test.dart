@@ -118,7 +118,7 @@ void main() {
     expect(find.text('Explorar'), findsNothing);
     expect(find.text('Biblioteca completa'), findsNothing);
     expect(find.text('Prescrição'), findsNothing);
-    expect(find.textContaining('×'), findsWidgets);
+    expect(find.text('Concluir'), findsNothing);
   });
 
   testWidgets('segmento Músculo mostra grupos sem Explorar', (tester) async {

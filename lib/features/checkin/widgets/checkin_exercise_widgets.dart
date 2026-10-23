@@ -65,7 +65,7 @@ class CheckinSerieCard extends StatelessWidget {
     final contextLine = checkinSerieContextLine(
       s,
       seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
-      carga: checkinCargaLabel(ee.cargaKg),
+      carga: checkinCargaLabel(ee.proximaCargaKg ?? ee.cargaKg),
       descansoSegundos: ee.descansoSegundos,
     );
     final previous = _previousLine(s, ee);
@@ -136,7 +136,9 @@ class CheckinSerieCard extends StatelessWidget {
                 ],
                 const SizedBox(height: TokensStrip.s3),
                 Text(
-                  checkinSerieKpiLabel(ee.seriesFeitas, ee.series),
+                  ee.proximaSeriePapel == 'AQUECIMENTO'
+                      ? 'Aquecimento · ${checkinSerieKpiLabel(ee.seriesFeitas, ee.series)}'
+                      : checkinSerieKpiLabel(ee.seriesFeitas, ee.series),
                   textAlign: TextAlign.center,
                   style: FocuxHubTypography.metric(
                     color: brand,
@@ -190,7 +192,7 @@ class CheckinSerieCard extends StatelessWidget {
                 vertical: TokensStrip.s3,
               ),
               child: _CheckinSetSteppers(
-                cargaKg: draftCargaKg ?? ee.cargaKg,
+                cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
                 reps: draftReps,
                 onPlusCarga: onPlusCarga,
                 onMinusCarga: onMinusCarga,

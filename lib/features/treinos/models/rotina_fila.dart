@@ -6,12 +6,14 @@ class RotinaItem {
     required this.tipo,
     this.treinoId,
     this.nome,
+    this.diaSemana,
   });
 
   final int id;
   final RotinaItemTipo tipo;
   final int? treinoId;
   final String? nome;
+  final int? diaSemana;
 
   bool get descanso => tipo == RotinaItemTipo.descanso;
 
@@ -25,6 +27,7 @@ class RotinaItem {
       tipo: tipoRaw == 'DESCANSO' ? RotinaItemTipo.descanso : RotinaItemTipo.treino,
       treinoId: (json['treinoId'] as num?)?.toInt(),
       nome: json['nome'] as String?,
+      diaSemana: (json['diaSemana'] as num?)?.toInt(),
     );
   }
 }

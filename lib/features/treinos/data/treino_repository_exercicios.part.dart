@@ -35,6 +35,25 @@ extension TreinoRepositoryExercicios on TreinoRepository {
     return Treino.fromJson(response.data as Map<String, dynamic>);
   }
 
+  Future<Treino> salvarSeries(
+    int treinoId,
+    int itemId, {
+    required List<SeriePrescrita> linhas,
+    String bloco = 'TRABALHO',
+    int? descansoSegundos,
+  }) async {
+    final response = await _dio.put(
+      '/api/treinos/$treinoId/exercicios/$itemId/series',
+      data: {
+        'bloco': bloco,
+        if (descansoSegundos != null) 'descansoSegundos': descansoSegundos,
+        'linhas': [for (final linha in linhas) linha.toJson()],
+      },
+    );
+    throwIfQueuedOffline(response);
+    return Treino.fromJson(response.data as Map<String, dynamic>);
+  }
+
   /// Inclui antes de remover: falha real no meio mantém o antigo em vez de
   /// deixar o treino sem nenhum. Na fila, as duas seguem juntas e em ordem.
   Future<void> substituirExercicio(

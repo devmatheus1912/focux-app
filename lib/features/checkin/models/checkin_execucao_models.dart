@@ -31,6 +31,9 @@ class ExecucaoExercicio {
   final bool? dorAnterior;
   final List<ExecucaoSerie> seriesDetalhes;
   final List<ExecucaoSerie> seriesAnteriores;
+  final String? proximaSeriePapel;
+  final double? proximaCargaKg;
+  final String? proximaRepeticoes;
 
   ExecucaoExercicio({
     required this.id,
@@ -62,6 +65,9 @@ class ExecucaoExercicio {
     this.dorAnterior,
     this.seriesDetalhes = const [],
     this.seriesAnteriores = const [],
+    this.proximaSeriePapel,
+    this.proximaCargaKg,
+    this.proximaRepeticoes,
   });
 
   factory ExecucaoExercicio.fromJson(Map<String, dynamic> j) =>
@@ -102,6 +108,9 @@ class ExecucaoExercicio {
             checkinJsonMapList(
               j['seriesAnteriores'],
             ).map(ExecucaoSerie.fromJson).toList(),
+        proximaSeriePapel: checkinJsonString(j['proximaSeriePapel']),
+        proximaCargaKg: checkinJsonDouble(j['proximaCargaKg']),
+        proximaRepeticoes: checkinJsonString(j['proximaRepeticoes']),
       );
 
   Map<String, dynamic> toJson() => {
@@ -173,6 +182,9 @@ class ExecucaoExercicio {
     dorAnterior: dorAnterior,
     seriesDetalhes: seriesDetalhes ?? this.seriesDetalhes,
     seriesAnteriores: seriesAnteriores,
+    proximaSeriePapel: proximaSeriePapel,
+    proximaCargaKg: proximaCargaKg,
+    proximaRepeticoes: proximaRepeticoes,
   );
 }
 
