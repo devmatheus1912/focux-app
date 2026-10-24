@@ -136,8 +136,9 @@ tasks.configureEach {
 
 dependencies {
     // FocuxApplication chama Intercom.initialize; o plugin declara o SDK como
-    // `implementation`, então o app precisa da dependência própria (mesma versão do plugin).
-    implementation("io.intercom.android:intercom-sdk:8.2.+")
+    // `implementation`, então o app precisa da dependência própria (mesma versão do plugin
+    // intercom_flutter 9.6.x).
+    implementation("io.intercom.android:intercom-sdk:18.10.0")
 }
 
 flutter {

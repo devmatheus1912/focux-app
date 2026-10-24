@@ -296,25 +296,54 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
 
   void _syncIntercomUser() {
     if (kIsWeb) return;
-    // Busca userId (JWT sub) + HMAC-SHA256 do backend para Identity Verification.
-    // Qualquer falha é silenciosa — suporte continua funcional sem identificação.
-    ref.read(apiClientProvider).dio.get('/api/auth/intercom-hash').then((r) {
-      final data = r.data as Map<String, dynamic>;
-      final userId = data['userId'] as String?;
-      final hash   = data['hash']   as String?;
-      if (userId == null || hash == null) return;
-      ref.read(perfilProvider.future).then((perfil) {
-        final papel =
-            ref.read(userRoleProvider) == UserRole.aluno ? 'aluno' : 'personal';
-        unawaited(IntercomService.loginUser(
-          userId: userId,
-          userHash: hash,
-          papel: papel,
-          email: perfil.email,
-          name: perfil.nome,
-        ));
-      }).catchError((_) {});
-    }).catchError((_) {});
+    unawaited(_loginIntercom());
+  }
+
+  /// Busca no backend o JWT do Messenger (`/api/auth/intercom-jwt`) e identifica o
+  /// usuário. Se o backend ainda não entrega o JWT, cai no HMAC legado
+  /// (`/api/auth/intercom-hash`). Qualquer falha é silenciosa — o suporte continua
+  /// funcional sem identificação.
+  Future<void> _loginIntercom() async {
+    try {
+      final dio = ref.read(apiClientProvider).dio;
+      String? userId;
+      String? jwt;
+      String? hash;
+      try {
+        final r = await dio.get('/api/auth/intercom-jwt');
+        final data = r.data as Map<String, dynamic>;
+        userId = data['userId'] as String?;
+        jwt = data['jwt'] as String?;
+      } catch (_) {}
+      if (jwt == null || userId == null) {
+        final r = await dio.get('/api/auth/intercom-hash');
+        final data = r.data as Map<String, dynamic>;
+        userId = data['userId'] as String?;
+        hash = data['hash'] as String?;
+      }
+      if (userId == null || (jwt == null && hash == null)) return;
+      final perfil = await ref.read(perfilProvider.future);
+      final papel =
+          ref.read(userRoleProvider) == UserRole.aluno ? 'aluno' : 'personal';
+      await IntercomService.loginUser(
+        userId: userId,
+        papel: papel,
+        jwt: jwt,
+        jwtProvider: jwt == null
+            ? null
+            : () async {
+                try {
+                  final r = await dio.get('/api/auth/intercom-jwt');
+                  return (r.data as Map<String, dynamic>)['jwt'] as String?;
+                } catch (_) {
+                  return null;
+                }
+              },
+        userHash: hash,
+        email: perfil.email,
+        name: perfil.nome,
+      );
+    } catch (_) {}
   }
 
   @override

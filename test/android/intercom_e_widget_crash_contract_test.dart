@@ -10,10 +10,10 @@ void main() {
     final application = File(
       'android/app/src/main/kotlin/com/focux/focux_app/FocuxApplication.kt',
     ).readAsStringSync();
-    final plugin = File(
-      'packages/intercom_flutter/android/src/main/kotlin/io/maido/intercom/IntercomFlutterPlugin.kt',
-    ).readAsStringSync();
     final gradle = File('android/app/build.gradle.kts').readAsStringSync();
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final service =
+        File('lib/core/support/intercom_service.dart').readAsStringSync();
 
     expect(settings, contains('base-application-name'));
     expect(settings, contains('com.focux.focux_app.FocuxApplication'));
@@ -25,7 +25,15 @@ void main() {
     expect(gradle, contains('INTERCOM_APP_ID'));
     expect(gradle, contains('INTERCOM_ANDROID_API_KEY'));
     expect(gradle, contains('buildConfig = true'));
-    expect(plugin, contains('Intercom.client()'));
+    // Plugin oficial (9.x, com setUserJwt); o fork local 3.0.0 não existe mais no build.
+    expect(pubspec, isNot(contains('path: packages/intercom_flutter')));
+    expect(pubspec, matches(RegExp(r'intercom_flutter:\s*\^9\.')));
+    expect(service, contains('setUserJwt'));
+    expect(service, contains('setUserJwtProvider'));
+    expect(
+      manifest,
+      contains('io.intercom.android.sdk.fcm.IntercomFcmMessengerService'),
+    );
     expect(
       manifest,
       contains('androidx.glance.appwidget.action.InvisibleActionTrampolineActivity'),

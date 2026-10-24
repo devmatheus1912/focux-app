@@ -887,10 +887,27 @@ packages:
   intercom_flutter:
     dependency: "direct main"
     description:
-      path: "packages/intercom_flutter"
-      relative: true
-    source: path
-    version: "3.0.0"
+      name: intercom_flutter
+      sha256: "4a2e16f85a63da2b2353f94e3ecdab519ec962c254bf3a6a991b6c8765d4272c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.6.33"
+  intercom_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: intercom_flutter_platform_interface
+      sha256: "4614db118f5a9841b9e43651ddcdfb22700fae499d376bc77b21106f0d7982a1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.9"
+  intercom_flutter_web:
+    dependency: transitive
+    description:
+      name: intercom_flutter_web
+      sha256: "9c6b598508368248880f57b037d323b12d0aefa3a422f2f2b5e1a1c74df0849d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.14"
   intl:
     dependency: transitive
     description:
