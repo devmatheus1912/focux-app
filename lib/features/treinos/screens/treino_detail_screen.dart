@@ -37,6 +37,7 @@ import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
 import '../utils/rotina_aviso.dart';
 import '../widgets/ficha_contexto_treino.dart';
+import '../widgets/modelo_contexto_treino.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_detail_help_sheet.dart';
@@ -78,12 +79,16 @@ class TreinoDetailScreen extends ConsumerStatefulWidget {
   final String? alunoNome;
   final bool recemCriado;
 
+  /// Aberto por um modelo de ficha (e não pela ficha de um aluno).
+  final int? modeloId;
+
   const TreinoDetailScreen({
     super.key,
     required this.treinoId,
     this.alunoId,
     this.alunoNome,
     this.recemCriado = false,
+    this.modeloId,
   });
 
   @override
@@ -175,6 +180,7 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
                     treinoId: treinoId,
                     alunoId: alunoId,
                     alunoNome: alunoNome,
+                    modeloId: widget.modeloId,
                     isDark: isDark,
                     recemCriado: widget.recemCriado,
                     atribuido: _atribuido,
@@ -198,6 +204,7 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
     required this.treinoId,
     required this.alunoId,
     required this.alunoNome,
+    required this.modeloId,
     required this.isDark,
     required this.recemCriado,
     required this.atribuido,
@@ -209,6 +216,7 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
+  final int? modeloId;
   final bool isDark;
   final bool recemCriado;
   final bool atribuido;
@@ -241,6 +249,7 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       treinoId: widget.treinoId,
       alunoId: widget.alunoId,
       alunoNome: widget.alunoNome,
+      modeloId: widget.modeloId,
       isDark: widget.isDark,
       atribuirEmDestaque: treinoDetailAtribuirEmDestaque(
         recemCriado: widget.recemCriado,

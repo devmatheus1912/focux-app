@@ -571,6 +571,12 @@
   },
   "modeloNaoAbriu": "Não abriu o modelo. Tente de novo.",
   "modeloTitulo": "Modelo",
+  "treinoContextoModelo": "Modelo: {nome}",
+  "@treinoContextoModelo": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

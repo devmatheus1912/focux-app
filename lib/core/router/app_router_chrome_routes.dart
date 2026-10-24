@@ -403,6 +403,7 @@ RouteBase buildChromeShellRoute() {
                 alunoId: extra.alunoId,
                 alunoNome: extra.alunoNome,
                 recemCriado: extra.recemCriado,
+                modeloId: extra.modeloId,
               );
             },
           ),

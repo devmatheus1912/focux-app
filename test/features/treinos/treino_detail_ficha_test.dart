@@ -5,7 +5,10 @@ import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
+import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
+import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/widgets/modelo_contexto_treino.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/treino_detail_screen.dart';
 import 'package:focux_app/features/treinos/utils/treino_blocos.dart';
@@ -40,10 +43,20 @@ Future<void> _settle(WidgetTester tester) async {
   }
 }
 
+const _modelo = FichaModelo(
+  id: 31,
+  nome: 'Hipertrofia 4 dias',
+  itens: [
+    FichaModeloItem(descanso: false, treinoId: 9, nome: 'Treino A', diaSemana: 1, exerciciosCount: 2),
+    FichaModeloItem(descanso: false, treinoId: 10, nome: 'Treino B', diaSemana: 2, exerciciosCount: 0),
+  ],
+);
+
 Widget _app(GoRouter router, {RotinaFila rotina = _rotina, Treino? treino}) =>
     ProviderScope(
       overrides: [
         alunoRotinaProvider(3).overrideWith((ref) async => rotina),
+        fichaModeloProvider(31).overrideWith((ref) async => _modelo),
         if (treino != null) treinoProvider.overrideWith((ref, id) async => treino),
       ],
       child: MaterialApp.router(
@@ -207,6 +220,67 @@ void main() {
       expect(find.text('Exercício 2'), findsOneWidget);
       expect(find.text('Alongamento'), findsOneWidget);
       expect(find.byType(OutlinedButton), findsOneWidget);
+    });
+  });
+
+  group('contexto do modelo', () {
+    Future<void> abrirContexto(WidgetTester tester, {int treinoId = 9}) async {
+      final router = GoRouter(
+        initialLocation: '/inicio',
+        routes: [
+          GoRoute(
+            path: '/inicio',
+            builder: (context, state) => Scaffold(
+              body: ModeloContextoDoTreino(modeloId: 31, treinoId: treinoId),
+            ),
+          ),
+          GoRoute(
+            path: '/treinos/:id',
+            builder: (context, state) => Text('treino ${state.pathParameters['id']} ${state.extra}'),
+          ),
+        ],
+      );
+      await tester.pumpWidget(_app(router));
+      await _settle(tester);
+    }
+
+    testWidgets('diz de qual modelo é a sessão', (tester) async {
+      await abrirContexto(tester);
+      expect(find.text('Modelo: Hipertrofia 4 dias'), findsOneWidget);
+      expect(find.text('Treino A'), findsOneWidget);
+      expect(find.text('Treino B'), findsOneWidget);
+    });
+
+    testWidgets('trocar de sessão mantém o modelo e não leva aluno', (tester) async {
+      await abrirContexto(tester);
+      await tester.tap(find.text('Treino B'));
+      await _settle(tester);
+
+      expect(find.textContaining('treino 10'), findsOneWidget);
+      expect(find.textContaining('modeloId: 31'), findsOneWidget);
+      expect(find.textContaining('alunoId'), findsNothing);
+    });
+
+    testWidgets('a tela aberta por um modelo mostra o contexto e esconde Atribuir', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(430, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final router = GoRouter(
+        initialLocation: '/treinos/9',
+        routes: [
+          GoRoute(
+            path: '/treinos/:id',
+            builder: (context, state) => const TreinoDetailScreen(treinoId: 9, modeloId: 31),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        _app(router, treino: Treino(id: 9, nome: 'Treino A', exercicios: [_item(1, 'TRABALHO', 0)])),
+      );
+      await _settle(tester);
+
+      expect(find.text('Modelo: Hipertrofia 4 dias'), findsOneWidget);
+      expect(find.text('Atribuir'), findsNothing);
+      expect(find.textContaining('Ficha de'), findsNothing);
     });
   });
 }

@@ -91,6 +91,7 @@ class _TreinoDetailBody extends StatelessWidget {
   final int treinoId;
   final int? alunoId;
   final String? alunoNome;
+  final int? modeloId;
   final bool isDark;
   final bool atribuirEmDestaque;
   final VoidCallback onAssigned;
@@ -101,6 +102,7 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.treinoId,
     required this.alunoId,
     required this.alunoNome,
+    required this.modeloId,
     required this.isDark,
     required this.atribuirEmDestaque,
     required this.onAssigned,
@@ -196,12 +198,20 @@ class _TreinoDetailBody extends StatelessWidget {
                   children: [
                     FxHubHeader(
                       title: displayName,
-                      subtitle: alunoId == null ? contextLabel : null,
+                      subtitle:
+                          alunoId == null && modeloId == null
+                              ? contextLabel
+                              : null,
                     ),
                     if (alunoId != null)
                       FichaContextoDoTreino(
                         alunoId: alunoId!,
                         alunoNome: alunoNome,
+                        treinoId: treinoId,
+                      )
+                    else if (modeloId != null)
+                      ModeloContextoDoTreino(
+                        modeloId: modeloId!,
                         treinoId: treinoId,
                       )
                     else ...[
