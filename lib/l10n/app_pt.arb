@@ -393,6 +393,8 @@
   "treinosContinuar": "Continuar",
   "treinosFazerMaisUm": "Fazer mais um",
   "treinosVerRotina": "Ver rotina",
+  "treinosSuaSemana": "Sua semana",
+  "treinosSuaSemanaHoje": "Hoje",
   "treinosOrdemDepois": "{ordem} de {total} · depois vem {treino}",
   "@treinosOrdemDepois": {
     "placeholders": {

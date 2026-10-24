@@ -20,9 +20,11 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/utils/aluno_ritmo_linha.dart';
 import '../../dashboard/widgets/aluno_ritmo_card.dart';
 import '../data/checkin_repository.dart';
+import '../../treinos/utils/semana_da_fila.dart';
 import '../utils/historico_detalhe_view.dart';
 import '../utils/treino_ficha_status.dart';
 import '../utils/treinos_hub_view.dart';
+import '../widgets/sua_semana_rows.dart';
 import '../widgets/treino_preparacao_sheet.dart';
 import '../widgets/treinos_destaque_card.dart';
 import '../widgets/treinos_hub_rows.dart';
@@ -41,6 +43,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
   Timer? _virada;
   var _abrindo = false;
   var _verRotina = false;
+  var _verSemana = false;
 
   @override
   void dispose() {
@@ -174,7 +177,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
         ),
       ];
     } else {
-      blocos = _blocos(s, _viewFor(home, now), now, home.treinos);
+      blocos = _blocos(s, _viewFor(home, now), now, home.treinos, home);
     }
 
     final semana = alunoRitmoDaSemana(s, home);
@@ -211,6 +214,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     TreinosHubView view,
     DateTime now,
     List<ExecucaoTreino> treinos,
+    AlunoDashboardHomeBundle home,
   ) {
     final destaque = view.destaque;
     final ordem = destaque != null && destaque.ordemTotal > 1
@@ -240,6 +244,20 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
             _ => () => _executar(destaque.treino),
           },
         ),
+      if (home.rotina.temTreino)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => setState(() => _verSemana = !_verSemana),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 48),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(s.treinosSuaSemana),
+          ),
+        ),
+      if (_verSemana && home.rotina.temTreino) _suaSemana(s, home, now),
       if (view.plano.isNotEmpty)
         Align(
           alignment: Alignment.centerLeft,
@@ -278,4 +296,23 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     ];
   }
 
+  Widget _suaSemana(S s, AlunoDashboardHomeBundle home, DateTime now) {
+    final nomes = [
+      s.rotinaDiaSeg,
+      s.rotinaDiaTer,
+      s.rotinaDiaQua,
+      s.rotinaDiaQui,
+      s.rotinaDiaSex,
+      s.rotinaDiaSab,
+      s.rotinaDiaDom,
+    ];
+    final dias = semanaDaFila(home.rotina);
+    return TreinosHubSecao(
+      titulo: s.treinosSuaSemana,
+      linhas: [
+        for (final (i, dia) in dias.indexed)
+          SuaSemanaRow(diaNome: nomes[i], dia: dia, hoje: dia.dia == now.weekday),
+      ],
+    );
+  }
 }

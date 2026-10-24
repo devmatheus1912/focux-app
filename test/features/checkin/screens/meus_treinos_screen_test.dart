@@ -32,6 +32,7 @@ Map<String, dynamic> _ficha(
 AlunoDashboardHomeBundle _home({
   List<Map<String, dynamic>>? treinos,
   List<Map<String, dynamic>> historico = const [],
+  Map<String, dynamic>? rotina,
 }) => AlunoDashboardHomeBundle.fromJson({
   'aluno': {'id': 7, 'nome': 'Ana', 'email': 'a@t.com', 'status': 'ATIVO'},
   'personalBrand': {'nomePersonal': 'Carlos'},
@@ -43,9 +44,43 @@ AlunoDashboardHomeBundle _home({
   'chat': {'possuiMensagemDoAluno': false, 'naoLidasDoPersonal': 0},
   'volumeSemanaKg': 3200.0,
   'streakAtual': 4,
+  if (rotina != null) 'rotina': rotina,
 });
 
+Map<String, dynamic> _rotinaSemana() => {
+  'itens': [
+    {'id': 1, 'tipo': 'TREINO', 'treinoId': 1, 'nome': 'Peito', 'diaSemana': 1},
+    {'id': 2, 'tipo': 'TREINO', 'treinoId': 2, 'nome': 'Costas', 'diaSemana': 2},
+    {'id': 3, 'tipo': 'DESCANSO'},
+    {'id': 4, 'tipo': 'TREINO', 'treinoId': 3, 'nome': 'Pernas', 'diaSemana': 4},
+  ],
+  'diasAviso': [3, 5, 6, 7],
+};
+
 void main() {
+  testWidgets('Sua semana lista os 7 dias e destaca hoje', (tester) async {
+    await _pump(tester, _home(rotina: _rotinaSemana()));
+
+    expect(find.text('Sua semana'), findsOneWidget);
+    expect(find.text('Seg'), findsNothing);
+    await tester.tap(find.text('Sua semana'));
+    await tester.pumpAndSettle();
+
+    for (final dia in ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']) {
+      expect(find.text(dia), findsOneWidget);
+    }
+    expect(find.text('Peito'), findsOneWidget);
+    expect(find.text('Costas'), findsOneWidget);
+    expect(find.text('Pernas'), findsOneWidget);
+    expect(find.text('Descanso'), findsNWidgets(4));
+    expect(find.text('Hoje'), findsOneWidget);
+  });
+
+  testWidgets('sem ficha na rotina não mostra Sua semana', (tester) async {
+    await _pump(tester, _home());
+    expect(find.text('Sua semana'), findsNothing);
+  });
+
   testWidgets('próximo treino: destaque, plano sem ele e nada inventado', (
     tester,
   ) async {
