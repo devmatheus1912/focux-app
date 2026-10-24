@@ -43,6 +43,7 @@ class RotinaFila {
     this.sessaoAbertaTreinoId,
     this.ultimoTreinoId,
     this.concluiuHoje = false,
+    this.sessoesAdiadas = const [],
   });
 
   static const vazia = RotinaFila();
@@ -52,6 +53,9 @@ class RotinaFila {
   final int? sessaoAbertaTreinoId;
   final int? ultimoTreinoId;
   final bool concluiuHoje;
+
+  /// Sessões que saíram da ficha mas esperam o aluno terminar o treino aberto.
+  final List<String> sessoesAdiadas;
 
   bool get temTreino => itens.any((item) => !item.descanso);
 
@@ -78,6 +82,9 @@ class RotinaFila {
       sessaoAbertaTreinoId: (json['sessaoAbertaTreinoId'] as num?)?.toInt(),
       ultimoTreinoId: (json['ultimoTreinoId'] as num?)?.toInt(),
       concluiuHoje: json['concluiuHoje'] == true,
+      sessoesAdiadas: (json['sessoesAdiadas'] as List? ?? const [])
+          .map((nome) => '$nome')
+          .toList(growable: false),
     );
   }
 }

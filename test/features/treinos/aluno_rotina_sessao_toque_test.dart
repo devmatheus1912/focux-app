@@ -362,6 +362,38 @@ void main() {
     });
   });
 
+  group('sessão adiada', () {
+    testWidgets('avisa que a troca vale quando o aluno terminar o treino', (tester) async {
+      await _abrir(
+        tester,
+        <Object?>[],
+        fila: const RotinaFila(
+          itens: [
+            RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 7, nome: 'Peito', diaSemana: 1, exerciciosCount: 5),
+          ],
+          sessoesAdiadas: ['Costas', 'Pernas'],
+        ),
+      );
+      expect(
+        find.text('A troca de Costas, Pernas vale quando Ana terminar o treino.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('sem sessão adiada, não mostra o aviso', (tester) async {
+      await _abrir(tester, <Object?>[]);
+      expect(find.textContaining('A troca de'), findsNothing);
+    });
+
+    test('sessoesAdiadas vem do JSON; ausente vira lista vazia', () {
+      expect(
+        RotinaFila.fromJson({'itens': [], 'sessoesAdiadas': ['Costas']}).sessoesAdiadas,
+        ['Costas'],
+      );
+      expect(RotinaFila.fromJson({'itens': []}).sessoesAdiadas, isEmpty);
+    });
+  });
+
   test('exerciciosCount vem do JSON da rotina', () {
     final fila = RotinaFila.fromJson({
       'itens': [

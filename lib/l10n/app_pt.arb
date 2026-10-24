@@ -511,6 +511,19 @@
   "treinoBlocoAjuste": "Ajuste",
   "treinoAddAquecimento": "Aquecimento",
   "treinoAddAlongamento": "Alongamento",
+  "rotinaSessaoAdiada": "A troca de {sessoes} vale quando {nome} terminar o treino.",
+  "@rotinaSessaoAdiada": {
+    "placeholders": {
+      "sessoes": {"type": "String"},
+      "nome": {"type": "String"}
+    }
+  },
+  "rotinaSessaoAdiadaSemNome": "A troca de {sessoes} vale quando o aluno terminar o treino.",
+  "@rotinaSessaoAdiadaSemNome": {
+    "placeholders": {
+      "sessoes": {"type": "String"}
+    }
+  },
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

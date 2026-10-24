@@ -227,6 +227,30 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                 linhaDeEstado,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
+              if (_rotina!.sessoesAdiadas.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: TokensStrip.s2),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.schedule_rounded, size: 18, color: chrome.mute),
+                      const SizedBox(width: TokensStrip.s2),
+                      Expanded(
+                        child: Text(
+                          nome.isEmpty
+                              ? s.rotinaSessaoAdiadaSemNome(
+                                  _rotina!.sessoesAdiadas.join(', '),
+                                )
+                              : s.rotinaSessaoAdiada(
+                                  _rotina!.sessoesAdiadas.join(', '),
+                                  nome,
+                                ),
+                          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: TokensStrip.s4),
               if (estado.vazia)
                 FichaFrequencia(
