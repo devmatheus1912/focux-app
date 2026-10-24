@@ -492,6 +492,25 @@
   "rotinaCargasZero": "Começar do zero",
   "rotinaMenuFicha": "Opções da ficha",
   "rotinaMaisAcoes": "Mais ações da sessão",
+  "treinoContextoFicha": "Ficha de {nome} · {dia}",
+  "@treinoContextoFicha": {
+    "placeholders": {
+      "nome": {"type": "String"},
+      "dia": {"type": "String"}
+    }
+  },
+  "treinoContextoFichaSemNome": "Ficha do aluno · {dia}",
+  "@treinoContextoFichaSemNome": {
+    "placeholders": {
+      "dia": {"type": "String"}
+    }
+  },
+  "treinoBlocoAquecimento": "Aquecimento",
+  "treinoBlocoTrabalho": "Trabalho",
+  "treinoBlocoAlongamento": "Alongamento",
+  "treinoBlocoAjuste": "Ajuste",
+  "treinoAddAquecimento": "Aquecimento",
+  "treinoAddAlongamento": "Alongamento",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

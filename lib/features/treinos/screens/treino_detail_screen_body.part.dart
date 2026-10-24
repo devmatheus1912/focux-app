@@ -96,8 +96,6 @@ class _TreinoDetailBody extends StatelessWidget {
   final VoidCallback onAssigned;
   final Future<void> Function() onRefresh;
   final WidgetRef ref;
-  final String bloco;
-  final ValueChanged<String> onBloco;
   const _TreinoDetailBody({
     required this.treino,
     required this.treinoId,
@@ -108,8 +106,6 @@ class _TreinoDetailBody extends StatelessWidget {
     required this.onAssigned,
     required this.onRefresh,
     required this.ref,
-    required this.bloco,
-    required this.onBloco,
   });
 
   @override
@@ -121,9 +117,15 @@ class _TreinoDetailBody extends StatelessWidget {
     final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
-    final doBloco = orderedExercises
-        .where((item) => item.bloco == bloco)
-        .toList();
+    final blocos = blocosComExercicio(orderedExercises);
+    final titulosDeBloco = mostrarTituloDeBloco(blocos);
+    final s = S.of(context);
+    final nomesDosBlocos = {
+      'AQUECIMENTO': s.treinoBlocoAquecimento,
+      'TRABALHO': s.treinoBlocoTrabalho,
+      'ALONGAMENTO': s.treinoBlocoAlongamento,
+      'AJUSTE': s.treinoBlocoAjuste,
+    };
 
     Future<void> openEditPrescription(TreinoExercicioItem item) async {
       HapticFeedback.selectionClick();
@@ -144,7 +146,7 @@ class _TreinoDetailBody extends StatelessWidget {
       }
     }
 
-    Future<void> openAdd({String source = 'cta'}) async {
+    Future<void> openAdd({String source = 'cta', String destino = 'TRABALHO'}) async {
       HapticFeedback.mediumImpact();
       AnalyticsService.instance.track(
         ProductEvents.treinoDetailAddTapped,
@@ -152,7 +154,7 @@ class _TreinoDetailBody extends StatelessWidget {
       );
       final added = await context.push<bool>(
         '/treinos/$treinoId/exercicios/add',
-        extra: TreinoRouteExtra(alunoId: alunoId, bloco: bloco).toExtra(),
+        extra: TreinoRouteExtra(alunoId: alunoId, bloco: destino).toExtra(),
       );
       if (added == true) {
         ref.invalidate(treinoProvider(treinoId));
@@ -194,29 +196,29 @@ class _TreinoDetailBody extends StatelessWidget {
                   children: [
                     FxHubHeader(
                       title: displayName,
-                      subtitle: contextLabel,
+                      subtitle: alunoId == null ? contextLabel : null,
                     ),
-                    const SizedBox(height: TokensStrip.s3),
-                    Wrap(
-                      spacing: TokensStrip.s2,
-                      runSpacing: TokensStrip.s2,
-                      children: [
-                        if (alunoId != null)
+                    if (alunoId != null)
+                      FichaContextoDoTreino(
+                        alunoId: alunoId!,
+                        alunoNome: alunoNome,
+                        treinoId: treinoId,
+                      )
+                    else ...[
+                      const SizedBox(height: TokensStrip.s3),
+                      Wrap(
+                        spacing: TokensStrip.s2,
+                        runSpacing: TokensStrip.s2,
+                        children: [
                           FxActionChip(
-                            label: 'Aluno',
-                            accent: chrome.mute,
+                            label: 'Atribuir',
+                            accent: primary,
                             isDark: isDark,
-                            onPressed: () =>
-                                context.push('/alunos/$alunoId'),
+                            onPressed: openAssign,
                           ),
-                        FxActionChip(
-                          label: 'Atribuir',
-                          accent: primary,
-                          isDark: isDark,
-                          onPressed: openAssign,
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -253,31 +255,6 @@ class _TreinoDetailBody extends StatelessWidget {
               ),
             ),
 
-            if (treino.exercicios.isNotEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final bloco in const [
-                        ('AQUECIMENTO', 'Aquecimento'),
-                        ('AJUSTE', 'Ajuste'),
-                        ('ALONGAMENTO', 'Alongamento'),
-                        ('TRABALHO', 'Trabalho'),
-                      ])
-                        TextButton(
-                          onPressed: () => onBloco(bloco.$1),
-                          child: Text(
-                            orderedExercises.every((item) => item.bloco != bloco.$1)
-                                ? '${bloco.$2} · Pular'
-                                : bloco.$2,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
             if (treino.exercicios.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -296,17 +273,68 @@ class _TreinoDetailBody extends StatelessWidget {
                   ),
                 ),
               )
-            else
-              _TreinoExerciseReorderList(
-                exercises: doBloco,
-                treinoId: treinoId,
-                alunoId: alunoId,
-                isDark: isDark,
-                primary: primary,
-                repo: repo,
-                ref: ref,
-                onEditPrescription: openEditPrescription,
+            else ...[
+              for (final (bloco, itens) in blocos) ...[
+                if (titulosDeBloco)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s2,
+                        FxSettingsLayout.pageInset,
+                        TokensStrip.s1,
+                      ),
+                      child: Text(
+                        nomesDosBlocos[bloco] ?? bloco,
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      ),
+                    ),
+                  ),
+                _TreinoExerciseReorderList(
+                  key: ValueKey(bloco),
+                  exercises: itens,
+                  todos: orderedExercises,
+                  treinoId: treinoId,
+                  alunoId: alunoId,
+                  isDark: isDark,
+                  primary: primary,
+                  repo: repo,
+                  ref: ref,
+                  onEditPrescription: openEditPrescription,
+                ),
+              ],
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    TokensStrip.s2,
+                    FxSettingsLayout.pageInset,
+                    0,
+                  ),
+                  child: Wrap(
+                    spacing: TokensStrip.s2,
+                    children: [
+                      for (final extra in const ['AQUECIMENTO', 'ALONGAMENTO'])
+                        if (!blocos.any((b) => b.$1 == extra))
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                openAdd(source: 'bloco', destino: extra),
+                            icon: const Icon(Icons.add_rounded),
+                            label: Text(
+                              extra == 'AQUECIMENTO'
+                                  ? s.treinoAddAquecimento
+                                  : s.treinoAddAlongamento,
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(48, 48),
+                              shape: const StadiumBorder(),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
               ),
+            ],
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),

@@ -2,6 +2,9 @@ part of 'treino_detail_screen.dart';
 
 class _TreinoExerciseReorderList extends StatefulWidget {
   final List<TreinoExercicioItem> exercises;
+
+  /// Todos os exercícios do treino: o backend só reordena com a lista completa.
+  final List<TreinoExercicioItem> todos;
   final int treinoId;
   final int? alunoId;
   final bool isDark;
@@ -11,7 +14,9 @@ class _TreinoExerciseReorderList extends StatefulWidget {
   final Future<void> Function(TreinoExercicioItem item) onEditPrescription;
 
   const _TreinoExerciseReorderList({
+    super.key,
     required this.exercises,
+    required this.todos,
     required this.treinoId,
     required this.alunoId,
     required this.isDark,
@@ -59,7 +64,11 @@ class _TreinoExerciseReorderListState
       _items.insert(newIndex, item);
     });
     HapticFeedback.mediumImpact();
-    final ids = _items.map((item) => item.id).toList();
+    final ids = idsCompletosAoReordenar(
+      todos: widget.todos,
+      doBloco: widget.exercises,
+      novaOrdemDoBloco: _items.map((item) => item.id).toList(),
+    );
     try {
       await widget.repo.reordenarExercicios(widget.treinoId, ids);
       widget.ref.invalidate(treinoProvider(widget.treinoId));

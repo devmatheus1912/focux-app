@@ -32,9 +32,11 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_criacao_fluxo.dart';
+import '../utils/treino_blocos.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
 import '../utils/rotina_aviso.dart';
+import '../widgets/ficha_contexto_treino.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
 import '../widgets/treino_detail_help_sheet.dart';
@@ -218,8 +220,6 @@ class _TreinoDetailFresh extends ConsumerStatefulWidget {
 }
 
 class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
-  String _bloco = 'TRABALHO';
-
   Future<void> _refresh() async {
     AnalyticsService.instance.track(
       ProductEvents.treinoDetailRefreshed,
@@ -251,8 +251,6 @@ class _TreinoDetailFreshState extends ConsumerState<_TreinoDetailFresh> {
       onAssigned: widget.onAssigned,
       onRefresh: _refresh,
       ref: ref,
-      bloco: _bloco,
-      onBloco: (bloco) => setState(() => _bloco = bloco),
     );
   }
 }
