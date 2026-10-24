@@ -62,3 +62,13 @@ String dataIso(DateTime data) =>
     '${data.year.toString().padLeft(4, '0')}-'
     '${data.month.toString().padLeft(2, '0')}-'
     '${data.day.toString().padLeft(2, '0')}';
+
+/// Quantos dias o selo "Ficha atualizada" aparece para o aluno.
+const diasDoSeloFichaAtualizada = 3;
+
+/// A ficha foi trocada há pouco? Some sozinho pela data, sem registrar leitura.
+bool fichaAtualizadaRecentemente(DateTime? atualizadaEm, DateTime agora) {
+  if (atualizadaEm == null || atualizadaEm.isAfter(agora)) return false;
+  return agora.difference(atualizadaEm) < const Duration(days: diasDoSeloFichaAtualizada);
+}
+

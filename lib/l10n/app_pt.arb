@@ -634,6 +634,21 @@
       "n": {"type": "int"}
     }
   },
+  "alunoFichaAte": "Ficha até {data}",
+  "@alunoFichaAte": {
+    "placeholders": {
+      "data": {"type": "String"}
+    }
+  },
+  "alunoFichaVenceEmDias": "{n, plural, =1{Sua ficha vence amanhã} other{Sua ficha vence em {n} dias}}",
+  "@alunoFichaVenceEmDias": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "alunoFichaVenceHoje": "Sua ficha vence hoje",
+  "alunoFichaVenceu": "Sua ficha venceu. Fale com seu personal.",
+  "alunoFichaAtualizada": "Ficha atualizada",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

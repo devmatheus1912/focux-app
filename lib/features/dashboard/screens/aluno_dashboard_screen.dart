@@ -37,6 +37,7 @@ import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_pendencias_block.dart';
 import '../widgets/aluno_today_focus_card.dart';
+import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 part 'aluno_dashboard_screen_tools.part.dart';
@@ -368,6 +369,11 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                   : null,
         ),
       ),
+      if (temAvisoDaFicha(home.rotina, now))
+        (
+          TokensStrip.s2,
+          FichaVigenciaAluno(rotina: home.rotina, hoje: now),
+        ),
       if (view.aviso != AlunoHomeAviso.nenhum)
         (
           TokensStrip.s3,

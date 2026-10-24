@@ -4,6 +4,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/semana_da_fila.dart';
+import 'ficha_vigencia_aluno.dart';
 import 'treinos_hub_rows.dart';
 
 /// Uma linha por dia da ficha: o que o aluno treina e o dia de hoje em destaque.
@@ -111,9 +112,15 @@ class _SuaSemanaBlocoState extends State<SuaSemanaBloco> {
       s.rotinaDiaDom,
     ];
     final dias = semanaDaFila(widget.rotina);
+    final agora = widget.hoje;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (temAvisoDaFicha(widget.rotina, agora))
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: FichaVigenciaAluno(rotina: widget.rotina, hoje: agora),
+          ),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton(
