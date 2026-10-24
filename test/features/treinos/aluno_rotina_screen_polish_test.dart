@@ -12,7 +12,8 @@ void main() {
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxLoading'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('FxStickyActions'));
+    expect(screen, contains('FichaSemana'));
     expect(screen, contains("'/alunos/\$alunoId/rotina'"));
 
     final aviso = File(

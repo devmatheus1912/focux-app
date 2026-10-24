@@ -456,6 +456,42 @@
   "rotinaAvisoLinha": "No dia marcado, ele vê descanso ao abrir e recebe um aviso. O treino continua lá.",
   "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
   "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
+  "rotinaEstadoVazia": "Escolha quantos dias por semana o aluno treina.",
+  "rotinaEstado": "{dias, plural, =1{1 dia} other{{dias} dias}} · {prontas} de {sessoes} prontas",
+  "@rotinaEstado": {
+    "placeholders": {
+      "dias": {"type": "int"},
+      "prontas": {"type": "int"},
+      "sessoes": {"type": "int"}
+    }
+  },
+  "rotinaEstadoCompleta": "{dias, plural, =1{1 dia} other{{dias} dias}} · tudo pronto",
+  "@rotinaEstadoCompleta": {
+    "placeholders": {
+      "dias": {"type": "int"}
+    }
+  },
+  "rotinaIncompletas": "{n, plural, =1{1 treino incompleto} other{{n} treinos incompletos}}",
+  "@rotinaIncompletas": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "rotinaMontar": "Montar",
+  "rotinaSessaoVazia": "Vazio",
+  "rotinaAdicionarTreino": "Adicionar treino",
+  "rotinaMoverDia": "Mover para outro dia",
+  "rotinaCopiarDia": "Copiar para outro dia",
+  "rotinaEscolhaODia": "Para qual dia?",
+  "rotinaRecomecar": "Recomeçar ficha",
+  "rotinaRecomecarTitulo": "Recomeçar a ficha?",
+  "rotinaRecomecarTexto": "As sessões atuais saem da ficha. Os treinos continuam salvos.",
+  "rotinaDuplicarBase": "Duplicar como base",
+  "rotinaManterCargasTitulo": "Manter as cargas?",
+  "rotinaManterCargas": "Manter as cargas",
+  "rotinaCargasZero": "Começar do zero",
+  "rotinaMenuFicha": "Opções da ficha",
+  "rotinaMaisAcoes": "Mais ações da sessão",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",
