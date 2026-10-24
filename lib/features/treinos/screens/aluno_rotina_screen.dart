@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -15,6 +16,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../models/rotina_fila.dart';
 import '../providers/treinos_provider.dart';
+import '../utils/ficha_medicao.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
@@ -101,6 +103,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   var _carregando = true;
   var _falhou = false;
   var _salvando = false;
+  final _medicao = FichaMedicao();
 
   @override
   void initState() {
@@ -123,6 +126,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         _dias = semanaDaFila(fila);
         _carregando = false;
       });
+      _marcarInicioSeVazia();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -152,8 +156,13 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     }
   }
 
+  void _marcarInicioSeVazia() {
+    if (estadoDaFicha(_dias).vazia) _medicao.iniciar(DateTime.now());
+  }
+
   Future<void> _persistir(List<DiaDaSemana> dias) {
     setState(() => _dias = dias);
+    if (estadoDaFicha(dias).vazia) _medicao.iniciar(DateTime.now());
     return _aplicar(
       () => ref.read(treinoRepositoryProvider).gravarSemana(widget.alunoId, dias),
     );
@@ -247,10 +256,21 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         FxStickyActions(
           primaryLabel: s.rotinaPronto,
           loading: _salvando,
-          onPrimary: () => context.pop(),
+          onPrimary: _concluir,
         ),
       ],
     );
+  }
+
+  void _concluir() {
+    final props = _medicao.aoConcluir(estadoDaFicha(_dias), DateTime.now());
+    if (props != null) {
+      AnalyticsService.instance.track(
+        ProductEvents.fichaPrimeiroPronto,
+        props: props,
+      );
+    }
+    context.pop();
   }
 
   Future<void> _abrirSessao(int treinoId) async {

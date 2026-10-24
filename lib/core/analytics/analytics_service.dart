@@ -258,6 +258,7 @@ class ProductEvents {
   static const treinosActionOpened = 'treinos_action_opened';
   static const treinosAssigned = 'treinos_assigned';
   static const treinosCloned = 'treinos_cloned';
+  static const fichaPrimeiroPronto = 'ficha_primeiro_pronto';
   static const treinosDuplicated = 'treinos_duplicated';
   static const treinosBulkOpened = 'treinos_bulk_opened';
   static const treinosDeleted = 'treinos_deleted';
