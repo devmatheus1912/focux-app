@@ -457,6 +457,13 @@
   "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
   "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
   "rotinaSessaoMontar": "Toque para montar",
+  "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
+  "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",
+  "@rotinaSessaoExercicios": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
   "rotinaFrequenciaTitulo": "Quantos dias por semana?",
   "rotinaFrequenciaDica": "Cria Treino A, B, C… nos dias certos. Você muda depois e preenche cada sessão.",
   "rotinaMarcarDescanso": "Marcar descanso",

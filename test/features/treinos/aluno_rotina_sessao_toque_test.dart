@@ -236,4 +236,65 @@ void main() {
     await _abrir(tester, <Object?>[]);
     expect(find.text('Quantos dias por semana?'), findsNothing);
   });
+
+  testWidgets('cada sessão mostra quantos exercícios tem', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(430, 2400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _abrir(
+      tester,
+      <Object?>[],
+      fila: const RotinaFila(
+        itens: [
+          RotinaItem(
+            id: 1,
+            tipo: RotinaItemTipo.treino,
+            treinoId: 7,
+            nome: 'Peito',
+            diaSemana: 1,
+            exerciciosCount: 5,
+          ),
+          RotinaItem(
+            id: 2,
+            tipo: RotinaItemTipo.treino,
+            treinoId: 8,
+            nome: 'Costas',
+            diaSemana: 2,
+            exerciciosCount: 1,
+          ),
+          RotinaItem(
+            id: 3,
+            tipo: RotinaItemTipo.treino,
+            treinoId: 9,
+            nome: 'Pernas',
+            diaSemana: 3,
+            exerciciosCount: 0,
+          ),
+        ],
+      ),
+    );
+
+    expect(find.text('5 exercícios'), findsOneWidget);
+    expect(find.text('1 exercício'), findsOneWidget);
+    expect(find.text('Sem exercícios. Toque para montar.'), findsOneWidget);
+    expect(find.text('Toque para montar'), findsNothing);
+  });
+
+  test('exerciciosCount vem do JSON da rotina', () {
+    final fila = RotinaFila.fromJson({
+      'itens': [
+        {
+          'id': 1,
+          'tipo': 'TREINO',
+          'treinoId': 7,
+          'nome': 'Peito',
+          'diaSemana': 1,
+          'exerciciosCount': 4,
+        },
+        {'id': 2, 'tipo': 'DESCANSO'},
+      ],
+    });
+    expect(fila.itens.first.exerciciosCount, 4);
+    expect(fila.itens.last.exerciciosCount, isNull);
+    expect(semanaDaFila(fila).first.sessoes.single.exerciciosCount, 4);
+  });
 }

@@ -7,6 +7,7 @@ class RotinaItem {
     this.treinoId,
     this.nome,
     this.diaSemana,
+    this.exerciciosCount,
   });
 
   final int id;
@@ -14,6 +15,7 @@ class RotinaItem {
   final int? treinoId;
   final String? nome;
   final int? diaSemana;
+  final int? exerciciosCount;
 
   bool get descanso => tipo == RotinaItemTipo.descanso;
 
@@ -28,6 +30,7 @@ class RotinaItem {
       treinoId: (json['treinoId'] as num?)?.toInt(),
       nome: json['nome'] as String?,
       diaSemana: (json['diaSemana'] as num?)?.toInt(),
+      exerciciosCount: (json['exerciciosCount'] as num?)?.toInt(),
     );
   }
 }

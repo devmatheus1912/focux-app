@@ -1,10 +1,17 @@
 import '../models/rotina_fila.dart';
 
 class SessaoDaSemana {
-  const SessaoDaSemana({this.treinoId, required this.nome});
+  const SessaoDaSemana({
+    this.treinoId,
+    required this.nome,
+    this.exerciciosCount,
+  });
 
   final int? treinoId;
   final String nome;
+
+  /// Null quando o backend não informou; 0 é sessão vazia.
+  final int? exerciciosCount;
 }
 
 class DiaDaSemana {
@@ -78,7 +85,11 @@ List<DiaDaSemana> semanaDaFila(RotinaFila fila) {
     final destino = (dia != null && dia >= 1 && dia <= 7) ? dia : cursor++;
     if (cursor > 8) cursor = 8;
     porDia.putIfAbsent(destino, () => []).add(
-      SessaoDaSemana(treinoId: item.treinoId, nome: item.nome ?? ''),
+      SessaoDaSemana(
+        treinoId: item.treinoId,
+        nome: item.nome ?? '',
+        exerciciosCount: item.exerciciosCount,
+      ),
     );
   }
   return [

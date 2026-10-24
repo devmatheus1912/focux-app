@@ -385,7 +385,11 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                 children: [
                   nome,
                   Text(
-                    s.rotinaSessaoMontar,
+                    switch (sessao.exerciciosCount) {
+                      null => s.rotinaSessaoMontar,
+                      0 => s.rotinaSessaoSemExercicios,
+                      final n => s.rotinaSessaoExercicios(n),
+                    },
                     style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                   ),
                 ],
