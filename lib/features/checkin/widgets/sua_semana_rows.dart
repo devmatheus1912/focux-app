@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/semana_da_fila.dart';
+import 'treinos_hub_rows.dart';
 
 /// Uma linha por dia da ficha: o que o aluno treina e o dia de hoje em destaque.
 class SuaSemanaRow extends StatelessWidget {
@@ -78,6 +80,65 @@ class SuaSemanaRow extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Botão "Sua semana" que abre a lista de segunda a domingo logo abaixo.
+class SuaSemanaBloco extends StatefulWidget {
+  const SuaSemanaBloco({super.key, required this.rotina, required this.hoje});
+
+  final RotinaFila rotina;
+  final DateTime hoje;
+
+  @override
+  State<SuaSemanaBloco> createState() => _SuaSemanaBlocoState();
+}
+
+class _SuaSemanaBlocoState extends State<SuaSemanaBloco> {
+  var _aberta = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final nomes = [
+      s.rotinaDiaSeg,
+      s.rotinaDiaTer,
+      s.rotinaDiaQua,
+      s.rotinaDiaQui,
+      s.rotinaDiaSex,
+      s.rotinaDiaSab,
+      s.rotinaDiaDom,
+    ];
+    final dias = semanaDaFila(widget.rotina);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => setState(() => _aberta = !_aberta),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(48, 48),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(s.treinosSuaSemana),
+          ),
+        ),
+        if (_aberta)
+          TreinosHubSecao(
+            titulo: s.treinosSuaSemana,
+            linhas: [
+              for (final (i, dia) in dias.indexed)
+                SuaSemanaRow(
+                  diaNome: nomes[i],
+                  dia: dia,
+                  hoje: dia.dia == widget.hoje.weekday,
+                ),
+            ],
+          ),
+      ],
     );
   }
 }
