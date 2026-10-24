@@ -281,6 +281,9 @@ RouteBase buildChromeShellRoute() {
                 (context, state) => AlunoRotinaScreen(
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? '',
+                  // Aviso e Hoje abrem a ficha já com o menu de renovar.
+                  abrirVigencia: state.uri.queryParameters['renovar'] == '1',
+                  origem: state.uri.queryParameters['origem'] ?? 'ficha',
                 ),
           ),
           GoRoute(

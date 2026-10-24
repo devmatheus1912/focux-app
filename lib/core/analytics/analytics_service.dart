@@ -259,6 +259,8 @@ class ProductEvents {
   static const treinosAssigned = 'treinos_assigned';
   static const treinosCloned = 'treinos_cloned';
   static const fichaPrimeiroPronto = 'ficha_primeiro_pronto';
+  static const fichaVigenciaDefinida = 'ficha_vigencia_definida';
+  static const fichaRenovada = 'ficha_renovada';
   static const treinosDuplicated = 'treinos_duplicated';
   static const treinosBulkOpened = 'treinos_bulk_opened';
   static const treinosDeleted = 'treinos_deleted';

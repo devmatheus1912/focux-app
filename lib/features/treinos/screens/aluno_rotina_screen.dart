@@ -111,10 +111,18 @@ class AlunoRotinaScreen extends ConsumerStatefulWidget {
     super.key,
     required this.alunoId,
     required this.alunoNome,
+    this.abrirVigencia = false,
+    this.origem = 'ficha',
   });
 
   final int alunoId;
   final String alunoNome;
+
+  /// Abre o menu de renovar assim que a ficha carrega (vindo do aviso ou do Hoje).
+  final bool abrirVigencia;
+
+  /// De onde veio: `aviso`, `hoje` ou `ficha`. Só serve para as métricas.
+  final String origem;
 
   @override
   ConsumerState<AlunoRotinaScreen> createState() => _AlunoRotinaScreenState();
@@ -127,6 +135,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   var _falhou = false;
   var _salvando = false;
   final _medicao = FichaMedicao();
+  var _vigenciaAberta = false;
 
   @override
   void initState() {
@@ -150,6 +159,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         _carregando = false;
       });
       _marcarInicioSeVazia();
+      _abrirVigenciaSeSolicitado();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -159,31 +169,49 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     }
   }
 
-  Future<void> _aplicar(Future<RotinaFila> Function() gravar) async {
-    if (_salvando) return;
+  /// Devolve true quando gravou.
+  Future<bool> _aplicar(Future<RotinaFila> Function() gravar) async {
+    if (_salvando) return false;
     setState(() => _salvando = true);
     try {
       final fila = await gravar();
       ref.invalidate(alunoRotinaProvider(widget.alunoId));
-      if (!mounted) return;
+      if (!mounted) return true;
       setState(() {
         _rotina = fila;
         _dias = semanaDaFila(fila);
         _salvando = false;
       });
+      return true;
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() => _salvando = false);
       FeedbackHelper.showError(context, S.of(context).checkinNaoSalvou);
       await _carregar();
+      return false;
     }
+  }
+
+  /// Aviso e Hoje levam direto ao menu de renovar, uma vez só.
+  void _abrirVigenciaSeSolicitado() {
+    if (!widget.abrirVigencia || _vigenciaAberta || estadoDaFicha(_dias).vazia) return;
+    _vigenciaAberta = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final acao = await mostrarMenuDaVigencia(context);
+      if (acao != null && mounted) await _acaoDaVigencia(acao);
+    });
+  }
+
+  void _registrar(String evento, Map<String, Object?> props) {
+    AnalyticsService.instance.track(evento, props: props);
   }
 
   void _marcarInicioSeVazia() {
     if (estadoDaFicha(_dias).vazia) _medicao.iniciar(DateTime.now());
   }
 
-  Future<void> _persistir(List<DiaDaSemana> dias) {
+  Future<bool> _persistir(List<DiaDaSemana> dias) {
     setState(() => _dias = dias);
     if (estadoDaFicha(dias).vazia) _medicao.iniciar(DateTime.now());
     return _aplicar(
@@ -337,12 +365,15 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     final semana = semanaPorFrequencia(dias);
     setState(() => _dias = semana);
     final repo = ref.read(treinoRepositoryProvider);
-    await _aplicar(() async {
+    final ok = await _aplicar(() async {
       final criada = await repo.gravarSemana(widget.alunoId, semana);
       return semanas == null
           ? criada
           : repo.definirVigenciaSemanas(widget.alunoId, semanas);
     });
+    if (ok && semanas != null) {
+      _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'criacao', 'semanas': semanas});
+    }
   }
 
   Future<void> _acaoDaVigencia(AcaoDaVigencia acao) async {
@@ -350,11 +381,11 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     final id = widget.alunoId;
     switch (acao) {
       case AcaoDaVigencia.renovar4:
-        await _renovar(() => repo.renovarVigencia(id, 4));
+        await _renovar(() => repo.renovarVigencia(id, 4), semanas: 4);
       case AcaoDaVigencia.renovar8:
-        await _renovar(() => repo.renovarVigencia(id, 8));
+        await _renovar(() => repo.renovarVigencia(id, 8), semanas: 8);
       case AcaoDaVigencia.renovar12:
-        await _renovar(() => repo.renovarVigencia(id, 12));
+        await _renovar(() => repo.renovarVigencia(id, 12), semanas: 12);
       case AcaoDaVigencia.semPrazo:
         await _aplicar(() => repo.removerVigencia(id));
       case AcaoDaVigencia.escolherData:
@@ -372,10 +403,17 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     }
   }
 
-  Future<void> _renovar(Future<RotinaFila> Function() gravar) async {
-    await _aplicar(gravar);
+  /// [semanas] só vem das renovações (4, 8, 12); escolher uma data é definir, não renovar.
+  Future<void> _renovar(Future<RotinaFila> Function() gravar, {int? semanas}) async {
+    final ok = await _aplicar(gravar);
+    if (!ok || !mounted) return;
+    if (semanas != null) {
+      _registrar(ProductEvents.fichaRenovada, {'origem': widget.origem, 'semanas': semanas});
+    } else {
+      _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'ficha'});
+    }
     final fim = _rotina?.vigencia.fim;
-    if (mounted && fim != null) {
+    if (fim != null) {
       FeedbackHelper.showSuccess(context, S.of(context).vigenciaRenovada(dataCurta(fim)));
     }
   }
@@ -534,11 +572,13 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       );
       if (!ok || !mounted) return;
     }
-    await _aplicar(
+    final ok = await _aplicar(
       () => ref
           .read(fichaModeloRepositoryProvider)
           .aplicar(modelo.id, widget.alunoId, manterCargas: manterCargas),
     );
+    // O backend começa 8 semanas novas ao aplicar um modelo.
+    if (ok) _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'modelo', 'semanas': 8});
   }
 
   Future<void> _recomecar() async {
@@ -557,11 +597,13 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   Future<void> _copiarFicha(int destinoId) async {
     final manterCargas = await escolherCargas(context);
     if (manterCargas == null || !mounted) return;
-    await _aplicar(
+    final ok = await _aplicar(
       () => ref
           .read(treinoRepositoryProvider)
           .copiarSemana(widget.alunoId, destinoId, manterCargas: manterCargas),
     );
+    // A cópia da ficha também começa 8 semanas novas (no aluno de destino).
+    if (ok) _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'ficha', 'semanas': 8});
   }
 
   Future<void> _usarEmOutro() async {
