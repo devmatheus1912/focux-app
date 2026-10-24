@@ -262,6 +262,8 @@ class ProductEvents {
   static const fichaVigenciaDefinida = 'ficha_vigencia_definida';
   static const fichaRenovada = 'ficha_renovada';
   static const fichaVolumeAberto = 'ficha_volume_aberto';
+  static const fichaHistoricoAberto = 'ficha_historico_aberto';
+  static const fichaHistoricoUsada = 'ficha_historico_usada';
   static const treinosDuplicated = 'treinos_duplicated';
   static const treinosBulkOpened = 'treinos_bulk_opened';
   static const treinosDeleted = 'treinos_deleted';

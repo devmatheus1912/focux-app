@@ -28,7 +28,9 @@ import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
 import '../../features/treinos/screens/aluno_rotina_screen.dart';
 import '../../features/treinos/screens/treinos_list_screen.dart';
+import '../../features/treinos/screens/ficha_anterior_screen.dart';
 import '../../features/treinos/screens/ficha_modelo_screen.dart';
+import '../../features/treinos/screens/fichas_anteriores_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
 import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
@@ -349,6 +351,32 @@ RouteBase buildChromeShellRoute() {
                 (context, state) => EvolucaoComparativoScreen(
                   alunoId: intPathParam(state, 'id')!,
                   alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/fichas-anteriores',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/alunos' : null,
+            builder:
+                (context, state) => FichasAnterioresScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                ),
+          ),
+          GoRoute(
+            path: '/alunos/:id/fichas-anteriores/:fichaId',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ||
+                            intPathParam(state, 'fichaId') == null
+                        ? '/alunos'
+                        : null,
+            builder:
+                (context, state) => FichaAnteriorScreen(
+                  alunoId: intPathParam(state, 'id')!,
+                  alunoNome: stringRouteExtra(state) ?? 'Aluno',
+                  fichaId: intPathParam(state, 'fichaId')!,
                 ),
           ),
           GoRoute(

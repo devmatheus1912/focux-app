@@ -20,6 +20,7 @@ class FichaSemana extends StatelessWidget {
     required this.onAbrir,
     this.onAdicionar,
     this.onMais,
+    this.alertarVazia = true,
   });
 
   final List<DiaDaSemana> dias;
@@ -30,6 +31,9 @@ class FichaSemana extends StatelessWidget {
   /// Sem [onAdicionar] e [onMais] a semana é só de leitura (tela do modelo).
   final void Function(int dia)? onAdicionar;
   final void Function(int dia, int indice)? onMais;
+
+  /// Sessão sem exercício ganha o selo "Montar". Fica desligado onde não dá para montar.
+  final bool alertarVazia;
 
   String? _detalhe(S s, SessaoDaSemana sessao) =>
       switch (sessao.exerciciosCount) {
@@ -68,7 +72,7 @@ class FichaSemana extends StatelessWidget {
                     fim: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (sessao.exerciciosCount == 0)
+                        if (alertarVazia && sessao.exerciciosCount == 0)
                           FxStatusPill(
                             label: s.rotinaMontar,
                             tone: FxPillTone.warning,

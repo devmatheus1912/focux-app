@@ -89,6 +89,11 @@ Future<_Modelos> _abrir(
         path: '/alunos/:id/rotina',
         builder: (context, state) => const AlunoRotinaScreen(alunoId: 3, alunoNome: ' Ana '),
       ),
+      GoRoute(
+        path: '/alunos/:id/fichas-anteriores',
+        builder: (context, state) =>
+            Scaffold(body: Text('fichas anteriores de ${state.extra}')),
+      ),
     ],
   );
   await tester.pumpWidget(
@@ -245,6 +250,19 @@ void main() {
       await _settle(tester);
 
       expect(repo.aplicados, isEmpty);
+    });
+  });
+
+  group('fichas anteriores no menu da ficha', () {
+    testWidgets('o item aparece sempre e abre a lista do aluno', (tester) async {
+      await _abrir(tester, fila: RotinaFila.vazia);
+      await _menuDaFicha(tester);
+
+      expect(find.text('Fichas anteriores'), findsOneWidget);
+      await tester.tap(find.text('Fichas anteriores'));
+      await _settle(tester);
+
+      expect(find.text('fichas anteriores de  Ana '), findsOneWidget);
     });
   });
 }

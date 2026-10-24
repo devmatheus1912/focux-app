@@ -222,6 +222,14 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     type: _s3,
     logicalParent: '/alunos/:id',
   ),
+  '/alunos/:id/fichas-anteriores': FocuxSurfaceSpec(
+    type: _s3,
+    logicalParent: '/alunos/:id',
+  ),
+  '/alunos/:id/fichas-anteriores/:fichaId': FocuxSurfaceSpec(
+    type: _s3,
+    logicalParent: '/alunos/:id/fichas-anteriores',
+  ),
   '/alunos/:id/trilhas': FocuxSurfaceSpec(
     type: _s3,
     hasInput: true,

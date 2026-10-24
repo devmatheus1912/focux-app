@@ -1284,5 +1284,51 @@
   "fichaOperacaoAgora": "Agora",
   "fichaOperacaoVerFicha": "Ver a ficha",
   "copilotoSobrancelha": "Copiloto",
-  "copilotoVerTarefas": "Ver tarefas"
+  "copilotoVerTarefas": "Ver tarefas",
+  "historicoMenu": "Fichas anteriores",
+  "fichasAnterioresTitulo": "Fichas anteriores",
+  "historicoDetalheTitulo": "Ficha anterior",
+  "fichasAnterioresVazioTitulo": "Nenhuma ficha anterior",
+  "fichasAnterioresVazioSubtitulo": "Quando você trocar a ficha, a anterior fica guardada aqui.",
+  "historicoNaoAbriu": "Não abriu as fichas anteriores. Tente de novo.",
+  "historicoPeriodo": "{inicio} a {fim}",
+  "@historicoPeriodo": {
+    "placeholders": {
+      "inicio": {"type": "String"},
+      "fim": {"type": "String"}
+    }
+  },
+  "historicoAte": "Até {fim}",
+  "@historicoAte": {
+    "placeholders": {
+      "fim": {"type": "String"}
+    }
+  },
+  "historicoMotivoRecomecada": "Recomeçada",
+  "historicoMotivoModelo": "Trocada pelo modelo {nome}",
+  "@historicoMotivoModelo": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "historicoMotivoModeloSemNome": "Trocada por um modelo",
+  "historicoMotivoDuplicada": "Duplicada como base",
+  "historicoMotivoCopiada": "Trocada pela ficha de outro aluno",
+  "historicoMotivoHistorico": "Trocada por uma ficha anterior",
+  "historicoSessaoRemovida": "{nome} · removida",
+  "@historicoSessaoRemovida": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "historicoUsarComoBase": "Usar como base",
+  "historicoUsarConfirmaTitulo": "Usar esta ficha como base?",
+  "historicoUsarConfirmaTexto": "A ficha atual sai, mas fica guardada aqui. Entra uma cópia desta, com 8 semanas de validade.",
+  "historicoUsada": "Ficha anterior aplicada",
+  "historicoUsadaSemSessoes": "{n, plural, =1{Aplicada. 1 sessão não existe mais e ficou de fora.} other{Aplicada. {n} sessões não existem mais e ficaram de fora.}}",
+  "@historicoUsadaSemSessoes": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  }
 }

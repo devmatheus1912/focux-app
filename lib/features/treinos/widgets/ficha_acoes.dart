@@ -12,6 +12,7 @@ enum FichaAcao {
   duplicarBase,
   usarEmOutro,
   recomecar,
+  fichasAnteriores,
 }
 
 enum SessaoAcao { maisUm, descanso, mover, copiar }
@@ -53,6 +54,11 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
         value: FichaAcao.usarEmOutro,
         label: s.rotinaUsarEmOutro,
         icon: Icons.people_alt_outlined,
+      ),
+      FxActionSheetItem(
+        value: FichaAcao.fichasAnteriores,
+        label: s.historicoMenu,
+        icon: Icons.history_rounded,
       ),
       FxActionSheetItem(
         value: FichaAcao.recomecar,

@@ -532,6 +532,12 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         await _copiarFicha(widget.alunoId);
       case FichaAcao.usarEmOutro:
         await _usarEmOutro();
+      case FichaAcao.fichasAnteriores:
+        await context.push(
+          '/alunos/${widget.alunoId}/fichas-anteriores',
+          extra: widget.alunoNome,
+        );
+        if (mounted) ref.invalidate(alunoRotinaProvider(widget.alunoId));
     }
   }
 
