@@ -531,6 +531,46 @@
   "rotinaSemModelos": "Você ainda não tem modelos. Salve uma ficha como modelo primeiro.",
   "rotinaAplicarConfirmaTitulo": "Substituir a ficha?",
   "rotinaAplicarConfirmaTexto": "A ficha atual sai e entra uma cópia do modelo. Editar um não muda o outro.",
+  "modelosAbaSemanas": "Semanas",
+  "modelosAbaSessoes": "Sessões",
+  "modelosNovo": "Novo modelo",
+  "modelosVazioTitulo": "Nenhum modelo ainda",
+  "modelosVazioSubtitulo": "Salve uma ficha como modelo ou crie um por dias da semana.",
+  "modelosQuantosDias": "Quantos dias por semana?",
+  "modeloNDias": "{n} dias",
+  "@modeloNDias": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "modeloNomeSugerido": "Modelo de {n} dias",
+  "@modeloNomeSugerido": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "modeloContagem": "{sessoes, plural, =1{1 sessão} other{{sessoes} sessões}} · {exercicios, plural, =1{1 exercício} other{{exercicios} exercícios}}",
+  "@modeloContagem": {
+    "placeholders": {
+      "sessoes": {"type": "int"},
+      "exercicios": {"type": "int"}
+    }
+  },
+  "modeloPronto": "Pronto",
+  "modeloEmMontagem": "Em montagem",
+  "modeloRenomear": "Renomear",
+  "modeloAplicarEmAluno": "Aplicar em aluno",
+  "modeloExcluir": "Excluir modelo",
+  "modeloExcluirTitulo": "Excluir o modelo?",
+  "modeloExcluirTexto": "Os treinos dele continuam salvos em Sessões.",
+  "modeloAplicado": "Ficha aplicada em {nome}",
+  "@modeloAplicado": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "modeloNaoAbriu": "Não abriu o modelo. Tente de novo.",
+  "modeloTitulo": "Modelo",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

@@ -244,7 +244,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
         );
         return;
       }
-      await repo.atribuirAluno(plano.id, alunoId);
+      await repo.atribuirAluno(plano.id, alunoId, copiar: true);
       invalidateTreinosCaches(ref);
       invalidateTreinosDoAluno(ref, alunoId);
       if (!mounted) return;

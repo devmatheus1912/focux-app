@@ -54,6 +54,7 @@ Future<void> _dispatchTreinoDetailAction({
           treinoId,
           selected.alunoId,
           dataFim: selected.dataFim,
+          copiar: true,
         );
         AnalyticsService.instance.track(
           ProductEvents.treinosAssigned,

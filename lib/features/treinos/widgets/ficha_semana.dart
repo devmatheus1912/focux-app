@@ -17,17 +17,19 @@ class FichaSemana extends StatelessWidget {
     required this.dias,
     required this.hoje,
     required this.ocupado,
-    required this.onAdicionar,
     required this.onAbrir,
-    required this.onMais,
+    this.onAdicionar,
+    this.onMais,
   });
 
   final List<DiaDaSemana> dias;
   final int hoje;
   final bool ocupado;
-  final void Function(int dia) onAdicionar;
   final void Function(int treinoId) onAbrir;
-  final void Function(int dia, int indice) onMais;
+
+  /// Sem [onAdicionar] e [onMais] a semana é só de leitura (tela do modelo).
+  final void Function(int dia)? onAdicionar;
+  final void Function(int dia, int indice)? onMais;
 
   String? _detalhe(S s, SessaoDaSemana sessao) =>
       switch (sessao.exerciciosCount) {
@@ -52,7 +54,9 @@ class FichaSemana extends StatelessWidget {
               descansoLabel: s.rotinaDescanso,
               adicionarLabel: s.rotinaAdicionarTreino,
               segundoTreinoLabel: s.rotinaSegundoTreino,
-              onAdicionar: ocupado ? null : () => onAdicionar(dia.dia),
+              onAdicionar: ocupado || onAdicionar == null
+                  ? null
+                  : () => onAdicionar!(dia.dia),
               sessoes: [
                 for (final (j, sessao) in dia.sessoes.indexed)
                   FxDaySession(
@@ -69,11 +73,12 @@ class FichaSemana extends StatelessWidget {
                             label: s.rotinaMontar,
                             tone: FxPillTone.warning,
                           ),
-                        IconButton(
-                          tooltip: s.rotinaMaisAcoes,
-                          onPressed: ocupado ? null : () => onMais(dia.dia, j),
-                          icon: const Icon(Icons.more_horiz_rounded),
-                        ),
+                        if (onMais != null)
+                          IconButton(
+                            tooltip: s.rotinaMaisAcoes,
+                            onPressed: ocupado ? null : () => onMais!(dia.dia, j),
+                            icon: const Icon(Icons.more_horiz_rounded),
+                          ),
                       ],
                     ),
                   ),

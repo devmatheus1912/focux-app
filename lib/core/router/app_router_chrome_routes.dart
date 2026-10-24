@@ -28,6 +28,7 @@ import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
 import '../../features/treinos/screens/aluno_rotina_screen.dart';
 import '../../features/treinos/screens/treinos_list_screen.dart';
+import '../../features/treinos/screens/ficha_modelo_screen.dart';
 import '../../features/treinos/screens/treino_detail_screen.dart';
 import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
@@ -380,6 +381,15 @@ RouteBase buildChromeShellRoute() {
                 alunoNome: extra.alunoNome,
               );
             },
+          ),
+          GoRoute(
+            path: '/modelos/:id',
+            redirect:
+                (context, state) =>
+                    intPathParam(state, 'id') == null ? '/treinos' : null,
+            builder:
+                (context, state) =>
+                    FichaModeloScreen(modeloId: intPathParam(state, 'id')!),
           ),
           GoRoute(
             path: '/treinos/:id',

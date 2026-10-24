@@ -8,6 +8,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   Timer? _searchDebounce;
   String _query = '';
   bool _selectionMode = false;
+  int _aba = 0;
   bool _viewTracked = false;
   bool _ttvTracked = false;
   DateTime? _fetchedAt;
@@ -22,6 +23,19 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  /// Semanas (modelos de ficha) | Sessões (treinos soltos da biblioteca).
+  Widget _abas(BuildContext context) {
+    final s = S.of(context);
+    return FxChoiceStrip<int>(
+      itens: [
+        FxChoiceItem(value: 0, label: s.modelosAbaSemanas),
+        FxChoiceItem(value: 1, label: s.modelosAbaSessoes),
+      ],
+      selecionado: _aba,
+      onSelecionar: (aba) => setState(() => _aba = aba),
+    );
   }
 
   bool _matchesQuery(Treino treino) {
@@ -127,6 +141,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
             treino.id,
             selected.alunoId,
             dataFim: selected.dataFim,
+            copiar: true,
           );
       invalidateTreinosCaches(ref);
       invalidateTreinosDoAluno(ref, selected.alunoId);
@@ -502,7 +517,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               ),
             ],
           ),
-          body: treinosAsync.when(
+          body: !fromAluno && _aba == 0
+              ? FichaModelosAba(abas: _abas(context))
+              : treinosAsync.when(
             loading:
                 () => const Padding(
                   padding: EdgeInsets.fromLTRB(TokensStrip.s5, 86, 20, 0),
@@ -616,6 +633,18 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                         keyboardDismissBehavior:
                             ScrollViewKeyboardDismissBehavior.onDrag,
                         slivers: [
+                          if (!fromAluno)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  TreinosLayout.screenPadding,
+                                  TokensStrip.s2,
+                                  TreinosLayout.screenPadding,
+                                  TokensStrip.s2,
+                                ),
+                                child: _abas(context),
+                              ),
+                            ),
                           if (loadedTreinos.isEmpty && _query.trim().isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,

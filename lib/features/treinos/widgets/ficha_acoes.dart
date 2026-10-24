@@ -16,6 +16,8 @@ enum FichaAcao {
 
 enum SessaoAcao { maisUm, descanso, mover, copiar }
 
+enum ModeloAcao { renomear, aplicar, excluir }
+
 List<String> nomesDosDias(S s) => [
   s.rotinaDiaSeg,
   s.rotinaDiaTer,
@@ -56,6 +58,32 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
         value: FichaAcao.recomecar,
         label: s.rotinaRecomecar,
         icon: Icons.restart_alt_rounded,
+        destructive: true,
+      ),
+    ],
+  );
+}
+
+Future<ModeloAcao?> mostrarMenuDoModelo(BuildContext context, {required String nome}) {
+  final s = S.of(context);
+  return showFxActionSheet<ModeloAcao>(
+    context,
+    title: nome,
+    itens: [
+      FxActionSheetItem(
+        value: ModeloAcao.aplicar,
+        label: s.modeloAplicarEmAluno,
+        icon: Icons.person_add_alt_1_rounded,
+      ),
+      FxActionSheetItem(
+        value: ModeloAcao.renomear,
+        label: s.modeloRenomear,
+        icon: Icons.edit_outlined,
+      ),
+      FxActionSheetItem(
+        value: ModeloAcao.excluir,
+        label: s.modeloExcluir,
+        icon: Icons.delete_outline_rounded,
         destructive: true,
       ),
     ],

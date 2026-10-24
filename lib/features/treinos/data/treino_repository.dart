@@ -395,9 +395,11 @@ class TreinoRepository {
     int alunoId, {
     DateTime? dataFim,
     int? posicaoNaRotina,
+    bool copiar = false,
   }) async {
     await _dio.post(
       '/api/treinos/$treinoId/alunos/$alunoId',
+      queryParameters: copiar ? {'copiar': true} : null,
       data: {
         'dataFim':
             dataFim == null ? null : TreinoAtribuicaoPrazo.toIsoDate(dataFim),

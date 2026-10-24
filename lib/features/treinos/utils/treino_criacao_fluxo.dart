@@ -6,6 +6,7 @@ class TreinoRouteExtra {
     this.alunoNome,
     this.recemCriado = false,
     this.bloco,
+    this.modeloId,
   });
 
   factory TreinoRouteExtra.parse(Object? extra) {
@@ -19,6 +20,10 @@ class TreinoRouteExtra {
       alunoNome: extra['alunoNome']?.toString(),
       recemCriado: extra['recemCriado'] == true,
       bloco: extra['bloco']?.toString(),
+      modeloId:
+          extra['modeloId'] is int
+              ? extra['modeloId'] as int
+              : int.tryParse(extra['modeloId']?.toString() ?? ''),
     );
   }
 
@@ -29,8 +34,15 @@ class TreinoRouteExtra {
   final bool recemCriado;
   final String? bloco;
 
+  /// Treino aberto a partir de um modelo de ficha (e não da ficha de um aluno).
+  final int? modeloId;
+
   Map<String, Object>? toExtra() {
-    if (alunoId == null && alunoNome == null && !recemCriado && bloco == null) {
+    if (alunoId == null &&
+        alunoNome == null &&
+        !recemCriado &&
+        bloco == null &&
+        modeloId == null) {
       return null;
     }
     return {
@@ -38,6 +50,7 @@ class TreinoRouteExtra {
       if (alunoNome != null) 'alunoNome': alunoNome!,
       if (recemCriado) 'recemCriado': true,
       if (bloco != null) 'bloco': bloco!,
+      if (modeloId != null) 'modeloId': modeloId!,
     };
   }
 }
