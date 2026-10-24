@@ -10,6 +10,7 @@ import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/aluno_rotina_screen.dart';
+import 'package:focux_app/features/treinos/utils/ficha_vigencia.dart';
 import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -26,6 +27,9 @@ class _FakeTreinoRepository extends TreinoRepository {
   List<DiaDaSemana>? ultimaSemana;
   final copias = <(int, int, bool)>[];
   final duplicados = <int>[];
+  final vigencias = <(int, int)>[];
+  final renovacoes = <(int, int)>[];
+  var vigenciasRemovidas = 0;
 
   @override
   Future<RotinaFila> buscarRotina(int alunoId) async {
@@ -47,6 +51,24 @@ class _FakeTreinoRepository extends TreinoRepository {
     bool manterCargas = true,
   }) async {
     copias.add((alunoId, destinoId, manterCargas));
+    return fila;
+  }
+
+  @override
+  Future<RotinaFila> definirVigenciaSemanas(int alunoId, int semanas) async {
+    vigencias.add((alunoId, semanas));
+    return fila;
+  }
+
+  @override
+  Future<RotinaFila> renovarVigencia(int alunoId, int semanas) async {
+    renovacoes.add((alunoId, semanas));
+    return fila;
+  }
+
+  @override
+  Future<RotinaFila> removerVigencia(int alunoId) async {
+    vigenciasRemovidas++;
     return fila;
   }
 
@@ -243,6 +265,105 @@ void main() {
     testWidgets('com sessões, a pergunta de frequência não aparece', (tester) async {
       await _abrir(tester, <Object?>[]);
       expect(find.text('Quantos dias por semana?'), findsNothing);
+    });
+  });
+
+  group('vigência', () {
+    testWidgets('ficha vazia: "Vale por" começa em 8 semanas e grava junto com os dias', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      expect(find.text('Vale por'), findsOneWidget);
+      await tester.tap(find.text('4'));
+      await _settle(tester);
+
+      expect(repo.gravacoes, 1);
+      expect(repo.vigencias, [(3, 8)]);
+    });
+
+    testWidgets('escolher 12 semanas grava 12', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      await tester.tap(find.text('12 semanas'));
+      await _settle(tester);
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+
+      expect(repo.vigencias, [(3, 12)]);
+    });
+
+    testWidgets('sem prazo cria a ficha sem definir vigência', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      await tester.tap(find.text('Sem prazo'));
+      await _settle(tester);
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+
+      expect(repo.gravacoes, 1);
+      expect(repo.vigencias, isEmpty);
+    });
+
+    testWidgets('ficha com sessões mostra a linha Vigência com o estado', (tester) async {
+      final amanha = DateTime.now().add(const Duration(days: 3));
+      await _abrir(
+        tester,
+        <Object?>[],
+        fila: RotinaFila(
+          itens: const [
+            RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 7, nome: 'Peito', diaSemana: 1, exerciciosCount: 5),
+          ],
+          vigencia: VigenciaFicha(fim: amanha),
+        ),
+      );
+
+      expect(find.text('Vigência'), findsOneWidget);
+      expect(find.text('Vence em 3 dias'), findsOneWidget);
+      expect(find.text('Vale por'), findsNothing);
+    });
+
+    testWidgets('sem prazo, a linha diz "Sem prazo"', (tester) async {
+      await _abrir(tester, <Object?>[]);
+      expect(find.text('Vigência'), findsOneWidget);
+      expect(find.text('Sem prazo'), findsOneWidget);
+    });
+
+    testWidgets('o menu renova por 8 semanas e avisa até quando vale', (tester) async {
+      final (repo, _) = await _abrir(
+        tester,
+        <Object?>[],
+        fila: RotinaFila(
+          itens: const [
+            RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 7, nome: 'Peito', diaSemana: 1, exerciciosCount: 5),
+          ],
+          vigencia: VigenciaFicha(fim: DateTime.now().add(const Duration(days: 40))),
+        ),
+      );
+      await tester.tap(find.text('Vigência'));
+      await _settle(tester);
+      await tester.tap(find.text('Renovar por 8 semanas'));
+      await _settle(tester);
+
+      expect(repo.renovacoes, [(3, 8)]);
+      expect(find.textContaining('Ficha vale até'), findsOneWidget);
+    });
+
+    testWidgets('o menu tira o prazo', (tester) async {
+      final (repo, _) = await _abrir(
+        tester,
+        <Object?>[],
+        fila: RotinaFila(
+          itens: const [
+            RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 7, nome: 'Peito', diaSemana: 1, exerciciosCount: 5),
+          ],
+          vigencia: VigenciaFicha(fim: DateTime.now().add(const Duration(days: 40))),
+        ),
+      );
+      await tester.tap(find.text('Vigência'));
+      await _settle(tester);
+      await tester.tap(find.text('Sem prazo').last);
+      await _settle(tester);
+
+      expect(repo.vigenciasRemovidas, 1);
     });
   });
 

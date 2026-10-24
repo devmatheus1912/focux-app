@@ -592,6 +592,48 @@
       "n": {"type": "int"}
     }
   },
+  "vigenciaTitulo": "Vigência",
+  "vigenciaMenuTitulo": "Vigência da ficha",
+  "vigenciaSemPrazo": "Sem prazo",
+  "vigenciaAte": "Até {data}",
+  "@vigenciaAte": {
+    "placeholders": {
+      "data": {"type": "String"}
+    }
+  },
+  "vigenciaVenceEmDias": "{n, plural, =1{Vence amanhã} other{Vence em {n} dias}}",
+  "@vigenciaVenceEmDias": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "vigenciaVenceHoje": "Vence hoje",
+  "vigenciaVencidaHa": "{n, plural, =1{Vencida há 1 dia} other{Vencida há {n} dias}}",
+  "@vigenciaVencidaHa": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "vigenciaRenovarSemanas": "Renovar por {n} semanas",
+  "@vigenciaRenovarSemanas": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "vigenciaEscolherData": "Escolher uma data",
+  "vigenciaRenovada": "Ficha vale até {data}",
+  "@vigenciaRenovada": {
+    "placeholders": {
+      "data": {"type": "String"}
+    }
+  },
+  "valePorTitulo": "Vale por",
+  "valePorSemanas": "{n} semanas",
+  "@valePorSemanas": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

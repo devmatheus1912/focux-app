@@ -29,6 +29,10 @@ class _Repo extends TreinoRepository {
   @override
   Future<RotinaFila> gravarSemana(int alunoId, List<DiaDaSemana> dias) async =>
       depoisDeGravar;
+
+  @override
+  Future<RotinaFila> definirVigenciaSemanas(int alunoId, int semanas) async =>
+      depoisDeGravar;
 }
 
 const _pronta = RotinaFila(

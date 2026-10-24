@@ -11,6 +11,7 @@ import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_sticky_actions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -19,10 +20,12 @@ import '../models/rotina_fila.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/ficha_medicao.dart';
+import '../utils/ficha_vigencia.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_semana.dart';
+import '../widgets/ficha_vigencia_linha.dart';
 
 /// Linha da ficha de treinos do aluno. O subtítulo é a semana numa frase.
 class AlunoRotinaLinha extends ConsumerWidget {
@@ -48,6 +51,16 @@ class AlunoRotinaLinha extends ConsumerWidget {
             palavraDescanso: s.rotinaDescanso,
           );
 
+    // Só chama atenção quando a vigência pede ação: perto de vencer ou vencida.
+    final agora = DateTime.now();
+    final estado = rotina?.vigencia.estado(agora);
+    final aviso = rotina != null &&
+            (estado == EstadoVigencia.venceEmBreve ||
+                estado == EstadoVigencia.venceHoje ||
+                estado == EstadoVigencia.vencida)
+        ? rotuloDaVigencia(s, rotina.vigencia, agora)
+        : null;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -63,9 +76,17 @@ class AlunoRotinaLinha extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  s.rotinaLinha,
-                  style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        s.rotinaLinha,
+                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                      ),
+                    ),
+                    if (aviso != null)
+                      FxStatusPill(label: aviso.texto, tone: aviso.tom),
+                  ],
                 ),
                 if (linha.isNotEmpty) ...[
                   const SizedBox(height: TokensStrip.s2),
@@ -229,6 +250,16 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                 linhaDeEstado,
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
+              if (!estado.vazia)
+                Padding(
+                  padding: const EdgeInsets.only(top: TokensStrip.s3),
+                  child: FichaVigenciaLinha(
+                    vigencia: _rotina!.vigencia,
+                    hoje: DateTime.now(),
+                    ocupado: _salvando,
+                    onAcao: _acaoDaVigencia,
+                  ),
+                ),
               if (_rotina!.sessoesAdiadas.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: TokensStrip.s2),
@@ -257,7 +288,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
               if (estado.vazia)
                 FichaFrequencia(
                   ocupado: _salvando,
-                  onEscolher: (n) => _persistir(semanaPorFrequencia(n)),
+                  onEscolher: _criarPorFrequencia,
                 ),
               FichaSemana(
                 dias: _dias,
@@ -299,6 +330,54 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       );
     }
     context.pop();
+  }
+
+  /// Cria a ficha pelos dias e, se escolhido, já define por quanto tempo ela vale.
+  Future<void> _criarPorFrequencia(int dias, int? semanas) async {
+    final semana = semanaPorFrequencia(dias);
+    setState(() => _dias = semana);
+    final repo = ref.read(treinoRepositoryProvider);
+    await _aplicar(() async {
+      final criada = await repo.gravarSemana(widget.alunoId, semana);
+      return semanas == null
+          ? criada
+          : repo.definirVigenciaSemanas(widget.alunoId, semanas);
+    });
+  }
+
+  Future<void> _acaoDaVigencia(AcaoDaVigencia acao) async {
+    final repo = ref.read(treinoRepositoryProvider);
+    final id = widget.alunoId;
+    switch (acao) {
+      case AcaoDaVigencia.renovar4:
+        await _renovar(() => repo.renovarVigencia(id, 4));
+      case AcaoDaVigencia.renovar8:
+        await _renovar(() => repo.renovarVigencia(id, 8));
+      case AcaoDaVigencia.renovar12:
+        await _renovar(() => repo.renovarVigencia(id, 12));
+      case AcaoDaVigencia.semPrazo:
+        await _aplicar(() => repo.removerVigencia(id));
+      case AcaoDaVigencia.escolherData:
+        final hoje = DateTime.now();
+        final escolhida = await showDatePicker(
+          context: context,
+          initialDate: _rotina?.vigencia.fim?.isAfter(hoje) == true
+              ? _rotina!.vigencia.fim!
+              : hoje.add(const Duration(days: 56)),
+          firstDate: hoje,
+          lastDate: hoje.add(const Duration(days: 730)),
+        );
+        if (escolhida == null || !mounted) return;
+        await _renovar(() => repo.definirVigenciaData(id, escolhida));
+    }
+  }
+
+  Future<void> _renovar(Future<RotinaFila> Function() gravar) async {
+    await _aplicar(gravar);
+    final fim = _rotina?.vigencia.fim;
+    if (mounted && fim != null) {
+      FeedbackHelper.showSuccess(context, S.of(context).vigenciaRenovada(dataCurta(fim)));
+    }
   }
 
   Future<void> _abrirSessao(int treinoId) async {

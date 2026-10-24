@@ -1,3 +1,5 @@
+import '../utils/ficha_vigencia.dart';
+
 enum RotinaItemTipo { treino, descanso }
 
 class RotinaItem {
@@ -44,6 +46,8 @@ class RotinaFila {
     this.ultimoTreinoId,
     this.concluiuHoje = false,
     this.sessoesAdiadas = const [],
+    this.vigencia = VigenciaFicha.semPrazo,
+    this.atualizadaEm,
   });
 
   static const vazia = RotinaFila();
@@ -56,6 +60,12 @@ class RotinaFila {
 
   /// Sessões que saíram da ficha mas esperam o aluno terminar o treino aberto.
   final List<String> sessoesAdiadas;
+
+  /// Quanto tempo a ficha vale (sem prazo por padrão).
+  final VigenciaFicha vigencia;
+
+  /// Quando o personal trocou a ficha pela última vez (nulo se nunca).
+  final DateTime? atualizadaEm;
 
   bool get temTreino => itens.any((item) => !item.descanso);
 
@@ -85,6 +95,8 @@ class RotinaFila {
       sessoesAdiadas: (json['sessoesAdiadas'] as List? ?? const [])
           .map((nome) => '$nome')
           .toList(growable: false),
+      vigencia: VigenciaFicha.fromJson(json['vigencia']),
+      atualizadaEm: DateTime.tryParse('${json['atualizadaEm'] ?? ''}'),
     );
   }
 }

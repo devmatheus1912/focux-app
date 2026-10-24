@@ -5,6 +5,7 @@ import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../models/rotina_fila.dart';
+import '../utils/ficha_vigencia.dart';
 import '../utils/prescricao_serie.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_atribuicao_prazo.dart';
@@ -523,6 +524,30 @@ class TreinoRepository {
             },
         ],
       },
+    );
+    return RotinaFila.fromJson(response.data);
+  }
+
+  /// Define a vigência por semanas (a partir de hoje).
+  Future<RotinaFila> definirVigenciaSemanas(int alunoId, int semanas) =>
+      _definirVigencia(alunoId, {'semanas': semanas});
+
+  Future<RotinaFila> definirVigenciaData(int alunoId, DateTime fim) =>
+      _definirVigencia(alunoId, {'fim': dataIso(fim)});
+
+  Future<RotinaFila> removerVigencia(int alunoId) =>
+      _definirVigencia(alunoId, {'remover': true});
+
+  Future<RotinaFila> _definirVigencia(int alunoId, Map<String, Object> corpo) async {
+    final response = await _dio.put('/api/alunos/$alunoId/rotina/vigencia', data: corpo);
+    return RotinaFila.fromJson(response.data);
+  }
+
+  /// Estende a vigência: parte do fim atual se a ficha ainda vale, ou de hoje se venceu.
+  Future<RotinaFila> renovarVigencia(int alunoId, int semanas) async {
+    final response = await _dio.post(
+      '/api/alunos/$alunoId/rotina/vigencia/renovar',
+      queryParameters: {'semanas': semanas},
     );
     return RotinaFila.fromJson(response.data);
   }

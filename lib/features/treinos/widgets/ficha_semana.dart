@@ -90,12 +90,21 @@ class FichaSemana extends StatelessWidget {
   }
 }
 
-/// Ficha vazia: pergunta de quantos dias, com chips que não esticam.
-class FichaFrequencia extends StatelessWidget {
+/// Ficha vazia: quantos dias por semana e por quanto tempo a ficha vale.
+/// [onEscolher] recebe os dias e as semanas de vigência (nulo = sem prazo).
+class FichaFrequencia extends StatefulWidget {
   const FichaFrequencia({super.key, required this.ocupado, required this.onEscolher});
 
   final bool ocupado;
-  final ValueChanged<int> onEscolher;
+  final void Function(int dias, int? semanas) onEscolher;
+
+  @override
+  State<FichaFrequencia> createState() => _FichaFrequenciaState();
+}
+
+class _FichaFrequenciaState extends State<FichaFrequencia> {
+  /// 0 = sem prazo.
+  var _semanas = 8;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +120,22 @@ class FichaFrequencia extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                s.valePorTitulo,
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
+              const SizedBox(height: TokensStrip.s1),
+              FxChoiceStrip<int>(
+                quebrar: true,
+                itens: [
+                  for (final n in const [4, 8, 12])
+                    FxChoiceItem(value: n, label: s.valePorSemanas(n)),
+                  FxChoiceItem(value: 0, label: s.vigenciaSemPrazo),
+                ],
+                selecionado: _semanas,
+                onSelecionar: (n) => setState(() => _semanas = n),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Text(
                 s.rotinaFrequenciaTitulo,
                 style: FocuxHubTypography.cardTitle(color: chrome.ink),
               ),
@@ -121,7 +146,7 @@ class FichaFrequencia extends StatelessWidget {
               ),
               const SizedBox(height: TokensStrip.s2),
               IgnorePointer(
-                ignoring: ocupado,
+                ignoring: widget.ocupado,
                 child: FxChoiceStrip<int>(
                   quebrar: true,
                   itens: [
@@ -129,7 +154,8 @@ class FichaFrequencia extends StatelessWidget {
                       FxChoiceItem(value: n, label: '$n'),
                   ],
                   selecionado: null,
-                  onSelecionar: onEscolher,
+                  onSelecionar: (dias) =>
+                      widget.onEscolher(dias, _semanas == 0 ? null : _semanas),
                 ),
               ),
             ],
