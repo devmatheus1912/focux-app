@@ -15,6 +15,7 @@ import '../models/rotina_fila.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/rotina_frase.dart';
 import '../utils/semana_da_fila.dart';
+import '../utils/treino_criacao_fluxo.dart';
 import '../../alunos/providers/alunos_provider.dart';
 
 /// Linha da ficha de treinos do aluno. O subtítulo é a fila numa frase.
@@ -242,10 +243,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                         ),
                         if (dia.sessoes.isNotEmpty)
                           for (final sessao in dia.sessoes)
-                            Text(
-                              sessao.nome,
-                              style: FocuxHubTypography.bodyMuted(color: chrome.ink),
-                            )
+                            _sessao(s, chrome, sessao)
                         else if (dia.descanso)
                           Text(
                             s.rotinaDescanso,
@@ -298,6 +296,52 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         ),
       ],
     );
+  }
+
+  Widget _sessao(S s, ShellPalette chrome, SessaoDaSemana sessao) {
+    final treinoId = sessao.treinoId;
+    final nome = Text(
+      sessao.nome,
+      style: FocuxHubTypography.bodyMuted(color: chrome.ink),
+    );
+    if (treinoId == null) return nome;
+    return InkWell(
+      onTap: _salvando ? null : () => _abrirSessao(treinoId),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  nome,
+                  Text(
+                    s.rotinaSessaoMontar,
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: chrome.mute),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _abrirSessao(int treinoId) async {
+    await context.push(
+      '/treinos/$treinoId',
+      extra: TreinoRouteExtra(
+        alunoId: widget.alunoId,
+        alunoNome: widget.alunoNome.trim(),
+      ).toExtra(),
+    );
+    if (!mounted) return;
+    ref.invalidate(alunoRotinaProvider(widget.alunoId));
+    await _carregar();
   }
 
   Future<void> _persistir(List<DiaDaSemana> dias) {

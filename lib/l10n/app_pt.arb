@@ -451,6 +451,7 @@
   "rotinaAvisoLinha": "No dia marcado, ele vê descanso ao abrir e recebe um aviso. O treino continua lá.",
   "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
   "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
+  "rotinaSessaoMontar": "Toque para montar",
   "rotinaDiaSeg": "Seg",
   "rotinaDiaTer": "Ter",
   "rotinaDiaQua": "Qua",
