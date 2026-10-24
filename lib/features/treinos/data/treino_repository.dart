@@ -4,6 +4,7 @@ import '../../../core/api/offline_queued_ack.dart';
 import '../../../core/api/offline_sync_service.dart';
 import '../../../core/api/pagina.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../models/ficha_volume.dart';
 import '../models/rotina_fila.dart';
 import '../utils/ficha_vigencia.dart';
 import '../utils/prescricao_serie.dart';
@@ -526,6 +527,12 @@ class TreinoRepository {
       },
     );
     return RotinaFila.fromJson(response.data);
+  }
+
+  /// Séries de trabalho por grupo muscular na ficha do aluno.
+  Future<FichaVolume> volumeDaFicha(int alunoId) async {
+    final response = await _dio.get('/api/alunos/$alunoId/rotina/volume');
+    return FichaVolume.fromJson(response.data);
   }
 
   /// Define a vigência por semanas (a partir de hoje).

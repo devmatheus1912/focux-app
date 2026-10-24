@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_choice_strip.dart';
@@ -22,6 +23,10 @@ class _Repo extends FichaModeloRepository {
   _Repo(this.modelos) : super(ApiClient());
 
   final List<FichaModelo> modelos;
+
+  @override
+  Future<FichaVolume> volumeDoModelo(int id) async =>
+      const FichaVolume(totalSeries: 26, grupos: [VolumeGrupo(grupo: 'PEITO', series: 12, exercicios: 3, dias: [1, 4]), VolumeGrupo(grupo: 'COSTAS_LATISSIMO', series: 9, exercicios: 2, dias: [2]), VolumeGrupo(grupo: 'OMBRO_LATERAL', series: 5, exercicios: 1, dias: [4])]);
 
   @override
   Future<List<FichaModelo>> listar() async => modelos;

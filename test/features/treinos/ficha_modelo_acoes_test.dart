@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/data/ficha_modelo_repository.dart';
@@ -19,6 +20,9 @@ class _Treinos extends TreinoRepository {
   _Treinos(this.fila) : super(ApiClient());
 
   final RotinaFila fila;
+
+  @override
+  Future<FichaVolume> volumeDaFicha(int alunoId) async => FichaVolume.vazio;
 
   @override
   Future<RotinaFila> buscarRotina(int alunoId) async => fila;

@@ -15,11 +15,13 @@ import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
+import '../providers/ficha_volume_provider.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/semana_do_modelo.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_semana.dart';
+import '../widgets/ficha_volume_secao.dart';
 
 /// Um modelo de ficha: a semana inteira, com as sessões prontas para montar.
 class FichaModeloScreen extends ConsumerStatefulWidget {
@@ -36,6 +38,7 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
 
   void _recarregar() {
     ref.invalidate(fichaModeloProvider(widget.modeloId));
+    ref.invalidate(modeloVolumeProvider(widget.modeloId));
     ref.invalidate(fichaModelosProvider);
   }
 
@@ -97,6 +100,11 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
                 hoje: 0,
                 ocupado: _ocupado,
                 onAbrir: _abrirSessao,
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              FichaVolumeSecao(
+                provider: modeloVolumeProvider(widget.modeloId),
+                origem: 'modelo',
               ),
             ],
           ),

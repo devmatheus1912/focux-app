@@ -18,6 +18,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../models/ficha_modelo.dart';
 import '../models/rotina_fila.dart';
 import '../providers/ficha_modelos_provider.dart';
+import '../providers/ficha_volume_provider.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/ficha_medicao.dart';
 import '../utils/ficha_vigencia.dart';
@@ -25,6 +26,7 @@ import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_semana.dart';
+import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
 
 /// Linha da ficha de treinos do aluno. O subtítulo é a semana numa frase.
@@ -176,6 +178,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     try {
       final fila = await gravar();
       ref.invalidate(alunoRotinaProvider(widget.alunoId));
+      ref.invalidate(fichaVolumeProvider(widget.alunoId));
       if (!mounted) return true;
       setState(() {
         _rotina = fila;
@@ -326,6 +329,14 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                 onAbrir: _abrirSessao,
                 onMais: _menuDaSessao,
               ),
+              if (!estado.vazia)
+                Padding(
+                  padding: const EdgeInsets.only(top: TokensStrip.s3),
+                  child: FichaVolumeSecao(
+                    provider: fichaVolumeProvider(widget.alunoId),
+                    origem: 'ficha',
+                  ),
+                ),
               if (estado.incompletas > 0)
                 Padding(
                   padding: const EdgeInsets.only(top: TokensStrip.s2),
@@ -428,6 +439,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     );
     if (!mounted) return;
     ref.invalidate(alunoRotinaProvider(widget.alunoId));
+    ref.invalidate(fichaVolumeProvider(widget.alunoId));
     await _carregar();
   }
 

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -30,6 +31,9 @@ class _FakeTreinoRepository extends TreinoRepository {
   final vigencias = <(int, int)>[];
   final renovacoes = <(int, int)>[];
   var vigenciasRemovidas = 0;
+
+  @override
+  Future<FichaVolume> volumeDaFicha(int alunoId) async => FichaVolume.vazio;
 
   @override
   Future<RotinaFila> buscarRotina(int alunoId) async {

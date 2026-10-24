@@ -649,6 +649,42 @@
   "alunoFichaVenceHoje": "Sua ficha vence hoje",
   "alunoFichaVenceu": "Sua ficha venceu. Fale com seu personal.",
   "alunoFichaAtualizada": "Ficha atualizada",
+  "volumeTitulo": "Volume da semana",
+  "volumeSeriesDeTrabalho": "{n, plural, =1{1 série de trabalho} other{{n} séries de trabalho}}",
+  "@volumeSeriesDeTrabalho": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "volumeVazio": "Monte as sessões para ver o volume.",
+  "volumeReferencia": "Referência comum para hipertrofia: 10 a 20 séries por semana por grupo. Ajuste ao seu aluno.",
+  "volumeSemGrupo": "Sem grupo definido: {n, plural, =1{1 série} other{{n} séries}}",
+  "@volumeSemGrupo": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "volumeDias": "{dias}",
+  "@volumeDias": {
+    "placeholders": {
+      "dias": {"type": "String"}
+    }
+  },
+  "volumeGrupoPeito": "Peito",
+  "volumeGrupoCostas": "Costas",
+  "volumeGrupoOmbros": "Ombros",
+  "volumeGrupoBiceps": "Bíceps",
+  "volumeGrupoTriceps": "Tríceps",
+  "volumeGrupoAntebraco": "Antebraço",
+  "volumeGrupoQuadriceps": "Quadríceps",
+  "volumeGrupoPosteriorCoxa": "Posterior de coxa",
+  "volumeGrupoGluteo": "Glúteo",
+  "volumeGrupoQuadril": "Quadril",
+  "volumeGrupoPanturrilha": "Panturrilha",
+  "volumeGrupoAbdomen": "Abdômen",
+  "volumeGrupoLombar": "Lombar",
+  "volumeGrupoCorpoTodo": "Corpo todo",
+  "volumeGrupoOutros": "Outros",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

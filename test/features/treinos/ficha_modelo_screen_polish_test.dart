@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
@@ -26,6 +27,9 @@ class _Repo extends FichaModeloRepository {
   final renomeados = <String>[];
   final arquivados = <int>[];
   final aplicados = <(int, int, bool)>[];
+
+  @override
+  Future<FichaVolume> volumeDoModelo(int id) async => FichaVolume.vazio;
 
   @override
   Future<FichaModelo> buscar(int id) async => modelo;

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/api/api_client.dart';
 import '../models/ficha_modelo.dart';
+import '../models/ficha_volume.dart';
 import '../models/rotina_fila.dart';
 
 class FichaModeloRepository {
@@ -20,6 +21,11 @@ class FichaModeloRepository {
   Future<FichaModelo> buscar(int id) async {
     final response = await _dio.get('/api/ficha-modelos/$id');
     return FichaModelo.fromJson(Map<String, dynamic>.from(response.data as Map));
+  }
+
+  Future<FichaVolume> volumeDoModelo(int id) async {
+    final response = await _dio.get('/api/ficha-modelos/$id/volume');
+    return FichaVolume.fromJson(response.data);
   }
 
   /// Salva a ficha atual de [alunoId] como modelo (copia as sessões).
