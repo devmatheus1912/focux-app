@@ -1,5 +1,6 @@
 import '../../../l10n/app_localizations.dart';
 import '../data/aluno_destaque_exercicio.dart';
+import '../data/dashboard_repository.dart';
 import 'aluno_home_texts.dart';
 import 'aluno_home_week.dart';
 
@@ -14,6 +15,19 @@ class AlunoRitmoLinha {
   final String sobrancelha;
   final String titulo;
   final String? frase;
+}
+
+/// Ritmo da aba Treinos a partir do agregado da Home.
+AlunoRitmoLinha? alunoRitmoDaSemana(S s, AlunoDashboardHomeBundle home) {
+  return alunoSemanaLinha(
+    s,
+    buildAlunoWeekSummary(
+      concluidosSemanaIso: home.concluidosSemanaIso,
+      frequenciaDias: home.frequenciaDias,
+      streakAtual: home.streakAtual,
+      volumeSemanaKg: home.volumeSemanaKg,
+    ),
+  );
 }
 
 /// "2 de 3" na aba Treinos. A sequência e o volume cabem na frase.

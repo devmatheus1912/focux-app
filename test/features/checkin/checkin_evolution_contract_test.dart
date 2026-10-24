@@ -85,7 +85,7 @@ void main() {
     expect(view, contains('checkinEvolucaoLinha('));
   });
 
-  test('student dashboard keeps persistent performance evolution card', () {
+  test('student home keeps the day in front of the evolution card', () {
     final screen = readScreenSourceBundle(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     );
@@ -94,7 +94,7 @@ void main() {
           'lib/features/dashboard/widgets/aluno_evolution_card.dart',
         ).readAsStringSync();
 
-    expect(screen, contains('AlunoEvolutionCard('));
+    expect(screen, isNot(contains('AlunoEvolutionCard(')));
     expect(card, contains('AlunoDestaqueExercicio'));
     expect(card, contains('ultimoRecorde'));
     expect(card, contains('recordesMes'));

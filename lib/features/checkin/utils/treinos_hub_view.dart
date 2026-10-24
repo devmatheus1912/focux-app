@@ -259,3 +259,31 @@ DateTime? _parseLocal(String? raw) {
   final t = raw?.trim() ?? '';
   return t.isEmpty ? null : DateTime.tryParse(t)?.toLocal();
 }
+
+/// Ordem no plano quando o destaque ainda não traz o total do rodízio.
+(int, int)? treinosDestaqueOrdem(
+  TreinosDestaque? destaque,
+  List<ExecucaoTreino> treinos,
+) {
+  if (destaque == null || destaque.tipo != TreinosDestaqueTipo.proximo) {
+    return null;
+  }
+  final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
+  if (idx < 0 || treinos.length < 2) return null;
+  return (idx + 1, treinos.length);
+}
+
+/// Nome do treino seguinte ao destaque, quando o destaque não traz.
+String? treinosProximoNome(TreinosHubView view, List<ExecucaoTreino> treinos) {
+  final destaque = view.destaque;
+  if (destaque == null) return null;
+  if (destaque.tipo == TreinosDestaqueTipo.concluidoHoje) {
+    return view.depois?.treinoNome;
+  }
+  if (destaque.tipo != TreinosDestaqueTipo.proximo || treinos.length < 2) {
+    return null;
+  }
+  final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
+  if (idx < 0) return null;
+  return treinos[(idx + 1) % treinos.length].treinoNome;
+}

@@ -68,7 +68,7 @@ void main() {
     AlunoAutonomyAnalytics.resetSessao();
   });
 
-  testWidgets('Home "Hoje" monta cabeçalho, foco, semana e pendências', (
+  testWidgets('Home "Hoje" monta cabeçalho, foco e pendências', (
     tester,
   ) async {
     await _pump(tester, const Size(430, 2400), _home());
@@ -79,13 +79,14 @@ void main() {
     expect(find.text('Peça seu próximo treino'), findsOneWidget);
     expect(find.text('Mais'), findsOneWidget);
     expect(find.text('Sua semana'), findsNothing);
+    expect(find.text('Evolução'), findsNothing);
     expect(find.text('Pendências'), findsNothing);
     await tester.tap(find.text('Mais'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('Sua semana'), findsOneWidget);
+    expect(find.text('Sua semana'), findsNothing);
+    expect(find.text('Evolução'), findsNothing);
     expect(find.text('Pendências'), findsOneWidget);
-    expect(find.text('Evolução'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

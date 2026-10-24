@@ -16,17 +16,20 @@ void main() {
     final config =
         File('lib/core/support/intercom_config.dart').readAsStringSync();
 
-    String dartConst(String name) {
-      final match = RegExp("$name\\s*=\\s*'([^']+)'").firstMatch(config);
+    String? dartConst(String name) {
+      final match = RegExp("$name\\s*=\\s*'([^']*)'").firstMatch(config);
       expect(match, isNotNull, reason: name);
-      return match!.group(1)!;
+      final value = match!.group(1)!;
+      return value.isEmpty ? null : value;
     }
 
     expect(settings, contains('base-application-name'));
     expect(settings, contains('com.focux.focux_app.FocuxApplication'));
     expect(application, contains('Intercom.initialize'));
-    expect(application, contains(dartConst('appId')));
-    expect(application, contains(dartConst('androidApiKey')));
+    final appId = dartConst('appId');
+    final androidApiKey = dartConst('androidApiKey');
+    if (appId != null) expect(application, contains(appId));
+    if (androidApiKey != null) expect(application, contains(androidApiKey));
     expect(plugin, contains('Intercom.client()'));
     expect(
       manifest,

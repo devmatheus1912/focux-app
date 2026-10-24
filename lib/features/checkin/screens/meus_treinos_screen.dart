@@ -17,7 +17,6 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
-import '../../dashboard/utils/aluno_home_week.dart';
 import '../../dashboard/utils/aluno_ritmo_linha.dart';
 import '../../dashboard/widgets/aluno_ritmo_card.dart';
 import '../data/checkin_repository.dart';
@@ -178,15 +177,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       blocos = _blocos(s, _viewFor(home, now), now, home.treinos);
     }
 
-    final semana = alunoSemanaLinha(
-      s,
-      buildAlunoWeekSummary(
-        concluidosSemanaIso: home.concluidosSemanaIso,
-        frequenciaDias: home.frequenciaDias,
-        streakAtual: home.streakAtual,
-        volumeSemanaKg: home.volumeSemanaKg,
-      ),
-    );
+    final semana = alunoRitmoDaSemana(s, home);
     final jaTreinou = home.historico.any(
       (h) => normalizeTreinoStatus(h.status) == treinoStatusConcluido,
     );
@@ -224,8 +215,8 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final destaque = view.destaque;
     final ordem = destaque != null && destaque.ordemTotal > 1
         ? (destaque.ordem, destaque.ordemTotal)
-        : _ordem(destaque, treinos);
-    final proximoNome = destaque?.depoisNome ?? _proximoNome(view, treinos);
+        : treinosDestaqueOrdem(destaque, treinos);
+    final proximoNome = destaque?.depoisNome ?? treinosProximoNome(view, treinos);
     return [
       if (destaque != null)
         TreinosDestaqueCard(
@@ -287,26 +278,4 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     ];
   }
 
-  (int, int)? _ordem(TreinosDestaque? destaque, List<ExecucaoTreino> treinos) {
-    if (destaque == null || destaque.tipo != TreinosDestaqueTipo.proximo) {
-      return null;
-    }
-    final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
-    if (idx < 0 || treinos.length < 2) return null;
-    return (idx + 1, treinos.length);
-  }
-
-  String? _proximoNome(TreinosHubView view, List<ExecucaoTreino> treinos) {
-    final destaque = view.destaque;
-    if (destaque == null) return null;
-    if (destaque.tipo == TreinosDestaqueTipo.concluidoHoje) {
-      return view.depois?.treinoNome;
-    }
-    if (destaque.tipo != TreinosDestaqueTipo.proximo || treinos.length < 2) {
-      return null;
-    }
-    final idx = treinos.indexWhere((t) => t.treinoId == destaque.treino.treinoId);
-    if (idx < 0) return null;
-    return treinos[(idx + 1) % treinos.length].treinoNome;
-  }
 }
