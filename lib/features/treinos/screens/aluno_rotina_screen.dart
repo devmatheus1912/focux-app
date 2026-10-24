@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -212,7 +214,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
               const SizedBox(height: TokensStrip.s2),
               Text(
                 vazia
-                    ? 'Nenhum treino ainda. Toque um dia e dê o nome da sessão.'
+                    ? s.rotinaVaziaDica
                     : (frase ?? s.rotinaVazia),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -242,8 +244,8 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                           style: FocuxHubTypography.cardTitle(color: chrome.ink),
                         ),
                         if (dia.sessoes.isNotEmpty)
-                          for (final sessao in dia.sessoes)
-                            _sessao(s, chrome, sessao)
+                          for (var i = 0; i < dia.sessoes.length; i++)
+                            _sessao(s, chrome, dia.sessoes[i], segunda: i > 0)
                         else if (dia.descanso)
                           Text(
                             s.rotinaDescanso,
@@ -253,14 +255,14 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                           onPressed: _salvando ? null : () => _nomear(index),
                           child: Text(
                             dia.sessoes.isEmpty
-                                ? 'Toque para nomear'
-                                : 'Mais um neste dia',
+                                ? s.rotinaToqueParaNomear
+                                : s.rotinaMaisUmNesteDia,
                           ),
                         ),
                         if (dia.sessoes.isNotEmpty)
                           TextButton(
                             onPressed: _salvando ? null : () => _marcarDescanso(index),
-                            child: Text(s.rotinaDescanso),
+                            child: Text(s.rotinaMarcarDescanso),
                           ),
                       ],
                     ),
@@ -282,13 +284,13 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
             children: [
               TextButton(
                 onPressed: _salvando ? null : _usarEmOutro,
-                child: const Text('Usar em outro aluno'),
+                child: Text(s.rotinaUsarEmOutro),
               ),
               const SizedBox(height: TokensStrip.s2),
               FxLiquidPrimaryButton(
-                label: 'Pronto',
+                label: s.rotinaPronto,
                 loading: _salvando,
-                loadingLabel: 'Pronto',
+                loadingLabel: s.rotinaPronto,
                 onPressed: _salvando ? null : () => context.pop(),
               ),
             ],
@@ -298,10 +300,15 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     );
   }
 
-  Widget _sessao(S s, ShellPalette chrome, SessaoDaSemana sessao) {
+  Widget _sessao(
+    S s,
+    ShellPalette chrome,
+    SessaoDaSemana sessao, {
+    required bool segunda,
+  }) {
     final treinoId = sessao.treinoId;
     final nome = Text(
-      sessao.nome,
+      segunda ? '${sessao.nome} · ${s.rotinaSegundoTreino}' : sessao.nome,
       style: FocuxHubTypography.bodyMuted(color: chrome.ink),
     );
     if (treinoId == null) return nome;
@@ -351,24 +358,25 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   }
 
   Future<void> _nomear(int index) async {
+    final s = S.of(context);
     final controle = TextEditingController();
     final nome = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Nome da sessão'),
+        title: Text(s.rotinaNomeDaSessao),
         content: TextField(
           controller: controle,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Peito'),
+          decoration: InputDecoration(hintText: s.rotinaNomeExemplo),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text(FocuxMicrocopy.cancelar),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controle.text.trim()),
-            child: const Text('Pronto'),
+            child: Text(s.rotinaPronto),
           ),
         ],
       ),
@@ -392,6 +400,15 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   }
 
   Future<void> _marcarDescanso(int index) async {
+    final s = S.of(context);
+    final ok = await showFxConfirmSheet(
+      context,
+      title: s.rotinaDescansoConfirmaTitulo,
+      message: s.rotinaDescansoConfirmaTexto,
+      confirmLabel: s.rotinaMarcarDescanso,
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
     final dias = [
       for (var i = 0; i < _dias.length; i++)
         i == index
@@ -408,7 +425,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     final destino = await showDialog<int>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Usar em outro aluno'),
+        title: Text(S.of(context).rotinaUsarEmOutro),
         children: [
           for (final aluno in alunos)
             if (aluno.id != widget.alunoId)

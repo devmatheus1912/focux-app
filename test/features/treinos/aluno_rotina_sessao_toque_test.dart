@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,7 @@ import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/aluno_rotina_screen.dart';
+import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -18,10 +21,17 @@ class _FakeTreinoRepository extends TreinoRepository {
 
   final RotinaFila fila;
   var buscas = 0;
+  var gravacoes = 0;
 
   @override
   Future<RotinaFila> buscarRotina(int alunoId) async {
     buscas++;
+    return fila;
+  }
+
+  @override
+  Future<RotinaFila> gravarSemana(int alunoId, List<DiaDaSemana> dias) async {
+    gravacoes++;
     return fila;
   }
 }
@@ -141,5 +151,49 @@ void main() {
 
     expect(find.text('Peito'), findsOneWidget);
     expect(repo.buscas, greaterThan(antes));
+  });
+
+  testWidgets('marcar descanso pede confirmação e cancelar mantém', (
+    tester,
+  ) async {
+    final (repo, _) = await _abrir(tester, <Object?>[]);
+
+    await tester.tap(find.text('Marcar descanso').first);
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+    expect(find.text('Marcar descanso?'), findsOneWidget);
+
+    await tester.tap(find.text('Cancelar'));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+    expect(repo.gravacoes, 0);
+
+    await tester.tap(find.text('Marcar descanso').first);
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+    await tester.tap(find.text('Marcar descanso').last);
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+    expect(repo.gravacoes, 1);
+  });
+
+  test('tela da semana não tem texto fixo fora do arb', () {
+    final fonte = File(
+      'lib/features/treinos/screens/aluno_rotina_screen.dart',
+    ).readAsStringSync();
+    for (final texto in [
+      "'Nome da sessão'",
+      "'Toque para nomear'",
+      "'Mais um neste dia'",
+      "'Pronto'",
+      "'Usar em outro aluno'",
+      "'Cancelar'",
+    ]) {
+      expect(fonte, isNot(contains(texto)));
+    }
   });
 }
