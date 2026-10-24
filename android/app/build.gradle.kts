@@ -41,6 +41,15 @@ fun metaConfig(env: String, local: String): String =
 val facebookAppId = metaConfig("FACEBOOK_APP_ID", "facebook.appId")
 val facebookClientToken = metaConfig("FACEBOOK_CLIENT_TOKEN", "facebook.clientToken")
 
+// Intercom: env (CI) ou android/local.properties (gitignored). Vazio deixa o debug
+// subir sem Intercom; o build de release exige as duas chaves (ver tasks abaixo).
+fun intercomConfig(env: String, local: String): String =
+    System.getenv(env)?.takeIf { it.isNotBlank() }
+        ?: localProperties.getProperty(local)?.takeIf { it.isNotBlank() }
+        ?: ""
+val intercomAppId = intercomConfig("INTERCOM_APP_ID", "intercom.appId")
+val intercomAndroidApiKey = intercomConfig("INTERCOM_ANDROID_API_KEY", "intercom.androidApiKey")
+
 android {
     namespace = "com.focux.focux_app"
     compileSdk = 36
@@ -74,10 +83,13 @@ android {
         versionName = flutter.versionName
         resValue("string", "facebook_app_id", facebookAppId)
         resValue("string", "facebook_client_token", facebookClientToken)
+        buildConfigField("String", "INTERCOM_APP_ID", "\"$intercomAppId\"")
+        buildConfigField("String", "INTERCOM_ANDROID_API_KEY", "\"$intercomAndroidApiKey\"")
     }
 
     buildFeatures {
         resValues = true
+        buildConfig = true
     }
 
     buildTypes {
@@ -108,6 +120,11 @@ tasks.configureEach {
                     "Release signing requires android/key.properties with keyAlias, keyPassword, storeFile, and storePassword. Debug signing fallback is disabled."
                 )
             }
+            if (intercomAppId.isBlank() || intercomAndroidApiKey.isBlank()) {
+                throw org.gradle.api.GradleException(
+                    "Release builds require Intercom keys: set INTERCOM_APP_ID and INTERCOM_ANDROID_API_KEY (env) or intercom.appId and intercom.androidApiKey in android/local.properties."
+                )
+            }
             if (!googleServicesJson.exists()) {
                 throw org.gradle.api.GradleException(
                     "Release builds require android/app/google-services.json (Firebase push/Crashlytics). Copy it from the Firebase console; never commit it."
@@ -115,6 +132,12 @@ tasks.configureEach {
             }
         }
     }
+}
+
+dependencies {
+    // FocuxApplication chama Intercom.initialize; o plugin declara o SDK como
+    // `implementation`, então o app precisa da dependência própria (mesma versão do plugin).
+    implementation("io.intercom.android:intercom-sdk:8.2.+")
 }
 
 flutter {
