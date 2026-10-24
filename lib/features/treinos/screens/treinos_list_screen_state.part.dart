@@ -645,6 +645,18 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                 child: _abas(context),
                               ),
                             ),
+                          if (!fromAluno)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  TreinosLayout.screenPadding,
+                                  0,
+                                  TreinosLayout.screenPadding,
+                                  TokensStrip.s2,
+                                ),
+                                child: SessoesSemUsoAviso(),
+                              ),
+                            ),
                           if (loadedTreinos.isEmpty && _query.trim().isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,

@@ -126,6 +126,10 @@ final treinoRepositoryProvider = Provider<TreinoRepository>(
   (ref) => TreinoRepository(ref.read(apiClientProvider)),
 );
 
+final sessoesSemUsoProvider = FutureProvider.autoDispose<int>(
+  (ref) => ref.watch(treinoRepositoryProvider).contarSessoesSemUso(),
+);
+
 final alunoRotinaProvider = FutureProvider.autoDispose.family<RotinaFila, int>(
   (ref, alunoId) => ref.watch(treinoRepositoryProvider).buscarRotina(alunoId),
 );

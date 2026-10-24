@@ -408,6 +408,18 @@ class TreinoRepository {
     );
   }
 
+  /// Sessões vazias, sem aluno e fora de qualquer modelo.
+  Future<int> contarSessoesSemUso() async {
+    final response = await _dio.get('/api/treinos/sem-uso');
+    return ((response.data as Map)['total'] as num?)?.toInt() ?? 0;
+  }
+
+  /// Arquiva essas sessões (nada é apagado de verdade); devolve quantas.
+  Future<int> arquivarSessoesSemUso() async {
+    final response = await _dio.post('/api/treinos/sem-uso/arquivar');
+    return ((response.data as Map)['total'] as num?)?.toInt() ?? 0;
+  }
+
   Future<TreinosAlunoPage> listarTreinosDoAlunoPagina(
     int alunoId, {
     int page = 0,

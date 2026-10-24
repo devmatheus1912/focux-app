@@ -577,6 +577,21 @@
       "nome": {"type": "String"}
     }
   },
+  "sessoesSemUso": "{n, plural, =1{1 sessão vazia sem aluno} other{{n} sessões vazias sem aluno}}",
+  "@sessoesSemUso": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "sessoesSemUsoAcao": "Limpar",
+  "sessoesSemUsoTitulo": "Limpar sessões sem uso?",
+  "sessoesSemUsoTexto": "Elas saem de Sessões. Nada é apagado de verdade.",
+  "sessoesSemUsoFeito": "{n, plural, =1{1 sessão arquivada} other{{n} sessões arquivadas}}",
+  "@sessoesSemUsoFeito": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

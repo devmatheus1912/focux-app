@@ -38,6 +38,7 @@ import '../constants/treinos_layout.dart';
 import '../utils/rotina_aviso.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../widgets/ficha_modelos_aba.dart';
+import '../widgets/sessoes_sem_uso_aviso.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
