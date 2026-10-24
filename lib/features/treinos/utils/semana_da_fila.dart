@@ -154,3 +154,77 @@ String resumoDaSemana(
       }(),
   ].join(' · ');
 }
+
+/// Semana toda de descanso: "Recomeçar ficha".
+List<DiaDaSemana> semanaVazia() => [
+  for (var dia = 1; dia <= 7; dia++) DiaDaSemana(dia: dia, descanso: true),
+];
+
+/// Move as sessões de [de] para [para]; se [para] já tem sessões, elas trocam
+/// de lugar. O dia que fica sem sessão vira descanso.
+List<DiaDaSemana> moverDia(
+  List<DiaDaSemana> semana, {
+  required int de,
+  required int para,
+}) {
+  if (de == para) return semana;
+  final origem = semana.firstWhere((d) => d.dia == de);
+  final destino = semana.firstWhere((d) => d.dia == para);
+  return [
+    for (final d in semana)
+      if (d.dia == de)
+        d.copyWith(
+          sessoes: destino.sessoes,
+          descanso: destino.sessoes.isEmpty,
+        )
+      else if (d.dia == para)
+        d.copyWith(sessoes: origem.sessoes, descanso: false)
+      else
+        d,
+  ];
+}
+
+/// Acrescenta [sessao] ao fim do dia [dia] (cópia de uma sessão, por exemplo).
+List<DiaDaSemana> comSessaoNoDia(
+  List<DiaDaSemana> semana, {
+  required int dia,
+  required SessaoDaSemana sessao,
+}) => [
+  for (final d in semana)
+    d.dia == dia
+        ? d.copyWith(sessoes: [...d.sessoes, sessao], descanso: false)
+        : d,
+];
+
+/// Quantos dias treinam, quantas sessões a ficha tem e quantas já têm exercício.
+/// Contagem desconhecida (backend antigo) conta como pronta, para não avisar à toa.
+class EstadoDaFicha {
+  const EstadoDaFicha({
+    required this.dias,
+    required this.sessoes,
+    required this.prontas,
+  });
+
+  final int dias;
+  final int sessoes;
+  final int prontas;
+
+  int get incompletas => sessoes - prontas;
+  bool get vazia => sessoes == 0;
+  bool get completa => sessoes > 0 && incompletas == 0;
+}
+
+EstadoDaFicha estadoDaFicha(List<DiaDaSemana> semana) {
+  var dias = 0;
+  var sessoes = 0;
+  var prontas = 0;
+  for (final dia in semana) {
+    if (dia.sessoes.isEmpty) continue;
+    dias++;
+    for (final sessao in dia.sessoes) {
+      sessoes++;
+      if ((sessao.exerciciosCount ?? 1) > 0) prontas++;
+    }
+  }
+  return EstadoDaFicha(dias: dias, sessoes: sessoes, prontas: prontas);
+}

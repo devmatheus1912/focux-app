@@ -513,9 +513,15 @@ class TreinoRepository {
     return RotinaFila.fromJson(response.data);
   }
 
-  Future<RotinaFila> copiarSemana(int alunoId, int destinoId) async {
+  /// Com [destinoId] igual a [alunoId] vira "duplicar como base".
+  Future<RotinaFila> copiarSemana(
+    int alunoId,
+    int destinoId, {
+    bool manterCargas = true,
+  }) async {
     final response = await _dio.post(
       '/api/alunos/$alunoId/rotina/copiar/$destinoId',
+      queryParameters: {'manterCargas': manterCargas},
     );
     return RotinaFila.fromJson(response.data);
   }
