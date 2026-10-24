@@ -425,15 +425,18 @@
   },
   "treinosContinuaLa": "O treino continua lá.",
   "treinosTreinarMesmoAssim": "Treinar mesmo assim",
-  "treinosEntrouNoFim": "Entrou no fim da rotina de {nome}.",
+  "treinosEntrouNoFim": "Entrou no fim da ficha de {nome}.",
   "@treinosEntrouNoFim": {
     "placeholders": {
       "nome": {"type": "String"}
     }
   },
-  "treinosEntrouNoFimSemNome": "Entrou no fim da rotina.",
-  "rotinaLinha": "Rotina",
-  "rotinaDe": "Rotina de {nome}",
+  "treinosEntrouNoFimSemNome": "Entrou no fim da ficha.",
+  "rotinaLinha": "Ficha de treino",
+  "treinosModelosTitulo": "Modelos de treino",
+  "treinosAplicarNaFicha": "Aplicar na ficha",
+  "treinosMaisDetalhes": "Mais detalhes",
+  "rotinaDe": "Ficha de {nome}",
   "@rotinaDe": {
     "placeholders": {
       "nome": {"type": "String"}

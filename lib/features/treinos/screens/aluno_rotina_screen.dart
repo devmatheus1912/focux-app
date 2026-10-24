@@ -36,7 +36,21 @@ class AlunoRotinaLinha extends ConsumerWidget {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
     final rotina = ref.watch(alunoRotinaProvider(alunoId)).asData?.value;
-    final linha = rotina?.linha(s.rotinaDescanso) ?? '';
+    final linha = rotina == null
+        ? ''
+        : resumoDaSemana(
+            rotina,
+            nomesDosDias: [
+              s.rotinaDiaSeg,
+              s.rotinaDiaTer,
+              s.rotinaDiaQua,
+              s.rotinaDiaQui,
+              s.rotinaDiaSex,
+              s.rotinaDiaSab,
+              s.rotinaDiaDom,
+            ],
+            palavraDescanso: s.rotinaDescanso,
+          );
 
     return Material(
       color: Colors.transparent,

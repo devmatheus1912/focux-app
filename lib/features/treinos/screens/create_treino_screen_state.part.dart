@@ -10,6 +10,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
   final _formNonce = DateTime.now().microsecondsSinceEpoch.toRadixString(36);
   String? _nivel;
   bool _loading = false;
+  bool _mostrarDetalhes = false;
   String? _error;
 
   /// Treino já criado cuja atribuição ao aluno falhou: reenviar só atribui.
@@ -301,6 +302,11 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
       _objetivoCtrl.text,
     );
     final hasNome = _nomeCtrl.text.trim().isNotEmpty;
+    final detalhes =
+        _mostrarDetalhes ||
+        _objetivoCtrl.text.trim().isNotEmpty ||
+        _descricaoCtrl.text.trim().isNotEmpty ||
+        _nivel != null;
     final previewTitle =
         hasNome
             ? displayWorkoutName(_nomeCtrl.text.trim())
@@ -468,25 +474,37 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                                           ? 'Informe o nome'
                                           : null,
                             ),
-                            AlunoInsetFormField(
-                              controller: _objetivoCtrl,
-                              label: 'Objetivo (opcional)',
-                              icon: Icons.flag_outlined,
-                            ),
-                            FxInsetPickerRow(
-                              icon: Icons.tune_rounded,
-                              iconColor: soft,
-                              label: 'Nível',
-                              value: CreateTreinoLogic.nivelLabel(_nivel),
-                              onTap: _openNivelPicker,
-                            ),
-                            AlunoInsetFormField(
-                              controller: _descricaoCtrl,
-                              label: 'Descrição (opcional)',
-                              icon: Icons.notes_rounded,
-                              maxLines: 2,
-                              showDivider: false,
-                            ),
+                            if (!detalhes)
+                              FxInsetPickerRow(
+                                icon: Icons.expand_more_rounded,
+                                iconColor: soft,
+                                label: s.treinosMaisDetalhes,
+                                value: '',
+                                showDivider: false,
+                                onTap: () =>
+                                    setState(() => _mostrarDetalhes = true),
+                              )
+                            else ...[
+                              AlunoInsetFormField(
+                                controller: _objetivoCtrl,
+                                label: 'Objetivo (opcional)',
+                                icon: Icons.flag_outlined,
+                              ),
+                              FxInsetPickerRow(
+                                icon: Icons.tune_rounded,
+                                iconColor: soft,
+                                label: 'Nível',
+                                value: CreateTreinoLogic.nivelLabel(_nivel),
+                                onTap: _openNivelPicker,
+                              ),
+                              AlunoInsetFormField(
+                                controller: _descricaoCtrl,
+                                label: 'Descrição (opcional)',
+                                icon: Icons.notes_rounded,
+                                maxLines: 2,
+                                showDivider: false,
+                              ),
+                            ],
                           ],
                         ),
                       ),

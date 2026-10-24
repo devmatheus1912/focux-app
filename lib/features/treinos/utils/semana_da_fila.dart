@@ -120,3 +120,26 @@ List<DiaDaSemana> semanaPorFrequencia(int diasPorSemana) {
       ),
   ];
 }
+
+/// Resumo da semana numa linha: "Seg Peito · Ter Costas · Qua descanso…".
+/// Vazio quando a ficha não tem sessão.
+String resumoDaSemana(
+  RotinaFila fila, {
+  required List<String> nomesDosDias,
+  required String palavraDescanso,
+}) {
+  final dias = semanaDaFila(fila);
+  if (dias.every((dia) => dia.sessoes.isEmpty)) return '';
+  return [
+    for (var i = 0; i < dias.length; i++)
+      () {
+        final nomes = dias[i].sessoes
+            .map((sessao) => sessao.nome.trim())
+            .where((nome) => nome.isNotEmpty)
+            .toList();
+        return nomes.isEmpty
+            ? '${nomesDosDias[i]} ${palavraDescanso.toLowerCase()}'
+            : '${nomesDosDias[i]} ${nomes.join(' + ')}';
+      }(),
+  ].join(' · ');
+}

@@ -378,7 +378,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     final fromAluno = widget.alunoId != null;
     final title =
         widget.alunoId == null
-            ? 'Treinos'
+            ? S.of(context).treinosModelosTitulo
             : (widget.alunoNome == null || widget.alunoNome!.trim().isEmpty)
             ? 'Treinos do aluno'
             : 'Treinos de ${widget.alunoNome!.trim()}';
@@ -415,7 +415,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
     }
 
     return fxScreenA11yScope(
-      label: widget.alunoId == null ? 'Treinos' : 'Treinos do aluno',
+      label:
+          widget.alunoId == null
+              ? S.of(context).treinosModelosTitulo
+              : 'Treinos do aluno',
       child: PopScope(
         canPop:
             !keyboardOpen &&
@@ -691,21 +694,6 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   ),
                                 ),
                               ),
-                            if (fromAluno && !_selectionMode)
-                              SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    TreinosLayout.screenPadding,
-                                    0,
-                                    TreinosLayout.screenPadding,
-                                    12,
-                                  ),
-                                  child: AlunoRotinaLinha(
-                                    alunoId: widget.alunoId!,
-                                    alunoNome: widget.alunoNome ?? '',
-                                  ),
-                                ),
-                              ),
                             if (!_selectionMode)
                               SliverToBoxAdapter(
                                 child: Padding(
@@ -718,7 +706,7 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   child: _SectionHeader(
                                     title:
                                         widget.alunoId == null
-                                            ? 'Biblioteca'
+                                            ? S.of(context).treinosModelosTitulo
                                             : 'Plano do aluno',
                                     action:
                                         _query.trim().isEmpty

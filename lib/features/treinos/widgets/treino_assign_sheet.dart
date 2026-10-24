@@ -34,7 +34,7 @@ class TreinoAssignSheet extends StatefulWidget {
     required this.alunos,
     required this.isDark,
     this.includePrazo = false,
-    this.title = 'Atribuir treino',
+    this.title = 'Aplicar na ficha',
     this.subtitleWhenEmpty = 'Cadastre um aluno antes.',
     this.subtitleWhenReady = 'Escolha quem recebe este plano.',
     this.confirmLabel = 'Atribuir',

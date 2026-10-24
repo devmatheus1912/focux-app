@@ -35,7 +35,6 @@ import '../providers/treinos_provider.dart';
 import '../utils/treinos_list_labels.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import '../constants/treinos_layout.dart';
-import 'aluno_rotina_screen.dart';
 import '../utils/rotina_aviso.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/treino_home_sheet.dart';
