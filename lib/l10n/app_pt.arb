@@ -452,6 +452,8 @@
   "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
   "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
   "rotinaSessaoMontar": "Toque para montar",
+  "rotinaFrequenciaTitulo": "Quantos dias por semana?",
+  "rotinaFrequenciaDica": "Cria Treino A, B, C… nos dias certos. Você muda depois e preenche cada sessão.",
   "rotinaMarcarDescanso": "Marcar descanso",
   "rotinaDescansoConfirmaTitulo": "Marcar descanso?",
   "rotinaDescansoConfirmaTexto": "As sessões deste dia saem da ficha.",

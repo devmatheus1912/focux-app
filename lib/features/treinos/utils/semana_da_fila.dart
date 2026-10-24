@@ -91,3 +91,32 @@ List<DiaDaSemana> semanaDaFila(RotinaFila fila) {
       ),
   ];
 }
+
+const _diasPorFrequencia = {
+  2: [1, 4],
+  3: [1, 3, 5],
+  4: [1, 2, 4, 5],
+  5: [1, 2, 3, 4, 5],
+  6: [1, 2, 3, 4, 5, 6],
+  7: [1, 2, 3, 4, 5, 6, 7],
+};
+
+/// Semana nova com Treino A, B, C… nos dias padrão da frequência escolhida.
+/// Os outros dias viram descanso. Fora de 2 a 7, devolve a semana vazia.
+List<DiaDaSemana> semanaPorFrequencia(int diasPorSemana) {
+  final dias = _diasPorFrequencia[diasPorSemana] ?? const <int>[];
+  return [
+    for (var dia = 1; dia <= 7; dia++)
+      DiaDaSemana(
+        dia: dia,
+        sessoes: dias.contains(dia)
+            ? [
+                SessaoDaSemana(
+                  nome: 'Treino ${String.fromCharCode(65 + dias.indexOf(dia))}',
+                ),
+              ]
+            : const [],
+        descanso: !dias.contains(dia),
+      ),
+  ];
+}

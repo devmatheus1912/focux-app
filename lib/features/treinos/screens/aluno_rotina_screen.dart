@@ -224,6 +224,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           ),
         ),
         const SizedBox(height: TokensStrip.s4),
+        if (vazia) _frequencia(s, chrome),
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s4),
@@ -297,6 +298,51 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _frequencia(S s, ShellPalette chrome) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s4,
+        0,
+        TokensStrip.s4,
+        TokensStrip.s4,
+      ),
+      child: DecoratedBox(
+        decoration: chrome.panel(radius: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(TokensStrip.s3),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                s.rotinaFrequenciaTitulo,
+                style: FocuxHubTypography.cardTitle(color: chrome.ink),
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              Text(
+                s.rotinaFrequenciaDica,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              Wrap(
+                spacing: TokensStrip.s2,
+                children: [
+                  for (final n in const [2, 3, 4, 5, 6, 7])
+                    OutlinedButton(
+                      key: ValueKey('rotina-frequencia-$n'),
+                      onPressed: _salvando
+                          ? null
+                          : () => _persistir(semanaPorFrequencia(n)),
+                      child: Text('$n'),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

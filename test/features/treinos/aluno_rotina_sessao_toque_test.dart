@@ -22,6 +22,7 @@ class _FakeTreinoRepository extends TreinoRepository {
   final RotinaFila fila;
   var buscas = 0;
   var gravacoes = 0;
+  List<DiaDaSemana>? ultimaSemana;
 
   @override
   Future<RotinaFila> buscarRotina(int alunoId) async {
@@ -32,6 +33,7 @@ class _FakeTreinoRepository extends TreinoRepository {
   @override
   Future<RotinaFila> gravarSemana(int alunoId, List<DiaDaSemana> dias) async {
     gravacoes++;
+    ultimaSemana = dias;
     return fila;
   }
 }
@@ -56,9 +58,10 @@ const _fila = RotinaFila(
 
 Future<(_FakeTreinoRepository, GoRouter)> _abrir(
   WidgetTester tester,
-  List<Object?> aberturas,
-) async {
-  final repo = _FakeTreinoRepository(_fila);
+  List<Object?> aberturas, {
+  RotinaFila fila = _fila,
+}) async {
+  final repo = _FakeTreinoRepository(fila);
   final router = GoRouter(
     initialLocation: '/alunos/3/rotina',
     routes: [
@@ -195,5 +198,42 @@ void main() {
     ]) {
       expect(fonte, isNot(contains(texto)));
     }
+  });
+
+  testWidgets('ficha vazia oferece 2 a 7 dias e 4 cria Treino A a D', (
+    tester,
+  ) async {
+    final (repo, _) = await _abrir(
+      tester,
+      <Object?>[],
+      fila: RotinaFila.vazia,
+    );
+
+    expect(find.text('Quantos dias por semana?'), findsOneWidget);
+    for (final n in [2, 3, 4, 5, 6, 7]) {
+      expect(find.byKey(ValueKey('rotina-frequencia-$n')), findsOneWidget);
+    }
+
+    await tester.tap(find.byKey(const ValueKey('rotina-frequencia-4')));
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 120));
+    }
+
+    expect(repo.gravacoes, 1);
+    final gravada = repo.ultimaSemana!;
+    expect(
+      [
+        for (final d in gravada)
+          if (d.sessoes.isNotEmpty) '${d.dia}:${d.sessoes.single.nome}',
+      ],
+      ['1:Treino A', '2:Treino B', '4:Treino C', '5:Treino D'],
+    );
+  });
+
+  testWidgets('ficha com sessões não oferece a pergunta de frequência', (
+    tester,
+  ) async {
+    await _abrir(tester, <Object?>[]);
+    expect(find.text('Quantos dias por semana?'), findsNothing);
   });
 }
