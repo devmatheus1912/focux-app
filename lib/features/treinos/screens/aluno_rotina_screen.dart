@@ -14,7 +14,9 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sticky_actions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../models/ficha_modelo.dart';
 import '../models/rotina_fila.dart';
+import '../providers/ficha_modelos_provider.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/ficha_medicao.dart';
 import '../utils/semana_da_fila.dart';
@@ -281,6 +283,8 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           primaryLabel: s.rotinaPronto,
           loading: _salvando,
           onPrimary: _concluir,
+          secondaryLabel: estado.vazia ? null : s.rotinaSalvarModelo,
+          onSecondary: _salvarComoModelo,
         ),
       ],
     );
@@ -389,6 +393,10 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     final acao = await mostrarMenuDaFicha(context);
     if (acao == null || !mounted) return;
     switch (acao) {
+      case FichaAcao.aplicarModelo:
+        await _aplicarModelo();
+      case FichaAcao.salvarModelo:
+        await _salvarComoModelo();
       case FichaAcao.recomecar:
         await _recomecar();
       case FichaAcao.duplicarBase:
@@ -396,6 +404,62 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
       case FichaAcao.usarEmOutro:
         await _usarEmOutro();
     }
+  }
+
+  Future<void> _salvarComoModelo() async {
+    if (estadoDaFicha(_dias).vazia) return;
+    final s = S.of(context);
+    final nomeAluno = widget.alunoNome.trim();
+    final nome = await pedirTexto(
+      context,
+      titulo: s.rotinaModeloNomeTitulo,
+      inicial: nomeAluno.isEmpty ? '' : s.rotinaDe(nomeAluno),
+    );
+    if (nome == null || !mounted) return;
+    try {
+      await ref
+          .read(fichaModeloRepositoryProvider)
+          .criarDaFicha(nome: nome, alunoId: widget.alunoId);
+      ref.invalidate(fichaModelosProvider);
+      if (mounted) FeedbackHelper.showSuccess(context, s.rotinaModeloSalvo);
+    } catch (_) {
+      if (mounted) FeedbackHelper.showError(context, s.checkinNaoSalvou);
+    }
+  }
+
+  Future<void> _aplicarModelo() async {
+    final s = S.of(context);
+    final List<FichaModelo> modelos;
+    try {
+      modelos = await ref.read(fichaModelosProvider.future);
+    } catch (_) {
+      if (mounted) FeedbackHelper.showError(context, s.checkinNaoSalvou);
+      return;
+    }
+    if (!mounted) return;
+    if (modelos.isEmpty) {
+      FeedbackHelper.showError(context, s.rotinaSemModelos);
+      return;
+    }
+    final modelo = await escolherModelo(context, modelos);
+    if (modelo == null || !mounted) return;
+    final manterCargas = await escolherCargas(context);
+    if (manterCargas == null || !mounted) return;
+    if (!estadoDaFicha(_dias).vazia) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: s.rotinaAplicarConfirmaTitulo,
+        message: s.rotinaAplicarConfirmaTexto,
+        confirmLabel: s.rotinaAplicarModelo,
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    await _aplicar(
+      () => ref
+          .read(fichaModeloRepositoryProvider)
+          .aplicar(modelo.id, widget.alunoId, manterCargas: manterCargas),
+    );
   }
 
   Future<void> _recomecar() async {

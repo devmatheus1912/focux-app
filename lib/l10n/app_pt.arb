@@ -524,6 +524,13 @@
       "sessoes": {"type": "String"}
     }
   },
+  "rotinaSalvarModelo": "Salvar como modelo",
+  "rotinaAplicarModelo": "Aplicar modelo",
+  "rotinaModeloNomeTitulo": "Nome do modelo",
+  "rotinaModeloSalvo": "Modelo salvo",
+  "rotinaSemModelos": "Você ainda não tem modelos. Salve uma ficha como modelo primeiro.",
+  "rotinaAplicarConfirmaTitulo": "Substituir a ficha?",
+  "rotinaAplicarConfirmaTexto": "A ficha atual sai e entra uma cópia do modelo. Editar um não muda o outro.",
   "rotinaSessaoMontar": "Toque para montar",
   "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",

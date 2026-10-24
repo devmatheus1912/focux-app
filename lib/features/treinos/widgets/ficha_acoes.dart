@@ -4,8 +4,15 @@ import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/widgets/fx_action_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
+import '../models/ficha_modelo.dart';
 
-enum FichaAcao { recomecar, duplicarBase, usarEmOutro }
+enum FichaAcao {
+  aplicarModelo,
+  salvarModelo,
+  duplicarBase,
+  usarEmOutro,
+  recomecar,
+}
 
 enum SessaoAcao { maisUm, descanso, mover, copiar }
 
@@ -26,10 +33,14 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
     title: s.rotinaMenuFicha,
     itens: [
       FxActionSheetItem(
-        value: FichaAcao.recomecar,
-        label: s.rotinaRecomecar,
-        icon: Icons.restart_alt_rounded,
-        destructive: true,
+        value: FichaAcao.aplicarModelo,
+        label: s.rotinaAplicarModelo,
+        icon: Icons.view_week_rounded,
+      ),
+      FxActionSheetItem(
+        value: FichaAcao.salvarModelo,
+        label: s.rotinaSalvarModelo,
+        icon: Icons.bookmark_add_outlined,
       ),
       FxActionSheetItem(
         value: FichaAcao.duplicarBase,
@@ -40,6 +51,12 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
         value: FichaAcao.usarEmOutro,
         label: s.rotinaUsarEmOutro,
         icon: Icons.people_alt_outlined,
+      ),
+      FxActionSheetItem(
+        value: FichaAcao.recomecar,
+        label: s.rotinaRecomecar,
+        icon: Icons.restart_alt_rounded,
+        destructive: true,
       ),
     ],
   );
@@ -121,32 +138,91 @@ Future<bool?> escolherCargas(BuildContext context) {
   );
 }
 
-Future<String?> pedirNomeDaSessao(BuildContext context) async {
+Future<String?> pedirNomeDaSessao(BuildContext context) {
   final s = S.of(context);
-  final controle = TextEditingController();
+  return pedirTexto(context, titulo: s.rotinaNomeDaSessao, dica: s.rotinaNomeExemplo);
+}
+
+/// Pede um nome ao personal; devolve null se cancelar ou deixar vazio.
+Future<String?> pedirTexto(
+  BuildContext context, {
+  required String titulo,
+  String? dica,
+  String inicial = '',
+}) async {
   final nome = await showDialog<String>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text(s.rotinaNomeDaSessao),
+    builder: (_) => _DialogoDeTexto(titulo: titulo, dica: dica, inicial: inicial),
+  );
+  return nome == null || nome.isEmpty ? null : nome;
+}
+
+/// O controller mora aqui para ser descartado só quando o diálogo sai da árvore,
+/// depois da animação de saída (descartar logo após o `await` quebra em debug).
+class _DialogoDeTexto extends StatefulWidget {
+  const _DialogoDeTexto({required this.titulo, required this.inicial, this.dica});
+
+  final String titulo;
+  final String? dica;
+  final String inicial;
+
+  @override
+  State<_DialogoDeTexto> createState() => _DialogoDeTextoState();
+}
+
+class _DialogoDeTextoState extends State<_DialogoDeTexto> {
+  late final TextEditingController _controle = TextEditingController(text: widget.inicial);
+
+  @override
+  void dispose() {
+    _controle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return AlertDialog(
+      title: Text(widget.titulo),
       content: TextField(
-        controller: controle,
+        controller: _controle,
         autofocus: true,
-        decoration: InputDecoration(hintText: s.rotinaNomeExemplo),
+        decoration: InputDecoration(hintText: widget.dica),
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
+          onPressed: () => Navigator.pop(context),
           child: Text(FocuxMicrocopy.cancelar),
         ),
         TextButton(
-          onPressed: () => Navigator.pop(dialogContext, controle.text.trim()),
+          onPressed: () => Navigator.pop(context, _controle.text.trim()),
           child: Text(s.rotinaPronto),
         ),
       ],
-    ),
+    );
+  }
+}
+
+/// Lista os modelos do personal e devolve o escolhido (ou null).
+Future<FichaModelo?> escolherModelo(
+  BuildContext context,
+  List<FichaModelo> modelos,
+) async {
+  final s = S.of(context);
+  final id = await showFxActionSheet<int>(
+    context,
+    title: s.rotinaAplicarModelo,
+    itens: [
+      for (final modelo in modelos)
+        FxActionSheetItem(
+          value: modelo.id,
+          label: modelo.nome,
+          icon: Icons.view_week_rounded,
+        ),
+    ],
   );
-  controle.dispose();
-  return nome == null || nome.isEmpty ? null : nome;
+  if (id == null) return null;
+  return modelos.where((m) => m.id == id).firstOrNull;
 }
 
 Future<int?> escolherAluno(
