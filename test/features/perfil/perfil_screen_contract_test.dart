@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/theme_provider.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'package:focux_app/features/perfil/data/perfil_repository.dart';
 import 'package:focux_app/features/perfil/providers/perfil_provider.dart';
@@ -33,10 +35,13 @@ void main() {
     expect(find.text('QA Coach'), findsWidgets);
     expect(find.textContaining('Marca'), findsWidgets);
     expect(find.text('Prontidão comercial'), findsNothing);
-    expect(find.text('Vitrine'), findsOneWidget);
+    expect(find.text('Sua página'), findsOneWidget);
+    expect(find.text('Vitrine'), findsNothing);
     expect(find.text('Link público'), findsOneWidget);
-    // Completar sticky: P0 S2 quando há lacuna (fixture sem foto/telefone).
-    expect(find.text('Completar'), findsOneWidget);
+    // O que falta vira cartão abaixo da identidade (fixture sem foto/telefone).
+    expect(find.textContaining('% completo'), findsOneWidget);
+    expect(find.textContaining('passos para fechar'), findsOneWidget);
+    expect(find.text('Completar'), findsNothing);
     expect(find.text('Ver ao vivo'), findsNothing);
     expect(find.text('Migração Focux'), findsNothing);
     expect(find.textContaining('alunos'), findsNothing);
@@ -49,7 +54,9 @@ void main() {
     await tester.pump();
     expect(find.text('Aparência'), findsOneWidget);
     expect(find.text('Sistema'), findsOneWidget);
-    expect(find.text('Operação'), findsOneWidget);
+    expect(find.text('Claro'), findsOneWidget);
+    expect(find.text('Escuro'), findsOneWidget);
+    expect(find.text('Negócio'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Carteira e PIX'),
       240,
@@ -67,7 +74,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Completar'), findsOneWidget);
     expect(find.text('Meus alunos'), findsNothing);
     expect(find.text('Copiloto IA'), findsNothing);
     expect(find.text('Conta e segurança'), findsOneWidget);
@@ -99,9 +105,11 @@ void main() {
     expect(find.textContaining('alunos'), findsNothing);
     expect(find.text('Cadastro completo'), findsNothing);
     expect(find.text('Completar'), findsNothing);
+    expect(find.text('Perfil completo'), findsOneWidget);
+    expect(find.textContaining('passos para fechar'), findsNothing);
 
     await tester.scrollUntilVisible(
-      find.text('Operação'),
+      find.text('Negócio'),
       240,
       scrollable: find.byType(Scrollable).first,
     );
@@ -114,6 +122,68 @@ void main() {
     expect(find.text('Link público'), findsOneWidget);
     expect(find.text('Ferramentas de desenvolvimento'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsNothing);
+  });
+
+  testWidgets('conta: sem exclusão duplicada, Sair neutro e Excluir sozinho', (
+    tester,
+  ) async {
+    DashboardHomeClientCache.clear();
+    tester.view.physicalSize = const Size(390, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(DashboardHomeClientCache.clear);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
+        ],
+        child: const MaterialApp(home: PerfilScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    expect(find.text('Ajuda e suporte'), findsOneWidget);
+    expect(find.text('Como excluir sua conta'), findsNothing);
+    expect(find.text('Sair da conta'), findsOneWidget);
+    expect(find.text('Excluir minha conta'), findsOneWidget);
+    expect(find.text('Preferências'), findsOneWidget);
+    expect(find.text('Tema'), findsNothing);
+    expect(find.text('Termos e privacidade'), findsOneWidget);
+  });
+
+  testWidgets('aparência troca o tema direto, sem abrir sheet', (tester) async {
+    DashboardHomeClientCache.clear();
+    SharedPreferences.setMockInitialValues({});
+    tester.view.physicalSize = const Size(390, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(DashboardHomeClientCache.clear);
+
+    late ProviderContainer container;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          perfilProvider.overrideWith((ref) async => _perfilCompletoFixture),
+        ],
+        child: Consumer(
+          builder: (context, ref, _) {
+            container = ProviderScope.containerOf(context);
+            return const MaterialApp(home: PerfilScreen());
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    await tester.tap(find.text('Escuro'));
+    await tester.pump();
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    expect(find.byType(BottomSheet), findsNothing);
   });
 }
 

@@ -88,7 +88,7 @@ void main() {
     }
   });
 
-  test('personal dashboard abre no dia, sem o banner de foco', () {
+  test('personal dashboard abre no Agora, sem painel em sheet nem banner de foco', () {
     final source =
         readScreenSourceBundle(
           'lib/features/dashboard/screens/personal_dashboard_screen.dart',
@@ -96,8 +96,9 @@ void main() {
         File(
           'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
         ).readAsStringSync();
-    expect(source, contains('HojePersonalCardView'));
-    expect(source, contains('hoje_personal_dia.dart'));
+    expect(source, contains('HojeAgoraSecao'));
+    expect(source, contains('hoje_agora.dart'));
+    expect(source, isNot(contains('showHojePersonalPainel')));
     expect(source, isNot(contains('DashboardDayFocusBanner')));
     expect(source, isNot(contains('DashboardAderenciaSemanaWidget')));
   });

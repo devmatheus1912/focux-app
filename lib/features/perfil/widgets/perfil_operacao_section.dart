@@ -41,8 +41,8 @@ class PerfilOperacaoSection extends ConsumerWidget {
               !carteira.liberado
                   ? ''
                   : pixDone
-                  ? 'Completa'
-                  : 'Configurar',
+                  ? 'PIX configurado'
+                  : 'Configurar PIX',
           mute: mute,
           line: line,
           locked: !carteira.liberado,

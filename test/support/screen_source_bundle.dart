@@ -18,8 +18,18 @@ String readScreenSourceBundle(String mainPath) {
       .where((file) => seen.add(file.resolveSymbolicLinksSync()))
       .map((file) => file.readAsStringSync())
       .join('\n');
-  return '$main\n$parts';
+  final extras = baseName == 'personal_dashboard_screen'
+      ? _hojePersonalWidgets.map((p) => File(p).readAsStringSync()).join('\n')
+      : '';
+  return '$main\n$parts\n$extras';
 }
+
+/// A Hoje do personal é montada por estes widgets: contam como parte da tela.
+const _hojePersonalWidgets = [
+  'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
+  'lib/features/dashboard/widgets/hoje_agora_secao.dart',
+  'lib/features/dashboard/widgets/hoje_base_secao.dart',
+];
 
 /// Reads paywall_components and all of its part files.
 String readPaywallComponentsBundle() {

@@ -1278,6 +1278,39 @@
   "@migracaoTextoCarregado": { "placeholders": { "arquivo": { "type": "String" } } },
   "hojePersonalAgora": "Agora",
   "hojePersonalVerPainel": "Ver o painel",
+  "hojeVerTodas": "Ver todas ({n})",
+  "@hojeVerTodas": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "hojeVerMenos": "Ver menos",
+  "hojeConvidarAluno": "Convidar um aluno",
+  "hojeSecaoBase": "A base",
+  "hojeTreinaramHoje": "Treinaram hoje",
+  "hojeEmRisco": "Em risco",
+  "hojeFichasAVencer": "Fichas a vencer",
+  "hojeSecaoDinheiro": "Dinheiro",
+  "hojeRecebidoEm": "Recebido em {mes}",
+  "@hojeRecebidoEm": {
+    "placeholders": {
+      "mes": {"type": "String"}
+    }
+  },
+  "hojeEmAtraso": "{n, plural, =1{1 em atraso} other{{n} em atraso}}",
+  "@hojeEmAtraso": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "ferramentasTitulo": "Ferramentas",
+  "ferramentasBuscar": "Buscar ferramenta",
+  "ferramentasNenhuma": "Nenhuma ferramenta encontrada",
+  "ferramentasNaoCarregou": "Não carregou as ferramentas.",
+  "ferramentasTentar": "Tentar de novo",
+  "hojeProximoPasso": "Próximo passo",
+  "hojeFerramentas": "Ferramentas",
+  "hojeFerramentasSub": "Exercícios, captação, vendas e mais",
   "hojePersonalEmDiaTitulo": "Operação sob controle",
   "hojePersonalEmDiaFrase": "Nada para fazer agora.",
   "hojeAlunoMais": "Mais",

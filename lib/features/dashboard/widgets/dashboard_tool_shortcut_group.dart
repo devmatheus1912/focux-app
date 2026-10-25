@@ -62,7 +62,9 @@ class DashboardToolShortcutGroup extends ConsumerWidget {
             fxIcon: shortcuts[i].icon,
             label: shortcuts[i].label,
             subtitle:
-                isLockedLeads(shortcuts[i], features) ? leadsTeaser : null,
+                isLockedLeads(shortcuts[i], features)
+                    ? leadsTeaser
+                    : shortcuts[i].descricao,
             semanticsLabel: dashboardShortcutSemanticsLabel(shortcuts[i]),
             value:
                 shortcuts[i].isUnlocked(features)

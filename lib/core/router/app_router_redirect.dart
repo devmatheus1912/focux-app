@@ -135,6 +135,7 @@ bool isPersonalOnlyLocation(String path) {
     '/dashboard/personal',
     '/dashboard/qualidade',
     '/dashboard/command-center/copiloto',
+    '/ferramentas',
     '/ia',
     '/ia/copiloto',
     '/ia/chat',

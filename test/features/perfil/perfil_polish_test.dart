@@ -42,7 +42,8 @@ void main() {
       File('lib/core/widgets/fx_settings_tile.dart').readAsStringSync(),
       contains('BrandPalette.softened'),
     );
-    expect(screen, contains('if (!profileComplete)'));
+    expect(screen, contains('if (nextStep != null)'));
+    expect(screen, isNot(contains('PerfilStickyBar')));
     expect(screen, isNot(contains('_PerfilGrowthSection')));
     expect(conta, contains('Conta e segurança'));
     expect(screen, isNot(contains('PerfilQuietCollapsible')));

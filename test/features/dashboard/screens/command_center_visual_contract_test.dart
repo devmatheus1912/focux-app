@@ -3,137 +3,58 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('command center autonomy bottlenecks keep compact layout safe', () {
+  test('a Hoje do personal é uma tela só, com Agora por pessoa e layout seguro', () {
     const paths = [
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_state.part.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
-      'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
-      'lib/features/dashboard/widgets/command_action_tile.dart',
-      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
+      'lib/features/dashboard/widgets/hoje_agora_secao.dart',
+      'lib/features/dashboard/widgets/hoje_base_secao.dart',
+      'lib/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
-      'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
-      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
-      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
-      'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
-      'lib/features/dashboard/utils/dashboard_microcopy.dart',
-      'lib/features/dashboard/utils/dashboard_next_actions.dart',
-      'lib/features/dashboard/utils/dashboard_command_copy.dart',
-      'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
+      'lib/features/dashboard/utils/hoje_agora.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
       'lib/features/dashboard/data/dashboard_repository.dart',
       'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
-      'lib/features/dashboard/utils/dashboard_chat_subtitle.dart',
       'lib/features/dashboard/utils/dashboard_unread.dart',
-      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
     ];
     final widget = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
-    expect(widget, contains('commandCenterTitle'));
-    expect(widget, contains('class CommandActionTile'));
-    expect(widget, contains('message-circle'));
-    expect(widget, isNot(contains('atalhoKicker')));
-    expect(widget, contains('if (hasTrend)'));
-    expect(widget, contains('expand: true'));
-    expect(widget, contains('Shimmer.fromColors'));
-    expect(widget, contains('maxLines: 1'));
-    expect(widget, contains('TextOverflow.ellipsis'));
-    expect(widget, contains('class DashboardDayPulseStrip'));
-    expect(widget, contains('pulsoOperacional'));
-    expect(widget, isNot(contains('hideRiscoChip')));
-    expect(widget, contains('class DashboardPrioritiesOverlay'));
-    expect(widget, contains('dashboardPanelIsOffscreen'));
-    expect(
-      File(
-            'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
-          ).readAsStringSync() +
-          File(
-            'lib/features/dashboard/widgets/dashboard_radar_sheet.dart',
-          ).readAsStringSync(),
-      allOf(
-        contains('FxSatelliteListTile'),
-        contains('dashboardRadarSplit'),
-        contains('radarVerTodos'),
-        isNot(contains('FxSettingsGroup')),
-        isNot(contains('SingleChildScrollView')),
-      ),
-    );
-    expect(
-      File(
-        'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
-      ).readAsStringSync(),
-      allOf(
-        contains('hojeCard'),
-        contains("source: 'hoje_card'"),
-        isNot(contains('DashboardPrioritiesOverlay')),
-      ),
-    );
-    expect(
-      File(
-        'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
-      ).readAsStringSync(),
-      isNot(contains('return Positioned(')),
-    );
-    expect(widget, contains('verPrioridades'));
-    expect(widget, contains('dashboardShowsStickyPrioritiesAction'));
-    expect(widget, contains('panelOffscreen'));
-    expect(widget, contains('_commandPanelKey'));
-    expect(widget, contains('DashboardPulseSnapshot'));
-    expect(widget, contains('riskOwnedByDayFocus'));
-    expect(widget, contains('atalhosHomeFromCatalogo'));
-    expect(widget, contains('showDashboardToolsCatalogSheet'));
-    expect(widget, contains('checkinsTrend'));
-    expect(widget, contains('attentionRiskLimit'));
-    expect(widget, contains('dashboardChatShortcutSubtitle'));
-    expect(widget, contains('dashboardChatUnreadCount'));
-    expect(widget, contains('tendenciaVaziaBase'));
-    expect(widget, contains('dashboardPulseEmptyHint'));
-    expect(widget, isNot(contains('pulseAgendaAccent')));
-    expect(widget, contains('dashboardShowsInlinePrioritiesLink'));
+    // Uma tela: nada de painel nem catálogo em sheet.
+    expect(widget, isNot(contains('showHojePersonalPainel')));
+    expect(widget, isNot(contains('showDashboardToolsCatalogSheet')));
+    expect(widget, isNot(contains('DashboardPrioritiesOverlay')));
+    expect(widget, isNot(contains('DashboardDayPulseStrip')));
+    expect(widget, isNot(contains('DashboardFinancialHeroSection')));
+
+    // Agora por pessoa, com verbo; a regra mora numa função pura.
+    expect(widget, contains('hojeAgora('));
+    expect(widget, contains('FxActionRow'));
+    expect(widget, contains('kHojeAgoraVisiveis'));
+    expect(widget, contains("source: 'hoje_agora'"));
+    expect(widget, contains('hojeVerTodas'));
+
+    // Base, dinheiro e ferramentas.
+    expect(widget, contains('FxMetricStrip'));
+    expect(widget, contains('HojeDinheiroLinha'));
+    expect(widget, contains("'/ferramentas'"));
     expect(widget, contains('mensagensNaoLidas'));
-    expect(widget, contains('notificacoesNaoLidas'));
-    expect(widget, contains('dashboardScrollOffsetMeaningfullyChanged'));
-    expect(widget, contains('dashboardScrollVisualStateChanged'));
-    expect(widget, isNot(contains('DashboardMicrocopy.recentes')));
-    expect(
-      widget,
-      isNot(
-        contains('dashboardShowsFloatingPrioritiesChip(_homeScrollOffset)'),
-      ),
-    );
-    expect(widget, isNot(contains('inboxUnread: 0')));
-    expect(widget, isNot(contains('inboxReady: false')));
-    expect(widget, isNot(contains('DashboardDayFocus.resolve(')));
-    expect(widget, contains('showPrioritiesLink'));
-    expect(widget, contains('Ações por aluno'));
-    expect(widget, contains('isRadarStudent'));
-    expect(widget, contains('priorityBadge'));
-    expect(widget, contains('BILLING_PENDING'));
-    expect(widget, contains('dashboardFormatCountCopy'));
-    expect(widget, contains('dashboardClampActionCopy'));
-    expect(widget, contains('showFxHomeSheet'));
-    expect(widget, contains('FxHomeSheetSurface'));
-    expect(widget, contains('expandHeightFactor'));
-    expect(widget, contains('maisPrioridades'));
-    expect(widget, contains('hasRiskCurated'));
-    expect(widget, contains('dashboardPriorityBadgeColors'));
-    expect(widget, contains('DashboardCommandCenterStickyHeaderDelegate'));
-    expect(widget, contains('SliverPersistentHeader'));
-    expect(widget, contains('Agendar primeiro treino'));
-    expect(widget, isNot(contains('Abrir agenda do dia')));
+    expect(widget, contains('dashboardChatUnreadCount'));
+    expect(widget, contains('riscoAlto'));
+    expect(widget, contains('checkinsHoje'));
+
+    // Layout seguro em tela estreita.
+    expect(widget, contains('maxLines'));
+    expect(widget, contains('TextOverflow.ellipsis'));
+    expect(widget, contains('Shimmer.fromColors'));
+    expect(widget, contains('SliverToBoxAdapter'));
+
+    // Dados do servidor que a Hoje usa.
     expect(widget, contains('buildDashboardNextActions'));
     expect(widget, contains('DashboardHomeFocusRules'));
-    expect(widget, contains('DashboardAderenciaCopy'));
-    expect(widget, isNot(contains('_RiskWaveBanner')));
-    expect(widget, contains('isRiskEchoCopy'));
-    expect(widget, contains('BrandPalette.sectionHeading'));
-    expect(widget, contains('BrandPalette.sectionLink'));
-
-    // A fila da Home é computada uma vez e só apresentada.
-    expect(widget, contains('required this.prioritiesSheetActions'));
-    expect(widget, contains('required this.showPrioritiesLink'));
-    expect(widget, contains('riskOwnedByDayFocus'));
+    expect(widget, contains('BILLING_PENDING'));
+    expect(widget, contains('FICHA_VENCENDO_'));
   });
 }

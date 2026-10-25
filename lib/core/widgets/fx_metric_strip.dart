@@ -1,0 +1,108 @@
+import 'package:flutter/material.dart';
+
+import '../theme/focux_hub_typography.dart';
+import '../theme/shell_chrome.dart';
+import '../theme/tokens_strip.dart';
+
+/// Um número com rótulo. [alerta] pinta de aviso; zero fica apagado.
+class FxMetric {
+  const FxMetric({
+    required this.valor,
+    required this.rotulo,
+    required this.onTap,
+    this.alerta = false,
+  });
+
+  final int valor;
+  final String rotulo;
+  final VoidCallback onTap;
+  final bool alerta;
+}
+
+/// Faixa de números tocáveis. Cada um leva à lista que o explica.
+/// Zero nunca ganha cor de alerta: fica apagado.
+class FxMetricStrip extends StatelessWidget {
+  const FxMetricStrip({super.key, required this.metricas});
+
+  final List<FxMetric> metricas;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    return Row(
+      children: [
+        for (final (i, m) in metricas.indexed) ...[
+          if (i > 0) const SizedBox(width: TokensStrip.s2),
+          Expanded(child: _Tile(metrica: m, chrome: chrome)),
+        ],
+      ],
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  const _Tile({required this.metrica, required this.chrome});
+
+  final FxMetric metrica;
+  final ShellPalette chrome;
+
+  @override
+  Widget build(BuildContext context) {
+    final zero = metrica.valor == 0;
+    final destaque = metrica.alerta && !zero;
+    final corNumero = zero
+        ? chrome.mute.withValues(alpha: 0.6)
+        : destaque
+        ? chrome.brand
+        : chrome.ink;
+
+    return Semantics(
+      button: true,
+      label: '${metrica.valor} ${metrica.rotulo}',
+      excludeSemantics: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: metrica.onTap,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: chrome.cardFill,
+              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+              border: Border.all(
+                color: destaque ? chrome.brand.withValues(alpha: 0.5) : chrome.lineStrong,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s2,
+              vertical: TokensStrip.s3,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${metrica.valor}',
+                    style: FocuxHubTypography.metric(
+                      color: corNumero,
+                      fontSize: 22,
+                    ),
+                  ),
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    metrica.rotulo,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

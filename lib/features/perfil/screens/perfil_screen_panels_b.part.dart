@@ -25,7 +25,7 @@ String _buildSubtitle(PerfilPersonal perfil) {
   final specialty = perfil.especialidade ?? 'Personal Trainer';
   final ig = perfil.instagram?.trim();
   if (ig != null && ig.isNotEmpty) {
-    return '$specialty  |  @${ig.replaceFirst('@', '')}';
+    return '$specialty · @${ig.replaceFirst('@', '')}';
   }
   return specialty;
 }

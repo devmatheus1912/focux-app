@@ -73,14 +73,6 @@ void main() {
     }
   });
 
-  test('personal dashboard keeps scroll logic outside build', () {
-    final screen = File(
-      'lib/features/dashboard/screens/personal_dashboard_screen.dart',
-    ).readAsStringSync();
-    expect(screen, contains('dashboard_scroll_logic.dart'));
-    expect(screen, isNot(contains('_commandCenterPrioritiesFloatingMaxOffset')));
-  });
-
   test('aluno detail imports operacao and copilot logic utils', () {
     final screen = File(
       'lib/features/alunos/screens/aluno_detail_screen.dart',
@@ -151,7 +143,6 @@ void main() {
     ).readAsStringSync();
     expect(screen, contains("part 'personal_dashboard_screen_state.part.dart'"));
     expect(screen, contains("part 'personal_dashboard_screen_build.part.dart'"));
-    expect(screen, contains('dashboard_scroll_logic.dart'));
   });
 
   test('ia copiloto entry stays decomposed under 300 LOC', () {

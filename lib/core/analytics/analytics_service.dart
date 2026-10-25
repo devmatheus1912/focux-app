@@ -263,6 +263,8 @@ class ProductEvents {
   static const fichaRenovada = 'ficha_renovada';
   static const fichaVolumeAberto = 'ficha_volume_aberto';
   static const fichaHistoricoAberto = 'ficha_historico_aberto';
+  static const hojeAgoraAberto = 'hoje_agora_aberto';
+  static const ferramentasAberta = 'ferramentas_aberta';
   static const fichaHistoricoUsada = 'ficha_historico_usada';
   static const treinosDuplicated = 'treinos_duplicated';
   static const treinosBulkOpened = 'treinos_bulk_opened';

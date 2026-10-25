@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
@@ -7,7 +5,6 @@ import 'package:focux_app/features/dashboard/utils/dashboard_day_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_home_focus.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_radar_items.dart';
-import 'package:focux_app/features/dashboard/utils/dashboard_attention_items.dart';
 
 void main() {
   group('dashboardRadarSplit', () {
@@ -119,42 +116,6 @@ void main() {
         ]),
         isFalse,
       );
-    });
-
-    test('radar strip is satellite list, not accordion', () {
-      final src =
-          File(
-            'lib/features/dashboard/widgets/dashboard_base_radar_strip.dart',
-          ).readAsStringSync() +
-          File(
-            'lib/features/dashboard/widgets/dashboard_radar_sheet.dart',
-          ).readAsStringSync();
-      expect(src, contains('FxSatelliteListTile'));
-      expect(src, contains('DashboardRadarTile'));
-      expect(src, contains('radarVerTodos'));
-      expect(src, isNot(contains('FxSettingsGroup')));
-      expect(src, isNot(contains('DashboardCollapsibleSection')));
-      expect(src, isNot(contains('DashboardHorizontalScrollPeek')));
-    });
-  });
-
-  group('dashboardAttentionSplit', () {
-    test('fold keeps 2 and overflows the rest', () {
-      final items = List.generate(
-        4,
-        (i) => DashboardAttentionEntry(
-          nome: 'A$i',
-          titulo: 'Prioridade hoje',
-          subt: 'Contato',
-          acao: 'Revisar',
-          route: '/alunos/$i',
-          icon: 'alert-triangle',
-        ),
-      );
-      final split = dashboardAttentionSplit(items);
-      expect(split.fold, hasLength(2));
-      expect(split.more, hasLength(2));
-      expect(split.fold.first.nome, 'A0');
     });
   });
 

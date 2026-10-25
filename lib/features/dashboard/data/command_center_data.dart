@@ -399,11 +399,15 @@ class MensalidadeResumo {
   final double valor;
   final String dataVencimento;
 
+  /// Dias de atraso; 0 quando ainda está no prazo (ou o servidor não informou).
+  final int diasAtraso;
+
   MensalidadeResumo({
     required this.id,
     required this.nomeAluno,
     required this.valor,
     required this.dataVencimento,
+    this.diasAtraso = 0,
   });
 
   factory MensalidadeResumo.fromJson(Map<String, dynamic> json) =>
@@ -412,5 +416,6 @@ class MensalidadeResumo {
         nomeAluno: json['nomeAluno'] as String? ?? '',
         valor: FxMoney.reais(json['valor']),
         dataVencimento: json['dataVencimento'] as String? ?? '',
+        diasAtraso: (json['diasAtraso'] as num?)?.toInt() ?? 0,
       );
 }

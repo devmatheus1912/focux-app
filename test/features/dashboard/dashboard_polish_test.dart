@@ -43,21 +43,17 @@ void main() {
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
       'lib/features/dashboard/screens/personal_dashboard_screen_build.part.dart',
       'lib/features/dashboard/utils/dashboard_screen_helpers.dart',
-      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-      'lib/features/dashboard/widgets/command_action_tile.dart',
-      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
-      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
-      'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
+      'lib/features/dashboard/widgets/hoje_agora_secao.dart',
+      'lib/features/dashboard/widgets/hoje_base_secao.dart',
+      'lib/features/dashboard/utils/hoje_agora.dart',
+      'lib/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart',
       'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
-      'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
       'lib/features/dashboard/utils/dashboard_command_copy.dart',
       'lib/features/dashboard/utils/dashboard_next_actions.dart',
-      'lib/features/dashboard/utils/dashboard_home_focus.dart',
       'lib/features/dashboard/widgets/dashboard_home_header.dart',
-      'lib/features/dashboard/widgets/dashboard_command_center_sticky_header.dart',
       'lib/features/dashboard/widgets/dashboard_section_header.dart',
       'lib/features/dashboard/utils/dashboard_a11y.dart',
       'lib/features/dashboard/utils/dashboard_home_snapshot.dart',
@@ -65,43 +61,27 @@ void main() {
     ];
     final screen = paths.map((p) => File(p).readAsStringSync()).join('\n');
 
-    expect(screen, contains('dashboardSectionKickerStyle'));
-    expect(screen, contains('panoramaFinanceiro'));
-    expect(screen, contains('receitaAtual > 0'));
-    expect(screen, contains(r'Recebido · $mes'));
-    expect(screen, contains('pulsoOperacional'));
-    expect(screen, contains('riscoOperacionalLabel'));
+    expect(screen, contains('DashboardSectionHeader'));
+    expect(screen, contains('HojeAgoraSecao'));
+    expect(screen, contains('hojeAgora('));
+    expect(screen, contains('FxActionRow'));
+    expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('/alunos?filtro=risco'));
-    expect(screen, contains('impactoHoje'));
-    expect(screen, contains('financeInadimplLabel'));
-    expect(screen, contains('financePercentLabel'));
-    expect(screen, contains('Meta batida'));
-    expect(screen, contains('pulseCheckinsAccent'));
-    expect(screen, contains('DashboardSectionHeader'));
-    expect(screen, contains('Pendente'));
-    expect(screen, contains('Ticket'));
-    expect(screen, contains('FxActionChip'));
     expect(screen, contains('BrandPalette.sectionLink'));
-    expect(screen, contains('showPrioritiesLink'));
-    expect(screen, contains('verPrioridades'));
-    expect(screen, contains('Ações por aluno'));
-    expect(screen, contains('DashboardSectionHeader'));
-    expect(screen, contains('dashboard_entry_motion.dart'));
-    expect(screen, contains('HojePersonalCardView'));
-    expect(screen, contains('DashboardHomeFocusRules'));
-    expect(screen, contains('groupCatalogoHubs'));
-    expect(screen, contains('buscarFerramenta'));
     expect(screen, contains('dashboardReadableMuted'));
-    expect(screen, contains('dashboardPriorityBadgeColors'));
-    expect(screen, contains('FxActionChip.solidForeground'));
     expect(screen, contains('RISK_STUDENTS'));
-    expect(screen, contains('DashboardFinanceEmptyState'));
-    // Sheet de prioridades migrou para o chrome canônico da Home (sem
-    // DraggableScrollableSheet ad-hoc com snapSizes soltos).
-    expect(screen, contains('showFxHomeSheet'));
+    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('FxHelpChrome.iconSize'));
+    expect(screen, contains('alunoFromAlertaResumo'));
+    expect(screen, contains('onboardingFromHome'));
+    expect(screen, contains('statusFromHome: onboardingFromHome'));
+    expect(screen, isNot(contains('onboardingStatusProvider')));
     expect(screen, isNot(contains('DraggableScrollableSheet(')));
-    expect(screen, contains('maxVisibleNextActions'));
-    expect(screen, contains('modoFoco'));
+    expect(screen, isNot(contains('showHojePersonalPainel')));
+    expect(screen, isNot(contains('showDashboardToolsCatalogSheet')));
+    expect(screen, isNot(contains('ShellThemeToggle')));
+    expect(screen, isNot(contains('retornoRapido')));
+    expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
     final shortcutsFile =
         File(
           'lib/features/dashboard/data/dashboard_tool_shortcuts.dart',
@@ -111,60 +91,31 @@ void main() {
     expect(shortcutsFile, isNot(contains('static const List')));
     expect(shortcutsFile, contains('fromEntrada'));
     expect(shortcutsFile, contains('atalhosHomeFromCatalogo'));
-    expect(screen, isNot(contains('retornoRapido')));
-    expect(screen, isNot(contains('DashboardRoiQuickLinksRow')));
-    expect(screen, contains('DashboardMicrocopy.commandCenterSubtitle'));
-    expect(screen, contains('verPrioridades'));
-    expect(screen, contains('verCatalogoCompleto'));
-    expect(screen, contains('omitSecondarySections'));
-    expect(screen, contains('FxHelpIconButton'));
-    expect(screen, isNot(contains('ShellThemeToggle')));
-    expect(screen, contains('FxHelpChrome.iconSize'));
-    expect(screen, contains('checkinsPulseLabel'));
-    expect(screen, contains('utilityOnly'));
-    expect(screen, contains('hideEmptyTrend'));
-    expect(screen, contains('FocuxHubTypography.sectionTitle'));
-    expect(screen, contains('checkinsTrend'));
-    expect(screen, contains('showDashboardToolsCatalogSheet'));
-    expect(screen, contains('alunoFromAlertaResumo'));
-    expect(screen, contains('onboardingFromHome'));
-    expect(screen, contains('statusFromHome: onboardingFromHome'));
-    expect(screen, isNot(contains('onboardingStatusProvider')));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
-    expect(semanticsCount, greaterThanOrEqualTo(10));
+    expect(semanticsCount, greaterThanOrEqualTo(4));
   });
 
-  test('destaque da Home e catálogo são lista inset', () {
-    final catalog = File(
-      'lib/features/dashboard/widgets/dashboard_tools_catalog_sheet.dart',
-    ).readAsStringSync();
-    final tools = File(
-      'lib/features/dashboard/widgets/dashboard_tools_section.dart',
+  test('Ferramentas é lista inset agrupada por tarefa', () {
+    final tela = File(
+      'lib/features/ferramentas/screens/ferramentas_screen.dart',
     ).readAsStringSync();
     final group = File(
       'lib/features/dashboard/widgets/dashboard_tool_shortcut_group.dart',
     ).readAsStringSync();
-    expect(catalog, contains('DashboardToolShortcutGroup'));
-    expect(catalog, contains('ListView.builder'));
-    expect(catalog, contains('catalogoSubtitle'));
-    expect(catalog, contains('groupCatalogoHubs'));
-    expect(catalog, contains('ferramentasCatalogoProvider'));
-    expect(catalog, contains('FxHomeSheetHandle'));
-    expect(catalog, contains('FxHomeSheetHeader'));
-    expect(catalog, isNot(contains('ExpansionTile')));
-    expect(catalog, isNot(contains('DashboardExpandableToolGroups')));
-    expect(catalog, isNot(contains('shortcutAspectRatio')));
-    expect(tools, contains('CommandActionTile'));
-    expect(tools, contains('FxSettingsLayout.pageInset'));
-    expect(tools, contains('atalhosHomeFromCatalogo'));
-    expect(tools, isNot(contains('DashboardShortcutGrid')));
-    expect(tools, isNot(contains('shortcutAspectRatio')));
-    expect(tools, isNot(contains('AspectRatio')));
+    expect(tela, contains('DashboardToolShortcutGroup'));
+    expect(tela, contains('ListView.separated'));
+    expect(tela, contains('groupCatalogoHubs'));
+    expect(tela, contains('agruparFerramentas'));
+    expect(tela, contains('ferramentasCatalogoProvider'));
+    expect(tela, contains('fxScreenA11yScope'));
+    expect(tela, isNot(contains('ExpansionTile')));
+    expect(tela, isNot(contains('DashboardExpandableToolGroups')));
+    expect(tela, isNot(contains('FxHomeSheetHandle')));
+    expect(tela, isNot(contains('nome antigo')));
     expect(group, contains('FxSettingsTile'));
     expect(group, contains('FxSettingsGroup'));
     expect(group, contains('dashboardShortcutSemanticsLabel'));
-    expect(group, contains('homeOverride: homePlanoFeatures'));
   });
 
   test('alerta de ativação da Home é faixa inset abaixo do Olá', () {
@@ -197,10 +148,13 @@ void main() {
       lessThan(slivers.indexOf('SetupOnboardingWidget')),
     );
     final primeiraTela = slivers.split('return [').last;
-    expect(primeiraTela, contains('HojePersonalCardView'));
-    expect(primeiraTela, isNot(contains('TrialCountdownBanner')));
-    expect(primeiraTela, isNot(contains('SetupOnboardingWidget')));
-    expect(slivers, contains('DashboardLayout.foldCard'));
+    expect(primeiraTela, contains('HojeAgoraSecao'));
+    expect(primeiraTela, contains('TrialCountdownBanner'));
+    expect(
+      primeiraTela.indexOf('TrialCountdownBanner'),
+      lessThan(primeiraTela.indexOf('HojeAgoraSecao')),
+    );
+    expect(primeiraTela, contains('SetupOnboardingWidget'));
   });
 
   test('Home opera o dia em métrica e satellite', () {
@@ -215,18 +169,5 @@ void main() {
     expect(tile, isNot(contains('entranceIndex')));
     expect(finance, contains('OperationalMetricTile'));
     expect(finance, isNot(contains('FxActionChip')));
-  });
-
-  test('pulso operacional é um grupo inset, sem cards KPI', () {
-    final pulse = File(
-      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-    ).readAsStringSync();
-    expect(pulse, contains('OperationalMetricTile'));
-    expect(pulse, contains('DashboardMicrocopy.pulsoOperacional'));
-    expect(pulse, isNot(contains('fxStripCardDecoration')));
-    expect(pulse, isNot(contains('_PulseChipEntrance')));
-    expect(pulse, isNot(contains('FxSettingsTile')));
-    expect(pulse, isNot(contains("label: 'Agenda'")));
-    expect(pulse, isNot(contains('hideRiscoChip')));
   });
 }

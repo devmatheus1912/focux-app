@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const hubScreens = {
     'lib/features/dashboard/screens/personal_dashboard_screen.dart': [
-      'dashboard_scroll_logic.dart',
       'dashboard_onboarding_logic.dart',
     ],
     'lib/features/alunos/screens/aluno_detail_screen.dart': [
@@ -31,7 +30,6 @@ void main() {
   };
 
   const requiredLogicFiles = [
-    'lib/features/dashboard/utils/dashboard_scroll_logic.dart',
     'lib/features/dashboard/utils/dashboard_onboarding_logic.dart',
     'lib/features/alunos/utils/aluno360_operacao_logic.dart',
     'lib/features/alunos/utils/aluno360_copilot_logic.dart',
@@ -68,13 +66,10 @@ void main() {
     }
   });
 
-  test('personal dashboard does not embed scroll threshold literals', () {
+  test('personal dashboard delega o onboarding à logic dedicada', () {
     final screen = File(
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     ).readAsStringSync();
-    expect(screen, isNot(contains('_commandCenterPrioritiesFloatingMaxOffset')));
-    expect(screen, isNot(contains('_showsFloatingPrioritiesChip')));
-    expect(screen, contains('dashboard_scroll_logic.dart'));
     expect(screen, contains('dashboard_onboarding_logic.dart'));
   });
 

@@ -101,8 +101,15 @@ void main() {
         ) +
         File(
           'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
+        ).readAsStringSync() +
+        File(
+          'lib/features/dashboard/widgets/hoje_base_secao.dart',
+        ).readAsStringSync() +
+        File(
+          'lib/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart',
         ).readAsStringSync();
     expect(source, contains('goPersonalShellTab'));
+    expect(source, contains('openPersonalRoute'));
     expect(source, contains("'/alunos"));
     expect(source, contains("'/agenda'"));
   });

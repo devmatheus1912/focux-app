@@ -458,6 +458,11 @@ const Map<String, FocuxSurfaceSpec> focuxSurfaceCatalog = {
     hasInput: true,
     logicalParent: '/financeiro',
   ),
+  '/ferramentas': FocuxSurfaceSpec(
+    type: _s4,
+    hasInput: true,
+    logicalParent: '/dashboard/personal',
+  ),
   '/ferramentas/hub/:itemId': FocuxSurfaceSpec(
     type: _s4,
     logicalParent: _home,

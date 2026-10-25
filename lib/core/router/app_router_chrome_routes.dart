@@ -12,7 +12,6 @@ import '../../features/alunos/screens/aluno_equipamentos_screen.dart';
 import '../../features/auth/screens/mfa_setup_screen.dart';
 import '../../features/perfil/data/perfil_repository.dart';
 import '../../features/perfil/screens/perfil_screen.dart';
-import '../../features/perfil/screens/perfil_ferramentas_screen.dart';
 import '../../features/perfil/screens/editar_perfil_screen.dart';
 import '../../features/perfil/screens/brand_public_identity_screen.dart';
 import '../../features/assinatura/screens/assinatura_screen.dart';
@@ -28,6 +27,7 @@ import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
 import '../../features/treinos/screens/aluno_rotina_screen.dart';
 import '../../features/treinos/screens/treinos_list_screen.dart';
+import '../../features/ferramentas/screens/ferramentas_screen.dart';
 import '../../features/treinos/screens/ficha_anterior_screen.dart';
 import '../../features/treinos/screens/ficha_modelo_screen.dart';
 import '../../features/treinos/screens/fichas_anteriores_screen.dart';
@@ -601,7 +601,7 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/perfil/ferramentas',
-            builder: (context, state) => const PerfilFerramentasScreen(),
+            redirect: (context, state) => '/ferramentas',
           ),
           GoRoute(
             path: '/perfil/mfa',
@@ -908,6 +908,10 @@ RouteBase buildChromeShellRoute() {
           GoRoute(
             path: '/pacotes',
             builder: (context, state) => const PacotesScreen(),
+          ),
+          GoRoute(
+            path: '/ferramentas',
+            builder: (context, state) => const FerramentasScreen(),
           ),
           GoRoute(
             path: '/ferramentas/hub/:itemId',

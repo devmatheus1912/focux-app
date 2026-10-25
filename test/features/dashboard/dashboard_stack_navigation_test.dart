@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/router/safe_navigation.dart';
 import 'package:focux_app/features/dashboard/data/command_action_item.dart';
 import 'package:focux_app/features/dashboard/utils/open_dashboard_command_action.dart';
-import 'package:focux_app/features/dashboard/widgets/dashboard_financial_hero_section.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,32 +139,5 @@ void main() {
 
     expect(find.text('Aba Alunos'), findsOneWidget);
     expect(router.routerDelegate.currentConfiguration.uri.path, '/alunos');
-  });
-
-  testWidgets('panorama financeiro abre Financeiro empilhado', (tester) async {
-    final router = _router(
-      const SingleChildScrollView(
-        child: DashboardFinancialHeroSection(
-          mes: 'setembro',
-          receitaAtual: 0,
-          pendente: 0,
-          progressRaw: 0,
-          metaSuperada: false,
-          loadingFin: false,
-          finData: null,
-        ),
-      ),
-    );
-    await _pumpApp(tester, router);
-
-    await tester.tap(find.text('Abrir financeiro'));
-    await tester.pumpAndSettle();
-    expect(find.text('Tela Financeiro'), findsOneWidget);
-
-    await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
-
-    expect(find.text('Tela Financeiro'), findsNothing);
-    expect(find.text('Abrir financeiro'), findsOneWidget);
   });
 }

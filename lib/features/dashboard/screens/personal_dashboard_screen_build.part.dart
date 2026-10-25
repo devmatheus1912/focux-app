@@ -24,14 +24,12 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     message: friendlyError(e),
                     onRetry: () {
                       ref.invalidate(dashboardHomeProvider);
-                      _loadFinFromHome();
                     },
                   ),
               data: (home) {
                 _applyHomeDeepLinkOnce(context);
                 final data = home.personal;
                 _maybeOfferTrial(data.totalAlunos);
-                final coachPending = home.pulse?.coachPendentes ?? 0;
 
                 if (_homeFetchedAt == null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,7 +44,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     AnalyticsService.instance.track(
                       ProductEvents.homeViewed,
                       props: {
-                        'focus_mode': _focusMode,
                         'day_focus_kind': home.dayFocus?.kind?.name,
                         'risco_alto':
                             home.commandCenter.alunosEmRisco.length,
@@ -85,27 +82,9 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   finData: home.financeiro,
                   alunos: null,
                   commandCenter: home.commandCenter,
-                  focusMode: _focusMode,
+                  focusMode: false,
                   isCommandPreparing: false,
                 );
-                final mes = snap.mesLabel;
-                final pendente = snap.pendente;
-                final receitaAtual = snap.receitaAtual;
-                final progressRaw = snap.progressRaw;
-                final metaSuperada = snap.metaSuperada;
-                final riskDominante = snap.riskDominante;
-                final dayFocus = snap.dayFocus;
-                final focusRules = snap.focusRules;
-                final dashboardNextActions = snap.dashboardNextActions;
-                final prioritiesSheetActions = snap.prioritiesSheetActions;
-                final showPrioritiesLink = snap.showPrioritiesLink;
-
-                if (_finData == null) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted || _finData != null) return;
-                    _applyFinanceData(home.financeiro);
-                  });
-                }
 
                 final onboardingFromHome = home.onboardingResumo;
                 final landingCompleta =
@@ -124,41 +103,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     );
                 final primeiroTreinoCriado =
                     onboardingFromHome?.primeiroTreinoCriado ?? false;
-                if (_focusPreferenceLoaded &&
-                    !_autoFocusApplied &&
-                    !_sessionFocusTouched) {
-                  final autoFocus = DashboardHomeFocusRules.defaultFocusMode(
-                    dayFocus: dayFocus,
-                    riskDominante: riskDominante,
-                    persisted: _persistedFocusMode,
-                  );
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted ||
-                        _autoFocusApplied ||
-                        _sessionFocusTouched) {
-                      return;
-                    }
-                    setState(() {
-                      _autoFocusApplied = true;
-                      _focusMode = autoFocus;
-                    });
-                  });
-                }
-                const commandCenterSubtitle =
-                    DashboardMicrocopy.commandCenterSubtitle;
-                final hojeCard = hojePersonalCard(
-                  acoes: dashboardNextActions,
-                  temAluno: data.totalAlunos > 0,
-                  proximoPasso:
-                      onboardingFromHome == null
-                          ? null
-                          : nextSetupStep(
-                            onboardingFromHome,
-                            landingCompleta: landingCompleta,
-                            hidden: onboardingHidden,
-                          ),
-                );
-
                 return RefreshIndicator(
                   onRefresh: () async {
                     DashboardHomeClientCache.clear();
@@ -166,7 +110,11 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                     ref.invalidate(dashboardHomeProvider);
                     ref.invalidate(notificacoesProvider);
                     ref.invalidate(notificacoesNaoLidasProvider);
-                    await _loadFinFromHome();
+                    try {
+                      await ref.read(dashboardHomeProvider.future);
+                    } catch (_) {
+                      // O erro aparece no próprio estado da tela.
+                    }
                     if (mounted) {
                       setState(() => _homeFetchedAt = DateTime.now());
                     }
@@ -181,79 +129,34 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                   child: Stack(
                     children: [
                       CustomScrollView(
-                        controller: _homeScrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
                         slivers: [
                           ...buildDashboardHomePrimarySlivers(
-                            card: hojeCard,
-                            onCard: () {
-                              final item = hojeCard.acao;
-                              if (item != null) {
-                                openDashboardCommandAction(
-                                  context: context,
-                                  ref: ref,
-                                  item: item,
-                                  source: 'hoje_card',
-                                );
-                                return;
-                              }
-                              final rota = hojeCard.rota;
-                              if (rota != null) context.push(rota);
-                            },
-                            painelExtra: [
-                              DashboardFinancialHeroSection(
-                                mes: mes,
-                                receitaAtual: receitaAtual,
-                                pendente: pendente,
-                                progressRaw: progressRaw,
-                                metaSuperada: metaSuperada,
-                                loadingFin: false,
-                                finData: home.financeiro,
-                              ),
-                              DashboardHomeToolsSection(
-                                isDark: themeDark,
-                                homePlanoFeatures: home.planoFeatures,
-                                onboardingCompleto:
-                                    onboardingFromHome?.ativacaoCompleta(
-                                      includeLinkBio: landingCompleta,
-                                      hiddenSteps: onboardingHidden,
-                                    ) ??
-                                    false,
-                              ),
-                            ],
                             context: context,
                             snap: snap,
-                            focusRules: focusRules,
-                            dayFocus: dayFocus,
                             isDark: themeDark,
                             primary: primary,
                             nomePersonal: data.nomePersonal,
                             logoUrl: data.logoUrl,
-                            focusMode: _focusMode,
-                            onToggleFocus: _toggleFocusMode,
-                            commandCenterSubtitle: commandCenterSubtitle,
+                            commandCenter: home.commandCenter,
                             finData: home.financeiro,
-                            nextActions: dashboardNextActions,
-                            prioritiesSheetActions: prioritiesSheetActions,
-                            showPrioritiesLink: showPrioritiesLink,
-                            commandPanelKey: _commandPanelKey,
-                            mensagensNaoLidas: home.pulse?.mensagensNaoLidas,
-                            commandFade: _commandFade,
-                            kpiFade: _kpiFade,
-                            isCommandPreparing: false,
-                            commandUnavailable: false,
+                            temAluno: data.totalAlunos > 0,
                             onboardingIncomplete: onboardingIncomplete,
                             primeiroTreinoCriado: primeiroTreinoCriado,
                             onboardingFromHome: onboardingFromHome,
-                            prioritiesChipVisible: false,
-                            pulseEmptyHint: home.pulse?.emptyHint,
+                            proximoPasso:
+                                onboardingFromHome == null
+                                    ? null
+                                    : nextSetupStep(
+                                      onboardingFromHome,
+                                      landingCompleta: landingCompleta,
+                                      hidden: onboardingHidden,
+                                    ),
                             notificacoesNaoLidasOverride:
                                 home.notificacoesNaoLidas,
                             brandAccent: dashboardParseBrandColor(
                               data.corPrimaria,
                             ),
-                            agendaItems: home.commandCenter.agendaHoje,
-                            alunosScore: home.commandCenter.alunosScore,
                             freshnessLabel:
                                 _homeFetchedAt == null
                                     ? DashboardHomeClientCache.fetchedAt == null
@@ -268,12 +171,6 @@ extension PersonalDashboardScreenBuild on _PersonalDashboardScreenState {
                                         _homeFetchedAt!,
                                       ),
                                     ),
-                            showCoachBanner:
-                                _coachLoaded && !_coachSeen,
-                            onDismissCoach: _dismissCoach,
-                            coachPending: coachPending,
-                            coachPendingLabel:
-                                coachPendingChipLabel(coachPending),
                             onQuickSearch:
                                 () => showDashboardQuickSearchSheet(
                                   context,

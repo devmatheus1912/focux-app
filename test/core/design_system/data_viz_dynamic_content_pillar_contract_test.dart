@@ -43,8 +43,7 @@ void main() {
       'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart',
     ];
     const dashboardWidgets = [
-      'lib/features/dashboard/widgets/dashboard_pulse_strip.dart',
-      'lib/features/dashboard/widgets/dashboard_financial_hero_section.dart',
+      'lib/features/dashboard/widgets/hoje_base_secao.dart',
     ];
     const financeiroTabs = [
       'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',

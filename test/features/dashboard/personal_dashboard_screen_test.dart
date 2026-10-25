@@ -24,19 +24,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../support/dynamic_type_harness.dart';
 import '../../support/riverpod_seeds.dart';
 
-DashboardHomeBundle _homeFixture() {
+DashboardHomeBundle _homeFixture({
+  int totalAlunos = 4,
+  List<AlertaResumo> risco = const [],
+  List<MensalidadeResumo> cobrancas = const [],
+  List<FilaAcaoResumo>? fila,
+  List<AgendamentoResumo> agenda = const [],
+  int mensagens = 1,
+  int checkins = 2,
+  double receita = 1200,
+  int inadimplentes = 0,
+}) {
   return DashboardHomeBundle(
     personal: DashboardData(
-      totalAlunos: 4,
-      alunosAtivos: 4,
+      totalAlunos: totalAlunos,
+      alunosAtivos: totalAlunos,
       planoAtual: 'PRO',
       limiteAlunos: 50,
       nomePersonal: 'Matheus',
       corPrimaria: '#00D4E8',
     ),
     commandCenter: CommandCenterData(
-      agendaHoje: const [],
-      alunosEmRisco: const [],
+      agendaHoje: agenda,
+      alunosEmRisco: risco,
       alunosScore: [
         AlunoScoreResumo(
           alunoId: 1,
@@ -52,10 +62,10 @@ DashboardHomeBundle _homeFixture() {
           iaSugerida: false,
         ),
       ],
-      cobrancasPendentes: const [],
+      cobrancasPendentes: cobrancas,
       autonomiaGargalos: const [],
       modoOperacao: const [],
-      filaAcoes: [
+      filaAcoes: fila ?? [
         FilaAcaoResumo(
           tipo: 'AGENDA',
           actionKey: 'AGENDA_TODAY',
@@ -73,19 +83,19 @@ DashboardHomeBundle _homeFixture() {
       ],
     ),
     financeiro: FinanceiroDashboard(
-      receitaMes: 1200,
-      receitaAcumulada: 1200,
+      receitaMes: receita,
+      receitaAcumulada: receita,
       ticketMedio: 300,
-      totalInadimplentes: 0,
+      totalInadimplentes: inadimplentes,
       previsaoReceita: 2000,
       vencimentosProximos: const [],
       topAlunos: const [],
       evolucaoMensal: const [],
     ),
-    pulse: const DashboardPulseSnapshot(
-      checkinsHoje: 2,
-      mensagensNaoLidas: 1,
-      checkinsTrend: [0, 1, 0, 2, 1, 0, 2],
+    pulse: DashboardPulseSnapshot(
+      checkinsHoje: checkins,
+      mensagensNaoLidas: mensagens,
+      checkinsTrend: const [0, 1, 0, 2, 1, 0, 2],
     ),
     notificacoesNaoLidas: 2,
     onboardingResumo: OnboardingStatusData(
@@ -128,7 +138,7 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await _pump(tester);
       expect(find.text('Agora'), findsOneWidget);
-      expect(find.text('Ver o painel'), findsOneWidget);
+      expect(find.text('Ver o painel'), findsNothing);
       expect(tester.takeException(), isNull);
 
       final lista = find.byType(CustomScrollView).first;
@@ -146,7 +156,8 @@ void main() {
       expect(find.byType(PersonalDashboardScreen), findsOneWidget);
       expect(find.textContaining('Matheus'), findsWidgets);
       expect(find.text('Agora'), findsOneWidget);
-      expect(find.text('Ver o painel'), findsOneWidget);
+      expect(find.text('Ver o painel'), findsNothing);
+      expect(find.text('Ferramentas'), findsOneWidget);
 
       final help = find.byTooltip(DashboardMicrocopy.helpHomeOpen);
       expect(help, findsOneWidget);
@@ -158,6 +169,98 @@ void main() {
       expect(find.text('Índice Focux'), findsOneWidget);
     },
   );
+
+  group('Agora por pessoa', () {
+    AlertaResumo risco(int id, String nome) => AlertaResumo(
+      id: id,
+      nomeAluno: nome,
+      motivo: '9 dias sem treinar',
+      nivelRisco: 'ALTO',
+    );
+
+    testWidgets('mostra 3 linhas com verbo e "Ver todas" abre o resto no lugar', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pump(
+        tester,
+        bundle: _homeFixture(
+          risco: [risco(1, 'Hugo'), risco(2, 'Bia'), risco(3, 'Caio'), risco(4, 'Duda')],
+          fila: const [],
+          mensagens: 0,
+        ),
+      );
+
+      expect(find.text('Chamar'), findsNWidgets(3));
+      expect(find.text('Duda'), findsNothing);
+      expect(find.text('Ver todas (4)'), findsOneWidget);
+
+      await tester.tap(find.text('Ver todas (4)'));
+      await tester.pump();
+      expect(find.text('Chamar'), findsNWidgets(4));
+      expect(find.text('Ver menos'), findsOneWidget);
+    });
+
+    testWidgets('cobrança só aparece vencida, com dias de atraso', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pump(
+        tester,
+        bundle: _homeFixture(
+          fila: const [],
+          mensagens: 0,
+          cobrancas: [
+            MensalidadeResumo(
+              id: 1,
+              nomeAluno: 'Ana',
+              valor: 150,
+              dataVencimento: '2026-10-01',
+              diasAtraso: 3,
+            ),
+            MensalidadeResumo(
+              id: 2,
+              nomeAluno: 'Bruno',
+              valor: 90,
+              dataVencimento: '2026-11-01',
+            ),
+          ],
+        ),
+      );
+
+      expect(find.text('Cobrar'), findsOneWidget);
+      expect(find.text('Ana'), findsOneWidget);
+      expect(find.text('Bruno'), findsNothing);
+    });
+
+    testWidgets('dia quieto: "Tudo em dia" e convite, sem números zerados', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pump(
+        tester,
+        bundle: _homeFixture(fila: const [], mensagens: 0, receita: 0),
+      );
+
+      expect(find.text('Operação sob controle'), findsOneWidget);
+      expect(find.text('Convidar um aluno'), findsOneWidget);
+      expect(find.text('Dinheiro'), findsNothing);
+    });
+
+    testWidgets('mostra a base e o dinheiro quando há o que dizer', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await _pump(
+        tester,
+        bundle: _homeFixture(risco: [risco(1, 'Hugo')], fila: const [], inadimplentes: 2),
+      );
+
+      expect(find.text('A base'), findsOneWidget);
+      expect(find.text('Treinaram hoje'), findsOneWidget);
+      expect(find.text('Em risco'), findsOneWidget);
+      expect(find.text('Dinheiro'), findsOneWidget);
+      expect(find.textContaining('2 em atraso'), findsOneWidget);
+    });
+  });
 }
 
 class _PlanosOffline implements PlanosRepository {
@@ -171,8 +274,8 @@ class _CatalogoLocal extends FerramentasCatalogoNotifier {
   Future<FerramentasCatalogo> build() async => ferramentasCatalogoBootstrap();
 }
 
-Future<void> _pump(WidgetTester tester) async {
-  final home = _homeFixture();
+Future<void> _pump(WidgetTester tester, {DashboardHomeBundle? bundle}) async {
+  final home = bundle ?? _homeFixture();
   const features = PlanoFeatures(
     plano: SubscriptionPlan.PRO,
     financeiro: true,

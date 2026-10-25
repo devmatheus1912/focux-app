@@ -30,6 +30,25 @@ class _PerfilBody extends StatefulWidget {
 }
 
 class _PerfilBodyState extends State<_PerfilBody> {
+  void _runNextStep(
+    PerfilChecklistAction action, {
+    required VoidCallback onPickPhoto,
+    required VoidCallback onEditPerfil,
+  }) {
+    switch (action) {
+      case PerfilChecklistAction.photo:
+        onPickPhoto();
+      case PerfilChecklistAction.editProfile:
+        onEditPerfil();
+      case PerfilChecklistAction.brand:
+        context.push('/identidade-visual');
+      case PerfilChecklistAction.wallet:
+        context.push('/perfil/wallet');
+      case PerfilChecklistAction.convites:
+        context.push('/convites');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final perfil = widget.perfil;
@@ -52,11 +71,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
     final readiness = PerfilReadinessView.from(perfil);
     final profileScore = readiness.score;
     final profileComplete = profileScore >= 100;
-    // S2: chip Completar é o P0 só com pendência; lápis soft na app bar abre o editor.
-    final scrollBottomPad =
-        profileComplete
-            ? TokensStrip.s5
-            : PerfilLayout.stickyOverlayReserve;
+    // O que falta aparece num cartão logo abaixo da identidade, não numa chip flutuante.
+    const scrollBottomPad = TokensStrip.s5;
+    final nextStep = readiness.nextStep;
 
     return FxShellScaffold(
       useMesh: true,
@@ -183,7 +200,9 @@ class _PerfilBodyState extends State<_PerfilBody> {
                           ),
                           const SizedBox(height: TokensStrip.s1),
                           Text(
-                            '$profileScore%',
+                            profileComplete
+                                ? 'Perfil completo'
+                                : 'Perfil $profileScore% completo',
                             textAlign: TextAlign.center,
                             style: FxSettingsLayout.rowMetric(color: mute),
                           ),
@@ -193,6 +212,27 @@ class _PerfilBodyState extends State<_PerfilBody> {
                     ),
                   ),
                 ),
+                if (nextStep != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        FxSettingsLayout.pageInset,
+                        FxSettingsLayout.headerToGroup,
+                        FxSettingsLayout.pageInset,
+                        0,
+                      ),
+                      child: FxActionRow(
+                        titulo: perfilReadinessGapCopy(readiness.missingCount),
+                        motivo: nextStep.label,
+                        verbo: nextStep.buttonLabel,
+                        onTap: () => _runNextStep(
+                          nextStep.action,
+                          onPickPhoto: onPickPhoto,
+                          onEditPerfil: onEditPerfil,
+                        ),
+                      ),
+                    ),
+                  ),
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
                     FxSettingsLayout.pageInset,
@@ -233,7 +273,7 @@ class _PerfilBodyState extends State<_PerfilBody> {
                           FxStaggerItem(
                             index: 6,
                             child: FxSettingsGroup(
-                              header: 'Operação',
+                              header: 'Negócio',
                               children: [
                                 PerfilOperacaoSection(
                                   mute: mute,
@@ -274,18 +314,6 @@ class _PerfilBodyState extends State<_PerfilBody> {
               ],
             ),
           ),
-          if (!profileComplete)
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: PerfilStickyBar(
-                  accent: accent,
-                  isDark: isDark,
-                  visible: true,
-                  onComplete: onEditPerfil,
-                ),
-              ),
-            ),
         ],
       ),
     );

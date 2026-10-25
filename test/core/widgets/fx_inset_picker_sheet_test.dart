@@ -54,14 +54,14 @@ void main() {
     expect(picked, ThemeMode.dark);
   });
 
-  test('perfil appearance usa picker canônico', () {
+  test('perfil appearance mostra as três opções à vista, sem sheet', () {
     final source = File(
       'lib/features/perfil/widgets/perfil_appearance_section.dart',
     ).readAsStringSync();
 
     expect(PerfilAppearanceSection.labelFor(ThemeMode.light), 'Claro');
-    expect(source, contains('showFxInsetPickerSheet'));
-    expect(source, contains('FxInsetPickerSheetItem'));
+    expect(source, contains('FxChoiceStrip'));
+    expect(source, isNot(contains('showFxInsetPickerSheet')));
     expect(source, isNot(contains('Icons.check,')));
   });
 }

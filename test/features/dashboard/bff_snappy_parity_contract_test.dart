@@ -29,7 +29,7 @@ void main() {
     expect(bundle, isNot(contains('_alunoUpsellProvider')));
   });
 
-  test('personal home first paint usa pulse.coachPendentes sem coachHome', () {
+  test('personal home first paint usa o BFF único, sem coachHome', () {
     final screen = File(
       'lib/features/dashboard/screens/personal_dashboard_screen.dart',
     ).readAsStringSync();
@@ -39,7 +39,6 @@ void main() {
     final bundle = '$screen\n$build';
 
     expect(bundle, contains('dashboardHomeProvider'));
-    expect(bundle, contains('coachPendentes'));
     expect(bundle, contains('seedFromHome'));
     expect(bundle, isNot(contains('coachHomeProvider')));
     expect(bundle, isNot(contains('/api/coach-proativo/home')));

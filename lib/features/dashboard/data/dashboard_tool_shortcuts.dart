@@ -30,6 +30,14 @@ class DashboardToolShortcut {
 
   String get displayFeatureName => featureName ?? label;
 
+  /// Uma linha do servidor sobre a ferramenta; vazia ou igual ao nome não conta.
+  String? get descricao {
+    final texto = entrada.subtitulo?.trim();
+    if (texto == null || texto.isEmpty) return null;
+    if (texto.toLowerCase() == label.trim().toLowerCase()) return null;
+    return texto;
+  }
+
   bool isUnlocked(PlanoFeatures features) {
     if (!entrada.unlocked) return false;
     if (capability == null) {

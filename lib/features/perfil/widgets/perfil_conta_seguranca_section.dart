@@ -43,16 +43,8 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               value: '',
               mute: mute,
               line: line,
-              onTap: () => IntercomService.openMessenger(),
-            ),
-            FxSettingsTile(
-              icon: Icons.person_remove_outlined,
-              label: 'Como excluir sua conta',
-              value: '',
-              mute: mute,
-              line: line,
               showDivider: false,
-              onTap: () => FocuxLegal.openDeleteAccount(),
+              onTap: () => IntercomService.openMessenger(),
             ),
           ],
         ),
@@ -73,10 +65,9 @@ class PerfilContaSegurancaSection extends StatelessWidget {
               FxSettingsTile(
                 icon: Icons.fact_check_outlined,
                 label: 'Consentimentos',
-                value: 'Termos, privacidade e aceite',
+                value: 'Termos e privacidade',
                 mute: mute,
                 line: line,
-                showDivider: false,
                 onTap: onConsentTap,
               )
             else ...[
@@ -94,24 +85,23 @@ class PerfilContaSegurancaSection extends StatelessWidget {
                 value: '',
                 mute: mute,
                 line: line,
-                showDivider: false,
                 onTap: () => FocuxLegal.openPrivacy(),
               ),
             ],
-          ],
-        ),
-        const SizedBox(height: FxSettingsLayout.groupGap),
-        FxSettingsGroup(
-          children: [
             FxSettingsTile(
               icon: Icons.logout,
               label: 'Sair da conta',
               value: '',
               mute: mute,
               line: line,
-              danger: true,
+              showDivider: false,
               onTap: onLogout,
             ),
+          ],
+        ),
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          children: [
             FxSettingsTile(
               icon: Icons.delete_forever_outlined,
               label: 'Excluir minha conta',

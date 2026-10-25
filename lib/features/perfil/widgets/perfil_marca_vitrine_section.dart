@@ -17,9 +17,9 @@ class PerfilMarcaVitrineSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       container: true,
-      label: 'Marca e vitrine online',
+      label: 'Sua página online',
       child: FxSettingsGroup(
-        header: 'Vitrine',
+        header: 'Sua página',
         caption:
             profileComplete ? null : 'Link público e identidade da marca.',
         children: children,
