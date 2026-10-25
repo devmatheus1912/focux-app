@@ -23,8 +23,12 @@ void main() {
     expect('emphasize: true'.allMatches(foco), hasLength(1));
     expect(at('AlunoHomeHeader('), lessThan(at('AlunoTodayFocusCard(')));
     expect(at('AlunoTodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
-    expect(at('_AlunoHomeAviso('), lessThan(at('hojeAlunoMais')));
-    expect(at('AlunoPendenciasBlock('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(at('AlunoTodayFocusCard('), lessThan(at('AlunoSemanaFaixa(')));
+    expect(at('AlunoSemanaFaixa('), lessThan(at('_AlunoHomeAviso(')));
+    expect(at('_AlunoHomeAviso('), lessThan(at('AlunoProximosPassos(')));
+    expect(at('AlunoProximosPassos('), lessThan(at('AlunoUpsellCarousel(')));
+    expect(at('AlunoUpsellCarousel('), lessThan(at('alunoFerramentasRoute')));
+    expect(screen, isNot(contains('hojeAlunoMais')));
     expect(screen, isNot(contains('AlunoWeekSummaryCard')));
     expect(screen, isNot(contains('AlunoRecoveryCard')));
     expect(screen, isNot(contains('AlunoEvolutionCard')));
@@ -79,8 +83,8 @@ void main() {
       'lib/features/dashboard/screens/perfil_aluno_editar_screen.dart',
     );
 
-    expect(hub, contains('Editar cadastro'));
-    expect(hubBody, contains('Anamnese'));
+    expect(hub, contains('alunoPerfilTitulo'));
+    expect(hubBody, contains('alunoPerfilAnamnese'));
     expect(profile, contains('foto de evolução'));
     expect(profile, contains('friendlyError'));
     expect(profile, contains('segurança e aderência'));

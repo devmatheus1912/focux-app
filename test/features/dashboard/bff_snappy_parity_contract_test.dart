@@ -8,7 +8,6 @@ void main() {
     final bundle = [
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
       'lib/features/dashboard/screens/aluno_dashboard_screen_header.part.dart',
-      'lib/features/dashboard/screens/aluno_dashboard_screen_tools.part.dart',
       'lib/features/dashboard/utils/aluno_home_view.dart',
     ].map((p) => File(p).readAsStringSync()).join('\n');
 

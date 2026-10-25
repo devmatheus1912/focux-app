@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/brand/focux_microcopy.dart';
@@ -24,30 +25,35 @@ class PerfilAlunoScreen extends ConsumerWidget {
     final chrome = ShellChrome.of(context);
     final accent = BrandPalette.softened(Theme.of(context).colorScheme.primary);
 
+    final s = S.of(context);
     return fxScreenA11yScope(
-      label: 'Meu perfil',
+      label: s.alunoPerfilTitulo,
       child: FxShellScaffold(
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Meu perfil',
+          title: s.alunoPerfilTitulo,
           showBack: false,
           subtitle: FxHubFreshness.fromFetchedAt(homeAsync.value?.fetchedAt),
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como usar o perfil',
+              tooltip: s.alunoPerfilAjudaTooltip,
               onTap: () => showFxHelpSheet(
                 context,
-                title: 'Meu perfil',
-                subtitle: 'Conta, consentimentos e anamnese.',
-                tips: const [
+                title: s.alunoPerfilTitulo,
+                subtitle: s.alunoPerfilAjudaSubtitulo,
+                tips: [
                   FxHelpTip(
-                    'Cadastro',
-                    'Toque no avatar ou em Editar cadastro para atualizar dados.',
+                    s.alunoPerfilAjudaCadastroTitulo,
+                    s.alunoPerfilAjudaCadastro,
                   ),
                   FxHelpTip(
-                    'Completar',
-                    'A barra inferior aparece enquanto o perfil não chega a 100%.',
+                    s.alunoPerfilAjudaCompletarTitulo,
+                    s.alunoPerfilAjudaCompletar,
+                  ),
+                  FxHelpTip(
+                    s.alunoPerfilAjudaContaTitulo,
+                    s.alunoPerfilAjudaConta,
                   ),
                 ],
               ),

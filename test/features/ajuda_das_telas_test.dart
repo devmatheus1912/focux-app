@@ -53,6 +53,10 @@ void main() {
       'Editar aluno': 'lib/features/alunos/screens/editar_aluno_screen.dart',
       'Perfil': 'lib/features/perfil/screens/perfil_screen_widgets_a.part.dart',
       'Migração': 'lib/features/growth/screens/migracao_magica_screen_state.part.dart',
+      'Hoje do aluno': 'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
+      'Treinos do aluno': 'lib/features/checkin/screens/meus_treinos_screen.dart',
+      'Perfil do aluno': 'lib/features/dashboard/screens/perfil_aluno_screen.dart',
+      'Ferramentas do aluno': 'lib/features/dashboard/screens/aluno_ferramentas_screen.dart',
     };
     for (final e in telas.entries) {
       test(e.key, () {

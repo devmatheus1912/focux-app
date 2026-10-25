@@ -211,7 +211,7 @@ void main() {
     expect(file.readAsLinesSync().length, lessThan(300));
     final source = file.readAsStringSync();
     expect(source, contains("import '../utils/treinos_hub_view.dart';"));
-    expect(source, contains("import '../widgets/treinos_destaque_card.dart';"));
+    expect(source, contains("import '../widgets/treinos_hoje_linha.dart';"));
     expect(source, contains("import '../widgets/treinos_hub_rows.dart';"));
     expect(source, isNot(contains("part '")));
   });

@@ -85,19 +85,12 @@ class SuaSemanaRow extends StatelessWidget {
   }
 }
 
-/// Botão "Sua semana" que abre a lista de segunda a domingo logo abaixo.
-class SuaSemanaBloco extends StatefulWidget {
+/// A ficha (validade) e a lista de segunda a domingo, sempre aberta.
+class SuaSemanaBloco extends StatelessWidget {
   const SuaSemanaBloco({super.key, required this.rotina, required this.hoje});
 
   final RotinaFila rotina;
   final DateTime hoje;
-
-  @override
-  State<SuaSemanaBloco> createState() => _SuaSemanaBlocoState();
-}
-
-class _SuaSemanaBlocoState extends State<SuaSemanaBloco> {
-  var _aberta = false;
 
   @override
   Widget build(BuildContext context) {
@@ -111,40 +104,27 @@ class _SuaSemanaBlocoState extends State<SuaSemanaBloco> {
       s.rotinaDiaSab,
       s.rotinaDiaDom,
     ];
-    final dias = semanaDaFila(widget.rotina);
-    final agora = widget.hoje;
+    final dias = semanaDaFila(rotina);
+    final agora = hoje;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (temAvisoDaFicha(widget.rotina, agora))
+        if (temAvisoDaFicha(rotina, agora))
           Padding(
             padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-            child: FichaVigenciaAluno(rotina: widget.rotina, hoje: agora),
+            child: FichaVigenciaAluno(rotina: rotina, hoje: agora),
           ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            onPressed: () => setState(() => _aberta = !_aberta),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(48, 48),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(s.treinosSuaSemana),
-          ),
+        TreinosHubSecao(
+          titulo: s.treinosSuaSemana,
+          linhas: [
+            for (final (i, dia) in dias.indexed)
+              SuaSemanaRow(
+                diaNome: nomes[i],
+                dia: dia,
+                hoje: dia.dia == hoje.weekday,
+              ),
+          ],
         ),
-        if (_aberta)
-          TreinosHubSecao(
-            titulo: s.treinosSuaSemana,
-            linhas: [
-              for (final (i, dia) in dias.indexed)
-                SuaSemanaRow(
-                  diaNome: nomes[i],
-                  dia: dia,
-                  hoje: dia.dia == widget.hoje.weekday,
-                ),
-            ],
-          ),
       ],
     );
   }

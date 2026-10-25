@@ -16,6 +16,7 @@ Future<void> confirmDeleteAlunoAccount(
     subtitulo:
         'Esta ação é irreversível. Seus dados pessoais serão anonimizados conforme a LGPD. '
         'Histórico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
+        'Prefere pela web? Veja como em focuxpersonal.com/excluir-conta.\n\n'
         'Digite sua senha (ou peça o código por e-mail) e EXCLUIR para confirmar.',
     aposExcluir: () async {
       await ref.read(authProvider.notifier).logout();

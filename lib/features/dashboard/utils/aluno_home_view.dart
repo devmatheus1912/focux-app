@@ -12,6 +12,7 @@ import 'aluno_today_action.dart';
 const alunoHomeRoute = '/dashboard/aluno';
 const alunoFinanceiroRoute = '/financeiro/aluno';
 const alunoFeedbackVideoRoute = '/aluno/feedback-videos';
+const alunoFerramentasRoute = '/aluno/ferramentas';
 
 /// Atalhos da Home em ordem de prioridade. Sem rotas do dock (Hoje, Treinos,
 /// Saúde, Chat, Perfil): o dock já leva a elas.
@@ -78,6 +79,9 @@ class AlunoHomeView {
   /// As que aparecem na Home ([alunoPendenciasVisiveis]).
   final List<AlunoPendencia> pendencias;
 
+  /// Com lugar na Home além das [pendencias] (o "Ver mais (N)").
+  final List<AlunoPendencia> pendenciasResto;
+
   /// Coach sem o que outro bloco já diz ([alunoCoachVisiveis]).
   final List<CoachMensagem> coach;
   final AlunoHomeAviso aviso;
@@ -110,6 +114,7 @@ class AlunoHomeView {
     required this.insight,
     required this.pendenciasAbertas,
     required this.pendencias,
+    this.pendenciasResto = const [],
     required this.coach,
     required this.aviso,
     required this.semana,
@@ -190,6 +195,10 @@ AlunoHomeView buildAlunoHomeView(
             : home.upsellPendentes,
     pendenciasAbertas: abertas,
     pendencias: alunoPendenciasVisiveis(abertas, action.mode),
+    pendenciasResto: alunoPendenciasNaHome(
+      abertas,
+      action.mode,
+    ).skip(alunoPendenciasMax).toList(growable: false),
     coach: coach,
     aviso: resolveAlunoHomeAviso(
       inadimplente: inadimplente,

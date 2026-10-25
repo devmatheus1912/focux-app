@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'aba Treinos: só o agregado da Home, um destaque e fold antigo fora',
+    'aba Treinos: só o agregado da Home, linha de hoje no lugar do card e fold antigo fora',
     () {
       final screen =
           File(
@@ -12,7 +12,7 @@ void main() {
           ).readAsStringSync();
       final destaque =
           File(
-            'lib/features/checkin/widgets/treinos_destaque_card.dart',
+            'lib/features/checkin/widgets/treinos_hoje_linha.dart',
           ).readAsStringSync();
 
       expect(screen, contains('alunoDashboardHomeProvider'));
@@ -24,7 +24,13 @@ void main() {
       expect(screen, contains('RefreshIndicator'));
       expect(screen, contains('refreshAlunoDashboardHome'));
       expect('emphasize: true'.allMatches(screen), isEmpty);
-      expect('emphasize: true'.allMatches(destaque), hasLength(1));
+      expect('emphasize: true'.allMatches(destaque), isEmpty);
+      expect(screen, contains('TreinosHojeLinha('));
+      expect(screen, contains('FxHelpIconButton'));
+      expect(
+        File('lib/features/checkin/widgets/treinos_destaque_card.dart').existsSync(),
+        isFalse,
+      );
 
       for (final morto in [
         'checkinRepositoryProvider',

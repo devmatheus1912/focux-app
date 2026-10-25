@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_status_pill.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/ficha_vigencia.dart';
@@ -12,8 +14,9 @@ bool temAvisoDaFicha(RotinaFila rotina, DateTime agora) =>
     (rotina.vigencia.temPrazo ||
         fichaAtualizadaRecentemente(rotina.atualizadaEm, agora));
 
-/// Chips discretos para o aluno: "Ficha até 30/11" e "Ficha atualizada".
-/// A validade orienta, nunca bloqueia: vencida vira um aviso suave.
+/// Linha da ficha para o aluno: "Ficha até 30/11" e, se trocada há pouco,
+/// "Ficha atualizada". A validade orienta, nunca bloqueia: vencida vira um
+/// aviso suave.
 class FichaVigenciaAluno extends StatelessWidget {
   const FichaVigenciaAluno({super.key, required this.rotina, required this.hoje});
 
@@ -24,26 +27,57 @@ class FichaVigenciaAluno extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!temAvisoDaFicha(rotina, hoje)) return const SizedBox.shrink();
     final s = S.of(context);
+    final chrome = ShellChrome.of(context);
     final vigencia = rotina.vigencia;
     final dias = vigencia.diasRestantes(hoje) ?? 0;
+    final aviso = switch (vigencia.estado(hoje)) {
+      EstadoVigencia.venceEmBreve ||
+      EstadoVigencia.venceHoje ||
+      EstadoVigencia.vencida => true,
+      _ => false,
+    };
     final prazo = switch (vigencia.estado(hoje)) {
       EstadoVigencia.semPrazo => null,
-      EstadoVigencia.emDia => (s.alunoFichaAte(dataCurta(vigencia.fim!)), FxPillTone.neutral),
-      EstadoVigencia.venceEmBreve => (s.alunoFichaVenceEmDias(dias), FxPillTone.warning),
-      EstadoVigencia.venceHoje => (s.alunoFichaVenceHoje, FxPillTone.warning),
-      EstadoVigencia.vencida => (s.alunoFichaVenceu, FxPillTone.warning),
+      EstadoVigencia.emDia => s.alunoFichaAte(dataCurta(vigencia.fim!)),
+      EstadoVigencia.venceEmBreve => s.alunoFichaVenceEmDias(dias),
+      EstadoVigencia.venceHoje => s.alunoFichaVenceHoje,
+      EstadoVigencia.vencida => s.alunoFichaVenceu,
     };
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
+    final atualizada = fichaAtualizadaRecentemente(rotina.atualizadaEm, hoje);
+    final cor = aviso
+        ? (chrome.isDark ? EagleTokens.warnDark : EagleTokens.warn)
+        : chrome.mute;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (prazo != null) FxStatusPill(label: prazo.$1, tone: prazo.$2),
-        if (fichaAtualizadaRecentemente(rotina.atualizadaEm, hoje))
-          FxStatusPill(
-            label: s.alunoFichaAtualizada,
-            tone: FxPillTone.accent,
-            icon: Icons.update_rounded,
+        Icon(
+          aviso ? Icons.event_busy_outlined : Icons.event_note_outlined,
+          size: 18,
+          color: cor,
+        ),
+        const SizedBox(width: TokensStrip.s2),
+        Expanded(
+          child: Wrap(
+            spacing: TokensStrip.s3,
+            runSpacing: TokensStrip.s1,
+            children: [
+              if (prazo != null)
+                Text(
+                  prazo,
+                  style: FocuxHubTypography.bodyMuted(
+                    color: aviso ? cor : chrome.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              if (atualizada)
+                Text(
+                  s.alunoFichaAtualizada,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+            ],
           ),
+        ),
       ],
     );
   }

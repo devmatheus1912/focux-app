@@ -16,7 +16,7 @@ import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_evolution_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_header.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_skeleton.dart';
-import 'package:focux_app/features/dashboard/widgets/aluno_pendencias_block.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_proximos_passos.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_today_focus_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_week_summary_card.dart';
 import 'package:focux_app/features/evolucao/data/evolucao_repository.dart';
@@ -255,17 +255,17 @@ void main() {
     });
   });
 
-  group('AlunoPendenciasBlock', () {
+  group('AlunoProximosPassos', () {
     testWidgets('lista vazia não desenha nada', (tester) async {
       await _pump(
         tester,
-        AlunoPendenciasBlock(
+        AlunoProximosPassos(
           pendencias: const [],
           hoje: DateTime(2026, 9, 27),
           onTap: (_) {},
         ),
       );
-      expect(find.text('Pendências'), findsNothing);
+      expect(find.text('Próximos passos'), findsNothing);
     });
 
     testWidgets('mostra itens, avisa exibição e repassa o toque', (
@@ -275,7 +275,7 @@ void main() {
       AlunoPendencia? tocada;
       await _pump(
         tester,
-        AlunoPendenciasBlock(
+        AlunoProximosPassos(
           pendencias: const [
             AlunoPendencia(AlunoPendenciaTipo.foto),
             AlunoPendencia(AlunoPendenciaTipo.agenda),
@@ -292,6 +292,32 @@ void main() {
       expect(tocada?.tipo, AlunoPendenciaTipo.agenda);
     });
 
+    testWidgets('cada passo traz o seu verbo e "Ver mais" mostra o resto', (
+      tester,
+    ) async {
+      var verMais = 0;
+      await _pump(
+        tester,
+        AlunoProximosPassos(
+          pendencias: const [
+            AlunoPendencia(AlunoPendenciaTipo.medida),
+            AlunoPendencia(AlunoPendenciaTipo.perfil),
+            AlunoPendencia(AlunoPendenciaTipo.chat, quantidade: 2),
+          ],
+          resto: 2,
+          onVerMais: () => verMais++,
+          hoje: DateTime(2026, 9, 27),
+          onTap: (_) {},
+        ),
+      );
+      expect(find.text('Registrar'), findsOneWidget);
+      expect(find.text('Completar'), findsOneWidget);
+      expect(find.text('Responder'), findsOneWidget);
+      expect(find.text('Ver mais (2)'), findsOneWidget);
+      await tester.tap(find.text('Ver mais (2)'));
+      expect(verMais, 1);
+    });
+
     testWidgets('hora do horário cabe com fonte 2x em tela estreita', (
       tester,
     ) async {
@@ -303,7 +329,7 @@ void main() {
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       await _pump(
         tester,
-        AlunoPendenciasBlock(
+        AlunoProximosPassos(
           pendencias: [
             AlunoPendencia(
               AlunoPendenciaTipo.agenda,

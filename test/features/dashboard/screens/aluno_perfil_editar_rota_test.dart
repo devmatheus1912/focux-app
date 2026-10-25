@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/core/router/app_router_aluno_routes.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/alunos_provider.dart';
@@ -45,7 +46,12 @@ void main() {
             (ref) => Completer<AlunoDashboardHomeBundle>().future,
           ),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          routerConfig: router,
+        ),
       ),
     );
     await tester.pump();

@@ -77,16 +77,11 @@ void main() {
     expect(find.text('Olá, Ana'), findsOneWidget);
     expect(find.text('Seu personal: Carlos'), findsOneWidget);
     expect(find.text('Peça seu próximo treino'), findsOneWidget);
-    expect(find.text('Mais'), findsOneWidget);
-    expect(find.text('Sua semana'), findsNothing);
+    expect(find.text('Mais'), findsNothing);
     expect(find.text('Evolução'), findsNothing);
     expect(find.text('Pendências'), findsNothing);
-    await tester.tap(find.text('Mais'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('Sua semana'), findsNothing);
-    expect(find.text('Evolução'), findsNothing);
-    expect(find.text('Pendências'), findsOneWidget);
+    expect(find.text('Próximos passos'), findsOneWidget);
+    expect(find.text('Ferramentas'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -113,7 +108,7 @@ void main() {
 
   testWidgets('tela estreita não estoura layout', (tester) async {
     await _pump(tester, const Size(320, 2400), _home());
-    expect(find.text('Mais'), findsOneWidget);
+    expect(find.text('Próximos passos'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

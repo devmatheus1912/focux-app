@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../screens/aluno_shell.dart';
 import '../../features/dashboard/screens/aluno_dashboard_screen.dart';
 import '../../features/dashboard/screens/aluno_activation_screen.dart';
+import '../../features/dashboard/screens/aluno_ferramentas_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_screen.dart';
 import '../../features/dashboard/screens/perfil_aluno_editar_screen.dart';
 import '../../features/checkin/screens/meus_treinos_screen.dart';
@@ -181,6 +182,12 @@ List<RouteBase> buildAlunoRoutes({
                 ),
               ),
             ),
+      ),
+      GoRoute(
+        path: '/aluno/ferramentas',
+        builder:
+            (context, state) =>
+                const FxRouteChrome(child: AlunoFerramentasScreen()),
       ),
       GoRoute(
         path: '/aluno/anamnese',

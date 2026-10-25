@@ -54,14 +54,15 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('AlunoTodayFocusCard('));
-    expect(screen, contains('AlunoPendenciasBlock'));
+    expect(screen, contains('AlunoProximosPassos'));
     expect(screen, isNot(contains('AlunoWeekSummaryCard')));
     expect(screen, isNot(contains('AlunoEvolutionCard')));
     expect(screen, isNot(contains('_StreakFoldBadge')));
     expect(screen, isNot(contains('Ver plano completo')));
     expect(screen, isNot(contains('Seu score Focux')));
     expect(screen, isNot(contains('RecoveryScoreRing')));
-    expect(screen, contains('hojeAlunoMais'));
+    expect(screen, isNot(contains('hojeAlunoMais')));
+    expect(screen, contains('AlunoSemanaFaixa('));
     expect(screen, contains('AlunoHomeSkeleton()'));
     expect(screen, contains('fxAnnounce('));
     expect(screen, contains('s.alunoHomeAjudaCalculo'));
@@ -74,6 +75,7 @@ void main() {
       'lib/features/dashboard/widgets/aluno_ferramentas_catalogo.dart',
     ).readAsStringSync();
     expect(catalogo, contains('FxSettingsGroup'));
+    expect(catalogo, contains('ferramentasDoAluno'));
     expect(catalogo, contains('/aluno/desafios'));
     expect(catalogo, contains('/aluno/trilhas'));
     expect(catalogo, contains('/aluno/grupo-aulas'));

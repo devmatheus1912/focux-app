@@ -10,6 +10,7 @@ import '../../../core/utils/a11y_announce.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_async_body.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -25,7 +26,7 @@ import '../utils/treino_ficha_status.dart';
 import '../utils/treinos_hub_view.dart';
 import '../widgets/sua_semana_rows.dart';
 import '../widgets/treino_preparacao_sheet.dart';
-import '../widgets/treinos_destaque_card.dart';
+import '../widgets/treinos_hoje_linha.dart';
 import '../widgets/treinos_hub_rows.dart';
 import '../widgets/treinos_hub_skeleton.dart';
 
@@ -142,6 +143,21 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
             error: (_, __) => null,
           ),
           showBack: false,
+          actions: [
+            FxHelpIconButton(
+              tooltip: s.treinosAjudaTooltip,
+              onTap: () => showFxHelpSheet(
+                context,
+                title: s.treinosAjudaTitulo,
+                subtitle: s.treinosAjudaSubtitulo,
+                tips: [
+                  FxHelpTip(s.treinosAjudaFichaTitulo, s.treinosAjudaFicha),
+                  FxHelpTip(s.treinosAjudaSemanaTitulo, s.treinosAjudaSemana),
+                  FxHelpTip(s.treinosAjudaUltimosTitulo, s.treinosAjudaUltimos),
+                ],
+              ),
+            ),
+          ],
         ),
         body: FxAsyncBody<AlunoDashboardHomeBundle>(
           value: homeAsync,
@@ -221,7 +237,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
     final proximoNome = destaque?.depoisNome ?? treinosProximoNome(view, treinos);
     return [
       if (destaque != null)
-        TreinosDestaqueCard(
+        TreinosHojeLinha(
           destaque: destaque,
           hoje: now,
           proximoNome: proximoNome,

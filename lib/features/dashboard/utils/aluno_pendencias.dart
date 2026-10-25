@@ -101,9 +101,8 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
   ];
 }
 
-/// As que aparecem na Home: sem repetir o destino do foco e cortadas em
-/// [alunoPendenciasMax]. As escondidas seguem abertas para a autonomia.
-List<AlunoPendencia> alunoPendenciasVisiveis(
+/// Em aberto e com lugar na Home: sem repetir o destino do foco.
+List<AlunoPendencia> alunoPendenciasNaHome(
   List<AlunoPendencia> abertas,
   AlunoTodayMode todayMode,
 ) => abertas
@@ -112,6 +111,14 @@ List<AlunoPendencia> alunoPendenciasVisiveis(
           !(todayMode == AlunoTodayMode.noWorkout &&
               p.tipo == AlunoPendenciaTipo.chat),
     )
+    .toList(growable: false);
+
+/// As que aparecem na Home: cortadas em [alunoPendenciasMax]. As escondidas
+/// seguem abertas para a autonomia e entram em "Ver mais".
+List<AlunoPendencia> alunoPendenciasVisiveis(
+  List<AlunoPendencia> abertas,
+  AlunoTodayMode todayMode,
+) => alunoPendenciasNaHome(abertas, todayMode)
     .take(alunoPendenciasMax)
     .toList(growable: false);
 

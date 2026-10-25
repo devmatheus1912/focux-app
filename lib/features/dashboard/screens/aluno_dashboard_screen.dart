@@ -14,6 +14,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
+import '../../../core/widgets/fx_action_row.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -32,15 +33,16 @@ import '../utils/aluno_home_analytics.dart';
 import '../utils/aluno_home_texts.dart';
 import '../utils/aluno_home_view.dart';
 import '../utils/aluno_pendencias.dart';
+import '../utils/aluno_semana_faixa.dart';
 import '../utils/aluno_today_action.dart';
 import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_skeleton.dart';
-import '../widgets/aluno_pendencias_block.dart';
+import '../widgets/aluno_proximos_passos.dart';
+import '../widgets/aluno_semana_faixa.dart';
 import '../widgets/aluno_today_focus_card.dart';
 import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
-part 'aluno_dashboard_screen_tools.part.dart';
 
 class AlunoDashboardScreen extends ConsumerStatefulWidget {
   const AlunoDashboardScreen({super.key});
@@ -328,6 +330,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     bool isDark,
     DateTime now,
   ) {
+    final s = S.of(context);
     final view = _viewFor(home, now);
     final action = view.action;
 
@@ -369,9 +372,18 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                   : null,
         ),
       ),
+      if (faixaDaSemana(home.rotina, home.historico, now) case final dias
+          when dias.isNotEmpty)
+        (
+          TokensStrip.s4,
+          AlunoSemanaFaixa(
+            dias: dias,
+            onTap: () => context.go('/checkin/treinos'),
+          ),
+        ),
       if (temAvisoDaFicha(home.rotina, now))
         (
-          TokensStrip.s2,
+          TokensStrip.s3,
           FichaVigenciaAluno(rotina: home.rotina, hoje: now),
         ),
       if (view.aviso != AlunoHomeAviso.nenhum)
@@ -384,28 +396,30 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
             onFinanceiro: _openFinanceiro,
           ),
         ),
-      if (view.pendencias.isNotEmpty || view.ofertas.isNotEmpty)
+      if (view.pendencias.isNotEmpty)
         (
-          TokensStrip.s2,
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => abrirHomeAlunoMais(
-                context,
-                view: view,
-                hoje: now,
-                onPendencia: _openPendencia,
-                onPendenciaShown: _pendenciaShown,
-              ),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(48, 48),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(S.of(context).hojeAlunoMais),
-            ),
+          TokensStrip.s4,
+          AlunoProximosPassos(
+            pendencias: view.pendencias,
+            resto: view.pendenciasResto.length,
+            hoje: now,
+            onTap: _openPendencia,
+            onShown: _pendenciaShown,
+            onVerMais: () => _verMaisPassos(view, now),
           ),
         ),
+      if (view.ofertas.isNotEmpty)
+        (TokensStrip.s4, AlunoUpsellCarousel(ofertas: view.ofertas)),
+      (
+        TokensStrip.s4,
+        FxActionRow(
+          leading: Icons.apps_rounded,
+          titulo: s.alunoFerramentasLinhaTitulo,
+          motivo: s.alunoFerramentasLinhaDetalhe,
+          verbo: s.alunoFerramentasLinhaVerbo,
+          onTap: () => openAlunoRoute(context, alunoFerramentasRoute),
+        ),
+      ),
     ];
 
     return RefreshIndicator(
@@ -426,6 +440,35 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  /// A lista inteira, quando passam de [alunoPendenciasMax].
+  void _verMaisPassos(AlunoHomeView view, DateTime hoje) {
+    final todos = [...view.pendencias, ...view.pendenciasResto];
+    showFxHomeSheet<void>(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              const SizedBox(height: TokensStrip.s4),
+              AlunoProximosPassos(
+                pendencias: todos,
+                hoje: hoje,
+                onTap: (p) {
+                  Navigator.of(ctx).pop();
+                  _openPendencia(p);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

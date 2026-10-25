@@ -26,7 +26,7 @@ class AlunoFerramentaAcao {
   final AlunoFerramentaGrupo group;
 }
 
-/// As rotas que o dock não cobre. Anamnese fica no grupo Conta do Perfil.
+/// Todas as ferramentas do aluno. Anamnese fica no Perfil.
 List<AlunoFerramentaAcao> alunoFerramentas(S s) => [
   AlunoFerramentaAcao(
     icon: Icons.fitness_center,
@@ -128,7 +128,18 @@ List<AlunoFerramentaAcao> alunoFerramentas(S s) => [
   ),
 ];
 
-/// Grupos do catálogo no Perfil. Some o grupo inteiro quando o plano esconde tudo.
+/// Rotas que a barra de baixo já abre: não repetem na lista.
+const alunoRotasDoDock = {'/checkin/treinos', '/chat/aluno', '/saude'};
+
+/// Ferramentas que o dock não abre e que o plano libera.
+List<AlunoFerramentaAcao> ferramentasDoAluno(
+  S s,
+  bool Function(String route) liberada,
+) => alunoFerramentas(s)
+    .where((t) => !alunoRotasDoDock.contains(t.route) && liberada(t.route))
+    .toList(growable: false);
+
+/// Grupos do catálogo da tela Ferramentas. Some o grupo inteiro quando o plano esconde tudo.
 class AlunoFerramentasCatalogo extends StatelessWidget {
   const AlunoFerramentasCatalogo({super.key, required this.liberada});
 
@@ -138,7 +149,7 @@ class AlunoFerramentasCatalogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final tools = alunoFerramentas(s).where((t) => liberada(t.route)).toList();
+    final tools = ferramentasDoAluno(s, liberada);
     final sections = <(AlunoFerramentaGrupo, String)>[
       (AlunoFerramentaGrupo.treino, s.alunoFerramentasGrupoTreino),
       (AlunoFerramentaGrupo.saude, s.alunoFerramentasGrupoSaude),
@@ -159,7 +170,8 @@ class AlunoFerramentasCatalogo extends StatelessWidget {
                 FxSettingsTile(
                   icon: items[i].icon,
                   label: items[i].title,
-                  value: items[i].subtitle,
+                  subtitle: items[i].subtitle,
+                  value: '',
                   mute: chrome.mute,
                   line: chrome.line,
                   showDivider: i < items.length - 1,
@@ -173,10 +185,7 @@ class AlunoFerramentasCatalogo extends StatelessWidget {
     if (grupos.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: TokensStrip.s4),
-        ...grupos,
-      ],
+      children: [...grupos],
     );
   }
 }

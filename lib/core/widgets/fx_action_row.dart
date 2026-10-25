@@ -32,6 +32,8 @@ class FxActionRow extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final bg = FxActionChip.solidBackground(chrome.brand, isDark: chrome.isDark);
     final fg = FxActionChip.solidForeground(isDark: chrome.isDark);
+    // Letra grande: o verbo desce para baixo do texto em vez de espremê-lo.
+    final empilhar = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
 
     return Semantics(
       button: true,
@@ -54,52 +56,72 @@ class FxActionRow extends StatelessWidget {
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: alturaMin - 16),
-              child: Row(
-                children: [
-                  if (leading != null) ...[
-                    Icon(leading, color: chrome.mute),
-                    const SizedBox(width: TokensStrip.s3),
-                  ],
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          titulo,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                        ),
-                        Text(
-                          motivo,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: TokensStrip.s2),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: bg,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: TokensStrip.s3,
-                        vertical: TokensStrip.s2,
-                      ),
-                      child: Text(verbo, style: FocuxHubTypography.chip(fg)),
-                    ),
-                  ),
-                ],
-              ),
+              child: _corpo(chrome, bg, fg, empilhar),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _corpo(ShellPalette chrome, Color bg, Color fg, bool empilhar) {
+    final texto = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          titulo,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: FocuxHubTypography.cardTitle(color: chrome.ink),
+        ),
+        Text(
+          motivo,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
+        ),
+      ],
+    );
+    final pilula = DecoratedBox(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TokensStrip.s3,
+          vertical: TokensStrip.s2,
+        ),
+        child: Text(verbo, style: FocuxHubTypography.chip(fg)),
+      ),
+    );
+    final icone = leading == null
+        ? const <Widget>[]
+        : [
+            Icon(leading, color: chrome.mute),
+            const SizedBox(width: TokensStrip.s3),
+          ];
+    if (empilhar) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [...icone, Expanded(child: texto)],
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Align(alignment: Alignment.centerRight, child: pilula),
+        ],
+      );
+    }
+    return Row(
+      children: [
+        ...icone,
+        Expanded(child: texto),
+        const SizedBox(width: TokensStrip.s2),
+        pilula,
+      ],
     );
   }
 }

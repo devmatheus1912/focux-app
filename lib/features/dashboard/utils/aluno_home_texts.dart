@@ -174,6 +174,15 @@ String? alunoPrazoTexto(S s, DateTime? prazoFim, {DateTime? hoje}) {
   ),
 };
 
+/// Verbo curto do botão de cada próximo passo.
+String alunoPendenciaVerbo(S s, AlunoPendencia p) => switch (p.tipo) {
+  AlunoPendenciaTipo.perfil => s.alunoVerboCompletar,
+  AlunoPendenciaTipo.foto => s.alunoVerboAdicionar,
+  AlunoPendenciaTipo.medida => s.alunoVerboRegistrar,
+  AlunoPendenciaTipo.chat => s.alunoVerboResponder,
+  AlunoPendenciaTipo.agenda => s.alunoVerboConferir,
+};
+
 /// "Hoje às 18:00", "Amanhã às 7:30" ou "qua., 30 de set. às 18:00".
 String alunoAgendaQuandoTexto(S s, DateTime? quando, {DateTime? hoje}) {
   if (quando == null) return s.alunoFerramentaAgendaDetalhe;
