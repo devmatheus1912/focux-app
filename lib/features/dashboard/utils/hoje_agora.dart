@@ -90,7 +90,7 @@ List<HojeAgoraItem> hojeAgora({
         verbo: HojeVerbo.cobrar,
         titulo: fxTitleCaseName(m.nomeAluno),
         motivo: '${_dinheiro(m.valor)} vencida há ${_dias(m.diasAtraso)}',
-        rota: '/financeiro',
+        rota: m.alunoId == null ? '/financeiro' : '/alunos/${m.alunoId}',
       ),
     );
   }

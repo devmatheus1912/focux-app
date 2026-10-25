@@ -81,6 +81,33 @@ void main() {
       expect(item.rota, '/financeiro');
     });
 
+    test('cobrança com alunoId abre o aluno', () {
+      final item = _agora(
+        cobrancas: [
+          MensalidadeResumo(
+            id: 1,
+            nomeAluno: 'Ana',
+            valor: 150,
+            dataVencimento: '2026-10-01',
+            diasAtraso: 3,
+            alunoId: 42,
+          ),
+        ],
+      ).single;
+      expect(item.rota, '/alunos/42');
+    });
+
+    test('alunoId vem do JSON do servidor', () {
+      final m = MensalidadeResumo.fromJson({
+        'id': 1,
+        'nomeAluno': 'Ana',
+        'valor': '100.00',
+        'diasAtraso': 4,
+        'alunoId': 7,
+      });
+      expect(m.alunoId, 7);
+    });
+
     test('um dia de atraso fica no singular e centavos aparecem', () {
       final item = _agora(cobrancas: [_cobranca('Ana', 150.5, 1)]).single;
       expect(item.motivo, contains('vencida há 1 dia'));
