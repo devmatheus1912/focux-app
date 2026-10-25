@@ -170,8 +170,12 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
           bottomNavigationBar: FxWizardStickyBar(
             secondary:
                 _isReviewing
-                    ? TextButton(
+                    ? OutlinedButton(
                       onPressed: _isSaving ? null : _voltarRevisao,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        shape: const StadiumBorder(),
+                      ),
                       child: Text(migracaoVoltarLabel()),
                     )
                     : null,
@@ -275,13 +279,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Planilha estruturada vai direto para revisão. Foto usa OCR gratuito no app.',
+                        migracaoAjudaDaFonte(_fonte),
                         style: TextStyle(
                           fontSize: 12,
                           color: mute,
                           height: 1.35,
                         ),
                       ),
+                      if (_fonte == MigracaoFonte.foto)
                       Builder(
                         builder: (context) {
                           final plano = ref.watch(planoFeaturesProvider).value;
@@ -307,7 +312,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                               style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
-                                color: brand,
+                                color: mute,
                                 height: 1.35,
                               ),
                             ),
@@ -402,8 +407,8 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                             ),
                             decoration: InputDecoration.collapsed(
                               hintText:
-                                  'Beatriz Carvalho — 28 anos — (11)99999-1111 — bia@gmail.com — hipertrofia\n'
-                                  'Ou cole texto copiado de print/PDF…',
+                                  'Maria Souza, 11 99999-0000, maria@email.com\n'
+                                  'João Lima, 21 98888-7777',
                               hintStyle: TextStyle(
                                 color: mute.withValues(alpha: 0.72),
                               ),
@@ -411,9 +416,17 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                           ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: _captureBusy ? null : _colarClipboard,
-                        child: Text(migracaoColarLabel()),
+                      Padding(
+                        padding: const EdgeInsets.only(top: TokensStrip.s2),
+                        child: OutlinedButton.icon(
+                          onPressed: _captureBusy ? null : _colarClipboard,
+                          icon: const Icon(Icons.content_paste_rounded, size: 18),
+                          label: Text(migracaoColarLabel()),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(48),
+                            shape: const StadiumBorder(),
+                          ),
+                        ),
                       ),
                       ],
                     ],
@@ -507,10 +520,14 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    'Toque para editar · desmarque quem não entra',
-                    style: FocuxHubTypography.bodyMuted(color: mute),
-                  ),
+                  if (_fonte == MigracaoFonte.foto) ...[
+                    const SizedBox(height: TokensStrip.s2),
+                    const FxStatusBanner(
+                      title: 'Confira os nomes antes de importar',
+                      body:
+                          'Em print de outro app, quem só tem nome começa desmarcado.',
+                    ),
+                  ],
                   const SizedBox(height: TokensStrip.s2),
                   Builder(
                     builder: (context) {
@@ -667,7 +684,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 ),
               );
             }),
-            if (_ignorados > 0)
+            if (migracaoAmostrasReais(_amostrasIgnoradas).isNotEmpty)
               Theme(
                 data: Theme.of(
                   context,
@@ -675,7 +692,9 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                 child: ExpansionTile(
                   tilePadding: EdgeInsets.zero,
                   title: Text(
-                    migracaoIgnoradasLabel(_ignorados),
+                    migracaoIgnoradasLabel(
+                      migracaoIgnoradasReais(_ignorados, _amostrasIgnoradas),
+                    ),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -687,7 +706,7 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                     style: TextStyle(fontSize: 11.5, color: mute),
                   ),
                   children: [
-                    for (final linha in _amostrasIgnoradas)
+                    for (final linha in migracaoAmostrasReais(_amostrasIgnoradas))
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(

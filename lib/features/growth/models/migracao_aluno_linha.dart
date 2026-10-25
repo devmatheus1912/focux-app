@@ -101,6 +101,17 @@ class MigracaoAlunoLinha {
     ];
   }
 
+  /// Print de outro app: quem tem só nome (sem e-mail e sem telefone) começa
+  /// desmarcado, porque a leitura de foto erra nome com mais facilidade.
+  static List<MigracaoAlunoLinha> desmarcarSoNome(List<MigracaoAlunoLinha> linhas) {
+    bool temContato(MigracaoAlunoLinha a) =>
+        (a.email?.trim().isNotEmpty ?? false) || (a.telefone?.trim().isNotEmpty ?? false);
+    return [
+      for (final a in linhas)
+        temContato(a) ? a : a.copyWith(selecionado: false),
+    ];
+  }
+
   static List<MigracaoAlunoLinha>? parseLista(dynamic data) {
     if (data is! List) return null;
     return data

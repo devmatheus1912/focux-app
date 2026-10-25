@@ -25,7 +25,7 @@ void main() {
     expect(screen, contains('_verificarAcessoFoto'));
     expect(screen, contains('/api/v1/migracao/foto/registrar'));
     expect(screen, isNot(contains('/api/v1/migracao/imagem')));
-    expect(screen, contains('OCR gratuito'));
+    expect(screen, contains('migracaoAjudaDaFonte'));
     expect(screen, contains('MFIT'));
     expect(screen, isNot(contains('Migração Mágica')));
   });
@@ -72,7 +72,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('Foto ou print'), findsOneWidget);
-    expect(find.textContaining('OCR gratuito'), findsOneWidget);
+    // Fora da aba de foto, nada de cota nem de leitura de imagem.
+    expect(find.textContaining('Fotos este mês'), findsNothing);
+    expect(find.textContaining('leitura gratuita'), findsNothing);
+
+    await tester.tap(find.text('Foto ou print'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.textContaining('leitura gratuita'), findsOneWidget);
     expect(find.textContaining('Fotos este mês'), findsOneWidget);
   });
 }

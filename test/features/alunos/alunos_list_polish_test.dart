@@ -42,7 +42,8 @@ void main() {
     expect(screen, contains('FxActionChip'));
     expect(screen, isNot(contains('ElevatedButton')));
     expect(screen, contains('_temFinanceiro'));
-    expect(screen, contains('if (_temFinanceiro)'));
+    expect(screen, contains('filtrosVisiveis'));
+    expect(screen, isNot(contains('_AlunosTriageBanner')));
     expect(screen, contains('showAlunosBulkPayCta'));
     expect(screen, contains('temFinanceiro:'));
     expect(screen, contains('ListenableBuilder'));

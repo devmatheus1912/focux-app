@@ -7,6 +7,7 @@ void main() {
     String? email,
     String? telefone,
     bool emailEnviado = false,
+    bool emailReal = false,
   }) =>
       MigracaoImportacaoDetalhe(
         nome: nome,
@@ -15,107 +16,107 @@ void main() {
         email: email,
         telefone: telefone,
         emailEnviado: emailEnviado,
+        emailReal: emailReal,
       );
 
-  group('MigracaoImportacaoResumo — agrupamento 3 grupos', () {
-    test('emailEnviadoAutomaticamente só contém alunos com emailEnviado=true', () {
-      final resumo = MigracaoImportacaoResumo(
-        importados: 3,
-        duplicados: 0,
-        erros: 0,
-        detalhes: [
-          aluno(nome: 'Ana', email: 'ana@email.com', emailEnviado: true),
-          aluno(nome: 'Carlos', telefone: '11999990000', emailEnviado: false),
-          aluno(nome: 'Pedro', emailEnviado: false),
-        ],
-      );
-
-      expect(resumo.emailEnviadoAutomaticamente.map((d) => d.nome), ['Ana']);
-      expect(resumo.enviarViaWhatsapp.map((d) => d.nome), ['Carlos']);
-      expect(resumo.enviarManualmente.map((d) => d.nome), ['Pedro']);
-    });
-
-    test('aluno só com nome (sem telefone, sem email) vai para enviarManualmente', () {
-      final resumo = MigracaoImportacaoResumo(
-        importados: 1,
-        duplicados: 0,
-        erros: 0,
-        detalhes: [aluno(nome: 'Marcos')],
-      );
-
-      expect(resumo.enviarManualmente, hasLength(1));
-      expect(resumo.emailEnviadoAutomaticamente, isEmpty);
-      expect(resumo.enviarViaWhatsapp, isEmpty);
-    });
-
-    test('aluno com email real e emailEnviado=false vai para enviarManualmente se sem telefone', () {
-      final resumo = MigracaoImportacaoResumo(
-        importados: 1,
-        duplicados: 0,
-        erros: 0,
-        detalhes: [
-          aluno(
-            nome: 'Lucia',
-            email: 'lucia@email.com',
-            emailEnviado: false,
-          ),
-        ],
-      );
-
-      // Sem telefone → manualmente (backend não enviou e não tem número)
-      expect(resumo.enviarManualmente, hasLength(1));
-    });
-
-    test('grupos somam corretamente com mix de 10 alunos', () {
-      final detalhes = [
-        aluno(nome: 'A1', email: 'a1@e.com', emailEnviado: true),
-        aluno(nome: 'A2', email: 'a2@e.com', emailEnviado: true),
-        aluno(nome: 'A3', email: 'a3@e.com', emailEnviado: true),
-        aluno(nome: 'A4', email: 'a4@e.com', emailEnviado: true),
-        aluno(nome: 'A5', email: 'a5@e.com', emailEnviado: true),
-        aluno(nome: 'B1', telefone: '11999990001'),
-        aluno(nome: 'B2', telefone: '11999990002'),
-        aluno(nome: 'B3', telefone: '11999990003'),
-        aluno(nome: 'C1'),
-        aluno(nome: 'C2'),
-      ];
-      final resumo = MigracaoImportacaoResumo(
-        importados: 10,
+  MigracaoImportacaoResumo resumo(List<MigracaoImportacaoDetalhe> detalhes) =>
+      MigracaoImportacaoResumo(
+        importados: detalhes.length,
         duplicados: 0,
         erros: 0,
         detalhes: detalhes,
       );
 
-      expect(resumo.emailEnviadoAutomaticamente, hasLength(5));
-      expect(resumo.enviarViaWhatsapp, hasLength(3));
-      expect(resumo.enviarManualmente, hasLength(2));
+  group('MigracaoImportacaoResumo — grupos pelo que aconteceu', () {
+    test('cada aluno cai num grupo só', () {
+      final r = resumo([
+        aluno(nome: 'Ana', email: 'ana@email.com', emailReal: true, emailEnviado: true),
+        aluno(nome: 'Bia', email: 'bia@email.com', emailReal: true),
+        aluno(nome: 'Carlos', telefone: '11999990000'),
+        aluno(nome: 'Pedro'),
+      ]);
+
+      expect(r.emailEnviadoAutomaticamente.map((d) => d.nome), ['Ana']);
+      expect(r.emailNaoSaiu.map((d) => d.nome), ['Bia']);
+      expect(r.soTelefone.map((d) => d.nome), ['Carlos']);
+      expect(r.semContato.map((d) => d.nome), ['Pedro']);
+    });
+
+    test('tem e-mail real e o envio falhou: "e-mail não saiu", mesmo sem telefone', () {
+      final r = resumo([aluno(nome: 'Lucia', email: 'lucia@email.com', emailReal: true)]);
+
+      expect(r.emailNaoSaiu, hasLength(1));
+      expect(r.semContato, isEmpty);
+      expect(r.soTelefone, isEmpty);
+    });
+
+    test('tem e-mail real e telefone, envio falhou: continua em "e-mail não saiu"', () {
+      final r = resumo([
+        aluno(nome: 'Rui', email: 'rui@email.com', emailReal: true, telefone: '11988887777'),
+      ]);
+
+      expect(r.emailNaoSaiu, hasLength(1));
+      expect(r.soTelefone, isEmpty);
+    });
+
+    test('aluno só com nome vai para "sem contato"', () {
+      final r = resumo([aluno(nome: 'Marcos')]);
+
+      expect(r.semContato, hasLength(1));
+      expect(r.emailEnviadoAutomaticamente, isEmpty);
+      expect(r.emailNaoSaiu, isEmpty);
+      expect(r.soTelefone, isEmpty);
+    });
+
+    test('os grupos somam todos os importados com link', () {
+      final detalhes = [
+        for (var i = 0; i < 5; i++)
+          aluno(nome: 'A$i', email: 'a$i@e.com', emailReal: true, emailEnviado: true),
+        for (var i = 0; i < 2; i++) aluno(nome: 'F$i', email: 'f$i@e.com', emailReal: true),
+        for (var i = 0; i < 3; i++) aluno(nome: 'B$i', telefone: '1199999000$i'),
+        aluno(nome: 'C1'),
+        aluno(nome: 'C2'),
+      ];
+      final r = resumo(detalhes);
+
+      expect(r.emailEnviadoAutomaticamente, hasLength(5));
+      expect(r.emailNaoSaiu, hasLength(2));
+      expect(r.soTelefone, hasLength(3));
+      expect(r.semContato, hasLength(2));
       expect(
-        resumo.emailEnviadoAutomaticamente.length +
-            resumo.enviarViaWhatsapp.length +
-            resumo.enviarManualmente.length,
-        equals(resumo.importadosComAcesso.length),
+        r.emailEnviadoAutomaticamente.length +
+            r.emailNaoSaiu.length +
+            r.soTelefone.length +
+            r.semContato.length,
+        r.importadosComAcesso.length,
       );
     });
 
-    test('fromJson parseia emailEnviado', () {
-      final json = {
+    test('fromJson lê emailEnviado, emailReal e emailFalha', () {
+      final d = MigracaoImportacaoDetalhe.fromJson({
         'nome': 'Test',
         'status': 'IMPORTADO',
         'linkAtivacao': 'https://test.com/tok',
-        'emailEnviado': true,
-      };
-      final d = MigracaoImportacaoDetalhe.fromJson(json);
-      expect(d.emailEnviado, isTrue);
+        'emailEnviado': false,
+        'emailReal': true,
+        'emailFalha': 'resend-domain',
+      });
+
+      expect(d.emailEnviado, isFalse);
+      expect(d.emailReal, isTrue);
+      expect(d.emailFalha, 'resend-domain');
     });
 
-    test('fromJson emailEnviado ausente vira false', () {
-      final json = {
+    test('campos ausentes (servidor antigo) viram falso e nulo', () {
+      final d = MigracaoImportacaoDetalhe.fromJson({
         'nome': 'Test',
         'status': 'IMPORTADO',
         'linkAtivacao': 'https://test.com/tok',
-      };
-      final d = MigracaoImportacaoDetalhe.fromJson(json);
+      });
+
       expect(d.emailEnviado, isFalse);
+      expect(d.emailReal, isFalse);
+      expect(d.emailFalha, isNull);
     });
   });
 }

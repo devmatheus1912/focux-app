@@ -128,4 +128,26 @@ void main() {
       expect(resumo.importadosComAcesso.first.nome, 'A');
     });
   });
+
+  group('migracaoVagasHint em plano ilimitado', () {
+    String hint(int novos) => migracaoVagasHint(
+      limiteAlunos: null,
+      alunosAtuais: 3,
+      novosParaImportar: novos,
+    );
+
+    test('um aluno: sem "todos os 1"', () {
+      expect(hint(1), 'Plano ilimitado — cabe o aluno.');
+      expect(hint(1), isNot(contains('todos')));
+    });
+
+    test('vários alunos', () {
+      expect(hint(4), 'Plano ilimitado — cabem os 4 alunos.');
+    });
+
+    test('nenhum selecionado', () {
+      expect(hint(0), 'Plano ilimitado.');
+    });
+  });
 }
+

@@ -13,6 +13,30 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
   final Map<int, MigracaoAcessoStatus> status;
   final void Function(int alunoId, MigracaoAcessoStatus status) onStatus;
 
+  /// "Copiar os N convites" só aparece com 2 ou mais: com 1 seria o mesmo botão do card.
+  List<Widget> _grupoDeConvites(List<MigracaoImportacaoDetalhe> itens, Color brand) {
+    return [
+      if (itens.length >= 2) ...[
+        _MigracaoEnviarTodosButton(data: itens),
+        const SizedBox(height: TokensStrip.s2),
+      ],
+      for (final item in itens)
+        Builder(
+          builder: (context) {
+            final dark = Theme.of(context).brightness == Brightness.dark;
+            return _MigracaoConviteTile(
+              item: item,
+              status: status[item.alunoId],
+              onStatus: (s) => onStatus(item.alunoId!, s),
+              ink: dark ? EagleTokens.darkInk : TokensStrip.textPrimary,
+              mute: dark ? EagleTokens.darkInkMute : TokensStrip.textSecondary,
+              brand: brand,
+            );
+          },
+        ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -21,39 +45,14 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
     final brand = Theme.of(context).colorScheme.primary;
     final comAcesso = data.importadosComAcesso;
 
-    Widget stat(String label, int value, Color color) {
-      return Expanded(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: isDark ? 0.15 : 0.1),
-            borderRadius: BorderRadius.circular(TokensStrip.rSm),
-          ),
-          child: Column(
-            children: [
-              Text('$value', style: FocuxTypography.headline(color: color)),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.bodyMuted(color: mute, height: 1.3),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            stat('Importados', data.importados, brand),
-            const SizedBox(width: 8),
-            stat('Duplicados', data.duplicados, EagleTokens.warn),
-            const SizedBox(width: 8),
-            stat('Erros', data.erros, EagleTokens.bad),
+        FxMetricStrip(
+          metricas: [
+            FxMetric(valor: data.importados, rotulo: 'Importados'),
+            FxMetric(valor: data.duplicados, rotulo: 'Duplicados'),
+            FxMetric(valor: data.erros, rotulo: 'Erros'),
           ],
         ),
         if (comAcesso.isNotEmpty) ...[
@@ -63,12 +62,12 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
             style: FocuxHubTypography.bodyMuted(color: mute),
           ),
           SizedBox(height: TokensStrip.s3),
-          // ── Grupo 1: E-mail enviado automaticamente ─────────────────────
+          // ── E-mail enviado ───────────────────────────────────────────────
           if (data.emailEnviadoAutomaticamente.isNotEmpty) ...[
             _MigracaoGrupoHeader(
               icon: Icons.mark_email_read_rounded,
               color: EagleTokens.good,
-              titulo: 'E-mail enviado automaticamente',
+              titulo: 'E-mail enviado',
               subtitulo:
                   'Esses alunos já receberam o convite no e-mail. Nenhuma ação necessária.',
               count: data.emailEnviadoAutomaticamente.length,
@@ -79,53 +78,48 @@ class _MigracaoImportacaoResumoBody extends StatelessWidget {
               _MigracaoEmailEnviadoTile(item: item, ink: ink, mute: mute),
             SizedBox(height: TokensStrip.s3),
           ],
-          // ── Grupo 2: Envie via WhatsApp ──────────────────────────────────
-          if (data.enviarViaWhatsapp.isNotEmpty) ...[
+          // ── E-mail não saiu: tem e-mail, mas o envio falhou ──────────────
+          if (data.emailNaoSaiu.isNotEmpty) ...[
+            _MigracaoGrupoHeader(
+              icon: Icons.mail_outline_rounded,
+              color: EagleTokens.warn,
+              titulo: 'E-mail não saiu',
+              subtitulo:
+                  'Esses alunos têm e-mail, mas o envio falhou. Mande o convite pelo WhatsApp ou copie o link.',
+              count: data.emailNaoSaiu.length,
+              ink: ink,
+              mute: mute,
+            ),
+            ..._grupoDeConvites(data.emailNaoSaiu, brand),
+            SizedBox(height: TokensStrip.s3),
+          ],
+          // ── Só telefone ──────────────────────────────────────────────────
+          if (data.soTelefone.isNotEmpty) ...[
             _MigracaoGrupoHeader(
               icon: Icons.send_rounded,
               color: EagleTokens.whatsapp,
-              titulo: 'Envie via WhatsApp',
-              subtitulo: migracaoWhatsappGrupo(),
-              count: data.enviarViaWhatsapp.length,
+              titulo: 'Só telefone',
+              subtitulo: 'Sem e-mail. Envie o convite pelo WhatsApp.',
+              count: data.soTelefone.length,
               ink: ink,
               mute: mute,
             ),
-            _MigracaoEnviarTodosButton(
-              data: data.enviarViaWhatsapp,
-            ),
-            SizedBox(height: TokensStrip.s2),
-            for (final item in data.enviarViaWhatsapp)
-              _MigracaoConviteTile(
-                item: item,
-                status: status[item.alunoId],
-                onStatus: (s) => onStatus(item.alunoId!, s),
-                ink: ink,
-                mute: mute,
-                brand: brand,
-              ),
+            ..._grupoDeConvites(data.soTelefone, brand),
             SizedBox(height: TokensStrip.s3),
           ],
-          // ── Grupo 3: Envie manualmente (só nome, sem contato) ────────────
-          if (data.enviarManualmente.isNotEmpty) ...[
+          // ── Sem contato ──────────────────────────────────────────────────
+          if (data.semContato.isNotEmpty) ...[
             _MigracaoGrupoHeader(
               icon: Icons.link_rounded,
               color: mute,
-              titulo: 'Envie manualmente',
+              titulo: 'Sem contato',
               subtitulo:
-                  'Esses alunos não têm telefone nem e-mail. Copie o link e envie pelo canal que preferir.',
-              count: data.enviarManualmente.length,
+                  'Sem telefone nem e-mail. Copie o link e envie pelo canal que preferir.',
+              count: data.semContato.length,
               ink: ink,
               mute: mute,
             ),
-            for (final item in data.enviarManualmente)
-              _MigracaoConviteTile(
-                item: item,
-                status: status[item.alunoId],
-                onStatus: (s) => onStatus(item.alunoId!, s),
-                ink: ink,
-                mute: mute,
-                brand: brand,
-              ),
+            ..._grupoDeConvites(data.semContato, brand),
           ],
         ] else if (data.detalhes.isNotEmpty) ...[
           SizedBox(height: TokensStrip.s4),
@@ -295,18 +289,27 @@ class _MigracaoConviteTile extends StatelessWidget {
               ),
             const SizedBox(height: TokensStrip.s2),
             if (whatsAppUri != null) ...[
-              FxLiquidPrimaryButton(
-                label: s.alunoLinkEnviarWhatsApp,
+              OutlinedButton(
                 onPressed: () => _whatsapp(context, whatsAppUri),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: const StadiumBorder(),
+                ),
+                child: Text(s.alunoLinkEnviarWhatsApp),
               ),
               TextButton(
                 onPressed: () => _copiar(context),
+                style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                 child: Text(s.alunoLinkCopiar),
               ),
             ] else
-              FxLiquidPrimaryButton(
-                label: s.alunoLinkCopiar,
+              OutlinedButton(
                 onPressed: () => _copiar(context),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: const StadiumBorder(),
+                ),
+                child: Text(s.alunoLinkCopiar),
               ),
           ],
         ),

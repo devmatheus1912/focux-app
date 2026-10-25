@@ -27,7 +27,12 @@ void main() {
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains('onBack: _cancel'));
+    expect(screen, isNot(contains("child: const Text('Cancelar')")));
+    expect(screen, contains('FxChoiceStrip'));
+    expect(screen, contains('rotuloVisivel: true'));
+    expect(screen, isNot(contains('AlunoOptionChip')));
+    expect(screen, isNot(contains('_AccessProgressStrip')));
     expect(screen, isNot(contains('FxActionChip')));
     expect(screen, contains('enabled: _canSubmit && !_loading'));
     expect(screen, contains('FxErrorState'));
@@ -41,7 +46,8 @@ void main() {
     expect(screen, contains('showAddAlunoHelpSheet'));
     expect(screen, contains('AlunoSegmentedChoice'));
     expect(screen, contains('AlunoChoiceSection'));
-    expect(screen, contains('WhatsApp opcional'));
+    expect(screen, contains('Dados do aluno'));
+    expect(screen, contains('Sobre o aluno'));
     expect(screen, isNot(contains('Complete nome e e-mail para cadastrar')));
     expect(screen, isNot(contains('abrimos o WhatsApp com a mensagem pronta')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(20));

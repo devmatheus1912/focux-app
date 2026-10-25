@@ -40,19 +40,6 @@ extension AlunosListScreenBody on _AlunosListScreenState {
               final riscoCount = stats.totalRiscoAlto;
               final contatoCount = stats.totalContatoHoje;
               final novosCount = stats.totalConvites;
-              final showTriageBanner = showAlunosContatoBanner(
-                modoSelecao: _modoSelecao,
-                filtro: _filtro,
-                contatoCount: contatoCount,
-                totalCount: stats.total,
-              );
-              final showRiscoBanner = showAlunosRiscoBanner(
-                modoSelecao: _modoSelecao,
-                filtro: _filtro,
-                riscoCount: riscoCount,
-                totalCount: stats.total,
-                contatoBannerVisible: showTriageBanner,
-              );
               final triageContextActive =
                   _filtro == AlunoFiltro.contatoHoje ||
                   (_filtro == AlunoFiltro.todos &&
@@ -87,42 +74,6 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                       ink: ink,
                       mute: mute,
                     ),
-
-                    if (showTriageBanner)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AlunosLayout.screenPadding,
-                          0,
-                          AlunosLayout.screenPadding,
-                          8,
-                        ),
-                        child: _AlunosTriageBanner(
-                          count: contatoCount,
-                          isDark: isDark,
-                          title: '$contatoCount precisam de contato hoje',
-                          subtitle:
-                              'Risco, inadimplência ou $diasLimite+ dias sem treino',
-                          onTap: () => _setFiltro(AlunoFiltro.contatoHoje),
-                        ),
-                      )
-                    else if (showRiscoBanner)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AlunosLayout.screenPadding,
-                          0,
-                          AlunosLayout.screenPadding,
-                          8,
-                        ),
-                        child: _AlunosTriageBanner(
-                          count: riscoCount,
-                          isDark: isDark,
-                          title:
-                              '$riscoCount aluno${riscoCount == 1 ? '' : 's'} em risco',
-                          subtitle:
-                              'Priorize contato e retomada de treino hoje',
-                          onTap: () => _setFiltro(AlunoFiltro.risco),
-                        ),
-                      ),
 
                     // List
                     Expanded(
@@ -296,15 +247,42 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            FxLiquidPrimaryButton(
-                              label: 'Novo aluno',
-                              onPressed: _adicionarAluno,
-                            ),
-                            const SizedBox(height: TokensStrip.s2),
-                            TextButton(
-                              onPressed: _importarVarios,
-                              child: const Text('Importar vários'),
-                            ),
+                            if (stats.total == 0)
+                              ...[
+                                FxLiquidPrimaryButton(
+                                  label: 'Novo aluno',
+                                  onPressed: _adicionarAluno,
+                                ),
+                                const SizedBox(height: TokensStrip.s2),
+                                OutlinedButton(
+                                  onPressed: _importarVarios,
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(48),
+                                    shape: const StadiumBorder(),
+                                  ),
+                                  child: const Text('Importar vários'),
+                                ),
+                              ]
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: FxLiquidPrimaryButton(
+                                      label: 'Novo aluno',
+                                      onPressed: _adicionarAluno,
+                                    ),
+                                  ),
+                                  const SizedBox(width: TokensStrip.s2),
+                                  IconButton.outlined(
+                                    tooltip: 'Importar vários',
+                                    onPressed: _importarVarios,
+                                    icon: const Icon(Icons.upload_file_rounded),
+                                    style: IconButton.styleFrom(
+                                      minimumSize: const Size(48, 48),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
                       ),

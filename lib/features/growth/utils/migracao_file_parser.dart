@@ -6,12 +6,22 @@ import 'package:excel/excel.dart';
 
 import '../models/migracao_aluno_linha.dart';
 import 'migracao_linha_classifier.dart';
+import 'migracao_nome_limpo.dart';
 
 /// Índice de cada campo nas colunas da planilha (`null` = não importar).
 class MigracaoColunas {
-  const MigracaoColunas({this.nome, this.email, this.telefone, this.objetivo});
+  const MigracaoColunas({
+    this.nome,
+    this.email,
+    this.telefone,
+    this.objetivo,
+    this.sobrenome,
+  });
 
   final int? nome;
+
+  /// Coluna "Sobrenome": junta com o nome ("Maria" + "Silva").
+  final int? sobrenome;
   final int? email;
   final int? telefone;
   final int? objetivo;
@@ -194,6 +204,7 @@ class MigracaoFileParser {
     'email': {'email', 'mail'},
     'telefone': {'telefone', 'celular', 'whatsapp', 'whats', 'phone', 'tel', 'fone', 'contato'},
     'objetivo': {'objetivo', 'objetivos', 'goal', 'meta'},
+    'sobrenome': {'sobrenome', 'surname'},
   };
 
   static MigracaoColunas colunasDoCabecalho(List<String> header) {
@@ -212,6 +223,7 @@ class MigracaoFileParser {
       email: achar('email'),
       telefone: achar('telefone'),
       objetivo: achar('objetivo'),
+      sobrenome: achar('sobrenome'),
     );
   }
 
@@ -223,7 +235,7 @@ class MigracaoFileParser {
     var ignorados = 0;
     for (final row in rows) {
       final linha = _linha(
-        nome: _cell(row, colunas.nome),
+        nome: _juntaNome(_cell(row, colunas.nome), _cell(row, colunas.sobrenome)),
         email: _cell(row, colunas.email),
         telefone: _cell(row, colunas.telefone),
         objetivo: _cell(row, colunas.objetivo),
@@ -242,9 +254,12 @@ class MigracaoFileParser {
   ) {
     final alunos = <MigracaoAlunoLinha>[];
     var ignorados = 0;
+    final numeradas = _colunasDeNumero(rows);
     for (final row in rows) {
-      final parts =
-          row.map((c) => c.trim()).where((p) => p.isNotEmpty).toList();
+      final parts = [
+        for (final (i, c) in row.indexed)
+          if (!numeradas.contains(i) && c.trim().isNotEmpty) c.trim(),
+      ];
       String? email;
       String? telefone;
       String? objetivo;
@@ -281,16 +296,42 @@ class MigracaoFileParser {
     String? telefone,
     String? objetivo,
   }) {
-    final status = migracaoClassificar(nome, email, telefone);
+    // Mesma limpeza do leitor de texto: sem traço, número de lista, status ou plano.
+    final limpo = limparNome(nome);
+    final nomeLimpo = limpo.nome.isEmpty ? null : limpo.nome;
+    final status = migracaoClassificar(nomeLimpo, email, telefone);
     if (status == MigracaoLinhaStatus.ignorado) return null;
-    final nomeFinal = (nome == null || nome.isEmpty) ? _nomeDoEmail(email) : nome;
+    final nomeFinal = nomeLimpo ?? _nomeDoEmail(email);
     return MigracaoAlunoLinha(
       nome: nomeFinal,
       email: email,
       telefone: telefone,
-      objetivo: objetivo,
+      objetivo: objetivo ?? limpo.objetivo,
       status: status,
     );
+  }
+
+  static String? _juntaNome(String? nome, String? sobrenome) {
+    final partes = [
+      if (nome != null && nome.isNotEmpty) nome,
+      if (sobrenome != null && sobrenome.isNotEmpty) sobrenome,
+    ];
+    return partes.isEmpty ? null : partes.join(' ');
+  }
+
+  /// Colunas só de números pequenos ("1", "2"...) são numeração de linha.
+  static Set<int> _colunasDeNumero(List<List<String>> rows) {
+    final numeradas = <int>{};
+    final largura = rows.fold<int>(0, (m, r) => r.length > m ? r.length : m);
+    final numero = RegExp(r'^\d{1,4}[.)]?$');
+    for (var i = 0; i < largura; i++) {
+      final valores = [
+        for (final r in rows)
+          if (i < r.length && r[i].trim().isNotEmpty) r[i].trim(),
+      ];
+      if (valores.isNotEmpty && valores.every(numero.hasMatch)) numeradas.add(i);
+    }
+    return numeradas;
   }
 
   static String _nomeDoEmail(String? email) {

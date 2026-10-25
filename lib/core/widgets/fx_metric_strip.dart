@@ -9,13 +9,15 @@ class FxMetric {
   const FxMetric({
     required this.valor,
     required this.rotulo,
-    required this.onTap,
+    this.onTap,
     this.alerta = false,
   });
 
   final int valor;
   final String rotulo;
-  final VoidCallback onTap;
+
+  /// Sem [onTap] o número só informa: não é botão para o leitor de tela.
+  final VoidCallback? onTap;
   final bool alerta;
 }
 
@@ -57,7 +59,7 @@ class _Tile extends StatelessWidget {
         : chrome.ink;
 
     return Semantics(
-      button: true,
+      button: metrica.onTap != null,
       label: '${metrica.valor} ${metrica.rotulo}',
       excludeSemantics: true,
       child: Material(

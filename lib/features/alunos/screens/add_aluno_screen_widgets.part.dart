@@ -1,15 +1,14 @@
 part of 'add_aluno_screen.dart';
 
-class _AccessProgressStrip extends StatelessWidget {
+/// Uma linha que diz o que falta: só nome e e-mail são obrigatórios.
+class _StatusDoCadastro extends StatelessWidget {
   final String name;
-  final bool hasName;
-  final bool hasEmail;
+  final bool pronto;
   final bool isDark;
 
-  const _AccessProgressStrip({
+  const _StatusDoCadastro({
     required this.name,
-    required this.hasName,
-    required this.hasEmail,
+    required this.pronto,
     required this.isDark,
   });
 
@@ -17,83 +16,32 @@ class _AccessProgressStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final ready = hasName && hasEmail;
-    final progress = (hasName ? 1 : 0) + (hasEmail ? 1 : 0);
-
     return Padding(
       padding: const EdgeInsets.only(left: 2, right: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  ready
-                      ? 'Convite pronto para $name'
-                      : 'Preencha nome e e-mail',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: FxSettingsLayout.subhead(
-                    color: ready ? ink : mute,
-                  ).copyWith(fontWeight: FontWeight.w800),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '$progress/2',
-                style: FxSettingsLayout.rowMetric(color: mute),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Row(
-            children: [
-              Expanded(child: _ProgressStep(done: hasName, isDark: isDark)),
-              const SizedBox(width: TokensStrip.s2),
-              Expanded(child: _ProgressStep(done: hasEmail, isDark: isDark)),
-            ],
+          if (pronto) ...[
+            Icon(
+              Icons.check_circle_rounded,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: TokensStrip.s2),
+          ],
+          Expanded(
+            child: Text(
+              pronto
+                  ? addAlunoProntoParaConvidar(name)
+                  : addAlunoSoNomeEEmail(),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: FxSettingsLayout.subhead(
+                color: pronto ? ink : mute,
+              ).copyWith(fontWeight: FontWeight.w800),
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ProgressStep extends StatelessWidget {
-  final bool done;
-  final bool isDark;
-
-  const _ProgressStep({required this.done, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final action = BrandPalette.sectionAction(primary, dark: isDark);
-    final line = isDark ? EagleTokens.darkLine : TokensStrip.borderDefault;
-
-    return Container(
-      height: 3,
-      decoration: BoxDecoration(
-        color: done ? action : line.withValues(alpha: isDark ? 0.7 : 0.75),
-        borderRadius: BorderRadius.circular(TokensStrip.rPill),
-      ),
-    );
-  }
-}
-
-class _ChipWrap extends StatelessWidget {
-  final List<Widget> children;
-
-  const _ChipWrap({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: TokensStrip.s2,
-      runSpacing: TokensStrip.s2,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: children,
     );
   }
 }

@@ -92,7 +92,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.text('Alunos'), findsWidgets);
-    expect(find.textContaining('Contato hoje'), findsOneWidget);
+    expect(find.text('Todos'), findsOneWidget);
+    expect(find.text('Ativos 1'), findsOneWidget);
+    // Sem ninguém para contato, o chip não aparece.
+    expect(find.textContaining('Contato hoje'), findsNothing);
     expect(find.bySemanticsLabel(AlunosMicrocopy.screenA11y), findsOneWidget);
     expect(find.byTooltip(AlunosMicrocopy.helpA11y), findsOneWidget);
   });

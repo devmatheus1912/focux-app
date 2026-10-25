@@ -8,13 +8,13 @@ import 'package:go_router/go_router.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
 import '../../../core/utils/friendly_error.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -324,16 +324,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         appBar: FxShellAppBar(
           title: 'Novo aluno',
           subtitle: addAlunoHubSubtitle(),
-          leadingWidth: 92,
-          leading: TextButton(
-            onPressed: _cancel,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Cancelar'),
-          ),
+          onBack: _cancel,
           actions: [
             FxHelpIconButton(
               tooltip: 'Como cadastrar',
@@ -383,31 +374,22 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _AccessProgressStrip(
+                        _StatusDoCadastro(
                           name: _firstName,
-                          hasName: _nomeCtrl.text.trim().isNotEmpty,
-                          hasEmail: addAlunoEmailValido(_emailCtrl.text),
+                          pronto:
+                              _nomeCtrl.text.trim().isNotEmpty &&
+                              addAlunoEmailValido(_emailCtrl.text),
                           isDark: isDark,
                         ),
                         const SizedBox(height: TokensStrip.s3),
                         FxSettingsGroup(
-                          header: 'Identidade',
-                          caption: 'Acesso e contato.',
-                          footer: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: FxSettingsLayout.groupPadH,
-                            ),
-                            child: Text(
-                              'WhatsApp opcional — se preencher, o convite abre pronto.',
-                              style: FxSettingsLayout.footer(
-                                color: chrome.mute,
-                              ),
-                            ),
-                          ),
+                          header: 'Dados do aluno',
                           children: [
                             AlunoInsetFormField(
                               controller: _nomeCtrl,
                               label: 'Nome completo',
+                              rotuloVisivel: true,
+                              obrigatorio: true,
                               hint: 'Ex.: Beatriz Andrade',
                               icon: Icons.person_outline_rounded,
                               inputFormatters: [
@@ -425,6 +407,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             AlunoInsetFormField(
                               controller: _emailCtrl,
                               label: 'E-mail',
+                              rotuloVisivel: true,
+                              obrigatorio: true,
                               hint: 'aluno@email.com',
                               icon: Icons.alternate_email_rounded,
                               keyboardType: TextInputType.emailAddress,
@@ -447,6 +431,8 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                             AlunoInsetFormField(
                               controller: _whatsappCtrl,
                               label: 'WhatsApp',
+                              rotuloVisivel: true,
+                              ajuda: 'Com WhatsApp, o convite já sai pronto.',
                               hint: '(11) 99999-9999',
                               icon: Icons.phone_iphone_rounded,
                               keyboardType: TextInputType.phone,
@@ -458,34 +444,39 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                         ),
                         const SizedBox(height: FxSettingsLayout.groupGap),
                         FxSettingsGroup(
-                          header: 'Perfil inicial',
-                          caption:
-                              'Opcional — melhora filtros e atendimento.',
+                          header: 'Sobre o aluno · opcional',
+                          caption: 'Melhora filtros e atendimento.',
                           children: [
                             AlunoChoiceSection(
                               label: 'Objetivo',
                               isDark: isDark,
-                              child: _ChipWrap(
-                                children: [
-                                  ...addAlunoObjetivosRapidos.map((objetivo) {
-                                    final selected =
-                                        !_objetivoLivre &&
-                                        _objetivoCtrl.text.trim() == objetivo;
-                                    return AlunoOptionChip(
+                              child: FxChoiceStrip<String>(
+                                quebrar: true,
+                                itens: [
+                                  for (final objetivo
+                                      in addAlunoObjetivosRapidos)
+                                    FxChoiceItem(
+                                      value: objetivo,
                                       label: objetivo,
-                                      selected: selected,
-                                      isDark: isDark,
-                                      onTap:
-                                          () => _selectObjetivoPreset(objetivo),
-                                    );
-                                  }),
-                                  AlunoOptionChip(
+                                    ),
+                                  const FxChoiceItem(
+                                    value: addAlunoObjetivoOutro,
                                     label: 'Outro',
-                                    selected: _objetivoLivre,
-                                    isDark: isDark,
-                                    onTap: _toggleObjetivoLivre,
                                   ),
                                 ],
+                                selecionado:
+                                    _objetivoLivre
+                                        ? addAlunoObjetivoOutro
+                                        : (addAlunoObjetivosRapidos.contains(
+                                              _objetivoCtrl.text.trim(),
+                                            )
+                                            ? _objetivoCtrl.text.trim()
+                                            : null),
+                                onSelecionar:
+                                    (valor) =>
+                                        valor == addAlunoObjetivoOutro
+                                            ? _toggleObjetivoLivre()
+                                            : _selectObjetivoPreset(valor),
                               ),
                             ),
                             if (_objetivoLivre) ...[
@@ -493,6 +484,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
                               AlunoInsetFormField(
                                 controller: _objetivoCtrl,
                                 label: 'Outro objetivo',
+                                rotuloVisivel: true,
                                 hint: 'Ex.: Reabilitação',
                                 icon: Icons.flag_outlined,
                                 textCapitalization:

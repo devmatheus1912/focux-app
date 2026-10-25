@@ -73,7 +73,10 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
     MigracaoTextoResultado? resultado, {
     String successSuffix = '',
   }) async {
-    final parsed = await _enriquecerComPreview(resultado?.alunos);
+    var parsed = await _enriquecerComPreview(resultado?.alunos);
+    if (parsed != null && _fonte == MigracaoFonte.foto) {
+      parsed = MigracaoAlunoLinha.desmarcarSoNome(parsed);
+    }
     if (!mounted) return;
     setState(() {
       _alunosEncontrados = parsed;
@@ -581,6 +584,16 @@ extension MigracaoMagicaScreenActions on _MigracaoMagicaScreenState {
         _limparImportacaoVisual();
         _controller.clear();
       });
+      if (resumo.emailNaoSaiu.isNotEmpty) {
+        // Diagnóstico para quem opera o Focux: o motivo estável do Resend, sem dado do aluno.
+        AnalyticsService.instance.track(
+          ProductEvents.migracaoEmailNaoSaiu,
+          props: {
+            'quantos': resumo.emailNaoSaiu.length,
+            'motivos': resumo.emailNaoSaiu.map((d) => d.emailFalha ?? 'desconhecido').toSet().join(','),
+          },
+        );
+      }
       await MigracaoMagicaDraftCache.clear();
       invalidateAlunosCaches(ref);
       await ref.read(planoFeaturesProvider.notifier).refresh();

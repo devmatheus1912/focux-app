@@ -319,81 +319,6 @@ void main() {
     });
   });
 
-  group('showAlunosContatoBanner', () {
-    test('mostra quando só parte da base precisa de contato', () {
-      expect(
-        showAlunosContatoBanner(
-          modoSelecao: false,
-          filtro: AlunoFiltro.todos,
-          contatoCount: 3,
-          totalCount: 8,
-        ),
-        isTrue,
-      );
-    });
-
-    test('esconde quando 100% da lista é o foco', () {
-      expect(
-        showAlunosContatoBanner(
-          modoSelecao: false,
-          filtro: AlunoFiltro.todos,
-          contatoCount: 8,
-          totalCount: 8,
-        ),
-        isFalse,
-      );
-    });
-
-    test('esconde em seleção e fora de todos', () {
-      expect(
-        showAlunosContatoBanner(
-          modoSelecao: true,
-          filtro: AlunoFiltro.todos,
-          contatoCount: 3,
-          totalCount: 8,
-        ),
-        isFalse,
-      );
-      expect(
-        showAlunosContatoBanner(
-          modoSelecao: false,
-          filtro: AlunoFiltro.contatoHoje,
-          contatoCount: 3,
-          totalCount: 8,
-        ),
-        isFalse,
-      );
-    });
-  });
-
-  group('showAlunosRiscoBanner', () {
-    test('some se o banner de contato já está no ar', () {
-      expect(
-        showAlunosRiscoBanner(
-          modoSelecao: false,
-          filtro: AlunoFiltro.todos,
-          riscoCount: 2,
-          totalCount: 8,
-          contatoBannerVisible: true,
-        ),
-        isFalse,
-      );
-    });
-
-    test('esconde quando risco cobre a base inteira', () {
-      expect(
-        showAlunosRiscoBanner(
-          modoSelecao: false,
-          filtro: AlunoFiltro.todos,
-          riscoCount: 8,
-          totalCount: 8,
-          contatoBannerVisible: false,
-        ),
-        isFalse,
-      );
-    });
-  });
-
   group('showAlunosBulkPayCta', () {
     test('some se ninguém está em atraso', () {
       expect(
@@ -435,6 +360,124 @@ void main() {
         ], temFinanceiro: true),
         isTrue,
       );
+    });
+  });
+
+  group('filtrosVisiveis', () {
+    List<AlunoFiltro> visiveis({
+      AlunoFiltro selecionado = AlunoFiltro.todos,
+      Map<AlunoFiltro, int?> contagens = const {},
+      bool financeiro = true,
+    }) => filtrosVisiveis(
+      selecionado: selecionado,
+      contagens: contagens,
+      temFinanceiro: financeiro,
+    );
+
+    test('Todos e Ativos ficam sempre', () {
+      final v = visiveis(contagens: {
+        AlunoFiltro.contatoHoje: 0,
+        AlunoFiltro.inadimplentes: 0,
+        AlunoFiltro.risco: 0,
+        AlunoFiltro.novos: 0,
+        AlunoFiltro.inativos: 0,
+      });
+      expect(v, [AlunoFiltro.todos, AlunoFiltro.ativos]);
+    });
+
+    test('chip com contagem aparece, na ordem de sempre', () {
+      final v = visiveis(contagens: {
+        AlunoFiltro.contatoHoje: 1,
+        AlunoFiltro.inadimplentes: 2,
+        AlunoFiltro.risco: 1,
+        AlunoFiltro.novos: 3,
+        AlunoFiltro.inativos: 4,
+      });
+      expect(v, [
+        AlunoFiltro.todos,
+        AlunoFiltro.contatoHoje,
+        AlunoFiltro.ativos,
+        AlunoFiltro.inadimplentes,
+        AlunoFiltro.risco,
+        AlunoFiltro.novos,
+        AlunoFiltro.inativos,
+      ]);
+    });
+
+    test('o selecionado fica mesmo com zero', () {
+      final v = visiveis(
+        selecionado: AlunoFiltro.risco,
+        contagens: {AlunoFiltro.risco: 0},
+      );
+      expect(v, contains(AlunoFiltro.risco));
+    });
+
+    test('contagem desconhecida (null) mostra o chip', () {
+      expect(
+        visiveis(contagens: {AlunoFiltro.inativos: null}),
+        contains(AlunoFiltro.inativos),
+      );
+    });
+
+    test('sem financeiro, Em atraso não aparece', () {
+      final v = visiveis(
+        financeiro: false,
+        contagens: {AlunoFiltro.inadimplentes: 5},
+      );
+      expect(v, isNot(contains(AlunoFiltro.inadimplentes)));
+    });
+  });
+
+  group('linhaDoCard', () {
+    Aluno aluno({
+      String? objetivo,
+      bool contaAtiva = true,
+      int? dias,
+      String status = 'ATIVO',
+    }) => Aluno(
+      id: 1,
+      nome: 'Ana',
+      email: 'ana@x.com',
+      status: status,
+      objetivo: objetivo,
+      contaAtiva: contaAtiva,
+      diasSemTreino: dias,
+    );
+
+    test('convite pendente vem primeiro', () {
+      final l = linhaDoCard(
+        aluno(contaAtiva: false, dias: 9, objetivo: 'Força'),
+        maskedEmail: 'a***@x.com',
+      );
+      expect(l.tipo, LinhaDoCardTipo.convite);
+      expect(l.texto, 'Ainda não entrou');
+    });
+
+    test('parado há 3 dias ou mais vem antes do objetivo', () {
+      final l = linhaDoCard(aluno(dias: 9, objetivo: 'Força'), maskedEmail: 'a***@x.com');
+      expect(l.tipo, LinhaDoCardTipo.parado);
+      expect(l.texto, 'Parado há 9 dias');
+    });
+
+    test('objetivo quando está tudo bem', () {
+      final l = linhaDoCard(aluno(dias: 1, objetivo: 'hipertrofia'), maskedEmail: 'a***@x.com');
+      expect(l.tipo, LinhaDoCardTipo.objetivo);
+      expect(l.texto, 'Hipertrofia');
+    });
+
+    test('sem objetivo cai no e-mail, nunca em "Objetivo pendente"', () {
+      final l = linhaDoCard(aluno(), maskedEmail: 'a***@x.com');
+      expect(l.tipo, LinhaDoCardTipo.email);
+      expect(l.texto, 'a***@x.com');
+      expect(l.texto, isNot(contains('pendente')));
+    });
+
+    test('aluno inativo sem conta não é "Ainda não entrou"', () {
+      final l = linhaDoCard(
+        aluno(contaAtiva: false, status: 'INATIVO'),
+        maskedEmail: 'a***@x.com',
+      );
+      expect(l.tipo, isNot(LinhaDoCardTipo.convite));
     });
   });
 }

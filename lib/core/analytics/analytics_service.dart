@@ -264,6 +264,7 @@ class ProductEvents {
   static const fichaVolumeAberto = 'ficha_volume_aberto';
   static const fichaHistoricoAberto = 'ficha_historico_aberto';
   static const hojeAgoraAberto = 'hoje_agora_aberto';
+  static const migracaoEmailNaoSaiu = 'migracao_email_nao_saiu';
   static const ferramentasAberta = 'ferramentas_aberta';
   static const fichaHistoricoUsada = 'ficha_historico_usada';
   static const treinosDuplicated = 'treinos_duplicated';

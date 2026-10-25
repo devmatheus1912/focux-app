@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/growth/utils/migracao_magica_display.dart';
+import 'package:focux_app/l10n/app_localizations_pt.dart';
 
 void main() {
   test('copy da migração confirma análise e gravação', () {
@@ -45,4 +46,38 @@ void main() {
       expect(migracaoVazioDica(), equals(migracaoVazioDica(deFoto: false)));
     });
   });
+
+  group('ajuda por fonte e linhas ignoradas', () {
+    test('a leitura de imagem só é citada na foto', () {
+      expect(migracaoAjudaDaFonte(MigracaoFonte.planilha), isNot(contains('foto')));
+      expect(migracaoAjudaDaFonte(MigracaoFonte.texto), isNot(contains('aparelho')));
+      expect(migracaoAjudaDaFonte(MigracaoFonte.foto), contains('leitura gratuita'));
+      expect(migracaoAjudaDaFonte(MigracaoFonte.foto), isNot(contains('OCR')));
+    });
+
+    test('amostras só com símbolo não são mostradas', () {
+      expect(
+        migracaoAmostrasReais(['|', '---', ' ', 'Alunos Buscar', 'Hoje 08:00']),
+        ['Alunos Buscar', 'Hoje 08:00'],
+      );
+      expect(migracaoAmostrasReais(['|']), isEmpty);
+      expect(migracaoAmostrasReais(const []), isEmpty);
+    });
+
+    test('o total de ignoradas desconta as que eram só símbolo', () {
+      expect(migracaoIgnoradasReais(3, ['|', 'Alunos Buscar', 'Hoje 08:00']), 2);
+      expect(migracaoIgnoradasReais(1, ['|']), 0);
+      expect(migracaoIgnoradasReais(0, const []), 0);
+    });
+
+    test('o total nunca fica negativo', () {
+      expect(migracaoIgnoradasReais(0, ['|', '-']), 0);
+    });
+
+    test('legenda da revisão tem uma instrução só', () {
+      final texto = migracaoQuestionCaption(MigracaoEtapa.revisao, SPt());
+      expect(texto, 'Toque para editar. Desmarque quem não entra.');
+    });
+  });
 }
+

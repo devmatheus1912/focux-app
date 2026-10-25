@@ -77,4 +77,31 @@ void main() {
     expect(m.first.entraNoSalvamento, isFalse);
     expect(m.last.entraNoSalvamento, isTrue);
   });
+
+  group('desmarcarSoNome (print de outro app)', () {
+    test('só nome começa desmarcado; com e-mail ou telefone continua marcado', () {
+      final r = MigracaoAlunoLinha.desmarcarSoNome(const [
+        MigracaoAlunoLinha(nome: 'Ana Souza'),
+        MigracaoAlunoLinha(nome: 'Bia Lima', email: 'bia@x.com'),
+        MigracaoAlunoLinha(nome: 'Caio Reis', telefone: '11988887777'),
+        MigracaoAlunoLinha(nome: 'Duda Reis', email: '  ', telefone: ''),
+      ]);
+
+      expect(r.map((a) => a.selecionado), [false, true, true, false]);
+    });
+
+    test('mantém a ordem e os dados', () {
+      final r = MigracaoAlunoLinha.desmarcarSoNome(const [
+        MigracaoAlunoLinha(nome: 'Ana Souza', objetivo: 'Força'),
+      ]);
+
+      expect(r.single.nome, 'Ana Souza');
+      expect(r.single.objetivo, 'Força');
+    });
+
+    test('lista vazia continua vazia', () {
+      expect(MigracaoAlunoLinha.desmarcarSoNome(const []), isEmpty);
+    });
+  });
 }
+

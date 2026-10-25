@@ -129,7 +129,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Beatriz Carvalho'), findsOneWidget);
-    expect(find.textContaining('Parado há 12d'), findsOneWidget);
+    expect(find.text('Parado há 12 dias'), findsOneWidget);
     expect(find.byTooltip('WhatsApp'), findsOneWidget);
     expect(find.byTooltip('Contato feito'), findsOneWidget);
     expect(find.byTooltip('Adiar 24h'), findsNothing);
@@ -243,8 +243,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Beatriz Carvalho'), findsOneWidget);
-    expect(find.text('Ainda não entrou.'), findsOneWidget);
-    expect(find.text('Reenviar convite'), findsOneWidget);
+    expect(find.text('Ainda não entrou'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'Reenviar'), findsOneWidget);
+    expect(find.text('Reenviar convite'), findsNothing);
     expect(find.text('0%'), findsNothing);
     expect(find.text('Risco alto'), findsNothing);
   });

@@ -52,6 +52,16 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('sem onTap o número só informa: não é botão', (tester) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      kitHost(const FxMetricStrip(metricas: [FxMetric(valor: 2, rotulo: 'Importados')])),
+    );
+    final semantics = tester.getSemantics(find.bySemanticsLabel('2 Importados'));
+    expect(semantics.flagsCollection.isButton, isFalse);
+    handle.dispose();
+  });
+
   for (final escuro in [false, true]) {
     testWidgets('texto 2.0 sem overflow (escuro: $escuro)', (tester) async {
       await tester.pumpWidget(

@@ -96,7 +96,7 @@ String migracaoQuestionCaption(MigracaoEtapa etapa, S s) => switch (etapa) {
   MigracaoEtapa.captura =>
     'Uma fonte por vez. Você revisa antes de gravar fichas.',
   MigracaoEtapa.revisao =>
-    'Toque para editar. Remova duplicados antes de salvar.',
+    'Toque para editar. Desmarque quem não entra.',
   MigracaoEtapa.acesso => s.migracaoAcessoCaption,
 };
 
@@ -129,3 +129,27 @@ String migracaoContinueCaptureLabel({
 String migracaoVoltarLabel() => 'Voltar';
 
 String migracaoIrParaListaLabel() => 'Ir para lista';
+
+
+/// Uma frase sobre a fonte escolhida: o texto de OCR só aparece na foto.
+String migracaoAjudaDaFonte(MigracaoFonte fonte) => switch (fonte) {
+  MigracaoFonte.planilha => 'A planilha vai direto para a revisão.',
+  MigracaoFonte.texto => 'Cole os dados dos alunos. Você revisa antes de gravar.',
+  MigracaoFonte.foto =>
+    'A foto é lida no seu aparelho (leitura gratuita). Você revisa antes de gravar.',
+};
+
+final _temLetraOuNumero = RegExp(r'[\p{L}\p{N}]', unicode: true);
+
+/// Amostras de linhas ignoradas que dizem alguma coisa (não "|" nem vazias).
+List<String> migracaoAmostrasReais(List<String> amostras) => [
+  for (final linha in amostras)
+    if (_temLetraOuNumero.hasMatch(linha)) linha,
+];
+
+/// Total de ignoradas sem as que são só símbolo, que o personal não precisa ver.
+int migracaoIgnoradasReais(int total, List<String> amostras) {
+  final descartadas = amostras.length - migracaoAmostrasReais(amostras).length;
+  final real = total - descartadas;
+  return real < 0 ? 0 : real;
+}

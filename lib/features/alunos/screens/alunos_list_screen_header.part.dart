@@ -182,49 +182,34 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
                   clipBehavior: Clip.hardEdge,
                   child: Row(
                     children: [
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.contatoHoje,
-                        label: context.alunosL10n.alunosFilterContactToday,
-                        count: contatoCount,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.ativos,
-                        label: context.alunosL10n.alunosFilterActive,
-                        count: ativosCount,
-                        isDark: isDark,
-                      ),
-                      if (_temFinanceiro) ...[
-                        const SizedBox(width: 8),
+                      for (final filtro in filtrosVisiveis(
+                        selecionado: _filtro,
+                        contagens: {
+                          AlunoFiltro.contatoHoje: contatoCount,
+                          AlunoFiltro.ativos: ativosCount,
+                          AlunoFiltro.inadimplentes: inadCount,
+                          AlunoFiltro.risco: riscoCount,
+                          AlunoFiltro.novos: novosCount,
+                          AlunoFiltro.inativos: inativosCount,
+                        },
+                        temFinanceiro: _temFinanceiro,
+                      )) ...[
                         _alunosFilterChip(
-                          filtro: AlunoFiltro.inadimplentes,
-                          label: context.alunosL10n.alunosFilterOverdue,
-                          count: inadCount,
+                          filtro: filtro,
+                          label: _rotuloDoFiltro(filtro),
+                          count: switch (filtro) {
+                            AlunoFiltro.contatoHoje => contatoCount,
+                            AlunoFiltro.ativos => ativosCount,
+                            AlunoFiltro.inadimplentes => inadCount,
+                            AlunoFiltro.risco => riscoCount,
+                            AlunoFiltro.novos => novosCount,
+                            AlunoFiltro.inativos => inativosCount,
+                            AlunoFiltro.todos => null,
+                          },
                           isDark: isDark,
                         ),
+                        const SizedBox(width: 8),
                       ],
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.risco,
-                        label: context.alunosL10n.alunosFilterHighRisk,
-                        count: riscoCount,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.novos,
-                        label: context.alunosL10n.alunosFilterInvites,
-                        count: novosCount,
-                        isDark: isDark,
-                      ),
-                      const SizedBox(width: 8),
-                      _alunosFilterChip(
-                        filtro: AlunoFiltro.inativos,
-                        label: 'Inativos',
-                        count: inativosCount,
-                        isDark: isDark,
-                      ),
                       const SizedBox(width: AlunosLayout.filterRowEndInset),
                     ],
                   ),
@@ -246,15 +231,23 @@ extension AlunosListScreenHeader on _AlunosListScreenState {
     return KeyedSubtree(
       key: _chipKeys[filtro],
       child: FxToggleChip(
-        label: count == null ? label : '$label $count',
+        label: count == null || count <= 0 ? label : '$label $count',
         selected: _filtro == filtro,
         isDark: isDark,
         filledWhenSelected: true,
-        onTap:
-            () => _setFiltro(
-              _filtro == filtro ? AlunoFiltro.todos : filtro,
-            ),
+        // O chip marcado não desliga: quem volta para a lista inteira é o "Todos".
+        onTap: () => _setFiltro(filtro),
       ),
     );
   }
+
+  String _rotuloDoFiltro(AlunoFiltro filtro) => switch (filtro) {
+    AlunoFiltro.todos => 'Todos',
+    AlunoFiltro.contatoHoje => context.alunosL10n.alunosFilterContactToday,
+    AlunoFiltro.ativos => context.alunosL10n.alunosFilterActive,
+    AlunoFiltro.inadimplentes => context.alunosL10n.alunosFilterOverdue,
+    AlunoFiltro.risco => context.alunosL10n.alunosFilterHighRisk,
+    AlunoFiltro.novos => context.alunosL10n.alunosFilterInvites,
+    AlunoFiltro.inativos => 'Inativos',
+  };
 }

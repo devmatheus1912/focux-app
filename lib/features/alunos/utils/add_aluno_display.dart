@@ -19,6 +19,14 @@ const addAlunoObjetivosRapidos = [
 
 String addAlunoHubSubtitle() => 'Cadastro rápido';
 
+String addAlunoSoNomeEEmail() => 'Só nome e e-mail são obrigatórios.';
+
+String addAlunoProntoParaConvidar(String firstName) =>
+    'Pronto para convidar $firstName';
+
+/// Valor do chip "Outro" do Objetivo (texto livre).
+const addAlunoObjetivoOutro = '__outro__';
+
 String addAlunoSalvarTooltip() => 'Cadastrar';
 
 bool addAlunoEmailValido(String raw) =>

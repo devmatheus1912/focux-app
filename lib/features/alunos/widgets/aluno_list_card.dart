@@ -104,7 +104,7 @@ class AlunoListCard extends ConsumerWidget {
             : AlunosLayout.cardAvatarGap;
 
     final displayName = fxTitleCaseName(aluno.nome);
-    final objetivo = prettyAlunoObjective(aluno.objetivo);
+    final linha = linhaDoCard(aluno, maskedEmail: maskEmailForList(aluno.email));
     final status = alunoListStatusBadge(aluno, isDark);
     final statusText = status.label;
     final statusExplicacao = alunoStatusExplicacao(aluno.status);
@@ -136,7 +136,9 @@ class AlunoListCard extends ConsumerWidget {
     final meaningfulPercent = alunoListHasMeaningfulPercent(aderenciaPercent);
     final needsOutreach =
         !modoSelecao && activeFiltro == AlunoFiltro.contatoHoje;
-    final showOpsLine = opsText.isNotEmpty;
+    // A linha 2 já diz "Parado há N dias": não repete embaixo.
+    final showOpsLine =
+        opsText.isNotEmpty && !(opsIsDays && linha.tipo == LinhaDoCardTipo.parado);
     final aguardandoEntrada = !aluno.contaAtiva && alunoStatusAtivo(aluno);
     final s = S.of(context);
     final whatsappNumber = (aluno.whatsapp ?? '').replaceAll(RegExp(r'\D'), '');
@@ -264,58 +266,19 @@ class AlunoListCard extends ConsumerWidget {
                               ],
                             ],
                           ),
-                          if (!compact) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              '$objetivo · ${maskEmailForList(aluno.email)}',
-                              style: FocuxHubTypography.bodyMuted(
-                                color: secondaryInk,
-                                height: 1.25,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          const SizedBox(height: 2),
+                          Text(
+                            linha.texto,
+                            style: FocuxHubTypography.bodyMuted(
+                              color:
+                                  linha.tipo == LinhaDoCardTipo.convite
+                                      ? EagleTokens.warn
+                                      : secondaryInk,
+                              height: 1.25,
                             ),
-                          ] else ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              objetivo,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: secondaryInk,
-                                height: 1.25,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          if (aguardandoEntrada) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              s.alunoAindaNaoEntrou,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: FocuxHubTypography.bodyMuted(
-                                color: EagleTokens.warn,
-                                height: 1.2,
-                              ),
-                            ),
-                            if (!modoSelecao)
-                              TextButton(
-                                onPressed: () => confirmarReenviarLinkAlunoDetail(
-                                  context,
-                                  ref,
-                                  aluno,
-                                  aindaNaoEntrou: true,
-                                ),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: primary,
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  alignment: Alignment.centerLeft,
-                                ),
-                                child: Text(s.alunoReenviarConviteAcao),
-                              ),
-                          ],
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           if (showOpsLine) ...[
                             SizedBox(height: compact ? 4 : 6),
                             Row(
@@ -366,6 +329,16 @@ class AlunoListCard extends ConsumerWidget {
                     ),
                     if (!modoSelecao && needsOutreach)
                       outreach
+                    else if (!modoSelecao && aguardandoEntrada)
+                      _ReenviarConvite(
+                        label: s.alunoReenviarCurto,
+                        onPressed: () => confirmarReenviarLinkAlunoDetail(
+                          context,
+                          ref,
+                          aluno,
+                          aindaNaoEntrou: true,
+                        ),
+                      )
                     else if (!modoSelecao && (compact || triageContextActive))
                       ExcludeSemantics(
                         child: Icon(
@@ -418,6 +391,30 @@ class AlunoListCard extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "Reenviar" do convite: botão de verdade (48 dp), não link no meio do texto.
+class _ReenviarConvite extends StatelessWidget {
+  const _ReenviarConvite({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: TokensStrip.s2),
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 48),
+          padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
+          shape: const StadiumBorder(),
+        ),
+        child: Text(label, maxLines: 1),
       ),
     );
   }

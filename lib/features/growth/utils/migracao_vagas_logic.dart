@@ -56,7 +56,11 @@ String migracaoVagasHint({
     novosParaImportar: novosParaImportar,
   );
   if (snap.isUnlimited) {
-    return 'Plano ilimitado — pode importar todos os $novosParaImportar.';
+    return novosParaImportar <= 0
+        ? 'Plano ilimitado.'
+        : novosParaImportar == 1
+        ? 'Plano ilimitado — cabe o aluno.'
+        : 'Plano ilimitado — cabem os $novosParaImportar alunos.';
   }
   final rest = snap.vagasRestantes ?? 0;
   if (snap.cabeNoPlano) {

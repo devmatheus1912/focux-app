@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../constants/alunos_list_filters.dart';
 import '../data/aluno_repository.dart';
+import 'aluno_display_utils.dart';
 import 'aluno_status.dart';
 
 export 'aluno_status.dart';
@@ -46,34 +47,55 @@ bool showAlunosBulkPayCta(
   required bool temFinanceiro,
 }) => temFinanceiro && selected.any(alunoListIsOverdue);
 
-/// Banner de contato — some se a base inteira já é o foco (eco do chip).
-bool showAlunosContatoBanner({
-  required bool modoSelecao,
-  required AlunoFiltro filtro,
-  required int contatoCount,
-  required int totalCount,
+/// Chips da lista. "Todos" e "Ativos" ficam sempre; os demais só com
+/// contagem maior que zero (ou desconhecida) ou se estiverem selecionados.
+/// O aluno nunca some da lista: só o chip sem nada a mostrar.
+List<AlunoFiltro> filtrosVisiveis({
+  required AlunoFiltro selecionado,
+  required Map<AlunoFiltro, int?> contagens,
+  required bool temFinanceiro,
 }) {
-  if (modoSelecao) return false;
-  if (filtro != AlunoFiltro.todos) return false;
-  if (contatoCount <= 0) return false;
-  if (totalCount > 0 && contatoCount >= totalCount) return false;
-  return true;
+  bool mostra(AlunoFiltro filtro) {
+    if (filtro == selecionado) return true;
+    final n = contagens[filtro];
+    return n == null || n > 0;
+  }
+
+  return [
+    AlunoFiltro.todos,
+    if (mostra(AlunoFiltro.contatoHoje)) AlunoFiltro.contatoHoje,
+    AlunoFiltro.ativos,
+    if (temFinanceiro && mostra(AlunoFiltro.inadimplentes))
+      AlunoFiltro.inadimplentes,
+    if (mostra(AlunoFiltro.risco)) AlunoFiltro.risco,
+    if (mostra(AlunoFiltro.novos)) AlunoFiltro.novos,
+    if (mostra(AlunoFiltro.inativos)) AlunoFiltro.inativos,
+  ];
 }
 
-/// Banner de risco — só se o de contato não estiver no ar e não for 100% da lista.
-bool showAlunosRiscoBanner({
-  required bool modoSelecao,
-  required AlunoFiltro filtro,
-  required int riscoCount,
-  required int totalCount,
-  required bool contatoBannerVisible,
-}) {
-  if (contatoBannerVisible) return false;
-  if (modoSelecao) return false;
-  if (filtro != AlunoFiltro.todos) return false;
-  if (riscoCount <= 0) return false;
-  if (totalCount > 0 && riscoCount >= totalCount) return false;
-  return true;
+/// O que a linha 2 do card diz.
+enum LinhaDoCardTipo { convite, parado, objetivo, email }
+
+typedef LinhaDoCard = ({String texto, LinhaDoCardTipo tipo});
+
+/// Uma linha só, por prioridade: convite pendente, parado, objetivo ou e-mail.
+/// Nunca "Objetivo pendente".
+LinhaDoCard linhaDoCard(Aluno aluno, {required String maskedEmail}) {
+  if (!aluno.contaAtiva && alunoStatusAtivo(aluno)) {
+    return (texto: 'Ainda não entrou', tipo: LinhaDoCardTipo.convite);
+  }
+  final dias = aluno.diasSemTreino;
+  if (dias != null && dias >= 3) {
+    return (texto: 'Parado há $dias dias', tipo: LinhaDoCardTipo.parado);
+  }
+  final objetivo = (aluno.objetivo ?? '').trim();
+  if (objetivo.isNotEmpty) {
+    return (
+      texto: prettyAlunoObjective(objetivo),
+      tipo: LinhaDoCardTipo.objetivo,
+    );
+  }
+  return (texto: maskedEmail, tipo: LinhaDoCardTipo.email);
 }
 
 /// Returns true if the status badge should be shown on the card.

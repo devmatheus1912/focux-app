@@ -29,16 +29,32 @@ class MigracaoImportacaoResumo {
           .where((d) => d.emailEnviado)
           .toList(growable: false);
 
-  /// Alunos sem e-mail automático mas com WhatsApp — enviar via broadcast.
-  List<MigracaoImportacaoDetalhe> get enviarViaWhatsapp =>
+  /// Tem e-mail real, mas o envio falhou: sai pelo WhatsApp ou pelo link.
+  List<MigracaoImportacaoDetalhe> get emailNaoSaiu =>
       importadosComAcesso
-          .where((d) => !d.emailEnviado && (d.telefone?.isNotEmpty ?? false))
+          .where((d) => !d.emailEnviado && d.emailReal)
           .toList(growable: false);
 
-  /// Alunos sem e-mail automático e sem telefone — copiar link manualmente.
-  List<MigracaoImportacaoDetalhe> get enviarManualmente =>
+  /// Sem e-mail real, com telefone: WhatsApp.
+  List<MigracaoImportacaoDetalhe> get soTelefone =>
       importadosComAcesso
-          .where((d) => !d.emailEnviado && (d.telefone?.isEmpty ?? true))
+          .where(
+            (d) =>
+                !d.emailEnviado &&
+                !d.emailReal &&
+                (d.telefone?.isNotEmpty ?? false),
+          )
+          .toList(growable: false);
+
+  /// Sem e-mail real e sem telefone: só copiar o link.
+  List<MigracaoImportacaoDetalhe> get semContato =>
+      importadosComAcesso
+          .where(
+            (d) =>
+                !d.emailEnviado &&
+                !d.emailReal &&
+                (d.telefone?.isEmpty ?? true),
+          )
           .toList(growable: false);
 
   factory MigracaoImportacaoResumo.fromJson(Map<String, dynamic> json) {
@@ -78,6 +94,8 @@ class MigracaoImportacaoDetalhe {
     this.telefone,
     this.linkAtivacao,
     this.emailEnviado = false,
+    this.emailReal = false,
+    this.emailFalha,
   });
 
   final String nome;
@@ -88,6 +106,12 @@ class MigracaoImportacaoDetalhe {
   final String? telefone;
   final String? linkAtivacao;
   final bool emailEnviado;
+
+  /// O aluno tem e-mail de verdade (não o provisório do import).
+  final bool emailReal;
+
+  /// Motivo estável da falha do envio (diagnóstico, nunca mostrado ao personal).
+  final String? emailFalha;
 
   factory MigracaoImportacaoDetalhe.fromJson(Map<String, dynamic> json) {
     int? asId(dynamic value) {
@@ -104,6 +128,8 @@ class MigracaoImportacaoDetalhe {
       telefone: json['telefone']?.toString(),
       linkAtivacao: json['linkAtivacao']?.toString(),
       emailEnviado: json['emailEnviado'] == true,
+      emailReal: json['emailReal'] == true,
+      emailFalha: json['emailFalha']?.toString(),
     );
   }
 }

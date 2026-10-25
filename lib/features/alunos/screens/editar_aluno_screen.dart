@@ -335,6 +335,8 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _nome,
                             label: 'Nome completo',
+                            rotuloVisivel: true,
+                            obrigatorio: true,
                             hint: 'Nome do aluno',
                             icon: Icons.person_outline_rounded,
                             textCapitalization: TextCapitalization.words,
@@ -357,6 +359,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _telefone,
                             label: 'Telefone',
+                            rotuloVisivel: true,
                             hint: 'DDD + número',
                             icon: Icons.phone_outlined,
                             keyboardType: TextInputType.phone,
@@ -369,6 +372,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _whatsapp,
                             label: 'WhatsApp',
+                            rotuloVisivel: true,
                             hint: 'DDD + número',
                             icon: Icons.chat_bubble_outline_rounded,
                             keyboardType: TextInputType.phone,
@@ -387,6 +391,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _objetivo,
                             label: 'Objetivo',
+                            rotuloVisivel: true,
                             hint: 'Ex.: Hipertrofia, emagrecimento',
                             icon: Icons.flag_outlined,
                             textCapitalization: TextCapitalization.sentences,
@@ -401,6 +406,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _nascimento,
                             label: S.of(context).editarAlunoNascimento,
+                            rotuloVisivel: true,
                             hint: 'DD-MM-AAAA',
                             icon: Icons.cake_outlined,
                             keyboardType: TextInputType.datetime,
@@ -415,6 +421,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
                           AlunoInsetFormField(
                             controller: _altura,
                             label: S.of(context).editarAlunoAltura,
+                            rotuloVisivel: true,
                             hint: 'Ex.: 175',
                             icon: Icons.height_outlined,
                             keyboardType: TextInputType.number,

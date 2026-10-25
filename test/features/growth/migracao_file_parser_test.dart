@@ -125,5 +125,64 @@ void main() {
       expect(result.usesDirectParse, isFalse);
       expect(result.textForIa, contains('foo'));
     });
+
+    MigracaoFileParseResult ler(String csv, [String nome = 'alunos.csv']) =>
+        MigracaoFileParser.parse(
+          bytes: Uint8List.fromList(utf8.encode(csv)),
+          filename: nome,
+        );
+
+    test('sem cabeçalho, a coluna de número de linha é ignorada', () {
+      final r = ler('1,Maria Silva,11988887777,maria@x.com\n2,Carlos Lima,11977776666,');
+
+      final alunos = r.directAlunos!;
+      expect(alunos.map((a) => a.nome), ['Maria Silva', 'Carlos Lima']);
+      expect(alunos.first.email, 'maria@x.com');
+      expect(alunos.first.objetivo, isNull);
+    });
+
+    test('colunas "Nome" e "Sobrenome" se juntam', () {
+      final r = ler('Nome,Sobrenome,Email\nMaria,Silva,maria@x.com\nJoão,Pedro Souza,joao@x.com');
+
+      expect(r.directAlunos!.map((a) => a.nome), ['Maria Silva', 'João Pedro Souza']);
+      expect(r.colunas!.sobrenome, 1);
+    });
+
+    test('cabeçalho de outro app ("Cliente", "Celular") continua lido', () {
+      final r = ler('Cliente;Plano;Status;Celular;E-mail\nMaria Silva;Mensal;Ativo;(11) 98888-7777;maria@x.com');
+
+      final a = r.directAlunos!.single;
+      expect(a.nome, 'Maria Silva');
+      expect(a.telefone, '(11) 98888-7777');
+      expect(a.email, 'maria@x.com');
+      expect(r.colunas!.objetivo, isNull);
+    });
+
+    test('nome da planilha sai sem status, número de lista e traço', () {
+      final r = ler('Nome,Email\n1. Maria Silva Ativo,maria@x.com\nguilherme -,g@x.com');
+
+      expect(r.directAlunos!.map((a) => a.nome), ['Maria Silva', 'guilherme']);
+    });
+
+    test('objetivo no meio do nome vira objetivo', () {
+      final r = ler('Nome,Email\nFernanda Alves emagrecimento,f@x.com');
+
+      final a = r.directAlunos!.single;
+      expect(a.nome, 'Fernanda Alves');
+      expect(a.objetivo, 'Emagrecimento');
+    });
+
+    test('a coluna de objetivo manda sobre a palavra achada no nome', () {
+      final r = ler('Nome,Email,Objetivo\nFernanda Alves hipertrofia,f@x.com,Saúde');
+
+      expect(r.directAlunos!.single.objetivo, 'Saúde');
+    });
+
+    test('coluna de telefone com número pequeno não é tratada como numeração', () {
+      final r = ler('Maria Silva,11988887777,maria@x.com\nCarlos Lima,11977776666,');
+
+      expect(r.directAlunos!.map((a) => a.nome), ['Maria Silva', 'Carlos Lima']);
+      expect(r.directAlunos!.first.telefone, '11988887777');
+    });
   });
 }
