@@ -5,18 +5,27 @@ import '../../../core/widgets/fx_help.dart';
 Future<void> showTreinosListHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Biblioteca de treinos',
-    subtitle:
-        'Monte o plano base, abra com um toque e atribua quando precisar.',
+    title: 'Modelos de treino',
+    subtitle: 'Semanas inteiras e sessões prontas para aplicar em qualquer aluno.',
     tips: const [
       FxHelpTip(
-        'Novo plano',
-        'O + no topo cria o treino. A biblioteca lista o que já está pronto.',
+        'Semanas e Sessões',
+        'Semanas são modelos de ficha completos ("Hipertrofia 4 dias"). Sessões são os treinos soltos da sua biblioteca.',
+        icon: 'calendar',
+      ),
+      FxHelpTip(
+        'Novo modelo',
+        'Crie por dias da semana ou salve a ficha de um aluno como modelo. As sessões nascem vazias para você preencher.',
         icon: 'plus',
       ),
       FxHelpTip(
+        'Aplicar',
+        'Dentro do modelo, "Aplicar em aluno" troca a ficha dele por uma cópia. Editar o modelo depois não muda quem já recebeu.',
+        icon: 'users',
+      ),
+      FxHelpTip(
         'Abrir e ações',
-        'Toque no card para abrir. O menu do card atribui, copia ou remove.',
+        'Toque no card para abrir. Nas sessões, o menu do card atribui, copia ou remove.',
         icon: 'dumbbell',
       ),
       FxHelpTip(

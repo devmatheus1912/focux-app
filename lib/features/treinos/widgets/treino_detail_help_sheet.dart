@@ -10,6 +10,11 @@ Future<void> showTreinoDetailHelpSheet(BuildContext context) {
         'Inclua exercícios, ajuste a prescrição e atribua quando o plano estiver pronto.',
     tips: const [
       FxHelpTip(
+        'De onde vem',
+        'A faixa no topo diz se esta sessão é da ficha de um aluno ou de um modelo. Mudar uma sessão da ficha não muda o modelo de onde ela veio.',
+        icon: 'calendar',
+      ),
+      FxHelpTip(
         'Adicionar',
         'O botão principal inclui da biblioteca. O menu do topo também chega lá.',
         icon: 'plus',

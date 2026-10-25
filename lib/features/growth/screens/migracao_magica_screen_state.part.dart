@@ -152,15 +152,19 @@ class _MigracaoMagicaScreenState extends ConsumerState<MigracaoMagicaScreen> {
                   tips: [
                     FxHelpTip(
                       'Importar',
-                      'Planilha, texto colado ou foto. A análise de texto não cria ficha ainda.',
+                      'Planilha, texto colado ou foto de outro app. Você revisa tudo antes de gravar.',
+                    ),
+                    FxHelpTip(
+                      'Foto ou print',
+                      'A foto é lida no seu aparelho. Confira os nomes: quem só tem nome (sem e-mail nem telefone) começa desmarcado.',
                     ),
                     FxHelpTip(
                       'Confirmar',
-                      'Só a confirmação grava alunos. Duplicados são ignorados.',
+                      'Só a confirmação grava alunos. Duplicados são ignorados e as linhas que não eram aluno aparecem em "ignoradas".',
                     ),
                     FxHelpTip(
-                      'Acesso',
-                      migracaoSalvarConfirmMessage(),
+                      'Convites',
+                      'Quem tem e-mail recebe o convite sozinho. Se o e-mail não sair, mande pelo WhatsApp ou copie o link, que vale 7 dias.',
                     ),
                   ],
                 ),

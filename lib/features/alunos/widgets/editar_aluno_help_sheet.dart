@@ -10,7 +10,7 @@ Future<void> showEditarAlunoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Obrigatório',
-        'Nome completo e e-mail válidos. O restante pode ficar em branco.',
+        'O nome é obrigatório e o e-mail só aparece para leitura. O restante é opcional.',
         icon: 'users',
       ),
       FxHelpTip(

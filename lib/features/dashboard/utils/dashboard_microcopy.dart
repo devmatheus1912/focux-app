@@ -42,7 +42,7 @@ abstract final class DashboardMicrocopy {
   static const headerRailNotif = 'Notificações';
   static const headerRailNotifHint = 'Novidades e alertas';
 
-  /// Personalidade da marca — fora do header (evita eco com «Foco do dia»).
+  /// Personalidade da marca — fora do header (evita eco com o título da tela).
   static const headerTaglineLead = '';
   static const headerTaglineAccent = 'Resultado';
   static const headerTaglineTail = ' começa hoje.';
@@ -54,19 +54,19 @@ abstract final class DashboardMicrocopy {
       'medida recente, chat recente e status financeiro. Risco sobe com dias sem treino.';
   static const helpHomeTitle = 'Como usar o Hoje';
   static const helpHomeBody =
-      'Cobrar, retomar e a agenda do dia — um toque no que importa agora.';
-  static const helpHomeFocusTitle = 'Foco do dia';
-  static const helpHomeFocusBody =
-      'O banner é a prioridade do dia. Toque para agir. O chip Foco esconde o resto quando o dia aperta.';
-  static const helpHomeActionsTitle = 'Próximas ações';
-  static const helpHomeActionsBody =
-      'Lista 1-toque abaixo do Foco. Desça até as ferramentas e o sticky some.';
-  static const helpHomeRadarTitle = 'Radar e pulso';
-  static const helpHomeRadarBody =
-      'Até 2 no Hoje — quem pede contato. Cadastro e ficha incompleta ficam no aluno.';
-  static const helpHomeSearchTitle = 'Busca e catálogo';
+      'Quem precisa de você agora, a agenda do dia e o resto em um só lugar.';
+  static const helpHomeAgoraTitle = 'Agora';
+  static const helpHomeAgoraBody =
+      'Até 3 pessoas, cada uma com o que fazer: chamar quem sumiu (7 dias sem treino), cobrar mensalidade vencida, renovar ficha que vence. Ver todas abre o resto.';
+  static const helpHomeBaseTitle = 'A base';
+  static const helpHomeBaseBody =
+      'Quem treinou hoje, quem está em risco e quantas fichas vencem logo. Cada número abre a lista dele. Zero não aparece como alerta.';
+  static const helpHomeDinheiroTitle = 'Dinheiro';
+  static const helpHomeDinheiroBody =
+      'O que entrou no mês e quantos estão em atraso, numa linha. Toque para abrir o financeiro.';
+  static const helpHomeSearchTitle = 'Busca e ferramentas';
   static const helpHomeSearchBody =
-      'A lupa acha aluno ou ferramenta. Mais ferramentas abre o catálogo do plano.';
+      'A lupa acha aluno ou ferramenta. Ferramentas lista tudo o que o seu plano oferece.';
   static const helpHomeFooter =
       'Sugestão opcional — você decide se aplica. IA só na aba IA, nunca sozinha.';
   static const helpHomeOpen = 'Ajuda';

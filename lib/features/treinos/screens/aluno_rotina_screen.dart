@@ -8,6 +8,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -25,6 +26,7 @@ import '../utils/ficha_vigencia.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
+import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
@@ -233,6 +235,10 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         appBar: FxShellAppBar(
           title: s.rotinaLinha,
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Sobre a ficha',
+              onTap: () => showFichaHelpSheet(context),
+            ),
             if (pronta)
               IconButton(
                 tooltip: s.rotinaMenuFicha,

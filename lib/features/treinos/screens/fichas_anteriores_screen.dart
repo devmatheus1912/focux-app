@@ -6,6 +6,7 @@ import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -14,6 +15,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/ficha_historico.dart';
 import '../providers/ficha_historico_provider.dart';
 import '../utils/ficha_historico_textos.dart';
+import '../widgets/ficha_help_sheets.dart';
 
 /// Fichas que o aluno já teve, da mais recente para a mais antiga.
 class FichasAnterioresScreen extends ConsumerStatefulWidget {
@@ -54,7 +56,15 @@ class _FichasAnterioresScreenState extends ConsumerState<FichasAnterioresScreen>
     return fxScreenA11yScope(
       label: s.fichasAnterioresTitulo,
       child: FxShellScaffold(
-        appBar: FxShellAppBar(title: s.fichasAnterioresTitulo),
+        appBar: FxShellAppBar(
+          title: s.fichasAnterioresTitulo,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Sobre as fichas anteriores',
+              onTap: () => showFichasAnterioresHelpSheet(context),
+            ),
+          ],
+        ),
         body: async.when(
           loading: () => const Center(child: FxLoading()),
           error: (_, __) => Center(

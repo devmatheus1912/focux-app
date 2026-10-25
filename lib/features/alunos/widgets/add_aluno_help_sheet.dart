@@ -11,7 +11,7 @@ Future<void> showAddAlunoHelpSheet(BuildContext context) {
     tips: const [
       FxHelpTip(
         'Obrigatório',
-        'Só nome completo e e-mail válidos liberam o Cadastrar.',
+        'Só nome completo e e-mail válidos liberam o Cadastrar. Cada campo diz se é obrigatório ou opcional.',
         icon: 'users',
       ),
       FxHelpTip(
@@ -20,8 +20,8 @@ Future<void> showAddAlunoHelpSheet(BuildContext context) {
         icon: 'phone',
       ),
       FxHelpTip(
-        'Perfil inicial',
-        'Objetivo, gênero e consultoria ajudam filtros — você pode ajustar depois.',
+        'Sobre o aluno',
+        'Objetivo, gênero e consultoria são opcionais e ajudam nos filtros. Você ajusta depois.',
         icon: 'flag',
       ),
       FxHelpTip(

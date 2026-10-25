@@ -8,23 +8,32 @@ Future<void> showAlunosListHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: AlunosMicrocopy.helpA11y,
-    subtitle:
-        'Priorize contato, filtre por status e abra a ficha com um toque.',
+    subtitle: 'Veja quem são seus alunos, filtre por situação e abra a ficha com um toque.',
     tips: const [
       FxHelpTip(
-        'Contato hoje',
-        'Chip na lista. O banner só aparece quando parte da base precisa — não quando todos precisam.',
-        icon: 'bell',
-      ),
-      FxHelpTip(
-        'Filtros e busca',
-        'Chips de contato, ativos, risco, convites e inativos (pausados ou bloqueados). A busca cobre nome e objetivo.',
+        'Filtros',
+        'Todos e Ativos ficam sempre. Contato hoje, Em atraso, Em risco, Convites e Inativos só aparecem quando há alguém. O filtro marcado é o que está valendo.',
         icon: 'search',
       ),
       FxHelpTip(
-        'Lista compacta',
-        'Em Organizar lista, oculta o e-mail e reduz o card para caber mais gente.',
+        'Contato hoje',
+        'Quem está em risco, inadimplente ou parado há dias. Na Hoje, o "Agora" mostra os mais urgentes.',
+        icon: 'bell',
+      ),
+      FxHelpTip(
+        'Convite pendente',
+        'Quem ainda não entrou mostra "Ainda não entrou" e o botão Reenviar.',
         icon: 'users',
+      ),
+      FxHelpTip(
+        'Novo aluno e importar',
+        '"Novo aluno" cadastra um. O botão ao lado importa vários de planilha, texto ou print.',
+        icon: 'plus',
+      ),
+      FxHelpTip(
+        'Lista compacta',
+        'Em Organizar lista, reduz o card para caber mais gente.',
+        icon: 'target',
       ),
       FxHelpTip(
         'Seleção',

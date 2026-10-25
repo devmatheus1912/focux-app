@@ -6,6 +6,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -16,6 +17,7 @@ import '../../dashboard/utils/dashboard_tool_groups.dart';
 import '../../dashboard/widgets/dashboard_tool_shortcut_group.dart';
 import '../providers/ferramentas_catalogo_provider.dart';
 import '../utils/ferramentas_agrupar.dart';
+import '../widgets/ferramentas_help_sheet.dart';
 
 /// Tudo o que o plano oferece, agrupado por tarefa. Substitui o catálogo em sheet.
 class FerramentasScreen extends ConsumerStatefulWidget {
@@ -43,7 +45,15 @@ class _FerramentasScreenState extends ConsumerState<FerramentasScreen> {
     return fxScreenA11yScope(
       label: s.ferramentasTitulo,
       child: FxShellScaffold(
-        appBar: FxShellAppBar(title: s.ferramentasTitulo),
+        appBar: FxShellAppBar(
+          title: s.ferramentasTitulo,
+          actions: [
+            FxHelpIconButton(
+              tooltip: 'Sobre as ferramentas',
+              onTap: () => showFerramentasHelpSheet(context),
+            ),
+          ],
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

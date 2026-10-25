@@ -7,6 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -20,6 +21,7 @@ import '../providers/treinos_provider.dart';
 import '../utils/semana_do_modelo.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
+import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_volume_secao.dart';
 
@@ -54,6 +56,10 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
         appBar: FxShellAppBar(
           title: modelo?.nome ?? s.modeloTitulo,
           actions: [
+            FxHelpIconButton(
+              tooltip: 'Sobre o modelo',
+              onTap: () => showModeloHelpSheet(context),
+            ),
             if (modelo != null)
               IconButton(
                 tooltip: s.rotinaMenuFicha,

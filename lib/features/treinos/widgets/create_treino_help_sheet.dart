@@ -6,16 +6,16 @@ Future<void> showCreateTreinoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Novo treino',
-    subtitle: 'Monte o plano base agora. Os exercícios entram no próximo passo.',
+    subtitle: 'Só o nome basta. Os exercícios entram no passo seguinte.',
     tips: const [
       FxHelpTip(
-        'Modelos rápidos',
-        'Toque em um modelo para pré-preencher nome e objetivo.',
+        'Nome',
+        'É o único campo obrigatório. Você pode partir de um modelo rápido para pré-preencher o nome.',
         icon: 'dumbbell',
       ),
       FxHelpTip(
         'Plano base',
-        'Nome é obrigatório. Nível e descrição ajudam na biblioteca e na atribuição.',
+        'Nível e descrição ajudam na biblioteca e na hora de atribuir.',
         icon: 'circle-check',
       ),
       FxHelpTip(

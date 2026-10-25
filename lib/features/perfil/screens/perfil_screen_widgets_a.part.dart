@@ -110,21 +110,31 @@ class _PerfilBodyState extends State<_PerfilBody> {
                 () => showFxHelpSheet(
                   context,
                   title: 'Perfil',
-                  subtitle: 'Conta, marca e operação em um lugar.',
+                  subtitle: 'Sua conta, a sua página e o seu negócio em um lugar.',
                   tips: const [
                     FxHelpTip(
-                      'Editar',
-                      'O lápis no topo abre o cadastro. Completar só aparece se faltar dado.',
+                      'Completar o perfil',
+                      'O percentual mostra o quanto do perfil está pronto. O cartão logo abaixo diz o próximo passo e abre direto onde resolver.',
                       icon: 'user',
                     ),
                     FxHelpTip(
-                      'Marca',
-                      'Link e personalização da landing ficam em Personalizar.',
+                      'Sua página',
+                      'Marca, link público e personalização da sua landing.',
                       icon: 'spark',
                     ),
                     FxHelpTip(
+                      'Negócio',
+                      'Plano e assinatura, carteira com PIX e o link de convite para novos alunos.',
+                      icon: 'coin',
+                    ),
+                    FxHelpTip(
+                      'Preferências',
+                      'Aparência: Sistema, Claro ou Escuro, trocada na hora.',
+                      icon: 'sun',
+                    ),
+                    FxHelpTip(
                       'Conta',
-                      'Sair e excluir ficam no fim, isolados.',
+                      'Sair fica no grupo de conta e segurança. Excluir a conta fica sozinha no fim, em vermelho.',
                       icon: 'shield',
                     ),
                   ],

@@ -13,19 +13,19 @@ Future<void> showDashboardHomeHelpSheet(BuildContext context) {
     subtitle: DashboardMicrocopy.helpHomeBody,
     tips: const [
       FxHelpTip(
-        DashboardMicrocopy.helpHomeFocusTitle,
-        DashboardMicrocopy.helpHomeFocusBody,
-        icon: 'target',
-      ),
-      FxHelpTip(
-        DashboardMicrocopy.helpHomeActionsTitle,
-        DashboardMicrocopy.helpHomeActionsBody,
+        DashboardMicrocopy.helpHomeAgoraTitle,
+        DashboardMicrocopy.helpHomeAgoraBody,
         icon: 'zap',
       ),
       FxHelpTip(
-        DashboardMicrocopy.helpHomeRadarTitle,
-        DashboardMicrocopy.helpHomeRadarBody,
+        DashboardMicrocopy.helpHomeBaseTitle,
+        DashboardMicrocopy.helpHomeBaseBody,
         icon: 'trend',
+      ),
+      FxHelpTip(
+        DashboardMicrocopy.helpHomeDinheiroTitle,
+        DashboardMicrocopy.helpHomeDinheiroBody,
+        icon: 'dollar-sign',
       ),
       FxHelpTip(
         DashboardMicrocopy.helpHomeSearchTitle,
