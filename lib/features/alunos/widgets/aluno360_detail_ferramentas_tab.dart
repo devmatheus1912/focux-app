@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import 'aluno360_ferramentas_modules_grid.dart';
+import 'aluno360_ferramentas_grupos_view.dart';
 import 'aluno360_ferramentas_tab.dart';
 import '../../../core/utils/pt_br_display.dart';
 
@@ -53,17 +53,12 @@ class Aluno360DetailFerramentasTab extends ConsumerWidget {
     return Aluno360FerramentasTab(
       aluno: aluno,
       alunoId: alunoId,
-      primary: primary,
-      bf: bf,
-      massaMagra: massaMagra,
-      measurementsLoading: anamneseLoading,
       animateEntrance: animateEntrance,
       onEntrancePlayed: onEntrancePlayed,
-      modulesSection: Aluno360FerramentasModulesGrid(
+      gruposSection: Aluno360FerramentasGrupos(
         aluno: aluno,
         alunoId: alunoId,
         primary: primary,
-        perfilCompletion: perfilCompletion,
         bf: bf,
         massaMagra: massaMagra,
         aderenciaSemanal: aderenciaSemanal,

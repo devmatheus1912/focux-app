@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
 import 'package:focux_app/features/alunos/constants/aluno_360_layout.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../../support/tolerant_golden_comparator.dart';
 
@@ -31,6 +32,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          locale: const Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
           theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
           home: MediaQuery(
             data: const MediaQueryData(

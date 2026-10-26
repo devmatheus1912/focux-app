@@ -11,7 +11,7 @@ void main() {
         'lib/features/alunos/screens/aluno_detail_screen.dart',
       ),
       File(
-        'lib/features/alunos/widgets/aluno360_operacao_sticky_cta.dart',
+        'lib/features/alunos/widgets/aluno360_acao_sticky.dart',
       ).readAsStringSync(),
       File(
         'lib/features/alunos/constants/aluno_360_layout.dart',
@@ -26,7 +26,6 @@ void main() {
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxHubFreshness'));
-    expect(screen, contains('onLista'));
     expect(screen, contains('subtitle: freshness'));
     expect(screen, contains('freshnessLabel: freshness'));
     expect(screen, contains("title: 'Não conseguimos carregar o aluno'"));

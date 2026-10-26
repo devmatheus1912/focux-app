@@ -16,7 +16,6 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
-import 'aluno360_help_sheets.dart';
 import 'aluno_outreach_message_sheet.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
@@ -109,12 +108,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DashboardSectionHeader(
-                  title: 'Evolução inteligente',
-                  actionLabel: 'Ajuda',
-                  onAction:
-                      () => showAluno360EvolucaoInteligenteHelpSheet(context),
-                ),
+                const DashboardSectionHeader(title: 'Evolução inteligente'),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: FxLoading.sectionShimmer(context, height: 160),
@@ -129,12 +123,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DashboardSectionHeader(
-                  title: 'Evolução inteligente',
-                  actionLabel: 'Ajuda',
-                  onAction:
-                      () => showAluno360EvolucaoInteligenteHelpSheet(context),
-                ),
+                const DashboardSectionHeader(title: 'Evolução inteligente'),
                 const SizedBox(height: 4),
                 Text(
                   friendlyError(
@@ -169,12 +158,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DashboardSectionHeader(
-                title: 'Evolução inteligente',
-                actionLabel: 'Ajuda',
-                onAction:
-                    () => showAluno360EvolucaoInteligenteHelpSheet(context),
-              ),
+              const DashboardSectionHeader(title: 'Evolução inteligente'),
               if (isEmptySignal) ...[
                 const SizedBox(height: 4),
                 Text(

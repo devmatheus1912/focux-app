@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/checkin/models/checkin_execucao_models.dart';
+import 'package:focux_app/core/widgets/fx_week_strip.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_semana_faixa.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 
@@ -39,11 +40,11 @@ void main() {
   test('sete dias: treino, descanso e hoje marcado', () {
     final dias = faixaDaSemana(ficha, const [], _quarta);
     expect(dias, hasLength(7));
-    expect(dias[0].estado, AlunoDiaEstado.treino);
-    expect(dias[1].estado, AlunoDiaEstado.descanso);
+    expect(dias[0].estado, FxWeekDayState.treino);
+    expect(dias[1].estado, FxWeekDayState.descanso);
     expect(dias[2].hoje, isTrue);
     expect(dias.where((d) => d.hoje), hasLength(1));
-    expect(dias[2].estado, AlunoDiaEstado.treino);
+    expect(dias[2].estado, FxWeekDayState.treino);
   });
 
   test('treino concluído na semana vira concluído, mesmo dia da semana passado', () {
@@ -52,8 +53,8 @@ void main() {
       [_feito(DateTime(2026, 10, 26, 18).toIso8601String())],
       _quarta,
     );
-    expect(dias[0].estado, AlunoDiaEstado.concluido);
-    expect(dias[2].estado, AlunoDiaEstado.treino);
+    expect(dias[0].estado, FxWeekDayState.concluido);
+    expect(dias[2].estado, FxWeekDayState.treino);
   });
 
   test('conclusão da semana passada não conta', () {
@@ -62,13 +63,13 @@ void main() {
       [_feito(DateTime(2026, 10, 19, 18).toIso8601String())],
       _quarta,
     );
-    expect(dias[0].estado, AlunoDiaEstado.treino);
+    expect(dias[0].estado, FxWeekDayState.treino);
   });
 
   test('hoje de descanso aponta o próximo dia de treino', () {
     final dias = faixaDaSemana(ficha, const [], _quinta);
     expect(dias[3].hoje, isTrue);
-    expect(dias[3].estado, AlunoDiaEstado.descanso);
+    expect(dias[3].estado, FxWeekDayState.descanso);
     expect(dias.where((d) => d.proximo).map((d) => d.dia), [5]);
   });
 
@@ -94,6 +95,6 @@ void main() {
       const [],
       _quarta,
     );
-    expect(dias[1].estado, AlunoDiaEstado.descanso);
+    expect(dias[1].estado, FxWeekDayState.descanso);
   });
 }

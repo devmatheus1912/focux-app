@@ -531,4 +531,45 @@ void main() {
       );
     });
   });
+
+  group('linguagem do personal na linha do tempo', () {
+    test('"Radar Focux" vira "Alerta" e nunca aparece', () {
+      expect(sanitizeTimeline360Copy('Radar Focux · 27 pts'), 'Alerta · 27 pts');
+      expect(sanitizeTimeline360Copy('radar focux'), 'Alerta');
+    });
+
+    test('números em vírgula, como no resto do app', () {
+      expect(timeline360NumerosEmVirgula('Peso 458.00 kg'), 'Peso 458,0 kg');
+      expect(timeline360NumerosEmVirgula('Gordura 18.5%'), 'Gordura 18,5%');
+      expect(sanitizeTimeline360Copy('Peso 458.00 kg'), 'Peso 458,0 kg');
+    });
+
+    test('milhar com ponto não vira decimal', () {
+      expect(timeline360NumerosEmVirgula('Volume 3.200 kg'), 'Volume 3.200 kg');
+    });
+
+    test('visualização do aluno é ruído; concluído continua', () {
+      expect(
+        timeline360EhVisualizacao(kind: 'Autonomia', body: 'Visualizado'),
+        isTrue,
+      );
+      expect(
+        timeline360EhVisualizacao(kind: 'Autonomia', body: 'Concluído'),
+        isFalse,
+      );
+      expect(
+        timeline360EhVisualizacao(kind: 'Chat', body: 'Visualizado'),
+        isFalse,
+      );
+    });
+
+    test('peso impossível ganha "Confirme este valor"; normal não', () {
+      expect(
+        timeline360MarcaMedidaSuspeita('Peso 458,0 kg'),
+        'Peso 458,0 kg · Confirme este valor',
+      );
+      expect(timeline360MarcaMedidaSuspeita('Peso 72,0 kg'), 'Peso 72,0 kg');
+      expect(timeline360MarcaMedidaSuspeita('Treino concluído'), 'Treino concluído');
+    });
+  });
 }

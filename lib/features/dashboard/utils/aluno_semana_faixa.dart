@@ -1,30 +1,11 @@
+import '../../../core/widgets/fx_week_strip.dart';
 import '../../checkin/data/checkin_repository.dart';
 import '../../checkin/utils/treino_ficha_status.dart';
 import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 
-enum AlunoDiaEstado { treino, descanso, concluido }
-
-/// Um dia da faixa "Esta semana" da Hoje.
-class AlunoDiaFaixa {
-  const AlunoDiaFaixa({
-    required this.dia,
-    required this.estado,
-    this.hoje = false,
-    this.proximo = false,
-  });
-
-  /// 1 = segunda … 7 = domingo.
-  final int dia;
-  final AlunoDiaEstado estado;
-  final bool hoje;
-
-  /// Próximo dia de treino, só quando hoje não é dia de treino.
-  final bool proximo;
-}
-
 /// Sete dias da semana de [hoje]. Vazia quando a ficha não tem dia de treino.
-List<AlunoDiaFaixa> faixaDaSemana(
+List<FxWeekDay> faixaDaSemana(
   RotinaFila rotina,
   List<ExecucaoTreino> historico,
   DateTime hoje,
@@ -54,13 +35,13 @@ List<AlunoDiaFaixa> faixaDaSemana(
 
   return [
     for (final (i, d) in dias.indexed)
-      AlunoDiaFaixa(
+      FxWeekDay(
         dia: i + 1,
         estado: feitos.contains(DateTime(segunda.year, segunda.month, segunda.day + i))
-            ? AlunoDiaEstado.concluido
+            ? FxWeekDayState.concluido
             : temTreino(d)
-            ? AlunoDiaEstado.treino
-            : AlunoDiaEstado.descanso,
+            ? FxWeekDayState.treino
+            : FxWeekDayState.descanso,
         hoje: i + 1 == hoje.weekday,
         proximo: proximo == i + 1,
       ),

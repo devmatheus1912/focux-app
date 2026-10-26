@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
@@ -66,6 +67,9 @@ void main() {
         ),
       ],
       child: MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
         theme: ThemeData(
           useMaterial3: true,
           brightness: isDark ? Brightness.dark : Brightness.light,
@@ -108,14 +112,14 @@ void main() {
   }
 
   testWidgets('ferramentas tab golden at 390px with empty measures', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(ferramentasTab(isDark: false));
     await tester.pumpAndSettle();
 
-    expect(find.text('Medidas'), findsOneWidget);
-    expect(find.text('Idade'), findsOneWidget);
-    expect(find.text('Mais ferramentas'), findsOneWidget);
-    expect(find.text('IA Progresso'), findsNothing);
-    expect(find.text('Gordura'), findsNothing);
+    expect(find.text('Dados do aluno'), findsOneWidget);
+    expect(find.text('Mais ferramentas'), findsNothing);
+    expect(find.text('IA Progresso'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectFocuxGolden(
@@ -125,6 +129,8 @@ void main() {
   });
 
   testWidgets('ferramentas tab golden dark at 390px', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(ferramentasTab(isDark: true));
     await tester.pumpAndSettle();
 
@@ -137,11 +143,13 @@ void main() {
   });
 
   testWidgets('ferramentas tab golden textScale 1.3 at 390px', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 4200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(ferramentasTab(isDark: false, textScale: 1.3));
     await tester.pumpAndSettle();
 
-    expect(find.text('Mais ferramentas'), findsOneWidget);
-    expect(find.text('IA Progresso'), findsNothing);
+    expect(find.text('Mais ferramentas'), findsNothing);
+    expect(find.text('IA Progresso'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectFocuxGolden(
@@ -151,6 +159,8 @@ void main() {
   });
 
   testWidgets('ferramentas tab golden tablet at 720px', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(720, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       ferramentasTab(
         isDark: false,
@@ -159,7 +169,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Medidas'), findsOneWidget);
+    expect(find.text('Dados do aluno'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await expectFocuxGolden(

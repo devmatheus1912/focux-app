@@ -1,68 +1,111 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_help.dart';
-import '../utils/aluno_hero_signal.dart';
 
-Future<void> showAluno360EvolucaoHelpSheet(BuildContext context) {
+/// Ajuda da aba Resumo do perfil 360.
+Future<void> showAluno360ResumoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Aba Evolução',
-    subtitle: 'Sinais de progresso, timeline e peso — sem repetir alertas.',
+    title: 'Resumo do aluno',
+    subtitle: 'O que fazer com este aluno agora, em uma tela só.',
     tips: const [
       FxHelpTip(
-        'Evolução inteligente',
-        'Gráfico de volume após check-ins. Peça check-in se ainda estiver vazio.',
+        'Agora',
+        'A ação mais importante, com o motivo e um botão (Chamar, Cobrar, Abrir). Sem nada urgente, a tela diz isso.',
+        icon: 'target',
+      ),
+      FxHelpTip(
+        'Números',
+        'Aderência dos últimos 30 dias, dias sem treino e check-ins da semana. Tocar abre o engajamento. Quem ainda não treinou aparece como "Sem treinos ainda", não como 0%.',
         icon: 'trend',
       ),
       FxHelpTip(
-        'Linha do tempo',
-        'Radar, check-ins, chat e medidas recentes. Toque para ver detalhe ou ir ao destino.',
-        icon: 'article',
+        'Ficha de treino',
+        'A semana do aluno, a validade e o botão Abrir ficha. A validade avisa; nunca bloqueia o aluno.',
+        icon: 'calendar',
       ),
       FxHelpTip(
-        'Peso · tendência',
-        'Última balança e sparkline. Radar P0 some aqui se a timeline já mostrar o mapa pendente.',
-        icon: 'dumbbell',
+        'Próximo contato',
+        'Agende o retorno, marque contato feito ou adie. A data fica salva para o aluno e para você.',
+        icon: 'bell',
+      ),
+      FxHelpTip(
+        'Menu ⋮',
+        'Editar cadastro, criar tarefa, pausar ou bloquear o acesso e, por último, excluir o aluno (pede confirmação). O Chat fica no topo.',
+        icon: 'zap',
       ),
     ],
   );
 }
 
-Future<void> showAluno360OperacaoHelpSheet(BuildContext context) {
+/// Ajuda da aba Evolução do perfil 360.
+Future<void> showAluno360EvolucaoHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Aba Operação',
-    subtitle: 'O que fazer com este aluno hoje — em ordem de prioridade.',
+    title: 'Evolução do aluno',
+    subtitle: 'Se ele está progredindo e o que mudou desde a última vez.',
     tips: const [
       FxHelpTip(
-        'Próximo contato',
-        'Linha de status. Toque em Agendar para marcar feito, data ou adiar — sem competir com o botão da base.',
-        icon: 'calendar',
-      ),
-      FxHelpTip(
-        'Status operacional',
-        'Aderência de 30 dias e dias sem treino. A faixa mostra os check-ins dos últimos 7 dias, não um segundo calendário.',
+        'Evolução inteligente',
+        'Volume e tendência a partir dos check-ins. Com a tela vazia, peça um check-in.',
         icon: 'trend',
       ),
       FxHelpTip(
-        'Prioridade do dia',
-        'Uma linha de contexto. Atualizar regenera a sugestão e troca o botão de baixo — sem segundo card.',
-        icon: 'spark',
+        'Linha do tempo',
+        'Alertas, check-ins, chat e medidas recentes, do mais novo para o mais antigo. O que o aluno só visualizou no app não aparece. Toque para ver o detalhe.',
+        icon: 'article',
       ),
       FxHelpTip(
-        'Botão da base',
-        'Ação principal do dia (contato, tarefa, sono ou treino). Um só por aba.',
+        'Peso e tendência',
+        'O peso vem da avaliação mais recente; sem avaliação, do cadastro (e diz isso). O gráfico precisa de duas medidas. Valor fora do normal aparece como "Confirme este valor".',
+        icon: 'dumbbell',
+      ),
+      FxHelpTip(
+        'Ajustar treino',
+        'Abre os treinos do aluno para mudar a prescrição a partir do que você viu aqui.',
         icon: 'target',
       ),
     ],
   );
 }
 
+/// Ajuda da aba Ferramentas do perfil 360.
+Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
+  return showFxHelpSheet(
+    context,
+    title: 'Ferramentas do aluno',
+    subtitle: 'Tudo o que você pode fazer por este aluno, por tarefa.',
+    tips: const [
+      FxHelpTip(
+        'Grupos',
+        'Treino, Acompanhamento, Relação e Dinheiro. Todos os módulos aparecem; o grupo com algo urgente sobe para o topo.',
+        icon: 'article',
+      ),
+      FxHelpTip(
+        'Selos',
+        'Cada linha mostra o estado: Pendente, Revisar, Em atraso, Confirme este valor. O selo do plano (Pro, Enterprise) abre o upgrade.',
+        icon: 'star',
+      ),
+      FxHelpTip(
+        'Dados do aluno',
+        'Contato, objetivo, nascimento e altura. Se faltar algum, o grupo abre a aba; tocar em qualquer linha leva ao cadastro.',
+        icon: 'users',
+      ),
+      FxHelpTip(
+        'Composição corporal',
+        'Gordura e massa magra da última avaliação. Número fora do normal pede confirmação em vez de aparecer como OK.',
+        icon: 'trend',
+      ),
+    ],
+  );
+}
+
+/// Ajuda da sugestão do copiloto (folha aberta pelo Resumo).
 Future<void> showAluno360CopilotHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
-    title: 'Prioridade do dia',
-    subtitle: 'Leitura rápida antes de agir — sem substituir seu julgamento.',
+    title: 'Sugestão do copiloto',
+    subtitle: 'Leitura rápida antes de agir, sem substituir seu julgamento.',
     tips: const [
       FxHelpTip(
         'Perfil',
@@ -86,138 +129,8 @@ Future<void> showAluno360CopilotHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Atualizar IA',
-        'Regenera a sugestão. Plano PRO necessário — upgrade aparece automaticamente se faltar.',
+        'Regenera a sugestão. Plano PRO necessário; o upgrade aparece sozinho se faltar.',
         icon: 'spark',
-      ),
-    ],
-  );
-}
-
-Future<void> showAluno360EvolucaoInteligenteHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Evolução inteligente',
-    subtitle: 'Sinais de volume e tendência — só após check-ins registrados.',
-    tips: const [
-      FxHelpTip(
-        'Sem dados ainda',
-        'Peça um check-in ou registre treino concluído. A linha do tempo abaixo já conta como interação.',
-        icon: 'alert-triangle',
-      ),
-      FxHelpTip(
-        'Volume',
-        'Soma semanal/mensal de treino concluído. O gráfico aparece com pelo menos uma semana.',
-        icon: 'trend',
-      ),
-      FxHelpTip(
-        'Próxima ação',
-        'Sugestão operacional derivada do histórico — ajuste o treino se fizer sentido.',
-        icon: 'target',
-      ),
-    ],
-  );
-}
-
-Future<void> showAluno360TimelineHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Linha do tempo 360',
-    subtitle: 'Últimos eventos consolidados — radar, check-in, chat e medidas.',
-    tips: const [
-      FxHelpTip(
-        'Radar Focux',
-        'Pontuação de completude corporal. P0 = mapa corporal pendente — registre na evolução.',
-        icon: 'target',
-      ),
-      FxHelpTip(
-        'Prioridade P0/P1',
-        'P0 exige ação hoje; P1 é importante mas não bloqueia.',
-        icon: 'target',
-      ),
-      FxHelpTip(
-        'Ver todos',
-        'Abre o histórico completo paginado quando houver mais de três sinais.',
-        icon: 'article',
-      ),
-    ],
-  );
-}
-
-Future<void> showAluno360PesoHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Peso · tendência',
-    subtitle: 'Última balança e sparkline das medições recentes.',
-    tips: const [
-      FxHelpTip(
-        'Primeira medida',
-        'Registre peso na evolução corporal para liberar a tendência.',
-        icon: 'dumbbell',
-      ),
-      FxHelpTip(
-        'Radar P0',
-        'Se o radar pedir mapa corporal, peso e medidas entram na mesma tela de evolução.',
-        icon: 'target',
-      ),
-    ],
-  );
-}
-
-Future<void> showAluno360FerramentasHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Aba Ferramentas',
-    subtitle: 'P0 no fold; o catálogo completo fica em Mais ferramentas.',
-    tips: const [
-      FxHelpTip(
-        'Medidas',
-        'Resumo do que falta no perfil e na composição corporal. Um toque abre o destino certo.',
-        icon: 'trend',
-      ),
-      FxHelpTip(
-        'Atalhos do aluno',
-        'Só o que precisa de atenção agora. Duplicados do sticky ficam em Mais.',
-        icon: 'dumbbell',
-      ),
-      FxHelpTip(
-        'Mais ferramentas',
-        'Catálogo completo em uma linha — não é o botão da base.',
-        icon: 'people',
-      ),
-    ],
-  );
-}
-
-Future<void> showAluno360StatusOperacionalHelpSheet(BuildContext context) {
-  return showFxHelpSheet(
-    context,
-    title: 'Status operacional',
-    subtitle: 'Diagnóstico rápido antes de prescrever ou cobrar.',
-    tips: const [
-      FxHelpTip(
-        'Situação do aluno',
-        'Nota de 0 a 100 que junta os dias com treino nos últimos 30 dias e os pagamentos: inadimplência derruba a nota. Não é a prontidão física do wearable.',
-        icon: 'zap',
-      ),
-      FxHelpTip(
-        riscoOperacionalLabel,
-        'Sobe com dias sem treino além do limite, aderência abaixo do mínimo da sua configuração de alertas e mensalidade em atraso. Não é o risco de churn da retenção.',
-        icon: 'alert-triangle',
-      ),
-      FxHelpTip(
-        'Aderência · 30 dias',
-        'Percentual de treinos concluídos entre os iniciados nos últimos 30 dias — não é o mesmo que check-ins dos últimos 7 dias.',
-        icon: 'trend',
-      ),
-      FxHelpTip(
-        'Faixa dos últimos 7 dias',
-        'Dias com check-in: verde = check-in; laranja = sem registro; anel = hoje. Pedir check-in some quando o botão da base já é o P0.',
-        icon: 'calendar',
-      ),
-      FxHelpTip(
-        'Sem treino',
-        'Dias parados desde o último registro — alerta quando passa do limite da sua config.',
-        icon: 'alert-triangle',
       ),
     ],
   );

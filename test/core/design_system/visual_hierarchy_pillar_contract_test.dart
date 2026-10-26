@@ -103,11 +103,12 @@ void main() {
     expect(source, isNot(contains('DashboardAderenciaSemanaWidget')));
   });
 
-  test('aluno detail keeps sticky CTA without operacao focus toggle', () {
+  test('aluno detail não tem barra fixa nem alternância de foco da operação', () {
     final source = readScreenSourceBundle(
       'lib/features/alunos/screens/aluno_detail_screen.dart',
     );
-    expect(source, contains('aluno360_operacao_sticky_cta'));
+    expect(source, isNot(contains('aluno360_operacao_sticky_cta')));
+    expect(source, isNot(contains('Aluno360OperacaoStickyCtaBar')));
     expect(source, isNot(contains('alunoOperacaoFocusModeProvider')));
     expect(source, isNot(contains('Aluno360OperacaoFocusModeToggle')));
   });

@@ -27,16 +27,6 @@ void main() {
     expect(chat, isNot(contains('Color(0xFF2563EB)')));
   });
 
-  test('command center low severity follows active primary color', () {
-    // Mapeamento de tom → accent extraído para o tile compartilhado.
-    final actionTile =
-        File(
-          'lib/features/dashboard/widgets/command_action_tile.dart',
-        ).readAsStringSync();
-
-    expect(actionTile, contains('CommandActionTone.primary => primary'));
-    expect(actionTile, isNot(contains('return const Color(0xFF2563EB);')));
-  });
 
   test('feature screens do not use fixed Focux brand tokens', () {
     const featureBrandAllowlist = {

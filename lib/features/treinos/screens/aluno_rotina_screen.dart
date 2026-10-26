@@ -12,7 +12,6 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_status_pill.dart';
 import '../../../core/widgets/fx_sticky_actions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -30,85 +29,6 @@ import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
-
-/// Linha da ficha de treinos do aluno. O subtítulo é a semana numa frase.
-class AlunoRotinaLinha extends ConsumerWidget {
-  const AlunoRotinaLinha({
-    super.key,
-    required this.alunoId,
-    required this.alunoNome,
-  });
-
-  final int alunoId;
-  final String alunoNome;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final s = S.of(context);
-    final chrome = ShellChrome.of(context);
-    final rotina = ref.watch(alunoRotinaProvider(alunoId)).asData?.value;
-    final linha = rotina == null
-        ? ''
-        : resumoDaSemana(
-            rotina,
-            nomesDosDias: nomesDosDias(s),
-            palavraDescanso: s.rotinaDescanso,
-          );
-
-    // Só chama atenção quando a vigência pede ação: perto de vencer ou vencida.
-    final agora = DateTime.now();
-    final estado = rotina?.vigencia.estado(agora);
-    final aviso = rotina != null &&
-            (estado == EstadoVigencia.venceEmBreve ||
-                estado == EstadoVigencia.venceHoje ||
-                estado == EstadoVigencia.vencida)
-        ? rotuloDaVigencia(s, rotina.vigencia, agora)
-        : null;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push(
-          '/alunos/$alunoId/rotina',
-          extra: alunoNome.trim(),
-        ),
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: chrome.panel(radius: 20),
-          child: Padding(
-            padding: const EdgeInsets.all(TokensStrip.s4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        s.rotinaLinha,
-                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                      ),
-                    ),
-                    if (aviso != null)
-                      FxStatusPill(label: aviso.texto, tone: aviso.tom),
-                  ],
-                ),
-                if (linha.isNotEmpty) ...[
-                  const SizedBox(height: TokensStrip.s2),
-                  Text(
-                    linha,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class AlunoRotinaScreen extends ConsumerStatefulWidget {
   const AlunoRotinaScreen({

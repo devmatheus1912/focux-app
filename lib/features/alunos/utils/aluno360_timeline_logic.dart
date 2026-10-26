@@ -3,6 +3,35 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../chat/data/chat_text_formatter.dart';
 import 'aluno360_copilot_logic.dart';
+import 'aluno360_medida_plausivel.dart';
+
+/// "Radar Focux" é um nome interno; o personal lê "Alerta".
+String timeline360TituloDoAlerta(String text) =>
+    text.replaceAll(RegExp('radar focux', caseSensitive: false), 'Alerta');
+
+/// "458.00 kg" e "818.0%" viram "458,0 kg" e "818,0%": a vírgula do resto do app.
+String timeline360NumerosEmVirgula(String text) => text.replaceAllMapped(
+  RegExp(r'(\d+)\.(\d{1,2})(?!\d)(\s*(?:kg|%))', caseSensitive: false),
+  (m) {
+    final decimais = m[2]!.length > 1 ? m[2]!.substring(0, 1) : m[2]!;
+    return '${m[1]},$decimais${m[3]}';
+  },
+);
+
+/// Evento do aluno olhando uma pendência no app (autonomia "Visualizado").
+/// É ruído para o personal; "Concluído" continua aparecendo.
+bool timeline360EhVisualizacao({required String kind, required String body}) =>
+    kind == 'Autonomia' && body.trim().toLowerCase() == 'visualizado';
+
+/// "Peso 458,0 kg" fora da faixa ganha "· Confirme este valor".
+String timeline360MarcaMedidaSuspeita(String body) {
+  final peso = RegExp(r'peso\s+(-?\d+(?:[.,]\d+)?)\s*kg', caseSensitive: false)
+      .firstMatch(body);
+  if (peso == null) return body;
+  final valor = double.tryParse(peso.group(1)!.replaceAll(',', '.'));
+  if (valor == null || medidaPlausivel(MedidaTipo.pesoKg, valor)) return body;
+  return '$body · Confirme este valor';
+}
 
 /// Normalizes timeline copy to PT-BR and fixes legacy encoding leaks.
 String sanitizeTimeline360Copy(String? raw) {
@@ -101,6 +130,8 @@ String sanitizeTimeline360Copy(String? raw) {
   text = cleanCopilotText(text);
   text = timeline360CollapseCopilotTemplate(text);
   text = timeline360LocalizeAutonomiaActionCode(text);
+  text = timeline360TituloDoAlerta(text);
+  text = timeline360NumerosEmVirgula(text);
   return timeline360FinalizeCopy(text);
 }
 

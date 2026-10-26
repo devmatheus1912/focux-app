@@ -5,6 +5,7 @@ import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/alunos_list_utils.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_detail_hero_card.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,9 @@ void main() {
 
   Widget harness({required Widget child, required bool isDark}) {
     return MaterialApp(
+      locale: const Locale('pt'),
+      supportedLocales: S.supportedLocales,
+      localizationsDelegates: S.localizationsDelegates,
       theme: ThemeData(
         useMaterial3: true,
         brightness: isDark ? Brightness.dark : Brightness.light,

@@ -33,7 +33,11 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
             .map((e) => Aluno360TimelineCard.itemFromApi(e, primary: primary))
             .toList();
     final filtered = mapped
-        .where((item) => !isSmokeTimelineContent(item.body))
+        .where(
+          (item) =>
+              !isSmokeTimelineContent(item.body) &&
+              !timeline360EhVisualizacao(kind: item.kind, body: item.body),
+        )
         .toList(growable: false);
     return sortTimeline360Items(
       dedupeAutonomiaTimelineByTask(
@@ -60,10 +64,12 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
     if (pagedAsync.hasValue) {
       final state = pagedAsync.requireValue;
       final items = _itemsFromEvents(state.events);
-      headerSubtitle =
-          state.totalCount > 0
-              ? '${state.totalCount} sinais'
-              : '${items.length} sinais';
+      // Se algo foi escondido (ex.: visualizações do aluno), o total do servidor
+      // não vale mais: conta só o que o personal vê.
+      final nadaEscondido = state.events.length == items.length;
+      headerSubtitle = state.totalCount > 0 && nadaEscondido
+          ? '${state.totalCount} sinais'
+          : '${items.length} sinais';
     }
 
     return FxHomeSheetSurface(
@@ -77,7 +83,7 @@ class Aluno360TimelineFullSheet extends ConsumerWidget {
           SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             isDark: isDark,
-            title: 'Histórico 360',
+            title: 'Histórico',
             subtitle: headerSubtitle,
             leading: Icon(Icons.timeline_rounded, color: primary, size: 18),
           ),

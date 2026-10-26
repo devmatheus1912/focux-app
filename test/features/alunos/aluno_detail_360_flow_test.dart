@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_timeline_full_sheet.dart';
@@ -62,6 +63,9 @@ void main() {
           ),
         ],
         child: MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
           home: MediaQuery(
             // Sem stagger delay — evita "Timer still pending" no tearDown.
             data: const MediaQueryData(
@@ -81,7 +85,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Histórico 360'), findsOneWidget);
+    expect(find.text('Histórico'), findsOneWidget);
     expect(find.text('12 sinais'), findsOneWidget);
     // Label de lista para CHECKIN é canônico — não o título cru do fixture.
     expect(find.text('Check-in concluído'), findsWidgets);

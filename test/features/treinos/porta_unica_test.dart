@@ -94,10 +94,10 @@ void main() {
 
   group('uma porta só', () {
     test('a linha do perfil 360 se chama Ficha de treino', () {
-      expect(_fonte('lib/l10n/app_pt.arb'), contains('"rotinaLinha": "Ficha de treino"'));
+      expect(_fonte('lib/l10n/app_pt.arb'), contains('"alunoResumoFichaTitulo": "Ficha de treino"'));
       expect(
-        _fonte('lib/features/alunos/widgets/aluno360_detail_operacao_tab.dart'),
-        contains('AlunoRotinaLinha('),
+        _fonte('lib/features/alunos/widgets/aluno360_ficha_card.dart'),
+        allOf(contains('Aluno360FichaCard'), contains("'/alunos/\$alunoId/rotina'")),
       );
     });
 

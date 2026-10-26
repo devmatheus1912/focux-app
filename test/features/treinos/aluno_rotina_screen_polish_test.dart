@@ -14,7 +14,6 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('FxStickyActions'));
     expect(screen, contains('FichaSemana'));
-    expect(screen, contains("'/alunos/\$alunoId/rotina'"));
 
     final aviso = File(
       'lib/features/treinos/utils/rotina_aviso.dart',

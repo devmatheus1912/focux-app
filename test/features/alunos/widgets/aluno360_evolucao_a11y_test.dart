@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_evolucao_tab.dart';
@@ -31,6 +32,9 @@ void main() {
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
         home: MediaQuery(
           data: const MediaQueryData(
             size: Size(390, 844),
@@ -73,6 +77,6 @@ void main() {
 
     expect(find.textContaining('já aparece na linha do tempo'), findsOneWidget);
     expect(find.text('Radar pede mapa corporal (P0)'), findsNothing);
-    expect(find.textContaining('Radar Focux'), findsOneWidget);
+    expect(find.textContaining('Alerta'), findsOneWidget);
   });
 }

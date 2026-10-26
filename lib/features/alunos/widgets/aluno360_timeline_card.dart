@@ -15,7 +15,6 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_timeline_logic.dart';
-import 'aluno360_help_sheets.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
@@ -86,7 +85,9 @@ class Aluno360TimelineCard extends StatelessWidget {
       at: at,
       kind: kind,
       title: sanitizeTimeline360Copy(e.titulo),
-      body: sanitizeTimeline360Copy(rawBody),
+      body: kind == 'Medida'
+          ? timeline360MarcaMedidaSuspeita(sanitizeTimeline360Copy(rawBody))
+          : sanitizeTimeline360Copy(rawBody),
       meta: sanitizeTimeline360Copy(e.meta),
       priority: e.prioridade.trim().isEmpty ? 'P2' : e.prioridade.trim(),
       icon: icon,
@@ -104,7 +105,11 @@ class Aluno360TimelineCard extends StatelessWidget {
             .map((event) => itemFromApi(event, primary: primary))
             .toList();
     final filtered = mapped
-        .where((item) => !isSmokeTimelineContent(item.body))
+        .where(
+          (item) =>
+              !isSmokeTimelineContent(item.body) &&
+              !timeline360EhVisualizacao(kind: item.kind, body: item.body),
+        )
         .toList(growable: false);
     return sortTimeline360Items(
       dedupeAutonomiaTimelineByTask(
@@ -179,15 +184,11 @@ class Aluno360TimelineCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: 'Linha do tempo 360, últimos sinais do aluno',
+      label: 'Linha do tempo, últimos sinais do aluno',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DashboardSectionHeader(
-            title: 'Linha do tempo 360',
-            actionLabel: 'Ajuda',
-            onAction: () => showAluno360TimelineHelpSheet(context),
-          ),
+          const DashboardSectionHeader(title: 'Linha do tempo'),
           if (allItems.isEmpty && !loading && !error) ...[
             const SizedBox(height: 4),
             Text(

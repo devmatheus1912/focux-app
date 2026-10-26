@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
@@ -64,6 +65,9 @@ void main() {
         alunoPesoHistoricoProvider(42).overrideWith((ref) async => const []),
       ],
       child: MaterialApp(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
         theme: ThemeData(
           useMaterial3: true,
           brightness: isDark ? Brightness.dark : Brightness.light,
@@ -213,6 +217,7 @@ void main() {
             isDark: false,
             ink: Colors.black,
           ),
+          ajustarCard: const SizedBox(height: 56),
           animateEntrance: false,
           onEntrancePlayed: () {},
         ),

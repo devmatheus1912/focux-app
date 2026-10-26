@@ -12,17 +12,10 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
-import 'aluno360_help_sheets.dart';
+import '../../../l10n/app_localizations.dart';
+import '../utils/aluno360_medida_plausivel.dart';
+import '../utils/aluno360_peso_fonte.dart';
 import '../../../core/utils/pt_br_display.dart';
-
-List<double> resolveWeightSeriesForAluno(
-  List<double> avaliacoes,
-  double? currentPeso,
-) {
-  if (avaliacoes.isNotEmpty) return avaliacoes;
-  if (currentPeso == null) return const [];
-  return [currentPeso, currentPeso];
-}
 
 class Aluno360WeightActivityCard extends ConsumerWidget {
   const Aluno360WeightActivityCard({
@@ -54,7 +47,11 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pesoHistoricoAsync = ref.watch(alunoPesoHistoricoProvider(alunoId));
     final primary = Theme.of(context).colorScheme.primary;
-    final showRadarHint = hasRadarP0 && !suppressRadarHint && aluno.peso == null;
+    final historico = pesoHistoricoAsync.asData?.value ?? const <double>[];
+    final peso = pesoMostrado(historico: historico, cadastro: aluno.peso);
+    final suspeito =
+        peso != null && !medidaPlausivel(MedidaTipo.pesoKg, peso.valor);
+    final showRadarHint = hasRadarP0 && !suppressRadarHint && peso == null;
 
     return Semantics(
       container: true,
@@ -62,26 +59,22 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DashboardSectionHeader(
-            title: 'Peso · tendência',
-            actionLabel: 'Ajuda',
-            onAction: () => showAluno360PesoHelpSheet(context),
-          ),
+          const DashboardSectionHeader(title: 'Peso · tendência'),
           const SizedBox(height: TokensStrip.s3),
           InkWell(
             onTap: () => _openComparativo(context),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Peso atual',
-              value:
-                  aluno.peso == null
-                      ? '—'
-                      : '${formatBrDecimal(aluno.peso!)} kg',
-              hint:
-                  showRadarHint
-                      ? 'Mapa corporal pendente no radar'
-                      : 'Toque para abrir o comparativo',
-              color: primary,
+              value: peso == null ? '—' : '${formatBrDecimal(peso.valor)} kg',
+              hint: suspeito
+                  ? S.of(context).aluno360ConfirmeValor
+                  : peso?.origem == PesoOrigem.cadastro
+                  ? S.of(context).aluno360PesoDoCadastro
+                  : showRadarHint
+                  ? 'Mapa corporal pendente no radar'
+                  : 'Toque para abrir o comparativo',
+              color: suspeito ? EagleTokens.warn : primary,
               isDark: isDark,
             ),
           ),
@@ -108,9 +101,9 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   ),
                 ),
             data: (series) {
-              final weightSeries = resolveWeightSeriesForAluno(
-                series,
-                aluno.peso,
+              final weightSeries = serieDePeso(
+                historico: series,
+                cadastro: aluno.peso,
               );
               if (weightSeries.isEmpty) {
                 return Align(
@@ -127,6 +120,25 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
                   weightSeries.length >= 2
                       ? weightSeries.last - weightSeries.first
                       : 0.0;
+              if (weightSeries.length < 2) {
+                // Um ponto não é tendência: sem gráfico e sem "Estável".
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context).aluno360PesoSemTendencia,
+                      style: Aluno360Layout.metaStyle(context),
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
+                    FxActionChip(
+                      label: 'Registrar medida',
+                      accent: primary,
+                      isDark: isDark,
+                      onPressed: () => _openEvolucao(context),
+                    ),
+                  ],
+                );
+              }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

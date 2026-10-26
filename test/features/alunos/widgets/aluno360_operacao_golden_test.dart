@@ -2,18 +2,11 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:focux_app/features/alunos/data/aluno_repository.dart';
-import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_operational_status_section.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_student_quick_actions.dart';
-import 'package:focux_app/features/alunos/utils/aluno360_operacao_logic.dart';
-import 'package:focux_app/features/alunos/widgets/aluno360_operacao_sticky_cta.dart';
 import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 
 import '../../../support/tolerant_golden_comparator.dart';
@@ -24,97 +17,6 @@ void main() {
   setUpAll(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     useTolerantGoldens();
-  });
-
-  final aluno = Aluno(
-    id: 42,
-    nome: 'Beatriz Costa',
-    email: 'beatriz@test.com',
-    status: 'ATIVO',
-    aderenciaPercent: 42,
-    scoreProntidao: 68,
-    diasSemTreino: 5,
-    emRisco: true,
-    riscoNivel: 'MEDIO',
-  );
-
-  /// Âncora fixa — `DateTime.now()` muda weekday e quebra golden todo dia.
-  List<Map<String, dynamic>> weekDataEndingToday() {
-    final anchor = DateTime(2026, 6, 7);
-    return List.generate(7, (i) {
-      final day = anchor.subtract(Duration(days: 6 - i));
-      final iso =
-          '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
-      return {'data': iso, 'checkins': i.isEven ? 1 : 0};
-    });
-  }
-
-  Widget operationalStatusHarness({
-    required bool isDark,
-    required Widget child,
-  }) {
-    return ProviderScope(
-      overrides: [
-        aluno360OperacaoProvider(42).overrideWith((ref) => null),
-      ],
-      child: MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          brightness: isDark ? Brightness.dark : Brightness.light,
-        ),
-        home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
-          child: Scaffold(
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  testWidgets('operational status section golden at 390px', (tester) async {
-    await tester.pumpWidget(
-      operationalStatusHarness(
-        isDark: false,
-        child: Aluno360OperationalStatusSection(
-          aluno: aluno,
-          alunoId: 42,
-          isDark: false,
-          primary: const Color(0xFF12A3A3),
-          aderenciaSemanal: weekDataEndingToday(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectFocuxGolden(
-      find.byType(Aluno360OperationalStatusSection),
-      'goldens/aluno360_operational_status_390.png',
-    );
-  });
-
-  testWidgets('operational status section golden dark at 390px', (tester) async {
-    await tester.pumpWidget(
-      operationalStatusHarness(
-        isDark: true,
-        child: Aluno360OperationalStatusSection(
-          aluno: aluno,
-          alunoId: 42,
-          isDark: true,
-          primary: const Color(0xFF12A3A3),
-          aderenciaSemanal: weekDataEndingToday(),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectFocuxGolden(
-      find.byType(Aluno360OperationalStatusSection),
-      'goldens/aluno360_operational_status_390_dark.png',
-    );
   });
 
   testWidgets('copilot prescription golden at 390px', (tester) async {
@@ -177,36 +79,6 @@ void main() {
     );
   });
 
-  testWidgets('operational status empty week golden at 390px', (tester) async {
-    await tester.pumpWidget(
-      operationalStatusHarness(
-        isDark: false,
-        child: Aluno360OperationalStatusSection(
-          aluno: Aluno(
-            id: 42,
-            nome: 'Beatriz Costa',
-            email: 'beatriz@test.com',
-            status: 'ATIVO',
-            aderenciaPercent: 0,
-            scoreProntidao: 68,
-            diasSemTreino: 5,
-            emRisco: true,
-            riscoNivel: 'MEDIO',
-          ),
-          alunoId: 42,
-          isDark: false,
-          primary: const Color(0xFF12A3A3),
-          aderenciaSemanal: null,
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectFocuxGolden(
-      find.byType(Aluno360OperationalStatusSection),
-      'goldens/aluno360_operational_status_empty_390.png',
-    );
-  });
 
   testWidgets('executar confirm sheet golden at 390px', (tester) async {
     const spec = CopilotExecutarAcaoSpec(
@@ -249,33 +121,6 @@ void main() {
     );
   });
 
-  testWidgets('quick actions golden at 390px', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
-        home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
-          child: Scaffold(
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Aluno360StudentQuickActions(
-                aluno: aluno,
-                onPassword: () {},
-                onEdit: () {},
-                onEvolve: () {},
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectFocuxGolden(
-      find.byType(Aluno360StudentQuickActions),
-      'goldens/aluno360_quick_actions_390.png',
-    );
-  });
 
   testWidgets('adherence legend golden at 390px', (tester) async {
     await tester.pumpWidget(
@@ -304,67 +149,4 @@ void main() {
     );
   });
 
-  testWidgets('sticky CTA bar golden contact plus task at 390px', (tester) async {
-    final stickyAluno = Aluno(
-      id: 42,
-      nome: 'Beatriz Costa',
-      email: 'beatriz@test.com',
-      status: 'ATIVO',
-      emRisco: true,
-      riscoNivel: 'ALTO',
-    );
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          alunoOpenIaActionsProvider(42).overrideWith((ref) async => const []),
-          alunoRecoveryProvider(42).overrideWith((ref) async => null),
-          aluno360OperacaoProvider(42).overrideWith(
-            (ref) => resolveAluno360OperacaoSnapshot(
-              aluno: stickyAluno,
-              proximaAcao360: const ProximaAcaoResumo(
-                acao: 'Contate aluno sobre check-in',
-                motivo: 'Sem resposta',
-                fonte: 'IA',
-                prioridade: 'P1',
-                stickyLabel: 'Retomar contato',
-                stickyLabelCompact: 'Contato',
-              ),
-              forceIa: false,
-              iaAsync: null,
-              hasOpenTask: true,
-              followUpDue: false,
-            ),
-          ),
-        ],
-        child: MaterialApp(
-          theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
-          home: MediaQuery(
-            data: const MediaQueryData(size: Size(390, 844)),
-            child: Scaffold(
-              bottomNavigationBar: Aluno360OperacaoStickyCtaBar(
-                aluno: stickyAluno,
-                alunoId: 42,
-                proximaAcao360: const ProximaAcaoResumo(
-                  acao: 'Contate aluno sobre check-in',
-                  motivo: 'Sem resposta',
-                  fonte: 'IA',
-                  prioridade: 'P1',
-                  stickyLabel: 'Retomar contato',
-                  stickyLabelCompact: 'Contato',
-                ),
-                hasOpenCopilotTask360: true,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-
-    await expectFocuxGolden(
-      find.byKey(const ValueKey('aluno360_operacao_sticky_cta')),
-      'goldens/aluno360_sticky_cta_contact_task_390.png',
-    );
-  });
 }

@@ -10,6 +10,8 @@ import '../data/aluno_repository.dart';
 import '../utils/aluno_display_utils.dart';
 import '../utils/aluno360_hero_risk_style.dart';
 import '../utils/aluno_hero_signal.dart';
+import '../../../l10n/app_localizations.dart';
+import '../utils/aluno360_resumo_agora.dart';
 import 'aluno_avatar.dart';
 
 class AlunoDetailHeroCard extends StatelessWidget {
@@ -107,7 +109,9 @@ class AlunoDetailHeroCard extends StatelessWidget {
                 SizedBox(height: compactContactPriority ? 6 : 10),
                 _HeroRiskNotice(
                   nivel: nivel,
-                  detail: compactContactPriority ? '' : contextLine,
+                  detail: compactContactPriority
+                      ? (motivoDeContato(S.of(context), aluno) ?? '')
+                      : contextLine,
                   isDark: isDark,
                   compact: compactContactPriority,
                 ),

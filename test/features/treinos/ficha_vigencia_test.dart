@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
-import 'package:focux_app/features/treinos/screens/aluno_rotina_screen.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_ficha_card.dart';
 import 'package:focux_app/features/treinos/utils/ficha_vigencia.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -76,14 +76,14 @@ void main() {
     });
   });
 
-  group('selo na linha Ficha de treino do perfil 360', () {
+  group('selo no cartão Ficha de treino do perfil 360', () {
     Future<void> abrir(WidgetTester tester, RotinaFila fila) async {
       final router = GoRouter(
         routes: [
           GoRoute(
             path: '/',
             builder: (context, state) => const Scaffold(
-              body: AlunoRotinaLinha(alunoId: 3, alunoNome: 'Ana'),
+              body: Aluno360FichaCard(alunoId: 3, alunoNome: 'Ana'),
             ),
           ),
         ],

@@ -29,6 +29,8 @@ import '../../../core/widgets/fx_sparkline.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/providers/aluno_detail_providers.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../alunos/utils/aluno360_medida_plausivel.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
@@ -355,7 +357,7 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
     final gorduraCtrl = TextEditingController();
     final massaCtrl = TextEditingController();
     try {
-      final saved = await showFxFormSheet(
+      Future<bool> abrirFormulario() => showFxFormSheet(
         context,
         title: 'Nova medida',
         icon: Icons.monitor_weight_outlined,
@@ -415,7 +417,32 @@ class _EvolucaoScreenState extends ConsumerState<EvolucaoScreen> {
           ],
         ),
       );
-      if (saved != true) return;
+      double? ler(TextEditingController c) =>
+          double.tryParse(c.text.replaceAll(',', '.'));
+      // Valor impossível (458 kg, 818 %) pede confirmação; os campos ficam
+      // como estão para o personal corrigir sem digitar tudo de novo.
+      while (true) {
+        final saved = await abrirFormulario();
+        if (saved != true) return;
+        final suspeitas = medidasSuspeitas(
+          peso: ler(pesoCtrl),
+          gordura: ler(gorduraCtrl),
+          massaMagra: ler(massaCtrl),
+        );
+        if (suspeitas.isEmpty) break;
+        if (!mounted) return;
+        final manter = await showFxConfirmSheet(
+          context,
+          title: S.of(context).aluno360ConfirmeValoresTitulo,
+          message: S.of(context).aluno360ConfirmeValoresMensagem(
+            suspeitas.join(', '),
+          ),
+          confirmLabel: S.of(context).aluno360ConfirmeValoresSalvar,
+          cancelLabel: S.of(context).aluno360ConfirmeValoresCorrigir,
+          icon: Icons.warning_amber_rounded,
+        );
+        if (manter) break;
+      }
       final peso = double.tryParse(pesoCtrl.text.replaceAll(',', '.'));
       final cintura = double.tryParse(abdomenCtrl.text.replaceAll(',', '.'));
       final quadril = double.tryParse(quadrilCtrl.text.replaceAll(',', '.'));

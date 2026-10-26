@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/aluno_360_layout.dart';
-import 'aluno360_operacao_tab.dart';
+import 'aluno360_entrance.dart';
 
 /// Evolução tab layout: inteligente + timeline (side-by-side on tablet) → weight.
 class Aluno360EvolucaoTab extends StatelessWidget {
@@ -10,6 +10,7 @@ class Aluno360EvolucaoTab extends StatelessWidget {
     required this.evolucaoCard,
     required this.timelineCard,
     required this.weightCard,
+    required this.ajustarCard,
     required this.animateEntrance,
     required this.onEntrancePlayed,
   });
@@ -17,6 +18,9 @@ class Aluno360EvolucaoTab extends StatelessWidget {
   final Widget evolucaoCard;
   final Widget timelineCard;
   final Widget weightCard;
+
+  /// Linha de ação no fim ("Ajustar treino"), no lugar da antiga barra fixa.
+  final Widget ajustarCard;
   final bool animateEntrance;
   final VoidCallback onEntrancePlayed;
 
@@ -38,6 +42,7 @@ class Aluno360EvolucaoTab extends StatelessWidget {
     final inteligenteTablet = _section(0, evolucaoCard, tablet: true);
     final timelineTablet = _section(1, timelineCard, tablet: true);
     final weightTablet = _section(2, weightCard, tablet: true);
+    final ajustar = _section(3, ajustarCard);
 
     return Semantics(
       container: true,
@@ -61,6 +66,8 @@ class Aluno360EvolucaoTab extends StatelessWidget {
                         timelineTablet,
                         const SizedBox(height: Aluno360Layout.sectionGap),
                         weightTablet,
+                        const SizedBox(height: Aluno360Layout.sectionGap),
+                        ajustar,
                       ],
                     ),
                   ),
@@ -76,6 +83,8 @@ class Aluno360EvolucaoTab extends StatelessWidget {
                 timeline,
                 const SizedBox(height: Aluno360Layout.sectionGap),
                 weight,
+                const SizedBox(height: Aluno360Layout.sectionGap),
+                ajustar,
               ],
             );
           },

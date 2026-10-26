@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/utils/friendly_error.dart';
@@ -13,6 +14,9 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../widgets/aluno_delete_confirm_sheet.dart';
 import '../widgets/aluno_link_ativacao_sheet.dart';
+import '../widgets/aluno_outreach_message_sheet.dart';
+import 'aluno360_copilot_logic.dart';
+import 'aluno360_copilot_task_actions.dart';
 import 'aluno_status.dart';
 
 String alunoDeleteConfirmToken(String nome) {
@@ -131,5 +135,50 @@ Future<void> confirmarReenviarLinkAlunoDetail(
         friendlyError(e, fallback: s.alunoReenviarLinkErro),
       );
     }
+  }
+}
+
+/// Chat do aluno; com mensagem sugerida pelo copiloto, abre a revisão antes.
+void abrirChatAluno360(BuildContext context, WidgetRef ref, Aluno aluno) {
+  final operacao = ref.read(aluno360OperacaoProvider(aluno.id));
+  final draft =
+      operacao?.effectiveProxima?.mensagemSugerida?.trim() ??
+      operacao?.outreachMessage.trim() ??
+      '';
+  if (draft.isNotEmpty) {
+    showAlunoOutreachMessageSheet(
+      context,
+      alunoId: aluno.id,
+      alunoNome: aluno.nome,
+      message: draft,
+      title: 'Mensagem sugerida',
+      subtitle: 'Copiloto · revise antes de enviar.',
+      icon: Icons.auto_awesome_rounded,
+    );
+    return;
+  }
+  context.push('/alunos/${aluno.id}/chat', extra: aluno.nome);
+}
+
+/// Cria a tarefa do copiloto para o aluno, a partir da próxima ação.
+Future<void> criarTarefaAluno360(
+  BuildContext context,
+  WidgetRef ref,
+  Aluno aluno,
+) async {
+  final operacao = ref.read(aluno360OperacaoProvider(aluno.id));
+  final fromProxima = operacao?.effectiveProxima?.acao.trim() ?? '';
+  final acao =
+      fromProxima.isNotEmpty ? fromProxima : copilotFallbackAction(aluno, null);
+  ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).value = true;
+  try {
+    await criarTarefaCopilotoFromAluno360(
+      context: context,
+      ref: ref,
+      aluno: aluno,
+      acao: acao,
+    );
+  } finally {
+    ref.read(alunoCopilotCreatingProvider(aluno.id).notifier).value = false;
   }
 }

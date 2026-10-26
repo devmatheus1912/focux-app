@@ -50,6 +50,32 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     _markFetched();
   }
 
+  /// Ações do ⋮: cada item chama o fluxo que já existia, com sua confirmação.
+  Future<void> _onMenu(Aluno360MenuItem item, Aluno aluno) async {
+    switch (item.acao) {
+      case Aluno360MenuAcao.editar:
+        final updated = await context.push<bool>(
+          '/alunos/$alunoId/editar',
+          extra: aluno,
+        );
+        if (updated == true) await _reload360();
+      case Aluno360MenuAcao.criarTarefa:
+        await criarTarefaAluno360(context, ref, aluno);
+      case Aluno360MenuAcao.reenviarLink:
+        await confirmarReenviarLinkAlunoDetail(context, ref, aluno);
+      case Aluno360MenuAcao.status:
+        await confirmarAlteracaoStatusAlunoDetail(
+          context,
+          ref,
+          aluno,
+          item.novoStatus ?? '',
+        );
+        _markFetched();
+      case Aluno360MenuAcao.excluir:
+        await confirmarExclusaoAlunoDetail(context, ref, aluno);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final listPreview = resolveAlunoDetailListPreview(
@@ -162,8 +188,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
         resolvedAlunoAsync.isLoading && !resolvedAlunoAsync.hasValue;
 
     final proximaAcao360 = operacaoAsync.value?.proximaAcao;
-    final showOperacaoSticky =
-        _tabController.index == 1 && resolvedAlunoAsync.hasValue;
     final showErrorChrome =
         !loadingPrimary &&
         !loadingFallback &&
@@ -251,7 +275,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                       );
                       switch (tabIndex) {
                         case 0:
-                          showAluno360OperacaoHelpSheet(context);
+                          showAluno360ResumoHelpSheet(context);
                         case 1:
                           showAluno360EvolucaoHelpSheet(context);
                         default:
@@ -326,24 +350,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                               isDark: isDark,
                               onBack: () => safePopOrGo(context, '/alunos'),
                               onHelp: openTabHelp,
-                              onDelete:
-                                  () => confirmarExclusaoAlunoDetail(
-                                    context,
-                                    ref,
-                                    aluno,
-                                  ),
-                              statusActions: alunoStatusAcoesDisponiveis(
-                                aluno.status,
-                              ),
-                              onStatusAction: (status) async {
-                                await confirmarAlteracaoStatusAlunoDetail(
-                                  context,
-                                  ref,
-                                  aluno,
-                                  status,
-                                );
-                                _markFetched();
-                              },
+                              onChat: () => abrirChatAluno360(context, ref, aluno),
+                              menuItens: aluno360MenuItens(aluno),
+                              onMenu: (item) => _onMenu(item, aluno),
                             ),
                           ),
                           SliverToBoxAdapter(
@@ -352,13 +361,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                 top: Aluno360Layout.tabContentGap,
                                 left: Aluno360Layout.screenPadding,
                                 right: Aluno360Layout.screenPadding,
-                                bottom:
-                                    showOperacaoSticky
-                                        ? Aluno360Layout.operacaoScrollBottomReserve(
-                                          context,
-                                        )
-                                        : MediaQuery.paddingOf(context).bottom +
-                                            8,
+                                bottom: MediaQuery.paddingOf(context).bottom + 8,
                               ),
                               child: AnimatedSwitcher(
                                 duration:
@@ -381,9 +384,9 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                   );
                                 },
                                 child: switch (tabIndex) {
-                                  0 => Aluno360DetailOperacaoTab(
+                                  0 => Aluno360ResumoTab(
                                     key: const ValueKey(
-                                      'aluno360_tab_operacao',
+                                      'aluno360_tab_resumo',
                                     ),
                                     aluno: aluno,
                                     alunoId: alunoId,
@@ -407,34 +410,12 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                                     recoveryAsync: recoveryAsync,
                                     autonomiaResumoAsync:
                                         resolvedAutonomiaResumoAsync,
-                                    animateEntrance: !_entrancePlayed,
-                                    onEntrancePlayed: () {
-                                      if (!_entrancePlayed) {
-                                        setState(() => _entrancePlayed = true);
-                                      }
-                                    },
-                                    onPassword:
-                                        () => confirmarReenviarLinkAlunoDetail(
-                                          context,
-                                          ref,
-                                          aluno,
-                                        ),
-                                    onLista: () =>
-                                        safePopOrGo(context, '/alunos'),
-                                    onEdit: () async {
-                                      final updated = await context.push<bool>(
-                                        '/alunos/$alunoId/editar',
-                                        extra: aluno,
-                                      );
-                                      if (updated == true) {
-                                        await _reload360();
-                                      }
-                                    },
-                                    onEvolve:
-                                        () => context.push(
-                                          '/alunos/${aluno.id}/ia/progressao',
-                                          extra: aluno.nome,
-                                        ),
+                                    riscoMotivo:
+                                        operacaoAsync
+                                            .value
+                                            ?.riscoResumo
+                                            ?.motivos
+                                            .firstOrNull,
                                   ),
                                   1 => Aluno360DetailEvolucaoTab(
                                     key: const ValueKey(
@@ -480,34 +461,6 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                     );
                   },
                 ),
-            if (showOperacaoSticky)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        chrome.sheetFill.withValues(alpha: 0),
-                        chrome.sheetFill.withValues(alpha: 0.82),
-                        chrome.sheetFill.withValues(alpha: 0.96),
-                      ],
-                      stops: const [0, 0.35, 1],
-                    ),
-                  ),
-                  child: Aluno360OperacaoStickyCtaBar(
-                    aluno: resolvedAlunoAsync.value!,
-                    alunoId: alunoId,
-                    tabIndex: _tabController.index,
-                    proximaAcao360: proximaAcao360,
-                    hasOpenCopilotTask360:
-                        operacaoAsync.value?.hasOpenCopilotTask ?? false,
-                  ),
-                ),
-              ),
           ],
         ),
         ),

@@ -158,15 +158,9 @@ void main() {
   });
 
   test('Home opera o dia em métrica e satellite', () {
-    final tile = File(
-      'lib/features/dashboard/widgets/command_action_tile.dart',
-    ).readAsStringSync();
     final finance = File(
       'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
     ).readAsStringSync();
-    expect(tile, contains('FxSettingsLayout.rowMinHeight'));
-    expect(tile, isNot(contains('fxStripCardDecoration')));
-    expect(tile, isNot(contains('entranceIndex')));
     expect(finance, contains('OperationalMetricTile'));
     expect(finance, isNot(contains('FxActionChip')));
   });

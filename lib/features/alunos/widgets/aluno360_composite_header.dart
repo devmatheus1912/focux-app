@@ -9,9 +9,11 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
+import '../../../l10n/app_localizations.dart';
+import '../utils/aluno360_menu_acoes.dart';
 import '../utils/aluno_status.dart';
 
-/// Tab bar for Aluno 360 (Operação · Evolução · Ferramentas).
+/// Tab bar for Aluno 360 (Resumo · Evolução · Ferramentas).
 class Aluno360DetailTabBar extends StatelessWidget {
   const Aluno360DetailTabBar({
     super.key,
@@ -28,7 +30,7 @@ class Aluno360DetailTabBar extends StatelessWidget {
   final Color line;
   final bool tabBackdropOpaque;
 
-  static const _labels = ['Operação', 'Evolução', 'Ferramentas'];
+  static const _labels = ['Resumo', 'Evolução', 'Ferramentas'];
 
   @override
   Widget build(BuildContext context) {
@@ -157,10 +159,10 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     required this.ink,
     required this.onBack,
     this.freshnessLabel,
-    this.onDelete,
+    this.onChat,
     this.onHelp,
-    this.statusActions = const [],
-    this.onStatusAction,
+    this.menuItens = const [],
+    this.onMenu,
     this.actionsEnabled = true,
   });
 
@@ -169,16 +171,17 @@ class Aluno360HeaderToolbar extends StatelessWidget {
   final Color ink;
   final String? freshnessLabel;
   final VoidCallback onBack;
-  final VoidCallback? onDelete;
+  final VoidCallback? onChat;
   final VoidCallback? onHelp;
 
-  /// Status de destino (ATIVO / INATIVO / BLOQUEADO) oferecidos no menu.
-  final List<String> statusActions;
-  final ValueChanged<String>? onStatusAction;
+  /// Itens do ⋮ (ver [aluno360MenuItens]) e o que fazer ao escolher um.
+  final List<Aluno360MenuItem> menuItens;
+  final ValueChanged<Aluno360MenuItem>? onMenu;
   final bool actionsEnabled;
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final stamp = freshnessLabel?.trim();
     final hasStamp = stamp != null && stamp.isNotEmpty;
 
@@ -230,53 +233,76 @@ class Aluno360HeaderToolbar extends StatelessWidget {
           )
         else
           const Spacer(),
+        if (onChat != null && actionsEnabled)
+          IconButton(
+            tooltip: s.aluno360ChatTooltip,
+            onPressed: onChat,
+            icon: Icon(Icons.chat_bubble_outline_rounded, color: ink),
+          ),
         if (onHelp != null && actionsEnabled)
           FxHelpIconButton(tooltip: 'Ajuda sobre esta aba', onTap: onHelp!),
-        if (onStatusAction != null &&
-            statusActions.isNotEmpty &&
-            actionsEnabled)
-          PopupMenuButton<String>(
-            tooltip: 'Status do aluno',
+        if (onMenu != null && menuItens.isNotEmpty && actionsEnabled)
+          PopupMenuButton<Aluno360MenuItem>(
+            tooltip: s.aluno360MenuTooltip,
             position: PopupMenuPosition.under,
             icon: Icon(Icons.more_vert_rounded, color: ink),
-            onSelected: onStatusAction,
-            itemBuilder:
-                (_) => [
-                  for (final status in statusActions)
-                    PopupMenuItem(
-                      value: status,
-                      child: Row(
-                        children: [
-                          Icon(
-                            alunoStatusIcon(status),
-                            size: 20,
-                            color:
-                                status == AlunoStatus.bloqueado
-                                    ? EagleTokens.bad
-                                    : null,
-                          ),
-                          const SizedBox(width: 10),
-                          Text(alunoStatusAcaoLabel(status)),
-                        ],
-                      ),
-                    ),
-                ],
+            onSelected: onMenu,
+            itemBuilder: (_) => [
+              for (final item in menuItens) ...[
+                if (item.separadorAntes) const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: item,
+                  child: _MenuLinha(item: item),
+                ),
+              ],
+            ],
           ),
-        if (onDelete != null && actionsEnabled)
-          IconButton(
-            tooltip: 'Excluir aluno',
-            onPressed: onDelete,
-            icon: Icon(Icons.delete_outline_rounded, color: EagleTokens.bad),
-          )
-        else if (onDelete != null)
-          IconButton(
-            tooltip: 'Excluir aluno',
-            onPressed: null,
-            icon: Icon(
-              Icons.delete_outline_rounded,
-              color: EagleTokens.bad.withValues(alpha: 0.45),
-            ),
+      ],
+    );
+  }
+}
+
+class _MenuLinha extends StatelessWidget {
+  const _MenuLinha({required this.item});
+
+  final Aluno360MenuItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final (icone, texto) = switch (item.acao) {
+      Aluno360MenuAcao.editar => (Icons.edit_outlined, s.aluno360MenuEditar),
+      Aluno360MenuAcao.criarTarefa => (
+        Icons.playlist_add_check_rounded,
+        s.aluno360MenuCriarTarefa,
+      ),
+      Aluno360MenuAcao.reenviarLink => (
+        Icons.link_rounded,
+        s.alunoReenviarLinkAcao,
+      ),
+      Aluno360MenuAcao.status => (
+        alunoStatusIcon(item.novoStatus ?? ''),
+        alunoStatusAcaoLabel(item.novoStatus ?? ''),
+      ),
+      Aluno360MenuAcao.excluir => (
+        Icons.delete_outline_rounded,
+        s.aluno360MenuExcluir,
+      ),
+    };
+    final cor = item.destrutivo ? EagleTokens.bad : null;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icone, size: 20, color: cor),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            texto,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: cor == null ? null : TextStyle(color: cor),
           ),
+        ),
       ],
     );
   }
@@ -297,10 +323,10 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.isDark,
     required this.onBack,
     this.freshnessLabel,
-    this.onDelete,
+    this.onChat,
     this.onHelp,
-    this.statusActions = const [],
-    this.onStatusAction,
+    this.menuItens = const [],
+    this.onMenu,
     this.actionsEnabled = true,
   });
 
@@ -316,10 +342,10 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Color ink;
   final bool isDark;
   final VoidCallback onBack;
-  final VoidCallback? onDelete;
+  final VoidCallback? onChat;
   final VoidCallback? onHelp;
-  final List<String> statusActions;
-  final ValueChanged<String>? onStatusAction;
+  final List<Aluno360MenuItem> menuItens;
+  final ValueChanged<Aluno360MenuItem>? onMenu;
   final bool actionsEnabled;
 
   @override
@@ -377,10 +403,10 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     freshnessLabel: freshnessLabel,
                     ink: ink,
                     onBack: onBack,
-                    onDelete: onDelete,
+                    onChat: onChat,
                     onHelp: onHelp,
-                    statusActions: statusActions,
-                    onStatusAction: onStatusAction,
+                    menuItens: menuItens,
+                    onMenu: onMenu,
                     actionsEnabled: actionsEnabled,
                   ),
                 ),
@@ -444,6 +470,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         isDark != oldDelegate.isDark ||
         actionsEnabled != oldDelegate.actionsEnabled ||
         onHelp != oldDelegate.onHelp ||
-        !listEquals(statusActions, oldDelegate.statusActions);
+        onChat != oldDelegate.onChat ||
+        !listEquals(menuItens, oldDelegate.menuItens);
   }
 }

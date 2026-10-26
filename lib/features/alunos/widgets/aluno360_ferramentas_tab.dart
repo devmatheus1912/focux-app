@@ -1,66 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../dashboard/widgets/dashboard_section_header.dart';
+import '../../../core/theme/fx_settings_layout.dart';
+import '../../../core/theme/shell_chrome.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../l10n/app_localizations.dart';
 import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
-import '../utils/aluno360_ferramentas_logic.dart';
-import 'aluno360_help_sheets.dart';
-import 'aluno360_operacao_tab.dart';
+import '../utils/aluno360_ferramentas_grupos.dart';
+import 'aluno360_entrance.dart';
 
-/// Ferramentas tab: medidas + módulos de ação no first paint.
+/// Aba Ferramentas: os módulos em grupos e os dados do cadastro. Quando falta
+/// algum dado, "Dados do aluno" abre a aba; completo, vai para o fim.
 class Aluno360FerramentasTab extends StatelessWidget {
   const Aluno360FerramentasTab({
     super.key,
     required this.aluno,
     required this.alunoId,
-    required this.primary,
-    required this.modulesSection,
-    this.bf,
-    this.massaMagra,
-    this.measurementsLoading = false,
+    required this.gruposSection,
     this.animateEntrance = false,
     this.onEntrancePlayed,
   });
 
   final Aluno aluno;
   final int alunoId;
-  final Color primary;
-  final Widget modulesSection;
-  final String? bf;
-  final String? massaMagra;
-  final bool measurementsLoading;
+  final Widget gruposSection;
   final bool animateEntrance;
   final VoidCallback? onEntrancePlayed;
-
-  void _openMeasurementField(
-    BuildContext context,
-    Aluno360MeasurementField field,
-  ) {
-    final editarRoute = '/alunos/$alunoId/editar';
-    final evolucaoRoute = '/alunos/$alunoId/evolucao';
-    switch (field) {
-      case Aluno360MeasurementField.idade:
-      case Aluno360MeasurementField.altura:
-        context.push(editarRoute, extra: aluno);
-      case Aluno360MeasurementField.gordura:
-      case Aluno360MeasurementField.massaMagra:
-        // Composição corporal registra na Evolução (nova medida).
-        context.push(evolucaoRoute, extra: aluno.nome);
-    }
-  }
-
-  IconData _measurementIcon(Aluno360MeasurementField field) {
-    return switch (field) {
-      Aluno360MeasurementField.idade => Icons.cake_outlined,
-      Aluno360MeasurementField.altura => Icons.height_outlined,
-      Aluno360MeasurementField.gordura => Icons.pie_chart_outline_outlined,
-      Aluno360MeasurementField.massaMagra => Icons.monitor_weight_outlined,
-    };
-  }
 
   Widget _section(int step, Widget child) {
     return Aluno360OperacaoEntrance(
@@ -73,94 +40,89 @@ class Aluno360FerramentasTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = Aluno360FerramentasLogic.measurementRows(
-      aluno: aluno,
-      bf: bf,
-      massaMagra: massaMagra,
-    );
-    final allComplete = Aluno360FerramentasLogic.measurementsAllComplete(
-      aluno: aluno,
-      bf: bf,
-      massaMagra: massaMagra,
-    );
-    final completeSummary = Aluno360FerramentasLogic.measurementsCompleteSummary(
-      aluno: aluno,
-      bf: bf,
-      massaMagra: massaMagra,
-    );
-
-    final measurements = _section(
+    final dados = _section(
       0,
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          DashboardSectionHeader(
-            title: 'Medidas',
-            actionLabel: 'Ajuda',
-            onAction: () => showAluno360FerramentasHelpSheet(context),
-          ),
-          Text(
-            Aluno360FerramentasLogic.medidasCaption,
-            style: Aluno360Layout.metaStyle(context),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          if (measurementsLoading)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: FxLoading.sectionShimmer(
-                context,
-                height: 52,
-                showHeader: false,
-              ),
-            )
-          else if (allComplete)
-            Semantics(
-              label:
-                  'Medidas em dia. $completeSummary. Toque para registrar ou ver evolução.',
-              button: true,
-              child: FxSatelliteListTile(
-                title: 'Medidas em dia',
-                titleCase: false,
-                subtitle: Text(completeSummary),
-                accent: primary,
-                onTap:
-                    () => context.push(
-                      '/alunos/$alunoId/evolucao',
-                      extra: aluno.nome,
-                    ),
-              ),
-            )
-          else
-            ...rows.map(
-              (row) => FxSatelliteListTile(
-                title: row.label,
-                titleCase: false,
-                subtitle: Text(row.subtitle),
-                trailing: Text(row.value),
-                leading: Icon(_measurementIcon(row.field), color: primary),
-                accent: row.highlight ? primary : null,
-                onTap:
-                    () => _openMeasurementField(context, row.field),
-              ),
-            ),
-        ],
-      ),
+      Aluno360DadosDoAlunoGrupo(aluno: aluno, alunoId: alunoId),
     );
-    final modules = _section(1, modulesSection);
+    final grupos = _section(1, gruposSection);
+    final dadosPrimeiro = aluno360DadosIncompletos(aluno);
 
     return Semantics(
       container: true,
-      label: 'Ferramentas do aluno: medidas corporais e módulos de ação',
+      label: 'Ferramentas do aluno: dados do cadastro e módulos de ação',
       child: Aluno360Layout.operacaoContentWidthLimiter(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            measurements,
-            const SizedBox(height: TokensStrip.s4),
-            modules,
+            dadosPrimeiro ? dados : grupos,
+            const SizedBox(height: FxSettingsLayout.groupGap),
+            dadosPrimeiro ? grupos : dados,
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Dados do aluno": contato, objetivo, nascimento e altura, mais o verbo
+/// "Editar cadastro". Cada linha abre o cadastro.
+class Aluno360DadosDoAlunoGrupo extends StatelessWidget {
+  const Aluno360DadosDoAlunoGrupo({
+    super.key,
+    required this.aluno,
+    required this.alunoId,
+  });
+
+  final Aluno aluno;
+  final int alunoId;
+
+  static IconData _icone(Aluno360DadoCampo c) => switch (c) {
+    Aluno360DadoCampo.contato => Icons.phone_outlined,
+    Aluno360DadoCampo.objetivo => Icons.flag_outlined,
+    Aluno360DadoCampo.nascimento => Icons.cake_outlined,
+    Aluno360DadoCampo.altura => Icons.height_outlined,
+  };
+
+  static String _rotulo(S s, Aluno360DadoCampo c) => switch (c) {
+    Aluno360DadoCampo.contato => s.aluno360DadoContato,
+    Aluno360DadoCampo.objetivo => s.aluno360DadoObjetivo,
+    Aluno360DadoCampo.nascimento => s.aluno360DadoNascimento,
+    Aluno360DadoCampo.altura => s.aluno360DadoAltura,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    void editar() => context.push('/alunos/$alunoId/editar', extra: aluno);
+    final linhas = aluno360DadosDoAluno(aluno);
+
+    return FxSettingsGroup(
+      key: const ValueKey('aluno360_dados_do_aluno'),
+      header: s.aluno360DadosGrupo,
+      caption: s.aluno360DadosLegenda,
+      children: [
+        for (final l in linhas)
+          FxSettingsTile(
+            icon: _icone(l.campo),
+            label: _rotulo(s, l.campo),
+            value: l.valor ?? s.aluno360DadoInformar,
+            highlight: !l.completo,
+            mute: chrome.mute,
+            line: chrome.line,
+            onTap: editar,
+          ),
+        FxSettingsTile(
+          icon: Icons.edit_outlined,
+          label: s.aluno360DadosEditar,
+          subtitle: s.aluno360DadosEditarDetalhe,
+          value: '',
+          mute: chrome.mute,
+          line: chrome.line,
+          showDivider: false,
+          onTap: editar,
+        ),
+      ],
     );
   }
 }
