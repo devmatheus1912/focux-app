@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../support/screen_source_bundle.dart';
 
 void main() {
-  test('churn dashboard cumpre contrato Tier S+', () {
+  test('alunos em risco cumpre contrato Tier S+', () {
     final screen = [
       readScreenSourceBundle(
         'lib/features/retencao/screens/churn_dashboard_screen.dart',
@@ -21,39 +21,35 @@ void main() {
     expect(screen, contains('FxContentWidthLimiter'));
     expect(screen, contains("safePopOrGo(context, '/dashboard/personal')"));
     expect(screen, contains('FxHelpIconButton'));
-    expect(screen, contains('FxStripCard'));
-    expect(screen, contains('emphasize: true'));
+    expect(screen, contains('FxMetricStrip'));
+    expect(screen, contains('FxActionRow'));
+    expect(screen, contains('FxChoiceStrip'));
+    expect(screen, contains('mostrarFiltros'));
+    expect(screen, contains('filaSemAluno'));
+    expect(screen, contains('listarBase'));
     expect(screen, contains('getHome'));
-    expect(screen, contains('showRetencaoCatalogSheet'));
     expect(screen, contains('showRetencaoAcoesSheet'));
-    expect(screen, contains('Escrever'));
-    expect(screen, contains('Cobrar'));
-    expect(screen, contains('Mais ações'));
-    expect(screen, contains('Mais hubs'));
-    expect(screen, contains('retencaoFocusActions'));
-    expect(screen, contains('showFxInsetPickerSheet'));
-    expect(screen, contains('FxToggleChip'));
     expect(screen, contains('retencaoEmptyTitle'));
-    expect(screen, isNot(contains('Scores em breve')));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, contains('keyboardDismissBehavior'));
-    expect(screen, isNot(contains('/alunos?filtro=risco')));
-    expect(screen, isNot(contains('class _ChurnScoreCard')));
-    expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, contains('retencaoHubViewed'));
     expect(screen, contains('alertaRiscoOpened'));
-    expect(screen, contains('Como calculamos'));
-    expect(screen, contains('isDark'));
     expect(screen, contains('PopScope'));
     expect(screen, contains('FxKeyboardPopScope'));
     expect(screen, contains("'/winback'"));
     expect(screen, contains("'/dunning'"));
-    expect(screen, contains('Histórico win-back'));
-    expect(screen, contains('Cobrança auto'));
-    expect(screen, contains('OperationalMetricTile'));
-    expect(screen, contains('FxSettingsLayout.pageInset'));
-    expect(screen, contains('Próximo contato'));
-    expect(screen, contains('dias únicos'));
+    expect(screen, contains('retencaoEntradaHistorico'));
+    expect(screen, contains('retencaoEntradaCobranca'));
+    // O que saiu desta tela
+    expect(screen, isNot(contains('showRetencaoCatalogSheet')));
+    expect(screen, isNot(contains('Base toda')));
+    expect(screen, isNot(contains('Ver todos')));
+    expect(screen, isNot(contains('Hubs relacionados')));
+    expect(screen, isNot(contains('Satélites')));
+    expect(screen, isNot(contains("icon: 'route'")));
+    expect(screen, isNot(contains('Saúde da base')));
+    expect(screen, isNot(contains('Risco de cancelar')));
+    expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 }

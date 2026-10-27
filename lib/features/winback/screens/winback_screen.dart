@@ -23,6 +23,7 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -194,7 +195,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return fxScreenA11yScope(
-      label: 'Histórico win-back',
+      label: 'Histórico de retomada',
       child: PopScope(
         canPop: !keyboardOpen,
         onPopInvokedWithResult: (didPop, _) {
@@ -205,7 +206,7 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
         useMesh: true,
         constrainWidth: false,
         appBar: FxShellAppBar(
-          title: 'Histórico win-back',
+          title: 'Histórico de retomada',
           subtitle: winbackHubSubtitle(freshness),
           onBack: () {
             FxKeyboardDismissScope.dismiss();
@@ -213,13 +214,13 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
           },
           actions: [
             FxHelpIconButton(
-              tooltip: 'Como funciona o win-back',
+              tooltip: 'Como funciona a retomada',
               onTap: () {
                 AnalyticsService.instance.track(ProductEvents.winbackHubHelpOpened);
                 showFxHelpSheet(
                 context,
-                title: 'Histórico win-back',
-                subtitle: 'Log dos pushes automáticos — risco ao vivo fica em Saúde da base.',
+                title: 'Histórico de retomada',
+                subtitle: 'Avisos automáticos enviados a quem parou de treinar.',
                 tips: const [
                   FxHelpTip('Como calculamos', winbackComoCalculamos),
                   FxHelpTip(
@@ -227,8 +228,8 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                     'Toque no envio para escrever, cobrar ou abrir o 360. Trial do personal não aparece aqui.',
                   ),
                   FxHelpTip(
-                    'Saúde da base',
-                    'Quem está em risco agora e o que fazer — use o botão Saúde da base.',
+                    'Alunos em risco',
+                    'Quem está em risco agora e o que fazer fica em Alunos em risco.',
                   ),
                 ],
               );
@@ -286,11 +287,15 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                       const SizedBox(height: 48),
                       FxEmptyState(
                         icon: 'bell',
-                        title: winbackSearchEmptyTitle(_query),
-                        subtitle: winbackSearchEmptySubtitle(_query),
+                        title: _query.trim().isEmpty
+                            ? S.of(context).winbackVazioTitulo
+                            : winbackSearchEmptyTitle(_query),
+                        subtitle: _query.trim().isEmpty
+                            ? S.of(context).winbackVazioTexto
+                            : winbackSearchEmptySubtitle(_query),
                         action: _query.trim().isEmpty
                             ? FxEmptyAction(
-                                label: 'Saúde da base',
+                                label: S.of(context).winbackVerEmRisco,
                                 onTap: _abrirRetencao,
                               )
                             : FxEmptyAction(
@@ -329,21 +334,6 @@ class _WinbackScreenState extends ConsumerState<WinbackScreen> {
                                   onAluno: () => _abrirAluno(first),
                                   onChat: () => _abrirChat(first),
                                   onCobrar: () => _abrirCobranca(first),
-                                ),
-                                const SizedBox(height: TokensStrip.s3),
-                                Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    FxActionChip(
-                                      label: 'Saúde da base',
-                                      accent: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
-                                      isDark: isDark,
-                                      onPressed: _abrirRetencao,
-                                    ),
-                                  ],
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
                                 const DashboardSectionHeader(title: 'Envios'),

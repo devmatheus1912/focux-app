@@ -46,8 +46,7 @@ void main() {
       'lib/features/dashboard/widgets/hoje_base_secao.dart',
     ];
     const financeiroTabs = [
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
-      'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     ];
 
     for (final path in hubScreens) {
@@ -99,14 +98,12 @@ void main() {
 
   test('financeiro hub exposes bar chart and resumo metric tiles', () {
     final dashboard = readScreenSourceBundle(
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     );
     expect(dashboard, contains('_EvolucaoChart'));
 
-    final resumo =
-        File('lib/features/financeiro/screens/financeiro_resumo_screen.dart')
-            .readAsStringSync();
-    expect(resumo, contains('OperationalMetricTile'));
+    expect(dashboard, contains('OperationalMetricTile'));
+    expect(dashboard, contains('FxStripCard'));
   });
 
   test('ia hub loads insights with async when', () {

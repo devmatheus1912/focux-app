@@ -229,16 +229,33 @@ class ResumoMensal {
   final FxMoney ticketMedio;
   final FxMoney acumuladoAnual;
 
+  /// Mensalidades abertas com referência no mês (pendentes + atrasadas).
+  final FxMoney totalEmAberto;
+
+  /// Tudo que está atrasado hoje, de qualquer mês.
+  final FxMoney totalAtrasado;
+  final int quantidadeAtrasadas;
+
+  /// Parte do recebido no mês que veio de mensalidades de meses anteriores.
+  final FxMoney recebidoDeMesesAnteriores;
+
   ResumoMensal({
     required Object? totalRecebido,
     required Object? totalPrevisto,
     required this.inadimplentes,
     required Object? ticketMedio,
     required Object? acumuladoAnual,
+    Object? totalEmAberto = 0,
+    Object? totalAtrasado = 0,
+    this.quantidadeAtrasadas = 0,
+    Object? recebidoDeMesesAnteriores = 0,
   }) : totalRecebido = FxMoney.parse(totalRecebido),
        totalPrevisto = FxMoney.parse(totalPrevisto),
        ticketMedio = FxMoney.parse(ticketMedio),
-       acumuladoAnual = FxMoney.parse(acumuladoAnual);
+       acumuladoAnual = FxMoney.parse(acumuladoAnual),
+       totalEmAberto = FxMoney.parse(totalEmAberto),
+       totalAtrasado = FxMoney.parse(totalAtrasado),
+       recebidoDeMesesAnteriores = FxMoney.parse(recebidoDeMesesAnteriores);
 
   factory ResumoMensal.fromJson(Map<String, dynamic> j) => ResumoMensal(
     totalRecebido: j['totalRecebido'] ?? 0,
@@ -248,6 +265,10 @@ class ResumoMensal {
             .toInt(),
     ticketMedio: j['ticketMedio'] ?? 0,
     acumuladoAnual: j['acumuladoAnual'] ?? 0,
+    totalEmAberto: j['totalEmAberto'] ?? 0,
+    totalAtrasado: j['totalAtrasado'] ?? 0,
+    quantidadeAtrasadas: (j['quantidadeAtrasadas'] as num? ?? 0).toInt(),
+    recebidoDeMesesAnteriores: j['recebidoDeMesesAnteriores'] ?? 0,
   );
 }
 
@@ -367,14 +388,17 @@ class FinanceiroRepository {
   Future<Mensalidade> criar(
     int alunoId,
     FxMoney valor,
-    String mesReferencia,
-  ) async {
+    String mesReferencia, {
+    String? vencimento,
+  }) async {
     final r = await _dio.post(
       '/api/financeiro/mensalidades',
       data: {
         'alunoId': alunoId,
         'valor': valor.wire,
         'mesReferencia': mesReferencia,
+        if (vencimento != null && vencimento.isNotEmpty)
+          'vencimento': vencimento,
       },
       // Aluno + mês já identificam a mensalidade: duas submissões são a
       // mesma intenção, não duas cobranças.

@@ -61,7 +61,7 @@ class _RetencaoAcoesSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s4),
           FxHomeSheetHeader(
             title: score.alunoNome,
-            subtitle: retencaoPorque(score),
+            subtitle: retencaoSaudeCurta(score),
             leading: Icon(Icons.favorite_outline, size: 18, color: primary),
           ),
           const SizedBox(height: TokensStrip.s4),

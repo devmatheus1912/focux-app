@@ -52,7 +52,8 @@ void main() {
     expect(tab, contains('RefreshIndicator'));
     expect(tab, contains('onLongPress'));
     expect(tab, contains('_onPullRefresh'));
-    expect(tab, contains('atualizarAtrasos'));
+    expect(tab, isNot(contains('atualizarAtrasos')));
+    expect(tab, contains('financeiroFiltroInicial'));
     expect(tab, contains('alunosProvider.future'));
     expect(tab, contains('initialAlunoId'));
     expect(tab, contains('FxErrorState'));
@@ -64,24 +65,14 @@ void main() {
     expect(tab, isNot(contains('Clipboard.setData')));
     expect(tab, isNot(contains('ref.watch(alunosProvider).when(')));
 
-    final dashboard = readScreenSourceBundle(
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+    final resultados = readScreenSourceBundle(
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     );
-    final resumo = readScreenSourceBundle(
-      'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
-    );
-    expect(dashboard, contains('FinanceiroResumoScreen'));
-    expect(dashboard, contains('financeiroPanoramaExtras'));
-    expect(dashboard, contains("'Mais no panorama'"));
-    expect(dashboard, contains('SmartPricingCard'));
-    expect(resumo, contains('emphasize: true'));
-    expect(
-      resumo,
-      anyOf(contains('Ver mensalidades'), contains('Abrir atrasadas')),
-    );
-    expect(resumo, contains('FxStripCard'));
-    expect(resumo, isNot(contains('PieChart')));
-    expect(resumo, isNot(contains('_DonutChartCard')));
+    expect(resultados, contains('SmartPricingCard'));
+    expect(resultados, contains('FxStripCard'));
+    expect(resultados, isNot(contains('FinanceiroResumoScreen')));
+    expect(resultados, isNot(contains('PieChart')));
+    expect(resultados, isNot(contains('_DonutChartCard')));
     expect(tab, contains('FxKeyboardPopScope'));
     expect(tab, contains('FxKeyboardDismissScope'));
   });
@@ -109,11 +100,10 @@ void main() {
     );
     expect(detail, contains('FxLiquidPrimaryButton'));
     expect(detail, contains('Marcar como paga'));
-    expect(detail, contains('FxHubHeader'));
-    expect(detail, contains('onTitleTap'));
+    expect(detail, contains('_CartaoMensalidade'));
+    expect(detail, contains('financeiroSelo'));
     expect(detail, contains('FxHelpIconButton'));
     expect(detail, contains('safePopOrGo'));
-    expect(detail, contains('OperationalMetricTile'));
     expect(detail, contains('confirmarPagarMensalidade'));
     expect(detail, contains('mostrarPixMensalidade'));
     expect(detail, contains('cobrarMensalidadeViaChat'));
@@ -122,15 +112,11 @@ void main() {
     expect(detail, contains('viewInsetsOf'));
     expect(detail, contains('FxContentWidthLimiter'));
     expect(detail, contains('RefreshIndicator'));
-    expect(detail, contains('financeiroMensalidadeHubSubtitle'));
     expect(detail, contains('Abrir aluno'));
     expect(detail, contains("'/financeiro'"));
-    expect(detail, contains('financeiroMensalidadeDetailReferenciaValue'));
-    expect(detail, contains("label: 'Vencimento'"));
     expect(detail, isNot(contains('freshness: freshnessLabel')));
     expect(detail, contains('financeiroMensalidadeVencimentoLabel'));
     expect(detail, contains('mensalidadeDetailMaisActions'));
-    expect(detail, contains('mensalidadeDetailMaisChipLabel'));
     expect(detail, contains('listarContatos'));
     expect(detail, contains('loaded.contatos'));
     expect(detail, isNot(contains('AlunoSegmentedChoice')));
@@ -139,7 +125,6 @@ void main() {
     expect(detail, contains('PopScope'));
     expect(detail, contains('FxEmptyState'));
     expect(detail, isNot(contains("context.pop('pay')")));
-    expect(detail, isNot(contains('FxSettingsGroup')));
     final actions = readScreenSourceBundle(
       'lib/features/financeiro/utils/mensalidade_surface_actions.dart',
     );

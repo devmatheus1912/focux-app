@@ -52,7 +52,7 @@ void main() {
 
   test('hub screens use centralized feedback patterns', () {
     const financeiroTabs = [
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
       'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
     ];
 

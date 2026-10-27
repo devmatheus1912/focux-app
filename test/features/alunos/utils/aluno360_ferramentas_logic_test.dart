@@ -27,7 +27,7 @@ void main() {
         'lib/features/alunos/widgets/aluno360_ferramentas_grupos_view.dart',
       ).readAsStringSync();
       final linhas = RegExp(
-        r'Aluno360FerramentasModule\.\w+ => linha\(',
+        r'Aluno360FerramentasModule\.\w+ => (linha|_linhaRecorrencia)\(',
       ).allMatches(grade).length;
       expect(linhas, Aluno360FerramentasModule.values.length);
       expect(grade, contains('Aluno360FerramentasLogic.moduleIcon(modulo)'));

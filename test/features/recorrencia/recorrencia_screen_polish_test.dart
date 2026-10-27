@@ -22,14 +22,30 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('alunosHomeProvider'));
+    expect(screen, contains('showRecorrenciaNovaFolha'));
+    expect(screen, contains('FinanceiroChavePixLinha'));
+    expect(screen, contains('FinanceiroCobrancaAutoLinha'));
+    expect(screen, contains('recorrenciaMostrarFiltros'));
+    expect(screen, contains('recorrenciaFaltaPixTitulo'));
+    expect(screen, isNot(contains('assinatura')));
+    expect(
+      screen.replaceAll('RecorrenciaAssinatura', ''),
+      isNot(contains('Assinatura')),
+    );
+    expect(screen, isNot(contains("'199'")));
     expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('listarPagina'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, contains('ListView.builder'));
-    expect(screen, contains('pixChaveAusenteCodigo'));
+    final folha = readScreenSourceBundle(
+      'lib/features/recorrencia/widgets/recorrencia_nova_folha.dart',
+    );
+    expect(folha, contains('pixChaveAusenteCodigo'));
+    expect(folha, contains('rotuloVisivel: true'));
+    expect(folha, isNot(contains("'199'")));
+    expect(folha, contains('recorrenciaResumo'));
     expect(screen, contains('acaoPersonal'));
     expect(screen, isNot(contains('Mercado Pago')));
     expect(screen, isNot(contains('TabBar')));

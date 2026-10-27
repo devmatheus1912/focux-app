@@ -20,8 +20,8 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../data/dunning_repository.dart';
@@ -120,8 +120,9 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     }
   }
 
-  void _abrirRetencao() {
-    context.push('/retencao');
+  void _abrirAtrasadas() {
+    AnalyticsService.instance.track(ProductEvents.financeiroViewed);
+    context.push('/financeiro');
   }
 
   void _abrirFinanceiro() {
@@ -200,16 +201,46 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
     }
   }
 
+  Widget _linhaDeFalha(DunningFalha falha) => FxSatelliteListTile(
+    title: dunningFalhaTitulo(falha.alunoNome, falha.contexto),
+    subtitle: Text(
+      dunningFalhaSubtitle(
+        contexto: falha.contexto,
+        alunoNome: falha.alunoNome,
+        motivo: falha.motivo,
+        tentativa: falha.tentativa,
+      ),
+    ),
+    trailing: Text(
+      _marcandoId == falha.id ? '…' : dunningMoneyLabel(falha.valor),
+      style: FocuxHubTypography.bodyMuted(
+        color: EagleTokens.bad,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+    accent: EagleTokens.bad,
+    onTap: _marcandoId == falha.id ? null : () => _abrirAcoes(falha),
+  );
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final snap = _snapshot;
-    final firstFalha = _falhas.isEmpty ? null : _falhas.first;
-    final preview = dunningFalhasPreview(_falhas);
+    final s = S.of(context);
+    final grupos = dunningSeparar<DunningFalha>(
+      _falhas,
+      contexto: (f) => f.contexto,
+      alunoId: (f) => f.alunoId,
+    );
+    // O destaque é da mensalidade de um aluno; a assinatura só se não houver outra.
+    final firstFalha = grupos.alunos.isNotEmpty
+        ? grupos.alunos.first
+        : (grupos.assinatura.isEmpty ? null : grupos.assinatura.first);
+    final preview = dunningFalhasPreview(grupos.alunos);
 
     return fxScreenA11yScope(
-      label: 'Cobrança auto',
+      label: 'Cobrança automática',
       child: FeatureGate(
         featureName: 'Cobrança automática',
         requiredPlan: SubscriptionPlan.PRO,
@@ -218,7 +249,7 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
           useMesh: true,
           constrainWidth: false,
           appBar: FxShellAppBar(
-            title: 'Cobrança auto',
+            title: S.of(context).dunningTitulo,
             subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
             onBack: () => safePopOrGo(context, '/financeiro'),
             actions: [
@@ -230,9 +261,8 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                   );
                   showFxHelpSheet(
                     context,
-                    title: 'Cobrança auto',
-                    subtitle:
-                        'Falhas de pagamento da base. A taxa é a mesma da Receita recorrente.',
+                    title: S.of(context).dunningTitulo,
+                    subtitle: S.of(context).dunningAjudaSubtitulo,
                     tips: const [
                       FxHelpTip('Como calculamos', dunningComoCalculamos),
                       FxHelpTip(
@@ -273,11 +303,11 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                         const SizedBox(height: 48),
                         FxEmptyState(
                           icon: 'circle-check',
-                          title: 'Tudo em dia',
-                          subtitle: 'Nenhuma falha de pagamento em aberto.',
+                          title: s.dunningVazioTitulo,
+                          subtitle: s.dunningVazioTexto,
                           action: FxEmptyAction(
-                            label: 'Saúde da base',
-                            onTap: _abrirRetencao,
+                            label: s.dunningVazioBotao,
+                            onTap: _abrirAtrasadas,
                           ),
                         ),
                       ],
@@ -310,19 +340,6 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                                     !dunningHasAluno(firstFalha.alunoId)
                                 ? _abrirAssinatura
                                 : null,
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          Wrap(
-                            spacing: TokensStrip.s2,
-                            runSpacing: TokensStrip.s2,
-                            children: [
-                              FxActionChip(
-                                label: 'Saúde da base',
-                                accent: Theme.of(context).colorScheme.primary,
-                                isDark: isDark,
-                                onPressed: _abrirRetencao,
-                              ),
-                            ],
                           ),
                           const SizedBox(height: TokensStrip.s4),
                           OperationalMetricTile(
@@ -360,54 +377,41 @@ class _DunningOpsScreenState extends ConsumerState<DunningOpsScreen> {
                             isDark: isDark,
                           ),
                           const SizedBox(height: TokensStrip.s4),
-                          const DashboardSectionHeader(title: 'Em aberto'),
-                          const SizedBox(height: TokensStrip.s2),
-                          Text(
-                            'Toque para escrever, cobrar ou marcar recuperada.',
-                            style: FocuxHubTypography.bodyMuted(
-                              color: fxScreenMute(context),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: TokensStrip.s3),
-                          if (_falhas.isEmpty)
-                            const FxSatelliteListTile(
-                              title: 'Nenhuma falha na lista',
-                            )
-                          else ...[
-                            for (final falha in preview)
-                              FxSatelliteListTile(
-                                title: dunningFalhaTitulo(
-                                  falha.alunoNome,
-                                  falha.contexto,
-                                ),
-                                subtitle: Text(
-                                  dunningFalhaSubtitle(
-                                    contexto: falha.contexto,
-                                    alunoNome: falha.alunoNome,
-                                    motivo: falha.motivo,
-                                    tentativa: falha.tentativa,
-                                  ),
-                                ),
-                                trailing: Text(
-                                  _marcandoId == falha.id
-                                      ? '…'
-                                      : dunningMoneyLabel(falha.valor),
-                                  style: FocuxHubTypography.bodyMuted(
-                                    color: EagleTokens.bad,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                accent: EagleTokens.bad,
-                                onTap: _marcandoId == falha.id
-                                    ? null
-                                    : () => _abrirAcoes(falha),
+                          if (grupos.alunos.isNotEmpty) ...[
+                            DashboardSectionHeader(title: s.dunningBlocoAlunos),
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              'Toque para escrever, cobrar ou marcar recuperada.',
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
+                                fontWeight: FontWeight.w600,
                               ),
-                            if (_falhas.length > 3 || _hasMore)
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            for (final falha in preview)
+                              _linhaDeFalha(falha),
+                            if (grupos.alunos.length > 3 || _hasMore)
                               FxSatelliteListTile(
                                 title: 'Ver mais',
                                 onTap: _abrirCatalogo,
                               ),
+                          ],
+                          if (grupos.assinatura.isNotEmpty) ...[
+                            const SizedBox(height: TokensStrip.s4),
+                            DashboardSectionHeader(
+                              title: s.dunningBlocoAssinatura,
+                            ),
+                            const SizedBox(height: TokensStrip.s2),
+                            Text(
+                              s.dunningBlocoAssinaturaNota,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: fxScreenMute(context),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: TokensStrip.s3),
+                            for (final falha in grupos.assinatura)
+                              _linhaDeFalha(falha),
                           ],
                         ],
                       ),

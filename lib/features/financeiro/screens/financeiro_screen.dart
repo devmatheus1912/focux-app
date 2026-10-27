@@ -12,31 +12,45 @@ import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
+import '../../recorrencia/screens/recorrencia_screen.dart';
+import '../data/financeiro_repository.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
 import '../financeiro_hub_scope.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../widgets/financeiro_linhas_estado.dart';
+import '../widgets/financeiro_numeros_mes.dart';
 import '../widgets/financeiro_help_sheet.dart';
-import 'financeiro_dashboard_screen.dart';
+import 'financeiro_resultados_screen.dart';
 import 'financeiro_mensalidades_tab.dart';
 
+part 'financeiro_screen_widgets.part.dart';
+
 class FinanceiroScreen extends ConsumerStatefulWidget {
-  const FinanceiroScreen({super.key, this.initialAlunoId});
+  const FinanceiroScreen({
+    super.key,
+    this.initialAlunoId,
+    this.initialSegmento = FinanceiroSegmento.mensalidades,
+  });
 
   final int? initialAlunoId;
+  final FinanceiroSegmento initialSegmento;
 
   @override
   ConsumerState<FinanceiroScreen> createState() => _FinanceiroScreenState();
 }
 
 class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
-  /// P0 do domínio = lista (A30). Panorama (mês + KPIs) atrás de Mais.
-  FinanceiroHubView _view = FinanceiroHubView.mensalidades;
+  late FinanceiroSegmento _segmento = widget.initialSegmento;
+
+  /// Segmentos já abertos: só carregam na primeira visita e depois ficam vivos.
+  late final Set<FinanceiroSegmento> _visitados = {widget.initialSegmento};
   final DateTime _openedAt = DateTime.now();
   bool _viewTracked = false;
   bool _ttvTracked = false;
@@ -44,31 +58,16 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
   /// Incrementa para pedir abertura do form na aba Mensalidades.
   int _novaMensalidadeToken = 0;
 
-  Future<void> _abrirMaisVistas() async {
-    final picked = await showFxInsetPickerSheet<FinanceiroHubView>(
-      context,
-      title: 'Mais no financeiro',
-      selected: _view,
-      items: [
-        FxInsetPickerSheetItem(
-          value: FinanceiroHubView.mensalidades,
-          label: financeiroHubViewLabel(FinanceiroHubView.mensalidades),
-        ),
-        for (final v in financeiroHubSecondaryViews)
-          FxInsetPickerSheetItem(
-            value: v,
-            label: financeiroHubViewLabel(v),
-          ),
-      ],
-    );
-    if (!mounted || picked == null || picked == _view) return;
-    if (picked == FinanceiroHubView.mensalidades) {
-      AnalyticsService.instance.track(
-        ProductEvents.financeiroMensalidadesOpened,
-        props: {'source': 'picker'},
-      );
-    }
-    setState(() => _view = picked);
+  /// Filtro pedido pelos números do mês (valem quando o token muda).
+  MensalidadeFiltro? _filtroPedido;
+  int _filtroToken = 0;
+
+  void _trocarSegmento(FinanceiroSegmento segmento) {
+    if (segmento == _segmento) return;
+    setState(() {
+      _segmento = segmento;
+      _visitados.add(segmento);
+    });
   }
 
   void _irParaMensalidades({String source = 'hub'}) {
@@ -76,7 +75,19 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       ProductEvents.financeiroMensalidadesOpened,
       props: {'source': source},
     );
-    setState(() => _view = FinanceiroHubView.mensalidades);
+    _trocarSegmento(FinanceiroSegmento.mensalidades);
+  }
+
+  void _abrirFiltro(MensalidadeFiltro filtro) {
+    AnalyticsService.instance.track(
+      ProductEvents.financeiroMensalidadesOpened,
+      props: {'source': 'numeros_mes'},
+    );
+    setState(() {
+      _segmento = FinanceiroSegmento.mensalidades;
+      _filtroPedido = filtro;
+      _filtroToken++;
+    });
   }
 
   void _abrirNovaMensalidade({String source = 'hub'}) {
@@ -93,7 +104,7 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
       }),
     );
     setState(() {
-      _view = FinanceiroHubView.mensalidades;
+      _segmento = FinanceiroSegmento.mensalidades;
       _novaMensalidadeToken++;
     });
   }
@@ -160,17 +171,10 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
         appBar: FxShellAppBar(
           title: 'Financeiro',
           subtitle: financeiroHubSubtitle(
-            view: _view,
             freshness: FxHubFreshness.fromFetchedAt(fetchedAt),
           ),
           onBack: () => safePopOrGo(context, '/dashboard/personal'),
           actions: [
-            ShellHeaderIconButton(
-              icon: 'route',
-              tooltip: 'Mais no financeiro',
-              onTap: _abrirMaisVistas,
-            ),
-            SizedBox(width: FxHelpChrome.gap),
             FxHelpIconButton(
               tooltip: 'Como usar o financeiro',
               onTap: () {
@@ -186,53 +190,62 @@ class _FinanceiroScreenState extends ConsumerState<FinanceiroScreen> {
           child: FinanceiroHubScope(
             goToMensalidades: _irParaMensalidades,
             openNovaMensalidade: _abrirNovaMensalidade,
+            openFiltro: _abrirFiltro,
             child: Column(
               children: [
                 if (widget.initialAlunoId != null)
-                  _FinanceiroAlunoContextBanner(
-                    alunoId: widget.initialAlunoId!,
+                  _FinanceiroAlunoContextBanner(alunoId: widget.initialAlunoId!)
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s2,
+                      FxSettingsLayout.pageInset,
+                      0,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FxChoiceStrip<FinanceiroSegmento>(
+                        itens: [
+                          for (final seg in FinanceiroSegmento.values)
+                            FxChoiceItem(
+                              value: seg,
+                              label: financeiroSegmentoLabel(
+                                seg,
+                                S.of(context),
+                              ),
+                            ),
+                        ],
+                        selecionado: _segmento,
+                        onSelecionar: _trocarSegmento,
+                      ),
+                    ),
                   ),
+                if (_segmento == FinanceiroSegmento.mensalidades &&
+                    widget.initialAlunoId == null)
+                  _NumerosDoMes(onAbrir: _abrirFiltro),
                 Expanded(
                   child: IndexedStack(
-                    index: _view.index,
+                    index: _segmento.index,
                     children: [
                       FinanceiroMensalidadesTab(
                         initialAlunoId: widget.initialAlunoId,
                         novaMensalidadeToken: _novaMensalidadeToken,
+                        filtroPedido: _filtroPedido,
+                        filtroToken: _filtroToken,
                       ),
-                      const FinanceiroDashboardScreen(),
+                      _visitados.contains(FinanceiroSegmento.recorrencias)
+                          ? const RecorrenciaScreen(embedded: true)
+                          : const SizedBox.shrink(),
+                      _visitados.contains(FinanceiroSegmento.resultados)
+                          ? const FinanceiroResultadosScreen()
+                          : const SizedBox.shrink(),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FinanceiroAlunoContextBanner extends ConsumerWidget {
-  const _FinanceiroAlunoContextBanner({required this.alunoId});
-
-  final int alunoId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final alunoAsync = ref.watch(alunoProvider(alunoId));
-    final nome = alunoAsync.value?.nome;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        TokensStrip.s2,
-        FxSettingsLayout.pageInset,
-        0,
-      ),
-      child: Text(
-        financeiroAlunoContextLabel(nome),
-        style: FxSettingsLayout.sectionHeader(
-          color: ShellChrome.of(context).mute,
         ),
       ),
     );

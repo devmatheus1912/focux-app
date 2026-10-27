@@ -36,6 +36,7 @@ import '../../features/treinos/screens/create_treino_screen.dart';
 import '../../features/treinos/screens/add_exercicio_to_treino_screen.dart';
 import '../../features/treinos/utils/treino_criacao_fluxo.dart';
 import '../../features/financeiro/screens/financeiro_screen.dart';
+import '../../features/financeiro/utils/financeiro_hub_display.dart';
 import '../../features/relatorio/screens/relatorio_screen.dart';
 import '../../features/feed/screens/feed_screen.dart';
 import '../../features/feed/screens/feed_aluno_screen.dart';
@@ -105,7 +106,6 @@ import '../../features/nps/screens/nps_dashboard_screen.dart';
 import '../../features/grupos/screens/grupo_aulas_personal_screen.dart';
 import '../../features/onboarding/screens/onboarding_wizard_screen.dart';
 import '../../features/captura/screens/leads_publicos_screen.dart';
-import '../../features/relatorio/screens/business_reports_screen.dart';
 import '../../features/growth/screens/migracao_magica_screen.dart';
 import '../../features/gamificacao/screens/gamificacao_screen.dart';
 import '../../features/anamnese/screens/anamnese_screen.dart';
@@ -558,7 +558,12 @@ RouteBase buildChromeShellRoute() {
             builder: (context, state) {
               final raw = state.uri.queryParameters['alunoId'];
               final initialAlunoId = raw == null ? null : int.tryParse(raw);
-              return FinanceiroScreen(initialAlunoId: initialAlunoId);
+              return FinanceiroScreen(
+                initialAlunoId: initialAlunoId,
+                initialSegmento: financeiroSegmentoDaRota(
+                  state.uri.queryParameters['aba'],
+                ),
+              );
             },
           ),
 
@@ -948,7 +953,8 @@ RouteBase buildChromeShellRoute() {
           ),
           GoRoute(
             path: '/relatorio/business',
-            builder: (context, state) => const BusinessReportsScreen(),
+            // Receita recorrente virou o segmento Resultados do Financeiro.
+            redirect: (context, state) => '/financeiro?aba=resultados',
           ),
           GoRoute(
             path: '/recorrencia',

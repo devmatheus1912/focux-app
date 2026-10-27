@@ -20,6 +20,9 @@ class BusinessSnapshot {
   final double? churnPct;
   final double vidaMediaMeses;
 
+  /// Meses de referência distintos com cobrança; base da regra de dados suficientes.
+  final int mesesComCobranca;
+
   BusinessSnapshot({
     required this.mrrAtual,
     required this.mrrAnterior,
@@ -37,6 +40,7 @@ class BusinessSnapshot {
     this.alunosPagantes = 0,
     this.churnPct,
     this.vidaMediaMeses = 12,
+    this.mesesComCobranca = 0,
   });
 
   factory BusinessSnapshot.fromJson(Map<String, dynamic> j) => BusinessSnapshot(
@@ -56,6 +60,7 @@ class BusinessSnapshot {
     alunosPagantes: (j['alunosPagantes'] as num?)?.toInt() ?? 0,
     churnPct: (j['churnPct'] as num?)?.toDouble(),
     vidaMediaMeses: (j['vidaMediaMeses'] as num?)?.toDouble() ?? 12,
+    mesesComCobranca: (j['mesesComCobranca'] as num?)?.toInt() ?? 0,
   );
 }
 

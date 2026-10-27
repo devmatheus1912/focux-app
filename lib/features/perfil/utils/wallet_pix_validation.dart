@@ -178,27 +178,29 @@ const walletDetalheSecoes = [
   (value: walletDetalheSecaoBanco, label: 'Banco'),
 ];
 
-String walletTipoChipLabel(String? tipo) {
-  if (tipo == null || tipo.trim().isEmpty) return 'Tipo de chave';
-  return WalletPixValidation.labelForTipo(tipo);
-}
+/// Tipos de chave, na ordem do seletor.
+const walletTiposChave = ['CPF', 'CNPJ', 'EMAIL', 'TELEFONE', 'ALEATORIA'];
+
+/// Rótulo curto para o seletor de tipo (cabe em uma fileira).
+String walletTipoCurto(String tipo) => switch (tipo) {
+  'CPF' => 'CPF',
+  'CNPJ' => 'CNPJ',
+  'EMAIL' => 'E-mail',
+  'TELEFONE' => 'Celular',
+  'ALEATORIA' => 'Aleatória',
+  _ => tipo,
+};
 
 String walletPixSectionTitle() => 'Dados PIX';
 
 String walletBancoSectionTitle() => 'Dados bancários';
 
-String walletVerFinanceiroLabel() => 'Ver financeiro';
-
-String walletRecebidoHint({
-  required String previsto,
-  required int percent,
-}) => '$percent% de $previsto previsto';
-
+/// Estado da chave **salva** (não do que está sendo digitado).
 String walletPixStatusValue(String? tipo, String chave) {
   final temTipo = tipo != null && tipo.trim().isNotEmpty;
   final temChave = chave.trim().isNotEmpty;
-  if (temTipo && temChave) return 'Pronta';
-  return 'Pendente';
+  if (temTipo && temChave) return 'Chave cadastrada';
+  return 'Cadastre sua chave';
 }
 
 String walletPixStatusHint(String? tipo, String chave) {
@@ -207,9 +209,7 @@ String walletPixStatusHint(String? tipo, String chave) {
   if (temTipo && temChave) {
     return WalletPixValidation.labelForTipo(tipo);
   }
-  if (!temTipo && !temChave) return 'Falta tipo e chave';
-  if (!temTipo) return 'Falta o tipo da chave';
-  return 'Falta a chave PIX';
+  return 'Escolha o tipo e informe a chave';
 }
 
 /// Máscara para exibir chave PIX (CPF/CNPJ/telefone) sem PII completa.

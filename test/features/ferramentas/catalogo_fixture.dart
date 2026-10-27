@@ -16,7 +16,7 @@ Map<String, dynamic> catalogoFixtureJson() => {
     },
     {
       'id': 'saude-base',
-      'titulo': 'Saúde da base',
+      'titulo': 'Alunos em risco',
       'rotaApp': '/retencao',
       'unlocked': true,
       'papel': 'essencial',

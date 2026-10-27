@@ -25,7 +25,10 @@ const aluno360ModulosDoGrupo = <Aluno360FerramentasGrupo, List<Aluno360Ferrament
     Aluno360FerramentasModule.anamnese,
   ],
   Aluno360FerramentasGrupo.relacao: [Aluno360FerramentasModule.chat],
-  Aluno360FerramentasGrupo.dinheiro: [Aluno360FerramentasModule.mensalidades],
+  Aluno360FerramentasGrupo.dinheiro: [
+    Aluno360FerramentasModule.mensalidades,
+    Aluno360FerramentasModule.recorrencia,
+  ],
 };
 
 Aluno360FerramentasGrupo aluno360GrupoDoModulo(Aluno360FerramentasModule m) =>

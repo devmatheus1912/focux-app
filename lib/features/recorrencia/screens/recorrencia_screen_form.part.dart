@@ -2,122 +2,24 @@ part of 'recorrencia_screen.dart';
 
 extension on _RecorrenciaScreenState {
   Future<void> _criar() async {
-    HapticFeedback.selectionClick();
-    List<Aluno> alunos;
-    try {
-      final home = await ref.read(alunosHomeProvider.future);
-      alunos = filterAlunoPickerAlunos(home.alunos, '');
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-      return;
-    }
-    if (alunos.isEmpty) {
-      if (!mounted) return;
-      FeedbackHelper.showWarn(context, 'Cadastre um aluno primeiro.');
-      return;
-    }
-    var alunoId = alunos.first.id;
-    var alunoNome = alunos.first.nome;
-    var dia = recorrenciaDiaPadrao(DateTime.now());
-    final valorCtrl = TextEditingController(text: '199');
-    var created = false;
-
-    try {
-      if (!mounted) return;
-      final ok = await showFxFormSheet(
+    final s = S.of(context);
+    // Sem chave PIX a recorrência não gera cobrança: avisa antes de abrir a folha.
+    final perfil = ref.read(perfilProvider).value;
+    if (perfil != null && (perfil.chavePix ?? '').trim().isEmpty) {
+      final cadastrar = await showFxConfirmSheet(
         context,
-        title: 'Nova recorrência',
-        icon: Icons.repeat_rounded,
-        confirmLabel: 'Criar',
-        child: StatefulBuilder(
-          builder:
-              (ctx, setDialogState) => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FxInsetPickerRow(
-                    icon: Icons.person_outline,
-                    label: 'Aluno',
-                    value: recorrenciaAlunoLabel(alunoNome),
-                    onTap: () async {
-                      final picked = await showFxInsetPickerSheet<int>(
-                        ctx,
-                        title: 'Aluno',
-                        selected: alunoId,
-                        items: [
-                          for (final a in alunos)
-                            FxInsetPickerSheetItem(
-                              value: a.id,
-                              label: recorrenciaAlunoLabel(a.nome),
-                            ),
-                        ],
-                      );
-                      if (picked == null) return;
-                      final aluno =
-                          alunos.where((a) => a.id == picked).firstOrNull;
-                      if (aluno == null) return;
-                      setDialogState(() {
-                        alunoId = aluno.id;
-                        alunoNome = aluno.nome;
-                      });
-                    },
-                  ),
-                  FxInsetPickerRow(
-                    icon: Icons.event_outlined,
-                    label: 'Vencimento',
-                    value: recorrenciaDiaLabel(dia),
-                    onTap: () async {
-                      final picked = await showFxInsetPickerSheet<int>(
-                        ctx,
-                        title: 'Dia do vencimento',
-                        selected: dia,
-                        items: [
-                          for (var d = 1; d <= recorrenciaDiaMaximo; d++)
-                            FxInsetPickerSheetItem(
-                              value: d,
-                              label: recorrenciaDiaLabel(d),
-                            ),
-                        ],
-                      );
-                      if (picked == null) return;
-                      setDialogState(() => dia = picked);
-                    },
-                  ),
-                  AlunoInsetFormField(
-                    controller: valorCtrl,
-                    label: 'Valor mensal (R\$)',
-                    icon: Icons.payments_outlined,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    showDivider: false,
-                  ),
-                ],
-              ),
-        ),
+        title: s.recorrenciaFaltaPixTitulo,
+        message: s.recorrenciaFaltaPixTexto,
+        confirmLabel: s.recorrenciaFaltaPixConfirma,
+        cancelLabel: s.recorrenciaFaltaPixDepois,
       );
-      if (ok != true) return;
-
-      await RecorrenciaRepository(ref.read(apiClientProvider)).criar(
-        alunoId: alunoId,
-        valor: FxMoney.fromInput(
-          valorCtrl.text.trim().isEmpty ? '199' : valorCtrl.text,
-        ),
-        diaVencimento: dia,
-      );
-      if (!mounted) return;
-      FeedbackHelper.showSuccess(context, recorrenciaCriadaMensagem);
-      created = true;
-    } catch (e) {
-      if (!mounted) return;
-      FeedbackHelper.showError(context, friendlyError(e));
-      if (ApiError.from(e)?.codigo == pixChaveAusenteCodigo) {
-        context.push('/perfil/wallet');
-      }
-    } finally {
-      valorCtrl.dispose();
+      if (cadastrar && mounted) context.push('/perfil/wallet');
+      return;
     }
-    if (created) await _load(reset: true);
+    final criou = await showRecorrenciaNovaFolha(context, ref);
+    if (!criou || !mounted) return;
+    FeedbackHelper.showSuccess(context, recorrenciaCriadaMensagem);
+    await _load(reset: true);
   }
 
   Future<void> _abrirAcoes(RecorrenciaAssinatura item) async {

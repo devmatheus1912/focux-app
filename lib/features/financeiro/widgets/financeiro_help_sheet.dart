@@ -6,24 +6,30 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
   return showFxHelpSheet(
     context,
     title: 'Como usar o financeiro',
-    subtitle:
-        'A lista de mensalidades é o centro. Panorama fica em Mais.',
+    subtitle: 'Três lugares: mensalidades, recorrências e resultados.',
     tips: const [
       FxHelpTip(
         'Mensalidades',
-        'Lance, marque paga, PIX e cobre no chat. Toque na linha para o detalhe. '
-        'Atualizar atrasos fica no chip do topo; lote pago é por long-press.',
+        'Os três números do topo abrem a lista: recebido, a receber e atrasado. '
+        'Toque na linha para cobrar ou marcar como paga. Segure para marcar várias.',
         icon: 'coin',
       ),
       FxHelpTip(
-        'Panorama',
-        'Troque o mês, veja recebido e inadimplentes. Abra em Mais → Panorama.',
-        icon: 'trend',
+        'Atrasadas',
+        'O Focux marca como atrasada a cobrança vencida, na hora de lançar e todo dia de manhã. '
+        'Não precisa atualizar nada.',
+        icon: 'alert-triangle',
       ),
       FxHelpTip(
-        'Como calculamos',
-        'Recebido do mês = mensalidades PAGO daquele mês. Pendente = soma ainda em aberto. Ticket = total pago ÷ quantidade de pagas. Atrasados = status ATRASADO.',
-        icon: 'help',
+        'Recorrências',
+        'Criam a mensalidade sozinhas todo mês e geram o PIX do aluno.',
+        icon: 'repeat',
+      ),
+      FxHelpTip(
+        'Resultados',
+        'Quanto entrou no mês, quanto falta e quem atrasa. '
+        'Recebido conta pela data do pagamento; o lançado conta pelo mês da cobrança.',
+        icon: 'trend',
       ),
     ],
   );

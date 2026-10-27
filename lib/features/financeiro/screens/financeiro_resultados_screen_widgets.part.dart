@@ -1,4 +1,4 @@
-part of 'financeiro_dashboard_screen.dart';
+part of 'financeiro_resultados_screen.dart';
 
 class _EvolucaoChart extends StatelessWidget {
   final List<EvolucaoMensalItem> items;
@@ -42,12 +42,17 @@ class _EvolucaoChart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(
-                  'Evolução · 6 meses',
-                  style: FocuxHubTypography.body(
-                    color: ink,
-                  ).copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
+                Flexible(
+                  child: Text(
+                    'Evolução · 6 meses',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.body(
+                      color: ink,
+                    ).copyWith(fontWeight: FontWeight.w600, letterSpacing: -0.2),
+                  ),
                 ),
+                const SizedBox(width: TokensStrip.s2),
                 if (items.length > 1)
                   Builder(
                     builder: (_) {
@@ -293,4 +298,261 @@ void _openAlunoOrMensalidades(
     return;
   }
   _openMensalidades(context, source: source);
+}
+
+/// "Outubro 2026 ▾": o mês que os blocos abaixo mostram.
+class _SeletorDeMes extends StatelessWidget {
+  const _SeletorDeMes({required this.rotulo, required this.onTap});
+
+  final String rotulo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        TokensStrip.s3,
+        FxSettingsLayout.pageInset,
+        TokensStrip.s3,
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: FxActionChip(
+          label: rotulo,
+          accent: Theme.of(context).colorScheme.primary,
+          isDark: Theme.of(context).brightness == Brightness.dark,
+          onPressed: onTap,
+        ),
+      ),
+    );
+  }
+}
+
+/// Cartão com um rótulo, um número grande e linhas de apoio.
+class _BlocoNumero extends StatelessWidget {
+  const _BlocoNumero({
+    required this.rotulo,
+    required this.valor,
+    required this.apoio,
+    this.destaque = false,
+  });
+
+  final String rotulo;
+  final String valor;
+  final List<String> apoio;
+  final bool destaque;
+
+  @override
+  Widget build(BuildContext context) {
+    final mute = fxScreenMute(context);
+    final ink = fxScreenInk(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
+      child: FxStripCard(
+        emphasize: destaque,
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        semanticsLabel: '$rotulo $valor. ${apoio.join('. ')}',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(rotulo, style: FocuxHubTypography.chip(mute)),
+            const SizedBox(height: 6),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                valor,
+                style: FocuxHubTypography.kpi(
+                  color: ink,
+                  fontSize: FocuxHubTypography.metricLg,
+                ).copyWith(
+                  letterSpacing: 0,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ),
+            for (final linha in apoio) ...[
+              const SizedBox(height: 4),
+              Text(linha, style: FocuxHubTypography.bodyMuted(color: mute)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BlocoQuantoEntrou extends StatelessWidget {
+  const _BlocoQuantoEntrou({required this.resumo});
+
+  final ResumoMensal resumo;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return _BlocoNumero(
+      rotulo: s.resultadosQuantoEntrou,
+      valor: resumo.totalRecebido.formatCompact(),
+      destaque: true,
+      apoio: [
+        if (resumo.recebidoDeMesesAnteriores.isPositive)
+          s.financeiroDeMesesAnteriores(
+            resumo.recebidoDeMesesAnteriores.formatCompact(),
+          ),
+      ],
+    );
+  }
+}
+
+class _BlocoLancado extends StatelessWidget {
+  const _BlocoLancado({required this.resumo});
+
+  final ResumoMensal resumo;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    return _BlocoNumero(
+      rotulo: s.resultadosLancado,
+      valor: resumo.totalPrevisto.formatCompact(),
+      apoio: [
+        if (resumo.totalEmAberto.isPositive)
+          s.resultadosAindaEmAberto(resumo.totalEmAberto.formatCompact()),
+        if (resultadosRecebidoMaiorQueLancado(resumo))
+          s.resultadosExplicaRecebido,
+      ],
+    );
+  }
+}
+
+class _BlocoQuemAtrasa extends StatelessWidget {
+  const _BlocoQuemAtrasa({required this.resumo, required this.onTap});
+
+  final ResumoMensal resumo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final atrasa = resumo.quantidadeAtrasadas > 0;
+    final alunos = s.resultadosAtrasaAlunos(resumo.inadimplentes);
+    final valor = s.resultadosAtrasaValor(resumo.totalAtrasado.formatCompact());
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
+      child: FxSatelliteListTile(
+        title: s.resultadosQuemAtrasa,
+        titleCase: false,
+        subtitle: Text(atrasa ? '$alunos · $valor' : s.resultadosAtrasaAlunos(0)),
+        accent: atrasa ? EagleTokens.bad : null,
+        onTap: atrasa ? onTap : null,
+      ),
+    );
+  }
+}
+
+/// "Detalhes": números de coorte, recolhidos e só com base suficiente.
+class _SecaoDetalhes extends StatelessWidget {
+  const _SecaoDetalhes({
+    required this.coorte,
+    required this.abertos,
+    required this.onAlternar,
+    required this.onExplicar,
+    required this.isDark,
+  });
+
+  final BusinessSnapshot coorte;
+  final bool abertos;
+  final VoidCallback onAlternar;
+  final void Function(String titulo, String texto) onExplicar;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final visiveis = resultadosDetalhesVisiveis(
+      pagantes: coorte.alunosPagantes,
+      mesesComCobranca: coorte.mesesComCobranca,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: FxSettingsLayout.pageInset,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DashboardSectionHeader(title: s.resultadosDetalhes),
+          const SizedBox(height: TokensStrip.s2),
+          if (!visiveis)
+            Text(
+              s.resultadosPoucosDados(resultadosMinPagantes, resultadosMinMeses),
+              style: FocuxHubTypography.bodyMuted(
+                color: fxScreenMute(context),
+                fontWeight: FontWeight.w600,
+              ),
+            )
+          else ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FxActionChip(
+                label: abertos
+                    ? s.resultadosDetalhesFechar
+                    : s.resultadosDetalhesAbrir,
+                accent: primary,
+                isDark: isDark,
+                onPressed: onAlternar,
+              ),
+            ),
+            if (abertos) ...[
+              const SizedBox(height: TokensStrip.s3),
+              OperationalMetricTile(
+                label: s.resultadosNdr,
+                value: resultadosPct(coorte.ndrPct),
+                hint: s.resultadosNdrHint,
+                onInfo: () => onExplicar(s.resultadosNdr, s.resultadosNdrAjuda),
+                color: primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              OperationalMetricTile(
+                label: s.resultadosArpa,
+                value: formatBrlCurrency(coorte.arpa),
+                hint: s.resultadosArpaHint(coorte.alunosPagantes),
+                onInfo: () =>
+                    onExplicar(s.resultadosArpa, s.resultadosArpaAjuda),
+                color: primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              OperationalMetricTile(
+                label: s.resultadosLtv,
+                value: formatBrlCurrency(coorte.ltvProxy),
+                hint: s.resultadosLtvHint(
+                  resultadosMesesLabel(coorte.vidaMediaMeses),
+                ),
+                onInfo: () => onExplicar(s.resultadosLtv, s.resultadosLtvAjuda),
+                color: primary,
+                isDark: isDark,
+              ),
+              const SizedBox(height: TokensStrip.s2),
+              OperationalMetricTile(
+                label: s.resultadosChurn,
+                value: resultadosPct(coorte.churnPct),
+                hint: s.resultadosChurnHint,
+                onInfo: () =>
+                    onExplicar(s.resultadosChurn, s.resultadosChurnAjuda),
+                color: primary,
+                isDark: isDark,
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
 }

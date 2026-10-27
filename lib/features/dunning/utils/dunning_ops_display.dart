@@ -55,7 +55,7 @@ List<T> dunningFalhasPreview<T>(List<T> items) =>
     items.take(3).toList(growable: false);
 
 const dunningComoCalculamos =
-    'Recuperadas dividido pelo total de falhas no recorte. É a mesma taxa da Receita recorrente.';
+    'Recuperadas dividido pelo total de falhas no recorte.';
 
 bool dunningHasAluno(int? alunoId) => alunoId != null && alunoId > 0;
 
@@ -97,3 +97,22 @@ String dunningFocusActionLabel(DunningFocusActionId id) => switch (id) {
   DunningFocusActionId.marcar => 'Marcar primeira',
   DunningFocusActionId.financeiro => 'Ver financeiro',
 };
+
+/// Falhas dos alunos de um lado, falhas da assinatura Focux do personal do outro.
+/// A assinatura do próprio personal nunca aparece como se fosse de um aluno.
+({List<T> alunos, List<T> assinatura}) dunningSeparar<T>(
+  List<T> falhas, {
+  required String Function(T) contexto,
+  required int? Function(T) alunoId,
+}) {
+  final alunos = <T>[];
+  final assinatura = <T>[];
+  for (final f in falhas) {
+    if (dunningIsAssinaturaFocux(contexto(f)) && !dunningHasAluno(alunoId(f))) {
+      assinatura.add(f);
+    } else {
+      alunos.add(f);
+    }
+  }
+  return (alunos: alunos, assinatura: assinatura);
+}

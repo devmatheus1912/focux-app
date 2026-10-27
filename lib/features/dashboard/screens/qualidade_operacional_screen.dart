@@ -125,7 +125,7 @@ class _QualidadeOperacionalScreenState
                     ),
                     FxHelpTip(
                       'Retenção',
-                      'Se a base cair, abra Saúde da base.',
+                      'Se a base cair, abra Alunos em risco.',
                     ),
                   ],
                 );

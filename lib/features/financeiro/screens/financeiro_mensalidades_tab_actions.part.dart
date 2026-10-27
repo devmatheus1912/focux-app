@@ -68,20 +68,4 @@ extension FinanceiroMensalidadesTabActions on _FinanceiroMensalidadesTabState {
       FeedbackHelper.showError(context, friendlyError(e));
     }
   }
-
-  Future<void> _atualizarAtrasos() async {
-    try {
-      await FinanceiroRepository(
-        ref.read(apiClientProvider),
-      ).atualizarAtrasos();
-      _load(force: true);
-      if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Mensalidades atualizadas!');
-      }
-    } catch (e) {
-      if (mounted) {
-        FeedbackHelper.showError(context, friendlyError(e));
-      }
-    }
-  }
 }

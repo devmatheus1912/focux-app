@@ -272,6 +272,13 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'more':
+        final ponto = Paint()..color = color;
+        for (final y in const [5.0, 12.0, 19.0]) {
+          canvas.drawCircle(Offset(12, y), 1.6, ponto);
+        }
+        break;
+
       case 'plus':
         canvas.drawLine(const Offset(12, 5), const Offset(12, 19), paint);
         canvas.drawLine(const Offset(5, 12), const Offset(19, 12), paint);

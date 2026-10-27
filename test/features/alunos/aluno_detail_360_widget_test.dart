@@ -1,3 +1,4 @@
+import 'package:focux_app/features/recorrencia/providers/recorrencia_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
@@ -63,9 +64,9 @@ Widget _harness({
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
-        locale: const Locale('pt'),
-        supportedLocales: S.supportedLocales,
-        localizationsDelegates: S.localizationsDelegates,
+      locale: const Locale('pt'),
+      supportedLocales: S.supportedLocales,
+      localizationsDelegates: S.localizationsDelegates,
       home: MediaQuery(
         data: MediaQueryData(
           size: const Size(390, 1600),
@@ -92,9 +93,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-
-
-
   testWidgets('Evolução empty state shows actionable CTAs', (tester) async {
     await tester.pumpWidget(
       _harness(
@@ -118,9 +116,15 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byKey(const ValueKey('aluno360_evolucao_empty')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('aluno360_evolucao_empty')),
+      findsOneWidget,
+    );
     expect(find.text('Pedir check-in'), findsWidgets);
-    expect(find.byKey(const ValueKey('aluno360_timeline_empty')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('aluno360_timeline_empty')),
+      findsOneWidget,
+    );
   });
 
   for (final scale in [1.0, 1.25, 1.3]) {
@@ -132,12 +136,16 @@ void main() {
           textScale: scale,
           overrides: [
             _proPlanoOverride(),
-            aluno360FerramentasBundleProvider(_alunoId).overrideWith(
-              (ref) async => const Aluno360Ferramentas(),
-            ),
-            alunoAderenciaSemanalProvider(_alunoId).overrideWith(
-              (ref) async => _week(),
-            ),
+            aluno360FerramentasBundleProvider(
+              _alunoId,
+            ).overrideWith((ref) async => const Aluno360Ferramentas()),
+            alunoAderenciaSemanalProvider(
+              _alunoId,
+            ).overrideWith((ref) async => _week()),
+            recorrenciaDoAlunoProvider((
+              alunoId: _alunoId,
+              nome: _aluno.nome,
+            )).overrideWith((ref) async => null),
           ],
           child: Aluno360DetailFerramentasTab(
             aluno: _aluno,
@@ -152,9 +160,14 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byKey(const ValueKey('aluno360_ferramentas_grupos')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('aluno360_ferramentas_grupos')),
+        findsOneWidget,
+      );
       expect(find.text('Dados do aluno'), findsOneWidget);
       expect(find.text('Composição corporal'), findsOneWidget);
+      expect(find.text('Recorrência'), findsOneWidget);
+      expect(find.text('Não criada'), findsOneWidget);
       expect(find.text('Mais ferramentas'), findsNothing);
       expect(find.text('Atalhos do aluno'), findsNothing);
       expect(tester.takeException(), isNull);

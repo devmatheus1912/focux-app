@@ -1,44 +1,48 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
+import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_action_row.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_metric_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_strip_card.dart';
-import '../../../core/widgets/fx_toggle_chip.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/retencao_repository.dart';
 import '../utils/retencao_display.dart';
+import '../utils/retencao_fila.dart';
 import '../widgets/retencao_acoes_sheet.dart';
-import '../widgets/retencao_catalog_sheet.dart';
 
 part 'churn_dashboard_screen_cards.part.dart';
+part 'churn_dashboard_screen_content.part.dart';
 
 final retencaoRepositoryProvider = Provider(
   (ref) => RetencaoRepository(ref.read(apiClientProvider)),
 );
 
+/// Alunos em risco: quem pode parar de treinar e o que fazer agora.
 class ChurnDashboardScreen extends ConsumerStatefulWidget {
   const ChurnDashboardScreen({super.key});
 
@@ -49,9 +53,16 @@ class ChurnDashboardScreen extends ConsumerStatefulWidget {
 
 class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   RetencaoHome? _home;
+  List<RetencaoAlunoScore> _base = [];
+  var _page = 0;
+  var _hasNext = false;
+  var _carregandoMais = false;
   bool _loading = true;
   String? _error;
-  var _filtro = '';
+  RetencaoNivel? _nivel;
+  var _query = '';
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
   final _openedAt = DateTime.now();
   var _viewTracked = false;
   var _ttvTracked = false;
@@ -62,23 +73,25 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     _load();
   }
 
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
   void _trackViewIfNeeded() {
     if (_viewTracked) return;
     _viewTracked = true;
     AnalyticsService.instance.track(
       ProductEvents.retencaoHubViewed,
-      props: {
-        'alto': _home?.alto ?? 0,
-        'medio': _home?.medio ?? 0,
-      },
+      props: {'alto': _home?.alto ?? 0, 'medio': _home?.medio ?? 0},
     );
     if (!_ttvTracked) {
       _ttvTracked = true;
       AnalyticsService.instance.track(
         ProductEvents.retencaoHubTtv,
-        props: {
-          'ms': DateTime.now().difference(_openedAt).inMilliseconds,
-        },
+        props: {'ms': DateTime.now().difference(_openedAt).inMilliseconds},
       );
     }
   }
@@ -89,10 +102,15 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
       _error = null;
     });
     try {
-      final home = await ref.read(retencaoRepositoryProvider).getHome();
+      final repo = ref.read(retencaoRepositoryProvider);
+      final home = await repo.getHome();
+      final base = await repo.listarBase(q: _query);
       if (!mounted) return;
       setState(() {
         _home = home;
+        _base = base.itens;
+        _page = base.page;
+        _hasNext = base.hasNext;
         _loading = false;
       });
       _trackViewIfNeeded();
@@ -102,6 +120,52 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
         _loading = false;
         _error = friendlyError(e);
       });
+    }
+  }
+
+  Future<void> _carregarMais() async {
+    if (_carregandoMais || !_hasNext) return;
+    setState(() => _carregandoMais = true);
+    try {
+      final next = await ref
+          .read(retencaoRepositoryProvider)
+          .listarBase(page: _page + 1, q: _query);
+      if (!mounted) return;
+      final vistos = _base.map((s) => s.alunoId).toSet();
+      setState(() {
+        _base = [..._base, ...next.itens.where((s) => vistos.add(s.alunoId))];
+        _page = next.page;
+        _hasNext = next.hasNext;
+        _carregandoMais = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _carregandoMais = false);
+    }
+  }
+
+  void _onBusca(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 450), () {
+      final q = value.trim();
+      if (q == _query) return;
+      _query = q;
+      _recarregarBase();
+    });
+  }
+
+  Future<void> _recarregarBase() async {
+    try {
+      final base = await ref
+          .read(retencaoRepositoryProvider)
+          .listarBase(q: _query);
+      if (!mounted) return;
+      setState(() {
+        _base = base.itens;
+        _page = base.page;
+        _hasNext = base.hasNext;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _error = friendlyError(e));
     }
   }
 
@@ -136,223 +200,91 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
     );
   }
 
-  Future<void> _abrirMaisHubs() async {
-    final chosen = await showFxInsetPickerSheet<RetencaoHubLinkId>(
+  void _ajuda() {
+    final s = S.of(context);
+    AnalyticsService.instance.track(ProductEvents.retencaoHubHelpOpened);
+    showFxHelpSheet(
       context,
-      title: retencaoHubsRelacionados,
-      headerIcon: Icons.apps_outlined,
-      selected: null,
-      items: [
-        for (final id in retencaoHubLinks)
-          FxInsetPickerSheetItem(
-            value: id,
-            label: retencaoHubLinkLabel(id),
-          ),
+      title: s.retencaoTitulo,
+      subtitle: s.retencaoAjudaSub,
+      tips: [
+        FxHelpTip(s.retencaoAjudaSaudeTitulo, s.retencaoAjudaSaudeTexto),
+        FxHelpTip(s.retencaoAjudaFilaTitulo, s.retencaoAjudaFilaTexto),
       ],
     );
-    if (chosen == null || !mounted) return;
-    HapticFeedback.selectionClick();
-    context.push(retencaoHubLinkRoute(chosen));
   }
 
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final home = _home;
     final freshnessLabel = FxHubFreshness.fromFetchedAt(home?.fetchedAt);
 
     return fxScreenA11yScope(
-      label: FocuxMicrocopy.saudeDaBase,
+      label: FocuxMicrocopy.alunosEmRisco,
       child: FxKeyboardPopScope(
         child: FxShellScaffold(
-        useMesh: true,
-        constrainWidth: false,
-        appBar: FxShellAppBar(
-          title: FocuxMicrocopy.saudeDaBase,
-          subtitle: freshnessLabel ?? retencaoDefaultSubtitle,
-          onBack: () {
-            FxKeyboardDismissScope.dismiss();
-            safePopOrGo(context, '/dashboard/personal');
-          },
-          actions: [
-            ShellHeaderIconButton(
-              icon: 'route',
-              tooltip: retencaoMaisHubs,
-              onTap: _abrirMaisHubs,
-            ),
-            const SizedBox(width: FxHelpChrome.gap),
-            FxHelpIconButton(
-              tooltip: retencaoComoUsar,
-              onTap: () {
-                AnalyticsService.instance.track(
-                  ProductEvents.retencaoHubHelpOpened,
-                );
-                showFxHelpSheet(
-                    context,
-                    title: FocuxMicrocopy.saudeDaBase,
-                    subtitle: retencaoHelpSubtitle,
-                    tips: const [
-                      FxHelpTip(retencaoComoCalculamosTitle, retencaoComoCalculamos),
-                      FxHelpTip(
-                        retencaoRiscoChurnTitle,
-                        retencaoHelpRiscoBody,
-                      ),
-                      FxHelpTip(
-                        retencaoHelpListaTitle,
-                        retencaoHelpListaBody,
-                      ),
-                      FxHelpTip(
-                        retencaoHelpSatelitesTitle,
-                        retencaoHelpSatelitesBody,
-                      ),
-                    ],
-                  );
-              },
-            ),
-          ],
-        ),
-        body:
-            _loading
-                ? const SkeletonList(count: 6)
-                : _error != null
-                ? FxErrorState(
-                  chromeOnDark: isDark,
-                  primary: primary,
-                  message: _error!,
-                  onRetry: _load,
-                )
-                : RefreshIndicator(
-                  color: primary,
-                  onRefresh: () async {
-                    AnalyticsService.instance.track(
-                      ProductEvents.retencaoHubRefreshed,
-                    );
-                    await _load();
-                  },
-                  child:
-                      home == null || home.isEmpty
-                          ? ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              const SizedBox(height: 48),
-                              FxEmptyState(
-                                icon: 'activity',
-                                title: retencaoEmptyTitle,
-                                subtitle: retencaoEmptySubtitle,
-                                action: FxEmptyAction(
-                                  label: retencaoFocusActionLabel(
-                                    RetencaoFocusActionId.verAlunos,
-                                  ),
-                                  onTap: () {
-                                    AnalyticsService.instance.track(
-                                      ProductEvents.alunosViewed,
-                                    );
-                                    goPersonalShellTab(context, '/alunos');
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                          : FxContentWidthLimiter(
-                            child: ListView(
+          useMesh: true,
+          constrainWidth: false,
+          appBar: FxShellAppBar(
+            title: s.retencaoTitulo,
+            subtitle: freshnessLabel ?? s.retencaoSubtitulo,
+            onBack: () {
+              FxKeyboardDismissScope.dismiss();
+              safePopOrGo(context, '/dashboard/personal');
+            },
+            actions: [
+              FxHelpIconButton(tooltip: retencaoComoUsar, onTap: _ajuda),
+            ],
+          ),
+          body:
+              _loading
+                  ? const SkeletonList(count: 6)
+                  : _error != null
+                  ? FxErrorState(
+                    chromeOnDark: isDark,
+                    primary: primary,
+                    message: _error!,
+                    onRetry: _load,
+                  )
+                  : RefreshIndicator(
+                    color: primary,
+                    onRefresh: () async {
+                      AnalyticsService.instance.track(
+                        ProductEvents.retencaoHubRefreshed,
+                      );
+                      await _load();
+                    },
+                    child:
+                        home == null || home.isEmpty
+                            ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
-                              keyboardDismissBehavior:
-                                  ScrollViewKeyboardDismissBehavior.onDrag,
-                              padding: const EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3,
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s6,
-                              ),
                               children: [
-                                _RetencaoMetricStrip(
-                                  home: home,
-                                  isDark: isDark,
-                                  primary: primary,
-                                  onFiltrarAlto: () => setState(
-                                    () => _filtro = retencaoFiltroAlto,
+                                const SizedBox(height: 48),
+                                FxEmptyState(
+                                  icon: 'activity',
+                                  title: retencaoEmptyTitle,
+                                  subtitle: retencaoEmptySubtitle,
+                                  action: FxEmptyAction(
+                                    label: retencaoFocusActionLabel(
+                                      RetencaoFocusActionId.verAlunos,
+                                    ),
+                                    onTap: () {
+                                      AnalyticsService.instance.track(
+                                        ProductEvents.alunosViewed,
+                                      );
+                                      goPersonalShellTab(context, '/alunos');
+                                    },
                                   ),
                                 ),
-                                const SizedBox(height: TokensStrip.s4),
-                                _RetencaoFocusCard(
-                                  home: home,
-                                  isDark: isDark,
-                                  onAluno: _abrirAluno,
-                                  onChat: _abrirChat,
-                                  onCobrar: _abrirCobranca,
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
-                                DashboardSectionHeader(
-                                  title: retencaoQuemOlhar,
-                                  actionLabel:
-                                      home.alto + home.medio + home.saudavel > 3
-                                          ? retencaoVerTodos
-                                          : null,
-                                  onAction:
-                                      home.alto + home.medio + home.saudavel > 3
-                                          ? () {
-                                            showRetencaoCatalogSheet(
-                                              context,
-                                              repo: ref.read(
-                                                retencaoRepositoryProvider,
-                                              ),
-                                              onAbrir: _abrirAcoes,
-                                            );
-                                          }
-                                          : null,
-                                ),
-                                const SizedBox(height: TokensStrip.s2),
-                                Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    FxToggleChip(
-                                      label: retencaoFiltroTodos,
-                                      selected: _filtro.isEmpty,
-                                      isDark: isDark,
-                                      onTap: () => setState(() => _filtro = ''),
-                                    ),
-                                    FxToggleChip(
-                                      label: retencaoRiscoLabel('ALTO'),
-                                      selected: _filtro == retencaoFiltroAlto,
-                                      isDark: isDark,
-                                      onTap:
-                                          () => setState(
-                                            () => _filtro = retencaoFiltroAlto,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: TokensStrip.s2),
-                                if (retencaoItemsForFiltro(
-                                  home.top3,
-                                  _filtro,
-                                ).isEmpty)
-                                  const FxEmptyState(
-                                    icon: 'activity',
-                                    title: retencaoNinguemRecorte,
-                                    subtitle:
-                                        retencaoNinguemRecorteSubtitle,
-                                  )
-                                else
-                                  for (final score in retencaoItemsForFiltro(
-                                    home.top3,
-                                    _filtro,
-                                  ))
-                                    _RetencaoTile(
-                                      score: score,
-                                      isDark: isDark,
-                                      onChat: () => _abrirChat(score),
-                                      onAluno: () => _abrirAluno(score),
-                                      onMais: () => _abrirAcoes(score),
-                                    ),
                               ],
-                            ),
-                          ),
-                ),
+                            )
+                            : _conteudo(context, home),
+                  ),
+        ),
       ),
-    ),
     );
   }
 }

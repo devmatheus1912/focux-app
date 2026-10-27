@@ -1,38 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/utils/clipboard_sensitive.dart';
 import '../../../core/utils/friendly_error.dart';
-import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
-import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_hub_header.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../alunos/widgets/aluno_inset_form_field.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
-import '../../financeiro/data/financeiro_repository.dart';
 import '../../../core/widgets/feature_gate.dart';
 import '../../planos/providers/plano_features_provider.dart';
 import '../../subscription/models/subscription_plan.dart';
@@ -62,6 +55,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   String? _tipoChavePix;
   bool _carregando = false;
   bool _inicializado = false;
+  var _editandoChave = false;
   var _secao = walletDetalheSecaoPix;
   DateTime? _fetchedAt;
 
@@ -70,14 +64,6 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
   String _snapshotBanco = '';
   String _snapshotAgencia = '';
   String _snapshotConta = '';
-
-  static const List<String> _tiposChavePix = [
-    'CPF',
-    'CNPJ',
-    'EMAIL',
-    'TELEFONE',
-    'ALEATORIA',
-  ];
 
   @override
   void initState() {
@@ -167,7 +153,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
         ),
         FxHelpTip(
           'Salvar',
-          'Confirme no botão de baixo. Só então a chave vale nos recebimentos.',
+          'Confirme em "Salvar dados". Só então aparece "Chave cadastrada" e ela vale nos recebimentos.',
           icon: 'circle-check',
         ),
       ],
@@ -216,6 +202,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
       ref.invalidate(perfilProvider);
       ref.invalidate(perfilWalletProvider);
       if (mounted) {
+        _editandoChave = false;
         _captureSnapshot();
         _fetchedAt = DateTime.now();
         FeedbackHelper.showSuccess(context, 'Carteira atualizada com sucesso.');
@@ -237,21 +224,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     FeedbackHelper.showSuccess(context, 'Chave PIX copiada.');
   }
 
-  Future<void> _selecionarTipoPix() async {
-    final selected = await showFxInsetPickerSheet<String>(
-      context,
-      title: 'Tipo de chave PIX',
-      subtitle: 'Escolha o formato da chave que você vai receber.',
-      selected: _tipoChavePix,
-      items: [
-        for (final tipo in _tiposChavePix)
-          FxInsetPickerSheetItem(
-            value: tipo,
-            label: WalletPixValidation.labelForTipo(tipo),
-          ),
-      ],
-    );
-    if (selected == null || !mounted) return;
+  void _definirTipo(String selected) {
+    if (selected == _tipoChavePix) return;
     final normalized = WalletPixValidation.normalizeForApi(
       _tipoChavePix,
       _chavePixCtrl.text,
@@ -355,9 +329,13 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                           contaCtrl: _contaCtrl,
                           carregando: _carregando,
                           secao: _secao,
-                          resumoMensal: perfil.resumoMensal,
+                          tipoSalvo: _snapshotTipo,
+                          chaveSalva: _snapshotChave,
+                          editandoChave: _editandoChave,
+                          onEditarChave: () =>
+                              setState(() => _editandoChave = true),
                           onSecao: (value) => setState(() => _secao = value),
-                          onSelecionarTipo: _selecionarTipoPix,
+                          onSelecionarTipo: _definirTipo,
                           onCopiarChave: _copiarChavePix,
                         ),
                       ),

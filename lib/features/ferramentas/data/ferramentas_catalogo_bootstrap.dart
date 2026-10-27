@@ -20,7 +20,7 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
       },
       {
         'id': 'retencao',
-        'titulo': 'Saúde da base',
+        'titulo': 'Alunos em risco',
         'rotaApp': '/retencao',
         'unlocked': true,
         'papel': 'essencial',
@@ -235,7 +235,7 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
         'itens': [
           {
             'id': 'saude-base',
-            'titulo': 'Saúde da base',
+            'titulo': 'Alunos em risco',
             'rotaApp': '/retencao',
             'unlocked': true,
             'papel': 'essencial',
@@ -244,7 +244,7 @@ FerramentasCatalogo ferramentasCatalogoBootstrap() {
           },
           {
             'id': 'winback',
-            'titulo': 'Histórico win-back',
+            'titulo': 'Histórico de retomada',
             'rotaApp': '/winback',
             'featureGate': 'AUTOMACOES',
             'unlocked': true,

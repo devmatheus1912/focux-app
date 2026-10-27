@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/safe_navigation.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,19 +13,22 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
+import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_icon.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
+import '../../../core/widgets/fx_status_pill.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_hub_header.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/operational_metric_tile.dart';
 import '../../../core/widgets/skeleton_loader.dart';
-import '../../alunos/utils/satellite_screen_utils.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../data/financeiro_repository.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../utils/financeiro_numeros.dart';
 import '../utils/mensalidade_surface_actions.dart';
 import '../widgets/financeiro_mensalidade_help_sheet.dart';
 import '../../../l10n/app_localizations.dart';
@@ -100,7 +102,9 @@ class _FinanceiroMensalidadeDetailScreenState
 
   Future<void> _carregarContatos() async {
     try {
-      final contatos = await mensalidadeRepo(ref).listarContatos(widget.mensalidadeId);
+      final contatos = await mensalidadeRepo(
+        ref,
+      ).listarContatos(widget.mensalidadeId);
       if (!mounted) return;
       setState(() => _contatos = contatos);
     } catch (_) {}
@@ -110,11 +114,7 @@ class _FinanceiroMensalidadeDetailScreenState
       m.status == 'PENDENTE' || m.status == 'ATRASADO';
 
   void _leave() {
-    safePopOrGo(
-      context,
-      '/financeiro',
-      result: _changed ? 'changed' : null,
-    );
+    safePopOrGo(context, '/financeiro', result: _changed ? 'changed' : null);
   }
 
   void _apply(Mensalidade updated) {
@@ -204,6 +204,115 @@ class _FinanceiroMensalidadeDetailScreenState
     );
   }
 
+  Future<void> _cobrar() async {
+    final m = _mensalidade;
+    if (m == null) return;
+    final s = S.of(context);
+    final via = await showFxInsetPickerSheet<_ViaCobranca>(
+      context,
+      title: s.financeiroCobrarEscolha,
+      items: [
+        FxInsetPickerSheetItem(
+          value: _ViaCobranca.chat,
+          label: s.financeiroCobrarChat,
+          subtitle: s.financeiroCobrarChatDetalhe,
+          icon: Icons.chat_bubble_outline_rounded,
+        ),
+        FxInsetPickerSheetItem(
+          value: _ViaCobranca.pix,
+          label: s.financeiroCobrarPix,
+          subtitle: s.financeiroCobrarPixDetalhe,
+          icon: Icons.qr_code_2_rounded,
+        ),
+      ],
+    );
+    if (via == null || !mounted) return;
+    switch (via) {
+      case _ViaCobranca.chat:
+        await cobrarMensalidadeViaChat(context: context, ref: ref, m: m);
+        await _carregarContatos();
+      case _ViaCobranca.pix:
+        await mostrarPixMensalidade(context: context, ref: ref, mensalidade: m);
+    }
+  }
+
+  Future<void> _abrirMenu() async {
+    final m = _mensalidade;
+    if (m == null) return;
+    final s = S.of(context);
+    final acoes = mensalidadeDetailMaisActions(
+      pending: _pending(m),
+      pago: m.status == 'PAGO',
+    );
+    final cancelar = acoes.contains(MensalidadeDetailActionId.cancelar);
+    final normais = [
+      for (final a in acoes)
+        if (a != MensalidadeDetailActionId.cancelar) a,
+    ];
+    const iconeDe = <MensalidadeDetailActionId, String>{
+      MensalidadeDetailActionId.edit: 'article',
+      MensalidadeDetailActionId.contato: 'chat',
+      MensalidadeDetailActionId.aluno: 'users',
+      MensalidadeDetailActionId.desfazerPagamento: 'refresh-cw',
+      MensalidadeDetailActionId.cancelar: 'x',
+    };
+    final escolha = await showFxHomeSheet<MensalidadeDetailActionId>(
+      context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        Widget tile(MensalidadeDetailActionId id, {bool ultimo = false}) =>
+            FxSettingsTile(
+              fxIcon: iconeDe[id]!,
+              label: mensalidadeDetailActionLabel(id, s),
+              value: '',
+              danger: id == MensalidadeDetailActionId.cancelar,
+              showDivider: !ultimo,
+              onTap: () => Navigator.of(ctx).pop(id),
+            );
+        return FxHomeSheetSurface(
+          isDark: isDark,
+          maxHeight:
+              MediaQuery.sizeOf(ctx).height * FxHomeSheetChrome.maxHeightFactor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FxHomeSheetHandle(isDark: isDark),
+              const SizedBox(height: TokensStrip.s4),
+              FxSettingsGroup(
+                children: [
+                  for (final (i, a) in normais.indexed)
+                    tile(a, ultimo: i == normais.length - 1),
+                ],
+              ),
+              if (cancelar) ...[
+                const SizedBox(height: TokensStrip.s3),
+                FxSettingsGroup(
+                  children: [
+                    tile(MensalidadeDetailActionId.cancelar, ultimo: true),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+    if (escolha == null || !mounted) return;
+    switch (escolha) {
+      case MensalidadeDetailActionId.edit:
+        await _editar();
+      case MensalidadeDetailActionId.contato:
+        await _contato();
+      case MensalidadeDetailActionId.aluno:
+        context.push('/alunos/${m.alunoId}');
+      case MensalidadeDetailActionId.desfazerPagamento:
+        await _desfazerPagamento();
+      case MensalidadeDetailActionId.cancelar:
+        await _cancelar();
+    }
+  }
+
   Future<void> _contato() async {
     final m = _mensalidade;
     if (m == null) return;
@@ -229,8 +338,7 @@ class _FinanceiroMensalidadeDetailScreenState
         _leave();
       },
       child: fxScreenA11yScope(
-        label:
-            m == null ? 'Mensalidade' : 'Mensalidade de ${m.alunoNome}',
+        label: m == null ? 'Mensalidade' : 'Mensalidade de ${m.alunoNome}',
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
@@ -238,6 +346,14 @@ class _FinanceiroMensalidadeDetailScreenState
             subtitle: freshness,
             onBack: _leave,
             actions: [
+              if (m != null) ...[
+                ShellHeaderIconButton(
+                  icon: 'more',
+                  tooltip: S.of(context).financeiroMenuTooltip,
+                  onTap: _abrirMenu,
+                ),
+                SizedBox(width: FxHelpChrome.gap),
+              ],
               FxHelpIconButton(
                 tooltip: 'Como usar esta mensalidade',
                 onTap: () => showFinanceiroMensalidadeHelpSheet(context),
@@ -275,29 +391,16 @@ class _FinanceiroMensalidadeDetailScreenState
                     paying: _paying,
                     onRefresh: _carregar,
                     onPay: _pagar,
-                    onEdit: _editar,
+                    onCobrar: _cobrar,
                     onOpenAluno: () => context.push('/alunos/${m.alunoId}'),
-                    onPix:
-                        () => mostrarPixMensalidade(
-                          context: context,
-                          ref: ref,
-                          mensalidade: m,
-                        ),
-                    onChat:
-                        () => cobrarMensalidadeViaChat(
-                          context: context,
-                          ref: ref,
-                          m: m,
-                        ),
-                    onContato: _contato,
-                    onCancelar: _cancelar,
-                    onDesfazerPagamento: _desfazerPagamento,
                   ),
         ),
       ),
     );
   }
 }
+
+enum _ViaCobranca { chat, pix }
 
 class _DetailBody extends StatelessWidget {
   const _DetailBody({
@@ -307,13 +410,8 @@ class _DetailBody extends StatelessWidget {
     required this.paying,
     required this.onRefresh,
     required this.onPay,
-    required this.onEdit,
+    required this.onCobrar,
     required this.onOpenAluno,
-    required this.onPix,
-    required this.onChat,
-    required this.onContato,
-    required this.onCancelar,
-    required this.onDesfazerPagamento,
   });
 
   final Mensalidade mensalidade;
@@ -322,62 +420,28 @@ class _DetailBody extends StatelessWidget {
   final bool paying;
   final Future<void> Function() onRefresh;
   final VoidCallback onPay;
-  final VoidCallback onEdit;
+  final VoidCallback onCobrar;
   final VoidCallback onOpenAluno;
-  final VoidCallback onPix;
-  final VoidCallback onChat;
-  final VoidCallback onContato;
-  final VoidCallback onCancelar;
-  final VoidCallback onDesfazerPagamento;
-
-  Future<void> _openMais(BuildContext context) async {
-    final s = S.of(context);
-    final actions = mensalidadeDetailMaisActions(
-      pending: pending,
-      pago: mensalidade.status == 'PAGO',
-    );
-    final chosen = await showFxInsetPickerSheet<MensalidadeDetailActionId>(
-      context,
-      title: mensalidadeDetailMaisSheetTitle(),
-      items: [
-        for (final id in actions)
-          FxInsetPickerSheetItem(
-            value: id,
-            label: mensalidadeDetailActionLabel(id, s),
-          ),
-      ],
-    );
-    if (chosen == null || !context.mounted) return;
-    switch (chosen) {
-      case MensalidadeDetailActionId.aluno:
-        onOpenAluno();
-      case MensalidadeDetailActionId.financeiro:
-        context.push('/financeiro');
-      case MensalidadeDetailActionId.edit:
-        onEdit();
-      case MensalidadeDetailActionId.pix:
-        onPix();
-      case MensalidadeDetailActionId.chat:
-        onChat();
-      case MensalidadeDetailActionId.contato:
-        onContato();
-      case MensalidadeDetailActionId.cancelar:
-        onCancelar();
-      case MensalidadeDetailActionId.desfazerPagamento:
-        onDesfazerPagamento();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primary = Theme.of(context).colorScheme.primary;
-    final overdue = mensalidade.status == 'ATRASADO';
-    final statusColor = overdue ? EagleTokens.bad : primary;
-    final status = financeiroMensalidadeStatusLabel(mensalidade.status);
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    final selo = financeiroSelo(s, mensalidade, hoje: DateTime.now());
     final vencimento = financeiroMensalidadeVencimentoLabel(
       mesReferencia: mensalidade.mesReferencia,
       vencimento: mensalidade.vencimento,
+    );
+    // Letra grande: os dois botões empilham em vez de espremer o rótulo.
+    final empilhar = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
+    final cobrar = FxLiquidSecondaryButton(
+      label: s.financeiroCobrar,
+      onPressed: onCobrar,
+    );
+    final pagar = FxLiquidPrimaryButton(
+      label: 'Marcar como paga',
+      loading: paying,
+      onPressed: paying ? null : onPay,
     );
 
     return Column(
@@ -395,85 +459,37 @@ class _DetailBody extends StatelessWidget {
                   24,
                 ),
                 children: [
-                  FxHubHeader(
-                    title: mensalidade.alunoNome,
-                    subtitle: financeiroMensalidadeHubSubtitle(
-                      mes: financeiroMensalidadeMesPorExtenso(
-                        mensalidade.mesReferencia,
+                  _CartaoMensalidade(
+                    mensalidade: mensalidade,
+                    seloTexto: selo.texto,
+                    seloTom: selo.tom,
+                    vencimento:
+                        pending ? s.financeiroVenceEm(vencimento) : null,
+                    onOpenAluno: onOpenAluno,
+                  ),
+                  if (contatos.isNotEmpty) ...[
+                    const SizedBox(height: TokensStrip.s4),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 4,
+                        bottom: TokensStrip.s2,
+                      ),
+                      child: Semantics(
+                        header: true,
+                        child: Text(
+                          s.financeiroCobrancasFeitas,
+                          style: TextStyle(
+                            color: chrome.mute,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ),
-                    onTitleTap: onOpenAluno,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  _ValorMetricTile(
-                    label: status,
-                    value: mensalidade.valor.formatCobranca(),
-                    hint: financeiroMensalidadeDetailValorHint(
-                      overdue: overdue,
-                      pending: pending,
-                    ),
-                    color: statusColor,
-                    isDark: isDark,
-                    emphasis:
-                        overdue
-                            ? OperationalMetricEmphasis.alert
-                            : OperationalMetricEmphasis.normal,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: pending ? 'Referência' : 'Pago em',
-                    value: financeiroMensalidadeDetailReferenciaValue(
-                      pending: pending,
-                      mesReferencia: mensalidade.mesReferencia,
-                      pagoEm: mensalidade.pagoEm,
-                    ),
-                    hint: financeiroMensalidadeDetailReferenciaHint(
-                      pending: pending,
-                    ),
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Contatos',
-                    value: '${contatos.length}',
-                    hint:
-                        contatos.isEmpty
-                            ? 'Nenhuma cobrança registrada'
-                            : 'Histórico desta mensalidade',
-                    color: primary,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s2),
-                  OperationalMetricTile(
-                    label: 'Vencimento',
-                    value: vencimento,
-                    hint: overdue ? 'Em atraso' : status,
-                    color: statusColor,
-                    isDark: isDark,
-                  ),
-                  const SizedBox(height: TokensStrip.s3),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FxActionChip(
-                      label: mensalidadeDetailMaisChipLabel(),
-                      accent: primary,
-                      isDark: isDark,
-                      onPressed: () => _openMais(context),
-                    ),
-                  ),
-                  const SizedBox(height: TokensStrip.s4),
-                  if (contatos.isEmpty)
-                    FxEmptyState(
-                      icon: 'chat',
-                      title: financeiroContatosEmpty(),
-                      subtitle:
-                          'Registre WhatsApp, ligação ou visita desta cobrança.',
-                    )
-                  else
                     for (final item in contatos)
                       FxSatelliteListTile(
                         title: financeiroContatoTipoLabel(item.tipo),
+                        titleCase: false,
                         subtitle: Text(
                           financeiroContatoSubtitle(
                             item.observacao,
@@ -481,6 +497,7 @@ class _DetailBody extends StatelessWidget {
                           ),
                         ),
                       ),
+                  ],
                 ],
               ),
             ),
@@ -495,11 +512,28 @@ class _DetailBody extends StatelessWidget {
               FxSettingsLayout.pageInset,
               TokensStrip.s3 + MediaQuery.viewInsetsOf(context).bottom,
             ),
-            child: FxLiquidPrimaryButton(
-              label: pending ? 'Marcar como paga' : 'Abrir aluno',
-              loading: paying,
-              onPressed: paying ? null : (pending ? onPay : onOpenAluno),
-            ),
+            child:
+                !pending
+                    ? FxLiquidPrimaryButton(
+                      label: 'Abrir aluno',
+                      onPressed: onOpenAluno,
+                    )
+                    : empilhar
+                    ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        pagar,
+                        const SizedBox(height: TokensStrip.s2),
+                        cobrar,
+                      ],
+                    )
+                    : Row(
+                      children: [
+                        Expanded(child: cobrar),
+                        const SizedBox(width: TokensStrip.s2),
+                        Expanded(flex: 2, child: pagar),
+                      ],
+                    ),
           ),
         ),
       ],
@@ -507,66 +541,81 @@ class _DetailBody extends StatelessWidget {
   }
 }
 
-/// Valor da cobrança — tabular figures / letterSpacing 0 (money).
-class _ValorMetricTile extends StatelessWidget {
-  const _ValorMetricTile({
-    required this.label,
-    required this.value,
-    required this.hint,
-    required this.color,
-    required this.isDark,
-    this.emphasis = OperationalMetricEmphasis.normal,
+/// Um cartão só: quem, quanto, de que mês e em que estado está.
+class _CartaoMensalidade extends StatelessWidget {
+  const _CartaoMensalidade({
+    required this.mensalidade,
+    required this.seloTexto,
+    required this.seloTom,
+    required this.vencimento,
+    required this.onOpenAluno,
   });
 
-  final String label;
-  final String value;
-  final String hint;
-  final Color color;
-  final bool isDark;
-  final OperationalMetricEmphasis emphasis;
+  final Mensalidade mensalidade;
+  final String seloTexto;
+  final FxPillTone seloTom;
+
+  /// "Vence em 05/11/2026"; só para cobrança em aberto.
+  final String? vencimento;
+  final VoidCallback onOpenAluno;
 
   @override
   Widget build(BuildContext context) {
-    final ink = fxScreenInk(context);
-    final mute = fxScreenMute(context);
-    final labelColor = Color.lerp(ink, color, isDark ? 0.22 : 0.18)!;
-    final hintColor = Color.lerp(mute, ink, isDark ? 0.55 : 0.72)!;
-
+    final chrome = ShellChrome.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: operationalMetricDecoration(
-        accent: color,
-        isDark: isDark,
-        emphasis: emphasis,
+      padding: const EdgeInsets.all(TokensStrip.s4),
+      decoration: BoxDecoration(
+        color: chrome.cardFill,
+        borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        border: Border.all(color: chrome.lineStrong),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: FocuxHubTypography.chip(labelColor).copyWith(
-              letterSpacing: 0.4,
+          InkWell(
+            onTap: onOpenAluno,
+            borderRadius: BorderRadius.circular(TokensStrip.rInput),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      mensalidade.alunoNome,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  FxIcon(name: 'chevron-right', size: 16, color: chrome.mute),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: TokensStrip.s2),
+          FxStatusPill(label: seloTexto, tone: seloTom),
+          const SizedBox(height: TokensStrip.s3),
           Text(
-            value,
+            mensalidade.valor.formatCobranca(),
             style: FocuxHubTypography.kpi(
-              color: ink,
-              fontSize: FocuxHubTypography.metricMd,
+              color: chrome.ink,
+              fontSize: FocuxHubTypography.metricLg,
             ).copyWith(
               letterSpacing: 0,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
+          const SizedBox(height: TokensStrip.s1),
           Text(
-            hint,
-            style: FocuxHubTypography.bodyMuted(
-              color: hintColor,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
+            financeiroMensalidadeMesPorExtenso(mensalidade.mesReferencia),
+            style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
           ),
+          if (vencimento != null)
+            Text(
+              vencimento!,
+              style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
+            ),
         ],
       ),
     );

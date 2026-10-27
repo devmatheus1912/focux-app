@@ -4,7 +4,28 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
   Future<void> _abrirFormularioNovaMensalidade() async {
     final formKey = GlobalKey<FormState>();
     final valorCtrl = TextEditingController();
-    var mesReferencia = '';
+    final hoje = DateTime.now();
+    var mesReferencia = financeiroMesAtualIso(hoje);
+    var vencimento = financeiroVencimentoSugerido(
+      mesReferenciaIso: mesReferencia,
+      hoje: hoje,
+    );
+    final s = S.of(context);
+
+    // Sugere o valor da última cobrança do aluno; nunca sobrescreve o digitado.
+    Future<void> sugerirValor(int alunoId) async {
+      if (valorCtrl.text.trim().isNotEmpty) return;
+      try {
+        final page = await FinanceiroRepository(
+          ref.read(apiClientProvider),
+        ).listarPagina(alunoId: alunoId, size: 1);
+        if (page.mensalidades.isEmpty || valorCtrl.text.trim().isNotEmpty) {
+          return;
+        }
+        valorCtrl.text = page.mensalidades.first.valor.wire;
+      } catch (_) {}
+    }
+
     // Prefetch before sheet so the aluno picker never infinite-spins.
     List<Aluno> alunos = const [];
     try {
@@ -60,7 +81,7 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                         FxHomeSheetHeader(
                           isDark: isDark,
                           title: 'Nova mensalidade',
-                          subtitle: 'Lance valor e mês de referência.',
+                          subtitle: 'Valor, mês e vencimento da cobrança.',
                           leading: Icon(
                             Icons.add_card_outlined,
                             color: primary,
@@ -77,41 +98,45 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                                 alunoSelecionadoNome,
                               ),
                               picker: true,
-                              onTap: alunos.isEmpty
-                                  ? null
-                                  : () async {
-                                      final picked =
-                                          await showFxInsetPickerSheet<int>(
-                                        ctx,
-                                        title: 'Aluno',
-                                        selected: alunoSelecionadoId,
-                                        items: [
-                                          for (final a in alunos)
-                                            FxInsetPickerSheetItem(
-                                              value: a.id,
-                                              label: a.nome,
-                                            ),
-                                        ],
-                                      );
-                                      if (picked == null) return;
-                                      String? nome;
-                                      for (final a in alunos) {
-                                        if (a.id == picked) {
-                                          nome = a.nome;
-                                          break;
+                              onTap:
+                                  alunos.isEmpty
+                                      ? null
+                                      : () async {
+                                        final picked =
+                                            await showFxInsetPickerSheet<int>(
+                                              ctx,
+                                              title: 'Aluno',
+                                              selected: alunoSelecionadoId,
+                                              items: [
+                                                for (final a in alunos)
+                                                  FxInsetPickerSheetItem(
+                                                    value: a.id,
+                                                    label: a.nome,
+                                                  ),
+                                              ],
+                                            );
+                                        if (picked == null) return;
+                                        String? nome;
+                                        for (final a in alunos) {
+                                          if (a.id == picked) {
+                                            nome = a.nome;
+                                            break;
+                                          }
                                         }
-                                      }
-                                      setModalState(() {
-                                        alunoSelecionadoId = picked;
-                                        alunoSelecionadoNome = nome;
-                                      });
-                                    },
+                                        setModalState(() {
+                                          alunoSelecionadoId = picked;
+                                          alunoSelecionadoNome = nome;
+                                        });
+                                        await sugerirValor(picked);
+                                      },
                             ),
                             AlunoInsetFormField(
                               controller: valorCtrl,
-                              label: 'Valor (R\$)',
-                              hint: '0,00',
+                              label: s.financeiroValorRotulo,
+                              hint: 'R\$ 0,00',
                               icon: Icons.attach_money,
+                              rotuloVisivel: true,
+                              obrigatorio: true,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
@@ -139,14 +164,39 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                               label: 'Mês de referência',
                               value: financeiroMesPickerValue(mesReferencia),
                               picker: true,
+                              onTap: () async {
+                                final picked =
+                                    await pickMensalidadeMesReferencia(
+                                      ctx,
+                                      atual: mesReferencia,
+                                    );
+                                if (picked != null) {
+                                  setModalState(() {
+                                    mesReferencia = picked;
+                                    vencimento = financeiroVencimentoSugerido(
+                                      mesReferenciaIso: picked,
+                                      hoje: hoje,
+                                    );
+                                  });
+                                }
+                              },
+                            ),
+                            FxSettingsTile(
+                              fxIcon: 'calendar',
+                              label: s.financeiroVencimentoRotulo,
+                              value: financeiroVencimentoPickerValue(
+                                vencimento,
+                              ),
+                              picker: true,
                               showDivider: false,
                               onTap: () async {
-                                final picked = await pickMensalidadeMesReferencia(
+                                final picked = await pickMensalidadeVencimento(
                                   ctx,
-                                  atual: mesReferencia,
+                                  mesReferencia: mesReferencia,
+                                  atual: vencimento,
                                 );
                                 if (picked != null) {
-                                  setModalState(() => mesReferencia = picked);
+                                  setModalState(() => vencimento = picked);
                                 }
                               },
                             ),
@@ -157,74 +207,76 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                           label: financeiroLancarMensalidadeTileLabel(),
                           loading: salvando,
                           loadingLabel: 'Lançando…',
-                          onPressed: salvando
-                              ? null
-                              : () async {
-                                      if (alunoSelecionadoId == null) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          'Selecione um aluno',
-                                        );
-                                        return;
-                                      }
-                                      if (!formKey.currentState!.validate()) {
-                                        return;
-                                      }
-                                      if (!RegExp(
-                                        r'^\d{4}-\d{2}-01$',
-                                      ).hasMatch(mesReferencia.trim())) {
-                                        FeedbackHelper.showError(
-                                          ctx,
-                                          'Selecione o mês de referência',
-                                        );
-                                        return;
-                                      }
-                                      HapticFeedback.mediumImpact();
-                                      final ok = await showFxConfirmSheet(
+                          onPressed:
+                              salvando
+                                  ? null
+                                  : () async {
+                                    if (alunoSelecionadoId == null) {
+                                      FeedbackHelper.showError(
                                         ctx,
-                                        title:
-                                            financeiroLancarMensalidadeConfirmTitle(),
-                                        message:
-                                            financeiroLancarMensalidadeConfirmMessage(),
-                                        icon: Icons.payments_outlined,
-                                        confirmLabel:
-                                            financeiroLancarMensalidadeTileLabel(),
+                                        'Selecione um aluno',
                                       );
-                                      if (!ok) return;
-                                      setModalState(() => salvando = true);
-                                      try {
-                                        final alunoId = alunoSelecionadoId!;
-                                        final valor = FxMoney.fromInput(
-                                          valorCtrl.text,
-                                        );
-                                        await FinanceiroRepository(
-                                          ref.read(apiClientProvider),
-                                        ).criar(
-                                          alunoId,
-                                          valor,
-                                          mesReferencia.trim(),
-                                        );
-                                        if (ctx.mounted) {
-                                          Navigator.of(ctx).pop();
-                                        }
-                                        _load(force: true);
-                                        if (mounted) {
-                                          HapticFeedback.heavyImpact();
-                                          FeedbackHelper.showSuccess(
-                                            context,
-                                            'Mensalidade lançada!',
-                                          );
-                                        }
-                                      } catch (e) {
-                                        setModalState(() => salvando = false);
-                                        if (ctx.mounted) {
-                                          FeedbackHelper.showError(
-                                            ctx,
-                                            friendlyError(e),
-                                          );
-                                        }
+                                      return;
+                                    }
+                                    if (!formKey.currentState!.validate()) {
+                                      return;
+                                    }
+                                    if (!RegExp(
+                                      r'^\d{4}-\d{2}-01$',
+                                    ).hasMatch(mesReferencia.trim())) {
+                                      FeedbackHelper.showError(
+                                        ctx,
+                                        'Selecione o mês de referência',
+                                      );
+                                      return;
+                                    }
+                                    HapticFeedback.mediumImpact();
+                                    final ok = await showFxConfirmSheet(
+                                      ctx,
+                                      title:
+                                          financeiroLancarMensalidadeConfirmTitle(),
+                                      message:
+                                          financeiroLancarMensalidadeConfirmMessage(),
+                                      icon: Icons.payments_outlined,
+                                      confirmLabel:
+                                          financeiroLancarMensalidadeTileLabel(),
+                                    );
+                                    if (!ok) return;
+                                    setModalState(() => salvando = true);
+                                    try {
+                                      final alunoId = alunoSelecionadoId!;
+                                      final valor = FxMoney.fromInput(
+                                        valorCtrl.text,
+                                      );
+                                      await FinanceiroRepository(
+                                        ref.read(apiClientProvider),
+                                      ).criar(
+                                        alunoId,
+                                        valor,
+                                        mesReferencia.trim(),
+                                        vencimento: vencimento.trim(),
+                                      );
+                                      if (ctx.mounted) {
+                                        Navigator.of(ctx).pop();
                                       }
-                                    },
+                                      _load(force: true);
+                                      if (mounted) {
+                                        HapticFeedback.heavyImpact();
+                                        FeedbackHelper.showSuccess(
+                                          context,
+                                          'Mensalidade lançada!',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setModalState(() => salvando = false);
+                                      if (ctx.mounted) {
+                                        FeedbackHelper.showError(
+                                          ctx,
+                                          friendlyError(e),
+                                        );
+                                      }
+                                    }
+                                  },
                         ),
                       ],
                     ),

@@ -4,67 +4,47 @@ import 'package:focux_app/features/financeiro/utils/financeiro_hub_display.dart'
 import 'package:focux_app/l10n/app_localizations.dart';
 
 void main() {
-  test('financeiroHubViewLabel e subtitle — P0 mensalidades', () {
+  test('segmentos do Financeiro: rótulos, rota e subtítulo', () {
+    final s = lookupS(const Locale('pt'));
     expect(
-      financeiroHubViewLabel(FinanceiroHubView.mensalidades),
-      'Mensalidades',
+      [for (final g in FinanceiroSegmento.values) financeiroSegmentoLabel(g, s)],
+      ['Mensalidades', 'Recorrências', 'Resultados'],
     );
-    expect(financeiroHubViewLabel(FinanceiroHubView.panorama), 'Panorama');
+    expect(financeiroSegmentoDaRota(null), FinanceiroSegmento.mensalidades);
+    expect(financeiroSegmentoDaRota('x'), FinanceiroSegmento.mensalidades);
     expect(
-      financeiroHubSubtitle(
-        view: FinanceiroHubView.mensalidades,
-        freshness: null,
-      ),
-      'Mensalidades',
+      financeiroSegmentoDaRota('recorrencias'),
+      FinanceiroSegmento.recorrencias,
     );
     expect(
-      financeiroHubSubtitle(
-        view: FinanceiroHubView.panorama,
-        freshness: 'há 1 min',
-      ),
-      'Panorama · há 1 min',
+      financeiroSegmentoDaRota('resultados'),
+      FinanceiroSegmento.resultados,
     );
-    expect(financeiroHubSecondaryViews, hasLength(1));
-    expect(financeiroHubSecondaryViews, contains(FinanceiroHubView.panorama));
-    expect(FinanceiroHubView.mensalidades.index, 0);
-    expect(FinanceiroHubView.panorama.index, 1);
-    expect(financeiroPanoramaExtras, hasLength(3));
-    expect(
-      financeiroPanoramaExtraLabel(FinanceiroPanoramaExtraId.evolucao),
-      'Evolução · 6 meses',
-    );
+    expect(financeiroHubSubtitle(freshness: 'há 1 min'), 'há 1 min');
+    expect(financeiroHubSubtitle(), 'Cobranças e resultados');
   });
 
-  test('financeiroListaTools e detalhe Mais — A30', () {
+  test('lista sem "Atualizar atrasos" e menu do detalhe', () {
     final idle = financeiroListaTools(modoSelecao: false);
-    expect(idle.foldChip, FinanceiroListaToolId.atualizarAtrasos);
+    expect(idle.foldChip, FinanceiroListaToolId.marcarLote);
     expect(idle.mais, isEmpty);
 
     final lote = financeiroListaTools(modoSelecao: true);
     expect(lote.foldChip, FinanceiroListaToolId.marcarLote);
-    expect(lote.mais, contains(FinanceiroListaToolId.cancelarLote));
-    expect(lote.mais, contains(FinanceiroListaToolId.atualizarAtrasos));
+    expect(lote.mais, [FinanceiroListaToolId.cancelarLote]);
 
     final mais = mensalidadeDetailMaisActions(pending: true);
-    expect(mais, isNot(contains(MensalidadeDetailActionId.aluno)));
-    expect(mais, isNot(contains(MensalidadeDetailActionId.financeiro)));
     expect(mais.first, MensalidadeDetailActionId.edit);
-    expect(mais, contains(MensalidadeDetailActionId.pix));
-    expect(mais, contains(MensalidadeDetailActionId.chat));
-    expect(
-      mensalidadeDetailMaisActions(pending: false),
-      isNot(contains(MensalidadeDetailActionId.pix)),
-    );
-    final s = lookupS(const Locale('pt'));
-    expect(
-      mensalidadeDetailActionLabel(MensalidadeDetailActionId.financeiro, s),
-      'Lista de mensalidades',
-    );
-    expect(mais, contains(MensalidadeDetailActionId.cancelar));
+    expect(mais.last, MensalidadeDetailActionId.cancelar);
+    expect(mais, contains(MensalidadeDetailActionId.contato));
+    expect(mais, contains(MensalidadeDetailActionId.aluno));
     expect(mais, isNot(contains(MensalidadeDetailActionId.desfazerPagamento)));
     final paga = mensalidadeDetailMaisActions(pending: false, pago: true);
     expect(paga, contains(MensalidadeDetailActionId.desfazerPagamento));
     expect(paga, isNot(contains(MensalidadeDetailActionId.cancelar)));
+    final cancelada = mensalidadeDetailMaisActions(pending: false);
+    expect(cancelada, [MensalidadeDetailActionId.aluno]);
+    final s = lookupS(const Locale('pt'));
     expect(
       mensalidadeDetailActionLabel(MensalidadeDetailActionId.cancelar, s),
       'Cancelar mensalidade',
@@ -157,38 +137,6 @@ void main() {
       'Setembro 2026',
     );
     expect(financeiroMensalidadeHubSubtitle(mes: '  '), 'Mensalidade');
-  });
-
-  test('detalhe mensalidade — labels sem repetir vencimento', () {
-    expect(
-      financeiroMensalidadeDetailHubSubtitle(mesReferencia: '2026-09-01'),
-      'Setembro 2026',
-    );
-    expect(
-      financeiroMensalidadeDetailValorHint(overdue: true, pending: true),
-      'Em atraso',
-    );
-    expect(
-      financeiroMensalidadeDetailValorHint(overdue: false, pending: true),
-      'Valor desta cobrança',
-    );
-    expect(
-      financeiroMensalidadeDetailValorHint(overdue: false, pending: false),
-      'Valor pago',
-    );
-    expect(
-      financeiroMensalidadeDetailReferenciaValue(
-        pending: true,
-        mesReferencia: '2026-09-01',
-      ),
-      'Setembro 2026',
-    );
-    expect(
-      financeiroMensalidadeDetailReferenciaHint(pending: true),
-      'Mês desta cobrança',
-    );
-    expect(mensalidadeDetailMaisSheetTitle(), 'Outras ações');
-    expect(mensalidadeDetailMaisChipLabel(), 'Mais ações');
   });
 
   test('financeiroMensalidadeMesPorExtenso e tipo de contato', () {

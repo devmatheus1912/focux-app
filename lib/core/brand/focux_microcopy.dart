@@ -40,7 +40,7 @@ abstract final class FocuxMicrocopy {
   static const focuxScoreAlertasRisco = 'Índice Focux + alertas de risco';
   static const focuxScoreMotorRetencaoIa =
       'Índice Focux + motor de retenção IA';
-  static const saudeDaBase = 'Saúde da base';
+  static const alunosEmRisco = 'Alunos em risco';
   static const painelPersonal = 'Painel do personal';
 
   static const deslizeHorizontal = 'Deslize horizontalmente para ver mais';

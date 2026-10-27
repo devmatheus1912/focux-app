@@ -42,8 +42,9 @@ void main() {
 
   test('hub screens use centralized copy and friendly errors', () {
     const financeiroTabs = [
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
-      'lib/features/financeiro/screens/financeiro_resumo_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen_state.part.dart',
+      'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
     ];
     const alunosStatePart =
         'lib/features/alunos/screens/alunos_list_screen_state.part.dart';

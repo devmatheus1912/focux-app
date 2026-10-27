@@ -2,69 +2,42 @@ import '../../../l10n/app_localizations.dart';
 import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/financeiro_repository.dart';
 
-/// Hub financeiro — P0 = lista de mensalidades (A30 / §0.1).
-/// Panorama = read model único (mês + KPIs/charts).
-enum FinanceiroHubView { mensalidades, panorama }
+/// Segmentos da tela única do Financeiro.
+enum FinanceiroSegmento { mensalidades, recorrencias, resultados }
 
-String financeiroHubViewLabel(FinanceiroHubView view) {
-  switch (view) {
-    case FinanceiroHubView.mensalidades:
-      return 'Mensalidades';
-    case FinanceiroHubView.panorama:
-      return 'Panorama';
-  }
-}
-
-/// Vistas secundárias — atrás de um toque no hub.
-const financeiroHubSecondaryViews = <FinanceiroHubView>[
-  FinanceiroHubView.panorama,
-];
-
-/// Extras do Panorama — fora do fold (A30 / §12).
-enum FinanceiroPanoramaExtraId { evolucao, topAlunos, pricing }
-
-const financeiroPanoramaExtras = <FinanceiroPanoramaExtraId>[
-  FinanceiroPanoramaExtraId.evolucao,
-  FinanceiroPanoramaExtraId.topAlunos,
-  FinanceiroPanoramaExtraId.pricing,
-];
-
-String financeiroPanoramaExtraLabel(FinanceiroPanoramaExtraId id) =>
-    switch (id) {
-      FinanceiroPanoramaExtraId.evolucao => 'Evolução · 6 meses',
-      FinanceiroPanoramaExtraId.topAlunos => 'Top alunos',
-      FinanceiroPanoramaExtraId.pricing => 'Preço sugerido',
+String financeiroSegmentoLabel(FinanceiroSegmento segmento, S s) =>
+    switch (segmento) {
+      FinanceiroSegmento.mensalidades => s.financeiroSegMensalidades,
+      FinanceiroSegmento.recorrencias => s.financeiroSegRecorrencias,
+      FinanceiroSegmento.resultados => s.financeiroSegResultados,
     };
 
-String financeiroHubSubtitle({
-  required FinanceiroHubView view,
-  String? freshness,
-}) {
-  final vista = financeiroHubViewLabel(view);
+/// `?aba=` da rota `/financeiro`; desconhecido volta para Mensalidades.
+FinanceiroSegmento financeiroSegmentoDaRota(String? aba) => switch (aba) {
+  'recorrencias' => FinanceiroSegmento.recorrencias,
+  'resultados' => FinanceiroSegmento.resultados,
+  _ => FinanceiroSegmento.mensalidades,
+};
+
+String financeiroHubSubtitle({String? freshness}) {
   final fresh = freshness?.trim();
-  if (fresh == null || fresh.isEmpty) return vista;
-  return '$vista · $fresh';
+  return fresh == null || fresh.isEmpty ? 'Cobranças e resultados' : fresh;
 }
 
 /// Ferramentas da lista — sticky é Nova; resto sob Mais / chip.
-enum FinanceiroListaToolId { atualizarAtrasos, marcarLote, cancelarLote }
+enum FinanceiroListaToolId { marcarLote, cancelarLote }
 
 ({FinanceiroListaToolId? foldChip, List<FinanceiroListaToolId> mais})
-financeiroListaTools({
-  required bool modoSelecao,
-}) {
+financeiroListaTools({required bool modoSelecao}) {
   if (modoSelecao) {
     return (
       foldChip: FinanceiroListaToolId.marcarLote,
-      mais: const [
-        FinanceiroListaToolId.cancelarLote,
-        FinanceiroListaToolId.atualizarAtrasos,
-      ],
+      mais: const [FinanceiroListaToolId.cancelarLote],
     );
   }
-  // Idle: atrasos no fold; lote continua por long-press na linha.
+  // Idle: o lote também abre por long-press na linha.
   return (
-    foldChip: FinanceiroListaToolId.atualizarAtrasos,
+    foldChip: FinanceiroListaToolId.marcarLote,
     mais: const <FinanceiroListaToolId>[],
   );
 }
@@ -73,60 +46,51 @@ String financeiroListaToolLabel(
   FinanceiroListaToolId id, {
   required bool modoSelecao,
   required int selecionados,
-}) =>
-    switch (id) {
-      FinanceiroListaToolId.atualizarAtrasos => 'Atualizar atrasos',
-      FinanceiroListaToolId.marcarLote => financeiroLotePagoChipLabel(
-        modoSelecao: modoSelecao,
-        selecionados: selecionados,
-      ),
-      FinanceiroListaToolId.cancelarLote => 'Cancelar seleção',
-    };
+}) => switch (id) {
+  FinanceiroListaToolId.marcarLote => financeiroLotePagoChipLabel(
+    modoSelecao: modoSelecao,
+    selecionados: selecionados,
+  ),
+  FinanceiroListaToolId.cancelarLote => 'Cancelar seleção',
+};
 
-/// Ações do detalhe S3 — sticky P0 separado; estas vão no Mais.
+/// Ações do menu "⋮" do detalhe. Cobrar (chat ou PIX) e Marcar como paga
+/// ficam na barra de baixo; Cancelar vem sempre por último.
 enum MensalidadeDetailActionId {
-  aluno,
-  financeiro,
   edit,
-  pix,
-  chat,
   contato,
-  cancelar,
+  aluno,
   desfazerPagamento,
+  cancelar,
 }
 
 List<MensalidadeDetailActionId> mensalidadeDetailMaisActions({
   required bool pending,
   bool pago = false,
-}) =>
-    [
-      MensalidadeDetailActionId.edit,
-      if (pending) MensalidadeDetailActionId.pix,
-      if (pending) MensalidadeDetailActionId.chat,
-      MensalidadeDetailActionId.contato,
-      if (pending) MensalidadeDetailActionId.cancelar,
-      if (pago) MensalidadeDetailActionId.desfazerPagamento,
-    ];
+}) => [
+  if (pending || pago) MensalidadeDetailActionId.edit,
+  if (pending) MensalidadeDetailActionId.contato,
+  MensalidadeDetailActionId.aluno,
+  if (pago) MensalidadeDetailActionId.desfazerPagamento,
+  if (pending) MensalidadeDetailActionId.cancelar,
+];
 
 String mensalidadeDetailActionLabel(MensalidadeDetailActionId id, S s) =>
     switch (id) {
-      MensalidadeDetailActionId.aluno => 'Abrir aluno',
-      MensalidadeDetailActionId.financeiro => 'Lista de mensalidades',
       MensalidadeDetailActionId.edit => 'Editar',
-      MensalidadeDetailActionId.pix => 'PIX',
-      MensalidadeDetailActionId.chat => 'Cobrar no chat',
       MensalidadeDetailActionId.contato => 'Registrar contato',
+      MensalidadeDetailActionId.aluno => 'Abrir aluno',
       MensalidadeDetailActionId.cancelar => s.mensalidadeCancelarAcao,
       MensalidadeDetailActionId.desfazerPagamento =>
         s.mensalidadeDesfazerPagamentoAcao,
     };
 
 String mensalidadeFiltroLabel(MensalidadeFiltro f, S s) => switch (f) {
-      MensalidadeFiltro.abertas => s.financeiroFiltroAbertas,
-      MensalidadeFiltro.atrasadas => s.financeiroFiltroAtrasadas,
-      MensalidadeFiltro.pagas => s.financeiroFiltroPagas,
-      MensalidadeFiltro.todas => s.financeiroFiltroTodas,
-    };
+  MensalidadeFiltro.abertas => s.financeiroFiltroAbertas,
+  MensalidadeFiltro.atrasadas => s.financeiroFiltroAtrasadas,
+  MensalidadeFiltro.pagas => s.financeiroFiltroPagas,
+  MensalidadeFiltro.todas => s.financeiroFiltroTodas,
+};
 
 /// Cabeçalho de grupo da lista: "Outubro 2026" a partir de `yyyy-MM[-dd]`.
 String financeiroMesCabecalho(String mesReferencia) {
@@ -136,40 +100,6 @@ String financeiroMesCabecalho(String mesReferencia) {
   if (ano == null || mes == null) return financeiroMensalidadeMesLabel(raw);
   return financeiroMesTitulo(mes, ano);
 }
-
-/// Sheet secundário — distinto do sticky P0 (pagar / abrir aluno).
-String mensalidadeDetailMaisSheetTitle() => 'Outras ações';
-
-String mensalidadeDetailMaisChipLabel() => 'Mais ações';
-
-/// Hub do detalhe: mês por extenso (não repete dd/mm do vencimento).
-String financeiroMensalidadeDetailHubSubtitle({
-  required String mesReferencia,
-}) =>
-    financeiroMensalidadeHubSubtitle(
-      mes: financeiroMensalidadeMesPorExtenso(mesReferencia),
-    );
-
-String financeiroMensalidadeDetailValorHint({
-  required bool overdue,
-  required bool pending,
-}) {
-  if (overdue) return 'Em atraso';
-  if (pending) return 'Valor desta cobrança';
-  return 'Valor pago';
-}
-
-String financeiroMensalidadeDetailReferenciaValue({
-  required bool pending,
-  required String mesReferencia,
-  String? pagoEm,
-}) =>
-    pending
-        ? financeiroMensalidadeMesPorExtenso(mesReferencia)
-        : financeiroMensalidadePagoEmLabel(pagoEm);
-
-String financeiroMensalidadeDetailReferenciaHint({required bool pending}) =>
-    pending ? 'Mês desta cobrança' : 'Data do pagamento';
 
 String financeiroMensalidadeVencimentoLabel({
   required String mesReferencia,
@@ -205,7 +135,9 @@ String financeiroAlunoAtrasadasHint(int atrasadas) {
 /// A API do aluno não devolve totais agregados: com mais páginas por vir,
 /// os tiles somam só o que já foi carregado.
 String financeiroAlunoRecorteHint(S s, {required bool parcial}) =>
-    parcial ? s.financeiroAlunoRecorteParcial : s.financeiroAlunoRecorteCompleto;
+    parcial
+        ? s.financeiroAlunoRecorteParcial
+        : s.financeiroAlunoRecorteCompleto;
 
 String financeiroAlunoEmAbertoHint(
   S s, {
@@ -416,7 +348,8 @@ List<FinanceiroVencimentoOpcao> financeiroVencimentoOpcoes({
   required String mesReferencia,
   String? atual,
 }) {
-  final mes = financeiroParseIsoDate(mesReferencia) ??
+  final mes =
+      financeiroParseIsoDate(mesReferencia) ??
       DateTime(DateTime.now().year, DateTime.now().month, 1);
   final last = DateTime(mes.year, mes.month + 1, 0);
   final isos = <String>{
@@ -457,9 +390,10 @@ String financeiroVencimentoDashboardSubtitle({
   required String status,
 }) {
   final atrasado = status == 'ATRASADO';
-  final raw = (vencimento != null && vencimento.trim().isNotEmpty)
-      ? vencimento.trim()
-      : mesReferencia;
+  final raw =
+      (vencimento != null && vencimento.trim().isNotEmpty)
+          ? vencimento.trim()
+          : mesReferencia;
   return '${atrasado ? 'Atrasado' : 'Vencendo'} · ${financeiroIsoDateLabel(raw)}';
 }
 

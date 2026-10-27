@@ -31,11 +31,12 @@ void main() {
     expect(screen, contains('FxActionChip'));
     expect(screen, contains('Escrever'));
     expect(screen, contains('Cobrar'));
-    expect(screen, contains('Saúde da base'));
+    expect(screen, contains('winbackVerEmRisco'));
+    expect(screen, isNot(contains('Saúde da base')));
     expect(screen, contains('FxEmptyAction'));
     expect(screen, isNot(contains('FxLiquidPrimaryButton')));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('Histórico win-back'));
+    expect(screen, contains('Histórico de retomada'));
     expect(screen, contains('showWinbackAcoesSheet'));
     expect(screen, contains('/alunos/\$id/chat'));
     expect(screen, contains('/financeiro?alunoId='));

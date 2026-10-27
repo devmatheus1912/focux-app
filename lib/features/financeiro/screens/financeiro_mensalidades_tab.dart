@@ -37,6 +37,7 @@ import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/financeiro_repository.dart';
 import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
+import '../utils/financeiro_numeros.dart';
 import '../utils/mensalidade_surface_actions.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
@@ -48,11 +49,19 @@ class FinanceiroMensalidadesTab extends ConsumerStatefulWidget {
     super.key,
     this.initialAlunoId,
     this.novaMensalidadeToken = 0,
+    this.filtroPedido,
+    this.filtroToken = 0,
   });
 
   final int? initialAlunoId;
+
   /// Quando incrementa, abre o formulário de nova mensalidade (hub empty CTA).
   final int novaMensalidadeToken;
+
+  /// Filtro pedido de fora (toque num dos números do mês); vale quando
+  /// [filtroToken] muda.
+  final MensalidadeFiltro? filtroPedido;
+  final int filtroToken;
 
   @override
   ConsumerState<FinanceiroMensalidadesTab> createState() =>
@@ -77,15 +86,20 @@ class _FinanceiroMensalidadesTabState
   final TextEditingController _searchCtrl = TextEditingController();
   Timer? _debounce;
   int _handledNovaToken = 0;
-  late var _filtro = widget.initialAlunoId == null
-      ? MensalidadeFiltro.abertas
-      : MensalidadeFiltro.todas;
+
+  /// Sem escolha do usuário, o filtro inicial segue o atraso do mês.
+  var _filtroDefinido = false;
+  late var _filtro =
+      widget.initialAlunoId == null
+          ? MensalidadeFiltro.abertas
+          : MensalidadeFiltro.todas;
 
   /// Primeira página em aberto já vem no BFF da home; os outros chips paginam direto.
   bool get _usaHome =>
       widget.initialAlunoId == null && _filtro == MensalidadeFiltro.abertas;
 
   void _trocarFiltro(MensalidadeFiltro f) {
+    _filtroDefinido = true;
     if (f == _filtro) return;
     setState(() => _filtro = f);
     if (_searchCtrl.text.trim().isEmpty) {
@@ -108,6 +122,10 @@ class _FinanceiroMensalidadesTabState
     super.didUpdateWidget(oldWidget);
     if (widget.novaMensalidadeToken != oldWidget.novaMensalidadeToken) {
       _scheduleNovaMensalidadeIfNeeded();
+    }
+    final pedido = widget.filtroPedido;
+    if (pedido != null && widget.filtroToken != oldWidget.filtroToken) {
+      _trocarFiltro(pedido);
     }
   }
 
@@ -152,37 +170,36 @@ class _FinanceiroMensalidadesTabState
       filtro != _filtro || _searchCtrl.text.trim() != query;
 
   Future<void> _buscar(String query) async {
-      final filtro = _filtro;
-      try {
-        final results = await FinanceiroRepository(
-          ref.read(apiClientProvider),
-        ).listarPagina(
-          nomeAluno: query,
-          alunoId: widget.initialAlunoId,
-          filtro: filtro,
-        );
-        if (!mounted || _buscaMudou(query, filtro)) return;
-        setState(() {
-          _buscaAtiva = query;
-          _items = results.mensalidades;
-          _page = results.page;
-          _hasMore = results.hasMore;
-        });
-      } catch (e) {
-        if (!mounted || _buscaMudou(query, filtro)) return;
-        setState(() {
-          _buscaAtiva = query;
-          _items =
-              _homeItems
-                  .where(
-                    (m) => m.alunoNome.toLowerCase().contains(
-                      query.toLowerCase(),
-                    ),
-                  )
-                  .toList();
-          _hasMore = false;
-        });
-      }
+    final filtro = _filtro;
+    try {
+      final results = await FinanceiroRepository(
+        ref.read(apiClientProvider),
+      ).listarPagina(
+        nomeAluno: query,
+        alunoId: widget.initialAlunoId,
+        filtro: filtro,
+      );
+      if (!mounted || _buscaMudou(query, filtro)) return;
+      setState(() {
+        _buscaAtiva = query;
+        _items = results.mensalidades;
+        _page = results.page;
+        _hasMore = results.hasMore;
+      });
+    } catch (e) {
+      if (!mounted || _buscaMudou(query, filtro)) return;
+      setState(() {
+        _buscaAtiva = query;
+        _items =
+            _homeItems
+                .where(
+                  (m) =>
+                      m.alunoNome.toLowerCase().contains(query.toLowerCase()),
+                )
+                .toList();
+        _hasMore = false;
+      });
+    }
   }
 
   Future<void> _applyPage(MensalidadesPage page) async {
@@ -209,6 +226,17 @@ class _FinanceiroMensalidadesTabState
     try {
       if (force) {
         invalidateFinanceiroCaches(ref);
+      }
+      if (!_filtroDefinido) {
+        _filtroDefinido = true;
+        if (widget.initialAlunoId == null) {
+          final home = await ref.read(financeiroHomeProvider.future);
+          if (!mounted) return;
+          final inicial = financeiroFiltroInicial(
+            quantidadeAtrasadas: home.resumoMesAtual.quantidadeAtrasadas,
+          );
+          if (inicial != _filtro) setState(() => _filtro = inicial);
+        }
       }
       if (!_usaHome) {
         final filtro = _filtro;
@@ -239,14 +267,6 @@ class _FinanceiroMensalidadesTabState
   }
 
   Future<void> _onPullRefresh() async {
-    try {
-      await FinanceiroRepository(
-        ref.read(apiClientProvider),
-      ).atualizarAtrasos();
-    } catch (_) {
-      // Refresh still reloads the list even if atrasos fail.
-    }
-    if (!mounted) return;
     await _load(force: true, silent: true);
   }
 
@@ -302,383 +322,390 @@ class _FinanceiroMensalidadesTabState
       child: FxKeyboardPopScope(
         child: FxKeyboardDismissScope(
           child: Column(
-        children: [
-          if (widget.initialAlunoId == null)
-            Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              8,
-              FxSettingsLayout.pageInset,
-              4,
-            ),
-            child: TextField(
-              controller: _searchCtrl,
-              textInputAction: TextInputAction.search,
-              onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-              decoration: InputDecoration(
-                hintText: 'Buscar por nome do aluno',
-                hintStyle: TextStyle(
-                  color: mute,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w600,
-                ),
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: FxIcon(name: 'search', size: 18, color: mute),
-                ),
-                suffixIcon:
-                    _searchCtrl.text.isNotEmpty
-                        ? IconButton(
-                          tooltip: 'Limpar busca',
-                          icon: FxIcon(name: 'x', size: 16, color: mute),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            setState(() {
-                              _buscaAtiva = '';
-                              _items = _homeItems;
-                              _page = _homePage;
-                              _hasMore = _homeHasMore;
-                            });
-                          },
-                        )
-                        : null,
-                filled: true,
-                fillColor: chrome.cardFill,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                border: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: chrome.line),
-                ),
-                enabledBorder: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: chrome.line),
-                ),
-                focusedBorder: FxInputDeco.outlineBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: primary, width: 1.6),
-                ),
-                isDense: true,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              TokensStrip.s2,
-              FxSettingsLayout.pageInset,
-              0,
-            ),
-            child: Wrap(
-              spacing: TokensStrip.s2,
-              runSpacing: TokensStrip.s2,
-              children: [
-                for (final f in MensalidadeFiltro.values)
-                  FxToggleChip(
-                    label: mensalidadeFiltroLabel(f, S.of(context)),
-                    selected: _filtro == f,
-                    isDark: chrome.isDark,
-                    onTap: () => _trocarFiltro(f),
+            children: [
+              if (widget.initialAlunoId == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    FxSettingsLayout.pageInset,
+                    8,
+                    FxSettingsLayout.pageInset,
+                    4,
                   ),
-              ],
-            ),
-          ),
-          Expanded(
-            child:
-                _loading
-                    ? _buildMensalidadesLoading(context)
-                    : _erro != null
-                    ? FxErrorState(
-                      chromeOnDark: chrome.isDark,
-                      primary: primary,
-                      message: _erro!,
-                      onRetry: () => _load(force: true),
-                    )
-                    : Column(
-                      children: [
-                        if (_items.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s2,
-                              FxSettingsLayout.pageInset,
-                              TokensStrip.s2,
-                            ),
-                            child: Builder(
-                              builder: (context) {
-                                final tools = financeiroListaTools(
-                                  modoSelecao: _modoSelecao,
-                                );
-                                Future<void> runTool(
-                                  FinanceiroListaToolId id,
-                                ) async {
-                                  switch (id) {
-                                    case FinanceiroListaToolId.atualizarAtrasos:
-                                      await _atualizarAtrasos();
-                                    case FinanceiroListaToolId.marcarLote:
-                                      if (_modoSelecao) {
-                                        await _confirmarLotePago();
-                                      } else {
-                                        _entrarModoLote();
+                  child: TextField(
+                    controller: _searchCtrl,
+                    textInputAction: TextInputAction.search,
+                    onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nome do aluno',
+                      hintStyle: TextStyle(
+                        color: mute,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: FxIcon(name: 'search', size: 18, color: mute),
+                      ),
+                      suffixIcon:
+                          _searchCtrl.text.isNotEmpty
+                              ? IconButton(
+                                tooltip: 'Limpar busca',
+                                icon: FxIcon(name: 'x', size: 16, color: mute),
+                                onPressed: () {
+                                  _searchCtrl.clear();
+                                  setState(() {
+                                    _buscaAtiva = '';
+                                    _items = _homeItems;
+                                    _page = _homePage;
+                                    _hasMore = _homeHasMore;
+                                  });
+                                },
+                              )
+                              : null,
+                      filled: true,
+                      fillColor: chrome.cardFill,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: chrome.line),
+                      ),
+                      enabledBorder: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: chrome.line),
+                      ),
+                      focusedBorder: FxInputDeco.outlineBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: primary, width: 1.6),
+                      ),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  FxSettingsLayout.pageInset,
+                  TokensStrip.s2,
+                  FxSettingsLayout.pageInset,
+                  0,
+                ),
+                child: Wrap(
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    for (final f in MensalidadeFiltro.values)
+                      FxToggleChip(
+                        label: mensalidadeFiltroLabel(f, S.of(context)),
+                        selected: _filtro == f,
+                        isDark: chrome.isDark,
+                        onTap: () => _trocarFiltro(f),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child:
+                    _loading
+                        ? _buildMensalidadesLoading(context)
+                        : _erro != null
+                        ? FxErrorState(
+                          chromeOnDark: chrome.isDark,
+                          primary: primary,
+                          message: _erro!,
+                          onRetry: () => _load(force: true),
+                        )
+                        : Column(
+                          children: [
+                            if (_items.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  FxSettingsLayout.pageInset,
+                                  TokensStrip.s2,
+                                  FxSettingsLayout.pageInset,
+                                  TokensStrip.s2,
+                                ),
+                                child: Builder(
+                                  builder: (context) {
+                                    final tools = financeiroListaTools(
+                                      modoSelecao: _modoSelecao,
+                                    );
+                                    Future<void> runTool(
+                                      FinanceiroListaToolId id,
+                                    ) async {
+                                      switch (id) {
+                                        case FinanceiroListaToolId.marcarLote:
+                                          if (_modoSelecao) {
+                                            await _confirmarLotePago();
+                                          } else {
+                                            _entrarModoLote();
+                                          }
+                                        case FinanceiroListaToolId.cancelarLote:
+                                          _sairModoLote();
                                       }
-                                    case FinanceiroListaToolId.cancelarLote:
-                                      _sairModoLote();
-                                  }
-                                }
+                                    }
 
-                                Future<void> openMais() async {
-                                  final chosen =
-                                      await showFxInsetPickerSheet<
-                                        FinanceiroListaToolId
-                                      >(
-                                        context,
-                                        title: 'Mais na lista',
-                                        items: [
-                                          for (final id in tools.mais)
-                                            FxInsetPickerSheetItem(
-                                              value: id,
-                                              label: financeiroListaToolLabel(
-                                                id,
-                                                modoSelecao: _modoSelecao,
-                                                selecionados:
-                                                    _selecionados.length,
-                                              ),
-                                            ),
-                                        ],
-                                      );
-                                  if (chosen == null || !mounted) return;
-                                  await runTool(chosen);
-                                }
-
-                                return Wrap(
-                                  spacing: TokensStrip.s2,
-                                  runSpacing: TokensStrip.s2,
-                                  children: [
-                                    if (tools.foldChip != null)
-                                      FxActionChip(
-                                        label: financeiroListaToolLabel(
-                                          tools.foldChip!,
-                                          modoSelecao: _modoSelecao,
-                                          selecionados: _selecionados.length,
-                                        ),
-                                        accent: primary,
-                                        isDark: chrome.isDark,
-                                        onPressed: () =>
-                                            runTool(tools.foldChip!),
-                                      ),
-                                    if (tools.mais.isNotEmpty)
-                                      FxActionChip(
-                                        label: 'Mais',
-                                        accent: chrome.mute,
-                                        isDark: chrome.isDark,
-                                        onPressed: openMais,
-                                      ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        Expanded(
-                          child:
-                              _items.isEmpty
-                                  ? RefreshIndicator(
-                                    onRefresh: _onPullRefresh,
-                                    child: ListView(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.fromLTRB(
-                                        FxSettingsLayout.pageInset,
-                                        0,
-                                        FxSettingsLayout.pageInset,
-                                        24,
-                                      ),
-                                      children: [
-                                        SizedBox(
-                                          height:
-                                              MediaQuery.sizeOf(
-                                                context,
-                                              ).height *
-                                              0.45,
-                                          child: _buildMensalidadesEmpty(
+                                    Future<void> openMais() async {
+                                      final chosen =
+                                          await showFxInsetPickerSheet<
+                                            FinanceiroListaToolId
+                                          >(
                                             context,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                  : RefreshIndicator(
-                                    onRefresh: _onPullRefresh,
-                                    child: ListView.builder(
-                                      physics:
-                                          const AlwaysScrollableScrollPhysics(),
-                                      padding: const EdgeInsets.fromLTRB(
-                                        FxSettingsLayout.pageInset,
-                                        0,
-                                        FxSettingsLayout.pageInset,
-                                        24,
-                                      ),
-                                      itemCount:
-                                          _items.length + (_hasMore ? 1 : 0),
-                                      itemBuilder: (context, i) {
-                                        if (i >= _items.length) {
-                                          return FxSatelliteListTile(
-                                            title:
-                                                _carregandoMais
-                                                    ? 'Carregando…'
-                                                    : 'Carregar mais',
-                                            titleCase: false,
-                                            onTap:
-                                                _carregandoMais
-                                                    ? null
-                                                    : _carregarMais,
-                                            leading: FxIcon(
-                                              name: 'plus',
-                                              size: 18,
-                                              color: primary,
-                                            ),
-                                          );
-                                        }
-                                        final item = _items[i];
-                                        final overdue =
-                                            item.status == 'ATRASADO';
-                                        final cancelada =
-                                            item.status == 'CANCELADO';
-                                        final selected = _selecionados.contains(
-                                          item.id,
-                                        );
-                                        final aberto = financeiroStatusAberto(
-                                          item.status,
-                                        );
-                                        final cabecalho =
-                                            financeiroMesCabecalho(
-                                              item.mesReferencia,
-                                            );
-                                        final novoMes =
-                                            i == 0 ||
-                                            financeiroMesCabecalho(
-                                                  _items[i - 1].mesReferencia,
-                                                ) !=
-                                                cabecalho;
-                                        final tile = FxSatelliteListTile(
-                                          title: item.alunoNome,
-                                          subtitle: Text(
-                                            financeiroMensalidadeStatusLabel(
-                                              item.status,
-                                            ),
-                                          ),
-                                          onTap: () => _modoSelecao
-                                              ? _toggleLote(item)
-                                              : _abrirAcoes(item),
-                                          onLongPress: aberto
-                                              ? () {
-                                                  if (!_modoSelecao) {
-                                                    _entrarModoLote();
-                                                  }
-                                                  _toggleLote(item);
-                                                }
-                                              : null,
-                                          accent:
-                                              overdue
-                                                  ? EagleTokens.bad
-                                                  : cancelada
-                                                  ? mute
-                                                  : primary,
-                                          leading: FxIcon(
-                                            name:
-                                                _modoSelecao && selected
-                                                    ? 'circle-check'
-                                                    : overdue
-                                                    ? 'alert-triangle'
-                                                    : item.status == 'PAGO'
-                                                    ? 'circle-check'
-                                                    : cancelada
-                                                    ? 'x'
-                                                    : 'coin',
-                                            size: 18,
-                                            color:
-                                                overdue
-                                                    ? EagleTokens.bad
-                                                    : cancelada
-                                                    ? mute
-                                                    : primary,
-                                          ),
-                                          trailing: Text(
-                                            item.valor.formatCobranca(),
-                                            style: TextStyle(
-                                              color: chrome.ink,
-                                              fontWeight: FontWeight.w700,
-                                              fontFeatures: const [
-                                                FontFeature.tabularFigures(),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                        if (!novoMes) return tile;
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                4,
-                                                i == 0
-                                                    ? TokensStrip.s2
-                                                    : TokensStrip.s4,
-                                                4,
-                                                TokensStrip.s2,
-                                              ),
-                                              child: Semantics(
-                                                header: true,
-                                                child: Text(
-                                                  cabecalho,
-                                                  style: TextStyle(
-                                                    color: mute,
-                                                    fontSize: 13,
-                                                    fontWeight:
-                                                        FontWeight.w700,
-                                                  ),
+                                            title: 'Mais na lista',
+                                            items: [
+                                              for (final id in tools.mais)
+                                                FxInsetPickerSheetItem(
+                                                  value: id,
+                                                  label:
+                                                      financeiroListaToolLabel(
+                                                        id,
+                                                        modoSelecao:
+                                                            _modoSelecao,
+                                                        selecionados:
+                                                            _selecionados
+                                                                .length,
+                                                      ),
                                                 ),
-                                              ),
+                                            ],
+                                          );
+                                      if (chosen == null || !mounted) return;
+                                      await runTool(chosen);
+                                    }
+
+                                    return Wrap(
+                                      spacing: TokensStrip.s2,
+                                      runSpacing: TokensStrip.s2,
+                                      children: [
+                                        if (tools.foldChip != null)
+                                          FxActionChip(
+                                            label: financeiroListaToolLabel(
+                                              tools.foldChip!,
+                                              modoSelecao: _modoSelecao,
+                                              selecionados:
+                                                  _selecionados.length,
                                             ),
-                                            tile,
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                        ),
-                        if (!_modoSelecao)
-                          SafeArea(
-                            top: false,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s2,
-                                FxSettingsLayout.pageInset,
-                                TokensStrip.s3 +
-                                    MediaQuery.viewInsetsOf(context).bottom,
-                              ),
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: FxActionChip(
-                                  label: 'Nova mensalidade',
-                                  accent: primary,
-                                  isDark: chrome.isDark,
-                                  onPressed: () {
-                                    FxKeyboardDismissScope.dismiss();
-                                    _abrirFormularioNovaMensalidade();
+                                            accent: primary,
+                                            isDark: chrome.isDark,
+                                            onPressed:
+                                                () => runTool(tools.foldChip!),
+                                          ),
+                                        if (tools.mais.isNotEmpty)
+                                          FxActionChip(
+                                            label: 'Mais',
+                                            accent: chrome.mute,
+                                            isDark: chrome.isDark,
+                                            onPressed: openMais,
+                                          ),
+                                      ],
+                                    );
                                   },
                                 ),
                               ),
+                            Expanded(
+                              child:
+                                  _items.isEmpty
+                                      ? RefreshIndicator(
+                                        onRefresh: _onPullRefresh,
+                                        child: ListView(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.fromLTRB(
+                                            FxSettingsLayout.pageInset,
+                                            0,
+                                            FxSettingsLayout.pageInset,
+                                            24,
+                                          ),
+                                          children: [
+                                            SizedBox(
+                                              height:
+                                                  MediaQuery.sizeOf(
+                                                    context,
+                                                  ).height *
+                                                  0.45,
+                                              child: _buildMensalidadesEmpty(
+                                                context,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                      : RefreshIndicator(
+                                        onRefresh: _onPullRefresh,
+                                        child: ListView.builder(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.fromLTRB(
+                                            FxSettingsLayout.pageInset,
+                                            0,
+                                            FxSettingsLayout.pageInset,
+                                            24,
+                                          ),
+                                          itemCount:
+                                              _items.length +
+                                              (_hasMore ? 1 : 0),
+                                          itemBuilder: (context, i) {
+                                            if (i >= _items.length) {
+                                              return FxSatelliteListTile(
+                                                title:
+                                                    _carregandoMais
+                                                        ? 'Carregando…'
+                                                        : 'Carregar mais',
+                                                titleCase: false,
+                                                onTap:
+                                                    _carregandoMais
+                                                        ? null
+                                                        : _carregarMais,
+                                                leading: FxIcon(
+                                                  name: 'plus',
+                                                  size: 18,
+                                                  color: primary,
+                                                ),
+                                              );
+                                            }
+                                            final item = _items[i];
+                                            final overdue =
+                                                item.status == 'ATRASADO';
+                                            final cancelada =
+                                                item.status == 'CANCELADO';
+                                            final selected = _selecionados
+                                                .contains(item.id);
+                                            final aberto =
+                                                financeiroStatusAberto(
+                                                  item.status,
+                                                );
+                                            final cabecalho =
+                                                financeiroMesCabecalho(
+                                                  item.mesReferencia,
+                                                );
+                                            final novoMes =
+                                                i == 0 ||
+                                                financeiroMesCabecalho(
+                                                      _items[i - 1]
+                                                          .mesReferencia,
+                                                    ) !=
+                                                    cabecalho;
+                                            final tile = FxSatelliteListTile(
+                                              title: item.alunoNome,
+                                              subtitle: Text(
+                                                financeiroMensalidadeStatusLabel(
+                                                  item.status,
+                                                ),
+                                              ),
+                                              onTap:
+                                                  () =>
+                                                      _modoSelecao
+                                                          ? _toggleLote(item)
+                                                          : _abrirAcoes(item),
+                                              onLongPress:
+                                                  aberto
+                                                      ? () {
+                                                        if (!_modoSelecao) {
+                                                          _entrarModoLote();
+                                                        }
+                                                        _toggleLote(item);
+                                                      }
+                                                      : null,
+                                              accent:
+                                                  overdue
+                                                      ? EagleTokens.bad
+                                                      : cancelada
+                                                      ? mute
+                                                      : primary,
+                                              leading: FxIcon(
+                                                name:
+                                                    _modoSelecao && selected
+                                                        ? 'circle-check'
+                                                        : overdue
+                                                        ? 'alert-triangle'
+                                                        : item.status == 'PAGO'
+                                                        ? 'circle-check'
+                                                        : cancelada
+                                                        ? 'x'
+                                                        : 'coin',
+                                                size: 18,
+                                                color:
+                                                    overdue
+                                                        ? EagleTokens.bad
+                                                        : cancelada
+                                                        ? mute
+                                                        : primary,
+                                              ),
+                                              trailing: Text(
+                                                item.valor.formatCobranca(),
+                                                style: TextStyle(
+                                                  color: chrome.ink,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontFeatures: const [
+                                                    FontFeature.tabularFigures(),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                            if (!novoMes) return tile;
+                                            return Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                    4,
+                                                    i == 0
+                                                        ? TokensStrip.s2
+                                                        : TokensStrip.s4,
+                                                    4,
+                                                    TokensStrip.s2,
+                                                  ),
+                                                  child: Semantics(
+                                                    header: true,
+                                                    child: Text(
+                                                      cabecalho,
+                                                      style: TextStyle(
+                                                        color: mute,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                tile,
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
                             ),
-                          ),
-                      ],
-                    ),
+                            if (!_modoSelecao)
+                              SafeArea(
+                                top: false,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    FxSettingsLayout.pageInset,
+                                    TokensStrip.s2,
+                                    FxSettingsLayout.pageInset,
+                                    TokensStrip.s3 +
+                                        MediaQuery.viewInsetsOf(context).bottom,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: FxActionChip(
+                                      label: 'Nova mensalidade',
+                                      accent: primary,
+                                      isDark: chrome.isDark,
+                                      onPressed: () {
+                                        FxKeyboardDismissScope.dismiss();
+                                        _abrirFormularioNovaMensalidade();
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+              ),
+            ],
           ),
-        ],
-      ),
         ),
       ),
     );

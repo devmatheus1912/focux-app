@@ -11,9 +11,14 @@ class FxMetric {
     required this.rotulo,
     this.onTap,
     this.alerta = false,
+    this.texto,
   });
 
+  /// Para dinheiro, passe os centavos: zero continua apagado.
   final int valor;
+
+  /// O que aparece no lugar do número (ex.: "R$ 1.250,00"). Sem ele, [valor].
+  final String? texto;
   final String rotulo;
 
   /// Sem [onTap] o número só informa: não é botão para o leitor de tela.
@@ -60,7 +65,7 @@ class _Tile extends StatelessWidget {
 
     return Semantics(
       button: metrica.onTap != null,
-      label: '${metrica.valor} ${metrica.rotulo}',
+      label: '${metrica.texto ?? metrica.valor} ${metrica.rotulo}',
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
@@ -84,11 +89,15 @@ class _Tile extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '${metrica.valor}',
-                    style: FocuxHubTypography.metric(
-                      color: corNumero,
-                      fontSize: 22,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      metrica.texto ?? '${metrica.valor}',
+                      maxLines: 1,
+                      style: FocuxHubTypography.metric(
+                        color: corNumero,
+                        fontSize: 22,
+                      ),
                     ),
                   ),
                   const SizedBox(height: TokensStrip.s1),

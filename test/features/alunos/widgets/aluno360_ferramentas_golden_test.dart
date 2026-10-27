@@ -11,6 +11,7 @@ import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/providers/aluno_detail_providers.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_detail_ferramentas_tab.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
+import 'package:focux_app/features/recorrencia/providers/recorrencia_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../support/riverpod_seeds.dart';
@@ -65,6 +66,10 @@ void main() {
         alunoAderenciaSemanalProvider(42).overrideWith(
           (ref) async => aderenciaSemanaEndingToday(),
         ),
+        recorrenciaDoAlunoProvider((
+          alunoId: 42,
+          nome: 'Beatriz Costa',
+        )).overrideWith((ref) async => null),
       ],
       child: MaterialApp(
         locale: const Locale('pt'),

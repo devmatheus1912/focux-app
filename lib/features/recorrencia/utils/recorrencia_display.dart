@@ -59,9 +59,6 @@ const recorrenciaAjudaTips = <(String, String)>[
 const recorrenciaCriadaMensagem =
     'Recorrência criada. A mensalidade sai 5 dias antes de cada vencimento.';
 
-const recorrenciaEmptyHubSubtitle =
-    'Crie a primeira para lançar a mensalidade todo mês com PIX.';
-
 const recorrenciaDiaMaximo = 28;
 
 int recorrenciaDiaPadrao(DateTime now) =>
@@ -126,12 +123,6 @@ bool recorrenciaPendente(String status) =>
 bool recorrenciaTemLinkCheckout(String status, String? initPoint) {
   final link = initPoint?.trim();
   return recorrenciaPendente(status) && link != null && link.isNotEmpty;
-}
-
-String recorrenciaCountLabel(int count) {
-  if (count <= 0) return 'Nenhuma assinatura';
-  if (count == 1) return '1 assinatura';
-  return '$count assinaturas';
 }
 
 enum RecorrenciaHubFiltro { todos, pendente, ativa, pausada, cancelada }

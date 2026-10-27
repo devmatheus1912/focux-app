@@ -197,13 +197,13 @@ void main() {
 
   test('financeiro dashboard entry stays decomposed under 100 LOC', () {
     final lines = File(
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     ).readAsLinesSync().length;
     expect(lines, lessThan(100));
     final screen = File(
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
     ).readAsStringSync();
-    expect(screen, contains("part 'financeiro_dashboard_screen_state.part.dart'"));
+    expect(screen, contains("part 'financeiro_resultados_screen_state.part.dart'"));
   });
 
   test('aba Treinos: tela só orquestra; regra em utils, blocos em widgets', () {

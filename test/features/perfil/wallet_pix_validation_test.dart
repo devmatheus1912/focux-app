@@ -67,16 +67,20 @@ void main() {
       walletHubSubtitle(freshness: 'há 1 min'),
       'PIX e banco dos recebimentos · há 1 min',
     );
-    expect(walletTipoChipLabel(null), 'Tipo de chave');
-    expect(walletTipoChipLabel('CPF'), 'CPF');
     expect(walletDetalheSecoes, hasLength(2));
-    expect(
-      walletRecebidoHint(previsto: 'R\$ 1.000,00', percent: 40),
-      '40% de R\$ 1.000,00 previsto',
-    );
-    expect(walletPixStatusValue('CPF', '123'), 'Pronta');
-    expect(walletPixStatusValue(null, ''), 'Pendente');
+    expect(walletPixStatusValue('CPF', '123'), 'Chave cadastrada');
+    expect(walletPixStatusValue(null, ''), 'Cadastre sua chave');
+    expect(walletPixStatusValue('CPF', ''), 'Cadastre sua chave');
+    expect(walletPixStatusValue(null, '123'), 'Cadastre sua chave');
     expect(walletPixStatusHint('EMAIL', 'a@b.com'), 'E-mail');
-    expect(walletPixStatusHint(null, ''), 'Falta tipo e chave');
+    expect(walletPixStatusHint(null, ''), 'Escolha o tipo e informe a chave');
+  });
+
+  test('seletor de tipo: cinco opções, rótulos curtos, sem "Pronta"', () {
+    expect(walletTiposChave, ['CPF', 'CNPJ', 'EMAIL', 'TELEFONE', 'ALEATORIA']);
+    expect(
+      [for (final tipo in walletTiposChave) walletTipoCurto(tipo)],
+      ['CPF', 'CNPJ', 'E-mail', 'Celular', 'Aleatória'],
+    );
   });
 }

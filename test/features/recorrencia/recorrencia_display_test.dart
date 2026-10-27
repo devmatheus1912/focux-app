@@ -109,10 +109,7 @@ void main() {
     expect(recorrenciaAcaoPath(RecorrenciaAcao.cancelar), 'cancelar');
   });
 
-  test('recorrenciaCountLabel e filtro', () {
-    expect(recorrenciaCountLabel(0), 'Nenhuma assinatura');
-    expect(recorrenciaCountLabel(1), '1 assinatura');
-    expect(recorrenciaCountLabel(3), '3 assinaturas');
+  test('filtros de recorrência', () {
     expect(
       recorrenciaHubFiltroLabel(RecorrenciaHubFiltro.pendente),
       'Pendentes',

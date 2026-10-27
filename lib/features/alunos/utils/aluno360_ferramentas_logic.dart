@@ -21,6 +21,7 @@ enum Aluno360FerramentasModule {
   engajamento,
   anamnese,
   mensalidades,
+  recorrencia,
   chat,
   feedbackVideo,
 }
@@ -42,6 +43,7 @@ abstract final class Aluno360FerramentasLogic {
         Icons.local_fire_department_outlined,
       Aluno360FerramentasModule.anamnese => Icons.assignment_outlined,
       Aluno360FerramentasModule.mensalidades => Icons.payments_outlined,
+      Aluno360FerramentasModule.recorrencia => Icons.autorenew_rounded,
       Aluno360FerramentasModule.chat => Icons.chat_bubble_outline_rounded,
       Aluno360FerramentasModule.feedbackVideo => Icons.videocam_outlined,
     };

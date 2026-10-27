@@ -14,7 +14,6 @@ void main() {
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
     expect(screen, contains('AlunoInsetFormField'));
     expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('showFxInsetPickerSheet'));
     expect(screen, isNot(contains('FxSettingsGroup')));
     expect(screen, contains('FxHubHeader'));
     expect(screen, contains('OperationalMetricTile'));
@@ -27,7 +26,7 @@ void main() {
     expect(screen, contains('safePopOrGo'));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('AlunoSegmentedChoice'));
-    expect(screen, contains('FxActionChip'));
+    expect(screen, contains('FxChoiceStrip'));
     expect(screen, contains('RefreshIndicator'));
     expect(screen, isNot(contains('FxKeyboardPopScope')));
     expect(screen, isNot(contains('FxLiquidSecondaryButton')));
@@ -37,14 +36,13 @@ void main() {
       screen.replaceAll('FxSatelliteListTile(', ''),
       isNot(contains('ListTile(')),
     );
-    expect(screen, contains('_ResumoMensalCard'));
+    expect(screen, isNot(contains('_ResumoMensalCard')));
+    expect(screen, isNot(contains('Pronta')));
+    expect(screen, contains('Alterar chave'));
     expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt'));
-    expect(screen, contains("label: 'Perfil'"));
     expect(screen, contains("safePopOrGo(context, '/perfil')"));
     expect(screen, contains('walletPixStatusValue'));
-    expect(screen, contains('totalPrevisto.format()'));
     expect(screen, contains('showSticky'));
     expect(screen, contains('perfilWalletProvider'));
-    expect(screen, contains('resumoMensal'));
   });
 }

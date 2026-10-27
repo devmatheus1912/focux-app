@@ -8,7 +8,11 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/feedback_helper.dart';
 import '../../planos/data/plano_recurso.dart';
+import '../../recorrencia/providers/recorrencia_provider.dart';
+import '../../recorrencia/utils/recorrencia_display.dart';
+import '../../recorrencia/widgets/recorrencia_nova_folha.dart';
 import '../../planos/utils/effective_plano_features.dart';
 import '../../planos/utils/plan_gate.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
@@ -75,6 +79,71 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
     );
   }
 
+  /// "Recorrência" do grupo Dinheiro: mostra o que existe e cria a partir daqui,
+  /// com o aluno já escolhido.
+  Widget _linhaRecorrencia(
+    BuildContext context,
+    WidgetRef ref, {
+    required FxSettingsTile Function({
+      required String label,
+      required String subtitle,
+      String value,
+      Widget? accessory,
+      bool locked,
+      String? tier,
+      required VoidCallback onTap,
+    })
+    linha,
+    required void Function(String featureName, VoidCallback action) goPlan,
+    required bool planLocked,
+    required String? tier,
+  }) {
+    final s = S.of(context);
+    final atual = planLocked
+        ? null
+        : ref
+              .watch(
+                recorrenciaDoAlunoProvider((
+                  alunoId: alunoId,
+                  nome: aluno.nome,
+                )),
+              )
+              .value;
+    final proxima = atual?.proximaCobranca?.trim() ?? '';
+    return linha(
+      label: s.alunoRecorrenciaLinha,
+      subtitle: atual == null
+          ? s.alunoRecorrenciaSubVazio
+          : proxima.isEmpty
+          ? recorrenciaStatusLabel(atual.status)
+          : s.alunoRecorrenciaProxima(recorrenciaProximaValue(proxima)),
+      value: atual == null
+          ? (planLocked ? '' : s.alunoRecorrenciaNaoCriada)
+          : recorrenciaValorLabel(atual.valor),
+      locked: planLocked,
+      tier: tier,
+      onTap: () => goPlan(s.alunoRecorrenciaLinha, () async {
+        if (atual != null) {
+          context.push('/financeiro?aba=recorrencias');
+          return;
+        }
+        final criou = await showRecorrenciaNovaFolha(
+          context,
+          ref,
+          alunoId: alunoId,
+          alunoNome: aluno.nome,
+        );
+        if (!criou) return;
+        ref.invalidate(
+          recorrenciaDoAlunoProvider((alunoId: alunoId, nome: aluno.nome)),
+        );
+        if (context.mounted) {
+          FeedbackHelper.showSuccess(context, recorrenciaCriadaMensagem);
+        }
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
@@ -98,6 +167,10 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
       Aluno360FerramentasModule.mensalidades: (
         PlanoRecursoKeys.financeiro,
         PlanGate.watch(ref, PlanoRecursoKeys.financeiro),
+      ),
+      Aluno360FerramentasModule.recorrencia: (
+        PlanoRecursoKeys.recorrencia,
+        PlanGate.watch(ref, PlanoRecursoKeys.recorrencia),
       ),
       Aluno360FerramentasModule.aderencia: (
         PlanoRecursoKeys.relatorios,
@@ -272,6 +345,14 @@ class Aluno360FerramentasGrupos extends ConsumerWidget {
               ? '…'
               : Aluno360FerramentasLogic.anamneseValue(anamneseStatus),
           onTap: () => push('/alunos/$alunoId/anamnese'),
+        ),
+        Aluno360FerramentasModule.recorrencia => _linhaRecorrencia(
+          context,
+          ref,
+          linha: linha,
+          goPlan: goPlan,
+          planLocked: planLocked,
+          tier: planLocked ? PlanGate.tierLabel(planLock.$2.planoMinimo) : null,
         ),
         Aluno360FerramentasModule.chat => linha(
           label: 'Chat',

@@ -40,7 +40,7 @@ void main() {
     const alunosStatePart =
         'lib/features/alunos/screens/alunos_list_screen_state.part.dart';
     const financeiroTabs = [
-      'lib/features/financeiro/screens/financeiro_dashboard_screen.dart',
+      'lib/features/financeiro/screens/financeiro_resultados_screen.dart',
       'lib/features/financeiro/screens/financeiro_mensalidades_tab.dart',
     ];
 
