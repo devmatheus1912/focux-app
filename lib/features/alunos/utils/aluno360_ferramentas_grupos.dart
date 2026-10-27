@@ -31,9 +31,6 @@ const aluno360ModulosDoGrupo = <Aluno360FerramentasGrupo, List<Aluno360Ferrament
   ],
 };
 
-Aluno360FerramentasGrupo aluno360GrupoDoModulo(Aluno360FerramentasModule m) =>
-    aluno360ModulosDoGrupo.entries.firstWhere((e) => e.value.contains(m)).key;
-
 class Aluno360FerramentasSecao {
   const Aluno360FerramentasSecao({
     required this.grupo,

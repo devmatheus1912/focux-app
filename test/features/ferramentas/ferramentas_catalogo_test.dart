@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/ferramentas/data/ferramentas_catalogo_models.dart';
 import 'package:focux_app/features/ferramentas/utils/ferramentas_icons.dart';
-import 'package:focux_app/features/dashboard/data/dashboard_tool_shortcuts.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_tool_groups.dart';
 
 import 'catalogo_fixture.dart';
@@ -39,17 +38,6 @@ void main() {
     final found = catalogo.findByLegacyId('lead-publico');
     expect(found, isNotNull);
     expect(found!.titulo, anyOf('Lead Público', 'Captação'));
-  });
-
-  test('atalhosHome esconde configuração inicial quando onboarding completo', () {
-    final withWizard = atalhosHomeFromCatalogo(catalogo);
-    expect(withWizard.any((s) => s.label.contains('Configuração')), isTrue);
-
-    final filtered = atalhosHomeFromCatalogo(
-      catalogo,
-      hideOnboardingWizard: true,
-    );
-    expect(filtered.any((s) => s.label.contains('Configuração')), isFalse);
   });
 
   test('papel studio fica secundário (depois dos primários)', () {

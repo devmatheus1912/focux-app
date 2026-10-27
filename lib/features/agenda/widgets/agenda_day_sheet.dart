@@ -169,6 +169,7 @@ class AgendaGapTile extends StatelessWidget {
     final mute = ShellChrome.of(context).mute;
     return FxSatelliteListTile(
       title: label,
+      titleCase: false,
       subtitle: const Text('Horário livre'),
       muted: onTap == null,
       trailing:

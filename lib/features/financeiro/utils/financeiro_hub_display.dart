@@ -1,5 +1,4 @@
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/utils/satellite_screen_utils.dart';
 import '../data/financeiro_repository.dart';
 
 /// Segmentos da tela única do Financeiro.
@@ -233,16 +232,6 @@ String financeiroMensalidadeMesLabel(String mesReferencia) {
   return raw.isEmpty ? 'Sem mês' : raw;
 }
 
-String financeiroMensalidadeSubtitle(String status, String mesReferencia) {
-  return '${financeiroMensalidadeStatusLabel(status)} · '
-      '${financeiroMensalidadeMesLabel(mesReferencia)}';
-}
-
-String financeiroMensalidadeHubSubtitle({required String mes}) {
-  final month = mes.trim();
-  return month.isEmpty ? 'Mensalidade' : month;
-}
-
 const _meses = [
   '',
   'Janeiro',
@@ -460,4 +449,3 @@ String financeiroContatoSubtitle(String? observacao, String? registradoEm) {
   return '$note · $when';
 }
 
-String financeiroContatosEmpty() => 'Nenhum contato nesta cobrança';

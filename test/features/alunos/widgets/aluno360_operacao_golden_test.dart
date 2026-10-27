@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_copilot_logic.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_executar_confirm.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_copilot_prescription.dart';
-import 'package:focux_app/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
 
 import '../../../support/tolerant_golden_comparator.dart';
 
@@ -121,32 +120,5 @@ void main() {
     );
   });
 
-
-  testWidgets('adherence legend golden at 390px', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true, brightness: Brightness.light),
-        home: MediaQuery(
-          data: const MediaQueryData(size: Size(390, 844)),
-          child: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.all(16),
-              child: AlunoOperacaoAdherenceLegend(
-                activeColor: const Color(0xFF22C55E),
-                missColor: const Color(0xFFDC6B6B),
-                todayRingColor: const Color(0xFF12A3A3),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    await expectFocuxGolden(
-      find.byType(AlunoOperacaoAdherenceLegend),
-      'goldens/aluno360_adherence_legend_390.png',
-    );
-  });
 
 }

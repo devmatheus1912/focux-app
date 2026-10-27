@@ -1,34 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/widgets/operational_metric_tile.dart';
 import 'package:focux_app/features/dashboard/data/command_center_data.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_microcopy.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart';
-import 'package:focux_app/features/dashboard/widgets/dashboard_finance_empty.dart';
-import 'package:focux_app/core/widgets/fx_action_chip.dart';
 import 'package:focux_app/features/dashboard/widgets/dashboard_home_activation_strip.dart';
 
 void main() {
-  testWidgets('finance empty é tile inset, sem chip in-card', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B4F5C)),
-        ),
-        home: Scaffold(
-          body: DashboardFinanceEmptyState(mes: 'agosto', onOpen: () {}),
-        ),
-      ),
-    );
-
-    expect(find.byType(FxActionChip), findsNothing);
-    expect(find.byType(FilledButton), findsNothing);
-    expect(find.byType(OperationalMetricTile), findsOneWidget);
-    expect(find.textContaining('RECEBIDO'), findsOneWidget);
-    expect(find.text('R\$ 0'), findsOneWidget);
-    expect(find.text(DashboardMicrocopy.abrirFinanceiro), findsNothing);
-  });
-
   testWidgets('agenda strip mostra até 3 compromissos', (tester) async {
     final items = [
       AgendamentoResumo(

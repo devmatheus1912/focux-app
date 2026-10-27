@@ -172,22 +172,6 @@ void main() {
       );
     });
 
-    test('outros no mesmo bloco', () {
-      final todos = [
-        _item(1, 'AQUECIMENTO', 0),
-        _item(2, 'AQUECIMENTO', 1),
-        _item(3, 'TRABALHO', 2),
-      ];
-      expect(
-        outrosNoMesmoBloco<TreinoExercicioItem>(
-          todos,
-          todos[0],
-          (e) => e.bloco,
-          (a, b) => a.id == b.id,
-        ),
-        1,
-      );
-    });
   });
 
   group('vídeo da Focux é fixo', () {

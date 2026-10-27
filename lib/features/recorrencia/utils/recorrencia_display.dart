@@ -101,19 +101,6 @@ String recorrenciaAcaoFeito(RecorrenciaAcao acao) => switch (acao) {
 
 String recorrenciaValorLabel(FxMoney valor) => valor.format();
 
-String recorrenciaFxIcon(String status) {
-  switch (status.trim().toUpperCase()) {
-    case 'ATIVA':
-      return 'circle-check';
-    case 'PAUSADA':
-      return 'alert-triangle';
-    case 'CANCELADA':
-      return 'alert-triangle';
-    default:
-      return 'coin';
-  }
-}
-
 bool recorrenciaDanger(String status) =>
     status.trim().toUpperCase() == 'CANCELADA';
 
@@ -241,8 +228,3 @@ String recorrenciaProximaValue(String? proximaCobranca) {
   return fxDateShort(parsed);
 }
 
-String recorrenciaProximaHint(String? proximaCobranca) {
-  final prox = proximaCobranca?.trim();
-  if (prox == null || prox.isEmpty) return 'Sem data da próxima cobrança';
-  return 'Próximo vencimento';
-}

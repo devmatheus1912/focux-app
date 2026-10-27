@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/features/alunos/utils/aluno360_a11y.dart';
 import 'package:focux_app/features/dashboard/data/dashboard_tool_shortcuts.dart';
 import 'package:focux_app/features/dashboard/utils/dashboard_a11y.dart';
 import 'package:focux_app/features/ferramentas/data/ferramentas_catalogo_models.dart';
@@ -34,25 +33,4 @@ void main() {
     );
   });
 
-  test('aluno360 module tile semantics includes badge', () {
-    expect(
-      aluno360ModuleTileSemantics(
-        label: 'Treinos',
-        sub: 'Ver ficha completa',
-        badge: 'Novo',
-      ),
-      'Treinos, Novo. Ver ficha completa',
-    );
-  });
-
-  test('aluno360 follow-up semantics includes subtitle and sheet hint', () {
-    expect(
-      aluno360FollowUpSemantics(subtitle: 'Ligar hoje', expanded: false),
-      'Próximo contato. Ligar hoje. Toque para abrir o agendamento',
-    );
-    expect(
-      aluno360FollowUpSemantics(subtitle: 'Ligar hoje', expanded: true),
-      'Próximo contato. Ligar hoje. Toque para recolher ações',
-    );
-  });
 }

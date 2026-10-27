@@ -98,29 +98,6 @@ class DashboardToolShortcut {
   }
 }
 
-/// Atalhos da home a partir de `atalhosHome` (+ destaqueHome), filtrando
-/// Configuração inicial quando onboarding já está completo.
-List<DashboardToolShortcut> atalhosHomeFromCatalogo(
-  FerramentasCatalogo catalogo, {
-  bool hideOnboardingWizard = false,
-}) {
-  final raw = catalogo.atalhosHome;
-  final list =
-      raw.isNotEmpty
-          ? raw
-          : [
-            for (final hub in catalogo.hubs)
-              for (final item in hub.itens)
-                if (item.destaqueHome) item,
-          ];
-
-  return [
-    for (final entrada in list)
-      if (!(hideOnboardingWizard && _isOnboardingWizard(entrada)))
-        DashboardToolShortcut.fromEntrada(entrada),
-  ];
-}
-
 /// Folhas + portas de hub (itens com abas contam como 1).
 List<DashboardToolShortcut> catalogLeavesFromHub(CatalogoHub hub) {
   return [
@@ -128,14 +105,3 @@ List<DashboardToolShortcut> catalogLeavesFromHub(CatalogoHub hub) {
   ];
 }
 
-bool _isOnboardingWizard(CatalogoEntrada e) {
-  final route = normalizeFerramentasRotaApp(e.rotaApp);
-  if (route == '/onboarding/wizard') return true;
-  final keys = [e.id, ...e.legacyIds, e.titulo.toLowerCase()];
-  return keys.any(
-    (k) =>
-        k.toLowerCase().contains('configuracao') ||
-        k.toLowerCase().contains('configuração') ||
-        k.toLowerCase().contains('onboarding'),
-  );
-}

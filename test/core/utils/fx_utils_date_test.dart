@@ -37,13 +37,4 @@ void main() {
     });
   });
 
-  group('fxMonthYear', () {
-    test('abbreviates month and appends year', () {
-      expect(fxMonthYear(DateTime(2026, 5, 1)), 'Mai 2026');
-    });
-
-    test('january', () {
-      expect(fxMonthYear(DateTime(2026, 1, 1)), 'Jan 2026');
-    });
-  });
 }

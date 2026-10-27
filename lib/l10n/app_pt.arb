@@ -441,19 +441,10 @@
       "nome": {"type": "String"}
     }
   },
-  "rotinaAbreVe": "{nome} abre o app e vê: {eyebrow}, {titulo}.",
-  "@rotinaAbreVe": {
-    "placeholders": {
-      "nome": {"type": "String"},
-      "eyebrow": {"type": "String"},
-      "titulo": {"type": "String"}
-    }
-  },
   "rotinaPorDescanso": "Pôr um descanso",
   "rotinaDescanso": "Descanso",
   "rotinaAvisar": "Avisar para não vir",
   "rotinaAvisoLinha": "No dia marcado, ele vê descanso ao abrir e recebe um aviso. O treino continua lá.",
-  "rotinaVazia": "Nenhum treino ainda. Atribua um e ele aparece aqui, no fim da fila.",
   "rotinaNaoAbriu": "Não abriu a rotina. Tente de novo.",
   "rotinaEstadoVazia": "Escolha quantos dias por semana o aluno treina.",
   "rotinaEstado": "{dias, plural, =1{1 dia} other{{dias} dias}} · {prontas} de {sessoes} prontas",
@@ -508,8 +499,6 @@
   "treinoBlocoTrabalho": "Trabalho",
   "treinoBlocoAlongamento": "Alongamento",
   "treinoBlocoAjuste": "Ajuste",
-  "treinoAddAquecimento": "Aquecimento",
-  "treinoAddAlongamento": "Alongamento",
   "rotinaSessaoAdiada": "A troca de {sessoes} vale quando {nome} terminar o treino.",
   "@rotinaSessaoAdiada": {
     "placeholders": {
@@ -663,12 +652,6 @@
       "n": {"type": "int"}
     }
   },
-  "volumeDias": "{dias}",
-  "@volumeDias": {
-    "placeholders": {
-      "dias": {"type": "String"}
-    }
-  },
   "volumeGrupoPeito": "Peito",
   "volumeGrupoCostas": "Costas",
   "volumeGrupoOmbros": "Ombros",
@@ -685,7 +668,6 @@
   "volumeGrupoCorpoTodo": "Corpo todo",
   "volumeGrupoOutros": "Outros",
   "rotinaSessaoMontar": "Toque para montar",
-  "rotinaSessaoSemExercicios": "Sem exercícios. Toque para montar.",
   "rotinaSessaoExercicios": "{n, plural, =1{1 exercício} other{{n} exercícios}}",
   "@rotinaSessaoExercicios": {
     "placeholders": {
@@ -699,12 +681,10 @@
   "rotinaDescansoConfirmaTexto": "As sessões deste dia saem da ficha.",
   "rotinaMaisUmNesteDia": "Mais um neste dia",
   "rotinaSegundoTreino": "2º treino",
-  "rotinaToqueParaNomear": "Toque para nomear",
   "rotinaNomeDaSessao": "Nome da sessão",
   "rotinaNomeExemplo": "Peito",
   "rotinaPronto": "Pronto",
   "rotinaUsarEmOutro": "Usar em outro aluno",
-  "rotinaVaziaDica": "Nenhum treino ainda. Toque um dia e dê o nome da sessão.",
   "rotinaDiaSeg": "Seg",
   "rotinaDiaTer": "Ter",
   "rotinaDiaQua": "Qua",
@@ -1233,7 +1213,6 @@
   "alunoReenviarLinkConfirma": "Gerar link",
   "alunoReenviarLinkErro": "Não foi possível gerar o link.",
   "alunoAindaNaoEntrou": "Ainda não entrou.",
-  "alunoReenviarConviteAcao": "Reenviar convite",
   "alunoReenviarCurto": "Reenviar",
   "alunoReenviarConviteTitulo": "Reenviar o convite?",
   "alunoReenviarConviteTexto": "Ele recebe um link novo para criar a senha. O anterior deixa de valer.",
@@ -1277,7 +1256,6 @@
   "migracaoTextoCarregado": "Texto carregado de {arquivo}. Toque em Analisar texto.",
   "@migracaoTextoCarregado": { "placeholders": { "arquivo": { "type": "String" } } },
   "hojePersonalAgora": "Agora",
-  "hojePersonalVerPainel": "Ver o painel",
   "hojeVerTodas": "Ver todas ({n})",
   "@hojeVerTodas": {
     "placeholders": {
@@ -1313,8 +1291,6 @@
   "hojeFerramentasSub": "Exercícios, captação, vendas e mais",
   "hojePersonalEmDiaTitulo": "Operação sob controle",
   "hojePersonalEmDiaFrase": "Nada para fazer agora.",
-  "fichaOperacaoAgora": "Agora",
-  "fichaOperacaoVerFicha": "Ver a ficha",
   "copilotoSobrancelha": "Copiloto",
   "copilotoVerTarefas": "Ver tarefas",
   "historicoMenu": "Fichas anteriores",
@@ -1379,8 +1355,6 @@
   "alunoFerramentasLinhaTitulo": "Ferramentas",
   "alunoFerramentasLinhaDetalhe": "Agenda, hábitos, desafios, financeiro e mais.",
   "alunoFerramentasLinhaVerbo": "Abrir",
-  "alunoFichaLinhaRotulo": "Sua ficha",
-  "treinosFichaTitulo": "Ficha",
   "treinosHojeVerboVer": "Ver",
   "treinosAjudaTooltip": "Sobre os treinos",
   "treinosAjudaTitulo": "Seus treinos",
@@ -1391,7 +1365,6 @@
   "treinosAjudaSemana": "Um dia por linha. A de hoje traz o botão para treinar.",
   "treinosAjudaUltimosTitulo": "Últimos treinos",
   "treinosAjudaUltimos": "Toque num treino feito para ver como foi.",
-  "alunoFerramentasBuscar": "Buscar ferramenta",
   "alunoFerramentasAjudaTooltip": "Sobre as ferramentas",
   "alunoFerramentasAjudaSubtitulo": "O que seu personal liberou no seu plano.",
   "alunoFerramentasAjudaGruposTitulo": "Grupos",
@@ -1508,9 +1481,7 @@
   "financeiroComoRecebe": "Como você recebe",
   "financeiroChaveCadastrada": "Chave PIX cadastrada",
   "financeiroChaveFalta": "Cadastre sua chave PIX para cobrar",
-  "financeiroVerboAbrir": "Abrir",
   "financeiroVerboCadastrar": "Cadastrar",
-  "financeiroVerboVer": "Ver",
   "financeiroCobrancaAuto": "Cobrança automática",
   "financeiroCobrancaAutoStatus": "{n, plural, =0{Ligada · sem falhas} =1{Ligada · 1 falha} other{Ligada · {n} falhas}}",
   "@financeiroCobrancaAutoStatus": {"placeholders": {"n": {"type": "int"}}},
@@ -1558,7 +1529,6 @@
   "@recorrenciaContagem": {"placeholders": {"n": {"type": "int"}}},
   "alunoRecorrenciaLinha": "Recorrência",
   "alunoRecorrenciaNaoCriada": "Não criada",
-  "alunoRecorrenciaCriar": "Criar",
   "alunoRecorrenciaProxima": "Próxima cobrança {data}",
   "@alunoRecorrenciaProxima": {"placeholders": {"data": {"type": "String"}}},
   "alunoRecorrenciaSubVazio": "Cobrar todo mês e gerar o PIX sozinho",
@@ -1580,9 +1550,6 @@
   "@resultadosAtrasaAlunos": {"placeholders": {"n": {"type": "int"}}},
   "resultadosAtrasaValor": "{valor} em atraso",
   "@resultadosAtrasaValor": {"placeholders": {"valor": {"type": "String"}}},
-  "resultadosSecaoVencimentos": "Vencimentos",
-  "resultadosSecaoEvolucao": "Evolução · 6 meses",
-  "resultadosSecaoTop": "Top alunos · acumulado",
   "resultadosSecaoPreco": "Preço sugerido",
   "resultadosDetalhes": "Detalhes",
   "resultadosDetalhesAbrir": "Ver detalhes",
@@ -1607,8 +1574,6 @@
   "resultadosVazioTitulo": "Sem dados para exibir",
   "resultadosVazioTexto": "Quando houver mensalidades, os resultados do mês aparecem aqui.",
   "resultadosSemMes": "Mês",
-  "resultadosAjudaTitulo": "Resultados",
-  "resultadosAjudaSub": "Quanto entrou, quanto falta e quem atrasa.",
   "retencaoTitulo": "Alunos em risco",
   "retencaoSubtitulo": "Quem pode parar de treinar · o que fazer agora",
   "retencaoMetAlto": "Em risco alto",

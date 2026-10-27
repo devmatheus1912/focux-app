@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_timeline_logic.dart';
 
@@ -325,30 +324,6 @@ void main() {
     });
   });
 
-  group('timeline360ShowTitleRow', () {
-    test('hides title row for chat', () {
-      expect(
-        timeline360ShowTitleRow(
-          kind: 'Chat',
-          title: 'Chat · Personal',
-          meta: 'PERSONAL',
-        ),
-        isFalse,
-      );
-    });
-
-    test('shows title row for radar', () {
-      expect(
-        timeline360ShowTitleRow(
-          kind: 'Radar',
-          title: 'Radar Focux · 19 pts',
-          meta: 'Completar mapa corporal',
-        ),
-        isTrue,
-      );
-    });
-  });
-
   group('timeline360ListLabel', () {
     test('check-in short label without treino name', () {
       expect(
@@ -393,64 +368,6 @@ void main() {
           body: 'Nathalia fechou 2 treino(s) em 7 dias.',
         ),
         'Nathalia fechou 2 treino(s) em 7 dias.',
-      );
-    });
-  });
-
-  group('timeline360ShouldShowMetaChip', () {
-    test('hides radar mapa corporal meta when P0 badge is shown', () {
-      expect(
-        timeline360ShouldShowMetaChip(
-          kind: 'Radar',
-          meta: 'Completar mapa corporal',
-          priority: 'P0',
-          title: 'Radar Focux · 19 pts',
-        ),
-        isFalse,
-      );
-    });
-    test('hides PERSONAL remetente duplicate', () {
-      expect(
-        timeline360ShouldShowMetaChip(
-          kind: 'Chat',
-          meta: 'PERSONAL',
-          priority: 'P3',
-          title: 'Chat · Personal',
-        ),
-        isFalse,
-      );
-    });
-
-    test('shows non-mapa radar meta', () {
-      expect(
-        timeline360ShouldShowMetaChip(
-          kind: 'Radar',
-          meta: 'Revisar aderência semanal',
-          priority: 'P1',
-          title: 'Radar Focux · 12 pts',
-        ),
-        isTrue,
-      );
-    });
-
-    test('hides autonomia business priority and action codes', () {
-      expect(
-        timeline360ShouldShowMetaChip(
-          kind: 'Autonomia',
-          meta: 'ALTA',
-          priority: 'P2',
-          title: 'Completar perfil base',
-        ),
-        isFalse,
-      );
-      expect(
-        timeline360ShouldShowMetaChip(
-          kind: 'Autonomia',
-          meta: 'VIEWED',
-          priority: 'P2',
-          title: 'Completar perfil base',
-        ),
-        isFalse,
       );
     });
   });
@@ -503,31 +420,6 @@ void main() {
       expect(
         isSmokeTimelineContent('Nathalia ainda não completou o mapa corporal.'),
         isFalse,
-      );
-    });
-  });
-
-  group('timeline360PriorityInk', () {
-    test('darkens brand teal on light surfaces', () {
-      const primary = Color(0xFF18B5B5);
-      final ink = timeline360PriorityInk(primary, isDark: false);
-      expect(ink, isNot(same(primary)));
-      expect(ink.computeLuminance(), lessThan(primary.computeLuminance()));
-    });
-  });
-
-  group('timeline360ShouldShowPriorityBadge', () {
-    test('hides priority on chat events', () {
-      expect(
-        timeline360ShouldShowPriorityBadge(kind: 'Chat'),
-        isFalse,
-      );
-    });
-
-    test('shows priority on radar events', () {
-      expect(
-        timeline360ShouldShowPriorityBadge(kind: 'Radar'),
-        isTrue,
       );
     });
   });

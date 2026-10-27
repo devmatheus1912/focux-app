@@ -41,8 +41,6 @@ String migracaoSalvarConfirmTitle(int count) =>
 String migracaoSalvarConfirmMessage() =>
     'Quem tem e-mail recebe o convite sozinho. Quem só tem telefone fica para o WhatsApp.';
 
-String migracaoWhatsappGrupo() => 'Estes só têm telefone.';
-
 String migracaoWhatsappFolha() =>
     'Estes só têm telefone. O texto já está copiado.';
 

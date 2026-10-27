@@ -11,10 +11,6 @@ RetencaoNivel nivelDoScore(int score) => score >= 70
     ? RetencaoNivel.atencao
     : RetencaoNivel.alto;
 
-/// A fila é a lista sem o primeiro, que já está em "Chamar agora".
-List<RetencaoAlunoScore> filaSemOPrimeiro(List<RetencaoAlunoScore> todos) =>
-    todos.length <= 1 ? const [] : todos.sublist(1);
-
 /// Fila sem o aluno em destaque (por id: o destaque pode vir de outra lista).
 List<RetencaoAlunoScore> filaSemAluno(
   List<RetencaoAlunoScore> todos,

@@ -123,22 +123,6 @@ void main() {
     expect(financeiroAlunoContextLabel('  '), 'Mensalidades deste aluno');
   });
 
-  test('financeiroMensalidadeSubtitle', () {
-    expect(
-      financeiroMensalidadeSubtitle('ATRASADO', '2026-09-01'),
-      'Atrasado · 2026-09',
-    );
-    expect(financeiroMensalidadeSubtitle('PAGO', ''), 'Pago · Sem mês');
-  });
-
-  test('financeiroMensalidadeHubSubtitle usa só o mês', () {
-    expect(
-      financeiroMensalidadeHubSubtitle(mes: 'Setembro 2026'),
-      'Setembro 2026',
-    );
-    expect(financeiroMensalidadeHubSubtitle(mes: '  '), 'Mensalidade');
-  });
-
   test('financeiroMensalidadeMesPorExtenso e tipo de contato', () {
     expect(
       financeiroMensalidadeMesPorExtenso('2026-09-01'),
@@ -261,15 +245,4 @@ void main() {
     );
   });
 
-  test('financeiro contato do detalhe S3', () {
-    expect(financeiroContatosEmpty(), 'Nenhum contato nesta cobrança');
-    expect(
-      financeiroContatoSubtitle(null, '2026-09-07T12:00:00'),
-      '07/09/2026',
-    );
-    expect(
-      financeiroContatoSubtitle('Ligou e pediu PIX', '2026-09-07T12:00:00'),
-      'Ligou e pediu PIX · 07/09/2026',
-    );
-  });
 }

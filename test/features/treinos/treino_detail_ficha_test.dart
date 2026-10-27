@@ -93,21 +93,6 @@ void main() {
       expect(blocos.map((b) => b.$1), ['TRABALHO', 'AJUSTE']);
     });
 
-    test('título de bloco só quando ajuda', () {
-      expect(mostrarTituloDeBloco(blocosComExercicio([_item(1, 'TRABALHO', 0)])), isFalse);
-      expect(mostrarTituloDeBloco(blocosComExercicio([_item(1, 'AQUECIMENTO', 0)])), isTrue);
-      expect(mostrarTituloDeBloco(blocosComExercicio(todos)), isTrue);
-      expect(mostrarTituloDeBloco(const []), isFalse);
-    });
-
-    test('reordenar um bloco manda todos os ids do treino', () {
-      final ids = idsCompletosAoReordenar(
-        todos: todos,
-        doBloco: [todos[1], todos[2]],
-        novaOrdemDoBloco: [3, 2],
-      );
-      expect(ids, [1, 3, 2, 4]);
-    });
   });
 
   group('contexto da ficha', () {

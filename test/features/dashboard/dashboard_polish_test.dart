@@ -47,7 +47,6 @@ void main() {
       'lib/features/dashboard/widgets/hoje_base_secao.dart',
       'lib/features/dashboard/utils/hoje_agora.dart',
       'lib/features/dashboard/widgets/dashboard_agenda_hoje_strip.dart',
-      'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
       'lib/features/dashboard/widgets/dashboard_home_primary_slivers.dart',
       'lib/features/dashboard/widgets/dashboard_shimmer_loading.dart',
       'lib/features/dashboard/utils/dashboard_microcopy.dart',
@@ -90,7 +89,6 @@ void main() {
     expect(shortcutsFile, isNot(contains("label: 'Preços'")));
     expect(shortcutsFile, isNot(contains('static const List')));
     expect(shortcutsFile, contains('fromEntrada'));
-    expect(shortcutsFile, contains('atalhosHomeFromCatalogo'));
 
     final semanticsCount = 'Semantics('.allMatches(screen).length;
     expect(semanticsCount, greaterThanOrEqualTo(4));
@@ -157,11 +155,4 @@ void main() {
     expect(primeiraTela, contains('SetupOnboardingWidget'));
   });
 
-  test('Home opera o dia em métrica e satellite', () {
-    final finance = File(
-      'lib/features/dashboard/widgets/dashboard_finance_empty.dart',
-    ).readAsStringSync();
-    expect(finance, contains('OperationalMetricTile'));
-    expect(finance, isNot(contains('FxActionChip')));
-  });
 }

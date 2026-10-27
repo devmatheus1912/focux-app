@@ -27,8 +27,6 @@ String addAlunoProntoParaConvidar(String firstName) =>
 /// Valor do chip "Outro" do Objetivo (texto livre).
 const addAlunoObjetivoOutro = '__outro__';
 
-String addAlunoSalvarTooltip() => 'Cadastrar';
-
 bool addAlunoEmailValido(String raw) =>
     RegExp(addAlunoEmailPattern).hasMatch(raw.trim());
 

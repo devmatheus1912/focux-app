@@ -167,19 +167,6 @@ String alunoListAderenciaLabel(int aderenciaPercent) =>
 /// Legenda do sparkline do card; curta para caber na largura do gráfico.
 const alunoListSparklineLabel = '7 dias';
 
-bool shouldShowAlunoListOpsLine({
-  required String adherenceLabel,
-  required bool triageContextActive,
-  required int? aderenciaPercent,
-  AlunoFiltro filtro = AlunoFiltro.todos,
-}) =>
-    alunoListOpsText(
-      adherenceLabel: adherenceLabel,
-      triageContextActive: triageContextActive,
-      aderenciaPercent: aderenciaPercent,
-      filtro: filtro,
-    ).isNotEmpty;
-
 /// O BFF ainda não filtra por status: `inativos` cai em todos e o recorte
 /// é feito aqui. Em Prioridade, pausados e bloqueados vão para o fim.
 List<Aluno> alunosListVisiveis(

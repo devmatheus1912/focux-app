@@ -6,21 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
-import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/create_treino_screen.dart';
-import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-const _dias = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
-
-String _resumo(RotinaFila fila) => resumoDaSemana(
-  fila,
-  nomesDosDias: _dias,
-  palavraDescanso: 'Descanso',
-);
 
 String _fonte(String caminho) => File(caminho).readAsStringSync();
 
@@ -28,68 +18,6 @@ void main() {
   setUp(() {
     GoogleFonts.config.allowRuntimeFetching = false;
     SharedPreferences.setMockInitialValues({});
-  });
-
-  group('resumo da semana no perfil 360', () {
-    test('mostra o que treina e o descanso, um dia depois do outro', () {
-      final resumo = _resumo(
-        const RotinaFila(
-          itens: [
-            RotinaItem(
-              id: 1,
-              tipo: RotinaItemTipo.treino,
-              nome: 'Peito',
-              diaSemana: 1,
-            ),
-            RotinaItem(
-              id: 2,
-              tipo: RotinaItemTipo.treino,
-              nome: 'Costas',
-              diaSemana: 2,
-            ),
-            RotinaItem(id: 3, tipo: RotinaItemTipo.descanso),
-            RotinaItem(
-              id: 4,
-              tipo: RotinaItemTipo.treino,
-              nome: 'Pernas',
-              diaSemana: 4,
-            ),
-          ],
-          diasAviso: {3, 5, 6, 7},
-        ),
-      );
-      expect(
-        resumo,
-        'Seg Peito · Ter Costas · Qua descanso · Qui Pernas · '
-        'Sex descanso · Sáb descanso · Dom descanso',
-      );
-    });
-
-    test('dois treinos no mesmo dia aparecem juntos', () {
-      final resumo = _resumo(
-        const RotinaFila(
-          itens: [
-            RotinaItem(
-              id: 1,
-              tipo: RotinaItemTipo.treino,
-              nome: 'Ombro',
-              diaSemana: 5,
-            ),
-            RotinaItem(
-              id: 2,
-              tipo: RotinaItemTipo.treino,
-              nome: 'Posterior',
-              diaSemana: 5,
-            ),
-          ],
-        ),
-      );
-      expect(resumo, contains('Sex Ombro + Posterior'));
-    });
-
-    test('ficha vazia não tem resumo', () {
-      expect(_resumo(RotinaFila.vazia), isEmpty);
-    });
   });
 
   group('uma porta só', () {

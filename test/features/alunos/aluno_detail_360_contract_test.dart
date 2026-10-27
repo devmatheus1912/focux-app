@@ -57,8 +57,6 @@ String _alunoDetailLibrarySource() {
       'lib/features/alunos/widgets/aluno_delete_confirm_sheet.dart';
   const evolucaoCardFile =
       'lib/features/alunos/widgets/aluno360_evolucao_inteligente_card.dart';
-  const adherenceLegendFile =
-      'lib/features/alunos/widgets/aluno_operacao_adherence_legend.dart';
   const profileGapsSheetFile =
       'lib/features/alunos/widgets/aluno360_copilot_profile_gaps_sheet.dart';
   const copilotTaskActionsFile =
@@ -112,7 +110,6 @@ String _alunoDetailLibrarySource() {
   final alunoActions = File(alunoActionsFile).readAsStringSync();
   final deleteConfirmSheet = File(deleteConfirmSheetFile).readAsStringSync();
   final evolucaoCard = File(evolucaoCardFile).readAsStringSync();
-  final adherenceLegend = File(adherenceLegendFile).readAsStringSync();
   final profileGapsSheet = File(profileGapsSheetFile).readAsStringSync();
   final iaRepository = File(iaRepositoryFile).readAsStringSync();
   final detailEvolucaoTab = File(detailEvolucaoTabFile).readAsStringSync();
@@ -126,7 +123,7 @@ String _alunoDetailLibrarySource() {
   final alunoCoreModels = File(alunoCoreModelsFile).readAsStringSync();
   final aluno360Models = File(aluno360ModelsFile).readAsStringSync();
   final alunoHomeModels = File(alunoHomeModelsFile).readAsStringSync();
-  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$fichaCard\n$resumoAgora\n$menuAcoes\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$evolucaoCard\n$adherenceLegend\n$profileGapsSheet\n$iaRepository\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
+  return '$main\n$statePart\n$providers\n$heroWidget\n$heroRiskStyle\n$headerWidget\n$operacaoTab\n$operacaoLogic\n$copilotLogic\n$copilotExecutarLogic\n$copilotOutreachLogic\n$copilotTextLogic\n$outreachDisplay\n$outreachSheet\n$copilotCard\n$fichaCard\n$resumoAgora\n$menuAcoes\n$copilotSupport\n$stickyCta\n$followUp\n$commitmentSheet\n$copilotTaskActions\n$executarButton\n$ferramentasModules\n$timelineCard\n$insetEmptyActions\n$alunoActions\n$deleteConfirmSheet\n$evolucaoCard\n$profileGapsSheet\n$iaRepository\n$detailEvolucaoTab\n$detailFerramentasTab\n$recoveryInsight\n$weightActivity\n$detailLoadingSkeleton\n$alunoRepository\n$alunoCoreModels\n$aluno360Models\n$alunoHomeModels';
 }
 
 void main() {
@@ -521,10 +518,6 @@ void main() {
         isNot(contains('FxActionChip')),
         isNot(contains('Registrar ou agendar')),
       ),
-    );
-    expect(
-      File('lib/features/alunos/utils/aluno360_a11y.dart').readAsStringSync(),
-      contains('aluno360ModuleTileSemantics'),
     );
     expect(
       File(

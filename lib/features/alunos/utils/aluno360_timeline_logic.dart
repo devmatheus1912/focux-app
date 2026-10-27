@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../chat/data/chat_text_formatter.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno360_medida_plausivel.dart';
@@ -147,17 +145,6 @@ String timeline360LocalizeAutonomiaActionCode(String raw) {
     'SKIPPED' => 'Pulou',
     _ => trimmed,
   };
-}
-
-bool timeline360IsAutonomiaActionCode(String? raw) {
-  if (raw == null) return false;
-  return const {
-    'VIEWED',
-    'CLICKED',
-    'COMPLETED',
-    'DISMISSED',
-    'SKIPPED',
-  }.contains(raw.trim().toUpperCase());
 }
 
 String timeline360AutonomiaTaskFingerprint(String title) {
@@ -513,51 +500,6 @@ String timeline360SheetTitle({
   return '$kind · ${title.trim()}';
 }
 
-/// Whether the title row adds information beyond the kind header.
-bool timeline360ShowTitleRow({
-  required String kind,
-  required String title,
-  required String meta,
-}) {
-  if (kind == 'Chat') return false;
-  return title.trim().isNotEmpty;
-}
-
-/// Whether the meta line adds information beyond title/priority.
-bool timeline360ShouldShowMetaChip({
-  required String kind,
-  required String meta,
-  required String priority,
-  required String title,
-}) {
-  if (kind == 'Chat') return false;
-  if (kind == 'Autonomia') {
-    final upper = meta.trim().toUpperCase();
-    if (upper == 'ALTA' ||
-        upper == 'MEDIA' ||
-        upper == 'MÉDIA' ||
-        upper == 'BAIXA') {
-      return false;
-    }
-    if (timeline360IsAutonomiaActionCode(meta)) return false;
-  }
-  if (kind == 'Radar' && meta.toLowerCase().contains('mapa corporal')) {
-    return false;
-  }
-  final trimmed = meta.trim();
-  if (trimmed.isEmpty) return false;
-  if (trimmed == priority.trim()) return false;
-  final upper = trimmed.toUpperCase();
-  if (upper == 'PERSONAL' || upper == 'ALUNO') return false;
-  if (title.toLowerCase().contains(trimmed.toLowerCase())) return false;
-  return true;
-}
-
-/// Chat events use sender in kind header — no priority badge.
-bool timeline360ShouldShowPriorityBadge({required String kind}) {
-  return kind != 'Chat';
-}
-
 String? timeline360SenderLabel({required String meta, required String title}) {
   final upper = meta.trim().toUpperCase();
   if (upper == 'PERSONAL') return 'Personal';
@@ -565,16 +507,6 @@ String? timeline360SenderLabel({required String meta, required String title}) {
   if (title.contains('Personal')) return 'Personal';
   if (title.contains('Aluno')) return 'Aluno';
   return null;
-}
-
-/// Ink on priority pill backgrounds — darkens brand teal for WCAG AA on white.
-Color timeline360PriorityInk(Color accent, {required bool isDark}) {
-  if (isDark) return accent;
-  final hsl = HSLColor.fromColor(accent);
-  if (hsl.hue >= 95 && hsl.hue <= 165) {
-    return Color.lerp(accent, EagleTokens.brandDeep, 0.42)!;
-  }
-  return Color.lerp(accent, EagleTokens.good, 0.48)!;
 }
 
 bool timeline360BodyExpandable(

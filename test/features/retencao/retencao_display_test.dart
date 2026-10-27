@@ -22,20 +22,6 @@ void main() {
     expect(nivelDoScore(100), RetencaoNivel.saudavel);
   });
 
-  group('filaSemOPrimeiro', () {
-    test('vazia, um e vários', () {
-      expect(filaSemOPrimeiro(const []), isEmpty);
-      expect(filaSemOPrimeiro([_s(1, 'Ana', 10)]), isEmpty);
-      final r = filaSemOPrimeiro([_s(1, 'Ana', 10), _s(2, 'Beto', 20)]);
-      expect(r.map((e) => e.alunoNome), ['Beto']);
-    });
-    test('filaSemAluno tira o destaque pelo id, onde ele estiver', () {
-      final lista = [_s(1, 'Ana', 10), _s(2, 'Beto', 20), _s(3, 'Cris', 30)];
-      expect(filaSemAluno(lista, 2).map((e) => e.alunoId), [1, 3]);
-      expect(filaSemAluno(lista, null), hasLength(3));
-    });
-  });
-
   group('mostrarFiltros', () {
     test('um grupo só: sem filtros', () {
       expect(

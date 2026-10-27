@@ -51,30 +51,6 @@ class SemanaMontada {
   final List<int> avisos;
 }
 
-SemanaMontada filaDaSemana(List<DiaDaSemana> dias) {
-  final itens = <ItemDaFila>[];
-  final avisos = <int>[];
-  var viuSessao = false;
-  for (final dia in dias) {
-    final nomes = dia.sessoes
-        .map((s) => s.nome.trim())
-        .where((nome) => nome.isNotEmpty)
-        .toList();
-    if (nomes.isNotEmpty && !dia.descanso) {
-      viuSessao = true;
-      for (final nome in nomes) {
-        itens.add(ItemDaFila.treino(nome, dia.dia));
-      }
-      continue;
-    }
-    avisos.add(dia.dia);
-    if (viuSessao && (itens.isEmpty || !itens.last.descanso)) {
-      itens.add(const ItemDaFila.descanso());
-    }
-  }
-  return SemanaMontada(itens: itens, avisos: avisos);
-}
-
 List<DiaDaSemana> semanaDaFila(RotinaFila fila) {
   final dias = List.generate(7, (i) => DiaDaSemana(dia: i + 1));
   final porDia = <int, List<SessaoDaSemana>>{};
@@ -130,29 +106,6 @@ List<DiaDaSemana> semanaPorFrequencia(int diasPorSemana) {
         descanso: !dias.contains(dia),
       ),
   ];
-}
-
-/// Resumo da semana numa linha: "Seg Peito · Ter Costas · Qua descanso…".
-/// Vazio quando a ficha não tem sessão.
-String resumoDaSemana(
-  RotinaFila fila, {
-  required List<String> nomesDosDias,
-  required String palavraDescanso,
-}) {
-  final dias = semanaDaFila(fila);
-  if (dias.every((dia) => dia.sessoes.isEmpty)) return '';
-  return [
-    for (var i = 0; i < dias.length; i++)
-      () {
-        final nomes = dias[i].sessoes
-            .map((sessao) => sessao.nome.trim())
-            .where((nome) => nome.isNotEmpty)
-            .toList();
-        return nomes.isEmpty
-            ? '${nomesDosDias[i]} ${palavraDescanso.toLowerCase()}'
-            : '${nomesDosDias[i]} ${nomes.join(' + ')}';
-      }(),
-  ].join(' · ');
 }
 
 /// Semana toda de descanso: "Recomeçar ficha".

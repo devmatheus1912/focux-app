@@ -81,21 +81,6 @@ const _monthsFull = [
   'dezembro',
 ];
 
-const _monthsShort = [
-  'Jan',
-  'Fev',
-  'Mar',
-  'Abr',
-  'Mai',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Set',
-  'Out',
-  'Nov',
-  'Dez',
-];
-
 /// "4 de maio de 2026"
 String fxDateFull(DateTime d) =>
     '${d.day} de ${_monthsFull[d.month - 1]} de ${d.year}';
@@ -103,9 +88,6 @@ String fxDateFull(DateTime d) =>
 /// "04/05"
 String fxDateShort(DateTime d) =>
     '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
-
-/// "Mai 2026"
-String fxMonthYear(DateTime d) => '${_monthsShort[d.month - 1]} ${d.year}';
 
 /// "hoje às 18:39" · "ontem às 09:05" · "12/09 às 18:39" · "12/09/2025 às 18:39"
 String fxDateTimeLabel(DateTime d, {DateTime? now}) {

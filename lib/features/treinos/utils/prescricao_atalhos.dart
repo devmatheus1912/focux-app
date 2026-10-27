@@ -40,11 +40,3 @@ bool maisDetalhesPreenchidos({
     observacoes.trim().isNotEmpty ||
     tipoSerie.toUpperCase() != 'NORMAL';
 
-/// "Aplicar a todo o bloco": quantos outros exercícios do mesmo bloco seriam
-/// afetados (0 = a opção nem aparece).
-int outrosNoMesmoBloco<T>(
-  List<T> todos,
-  T atual,
-  String Function(T) blocoDe,
-  bool Function(T, T) mesmo,
-) => todos.where((e) => !mesmo(e, atual) && blocoDe(e) == blocoDe(atual)).length;
