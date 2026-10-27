@@ -32,6 +32,7 @@ class TreinoPrescriptionVideoBlock extends ConsumerStatefulWidget {
     required this.isDark,
     required this.busy,
     this.onBusyChanged,
+    this.onUsarCopia,
   });
 
   final int treinoId;
@@ -39,6 +40,9 @@ class TreinoPrescriptionVideoBlock extends ConsumerStatefulWidget {
   final bool isDark;
   final bool busy;
   final ValueChanged<bool>? onBusyChanged;
+
+  /// Troca o exercício do item pela cópia recém-criada (id do novo).
+  final Future<void> Function(int novoExercicioId)? onUsarCopia;
 
   @override
   ConsumerState<TreinoPrescriptionVideoBlock> createState() =>
@@ -205,7 +209,22 @@ class _TreinoPrescriptionVideoBlockState
 
   Future<void> _criarMeu() async {
     HapticFeedback.selectionClick();
-    await context.push<bool>('/exercicios/novo', extra: _exercicio);
+    final criadoId = await context.push<int>(
+      '/exercicios/novo',
+      extra: _exercicio,
+    );
+    final usar = widget.onUsarCopia;
+    if (criadoId == null || usar == null || !mounted) return;
+    final trocar = await showFxConfirmSheet(
+      context,
+      title: 'Usar no treino?',
+      message:
+          'Seu exercício foi criado. Trocar "${_exercicio.nomeDisplay}" '
+          'pelo seu neste treino? A prescrição é mantida.',
+      confirmLabel: 'Usar o meu',
+    );
+    if (!trocar || !mounted) return;
+    await usar(criadoId);
   }
 
   @override

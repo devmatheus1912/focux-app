@@ -163,6 +163,20 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     }
   }
 
+  /// Troca o exercício do item pela cópia do personal, mantendo a prescrição.
+  Future<void> _usarCopia(int novoExercicioId) async {
+    try {
+      await widget.repo.substituirExercicio(
+        widget.treinoId,
+        widget.item,
+        novoExercicioId,
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    }
+  }
+
   /// Aplica só séries, repetições e descanso: carga, RPE e observações de cada
   /// exercício continuam como estavam.
   Future<void> _aplicarEm(
@@ -241,6 +255,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         onBusyChanged: (value) {
           if (mounted) setState(() => _videoBusy = value);
         },
+        onUsarCopia: _usarCopia,
       ),
       stickyFooter: FxLiquidPrimaryButton(
         label: treinoPrescriptionSaveLabel(),

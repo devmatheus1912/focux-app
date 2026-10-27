@@ -128,73 +128,68 @@ class ExercisePickerFilterBar extends StatelessWidget {
               ),
             ),
           ],
-          Row(
-            children: [
-              Expanded(
-                child: _FilterChip(
-                  label: 'Favoritos',
-                  icon:
-                      filter.somenteFavoritos
-                          ? Icons.star_rounded
-                          : Icons.star_outline_rounded,
-                  selected: filter.somenteFavoritos,
-                  primary: primary,
-                  isDark: isDark,
-                  expanded: true,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onChanged(
-                      filter.copyWith(
-                        somenteFavoritos: !filter.somenteFavoritos,
-                      ),
-                    );
-                  },
-                ),
+          ClipRect(
+            clipBehavior: Clip.none,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label:
+                        advancedCount > 0
+                            ? 'Filtros ($advancedCount)'
+                            : 'Filtros',
+                    icon: Icons.tune_rounded,
+                    selected: advancedCount > 0,
+                    primary: primary,
+                    isDark: isDark,
+                    onTap: () => _openAdvanced(context),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Favoritos',
+                    icon:
+                        filter.somenteFavoritos
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                    selected: filter.somenteFavoritos,
+                    primary: primary,
+                    isDark: isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onChanged(
+                        filter.copyWith(
+                          somenteFavoritos: !filter.somenteFavoritos,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'Com vídeo',
+                    icon: Icons.play_circle_outline_rounded,
+                    selected: filter.somenteComVideo,
+                    primary: primary,
+                    isDark: isDark,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      onChanged(
+                        filter.copyWith(
+                          somenteComVideo: !filter.somenteComVideo,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _FilterChip(
-                  label: 'Com vídeo',
-                  icon: Icons.play_circle_outline_rounded,
-                  selected: filter.somenteComVideo,
-                  primary: primary,
-                  isDark: isDark,
-                  expanded: true,
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onChanged(
-                      filter.copyWith(
-                        somenteComVideo: !filter.somenteComVideo,
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _FilterChip(
-                  label:
-                      advancedCount > 0
-                          ? 'Filtros ($advancedCount)'
-                          : 'Filtros',
-                  icon: Icons.tune_rounded,
-                  selected: advancedCount > 0,
-                  primary: primary,
-                  isDark: isDark,
-                  expanded: true,
-                  onTap: () => _openAdvanced(context),
-                ),
-              ),
-            ],
+            ),
           ),
           if (caption != null) ...[
             const SizedBox(height: 8),
             Semantics(
               label: 'Resultado dos filtros: $caption',
-              child: Text(
-                caption,
-                style: FxSettingsLayout.footer(color: mute),
-              ),
+              child: Text(caption, style: FxSettingsLayout.footer(color: mute)),
             ),
           ],
         ],
@@ -211,7 +206,6 @@ class _FilterChip extends StatelessWidget {
     required this.isDark,
     required this.onTap,
     this.icon,
-    this.expanded = false,
   });
 
   final String label;
@@ -220,7 +214,6 @@ class _FilterChip extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final VoidCallback onTap;
-  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
@@ -239,15 +232,8 @@ class _FilterChip extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 160),
             curve: Curves.easeOutCubic,
-            width: expanded ? double.infinity : null,
-            constraints: BoxConstraints(
-              minHeight: 40,
-              minWidth: expanded ? 0 : 0,
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: expanded ? 8 : 12,
-              vertical: 8,
-            ),
+            constraints: BoxConstraints(minHeight: 44),
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
               color:
                   selected
@@ -260,12 +246,12 @@ class _FilterChip extends StatelessWidget {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
                   Icon(
                     icon,
-                    size: 15,
+                    size: 16,
                     color: selected ? primary : ink.withValues(alpha: 0.72),
                   ),
                   const SizedBox(width: 4),
@@ -279,7 +265,7 @@ class _FilterChip extends StatelessWidget {
                     style: FocuxHubTypography.bodyMuted(
                       color: selected ? primary : ink,
                       fontWeight: FontWeight.w700,
-                    ).copyWith(fontSize: expanded ? 12 : null),
+                    ).copyWith(fontSize: 13),
                   ),
                 ),
               ],

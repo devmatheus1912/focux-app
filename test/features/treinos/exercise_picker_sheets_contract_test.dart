@@ -6,12 +6,14 @@ import '../../support/screen_source_bundle.dart';
 
 void main() {
   test('picker sheets extraídos para widgets reutilizáveis', () {
-    final library = File(
-      'lib/features/treinos/widgets/exercise_library_panel.dart',
-    ).readAsStringSync();
-    final filters = File(
-      'lib/features/treinos/widgets/exercise_picker_filter_sheet.dart',
-    ).readAsStringSync();
+    final library =
+        File(
+          'lib/features/treinos/widgets/exercise_library_panel.dart',
+        ).readAsStringSync();
+    final filters =
+        File(
+          'lib/features/treinos/widgets/exercise_picker_filter_sheet.dart',
+        ).readAsStringSync();
     final prescription = readScreenSourceBundle(
       'lib/features/treinos/widgets/prescription_editor_sheet.dart',
     );
@@ -39,7 +41,7 @@ void main() {
       File(
         'lib/features/treinos/screens/widgets/exercise_picker_filter_bar.dart',
       ).readAsStringSync(),
-      allOf(contains('Expanded('), contains('expanded: true')),
+      allOf(contains('SingleChildScrollView('), contains('minHeight: 44')),
     );
   });
 }

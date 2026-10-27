@@ -17,7 +17,8 @@ void main() {
     );
     expect(sheet, contains('picker: true'));
     expect(sheet, contains('class _AlternativaTile'));
-    expect(sheet, contains('OutlinedButton.icon'));
+    expect(sheet, isNot(contains('OutlinedButton')));
+    expect(sheet, contains('Criar exercício personalizado'));
   });
 
   test('template split escolhe no picker certo', () {

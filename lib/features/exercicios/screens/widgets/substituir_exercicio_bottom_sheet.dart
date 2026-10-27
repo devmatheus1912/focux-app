@@ -251,21 +251,20 @@ class _SubstituirExercicioBottomSheetState
                             widget.onCriarNovo != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                widget.onCriarNovo!();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(46),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
+                            child: FxSettingsGroup(
+                              accent: primary,
+                              children: aluno360InsetEmptyActionTiles([
+                                Aluno360InsetEmptyActionSpec(
+                                  icon: Icons.add_rounded,
+                                  accent: BrandPalette.softened(primary),
+                                  label: 'Criar exercício personalizado',
+                                  subtitle: 'Abre o cadastro e usa no lugar deste',
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    widget.onCriarNovo!();
+                                  },
                                 ),
-                              ),
-                              icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text(
-                                'Criar exercício personalizado',
-                              ),
+                              ]),
                             ),
                           ),
                       ],

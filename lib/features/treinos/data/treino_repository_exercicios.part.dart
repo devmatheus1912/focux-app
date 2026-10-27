@@ -77,6 +77,7 @@ extension TreinoRepositoryExercicios on TreinoRepository {
         tipoSerie: item.tipoSerie,
         grupoSuperset: item.grupoSuperset,
         ordem: item.ordem,
+        bloco: item.bloco,
       );
     } on OfflineQueuedException {
       queued = true;

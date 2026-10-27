@@ -248,7 +248,14 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       if (!_isEdit && _videoPath != null) {
         await _enviarVideoDoNovo();
       }
-      if (mounted) context.pop(true);
+      if (mounted) {
+        // cópia de exercício devolve o id para quem quiser usar no treino
+        if (widget.copiaDe != null && _criadoId != null) {
+          context.pop(_criadoId);
+        } else {
+          context.pop(true);
+        }
+      }
     } on OfflineQueuedException {
       if (mounted) leaveWithQueuedNotice(context, '/exercicios');
     } catch (e) {

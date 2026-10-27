@@ -191,6 +191,58 @@ void main() {
       expect(find.text('Vídeo escolhido'), findsNothing);
     });
 
+    testWidgets('criar a cópia devolve o id para usar no treino', (
+      tester,
+    ) async {
+      tela(tester);
+      final adapter = _Adapter();
+      Object? resultado;
+      final dio = Dio(BaseOptions(baseUrl: 'https://api.example.test'))
+        ..httpClientAdapter = adapter;
+      final router = GoRouter(
+        initialLocation: '/inicio',
+        routes: [
+          GoRoute(
+            path: '/inicio',
+            builder:
+                (context, _) => Scaffold(
+                  body: TextButton(
+                    onPressed: () async {
+                      resultado = await context.push<Object>(
+                        '/novo',
+                        extra: original,
+                      );
+                    },
+                    child: const Text('abrir'),
+                  ),
+                ),
+          ),
+          GoRoute(
+            path: '/novo',
+            builder:
+                (_, state) =>
+                    AddExercicioScreen(copiaDe: state.extra as Exercicio?),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [apiClientProvider.overrideWithValue(_FakeApiClient(dio))],
+          child: MaterialApp.router(
+            locale: const Locale('pt'),
+            supportedLocales: S.supportedLocales,
+            localizationsDelegates: S.localizationsDelegates,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.tap(find.text('abrir'));
+      await _settle(tester);
+      await tester.tap(find.text('Cadastrar'));
+      await _settle(tester);
+      expect(resultado, 55);
+    });
+
     testWidgets('criar envia o exercício novo sem o vídeo da Focux', (
       tester,
     ) async {
