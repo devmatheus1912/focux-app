@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'design_tokens.dart';
+import 'focux_contrast.dart';
 
 /// Derives soft/deep/accent variants from any dynamic primary color.
 /// Used by white-label: personal's corPrimaria is passed here to generate
@@ -11,6 +12,9 @@ class BrandPalette {
   static const Color defaultPrimary = Color(0xFF0B4F5C);
   static const Color defaultSecondary = Color(0xFF3D9AAD);
   static const Color defaultInk = Color(0xFF083D47);
+  /// Fundos de referência (claro/escuro) para checar contraste e pintar prévias.
+  static const Color fundoClaroReferencia = Color(0xFFF6F4FA);
+  static const Color fundoEscuroReferencia = Color(0xFF14161A);
   static const String defaultPrimaryHex = '#0B4F5C';
   static const String defaultSecondaryHex = '#3D9AAD';
 
@@ -150,4 +154,47 @@ class BrandPalette {
   /// Icons and micro-labels in branded rows.
   static Color sectionAccent(Color primary, {required bool dark}) =>
       dark ? accent(primary) : deep(primary);
+
+  /// Gradiente de marca para superfícies grandes (card principal da Home):
+  /// primária → secundária em opacidade baixa, para o texto por cima continuar
+  /// legível em claro e escuro.
+  static LinearGradient gradient(
+    Color primary,
+    Color secondary, {
+    required bool dark,
+  }) {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        primary.withValues(alpha: dark ? 0.30 : 0.16),
+        secondary.withValues(alpha: dark ? 0.18 : 0.08),
+      ],
+    );
+  }
+
+  /// Tinta de superfície a 4% (claro) / 6% (escuro): fundos que sentem a marca
+  /// sem virar cor chapada.
+  static Color surfaceTint(Color primary, {required bool dark}) =>
+      primary.withValues(alpha: dark ? 0.06 : 0.04);
+
+  /// Acento da cor secundária para ícones, anéis e selos. Se a secundária não
+  /// tiver contraste (3:1, texto grande/ícone) com o [background], cai para o
+  /// acento da primária.
+  static Color secondaryAccent(
+    Color secondary,
+    Color primary, {
+    required bool dark,
+    required Color background,
+  }) {
+    // No escuro, a secundária entra mais clara; no claro, mais funda.
+    final candidata = dark ? accent(secondary) : deep(secondary);
+    if (FocuxContrast.meetsWcagAa(candidata, background, largeText: true)) {
+      return candidata;
+    }
+    if (FocuxContrast.meetsWcagAa(secondary, background, largeText: true)) {
+      return secondary;
+    }
+    return sectionAccent(primary, dark: dark);
+  }
 }

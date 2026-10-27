@@ -20,6 +20,9 @@ AlunoTodayTexto alunoTodayTexto(
   AlunoTodayAction a, {
   DateTime? hoje,
   bool prontidaoBaixa = false,
+
+  /// Nome curto do próximo dia de treino ("Qua"), só quando hoje é descanso.
+  String? proximoDia,
 }) => switch (a.mode) {
   AlunoTodayMode.workoutDone => (
     eyebrow: s.treinosProntoHoje,
@@ -42,11 +45,16 @@ AlunoTodayTexto alunoTodayTexto(
   ),
   AlunoTodayMode.workoutReady => _treinoTexto(s, a, hoje, prontidaoBaixa),
   AlunoTodayMode.descansoHoje => (
-    eyebrow: s.treinosHojeDescanso,
-    titulo: (a.treinoNome?.trim().isNotEmpty ?? false)
-        ? s.treinosQuandoVoltar(a.treinoNome!.trim())
-        : s.treinosContinuaLa,
-    descricao: s.treinosContinuaLa,
+    eyebrow: s.alunoHojeDescansoEyebrow,
+    titulo: s.alunoHojeDescansoTitulo,
+    descricao: switch ((a.treinoNome?.trim(), proximoDia?.trim())) {
+      (final String treino, final String dia)
+          when treino.isNotEmpty && dia.isNotEmpty =>
+        s.alunoHojeProximoTreinoDia(treino, dia),
+      (final String treino, _) when treino.isNotEmpty =>
+        s.alunoHojeProximoTreino(treino),
+      _ => s.treinosContinuaLa,
+    },
     prazo: null,
     cta: s.treinosTreinarMesmoAssim,
     ctaPrimario: false,

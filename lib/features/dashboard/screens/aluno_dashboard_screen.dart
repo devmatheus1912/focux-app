@@ -14,7 +14,6 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_help.dart';
-import '../../../core/widgets/fx_action_row.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -38,9 +37,18 @@ import '../utils/aluno_today_action.dart';
 import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_proximos_passos.dart';
-import '../widgets/aluno_semana_faixa.dart';
 import '../widgets/aluno_today_focus_card.dart';
 import '../../checkin/widgets/ficha_vigencia_aluno.dart';
+import '../../../core/widgets/fx_status_pill.dart';
+import '../../treinos/models/rotina_fila.dart';
+import '../../treinos/utils/ficha_vigencia.dart';
+import '../../treinos/widgets/ficha_vigencia_linha.dart';
+import '../widgets/aluno_personal_card.dart';
+import '../../../core/widgets/fx_action_link.dart';
+import '../widgets/aluno_capa_banner.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/brand_style.dart';
+import '../../../core/theme/theme_provider.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 
@@ -333,18 +341,21 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     final s = S.of(context);
     final view = _viewFor(home, now);
     final action = view.action;
+    final semana = faixaDaSemana(home.rotina, home.historico, now);
+    final selo = _seloDaFicha(s, home.rotina, now);
+    final estilo = BrandStyle.fromApi(home.personalBrand.estiloMarca);
+    final secundaria = ref.watch(secondaryColorProvider);
+    final primaria = Theme.of(context).colorScheme.primary;
+    final capa = home.personalBrand.capaUrl;
 
     // (espaço antes, bloco): só entra bloco com conteúdo, então nenhum
     // espaçamento se soma quando um bloco some.
     final blocos = <(double, Widget)>[
+      if (capa != null && capa.trim().isNotEmpty)
+        (0, AlunoCapaBanner(url: capa)),
       (
-        0,
-        AlunoHomeHeader(
-          alunoNome: home.aluno.nome,
-          nomePersonal: home.personalBrand.nomePersonal,
-          logoUrl: home.personalBrand.logoUrl,
-          onOpenChat: () => openAlunoRoute(context, '/chat/aluno'),
-        ),
+        capa != null && capa.trim().isNotEmpty ? TokensStrip.s3 : 0,
+        AlunoHomeHeader(alunoNome: home.aluno.nome),
       ),
       (
         TokensStrip.s2,
@@ -355,6 +366,16 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           horario: view.horarioNoFoco,
           prontidaoBaixa: view.prontidaoBaixa,
           isDark: isDark,
+          assinatura: home.personalBrand.nomePersonal,
+          fundoMarca:
+              estilo.usaGradiente
+                  ? BrandPalette.gradient(primaria, secundaria, dark: isDark)
+                  : null,
+          semana: semana,
+          onSemana: () => context.go('/checkin/treinos'),
+          seloFicha: selo?.texto,
+          seloFichaTom: selo?.tom ?? FxPillTone.accent,
+          onVerTreinos: () => context.go('/checkin/treinos'),
           onAction: () {
             if (action.mode == AlunoTodayMode.workoutDone &&
                 action.proximoTreinoId != null) {
@@ -372,16 +393,18 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
                   : null,
         ),
       ),
-      if (faixaDaSemana(home.rotina, home.historico, now) case final dias
-          when dias.isNotEmpty)
+      if (home.personalBrand.nomePersonal.trim().isNotEmpty)
         (
-          TokensStrip.s4,
-          AlunoSemanaFaixa(
-            dias: dias,
-            onTap: () => context.go('/checkin/treinos'),
+          TokensStrip.s3,
+          AlunoPersonalCard(
+            nome: home.personalBrand.nomePersonal,
+            logoUrl: home.personalBrand.logoUrl,
+            slogan: home.personalBrand.slogan,
+            onConversar: () => openAlunoRoute(context, '/chat/aluno'),
           ),
         ),
-      if (temAvisoDaFicha(home.rotina, now))
+      // A semana e o selo da ficha moram no card; aqui só o alerta de prazo.
+      if (_fichaEmAlerta(home.rotina, now))
         (
           TokensStrip.s3,
           FichaVigenciaAluno(rotina: home.rotina, hoje: now),
@@ -410,14 +433,15 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
         ),
       if (view.ofertas.isNotEmpty)
         (TokensStrip.s4, AlunoUpsellCarousel(ofertas: view.ofertas)),
+      // Ferramentas: linha discreta no fim, fora do fold.
       (
-        TokensStrip.s4,
-        FxActionRow(
-          leading: Icons.apps_rounded,
-          titulo: s.alunoFerramentasLinhaTitulo,
-          motivo: s.alunoFerramentasLinhaDetalhe,
-          verbo: s.alunoFerramentasLinhaVerbo,
-          onTap: () => openAlunoRoute(context, alunoFerramentasRoute),
+        TokensStrip.s3,
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FxActionLink(
+            label: s.alunoFerramentasLinhaTitulo,
+            onTap: () => openAlunoRoute(context, alunoFerramentasRoute),
+          ),
         ),
       ),
     ];
@@ -442,6 +466,32 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
       ),
     );
   }
+
+  /// Selo da ficha no card: prazo ("Até 14/02", "Vence em 3 dias") ou
+  /// "Ficha atualizada" quando o personal trocou há pouco.
+  ({String texto, FxPillTone tom})? _seloDaFicha(
+    S s,
+    RotinaFila rotina,
+    DateTime agora,
+  ) {
+    if (!rotina.temTreino) return null;
+    if (rotina.vigencia.temPrazo) {
+      return rotuloDaVigencia(s, rotina.vigencia, agora);
+    }
+    if (fichaAtualizadaRecentemente(rotina.atualizadaEm, agora)) {
+      return (texto: s.alunoFichaAtualizada, tom: FxPillTone.accent);
+    }
+    return null;
+  }
+
+  bool _fichaEmAlerta(RotinaFila rotina, DateTime agora) =>
+      rotina.temTreino &&
+      switch (rotina.vigencia.estado(agora)) {
+        EstadoVigencia.venceEmBreve ||
+        EstadoVigencia.venceHoje ||
+        EstadoVigencia.vencida => true,
+        _ => false,
+      };
 
   /// A lista inteira, quando passam de [alunoPendenciasMax].
   void _verMaisPassos(AlunoHomeView view, DateTime hoje) {

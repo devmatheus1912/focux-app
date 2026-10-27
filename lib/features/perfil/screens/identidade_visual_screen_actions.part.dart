@@ -82,6 +82,32 @@ extension on _IdentidadeVisualScreenState {
     }
   }
 
+  Future<void> _pickCapa() async {
+    if (_uploadingCapa) return;
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (file == null || !mounted) return;
+    setState(() => _uploadingCapa = true);
+    try {
+      final url = await MediaUploadService(
+        ref.read(apiClientProvider),
+      ).uploadBytes(
+        bytes: await file.readAsBytes(),
+        filename: file.name,
+        folder: 'identidade',
+        resourceType: 'image',
+      );
+      if (mounted) setState(() => _capaUrl = url);
+    } catch (e) {
+      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
+    } finally {
+      if (mounted) setState(() => _uploadingCapa = false);
+    }
+  }
+
   Future<void> _restoreDefaultBrandColors({required bool hasWhiteLabel}) async {
     if (!hasWhiteLabel) return;
     setState(() => _palette = CuratedBrandPalette.focuxDefault);
@@ -105,11 +131,16 @@ extension on _IdentidadeVisualScreenState {
         'corPrimaria': BrandPalette.toHex(_corPrimaria),
         'corSecundaria': BrandPalette.toHex(_corSecundaria),
         'slogan': _sloganCtrl.text.trim(),
+        'estiloMarca': _estilo.api,
+        // vazio remove a capa
+        'capaUrl': _capaUrl ?? '',
       };
       if (_logoUrl != null) body['logoUrl'] = _logoUrl;
       await dio.put('/api/personal/identidade', data: body);
       ref.read(primaryColorProvider.notifier).value = _corPrimaria;
       ref.read(secondaryColorProvider.notifier).value = _corSecundaria;
+      ref.read(brandStyleProvider.notifier).value = _estilo;
+      ref.read(capaUrlProvider.notifier).value = _capaUrl;
       final slogan = _sloganCtrl.text.trim();
       ref.read(sloganProvider.notifier).value =
           slogan.isNotEmpty ? slogan : null;
@@ -126,6 +157,8 @@ extension on _IdentidadeVisualScreenState {
             'palette': _palette.id,
             'hasLogo': _logoUrl != null && _logoUrl!.isNotEmpty,
             'hasSlogan': slogan.isNotEmpty,
+            'estilo': _estilo.api,
+            'hasCapa': _capaUrl != null,
             'setup': widget.isSetup,
           },
         ),

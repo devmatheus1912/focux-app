@@ -23,8 +23,6 @@ void main() {
     expect('emphasize: true'.allMatches(foco), hasLength(1));
     expect(at('AlunoHomeHeader('), lessThan(at('AlunoTodayFocusCard(')));
     expect(at('AlunoTodayFocusCard('), lessThan(at('_AlunoHomeAviso(')));
-    expect(at('AlunoTodayFocusCard('), lessThan(at('AlunoSemanaFaixa(')));
-    expect(at('AlunoSemanaFaixa('), lessThan(at('_AlunoHomeAviso(')));
     expect(at('_AlunoHomeAviso('), lessThan(at('AlunoProximosPassos(')));
     expect(at('AlunoProximosPassos('), lessThan(at('AlunoUpsellCarousel(')));
     expect(at('AlunoUpsellCarousel('), lessThan(at('alunoFerramentasRoute')));

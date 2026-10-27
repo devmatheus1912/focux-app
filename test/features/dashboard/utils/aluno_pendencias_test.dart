@@ -189,18 +189,24 @@ void main() {
       expect(_tipos(alunoPendenciasVisiveis(todas, AlunoTodayMode.noWorkout)), [
         AlunoPendenciaTipo.agenda,
         AlunoPendenciaTipo.medida,
-        AlunoPendenciaTipo.foto,
       ]);
     });
 
-    test('com treino mantém o chat e corta em 3', () {
+    test('com treino mantém o chat e corta em 2', () {
       expect(
         _tipos(alunoPendenciasVisiveis(todas, AlunoTodayMode.workoutReady)),
-        [
-          AlunoPendenciaTipo.chat,
-          AlunoPendenciaTipo.agenda,
-          AlunoPendenciaTipo.medida,
-        ],
+        [AlunoPendenciaTipo.chat, AlunoPendenciaTipo.agenda],
+      );
+    });
+
+    test('perfil e medida são um passo só: a medida cede a linha ao perfil', () {
+      const abertas = [
+        AlunoPendencia(AlunoPendenciaTipo.medida),
+        AlunoPendencia(AlunoPendenciaTipo.perfil),
+      ];
+      expect(
+        _tipos(alunoPendenciasNaHome(abertas, AlunoTodayMode.workoutReady)),
+        [AlunoPendenciaTipo.perfil],
       );
     });
   });

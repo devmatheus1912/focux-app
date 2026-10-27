@@ -17,7 +17,8 @@ import 'package:focux_app/features/dashboard/screens/perfil_aluno_screen.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_semana_faixa.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_proximos_passos.dart';
-import 'package:focux_app/features/dashboard/widgets/aluno_semana_faixa.dart';
+import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_today_focus_card.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/utils/ficha_vigencia.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -87,9 +88,17 @@ void main() {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  AlunoSemanaFaixa(
-                    dias: faixaDaSemana(rotina, const [], _hoje),
-                    onTap: () {},
+                  AlunoTodayFocusCard(
+                    action: const AlunoTodayAction(
+                      mode: AlunoTodayMode.descansoHoje,
+                      route: '/checkin/executar',
+                      treinoNome: 'Treino Força',
+                    ),
+                    hoje: _hoje,
+                    isDark: escuro,
+                    onAction: () {},
+                    semana: faixaDaSemana(rotina, const [], _hoje),
+                    seloFicha: 'Até 02/11',
                   ),
                   const SizedBox(height: 12),
                   FichaVigenciaAluno(rotina: rotina, hoje: _hoje),

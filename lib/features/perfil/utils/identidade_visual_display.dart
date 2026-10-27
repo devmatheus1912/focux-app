@@ -1,5 +1,8 @@
 import '../../subscription/models/subscription_plan.dart';
+import '../../../core/theme/brand_palette.dart';
+import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
+import '../../../core/theme/focux_contrast.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 
 bool identidadeHasWhiteLabel({
@@ -75,11 +78,70 @@ bool identidadeIsDirty({
   required String? baselineLogo,
   required CuratedBrandPalette palette,
   required CuratedBrandPalette? baselinePalette,
+  BrandStyle estilo = BrandStyle.classico,
+  BrandStyle baselineEstilo = BrandStyle.classico,
+  String? capaUrl,
+  String? baselineCapa,
 }) {
   if (!perfilLoaded) return false;
   return slogan != baselineSlogan ||
       logoUrl != baselineLogo ||
-      palette != baselinePalette;
+      palette != baselinePalette ||
+      estilo != baselineEstilo ||
+      capaUrl != baselineCapa;
+}
+
+String identidadeEstiloLabel(BrandStyle estilo) => switch (estilo) {
+  BrandStyle.classico => 'Clássico',
+  BrandStyle.cinematografico => 'Cinematográfico',
+  BrandStyle.minimalista => 'Minimalista',
+};
+
+String identidadeEstiloDescricao(BrandStyle estilo) => switch (estilo) {
+  BrandStyle.classico =>
+    'A sua cor nos botões e destaques, como sempre foi.',
+  BrandStyle.cinematografico =>
+    'Gradiente da sua marca no card principal, fundo tingido e acento da cor secundária.',
+  BrandStyle.minimalista =>
+    'Só a cor primária, superfícies neutras e nenhum gradiente.',
+};
+
+String identidadeEstiloSubtitle() =>
+    'O clima do app do seu aluno. Você vê o resultado na prévia.';
+
+String identidadeImagensSubtitle() =>
+    'Logo no topo e capa 16:9 na home do aluno. Slogan junto do seu nome.';
+
+String identidadeCapaAdicionar() => 'Adicionar capa';
+
+String identidadeCapaTrocar() => 'Trocar capa';
+
+String identidadeCapaRemover() => 'Remover capa';
+
+String identidadeCapaDica() =>
+    'Foto horizontal (16:9). Um véu escuro suave mantém o texto legível.';
+
+String identidadePreviaHomeClaro() => 'Home · claro';
+
+String identidadePreviaHomeEscuro() => 'Home · escuro';
+
+String identidadePreviaLogin() => 'Login';
+
+/// Aviso quando a primária tem pouco contraste como destaque no escuro (ou no
+/// claro). Nulo quando está tudo legível. O app ajusta o tom sozinho; o aviso
+/// só deixa o personal ciente do que vai acontecer.
+String? identidadeAvisoContraste(CuratedBrandPalette palette) {
+  const fundoEscuro = BrandPalette.fundoEscuroReferencia;
+  const fundoClaro = BrandPalette.fundoClaroReferencia;
+  final escuro = palette.chromeFor(dark: true);
+  final claro = palette.chromeFor(dark: false);
+  if (!FocuxContrast.meetsWcagAa(escuro, fundoEscuro, largeText: true)) {
+    return 'No modo escuro esta cor fica difícil de ler. O app clareia o tom automaticamente.';
+  }
+  if (!FocuxContrast.meetsWcagAa(claro, fundoClaro, largeText: true)) {
+    return 'No modo claro esta cor fica difícil de ler. O app escurece o tom automaticamente.';
+  }
+  return null;
 }
 
 String identidadeAppBarSubtitle({

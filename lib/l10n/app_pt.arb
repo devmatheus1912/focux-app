@@ -1568,5 +1568,18 @@
   "dockBadgeEmRisco": "{count, plural, =1{1 em risco} other{{count} em risco}}",
   "@dockBadgeEmRisco": {"placeholders": {"count": {"type": "int"}}},
   "dockBadgeHoje": "{count, plural, =1{1 hoje} other{{count} hoje}}",
-  "@dockBadgeHoje": {"placeholders": {"count": {"type": "int"}}}
+  "@dockBadgeHoje": {"placeholders": {"count": {"type": "int"}}},
+  "alunoHojeDescansoEyebrow": "Descanso",
+  "alunoHojeDescansoTitulo": "Hoje é seu descanso",
+  "alunoHojeProximoTreino": "Próximo: {treino}",
+  "@alunoHojeProximoTreino": {"placeholders": {"treino": {"type": "String"}}},
+  "alunoHojeProximoTreinoDia": "Próximo: {treino} · {dia}",
+  "@alunoHojeProximoTreinoDia": {"placeholders": {"treino": {"type": "String"}, "dia": {"type": "String"}}},
+  "alunoHojeVerTreino": "Ver o treino",
+  "alunoPersonalCardEyebrow": "Seu personal",
+  "alunoPersonalCardConversar": "Conversar",
+  "alunoPersonalCardSemantica": "Seu personal: {nome}",
+  "@alunoPersonalCardSemantica": {"placeholders": {"nome": {"type": "String"}}},
+  "alunoHojeTreinoComPersonal": "Treino com {personal}",
+  "@alunoHojeTreinoComPersonal": {"placeholders": {"personal": {"type": "String"}}}
 }

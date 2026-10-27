@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/brand_palette.dart';
+import '../theme/brand_tint.dart';
 import '../theme/tokens_strip.dart';
 
 /// Shared cinematic mesh — TOKENS STRIP Liquid Glass backdrop.
@@ -58,8 +59,40 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
     final isLight =
         !widget.forceDark && Theme.of(context).brightness == Brightness.light;
     final primary = Theme.of(context).colorScheme.primary;
+    // Estilo Cinematográfico: a malha sente a paleta do personal.
+    final marca = BrandTint.maybeOf(context);
+    final tinge = marca != null && marca.estilo.tingeFundo;
     final cornerGlow =
-        isLight ? BrandPalette.accent(primary) : TokensStrip.neonGlow;
+        tinge
+            ? marca.secundaria
+            : isLight
+            ? BrandPalette.accent(primary)
+            : TokensStrip.neonGlow;
+    final malhaClara = [
+      TokensStrip.lightMeshA,
+      TokensStrip.lightMeshB,
+      TokensStrip.lightMeshC,
+    ];
+    final malhaEscura = [
+      const Color(0xFF0D2830),
+      const Color(0xFF0B0E14),
+      TokensStrip.cinematicBg,
+    ];
+    final malha = tinge
+        ? [
+          Color.lerp(
+            isLight ? malhaClara[0] : malhaEscura[0],
+            marca.primaria,
+            isLight ? 0.12 : 0.38,
+          )!,
+          Color.lerp(
+            isLight ? malhaClara[1] : malhaEscura[1],
+            marca.secundaria,
+            isLight ? 0.05 : 0.12,
+          )!,
+          isLight ? malhaClara[2] : malhaEscura[2],
+        ]
+        : (isLight ? malhaClara : malhaEscura);
     final reduceMotion = TokensStrip.prefersReducedMotion(context);
     final showGrid = widget.showGrid && !reduceMotion;
     final flatBackground = widget.flatBackground || reduceMotion;
@@ -99,18 +132,7 @@ class _CinematicMeshBackgroundState extends State<CinematicMeshBackground>
                       gradient: RadialGradient(
                         center: const Alignment(-0.35, -0.85),
                         radius: 1.45,
-                        colors:
-                            isLight
-                                ? const [
-                                  TokensStrip.lightMeshA,
-                                  TokensStrip.lightMeshB,
-                                  TokensStrip.lightMeshC,
-                                ]
-                                : const [
-                                  Color(0xFF0D2830),
-                                  Color(0xFF0B0E14),
-                                  TokensStrip.cinematicBg,
-                                ],
+                        colors: malha,
                         stops: const [0.0, 0.52, 1.0],
                       ),
                     ),

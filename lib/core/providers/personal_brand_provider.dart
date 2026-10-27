@@ -19,6 +19,10 @@ class PersonalBrand {
   final String? publicLandingUrl;
   final String? capturaUrl;
 
+  /// Estilo da marca (`CLASSICO` | `CINEMATOGRAFICO` | `MINIMALISTA`) e capa 16:9.
+  final String estiloMarca;
+  final String? capaUrl;
+
   PersonalBrand({
     required this.nomePersonal,
     this.slogan,
@@ -35,6 +39,8 @@ class PersonalBrand {
     this.customDomainVerified = false,
     this.publicLandingUrl,
     this.capturaUrl,
+    this.estiloMarca = 'CLASSICO',
+    this.capaUrl,
   });
 
   factory PersonalBrand.fromJson(Map<String, dynamic> j) => PersonalBrand(
@@ -53,6 +59,8 @@ class PersonalBrand {
     customDomainVerified: j['customDomainVerified'] as bool? ?? false,
     publicLandingUrl: j['publicLandingUrl'] as String?,
     capturaUrl: j['capturaUrl'] as String?,
+    estiloMarca: j['estiloMarca'] as String? ?? 'CLASSICO',
+    capaUrl: j['capaUrl'] as String?,
   );
 
   bool get isEnterprise =>

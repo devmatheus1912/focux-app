@@ -62,7 +62,8 @@ void main() {
     expect(screen, isNot(contains('Seu score Focux')));
     expect(screen, isNot(contains('RecoveryScoreRing')));
     expect(screen, isNot(contains('hojeAlunoMais')));
-    expect(screen, contains('AlunoSemanaFaixa('));
+    // a semana mora dentro do card de foco
+    expect(screen, contains('semana: semana'));
     expect(screen, contains('AlunoHomeSkeleton()'));
     expect(screen, contains('fxAnnounce('));
     expect(screen, contains('s.alunoHomeAjudaCalculo'));

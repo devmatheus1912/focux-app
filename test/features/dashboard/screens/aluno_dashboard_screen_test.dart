@@ -75,7 +75,10 @@ void main() {
 
     expect(find.text('Hoje'), findsWidgets);
     expect(find.text('Olá, Ana'), findsOneWidget);
-    expect(find.text('Seu personal: Carlos'), findsOneWidget);
+    // a assinatura do personal é um cartão próprio, com botão de conversa
+    expect(find.text('Seu personal'), findsOneWidget);
+    expect(find.text('Carlos'), findsOneWidget);
+    expect(find.text('Conversar'), findsOneWidget);
     expect(find.text('Peça seu próximo treino'), findsOneWidget);
     expect(find.text('Mais'), findsNothing);
     expect(find.text('Evolução'), findsNothing);

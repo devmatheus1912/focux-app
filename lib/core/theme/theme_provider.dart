@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../state/fx_value_notifier.dart';
 import 'brand_palette.dart';
+import 'brand_style.dart';
 import 'design_tokens.dart';
 
 const _themePrefKey = 'focux_appearance_mode';
@@ -27,6 +28,11 @@ final personalNameProvider = fxValueProvider<String?>(null);
 final hideFocuxBrandingProvider = fxValueProvider<bool>(false);
 
 final appDisplayNameProvider = fxValueProvider<String?>(null);
+
+/// Estilo da marca (Clássico, Cinematográfico, Minimalista) e capa 16:9.
+final brandStyleProvider = fxValueProvider<BrandStyle>(BrandStyle.classico);
+
+final capaUrlProvider = fxValueProvider<String?>(null);
 
 /// Aparência do app. Padrão = modo do celular ([ThemeMode.system]).
 class ThemeModeController extends Notifier<ThemeMode> {

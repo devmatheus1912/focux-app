@@ -10,6 +10,7 @@ import 'package:focux_app/features/dashboard/utils/aluno_autonomy_analytics.dart
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_header.dart';
+import 'package:focux_app/features/dashboard/widgets/aluno_personal_card.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_home_skeleton.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_proximos_passos.dart';
 import 'package:focux_app/features/dashboard/widgets/aluno_today_focus_card.dart';
@@ -96,50 +97,63 @@ class _RepoFake extends Fake implements AlunoRepository {
 
 void main() {
   group('AlunoHomeHeader', () {
-    testWidgets('saudação com primeiro nome e linha do personal', (
-      tester,
-    ) async {
-      var abriu = false;
-      await _pump(
-        tester,
-        AlunoHomeHeader(
-          alunoNome: 'Ana Paula',
-          nomePersonal: 'Carlos',
-          onOpenChat: () => abriu = true,
-        ),
-      );
+    testWidgets('saudação com o primeiro nome', (tester) async {
+      await _pump(tester, const AlunoHomeHeader(alunoNome: 'Ana Paula'));
       expect(find.text('Olá, Ana'), findsOneWidget);
-      expect(find.text('Seu personal: Carlos'), findsOneWidget);
-      expect(
-        find.bySemanticsLabel('Abrir conversa com Carlos'),
-        findsOneWidget,
-      );
-      await tester.tap(find.text('Seu personal: Carlos'));
-      expect(abriu, isTrue);
     });
 
-    testWidgets('nome longo do personal inteiro com fonte grande', (
-      tester,
-    ) async {
+    testWidgets('sem nome: saudação genérica', (tester) async {
+      await _pump(tester, const AlunoHomeHeader(alunoNome: ' '));
+      expect(find.textContaining('Olá'), findsOneWidget);
+    });
+  });
+
+  group('AlunoPersonalCard', () {
+    testWidgets('logo, nome, slogan e botão Conversar', (tester) async {
+      var abriu = 0;
+      await _pump(
+        tester,
+        AlunoPersonalCard(
+          nome: 'Carlos',
+          slogan: 'Transformando vidas através do movimento',
+          onConversar: () => abriu++,
+        ),
+      );
+      expect(find.text('Seu personal'), findsOneWidget);
+      expect(find.text('Carlos'), findsOneWidget);
+      expect(
+        find.text('Transformando vidas através do movimento'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Conversar'));
+      expect(abriu, 1);
+    });
+
+    testWidgets('sem slogan não ocupa linha', (tester) async {
+      await _pump(
+        tester,
+        AlunoPersonalCard(nome: 'Carlos', onConversar: () {}),
+      );
+      expect(find.text('Carlos'), findsOneWidget);
+      expect(find.text('Transformando vidas através do movimento'), findsNothing);
+    });
+
+    testWidgets('sem nome o cartão some', (tester) async {
+      await _pump(tester, AlunoPersonalCard(nome: '  ', onConversar: () {}));
+      expect(find.text('Conversar'), findsNothing);
+    });
+
+    testWidgets('nome longo e fonte grande sem estourar', (tester) async {
       await _pumpEstreito(
         tester,
         escala: 1.5,
-        AlunoHomeHeader(
-          alunoNome: 'Ana',
-          nomePersonal: 'Carlos Eduardo',
-          onOpenChat: () {},
+        AlunoPersonalCard(
+          nome: 'Carlos Eduardo Albuquerque',
+          slogan: 'Treino com método e acompanhamento de perto',
+          onConversar: () {},
         ),
       );
-      _expectInteiro(tester, find.text('Seu personal: Carlos Eduardo'));
-    });
-
-    testWidgets('sem nome do personal a linha não aparece', (tester) async {
-      await _pump(
-        tester,
-        AlunoHomeHeader(alunoNome: 'Ana', nomePersonal: ' ', onOpenChat: () {}),
-      );
-      expect(find.text('Olá, Ana'), findsOneWidget);
-      expect(find.textContaining('Seu personal'), findsNothing);
+      expect(tester.takeException(), isNull);
     });
   });
 

@@ -109,7 +109,7 @@ void main() {
     });
   });
 
-  group('próximos passos além das três visíveis', () {
+  group('próximos passos além das duas visíveis', () {
     const abertas = [
       AlunoPendencia(AlunoPendenciaTipo.chat, quantidade: 1),
       AlunoPendencia(AlunoPendenciaTipo.medida),
@@ -117,14 +117,19 @@ void main() {
       AlunoPendencia(AlunoPendenciaTipo.agenda),
     ];
 
-    test('visíveis cortam em três e o resto sobra para "Ver mais"', () {
+    test('visíveis cortam em duas e o resto sobra para "Ver mais"', () {
       final naHome = alunoPendenciasNaHome(abertas, AlunoTodayMode.workoutReady);
-      expect(naHome, hasLength(4));
+      // medida e perfil são um passo só: com perfil aberto, a medida não ganha linha
+      expect(naHome, hasLength(3));
       expect(
         alunoPendenciasVisiveis(abertas, AlunoTodayMode.workoutReady),
         hasLength(alunoPendenciasMax),
       );
       expect(naHome.skip(alunoPendenciasMax), hasLength(1));
+      expect(
+        naHome.map((p) => p.tipo),
+        isNot(contains(AlunoPendenciaTipo.medida)),
+      );
     });
 
     test('sem treino, o chat não entra (o foco já leva ao chat)', () {

@@ -35,6 +35,8 @@ import 'core/storage/secure_storage.dart';
 import 'core/utils/motion_preferences.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/brand_palette.dart';
+import 'core/theme/brand_style.dart';
+import 'core/theme/brand_tint.dart';
 import 'core/theme/curated_brand_palettes.dart';
 import 'core/theme/design_tokens.dart';
 import 'core/theme/focux_system_chrome.dart';
@@ -479,6 +481,12 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
           data['hideFocuxBranding'] as bool? ?? false;
       ref.read(appDisplayNameProvider.notifier).value =
           data['appDisplayName'] as String?;
+      ref.read(brandStyleProvider.notifier).value = BrandStyle.fromApi(
+        data['estiloMarca'] as String?,
+      );
+      final capa = (data['capaUrl'] as String?)?.trim();
+      ref.read(capaUrlProvider.notifier).value =
+          (capa != null && capa.isNotEmpty) ? capa : null;
     } catch (error) {
       if (kDebugMode) debugPrint('[Focux] aluno theme load failed: $error');
     }
@@ -493,6 +501,8 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     ref.read(personalNameProvider.notifier).value = null;
     ref.read(hideFocuxBrandingProvider.notifier).value = false;
     ref.read(appDisplayNameProvider.notifier).value = null;
+    ref.read(brandStyleProvider.notifier).value = BrandStyle.classico;
+    ref.read(capaUrlProvider.notifier).value = null;
   }
 
   Color _safePrimaryColor(String? raw) {
@@ -529,6 +539,7 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
     final themeMode = ref.watch(themeModeProvider);
     final primaryColor = ref.watch(primaryColorProvider);
     final secondaryColor = ref.watch(secondaryColorProvider);
+    final brandStyle = ref.watch(brandStyleProvider);
     final hideFocux = ref.watch(hideFocuxBrandingProvider);
     final appDisplayName = ref.watch(appDisplayNameProvider);
     final personalName = ref.watch(personalNameProvider);
@@ -558,10 +569,15 @@ class _FocuxAppState extends ConsumerState<FocuxApp>
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(textScaler: appTextScaler(mq.textScaler)),
-          child: FxConnectivityBanner(
-            child: CheckinFilaSyncScope(
-              child: IapPurchaseSyncScope(
-                child: child ?? const SizedBox.shrink(),
+          child: BrandTint(
+            estilo: brandStyle,
+            primaria: primaryColor,
+            secundaria: secondaryColor,
+            child: FxConnectivityBanner(
+              child: CheckinFilaSyncScope(
+                child: IapPurchaseSyncScope(
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
             ),
           ),

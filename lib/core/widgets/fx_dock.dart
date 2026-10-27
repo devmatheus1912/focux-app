@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../theme/brand_palette.dart';
+import '../theme/brand_tint.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
@@ -96,7 +98,20 @@ class FxDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    // Estilo Cinematográfico: o item ativo usa o acento da cor secundária
+    // (com contraste checado); nos outros, a primária de sempre.
+    final marca = BrandTint.maybeOf(context);
+    final primary =
+        marca != null && marca.estilo.usaAcentoSecundario
+            ? BrandPalette.secondaryAccent(
+              marca.secundaria,
+              marca.primaria,
+              dark: isDark,
+              background: isDark
+                  ? BrandPalette.fundoEscuroReferencia
+                  : BrandPalette.fundoClaroReferencia,
+            )
+            : Theme.of(context).colorScheme.primary;
     final width = MediaQuery.sizeOf(context).width;
     final compact = width < 390;
 

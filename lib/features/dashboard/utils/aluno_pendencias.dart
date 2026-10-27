@@ -44,7 +44,8 @@ class AlunoPendencia {
   });
 }
 
-const alunoPendenciasMax = 3;
+/// Um passo principal e mais um; o resto entra em "Ver mais".
+const alunoPendenciasMax = 2;
 const alunoMedidaValidadeDias = 14;
 
 /// Horário de hoje e amanhã fica na linha do card de foco.
@@ -101,17 +102,25 @@ List<AlunoPendencia> listAlunoPendenciasAbertas({
   ];
 }
 
-/// Em aberto e com lugar na Home: sem repetir o destino do foco.
+/// Em aberto e com lugar na Home: sem repetir o destino do foco. Medida e
+/// perfil são um passo só ("Completar seu perfil"): com perfil aberto, a
+/// medida não ganha linha própria (segue aberta para a autonomia).
 List<AlunoPendencia> alunoPendenciasNaHome(
   List<AlunoPendencia> abertas,
   AlunoTodayMode todayMode,
-) => abertas
-    .where(
-      (p) =>
-          !(todayMode == AlunoTodayMode.noWorkout &&
-              p.tipo == AlunoPendenciaTipo.chat),
-    )
-    .toList(growable: false);
+) {
+  final perfilAberto = abertas.any(
+    (p) => p.tipo == AlunoPendenciaTipo.perfil,
+  );
+  return abertas
+      .where(
+        (p) =>
+            !(todayMode == AlunoTodayMode.noWorkout &&
+                p.tipo == AlunoPendenciaTipo.chat) &&
+            !(perfilAberto && p.tipo == AlunoPendenciaTipo.medida),
+      )
+      .toList(growable: false);
+}
 
 /// As que aparecem na Home: cortadas em [alunoPendenciasMax]. As escondidas
 /// seguem abertas para a autonomia e entram em "Ver mais".

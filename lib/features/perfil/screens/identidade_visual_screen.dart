@@ -34,10 +34,15 @@ import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/theme/brand_style.dart';
+import '../../../core/widgets/fx_action_link.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
+import '../widgets/identidade_previa_app.dart';
+import '../widgets/identidade_capa_tile.dart';
+import '../widgets/identidade_paletas_grade.dart';
 
 part 'identidade_visual_screen_actions.part.dart';
 part 'identidade_visual_screen_widgets.part.dart';
@@ -59,6 +64,12 @@ class _IdentidadeVisualScreenState
   late CuratedBrandPalette _palette = CuratedBrandPalette.focuxDefault;
   bool _salvando = false;
   bool _uploadingLogo = false;
+  bool _uploadingCapa = false;
+  BrandStyle _estilo = BrandStyle.classico;
+  String? _capaUrl;
+  BrandStyle _baselineEstilo = BrandStyle.classico;
+  String? _baselineCapa;
+  int _previa = 0;
   bool _perfilLoaded = false;
   bool _viewTracked = false;
   DateTime? _fetchedAt;
@@ -94,12 +105,18 @@ class _IdentidadeVisualScreenState
     baselineLogo: _baselineLogo,
     palette: _palette,
     baselinePalette: _baselinePalette,
+    estilo: _estilo,
+    baselineEstilo: _baselineEstilo,
+    capaUrl: _capaUrl,
+    baselineCapa: _baselineCapa,
   );
 
   void _snapshotBaseline() {
     _baselineSlogan = _sloganCtrl.text;
     _baselineLogo = _logoUrl;
     _baselinePalette = _palette;
+    _baselineEstilo = _estilo;
+    _baselineCapa = _capaUrl;
   }
 
   Future<void> _pedirSair() async {
@@ -127,6 +144,8 @@ class _IdentidadeVisualScreenState
   void _applyPerfil(PerfilPersonal perfil) {
     _sloganCtrl.text = perfil.slogan ?? '';
     _logoUrl = perfil.logoUrl;
+    _estilo = BrandStyle.fromApi(perfil.estiloMarca);
+    _capaUrl = perfil.capaUrl;
 
     // Cyan legado no perfil → Focux Original (azul petróleo), não slate teal.
     var primary = BrandPalette.resolveStoredPrimary(perfil.corPrimaria);
@@ -261,13 +280,49 @@ class _IdentidadeVisualScreenState
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                _PaletteThemePreviewPair(
-                                  palette: _palette,
-                                  name: nomePersonal,
-                                  slogan: _sloganCtrl.text.trim(),
-                                  logoUrl: _logoUrl,
-                                  reduceMotion: reduceMotion,
+                                Text(
+                                  identidadeAlunoVisibilityLabel(),
+                                  style: FocuxHubTypography.chip(chrome.mute)
+                                      .copyWith(letterSpacing: 0.2),
                                 ),
+                                const SizedBox(height: TokensStrip.s2),
+                                FxChoiceStrip<int>(
+                                  itens: [
+                                    FxChoiceItem(
+                                      value: 0,
+                                      label: identidadePreviaHomeClaro(),
+                                    ),
+                                    FxChoiceItem(
+                                      value: 1,
+                                      label: identidadePreviaHomeEscuro(),
+                                    ),
+                                    FxChoiceItem(
+                                      value: 2,
+                                      label: identidadePreviaLogin(),
+                                    ),
+                                  ],
+                                  selecionado: _previa,
+                                  onSelecionar: (v) => setState(() => _previa = v),
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                                if (_previa == 2)
+                                  _PaletteThemePreviewPair(
+                                    palette: _palette,
+                                    name: nomePersonal,
+                                    slogan: _sloganCtrl.text.trim(),
+                                    logoUrl: _logoUrl,
+                                    reduceMotion: reduceMotion,
+                                  )
+                                else
+                                  IdentidadePreviaApp(
+                                    palette: _palette,
+                                    estilo: _estilo,
+                                    escuro: _previa == 1,
+                                    nomePersonal: nomePersonal,
+                                    slogan: _sloganCtrl.text.trim(),
+                                    logoUrl: _logoUrl,
+                                    capaUrl: _capaUrl,
+                                  ),
                                 const SizedBox(height: TokensStrip.s4),
                                 ShellSurface(
                                   accent: chromeAccent,
@@ -277,10 +332,52 @@ class _IdentidadeVisualScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       _PanelTitle(
+                                        icon: Icons.auto_awesome_motion_outlined,
+                                        title: 'Estilo',
+                                        subtitle: identidadeEstiloSubtitle(),
+                                        accent: chromeAccent,
+                                        mute: chrome.mute,
+                                      ),
+                                      const SizedBox(height: 14),
+                                      FxChoiceStrip<BrandStyle>(
+                                        itens: [
+                                          for (final e in BrandStyle.values)
+                                            FxChoiceItem(
+                                              value: e,
+                                              label: identidadeEstiloLabel(e),
+                                            ),
+                                        ],
+                                        selecionado: _estilo,
+                                        onSelecionar:
+                                            hasWhiteLabel
+                                                ? (e) {
+                                                  HapticFeedback.selectionClick();
+                                                  setState(() => _estilo = e);
+                                                }
+                                                : (_) {},
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        identidadeEstiloDescricao(_estilo),
+                                        style: FocuxHubTypography.bodyMuted(
+                                          color: chrome.mute,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                ShellSurface(
+                                  accent: chromeAccent,
+                                  padding: const EdgeInsets.all(18),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _PanelTitle(
                                         icon: Icons.auto_awesome_outlined,
-                                        title: 'Logo e slogan',
-                                        subtitle:
-                                            identidadeLogoSloganSubtitle(),
+                                        title: 'Imagens e slogan',
+                                        subtitle: identidadeImagensSubtitle(),
                                         accent: chromeAccent,
                                         mute: chrome.mute,
                                       ),
@@ -297,6 +394,26 @@ class _IdentidadeVisualScreenState
                                                   ? _pedirTrocarLogo
                                                   : null,
                                         ),
+                                      ),
+                                      const SizedBox(height: 18),
+                                      Text(
+                                        'CAPA',
+                                        style: FocuxHubTypography.chip(
+                                          chrome.mute,
+                                        ).copyWith(letterSpacing: 1.2),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      IdentidadeCapaTile(
+                                        url: _capaUrl,
+                                        uploading: _uploadingCapa,
+                                        onEscolher:
+                                            hasWhiteLabel ? _pickCapa : null,
+                                        onRemover:
+                                            hasWhiteLabel
+                                                ? () => setState(
+                                                  () => _capaUrl = null,
+                                                )
+                                                : null,
                                       ),
                                       const SizedBox(height: 18),
                                       _BrandField(
@@ -334,8 +451,8 @@ class _IdentidadeVisualScreenState
                                         mute: chrome.mute,
                                       ),
                                       const SizedBox(height: 14),
-                                      _CuratedPaletteGrid(
-                                        selected: _palette,
+                                      IdentidadePaletasGrade(
+                                        selecionada: _palette,
                                         onSelect:
                                             hasWhiteLabel
                                                 ? (p) {
@@ -344,22 +461,42 @@ class _IdentidadeVisualScreenState
                                                 }
                                                 : null,
                                       ),
-                                      if (hasWhiteLabel) ...[
+                                      if (identidadeAvisoContraste(_palette)
+                                          case final aviso?) ...[
                                         const SizedBox(height: 10),
-                                        TextButton(
-                                          onPressed:
-                                              () => _pedirRestaurarCores(
-                                                hasWhiteLabel: hasWhiteLabel,
-                                              ),
-                                          style: TextButton.styleFrom(
-                                            minimumSize: const Size(
-                                              FxSettingsLayout.rowMinHeight,
-                                              FxSettingsLayout.rowMinHeight,
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons.visibility_outlined,
+                                              size: 16,
+                                              color: chrome.mute,
                                             ),
-                                            alignment: Alignment.centerLeft,
-                                          ),
-                                          child: Text(
-                                            identidadeRestaurarCoresLabel(),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                aviso,
+                                                style:
+                                                    FocuxHubTypography.bodyMuted(
+                                                      color: chrome.mute,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                      if (hasWhiteLabel) ...[
+                                        const SizedBox(height: 6),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: FxActionLink(
+                                            label:
+                                                identidadeRestaurarCoresLabel(),
+                                            onTap:
+                                                () => _pedirRestaurarCores(
+                                                  hasWhiteLabel: hasWhiteLabel,
+                                                ),
                                           ),
                                         ),
                                       ],

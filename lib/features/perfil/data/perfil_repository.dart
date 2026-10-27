@@ -71,6 +71,8 @@ class PerfilPersonal {
   final String? corPrimaria;
   final String? corSecundaria;
   final String? slogan;
+  final String estiloMarca;
+  final String? capaUrl;
   final String? slug;
   final String? dominioCustomizado;
   final String? videoUrl;
@@ -129,6 +131,8 @@ class PerfilPersonal {
     this.corPrimaria,
     this.corSecundaria,
     this.slogan,
+    this.estiloMarca = 'CLASSICO',
+    this.capaUrl,
     this.slug,
     this.dominioCustomizado,
     this.videoUrl,
@@ -184,6 +188,8 @@ class PerfilPersonal {
     corPrimaria: json['corPrimaria'] as String?,
     corSecundaria: json['corSecundaria'] as String?,
     slogan: json['slogan'] as String?,
+    estiloMarca: json['estiloMarca'] as String? ?? 'CLASSICO',
+    capaUrl: json['capaUrl'] as String?,
     slug: json['slug'] as String?,
     dominioCustomizado: json['dominioCustomizado'] as String?,
     videoUrl: json['videoUrl'] as String?,

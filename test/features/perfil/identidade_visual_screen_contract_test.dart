@@ -11,6 +11,7 @@ import 'package:focux_app/features/perfil/utils/identidade_visual_display.dart';
 import 'package:focux_app/features/planos/data/plano_features_bff_cache.dart';
 import 'package:focux_app/features/planos/data/planos_repository.dart';
 import 'package:focux_app/features/subscription/models/subscription_plan.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 
 import '../../support/riverpod_seeds.dart';
 
@@ -36,7 +37,12 @@ void main() {
           perfilProvider.overrideWith((ref) async => _enterprisePerfil),
           _planoOverride(whiteLabel: true, plan: SubscriptionPlan.ENTERPRISE),
         ],
-        child: const MaterialApp(home: IdentidadeVisualScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: IdentidadeVisualScreen(),
+        ),
       ),
     );
     await tester.pump();
@@ -45,8 +51,11 @@ void main() {
     expect(find.text('Identidade Visual'), findsOneWidget);
     expect(find.text(identidadeSalvarLabel(isSetup: false)), findsOneWidget);
     expect(find.textContaining('Visível no app do aluno'), findsOneWidget);
-    expect(find.text(identidadeLightPreviewLabel()), findsOneWidget);
-    expect(find.text(identidadeDarkPreviewLabel()), findsOneWidget);
+    // a prévia é a Home do aluno (claro/escuro) e o login, em abas
+    expect(find.text(identidadePreviaHomeClaro()), findsOneWidget);
+    expect(find.text(identidadePreviaHomeEscuro()), findsOneWidget);
+    expect(find.text(identidadePreviaLogin()), findsOneWidget);
+    expect(find.text('Estilo'), findsOneWidget);
     expect(find.text('Assinar Enterprise'), findsNothing);
     expect(find.byType(FxLiquidPrimaryButton), findsWidgets);
   });
@@ -63,7 +72,12 @@ void main() {
           perfilProvider.overrideWith((ref) async => _proPerfil),
           _planoOverride(whiteLabel: false, plan: SubscriptionPlan.PRO),
         ],
-        child: const MaterialApp(home: IdentidadeVisualScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: IdentidadeVisualScreen(),
+        ),
       ),
     );
     await tester.pump();
@@ -88,18 +102,21 @@ void main() {
           perfilProvider.overrideWith((ref) async => _enterprisePerfil),
           _planoOverride(whiteLabel: true, plan: SubscriptionPlan.ENTERPRISE),
         ],
-        child: const MaterialApp(home: IdentidadeVisualScreen()),
+        child: const MaterialApp(
+          locale: Locale('pt'),
+          supportedLocales: S.supportedLocales,
+          localizationsDelegates: S.localizationsDelegates,
+          home: IdentidadeVisualScreen(),
+        ),
       ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     final midnight = find.text('Midnight Gold');
-    await tester.scrollUntilVisible(
-      midnight,
-      180,
-      scrollable: find.byType(Scrollable).first,
-    );
+    // a grade é montada inteira (shrinkWrap): basta trazer a amostra para a tela
+    await tester.ensureVisible(midnight);
+    await tester.pump();
     await tester.tap(midnight);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));

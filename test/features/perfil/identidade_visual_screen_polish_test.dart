@@ -50,7 +50,7 @@ void main() {
     expect(screen, contains('Assinar Enterprise'));
     expect(screen, contains('_PaletteThemePreviewPair'));
     expect(screen, contains('_PaletteThemePreview'));
-    expect(screen, contains('_CuratedPaletteGrid'));
+    expect(screen, contains('IdentidadePaletasGrade'));
     expect(screen, isNot(contains('_LiveBrandHero')));
     expect(screen, isNot(contains('_PaletteDarkPreview')));
     expect(screen, contains('_LogoUploadRing'));
