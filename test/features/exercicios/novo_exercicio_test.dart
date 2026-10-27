@@ -10,6 +10,7 @@ import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
 import 'package:focux_app/features/exercicios/data/enums.dart';
 import 'package:focux_app/features/exercicios/data/exercicio_repository.dart';
+import 'package:focux_app/features/exercicios/models/exercicio_criado.dart';
 import 'package:focux_app/features/exercicios/screens/add_exercicio_screen.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -191,9 +192,11 @@ void main() {
       expect(find.text('Vídeo escolhido'), findsNothing);
     });
 
-    testWidgets('criar a cópia devolve o id para usar no treino', (
-      tester,
-    ) async {
+    Future<Object?> criarComOrigem(
+      WidgetTester tester, {
+      required String origem,
+      required String botao,
+    }) async {
       tela(tester);
       final adapter = _Adapter();
       Object? resultado;
@@ -209,7 +212,7 @@ void main() {
                   body: TextButton(
                     onPressed: () async {
                       resultado = await context.push<Object>(
-                        '/novo',
+                        '/novo?origem=$origem',
                         extra: original,
                       );
                     },
@@ -220,8 +223,10 @@ void main() {
           GoRoute(
             path: '/novo',
             builder:
-                (_, state) =>
-                    AddExercicioScreen(copiaDe: state.extra as Exercicio?),
+                (_, state) => AddExercicioScreen(
+                  copiaDe: state.extra as Exercicio?,
+                  origem: exercicioOrigemDe(state.uri.queryParameters['origem']),
+                ),
           ),
         ],
       );
@@ -240,7 +245,41 @@ void main() {
       await _settle(tester);
       await tester.tap(find.text('Cadastrar'));
       await _settle(tester);
-      expect(resultado, 55);
+      expect(find.text('Exercício criado'), findsOneWidget);
+      await tester.tap(find.text(botao));
+      await _settle(tester);
+      return resultado;
+    }
+
+    testWidgets('da biblioteca: diz que ficou em Meus exercícios', (tester) async {
+      final r = await criarComOrigem(
+        tester,
+        origem: 'biblioteca',
+        botao: 'Ver em Meus exercícios',
+      );
+      expect(r, isA<ExercicioCriado>());
+      expect((r as ExercicioCriado).id, 55);
+      expect(r.destino, ExercicioCriadoDestino.verEmMeus);
+    });
+
+    testWidgets('do treino: "Adicionar ao treino" é o principal', (tester) async {
+      final r = await criarComOrigem(
+        tester,
+        origem: 'treino',
+        botao: 'Adicionar ao treino',
+      );
+      expect((r as ExercicioCriado).destino, ExercicioCriadoDestino.adicionarAoTreino);
+    });
+
+    testWidgets('da troca: "Usar no lugar do atual" devolve o id', (tester) async {
+      final r = await criarComOrigem(
+        tester,
+        origem: 'troca',
+        botao: 'Usar no lugar do atual',
+      );
+      final criado = r as ExercicioCriado;
+      expect(criado.id, 55);
+      expect(criado.destino, ExercicioCriadoDestino.usarNoLugar);
     });
 
     testWidgets('criar envia o exercício novo sem o vídeo da Focux', (

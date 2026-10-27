@@ -1,5 +1,6 @@
 import '../../../core/money/fx_money.dart';
 import '../../../core/utils/fx_utils.dart';
+import 'package:flutter/material.dart';
 
 String recorrenciaAlunoLabel(String? alunoNome) {
   final nome = alunoNome?.trim();
@@ -85,6 +86,18 @@ String recorrenciaAcaoLabel(RecorrenciaAcao acao) => switch (acao) {
   RecorrenciaAcao.pausar => 'Pausar',
   RecorrenciaAcao.retomar => 'Retomar',
   RecorrenciaAcao.cancelar => 'Encerrar recorrência',
+};
+
+String recorrenciaAcaoDescricao(RecorrenciaAcao acao) => switch (acao) {
+  RecorrenciaAcao.pausar => 'Para de cobrar até você retomar.',
+  RecorrenciaAcao.retomar => 'Volta a lançar a cobrança todo mês.',
+  RecorrenciaAcao.cancelar => 'Para de lançar; o que já foi lançado continua.',
+};
+
+IconData recorrenciaAcaoIcone(RecorrenciaAcao acao) => switch (acao) {
+  RecorrenciaAcao.pausar => Icons.pause_circle_outline_rounded,
+  RecorrenciaAcao.retomar => Icons.play_circle_outline_rounded,
+  RecorrenciaAcao.cancelar => Icons.stop_circle_outlined,
 };
 
 String recorrenciaAcaoPath(RecorrenciaAcao acao) => switch (acao) {

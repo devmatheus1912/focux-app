@@ -212,6 +212,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         value: _filter.favoritos ? 'Ativo' : '',
                         highlight: _filter.favoritos,
                         accessory: Switch.adaptive(
+                          activeTrackColor: Theme.of(context).colorScheme.primary,
                           value: _filter.favoritos,
                           onChanged:
                               (v) => _emit(_filter.copyWith(favoritos: v)),
@@ -223,6 +224,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         value: _filter.comVideo ? 'Ativo' : '',
                         highlight: _filter.comVideo,
                         accessory: Switch.adaptive(
+                          activeTrackColor: Theme.of(context).colorScheme.primary,
                           value: _filter.comVideo,
                           onChanged:
                               (v) => _emit(
@@ -240,6 +242,7 @@ class _ExerciciosFilterSheetState extends State<_ExerciciosFilterSheet> {
                         highlight: _filter.semVideo,
                         showDivider: false,
                         accessory: Switch.adaptive(
+                          activeTrackColor: Theme.of(context).colorScheme.primary,
                           value: _filter.semVideo,
                           onChanged:
                               (v) => _emit(

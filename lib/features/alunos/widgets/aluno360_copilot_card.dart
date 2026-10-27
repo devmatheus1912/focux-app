@@ -27,6 +27,7 @@ import '../widgets/aluno360_copilot_support.dart';
 import 'aluno360_help_sheets.dart';
 import 'aluno360_copilot_ia_prompt_section.dart';
 import '../widgets/aluno_outreach_message_sheet.dart';
+import '../../../core/widgets/fx_help.dart';
 
 class Aluno360CopilotCard extends ConsumerWidget {
   final Aluno aluno;
@@ -226,8 +227,10 @@ class Aluno360CopilotCard extends ConsumerWidget {
         children: [
           DashboardSectionHeader(
             title: copilotCardTitle(contactPriority: operacao.contactPriority),
-            actionLabel: 'Ajuda',
-            onAction: () => showAluno360CopilotHelpSheet(context),
+            trailing: FxHelpIconButton(
+              tooltip: 'Sobre a prioridade do dia',
+              onTap: () => showAluno360CopilotHelpSheet(context),
+            ),
           ),
           const SizedBox(height: 4),
           Row(

@@ -56,7 +56,7 @@ extension on _ExerciciosListScreenState {
             title: 'Nenhum exercício seu ainda.',
             action: FxEmptyAction(
               label: 'Criar exercício',
-              onTap: () => context.push('/exercicios/novo'),
+              onTap: _novoExercicio,
             ),
           ),
         ],

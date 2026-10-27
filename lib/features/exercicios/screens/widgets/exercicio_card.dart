@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/fx_shell_scaffold.dart';
+import '../../../../core/widgets/fx_status_pill.dart';
+import '../../../../core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../data/enums.dart';
 import '../../data/exercicio_repository.dart';
@@ -61,12 +63,9 @@ class ExercicioCard extends ConsumerWidget {
     final subtitle = [
       _grupoLabel(exercicio),
       _equipamentoLabel(exercicio),
-      hasPersonalVideo
-          ? 'Vídeo próprio'
-          : hasDemo
-          ? 'Biblioteca'
-          : 'Sem demo',
     ].where((s) => s != null && s.isNotEmpty).join(' · ');
+    final meu = !videoFocuxIntocado(exercicio);
+    final semVideo = !hasDemo;
 
     return GestureDetector(
       onLongPress: onLongPress,
@@ -81,7 +80,41 @@ class ExercicioCard extends ConsumerWidget {
         color: primary,
         size: 20,
       ),
-      subtitle: Text(subtitle),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (subtitle.isNotEmpty) Text(subtitle),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              FxStatusPill(
+                label:
+                    semVideo
+                        ? 'Sem vídeo'
+                        : hasPersonalVideo
+                        ? 'Seu vídeo'
+                        : 'Vídeo da Focux',
+                tone:
+                    semVideo
+                        ? FxPillTone.warning
+                        : hasPersonalVideo
+                        ? FxPillTone.success
+                        : FxPillTone.neutral,
+              ),
+              if (meu && semVideo)
+                FxTonalButton(
+                  label: 'Adicionar vídeo',
+                  icon: Icons.videocam_outlined,
+                  compact: true,
+                  onPressed: onUploadVideo,
+                ),
+            ],
+          ),
+        ],
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

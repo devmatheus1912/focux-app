@@ -11,7 +11,6 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
-import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -27,6 +26,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
 import '../utils/recorrencia_sugestao.dart';
+import '../../financeiro/widgets/dia_vencimento_grade.dart';
 
 /// Folha curta de "Nova recorrência", usada pela lista e pelo perfil 360.
 /// Com [alunoId] a pessoa já vem escolhida. Devolve `true` se criou.
@@ -140,14 +140,11 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
   }
 
   Future<void> _escolherDia() async {
-    final picked = await showFxInsetPickerSheet<int>(
+    final picked = await showDiaVencimentoSheet(
       context,
-      title: S.of(context).recorrenciaDia,
-      selected: _dia,
-      items: [
-        for (var d = 1; d <= recorrenciaDiaMaximo; d++)
-          FxInsetPickerSheetItem(value: d, label: recorrenciaDiaLabel(d)),
-      ],
+      titulo: S.of(context).recorrenciaDia,
+      selecionado: _dia,
+      maximo: recorrenciaDiaMaximo,
     );
     if (picked != null && mounted) setState(() => _dia = picked);
   }

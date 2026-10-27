@@ -39,18 +39,19 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
     if (alunoSelecionadoId != null) {
       for (final a in alunos) {
         if (a.id == alunoSelecionadoId) {
-          alunoSelecionadoNome = a.nome;
+          alunoSelecionadoNome = fxTitleCaseName(a.nome);
           break;
         }
       }
       if (alunoSelecionadoNome == null) {
         try {
           final a = await ref.read(alunoProvider(alunoSelecionadoId).future);
-          alunoSelecionadoNome = a.nome;
+          alunoSelecionadoNome = fxTitleCaseName(a.nome);
         } catch (_) {}
       }
     }
     var salvando = false;
+    var escolhendoAluno = false;
 
     if (!mounted) {
       valorCtrl.dispose();
@@ -69,8 +70,24 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                 MediaQuery.sizeOf(ctx).height *
                 FxHomeSheetChrome.maxHeightFactor,
             child: StatefulBuilder(
-              builder:
-                  (ctx, setModalState) => Form(
+              builder: (ctx, setModalState) {
+                if (escolhendoAluno) {
+                  return FinanceiroAlunoEtapa(
+                    alunos: alunos,
+                    selecionadoId: alunoSelecionadoId,
+                    onVoltar:
+                        () => setModalState(() => escolhendoAluno = false),
+                    onPick: (a) {
+                      setModalState(() {
+                        alunoSelecionadoId = a.id;
+                        alunoSelecionadoNome = fxTitleCaseName(a.nome);
+                        escolhendoAluno = false;
+                      });
+                      sugerirValor(a.id);
+                    },
+                  );
+                }
+                return Form(
                     key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -101,34 +118,9 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                               onTap:
                                   alunos.isEmpty
                                       ? null
-                                      : () async {
-                                        final picked =
-                                            await showFxInsetPickerSheet<int>(
-                                              ctx,
-                                              title: 'Aluno',
-                                              selected: alunoSelecionadoId,
-                                              items: [
-                                                for (final a in alunos)
-                                                  FxInsetPickerSheetItem(
-                                                    value: a.id,
-                                                    label: a.nome,
-                                                  ),
-                                              ],
-                                            );
-                                        if (picked == null) return;
-                                        String? nome;
-                                        for (final a in alunos) {
-                                          if (a.id == picked) {
-                                            nome = a.nome;
-                                            break;
-                                          }
-                                        }
-                                        setModalState(() {
-                                          alunoSelecionadoId = picked;
-                                          alunoSelecionadoNome = nome;
-                                        });
-                                        await sugerirValor(picked);
-                                      },
+                                      : () => setModalState(
+                                        () => escolhendoAluno = true,
+                                      ),
                             ),
                             AlunoInsetFormField(
                               controller: valorCtrl,
@@ -280,7 +272,8 @@ extension FinanceiroMensalidadesTabForms on _FinanceiroMensalidadesTabState {
                         ),
                       ],
                     ),
-                  ),
+                  );
+              },
             ),
           );
         },

@@ -34,6 +34,7 @@ import '../../chat/screens/chat_inbox_screen.dart';
 import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
 import 'pix_qr_display.dart';
+import '../widgets/vencimento_escolha.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
@@ -109,21 +110,19 @@ Future<String?> pickMensalidadeVencimento(
   required String mesReferencia,
   required String atual,
 }) async {
-  final ops = financeiroVencimentoOpcoes(
-    mesReferencia: mesReferencia,
-    atual: atual,
-  );
-  final picked = await showFxInsetPickerSheet<String>(
+  final hoje = DateTime.now();
+  final mes =
+      financeiroParseIsoDate(mesReferencia) ??
+      DateTime(hoje.year, hoje.month, 1);
+  final dataAtual = financeiroParseIsoDate(atual) ?? hoje;
+  final picked = await showVencimentoSheet(
     ctx,
-    title: 'Vencimento',
-    selected: atual.trim(),
-    items: [
-      for (final o in ops)
-        FxInsetPickerSheetItem(value: o.iso, label: o.label),
-    ],
+    mesReferencia: mes,
+    atual: dataAtual,
+    hoje: hoje,
   );
   if (picked == null) return null;
-  return picked;
+  return financeiroIsoDate(picked.year, picked.month, picked.day);
 }
 
 Future<Mensalidade?> confirmarPagarMensalidade({

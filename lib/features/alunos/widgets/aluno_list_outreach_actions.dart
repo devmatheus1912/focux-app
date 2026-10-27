@@ -109,6 +109,36 @@ class AlunoListOutreachActions extends ConsumerWidget {
   }
 }
 
+/// Conversa com o aluno a um toque, em todo cartão da lista (não só em
+/// "Contato hoje").
+class AlunoChatQuickButton extends StatelessWidget {
+  const AlunoChatQuickButton({
+    super.key,
+    required this.alunoId,
+    required this.displayName,
+    required this.primary,
+    required this.isDark,
+    this.compact = false,
+  });
+
+  final int alunoId;
+  final String displayName;
+  final Color primary;
+  final bool isDark;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return _AlunoQuickActionIcon(
+      compact: compact,
+      icon: Icons.forum_outlined,
+      tooltip: 'Conversar com $displayName',
+      color: BrandPalette.sectionAction(primary, dark: isDark),
+      onTap: () => context.push('/alunos/$alunoId/chat', extra: displayName),
+    );
+  }
+}
+
 class _AlunoQuickActionIcon extends StatelessWidget {
   final IconData icon;
   final String tooltip;

@@ -22,6 +22,10 @@ Future<bool> showFxConfirmSheet(
   IconData? confirmIcon,
   String cancelLabel = FocuxMicrocopy.cancelar,
   bool destructive = false,
+
+  /// Descartar rascunho: o botão cheio é "Continuar editando" e descartar
+  /// é texto vermelho (a ação destrutiva nunca ganha a cor da marca).
+  bool discard = false,
   /// Auth S6: força chrome dark de marca (não herda light do SO).
   bool forceDark = false,
 }) async {
@@ -38,6 +42,7 @@ Future<bool> showFxConfirmSheet(
           confirmLabel: confirmLabel,
           cancelLabel: cancelLabel,
           destructive: destructive,
+          discard: discard,
         ),
   );
   return confirmed ?? false;
@@ -53,6 +58,7 @@ class _FxConfirmSheet extends StatelessWidget {
     required this.confirmLabel,
     required this.cancelLabel,
     required this.destructive,
+    this.discard = false,
   });
 
   final String title;
@@ -63,6 +69,7 @@ class _FxConfirmSheet extends StatelessWidget {
   final String confirmLabel;
   final String cancelLabel;
   final bool destructive;
+  final bool discard;
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +78,7 @@ class _FxConfirmSheet extends StatelessWidget {
     final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = destructive ? EagleTokens.bad : theme.colorScheme.primary;
     final onAccent = destructive ? Colors.white : theme.colorScheme.onPrimary;
+    if (discard) return _discardBody(context, isDark, mute);
 
     return FxHomeSheetSurface(
       isDark: isDark,
@@ -130,6 +138,73 @@ class _FxConfirmSheet extends StatelessWidget {
                 cancelLabel,
                 style: FocuxHubTypography.bodyMuted(
                   color: mute,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _discardBody(BuildContext context, bool isDark, Color mute) {
+    final theme = Theme.of(context);
+    return FxHomeSheetSurface(
+      isDark: isDark,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxHomeSheetHandle(isDark: isDark),
+          SizedBox(height: TokensStrip.s4),
+          FxHomeSheetHeader(
+            isDark: isDark,
+            title: title,
+            subtitle: subtitle,
+            leading: Icon(icon, color: theme.colorScheme.primary, size: 18),
+          ),
+          if (message != null && message!.trim().isNotEmpty) ...[
+            SizedBox(height: TokensStrip.s3),
+            Text(
+              message!,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.bodyMuted(
+                color: mute,
+                fontWeight: FontWeight.w400,
+                height: 1.35,
+              ),
+            ),
+          ],
+          const SizedBox(height: TokensStrip.s4),
+          SizedBox(
+            height: 52,
+            child: ElevatedButton(
+              onPressed:
+                  () => FxHomeSheetChrome.dismissAndPop(context, false),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                ),
+                elevation: 0,
+              ),
+              child: const Text('Continuar editando'),
+            ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          SizedBox(
+            height: 48,
+            child: TextButton(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                FxHomeSheetChrome.dismissAndPop(context, true);
+              },
+              child: Text(
+                confirmLabel,
+                style: const TextStyle(
+                  color: EagleTokens.bad,
                   fontWeight: FontWeight.w700,
                 ),
               ),

@@ -135,8 +135,11 @@ class Aluno360ResumoTab extends ConsumerWidget {
             riscoMotivo: riscoMotivo,
           );
     final acaoCopiloto = snapshot?.effectiveProxima?.acao.trim() ?? '';
+    // O copiloto não repete o que "Agora" já mostra (título ou motivo).
     final mostraCopiloto =
-        acaoCopiloto.isNotEmpty && acaoCopiloto != agora?.motivo;
+        acaoCopiloto.isNotEmpty &&
+        !mesmaAcao(acaoCopiloto, agora?.titulo) &&
+        !mesmaAcao(acaoCopiloto, agora?.motivo);
     final week = summarizeAderenciaWeek(
       parseAderenciaSemanal(aderenciaSemanal),
       bundle: aderenciaBundle,
@@ -151,12 +154,8 @@ class Aluno360ResumoTab extends ConsumerWidget {
 
     final blocos = <Widget>[
       if (snapshot != null) _agora(context, s, chrome, snapshot, agora),
-      if (semTreinos)
-        Text(
-          s.alunoResumoSemTreinosAinda,
-          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-        )
-      else
+      // Sem treino nenhum, o cartão da ficha ("Sem ficha ainda") já diz tudo.
+      if (!semTreinos)
         FxMetricStrip(metricas: _metricas(context, s, checkins, abrirEngajamento)),
       Aluno360FichaCard(
         alunoId: alunoId,

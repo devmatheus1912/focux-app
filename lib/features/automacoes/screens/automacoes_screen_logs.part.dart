@@ -17,7 +17,7 @@ extension on _AutomacoesScreenState {
           for (final a in alunos)
             FxInsetPickerSheetItem(
               value: a.id,
-              label: a.nome,
+              label: fxTitleCaseName(a.nome),
               subtitle: a.email.trim().isEmpty ? null : a.email,
             ),
         ],

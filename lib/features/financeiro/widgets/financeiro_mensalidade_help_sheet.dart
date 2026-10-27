@@ -16,13 +16,13 @@ Future<void> showFinanceiroMensalidadeHelpSheet(BuildContext context) {
       FxHelpTip(
         'Cobrar',
         'Escolha entre mandar a cobrança no chat ou gerar o PIX copia e cola. '
-        'Registrar contato, só anota que você falou.',
+            'Registrar contato, só anota que você falou.',
         icon: 'message-circle',
       ),
       FxHelpTip(
         'Editar e cancelar',
         'No menu ⋮: ajuste valor ou vencimento, ou cancele a cobrança. '
-        'Se o vencimento já passou, ela fica atrasada sozinha.',
+            'Se o vencimento já passou, ela fica atrasada sozinha.',
         icon: 'dollar-sign',
       ),
     ],

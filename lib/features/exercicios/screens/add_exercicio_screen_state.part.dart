@@ -94,6 +94,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                 ? 'O que você alterou não será salvo.'
                 : 'O que você preencheu não será salvo.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }
@@ -248,14 +249,25 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       if (!_isEdit && _videoPath != null) {
         await _enviarVideoDoNovo();
       }
-      if (mounted) {
-        // cópia de exercício devolve o id para quem quiser usar no treino
-        if (widget.copiaDe != null && _criadoId != null) {
-          context.pop(_criadoId);
-        } else {
-          context.pop(true);
-        }
+      if (!mounted) return;
+      final criadoId = _criadoId;
+      if (_isEdit || criadoId == null) {
+        context.pop(true);
+        return;
       }
+      final destino = await showExercicioCriadoSheet(
+        context,
+        nome: _nomeCtrl.text.trim(),
+        origem: widget.origem,
+      );
+      if (!mounted) return;
+      context.pop(
+        ExercicioCriado(
+          id: criadoId,
+          nome: _nomeCtrl.text.trim(),
+          destino: destino,
+        ),
+      );
     } on OfflineQueuedException {
       if (mounted) leaveWithQueuedNotice(context, '/exercicios');
     } catch (e) {
@@ -294,7 +306,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       if (mounted) {
         FeedbackHelper.showWarn(
           context,
-          'Exercício criado, mas o vídeo não subiu. Envie depois pela prescrição.',
+          'Exercício criado, mas o vídeo não subiu. Envie depois em Meus exercícios, em "Adicionar vídeo".',
         );
       }
     }
@@ -526,6 +538,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   value: '',
                                   showDivider: false,
                                   accessory: Switch.adaptive(
+                                    activeTrackColor: Theme.of(context).colorScheme.primary,
                                     value: _unilateral,
                                     onChanged:
                                         (v) => setState(() => _unilateral = v),

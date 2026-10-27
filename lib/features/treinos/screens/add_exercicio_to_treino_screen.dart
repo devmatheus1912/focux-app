@@ -29,6 +29,7 @@ import '../../alunos/providers/alunos_provider.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_page.dart';
 import '../../exercicios/data/exercicio_repository.dart';
+import '../../exercicios/models/exercicio_criado.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
 import '../../exercicios/providers/exercicios_provider.dart';

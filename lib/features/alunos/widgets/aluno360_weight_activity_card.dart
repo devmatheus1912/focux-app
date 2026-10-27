@@ -62,13 +62,22 @@ class Aluno360WeightActivityCard extends ConsumerWidget {
           const DashboardSectionHeader(title: 'Peso · tendência'),
           const SizedBox(height: TokensStrip.s3),
           InkWell(
-            onTap: () => _openComparativo(context),
+            onTap:
+                () =>
+                    suspeito
+                        ? _openEvolucao(context)
+                        : _openComparativo(context),
             borderRadius: BorderRadius.circular(12),
             child: OperationalMetricTile(
               label: 'Peso atual',
-              value: peso == null ? '—' : '${formatBrDecimal(peso.valor)} kg',
+              value:
+                  peso == null
+                      ? '—'
+                      : suspeito
+                      ? 'A confirmar'
+                      : '${formatBrDecimal(peso.valor)} kg',
               hint: suspeito
-                  ? S.of(context).aluno360ConfirmeValor
+                  ? 'Registrado ${formatBrDecimal(peso.valor)} kg · toque para corrigir'
                   : peso?.origem == PesoOrigem.cadastro
                   ? S.of(context).aluno360PesoDoCadastro
                   : showRadarHint

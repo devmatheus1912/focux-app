@@ -104,6 +104,7 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
         title: 'Descartar cadastro?',
         message: 'O que você preencheu não será salvo.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

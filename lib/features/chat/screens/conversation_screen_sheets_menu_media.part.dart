@@ -3,69 +3,69 @@ part of 'conversation_screen.dart';
 extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
   Future<void> _showChatMenu() async {
     final l10n = S.of(context);
-    final items = <FxInsetPickerSheetItem<String>>[
+    final conversa = <FxActionItem<String>>[
       if (_isPersonalMode)
-        const FxInsetPickerSheetItem(
-          value: 'perfil',
-          label: 'Ver perfil do aluno',
-          subtitle: 'Abrir o Aluno 360',
-          icon: Icons.person_outline_rounded,
+        const FxActionItem(
+          valor: 'perfil',
+          rotulo: 'Ver perfil do aluno',
+          descricao: 'Abrir o Aluno 360',
+          icone: Icons.person_outline_rounded,
         ),
-      const FxInsetPickerSheetItem(
-        value: 'buscar',
-        label: 'Buscar conversa',
-        subtitle: 'Encontrar mensagem na thread',
-        icon: Icons.search_rounded,
+      const FxActionItem(
+        valor: 'buscar',
+        rotulo: 'Buscar conversa',
+        descricao: 'Encontrar mensagem na thread',
+        icone: Icons.search_rounded,
       ),
-      const FxInsetPickerSheetItem(
-        value: 'midias',
-        label: 'Mídias da conversa',
-        subtitle: 'Fotos, vídeos e áudios',
-        icon: Icons.perm_media_outlined,
+      const FxActionItem(
+        valor: 'midias',
+        rotulo: 'Mídias da conversa',
+        descricao: 'Fotos, vídeos e áudios',
+        icone: Icons.perm_media_outlined,
       ),
-      const FxInsetPickerSheetItem(
-        value: 'atualizar',
-        label: 'Atualizar conversa',
-        subtitle: 'Recarregar mensagens',
-        icon: Icons.refresh_rounded,
+      const FxActionItem(
+        valor: 'atualizar',
+        rotulo: 'Atualizar conversa',
+        descricao: 'Recarregar mensagens',
+        icone: Icons.refresh_rounded,
       ),
-      if (!_bloqueio.ativo)
-        const FxInsetPickerSheetItem(
-          value: 'emoji',
-          label: 'Adicionar emoji',
-          subtitle: 'Inserir no campo de mensagem',
-          icon: Icons.emoji_emotions_outlined,
-        ),
+    ];
+    final seguranca = <FxActionItem<String>>[
       if (_ultimaRecebida() != null)
-        FxInsetPickerSheetItem(
-          value: 'denunciar',
-          label: l10n.chatDenunciarConversa,
-          subtitle: l10n.chatDenunciarConversaSubtitulo,
-          icon: Icons.flag_outlined,
+        FxActionItem(
+          valor: 'denunciar',
+          rotulo: l10n.chatDenunciarConversa,
+          descricao: l10n.chatDenunciarConversaSubtitulo,
+          icone: Icons.flag_outlined,
         ),
       if (_bloqueadoPorMim)
-        FxInsetPickerSheetItem(
-          value: 'desbloquear',
-          label: l10n.chatDesbloquear,
-          subtitle: l10n.chatDesbloquearSubtitulo,
-          icon: Icons.lock_open_rounded,
-        )
-      else
-        FxInsetPickerSheetItem(
-          value: 'bloquear',
-          label: l10n.chatBloquear,
-          subtitle: _isAlunoMode
-              ? l10n.chatBloquearSubtituloAluno
-              : l10n.chatBloquearSubtituloPersonal,
-          icon: Icons.block_rounded,
+        FxActionItem(
+          valor: 'desbloquear',
+          rotulo: l10n.chatDesbloquear,
+          descricao: l10n.chatDesbloquearSubtitulo,
+          icone: Icons.lock_open_rounded,
         ),
     ];
-    final chosen = await showFxInsetPickerSheet<String>(
+    final chosen = await showFxGroupedActionSheet<String>(
       context,
-      title: 'Conversa',
-      headerIcon: Icons.more_horiz_rounded,
-      selected: null,
-      items: items,
+      titulo: 'Conversa',
+      icone: Icons.more_horiz_rounded,
+      grupos: [
+        FxActionGroup<String>(null, conversa),
+        if (seguranca.isNotEmpty) FxActionGroup<String>('Segurança', seguranca),
+      ],
+      destrutiva:
+          _bloqueadoPorMim
+              ? null
+              : FxActionItem(
+                valor: 'bloquear',
+                rotulo: l10n.chatBloquear,
+                descricao:
+                    _isAlunoMode
+                        ? l10n.chatBloquearSubtituloAluno
+                        : l10n.chatBloquearSubtituloPersonal,
+                icone: Icons.block_rounded,
+              ),
     );
     if (chosen == null || !mounted) return;
     HapticFeedback.selectionClick();
@@ -78,8 +78,6 @@ extension ConversationScreenSheetsMenuMedia on _ConversationScreenState {
         _showMediaGallerySheet();
       case 'atualizar':
         _loadHistorico();
-      case 'emoji':
-        _showEmojiSheet();
       case 'denunciar':
         final msg = _ultimaRecebida();
         if (msg == null) return;

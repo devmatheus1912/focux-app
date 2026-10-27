@@ -126,3 +126,13 @@ ResumoAgora? _comSugestao(
     destino: sticky.destination,
   );
 }
+
+/// As duas frases dizem a mesma coisa (ignora caixa, espaços e ponto final).
+bool mesmaAcao(String a, String? b) {
+  if (b == null) return false;
+  String norma(String x) =>
+      x.trim().toLowerCase().replaceAll(RegExp(r'[\s.!]+$'), '');
+  final na = norma(a);
+  final nb = norma(b);
+  return na.isNotEmpty && na == nb;
+}

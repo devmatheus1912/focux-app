@@ -24,6 +24,7 @@ import '../../features/checkin/screens/treino_previa_screen.dart';
 import '../../features/exercicios/screens/exercicios_list_screen.dart';
 import '../../features/exercicios/screens/exercicio_detail_screen.dart';
 import '../../features/exercicios/data/exercicio_repository.dart' show Exercicio;
+import '../../features/exercicios/models/exercicio_criado.dart' show exercicioOrigemDe;
 import '../../features/exercicios/screens/add_exercicio_screen.dart';
 import '../../features/exercicios/screens/onboarding_biblioteca_wizard.dart';
 import '../../features/treinos/screens/aluno_rotina_screen.dart';
@@ -466,6 +467,7 @@ RouteBase buildChromeShellRoute() {
               final extra = state.extra;
               return AddExercicioScreen(
                 copiaDe: extra is Exercicio ? extra : null,
+                origem: exercicioOrigemDe(state.uri.queryParameters['origem']),
               );
             },
           ),

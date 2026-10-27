@@ -31,11 +31,16 @@ import '../providers/exercicios_provider.dart';
 import 'widgets/exercicios_batch_actions.dart';
 import 'widgets/exercicios_filter_bar.dart';
 import 'widgets/exercicios_list_view.dart';
+import '../../alunos/widgets/aluno_form_choices.dart';
+import '../models/exercicio_criado.dart';
 
 part 'exercicios_list_screen_body.part.dart';
 
 class ExerciciosListScreen extends ConsumerStatefulWidget {
-  const ExerciciosListScreen({super.key});
+  const ExerciciosListScreen({super.key, this.embedded = false});
+
+  /// Dentro da aba Treinos: sem scaffold nem barra, só o conteúdo.
+  final bool embedded;
 
   @override
   ConsumerState<ExerciciosListScreen> createState() =>
@@ -55,7 +60,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   int _page = 0;
   int _totalElements = 0;
   String? _error;
-  String _aba = 'FOCUX';
+  String _aba = 'MEUS';
+
+  /// "Meus" é o padrão; sem nenhum exercício do personal, abre a Focux uma vez.
+  bool _abaDecidida = false;
 
   List<Exercicio> get _visibleItems => _items;
 
@@ -129,6 +137,13 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         _loading = false;
         _loadingMore = false;
       });
+      if (reset && !_abaDecidida) {
+        _abaDecidida = true;
+        if (_aba == 'MEUS' && _totalElements == 0 && !_filter.hasActive) {
+          setState(() => _aba = 'FOCUX');
+          _fetchPage(reset: true);
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -148,7 +163,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _uploadVideo(Exercicio exercicio) async {
     final file = await _picker.pickVideo(source: ImageSource.gallery);
     if (file == null || !mounted) return;
-    FeedbackHelper.showInfo(context, 'Enviando video de ${exercicio.nome}...');
+    FeedbackHelper.showInfo(context, 'Enviando vídeo de ${exercicio.nome}…');
     try {
       await ref
           .read(exercicioRepositoryProvider)
@@ -162,7 +177,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
         props: {'exId': exercicio.id},
       );
       _refresh();
-      if (mounted) FeedbackHelper.showSuccess(context, 'Video adicionado.');
+      if (mounted) FeedbackHelper.showSuccess(context, 'Vídeo adicionado.');
     } catch (e) {
       if (mounted) FeedbackHelper.showError(context, friendlyError(e));
     }
@@ -171,7 +186,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   Future<void> _deleteOne(Exercicio exercicio) async {
     final ok = await showFxConfirmSheet(
       context,
-      title: 'Excluir exercicio?',
+      title: 'Excluir exercício?',
       message:
           'Isso remove "${exercicio.nome}" da biblioteca. Se estiver em treino, o backend pode bloquear.',
       icon: Icons.delete_outline_rounded,
@@ -184,7 +199,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       _selected.remove(exercicio.id);
       _refresh();
       if (mounted) {
-        FeedbackHelper.showSuccess(context, 'Exercicio excluido.');
+        FeedbackHelper.showSuccess(context, 'Exercício excluído.');
       }
     } catch (e) {
       if (mounted) {
@@ -299,7 +314,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
       if (blocked.isEmpty) _selected.clear();
     });
     _refresh();
-    switch (resolveBatchMutationNotice(failed: blocked.length, queued: queued)) {
+    switch (resolveBatchMutationNotice(
+      failed: blocked.length,
+      queued: queued,
+    )) {
       case BatchMutationNotice.success:
         FeedbackHelper.showSuccess(
           context,
@@ -345,8 +363,13 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   }
 
   Future<void> _novoExercicio() async {
-    final created = await context.push<bool>('/exercicios/novo');
-    if (created == true) _refresh();
+    final criado = await context.push<ExercicioCriado>('/exercicios/novo');
+    if (criado == null || !mounted) return;
+    if (_aba != 'MEUS') setState(() => _aba = 'MEUS');
+    _refresh();
+    if (criado.destino == ExercicioCriadoDestino.criarOutro) {
+      await _novoExercicio();
+    }
   }
 
   Future<void> _abrirBiblioteca() async {
@@ -365,6 +388,10 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
     final headerSubtitle = FxHubFreshness.joinCount(totalLabel, freshnessLabel);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
+    if (widget.embedded) {
+      return _conteudo(isDark: isDark, primary: primary, visible: visible);
+    }
+
     return fxScreenA11yScope(
       label: 'Exercícios',
       child: PopScope(
@@ -382,105 +409,117 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
           safePopOrGo(context, '/treinos');
         },
         child: FxShellScaffold(
-        useMesh: true,
-        appBar:
-            _selected.isEmpty
-                ? FxShellAppBar(
-                  title: 'Exercícios',
-                  subtitle: headerSubtitle,
-                  onBack: () {
-                    FxKeyboardDismissScope.dismiss();
-                    safePopOrGo(context, '/treinos');
-                  },
-                  actions: [
-                    IconButton(
-                      tooltip: 'Selecionar exercícios',
-                      onPressed:
-                          visible.isEmpty
-                              ? null
-                              : () => setState(
-                                () => _selected.add(visible.first.id),
-                              ),
-                      icon: const Icon(Icons.checklist_rounded),
-                    ),
-                    IconButton(
-                      tooltip: 'Carregar biblioteca completa',
-                      onPressed: _abrirBiblioteca,
-                      icon: const Icon(Icons.menu_book_rounded),
-                    ),
-                  ],
-                )
-                : null,
-        body: SafeArea(
-          bottom: false,
-          child: FxContentWidthLimiter(
-            child: Column(
-            children: [
-              if (_selected.isNotEmpty)
-                ExerciciosBatchActions(
-                  count: _selected.length,
-                  onCancel: () => setState(_selected.clear),
-                  onSelectAll: _selectAllVisible,
-                  onFavorite: _favoriteBatch,
-                  onDelete: _deleteBatch,
-                ),
-              Row(
-                children: [
-                  for (final aba in const [
-                    ('FOCUX', 'Biblioteca'),
-                    ('MEUS', 'Meus exercícios'),
-                  ])
-                    TextButton(
-                      onPressed: _aba == aba.$1
-                          ? null
-                          : () {
-                              setState(() => _aba = aba.$1);
-                              _fetchPage(reset: true);
-                            },
-                      child: Text(aba.$2),
-                    ),
-                ],
+          useMesh: true,
+          appBar:
+              _selected.isEmpty
+                  ? FxShellAppBar(
+                    title: 'Exercícios',
+                    subtitle: headerSubtitle,
+                    onBack: () {
+                      FxKeyboardDismissScope.dismiss();
+                      safePopOrGo(context, '/treinos');
+                    },
+                    actions: [
+                      IconButton(
+                        tooltip: 'Selecionar exercícios',
+                        onPressed:
+                            visible.isEmpty
+                                ? null
+                                : () => setState(
+                                  () => _selected.add(visible.first.id),
+                                ),
+                        icon: const Icon(Icons.checklist_rounded),
+                      ),
+                      IconButton(
+                        tooltip: 'Carregar biblioteca completa',
+                        onPressed: _abrirBiblioteca,
+                        icon: const Icon(Icons.menu_book_rounded),
+                      ),
+                    ],
+                  )
+                  : null,
+          body: SafeArea(
+            bottom: false,
+            child: FxContentWidthLimiter(
+              child: _conteudo(
+                isDark: isDark,
+                primary: primary,
+                visible: visible,
               ),
-              ExerciciosFilterBar(
-                filter: _filter,
-                onChanged: (value) {
-                  setState(() => _filter = value);
-                  _fetchPage(reset: true);
-                },
-                onClear: () {
-                  setState(() => _filter = const ExerciciosUiFilter());
-                  _fetchPage(reset: true);
-                },
-              ),
-              Expanded(
-                child: _libraryBody(
-                  isDark: isDark,
-                  primary: primary,
-                  visible: visible,
-                ),
-              ),
-              if (_selected.isEmpty && !_loading && _error == null)
-                SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      TokensStrip.s4,
-                      TokensStrip.s2,
-                      TokensStrip.s4,
-                      TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
-                    ),
-                    child: FxLiquidPrimaryButton(
-                      label: 'Novo exercício',
-                      onPressed: _novoExercicio,
-                    ),
-                  ),
-                ),
-            ],
             ),
           ),
         ),
       ),
-      ),
+    );
+  }
+
+  Widget _conteudo({
+    required bool isDark,
+    required Color primary,
+    required List<Exercicio> visible,
+  }) {
+    return Column(
+      children: [
+        if (_selected.isNotEmpty)
+          ExerciciosBatchActions(
+            count: _selected.length,
+            onCancel: () => setState(_selected.clear),
+            onSelectAll: _selectAllVisible,
+            onFavorite: _favoriteBatch,
+            onDelete: _deleteBatch,
+          ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+          child: AlunoSegmentedChoice(
+            options: const [
+              (value: 'MEUS', label: 'Meus'),
+              (value: 'FOCUX', label: 'Focux'),
+            ],
+            selected: _aba,
+            isDark: isDark,
+            onSelect: (value) {
+              if (_aba == value) return;
+              _abaDecidida = true;
+              setState(() => _aba = value);
+              _fetchPage(reset: true);
+            },
+          ),
+        ),
+        ExerciciosFilterBar(
+          filter: _filter,
+          onChanged: (value) {
+            setState(() => _filter = value);
+            _fetchPage(reset: true);
+          },
+          onClear: () {
+            setState(() => _filter = const ExerciciosUiFilter());
+            _fetchPage(reset: true);
+          },
+        ),
+        Expanded(
+          child: _libraryBody(
+            isDark: isDark,
+            primary: primary,
+            visible: visible,
+          ),
+        ),
+        if (_selected.isEmpty && !_loading && _error == null)
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                TokensStrip.s4,
+                TokensStrip.s2,
+                TokensStrip.s4,
+                TokensStrip.s2 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: FxLiquidPrimaryButton(
+                label: 'Novo exercício',
+                onPressed: _novoExercicio,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

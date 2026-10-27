@@ -45,10 +45,14 @@ class _FinanceiroAlunoContextBanner extends ConsumerWidget {
         FxSettingsLayout.pageInset,
         0,
       ),
-      child: Text(
-        financeiroAlunoContextLabel(nome),
-        style: FxSettingsLayout.sectionHeader(
-          color: ShellChrome.of(context).mute,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          financeiroAlunoContextLabel(nome == null ? null : fxTitleCaseName(nome)),
+          textAlign: TextAlign.start,
+          style: FxSettingsLayout.sectionHeader(
+            color: ShellChrome.of(context).mute,
+          ),
         ),
       ),
     );

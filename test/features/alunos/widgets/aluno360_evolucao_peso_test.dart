@@ -94,11 +94,12 @@ Timeline360Event _evento(
 
 void main() {
   group('peso: uma fonte só', () {
-    testWidgets('avaliação de 458 kg e cadastro vazio: o card mostra o valor e pede confirmação', (tester) async {
+    testWidgets('avaliação de 458 kg e cadastro vazio: o card pede confirmação, sem mostrar 458 como atual', (tester) async {
       await _abrir(tester, _peso(_aluno()), historico: [458.0]);
-      expect(find.text('458,0 kg'), findsOneWidget);
+      expect(find.text('A confirmar'), findsOneWidget);
+      expect(find.text('458,0 kg'), findsNothing);
       expect(find.text('—'), findsNothing);
-      expect(find.text('Confirme este valor'), findsOneWidget);
+      expect(find.textContaining('Registrado 458,0 kg'), findsOneWidget);
     });
 
     testWidgets('um ponto só: sem gráfico e sem "Estável"', (tester) async {

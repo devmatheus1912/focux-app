@@ -322,11 +322,11 @@ class ConversationMessageComposer extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            IconButton(
+            // Botão tonal: o "+" solto não parecia tocável.
+            IconButton.filledTonal(
               onPressed: uploading ? null : onAttach,
               tooltip: S.of(context).chatAnexar,
               icon: const Icon(Icons.add_rounded),
-              color: mute,
               style: IconButton.styleFrom(
                 visualDensity: VisualDensity.standard,
                 minimumSize: const Size.square(kMinInteractiveDimension),

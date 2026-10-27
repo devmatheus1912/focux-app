@@ -16,6 +16,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_copilot_ia_cache_store.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_ia_upgrade.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class Aluno360CopilotIaRefreshButton extends ConsumerStatefulWidget {
   const Aluno360CopilotIaRefreshButton({
@@ -193,35 +194,16 @@ class Aluno360CopilotIaRefreshButtonState
     final iconSize = wideHeader ? 20.0 : 18.0;
 
     if (wideHeader) {
-      return Semantics(
-        button: true,
-        label:
+      return FxTonalButton(
+        label: _refreshing ? 'Atualizando…' : 'Atualizar',
+        semanticLabel:
             _refreshing
                 ? 'Atualizando sugestão com IA'
                 : 'Atualizar sugestão com IA',
-        child: TextButton.icon(
-          onPressed: _refreshIa,
-          style: TextButton.styleFrom(
-            visualDensity: VisualDensity.compact,
-            minimumSize: const Size(44, 44),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-            foregroundColor: widget.primary,
-          ),
-          icon:
-              _refreshing
-                  ? FxLoading(
-                    size: iconSize,
-                    strokeWidth: 2,
-                    color: widget.primary,
-                  )
-                  : Icon(Icons.refresh_rounded, size: iconSize),
-          label: Text(
-            _refreshing ? 'Atualizando…' : 'Atualizar',
-            style: Aluno360Layout.chipLabelStyle(
-              context,
-            ).copyWith(color: widget.primary),
-          ),
-        ),
+        icon: Icons.refresh_rounded,
+        compact: true,
+        loading: _refreshing,
+        onPressed: _refreshIa,
       );
     }
 

@@ -327,6 +327,14 @@ class AlunoListCard extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    if (!modoSelecao && !needsOutreach)
+                      AlunoChatQuickButton(
+                        alunoId: aluno.id,
+                        displayName: displayName,
+                        primary: primary,
+                        isDark: isDark,
+                        compact: compact,
+                      ),
                     if (!modoSelecao && needsOutreach)
                       outreach
                     else if (!modoSelecao && aguardandoEntrada)

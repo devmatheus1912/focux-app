@@ -25,26 +25,29 @@ extension on _RecorrenciaScreenState {
   Future<void> _abrirAcoes(RecorrenciaAssinatura item) async {
     final acoes = recorrenciaAcoesDisponiveis(item.status);
     if (acoes.isEmpty) return;
-    final acao = await showFxInsetPickerSheet<RecorrenciaAcao>(
+    FxActionItem<RecorrenciaAcao> linha(RecorrenciaAcao a) => FxActionItem(
+      valor: a,
+      rotulo: recorrenciaAcaoLabel(a),
+      descricao: recorrenciaAcaoDescricao(a),
+      icone: recorrenciaAcaoIcone(a),
+    );
+    final encerrar = acoes.contains(RecorrenciaAcao.cancelar);
+    final acao = await showFxGroupedActionSheet<RecorrenciaAcao>(
       context,
-      title: recorrenciaAlunoLabel(item.alunoNome),
-      items: [
-        for (final a in acoes)
-          FxInsetPickerSheetItem(value: a, label: recorrenciaAcaoLabel(a)),
+      titulo: recorrenciaAlunoLabel(item.alunoNome),
+      icone: Icons.repeat_rounded,
+      grupos: [
+        FxActionGroup<RecorrenciaAcao>(null, [
+          for (final a in acoes)
+            if (a != RecorrenciaAcao.cancelar) linha(a),
+        ]),
       ],
+      destrutiva: encerrar ? linha(RecorrenciaAcao.cancelar) : null,
+      confirmarTitulo: 'Encerrar recorrência?',
+      confirmarMensagem:
+          'Novas mensalidades param de ser lançadas. As já lançadas continuam.',
     );
     if (acao == null || !mounted) return;
-    if (acao == RecorrenciaAcao.cancelar) {
-      final ok = await showFxConfirmSheet(
-        context,
-        title: 'Encerrar recorrência?',
-        subtitle: recorrenciaAlunoLabel(item.alunoNome),
-        message: 'Novas mensalidades param de ser lançadas. As já lançadas continuam.',
-        confirmLabel: 'Encerrar',
-        destructive: true,
-      );
-      if (!ok || !mounted) return;
-    }
     try {
       await RecorrenciaRepository(
         ref.read(apiClientProvider),

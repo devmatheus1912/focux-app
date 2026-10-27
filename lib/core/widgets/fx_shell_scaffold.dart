@@ -414,7 +414,18 @@ class FxSatelliteListTile extends StatelessWidget {
         onTap: onTap,
         onLongPress: onLongPress,
         leading: leading,
-        trailing: trailing,
+        // Linha tocável sem acessório ganha a seta: sinal de que abre algo.
+        trailing:
+            trailing ??
+            (onTap == null
+                ? null
+                : ExcludeSemantics(
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: mute.withValues(alpha: 0.9),
+                  ),
+                )),
         title: Text(
           displayTitle,
           maxLines: titleMaxLines ?? (isThreeLine ? 2 : 1),

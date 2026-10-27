@@ -32,6 +32,8 @@ import '../constants/treinos_layout.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/treino_blocos.dart';
 import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
+import '../../exercicios/models/exercicio_criado.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../utils/treino_detail_grouping.dart';

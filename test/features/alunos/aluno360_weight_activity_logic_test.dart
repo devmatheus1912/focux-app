@@ -25,6 +25,19 @@ void main() {
     });
   });
 
+  group('peso fora da faixa', () {
+    test('458 kg digitado errado não vira o atual se há medida possível', () {
+      final p = pesoMostrado(historico: [72.0, 458.0], cadastro: null)!;
+      expect(p.valor, 72.0);
+    });
+
+    test('a série do gráfico ignora o valor impossível', () {
+      expect(serieDePeso(historico: [70.0, 458.0, 71.0], cadastro: null), [70.0, 71.0]);
+      expect(serieDePeso(historico: [458.0], cadastro: 70.0), isEmpty);
+      expect(serieDePeso(historico: const [], cadastro: 458.0), isEmpty);
+    });
+  });
+
   group('serieDePeso', () {
     test('devolve as avaliações', () {
       expect(serieDePeso(historico: [70.0, 71.5], cadastro: 72.0), [70.0, 71.5]);

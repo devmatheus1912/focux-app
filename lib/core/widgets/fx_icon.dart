@@ -397,6 +397,7 @@ class _FxIconPainter extends CustomPainter {
         );
         break;
 
+      case 'repeat':
       case 'refresh-cw':
         const ring = Rect.fromLTWH(3, 3, 18, 18);
         canvas.drawPath(
@@ -566,6 +567,36 @@ class _FxIconPainter extends CustomPainter {
             ..close(),
           paint,
         );
+        break;
+
+      case 'clock':
+        canvas.drawCircle(const Offset(12, 12), 9, paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(12, 7)
+            ..lineTo(12, 12)
+            ..lineTo(15.5, 14),
+          paint,
+        );
+        break;
+
+      case 'wallet':
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            const Rect.fromLTRB(3, 6, 21, 19),
+            const Radius.circular(3),
+          ),
+          paint,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(3, 9)
+            ..lineTo(3, 6)
+            ..cubicTo(3, 4.9, 3.9, 4, 5, 4)
+            ..lineTo(17, 4),
+          paint,
+        );
+        canvas.drawCircle(const Offset(16.5, 12.5), 1.2, paint);
         break;
 
       default:

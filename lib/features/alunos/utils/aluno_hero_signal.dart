@@ -185,5 +185,7 @@ String alunoHeroIdentitySubtitle({
   required String contextLine,
 }) {
   if (compactContactPriority) return objective;
+  // Sem frase de contexto (o aviso de risco já a diz): só o objetivo.
+  if (contextLine.trim().isEmpty) return objectiveDefined ? objective : '';
   return objectiveDefined ? '$objective · $contextLine' : contextLine;
 }

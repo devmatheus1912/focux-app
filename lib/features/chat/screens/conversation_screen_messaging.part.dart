@@ -93,7 +93,10 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     };
   }
 
-  Future<void> _pickAndSend(ConversationMediaType type) async {
+  Future<void> _pickAndSend(
+    ConversationMediaType type, {
+    ImageSource source = ImageSource.gallery,
+  }) async {
     if (_uploading) return;
     if (!_isAlunoMode && _alunoId == null) {
       FeedbackHelper.showError(context, 'Conversa sem aluno. Reabra o chat.');
@@ -104,13 +107,13 @@ extension ConversationScreenMessaging on _ConversationScreenState {
     try {
       if (type == ConversationMediaType.photo) {
         file = await _picker.pickImage(
-          source: ImageSource.gallery,
+          source: source,
           maxWidth: 1600,
           imageQuality: 72,
         );
       } else if (type == ConversationMediaType.video) {
         file = await _picker.pickVideo(
-          source: ImageSource.gallery,
+          source: source,
           maxDuration: const Duration(seconds: 60),
         );
       } else {

@@ -7,6 +7,7 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
+import '../../exercicios/utils/biblioteca_aba.dart';
 import '../utils/exercise_library_meta.dart';
 
 /// Linha inset da biblioteca — paridade Perfil (48–52px, thumb opcional, check).
@@ -149,6 +150,10 @@ class ExerciseLibraryRow extends StatelessWidget {
                                 style: FxSettingsLayout.subhead(color: mute),
                               ),
                             ),
+                            if (!alreadyInTreino && !videoFocuxIntocado(exercicio)) ...[
+                              const SizedBox(width: 6),
+                              _MeuPill(brand: brand),
+                            ],
                             if (alreadyInTreino) ...[
                               const SizedBox(width: 6),
                               _InTreinoPill(mute: mute, resumo: resumoNoTreino),
@@ -267,6 +272,30 @@ class _ExerciseTitle extends StatelessWidget {
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+/// Marca os exercícios do próprio personal no meio dos da Focux.
+class _MeuPill extends StatelessWidget {
+  const _MeuPill({required this.brand});
+
+  final Color brand;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: brand.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        'Meu',
+        style: FxSettingsLayout.footer(
+          color: brand,
+        ).copyWith(fontWeight: FontWeight.w800),
+      ),
     );
   }
 }

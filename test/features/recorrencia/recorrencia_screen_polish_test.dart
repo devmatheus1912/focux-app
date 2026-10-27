@@ -33,7 +33,7 @@ void main() {
       isNot(contains('Assinatura')),
     );
     expect(screen, isNot(contains("'199'")));
-    expect(screen, contains('showFxInsetPickerSheet'));
+    expect(screen, contains('showFxGroupedActionSheet'));
     expect(screen, contains('Carregar mais'));
     expect(screen, contains('listarPagina'));
     expect(screen, isNot(contains('FxSettingsGroup')));

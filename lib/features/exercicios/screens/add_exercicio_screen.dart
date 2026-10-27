@@ -30,6 +30,8 @@ import '../data/exercicio_repository.dart';
 import '../data/exercicio_taxonomy_labels.dart';
 import '../providers/exercicios_provider.dart';
 import '../utils/video_oficial.dart';
+import '../models/exercicio_criado.dart';
+import '../widgets/exercicio_criado_sheet.dart';
 import '../widgets/exercise_video_picker.dart';
 import '../widgets/add_exercicio_enum_picker_sheet.dart';
 import '../widgets/add_exercicio_filters_sheet.dart';
@@ -39,7 +41,15 @@ part 'add_exercicio_screen_state.part.dart';
 part 'add_exercicio_screen_widgets_form.part.dart';
 
 class AddExercicioScreen extends ConsumerStatefulWidget {
-  const AddExercicioScreen({super.key, this.exercicioId, this.copiaDe});
+  const AddExercicioScreen({
+    super.key,
+    this.exercicioId,
+    this.copiaDe,
+    this.origem = ExercicioOrigem.biblioteca,
+  });
+
+  /// De onde o cadastro foi aberto: decide as opções depois de criar.
+  final ExercicioOrigem origem;
 
   /// Quando informado, abre em modo edição com o mesmo fold do cadastro.
   final int? exercicioId;

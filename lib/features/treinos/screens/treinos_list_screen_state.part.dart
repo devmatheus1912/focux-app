@@ -9,6 +9,9 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
   String _query = '';
   bool _selectionMode = false;
   int _aba = 0;
+
+  /// Treinos sem exercício ficam recolhidos num "Rascunhos (N)" no fim.
+  bool _mostrarRascunhos = false;
   bool _viewTracked = false;
   bool _ttvTracked = false;
   DateTime? _fetchedAt;
@@ -32,6 +35,8 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
       itens: [
         FxChoiceItem(value: 0, label: s.modelosAbaSemanas),
         FxChoiceItem(value: 1, label: s.modelosAbaSessoes),
+        if (widget.alunoId == null)
+          FxChoiceItem(value: 2, label: s.modelosAbaExercicios),
       ],
       selecionado: _aba,
       onSelecionar: (aba) => setState(() => _aba = aba),
@@ -517,7 +522,23 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
               ),
             ],
           ),
-          body: !fromAluno && _aba == 0
+          body: !fromAluno && _aba == 2
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        TreinosLayout.screenPadding,
+                        TokensStrip.s2,
+                        TreinosLayout.screenPadding,
+                        TokensStrip.s2,
+                      ),
+                      child: _abas(context),
+                    ),
+                    const Expanded(child: ExerciciosListScreen(embedded: true)),
+                  ],
+                )
+              : !fromAluno && _aba == 0
               ? FichaModelosAba(abas: _abas(context))
               : treinosAsync.when(
             loading:
@@ -563,6 +584,10 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                   fromLibrary
                       ? loadedTreinos
                       : loadedTreinos.where(_matchesQuery).toList();
+              final rascunhos = filteredTreinos.where((t) => t.exerciciosCount == 0).toList();
+              final prontosLista = filteredTreinos.where((t) => t.exerciciosCount > 0).toList();
+              final mostrarRascunhos = _mostrarRascunhos || _selectionMode || _query.trim().isNotEmpty || prontosLista.isEmpty;
+              final listaVisivel = fromAluno ? filteredTreinos : (mostrarRascunhos ? [...prontosLista, ...rascunhos] : prontosLista);
               final selectedTreinos =
                   loadedTreinos
                       .where((treino) => _selectedIds.contains(treino.id))
@@ -805,42 +830,64 @@ class _TreinosListViewState extends ConsumerState<_TreinosListView> {
                                   ),
                                   sliver: SliverList.separated(
                                     itemCount:
-                                        filteredTreinos.length +
+                                        listaVisivel.length +
                                         (tail.hasNext ? 1 : 0),
                                     separatorBuilder:
                                         (_, __) => const SizedBox(
                                           height: TokensStrip.s2,
                                         ),
                                     itemBuilder: (context, i) {
-                                      if (i >= filteredTreinos.length) {
+                                      if (i >= listaVisivel.length) {
                                         return const SizedBox(height: 48);
                                       }
                                       return _TreinoCard(
-                                          treino: filteredTreinos[i],
+                                          treino: listaVisivel[i],
                                           isDark: isDark,
                                           primary: primary,
                                           alunoId: widget.alunoId,
                                           alunoNome: widget.alunoNome,
                                           selectionMode: _selectionMode,
                                           selected: _selectedIds.contains(
-                                            filteredTreinos[i].id,
+                                            listaVisivel[i].id,
                                           ),
                                           onToggleSelection:
                                               () => _toggleSelection(
-                                                filteredTreinos[i].id,
+                                                listaVisivel[i].id,
                                               ),
                                           onStartSelection:
                                               () => _startSelection(
-                                                filteredTreinos[i].id,
+                                                listaVisivel[i].id,
                                               ),
                                           onActions:
                                               () => _openTreinoActions(
-                                                filteredTreinos[i],
+                                                listaVisivel[i],
                                               ),
                                       );
                                     },
                                   ),
                                 ),
+                                if (!fromAluno && rascunhos.isNotEmpty && prontosLista.isNotEmpty && _query.trim().isEmpty && !_selectionMode)
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        TreinosLayout.screenPadding,
+                                        TokensStrip.s2,
+                                        TreinosLayout.screenPadding,
+                                        TokensStrip.s2,
+                                      ),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: FxActionLink(
+                                          label: _mostrarRascunhos
+                                              ? 'Ocultar rascunhos'
+                                              : 'Rascunhos (${rascunhos.length}) · ainda sem exercícios',
+                                          onTap: () => setState(
+                                            () => _mostrarRascunhos = !_mostrarRascunhos,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 if (sparseHint != null)
                                   SliverToBoxAdapter(
                                     child: Padding(

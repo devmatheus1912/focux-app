@@ -122,4 +122,34 @@ void main() {
       );
     });
   });
+
+  test('subtítulo sem a frase de contexto quando o aviso de risco já a diz', () {
+    expect(
+      alunoHeroIdentitySubtitle(
+        compactContactPriority: false,
+        objectiveDefined: true,
+        objective: 'Força',
+        contextLine: '',
+      ),
+      'Força',
+    );
+    expect(
+      alunoHeroIdentitySubtitle(
+        compactContactPriority: false,
+        objectiveDefined: false,
+        objective: 'Objetivo pendente',
+        contextLine: '  ',
+      ),
+      '',
+    );
+    expect(
+      alunoHeroIdentitySubtitle(
+        compactContactPriority: false,
+        objectiveDefined: true,
+        objective: 'Força',
+        contextLine: 'Priorize contato hoje',
+      ),
+      'Força · Priorize contato hoje',
+    );
+  });
 }

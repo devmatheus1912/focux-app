@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../exercicios/data/enums.dart';
@@ -82,106 +85,84 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final brand = BrandPalette.softened(primary);
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
+    final ativos =
+        (_filter.espaco != null ? 1 : 0) + (_filter.equipamento != null ? 1 : 0);
 
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      maxHeight: maxHeight,
-      padding: const EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        8,
-        FxSettingsLayout.pageInset,
-        14,
+    return FxSheetFrame(
+      title: 'Filtros',
+      subtitle: 'Refina por espaço e equipamento.',
+      leading: Icon(Icons.tune_rounded, color: brand, size: 20),
+      footer: Row(
+        children: [
+          if (_hasAdvanced) ...[
+            FxTonalButton(
+              label: 'Limpar',
+              icon: Icons.close_rounded,
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                _apply(
+                  _filter.copyWith(clearEspaco: true, clearEquipamento: true),
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+          ],
+          Expanded(
+            child: FxLiquidPrimaryButton(
+              label: ativos > 0 ? 'Aplicar ($ativos)' : 'Concluir',
+              onPressed: () => FxHomeSheetChrome.dismissAndPop(context),
+            ),
+          ),
+        ],
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FxHomeSheetHandle(isDark: isDark),
-          const SizedBox(height: 8),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: 'Filtros',
-            subtitle: 'Refina por espaço e equipamento.',
-            leading: Icon(Icons.tune_rounded, color: brand, size: 20),
-            trailing:
-                _hasAdvanced
-                    ? TextButton(
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        _apply(
-                          _filter.copyWith(
-                            clearEspaco: true,
-                            clearEquipamento: true,
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Limpar',
-                        style: FxSettingsLayout.rowLabel(color: brand),
-                      ),
-                    )
-                    : null,
+          FxSettingsGroup(
+            accent: primary,
+            edgeToEdgeRows: true,
+            caption: 'Onde o aluno treina',
+            children: FxInsetPickerOption.list(
+              accent: brand,
+              items: [
+                for (final espaco in _espacos)
+                  FxInsetPickerOptionSpec(
+                    label: _espacoLabel(espaco),
+                    selected: _filter.espaco == espaco,
+                    onTap: () {
+                      _apply(
+                        _filter.espaco == espaco
+                            ? _filter.copyWith(clearEspaco: true)
+                            : _filter.copyWith(espaco: espaco),
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FxSettingsGroup(
-                    accent: primary,
-                    edgeToEdgeRows: true,
-                    caption: 'Onde o aluno treina',
-                    children: FxInsetPickerOption.list(
-                      accent: brand,
-                      items: [
-                        for (final espaco in _espacos)
-                          FxInsetPickerOptionSpec(
-                            label: _espacoLabel(espaco),
-                            selected: _filter.espaco == espaco,
-                            onTap: () {
-                              _apply(
-                                _filter.espaco == espaco
-                                    ? _filter.copyWith(clearEspaco: true)
-                                    : _filter.copyWith(espaco: espaco),
-                              );
-                            },
-                          ),
-                      ],
-                    ),
+          const SizedBox(height: FxSettingsLayout.groupGap),
+          FxSettingsGroup(
+            accent: primary,
+            edgeToEdgeRows: true,
+            caption: 'Equipamento principal',
+            children: FxInsetPickerOption.list(
+              accent: brand,
+              items: [
+                for (final equipamento in _equipamentos)
+                  FxInsetPickerOptionSpec(
+                    label: _equipamentoLabel(equipamento),
+                    selected: _filter.equipamento == equipamento,
+                    onTap: () {
+                      _apply(
+                        _filter.equipamento == equipamento
+                            ? _filter.copyWith(clearEquipamento: true)
+                            : _filter.copyWith(equipamento: equipamento),
+                      );
+                    },
                   ),
-                  const SizedBox(height: FxSettingsLayout.groupGap),
-                  FxSettingsGroup(
-                    accent: primary,
-                    edgeToEdgeRows: true,
-                    caption: 'Equipamento principal',
-                    children: FxInsetPickerOption.list(
-                      accent: brand,
-                      items: [
-                        for (final equipamento in _equipamentos)
-                          FxInsetPickerOptionSpec(
-                            label: _equipamentoLabel(equipamento),
-                            selected: _filter.equipamento == equipamento,
-                            onTap: () {
-                              _apply(
-                                _filter.equipamento == equipamento
-                                    ? _filter.copyWith(clearEquipamento: true)
-                                    : _filter.copyWith(
-                                      equipamento: equipamento,
-                                    ),
-                              );
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
         ],

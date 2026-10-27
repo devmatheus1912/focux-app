@@ -1,3 +1,5 @@
+import 'aluno360_medida_plausivel.dart';
+
 enum PesoOrigem { avaliacao, cadastro }
 
 /// Peso que a tela mostra: a medida mais recente das avaliações; se não
@@ -6,6 +8,13 @@ enum PesoOrigem { avaliacao, cadastro }
   required List<double> historico,
   required double? cadastro,
 }) {
+  // Peso digitado errado (458 kg) não vira "atual" se há uma medida possível.
+  final plausiveis = historico
+      .where((v) => medidaPlausivel(MedidaTipo.pesoKg, v))
+      .toList();
+  if (plausiveis.isNotEmpty) {
+    return (valor: plausiveis.last, origem: PesoOrigem.avaliacao);
+  }
   if (historico.isNotEmpty) {
     return (valor: historico.last, origem: PesoOrigem.avaliacao);
   }
@@ -19,7 +28,13 @@ List<double> serieDePeso({
   required List<double> historico,
   required double? cadastro,
 }) {
-  if (historico.isNotEmpty) return historico;
-  if (cadastro == null) return const [];
+  final plausiveis = historico
+      .where((v) => medidaPlausivel(MedidaTipo.pesoKg, v))
+      .toList();
+  if (plausiveis.isNotEmpty) return plausiveis;
+  if (historico.isNotEmpty) return const [];
+  if (cadastro == null || !medidaPlausivel(MedidaTipo.pesoKg, cadastro)) {
+    return const [];
+  }
   return [cadastro];
 }

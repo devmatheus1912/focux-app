@@ -85,6 +85,7 @@ class _PerfilAlunoEditarScreenState extends ConsumerState<PerfilAlunoEditarScree
         title: 'Descartar alterações?',
         message: 'O que você alterou não será salvo.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

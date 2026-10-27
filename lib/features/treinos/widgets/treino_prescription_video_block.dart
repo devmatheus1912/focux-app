@@ -23,6 +23,7 @@ import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/exercise_video_upload_spec.dart';
 import '../../exercicios/utils/video_oficial.dart';
 import '../providers/treinos_provider.dart';
+import '../../exercicios/models/exercicio_criado.dart';
 
 class TreinoPrescriptionVideoBlock extends ConsumerStatefulWidget {
   const TreinoPrescriptionVideoBlock({
@@ -209,10 +210,14 @@ class _TreinoPrescriptionVideoBlockState
 
   Future<void> _criarMeu() async {
     HapticFeedback.selectionClick();
-    final criadoId = await context.push<int>(
-      '/exercicios/novo',
+    final criado = await context.push<ExercicioCriado>(
+      '/exercicios/novo?origem=troca',
       extra: _exercicio,
     );
+    final criadoId =
+        criado?.destino == ExercicioCriadoDestino.usarNoLugar
+            ? criado?.id
+            : null;
     final usar = widget.onUsarCopia;
     if (criadoId == null || usar == null || !mounted) return;
     final trocar = await showFxConfirmSheet(

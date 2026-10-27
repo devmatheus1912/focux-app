@@ -521,6 +521,7 @@
   "rotinaAplicarConfirmaTexto": "A ficha atual sai e entra uma cópia do modelo. Editar um não muda o outro.",
   "modelosAbaSemanas": "Semanas",
   "modelosAbaSessoes": "Sessões",
+  "modelosAbaExercicios": "Exercícios",
   "modelosNovo": "Novo modelo",
   "modelosVazioTitulo": "Nenhum modelo ainda",
   "modelosVazioSubtitulo": "Salve uma ficha como modelo ou crie um por dias da semana.",

@@ -82,6 +82,7 @@ class _BroadcastScreenState extends ConsumerState<BroadcastScreen> {
         title: 'Descartar rascunho?',
         message: 'O título e a mensagem não serão enviados.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

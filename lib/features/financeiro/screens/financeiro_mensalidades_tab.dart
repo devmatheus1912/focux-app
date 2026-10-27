@@ -39,6 +39,8 @@ import '../providers/financeiro_provider.dart';
 import '../utils/financeiro_hub_display.dart';
 import '../utils/financeiro_numeros.dart';
 import '../utils/mensalidade_surface_actions.dart';
+import '../../../core/utils/fx_utils.dart';
+import '../widgets/financeiro_aluno_etapa.dart';
 
 part 'financeiro_mensalidades_tab_actions.part.dart';
 part 'financeiro_mensalidades_tab_forms.part.dart';
@@ -622,7 +624,7 @@ class _FinanceiroMensalidadesTabState
                                                         ? 'circle-check'
                                                         : cancelada
                                                         ? 'x'
-                                                        : 'coin',
+                                                        : 'clock',
                                                 size: 18,
                                                 color:
                                                     overdue
@@ -631,15 +633,28 @@ class _FinanceiroMensalidadesTabState
                                                         ? mute
                                                         : primary,
                                               ),
-                                              trailing: Text(
-                                                item.valor.formatCobranca(),
-                                                style: TextStyle(
-                                                  color: chrome.ink,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontFeatures: const [
-                                                    FontFeature.tabularFigures(),
-                                                  ],
-                                                ),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    item.valor.formatCobranca(),
+                                                    style: TextStyle(
+                                                      color: chrome.ink,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontFeatures: const [
+                                                        FontFeature
+                                                            .tabularFigures(),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  FxIcon(
+                                                    name: 'chevron-right',
+                                                    size: 16,
+                                                    color: mute,
+                                                  ),
+                                                ],
                                               ),
                                             );
                                             if (!novoMes) return tile;
@@ -687,17 +702,13 @@ class _FinanceiroMensalidadesTabState
                                     TokensStrip.s3 +
                                         MediaQuery.viewInsetsOf(context).bottom,
                                   ),
-                                  child: Align(
-                                    alignment: Alignment.center,
-                                    child: FxActionChip(
-                                      label: 'Nova mensalidade',
-                                      accent: primary,
-                                      isDark: chrome.isDark,
-                                      onPressed: () {
-                                        FxKeyboardDismissScope.dismiss();
-                                        _abrirFormularioNovaMensalidade();
-                                      },
-                                    ),
+                                  child: FxLiquidPrimaryButton(
+                                    label: 'Nova mensalidade',
+                                    icon: Icons.add_rounded,
+                                    onPressed: () {
+                                      FxKeyboardDismissScope.dismiss();
+                                      _abrirFormularioNovaMensalidade();
+                                    },
                                   ),
                                 ),
                               ),

@@ -11,13 +11,13 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
       FxHelpTip(
         'Mensalidades',
         'Os três números do topo abrem a lista: recebido, a receber e atrasado. '
-        'Toque na linha para cobrar ou marcar como paga. Segure para marcar várias.',
+            'Toque na linha para cobrar ou marcar como paga. Segure para marcar várias.',
         icon: 'coin',
       ),
       FxHelpTip(
         'Atrasadas',
         'O Focux marca como atrasada a cobrança vencida, na hora de lançar e todo dia de manhã. '
-        'Não precisa atualizar nada.',
+            'Não precisa atualizar nada.',
         icon: 'alert-triangle',
       ),
       FxHelpTip(
@@ -28,7 +28,7 @@ Future<void> showFinanceiroHelpSheet(BuildContext context) {
       FxHelpTip(
         'Resultados',
         'Quanto entrou no mês, quanto falta e quem atrasa. '
-        'Recebido conta pela data do pagamento; o lançado conta pelo mês da cobrança.',
+            'Recebido conta pela data do pagamento; o lançado conta pelo mês da cobrança.',
         icon: 'trend',
       ),
     ],

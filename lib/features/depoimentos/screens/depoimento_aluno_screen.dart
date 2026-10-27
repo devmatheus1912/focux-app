@@ -98,6 +98,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
         title: 'Descartar depoimento?',
         message: 'O texto e a nota não serão enviados.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

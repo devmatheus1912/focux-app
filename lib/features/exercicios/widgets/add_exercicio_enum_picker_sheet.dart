@@ -4,8 +4,9 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
+import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/enums.dart';
@@ -124,12 +125,8 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final soft = widget.iconColor ?? BrandPalette.softened(primary);
-    final ink = fxScreenInk(context);
     final filtered = _filtered;
     final showSearch = widget.values.length > 5;
-    final scrollable = widget.values.length > 8;
-    final maxHeight =
-        MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
     Widget options = _optionsList(filtered, primary, soft);
 
@@ -138,18 +135,10 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Semantics(
-            label: 'Buscar ${widget.title.toLowerCase()}',
-            child: TextField(
-              controller: _searchCtrl,
-              style: FxSettingsLayout.rowLabel(color: ink),
-              decoration: FxInputDeco.insetGrouped(
-                context,
-                icon: Icons.search_rounded,
-                hint: 'Buscar opção',
-                iconColor: soft,
-              ),
-            ),
+          FxSheetSearchField(
+            dica: 'Buscar opção',
+            controller: _searchCtrl,
+            onChanged: (_) {},
           ),
           const SizedBox(height: TokensStrip.s3),
           options,
@@ -157,33 +146,13 @@ class _AddExercicioEnumPickerSheetState<T extends Enum>
       );
     }
 
-    return FxHomeSheetSurface(
-      isDark: widget.isDark,
-      maxHeight: scrollable ? maxHeight : null,
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxHomeSheetHandle(isDark: widget.isDark),
-          const SizedBox(height: 8),
-          FxHomeSheetHeader(
-            isDark: widget.isDark,
-            title: widget.title,
-            subtitle: widget.contextLabel,
-            leading: Icon(widget.icon, color: soft, size: 20),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          if (scrollable)
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: options,
-              ),
-            )
-          else
-            options,
-        ],
+    return FxSheetFrame(
+      title: widget.title,
+      subtitle: widget.contextLabel,
+      leading: Icon(widget.icon, color: soft, size: 20),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: options,
       ),
     );
   }

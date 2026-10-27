@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_status_pill.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_week_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/aluno_semana_faixa.dart';
@@ -41,6 +43,10 @@ class Aluno360FichaCard extends ConsumerWidget {
         ? rotuloDaVigencia(s, rotina.vigencia, agora)
         : null;
     final verbo = vazia ? s.alunoResumoFichaMontar : s.alunoResumoFichaAbrir;
+    void abrir() => context.push(
+      '/alunos/$alunoId/rotina',
+      extra: alunoNome.trim(),
+    );
 
     return Semantics(
       button: true,
@@ -54,10 +60,7 @@ class Aluno360FichaCard extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(
-            '/alunos/$alunoId/rotina',
-            extra: alunoNome.trim(),
-          ),
+          onTap: abrir,
           borderRadius: BorderRadius.circular(20),
           child: Ink(
             decoration: chrome.panel(radius: 20),
@@ -88,13 +91,14 @@ class Aluno360FichaCard extends ConsumerWidget {
                 const SizedBox(height: TokensStrip.s3),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Text(
-                    verbo,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: chrome.brand,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: vazia
+                      ? FxTonalButton(
+                          label: verbo,
+                          icon: Icons.add_rounded,
+                          compact: true,
+                          onPressed: abrir,
+                        )
+                      : FxActionLink(label: verbo, onTap: abrir),
                 ),
               ],
             ),

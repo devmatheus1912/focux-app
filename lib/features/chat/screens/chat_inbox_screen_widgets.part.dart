@@ -148,7 +148,7 @@ class _AlunoContactTile extends StatelessWidget {
     assert(isDark || !isDark);
     return FxSettingsTile(
       fxIcon: 'chat',
-      label: aluno.nome,
+      label: fxTitleCaseName(aluno.nome),
       subtitle: aluno.email.isNotEmpty ? aluno.email : 'Aluno',
       value: 'Abrir',
       showDivider: showDivider,

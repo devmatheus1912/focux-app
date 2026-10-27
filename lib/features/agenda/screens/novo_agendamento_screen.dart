@@ -73,6 +73,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
         title: agendaNovoDiscardTitle(),
         message: agendaNovoDiscardMessage(),
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

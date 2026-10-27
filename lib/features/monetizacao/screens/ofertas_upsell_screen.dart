@@ -24,6 +24,7 @@ import '../../chat/utils/aluno_picker_list.dart';
 import '../data/upsell_repository.dart';
 import '../utils/oferta_upsell_display.dart';
 import '../widgets/oferta_upsell_editor.dart';
+import '../../../core/utils/fx_utils.dart';
 
 class OfertasUpsellScreen extends ConsumerStatefulWidget {
   const OfertasUpsellScreen({super.key});
@@ -136,7 +137,7 @@ class _OfertasUpsellScreenState extends ConsumerState<OfertasUpsellScreen> {
           for (final a in alunos)
             FxInsetPickerSheetItem(
               value: a.id,
-              label: a.nome,
+              label: fxTitleCaseName(a.nome),
               subtitle: a.email.trim().isEmpty ? null : a.email,
             ),
         ],

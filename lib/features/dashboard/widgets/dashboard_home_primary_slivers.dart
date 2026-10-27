@@ -50,6 +50,8 @@ List<Widget> buildDashboardHomePrimarySlivers({
     onQuickSearch: onQuickSearch,
     onHelp: onHelp,
     freshnessLabel: freshnessLabel,
+    onConversas: () => context.push('/chat/inbox'),
+    conversasCount: snap.unreadCount,
   );
 
   final itens = hojeAgora(

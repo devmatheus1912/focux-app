@@ -18,6 +18,7 @@ import '../utils/aluno360_timeline_logic.dart';
 import 'aluno360_timeline_full_sheet.dart';
 import 'aluno360_timeline_sheet_motion.dart';
 import 'aluno_outreach_message_sheet.dart';
+import '../../../core/widgets/fx_action_link.dart';
 
 class Aluno360TimelineCard extends StatelessWidget {
   const Aluno360TimelineCard({
@@ -267,10 +268,9 @@ class Aluno360TimelineCard extends StatelessWidget {
           if (!loading && !error && allItems.isNotEmpty && hasMore)
             Align(
               alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () => _showFullTimeline(context, primary),
-                style: Aluno360Layout.secondaryTextLinkStyle(context),
-                child: Text('Ver todos os ${allItems.length} sinais'),
+              child: FxActionLink(
+                label: 'Ver todos os ${allItems.length} sinais',
+                onTap: () => _showFullTimeline(context, primary),
               ),
             ),
         ],

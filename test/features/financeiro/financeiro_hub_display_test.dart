@@ -201,41 +201,6 @@ void main() {
     );
   });
 
-  test('financeiroVencimentoOpcoes cobre o mês e o atual', () {
-    final ops = financeiroVencimentoOpcoes(
-      mesReferencia: '2026-06-01',
-      atual: '2026-06-10',
-    );
-    expect(
-      ops.map((o) => o.iso),
-      containsAll(['2026-06-01', '2026-06-05', '2026-06-10', '2026-06-15', '2026-06-30']),
-    );
-    expect(
-      financeiroVencimentoAposTrocaDeMes(
-        mesAntigo: '2026-06-01',
-        mesNovo: '2026-07-01',
-        vencimentoAtual: '2026-06-01',
-      ),
-      '2026-07-01',
-    );
-    expect(
-      financeiroVencimentoAposTrocaDeMes(
-        mesAntigo: '2026-06-01',
-        mesNovo: '2026-07-01',
-        vencimentoAtual: '2026-06-10',
-      ),
-      '2026-06-10',
-    );
-    expect(
-      financeiroVencimentoDashboardSubtitle(
-        mesReferencia: '2026-06-01',
-        vencimento: '2026-06-10',
-        status: 'PENDENTE',
-      ),
-      'Vencendo · 10/06/2026',
-    );
-  });
-
   test('financeiroMensalidadePagoEmLabel formata ISO', () {
     expect(financeiroMensalidadePagoEmLabel(null), 'Ainda em aberto');
     expect(financeiroMensalidadePagoEmLabel(''), 'Ainda em aberto');

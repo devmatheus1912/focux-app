@@ -217,34 +217,37 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
               children: [
                 FxHomeSheetHandle(isDark: isDark),
                 SizedBox(height: TokensStrip.s4),
-                ConversationAttachOption(
-                  icon: Icons.photo_camera_outlined,
-                  label: 'Foto da galeria',
-                  isDark: isDark,
-                  onTap:
-                      () => Navigator.pop(
-                        sheetContext,
-                        ConversationMediaType.photo,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                ConversationAttachOption(
-                  icon: Icons.videocam_outlined,
-                  label: 'Video da galeria',
-                  isDark: isDark,
-                  onTap:
-                      () => Navigator.pop(
-                        sheetContext,
-                        ConversationMediaType.video,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                ConversationAttachOption(
-                  icon: Icons.mic_none_outlined,
-                  label: 'Gravar audio',
-                  isDark: isDark,
-                  onTap: () => Navigator.pop(sheetContext, 'audio'),
-                ),
+                for (final (icone, rotulo, valor) in <(IconData, String, Object)>[
+                  (
+                    Icons.photo_camera_outlined,
+                    'Tirar foto',
+                    (ConversationMediaType.photo, ImageSource.camera),
+                  ),
+                  (
+                    Icons.videocam_outlined,
+                    'Filmar',
+                    (ConversationMediaType.video, ImageSource.camera),
+                  ),
+                  (
+                    Icons.photo_library_outlined,
+                    'Foto da galeria',
+                    (ConversationMediaType.photo, ImageSource.gallery),
+                  ),
+                  (
+                    Icons.video_library_outlined,
+                    'Vídeo da galeria',
+                    (ConversationMediaType.video, ImageSource.gallery),
+                  ),
+                  (Icons.mic_none_outlined, 'Gravar áudio', 'audio'),
+                ]) ...[
+                  ConversationAttachOption(
+                    icon: icone,
+                    label: rotulo,
+                    isDark: isDark,
+                    onTap: () => Navigator.pop(sheetContext, valor),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ],
             ),
           ),
@@ -254,8 +257,8 @@ extension ConversationScreenSheetsActions on _ConversationScreenState {
       await _startAudioRecording();
       return;
     }
-    if (choice is ConversationMediaType) {
-      await _pickAndSend(choice);
+    if (choice is (ConversationMediaType, ImageSource)) {
+      await _pickAndSend(choice.$1, source: choice.$2);
     }
   }
 }

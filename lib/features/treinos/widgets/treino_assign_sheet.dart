@@ -13,6 +13,7 @@ import '../../alunos/data/aluno_repository.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import 'treino_home_sheet.dart';
+import '../../../core/utils/fx_utils.dart';
 
 /// Resultado do sheet de escolher aluno e o prazo opcional.
 class TreinoAtribuicaoResult {
@@ -152,7 +153,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                     items: [
                       for (var i = 0; i < widget.alunos.length; i++)
                         FxInsetPickerOptionSpec(
-                          label: widget.alunos[i].nome,
+                          label: fxTitleCaseName(widget.alunos[i].nome),
                           subtitle:
                               widget.alunos[i].objetivo?.trim().isNotEmpty ==
                                       true

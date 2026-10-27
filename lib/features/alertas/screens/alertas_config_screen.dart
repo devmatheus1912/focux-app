@@ -94,6 +94,7 @@ class _AlertasConfigScreenState extends ConsumerState<AlertasConfigScreen> {
         title: 'Descartar alterações?',
         message: 'Os limiares novos não serão salvos.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

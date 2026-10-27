@@ -326,38 +326,6 @@ String financeiroIsoDateLabel(String iso) {
   return '$d/$m/${parsed.year}';
 }
 
-class FinanceiroVencimentoOpcao {
-  const FinanceiroVencimentoOpcao({required this.iso});
-
-  final String iso;
-  String get label => financeiroIsoDateLabel(iso);
-}
-
-List<FinanceiroVencimentoOpcao> financeiroVencimentoOpcoes({
-  required String mesReferencia,
-  String? atual,
-}) {
-  final mes =
-      financeiroParseIsoDate(mesReferencia) ??
-      DateTime(DateTime.now().year, DateTime.now().month, 1);
-  final last = DateTime(mes.year, mes.month + 1, 0);
-  final isos = <String>{
-    financeiroIsoDate(mes.year, mes.month, 1),
-    if (last.day >= 5) financeiroIsoDate(mes.year, mes.month, 5),
-    if (last.day >= 10) financeiroIsoDate(mes.year, mes.month, 10),
-    if (last.day >= 15) financeiroIsoDate(mes.year, mes.month, 15),
-    financeiroIsoDate(mes.year, mes.month, last.day),
-  };
-  final atualParsed = financeiroParseIsoDate(atual);
-  if (atualParsed != null) {
-    isos.add(
-      financeiroIsoDate(atualParsed.year, atualParsed.month, atualParsed.day),
-    );
-  }
-  final sorted = isos.toList()..sort();
-  return [for (final iso in sorted) FinanceiroVencimentoOpcao(iso: iso)];
-}
-
 String financeiroVencimentoPickerValue(String vencimento) {
   final raw = vencimento.trim();
   if (raw.isEmpty) return 'Selecionar';

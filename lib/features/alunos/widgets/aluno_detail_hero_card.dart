@@ -13,6 +13,7 @@ import '../utils/aluno_hero_signal.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/aluno360_resumo_agora.dart';
 import 'aluno_avatar.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AlunoDetailHeroCard extends StatelessWidget {
   const AlunoDetailHeroCard({
@@ -41,18 +42,20 @@ class AlunoDetailHeroCard extends StatelessWidget {
     final contextLine = alunoHeroContextLine(signal, caption);
     final ink = fxScreenInk(context);
     final mute = fxScreenMute(context);
+    final showRiskNotice =
+        aluno.emRisco && signal.label == riscoOperacionalLabel;
+    // O aviso de risco abaixo já carrega a frase ("Priorize contato hoje"):
+    // o subtítulo não a repete.
     final subtitle = alunoHeroIdentitySubtitle(
       compactContactPriority: compactContactPriority,
       objectiveDefined: objectiveDefined,
       objective: objective,
-      contextLine: contextLine,
+      contextLine: showRiskNotice ? '' : contextLine,
     );
     final showStatusBadge = alunoHeroShouldShowStatusBadge(
       signal: signal,
       status: status,
     );
-    final showRiskNotice =
-        aluno.emRisco && signal.label == riscoOperacionalLabel;
     final nivel = formatRiscoNivel(aluno.riscoNivel);
 
     return Semantics(
@@ -94,7 +97,7 @@ class AlunoDetailHeroCard extends StatelessWidget {
                   mute: mute,
                   onDefineObjective: onDefineObjective!,
                 )
-              else
+              else if (subtitle.isNotEmpty)
                 Text(
                   subtitle,
                   textAlign: TextAlign.center,
@@ -274,25 +277,11 @@ class _IdentityObjectiveRow extends StatelessWidget {
             ],
           ),
         ),
-        Semantics(
-          button: true,
-          label: 'Definir objetivo do aluno',
-          child: TextButton(
-            onPressed: onDefineObjective,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(44, 44),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              tapTargetSize: MaterialTapTargetSize.padded,
-              foregroundColor: primary,
-            ),
-            child: Text(
-              'Definir',
-              style: Aluno360Layout.ctaLabelStyle(
-                context,
-                primary,
-              ).copyWith(decoration: TextDecoration.underline),
-            ),
-          ),
+        FxTonalButton(
+          label: 'Definir',
+          icon: Icons.flag_outlined,
+          compact: true,
+          onPressed: onDefineObjective,
         ),
       ],
     );

@@ -164,4 +164,17 @@ void main() {
       expect(acoes.take(2), [Aluno360MenuAcao.editar, Aluno360MenuAcao.criarTarefa]);
     });
   });
+
+  group('mesmaAcao', () {
+    test('ignora caixa, espaço e ponto final', () {
+      expect(mesmaAcao('Completar mapa corporal', 'completar mapa corporal.'), isTrue);
+      expect(mesmaAcao(' Completar mapa corporal ', 'Completar mapa corporal'), isTrue);
+    });
+
+    test('frases diferentes ou ausentes não casam', () {
+      expect(mesmaAcao('Completar mapa corporal', 'Retomar contato'), isFalse);
+      expect(mesmaAcao('Completar mapa corporal', null), isFalse);
+      expect(mesmaAcao('', ''), isFalse);
+    });
+  });
 }

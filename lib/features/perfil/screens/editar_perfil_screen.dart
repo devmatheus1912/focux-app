@@ -91,6 +91,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
         title: 'Descartar alterações?',
         message: 'O que você alterou não será salvo.',
         confirmLabel: 'Descartar',
+        discard: true,
       );
       if (!ok || !mounted) return;
     }

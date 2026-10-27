@@ -168,7 +168,8 @@ void main() {
 
   testWidgets('números: zero apagado, nunca "0%" vermelho para quem não treinou', (tester) async {
     await _abrir(tester, _hugo(dias: null, ader: 0));
-    expect(find.text('Sem treinos ainda.'), findsOneWidget);
+    // a linha solta saiu: o cartão da ficha já diz que não há ficha
+    expect(find.text('Sem treinos ainda.'), findsNothing);
     expect(find.text('Aderência 30 dias'), findsNothing);
   });
 

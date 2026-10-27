@@ -156,11 +156,22 @@ extension _AddExercicioToTreinoScreenActions
   }
 
   Future<void> _openCreateExercise() async {
-    final criado = await context.push<bool>('/exercicios/novo');
-    if (criado == true && mounted) {
-      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
-      ref.invalidate(exerciciosProvider);
-      ref.invalidate(exercicioPickerStatsProvider);
+    final criado = await context.push<ExercicioCriado>(
+      '/exercicios/novo?origem=treino',
+    );
+    if (criado == null || !mounted) return;
+    ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
+    ref.invalidate(exerciciosProvider);
+    ref.invalidate(exercicioPickerStatsProvider);
+    switch (criado.destino) {
+      case ExercicioCriadoDestino.adicionarAoTreino:
+        await _adicionarRapido(Exercicio(id: criado.id, nome: criado.nome));
+      case ExercicioCriadoDestino.criarOutro:
+        await _openCreateExercise();
+      case ExercicioCriadoDestino.verEmMeus:
+        await context.push('/exercicios');
+      case ExercicioCriadoDestino.ficar || ExercicioCriadoDestino.usarNoLugar:
+        break;
     }
   }
 

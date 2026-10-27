@@ -246,7 +246,29 @@ class _TreinoListaUnicaState extends State<_TreinoListaUnica> {
                 }
               }
             },
-            onCriarNovo: () => context.push('/exercicios/novo'),
+            onCriarNovo: () async {
+              final criado = await context.push<ExercicioCriado>(
+                '/exercicios/novo?origem=troca',
+              );
+              if (criado == null || !mounted) return;
+              if (criado.destino != ExercicioCriadoDestino.usarNoLugar) return;
+              try {
+                await widget.repo.substituirExercicio(
+                  widget.treinoId,
+                  te,
+                  criado.id,
+                );
+                widget.ref.invalidate(treinoProvider(widget.treinoId));
+              } catch (error) {
+                if (mounted) {
+                  FeedbackHelper.showApiFailure(
+                    context,
+                    error,
+                    fallback: 'Erro ao substituir exercício.',
+                  );
+                }
+              }
+            },
           ),
     );
   }
@@ -438,14 +460,12 @@ class _SecaoDoTreino extends StatelessWidget {
                   ),
                 ),
               ),
-              TextButton.icon(
+              FxTonalButton(
+                label: 'Adicionar',
+                semanticLabel: 'Adicionar em $nome',
+                icon: Icons.add_rounded,
+                compact: true,
                 onPressed: onAdd,
-                icon: const Icon(Icons.add_rounded, size: 18),
-                label: Text('Adicionar', semanticsLabel: 'Adicionar em $nome'),
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(48, 48),
-                  foregroundColor: primary,
-                ),
               ),
             ],
           ),

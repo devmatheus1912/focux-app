@@ -39,6 +39,7 @@ import '../../../core/api/pagina.dart';
 import '../data/automacao_repository.dart';
 import '../utils/automacao_display.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/utils/fx_utils.dart';
 
 part 'automacoes_screen_logs.part.dart';
 part 'automacoes_screen_list.part.dart';

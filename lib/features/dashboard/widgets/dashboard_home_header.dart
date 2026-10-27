@@ -14,6 +14,12 @@ import '../utils/dashboard_readability.dart';
 import '../utils/dashboard_screen_helpers.dart';
 import 'dashboard_header_profile_avatar.dart';
 
+String dashboardConversasTooltip(int semResposta) {
+  if (semResposta <= 0) return 'Conversas';
+  if (semResposta == 1) return 'Conversas, 1 sem resposta';
+  return 'Conversas, $semResposta sem resposta';
+}
+
 /// Header Home 10/10 — identidade limpa + chrome soft; «Foco» só no banner.
 class DashboardHomeHeader extends StatelessWidget {
   const DashboardHomeHeader({
@@ -27,6 +33,8 @@ class DashboardHomeHeader extends StatelessWidget {
     this.onQuickSearch,
     this.onHelp,
     this.freshnessLabel,
+    this.onConversas,
+    this.conversasCount = 0,
   });
 
   final String? nomePersonal;
@@ -38,6 +46,10 @@ class DashboardHomeHeader extends StatelessWidget {
   final VoidCallback? onQuickSearch;
   final VoidCallback? onHelp;
   final String? freshnessLabel;
+
+  /// Abre a caixa de entrada; o selo mostra as conversas sem resposta.
+  final VoidCallback? onConversas;
+  final int conversasCount;
 
   static const double _chrome = FxHelpChrome.iconSize;
   static const double _chromeGap = FxHelpChrome.gap;
@@ -146,6 +158,8 @@ class DashboardHomeHeader extends StatelessWidget {
                 onQuickSearch: compactChrome ? null : onQuickSearch,
                 onHelp: onHelp,
                 notificacoesCountOverride: notificacoesCountOverride,
+                onConversas: onConversas,
+                conversasCount: conversasCount,
               ),
             ],
           ),
@@ -160,8 +174,12 @@ class _HeaderChromeCluster extends StatelessWidget {
     this.onQuickSearch,
     this.onHelp,
     this.notificacoesCountOverride,
+    this.onConversas,
+    this.conversasCount = 0,
   });
 
+  final VoidCallback? onConversas;
+  final int conversasCount;
   final VoidCallback? onQuickSearch;
   final VoidCallback? onHelp;
   final int? notificacoesCountOverride;
@@ -187,6 +205,16 @@ class _HeaderChromeCluster extends StatelessWidget {
             size: size,
             tooltip: DashboardMicrocopy.helpHomeOpen,
             onTap: onHelp!,
+          ),
+          const SizedBox(width: gap),
+        ],
+        if (onConversas != null) ...[
+          ShellHeaderIconButton(
+            icon: 'chat',
+            size: size,
+            badgeCount: conversasCount,
+            tooltip: dashboardConversasTooltip(conversasCount),
+            onTap: onConversas!,
           ),
           const SizedBox(width: gap),
         ],
