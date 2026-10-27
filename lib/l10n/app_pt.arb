@@ -1607,5 +1607,19 @@
   "retencaoAjudaFilaTexto": "Mostra todos os alunos, do mais para o menos urgente. O primeiro em risco alto fica em Chamar agora.",
   "winbackVazioTitulo": "Nenhum envio ainda",
   "winbackVazioTexto": "Quando um aluno fica sem treinar por um tempo, o Focux manda um aviso automático. Os envios aparecem aqui.",
-  "winbackVerEmRisco": "Ver alunos em risco"
+  "winbackVerEmRisco": "Ver alunos em risco",
+  "dockHoje": "Hoje",
+  "dockAlunos": "Alunos",
+  "dockTreinos": "Treinos",
+  "dockAgenda": "Agenda",
+  "dockIa": "IA",
+  "dockSaude": "Saúde",
+  "dockChat": "Chat",
+  "dockPerfil": "Perfil",
+  "dockBadgeNaoLidas": "{count, plural, =1{1 não lida} other{{count} não lidas}}",
+  "@dockBadgeNaoLidas": {"placeholders": {"count": {"type": "int"}}},
+  "dockBadgeEmRisco": "{count, plural, =1{1 em risco} other{{count} em risco}}",
+  "@dockBadgeEmRisco": {"placeholders": {"count": {"type": "int"}}},
+  "dockBadgeHoje": "{count, plural, =1{1 hoje} other{{count} hoje}}",
+  "@dockBadgeHoje": {"placeholders": {"count": {"type": "int"}}}
 }

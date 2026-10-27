@@ -9,7 +9,7 @@ void main() {
 
     expect(icon, contains("case 'heart-pulse':"));
     expect(icon, contains("case 'refresh-cw':"));
-    expect(dock, contains("FxDockItem(icon: 'heart-pulse', label: 'Saúde')"));
-    expect(dock, isNot(contains("FxDockItem(icon: 'trend', label: 'Saúde')")));
+    expect(dock, contains("FxDockItem(icon: 'heart-pulse', label: s.dockSaude)"));
+    expect(dock, isNot(contains("FxDockItem(icon: 'trend'")));
   });
 }

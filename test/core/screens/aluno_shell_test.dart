@@ -5,6 +5,7 @@ import 'package:focux_app/core/router/safe_navigation.dart';
 import 'package:focux_app/core/screens/aluno_shell.dart';
 import 'package:focux_app/core/widgets/fx_dock.dart';
 import 'package:focux_app/features/dashboard/providers/dashboard_provider.dart';
+import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter _router({Widget? home}) {
@@ -64,6 +65,9 @@ Future<void> _pump(WidgetTester tester, GoRouter router) async {
     ProviderScope(
       overrides: [alunoHomeChatUnreadSelectProvider.overrideWithValue(0)],
       child: MaterialApp.router(
+        locale: const Locale('pt'),
+        supportedLocales: S.supportedLocales,
+        localizationsDelegates: S.localizationsDelegates,
         routerConfig: router,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

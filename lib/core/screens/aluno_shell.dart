@@ -9,6 +9,7 @@ import '../widgets/cinematic_mesh_background.dart';
 import '../widgets/fx_dock.dart';
 import '../widgets/mesh_scope.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class AlunoShell extends ConsumerWidget {
   const AlunoShell({super.key, required this.navigationShell});
@@ -28,10 +29,7 @@ class AlunoShell extends ConsumerWidget {
     final dockClearance =
         onChat
             ? 0.0
-            : FxDock.shellClearance(
-              bottomInset: bottomInset,
-              compact: compact,
-            );
+            : FxDock.shellClearance(bottomInset: bottomInset, compact: compact);
     final chatUnread = ref.watch(alunoHomeChatUnreadSelectProvider);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -60,7 +58,10 @@ class AlunoShell extends ConsumerWidget {
                     left: FxDock.sideInset,
                     right: FxDock.sideInset,
                     child: FxDock(
-                      items: FxDockItems.aluno(chatUnread: chatUnread),
+                      items: FxDockItems.aluno(
+                        S.of(context),
+                        chatUnread: chatUnread,
+                      ),
                       currentIndex: navigationShell.currentIndex,
                       cinematicChrome: true,
                       isDark: isDark,

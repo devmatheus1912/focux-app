@@ -5,39 +5,65 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/fx_settings_layout.dart';
 import '../theme/tokens_strip.dart';
+import '../../l10n/app_localizations.dart';
 import 'fx_icon.dart';
+
+/// Tom do selo: `alerta` pede ação (vermelho); `info` só informa (cor da marca).
+enum FxDockBadgeTone { alerta, info }
 
 class FxDockItem {
   final String icon;
   final String label;
   final int badgeCount;
+  final FxDockBadgeTone badgeTone;
+
+  /// Texto lido pelo leitor de tela junto do nome ("3 não lidas").
+  final String? badgeLabel;
 
   const FxDockItem({
     required this.icon,
     required this.label,
     this.badgeCount = 0,
+    this.badgeTone = FxDockBadgeTone.alerta,
+    this.badgeLabel,
   });
 }
 
 class FxDockItems {
-  static const personal = [
-    FxDockItem(icon: 'home', label: 'Hoje'),
-    FxDockItem(icon: 'users', label: 'Alunos'),
-    FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    FxDockItem(icon: 'calendar', label: 'Agenda'),
-    FxDockItem(icon: 'spark', label: 'IA'),
+  static List<FxDockItem> personal(
+    S s, {
+    int alunosEmRisco = 0,
+    int agendaHoje = 0,
+  }) => [
+    FxDockItem(icon: 'home', label: s.dockHoje),
+    FxDockItem(
+      icon: 'users',
+      label: s.dockAlunos,
+      badgeCount: alunosEmRisco,
+      badgeLabel: alunosEmRisco > 0 ? s.dockBadgeEmRisco(alunosEmRisco) : null,
+    ),
+    FxDockItem(icon: 'dumbbell', label: s.dockTreinos),
+    FxDockItem(
+      icon: 'calendar',
+      label: s.dockAgenda,
+      badgeCount: agendaHoje,
+      badgeTone: FxDockBadgeTone.info,
+      badgeLabel: agendaHoje > 0 ? s.dockBadgeHoje(agendaHoje) : null,
+    ),
+    FxDockItem(icon: 'spark', label: s.dockIa),
   ];
 
-  static List<FxDockItem> aluno({int chatUnread = 0}) => [
-    const FxDockItem(icon: 'home', label: 'Hoje'),
-    const FxDockItem(icon: 'dumbbell', label: 'Treinos'),
-    const FxDockItem(icon: 'heart-pulse', label: 'Saúde'),
+  static List<FxDockItem> aluno(S s, {int chatUnread = 0}) => [
+    FxDockItem(icon: 'home', label: s.dockHoje),
+    FxDockItem(icon: 'dumbbell', label: s.dockTreinos),
+    FxDockItem(icon: 'heart-pulse', label: s.dockSaude),
     FxDockItem(
       icon: 'chat',
-      label: 'Chat',
+      label: s.dockChat,
       badgeCount: chatUnread,
+      badgeLabel: chatUnread > 0 ? s.dockBadgeNaoLidas(chatUnread) : null,
     ),
-    const FxDockItem(icon: 'users', label: 'Perfil'),
+    FxDockItem(icon: 'user', label: s.dockPerfil),
   ];
 }
 
@@ -61,13 +87,12 @@ class FxDock extends StatelessWidget {
   static const double floatGap = 10;
   static const double sideInset = FxSettingsLayout.pageInset;
 
-  static double barHeight({required bool compact}) => compact ? 56 : 58;
+  static double barHeight({required bool compact}) => compact ? 62 : 64;
 
   static double shellClearance({
     required double bottomInset,
     required bool compact,
-  }) =>
-      bottomInset + floatGap + barHeight(compact: compact) + 8;
+  }) => bottomInset + floatGap + barHeight(compact: compact) + 8;
 
   @override
   Widget build(BuildContext context) {
@@ -79,30 +104,35 @@ class FxDock extends StatelessWidget {
       dark: isDark,
       opacity: isDark ? (cinematicChrome ? 0.88 : 0.92) : 0.94,
     );
-    final border = TokensStrip.glassBorder(dark: isDark, accent: primary)
-        .withValues(alpha: isDark ? 0.36 : 0.40);
+    final border = TokensStrip.glassBorder(
+      dark: isDark,
+      accent: primary,
+    ).withValues(alpha: isDark ? 0.36 : 0.40);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.08),
-            blurRadius: isDark ? 18 : 14,
-            offset: const Offset(0, 6),
-            spreadRadius: -4,
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.36 : 0.08),
+              blurRadius: isDark ? 18 : 14,
+              offset: const Offset(0, 6),
+              spreadRadius: -4,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
+          child: _dockSurface(
+            context: context,
+            isDark: isDark,
+            surface: surface,
+            border: border,
+            primary: primary,
+            compact: compact,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(FxSettingsLayout.groupRadius),
-        child: _dockSurface(
-          context: context,
-          isDark: isDark,
-          surface: surface,
-          border: border,
-          primary: primary,
-          compact: compact,
         ),
       ),
     );
@@ -181,15 +211,23 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
 
   @override
   Widget build(BuildContext context) {
-    final inactive = widget.isDark
-        ? TokensStrip.textSecondary.withValues(alpha: 0.72)
-        : const Color(0xFF5B6B76);
+    final inactive =
+        widget.isDark
+            ? const Color(0xFFA9B4C0)
+            : const Color(0xFF51606B);
     final color = widget.active ? widget.primary : inactive;
+    final reduceMotion = TokensStrip.prefersReducedMotion(context);
+    final item = widget.item;
+    final semantica =
+        item.badgeLabel == null
+            ? item.label
+            : '${item.label}, ${item.badgeLabel}';
 
     return Semantics(
       button: true,
       selected: widget.active,
-      label: widget.item.label,
+      label: semantica,
+      excludeSemantics: true,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -203,60 +241,64 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
             duration: const Duration(milliseconds: 110),
             curve: Curves.easeOutCubic,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
+              constraints: const BoxConstraints(minHeight: 52),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        FxIcon(
-                          name: widget.item.icon,
-                          size: FxSettingsLayout.iconSize,
-                          color: color,
-                          strokeWidth: widget.active ? 2.0 : 1.7,
-                        ),
-                        if (widget.item.badgeCount > 0)
-                          Positioned(
-                            right: -6,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 1,
-                              ),
-                              constraints: const BoxConstraints(minWidth: 14),
-                              decoration: BoxDecoration(
-                                color: EagleTokens.bad,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                widget.item.badgeCount > 9
-                                    ? '9+'
-                                    : '${widget.item.badgeCount}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.1,
-                                ),
+                    // pílula tonal: o estado ativo não depende só da cor do ícone
+                    AnimatedContainer(
+                      duration:
+                          reduceMotion
+                              ? Duration.zero
+                              : const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      width: 52,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color:
+                            widget.active
+                                ? widget.primary.withValues(
+                                  alpha: widget.isDark ? 0.24 : 0.14,
+                                )
+                                : Colors.transparent,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.center,
+                        children: [
+                          FxIcon(
+                            name: item.icon,
+                            size: FxSettingsLayout.iconSize,
+                            color: color,
+                            strokeWidth: widget.active ? 2.0 : 1.7,
+                          ),
+                          if (item.badgeCount > 0)
+                            Positioned(
+                              right: -10,
+                              top: -7,
+                              child: _DockBadge(
+                                count: item.badgeCount,
+                                tone: item.badgeTone,
+                                primary: widget.primary,
+                                isDark: widget.isDark,
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      widget.item.label,
+                      item.label,
                       style: FocuxHubTypography.chip(color).copyWith(
-                        fontSize: widget.compact ? 10.0 : 10.5,
+                        fontSize: widget.compact ? 11.0 : 11.5,
                         fontWeight:
                             widget.active ? FontWeight.w700 : FontWeight.w500,
-                        height: 1.05,
+                        height: 1.1,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -267,6 +309,48 @@ class _FxDockNavItemState extends State<_FxDockNavItem> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DockBadge extends StatelessWidget {
+  const _DockBadge({
+    required this.count,
+    required this.tone,
+    required this.primary,
+    required this.isDark,
+  });
+
+  final int count;
+  final FxDockBadgeTone tone;
+  final Color primary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final fill = tone == FxDockBadgeTone.alerta ? EagleTokens.bad : primary;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: fill,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark ? const Color(0xFF14161A) : Colors.white,
+          width: 1.5,
+        ),
+      ),
+      child: Text(
+        count > 9 ? '9+' : '$count',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          height: 1.1,
         ),
       ),
     );
