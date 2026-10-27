@@ -14,7 +14,9 @@ import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../data/exercise_prescription_memory.dart';
 import '../data/workout_builder_preset.dart';
+import '../utils/prescricao_atalhos.dart';
 import '../utils/prescription_volume_stepper.dart';
+import '../../../core/widgets/fx_quick_chips.dart';
 import '../utils/workout_prescription_display.dart';
 import 'prescription_editor_copy.dart';
 
@@ -100,6 +102,10 @@ class PrescriptionEditorSheet extends StatefulWidget {
     this.heightFactor,
     this.canPop = true,
     this.enabled = true,
+    this.bloco = 'TRABALHO',
+    this.outrosNoBloco = 0,
+    this.aplicarAoBloco = false,
+    this.onAplicarAoBlocoChanged,
   });
 
   final bool isDark;
@@ -132,6 +138,14 @@ class PrescriptionEditorSheet extends StatefulWidget {
   final double? heightFactor;
   final bool canPop;
   final bool enabled;
+
+  /// Bloco do exercício: define os atalhos de repetições e descanso.
+  final String bloco;
+
+  /// Outros exercícios do mesmo bloco (0 = sem "Aplicar a todo o bloco").
+  final int outrosNoBloco;
+  final bool aplicarAoBloco;
+  final ValueChanged<bool>? onAplicarAoBlocoChanged;
 
   @override
   State<PrescriptionEditorSheet> createState() =>

@@ -8,8 +8,12 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_quick_chips.dart';
+import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../constants/aluno_360_layout.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_followup_dates.dart';
@@ -81,29 +85,6 @@ class _Aluno360CommitmentSheetState
       return 'Combine o horário e registre quando falar com ${aluno.nome}.';
     }
     return 'Quando você fala de novo com ${aluno.nome}.';
-  }
-
-  String _statusLine({
-    required DateTime? followUpDate,
-    required bool isSnoozed,
-    required DateTime? snoozedUntil,
-  }) {
-    final parts = <String>[];
-    if (aluno.ultimoContatoDate != null) {
-      parts.add('Último contato: ${_formatDate(aluno.ultimoContatoDate!)}');
-    }
-    if (isSnoozed && snoozedUntil != null) {
-      parts.add(
-        'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}',
-      );
-    } else if (followUpDate != null) {
-      parts.add('Próximo contato: ${_formatDate(followUpDate)}');
-    } else if (_isSleep) {
-      parts.add('Ainda sem data — use Definir data ou Adiar');
-    } else {
-      parts.add('Agendar próximo contato · sincronizado com a nuvem');
-    }
-    return parts.join(' · ');
   }
 
   Future<void> _runAction(
@@ -254,69 +235,135 @@ class _Aluno360CommitmentSheetState
     );
   }
 
+  /// Atalhos de data: amanhã, em 3 dias, em 1 semana. "Outro" abre a lista completa.
+  List<DateTime> get _atalhosDeData {
+    final hoje = DateTime.now();
+    final base = DateTime(hoje.year, hoje.month, hoje.day);
+    return [
+      base.add(const Duration(days: 1)),
+      base.add(const Duration(days: 3)),
+      base.add(const Duration(days: 7)),
+    ];
+  }
+
+  bool _mesmoDia(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  String _rotuloAtalho(DateTime d) {
+    final dias = d.difference(_atalhosDeData.first).inDays;
+    return switch (dias) {
+      0 => 'Amanhã',
+      2 => 'Em 3 dias',
+      _ => 'Em 1 semana',
+    };
+  }
+
+  Future<void> _definirAtalho(DateTime data) {
+    return _runAction(
+      () => ref.read(alunoFollowUpActionsProvider).setFollowUpDate(aluno.id, data),
+      _isSleep
+          ? 'Sono combinado para ${_formatDate(data)}'
+          : 'Follow-up definido para ${_formatDate(data)}',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
-    final mute = fxScreenMute(context);
     final followUpDate = aluno.followUpDate;
     final snoozedUntil = aluno.snoozedUntilDate;
     final isSnoozed =
         snoozedUntil != null && snoozedUntil.isAfter(DateTime.now());
     final actions = ref.read(alunoFollowUpActionsProvider);
-    final status = _statusLine(
-      followUpDate: followUpDate,
-      isSnoozed: isSnoozed,
-      snoozedUntil: snoozedUntil,
-    );
+    final atalhos = _atalhosDeData;
+    final dataAtual = isSnoozed ? null : followUpDate;
+    final dataEhAtalho =
+        dataAtual != null && atalhos.any((d) => _mesmoDia(d, dataAtual));
+    final ultimo = aluno.ultimoContatoDate;
 
-    Widget secondary(String label, VoidCallback onPressed) {
-      return OutlinedButton(
-        style: Aluno360Layout.operacaoOutlinedButtonStyle(context, primary),
-        onPressed: _busy ? null : onPressed,
-        child: Text(label),
-      );
-    }
-
-    return FxHomeSheetScaffold(
-      isDark: widget.isDark,
+    return FxSheetFrame(
+      title: _title,
+      subtitle: _subtitle,
       leading: Icon(
         _isSleep ? Icons.bedtime_outlined : Icons.event_outlined,
         color: primary,
         size: 20,
       ),
-      title: _title,
-      subtitle: _subtitle,
+      footer: FxLiquidPrimaryButton(
+        label: _doneLabel,
+        loading: _busy,
+        onPressed: _busy ? null : () => _markDone(actions),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            status,
-            style: FocuxHubTypography.bodyMuted(
-              color: mute,
-              fontWeight: FontWeight.w600,
-              height: 1.35,
+          FxSettingsGroup(
+            children: [
+              FxSettingsTile(
+                icon: Icons.history_rounded,
+                label: 'Último contato',
+                value: ultimo == null ? 'Ainda não registrado' : _formatDate(ultimo),
+                showDivider: true,
+              ),
+              FxSettingsTile(
+                icon: Icons.event_available_outlined,
+                label: _isSleep ? 'Combinado para' : 'Próximo contato',
+                value: isSnoozed
+                    ? 'Adiado até ${_formatDate(snoozedUntil)} ${_formatTime(snoozedUntil)}'
+                    : (followUpDate == null
+                          ? 'Sem data'
+                          : _formatDate(followUpDate)),
+                showDivider: false,
+              ),
+            ],
+          ),
+          const SizedBox(height: TokensStrip.s3),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, TokensStrip.s1),
+            child: Semantics(
+              header: true,
+              child: Text(
+                'Agendar',
+                style: FocuxHubTypography.chip(fxScreenMute(context)),
+              ),
             ),
           ),
-          const SizedBox(height: TokensStrip.s4),
-          FilledButton(
-            style: Aluno360Layout.operacaoFilledButtonStyle(context, primary),
-            onPressed: _busy ? null : () => _markDone(actions),
-            child: Text(_doneLabel),
+          FxQuickChips<DateTime>(
+            itens: atalhos,
+            selecionado: dataAtual == null
+                ? null
+                : atalhos.where((d) => _mesmoDia(d, dataAtual)).firstOrNull,
+            rotuloDe: _rotuloAtalho,
+            outroSelecionado: dataAtual != null && !dataEhAtalho,
+            outroRotulo: dataAtual != null && !dataEhAtalho
+                ? _formatDate(dataAtual)
+                : 'Escolher data',
+            onSelecionar: (d) {
+              if (!_busy) _definirAtalho(d);
+            },
+            onOutro: _busy ? null : _pickDate,
           ),
-          const SizedBox(height: TokensStrip.s2),
-          Wrap(
-            spacing: TokensStrip.s2,
-            runSpacing: TokensStrip.s2,
+          const SizedBox(height: TokensStrip.s3),
+          FxSettingsGroup(
             children: [
-              secondary(
-                followUpDate == null
-                    ? 'Definir data'
-                    : 'Data ${_formatDate(followUpDate)}',
-                _pickDate,
+              FxSettingsTile(
+                icon: Icons.snooze_rounded,
+                label: 'Adiar',
+                subtitle: 'Volta a avisar em 24 horas ou 3 dias',
+                value: '',
+                picker: true,
+                showDivider: followUpDate != null || isSnoozed,
+                onTap: _busy ? null : () => _showSnoozeSheet(actions),
               ),
-              secondary('Adiar', () => _showSnoozeSheet(actions)),
               if (followUpDate != null || isSnoozed)
-                secondary('Limpar', () => _confirmClear(actions)),
+                FxSettingsTile(
+                  icon: Icons.event_busy_rounded,
+                  label: _isSleep ? 'Limpar combinação' : 'Limpar follow-up',
+                  value: '',
+                  danger: true,
+                  showDivider: false,
+                  onTap: _busy ? null : () => _confirmClear(actions),
+                ),
             ],
           ),
         ],

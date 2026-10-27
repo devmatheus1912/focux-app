@@ -114,8 +114,10 @@ void main() {
     ).readAsStringSync();
     expect(inset, contains('treinoInsetActionChildren'));
     expect(inset, isNot(contains('treinoInsetActionTiles')));
-    expect(inset, contains('picker: !safe[i].showChevron'));
+    expect(inset, contains('picker: !g.\$2[j].showChevron'));
     expect(inset, contains('this.showChevron = false'));
+    // Ação destrutiva da lista é linha de texto; o botão cheio fica só na confirmação.
+    expect(inset, contains('danger: true'));
     expect(inset, contains('ElevatedButton'));
     expect(inset, contains('child: Text(confirmLabel)'));
     expect(inset, isNot(contains('label: confirmLabel')));
@@ -156,8 +158,9 @@ void main() {
     expect(screen, isNot(contains('locked: selectedAlunoId == null')));
     expect(screen, contains('treinoPrescriptionSaveLabel'));
     expect(screen, isNot(contains('? () {}')));
-    expect(screen, contains('showFxConfirmSheet'));
-    expect(screen, contains('treinoPrescriptionSaveConfirmTitle'));
+    // salvar prescrição não pede mais confirmação
+    expect(screen, isNot(contains('treinoPrescriptionSaveConfirmTitle')));
+    expect(screen, contains('_aplicarAoBloco'));
     expect(screen, contains('heightFactor: 0.88'));
     expect(
       File(
@@ -198,13 +201,16 @@ void main() {
         contains('onHelpTap'),
         contains('Semantics('),
         contains('liveRegion: locked'),
-        contains('Demo da biblioteca ou envie o seu'),
+        contains('O vídeo da Focux é fixo'),
       ),
     );
     expect(videoBlock, contains('showFxConfirmSheet'));
     expect(videoBlock, contains('showFxInsetPickerSheet'));
-    expect(videoBlock, contains('ElevatedButton'));
-    expect(videoBlock, isNot(contains('FxSettingsTile')));
+    // sem botões cheios: linhas do kit, remover em texto vermelho
+    expect(videoBlock, isNot(contains('ElevatedButton')));
+    expect(videoBlock, contains('FxSettingsTile'));
+    expect(videoBlock, contains('videoEditavel'));
+    expect(videoBlock, contains('Criar meu exercício com meu vídeo'));
     expect(videoBlock, contains('exerciseVideoUploadConfirmTitle'));
     expect(videoBlock, contains('exerciseVideoRemoveConfirmTitle'));
     expect(videoBlock, isNot(contains('TextButton')));

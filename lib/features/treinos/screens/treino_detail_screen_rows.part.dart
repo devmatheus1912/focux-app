@@ -1,24 +1,31 @@
 part of 'treino_detail_screen.dart';
 
+/// "ABDÔMEN" → "Abdômen" (o grupo vira texto pequeno da linha).
+String _grupoEmTexto(TreinoExercicioItem te) {
+  final g = treinoDetailGroupLabel(te);
+  if (g == 'OUTROS' || g.isEmpty) return '';
+  return g[0] + g.substring(1).toLowerCase();
+}
+
+/// Linha do exercício: alça de arrasto visível, miniatura, nome, músculo e
+/// prescrição. Tocar na linha edita a prescrição; o "⋯" guarda o resto.
 class _ExercicioRow extends StatelessWidget {
   final TreinoExercicioItem te;
-  final int index;
+
+  /// Posição na lista única (para a alça de arrasto).
+  final int reorderIndex;
   final bool isDark;
   final bool isLast;
-  final VoidCallback onDuplicate;
-  final VoidCallback onSubstitute;
-  final VoidCallback onRemove;
   final VoidCallback onEditPrescription;
+  final VoidCallback onMenu;
 
   const _ExercicioRow({
     required this.te,
-    required this.index,
+    required this.reorderIndex,
     required this.isDark,
     required this.isLast,
-    required this.onDuplicate,
-    required this.onSubstitute,
-    required this.onRemove,
     required this.onEditPrescription,
+    required this.onMenu,
   });
 
   @override
@@ -30,6 +37,15 @@ class _ExercicioRow extends StatelessWidget {
     final note = te.observacoes?.trim();
     final hasNote = note != null && note.isNotEmpty;
     final prescription = treinoDetailExerciseLine(te);
+    final grupo = _grupoEmTexto(te);
+    final nome =
+        te.exercicio.isPersonalUpload
+            ? '${te.exercicio.nomeDisplay} · Meu'
+            : te.exercicio.nomeDisplay;
+    final apoio = [
+      if (grupo.isNotEmpty) grupo,
+      if (hasNote) note,
+    ].join(' · ');
 
     return Container(
       decoration: BoxDecoration(
@@ -38,6 +54,22 @@ class _ExercicioRow extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Alça: arrasta na hora, sem precisar segurar.
+          ReorderableDragStartListener(
+            index: reorderIndex,
+            child: Semantics(
+              label: 'Arrastar ${te.exercicio.nomeDisplay}',
+              child: SizedBox(
+                width: 40,
+                height: TreinosLayout.touchTarget,
+                child: Icon(
+                  Icons.drag_indicator_rounded,
+                  size: 22,
+                  color: mute.withValues(alpha: 0.85),
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: Material(
               color: fxTransparent,
@@ -47,54 +79,47 @@ class _ExercicioRow extends StatelessWidget {
                   button: true,
                   label:
                       '${te.exercicio.nomeDisplay}. $prescription'
-                      '${hasNote ? '. $note' : ''}. Editar prescrição.',
+                      '${apoio.isEmpty ? '' : '. $apoio'}. Editar prescrição.',
+                  excludeSemantics: true,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
-                      TreinosLayout.exerciseRowPadH,
+                      0,
                       TreinosLayout.exerciseRowPadV,
                       TokensStrip.s2,
                       TreinosLayout.exerciseRowPadV,
                     ),
                     child: Row(
                       children: [
-                        Semantics(
-                          label:
-                              'Segure para reordenar ${te.exercicio.nomeDisplay}',
-                          child: Icon(
-                            Icons.drag_indicator_rounded,
-                            size: 18,
-                            color: mute.withValues(alpha: 0.72),
-                          ),
+                        ExerciseMediaThumb.fromExercicio(
+                          te.exercicio,
+                          size: 40,
+                          radius: 10,
                         ),
-                        SizedBox(
-                          width: 18,
-                          child: Text(
-                            '$index',
-                            textAlign: TextAlign.center,
-                            style: FocuxHubTypography.metric(
-                              color: mute,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: TokensStrip.s2),
+                        const SizedBox(width: TokensStrip.s2),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                te.exercicio.isPersonalUpload
-                                    ? '${te.exercicio.nomeDisplay} · Meu'
-                                    : te.exercicio.nomeDisplay,
+                                nome,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: FocuxHubTypography.cardTitle(color: ink),
                               ),
-                              if (hasNote) ...[
-                                const SizedBox(height: 1),
+                              const SizedBox(height: 1),
+                              Text(
+                                prescription,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: FocuxHubTypography.metric(
+                                  color: ink.withValues(alpha: 0.8),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (apoio.isNotEmpty)
                                 Text(
-                                  note,
+                                  apoio,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: FocuxHubTypography.bodyMuted(
@@ -102,23 +127,7 @@ class _ExercicioRow extends StatelessWidget {
                                     fontWeight: FontWeight.w600,
                                   ).copyWith(fontSize: 11),
                                 ),
-                              ],
                             ],
-                          ),
-                        ),
-                        SizedBox(width: TokensStrip.s2),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 148),
-                          child: Text(
-                            prescription,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.end,
-                            style: FocuxHubTypography.metric(
-                              color: mute,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
                           ),
                         ),
                       ],
@@ -133,25 +142,7 @@ class _ExercicioRow extends StatelessWidget {
             label: 'Ações de ${te.exercicio.nomeDisplay}',
             child: IconButton(
               tooltip: 'Ações de ${te.exercicio.nomeDisplay}',
-              onPressed: () async {
-                HapticFeedback.selectionClick();
-                AnalyticsService.instance.track(
-                  ProductEvents.treinoExerciseMenuOpened,
-                  props: {'id': te.id},
-                );
-                final action = await _showTreinoSheet<String>(
-                  context: context,
-                  builder:
-                      (_) => _ExerciseActionsSheet(
-                        title: te.exercicio.nomeDisplay,
-                        isDark: isDark,
-                      ),
-                );
-                if (action == 'edit') onEditPrescription();
-                if (action == 'duplicate') onDuplicate();
-                if (action == 'substitute') onSubstitute();
-                if (action == 'remove') onRemove();
-              },
+              onPressed: onMenu,
               style: IconButton.styleFrom(
                 minimumSize: const Size(
                   TreinosLayout.headerChromeSize,
@@ -166,48 +157,6 @@ class _ExercicioRow extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ExerciseActionsSheet extends StatelessWidget {
-  final String title;
-  final bool isDark;
-
-  const _ExerciseActionsSheet({required this.title, required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final maxHeight = MediaQuery.sizeOf(context).height * 0.72;
-    return TreinoInsetActionSheet(
-      isDark: isDark,
-      maxHeight: maxHeight,
-      headerIcon: Icons.fitness_center_rounded,
-      title: 'Ações do exercício',
-      subtitle: title,
-      actions: [
-        TreinoInsetActionSpec(
-          icon: Icons.edit_note_rounded,
-          label: 'Editar prescrição',
-          onTap: () => Navigator.pop(context, 'edit'),
-        ),
-        TreinoInsetActionSpec(
-          icon: Icons.copy_rounded,
-          label: 'Duplicar',
-          onTap: () => Navigator.pop(context, 'duplicate'),
-        ),
-        TreinoInsetActionSpec(
-          icon: Icons.swap_horiz_rounded,
-          label: 'Substituir',
-          onTap: () => Navigator.pop(context, 'substitute'),
-        ),
-        TreinoInsetActionSpec(
-          icon: Icons.remove_circle_outline_rounded,
-          label: 'Remover do treino',
-          danger: true,
-          onTap: () => Navigator.pop(context, 'remove'),
-        ),
-      ],
     );
   }
 }

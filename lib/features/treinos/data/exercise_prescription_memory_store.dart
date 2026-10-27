@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'exercise_prescription_memory.dart';
+import '../utils/prescricao_padrao_bloco.dart';
 import '../utils/prescricao_serie.dart';
 
 /// Persiste a última prescrição usada ao adicionar exercício.
@@ -11,13 +12,18 @@ class ExercisePrescriptionMemoryStore {
 
   static const _key = 'last_exercise_prescription_v1';
 
-  static Future<void> saveFor(int exercicioId, List<SeriePrescrita> series) async {
+  static Future<void> saveFor(
+    int exercicioId,
+    List<SeriePrescrita> series, {
+    String bloco = 'TRABALHO',
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
-      'exercise_prescription_v1_$exercicioId',
+      chaveMemoriaDoExercicio(exercicioId, bloco),
       jsonEncode([for (final serie in series) serie.toJson()]),
     );
-    if (series.isEmpty) return;
+    // Aquecimento e alongamento não viram o "último usado" do trabalho.
+    if (series.isEmpty || !usaMemoriaGlobal(bloco)) return;
     final valida = series.firstWhere(
       (serie) => serie.papel != 'AQUECIMENTO',
       orElse: () => series.first,
@@ -35,9 +41,12 @@ class ExercisePrescriptionMemoryStore {
     );
   }
 
-  static Future<List<SeriePrescrita>?> loadFor(int exercicioId) async {
+  static Future<List<SeriePrescrita>?> loadFor(
+    int exercicioId, {
+    String bloco = 'TRABALHO',
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('exercise_prescription_v1_$exercicioId');
+    final raw = prefs.getString(chaveMemoriaDoExercicio(exercicioId, bloco));
     if (raw == null || raw.isEmpty) return null;
     try {
       final list = jsonDecode(raw) as List;

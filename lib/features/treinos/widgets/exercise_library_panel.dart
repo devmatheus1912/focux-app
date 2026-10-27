@@ -29,6 +29,7 @@ import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
 import '../utils/exercise_library_sections.dart';
+import '../utils/exercise_library_meta.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_picker_sort.dart';
@@ -62,7 +63,15 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
     this.header,
     this.footer,
     this.onUploadVideo,
+    this.resumoNoTreino = const {},
+    this.onCadastrar,
   });
+
+  /// Prescrição já aplicada a cada exercício que está no treino ("3 × 10-12").
+  final Map<int, String> resumoNoTreino;
+
+  /// "Não achou? Cadastrar 'termo'": abre o cadastro de exercício.
+  final VoidCallback? onCadastrar;
 
   final Set<int> alreadyInTreinoIds;
   final ExercisePickerFilter filter;
@@ -508,7 +517,12 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                   ? 'Tente outro termo ou limpe busca e filtros.'
                   : 'A biblioteca ainda está vazia.',
           action:
-              _committedQuery.isNotEmpty || _filter.isActive
+              _committedQuery.isNotEmpty && widget.onCadastrar != null
+                  ? FxEmptyAction(
+                    label: 'Cadastrar "$_committedQuery"',
+                    onTap: widget.onCadastrar!,
+                  )
+                  : _committedQuery.isNotEmpty || _filter.isActive
                   ? FxEmptyAction(
                     label:
                         _committedQuery.isNotEmpty
@@ -542,6 +556,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       sections: sections,
       searchQuery: _committedQuery,
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
+      resumoNoTreino: widget.resumoNoTreino,
       uploading: _uploading,
       primary: primary,
       onUploadVideo: widget.onUploadVideo,
@@ -659,6 +674,7 @@ class _CategoryTilesBody extends ConsumerWidget {
                 label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
                 count: exercisePickerStatCount(stats.porGrupo, grupo.name),
                 onTap: () => onSelectGrupo(grupo),
+                icon: iconeDoGrupoMuscular(grupo),
               ),
         ]..sort((a, b) => b.count.compareTo(a.count));
 
@@ -695,7 +711,7 @@ class _CategoryTilesBody extends ConsumerWidget {
                 items: [
                   for (final item in items)
                     FxInsetPickerOptionSpec(
-                      icon: Icons.fitness_center_outlined,
+                      icon: item.icon,
                       label: item.label,
                       subtitle:
                           item.count == 1
@@ -720,6 +736,7 @@ class _GroupedExerciseList extends StatelessWidget {
     required this.sections,
     required this.searchQuery,
     required this.alreadyInTreinoIds,
+    this.resumoNoTreino = const {},
     required this.uploading,
     required this.primary,
     required this.onSelect,
@@ -733,6 +750,7 @@ class _GroupedExerciseList extends StatelessWidget {
   final List<ExerciseLibrarySection> sections;
   final String searchQuery;
   final Set<int> alreadyInTreinoIds;
+  final Map<int, String> resumoNoTreino;
   final bool uploading;
   final Color primary;
   final ValueChanged<Exercicio> onSelect;
@@ -781,6 +799,7 @@ class _GroupedExerciseList extends StatelessWidget {
                   alreadyInTreino: alreadyInTreinoIds.contains(
                     section.items[i].id,
                   ),
+                  resumoNoTreino: resumoNoTreino[section.items[i].id],
                   showDivider: i < section.items.length - 1,
                   insetGroup: true,
                   uploadEnabled: onUploadVideo != null && !uploading,

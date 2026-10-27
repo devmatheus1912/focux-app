@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -16,6 +15,8 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
+import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
@@ -130,11 +131,45 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
       }
     }
 
-    return FxHomeSheetScaffold(
-      isDark: isDark,
+    return FxSheetFrame(
       leading: Icon(icon, color: primary, size: 18),
       title: title,
       subtitle: checkin ? 'Para $firstName · pronta para enviar' : subtitle,
+      footer: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxLiquidPrimaryButton(
+            label: alunoOutreachOpenChatLabel(),
+            onPressed: openChatWithDraft,
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () async {
+                    await copySensitiveToClipboard(message);
+                    if (!context.mounted) return;
+                    Navigator.of(context).pop();
+                    FeedbackHelper.showSuccess(
+                      context,
+                      alunoOutreachCopySuccess(),
+                    );
+                  },
+                  child: Text(alunoOutreachCopyLabel()),
+                ),
+              ),
+              Expanded(
+                child: TextButton(
+                  onPressed: markContactDone,
+                  child: const Text('Contato feito'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -144,27 +179,6 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
             firstName: firstName,
             primary: primary,
             isDark: isDark,
-          ),
-          const SizedBox(height: TokensStrip.s4),
-          FxLiquidPrimaryButton(
-            label: alunoOutreachOpenChatLabel(),
-            onPressed: openChatWithDraft,
-          ),
-          TextButton(
-            onPressed: () async {
-              await copySensitiveToClipboard(message);
-              if (!context.mounted) return;
-              Navigator.of(context).pop();
-              FeedbackHelper.showSuccess(
-                context,
-                alunoOutreachCopySuccess(),
-              );
-            },
-            child: Text(alunoOutreachCopyLabel()),
-          ),
-          TextButton(
-            onPressed: markContactDone,
-            child: const Text('Contato feito'),
           ),
           Padding(
             padding: const EdgeInsets.only(top: TokensStrip.s3),
@@ -197,74 +211,31 @@ class _OutreachMessageQuote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ink = isDark ? EagleTokens.darkInk : TokensStrip.textPrimary;
-    final deep = BrandPalette.deep(primary);
-    final soft = BrandPalette.softer(primary, dark: isDark);
-
+    final chrome = ShellChrome.of(context);
     return Semantics(
       label: 'Mensagem sugerida para $displayName',
       readOnly: true,
-      child: DecoratedBox(
+      child: Container(
+        padding: const EdgeInsets.all(TokensStrip.s3),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              soft.withValues(alpha: isDark ? 0.55 : 0.92),
-              (isDark ? EagleTokens.darkCard : Colors.white).withValues(
-                alpha: isDark ? 0.88 : 0.98,
-              ),
-            ],
-          ),
-          border: Border.all(
-            color: primary.withValues(alpha: isDark ? 0.22 : 0.14),
-          ),
+          color: chrome.cardFill,
+          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+          border: Border.all(color: chrome.lineStrong),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(width: 4, color: deep),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: deep.withValues(alpha: isDark ? 0.88 : 1),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            'Para $firstName',
-                            style: FocuxHubTypography.chip(Colors.white)
-                                .copyWith(letterSpacing: 0.2),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          message,
-                          style: FocuxHubTypography.body(color: ink).copyWith(
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Para $firstName', style: FocuxHubTypography.chip(chrome.mute)),
+            const SizedBox(height: TokensStrip.s2),
+            Text(
+              message,
+              style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+                fontWeight: FontWeight.w500,
+                height: 1.5,
+                fontSize: 15,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

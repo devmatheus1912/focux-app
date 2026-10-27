@@ -7,12 +7,21 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   bool _showCarga = false;
   bool _showRpeAlvo = false;
   bool _showNotes = false;
+  bool _maisAberto = false;
+  late bool _aplicarAoBloco;
 
   @override
   void initState() {
     super.initState();
     _presetId = widget.presetId;
     _tipoSerie = widget.tipoSerie;
+    _aplicarAoBloco = widget.aplicarAoBloco;
+    _maisAberto = maisDetalhesPreenchidos(
+      carga: widget.cargaCtrl.text,
+      rpe: widget.rpeAlvoCtrl?.text ?? '',
+      observacoes: widget.observacoesCtrl.text,
+      tipoSerie: widget.tipoSerie,
+    );
     _showCarga = widget.cargaCtrl.text.trim().isNotEmpty;
     _showRpeAlvo = widget.rpeAlvoCtrl?.text.trim().isNotEmpty == true;
     _showNotes = widget.observacoesCtrl.text.trim().isNotEmpty;
@@ -47,29 +56,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
   WorkoutBuilderPreset get _selectedPreset =>
       workoutBuilderPresetById(_presetId);
 
-  String _previewLine() {
-    final preset = _selectedPreset;
-    final series =
-        widget.seriesCtrl.text.trim().isEmpty
-            ? '${preset.series}'
-            : widget.seriesCtrl.text.trim();
-    final reps =
-        widget.repCtrl.text.trim().isEmpty
-            ? preset.repeticoes
-            : widget.repCtrl.text.trim();
-    final rest =
-        widget.descansoCtrl.text.trim().isEmpty
-            ? '${preset.descansoSegundos}'
-            : widget.descansoCtrl.text.trim();
-    return formatActivePrescriptionLine(
-      presetLabel: preset.label,
-      series: series,
-      repeticoes: reps,
-      descansoSegundos: rest,
-      tipoSerie: _tipoSerie,
-    );
-  }
-
   void _setSeries(int value) {
     widget.seriesCtrl.text = '$value';
     HapticFeedback.selectionClick();
@@ -80,52 +66,6 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     widget.descansoCtrl.text = '$value';
     HapticFeedback.selectionClick();
     setState(() {});
-  }
-
-  Future<void> _openObjetivoPicker() async {
-    if (!widget.enabled) return;
-    final picked = await showFxInsetPickerSheet<String>(
-      context,
-      title: prescriptionObjetivo,
-      subtitle: prescriptionObjetivoSubtitle,
-      headerIcon: Icons.flag_outlined,
-      selected: _presetId,
-      items: [
-        for (final preset in workoutBuilderPresets)
-          FxInsetPickerSheetItem(
-            value: preset.id,
-            label: preset.label,
-            subtitle: preset.summary,
-            icon: Icons.flag_outlined,
-          ),
-      ],
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _presetId = picked);
-    widget.onPresetSelected(picked);
-  }
-
-  Future<void> _openTipoSeriePicker() async {
-    if (!widget.enabled) return;
-    const tipos = ['NORMAL', 'SUPERSET', 'DROPSET'];
-    final picked = await showFxInsetPickerSheet<String>(
-      context,
-      title: prescriptionTipoSerie,
-      headerIcon: Icons.layers_outlined,
-      selected: _tipoSerie.toUpperCase(),
-      items: [
-        for (final tipo in tipos)
-          FxInsetPickerSheetItem(
-            value: tipo,
-            label: workoutTipoSerieLabel(tipo),
-            subtitle: workoutTipoSerieSubtitle(tipo),
-            icon: Icons.layers_outlined,
-          ),
-      ],
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _tipoSerie = picked);
-    widget.onTipoSerieChanged(picked);
   }
 
   @override
@@ -209,16 +149,27 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                         _setSeries(adjustPrescriptionSeries(seriesValue, 1))
                     : null,
           ),
-          FxSettingsTile(
-            icon: Icons.fitness_center_rounded,
+          _PrescriptionChipsRow(
             label: prescriptionRepsLabel,
-            value: repsValue,
-            mute: mute,
+            icon: Icons.fitness_center_rounded,
+            iconColor: brand,
+            ink: ink,
             line: line,
-            accent: brand,
-            picker: true,
-            numeric: true,
-            onTap: enabled ? () => _openRepsSheet() : null,
+            chips: FxQuickChips<String>(
+              itens: atalhosRepeticoes(widget.bloco),
+              selecionado: repsValue.trim(),
+              outroSelecionado: !repeticoesEhAtalho(widget.bloco, repsValue),
+              outroRotulo: repeticoesEhAtalho(widget.bloco, repsValue)
+                  ? 'Outro'
+                  : repsValue,
+              onSelecionar: (v) {
+                if (!enabled) return;
+                widget.repCtrl.text = v;
+                HapticFeedback.selectionClick();
+                setState(() {});
+              },
+              onOutro: enabled ? () => _openRepsSheet() : null,
+            ),
           ),
           _PrescriptionStepperRow(
             label: prescriptionDescanso,
@@ -240,11 +191,91 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
                       adjustPrescriptionRestSeconds(restValue, 15),
                     )
                     : null,
+            showDivider: true,
+          ),
+          _PrescriptionChipsRow(
+            label: '',
+            icon: null,
+            iconColor: brand,
+            ink: ink,
+            line: line,
             showDivider: false,
+            chips: FxQuickChips<int>(
+              itens: atalhosDescansoSeg(widget.bloco),
+              selecionado: restValue,
+              rotuloDe: (v) => '${v}s',
+              outroSelecionado: !descansoEhAtalho(widget.bloco, restValue),
+              outroRotulo: descansoEhAtalho(widget.bloco, restValue)
+                  ? 'Outro'
+                  : '${restValue}s',
+              onSelecionar: (v) {
+                if (enabled) _setRest(v);
+              },
+              onOutro: enabled ? _openDescansoPicker : null,
+            ),
           ),
         ],
       ),
+      if (widget.outrosNoBloco > 0 &&
+          widget.onAplicarAoBlocoChanged != null) ...[
+        const SizedBox(height: FxSettingsLayout.groupGap),
+        FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              icon: Icons.library_add_check_outlined,
+              label: 'Aplicar a todo o bloco',
+              subtitle: widget.outrosNoBloco == 1
+                  ? 'Séries, repetições e descanso do outro exercício do bloco'
+                  : 'Séries, repetições e descanso dos outros ${widget.outrosNoBloco} do bloco',
+              value: '',
+              mute: mute,
+              line: line,
+              accent: brand,
+              showDivider: false,
+              accessory: Switch.adaptive(
+                value: _aplicarAoBloco,
+                onChanged: enabled
+                    ? (v) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _aplicarAoBloco = v);
+                        widget.onAplicarAoBlocoChanged!(v);
+                      }
+                    : null,
+              ),
+              onTap: enabled
+                  ? () {
+                      final v = !_aplicarAoBloco;
+                      HapticFeedback.selectionClick();
+                      setState(() => _aplicarAoBloco = v);
+                      widget.onAplicarAoBlocoChanged!(v);
+                    }
+                  : null,
+            ),
+          ],
+        ),
+      ],
       const SizedBox(height: FxSettingsLayout.groupGap),
+      if (!_maisAberto)
+        FxSettingsGroup(
+          children: [
+            FxSettingsTile(
+              icon: Icons.tune_rounded,
+              label: prescriptionMaisDetalhes,
+              subtitle: 'Tipo de série, carga, RPE e observações',
+              value: '',
+              mute: mute,
+              line: line,
+              accent: brand,
+              disclosure: true,
+              showDivider: false,
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _maisAberto = true);
+              },
+            ),
+          ],
+        )
+      else
       FxSettingsGroup(
         header: prescriptionMaisDetalhes,
         accent: widget.primary,
@@ -456,4 +487,3 @@ class _PrescriptionEditorSheetState extends State<PrescriptionEditorSheet> {
     );
   }
 }
-

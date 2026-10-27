@@ -6,12 +6,16 @@ class _EditPrescriptionSheet extends StatefulWidget {
     required this.item,
     required this.isDark,
     required this.repo,
+    this.outrosNoBloco = const [],
   });
 
   final int treinoId;
   final TreinoExercicioItem item;
   final bool isDark;
   final TreinoRepository repo;
+
+  /// Outros exercícios do mesmo bloco (para "Aplicar a todo o bloco").
+  final List<TreinoExercicioItem> outrosNoBloco;
 
   @override
   State<_EditPrescriptionSheet> createState() => _EditPrescriptionSheetState();
@@ -29,6 +33,7 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
   late String _presetId;
   bool _saving = false;
   bool _videoBusy = false;
+  bool _aplicarAoBloco = false;
 
   @override
   void initState() {
@@ -82,13 +87,6 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
 
   Future<void> _save() async {
     if (_saving || _videoBusy) return;
-    final ok = await showFxConfirmSheet(
-      context,
-      title: treinoPrescriptionSaveConfirmTitle(),
-      message: treinoPrescriptionSaveConfirmMessage(),
-      confirmLabel: treinoPrescriptionSaveLabel(),
-    );
-    if (!ok || !mounted) return;
     final series = int.tryParse(_seriesCtrl.text) ?? widget.item.series;
     final descansoSegundos = int.tryParse(_descansoCtrl.text) ?? 60;
     final rejection = treinoPrescriptionRejection(
@@ -137,6 +135,16 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
         bloco: widget.item.bloco,
         descansoSegundos: descansoSegundos,
       );
+      if (_aplicarAoBloco) {
+        for (final outro in widget.outrosNoBloco) {
+          await _aplicarEm(
+            outro,
+            series: series,
+            repeticoes: reps,
+            descansoSegundos: descansoSegundos,
+          );
+        }
+      }
       AnalyticsService.instance.track(
         ProductEvents.treinoPrescriptionSaved,
         props: {
@@ -153,6 +161,42 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// Aplica só séries, repetições e descanso: carga, RPE e observações de cada
+  /// exercício continuam como estavam.
+  Future<void> _aplicarEm(
+    TreinoExercicioItem outro, {
+    required int series,
+    required String repeticoes,
+    required int descansoSegundos,
+  }) async {
+    await widget.repo.atualizarExercicioPrescricao(
+      widget.treinoId,
+      outro.id,
+      series: series,
+      repeticoes: repeticoes,
+      descansoSegundos: descansoSegundos,
+      cargaKg: outro.cargaKg,
+      rpeAlvo: outro.rpeAlvo,
+      observacoes: outro.observacoes ?? '',
+      tipoSerie: outro.tipoSerie,
+      grupoSuperset: outro.tipoSerie == 'SUPERSET' ? outro.grupoSuperset : null,
+    );
+    await widget.repo.salvarSeries(
+      widget.treinoId,
+      outro.id,
+      linhas: [
+        for (var i = 1; i <= series; i++)
+          SeriePrescrita(
+            numero: i,
+            repeticoes: repeticoes,
+            cargaKg: outro.cargaKg,
+          ),
+      ],
+      bloco: outro.bloco,
+      descansoSegundos: descansoSegundos,
+    );
   }
 
   @override
@@ -185,6 +229,10 @@ class _EditPrescriptionSheetState extends State<_EditPrescriptionSheet> {
       heightFactor: 0.88,
       canPop: !busy,
       enabled: !busy,
+      bloco: widget.item.bloco,
+      outrosNoBloco: widget.outrosNoBloco.length,
+      aplicarAoBloco: _aplicarAoBloco,
+      onAplicarAoBlocoChanged: (v) => _aplicarAoBloco = v,
       belowFields: TreinoPrescriptionVideoBlock(
         treinoId: widget.treinoId,
         exercicio: widget.item.exercicio,

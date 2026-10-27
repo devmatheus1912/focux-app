@@ -14,6 +14,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import 'treino_detail_screen.dart' show showPrescricaoDoItem;
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_form_chrome.dart';
@@ -21,8 +23,6 @@ import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../alunos/providers/alunos_provider.dart';
@@ -42,6 +42,7 @@ import '../providers/treinos_provider.dart';
 import '../services/recent_exercise_usage_store.dart';
 import '../utils/add_exercise_prescription_input.dart';
 import '../utils/exercise_picker_filter.dart';
+import '../utils/prescricao_padrao_bloco.dart';
 import '../utils/prescricao_serie.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/workout_prescription_display.dart';
@@ -81,6 +82,9 @@ class _AddExercicioToTreinoScreenState
   String _presetId = 'hypertrophy';
   String _tipoSerie = 'NORMAL';
   bool _loading = false;
+
+  /// Quantos exercícios entraram nesta visita ("Pronto (3)").
+  int _adicionados = 0;
   String? _error;
   bool _seedingBiblioteca = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
@@ -151,12 +155,12 @@ class _AddExercicioToTreinoScreenState
         child: FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(
-            title: 'Adicionar Exercício',
+            title: destinoDoAdicionar(widget.bloco),
             subtitle: treinoAsync.maybeWhen(
               data: (treino) => displayWorkoutName(treino.nome),
               orElse: () => 'Montando treino',
             ),
-            leadingWidth: 92,
+            leadingWidth: 120,
             leading: TextButton(
               onPressed: _cancel,
               style: TextButton.styleFrom(
@@ -164,9 +168,21 @@ class _AddExercicioToTreinoScreenState
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Cancelar'),
+              child: Text(
+                _adicionados > 0 ? 'Pronto ($_adicionados)' : 'Fechar',
+                style: TextStyle(
+                  fontWeight:
+                      _adicionados > 0 ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
             ),
             actions: [
+              ShellHeaderIconButton(
+                icon: 'plus',
+                tooltip: 'Cadastrar exercício',
+                onTap: _openCreateExercise,
+              ),
+              const SizedBox(width: FxHelpChrome.gap),
               FxHelpIconButton(
                 tooltip: 'Ajuda para adicionar exercícios',
                 onTap: () => showAddExercicioHelpSheet(context),
@@ -301,19 +317,8 @@ class _AddExercicioToTreinoScreenState
                             recentIds: _recentIds,
                             shortcutItems: home.shortcuts,
                             header: _alunoFilterHeader(isDark, primary),
-                            footer: FxSettingsGroup(
-                              accent: primary,
-                              children: [
-                                FxSettingsTile(
-                                  icon: Icons.add_rounded,
-                                  accent: BrandPalette.softened(primary),
-                                  label: pickerHints.createCtaLabel,
-                                  value: '',
-                                  showDivider: false,
-                                  onTap: _openCreateExercise,
-                                ),
-                              ],
-                            ),
+                            resumoNoTreino: _resumoNoTreino(treinoAsync),
+                            onCadastrar: _openCreateExercise,
                           );
                         },
                       ),

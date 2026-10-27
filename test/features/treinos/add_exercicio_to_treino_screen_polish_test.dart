@@ -17,7 +17,9 @@ void main() {
     expect(screen, contains('FxShellScaffold'));
     expect(screen, isNot(contains('centerTitle: true')));
     expect(screen, contains('FxFormPopGuard'));
-    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains("'Pronto (\$_adicionados)'"));
+    expect(screen, contains("'Fechar'"));
+    expect(screen, contains('destinoDoAdicionar'));
     expect(screen, isNot(contains("label: 'Concluir'")));
     expect(screen, isNot(contains('FxActionChip.solidBackground')));
     expect(

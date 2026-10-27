@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/analytics/analytics_service.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +31,9 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../constants/treinos_layout.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/treino_blocos.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
+import '../../../core/widgets/fx_inset_picker_sheet.dart';
+import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../utils/treino_detail_grouping.dart';
 import '../utils/treino_prescription_rules.dart';
 import '../utils/rotina_aviso.dart';
@@ -59,19 +60,27 @@ String _workoutContextLabel(Treino treino, String? alunoNome) =>
 
 String _displayWorkoutName(String raw) => displayWorkoutName(raw);
 
-String _workoutGroupLabel(TreinoExercicioItem te) => treinoDetailGroupLabel(te);
-
-bool _showsExerciseGroupHeader(List<TreinoExercicioItem> items, int index) =>
-    treinoDetailShowsGroupHeader(items, index);
-
-int _localIndexInGroup(List<TreinoExercicioItem> items, int index) =>
-    treinoDetailLocalIndexInGroup(items, index);
-
-int _groupExerciseCount(List<TreinoExercicioItem> items, int index) =>
-    treinoDetailGroupExerciseCount(items, index);
-
-bool _isLastInExerciseGroup(List<TreinoExercicioItem> items, int index) =>
-    treinoDetailIsLastInGroup(items, index);
+/// Abre a folha de prescrição de um exercício do treino (também usada pela
+/// tela de adicionar). Devolve `true` se salvou.
+Future<bool?> showPrescricaoDoItem(
+  BuildContext context, {
+  required int treinoId,
+  required TreinoExercicioItem item,
+  required TreinoRepository repo,
+  List<TreinoExercicioItem> outrosNoBloco = const [],
+}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return _showTreinoSheet<bool>(
+    context: context,
+    builder: (_) => _EditPrescriptionSheet(
+      treinoId: treinoId,
+      item: item,
+      isDark: isDark,
+      repo: repo,
+      outrosNoBloco: outrosNoBloco,
+    ),
+  );
+}
 
 class TreinoDetailScreen extends ConsumerStatefulWidget {
   final int treinoId;

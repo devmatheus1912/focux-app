@@ -214,12 +214,13 @@ void main() {
     testWidgets('blocos viram seções, sem a faixa de "Pular"', (tester) async {
       await abrir(tester, alunoId: 3);
       expect(find.textContaining('Pular'), findsNothing);
-      expect(find.text('Aquecimento'), findsOneWidget);
-      expect(find.text('Trabalho'), findsOneWidget);
+      expect(find.textContaining('Aquecimento'), findsWidgets);
+      expect(find.textContaining('Trabalho'), findsWidgets);
       expect(find.text('Exercício 1'), findsOneWidget);
       expect(find.text('Exercício 2'), findsOneWidget);
-      expect(find.text('Alongamento'), findsOneWidget);
-      expect(find.byType(OutlinedButton), findsOneWidget);
+      expect(find.textContaining('Alongamento'), findsWidgets);
+      // cada seção tem o seu "+ Adicionar", mesmo com exercícios
+      expect(find.text('Adicionar'), findsNWidgets(3));
     });
   });
 

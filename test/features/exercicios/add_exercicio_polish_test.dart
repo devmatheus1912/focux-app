@@ -14,7 +14,11 @@ void main() {
     ).readAsStringSync();
 
     expect(screen, contains('Semantics('));
-    expect(screen, contains('Perfil rápido'));
+    expect(screen, contains('Tipo de exercício'));
+    expect(screen, isNot(contains('Perfil rápido')));
+    expect(screen, isNot(contains('Recolher campos')));
+    expect(screen, contains('rotuloVisivel: true'));
+    expect(screen, contains('nomeDaCopia'));
     expect(screen, contains('FxToggleChip'));
     expect(screen, isNot(contains('DropdownButtonFormField')));
     expect(screen, isNot(contains('_EnumPicker')));

@@ -203,13 +203,86 @@ extension _AddExercicioToTreinoScreenActions
     return resolved.values;
   }
 
+  /// "3 × 10-12" de cada exercício que já está no treino.
+  Map<int, String> _resumoNoTreino(AsyncValue<Treino> treinoAsync) {
+    return treinoAsync.maybeWhen(
+      data: (treino) => {
+        for (final item in treino.exercicios)
+          item.exercicio.id: '${item.series} × ${item.repeticoes}',
+      },
+      orElse: () => const <int, String>{},
+    );
+  }
+
   Future<void> _adicionarRapido(Exercicio exercicio) async {
     if (_loading) return;
-    final deste = await ExercisePrescriptionMemoryStore.loadFor(exercicio.id);
-    final global = await ExercisePrescriptionMemoryStore.loadGlobalSeries();
-    final linhas = seriesIniciais(desteExercicio: deste, ultimaGlobal: global);
+    final bloco = widget.bloco;
+    final treinoAtual = ref
+        .read(treinoPickerHomeProvider(widget.treinoId))
+        .whenData((h) => h.treino)
+        .value;
+    final jaNoTreino = treinoAtual?.exercicios
+        .where((e) => e.exercicio.id == exercicio.id)
+        .toList();
+    if (jaNoTreino != null && jaNoTreino.isNotEmpty) {
+      final escolha = await showFxGroupedActionSheet<String>(
+        context,
+        titulo: exercicio.nomeDisplay,
+        subtitulo: 'Já está neste treino',
+        icone: Icons.fitness_center_rounded,
+        grupos: [
+          FxActionGroup<String>(null, [
+            FxActionItem(
+              valor: 'ajustar',
+              rotulo: 'Ajustar prescrição',
+              icone: Icons.edit_note_rounded,
+            ),
+            FxActionItem(
+              valor: 'repetir',
+              rotulo: 'Adicionar de novo',
+              descricao: 'Entra como outra linha do treino',
+              icone: Icons.control_point_duplicate_rounded,
+            ),
+          ]),
+        ],
+      );
+      if (!mounted || escolha == null) return;
+      if (escolha == 'ajustar') {
+        final item = jaNoTreino.last;
+        final salvou = await showPrescricaoDoItem(
+          context,
+          treinoId: widget.treinoId,
+          item: item,
+          repo: ref.read(treinoRepositoryProvider),
+          outrosNoBloco: [
+            for (final e in treinoAtual!.exercicios)
+              if (e.id != item.id && e.bloco == item.bloco) e,
+          ],
+        );
+        if (salvou == true && mounted) {
+          ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
+          ref.invalidate(treinoProvider(widget.treinoId));
+        }
+        return;
+      }
+    }
+    final deste = await ExercisePrescriptionMemoryStore.loadFor(
+      exercicio.id,
+      bloco: bloco,
+    );
+    final global = usaMemoriaGlobal(bloco)
+        ? await ExercisePrescriptionMemoryStore.loadGlobalSeries()
+        : null;
+    final padrao = padraoDoBloco(bloco);
+    // Memória do exercício vence o padrão do bloco; a global só vale no trabalho.
+    final linhas = deste == null && global == null
+        ? padrao.linhas
+        : seriesIniciais(desteExercicio: deste, ultimaGlobal: global);
     final validas = linhas.where((linha) => !linha.aquecimento).toList();
     final base = validas.isEmpty ? linhas.first : validas.first;
+    final descanso = usaMemoriaGlobal(bloco)
+        ? prescricaoHipertrofiaDescanso
+        : padrao.descansoSegundos;
     setState(() {
       _loading = true;
       _error = null;
@@ -222,8 +295,9 @@ extension _AddExercicioToTreinoScreenActions
             exercicio.id,
             series: linhas.length,
             repeticoes: base.repeticoes,
-            descanso: prescricaoHipertrofiaDescanso,
+            descanso: descanso,
             cargaKg: base.cargaKg,
+            bloco: bloco,
           );
       final item = treino.exercicios
           .where((linha) => linha.exercicio.id == exercicio.id)
@@ -233,22 +307,23 @@ extension _AddExercicioToTreinoScreenActions
           widget.treinoId,
           item.id,
           linhas: linhas,
-          bloco: widget.bloco,
-          descansoSegundos: prescricaoHipertrofiaDescanso,
+          bloco: bloco,
+          descansoSegundos: descanso,
         );
       }
-      await ExercisePrescriptionMemoryStore.saveFor(exercicio.id, linhas);
+      await ExercisePrescriptionMemoryStore.saveFor(exercicio.id, linhas, bloco: bloco);
       AnalyticsService.instance.track(
         'quick_add_exercicio',
-        props: {'exId': exercicio.id, 'treinoId': widget.treinoId},
+        props: {'exId': exercicio.id, 'treinoId': widget.treinoId, 'bloco': bloco},
       );
       if (mounted) {
         HapticFeedback.mediumImpact();
+        setState(() => _adicionados++);
         ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
         ref.invalidate(treinoProvider(widget.treinoId));
         FeedbackHelper.showSuccess(
           context,
-          '${exercicio.nomeDisplay} adicionado.',
+          '${exercicio.nomeDisplay} adicionado (${linhas.length} × ${base.repeticoes}).',
         );
       }
     } catch (error) {

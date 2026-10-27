@@ -5,7 +5,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
+import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -140,7 +140,6 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     final soft = BrandPalette.softened(primary);
-    final ink = fxScreenInk(context);
     final maxHeight =
         MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor;
 
@@ -180,18 +179,10 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
             leading: Icon(Icons.inventory_2_outlined, color: soft, size: 20),
           ),
           const SizedBox(height: TokensStrip.s3),
-          Semantics(
-            label: 'Buscar equipamento ou espaço',
-            child: TextField(
-              controller: _searchCtrl,
-              style: FxSettingsLayout.rowLabel(color: ink),
-              decoration: FxInputDeco.insetGrouped(
-                context,
-                icon: Icons.search_rounded,
-                hint: 'Buscar…',
-                iconColor: soft,
-              ),
-            ),
+          FxSheetSearchField(
+            controller: _searchCtrl,
+            dica: 'Buscar equipamento ou espaço',
+            onChanged: (_) {},
           ),
           const SizedBox(height: TokensStrip.s3),
           Flexible(
@@ -265,7 +256,7 @@ class _AddExercicioFiltersSheetState extends State<_AddExercicioFiltersSheet> {
           ),
           const SizedBox(height: 10),
           FxLiquidPrimaryButton(
-            label: 'Aplicar',
+            label: 'Aplicar (${_equipamentos.length + _espacos.length})',
             onPressed: _apply,
           ),
         ],

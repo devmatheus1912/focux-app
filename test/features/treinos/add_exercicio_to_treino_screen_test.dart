@@ -109,11 +109,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 80));
 
     expect(find.bySemanticsLabel('Adicionar exercício'), findsOneWidget);
+    expect(find.text('Adicionando ao treino'), findsOneWidget);
+    expect(find.text('Fechar'), findsOneWidget);
     expect(find.text('Treino Emagrecimento'), findsWidgets);
     expect(find.text('Todos'), findsOneWidget);
     expect(find.text('Movimento'), findsNothing);
     expect(find.text('Músculo'), findsOneWidget);
-    expect(find.text('Cadastrar exercício'), findsOneWidget);
+    // o cadastro virou o "+" do topo, sem rodapé fixo
+    expect(find.byTooltip('Cadastrar exercício'), findsOneWidget);
     expect(find.text('Buscar'), findsOneWidget);
     expect(find.text('Explorar'), findsNothing);
     expect(find.text('Biblioteca completa'), findsNothing);

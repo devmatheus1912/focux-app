@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
@@ -20,6 +21,7 @@ class TreinoInsetActionSpec {
     this.showChevron = false,
     this.danger = false,
     this.highlight = false,
+    this.grupo,
     required this.onTap,
   });
 
@@ -29,6 +31,10 @@ class TreinoInsetActionSpec {
   final bool showChevron;
   final bool danger;
   final bool highlight;
+
+  /// Título pequeno do grupo ("Montar", "Usar"). Ações seguidas com o mesmo
+  /// título ficam no mesmo cartão.
+  final String? grupo;
   final VoidCallback onTap;
 }
 
@@ -45,42 +51,66 @@ List<Widget> treinoInsetActionChildren({
       if (a.danger) a,
   ];
 
+  // Agrupa ações consecutivas com o mesmo título.
+  final grupos = <(String?, List<TreinoInsetActionSpec>)>[];
+  for (final a in safe) {
+    if (grupos.isNotEmpty && grupos.last.$1 == a.grupo) {
+      grupos.last.$2.add(a);
+    } else {
+      grupos.add((a.grupo, [a]));
+    }
+  }
+
   return [
-    if (safe.isNotEmpty)
+    for (final (i, g) in grupos.indexed) ...[
+      if (i > 0) const SizedBox(height: FxSettingsLayout.groupGap),
+      if (g.$1 != null)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
+          child: Semantics(
+            header: true,
+            child: Builder(
+              builder: (context) => Text(
+                g.$1!,
+                style: FocuxHubTypography.chip(fxScreenMute(context)),
+              ),
+            ),
+          ),
+        ),
       FxSettingsGroup(
         accent: accent,
         children: [
-          for (var i = 0; i < safe.length; i++)
+          for (var j = 0; j < g.$2.length; j++)
             FxSettingsTile(
-              icon: safe[i].icon,
+              icon: g.$2[j].icon,
               accent: accent,
-              label: safe[i].label,
-              subtitle: safe[i].subtitle,
+              label: g.$2[j].label,
+              subtitle: g.$2[j].subtitle,
               value: '',
-              highlight: safe[i].highlight,
+              highlight: g.$2[j].highlight,
               // Chevron só em push de rota (Abrir). Comandos: picker esconde seta.
-              picker: !safe[i].showChevron,
-              showDivider: i < safe.length - 1,
-              onTap: safe[i].onTap,
+              picker: !g.$2[j].showChevron,
+              showDivider: j < g.$2.length - 1,
+              onTap: g.$2[j].onTap,
             ),
         ],
       ),
-    for (final danger in dangers) ...[
+    ],
+    // Destrutiva: linha de texto vermelha em cartão próprio, nunca botão cheio.
+    if (dangers.isNotEmpty) ...[
       const SizedBox(height: FxSettingsLayout.groupGap),
-      SizedBox(
-        height: 52,
-        child: ElevatedButton(
-          onPressed: danger.onTap,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: EagleTokens.bad,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+      FxSettingsGroup(
+        children: [
+          for (var j = 0; j < dangers.length; j++)
+            FxSettingsTile(
+              icon: dangers[j].icon,
+              label: dangers[j].label,
+              value: '',
+              danger: true,
+              showDivider: j < dangers.length - 1,
+              onTap: dangers[j].onTap,
             ),
-          ),
-          child: Text(danger.label),
-        ),
+        ],
       ),
     ],
   ];

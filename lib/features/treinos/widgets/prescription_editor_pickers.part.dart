@@ -106,4 +106,95 @@ extension on _PrescriptionEditorSheetState {
     }
     draft.dispose();
   }
+
+  Future<void> _openObjetivoPicker() async {
+    if (!widget.enabled) return;
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: prescriptionObjetivo,
+      subtitle: prescriptionObjetivoSubtitle,
+      headerIcon: Icons.flag_outlined,
+      selected: _presetId,
+      items: [
+        for (final preset in workoutBuilderPresets)
+          FxInsetPickerSheetItem(
+            value: preset.id,
+            label: preset.label,
+            subtitle: preset.summary,
+            icon: Icons.flag_outlined,
+          ),
+      ],
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _presetId = picked);
+    widget.onPresetSelected(picked);
+  }
+
+  Future<void> _openTipoSeriePicker() async {
+    if (!widget.enabled) return;
+    const tipos = ['NORMAL', 'SUPERSET', 'DROPSET'];
+    final picked = await showFxInsetPickerSheet<String>(
+      context,
+      title: prescriptionTipoSerie,
+      headerIcon: Icons.layers_outlined,
+      selected: _tipoSerie.toUpperCase(),
+      items: [
+        for (final tipo in tipos)
+          FxInsetPickerSheetItem(
+            value: tipo,
+            label: workoutTipoSerieLabel(tipo),
+            subtitle: workoutTipoSerieSubtitle(tipo),
+            icon: Icons.layers_outlined,
+          ),
+      ],
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _tipoSerie = picked);
+    widget.onTipoSerieChanged(picked);
+  }
+
+  String _previewLine() {
+    final preset = _selectedPreset;
+    final series =
+        widget.seriesCtrl.text.trim().isEmpty
+            ? '${preset.series}'
+            : widget.seriesCtrl.text.trim();
+    final reps =
+        widget.repCtrl.text.trim().isEmpty
+            ? preset.repeticoes
+            : widget.repCtrl.text.trim();
+    final rest =
+        widget.descansoCtrl.text.trim().isEmpty
+            ? '${preset.descansoSegundos}'
+            : widget.descansoCtrl.text.trim();
+    return formatActivePrescriptionLine(
+      presetLabel: preset.label,
+      series: series,
+      repeticoes: reps,
+      descansoSegundos: rest,
+      tipoSerie: _tipoSerie,
+    );
+  }
+}
+
+extension _DescansoPicker on _PrescriptionEditorSheetState {
+  Future<void> _openDescansoPicker() async {
+    if (!widget.enabled) return;
+    final atual = parsePrescriptionInt(widget.descansoCtrl.text, fallback: 60);
+    final picked = await showFxInsetPickerSheet<int>(
+      context,
+      title: prescriptionDescanso,
+      headerIcon: Icons.timer_outlined,
+      selected: atual,
+      items: [
+        for (final s in opcoesDescansoSeg)
+          FxInsetPickerSheetItem(
+            value: s,
+            label: s == 0 ? 'Sem descanso' : '${s}s',
+          ),
+      ],
+    );
+    if (picked == null || !mounted) return;
+    _setRest(picked);
+  }
 }

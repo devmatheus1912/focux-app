@@ -29,34 +29,40 @@ Future<void> _openTreinoDetailMenu({
             TreinoInsetActionSpec(
               icon: Icons.add_rounded,
               label: 'Adicionar exercício',
+              grupo: 'Montar',
               showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'add'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.view_agenda_outlined,
               label: 'Montar por modelo',
+              grupo: 'Montar',
               onTap: () => Navigator.pop(sheetContext, 'template_split'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.person_add_alt_1_rounded,
               label: s.treinoDetalheAtribuirAluno,
+              grupo: 'Usar',
               subtitle: s.treinoDetalheAtribuirSubtitulo,
               onTap: () => Navigator.pop(sheetContext, 'assign'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.assignment_ind_rounded,
               label: 'Copiar para aluno',
+              grupo: 'Usar',
               subtitle: s.treinoDetalheCopiarSubtitulo,
               onTap: () => Navigator.pop(sheetContext, 'clone'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.control_point_duplicate_rounded,
               label: 'Duplicar treino',
+              grupo: 'Guardar',
               onTap: () => Navigator.pop(sheetContext, 'duplicate'),
             ),
             TreinoInsetActionSpec(
               icon: Icons.bookmark_border_rounded,
               label: 'Salvar como template',
+              grupo: 'Guardar',
               onTap: () => Navigator.pop(sheetContext, 'template'),
             ),
             TreinoInsetActionSpec(
@@ -119,8 +125,6 @@ class _TreinoDetailBody extends StatelessWidget {
     final displayName = _displayWorkoutName(treino.nome);
     final orderedExercises = [...treino.exercicios]
       ..sort((a, b) => a.ordem.compareTo(b.ordem));
-    final blocos = blocosComExercicio(orderedExercises);
-    final titulosDeBloco = mostrarTituloDeBloco(blocos);
     final s = S.of(context);
     final nomesDosBlocos = {
       'AQUECIMENTO': s.treinoBlocoAquecimento,
@@ -139,6 +143,10 @@ class _TreinoDetailBody extends StatelessWidget {
               item: item,
               isDark: isDark,
               repo: repo,
+              outrosNoBloco: [
+                for (final e in orderedExercises)
+                  if (e.id != item.id && e.bloco == item.bloco) e,
+              ],
             ),
       );
       if (saved != true) return;
@@ -243,7 +251,8 @@ class _TreinoDetailBody extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Expanded(
+                    Padding(
+                      padding: const EdgeInsets.only(right: TokensStrip.s2),
                       child: Text(
                         'Exercícios',
                         style: FocuxHubTypography.sectionTitle(
@@ -252,12 +261,17 @@ class _TreinoDetailBody extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (orderedExercises.length > 1)
-                      Text(
-                        'Segure para reordenar',
-                        style: FocuxHubTypography.bodyMuted(
-                          color: chrome.mute,
-                          fontWeight: FontWeight.w600,
+                    if (orderedExercises.isNotEmpty)
+                      Flexible(
+                        child: Text(
+                          treinoResumoLinha(orderedExercises),
+                          maxLines: 2,
+                          textAlign: TextAlign.end,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(
+                            color: chrome.mute,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                   ],
@@ -284,65 +298,18 @@ class _TreinoDetailBody extends StatelessWidget {
                 ),
               )
             else ...[
-              for (final (bloco, itens) in blocos) ...[
-                if (titulosDeBloco)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s2,
-                        FxSettingsLayout.pageInset,
-                        TokensStrip.s1,
-                      ),
-                      child: Text(
-                        nomesDosBlocos[bloco] ?? bloco,
-                        style: FocuxHubTypography.cardTitle(color: chrome.ink),
-                      ),
-                    ),
-                  ),
-                _TreinoExerciseReorderList(
-                  key: ValueKey(bloco),
-                  exercises: itens,
-                  todos: orderedExercises,
-                  treinoId: treinoId,
-                  alunoId: alunoId,
-                  isDark: isDark,
-                  primary: primary,
-                  repo: repo,
-                  ref: ref,
-                  onEditPrescription: openEditPrescription,
-                ),
-              ],
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    FxSettingsLayout.pageInset,
-                    TokensStrip.s2,
-                    FxSettingsLayout.pageInset,
-                    0,
-                  ),
-                  child: Wrap(
-                    spacing: TokensStrip.s2,
-                    children: [
-                      for (final extra in const ['AQUECIMENTO', 'ALONGAMENTO'])
-                        if (!blocos.any((b) => b.$1 == extra))
-                          OutlinedButton.icon(
-                            onPressed: () =>
-                                openAdd(source: 'bloco', destino: extra),
-                            icon: const Icon(Icons.add_rounded),
-                            label: Text(
-                              extra == 'AQUECIMENTO'
-                                  ? s.treinoAddAquecimento
-                                  : s.treinoAddAlongamento,
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(48, 48),
-                              shape: const StadiumBorder(),
-                            ),
-                          ),
-                    ],
-                  ),
-                ),
+              _TreinoListaUnica(
+                key: const ValueKey('lista-unica'),
+                exercises: orderedExercises,
+                treinoId: treinoId,
+                alunoId: alunoId,
+                isDark: isDark,
+                primary: primary,
+                repo: repo,
+                ref: ref,
+                nomesDosBlocos: nomesDosBlocos,
+                onEditPrescription: openEditPrescription,
+                onAdd: (bloco) => openAdd(source: 'bloco', destino: bloco),
               ),
             ],
             const SliverToBoxAdapter(child: SizedBox(height: 24)),

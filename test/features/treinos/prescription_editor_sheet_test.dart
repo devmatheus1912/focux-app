@@ -105,11 +105,16 @@ void main() {
     expect(find.text('Editar prescrição'), findsOneWidget);
     expect(find.text('Supino declinado máquina'), findsOneWidget);
     expect(find.text('Prescrição'), findsOneWidget);
+    // detalhes ficam recolhidos até o personal abrir (ou já terem valor)
     expect(find.text('Mais detalhes'), findsOneWidget);
+    expect(find.text('Tipo de série'), findsNothing);
     expect(find.text('Objetivo'), findsOneWidget);
-    expect(find.text('Tipo de série'), findsOneWidget);
     expect(find.text('Hipertrofia'), findsOneWidget);
     expect(find.text('Salvar prescrição'), findsOneWidget);
+    await tester.ensureVisible(find.text('Mais detalhes'));
+    await tester.tap(find.text('Mais detalhes'));
+    await _pumpOpen(tester);
+    expect(find.text('Tipo de série'), findsOneWidget);
 
     await tester.tap(find.text('Salvar prescrição'));
     await _pumpOpen(tester);

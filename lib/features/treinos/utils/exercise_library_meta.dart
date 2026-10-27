@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_taxonomy_labels.dart';
@@ -32,3 +33,26 @@ String exerciseLibraryMeta(Exercicio exercicio, {bool alreadyInTreino = false}) 
   }
   return meta;
 }
+
+/// Ícone por região do corpo (e não o mesmo halter para todos os grupos).
+IconData iconeDoGrupoMuscular(GrupoMuscular grupo) => switch (grupo) {
+  GrupoMuscular.peito ||
+  GrupoMuscular.costasLatissimo ||
+  GrupoMuscular.costasRetangulares ||
+  GrupoMuscular.trapezio ||
+  GrupoMuscular.lombar => Icons.accessibility_new_rounded,
+  GrupoMuscular.ombroAnterior ||
+  GrupoMuscular.ombroLateral ||
+  GrupoMuscular.ombroPosterior ||
+  GrupoMuscular.biceps ||
+  GrupoMuscular.triceps ||
+  GrupoMuscular.antebraco => Icons.sports_gymnastics_rounded,
+  GrupoMuscular.abdomen || GrupoMuscular.obliquo => Icons.self_improvement_rounded,
+  GrupoMuscular.quadriceps ||
+  GrupoMuscular.posteriorCoxa ||
+  GrupoMuscular.gluteo ||
+  GrupoMuscular.panturrilha ||
+  GrupoMuscular.adutor ||
+  GrupoMuscular.abdutor => Icons.directions_run_rounded,
+  GrupoMuscular.fullBody => Icons.fitness_center_rounded,
+};

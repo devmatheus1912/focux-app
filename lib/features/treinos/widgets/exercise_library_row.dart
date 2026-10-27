@@ -17,6 +17,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     required this.onTap,
     this.selected = false,
     this.alreadyInTreino = false,
+    this.resumoNoTreino,
     this.showDivider = true,
     this.onPreviewThumb,
     this.onUploadVideo,
@@ -31,6 +32,9 @@ class ExerciseLibraryRow extends StatelessWidget {
   final VoidCallback onTap;
   final bool selected;
   final bool alreadyInTreino;
+
+  /// Prescrição aplicada, quando o exercício já está no treino ("3 × 10-12").
+  final String? resumoNoTreino;
   final bool showDivider;
   final VoidCallback? onPreviewThumb;
   final VoidCallback? onUploadVideo;
@@ -50,7 +54,7 @@ class ExerciseLibraryRow extends StatelessWidget {
         selected
             ? '${exercicio.nomeDisplay}, selecionado. $meta'
             : alreadyInTreino
-            ? '${exercicio.nomeDisplay}. $meta. Já no treino.'
+            ? '${exercicio.nomeDisplay}. $meta. Já no treino${resumoNoTreino == null ? '' : ', $resumoNoTreino'}.'
             : '${exercicio.nomeDisplay}. $meta';
     final fav = exercicio.favoritado ? ' Favorito.' : '';
     final action =
@@ -147,7 +151,7 @@ class ExerciseLibraryRow extends StatelessWidget {
                             ),
                             if (alreadyInTreino) ...[
                               const SizedBox(width: 6),
-                              _InTreinoPill(mute: mute),
+                              _InTreinoPill(mute: mute, resumo: resumoNoTreino),
                             ],
                           ],
                         ),
@@ -268,9 +272,10 @@ class _ExerciseTitle extends StatelessWidget {
 }
 
 class _InTreinoPill extends StatelessWidget {
-  const _InTreinoPill({required this.mute});
+  const _InTreinoPill({required this.mute, this.resumo});
 
   final Color mute;
+  final String? resumo;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +286,7 @@ class _InTreinoPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'No treino',
+        resumo == null || resumo!.isEmpty ? 'No treino' : 'No treino · $resumo',
         style: FxSettingsLayout.footer(color: mute).copyWith(
           fontWeight: FontWeight.w800,
         ),

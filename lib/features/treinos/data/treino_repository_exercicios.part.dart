@@ -14,6 +14,7 @@ extension TreinoRepositoryExercicios on TreinoRepository {
     String tipoSerie = 'NORMAL',
     int? grupoSuperset,
     int? ordem,
+    String? bloco,
   }) async {
     final response = await _dio.post(
       '/api/treinos/$treinoId/exercicios',
@@ -29,6 +30,7 @@ extension TreinoRepositoryExercicios on TreinoRepository {
         'tipoSerie': tipoSerie,
         if (grupoSuperset != null) 'grupoSuperset': grupoSuperset,
         if (ordem != null) 'ordem': ordem,
+        if (bloco != null && bloco != 'TRABALHO') 'bloco': bloco,
       },
     );
     throwIfQueuedOffline(response);

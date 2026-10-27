@@ -91,8 +91,15 @@ class _QuickSetupStrip extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 8, 4, 6),
           child: Text(
-            'Perfil rápido',
+            'Tipo de exercício',
             style: FxSettingsLayout.sectionHeader(color: mute),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 6),
+          child: Text(
+            'Preenche equipamentos e espaços para você ajustar.',
+            style: FxSettingsLayout.footer(color: mute),
           ),
         ),
         Padding(
@@ -159,17 +166,17 @@ class _CollapsibleSection extends StatelessWidget {
     final soft = BrandPalette.softened(primary);
 
     return FxSettingsGroup(
-      header: title,
+      header: '$title · opcional',
       caption: subtitle,
       accent: primary,
       children: [
         FxSettingsTile(
           icon: icon,
           accent: soft,
-          label: expanded ? 'Recolher campos' : 'Adicionar orientação',
+          label: expanded ? 'Orientação ao aluno' : 'Adicionar orientação',
           subtitle:
               expanded
-                  ? 'Toque para esconder descrição, erros e contraindicações.'
+                  ? 'Toque para esconder.'
                   : 'Opcional — aparece para o aluno na ficha do exercício.',
           value: '',
           disclosure: true,
@@ -197,6 +204,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
   final String? Function(T?)? validator;
   final bool showDivider;
   final String sheetContextLabel;
+  final bool obrigatorio;
 
   const _EnumDropdown({
     required this.label,
@@ -209,6 +217,7 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
     required this.sheetContextLabel,
     this.validator,
     this.showDivider = true,
+    this.obrigatorio = false,
   });
 
   @override
@@ -218,20 +227,21 @@ class _EnumDropdown<T extends Enum> extends StatelessWidget {
       validator: validator,
       builder: (state) {
         final effectiveValue = value ?? state.value;
-        // Valor vazio → hint do campo (label) fica visível; "Selecionar" tapava o rótulo.
+        // O rótulo fica sempre visível; sem valor, o direito diz o que falta.
         final selectedLabel =
             effectiveValue == null
-                ? ''
+                ? (obrigatorio ? 'Escolher · obrigatório' : 'Escolher')
                 : labels[effectiveValue] ?? effectiveValue.backendName;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FxInsetPickerRow(
+            FxSettingsTile(
               icon: icon,
-              iconColor: iconColor,
+              accent: iconColor,
               label: label,
               value: selectedLabel,
+              picker: true,
               showDivider: showDivider && state.errorText == null,
               semanticsLabel:
                   effectiveValue == null

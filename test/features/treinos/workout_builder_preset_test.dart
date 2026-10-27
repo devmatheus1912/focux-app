@@ -70,8 +70,8 @@ void main() {
     expect(repository, contains('duplicarExercicio'));
     expect(repository, contains('/duplicar'));
     expect(detail, contains('SliverReorderableList'));
-    expect(detail, contains('ReorderableDelayedDragStartListener'));
-    expect(detail, contains("label: 'Duplicar'"));
+    expect(detail, contains('ReorderableDragStartListener'));
+    expect(detail, contains("rotulo: 'Duplicar'"));
   });
 
   test('workout detail persists order through drag reorder', () {
@@ -79,9 +79,9 @@ void main() {
       'lib/features/treinos/screens/treino_detail_screen.dart',
     );
 
-    expect(detail, contains('_TreinoExerciseReorderList'));
-    expect(detail, contains('removeAt'));
-    expect(detail, contains('insert'));
-    expect(detail, contains('reordenarExercicios(widget.treinoId, ids)'));
+    expect(detail, contains('_TreinoListaUnica'));
+    expect(detail, contains('moverNaLista'));
+    expect(detail, contains('salvarSeries('));
+    expect(detail, contains('movimento.idsEmOrdem'));
   });
 }

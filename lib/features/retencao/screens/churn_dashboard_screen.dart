@@ -63,6 +63,7 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   var _query = '';
   final _searchCtrl = TextEditingController();
   Timer? _debounce;
+  final _scroll = ScrollController();
   final _openedAt = DateTime.now();
   var _viewTracked = false;
   var _ttvTracked = false;
@@ -70,11 +71,18 @@ class _ChurnDashboardScreenState extends ConsumerState<ChurnDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _scroll.addListener(() {
+      if (_scroll.hasClients &&
+          _scroll.position.pixels >= _scroll.position.maxScrollExtent - 300) {
+        _carregarMais();
+      }
+    });
     _load();
   }
 
   @override
   void dispose() {
+    _scroll.dispose();
     _debounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();

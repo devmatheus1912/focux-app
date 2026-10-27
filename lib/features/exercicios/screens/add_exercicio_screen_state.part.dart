@@ -32,6 +32,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
   String? _error;
   String? _selectedSetupLabel = 'Academia';
 
+  /// Vídeo escolhido na criação (opcional); sobe depois que o exercício existe.
+  String? _videoPath;
+  int? _criadoId;
+
   // Baseline for edit dirty-check (filled after prefill).
   String _baselineNome = '';
   String _baselineDescricao = '';
@@ -105,6 +109,10 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
     _contraindicacoesCtrl.addListener(_onFormChanged);
     if (_isEdit) {
       Future.microtask(_prefillFromApi);
+    } else if (widget.copiaDe != null) {
+      // Cópia da biblioteca: mesmos dados, nome "(meu)", nunca o vídeo.
+      _prefillFrom(widget.copiaDe!);
+      _nomeCtrl.text = nomeDaCopia(widget.copiaDe!.nomeDisplay);
     }
   }
 
@@ -217,7 +225,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         );
         ref.invalidate(exercicioProvider(widget.exercicioId!));
       } else {
-        await repo.criar(
+        _criadoId = (await repo.criar(
           nome: payload['nome']!,
           descricao: payload['descricao'],
           musculoAlvo: payload['musculoAlvo'],
@@ -234,9 +242,12 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
           unilateral: _unilateral,
           errosComuns: payload['errosComuns'],
           contraindicacoes: payload['contraindicacoes'],
-        );
+        )).id;
       }
       ref.invalidate(exerciciosFilteredProvider);
+      if (!_isEdit && _videoPath != null) {
+        await _enviarVideoDoNovo();
+      }
       if (mounted) context.pop(true);
     } on OfflineQueuedException {
       if (mounted) leaveWithQueuedNotice(context, '/exercicios');
@@ -254,6 +265,31 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
       }
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _escolherVideo() async {
+    FxKeyboardDismissScope.dismiss();
+    final path = await escolherVideoDoExercicio(context);
+    if (path == null || !mounted) return;
+    setState(() => _videoPath = path);
+  }
+
+  /// O exercício já existe: sobe o vídeo. Falha não desfaz o cadastro.
+  Future<void> _enviarVideoDoNovo() async {
+    final id = _criadoId;
+    final path = _videoPath;
+    if (id == null || path == null) return;
+    try {
+      await ref.read(exercicioRepositoryProvider).uploadVideoExercicio(id, path);
+      ref.invalidate(exerciciosFilteredProvider);
+    } catch (e) {
+      if (mounted) {
+        FeedbackHelper.showWarn(
+          context,
+          'Exercício criado, mas o vídeo não subiu. Envie depois pela prescrição.',
+        );
+      }
     }
   }
 
@@ -410,6 +446,8 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   label: 'Nome do exercício',
                                   hint: 'Ex.: Elevação lateral',
                                   icon: Icons.fitness_center_outlined,
+                                  rotuloVisivel: true,
+                                  obrigatorio: true,
                                   validator:
                                       (v) =>
                                           v == null || v.trim().isEmpty
@@ -423,6 +461,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   ),
                                 _EnumDropdown<GrupoMuscular>(
                                   label: 'Grupo principal',
+                                  obrigatorio: true,
                                   icon: Icons.accessibility_new_rounded,
                                   iconColor: soft,
                                   sheetContextLabel: screenTitle,
@@ -513,12 +552,48 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                               ],
                             ),
                           ),
+                          if (!_isEdit) ...[
+                            const SizedBox(height: FxSettingsLayout.groupGap),
+                            FxSettingsGroup(
+                              header: 'Vídeo',
+                              caption:
+                                  'Opcional. O aluno vê o seu vídeo no treino; dá para enviar depois.',
+                              accent: primary,
+                              children: [
+                                FxSettingsTile(
+                                  icon: Icons.videocam_outlined,
+                                  accent: soft,
+                                  label:
+                                      _videoPath == null
+                                          ? 'Adicionar meu vídeo'
+                                          : 'Vídeo escolhido',
+                                  subtitle:
+                                      _videoPath == null
+                                          ? 'Câmera ou galeria'
+                                          : 'Toque para trocar',
+                                  value: '',
+                                  picker: true,
+                                  showDivider: _videoPath != null,
+                                  onTap: _escolherVideo,
+                                ),
+                                if (_videoPath != null)
+                                  FxSettingsTile(
+                                    icon: Icons.delete_outline_rounded,
+                                    label: 'Tirar vídeo',
+                                    value: '',
+                                    danger: true,
+                                    showDivider: false,
+                                    onTap: () => setState(() => _videoPath = null),
+                                  ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: FxSettingsLayout.groupGap),
                           FxStaggerItem(
                             index: 2,
                             child: _CollapsibleSection(
                               icon: Icons.co_present_outlined,
-                              title: 'Orientação opcional',
+                              title: 'Orientação',
                               subtitle:
                                   _showGuidance
                                       ? 'Detalhes úteis para o aluno executar com segurança.'
@@ -533,6 +608,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   AlunoInsetFormField(
                                     controller: _descricaoCtrl,
                                     label: 'Descrição curta',
+                                    rotuloVisivel: true,
                                     hint:
                                         'Como executar em uma frase objetiva.',
                                     icon: Icons.notes_rounded,
@@ -541,6 +617,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   AlunoInsetFormField(
                                     controller: _errosComunsCtrl,
                                     label: 'Erros comuns',
+                                    rotuloVisivel: true,
                                     hint:
                                         'Ex.: elevar os ombros, roubar com o tronco.',
                                     icon: Icons.warning_amber_rounded,
@@ -549,6 +626,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
                                   AlunoInsetFormField(
                                     controller: _contraindicacoesCtrl,
                                     label: 'Contraindicações',
+                                    rotuloVisivel: true,
                                     hint:
                                         'Quando evitar ou adaptar este exercício.',
                                     icon: Icons.health_and_safety_outlined,

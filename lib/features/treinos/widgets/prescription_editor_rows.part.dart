@@ -412,3 +412,70 @@ class _RepeatPrescriptionTile extends StatelessWidget {
     );
   }
 }
+
+
+/// Rótulo + atalhos de um toque; o rótulo vazio deixa os chips colados na
+/// linha de cima (descanso).
+class _PrescriptionChipsRow extends StatelessWidget {
+  const _PrescriptionChipsRow({
+    required this.label,
+    required this.icon,
+    required this.iconColor,
+    required this.ink,
+    required this.line,
+    required this.chips,
+    this.showDivider = true,
+  });
+
+  final String label;
+  final IconData? icon;
+  final Color iconColor;
+  final Color ink;
+  final Color line;
+  final Widget chips;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            0,
+            label.isEmpty ? 0 : TokensStrip.s2,
+            0,
+            TokensStrip.s1,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (label.isNotEmpty)
+                Row(
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, color: iconColor, size: FxSettingsLayout.iconSize),
+                      SizedBox(width: FxSettingsLayout.iconGap),
+                    ],
+                    Text(label, style: FxSettingsLayout.rowLabel(color: ink)),
+                  ],
+                ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: label.isEmpty ? 0 : TokensStrip.s1,
+                ),
+                child: chips,
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: FxSettingsLayout.dividerThickness,
+            color: line,
+          ),
+      ],
+    );
+  }
+}

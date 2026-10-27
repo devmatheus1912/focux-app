@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -14,12 +14,14 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
+import '../../../core/widgets/fx_settings_tile.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../../exercicios/screens/widgets/exercise_video_spec_tips.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/utils/exercise_video_upload_spec.dart';
+import '../../exercicios/utils/video_oficial.dart';
 import '../providers/treinos_provider.dart';
 
 class TreinoPrescriptionVideoBlock extends ConsumerStatefulWidget {
@@ -201,6 +203,11 @@ class _TreinoPrescriptionVideoBlockState
     }
   }
 
+  Future<void> _criarMeu() async {
+    HapticFeedback.selectionClick();
+    await context.push<bool>('/exercicios/novo', extra: _exercicio);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chrome = ShellChrome.forBrightness(context, widget.isDark);
@@ -209,6 +216,7 @@ class _TreinoPrescriptionVideoBlockState
     final locked = widget.busy || _mediaLoading;
     final hasPersonal = exercicioHasPersonalVideo(_exercicio);
     final canPreview = canPreviewExerciseMedia(_exercicio);
+    final editavel = videoEditavel(_exercicio);
     final title =
         locked
             ? 'Enviando…'
@@ -218,9 +226,11 @@ class _TreinoPrescriptionVideoBlockState
     final caption =
         locked
             ? 'Não feche o app enquanto o envio termina.'
-            : hasPersonal
-            ? 'Revise a gravação ou envie outra.'
-            : 'Demo da biblioteca ou envie o seu.';
+            : editavel
+            ? (hasPersonal
+                ? 'Revise a gravação ou envie outra.'
+                : 'Envie o seu vídeo para o aluno ver a sua técnica.')
+            : 'O vídeo da Focux é fixo. Para usar o seu, crie o seu exercício.';
 
     return Semantics(
       container: true,
@@ -230,8 +240,8 @@ class _TreinoPrescriptionVideoBlockState
         header: 'Vídeo',
         caption: caption,
         accent: primary,
-        helpTooltip: 'Como filmar',
-        onHelpTap: () => ExerciseVideoSpecTips.open(context),
+        helpTooltip: editavel ? 'Como filmar' : null,
+        onHelpTap: editavel ? () => ExerciseVideoSpecTips.open(context) : null,
         children: [
           if (locked)
             Padding(
@@ -268,76 +278,45 @@ class _TreinoPrescriptionVideoBlockState
               ),
             )
           else ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: TokensStrip.s2),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (canPreview) ...[
-                    SizedBox(
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: _preview,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: chrome.ink,
-                          side: BorderSide(
-                            color: primary.withValues(alpha: 0.28),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              TokensStrip.rButton,
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          exerciseVideoPreviewLabel(hasPersonal: hasPersonal),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: TokensStrip.s2),
-                  ],
-                  SizedBox(
-                    height: 52,
-                    child: ElevatedButton(
-                      onPressed: _upload,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            TokensStrip.rButton,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        exerciseVideoUploadLabel(hasVideo: hasPersonal),
-                      ),
-                    ),
-                  ),
-                  if (hasPersonal) ...[
-                    const SizedBox(height: TokensStrip.s2),
-                    SizedBox(
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _remove,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: EagleTokens.bad,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              TokensStrip.rButton,
-                            ),
-                          ),
-                        ),
-                        child: Text(exerciseVideoRemoveLabel()),
-                      ),
-                    ),
-                  ],
-                ],
+            if (canPreview)
+              FxSettingsTile(
+                icon: Icons.play_circle_outline_rounded,
+                accent: brand,
+                label: title,
+                value: exerciseVideoPreviewLabel(hasPersonal: hasPersonal),
+                picker: true,
+                showDivider: true,
+                onTap: _preview,
               ),
-            ),
+            if (editavel)
+              FxSettingsTile(
+                icon: Icons.videocam_outlined,
+                accent: brand,
+                label: exerciseVideoUploadLabel(hasVideo: hasPersonal),
+                value: '',
+                picker: true,
+                showDivider: hasPersonal,
+                onTap: _upload,
+              )
+            else
+              FxSettingsTile(
+                icon: Icons.add_circle_outline_rounded,
+                accent: brand,
+                label: 'Criar meu exercício com meu vídeo',
+                value: '',
+                picker: true,
+                showDivider: false,
+                onTap: _criarMeu,
+              ),
+            if (editavel && hasPersonal)
+              FxSettingsTile(
+                icon: Icons.delete_outline_rounded,
+                label: exerciseVideoRemoveLabel(),
+                value: '',
+                danger: true,
+                showDivider: false,
+                onTap: _remove,
+              ),
           ],
         ],
       ),

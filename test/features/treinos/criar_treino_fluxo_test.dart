@@ -297,9 +297,9 @@ void main() {
       await _pumpFluxo(tester, router, repo);
 
       await _criarTreino(tester, 'Lista de treinos');
-      expect(find.text('Cancelar'), findsWidgets);
+      expect(find.text('Fechar'), findsWidgets);
 
-      await tester.tap(find.text('Cancelar').first);
+      await tester.tap(find.text('Fechar').first);
       await _settle(tester);
 
       expect(find.bySemanticsLabel('Detalhe do treino'), findsOneWidget);
@@ -316,7 +316,7 @@ void main() {
       await _settle(tester);
 
       expect(find.text('Lista de treinos'), findsOneWidget);
-      expect(find.text('Cancelar'), findsNothing);
+      expect(find.text('Fechar'), findsNothing);
       expect(find.text('Criar'), findsNothing);
     },
   );
@@ -334,7 +334,7 @@ void main() {
     await _criarTreino(tester, 'Aluno 360');
     expect(repo.atribuicoes, [(12, 5)]);
 
-    await tester.tap(find.text('Cancelar').first);
+    await tester.tap(find.text('Fechar').first);
     await _settle(tester);
 
     expect(find.text('Aluno 360'), findsOneWidget);
@@ -386,7 +386,7 @@ void main() {
     expect(repo.nonces, hasLength(1));
     expect(repo.tentativasAtribuir, [12, 12]);
     expect(repo.atribuicoes, [(12, 5)]);
-    expect(find.text('Cancelar'), findsWidgets);
+    expect(find.text('Fechar'), findsWidgets);
   });
 
   for (final viaVoltar in [false, true]) {

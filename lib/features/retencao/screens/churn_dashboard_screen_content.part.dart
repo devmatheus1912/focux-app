@@ -23,6 +23,7 @@ extension _ChurnDashboardContent on _ChurnDashboardScreenState {
 
     return FxContentWidthLimiter(
       child: ListView(
+        controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
