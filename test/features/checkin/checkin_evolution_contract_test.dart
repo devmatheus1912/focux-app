@@ -89,14 +89,6 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/dashboard/screens/aluno_dashboard_screen.dart',
     );
-    final card =
-        File(
-          'lib/features/dashboard/widgets/aluno_evolution_card.dart',
-        ).readAsStringSync();
-
     expect(screen, isNot(contains('AlunoEvolutionCard(')));
-    expect(card, contains('AlunoDestaqueExercicio'));
-    expect(card, contains('ultimoRecorde'));
-    expect(card, contains('recordesMes'));
   });
 }

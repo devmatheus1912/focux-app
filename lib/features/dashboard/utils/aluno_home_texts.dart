@@ -201,33 +201,6 @@ String alunoTreinosSemanaValor(S s, AlunoWeekSummary w) {
   return s.alunoSemanaTreinosValor(feitos, meta);
 }
 
-/// Meta batida troca o rótulo: "6 de 2" não se lê.
-String alunoTreinosSemanaLabel(S s, AlunoWeekSummary w) =>
-    w.metaAtingida
-        ? s.alunoSemanaMetaBatidaLabel(w.meta!)
-        : s.alunoSemanaTreinosLabel;
-
-/// "Sua semana" lida como uma frase pelo leitor de tela.
-String alunoWeekSemantics(S s, AlunoWeekSummary w) {
-  final feitos = w.feitos;
-  final meta = w.meta;
-  final volume = w.volumeKg;
-  final partes = [
-    if (feitos != null)
-      if (w.metaAtingida) ...[
-        s.alunoSemanaFraseTreinos(feitos),
-        s.alunoSemanaFraseMetaDeBatida(meta!),
-      ] else
-        meta == null
-            ? s.alunoSemanaFraseTreinos(feitos)
-            : s.alunoSemanaFraseTreinosMeta(feitos, meta),
-    s.alunoSemanaFraseSequencia(w.streakSemanas),
-    if (volume != null) s.alunoSemanaFraseVolume(alunoVolumeTexto(s, volume)),
-  ];
-  final frase = partes.join(', ');
-  return frase[0].toUpperCase() + frase.substring(1);
-}
-
 String alunoVolumeTexto(S s, double kg) => s.alunoVolumeKg(kg.round());
 
 String alunoForcaDeltaTexto(S s, double pct) {

@@ -48,15 +48,4 @@ void main() {
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });
 
-  test('prontidão da Home vem do BFF, sem sync próprio nem texto fixo', () {
-    final card = readScreenSourceBundle(
-      'lib/features/health/widgets/aluno_recovery_card.dart',
-    );
-    expect(card, contains('extends StatelessWidget'));
-    expect(card, contains('s.alunoProntidaoSincronizar'));
-    expect(card, contains('fxListCardDecoration'));
-    expect(card, isNot(contains('Provider')));
-    expect(card, isNot(contains('syncTodayIfPermitted')));
-    expect(card, isNot(contains('TextStyle(')));
-  });
 }

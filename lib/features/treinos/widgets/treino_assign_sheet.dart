@@ -180,33 +180,40 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
               style: FxSettingsLayout.sectionHeader(color: mute),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final preset in _PrazoPreset.values)
-                  if (preset != _PrazoPreset.custom)
-                    _PrazoChip(
-                      label: preset.label,
-                      selected: _prazo == preset,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        setState(() {
-                          _prazo = preset;
-                          _customDate = null;
-                        });
-                      },
-                    ),
-                _PrazoChip(
-                  label:
-                      _customDate == null
-                          ? 'Data…'
-                          : TreinoAtribuicaoPrazo.chipLabel(_customDate)!
-                              .replaceFirst('Até ', ''),
-                  selected: _prazo == _PrazoPreset.custom,
-                  onTap: _pickCustomDate,
-                ),
-              ],
+            // Uma linha só, rolando para o lado: "Data…" não cai para baixo.
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (final preset in _PrazoPreset.values)
+                    if (preset != _PrazoPreset.custom)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _PrazoChip(
+                          label: preset.label,
+                          selected: _prazo == preset,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _prazo = preset;
+                              _customDate = null;
+                            });
+                          },
+                        ),
+                      ),
+                  const SizedBox(width: 8),
+                  _PrazoChip(
+                    label:
+                        _customDate == null
+                            ? 'Data…'
+                            : TreinoAtribuicaoPrazo.chipLabel(
+                              _customDate,
+                            )!.replaceFirst('Até ', ''),
+                    selected: _prazo == _PrazoPreset.custom,
+                    onTap: _pickCustomDate,
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -221,9 +228,10 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
                 selectedAlunoId == null
                     ? null
                     : () {
-                      final aluno = widget.alunos
-                          .where((a) => a.id == selectedAlunoId)
-                          .firstOrNull;
+                      final aluno =
+                          widget.alunos
+                              .where((a) => a.id == selectedAlunoId)
+                              .firstOrNull;
                       Navigator.pop(
                         context,
                         TreinoAtribuicaoResult(

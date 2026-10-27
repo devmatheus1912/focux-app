@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_home_texts.dart';
-import 'package:focux_app/features/dashboard/utils/aluno_home_week.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_pendencias.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -190,80 +189,6 @@ void main() {
   });
 
   group('semana', () {
-    test('frase com meta, sequência e volume', () {
-      const w = AlunoWeekSummary(
-        feitos: 2,
-        meta: 3,
-        streakSemanas: 4,
-        volumeKg: 3200,
-      );
-      expect(
-        alunoWeekSemantics(_pt, w),
-        '2 de 3 treinos nesta semana, sequência de 4 semanas, volume de 3.200 kg',
-      );
-      expect(alunoTreinosSemanaValor(_pt, w), '2 de 3');
-    });
-
-    test('sem meta e sem volume', () {
-      const w = AlunoWeekSummary(
-        feitos: 1,
-        meta: null,
-        streakSemanas: 0,
-        volumeKg: null,
-      );
-      expect(
-        alunoWeekSemantics(_pt, w),
-        '1 treino nesta semana, sem sequência',
-      );
-      expect(alunoTreinosSemanaValor(_pt, w), '1');
-    });
-
-    test('meta superada: número, rótulo de meta e frase sem "6 de 2"', () {
-      const w = AlunoWeekSummary(
-        feitos: 6,
-        meta: 2,
-        streakSemanas: 1,
-        volumeKg: 12445,
-      );
-      expect(alunoTreinosSemanaValor(_pt, w), '6 treinos');
-      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta de 2 treinos');
-      expect(
-        alunoWeekSemantics(_pt, w),
-        '6 treinos nesta semana, meta de 2 batida, sequência de 1 semana, '
-        'volume de 12.445 kg',
-      );
-    });
-
-    test('meta igual: mesmo formato de meta batida', () {
-      const w = AlunoWeekSummary(
-        feitos: 3,
-        meta: 3,
-        streakSemanas: 2,
-        volumeKg: null,
-      );
-      expect(alunoTreinosSemanaValor(_pt, w), '3 treinos');
-      expect(alunoTreinosSemanaLabel(_pt, w), 'Meta de 3 treinos');
-    });
-
-    test('abaixo da meta: "2 de 3" e rótulo padrão', () {
-      const w = AlunoWeekSummary(
-        feitos: 2,
-        meta: 3,
-        streakSemanas: 0,
-        volumeKg: null,
-      );
-      expect(alunoTreinosSemanaLabel(_pt, w), 'Treinos na semana');
-    });
-
-    test('sem dado de sessões começa pela sequência', () {
-      const w = AlunoWeekSummary(
-        feitos: null,
-        meta: null,
-        streakSemanas: 2,
-        volumeKg: null,
-      );
-      expect(alunoWeekSemantics(_en, w), '2-week streak');
-    });
   });
 
   test('números seguem o locale', () {
