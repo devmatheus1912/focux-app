@@ -5,6 +5,7 @@ import '../../../core/widgets/fx_action_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
 import '../models/ficha_modelo.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 enum FichaAcao {
   aplicarModelo,
@@ -224,14 +225,8 @@ class _DialogoDeTextoState extends State<_DialogoDeTexto> {
         decoration: InputDecoration(hintText: widget.dica),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(FocuxMicrocopy.cancelar),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, _controle.text.trim()),
-          child: Text(s.rotinaPronto),
-        ),
+        FxTonalButton(label: FocuxMicrocopy.cancelar, onPressed: () => Navigator.pop(context), compact: true),
+        FxTonalButton(label: s.rotinaPronto, onPressed: () => Navigator.pop(context, _controle.text.trim()), compact: true),
       ],
     );
   }

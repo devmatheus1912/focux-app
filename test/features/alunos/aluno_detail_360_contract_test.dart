@@ -175,7 +175,7 @@ void main() {
     );
     expect(screen, contains('copySensitiveToClipboard'));
     expect(screen, contains('aluno360MenuCriarTarefa'));
-    expect(screen, contains('TextButton'));
+    expect(screen, contains('FxTonalButton'));
     // Criar tarefa fica no ⋮ do cabeçalho e o Chat é ação do cabeçalho; nunca no sticky.
     expect(screen, contains('Aluno360MenuAcao.criarTarefa'));
     expect(
@@ -651,7 +651,6 @@ void main() {
         contains('_EvolucaoMetricChip'),
         contains('_VolumeSparklineRow'),
         contains('formatAlunoVolumeKg'),
-        contains('secondaryTextLinkStyle'),
       ),
     );
     expect(

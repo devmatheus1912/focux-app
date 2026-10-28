@@ -21,6 +21,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../providers/aluno_followup_provider.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno_outreach_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Opens a polished outreach sheet with copy + chat actions.
 Future<void> showAlunoOutreachMessageSheet(
@@ -147,8 +148,7 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: TextButton(
-                  onPressed: () async {
+                child: FxTonalButton(label: alunoOutreachCopyLabel(), onPressed: () async {
                     await copySensitiveToClipboard(message);
                     if (!context.mounted) return;
                     Navigator.of(context).pop();
@@ -156,15 +156,10 @@ class _AlunoOutreachMessageSheet extends ConsumerWidget {
                       context,
                       alunoOutreachCopySuccess(),
                     );
-                  },
-                  child: Text(alunoOutreachCopyLabel()),
-                ),
+                  }, compact: true),
               ),
               Expanded(
-                child: TextButton(
-                  onPressed: markContactDone,
-                  child: const Text('Contato feito'),
-                ),
+                child: FxTonalButton(label: 'Contato feito', onPressed: markContactDone, compact: true),
               ),
             ],
           ),

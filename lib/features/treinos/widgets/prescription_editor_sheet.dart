@@ -19,6 +19,7 @@ import '../utils/prescription_volume_stepper.dart';
 import '../../../core/widgets/fx_quick_chips.dart';
 import '../utils/workout_prescription_display.dart';
 import 'prescription_editor_copy.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'prescription_editor_rows.part.dart';
 part 'prescription_editor_pickers.part.dart';

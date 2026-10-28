@@ -36,6 +36,7 @@ import '../widgets/exercise_video_picker.dart';
 import '../widgets/add_exercicio_enum_picker_sheet.dart';
 import '../widgets/add_exercicio_filters_sheet.dart';
 import '../widgets/novo_exercicio_help_sheets.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'add_exercicio_screen_state.part.dart';
 part 'add_exercicio_screen_widgets_form.part.dart';

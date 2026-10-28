@@ -24,6 +24,7 @@ import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_volume_secao.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Um modelo de ficha: a semana inteira, com as sessões prontas para montar.
 class FichaModeloScreen extends ConsumerStatefulWidget {
@@ -71,10 +72,7 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
         body: async.when(
           loading: () => const Center(child: FxLoading()),
           error: (_, __) => Center(
-            child: TextButton(
-              onPressed: _recarregar,
-              child: Text(s.modeloNaoAbriu),
-            ),
+            child: FxTonalButton(label: s.modeloNaoAbriu, onPressed: _recarregar, compact: true),
           ),
           data: (modelo) => _corpo(s, ShellChrome.of(context), modelo),
         ),

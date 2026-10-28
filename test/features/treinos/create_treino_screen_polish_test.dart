@@ -14,7 +14,7 @@ void main() {
     expect(screen, contains('FxFormStickyBar'));
     expect(screen, contains('FxFormPopGuard'));
     expect(screen, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains("label: 'Cancelar'"));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

@@ -33,6 +33,7 @@ import '../utils/editar_aluno_display.dart';
 import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
 import '../widgets/editar_aluno_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class EditarAlunoScreen extends ConsumerStatefulWidget {
   final Aluno aluno;
@@ -200,15 +201,7 @@ class _EditarAlunoScreenState extends ConsumerState<EditarAlunoScreen> {
           title: 'Editar Aluno',
           subtitle: editarAlunoHubSubtitle(),
           leadingWidth: 92,
-          leading: TextButton(
-            onPressed: _cancel,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Cancelar'),
-          ),
+          leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como editar',

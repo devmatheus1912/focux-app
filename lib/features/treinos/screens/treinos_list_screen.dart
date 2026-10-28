@@ -46,6 +46,7 @@ import '../widgets/treino_home_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
 import '../widgets/treino_prazo_badge.dart';
 import '../widgets/treinos_list_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'treinos_list_screen_state.part.dart';
 part 'treinos_list_sheets.part.dart';

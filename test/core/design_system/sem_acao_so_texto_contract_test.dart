@@ -5,7 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 /// Regra do app: nenhuma ação é só texto. Toda ação tem superfície (botão
 /// primário, `FxTonalButton`, linha ou botão de ícone). Este teste varre as
 /// pastas já migradas e cresce a cada onda (ver `SPEC-execucao-treino.md`, M8).
-const _pastasMigradas = ['lib/features/checkin'];
+const _pastasMigradas = [
+  'lib/features/checkin',
+  'lib/features/treinos',
+  'lib/features/exercicios',
+  'lib/features/alunos',
+];
 
 /// Exceções documentadas: arquivo → motivo.
 const _excecoes = <String, String>{};

@@ -587,16 +587,7 @@ class _AlunoEquipmentFilterBanner extends StatelessWidget {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: onClear,
-              child: Text(
-                'Limpar',
-                style: FocuxHubTypography.bodyMuted(
-                  color: primary,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+            FxTonalButton(label: 'Limpar', onPressed: onClear, compact: true),
           ],
         ),
       ),

@@ -42,7 +42,7 @@ void main() {
     expect(screen, isNot(contains("label: 'Modelo \${preset.title}")));
     expect(screen, isNot(contains('BouncingScrollPhysics')));
     expect(screen, contains("soAtribuir ? s.treinoTentarAtribuir : 'Criar'"));
-    expect(screen, contains("child: const Text('Cancelar')"));
+    expect(screen, contains("label: 'Cancelar'"));
     expect(screen, contains("soAtribuir ? s.treinoAtribuindo : 'Criando…'"));
     expect(screen, contains('FxInsetPickerOption.list'));
     expect(screen, contains('label: s.treinoPlanoSalvoUsar'));

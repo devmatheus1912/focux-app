@@ -10,10 +10,10 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../alunos/data/aluno_repository.dart';
-import '../constants/treinos_layout.dart';
 import '../utils/treino_atribuicao_prazo.dart';
 import 'treino_home_sheet.dart';
 import '../../../core/utils/fx_utils.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Resultado do sheet de escolher aluno e o prazo opcional.
 class TreinoAtribuicaoResult {
@@ -247,18 +247,7 @@ class _TreinoAssignSheetState extends State<TreinoAssignSheet> {
             child: Semantics(
               button: true,
               label: 'Cancelar',
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: mute,
-                  minimumSize: const Size(
-                    TreinosLayout.touchTarget,
-                    TreinosLayout.touchTarget,
-                  ),
-                  textStyle: FxSettingsLayout.footer(color: mute),
-                ),
-                child: const Text('Cancelar'),
-              ),
+              child: FxTonalButton(label: 'Cancelar', onPressed: () => Navigator.pop(context), compact: true),
             ),
           ),
         ],

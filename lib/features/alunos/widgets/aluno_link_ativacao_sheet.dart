@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/aluno_invite_copy.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Compartilha o link de ativação (aluno novo ou reenvio).
 Future<void> showAlunoLinkAtivacaoSheet({
@@ -95,38 +96,14 @@ Future<void> showAlunoLinkAtivacaoSheet({
               },
             ),
             if (whatsAppUri != null)
-              TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(
-                    FxHomeSheetChrome.touchTarget,
-                    FxHomeSheetChrome.touchTarget,
-                  ),
-                ),
-                onPressed: () async {
+              FxTonalButton(label: s.alunoLinkCopiar, onPressed: () async {
                   await copiar(ctx, s.alunoLinkCopiado);
                   onDone?.call();
-                },
-                child: Text(s.alunoLinkCopiar),
-              ),
-            TextButton(
-              style: TextButton.styleFrom(
-                minimumSize: const Size(
-                  FxHomeSheetChrome.touchTarget,
-                  FxHomeSheetChrome.touchTarget,
-                ),
-              ),
-              onPressed: () {
+                }, compact: true),
+            FxTonalButton(label: s.alunoLinkFechar, onPressed: () {
                 Navigator.of(ctx).pop();
                 onDone?.call();
-              },
-              child: Text(
-                s.alunoLinkFechar,
-                style: TextStyle(
-                  color: chrome.mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+              }, compact: true),
           ],
         ),
       );

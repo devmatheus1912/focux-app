@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_microcopy.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../dashboard/data/command_center_data.dart';
@@ -13,6 +12,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../data/aluno_repository.dart';
 import '../providers/aluno_detail_providers.dart';
 import '../utils/aluno360_copilot_logic.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Signal rows in one Fx card (Perfil / Financeiro / Autonomia / Contexto).
 class Aluno360CopilotSignalsGrid extends StatelessWidget {
@@ -196,26 +196,11 @@ class _Aluno360CopilotActionRowState
     return Semantics(
       button: true,
       label: semanticsLabel ?? label,
-      child: TextButton(
+      child: FxTonalButton(
+        label: label,
+        loading: loading,
+        expanded: true,
         onPressed: onPressed,
-        style: TextButton.styleFrom(
-          minimumSize: const Size(
-            FxSettingsLayout.rowMinHeight,
-            FxSettingsLayout.rowMinHeight,
-          ),
-          alignment: Alignment.centerLeft,
-        ),
-        child:
-            loading
-                ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FxLoading(size: 18, strokeWidth: 2, color: widget.primary),
-                    const SizedBox(width: FxSettingsLayout.iconGap),
-                    Text(label),
-                  ],
-                )
-                : Text(label),
       ),
     );
   }

@@ -121,19 +121,7 @@ class _DeleteWorkoutSheet extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             height: TreinosLayout.touchTarget,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              style: TextButton.styleFrom(
-                foregroundColor: mute,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
+            child: FxTonalButton(label: 'Cancelar', onPressed: () => Navigator.of(context).pop(false), compact: true),
           ),
         ],
       ),

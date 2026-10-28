@@ -17,6 +17,7 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../utils/aluno360_evolucao_inteligente_logic.dart';
 import 'aluno_outreach_message_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
   const Aluno360EvolucaoInteligenteCard({
@@ -300,13 +301,7 @@ class Aluno360EvolucaoInteligenteCard extends StatelessWidget {
                                   onOpenCopilot != null) ...[
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: TextButton(
-                                    onPressed: onOpenCopilot,
-                                    style: Aluno360Layout.secondaryTextLinkStyle(
-                                      context,
-                                    ),
-                                    child: const Text('Abrir Copiloto'),
-                                  ),
+                                  child: FxTonalButton(label: 'Abrir Copiloto', onPressed: onOpenCopilot, compact: true),
                                 ),
                               ],
                             ],

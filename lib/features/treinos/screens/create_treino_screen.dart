@@ -36,6 +36,7 @@ import '../utils/create_treino_logic.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/create_treino_help_sheet.dart';
 import '../widgets/treino_salvo_picker_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'create_treino_screen_state.part.dart';
 part 'create_treino_screen_widgets.part.dart';

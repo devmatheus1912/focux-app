@@ -17,15 +17,15 @@ Widget _app(Widget child, {bool dark = false}) => MaterialApp(
 );
 
 void main() {
-  testWidgets('FxActionLink: texto com seta, 44 de toque e chama onTap', (
+  testWidgets('FxActionLink: chip tonal com seta, 48 de toque e chama onTap', (
     tester,
   ) async {
     var n = 0;
     await tester.pumpWidget(
       _app(FxActionLink(label: 'Ver todos', onTap: () => n++)),
     );
-    final alvo = tester.getSize(find.byType(InkWell));
-    expect(alvo.height, greaterThanOrEqualTo(44));
+    final alvo = tester.getSize(find.byType(FxActionLink));
+    expect(alvo.height, greaterThanOrEqualTo(48));
     expect(alvo.width, greaterThanOrEqualTo(44));
     await tester.tap(find.text('Ver todos'));
     expect(n, 1);

@@ -9,8 +9,8 @@ import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../constants/treinos_layout.dart';
 import 'treino_home_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Ação inset para sheets de treino — paridade Perfil / [FxSettingsTile].
 class TreinoInsetActionSpec {
@@ -201,7 +201,6 @@ class TreinoInsetConfirmSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = fxScreenMute(context);
 
     return TreinoHomeSheetSurface(
       isDark: isDark,
@@ -244,21 +243,10 @@ class TreinoInsetConfirmSheet extends StatelessWidget {
             child: Semantics(
               button: true,
               label: 'Cancelar',
-              child: TextButton(
-                onPressed: () {
+              child: FxTonalButton(label: 'Cancelar', onPressed: () {
                   HapticFeedback.selectionClick();
                   Navigator.of(context).pop(false);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: mute,
-                  minimumSize: const Size(
-                    TreinosLayout.touchTarget,
-                    TreinosLayout.touchTarget,
-                  ),
-                  textStyle: FxSettingsLayout.footer(color: mute),
-                ),
-                child: const Text('Cancelar'),
-              ),
+                }, compact: true),
             ),
           ),
         ],

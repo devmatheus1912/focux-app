@@ -29,6 +29,7 @@ import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AlunoRotinaScreen extends ConsumerStatefulWidget {
   const AlunoRotinaScreen({
@@ -171,10 +172,7 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
             ? const Center(child: FxLoading())
             : !pronta
             ? Center(
-                child: TextButton(
-                  onPressed: _carregar,
-                  child: Text(s.rotinaNaoAbriu),
-                ),
+                child: FxTonalButton(label: s.rotinaNaoAbriu, onPressed: _carregar, compact: true),
               )
             : _corpo(s, ShellChrome.of(context)),
       ),

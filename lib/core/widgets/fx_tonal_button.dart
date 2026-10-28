@@ -18,6 +18,8 @@ class FxTonalButton extends StatelessWidget {
     this.compact = false,
     this.loading = false,
     this.expanded = false,
+    this.danger = false,
+    this.trailing,
     this.semanticLabel,
   });
 
@@ -32,6 +34,12 @@ class FxTonalButton extends StatelessWidget {
   /// Ocupa a largura toda; senão, só o que o texto pede.
   final bool expanded;
 
+  /// Ação destrutiva: mesmo formato tonal, em vermelho (sem preencher).
+  final bool danger;
+
+  /// Peça depois do rótulo (seta de navegação).
+  final Widget? trailing;
+
   /// Leitura mais específica que o texto ('Adicionar em Aquecimento').
   final String? semanticLabel;
 
@@ -40,7 +48,10 @@ class FxTonalButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = Theme.of(context).colorScheme.primary;
+    final accent =
+        danger
+            ? Theme.of(context).colorScheme.error
+            : Theme.of(context).colorScheme.primary;
     final fg = FxActionChip.tonalForeground(accent, isDark: isDark);
     final bg = FxActionChip.tonalBackground(accent, isDark: isDark);
     final enabled = onPressed != null && !loading;
@@ -66,6 +77,7 @@ class FxTonalButton extends StatelessWidget {
             ),
           ),
         ),
+        if (trailing != null) ...[const SizedBox(width: 4), trailing!],
       ],
     );
 

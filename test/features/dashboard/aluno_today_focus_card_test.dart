@@ -95,7 +95,8 @@ void main() {
       expect(find.text('Descanso'), findsOneWidget);
       expect(find.text('Hoje é seu descanso'), findsOneWidget);
       expect(find.text('Próximo: Treino Força · Qua'), findsOneWidget);
-      expect(find.byType(FxTonalButton), findsOneWidget);
+      // ação principal tonal + o link com seta, que também é um chip tonal
+      expect(find.byType(FxTonalButton), findsNWidgets(2));
       expect(find.text('Ver o treino'), findsOneWidget);
       // a ação secundária é link com seta, não texto solto
       expect(find.byType(FxActionLink), findsOneWidget);
@@ -164,7 +165,7 @@ void main() {
         onOpen: () => resumo++,
       );
       expect(find.text('Fazer mais um'), findsOneWidget);
-      expect(find.byType(FxTonalButton), findsOneWidget);
+      expect(find.byType(FxTonalButton), findsNWidgets(2));
       await tester.tap(find.text('Ver resumo'));
       expect(resumo, 1);
     });

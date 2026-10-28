@@ -52,7 +52,6 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         final primary = Theme.of(ctx).colorScheme.primary;
-        final linkColor = BrandPalette.sectionLink(primary, dark: isDark);
         final brand = BrandPalette.softened(primary);
 
         return FxHomeSheetScaffold(
@@ -60,8 +59,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
           leading: Icon(Icons.tune_rounded, color: brand, size: 22),
           title: 'Organizar alunos',
           subtitle: 'Como a lista aparece agora.',
-          trailing: TextButton(
-            onPressed: () {
+          trailing: FxTonalButton(label: 'Redefinir', onPressed: () {
               setState(() {
                 _filtro = AlunoFiltro.todos;
                 _ordenacao = AlunoOrdenacao.prioridade;
@@ -70,16 +68,7 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
               AlunoListPreferencesStore.saveCompact(true);
               _syncHomeQuery();
               Navigator.pop(ctx);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: linkColor,
-              minimumSize: const Size(
-                FxHomeSheetChrome.touchTarget,
-                FxHomeSheetChrome.touchTarget,
-              ),
-            ),
-            child: const Text('Redefinir'),
-          ),
+            }, compact: true),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -144,23 +133,14 @@ extension AlunosListScreenFilters on _AlunosListScreenState {
               Semantics(
                 button: true,
                 label: 'Ajuda da lista de alunos',
-                child: TextButton.icon(
+                child: FxTonalButton(
+                  label: 'Como usar a lista',
+                  icon: Icons.help_outline_rounded,
+                  expanded: true,
                   onPressed: () {
                     Navigator.pop(ctx);
                     _openHelp();
                   },
-                  icon: FxIcon(
-                    name: FxHelpChrome.iconName,
-                    size: FxHelpChrome.glyphSize,
-                    color: linkColor,
-                  ),
-                  label: Text(
-                    'Como usar a lista',
-                    style: TextStyle(
-                      color: linkColor,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 ),
               ),
             ],

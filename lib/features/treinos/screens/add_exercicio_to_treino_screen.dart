@@ -50,6 +50,7 @@ import '../utils/workout_prescription_display.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'add_exercicio_to_treino_screen_actions.part.dart';
 
@@ -162,21 +163,7 @@ class _AddExercicioToTreinoScreenState
               orElse: () => 'Montando treino',
             ),
             leadingWidth: 120,
-            leading: TextButton(
-              onPressed: _cancel,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                _adicionados > 0 ? 'Pronto ($_adicionados)' : 'Fechar',
-                style: TextStyle(
-                  fontWeight:
-                      _adicionados > 0 ? FontWeight.w800 : FontWeight.w600,
-                ),
-              ),
-            ),
+            leading: FxTonalButton(label: _adicionados > 0 ? 'Pronto ($_adicionados)' : 'Fechar', onPressed: _cancel, compact: true),
             actions: [
               ShellHeaderIconButton(
                 icon: 'plus',

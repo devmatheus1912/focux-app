@@ -8,6 +8,7 @@ import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../data/aluno_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AlunoDeleteConfirmSheet extends StatefulWidget {
   const AlunoDeleteConfirmSheet({
@@ -160,16 +161,7 @@ class _AlunoDeleteConfirmSheetState extends State<AlunoDeleteConfirmSheet> {
           SizedBox(
             width: double.infinity,
             height: 48,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(
-                'Cancelar',
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: 'Cancelar', onPressed: () => Navigator.of(context).pop(false), compact: true),
           ),
         ],
       ),

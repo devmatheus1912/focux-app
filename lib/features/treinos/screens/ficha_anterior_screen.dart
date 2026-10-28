@@ -19,6 +19,7 @@ import '../providers/treinos_provider.dart';
 import '../utils/ficha_historico_textos.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_semana.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Uma ficha anterior como era: só leitura, com "Usar como base".
 class FichaAnteriorScreen extends ConsumerStatefulWidget {
@@ -55,10 +56,7 @@ class _FichaAnteriorScreenState extends ConsumerState<FichaAnteriorScreen> {
         body: async.when(
           loading: () => const Center(child: FxLoading()),
           error: (_, __) => Center(
-            child: TextButton(
-              onPressed: () => ref.invalidate(fichaAnteriorProvider(_chave)),
-              child: Text(s.historicoNaoAbriu),
-            ),
+            child: FxTonalButton(label: s.historicoNaoAbriu, onPressed: () => ref.invalidate(fichaAnteriorProvider(_chave)), compact: true),
           ),
           data: (ficha) => _corpo(s, ShellChrome.of(context), ficha),
         ),

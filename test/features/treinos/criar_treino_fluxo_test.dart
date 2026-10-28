@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/api/offline_queued_ack.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
@@ -308,7 +309,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.widgetWithText(TextButton, 'Adicionar exercício'),
+        find.widgetWithText(FxTonalButton, 'Adicionar exercício'),
         findsOneWidget,
       );
 

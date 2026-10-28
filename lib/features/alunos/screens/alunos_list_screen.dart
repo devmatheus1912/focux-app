@@ -15,7 +15,6 @@ import '../providers/aluno_detail_providers.dart';
 import '../providers/alunos_provider.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_icon.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
@@ -51,6 +50,7 @@ import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 export '../constants/alunos_list_filters.dart';
 

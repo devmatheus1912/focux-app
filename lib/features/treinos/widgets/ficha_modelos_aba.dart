@@ -14,6 +14,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Aba "Semanas" de Modelos de treino: um card por modelo e "Novo modelo".
 /// [abas] é a fileira Semanas | Sessões, que o dono da tela desenha.
@@ -38,10 +39,7 @@ class FichaModelosAba extends ConsumerWidget {
           child: modelos.when(
             loading: () => const Center(child: FxLoading()),
             error: (_, __) => Center(
-              child: TextButton(
-                onPressed: () => ref.invalidate(fichaModelosProvider),
-                child: Text(s.modeloNaoAbriu),
-              ),
+              child: FxTonalButton(label: s.modeloNaoAbriu, onPressed: () => ref.invalidate(fichaModelosProvider), compact: true),
             ),
             data: (lista) => lista.isEmpty
                 ? Center(

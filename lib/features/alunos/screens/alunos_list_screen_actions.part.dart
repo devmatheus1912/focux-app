@@ -150,7 +150,6 @@ class _ExcluirAlunosSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
 
     final label =
         count == 1
@@ -192,19 +191,7 @@ class _ExcluirAlunosSheet extends StatelessWidget {
             },
           ),
           const SizedBox(height: 10),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            style: TextButton.styleFrom(
-              minimumSize: const Size(
-                FxHomeSheetChrome.touchTarget,
-                FxHomeSheetChrome.touchTarget,
-              ),
-            ),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: mute, fontWeight: FontWeight.w700),
-            ),
-          ),
+          FxTonalButton(label: 'Cancelar', onPressed: () => Navigator.of(context).pop(false), compact: true),
         ],
       ),
     );

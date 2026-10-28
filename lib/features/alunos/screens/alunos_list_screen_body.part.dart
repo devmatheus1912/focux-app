@@ -190,8 +190,10 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                     AlunosLayout.bulkBarPaddingBottom,
                                 child: Row(
                                     children: [
-                                      TextButton(
-                                        onPressed: () {
+                                      FxTonalButton(label: _selecionados.length ==
+                                                  filtrados.length
+                                              ? 'Limpar'
+                                              : 'Todos', onPressed: () {
                                           setState(() {
                                             if (_selecionados.length ==
                                                 filtrados.length) {
@@ -202,31 +204,7 @@ extension AlunosListScreenBody on _AlunosListScreenState {
                                               );
                                             }
                                           });
-                                        },
-                                        style: TextButton.styleFrom(
-                                          minimumSize: const Size(
-                                            AlunosLayout.touchTarget,
-                                            AlunosLayout.touchTarget,
-                                          ),
-                                          foregroundColor: ink,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          _selecionados.length ==
-                                                  filtrados.length
-                                              ? 'Limpar'
-                                              : 'Todos',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: FocuxHubTypography.chip(
-                                            ink,
-                                          ).copyWith(
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
+                                        }, compact: true),
                                       const Spacer(),
                                       FxActionChip(
                                         label:

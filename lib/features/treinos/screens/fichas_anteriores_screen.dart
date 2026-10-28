@@ -16,6 +16,7 @@ import '../models/ficha_historico.dart';
 import '../providers/ficha_historico_provider.dart';
 import '../utils/ficha_historico_textos.dart';
 import '../widgets/ficha_help_sheets.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Fichas que o aluno já teve, da mais recente para a mais antiga.
 class FichasAnterioresScreen extends ConsumerStatefulWidget {
@@ -68,10 +69,7 @@ class _FichasAnterioresScreenState extends ConsumerState<FichasAnterioresScreen>
         body: async.when(
           loading: () => const Center(child: FxLoading()),
           error: (_, __) => Center(
-            child: TextButton(
-              onPressed: () => ref.invalidate(fichasAnterioresProvider(widget.alunoId)),
-              child: Text(s.historicoNaoAbriu),
-            ),
+            child: FxTonalButton(label: s.historicoNaoAbriu, onPressed: () => ref.invalidate(fichasAnterioresProvider(widget.alunoId)), compact: true),
           ),
           data: (lista) => lista.isEmpty
               ? Center(

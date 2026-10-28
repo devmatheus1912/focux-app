@@ -33,12 +33,12 @@ void main() {
     }
   });
 
-  test('as peças da hierarquia existem e garantem o alvo de toque (link 44, tonal 48)', () {
+  test('as peças da hierarquia existem e garantem o alvo de toque (tonal 48; o link é um chip tonal)', () {
     final link =
         File('lib/core/widgets/fx_action_link.dart').readAsStringSync();
     final tonal =
         File('lib/core/widgets/fx_tonal_button.dart').readAsStringSync();
-    expect(link, contains('minHeight: 44'));
+    expect(link, contains('FxTonalButton('));
     expect(link, contains("'chevron-right'"));
     expect(tonal, contains('alturaToque = 48'));
   });

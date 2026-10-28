@@ -338,15 +338,12 @@ class _TreinoDetailBody extends StatelessWidget {
                           onPressed: () => openAdd(),
                         ),
                         const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () => openMontarPorModelo(
+                        FxTonalButton(label: 'Montar por modelo', onPressed: () => openMontarPorModelo(
                             context: context,
                             ref: ref,
                             treinoId: treinoId,
                             alreadyInTreinoIds: const {},
-                          ),
-                          child: const Text('Montar por modelo'),
-                        ),
+                          ), compact: true),
                       ],
                     )
                     : atribuirEmDestaque
@@ -359,10 +356,7 @@ class _TreinoDetailBody extends StatelessWidget {
                           onPressed: openAssign,
                         ),
                         const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () => openAdd(),
-                          child: const Text('Adicionar exercício'),
-                        ),
+                        FxTonalButton(label: 'Adicionar exercício', onPressed: () => openAdd(), compact: true),
                       ],
                     )
                     : FxLiquidPrimaryButton(

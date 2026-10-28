@@ -332,15 +332,7 @@ class _CreateTreinoScreenState extends ConsumerState<CreateTreinoScreen> {
                       : 'Vincular ao aluno'
                   : null,
           leadingWidth: 92,
-          leading: TextButton(
-            onPressed: _cancel,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Cancelar'),
-          ),
+          leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
           actions: [
             FxHelpIconButton(
               tooltip: 'Ajuda sobre novo treino',

@@ -388,15 +388,7 @@ class _AddExercicioScreenState extends ConsumerState<AddExercicioScreen> {
         appBar: FxShellAppBar(
           title: screenTitle,
           leadingWidth: 92,
-          leading: TextButton(
-            onPressed: _cancel,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Cancelar'),
-          ),
+          leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
           actions: [
             FxHelpIconButton(
               tooltip: 'Como cadastrar',

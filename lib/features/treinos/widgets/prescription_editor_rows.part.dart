@@ -393,19 +393,7 @@ class _RepeatPrescriptionTile extends StatelessWidget {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: onApply,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(48, 40),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-              ),
-              child: Text(
-                'Aplicar',
-                style: FocuxHubTypography.body(color: primary).copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+            FxTonalButton(label: 'Aplicar', onPressed: onApply, compact: true),
           ],
         ),
       ),

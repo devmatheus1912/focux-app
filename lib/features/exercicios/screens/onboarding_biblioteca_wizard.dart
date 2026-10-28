@@ -24,6 +24,7 @@ import '../models/curated_biblioteca.dart';
 import '../providers/exercicios_provider.dart';
 import '../utils/biblioteca_wizard_display.dart';
 import 'widgets/biblioteca_wizard_steps.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class OnboardingBibliotecaWizard extends ConsumerStatefulWidget {
   const OnboardingBibliotecaWizard({super.key});
@@ -210,15 +211,7 @@ class _OnboardingBibliotecaWizardState
           title: 'Biblioteca curada',
           subtitle: bibliotecaEtapaLabel(_step),
           leadingWidth: 88,
-          leading: TextButton(
-            onPressed: _importing ? null : _pular,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(bibliotecaPularLabel()),
-          ),
+          leading: FxTonalButton(label: bibliotecaPularLabel(), onPressed: _importing ? null : _pular, compact: true),
           actions: [
             FxHelpIconButton(
               tooltip: bibliotecaHelpTitle(),
@@ -229,10 +222,7 @@ class _OnboardingBibliotecaWizardState
         bottomNavigationBar: FxWizardStickyBar(
           secondary:
               _step > 0
-                  ? TextButton(
-                    onPressed: _importing ? null : _voltar,
-                    child: Text(bibliotecaVoltarLabel()),
-                  )
+                  ? FxTonalButton(label: bibliotecaVoltarLabel(), onPressed: _importing ? null : _voltar, compact: true)
                   : null,
           primary: FxLiquidPrimaryButton(
             label: bibliotecaContinueLabel(step: _step),
