@@ -158,6 +158,16 @@ class CheckinResumoView extends StatelessWidget {
                               ).copyWith(fontWeight: FontWeight.w700),
                             ),
                           ],
+                          if (resumo.seriesSemCarga > 0) ...[
+                            const SizedBox(height: TokensStrip.s4),
+                            _Linha(
+                              icone: Icons.fitness_center_rounded,
+                              cor: chrome.mute,
+                              texto:
+                                  '${s.checkinResumoSemCarga(resumo.seriesSemCarga)}. '
+                                  '${s.checkinResumoSemCargaDica}',
+                            ),
+                          ],
                           if (resumo.recordes.isNotEmpty) ...[
                             const SizedBox(height: TokensStrip.s6),
                             Text(

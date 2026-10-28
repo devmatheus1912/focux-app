@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -144,10 +145,11 @@ class _HistoricoMaisRodapeState extends State<HistoricoMaisRodape> {
           ),
         ),
         const SizedBox(width: TokensStrip.s2),
-        TextButton(
-          style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
+        FxTonalButton(
+          label: s.historicoTentarDeNovo,
+          icon: Icons.refresh_rounded,
+          compact: true,
           onPressed: widget.onCarregar,
-          child: Text(s.historicoTentarDeNovo),
         ),
       ],
     );

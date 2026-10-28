@@ -31,4 +31,18 @@ extension _CheckinCarga on _CheckinScreenState {
     _mexerRascunho(() => _rascunhos.definirCarga(ee, r!.valor!));
     return true;
   }
+
+  /// Séries feitas sem carga, sem contar exercícios marcados "sem carga".
+  Future<int> _contarSemCarga() async {
+    var total = 0;
+    for (final ee in _execucao?.exercicios ?? const <ExecucaoExercicio>[]) {
+      final sem = ee.seriesDetalhes.where((d) => d.cargaKg == null).length;
+      if (sem == 0) continue;
+      if (await _CheckinScreenState._semCarga.semCarga(ee.treinoExercicioId)) {
+        continue;
+      }
+      total += sem;
+    }
+    return total;
+  }
 }

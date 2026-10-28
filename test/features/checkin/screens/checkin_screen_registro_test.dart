@@ -105,6 +105,28 @@ void main() {
     });
   });
 
+  group('faixa de desfazer', () {
+    testWidgets('depois de registrar mostra a faixa com botão Desfazer', (
+      tester,
+    ) async {
+      await pumpCheckin(tester, FakeCheckinRepo());
+      await tocarRegistrar(tester);
+
+      expect(find.textContaining('Série 1 registrada'), findsOneWidget);
+      expect(find.text('Desfazer'), findsOneWidget);
+    });
+
+    testWidgets('a faixa some sozinha depois de alguns segundos', (
+      tester,
+    ) async {
+      await pumpCheckin(tester, FakeCheckinRepo());
+      await tocarRegistrar(tester);
+      await tester.pump(const Duration(seconds: 7));
+
+      expect(find.textContaining('Série 1 registrada'), findsNothing);
+    });
+  });
+
   group('salvar série com garantia', () {
     testWidgets(
       'botão mostra Salvando…, ignora 2º toque e só vibra após a resposta',

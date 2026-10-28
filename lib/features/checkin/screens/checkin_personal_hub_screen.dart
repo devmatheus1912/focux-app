@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/focux_hub_typography.dart';
@@ -375,9 +376,11 @@ class _CheckinPendenteTile extends StatelessWidget {
         name: pendente.alunoNome,
         variant: AlunoAvatarVariant.strip,
       ),
-      trailing: TextButton(
+      trailing: FxTonalButton(
+        label: loading ? 'Enviando…' : 'Cobrar treino',
+        compact: true,
+        loading: loading,
         onPressed: loading ? null : onCobrar,
-        child: Text(loading ? 'Enviando…' : 'Cobrar treino'),
       ),
       onTap: () => context.push('/alunos/${pendente.alunoId}'),
     );

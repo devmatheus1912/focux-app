@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/a11y_announce.dart';
@@ -261,14 +262,11 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
       if (view.plano.isNotEmpty)
         Align(
           alignment: Alignment.centerLeft,
-          child: TextButton(
+          child: FxTonalButton(
+            label: s.treinosVerRotina,
+            icon: _verRotina ? Icons.expand_less : Icons.expand_more,
+            compact: true,
             onPressed: () => setState(() => _verRotina = !_verRotina),
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(48, 48),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(s.treinosVerRotina),
           ),
         ),
       if (_verRotina && view.plano.isNotEmpty)

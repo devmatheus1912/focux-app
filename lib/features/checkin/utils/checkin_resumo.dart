@@ -49,10 +49,15 @@ class CheckinResumo {
     this.recordes = const [],
     this.destaque,
     this.parcialDoServidor,
+    this.seriesSemCarga = 0,
   });
 
   /// Marca vinda do servidor; sem ela, vale a mesma regra de 50% daqui.
   final bool? parcialDoServidor;
+
+  /// Séries feitas sem carga, fora dos exercícios que o aluno marcou como
+  /// "sem carga" (peso do corpo). Só informa: nunca bloqueia concluir.
+  final int seriesSemCarga;
 
   final String treinoNome;
   final Duration? duracao;
@@ -81,6 +86,7 @@ CheckinResumo buildCheckinResumo({
   required ExecucaoTreino? concluida,
   required SessaoEvolucaoDto? evolucao,
   String treinoNomeLocal = 'Treino',
+  int seriesSemCarga = 0,
 }) {
   if (concluida == null) {
     return CheckinResumo(
@@ -89,6 +95,7 @@ CheckinResumo buildCheckinResumo({
       seriesPlanejadas: evolucao?.seriesPlanejadas ?? 0,
       volumeKg: _positivo(evolucao?.volumeKg),
       comparacao: _comparacao(evolucao, _positivo(evolucao?.volumeKg)),
+      seriesSemCarga: seriesSemCarga,
     );
   }
   final view = buildHistoricoDetalheView(concluida, evolucao: evolucao);
@@ -105,6 +112,7 @@ CheckinResumo buildCheckinResumo({
     comparacao: _comparacao(evolucao, view.volumeKg),
     recordes: recordes,
     parcialDoServidor: concluida.parcial ? true : null,
+    seriesSemCarga: seriesSemCarga,
     destaque:
         recordes.isEmpty && (view.destaque?.deltaKg ?? 0) > 0
             ? view.destaque

@@ -116,6 +116,12 @@ extension _CheckinCorpo on _CheckinScreenState {
                     onTrocar,
                   ),
         ),
+        if (_ultimaSerie != null)
+          CheckinDesfazerFaixa(
+            numero: _ultimaSerie!.numero,
+            detalhe: _ultimaSerie!.detalhe,
+            onDesfazer: _desfazerUltimaSerie,
+          ),
         if (_pendentes > 0)
           CheckinPendentesAviso(
             pendentes: _pendentes,

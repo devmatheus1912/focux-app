@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/router/safe_navigation.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/tokens_strip.dart';
@@ -231,12 +232,11 @@ class _PreviaBody extends StatelessWidget {
                     ),
                     if (treinoPreviaMostraJaFiz(situacao)) ...[
                       const SizedBox(height: TokensStrip.s1),
-                      TextButton(
+                      FxTonalButton(
+                        label: s.treinoJaFizCta,
+                        icon: Icons.check_rounded,
+                        expanded: true,
                         onPressed: registrando ? null : onJaFiz,
-                        style: TextButton.styleFrom(
-                          minimumSize: const Size.fromHeight(48),
-                        ),
-                        child: Text(s.treinoJaFizCta),
                       ),
                     ],
                   ],

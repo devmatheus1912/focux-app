@@ -47,6 +47,7 @@ import '../widgets/checkin_timer_widgets.dart';
 
 part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';
+part 'checkin_screen_desfazer.part.dart';
 part 'checkin_screen_saida.part.dart';
 
 class CheckinScreen extends ConsumerStatefulWidget {
@@ -79,6 +80,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   int? _focoTreinoExercicioId;
   final _rascunhos = CheckinRascunhos();
   int _pendentes = 0;
+  ({int exercicioId, int numero, String? detalhe})? _ultimaSerie;
+  Timer? _ultimaTimer;
   StreamSubscription<void>? _conexaoSub;
   late final ProviderSubscription<CheckinDescansoAlerta> _alerta;
   late final _descanso = CheckinDescansoRelogio(
@@ -105,6 +108,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     WidgetsBinding.instance.removeObserver(this);
     _conexaoSub?.cancel();
     _timer?.cancel();
+    _ultimaTimer?.cancel();
     _descanso.dispose();
     super.dispose();
   }
@@ -339,6 +343,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         );
     }
     HapticFeedback.selectionClick();
+    _anotarUltimaSerie(ee, serie);
     if (serie.numero > ee.seriesFeitas) {
       _iniciarDescanso(depois.descansoSegundos ?? 60);
     }
@@ -402,11 +407,13 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         evolucao = await _repo.evolucaoSessao(id);
       } catch (_) {}
       _invalidateSessaoCaches();
+      final semCarga = await _contarSemCarga();
       if (!mounted) return;
       final resumo = buildCheckinResumo(
         concluida: concluida,
         evolucao: evolucao,
         treinoNomeLocal: _execucao!.treinoNome,
+        seriesSemCarga: semCarga,
       );
       final acao = await showCheckinResumo(context, resumo: resumo);
       if (!mounted) return;

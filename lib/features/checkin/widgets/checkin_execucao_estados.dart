@@ -195,3 +195,74 @@ class CheckinFinalizarLink extends StatelessWidget {
     );
   }
 }
+
+/// Faixa curta logo depois de registrar: confirma o que foi gravado e deixa
+/// desfazer com um toque, sem abrir menu.
+class CheckinDesfazerFaixa extends StatelessWidget {
+  const CheckinDesfazerFaixa({
+    super.key,
+    required this.numero,
+    required this.onDesfazer,
+    this.detalhe,
+  });
+
+  final int numero;
+  final String? detalhe;
+  final VoidCallback onDesfazer;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
+    final brand = Theme.of(context).colorScheme.primary;
+    final texto =
+        detalhe == null
+            ? s.checkinSerieRegistrada(numero)
+            : '${s.checkinSerieRegistrada(numero)} · $detalhe';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        FxSettingsLayout.pageInset,
+        TokensStrip.s2,
+        FxSettingsLayout.pageInset,
+        0,
+      ),
+      child: Semantics(
+        liveRegion: true,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: chrome.cardFill,
+            borderRadius: BorderRadius.circular(TokensStrip.rCard),
+            border: Border.all(color: chrome.lineStrong),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s3,
+              vertical: TokensStrip.s2,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: brand, size: 20),
+                const SizedBox(width: TokensStrip.s2),
+                Expanded(
+                  child: Text(
+                    texto,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.cardTitle(color: chrome.ink),
+                  ),
+                ),
+                const SizedBox(width: TokensStrip.s2),
+                FxTonalButton(
+                  label: s.checkinDesfazerCurto,
+                  icon: Icons.undo_rounded,
+                  compact: true,
+                  onPressed: onDesfazer,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

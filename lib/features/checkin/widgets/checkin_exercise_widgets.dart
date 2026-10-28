@@ -8,6 +8,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_number_pad_sheet.dart';
+import '../../../core/widgets/fx_set_dots.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
@@ -151,6 +152,10 @@ class CheckinSerieCard extends StatelessWidget {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
+                if (_dots(ee).isNotEmpty) ...[
+                  const SizedBox(height: TokensStrip.s3),
+                  FxSetDots(series: _dots(ee), accent: brand),
+                ],
                 const SizedBox(height: TokensStrip.s2),
                 Text(
                   contextLine,
@@ -361,6 +366,37 @@ class CheckinSerieCard extends StatelessWidget {
       brand: brand,
       dark: dark,
     );
+  }
+
+  /// Uma bolinha por série prescrita; as feitas mostram "40×10".
+  static List<FxSetDot> _dots(ExecucaoExercicio ee) {
+    final total = ee.series ?? 0;
+    if (total < 1 || total > 10) return const [];
+    ExecucaoSerie? feita(int n) {
+      for (final d in ee.seriesDetalhes) {
+        if (d.numero == n) return d;
+      }
+      return null;
+    }
+
+    return [
+      for (var n = 1; n <= total; n++)
+        FxSetDot(
+          numero: n,
+          feita: n <= ee.seriesFeitas,
+          detalhe: n <= ee.seriesFeitas ? _detalhe(feita(n)) : null,
+        ),
+    ];
+  }
+
+  static String? _detalhe(ExecucaoSerie? d) {
+    if (d == null) return null;
+    final carga = d.cargaKg == null ? null : checkinCargaLabel(d.cargaKg);
+    final cargaCurta = carga?.replaceAll(' kg', '');
+    final reps = d.repeticoes?.trim();
+    final temReps = reps != null && reps.isNotEmpty;
+    if (cargaCurta != null && temReps) return '$cargaCurta×$reps';
+    return cargaCurta ?? (temReps ? '$reps reps' : null);
   }
 
   static String? _previousLine(S s, ExecucaoExercicio ee) {
