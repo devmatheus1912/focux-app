@@ -260,18 +260,6 @@ abstract final class Aluno360Layout {
     return isDark ? primary : Color.lerp(primary, Colors.black, 0.32)!;
   }
 
-  /// Link secundário 48dp — não usa o TextButton cru do Material.
-  static ButtonStyle secondaryTextLinkStyle(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return TextButton.styleFrom(
-      foregroundColor: primary,
-      minimumSize: const Size(48, 48),
-      tapTargetSize: MaterialTapTargetSize.padded,
-      padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-      alignment: Alignment.centerLeft,
-    );
-  }
-
   static ButtonStyle operacaoOutlinedButtonStyle(
     BuildContext context,
     Color primary,
