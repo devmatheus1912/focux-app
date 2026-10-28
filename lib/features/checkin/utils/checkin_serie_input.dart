@@ -79,8 +79,12 @@ CheckinCurrentSetSeed checkinCurrentSetSeed({
       reps: int.tryParse(checkinFirstRepsToken(previous.repeticoes) ?? ''),
     );
   }
-  final prescReps = int.tryParse(checkinFirstRepsToken(ee.repeticoes) ?? '');
-  final seedCarga = ee.cargaKg ?? ee.cargaAnteriorKg;
+  // A prescrição da própria série (V205) vale mais que a do exercício: é o que
+  // o cartão já mostra, então registrar grava o que o aluno está vendo.
+  final prescReps = int.tryParse(
+    checkinFirstRepsToken(ee.proximaRepeticoes ?? ee.repeticoes) ?? '',
+  );
+  final seedCarga = ee.proximaCargaKg ?? ee.cargaKg ?? ee.cargaAnteriorKg;
   if (seedCarga != null || prescReps != null) {
     return CheckinCurrentSetSeed(cargaKg: seedCarga, reps: prescReps);
   }

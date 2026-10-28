@@ -10,10 +10,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
-import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -22,6 +20,7 @@ import '../../auth/providers/auth_provider.dart';
 import '../../chat/utils/aluno_picker_list.dart';
 import '../../financeiro/data/financeiro_repository.dart';
 import '../../financeiro/utils/pix_qr_display.dart';
+import '../../financeiro/widgets/financeiro_aluno_etapa.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../data/recorrencia_repository.dart';
 import '../utils/recorrencia_display.dart';
@@ -50,10 +49,7 @@ Future<bool> showRecorrenciaNovaFolha(
     }
     if (alunos.isEmpty) {
       if (context.mounted) {
-        FeedbackHelper.showWarn(
-          context,
-          'Cadastre um aluno primeiro.',
-        );
+        FeedbackHelper.showWarn(context, 'Cadastre um aluno primeiro.');
       }
       return false;
     }
@@ -62,12 +58,13 @@ Future<bool> showRecorrenciaNovaFolha(
 
   final criou = await showFxHomeSheet<bool>(
     context,
-    builder: (ctx) => _NovaRecorrenciaSheet(
-      ref: ref,
-      alunos: alunos,
-      alunoId: alunoId,
-      alunoNome: alunoNome,
-    ),
+    builder:
+        (ctx) => _NovaRecorrenciaSheet(
+          ref: ref,
+          alunos: alunos,
+          alunoId: alunoId,
+          alunoNome: alunoNome,
+        ),
   );
   return criou ?? false;
 }
@@ -95,6 +92,9 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
   late String? _alunoNome = widget.alunoNome;
   late int _dia = recorrenciaDiaPadrao(DateTime.now());
   var _salvando = false;
+
+  /// A busca de aluno troca o conteúdo da própria folha, sem abrir outra por cima.
+  var _escolhendoAluno = false;
 
   @override
   void initState() {
@@ -126,17 +126,13 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
     } catch (_) {}
   }
 
-  Future<void> _escolherAluno() async {
-    final escolhido = await showFxHomeSheet<Aluno>(
-      context,
-      builder: (_) => _AlunoBuscaSheet(alunos: widget.alunos),
-    );
-    if (escolhido == null || !mounted) return;
+  void _escolherAluno(Aluno escolhido) {
     setState(() {
       _alunoId = escolhido.id;
       _alunoNome = escolhido.nome;
+      _escolhendoAluno = false;
     });
-    await _sugerirValor(escolhido.id);
+    _sugerirValor(escolhido.id);
   }
 
   Future<void> _escolherDia() async {
@@ -188,138 +184,99 @@ class _NovaRecorrenciaSheetState extends State<_NovaRecorrenciaSheet> {
     final primary = Theme.of(context).colorScheme.primary;
     final valor = recorrenciaLerValor(_valorCtrl.text);
     final fixo = widget.alunoId != null;
+    // O FxHomeSheetSurface já reserva o espaço do teclado: não somar de novo.
     return FxHomeSheetSurface(
       isDark: isDark,
       maxHeight:
           MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            const SizedBox(height: TokensStrip.s4),
-            FxHomeSheetHeader(
-              isDark: isDark,
-              title: s.recorrenciaNova,
-              subtitle: s.recorrenciaNovaSub,
-              leading: Icon(Icons.repeat_rounded, color: primary, size: 18),
-            ),
-            const SizedBox(height: TokensStrip.s3),
-            FxSettingsGroup(
-              children: [
-                FxSettingsTile(
-                  fxIcon: 'users',
-                  label: s.recorrenciaAluno,
-                  value: _alunoNome ?? s.recorrenciaSelecionar,
-                  picker: !fixo,
-                  onTap: fixo ? null : _escolherAluno,
-                ),
-                AlunoInsetFormField(
-                  controller: _valorCtrl,
-                  label: s.recorrenciaValor,
-                  hint: 'R\$ 0,00',
-                  icon: Icons.payments_outlined,
-                  rotuloVisivel: true,
-                  obrigatorio: true,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[\d.,]')),
+      child:
+          _escolhendoAluno
+              ? FinanceiroAlunoEtapa(
+                alunos: widget.alunos,
+                selecionadoId: _alunoId,
+                onVoltar: () => setState(() => _escolhendoAluno = false),
+                onPick: _escolherAluno,
+              )
+              : SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    FxHomeSheetHandle(isDark: isDark),
+                    const SizedBox(height: TokensStrip.s4),
+                    FxHomeSheetHeader(
+                      isDark: isDark,
+                      title: s.recorrenciaNova,
+                      subtitle: s.recorrenciaNovaSub,
+                      leading: Icon(
+                        Icons.repeat_rounded,
+                        color: primary,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(height: TokensStrip.s3),
+                    FxSettingsGroup(
+                      children: [
+                        FxSettingsTile(
+                          fxIcon: 'users',
+                          label: s.recorrenciaAluno,
+                          value: _alunoNome ?? s.recorrenciaSelecionar,
+                          picker: !fixo,
+                          onTap:
+                              fixo
+                                  ? null
+                                  : () =>
+                                      setState(() => _escolhendoAluno = true),
+                        ),
+                        AlunoInsetFormField(
+                          controller: _valorCtrl,
+                          label: s.recorrenciaValor,
+                          hint: 'R\$ 0,00',
+                          icon: Icons.payments_outlined,
+                          rotuloVisivel: true,
+                          obrigatorio: true,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[\d.,]'),
+                            ),
+                          ],
+                        ),
+                        FxSettingsTile(
+                          fxIcon: 'calendar',
+                          label: s.recorrenciaDia,
+                          value: recorrenciaDiaLabel(_dia),
+                          picker: true,
+                          showDivider: false,
+                          onTap: _escolherDia,
+                        ),
+                      ],
+                    ),
+                    if (valor != null) ...[
+                      const SizedBox(height: TokensStrip.s2),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          recorrenciaResumo(s, dia: _dia, valor: valor),
+                          style: FocuxHubTypography.cardSubtitle(
+                            color: chrome.mute,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: TokensStrip.s3),
+                    FxLiquidPrimaryButton(
+                      label: s.recorrenciaCriar,
+                      loading: _salvando,
+                      loadingLabel: s.recorrenciaCriando,
+                      onPressed: _salvando ? null : _criar,
+                    ),
+                    const SizedBox(height: TokensStrip.s2),
                   ],
                 ),
-                FxSettingsTile(
-                  fxIcon: 'calendar',
-                  label: s.recorrenciaDia,
-                  value: recorrenciaDiaLabel(_dia),
-                  picker: true,
-                  showDivider: false,
-                  onTap: _escolherDia,
-                ),
-              ],
-            ),
-            if (valor != null) ...[
-              const SizedBox(height: TokensStrip.s2),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Text(
-                  recorrenciaResumo(s, dia: _dia, valor: valor),
-                  style: FocuxHubTypography.cardSubtitle(color: chrome.mute),
-                ),
               ),
-            ],
-            const SizedBox(height: TokensStrip.s3),
-            FxLiquidPrimaryButton(
-              label: s.recorrenciaCriar,
-              loading: _salvando,
-              loadingLabel: s.recorrenciaCriando,
-              onPressed: _salvando ? null : _criar,
-            ),
-            const SizedBox(height: TokensStrip.s2),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Lista de alunos com busca por nome ou e-mail.
-class _AlunoBuscaSheet extends StatefulWidget {
-  const _AlunoBuscaSheet({required this.alunos});
-
-  final List<Aluno> alunos;
-
-  @override
-  State<_AlunoBuscaSheet> createState() => _AlunoBuscaSheetState();
-}
-
-class _AlunoBuscaSheetState extends State<_AlunoBuscaSheet> {
-  var _query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final filtrados = filterAlunoPickerAlunos(widget.alunos, _query);
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      maxHeight:
-          MediaQuery.sizeOf(context).height * FxHomeSheetChrome.maxHeightFactor,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            FxHomeSheetHandle(isDark: isDark),
-            const SizedBox(height: TokensStrip.s3),
-            TextField(
-              autofocus: true,
-              onChanged: (v) => setState(() => _query = v),
-              decoration: FxInputDeco.build(context, s.recorrenciaBuscarAluno),
-            ),
-            const SizedBox(height: TokensStrip.s2),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: filtrados.length,
-                itemBuilder: (_, i) {
-                  final a = filtrados[i];
-                  return FxSatelliteListTile(
-                    title: a.nome,
-                    titleCase: false,
-                    onTap: () => Navigator.of(context).pop(a),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

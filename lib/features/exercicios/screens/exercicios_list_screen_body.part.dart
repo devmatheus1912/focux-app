@@ -56,19 +56,12 @@ extension on _ExerciciosListScreenState {
             title: 'Nenhum exercício seu ainda.',
             subtitle:
                 widget.embedded
-                    ? 'Traga a biblioteca curada para cá ou crie o seu.'
+                    ? 'Os exercícios que você criar aparecem aqui.'
                     : null,
+            // Embutido: o botão fixo "Novo exercício" já é a ação.
             action:
                 widget.embedded
-                    ? FxEmptyAction(
-                      label: 'Carregar biblioteca',
-                      onTap: () async {
-                        final imported = await context.push<bool>(
-                          '/exercicios/biblioteca-wizard',
-                        );
-                        if (imported == true) _refresh();
-                      },
-                    )
+                    ? null
                     : FxEmptyAction(
                       label: 'Criar exercício',
                       onTap: _novoExercicio,

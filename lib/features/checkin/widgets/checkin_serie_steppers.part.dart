@@ -10,11 +10,15 @@ class _CheckinSetSteppers extends StatelessWidget {
     this.onMinusReps,
     this.onEditarCarga,
     this.onEditarReps,
+    this.cargaAnteriorKg,
   });
 
   final ValueChanged<double>? onEditarCarga;
   final ValueChanged<int>? onEditarReps;
   final double? cargaKg;
+
+  /// Carga da última sessão: atalho "mesma da última vez" no teclado.
+  final double? cargaAnteriorKg;
   final int? reps;
   final VoidCallback? onPlusCarga;
   final VoidCallback? onMinusCarga;
@@ -44,6 +48,8 @@ class _CheckinSetSteppers extends StatelessWidget {
                           titulo: s.checkinStepperKg,
                           inicial: cargaKg,
                           decimal: true,
+                          ultima: cargaAnteriorKg,
+                          sufixo: s.checkinStepperKg,
                         );
                         if (v != null) onEditarCarga!(v);
                       },
@@ -72,6 +78,7 @@ class _CheckinSetSteppers extends StatelessWidget {
                           titulo: s.checkinStepperReps,
                           inicial: reps?.toDouble(),
                           decimal: false,
+                          sufixo: s.checkinStepperReps,
                         );
                         if (v != null) onEditarReps!(v.round());
                       },
@@ -139,14 +146,16 @@ class _CheckinStepper extends StatelessWidget {
                   onTap: onEditar,
                   borderRadius: BorderRadius.circular(8),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 44),
+                    constraints: const BoxConstraints(minHeight: 56),
                     child: Center(
                       child: Text(
                         value,
                         textAlign: TextAlign.center,
-                        style: FocuxHubTypography.sectionTitle(
-                          context,
+                        // Número grande: lido de longe, com a mão ocupada.
+                        style: FocuxHubTypography.metric(
                           color: ink,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -204,53 +213,33 @@ class _CheckinStepperButton extends StatelessWidget {
   }
 }
 
-/// Pede o número digitado (vírgula ou ponto); nulo ao cancelar ou se inválido.
+/// Pede o número em folha com teclado numérico; nulo ao fechar sem confirmar.
 Future<double?> _pedirNumero(
   BuildContext context, {
   required String titulo,
   required double? inicial,
   required bool decimal,
+  double? ultima,
+  String? sufixo,
 }) async {
-  final ctrl = TextEditingController(
-    text:
-        inicial == null
-            ? ''
-            : (inicial.roundToDouble() == inicial
-                ? inicial.toStringAsFixed(0)
-                : inicial.toString().replaceAll('.', ',')),
-  );
-  final valor = await showDialog<double>(
-    context: context,
-    builder:
-        (ctx) => AlertDialog(
-          title: Text(titulo),
-          content: TextField(
-            controller: ctrl,
-            autofocus: true,
-            keyboardType: TextInputType.numberWithOptions(decimal: decimal),
-            textInputAction: TextInputAction.done,
-            onSubmitted:
-                (v) => Navigator.pop(
-                  ctx,
-                  double.tryParse(v.trim().replaceAll(',', '.')),
-                ),
+  final s = S.of(context);
+  final r = await showFxNumberPadSheet(
+    context,
+    titulo: titulo,
+    confirmarLabel: MaterialLocalizations.of(context).okButtonLabel,
+    sufixo: sufixo,
+    inicial: inicial,
+    decimal: decimal,
+    maximo: decimal ? 500 : 50,
+    atalhos: [
+      if (ultima != null)
+        (
+          label: s.checkinUltimaVez(
+            '${fxNumberPadTexto(ultima)} ${s.checkinStepperKg}',
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
-            ),
-            FilledButton(
-              onPressed:
-                  () => Navigator.pop(
-                    ctx,
-                    double.tryParse(ctrl.text.trim().replaceAll(',', '.')),
-                  ),
-              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
-            ),
-          ],
+          valor: ultima,
         ),
+    ],
   );
-  ctrl.dispose();
-  return valor == null || valor < 0 ? null : valor;
+  return r?.valor;
 }

@@ -33,14 +33,14 @@ void main() {
     }
   });
 
-  test('as peças da hierarquia existem e garantem 44 de toque', () {
+  test('as peças da hierarquia existem e garantem o alvo de toque (link 44, tonal 48)', () {
     final link =
         File('lib/core/widgets/fx_action_link.dart').readAsStringSync();
     final tonal =
         File('lib/core/widgets/fx_tonal_button.dart').readAsStringSync();
     expect(link, contains('minHeight: 44'));
     expect(link, contains("'chevron-right'"));
-    expect(tonal, contains('alturaToque = 44'));
+    expect(tonal, contains('alturaToque = 48'));
   });
 
   test('"Nova mensalidade" é o botão principal do rodapé', () {

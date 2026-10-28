@@ -147,6 +147,18 @@ void main() {
     expect(find.text('Adicionar vídeo'), findsNothing);
   });
 
+  testWidgets('Meus vazio na tela cheia tem uma única ação de criar', (
+    tester,
+  ) async {
+    await _abrir(tester, meus: const []);
+    await tester.tap(find.text('Meus'));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Criar exercício'), findsOneWidget);
+    expect(find.text('Novo exercício'), findsNothing);
+  });
+
   testWidgets('trocar para Focux e voltar não refaz a escolha automática', (
     tester,
   ) async {
@@ -164,7 +176,7 @@ void main() {
     expect(adapter.abas.last, 'MEUS');
   });
 
-  testWidgets('dentro de Treinos só mostra os do personal e aponta a Focux', (
+  testWidgets('dentro de Treinos só mostra os do personal, sem Focux', (
     tester,
   ) async {
     final adapter = await _abrir(
@@ -175,7 +187,7 @@ void main() {
     expect(adapter.abas, ['MEUS']);
     expect(find.text('Meu exercício'), findsOneWidget);
     expect(find.text('Meus'), findsNothing);
-    expect(find.text('Biblioteca Focux'), findsOneWidget);
+    expect(find.text('Biblioteca Focux'), findsNothing);
   });
 
   testWidgets(
@@ -183,7 +195,8 @@ void main() {
     (tester) async {
       final adapter = await _abrir(tester, meus: const [], embedded: true);
       expect(adapter.abas, ['MEUS']);
-      expect(find.text('Carregar biblioteca'), findsOneWidget);
+      expect(find.text('Carregar biblioteca'), findsNothing);
+      expect(find.text('Novo exercício'), findsOneWidget);
     },
   );
 

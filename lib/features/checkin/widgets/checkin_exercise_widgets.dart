@@ -7,9 +7,11 @@ import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
+import '../../../core/widgets/fx_number_pad_sheet.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/checkin_repository.dart';
 import '../utils/checkin_execucao_display.dart';
@@ -125,19 +127,13 @@ class CheckinSerieCard extends StatelessWidget {
                   ),
                 ),
                 if (onTrocar != null) ...[
-                  const SizedBox(height: TokensStrip.s1),
-                  Text(
-                    trocarHint,
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                  TextButton(
+                  const SizedBox(height: TokensStrip.s2),
+                  FxTonalButton(
+                    label: s.checkinTrocarExercicio,
+                    icon: Icons.swap_horiz_rounded,
+                    compact: true,
+                    semanticLabel: trocarHint,
                     onPressed: onTrocar,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(48, 48),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: Text(s.checkinTrocarExercicio),
                   ),
                 ],
                 const SizedBox(height: TokensStrip.s3),
@@ -206,13 +202,17 @@ class CheckinSerieCard extends StatelessWidget {
                 onMinusReps: onMinusReps,
                 onEditarCarga: onEditarCarga,
                 onEditarReps: onEditarReps,
+                cargaAnteriorKg: ee.cargaAnteriorKg,
               ),
             ),
             if (onAjustar != null ||
                 onConfirmarRestante != null ||
                 onDesfazer != null) ...[
               const SizedBox(height: TokensStrip.s1),
-              TextButton(
+              FxTonalButton(
+                label: s.checkinMais,
+                icon: Icons.more_horiz_rounded,
+                compact: true,
                 onPressed: () async {
                   final actions = <({
                     String id,
@@ -306,13 +306,6 @@ class CheckinSerieCard extends StatelessWidget {
                       onDesfazer?.call();
                   }
                 },
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(64, checkinExecutionControlMin),
-                ),
-                child: Text(
-                  s.checkinMais,
-                  style: FocuxHubTypography.chip(brand),
-                ),
               ),
             ],
           ] else

@@ -46,6 +46,11 @@ void main() {
     expect(folha, contains('rotuloVisivel: true'));
     expect(folha, isNot(contains("'199'")));
     expect(folha, contains('recorrenciaResumo'));
+    // O FxHomeSheetSurface já reserva o teclado; somar de novo sobe a folha.
+    expect(folha, isNot(contains('viewInsetsOf')));
+    // Escolher aluno troca o conteúdo da folha, sem abrir outra por cima.
+    expect(folha, contains('FinanceiroAlunoEtapa'));
+    expect('showFxHomeSheet'.allMatches(folha).length, 1);
     expect(screen, contains('acaoPersonal'));
     expect(screen, isNot(contains('Mercado Pago')));
     expect(screen, isNot(contains('TabBar')));

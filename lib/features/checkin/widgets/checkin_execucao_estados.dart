@@ -5,6 +5,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -65,13 +66,10 @@ class CheckinIniciarErroView extends StatelessWidget {
               message: mensagem,
               onRetry: onRetry,
             ),
-            TextButton(
+            FxTonalButton(
+              label: s.checkinVoltarAosTreinos,
+              icon: Icons.arrow_back_rounded,
               onPressed: onVoltar,
-              style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-              child: Text(
-                s.checkinVoltarAosTreinos,
-                style: TextStyle(color: chrome.mute),
-              ),
             ),
           ],
         ),
@@ -113,15 +111,11 @@ class CheckinPendentesAviso extends StatelessWidget {
                 ).copyWith(fontSize: checkinPendentesAvisoFonte),
               ),
             ),
-            TextButton(
+            FxTonalButton(
+              label: s.checkinPendentesTentar,
+              icon: Icons.refresh_rounded,
+              compact: true,
               onPressed: onTentar,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(
-                  checkinPendentesAvisoAltura,
-                  checkinPendentesAvisoAltura,
-                ),
-              ),
-              child: Text(s.checkinPendentesTentar),
             ),
           ],
         ),
@@ -177,8 +171,8 @@ class CheckinRodapeBar extends StatelessWidget {
   }
 }
 
-/// Finalizar com exercício faltando: texto discreto abaixo do card, que
-/// confirma antes de encerrar.
+/// Finalizar com exercício faltando: botão tonal abaixo do card, que confirma
+/// antes de encerrar.
 class CheckinFinalizarLink extends StatelessWidget {
   const CheckinFinalizarLink({
     super.key,
@@ -192,14 +186,12 @@ class CheckinFinalizarLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final chrome = ShellChrome.of(context);
-    return TextButton(
+    return FxTonalButton(
+      label: concluindo ? s.checkinFinalizando : s.checkinFinalizarTreino,
+      icon: Icons.flag_rounded,
+      expanded: true,
+      loading: concluindo,
       onPressed: concluindo ? null : onFinalizar,
-      style: TextButton.styleFrom(
-        foregroundColor: chrome.mute,
-        minimumSize: const Size(double.infinity, checkinExecutionControlMin),
-      ),
-      child: Text(concluindo ? s.checkinFinalizando : s.checkinFinalizarTreino),
     );
   }
 }

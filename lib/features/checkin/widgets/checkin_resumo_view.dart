@@ -10,6 +10,8 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/fx_confetti_burst.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_resumo.dart';
 import '../utils/historico_detalhe_texts.dart';
@@ -18,13 +20,20 @@ import 'checkin_execucao_sheets.dart';
 
 enum CheckinResumoAcao { concluir, detalhes }
 
+/// Verdadeiro enquanto a tela de fim de treino está aberta. Pedidos que
+/// interrompem (nota do NPS) esperam ela fechar: o resumo vai por cima do
+/// roteador, então a rota da Home continua "na frente" por baixo dele.
+final ValueNotifier<bool> checkinResumoAberto = ValueNotifier(false);
+
 /// Tela cheia do fim do treino. Voltar do sistema equivale a "Concluir".
 Future<CheckinResumoAcao> showCheckinResumo(
   BuildContext context, {
   required CheckinResumo resumo,
 }) async {
   HapticFeedback.mediumImpact();
-  final acao = await Navigator.of(context, rootNavigator: true).push(
+  checkinResumoAberto.value = true;
+  final acao = await Navigator.of(context, rootNavigator: true)
+      .push(
     PageRouteBuilder<CheckinResumoAcao>(
       fullscreenDialog: true,
       transitionDuration: fxMotionDuration(
@@ -38,7 +47,8 @@ Future<CheckinResumoAcao> showCheckinResumo(
             child: child,
           ),
     ),
-  );
+  )
+      .whenComplete(() => checkinResumoAberto.value = false);
   return acao ?? CheckinResumoAcao.concluir;
 }
 
@@ -189,21 +199,21 @@ class CheckinResumoView extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        FilledButton(
-                          autofocus: true,
+                        FxLiquidPrimaryButton(
+                          label: s.checkinResumoConcluir,
                           onPressed:
                               () => Navigator.of(
                                 context,
                               ).pop(CheckinResumoAcao.concluir),
-                          child: Text(s.checkinResumoConcluir),
                         ),
                         const SizedBox(height: TokensStrip.s2),
-                        TextButton(
+                        FxTonalButton(
+                          label: s.checkinResumoDetalhes,
+                          expanded: true,
                           onPressed:
                               () => Navigator.of(
                                 context,
                               ).pop(CheckinResumoAcao.detalhes),
-                          child: Text(s.checkinResumoDetalhes),
                         ),
                       ],
                     ),

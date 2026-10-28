@@ -12,6 +12,7 @@ import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_execution_chrome.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
+import '../../../core/widgets/fx_number_pad_sheet.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -29,6 +30,7 @@ import '../utils/checkin_execucao_display.dart';
 import '../utils/checkin_execucao_estado.dart';
 import '../utils/checkin_exercise_tips.dart';
 import '../utils/checkin_resumo.dart';
+import '../utils/checkin_sem_carga.dart';
 import '../utils/checkin_serie_input.dart';
 import '../utils/checkin_series_fila.dart';
 import '../utils/checkin_sessao_aberta.dart';
@@ -43,6 +45,7 @@ import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_sessao_aberta_state.dart';
 import '../widgets/checkin_timer_widgets.dart';
 
+part 'checkin_screen_carga.part.dart';
 part 'checkin_screen_corpo.part.dart';
 part 'checkin_screen_saida.part.dart';
 
@@ -57,6 +60,7 @@ class CheckinScreen extends ConsumerStatefulWidget {
 class _CheckinScreenState extends ConsumerState<CheckinScreen>
     with WidgetsBindingObserver {
   static const _fila = CheckinSeriesPendentesStore();
+  static const _semCarga = CheckinSemCargaStore();
 
   ExecucaoTreino? _execucao;
   bool _loading = true;
@@ -247,6 +251,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   Future<void> _registrarSerieRapida(ExecucaoExercicio ee) async {
     final id = _execucao?.id;
     if (id == null || _concluindo || _registrando || _pedindoRpe) return;
+    if (!await _garantirCarga(ee) || !mounted) return;
     final draft = _rascunhos.de(ee);
     int? rpe;
     if (ee.rpeAlvo != null) {

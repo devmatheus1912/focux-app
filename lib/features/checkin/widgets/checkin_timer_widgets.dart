@@ -6,10 +6,11 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
 
-/// S8: um alvo — o tempo. Pular/Trocar ficam texto na thumb zone.
+/// S8: um alvo — o tempo. Pular/Trocar são botões tonais na thumb zone.
 class CheckinRestFocusView extends StatelessWidget {
   final int seconds;
   final int? totalSeconds;
@@ -103,26 +104,16 @@ class CheckinRestFocusView extends StatelessWidget {
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [
-                  TextButton(
+                  FxTonalButton(
+                    label: s.checkinPularDescanso,
+                    icon: Icons.skip_next_rounded,
                     onPressed: onSkip,
-                    style: TextButton.styleFrom(
-                      minimumSize: Size(
-                        88,
-                        checkinExecutionControlMin + 8,
-                      ),
-                    ),
-                    child: Text(s.checkinPularDescanso),
                   ),
                   if (onTrocar != null)
-                    TextButton(
+                    FxTonalButton(
+                      label: s.checkinTrocar,
+                      icon: Icons.swap_horiz_rounded,
                       onPressed: onTrocar,
-                      style: TextButton.styleFrom(
-                        minimumSize: Size(
-                          72,
-                          checkinExecutionControlMin + 8,
-                        ),
-                      ),
-                      child: Text(s.checkinTrocar),
                     ),
                 ],
               ),

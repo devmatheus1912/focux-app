@@ -13,7 +13,6 @@ import '../../../core/utils/batch_mutation_notice.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -67,6 +66,14 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   bool _abaDecidida = false;
 
   List<Exercicio> get _visibleItems => _items;
+
+  /// Lista vazia na tela cheia: o estado vazio já traz "Criar exercício", então
+  /// o botão fixo não repete a mesma ação.
+  bool get _vazioComCriar =>
+      !widget.embedded &&
+      _totalElements == 0 &&
+      !_filter.hasActive &&
+      _aba == 'MEUS';
 
   bool? get _hasVideoFilter {
     if (_filter.comVideo) return true;
@@ -472,15 +479,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             onFavorite: _favoriteBatch,
             onDelete: _deleteBatch,
           ),
-        if (widget.embedded)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FxActionLink(
-              label: 'Biblioteca Focux',
-              onTap: () => context.push('/exercicios'),
-            ),
-          )
-        else
+        if (!widget.embedded)
           Padding(
             padding: const EdgeInsets.only(bottom: TokensStrip.s2),
             child: AlunoSegmentedChoice(
@@ -516,7 +515,7 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             visible: visible,
           ),
         ),
-        if (_selected.isEmpty && !_loading && _error == null)
+        if (_selected.isEmpty && !_loading && _error == null && !_vazioComCriar)
           SafeArea(
             top: false,
             child: Padding(

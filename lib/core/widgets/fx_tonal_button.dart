@@ -6,7 +6,7 @@ import '../theme/tokens_strip.dart';
 import 'fx_action_chip.dart';
 import 'fx_loading.dart';
 
-/// Ação secundária: fundo tonal da marca, ícone opcional e área de toque de 44.
+/// Ação secundária: fundo tonal da marca, ícone opcional e área de toque de 48.
 /// Mesma paleta do [FxActionChip]; esta peça cresce com o texto e aceita ícone
 /// e carregamento. O botão principal da tela continua sendo o preenchido.
 class FxTonalButton extends StatelessWidget {
@@ -25,7 +25,7 @@ class FxTonalButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData? icon;
 
-  /// 36 de altura visível (a área de toque segue com 44) para linhas densas.
+  /// 36 de altura visível (a área de toque segue com 48) para linhas densas.
   final bool compact;
   final bool loading;
 
@@ -35,7 +35,7 @@ class FxTonalButton extends StatelessWidget {
   /// Leitura mais específica que o texto ('Adicionar em Aquecimento').
   final String? semanticLabel;
 
-  static const double alturaToque = 44;
+  static const double alturaToque = 48;
 
   @override
   Widget build(BuildContext context) {

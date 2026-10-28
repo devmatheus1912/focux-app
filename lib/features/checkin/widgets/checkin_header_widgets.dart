@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
+
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
@@ -69,16 +71,13 @@ class CheckinWorkoutHeader extends StatelessWidget {
               ),
             SizedBox(
               height: checkinExecutionControlMin,
-              child: TextButton(
-                onPressed: onBack,
-                style: TextButton.styleFrom(
-                  minimumSize: const Size(
-                    checkinExecutionControlMin,
-                    checkinExecutionControlMin,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s3),
+              child: Center(
+                child: FxTonalButton(
+                  label: s.checkinSair,
+                  icon: Icons.logout_rounded,
+                  compact: true,
+                  onPressed: onBack,
                 ),
-                child: Text(s.checkinSair),
               ),
             ),
           ],

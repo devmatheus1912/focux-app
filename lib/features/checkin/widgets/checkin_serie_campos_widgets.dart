@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/widgets/fx_tonal_button.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
@@ -165,7 +165,6 @@ class _CheckinRpeAlvoPromptSheetState
     final s = S.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final primary = theme.colorScheme.primary;
     final brand = isDark ? BrandPalette.accent(primary) : primary;
 
@@ -218,18 +217,10 @@ class _CheckinRpeAlvoPromptSheetState
             ),
           ),
           const SizedBox(height: TokensStrip.s2),
-          SizedBox(
-            height: 48,
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                s.checkinCancelar,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+          FxTonalButton(
+            label: s.checkinCancelar,
+            expanded: true,
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),

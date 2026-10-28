@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/features/checkin/widgets/checkin_timer_widgets.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 
@@ -154,7 +155,7 @@ void main() {
         contains('class CheckinRestFocusView'),
         contains('checkinRestRingSize'),
         contains('TokensStrip.fontH1'),
-        contains('checkinExecutionControlMin + 8'),
+        contains('FxTonalButton'),
         contains('this.onTrocar'),
         contains('this.contextLine'),
       ),
@@ -169,7 +170,8 @@ void main() {
     expect(timers, isNot(contains('class CheckinRestBanner')));
     expect(timers, isNot(contains('FxLoading')));
     expect(timers, isNot(contains('FxLiquidPrimaryButton')));
-    expect(timers, contains('TextButton('));
+    expect(timers, contains('FxTonalButton('));
+    expect(timers, isNot(contains('TextButton(')));
     expect(timers, isNot(contains('FilledButton')));
   });
 
@@ -290,7 +292,9 @@ void main() {
     await tester.tap(find.text('Pular descanso'));
     expect(trocarTaps, 1);
     expect(skipTaps, 1);
-    expect(find.byType(TextButton), findsNWidgets(2));
+    // Ação nunca é só texto: os dois são botões tonais.
+    expect(find.byType(TextButton), findsNothing);
+    expect(find.byType(FxTonalButton), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 

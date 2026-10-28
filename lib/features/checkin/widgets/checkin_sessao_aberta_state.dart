@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/fx_tonal_button.dart';
+
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_motion.dart';
@@ -90,9 +92,10 @@ class CheckinSessaoAbertaState extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: TokensStrip.s2),
-              TextButton(
+              FxTonalButton(
+                label: s.checkinVoltarAosTreinos,
+                expanded: true,
                 onPressed: descartando ? null : onVoltar,
-                child: Text(s.checkinVoltarAosTreinos),
               ),
             ],
           ),

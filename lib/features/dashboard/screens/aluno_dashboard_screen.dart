@@ -38,6 +38,7 @@ import '../widgets/aluno_home_header.dart';
 import '../widgets/aluno_home_skeleton.dart';
 import '../widgets/aluno_proximos_passos.dart';
 import '../widgets/aluno_today_focus_card.dart';
+import '../../checkin/widgets/checkin_resumo_view.dart' show checkinResumoAberto;
 import '../../checkin/widgets/ficha_vigencia_aluno.dart';
 import '../../../core/widgets/fx_status_pill.dart';
 import '../../treinos/models/rotina_fila.dart';
@@ -83,6 +84,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   void initState() {
     super.initState();
     unawaited(_loadAgendaVista());
+    checkinResumoAberto.addListener(_agendarNps);
     ref.listenManual(
       alunoDashboardHomeProvider,
       (_, next) => next.whenData(_onHomeLoaded),
@@ -101,6 +103,7 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
 
   @override
   void dispose() {
+    checkinResumoAberto.removeListener(_agendarNps);
     _router?.removeListener(_onRota);
     _relogio?.cancel();
     super.dispose();
@@ -170,6 +173,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
   /// espera a Home voltar para a frente, senão o pop do check-in a fecharia.
   void _tentarNps() {
     if (!mounted || !_npsPendente || _npsPrompted || !_homeNaFrente) return;
+    // Nunca por cima do resumo do treino; espera ele fechar.
+    if (checkinResumoAberto.value) return;
     _npsPrompted = true;
     showAlunoNpsPrompt(context, ref);
   }

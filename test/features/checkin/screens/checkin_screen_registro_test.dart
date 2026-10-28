@@ -60,7 +60,7 @@ void main() {
       expect(rodape.height, greaterThanOrEqualTo(48));
     });
 
-    testWidgets('Finalizar incompleto sai do rodapé e vira texto no conteúdo', (
+    testWidgets('Finalizar incompleto sai do rodapé e vira botão tonal no conteúdo', (
       tester,
     ) async {
       await pumpCheckin(tester, FakeCheckinRepo());
