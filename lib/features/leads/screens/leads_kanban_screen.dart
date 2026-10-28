@@ -19,6 +19,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
 import '../utils/lead_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 const _kCols = leadFunilColunas;
 
@@ -189,11 +190,7 @@ class _LeadsKanbanScreenState extends ConsumerState<LeadsKanbanScreen> {
           subtitle: 'CRM',
           onBack: () => safePopOrGo(context, '/leads'),
           actions: [
-            TextButton.icon(
-              onPressed: _novoLeadRapido,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Lead'),
-            ),
+            FxTonalButton(label: 'Lead', icon: Icons.add, onPressed: _novoLeadRapido, compact: true),
           ],
         ),
         body: SafeArea(

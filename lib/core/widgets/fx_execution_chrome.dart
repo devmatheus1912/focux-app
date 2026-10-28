@@ -138,30 +138,13 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           SizedBox(
             height: 48,
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                s.checkinVoltarAoTreino,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: s.checkinVoltarAoTreino, onPressed: () => Navigator.pop(context), compact: true),
           ),
           const Divider(height: TokensStrip.s5),
           // Destrutivo longe dos CTAs; o caller ainda pede confirmação.
           SizedBox(
             height: 48,
-            child: TextButton.icon(
-              onPressed: () => onPick(FxExecutionLeaveChoice.descartar),
-              icon: const Icon(Icons.delete_outline_rounded, size: 18),
-              label: Text(s.checkinDescartar),
-              style: TextButton.styleFrom(
-                foregroundColor: EagleTokens.bad,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
+            child: FxTonalButton(label: s.checkinDescartar, icon: Icons.delete_outline_rounded, onPressed: () => onPick(FxExecutionLeaveChoice.descartar), compact: true, danger: true),
           ),
         ],
       ),

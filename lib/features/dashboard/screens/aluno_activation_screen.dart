@@ -23,6 +23,7 @@ import '../../../core/widgets/fx_wizard_chrome.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../providers/dashboard_provider.dart';
 import '../utils/aluno_activation_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AlunoActivationScreen extends ConsumerWidget {
   const AlunoActivationScreen({super.key});
@@ -112,34 +113,16 @@ class AlunoActivationScreen extends ConsumerWidget {
                 title: 'Boas-vindas',
                 subtitle: progress.etapaLabel,
                 leadingWidth: 108,
-                leading: TextButton(
-                  onPressed: () => _sair(context, aluno.id),
-                  style: TextButton.styleFrom(
-                    foregroundColor: chrome.mute,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    wizardFazerDepoisLabel(),
-                    style: FocuxHubTypography.bodyMuted(
-                      color: chrome.mute,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                leading: FxTonalButton(label: wizardFazerDepoisLabel(), onPressed: () => _sair(context, aluno.id), compact: true),
               ),
               bottomNavigationBar: FxWizardStickyBar(
                 secondary:
                     progress.allDone && !home.chat.possuiMensagemDoAluno
-                        ? TextButton(
-                          onPressed: () async {
+                        ? FxTonalButton(label: step.cta, onPressed: () async {
                             await _markSeen(aluno.id);
                             if (!context.mounted) return;
                             context.go('/chat/aluno');
-                          },
-                          child: Text(step.cta),
-                        )
+                          }, compact: true)
                         : null,
                 primary: FxLiquidPrimaryButton(
                   icon: Icons.arrow_forward,

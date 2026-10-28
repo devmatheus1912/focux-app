@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/upsell_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Texto livre do personal, sem limite no servidor: corta aqui para uma oferta
 /// longa não esticar todas as do carrossel (a altura é a da mais alta).
@@ -165,13 +166,7 @@ class _OfertaCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                  onPressed: enviando ? null : onDecline,
-                  child: Text(s.alunoOfertaRecusar),
-                ),
+                child: FxTonalButton(label: s.alunoOfertaRecusar, onPressed: enviando ? null : onDecline, expanded: true),
               ),
               const SizedBox(width: TokensStrip.s2),
               Expanded(

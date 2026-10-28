@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/data/aluno_onboarding_prefs.dart';
 import '../data/nps_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Pergunta o NPS que o BFF liberou. Fechar sem responder adia por
 /// [alunoNpsAdiadoDias] dias neste aparelho.
@@ -119,14 +120,7 @@ class _NpsPromptSheetState extends State<_NpsPromptSheet> {
             loading: _saving,
             onPressed: _saving ? null : _enviar,
           ),
-          TextButton(
-            onPressed:
-                _saving ? null : () => FxHomeSheetChrome.dismissAndPop(context),
-            child: Text(
-              s.npsPromptDepois,
-              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-            ),
-          ),
+          FxTonalButton(label: s.npsPromptDepois, onPressed: _saving ? null : () => FxHomeSheetChrome.dismissAndPop(context), compact: true),
         ],
       ),
     );

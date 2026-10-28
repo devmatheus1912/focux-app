@@ -63,14 +63,11 @@ extension on _LojaScreenState {
               padding: const EdgeInsets.only(bottom: 10),
               child: SizedBox(
                 height: 48,
-                child: TextButton(
-                  onPressed: () async {
+                child: FxTonalButton(label: 'Copiar', onPressed: () async {
                     await copySensitiveToClipboard(pix);
                     if (!mounted) return;
                     FeedbackHelper.showSuccess(context, 'Código copiado');
-                  },
-                  child: const Text('Copiar'),
-                ),
+                  }, compact: true),
               ),
             ),
         ],
@@ -106,14 +103,11 @@ extension on _LojaScreenState {
             padding: const EdgeInsets.only(bottom: 10),
             child: SizedBox(
               height: 48,
-              child: TextButton(
-                onPressed: () async {
+              child: FxTonalButton(label: 'Copiar PIX', onPressed: () async {
                   await copySensitiveToClipboard(pix);
                   if (!mounted) return;
                   FeedbackHelper.showSuccess(context, 'Código copiado');
-                },
-                child: const Text('Copiar PIX'),
-              ),
+                }, compact: true),
             ),
           ),
         if (pendente)
@@ -122,13 +116,10 @@ extension on _LojaScreenState {
             child: SizedBox(
               height: 48,
               child: Builder(
-                builder: (sheetCtx) => TextButton(
-                  onPressed: () async {
+                builder: (sheetCtx) => FxTonalButton(label: 'Marcar pago', onPressed: () async {
                     Navigator.of(sheetCtx).pop();
                     await _confirmarPedido(pedido);
-                  },
-                  child: const Text('Marcar pago'),
-                ),
+                  }, compact: true),
               ),
             ),
           ),

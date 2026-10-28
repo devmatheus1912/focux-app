@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/auth/providers/auth_provider.dart';
@@ -378,7 +379,7 @@ void main() {
     expect(descartar.top, greaterThanOrEqualTo(reenviar.bottom));
     final acoes = tester.getRect(find.byType(ConversationSendFailedActions));
     final botaoDescartar = tester.getRect(
-      find.widgetWithText(TextButton, 'Descartar'),
+      find.widgetWithText(FxTonalButton, 'Descartar'),
     );
     expect(botaoDescartar.right, moreOrLessEquals(acoes.right));
   });
@@ -403,9 +404,9 @@ void main() {
     );
     await tester.pump();
 
-    final botoes = find.byWidgetPredicate((w) => w is TextButton);
+    final botoes = find.byWidgetPredicate((w) => w is FxTonalButton);
     expect(botoes, findsNWidgets(2));
-    final reenviar = tester.widget<TextButton>(botoes.first);
+    final reenviar = tester.widget<FxTonalButton>(botoes.first);
     expect(reenviar.onPressed, isNull);
     for (final e in botoes.evaluate()) {
       final size = tester.getSize(find.byWidget(e.widget));

@@ -31,6 +31,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../data/notificacoes_repository.dart';
 import '../notificacao_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'notificacoes_screen_widgets.part.dart';
 
@@ -286,8 +287,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
               Semantics(
                 button: true,
                 label: 'Marcar todas as notificações como lidas',
-                child: TextButton(
-                  onPressed: () async {
+                child: FxTonalButton(label: 'Ler todas', onPressed: () async {
                     AnalyticsService.instance.track(
                       ProductEvents.notificacoesMarkedAllRead,
                       props: {'unread': unreadCount},
@@ -306,9 +306,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                       context,
                       'Todas marcadas como lidas.',
                     );
-                  },
-                  child: const Text('Ler todas'),
-                ),
+                  }, compact: true),
               ),
             if (lidasCount > 0)
               IconButton(

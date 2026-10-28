@@ -86,19 +86,9 @@ class PaywallBillingLegalPanel extends StatelessWidget {
     return Column(
       children: [
         if (onRestore != null)
-          TextButton(
-            onPressed: restoring ? null : onRestore,
-            child: Text(
-              restoring
+          FxTonalButton(label: restoring
                   ? S.of(context).assinaturaRestaurandoCompras
-                  : S.of(context).assinaturaRestaurarCompras,
-              style: TextStyle(
-                fontSize: 14,
-                color: ink.withValues(alpha: 0.82),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
+                  : S.of(context).assinaturaRestaurarCompras, onPressed: restoring ? null : onRestore, compact: true),
         if (showStoreBillingNote)
           Text(
             'Cobrança e renovação automática ${subscriptionChannelWith(ChannelPreposition.por)}. '
@@ -123,17 +113,6 @@ class PaywallTrustFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle link() => TextStyle(
-      fontSize: 12,
-      fontWeight: FontWeight.w600,
-      color: primary,
-      decoration: TextDecoration.underline,
-    );
-    final linkStyle = TextButton.styleFrom(
-      minimumSize: const Size(44, 44),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      tapTargetSize: MaterialTapTargetSize.padded,
-    );
     return Column(
       children: [
         Text(
@@ -151,20 +130,12 @@ class PaywallTrustFooter extends StatelessWidget {
             Semantics(
               button: true,
               label: 'Abrir política de privacidade',
-              child: TextButton(
-                onPressed: () => FocuxLegal.openPrivacy(),
-                style: linkStyle,
-                child: Text('Privacidade (LGPD)', style: link()),
-              ),
+              child: FxTonalButton(label: 'Privacidade (LGPD)', onPressed: () => FocuxLegal.openPrivacy(), compact: true),
             ),
             Semantics(
               button: true,
               label: 'Abrir termos de uso',
-              child: TextButton(
-                onPressed: () => FocuxLegal.openTerms(),
-                style: linkStyle,
-                child: Text('Termos de uso', style: link()),
-              ),
+              child: FxTonalButton(label: 'Termos de uso', onPressed: () => FocuxLegal.openTerms(), compact: true),
             ),
           ],
         ),

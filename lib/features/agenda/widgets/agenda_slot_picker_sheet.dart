@@ -13,6 +13,7 @@ import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
 import '../utils/agenda_slots.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AgendaSlotPick {
   const AgendaSlotPick({required this.inicio, required this.duracaoMin});
@@ -237,14 +238,10 @@ class _AgendaSlotPickerSheetState extends State<AgendaSlotPickerSheet> {
               title: dayLabel[0].toUpperCase() + dayLabel.substring(1),
               subtitle: widget.title,
               leading: Icon(Icons.schedule_outlined, color: primary, size: 18),
-              trailing: TextButton(
-                onPressed:
-                    () => setState(() {
+              trailing: FxTonalButton(label: s.agendaTrocarDia, onPressed: () => setState(() {
                       _choosingDay = !_choosingDay;
                       _calMonth = agendaMonthOf(_day);
-                    }),
-                child: Text(s.agendaTrocarDia),
-              ),
+                    }), compact: true),
             ),
             SizedBox(height: TokensStrip.s3),
             if (widget.aviso case final aviso?) ...[

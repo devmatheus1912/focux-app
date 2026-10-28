@@ -37,6 +37,7 @@ import '../utils/onboarding_wizard_display.dart';
 import '../utils/onboarding_wizard_normalize.dart';
 import '../utils/setup_action_navigation.dart';
 import '../widgets/setup_step_widgets.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'onboarding_wizard_screen_actions.part.dart';
 
@@ -249,22 +250,7 @@ class _OnboardingWizardScreenState
                     allDone: _allDone,
                   ),
           leadingWidth: 108,
-          leading: TextButton(
-            onPressed: _sairSemConcluir,
-            style: TextButton.styleFrom(
-              foregroundColor: chrome.mute,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              wizardFazerDepoisLabel(),
-              style: FocuxHubTypography.bodyMuted(
-                color: chrome.mute,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+          leading: FxTonalButton(label: wizardFazerDepoisLabel(), onPressed: _sairSemConcluir, compact: true),
           actions: [
             FxHelpIconButton(
               tooltip: wizardHelpTitle(),

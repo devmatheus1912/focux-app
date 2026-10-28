@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/progressao_copy.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class IaProgressaoResultActionBar extends StatelessWidget {
   const IaProgressaoResultActionBar({
@@ -75,15 +76,7 @@ class IaProgressaoResultActionBar extends StatelessWidget {
         if (onReport != null)
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: onReport,
-              icon: const Icon(Icons.flag_outlined, size: 16),
-              label: Text(S.of(context).moderacaoDenunciarIa),
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                textStyle: const TextStyle(fontSize: 12),
-              ),
-            ),
+            child: FxTonalButton(label: S.of(context).moderacaoDenunciarIa, icon: Icons.flag_outlined, onPressed: onReport, compact: true),
           ),
       ],
     );

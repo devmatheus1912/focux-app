@@ -6,7 +6,6 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_loading.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_bubble_grouping.dart';
@@ -14,6 +13,7 @@ import '../utils/chat_outbox.dart';
 import '../utils/chat_system_event.dart';
 import 'conversation_media_widgets.dart';
 import 'conversation_outgoing_status.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class ConversationDateDivider extends StatelessWidget {
   final DateTime date;
@@ -75,22 +75,13 @@ class ConversationOlderMessagesLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return Center(
-      child: TextButton(
+      child: FxTonalButton(
+        label: 'Carregar mensagens antigas',
+        icon: Icons.history_rounded,
+        loading: loading,
+        compact: true,
         onPressed: loading ? null : onTap,
-        style: TextButton.styleFrom(minimumSize: const Size(48, 48)),
-        child:
-            loading
-                ? SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: FxLoading(strokeWidth: 2, color: primary),
-                )
-                : Text(
-                  'Carregar mensagens antigas',
-                  style: FocuxHubTypography.chip(primary),
-                ),
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'package:focux_app/core/widgets/fx_input_deco.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 enum _AcaoComentario { apagar, denunciar, bloquear }
 
@@ -231,14 +232,9 @@ class _FeedCommentsSheetState extends State<FeedCommentsSheet> {
                       itemCount: _comentarios.length + (_hasNext ? 1 : 0),
                       itemBuilder: (ctx, i) {
                         if (i >= _comentarios.length) {
-                          return TextButton(
-                            onPressed: _loadingMore
+                          return FxTonalButton(label: _loadingMore ? 'Carregando…' : 'Carregar mais', onPressed: _loadingMore
                                 ? null
-                                : () => _load(more: true),
-                            child: Text(
-                              _loadingMore ? 'Carregando…' : 'Carregar mais',
-                            ),
-                          );
+                                : () => _load(more: true), compact: true);
                         }
                         final c = _comentarios[i];
                         final useCurrentAlunoFallback =

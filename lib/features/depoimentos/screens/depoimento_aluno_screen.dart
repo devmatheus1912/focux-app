@@ -26,6 +26,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../data/depoimento_repository.dart';
 import '../utils/depoimento_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class DepoimentoAlunoScreen extends ConsumerStatefulWidget {
   const DepoimentoAlunoScreen({super.key});
@@ -165,15 +166,7 @@ class _State extends ConsumerState<DepoimentoAlunoScreen> {
                   ? 'Conte como foi sua experiência'
                   : depoimentoStatusLabel(aprovado: _enviado!.aprovado),
               leadingWidth: 92,
-              leading: TextButton(
-                onPressed: _cancel,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(_enviado == null ? 'Cancelar' : 'Fechar'),
-              ),
+              leading: FxTonalButton(label: _enviado == null ? 'Cancelar' : 'Fechar', onPressed: _cancel, compact: true),
               actions: [
                 FxHelpIconButton(
                   tooltip: 'Como funciona',

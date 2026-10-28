@@ -28,6 +28,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../alunos/widgets/aluno_avatar.dart';
 import '../data/depoimento_repository.dart';
 import '../utils/depoimento_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class DepoimentosPersonalScreen extends ConsumerStatefulWidget {
   const DepoimentosPersonalScreen({super.key});
@@ -251,13 +252,10 @@ class _State extends ConsumerState<DepoimentosPersonalScreen> {
                   },
                 ),
               ),
-            TextButton(
-              onPressed: () {
+            FxTonalButton(label: item.aprovado ? 'Remover' : 'Rejeitar', onPressed: () {
                 Navigator.pop(sheetContext);
                 _action(item, aprovado: false);
-              },
-              child: Text(item.aprovado ? 'Remover' : 'Rejeitar'),
-            ),
+              }, compact: true),
           ],
         ),
       ),

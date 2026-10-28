@@ -27,6 +27,7 @@ import '../data/relatorio_repository.dart';
 import '../utils/relatorio_global_display.dart';
 import '../widgets/relatorio_ranking_catalog_sheet.dart';
 import '../widgets/relatorio_ranking_tile.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class RelatorioGlobalScreen extends ConsumerStatefulWidget {
   const RelatorioGlobalScreen({super.key});
@@ -373,10 +374,7 @@ class _RelatorioFocusCard extends StatelessWidget {
                 },
               ),
               if (firstAtencao != null)
-                TextButton(
-                  onPressed: onRetencao,
-                  child: const Text('Ver retenção'),
-                ),
+                FxTonalButton(label: 'Ver retenção', onPressed: onRetencao, compact: true),
             ],
           ),
         ],

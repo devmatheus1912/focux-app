@@ -67,13 +67,16 @@ class FxTonalButton extends StatelessWidget {
           Icon(icon, size: 18, color: fg),
         if (loading || icon != null) const SizedBox(width: 8),
         Flexible(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: FocuxHubTypography.bodyMuted(
-              color: fg,
-              fontWeight: FontWeight.w700,
+          // Letra grande: o rótulo encolhe até caber, nunca é cortado.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: FocuxHubTypography.bodyMuted(
+                color: fg,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
@@ -109,7 +112,12 @@ class FxTonalButton extends StatelessWidget {
                 constraints: BoxConstraints(minHeight: altura),
                 child: Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: compact ? TokensStrip.s3 : TokensStrip.s4,
+                    horizontal:
+                        MediaQuery.textScalerOf(context).scale(1) >= 1.5
+                            ? TokensStrip.s2
+                            : compact
+                            ? TokensStrip.s3
+                            : TokensStrip.s4,
                   ),
                   child: conteudo,
                 ),

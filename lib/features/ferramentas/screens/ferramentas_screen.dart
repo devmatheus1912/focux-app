@@ -18,6 +18,7 @@ import '../../dashboard/widgets/dashboard_tool_shortcut_group.dart';
 import '../providers/ferramentas_catalogo_provider.dart';
 import '../utils/ferramentas_agrupar.dart';
 import '../widgets/ferramentas_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Tudo o que o plano oferece, agrupado por tarefa. Substitui o catálogo em sheet.
 class FerramentasScreen extends ConsumerStatefulWidget {
@@ -101,10 +102,7 @@ class _FerramentasScreenState extends ConsumerState<FerramentasScreen> {
                   child: SkeletonList(count: 6),
                 ),
                 error: (_, __) => Center(
-                  child: TextButton(
-                    onPressed: () => ref.invalidate(ferramentasCatalogoProvider),
-                    child: Text('${s.ferramentasNaoCarregou} ${s.ferramentasTentar}'),
-                  ),
+                  child: FxTonalButton(label: '${s.ferramentasNaoCarregou} ${s.ferramentasTentar}', onPressed: () => ref.invalidate(ferramentasCatalogoProvider), compact: true),
                 ),
                 data: (dados) {
                   final grupos = agruparFerramentas(

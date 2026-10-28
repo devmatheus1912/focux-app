@@ -34,6 +34,7 @@ import '../../pacotes/providers/pacotes_provider.dart';
 import '../data/perfil_repository.dart';
 import '../providers/perfil_provider.dart';
 import '../widgets/editar_perfil_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'editar_perfil_screen_widgets.part.dart';
 
@@ -259,15 +260,7 @@ class _EditarPerfilScreenState extends ConsumerState<EditarPerfilScreen> {
             title: 'Editar Perfil',
             subtitle: 'Conta e marca comercial',
             leadingWidth: 92,
-            leading: TextButton(
-              onPressed: _cancel,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text('Cancelar'),
-            ),
+            leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
             actions: [
               FxHelpIconButton(
                 tooltip: 'Como editar o perfil',

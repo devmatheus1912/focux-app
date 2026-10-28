@@ -34,6 +34,7 @@ import '../utils/agenda_slots.dart';
 import '../widgets/agenda_form_sheets.dart';
 import '../widgets/agenda_help_sheet.dart';
 import '../widgets/agenda_slot_picker_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class NovoAgendamentoScreen extends ConsumerStatefulWidget {
   const NovoAgendamentoScreen({super.key, this.seedDay, this.args});
@@ -247,15 +248,7 @@ class _NovoAgendamentoScreenState extends ConsumerState<NovoAgendamentoScreen> {
             title: 'Novo agendamento',
             subtitle: 'AGENDA',
             leadingWidth: 92,
-            leading: TextButton(
-              onPressed: _cancel,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text('Cancelar'),
-            ),
+            leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
           ),
           bottomNavigationBar: FxFormStickyBar(
             child: FxLiquidPrimaryButton(

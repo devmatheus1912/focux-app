@@ -22,6 +22,7 @@ import '../utils/auth_error_messages.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/password_strength_meter.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// `/aluno/ativar/:token` — link que o personal mandou: cria a senha e entra.
 class AtivarAlunoScreen extends ConsumerStatefulWidget {
@@ -203,10 +204,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
               onRetry: _validar,
             ),
             const SizedBox(height: TokensStrip.s4),
-            TextButton(
-              onPressed: () => context.go(_loginPath),
-              child: Text(s.ativarIrLogin),
-            ),
+            FxTonalButton(label: s.ativarIrLogin, onPressed: () => context.go(_loginPath), compact: true),
           ],
         ),
       ),
@@ -271,15 +269,9 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                   ),
                   Align(
                     alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed:
-                          _enviando || _enviandoCodigo ? null : _enviarCodigo,
-                      child: Text(
-                        _codigoEnviadoPara == null
+                    child: FxTonalButton(label: _codigoEnviadoPara == null
                             ? s.ativarEnviarCodigo
-                            : s.ativarReenviarCodigo,
-                      ),
-                    ),
+                            : s.ativarReenviarCodigo, onPressed: _enviando || _enviandoCodigo ? null : _enviarCodigo, compact: true),
                   ),
                   if (_codigoEnviadoPara != null) ...[
                     Text(
@@ -352,10 +344,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                 const SizedBox(height: TokensStrip.s3),
                 AuthLegalConsentText(primary: primary),
                 Center(
-                  child: TextButton(
-                    onPressed: _enviando ? null : () => context.go(_loginPath),
-                    child: Text(s.ativarIrLogin),
-                  ),
+                  child: FxTonalButton(label: s.ativarIrLogin, onPressed: _enviando ? null : () => context.go(_loginPath), compact: true),
                 ),
               ],
             ),

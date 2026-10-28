@@ -15,6 +15,7 @@ import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../data/feed_repository.dart';
 import '../utils/feed_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Card de publicação do feed (personal + aluno).
 class FeedPostCard extends StatelessWidget {
@@ -209,13 +210,7 @@ class FeedPostCard extends StatelessWidget {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   if (onCurtir != null)
-                    TextButton.icon(
-                      onPressed: onCurtir,
-                      icon: const Icon(Icons.thumb_up_alt_outlined, size: 18),
-                      label: Text(
-                        ptCountLabel(curtidas, 'curtida', 'curtidas'),
-                      ),
-                    )
+                    FxTonalButton(label: ptCountLabel(curtidas, 'curtida', 'curtidas'), icon: Icons.thumb_up_alt_outlined, onPressed: onCurtir, compact: true)
                   else
                     Text(
                       ptCountLabel(curtidas, 'curtida', 'curtidas'),
@@ -224,13 +219,7 @@ class FeedPostCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  TextButton.icon(
-                    onPressed: onComentar,
-                    icon: const Icon(Icons.comment_outlined, size: 18),
-                    label: Text(
-                      ptCountLabel(comentarios, 'comentário', 'comentários'),
-                    ),
-                  ),
+                  FxTonalButton(label: ptCountLabel(comentarios, 'comentário', 'comentários'), icon: Icons.comment_outlined, onPressed: onComentar, compact: true),
                 ],
               ),
             ],
@@ -434,11 +423,7 @@ class _FeedVideoPreview extends StatelessWidget {
               child: ColoredBox(
                 color: BrandPalette.deep(primary),
                 child: Center(
-                  child: TextButton.icon(
-                    onPressed: () => launchSafeHttpUrl(url),
-                    icon: const Icon(Icons.play_arrow_rounded),
-                    label: const Text('Abrir vídeo'),
-                  ),
+                  child: FxTonalButton(label: 'Abrir vídeo', icon: Icons.play_arrow_rounded, onPressed: () => launchSafeHttpUrl(url), compact: true),
                 ),
               ),
             ),

@@ -173,10 +173,7 @@ class _OnboardingFooter extends StatelessWidget {
               ),
               if (onBack != null) ...[
                 const SizedBox(height: TokensStrip.s2),
-                TextButton(
-                  onPressed: onBack,
-                  child: Text(FocuxBrandCopy.onboardingBack),
-                ),
+                FxTonalButton(label: FocuxBrandCopy.onboardingBack, onPressed: onBack, compact: true),
               ],
               const SizedBox(height: TokensStrip.s3),
               FxConversionTextLink(

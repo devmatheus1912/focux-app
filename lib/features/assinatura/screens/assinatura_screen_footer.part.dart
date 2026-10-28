@@ -238,32 +238,12 @@ class _AssinaturaStickyFooter extends StatelessWidget {
             ),
           ),
         ] else if (onRestore != null)
-          TextButton(
-            onPressed: restoringPurchases ? null : onRestore,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(48, 44),
-              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-            ),
-            child: Text(
-              restoringPurchases
+          FxTonalButton(label: restoringPurchases
                   ? S.of(context).assinaturaRestaurandoCompras
-                  : S.of(context).assinaturaRestaurarCompras,
-              style: FocuxHubTypography.chip(tierAccent ?? primary),
-            ),
-          ),
+                  : S.of(context).assinaturaRestaurarCompras, onPressed: restoringPurchases ? null : onRestore, compact: true),
         if (onBillingDetails != null) ...[
           const SizedBox(height: TokensStrip.s1),
-          TextButton(
-            onPressed: onBillingDetails,
-            style: TextButton.styleFrom(
-              minimumSize: const Size(48, 48),
-              padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-            ),
-            child: Text(
-              'Termos e cobrança',
-              style: FocuxHubTypography.chip(tierAccent ?? primary),
-            ),
-          ),
+          FxTonalButton(label: 'Termos e cobrança', onPressed: onBillingDetails, compact: true),
         ],
         if (showLegalConsent) ...[
           const SizedBox(height: TokensStrip.s1),

@@ -37,6 +37,7 @@ import '../providers/leads_provider.dart';
 import '../utils/lead_display.dart';
 import '../widgets/lead_detail_help_sheet.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'lead_detail_screen_state.part.dart';
 part 'lead_detail_screen_widgets.part.dart';

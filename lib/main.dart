@@ -49,6 +49,7 @@ import 'features/dashboard/utils/dashboard_home_client_cache.dart';
 import 'features/perfil/data/perfil_repository.dart';
 import 'features/perfil/providers/perfil_provider.dart';
 import 'l10n/app_localizations.dart';
+import 'core/widgets/fx_tonal_button.dart';
 
 /// Relógio do cold start — parado no primeiro frame de [FocuxApp].
 final Stopwatch _bootStopwatch = Stopwatch();
@@ -168,23 +169,14 @@ void main() {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () {
+                    FxTonalButton(label: 'Voltar', onPressed: () {
                         final router = GoRouter.maybeOf(context);
                         if (router != null && router.canPop()) {
                           router.pop();
                           return;
                         }
                         safePopOrGo(context, '/dashboard/personal');
-                      },
-                      child: const Text(
-                        'Voltar',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                      }, compact: true),
                   ],
                 ),
               ),

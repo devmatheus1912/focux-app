@@ -9,6 +9,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 Future<void> showPerfilPublicLinkSheet(
   BuildContext context, {
@@ -80,14 +81,11 @@ class _PerfilPublicLinkBody extends StatelessWidget {
           },
         ),
         const SizedBox(height: TokensStrip.s2),
-        TextButton(
-          onPressed: () async {
+        FxTonalButton(label: 'Abrir no navegador', onPressed: () async {
             final uri = Uri.tryParse(url);
             if (uri == null) return;
             await launchUrl(uri, mode: LaunchMode.externalApplication);
-          },
-          child: const Text('Abrir no navegador'),
-        ),
+          }, compact: true),
       ],
     );
   }

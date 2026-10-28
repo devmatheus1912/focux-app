@@ -29,6 +29,7 @@ import '../data/convite_repository.dart';
 import '../providers/convite_provider.dart';
 import '../utils/convite_display.dart';
 import '../widgets/convites_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class ConvitesScreen extends ConsumerStatefulWidget {
   const ConvitesScreen({super.key});
@@ -414,15 +415,9 @@ class _ConvitesScreenState extends ConsumerState<ConvitesScreen> {
                                   padding: const EdgeInsets.only(
                                     bottom: TokensStrip.s2,
                                   ),
-                                  child: TextButton(
-                                    onPressed:
-                                        _revoking || _generating
+                                  child: FxTonalButton(label: _revoking ? 'Revogando…' : 'Revogar link', onPressed: _revoking || _generating
                                             ? null
-                                            : _revogar,
-                                    child: Text(
-                                      _revoking ? 'Revogando…' : 'Revogar link',
-                                    ),
-                                  ),
+                                            : _revogar, compact: true),
                                 ),
                               FxLiquidPrimaryButton(
                                 label: ativo ? 'Gerar novo link' : 'Gerar link',

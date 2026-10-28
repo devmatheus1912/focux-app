@@ -31,6 +31,7 @@ import '../utils/prontidao_display.dart';
 import '../widgets/recovery_score_ring.dart';
 import '../../../core/utils/pt_br_display.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 typedef HealthDashboardCheckAuthorization = Future<bool> Function();
 typedef HealthDashboardLoadTodaySummary = Future<HealthSummary> Function();
@@ -559,14 +560,7 @@ class _HealthDashboardScreenState extends State<HealthDashboardScreen> {
           ),
           const SizedBox(height: TokensStrip.s6),
           Center(
-            child: TextButton(
-              onPressed: _desconectar,
-              style: TextButton.styleFrom(foregroundColor: chrome.mute),
-              child: Text(
-                saudeGerenciarConexaoLabel,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-            ),
+            child: FxTonalButton(label: saudeGerenciarConexaoLabel, onPressed: _desconectar, compact: true),
           ),
         ],
       ),

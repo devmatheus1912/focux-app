@@ -9,6 +9,7 @@ import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
 import 'fx_motion.dart';
+import 'fx_tonal_button.dart';
 
 /// Sheet de formulário curto — substitui `AlertDialog` com campos.
 ///
@@ -110,7 +111,6 @@ class _FxFormSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
     final accent = destructive ? EagleTokens.bad : Theme.of(context).colorScheme.primary;
     final onAccent = destructive ? Colors.white : Theme.of(context).colorScheme.onPrimary;
     final maxHeight =
@@ -166,16 +166,7 @@ class _FxFormSheet extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(
             height: 48,
-            child: TextButton(
-              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
-              child: Text(
-                cancelLabel,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: cancelLabel, onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false), compact: true),
           ),
         ],
       ),

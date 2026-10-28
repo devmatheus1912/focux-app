@@ -20,6 +20,7 @@ import '../widgets/ia_chat_composer.dart';
 import '../widgets/ia_quota_upgrade.dart';
 import 'package:focux_app/core/widgets/fx_loading.dart';
 import 'package:focux_app/core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class _IaMsg {
   final String texto;
@@ -241,23 +242,14 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               bubble,
-                              TextButton.icon(
-                                onPressed: () => showDenunciarSheet(
+                              FxTonalButton(label: S.of(context).moderacaoDenunciarIa, icon: Icons.flag_outlined, onPressed: () => showDenunciarSheet(
                                   context,
                                   repo: ModeracaoRepository(
                                     ref.read(apiClientProvider),
                                   ),
                                   tipo: DenunciaTipo.iaResposta,
                                   conteudo: m.texto,
-                                ),
-                                icon: const Icon(Icons.flag_outlined, size: 16),
-                                label: Text(S.of(context).moderacaoDenunciarIa),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: chrome.mute,
-                                  visualDensity: VisualDensity.compact,
-                                  textStyle: const TextStyle(fontSize: 12),
-                                ),
-                              ),
+                                ), compact: true),
                             ],
                           );
                         },

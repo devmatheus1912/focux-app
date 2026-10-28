@@ -8,6 +8,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/ia_copiloto_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class CopilotoCardView extends StatelessWidget {
   const CopilotoCardView({
@@ -81,22 +82,7 @@ class CopilotoCardView extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: onVerTarefas,
-              style: TextButton.styleFrom(
-                foregroundColor: mute,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(48, 48),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                s.copilotoVerTarefas,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: s.copilotoVerTarefas, onPressed: onVerTarefas, compact: true),
           ),
         ],
       ),

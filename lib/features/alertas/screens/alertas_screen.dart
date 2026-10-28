@@ -29,6 +29,7 @@ import '../../dashboard/widgets/dashboard_section_header.dart';
 import '../data/alertas_repository.dart';
 import '../utils/alerta_detalhe_display.dart';
 import '../widgets/alerta_enviar_mensagem_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AlertasScreen extends ConsumerStatefulWidget {
   const AlertasScreen({super.key});
@@ -252,13 +253,10 @@ class _AlertasScreenState extends ConsumerState<AlertasScreen> {
                 },
               ),
               const SizedBox(height: TokensStrip.s2),
-              TextButton(
-                onPressed: () {
+              FxTonalButton(label: alertaAdiarCtaLabel(), onPressed: () {
                   Navigator.pop(sheetContext);
                   _resolverAlerta(alerta);
-                },
-                child: Text(alertaAdiarCtaLabel()),
-              ),
+                }, compact: true),
             ],
           ),
         );

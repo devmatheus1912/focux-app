@@ -10,6 +10,7 @@ import '../../../core/widgets/fx_strip_card.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../core/widgets/fx_action_chip.dart';
 import '../data/smart_pricing_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class SmartPricingCard extends ConsumerStatefulWidget {
   const SmartPricingCard({super.key});
@@ -106,21 +107,13 @@ class _SmartPricingCardState extends ConsumerState<SmartPricingCard> {
               ),
             ),
             if (_failed)
-              TextButton(
-                onPressed: () {
+              FxTonalButton(label: 'Tentar', onPressed: () {
                   setState(() {
                     _loading = true;
                     _failed = false;
                   });
                   _load();
-                },
-                child: Text(
-                  'Tentar',
-                  style: FocuxHubTypography.chip(primary).copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+                }, compact: true),
           ],
         ),
       );

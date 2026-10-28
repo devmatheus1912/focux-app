@@ -111,7 +111,7 @@ void main() {
     expect(build, contains('managementMode'));
     expect(build, contains("title: managementMode ? 'Assinatura' : 'Planos'"));
     expect(build, contains("'Cancelar'"));
-    expect(build, contains('TextButton('));
+    expect(build, contains('FxTonalButton('));
     expect(build, isNot(contains('Icons.cancel_outlined')));
 
     final body = File(

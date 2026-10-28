@@ -297,11 +297,7 @@ class _MigracaoConviteTile extends StatelessWidget {
                 ),
                 child: Text(s.alunoLinkEnviarWhatsApp),
               ),
-              TextButton(
-                onPressed: () => _copiar(context),
-                style: TextButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-                child: Text(s.alunoLinkCopiar),
-              ),
+              FxTonalButton(label: s.alunoLinkCopiar, onPressed: () => _copiar(context), expanded: true),
             ] else
               OutlinedButton(
                 onPressed: () => _copiar(context),

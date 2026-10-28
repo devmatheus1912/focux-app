@@ -12,6 +12,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../auth/widgets/auth_shell.dart';
 import '../providers/convite_provider.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Universal Link / custom scheme → valida token e abre register/aluno.
 class ConviteDeepLinkScreen extends ConsumerStatefulWidget {
@@ -133,8 +134,7 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
                             onPressed: () => context.go('/register/aluno'),
                           ),
                           const SizedBox(height: TokensStrip.s2),
-                          TextButton(
-                            onPressed: () async {
+                          FxTonalButton(label: 'Já tenho conta — Entrar', onPressed: () async {
                               final slug =
                                   widget.initialSlug?.trim().isNotEmpty == true
                                       ? widget.initialSlug!.trim()
@@ -150,9 +150,7 @@ class _ConviteDeepLinkScreenState extends ConsumerState<ConviteDeepLinkScreen> {
                                   queryParameters: params,
                                 ).toString(),
                               );
-                            },
-                            child: const Text('Já tenho conta — Entrar'),
-                          ),
+                            }, compact: true),
                         ],
                       ),
                     ),

@@ -53,6 +53,7 @@ import '../assinatura_route_args.dart';
 import '../utils/assinatura_checkout_events.dart';
 import '../utils/assinatura_review_display.dart';
 import 'package:focux_app/core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'assinatura_screen_footer.part.dart';
 part 'assinatura_screen_build.part.dart';

@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Campo OTP 6 dígitos reutilizável (cadastro + reset de senha).
 class AuthOtpField extends StatelessWidget {
@@ -27,7 +27,6 @@ class AuthOtpField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return AuthField(
       label: 'Código do e-mail',
       controller: controller,
@@ -52,21 +51,11 @@ class AuthOtpField extends StatelessWidget {
             resendSeconds > 0
                 ? 'Reenviar código em $resendSeconds segundos'
                 : resendLabel,
-        child: TextButton(
-          onPressed:
-              (sending || disabled || resendSeconds > 0) ? null : onResend,
-          child: Text(
-            sending
+        child: FxTonalButton(label: sending
                 ? 'Enviando…'
                 : resendSeconds > 0
                 ? '${resendSeconds}s'
-                : resendLabel,
-            style: FocuxHubTypography.chip(primary).copyWith(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
+                : resendLabel, onPressed: (sending || disabled || resendSeconds > 0) ? null : onResend, compact: true),
       ),
     );
   }

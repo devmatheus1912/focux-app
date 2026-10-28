@@ -24,6 +24,7 @@ import '../../alunos/utils/satellite_screen_utils.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/evolucao_repository.dart';
 import '../utils/evolucao_fotos_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class EvolucaoFotosScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -303,13 +304,10 @@ class _State extends ConsumerState<EvolucaoFotosScreen> {
                         color: chrome.mute,
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => setState(() {
+                    FxTonalButton(label: 'Limpar', onPressed: () => setState(() {
                         _selBefore = null;
                         _selAfter = null;
-                      }),
-                      child: const Text('Limpar'),
-                    ),
+                      }), compact: true),
                     Text(
                       'Depois',
                       style: TextStyle(

@@ -13,6 +13,7 @@ import '../auth/session_refresh_coordinator.dart';
 import '../theme/design_tokens.dart';
 import '../utils/connectivity_banner_state.dart';
 import 'feedback_helper.dart';
+import 'fx_tonal_button.dart';
 
 /// Mostra conexão e fila offline, e drena a fila: ao voltar a rede, ao voltar
 /// ao primeiro plano e em intervalo enquanto houver pendência.
@@ -196,17 +197,7 @@ class _FxConnectivityBannerState extends ConsumerState<FxConnectivityBanner>
                             // Descarte é o único estado que exige ciência do
                             // usuário: conexão e sincronia se resolvem sozinhas.
                             if (kind == ConnectivityBannerKind.dropped)
-                              TextButton(
-                                onPressed: _dismissDropped,
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  minimumSize: const Size(44, 44),
-                                ),
-                                child: Text(S.of(context).conexaoOk),
-                              ),
+                              FxTonalButton(label: S.of(context).conexaoOk, onPressed: _dismissDropped, compact: true),
                           ],
                         ),
                       ),

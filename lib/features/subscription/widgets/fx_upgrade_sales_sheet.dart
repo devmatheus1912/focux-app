@@ -12,6 +12,7 @@ import '../../planos/paywall/paywall_catalog.dart';
 import '../models/subscription_plan.dart';
 import '../plan_entitlements.dart';
 import '../services/upgrade_prompt_cooldown.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Corpo de venda reutilizável (sheet Free + FeatureGate).
 class FxUpgradeSalesPanel extends StatelessWidget {
@@ -135,13 +136,7 @@ class FxUpgradeSalesPanel extends StatelessWidget {
           onPressed: onCta,
         ),
         if (onDismiss != null)
-          TextButton(
-            onPressed: onDismiss,
-            child: Text(
-              'Agora não',
-              style: TextStyle(color: mute, fontWeight: FontWeight.w600),
-            ),
-          ),
+          FxTonalButton(label: 'Agora não', onPressed: onDismiss, compact: true),
       ],
     );
   }

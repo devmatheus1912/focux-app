@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/chat_outbox.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 String chatOutgoingStatusLabel(ChatOutgoingStatus status, S s) {
   return switch (status) {
@@ -74,12 +75,7 @@ class ConversationSendFailedActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
-    final chrome = ShellChrome.of(context);
     final canRetry = onRetry != null;
-    final style = TextButton.styleFrom(
-      minimumSize: const Size(48, 48),
-      padding: const EdgeInsets.symmetric(horizontal: TokensStrip.s2),
-    );
     return Wrap(
       alignment: WrapAlignment.end,
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -87,31 +83,10 @@ class ConversationSendFailedActions extends StatelessWidget {
         MergeSemantics(
           child: Semantics(
             hint: canRetry ? null : s.chatReenvioAguardaAnexo,
-            child: TextButton.icon(
-              onPressed: onRetry,
-              style: style,
-              icon: Icon(
-                Icons.refresh_rounded,
-                size: 16,
-                color: canRetry ? accentColor : chrome.mute,
-              ),
-              label: Text(
-                s.retry,
-                style: FocuxHubTypography.chip(
-                  canRetry ? chrome.ink : chrome.mute,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: s.retry, icon: Icons.refresh_rounded, onPressed: onRetry, compact: true),
           ),
         ),
-        TextButton(
-          onPressed: onDiscard,
-          style: style,
-          child: Text(
-            s.chatDescartarNaoEnviada,
-            style: FocuxHubTypography.chip(chrome.mute),
-          ),
-        ),
+        FxTonalButton(label: s.chatDescartarNaoEnviada, onPressed: onDiscard, compact: true),
       ],
     );
   }

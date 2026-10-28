@@ -35,6 +35,7 @@ import '../data/financeiro_repository.dart';
 import 'financeiro_hub_display.dart';
 import 'pix_qr_display.dart';
 import '../widgets/vencimento_escolha.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 FinanceiroRepository mensalidadeRepo(WidgetRef ref) =>
     FinanceiroRepository(ref.read(apiClientProvider));
@@ -336,10 +337,7 @@ Future<bool> mostrarPixMensalidade({
                                       },
                                     )
                                   else
-                                    TextButton(
-                                      onPressed: () => carregar(setDialogState),
-                                      child: const Text('Tentar de novo'),
-                                    ),
+                                    FxTonalButton(label: 'Tentar de novo', onPressed: () => carregar(setDialogState), compact: true),
                                 ],
                               ),
                             )
@@ -400,11 +398,7 @@ Future<bool> mostrarPixMensalidade({
                             ],
                           ],
                           const SizedBox(height: 12),
-                          TextButton(
-                            onPressed:
-                                () => FxHomeSheetChrome.dismissAndPop(ctx),
-                            child: const Text('Fechar'),
-                          ),
+                          FxTonalButton(label: 'Fechar', onPressed: () => FxHomeSheetChrome.dismissAndPop(ctx), compact: true),
                         ],
                       ),
                     ),

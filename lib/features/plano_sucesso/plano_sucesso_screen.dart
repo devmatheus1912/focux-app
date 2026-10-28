@@ -33,6 +33,7 @@ import 'plano_sucesso_model.dart';
 import 'plano_sucesso_provider.dart';
 import 'widgets/plano_sucesso_help_sheet.dart';
 import '../../core/widgets/fx_action_chip.dart';
+import '../../core/widgets/fx_tonal_button.dart';
 
 part 'plano_sucesso_screen_hub.part.dart';
 
@@ -202,8 +203,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: () async {
+                    child: FxTonalButton(label: 'Remover etapa', onPressed: () async {
                         final marcoId = pendentes[i].id;
                         final confirm = await showFxConfirmSheet(
                           context,
@@ -230,9 +230,7 @@ class _PlanoSucessoScreenState extends State<PlanoSucessoScreen> {
                             FeedbackHelper.showError(context, friendlyError(e));
                           }
                         }
-                      },
-                      child: const Text('Remover etapa'),
-                    ),
+                      }, compact: true),
                   ),
                 ],
                 AlunoInsetFormField(

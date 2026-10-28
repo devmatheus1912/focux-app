@@ -6,6 +6,7 @@ import '../data/qa_endpoint_runner.dart';
 import '../data/qa_smoke_catalog.dart';
 import '../widgets/qa_route_preview.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Tela QA — navega por todas as rotas de smoke test catalogadas.
 ///
@@ -38,31 +39,11 @@ class _QaSmokeScreenState extends State<QaSmokeScreen> {
         elevation: 0,
         title: const Text('🧪 QA Smoke Test'),
         actions: [
-          TextButton.icon(
-            onPressed: _running ? null : () => context.go('/qa/tokens-strip'),
-            icon: const Icon(Icons.palette_outlined),
-            label: const Text('TOKENS'),
-          ),
-          TextButton.icon(
-            onPressed: _running ? null : _runPublicRoutes,
-            icon: const Icon(Icons.play_arrow),
-            label: const Text('Públicas'),
-          ),
-          TextButton.icon(
-            onPressed: _running ? null : _runPrivateRoutes,
-            icon: const Icon(Icons.lock_open),
-            label: const Text('Logadas'),
-          ),
-          TextButton.icon(
-            onPressed: _running ? null : _runEndpoints,
-            icon: const Icon(Icons.cloud_outlined),
-            label: const Text('APIs'),
-          ),
-          TextButton.icon(
-            onPressed: _resetResults,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Limpar'),
-          ),
+          FxTonalButton(label: 'TOKENS', icon: Icons.palette_outlined, onPressed: _running ? null : () => context.go('/qa/tokens-strip'), compact: true),
+          FxTonalButton(label: 'Públicas', icon: Icons.play_arrow, onPressed: _running ? null : _runPublicRoutes, compact: true),
+          FxTonalButton(label: 'Logadas', icon: Icons.lock_open, onPressed: _running ? null : _runPrivateRoutes, compact: true),
+          FxTonalButton(label: 'APIs', icon: Icons.cloud_outlined, onPressed: _running ? null : _runEndpoints, compact: true),
+          FxTonalButton(label: 'Limpar', icon: Icons.refresh, onPressed: _resetResults, compact: true),
         ],
       ),
       body: Column(

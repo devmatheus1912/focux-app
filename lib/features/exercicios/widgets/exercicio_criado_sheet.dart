@@ -65,14 +65,18 @@ class _ExercicioCriadoSheet extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (origem != ExercicioOrigem.biblioteca)
-                FxActionLink(
-                  label: 'Ver em Meus exercícios',
-                  onTap: () => escolher(ExercicioCriadoDestino.verEmMeus),
+                Flexible(
+                  child: FxActionLink(
+                    label: 'Ver em Meus exercícios',
+                    onTap: () => escolher(ExercicioCriadoDestino.verEmMeus),
+                  ),
                 ),
               if (origem == ExercicioOrigem.biblioteca)
-                FxActionLink(
-                  label: 'Criar outro',
-                  onTap: () => escolher(ExercicioCriadoDestino.criarOutro),
+                Flexible(
+                  child: FxActionLink(
+                    label: 'Criar outro',
+                    onTap: () => escolher(ExercicioCriadoDestino.criarOutro),
+                  ),
                 ),
             ],
           ),

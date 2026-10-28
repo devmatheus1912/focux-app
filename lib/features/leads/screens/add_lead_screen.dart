@@ -24,6 +24,7 @@ import '../../../features/auth/providers/auth_provider.dart';
 import '../../subscription/widgets/upgrade_prompt_sheet.dart';
 import '../data/lead_repository.dart';
 import '../utils/lead_display.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class AddLeadScreen extends ConsumerStatefulWidget {
   const AddLeadScreen({super.key});
@@ -195,15 +196,7 @@ class _AddLeadScreenState extends ConsumerState<AddLeadScreen> {
         title: 'Novo Lead',
         subtitle: leadNovoHubSubtitle(),
         leadingWidth: 92,
-        leading: TextButton(
-          onPressed: _cancel,
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: const Text('Cancelar'),
-        ),
+        leading: FxTonalButton(label: 'Cancelar', onPressed: _cancel, compact: true),
         actions: [
           FxHelpIconButton(
             tooltip: 'Como cadastrar um lead',

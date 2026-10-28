@@ -200,11 +200,7 @@ class _LeadDetailContent extends StatelessWidget {
       const SizedBox(height: TokensStrip.s5),
       Align(
         alignment: Alignment.centerLeft,
-        child: TextButton(
-          onPressed: onArquivar,
-          style: TextButton.styleFrom(foregroundColor: EagleTokens.bad),
-          child: const Text('Arquivar lead'),
-        ),
+        child: FxTonalButton(label: 'Arquivar lead', onPressed: onArquivar, compact: true, danger: true),
       ),
     ];
   }

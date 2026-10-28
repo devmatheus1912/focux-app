@@ -332,8 +332,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                     const IaSafetyDisclaimer(compact: true),
                                     Align(
                                       alignment: Alignment.centerLeft,
-                                      child: TextButton.icon(
-                                        onPressed: () => showDenunciarSheet(
+                                      child: FxTonalButton(label: S.of(context).moderacaoDenunciarIa, icon: Icons.flag_outlined, onPressed: () => showDenunciarSheet(
                                           context,
                                           repo: ModeracaoRepository(
                                             ref.read(apiClientProvider),
@@ -345,22 +344,7 @@ extension IaCopilotoScreenBuild on _IaCopilotoScreenState {
                                                     '${i.titulo}: ${i.detalhe}',
                                               )
                                               .join('\n'),
-                                        ),
-                                        icon: const Icon(
-                                          Icons.flag_outlined,
-                                          size: 16,
-                                        ),
-                                        label: Text(
-                                          S.of(context).moderacaoDenunciarIa,
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: mute,
-                                          visualDensity: VisualDensity.compact,
-                                          textStyle: const TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
+                                        ), compact: true),
                                     ),
                                   ],
                                 ),

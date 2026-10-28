@@ -6,6 +6,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
+import 'fx_tonal_button.dart';
 
 /// Confirmação canônica no chrome da Home — substitui `AlertDialog` de
 /// confirmar/cancelar. Retorna `true` só se o usuário confirmar.
@@ -132,16 +133,7 @@ class _FxConfirmSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           SizedBox(
             height: 48,
-            child: TextButton(
-              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false),
-              child: Text(
-                cancelLabel,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+            child: FxTonalButton(label: cancelLabel, onPressed: () => FxHomeSheetChrome.dismissAndPop(context, false), compact: true),
           ),
         ],
       ),
@@ -196,19 +188,10 @@ class _FxConfirmSheet extends StatelessWidget {
           const SizedBox(height: TokensStrip.s2),
           SizedBox(
             height: 48,
-            child: TextButton(
-              onPressed: () {
+            child: FxTonalButton(label: confirmLabel, onPressed: () {
                 HapticFeedback.mediumImpact();
                 FxHomeSheetChrome.dismissAndPop(context, true);
-              },
-              child: Text(
-                confirmLabel,
-                style: const TextStyle(
-                  color: EagleTokens.bad,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+              }, compact: true),
           ),
         ],
       ),

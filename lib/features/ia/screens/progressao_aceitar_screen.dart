@@ -31,6 +31,7 @@ import '../utils/progressao_aceitar_route_args.dart';
 import '../utils/progressao_copy.dart';
 import '../widgets/ia_progressao_card_entrance.dart';
 import '../widgets/ia_progressao_exercise_card.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 class ProgressaoAceitarScreen extends ConsumerStatefulWidget {
   const ProgressaoAceitarScreen({super.key});
@@ -228,15 +229,10 @@ class _ProgressaoAceitarScreenState
         ),
         if (args.alunoId != null)
           Center(
-            child: TextButton.icon(
-              onPressed:
-                  () => safePopOrGo(
+            child: FxTonalButton(label: 'Voltar ao Aluno 360', icon: Icons.arrow_back_rounded, onPressed: () => safePopOrGo(
                     context,
                     args.returnTo ?? '/alunos/${args.alunoId}',
-                  ),
-              icon: const Icon(Icons.arrow_back_rounded, size: 18),
-              label: const Text('Voltar ao Aluno 360'),
-            ),
+                  ), compact: true),
           ),
       ],
     );

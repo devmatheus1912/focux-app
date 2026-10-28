@@ -257,15 +257,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
             Semantics(
               button: true,
               label: 'Cancelar assinatura',
-              child: TextButton(
-                onPressed: () => context.push('/cancel-save'),
-                child: Text(
-                  'Cancelar',
-                  style: TokensStrip.body(
-                    color: primary,
-                  ).copyWith(fontWeight: FontWeight.w600, fontSize: 14),
-                ),
-              ),
+              child: FxTonalButton(label: 'Cancelar', onPressed: () => context.push('/cancel-save'), compact: true),
             ),
         ],
       ),
@@ -374,16 +366,7 @@ extension AssinaturaScreenBuild on _AssinaturaScreenState {
                         },
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => FocuxLegal.openSupport(),
-                      child: Text(
-                        'Falar com suporte',
-                        style: TextStyle(
-                          color: mute,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    FxTonalButton(label: 'Falar com suporte', onPressed: () => FocuxLegal.openSupport(), compact: true),
                   ],
                 ),
               ),

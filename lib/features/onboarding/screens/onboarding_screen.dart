@@ -17,6 +17,7 @@ import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../auth/widgets/auth_shell.dart';
 import '../data/brand_pulse_repository.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'onboarding_screen_widgets.part.dart';
 

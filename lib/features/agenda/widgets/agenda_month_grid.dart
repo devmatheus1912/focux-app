@@ -10,6 +10,7 @@ import '../../../l10n/app_localizations.dart';
 import '../data/agenda_repository.dart';
 import '../utils/agenda_month.dart';
 import '../utils/agenda_schedule.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Mês no formato do Calendário do iPhone: título grande, grade de borda a
 /// borda com hairline por semana e atendimentos em chips.
@@ -248,28 +249,10 @@ class _MonthTitle extends StatelessWidget {
           if (onToday != null)
             Tooltip(
               message: S.of(context).agendaIrParaHoje,
-              child: TextButton(
-                onPressed: () {
+              child: FxTonalButton(label: S.of(context).agendaHoje, onPressed: () {
                   HapticFeedback.selectionClick();
                   onToday!();
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: primary,
-                  minimumSize: const Size(
-                    FxHomeSheetChrome.touchTarget,
-                    FxHomeSheetChrome.touchTarget,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: TokensStrip.s2,
-                  ),
-                ),
-                child: Text(
-                  S.of(context).agendaHoje,
-                  style: FocuxHubTypography.body(
-                    color: primary,
-                  ).copyWith(fontWeight: FontWeight.w700),
-                ),
-              ),
+                }, compact: true),
             ),
           seta(Icons.chevron_left_rounded, 'Mês anterior', onPrev),
           seta(Icons.chevron_right_rounded, 'Próximo mês', onNext),

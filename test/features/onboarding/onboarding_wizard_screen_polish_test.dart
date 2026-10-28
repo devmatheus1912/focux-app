@@ -23,7 +23,7 @@ void main() {
     expect(screen, contains('bottomNavigationBar'));
     expect(screen, contains('wizardEtapaLabel'));
     expect(screen, contains('wizardFazerDepoisLabel'));
-    expect(screen, contains('foregroundColor: chrome.mute'));
+    expect(screen, contains('FxTonalButton'));
     expect(screen, contains('TokensStrip.s6'));
     expect(screen, contains('TokensStrip.fontBodySm'));
     expect(screen, contains('FocuxHubTypography.sectionTitle'));

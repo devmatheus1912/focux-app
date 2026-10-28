@@ -8,6 +8,7 @@ import '../widgets/fx_form_sheet.dart';
 import '../widgets/fx_input_deco.dart';
 import '../widgets/fx_keyboard_dismiss_scope.dart';
 import '../widgets/fx_loading.dart';
+import '../widgets/fx_tonal_button.dart';
 
 const excluirContaPath = '/api/lgpd/me/delete';
 const excluirContaCodigoPath = '/api/lgpd/me/delete/codigo';
@@ -209,24 +210,20 @@ class _ExcluirContaCamposState extends State<_ExcluirContaCampos> {
           ),
         Align(
           alignment: Alignment.centerLeft,
-          child: TextButton(
+          child: FxTonalButton(
+            label:
+                _usarCodigo
+                    ? l10n.excluirContaReenviarCodigo
+                    : l10n.excluirContaPedirCodigo,
+            loading: _enviando,
+            compact: true,
             onPressed: _enviando ? null : _pedirCodigo,
-            child: _enviando
-                ? const FxLoading(size: 18, strokeWidth: 2)
-                : Text(
-                    _usarCodigo
-                        ? l10n.excluirContaReenviarCodigo
-                        : l10n.excluirContaPedirCodigo,
-                  ),
           ),
         ),
         if (_usarCodigo)
           Align(
             alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: _usarSenha,
-              child: Text(l10n.excluirContaUsarSenha),
-            ),
+            child: FxTonalButton(label: l10n.excluirContaUsarSenha, onPressed: _usarSenha, compact: true),
           ),
         const SizedBox(height: 8),
         TextField(

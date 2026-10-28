@@ -24,6 +24,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../data/rbac_repository.dart';
 import '../models/permissao_rbac.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 final rbacRepositoryProvider = Provider(
   (ref) => RbacRepository(ref.read(apiClientProvider)),
@@ -267,8 +268,7 @@ class RbacScreen extends ConsumerWidget {
                               }
                             },
                   ),
-                  TextButton(
-                    onPressed: () async {
+                  FxTonalButton(label: 'Revogar acesso', onPressed: () async {
                       FxHomeSheetChrome.dismissAndPop(ctx);
                       if (context.mounted) {
                         await _revogarPermissao(
@@ -277,15 +277,7 @@ class RbacScreen extends ConsumerWidget {
                           permissao.recurso,
                         );
                       }
-                    },
-                    child: Text(
-                      'Revogar acesso',
-                      style: TextStyle(
-                        color: Theme.of(ctx).colorScheme.error,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
+                    }, compact: true),
                 ],
               ),
             );

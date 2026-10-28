@@ -12,7 +12,6 @@ import '../../../core/config/env.dart';
 import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
@@ -37,6 +36,7 @@ import '../widgets/apple_sign_in_button.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'login_screen_actions.part.dart';
 
@@ -317,19 +317,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             _showPassword
                                                 ? 'Ocultar senha'
                                                 : 'Mostrar senha',
-                                        child: TextButton(
-                                          onPressed: () {
+                                        child: FxTonalButton(label: _showPassword ? 'Ocultar' : 'Ver', onPressed: () {
                                             setState(() {
                                               _showPassword = !_showPassword;
                                             });
-                                          },
-                                          child: Text(
-                                            _showPassword ? 'Ocultar' : 'Ver',
-                                            style: FocuxHubTypography.chip(
-                                              primary,
-                                            ),
-                                          ),
-                                        ),
+                                          }, compact: true),
                                       ),
                                     ),
                                     const SizedBox(height: TokensStrip.s2),

@@ -218,14 +218,9 @@ class _AutomacaoLogsSheetState extends State<_AutomacaoLogsSheet> {
               FxSettingsLayout.pageInset,
               TokensStrip.s2,
             ),
-            child: TextButton(
-              onPressed: _toggling ? null : _toggle,
-              child: Text(
-                _fluxo.ativo
+            child: FxTonalButton(label: _fluxo.ativo
                     ? automacaoPausarLabel()
-                    : automacaoRetomarLabel(),
-              ),
-            ),
+                    : automacaoRetomarLabel(), onPressed: _toggling ? null : _toggle, compact: true),
           ),
           if (_fluxo.ativo)
             Padding(

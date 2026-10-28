@@ -13,6 +13,7 @@ import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Challenge MFA após login Personal (TOTP ou recovery).
 class MfaVerifyScreen extends ConsumerStatefulWidget {
@@ -188,21 +189,15 @@ class _MfaVerifyScreenState extends ConsumerState<MfaVerifyScreen> {
                       ),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          onPressed:
-                              _loading
+                        child: FxTonalButton(label: _useRecovery
+                                ? 'Usar código do autenticador'
+                                : 'Usar código de recuperação', onPressed: _loading
                                   ? null
                                   : () => setState(() {
                                         _useRecovery = !_useRecovery;
                                         _codeController.clear();
                                         _error = null;
-                                      }),
-                          child: Text(
-                            _useRecovery
-                                ? 'Usar código do autenticador'
-                                : 'Usar código de recuperação',
-                          ),
-                        ),
+                                      }), compact: true),
                       ),
                       if (_error != null) ...[
                         Semantics(

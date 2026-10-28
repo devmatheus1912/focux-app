@@ -22,6 +22,7 @@ import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../utils/mfa_disable_otp_copy.dart';
 import '../utils/mfa_setup_help_sheet.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Setup / status / disable MFA TOTP do Personal.
 class MfaSetupScreen extends ConsumerStatefulWidget {
@@ -333,10 +334,7 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () => _copy(_setup!.secret, 'Secret'),
-                          child: const Text('Copiar secret'),
-                        ),
+                        FxTonalButton(label: 'Copiar secret', onPressed: () => _copy(_setup!.secret, 'Secret'), compact: true),
                         const SizedBox(height: 12),
                         Text(
                           'Códigos de recuperação (salve agora — só aparecem uma vez):',
@@ -352,14 +350,10 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                             ),
                           ),
                         ),
-                        TextButton(
-                          onPressed:
-                              () => _copy(
+                        FxTonalButton(label: 'Copiar códigos', onPressed: () => _copy(
                                 _setup!.recoveryCodes.join('\n'),
                                 'Códigos',
-                              ),
-                          child: const Text('Copiar códigos'),
-                        ),
+                              ), compact: true),
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
                           value: _recoverySaved,
@@ -438,14 +432,9 @@ class _MfaSetupScreenState extends ConsumerState<MfaSetupScreen> {
                         ),
                         Align(
                           alignment: Alignment.centerLeft,
-                          child: TextButton(
-                            onPressed: _busy ? null : _requestEmailOtp,
-                            child: Text(
-                              _emailOtpSent
+                          child: FxTonalButton(label: _emailOtpSent
                                   ? 'Reenviar código por e-mail'
-                                  : 'Enviar código por e-mail',
-                            ),
-                          ),
+                                  : 'Enviar código por e-mail', onPressed: _busy ? null : _requestEmailOtp, compact: true),
                         ),
                       ],
                       const SizedBox(height: 8),
