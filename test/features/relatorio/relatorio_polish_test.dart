@@ -26,7 +26,7 @@ void main() {
     expect(screen, isNot(contains('_PeriodPill')));
 
     expect(pdf, contains('focuxPdfPage'));
-    expect(pdf, contains('FocuxPdfBrand.from'));
+    expect(pdf, contains('brand: brand'));
     expect(pdf, isNot(contains('PdfColor.fromInt')));
 
     expect(global, contains('fxScreenA11yScope'));

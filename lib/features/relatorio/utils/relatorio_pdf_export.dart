@@ -36,6 +36,9 @@ Future<Uint8List> buildRelatorioPdf({
   DateTime? agora,
 }) {
   final marca = brand ?? FocuxPdfBrand.focux();
+  // seções na cor da marca do personal
+  List<pw.Widget> secao(String titulo, List<pw.Widget> filhos) =>
+      focuxPdfSection(titulo, filhos, cor: marca.cor);
   final checkIns = comparativo?.checkInsAtual;
   final doc = pw.Document(
     title: 'Relatório de aderência · $alunoNome',
@@ -70,7 +73,7 @@ Future<Uint8List> buildRelatorioPdf({
         ]),
         pw.SizedBox(height: 18),
         if (comparativo != null) ...[
-          ...focuxPdfSection('Aderência: atual x período anterior', [
+          ...secao('Aderência: atual x período anterior', [
             focuxPdfBarChart(
               [
                 (label: 'Período atual', valor: comparativo.aderenciaAtual),
@@ -79,7 +82,7 @@ Future<Uint8List> buildRelatorioPdf({
               formatar: (v) => '${formatBrDecimal(v)}%',
             ),
           ]),
-          ...focuxPdfSection('Comparativo', [
+          ...secao('Comparativo', [
             focuxPdfTable(
               headers: const ['', 'Atual', 'Anterior', 'Variação'],
               rows: [
@@ -124,8 +127,7 @@ Future<void> exportRelatorioPdf({
   required String periodoLabel,
   required AderenciaData dados,
   ComparativoPeriodo? comparativo,
-  String? appDisplayName,
-  bool ocultarMarcaFocux = false,
+  FocuxPdfBrand? brand,
 }) async {
   final assets = await FocuxPdfAssets.load();
   final bytes = await buildRelatorioPdf(
@@ -134,10 +136,7 @@ Future<void> exportRelatorioPdf({
     periodoLabel: periodoLabel,
     dados: dados,
     comparativo: comparativo,
-    brand: FocuxPdfBrand.from(
-      nomeMarca: appDisplayName,
-      ocultarFocux: ocultarMarcaFocux,
-    ),
+    brand: brand,
   );
   await Printing.layoutPdf(onLayout: (_) async => bytes);
 }

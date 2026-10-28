@@ -57,8 +57,6 @@ void main() {
     expect(screen, contains('relatorioAlunoPeriodoOpcoes'));
     expect(screen, contains('relatorioAlunoPeriodoMetricValue'));
     expect(screen, contains('relatorioAlunoResumoCaption'));
-    expect(screen, contains('whiteLabelConfigProvider'));
-    expect(screen, contains('appDisplayName'));
-    expect(screen, contains('ocultarMarcaFocux'));
+    expect(screen, contains('carregarMarcaDoPdf'));
   });
 }

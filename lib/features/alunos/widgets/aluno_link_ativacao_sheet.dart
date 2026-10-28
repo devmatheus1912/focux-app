@@ -20,6 +20,7 @@ Future<void> showAlunoLinkAtivacaoSheet({
   required String link,
   String? whatsapp,
   bool reenvio = false,
+  ConviteMarca? marca,
   VoidCallback? onDone,
 }) {
   final s = S.of(context);
@@ -30,6 +31,7 @@ Future<void> showAlunoLinkAtivacaoSheet({
     nome: nome,
     link: link,
     reenvio: reenvio,
+    marca: marca,
   );
   final whatsAppUri = BrPhone.whatsAppUri(whatsapp, text: convite);
   final first = nome.trim().split(RegExp(r'\s+')).first;

@@ -41,6 +41,7 @@ import '../widgets/ia_progressao_loading_skeleton.dart';
 import '../widgets/ia_progressao_pedido_card.dart';
 import '../widgets/ia_progressao_result_view.dart';
 import '../widgets/ia_quota_upgrade.dart';
+import '../../../core/pdf/focux_pdf_brand_loader.dart';
 
 class IaProgressaoScreen extends ConsumerStatefulWidget {
   final int alunoId;
@@ -99,6 +100,7 @@ class _IaProgressaoScreenState extends ConsumerState<IaProgressaoScreen> {
         alunoNome: widget.alunoNome,
         personalNome: ref.read(personalNameProvider),
         assets: await FocuxPdfAssets.load(),
+        brand: await carregarMarcaDoPdf(ref),
         agora: agora,
       );
       await Printing.sharePdf(

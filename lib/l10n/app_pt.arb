@@ -1581,5 +1581,9 @@
   "alunoPersonalCardSemantica": "Seu personal: {nome}",
   "@alunoPersonalCardSemantica": {"placeholders": {"nome": {"type": "String"}}},
   "alunoHojeTreinoComPersonal": "Treino com {personal}",
-  "@alunoHojeTreinoComPersonal": {"placeholders": {"personal": {"type": "String"}}}
+  "@alunoHojeTreinoComPersonal": {"placeholders": {"personal": {"type": "String"}}},
+  "alunoAtivacaoConviteMarca": "Olá {nome}! {personal} te cadastrou no {app}.{slogan}\n\nToque no card abaixo para criar sua senha e entrar no app 👇\n\n{link}\n\nO link é válido por 7 dias.",
+  "@alunoAtivacaoConviteMarca": { "placeholders": { "nome": { "type": "String" }, "personal": { "type": "String" }, "app": { "type": "String" }, "slogan": { "type": "String" }, "link": { "type": "String" } } },
+  "alunoAtivacaoReenvioMarca": "Olá {nome}! Aqui está seu novo link de acesso ao {app}.{slogan}\n\nToque no card abaixo para criar sua senha e entrar 👇\n\n{link}\n\nO link é válido por 7 dias.",
+  "@alunoAtivacaoReenvioMarca": { "placeholders": { "nome": { "type": "String" }, "app": { "type": "String" }, "slogan": { "type": "String" }, "link": { "type": "String" } } }
 }

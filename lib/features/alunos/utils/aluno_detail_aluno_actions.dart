@@ -18,6 +18,7 @@ import '../widgets/aluno_outreach_message_sheet.dart';
 import 'aluno360_copilot_logic.dart';
 import 'aluno360_copilot_task_actions.dart';
 import 'aluno_status.dart';
+import 'convite_marca_loader.dart';
 
 String alunoDeleteConfirmToken(String nome) {
   final trimmed = nome.trim();
@@ -121,12 +122,15 @@ Future<void> confirmarReenviarLinkAlunoDetail(
       ref.read(apiClientProvider),
     ).gerarLinkAtivacao(aluno.id);
     if (!context.mounted) return;
+    final marca = await carregarMarcaDoConvite(ref);
+    if (!context.mounted) return;
     await showAlunoLinkAtivacaoSheet(
       context: context,
       nome: aluno.nome,
       link: link,
       whatsapp: aluno.whatsapp,
       reenvio: true,
+      marca: marca,
     );
   } catch (e) {
     if (context.mounted) {

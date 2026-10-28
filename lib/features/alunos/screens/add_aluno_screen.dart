@@ -35,6 +35,7 @@ import '../widgets/aluno_link_ativacao_sheet.dart';
 import '../widgets/aluno_form_choices.dart';
 import '../widgets/aluno_inset_form_field.dart';
 import '../../leads/providers/leads_provider.dart';
+import '../utils/convite_marca_loader.dart';
 
 part 'add_aluno_screen_widgets.part.dart';
 
@@ -267,11 +268,14 @@ class _AddAlunoScreenState extends ConsumerState<AddAlunoScreen>
       }
       if (!mounted) return;
       if (link != null) {
+        final marca = await carregarMarcaDoConvite(ref);
+        if (!mounted) return;
         await showAlunoLinkAtivacaoSheet(
           context: context,
           nome: novoAluno.nome,
           link: link,
           whatsapp: novoAluno.whatsapp,
+          marca: marca,
           onDone: () {
             if (mounted) context.pop(true);
           },

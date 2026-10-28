@@ -52,23 +52,51 @@ class FocuxPdfBrand {
     required this.nome,
     this.cor = FocuxPdfColors.brand,
     this.whiteLabel = false,
+    this.slogan,
+    this.logo,
   });
 
-  factory FocuxPdfBrand.focux() => const FocuxPdfBrand(nome: 'Focux');
-
-  /// White-label só quando há nome; senão volta para Focux.
-  factory FocuxPdfBrand.from({String? nomeMarca, bool ocultarFocux = false}) {
-    final nome = (nomeMarca ?? '').trim();
-    if (!ocultarFocux || nome.isEmpty) return FocuxPdfBrand.focux();
-    return FocuxPdfBrand(nome: nome, whiteLabel: true);
+  /// Marca do personal com cor, slogan e logo. `ocultarFocux` tira o logo e o
+  /// rodapé da Focux (white-label completo); sem ele, o documento leva a marca
+  /// do personal e mantém o selo Focux.
+  factory FocuxPdfBrand.doPersonal({
+    required String nome,
+    String? corHex,
+    String? slogan,
+    pw.MemoryImage? logo,
+    bool ocultarFocux = false,
+  }) {
+    final limpo = nome.trim();
+    if (limpo.isEmpty) return FocuxPdfBrand.focux();
+    final frase = slogan?.trim() ?? '';
+    return FocuxPdfBrand(
+      nome: limpo,
+      cor: pdfColorDeHex(corHex) ?? FocuxPdfColors.brand,
+      whiteLabel: ocultarFocux,
+      slogan: frase.isEmpty ? null : frase,
+      logo: logo,
+    );
   }
+
+  factory FocuxPdfBrand.focux() => const FocuxPdfBrand(nome: 'Focux');
 
   final String nome;
   final PdfColor cor;
   final bool whiteLabel;
 
+  /// Frase da marca (cabeçalho da capa) e logo do personal.
+  final String? slogan;
+  final pw.MemoryImage? logo;
+
   String get cabecalho => nome.toUpperCase();
   String get rodape => whiteLabel ? nome : 'focux.app';
+}
+
+/// `#RRGGBB` → cor do PDF; nulo quando o texto não é uma cor válida.
+PdfColor? pdfColorDeHex(String? hex) {
+  final limpo = (hex ?? '').trim().replaceFirst('#', '');
+  if (!RegExp(r'^[0-9a-fA-F]{6}$').hasMatch(limpo)) return null;
+  return PdfColor.fromInt(0xFF000000 | int.parse(limpo, radix: 16));
 }
 
 pw.ThemeData focuxPdfTheme(FocuxPdfAssets a) =>
@@ -187,6 +215,17 @@ pw.Widget _capa(
                       color: FocuxPdfColors.navy,
                     ),
                   ),
+                  if (brand.slogan != null) ...[
+                    pw.SizedBox(height: 2),
+                    pw.Text(
+                      brand.slogan!,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontStyle: pw.FontStyle.italic,
+                        color: FocuxPdfColors.mute,
+                      ),
+                    ),
+                  ],
                   if (subtitulo != null && subtitulo.trim().isNotEmpty) ...[
                     pw.SizedBox(height: 3),
                     pw.Text(
@@ -205,6 +244,13 @@ pw.Widget _capa(
                 ],
               ),
             ),
+            // Logo do personal sempre que existe; o selo Focux só fica quando a
+            // marca Focux não foi ocultada.
+            if (brand.logo != null) ...[
+              pw.SizedBox(height: 34, child: pw.Image(brand.logo!)),
+              if (!brand.whiteLabel && assets.logo != null)
+                pw.SizedBox(width: 10),
+            ],
             if (!brand.whiteLabel && assets.logo != null)
               pw.SizedBox(height: 30, child: pw.Image(assets.logo!)),
           ],
@@ -217,13 +263,17 @@ pw.Widget _capa(
 }
 
 /// Título + conteúdo como lista solta, para o MultiPage quebrar entre páginas.
-List<pw.Widget> focuxPdfSection(String titulo, List<pw.Widget> children) {
+List<pw.Widget> focuxPdfSection(
+  String titulo,
+  List<pw.Widget> children, {
+  PdfColor cor = FocuxPdfColors.brand,
+}) {
   return [
     pw.Padding(
       padding: const pw.EdgeInsets.only(top: 4, bottom: 8),
       child: pw.Row(
         children: [
-          pw.Container(width: 3, height: 12, color: FocuxPdfColors.brand),
+          pw.Container(width: 3, height: 12, color: cor),
           pw.SizedBox(width: 6),
           pw.Text(
             titulo,

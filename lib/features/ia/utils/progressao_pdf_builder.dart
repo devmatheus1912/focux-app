@@ -11,6 +11,7 @@ Future<Uint8List> buildProgressaoPdf({
   required IaProgressaoCargaResult result,
   required String alunoNome,
   required FocuxPdfAssets assets,
+  FocuxPdfBrand? brand,
   String? personalNome,
   DateTime? agora,
 }) {
@@ -21,13 +22,14 @@ Future<Uint8List> buildProgressaoPdf({
     author: personal.isEmpty ? 'Focux' : personal,
     theme: focuxPdfTheme(assets),
   );
+  final marca = brand ?? FocuxPdfBrand.focux();
   const body = pw.TextStyle(fontSize: 10, color: FocuxPdfColors.ink, lineSpacing: 2);
   final bold = pw.TextStyle(fontSize: 10, color: FocuxPdfColors.ink, fontWeight: pw.FontWeight.bold);
 
   doc.addPage(
     focuxPdfPage(
       assets: assets,
-      brand: FocuxPdfBrand.focux(),
+      brand: marca,
       titulo: 'Progressão de carga',
       subtitulo: alunoNome,
       linhasMeta: [
@@ -57,7 +59,7 @@ Future<Uint8List> buildProgressaoPdf({
         ),
         if (result.exercises.any((e) => e.justificativa.isNotEmpty)) ...[
           pw.SizedBox(height: 18),
-          ...focuxPdfSection('Por que cada ajuste', [
+          ...focuxPdfSection('Por que cada ajuste', cor: marca.cor, [
             for (final e in result.exercises.where((e) => e.justificativa.isNotEmpty))
               pw.Padding(
                 padding: const pw.EdgeInsets.only(bottom: 6),
