@@ -48,7 +48,11 @@ class CheckinResumo {
     this.comparacao,
     this.recordes = const [],
     this.destaque,
+    this.parcialDoServidor,
   });
+
+  /// Marca vinda do servidor; sem ela, vale a mesma regra de 50% daqui.
+  final bool? parcialDoServidor;
 
   final String treinoNome;
   final Duration? duracao;
@@ -64,7 +68,8 @@ class CheckinResumo {
   /// Encerrou com menos da metade das séries planejadas: não é um treino
   /// completo (pular uma ou outra série ainda conta como concluído).
   bool get parcial =>
-      seriesPlanejadas > 0 && seriesFeitas * 2 < seriesPlanejadas;
+      parcialDoServidor ??
+      (seriesPlanejadas > 0 && seriesFeitas * 2 < seriesPlanejadas);
 
   bool get temNumeros =>
       duracao != null || seriesFeitas > 0 || volumeKg != null;
@@ -99,6 +104,7 @@ CheckinResumo buildCheckinResumo({
     volumeKg: view.volumeKg,
     comparacao: _comparacao(evolucao, view.volumeKg),
     recordes: recordes,
+    parcialDoServidor: concluida.parcial ? true : null,
     destaque:
         recordes.isEmpty && (view.destaque?.deltaKg ?? 0) > 0
             ? view.destaque
