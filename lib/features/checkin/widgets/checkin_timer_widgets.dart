@@ -18,6 +18,9 @@ class CheckinRestFocusView extends StatelessWidget {
   final VoidCallback onSkip;
   final VoidCallback? onTrocar;
 
+  /// Soma ou tira segundos do descanso (±15 s).
+  final ValueChanged<int>? onAjustar;
+
   const CheckinRestFocusView({
     super.key,
     required this.seconds,
@@ -25,6 +28,7 @@ class CheckinRestFocusView extends StatelessWidget {
     this.totalSeconds,
     this.contextLine,
     this.onTrocar,
+    this.onAjustar,
   });
 
   @override
@@ -101,6 +105,27 @@ class CheckinRestFocusView extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: TokensStrip.s5),
+              if (onAjustar != null) ...[
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: TokensStrip.s2,
+                  children: [
+                    FxTonalButton(
+                      label: s.checkinDescansoMenos15,
+                      icon: Icons.remove_rounded,
+                      compact: true,
+                      onPressed: () => onAjustar!(-15),
+                    ),
+                    FxTonalButton(
+                      label: s.checkinDescansoMais15,
+                      icon: Icons.add_rounded,
+                      compact: true,
+                      onPressed: () => onAjustar!(15),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: TokensStrip.s2),
+              ],
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [

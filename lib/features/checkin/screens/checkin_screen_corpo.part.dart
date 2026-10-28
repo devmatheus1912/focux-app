@@ -106,6 +106,7 @@ extension _CheckinCorpo on _CheckinScreenState {
                     totalSeconds: _descanso.total,
                     contextLine: _proximaSerieLinha(),
                     onSkip: _pularDescanso,
+                    onAjustar: _ajustarDescanso,
                     onTrocar: onTrocar,
                   )
                   : _cardOuVazio(

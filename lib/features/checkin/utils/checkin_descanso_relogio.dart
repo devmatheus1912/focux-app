@@ -33,6 +33,16 @@ class CheckinDescansoRelogio {
     );
   }
 
+  /// Soma ou tira segundos do descanso em andamento (mínimo 5 s, máx. 10 min).
+  /// Tirar além do que resta encerra o descanso, sem tocar o aviso de fim.
+  void ajustar(int delta) {
+    final fim = _fim;
+    if (!ativo || fim == null) return;
+    _fim = fim.add(Duration(seconds: delta));
+    total = (total + delta).clamp(5, 600).toInt();
+    _conferir(avisar: false);
+  }
+
   void parar() {
     _timer?.cancel();
     ativo = false;

@@ -826,6 +826,8 @@
   "checkinResumoSemCarga": "{n, plural, =1{1 série ficou sem peso} other{{n} séries ficaram sem peso}}",
   "@checkinResumoSemCarga": { "placeholders": { "n": { "type": "int" } } },
   "checkinResumoSemCargaDica": "Anote a carga na próxima vez para ver sua evolução.",
+  "checkinDescansoMenos15": "15 s",
+  "checkinDescansoMais15": "15 s",
   "checkinMaisTitulo": "Mais na série",
   "checkinMaisSub": "Ajustes e ações secundárias",
   "checkinExercicioConcluido": "Exercício concluído",

@@ -23,6 +23,9 @@ extension _CheckinDesfazer on _CheckinScreenState {
     _ultimaTimer = Timer(_duracaoFaixa, _limparUltimaSerie);
   }
 
+  /// ±15 s no descanso em andamento.
+  void _ajustarDescanso(int delta) => setState(() => _descanso.ajustar(delta));
+
   void _limparUltimaSerie() {
     _ultimaTimer?.cancel();
     if (mounted && _ultimaSerie != null) setState(() => _ultimaSerie = null);
