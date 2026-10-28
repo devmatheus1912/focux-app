@@ -148,7 +148,7 @@ void main() {
         expect(find.text('Exercício $i'), findsOneWidget);
       }
       expect(find.text('Aquecimento · 3'), findsOneWidget);
-      expect(find.text('Alongamento · 2'), findsOneWidget);
+      expect(find.text('Alongamento e volta à calma · 2'), findsOneWidget);
       expect(find.text('Adicionar'), findsNWidgets(3));
       expect(find.text('Segure para reordenar'), findsNothing);
       // um cabeçalho de grupo muscular dentro do bloco não existe mais
@@ -220,7 +220,7 @@ void main() {
     await _settle(tester);
     // o bloco atual (Trabalho) não é oferecido
     expect(find.text('Trabalho'), findsNothing);
-    await tester.tap(find.text('Alongamento').last);
+    await tester.tap(find.text('Alongamento e volta à calma').last);
     await _settle(tester);
 
     final put = adapter.chamadas.singleWhere(

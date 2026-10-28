@@ -4,11 +4,7 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/brand_tint.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
-import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_week_strip.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/aluno_today_action.dart';
 import '../../dashboard/widgets/aluno_capa_banner.dart';
 import '../../dashboard/widgets/aluno_personal_card.dart';
@@ -36,16 +32,6 @@ class IdentidadePreviaApp extends StatelessWidget {
   final String? logoUrl;
   final String? capaUrl;
 
-  static const _semana = [
-    FxWeekDay(dia: 1, estado: FxWeekDayState.concluido),
-    FxWeekDay(dia: 2, estado: FxWeekDayState.treino, hoje: true),
-    FxWeekDay(dia: 3, estado: FxWeekDayState.descanso),
-    FxWeekDay(dia: 4, estado: FxWeekDayState.treino),
-    FxWeekDay(dia: 5, estado: FxWeekDayState.descanso),
-    FxWeekDay(dia: 6, estado: FxWeekDayState.treino),
-    FxWeekDay(dia: 7, estado: FxWeekDayState.descanso),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final brilho = escuro ? Brightness.dark : Brightness.light;
@@ -63,7 +49,6 @@ class IdentidadePreviaApp extends StatelessWidget {
         escuro
             ? BrandPalette.fundoEscuroReferencia
             : BrandPalette.fundoClaroReferencia;
-    final s = S.of(context);
 
     return Semantics(
       label: 'Prévia da home do aluno',
@@ -78,7 +63,6 @@ class IdentidadePreviaApp extends StatelessWidget {
               secundaria: palette.secondary,
               child: Builder(
                 builder: (context) {
-                  final chrome = ShellChrome.forBrightness(context, escuro);
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     child: DecoratedBox(
@@ -99,17 +83,9 @@ class IdentidadePreviaApp extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             if ((capaUrl ?? '').trim().isNotEmpty) ...[
-                              AlunoCapaBanner(url: capaUrl, altura: 92),
+                              AlunoCapaBanner(url: capaUrl, altura: 72),
                               const SizedBox(height: 10),
                             ],
-                            Text(
-                              s.alunoHomeSaudacao('Ana'),
-                              style: FocuxHubTypography.sectionTitle(
-                                context,
-                                color: chrome.ink,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
                             AlunoTodayFocusCard(
                               action: const AlunoTodayAction(
                                 mode: AlunoTodayMode.workoutReady,
@@ -120,7 +96,6 @@ class IdentidadePreviaApp extends StatelessWidget {
                               hoje: DateTime(2026, 10, 27),
                               isDark: escuro,
                               onAction: () {},
-                              semana: _semana,
                               assinatura: nomePersonal,
                               fundoMarca:
                                   estilo.usaGradiente

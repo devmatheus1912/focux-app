@@ -451,7 +451,7 @@
   },
   "treinoBlocoAquecimento": "Aquecimento",
   "treinoBlocoTrabalho": "Trabalho",
-  "treinoBlocoAlongamento": "Alongamento",
+  "treinoBlocoAlongamento": "Alongamento e volta à calma",
   "treinoBlocoAjuste": "Ajuste",
   "rotinaSessaoAdiada": "A troca de {sessoes} vale quando {nome} terminar o treino.",
   "@rotinaSessaoAdiada": {
