@@ -51,6 +51,23 @@ Future<CheckinResumoAcao?> _abrir(
 }
 
 void main() {
+  testWidgets('com menos da metade das séries vira treino parcial', (
+    tester,
+  ) async {
+    await _abrir(
+      tester,
+      const CheckinResumo(
+        treinoNome: 'Treino Força',
+        seriesFeitas: 1,
+        seriesPlanejadas: 16,
+        volumeKg: 80,
+      ),
+    );
+    expect(find.text('Treino parcial'), findsOneWidget);
+    expect(find.text('Treino concluído'), findsNothing);
+    expect(find.textContaining('1 de 16 séries'), findsOneWidget);
+  });
+
   testWidgets('mostra números, comparação e recordes', (tester) async {
     await _abrir(
       tester,

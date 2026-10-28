@@ -61,6 +61,11 @@ class CheckinResumo {
   /// Maior ganho de carga da sessão quando não houve recorde.
   final ({String exercicio, double deltaKg})? destaque;
 
+  /// Encerrou com menos da metade das séries planejadas: não é um treino
+  /// completo (pular uma ou outra série ainda conta como concluído).
+  bool get parcial =>
+      seriesPlanejadas > 0 && seriesFeitas * 2 < seriesPlanejadas;
+
   bool get temNumeros =>
       duracao != null || seriesFeitas > 0 || volumeKg != null;
 }

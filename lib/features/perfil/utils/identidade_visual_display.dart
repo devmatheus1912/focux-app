@@ -101,7 +101,7 @@ String identidadeEstiloDescricao(BrandStyle estilo) => switch (estilo) {
   BrandStyle.classico =>
     'A sua cor nos botões e destaques, como sempre foi.',
   BrandStyle.cinematografico =>
-    'Gradiente da sua marca no card principal, fundo tingido e acento da cor secundária.',
+    'Card principal em tom da sua marca, fundo tingido e acento da cor secundária.',
   BrandStyle.minimalista =>
     'Só a cor primária, superfícies neutras e nenhum gradiente.',
 };

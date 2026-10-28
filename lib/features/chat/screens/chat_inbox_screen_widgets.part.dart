@@ -47,20 +47,11 @@ class _AlunoPickerSheetState extends ConsumerState<_AlunoPickerSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          TextField(
+          FxSheetSearchField(
+            dica: 'Buscar aluno',
             controller: _searchCtrl,
             autofocus: true,
             onChanged: (v) => setState(() => _query = v.trim()),
-            decoration: InputDecoration(
-              hintText: 'Buscar aluno',
-              prefixIcon: const Icon(Icons.search_rounded),
-              filled: true,
-              fillColor: chrome.cardFill,
-              border: FxInputDeco.outlineBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: chrome.line),
-              ),
-            ),
           ),
           const SizedBox(height: 12),
           Expanded(

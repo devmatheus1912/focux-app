@@ -62,10 +62,9 @@ void main() {
             paleta.secondary,
             dark: escuro,
           );
-          // gradiente só em opacidade baixa: o texto por cima continua legível
-          for (final c in g.colors) {
-            expect(c.a, lessThanOrEqualTo(0.30));
-          }
+          // tom sólido e baixo: sem degradê, texto por cima legível
+          expect(g.colors.first, g.colors.last);
+          expect(g.colors.first.a, lessThanOrEqualTo(0.16 + 1e-6));
           final tinta = BrandPalette.surfaceTint(paleta.primary, dark: escuro);
           expect(tinta.a, lessThanOrEqualTo(0.06 + 1e-6));
         });

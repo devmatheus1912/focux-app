@@ -3,10 +3,14 @@
 String fxTitleCaseName(String value) {
   // Sobra de import ("Guilherme -", "1. Maria"): o que não é letra ou número
   // nas pontas e o número de lista no começo não fazem parte do nome.
-  final trimmed = value
-      .replaceAll(RegExp(r'^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$', unicode: true), '')
-      .replaceFirst(RegExp(r'^\d+[.)]?\s+(?=\p{L})', unicode: true), '')
-      .trim();
+  final trimmed =
+      value
+          .replaceAll(
+            RegExp(r'^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$', unicode: true),
+            '',
+          )
+          .replaceFirst(RegExp(r'^\d+[.)]?\s+(?=\p{L})', unicode: true), '')
+          .trim();
   if (trimmed.isEmpty) return 'Aluno';
 
   const keepUpper = {
@@ -23,15 +27,39 @@ String fxTitleCaseName(String value) {
     'otp',
   };
 
-  return trimmed
-      .split(RegExp(r'\s+'))
-      .map((part) {
-        if (part.isEmpty) return part;
-        final lower = part.toLowerCase();
-        if (keepUpper.contains(lower)) return lower.toUpperCase();
-        return part[0].toUpperCase() + part.substring(1).toLowerCase();
-      })
-      .join(' ');
+  // Conectivos do português ficam minúsculos no meio ("Maria da Silva",
+  // "Abdução de quadril na polia"); a primeira palavra sempre abre maiúscula.
+  const conectivos = {
+    'de',
+    'da',
+    'do',
+    'das',
+    'dos',
+    'e',
+    'na',
+    'no',
+    'nas',
+    'nos',
+    'em',
+    'com',
+    'sem',
+    'para',
+    'por',
+    'ao',
+  };
+
+  final partes = trimmed.split(RegExp(r'\s+'));
+  return [
+    for (var i = 0; i < partes.length; i++)
+      if (partes[i].isEmpty)
+        partes[i]
+      else if (keepUpper.contains(partes[i].toLowerCase()))
+        partes[i].toUpperCase()
+      else if (i > 0 && conectivos.contains(partes[i].toLowerCase()))
+        partes[i].toLowerCase()
+      else
+        partes[i][0].toUpperCase() + partes[i].substring(1).toLowerCase(),
+  ].join(' ');
 }
 
 /// Returns the 2-letter initials for a full name.

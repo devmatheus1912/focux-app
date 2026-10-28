@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -6,6 +7,7 @@ import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_chip.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -132,6 +134,25 @@ class TreinoDepoisRow extends StatelessWidget {
 }
 
 /// Execução concluída: "Hoje · 52 min". Toque abre o detalhe.
+/// Atalho do histórico quando a única sessão é a de hoje (fora de "Últimos").
+class TreinosVerHistoricoLink extends StatelessWidget {
+  const TreinosVerHistoricoLink(this.destaque, {super.key});
+
+  final TreinosDestaque? destaque;
+
+  @override
+  Widget build(BuildContext context) =>
+      destaque?.tipo != TreinosDestaqueTipo.concluidoHoje
+          ? const SizedBox.shrink()
+          : Align(
+            alignment: Alignment.centerLeft,
+            child: FxActionLink(
+              label: S.of(context).treinosVerHistorico,
+              onTap: () => context.push('/checkin/historico'),
+            ),
+          );
+}
+
 class TreinoRecenteRow extends StatelessWidget {
   const TreinoRecenteRow({
     super.key,

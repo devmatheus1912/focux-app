@@ -303,7 +303,7 @@ class CheckinSerieCard extends StatelessWidget {
                 ),
                 child: Text(
                   s.checkinMais,
-                  style: FocuxHubTypography.chip(chrome.mute),
+                  style: FocuxHubTypography.chip(brand),
                 ),
               ),
             ],

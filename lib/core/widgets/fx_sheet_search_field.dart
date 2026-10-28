@@ -7,7 +7,7 @@ import 'fx_input_deco.dart';
 import 'fx_keyboard_dismiss_scope.dart';
 
 /// Busca com borda e ícone para usar dentro de folhas.
-class FxSheetSearchField extends StatelessWidget {
+class FxSheetSearchField extends StatefulWidget {
   const FxSheetSearchField({
     super.key,
     required this.dica,
@@ -22,7 +22,23 @@ class FxSheetSearchField extends StatelessWidget {
   final bool autofocus;
 
   @override
+  State<FxSheetSearchField> createState() => _FxSheetSearchFieldState();
+}
+
+class _FxSheetSearchFieldState extends State<FxSheetSearchField> {
+  final _foco = FocusNode();
+
+  @override
+  void dispose() {
+    // Campo que sai da tela com foco deixa o teclado órfão no iOS.
+    if (_foco.hasFocus) _foco.unfocus();
+    _foco.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final dica = widget.dica;
     final chrome = ShellChrome.of(context);
     final primary = Theme.of(context).colorScheme.primary;
     InputBorder borda(Color cor, [double largura = 1]) =>
@@ -34,10 +50,11 @@ class FxSheetSearchField extends StatelessWidget {
       textField: true,
       label: dica,
       child: TextField(
-        controller: controller,
-        autofocus: autofocus,
+        controller: widget.controller,
+        focusNode: _foco,
+        autofocus: widget.autofocus,
         textInputAction: TextInputAction.search,
-        onChanged: onChanged,
+        onChanged: widget.onChanged,
         onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
         decoration: InputDecoration(
           isDense: true,

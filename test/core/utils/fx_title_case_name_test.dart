@@ -5,8 +5,12 @@ void main() {
   group('fxTitleCaseName', () {
     test('capitaliza cada parte e mantém siglas de produto', () {
       expect(fxTitleCaseName('thales silva'), 'Thales Silva');
-      expect(fxTitleCaseName('maria DA silva'), 'Maria Da Silva');
+      expect(fxTitleCaseName('maria DA silva'), 'Maria da Silva');
       expect(fxTitleCaseName('ia'), 'IA');
+      expect(
+        fxTitleCaseName('abdução DE quadril na polia'),
+        'Abdução de Quadril na Polia',
+      );
     });
 
     test('apara sobra de import nas pontas', () {

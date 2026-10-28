@@ -82,6 +82,7 @@ Future<_Adapter> _abrir(
   WidgetTester tester, {
   required List<Map<String, Object?>> meus,
   List<Map<String, Object?>>? focux,
+  bool embedded = false,
 }) async {
   tester.view.physicalSize = const Size(1170, 2600);
   tester.view.devicePixelRatio = 3;
@@ -103,7 +104,7 @@ Future<_Adapter> _abrir(
         locale: const Locale('pt'),
         supportedLocales: S.supportedLocales,
         localizationsDelegates: S.localizationsDelegates,
-        home: const Scaffold(body: ExerciciosListScreen(embedded: true)),
+        home: Scaffold(body: ExerciciosListScreen(embedded: embedded)),
       ),
     ),
   );
@@ -162,6 +163,29 @@ void main() {
     }
     expect(adapter.abas.last, 'MEUS');
   });
+
+  testWidgets('dentro de Treinos só mostra os do personal e aponta a Focux', (
+    tester,
+  ) async {
+    final adapter = await _abrir(
+      tester,
+      meus: [_meu(1, 'Meu exercício')],
+      embedded: true,
+    );
+    expect(adapter.abas, ['MEUS']);
+    expect(find.text('Meu exercício'), findsOneWidget);
+    expect(find.text('Meus'), findsNothing);
+    expect(find.text('Biblioteca Focux'), findsOneWidget);
+  });
+
+  testWidgets(
+    'dentro de Treinos, sem exercício seu, não abre a Focux sozinho',
+    (tester) async {
+      final adapter = await _abrir(tester, meus: const [], embedded: true);
+      expect(adapter.abas, ['MEUS']);
+      expect(find.text('Carregar biblioteca'), findsOneWidget);
+    },
+  );
 
   test('a aba Treinos tem o seletor com Exercícios, só fora do aluno', () {
     final fonte =

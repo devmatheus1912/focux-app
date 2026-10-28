@@ -7,7 +7,6 @@ import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_dock.dart';
 import '../../../core/widgets/fx_week_strip.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dashboard/utils/aluno_today_action.dart';
@@ -84,22 +83,15 @@ class IdentidadePreviaApp extends StatelessWidget {
                     borderRadius: BorderRadius.circular(TokensStrip.rCard),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: fundo,
-                        gradient:
+                        // Tom sólido da marca, sem degradê.
+                        color:
                             estilo.tingeFundo
-                                ? LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color.lerp(
-                                      fundo,
-                                      palette.primary,
-                                      escuro ? 0.32 : 0.10,
-                                    )!,
-                                    fundo,
-                                  ],
+                                ? Color.lerp(
+                                  fundo,
+                                  palette.primary,
+                                  escuro ? 0.10 : 0.04,
                                 )
-                                : null,
+                                : fundo,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -148,13 +140,6 @@ class IdentidadePreviaApp extends StatelessWidget {
                               slogan: slogan,
                               logoUrl: logoUrl,
                               onConversar: () {},
-                            ),
-                            const SizedBox(height: 10),
-                            FxDock(
-                              items: FxDockItems.aluno(s),
-                              currentIndex: 0,
-                              onTap: (_) {},
-                              isDark: escuro,
                             ),
                           ],
                         ),

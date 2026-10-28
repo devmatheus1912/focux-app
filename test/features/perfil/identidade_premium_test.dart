@@ -98,7 +98,7 @@ void main() {
           expect(find.text('Treino com Matheus Teste'), findsOneWidget);
           expect(find.text('Seu personal'), findsOneWidget);
           expect(find.text('Conversar'), findsOneWidget);
-          expect(find.text('Hoje'), findsWidgets);
+          expect(find.text('Seu personal'), findsWidgets);
         });
       }
     }

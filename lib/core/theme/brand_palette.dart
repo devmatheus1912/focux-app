@@ -155,22 +155,17 @@ class BrandPalette {
   static Color sectionAccent(Color primary, {required bool dark}) =>
       dark ? accent(primary) : deep(primary);
 
-  /// Gradiente de marca para superfícies grandes (card principal da Home):
-  /// primária → secundária em opacidade baixa, para o texto por cima continuar
-  /// legível em claro e escuro.
+  /// Fundo da marca para superfícies grandes (card principal da Home): a
+  /// primária em tom sólido e baixo (sem degradê, que denuncia visual
+  /// genérico), com texto por cima legível em claro e escuro. A secundária
+  /// fica para ícones, anéis e selos ([secondaryAccent]).
   static LinearGradient gradient(
     Color primary,
     Color secondary, {
     required bool dark,
   }) {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        primary.withValues(alpha: dark ? 0.30 : 0.16),
-        secondary.withValues(alpha: dark ? 0.18 : 0.08),
-      ],
-    );
+    final tom = primary.withValues(alpha: dark ? 0.16 : 0.10);
+    return LinearGradient(colors: [tom, tom]);
   }
 
   /// Tinta de superfície a 4% (claro) / 6% (escuro): fundos que sentem a marca

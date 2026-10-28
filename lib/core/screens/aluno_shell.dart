@@ -49,7 +49,11 @@ class AlunoShell extends ConsumerWidget {
                   bottom: false,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: dockClearance),
-                    child: navigationShell,
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeBottom: !onChat,
+                      child: navigationShell,
+                    ),
                   ),
                 ),
                 if (!onChat)

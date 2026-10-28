@@ -4,7 +4,7 @@ enum BrandStyle {
   /// Como sempre foi: cor primária como acento.
   classico('CLASSICO'),
 
-  /// Gradiente de marca no card principal, fundo tingido e acento secundário.
+  /// Card principal em tom sólido da marca, fundo tingido e acento secundário.
   cinematografico('CINEMATOGRAFICO'),
 
   /// Só a primária; superfícies neutras e sem gradiente.

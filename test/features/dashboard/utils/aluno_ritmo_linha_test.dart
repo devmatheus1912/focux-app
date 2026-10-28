@@ -24,7 +24,7 @@ void main() {
     );
 
     expect(linha, isNotNull);
-    expect(linha!.sobrancelha, 'Sua semana');
+    expect(linha!.sobrancelha, 'Seu ritmo');
     expect(linha.titulo, '2 de 3');
     expect(linha.frase, contains('4 semanas'));
     expect(linha.frase, contains('kg'));

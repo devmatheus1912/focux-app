@@ -6,6 +6,7 @@ import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/tokens_strip.dart';
 import 'fx_home_sheet.dart';
+import 'fx_tonal_button.dart';
 
 /// S8: tela acesa enquanto a execução está montada (§9).
 class FxExecutionKeepAwake extends StatefulWidget {
@@ -127,13 +128,12 @@ class _FxExecutionLeaveSheet extends StatelessWidget {
             onTap: () => onPick(FxExecutionLeaveChoice.continuarDepois),
           ),
           const SizedBox(height: TokensStrip.s2),
-          _leaveButton(
-            context,
+          // Um só botão principal: encerrar é secundário (tonal).
+          FxTonalButton(
             label: s.checkinEncerrarAgora,
             icon: Icons.flag_rounded,
-            accent: primary,
-            onPrimary: theme.colorScheme.onPrimary,
-            onTap: () => onPick(FxExecutionLeaveChoice.encerrarAgora),
+            expanded: true,
+            onPressed: () => onPick(FxExecutionLeaveChoice.encerrarAgora),
           ),
           const SizedBox(height: TokensStrip.s2),
           SizedBox(

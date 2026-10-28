@@ -13,6 +13,7 @@ import '../../../core/utils/batch_mutation_notice.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
+import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_form_sheet.dart';
 import '../../../core/widgets/fx_error_state.dart';
@@ -76,6 +77,9 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
   @override
   void initState() {
     super.initState();
+    // Dentro de Treinos só aparecem os exercícios do personal; a biblioteca
+    // Focux fica em um lugar só (tela cheia).
+    if (widget.embedded) _abaDecidida = true;
     _scrollCtrl.addListener(_onScroll);
     _fetchPage(reset: true);
   }
@@ -468,23 +472,32 @@ class _ExerciciosListScreenState extends ConsumerState<ExerciciosListScreen> {
             onFavorite: _favoriteBatch,
             onDelete: _deleteBatch,
           ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-          child: AlunoSegmentedChoice(
-            options: const [
-              (value: 'MEUS', label: 'Meus'),
-              (value: 'FOCUX', label: 'Focux'),
-            ],
-            selected: _aba,
-            isDark: isDark,
-            onSelect: (value) {
-              if (_aba == value) return;
-              _abaDecidida = true;
-              setState(() => _aba = value);
-              _fetchPage(reset: true);
-            },
+        if (widget.embedded)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FxActionLink(
+              label: 'Biblioteca Focux',
+              onTap: () => context.push('/exercicios'),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+            child: AlunoSegmentedChoice(
+              options: const [
+                (value: 'MEUS', label: 'Meus'),
+                (value: 'FOCUX', label: 'Focux'),
+              ],
+              selected: _aba,
+              isDark: isDark,
+              onSelect: (value) {
+                if (_aba == value) return;
+                _abaDecidida = true;
+                setState(() => _aba = value);
+                _fetchPage(reset: true);
+              },
+            ),
           ),
-        ),
         ExerciciosFilterBar(
           filter: _filter,
           onChanged: (value) {

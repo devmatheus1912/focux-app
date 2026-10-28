@@ -53,7 +53,13 @@ class MainShell extends ConsumerWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.only(bottom: dockClearance),
-                  child: navigationShell,
+                  // A folga do dock já está no padding acima: as telas não somam
+                  // a área segura de baixo por cima (senão sobra vão).
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeBottom: true,
+                    child: navigationShell,
+                  ),
                 ),
                 Positioned(
                   bottom: bottomInset + FxDock.floatGap,

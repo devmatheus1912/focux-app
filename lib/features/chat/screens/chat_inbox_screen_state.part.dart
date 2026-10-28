@@ -547,6 +547,7 @@ class _ChatInboxScreenState extends ConsumerState<ChatInboxScreen> {
       builder:
           (ctx) => _AlunoPickerSheet(
             onSelect: (aluno) {
+              FxKeyboardDismissScope.dismiss();
               Navigator.pop(ctx);
               _openThread(aluno.id, extra: aluno.nome);
             },

@@ -7,6 +7,7 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/fx_utils.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_inset_picker_option.dart';
+import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_sheet_search_field.dart';
 import '../../alunos/data/aluno_repository.dart';
@@ -55,7 +56,10 @@ class _FinanceiroAlunoEtapaState extends State<FinanceiroAlunoEtapa> {
           leading: IconButton(
             tooltip: 'Voltar',
             visualDensity: VisualDensity.compact,
-            onPressed: widget.onVoltar,
+            onPressed: () {
+              FxKeyboardDismissScope.dismiss();
+              widget.onVoltar();
+            },
             icon: Icon(Icons.arrow_back_rounded, color: chrome.brand, size: 20),
           ),
         ),
@@ -87,7 +91,10 @@ class _FinanceiroAlunoEtapaState extends State<FinanceiroAlunoEtapa> {
                             FxInsetPickerOptionSpec(
                               label: fxTitleCaseName(a.nome),
                               selected: a.id == widget.selecionadoId,
-                              onTap: () => widget.onPick(a),
+                              onTap: () {
+                                FxKeyboardDismissScope.dismiss();
+                                widget.onPick(a);
+                              },
                             ),
                         ],
                       ),

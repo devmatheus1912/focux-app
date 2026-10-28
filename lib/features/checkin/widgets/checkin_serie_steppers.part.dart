@@ -28,7 +28,7 @@ class _CheckinSetSteppers extends StatelessWidget {
           Expanded(
             child: _CheckinStepper(
               label: s.checkinStepperKg,
-              value: checkinCargaLabel(cargaKg) ?? '0',
+              value: checkinCargaLabel(cargaKg) ?? '—',
               onMinus: onMinusCarga,
               onPlus: onPlusCarga,
               mute: chrome.mute,

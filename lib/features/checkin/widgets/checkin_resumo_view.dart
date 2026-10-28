@@ -48,8 +48,9 @@ class CheckinResumoView extends StatelessWidget {
   final CheckinResumo resumo;
 
   bool get _celebra =>
-      resumo.recordes.isNotEmpty ||
-      resumo.comparacao?.tipo == CheckinResumoComparacaoTipo.mais;
+      !resumo.parcial &&
+      (resumo.recordes.isNotEmpty ||
+          resumo.comparacao?.tipo == CheckinResumoComparacaoTipo.mais);
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +114,9 @@ class CheckinResumoView extends StatelessWidget {
                           ),
                           const SizedBox(height: TokensStrip.s1),
                           Text(
-                            s.checkinResumoTitulo,
+                            resumo.parcial
+                                ? s.checkinResumoTituloParcial
+                                : s.checkinResumoTitulo,
                             textAlign: TextAlign.center,
                             style: FocuxHubTypography.bodyMuted(
                               color: chrome.mute,
@@ -123,7 +126,19 @@ class CheckinResumoView extends StatelessWidget {
                             const SizedBox(height: TokensStrip.s6),
                             _Numeros(resumo: resumo),
                           ],
-                          if (comparacao != null) ...[
+                          if (resumo.parcial) ...[
+                            const SizedBox(height: TokensStrip.s4),
+                            Text(
+                              s.checkinResumoParcialDica(
+                                resumo.seriesFeitas,
+                                resumo.seriesPlanejadas,
+                              ),
+                              textAlign: TextAlign.center,
+                              style: FocuxHubTypography.bodyMuted(
+                                color: chrome.mute,
+                              ),
+                            ),
+                          ] else if (comparacao != null) ...[
                             const SizedBox(height: TokensStrip.s4),
                             Text(
                               comparacao,

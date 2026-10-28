@@ -19,7 +19,7 @@ void main() {
       );
       expect(
         dashboardPersonalDisplayName('João Pedro da Costa'),
-        'João Pedro Da Costa',
+        'João Pedro da Costa',
       );
     });
 

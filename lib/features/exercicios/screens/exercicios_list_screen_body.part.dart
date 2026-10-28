@@ -54,10 +54,25 @@ extension on _ExerciciosListScreenState {
           FxEmptyState(
             icon: 'dumbbell',
             title: 'Nenhum exercício seu ainda.',
-            action: FxEmptyAction(
-              label: 'Criar exercício',
-              onTap: _novoExercicio,
-            ),
+            subtitle:
+                widget.embedded
+                    ? 'Traga a biblioteca curada para cá ou crie o seu.'
+                    : null,
+            action:
+                widget.embedded
+                    ? FxEmptyAction(
+                      label: 'Carregar biblioteca',
+                      onTap: () async {
+                        final imported = await context.push<bool>(
+                          '/exercicios/biblioteca-wizard',
+                        );
+                        if (imported == true) _refresh();
+                      },
+                    )
+                    : FxEmptyAction(
+                      label: 'Criar exercício',
+                      onTap: _novoExercicio,
+                    ),
           ),
         ],
       );
