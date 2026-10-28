@@ -247,6 +247,10 @@ extension _CheckinCorpo on _CheckinScreenState {
       onPlusReps: () => _mexerRascunho(() => _rascunhos.somarReps(current, 1)),
       onMinusReps:
           () => _mexerRascunho(() => _rascunhos.somarReps(current, -1)),
+      onEditarCarga:
+          (kg) => _mexerRascunho(() => _rascunhos.definirCarga(current, kg)),
+      onEditarReps:
+          (n) => _mexerRascunho(() => _rascunhos.definirReps(current, n)),
       onAjustar: () => _registrarSerieDetalhada(current),
       onConfirmarRestante:
           faltaSerie ? () => _confirmarRestante(current) : null,

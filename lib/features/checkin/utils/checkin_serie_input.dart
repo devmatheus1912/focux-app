@@ -132,6 +132,22 @@ class CheckinRascunhos {
     );
   }
 
+  void definirCarga(ExecucaoExercicio ee, double kg) {
+    final atual = de(ee);
+    _porSerie[_chave(ee)] = CheckinCurrentSetSeed(
+      cargaKg: kg.clamp(0, 500).toDouble(),
+      reps: atual.reps,
+    );
+  }
+
+  void definirReps(ExecucaoExercicio ee, int reps) {
+    final atual = de(ee);
+    _porSerie[_chave(ee)] = CheckinCurrentSetSeed(
+      cargaKg: atual.cargaKg,
+      reps: reps.clamp(0, 50).toInt(),
+    );
+  }
+
   /// Envio recusado: o que foi digitado continua para a próxima tentativa.
   void manter(ExecucaoExercicio ee, {double? cargaKg, String? repeticoes}) {
     final atual = de(ee);

@@ -53,6 +53,27 @@ void main() {
     expect(seed.reps, 9);
   });
 
+  test('digitar carga e reps define o rascunho e respeita os limites', () {
+    final ee = ExecucaoExercicio(
+      id: 1,
+      treinoExercicioId: 2,
+      exercicioNome: 'Supino',
+      series: 3,
+      repeticoes: '8-12',
+      seriesFeitas: 0,
+      concluido: false,
+    );
+    final rascunhos = CheckinRascunhos();
+    rascunhos.definirCarga(ee, 42.5);
+    rascunhos.definirReps(ee, 10);
+    expect(rascunhos.de(ee).cargaKg, 42.5);
+    expect(rascunhos.de(ee).reps, 10);
+    rascunhos.definirCarga(ee, 900);
+    rascunhos.definirReps(ee, 99);
+    expect(rascunhos.de(ee).cargaKg, 500);
+    expect(rascunhos.de(ee).reps, 50);
+  });
+
   test('RPE plain labels help students who do not know the acronym', () {
     expect(checkinRpePlainLabel(s, 2), 'Muito leve');
     expect(checkinRpePlainLabel(s, 7), 'Cansativo');

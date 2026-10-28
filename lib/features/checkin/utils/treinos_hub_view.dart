@@ -88,21 +88,24 @@ TreinosHubView buildTreinosHubView({
   required DateTime now,
   RotinaFila? rotina,
 }) {
-  final decisao = rotina == null || rotina.itens.isEmpty
-      ? null
-      : decisaoDaRotina(
-          itens: rotina.itens,
-          diasAviso: rotina.diasAviso,
-          treinos: treinos,
-          historico: historico,
-          agora: now,
-        );
-  final destaque = decisao == null
-      ? _destaque(treinos, historico, now)
-      : _destaqueDaDecisao(decisao, historico);
-  final depois = decisao != null
-      ? (decisao.momento == RotinaMomento.pronto ? decisao.depois : null)
-      : destaque?.tipo == TreinosDestaqueTipo.concluidoHoje
+  final decisao =
+      rotina == null || rotina.itens.isEmpty
+          ? null
+          : decisaoDaRotina(
+            itens: rotina.itens,
+            diasAviso: rotina.diasAviso,
+            treinos: treinos,
+            historico: historico,
+            agora: now,
+          );
+  final destaque =
+      decisao == null
+          ? _destaque(treinos, historico, now)
+          : _destaqueDaDecisao(decisao, historico);
+  final depois =
+      decisao != null
+          ? (decisao.momento == RotinaMomento.pronto ? decisao.depois : null)
+          : destaque?.tipo == TreinosDestaqueTipo.concluidoHoje
           ? proximoTreinoParaHoje(treinos: treinos, historico: historico)
           : null;
 
@@ -242,6 +245,21 @@ TreinoRecente? treinoRecenteDe(ExecucaoTreino h) {
     quando: quando,
     duracao: treinoDuracaoReal(h.iniciadoEm, h.concluidoEm),
   );
+}
+
+/// Dias (1 = seg … 7 = dom) da semana de [hoje] em que houve treino concluído.
+Set<int> diasFeitosNaSemana(List<ExecucaoTreino> historico, DateTime hoje) {
+  final segunda = DateTime(
+    hoje.year,
+    hoje.month,
+    hoje.day,
+  ).subtract(Duration(days: hoje.weekday - 1));
+  final dias = <int>{};
+  for (final h in historico) {
+    final r = treinoRecenteDe(h);
+    if (r != null && !r.quando.isBefore(segunda)) dias.add(r.quando.weekday);
+  }
+  return dias;
 }
 
 /// `concluidoEm − iniciadoEm` quando plausível (5 min a 8 h). Fora disso é

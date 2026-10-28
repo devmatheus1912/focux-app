@@ -257,7 +257,7 @@ class _MeusTreinosScreenState extends ConsumerState<MeusTreinosScreen> {
             _ => () => _executar(destaque.treino),
           },
         ),
-      if (home.rotina.temTreino) SuaSemanaBloco(rotina: home.rotina, hoje: now),
+      if (home.rotina.temTreino) SuaSemanaBloco(rotina: home.rotina, hoje: now, historico: home.historico),
       if (view.plano.isNotEmpty)
         Align(
           alignment: Alignment.centerLeft,

@@ -8,8 +8,12 @@ class _CheckinSetSteppers extends StatelessWidget {
     this.onMinusCarga,
     this.onPlusReps,
     this.onMinusReps,
+    this.onEditarCarga,
+    this.onEditarReps,
   });
 
+  final ValueChanged<double>? onEditarCarga;
+  final ValueChanged<int>? onEditarReps;
   final double? cargaKg;
   final int? reps;
   final VoidCallback? onPlusCarga;
@@ -31,6 +35,18 @@ class _CheckinSetSteppers extends StatelessWidget {
               value: checkinCargaLabel(cargaKg) ?? '—',
               onMinus: onMinusCarga,
               onPlus: onPlusCarga,
+              onEditar:
+                  onEditarCarga == null
+                      ? null
+                      : () async {
+                        final v = await _pedirNumero(
+                          context,
+                          titulo: s.checkinStepperKg,
+                          inicial: cargaKg,
+                          decimal: true,
+                        );
+                        if (v != null) onEditarCarga!(v);
+                      },
               mute: chrome.mute,
               ink: chrome.ink,
               accent: brand,
@@ -47,6 +63,18 @@ class _CheckinSetSteppers extends StatelessWidget {
               value: reps == null ? '—' : '$reps',
               onMinus: onMinusReps,
               onPlus: onPlusReps,
+              onEditar:
+                  onEditarReps == null
+                      ? null
+                      : () async {
+                        final v = await _pedirNumero(
+                          context,
+                          titulo: s.checkinStepperReps,
+                          inicial: reps?.toDouble(),
+                          decimal: false,
+                        );
+                        if (v != null) onEditarReps!(v.round());
+                      },
               mute: chrome.mute,
               ink: chrome.ink,
               accent: brand,
@@ -67,8 +95,10 @@ class _CheckinStepper extends StatelessWidget {
     required this.accent,
     this.onMinus,
     this.onPlus,
+    this.onEditar,
   });
 
+  final VoidCallback? onEditar;
   final String label;
   final String value;
   final Color mute;
@@ -101,10 +131,27 @@ class _CheckinStepper extends StatelessWidget {
               accent: accent,
             ),
             Expanded(
-              child: Text(
-                value,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.sectionTitle(context, color: ink),
+              child: Semantics(
+                button: onEditar != null,
+                label: onEditar == null ? null : '$label: $value',
+                excludeSemantics: onEditar != null,
+                child: InkWell(
+                  onTap: onEditar,
+                  borderRadius: BorderRadius.circular(8),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    child: Center(
+                      child: Text(
+                        value,
+                        textAlign: TextAlign.center,
+                        style: FocuxHubTypography.sectionTitle(
+                          context,
+                          color: ink,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             _CheckinStepperButton(
@@ -155,4 +202,55 @@ class _CheckinStepperButton extends StatelessWidget {
       icon: Icon(icon),
     );
   }
+}
+
+/// Pede o número digitado (vírgula ou ponto); nulo ao cancelar ou se inválido.
+Future<double?> _pedirNumero(
+  BuildContext context, {
+  required String titulo,
+  required double? inicial,
+  required bool decimal,
+}) async {
+  final ctrl = TextEditingController(
+    text:
+        inicial == null
+            ? ''
+            : (inicial.roundToDouble() == inicial
+                ? inicial.toStringAsFixed(0)
+                : inicial.toString().replaceAll('.', ',')),
+  );
+  final valor = await showDialog<double>(
+    context: context,
+    builder:
+        (ctx) => AlertDialog(
+          title: Text(titulo),
+          content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            keyboardType: TextInputType.numberWithOptions(decimal: decimal),
+            textInputAction: TextInputAction.done,
+            onSubmitted:
+                (v) => Navigator.pop(
+                  ctx,
+                  double.tryParse(v.trim().replaceAll(',', '.')),
+                ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
+            ),
+            FilledButton(
+              onPressed:
+                  () => Navigator.pop(
+                    ctx,
+                    double.tryParse(ctrl.text.trim().replaceAll(',', '.')),
+                  ),
+              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+            ),
+          ],
+        ),
+  );
+  ctrl.dispose();
+  return valor == null || valor < 0 ? null : valor;
 }

@@ -34,6 +34,10 @@ class CheckinSerieCard extends StatelessWidget {
   final VoidCallback? onMinusCarga;
   final VoidCallback? onPlusReps;
   final VoidCallback? onMinusReps;
+
+  /// Toque no número: digitar o valor em vez de somar de 2,5 em 2,5.
+  final ValueChanged<double>? onEditarCarga;
+  final ValueChanged<int>? onEditarReps;
   final String? concluidoFrase;
 
   const CheckinSerieCard({
@@ -51,6 +55,8 @@ class CheckinSerieCard extends StatelessWidget {
     this.onMinusCarga,
     this.onPlusReps,
     this.onMinusReps,
+    this.onEditarCarga,
+    this.onEditarReps,
     this.concluidoFrase,
   });
 
@@ -198,6 +204,8 @@ class CheckinSerieCard extends StatelessWidget {
                 onMinusCarga: onMinusCarga,
                 onPlusReps: onPlusReps,
                 onMinusReps: onMinusReps,
+                onEditarCarga: onEditarCarga,
+                onEditarReps: onEditarReps,
               ),
             ),
             if (onAjustar != null ||
