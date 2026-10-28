@@ -6,6 +6,8 @@ extension _CheckinDesfazer on _CheckinScreenState {
 
   void _anotarUltimaSerie(ExecucaoExercicio ee, CheckinSeriePendente serie) {
     _ultimaTimer?.cancel();
+    _ultimaEnvio = serie;
+    _rpeEscolhido = serie.rpe;
     final carga = checkinCargaLabel(serie.cargaKg);
     final reps = serie.repeticoes;
     final partes = [
@@ -21,6 +23,43 @@ extension _CheckinDesfazer on _CheckinScreenState {
           ),
     );
     _ultimaTimer = Timer(_duracaoFaixa, _limparUltimaSerie);
+  }
+
+  /// Esforço sentido na série que acabou de ser registrada. Reenvia a mesma
+  /// série (mesmo número, carga e reps) com o RPE: o servidor grava por número,
+  /// então só o esforço muda.
+  Future<void> _anotarRpe(int rpe) async {
+    final base = _ultimaEnvio;
+    if (base == null) return;
+    setState(() => _rpeEscolhido = rpe);
+    final serie = CheckinSeriePendente(
+      execucaoId: base.execucaoId,
+      treinoExercicioId: base.treinoExercicioId,
+      numero: base.numero,
+      cargaKg: base.cargaKg,
+      repeticoes: base.repeticoes,
+      feedback: base.feedback,
+      rpe: rpe,
+      dor: base.dor,
+    );
+    _ultimaEnvio = serie;
+    final r = await checkinRegistrarSerie(
+      serie: serie,
+      store: _CheckinScreenState._fila,
+      enviar: checkinEnvioPelo(_repo),
+      sessaoAtiva: ref.read(checkinSessaoAtivaProvider),
+    );
+    if (!mounted) return;
+    switch (r) {
+      case CheckinRegistroSalvo(:final exercicio):
+        _applyUpdated(exercicio);
+      case CheckinRegistroNaFila(:final fila):
+        setState(
+          () => _pendentes = checkinPendentesDaExecucao(fila, serie.execucaoId),
+        );
+      case CheckinRegistroRecusado():
+        setState(() => _rpeEscolhido = null);
+    }
   }
 
   /// ±15 s no descanso em andamento.

@@ -227,44 +227,37 @@ void main() {
       expect(find.text('Sessão expirada. Faça login novamente.'), findsOneWidget);
     });
 
-    testWidgets('dois toques abrem um só pedido de esforço; cancelar libera', (
+    testWidgets('com esforço alvo, registrar grava na hora e não abre pergunta', (
       tester,
     ) async {
       final repo = FakeCheckinRepo(rpeAlvo: 8);
       await pumpCheckin(tester, repo);
 
       await tester.tap(find.text('Registrar série'));
-      await tester.tap(find.text('Registrar série'), warnIfMissed: false);
       await pumpSheet(tester);
-      expect(find.text('Esforço sentido (RPE)'), findsOneWidget);
 
-      await tester.tap(find.text('Cancelar'));
-      await pumpSheet(tester);
+      expect(repo.registros, 1);
+      expect(repo.rpes, [null]);
       expect(find.text('Esforço sentido (RPE)'), findsNothing);
-      expect(repo.registros, 0);
-      expect(find.text('Salvando…'), findsNothing);
-      expect(find.text('Registrar série'), findsOneWidget);
+      // o esforço é perguntado dentro do descanso, sem travar o registro
+      expect(find.text('Como foi a série?'), findsOneWidget);
+      expect(find.textContaining('perto de 8'), findsOneWidget);
     });
 
-    testWidgets('pedido de esforço aberto não mostra "Salvando…" atrás', (
+    testWidgets('no descanso, tocar o esforço reenvia a mesma série com RPE', (
       tester,
     ) async {
-      final repo = FakeCheckinRepo(rpeAlvo: 8);
+      final repo = FakeCheckinRepo();
       await pumpCheckin(tester, repo);
 
       await tester.tap(find.text('Registrar série'));
       await pumpSheet(tester);
+      await tester.tap(find.text('Pesado'));
+      await pumpSheet(tester);
 
-      expect(find.text('Esforço sentido (RPE)'), findsOneWidget);
-      expect(find.text('Salvando…'), findsNothing);
-      expect(
-        find.descendant(
-          of: find.byType(CheckinRodapeBar),
-          matching: find.text('Registrar série'),
-        ),
-        findsOneWidget,
-      );
-      expect(repo.registros, 0);
+      expect(repo.registros, 2);
+      expect(repo.rpes, [null, 8]);
+      expect(repo.cargas.first, repo.cargas.last);
     });
 
     testWidgets('durante o envio, Mais não oferece desfazer nem confirmar', (

@@ -107,6 +107,9 @@ extension _CheckinCorpo on _CheckinScreenState {
                     contextLine: _proximaSerieLinha(),
                     onSkip: _pularDescanso,
                     onAjustar: _ajustarDescanso,
+                    rpeAlvo: current?.rpeAlvo,
+                    rpeEscolhido: _rpeEscolhido,
+                    onRpe: _ultimaEnvio == null ? null : _anotarRpe,
                     onTrocar: onTrocar,
                   )
                   : _cardOuVazio(

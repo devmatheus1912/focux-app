@@ -63,6 +63,7 @@ class FakeCheckinRepo implements CheckinRepository {
   int concluidos = 0;
   int descartes = 0;
   final cargas = <double?>[];
+  final rpes = <int?>[];
   final Map<int, int> _feitasPorTe = {};
 
   @override
@@ -95,6 +96,7 @@ class FakeCheckinRepo implements CheckinRepository {
   }) async {
     registros++;
     cargas.add(cargaKg);
+    rpes.add(rpe);
     await travaSerie?.future;
     if (offline) {
       throw DioException(
@@ -105,14 +107,15 @@ class FakeCheckinRepo implements CheckinRepository {
     final erro = erroSerie;
     if (erro != null) throw erro;
     _feitasPorTe[treinoExercicioId] = numero;
-    return ExecucaoExercicio.fromJson(
-      _exercicioJson(
+    return ExecucaoExercicio.fromJson({
+      ..._exercicioJson(
         treinoExercicioId == 2 ? 10 : 11,
         treinoExercicioId,
         treinoExercicioId == 2 ? 'Supino' : 'Remada',
         numero,
       ),
-    );
+      if (treinoExercicioId == 2) 'rpeAlvo': rpeAlvo,
+    });
   }
 
   @override

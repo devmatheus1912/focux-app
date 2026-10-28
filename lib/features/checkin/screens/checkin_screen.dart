@@ -40,7 +40,6 @@ import '../widgets/checkin_execucao_sheets.dart';
 import '../widgets/checkin_exercise_widgets.dart';
 import '../widgets/checkin_header_widgets.dart';
 import '../widgets/checkin_resumo_view.dart';
-import '../widgets/checkin_serie_campos_widgets.dart';
 import '../widgets/checkin_serie_detail_widgets.dart';
 import '../widgets/checkin_sessao_aberta_state.dart';
 import '../widgets/checkin_timer_widgets.dart';
@@ -81,6 +80,8 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
   final _rascunhos = CheckinRascunhos();
   int _pendentes = 0;
   ({int exercicioId, int numero, String? detalhe})? _ultimaSerie;
+  CheckinSeriePendente? _ultimaEnvio;
+  int? _rpeEscolhido;
   Timer? _ultimaTimer;
   StreamSubscription<void>? _conexaoSub;
   late final ProviderSubscription<CheckinDescansoAlerta> _alerta;
@@ -257,16 +258,7 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
     if (id == null || _concluindo || _registrando || _pedindoRpe) return;
     if (!await _garantirCarga(ee) || !mounted) return;
     final draft = _rascunhos.de(ee);
-    int? rpe;
-    if (ee.rpeAlvo != null) {
-      _pedindoRpe = true;
-      try {
-        rpe = await showCheckinRpeAlvoPrompt(context, rpeAlvo: ee.rpeAlvo!);
-      } finally {
-        _pedindoRpe = false;
-      }
-      if (rpe == null || !mounted) return;
-    }
+    // O esforço (RPE) é perguntado dentro do descanso, sem travar o registro.
     await _enviarSerie(
       ee,
       CheckinSeriePendente(
@@ -275,7 +267,6 @@ class _CheckinScreenState extends ConsumerState<CheckinScreen>
         numero: _proximoNumero(ee),
         cargaKg: draft.cargaKg,
         repeticoes: draft.reps == null ? null : '${draft.reps}',
-        rpe: rpe,
       ),
     );
   }

@@ -6,9 +6,18 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
+
+/// RPE gravado (1 a 10) -> o botão rápido mais próximo (4, 6 ou 8).
+int? _rpeNoGrupo(int? rpe) {
+  if (rpe == null) return null;
+  if (rpe <= 5) return 4;
+  if (rpe <= 7) return 6;
+  return 8;
+}
 
 /// S8: um alvo — o tempo. Pular/Trocar são botões tonais na thumb zone.
 class CheckinRestFocusView extends StatelessWidget {
@@ -21,6 +30,11 @@ class CheckinRestFocusView extends StatelessWidget {
   /// Soma ou tira segundos do descanso (±15 s).
   final ValueChanged<int>? onAjustar;
 
+  /// Esforço da série que acabou (opcional): três toques, sem sair do descanso.
+  final ValueChanged<int>? onRpe;
+  final int? rpeEscolhido;
+  final int? rpeAlvo;
+
   const CheckinRestFocusView({
     super.key,
     required this.seconds,
@@ -29,6 +43,9 @@ class CheckinRestFocusView extends StatelessWidget {
     this.contextLine,
     this.onTrocar,
     this.onAjustar,
+    this.onRpe,
+    this.rpeEscolhido,
+    this.rpeAlvo,
   });
 
   @override
@@ -103,6 +120,40 @@ class CheckinRestFocusView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: FocuxHubTypography.bodyMuted(color: chrome.mute),
                 ),
+              ],
+              if (onRpe != null) ...[
+                const SizedBox(height: TokensStrip.s4),
+                Text(
+                  s.checkinRpeComoFoi,
+                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                ),
+                const SizedBox(height: TokensStrip.s2),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: TokensStrip.s2,
+                  runSpacing: TokensStrip.s2,
+                  children: [
+                    for (final (rotulo, valor) in [
+                      (s.checkinRpeLeve, 4),
+                      (s.checkinRpeModerado, 6),
+                      (s.checkinRpePesado, 8),
+                    ])
+                      FxToggleChip(
+                        label: rotulo,
+                        selected: _rpeNoGrupo(rpeEscolhido) == valor,
+                        isDark: chrome.isDark,
+                        filledWhenSelected: true,
+                        onTap: () => onRpe!(valor),
+                      ),
+                  ],
+                ),
+                if (rpeAlvo != null) ...[
+                  const SizedBox(height: TokensStrip.s1),
+                  Text(
+                    s.checkinRpeAlvoCurto(rpeAlvo!),
+                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                  ),
+                ],
               ],
               const SizedBox(height: TokensStrip.s5),
               if (onAjustar != null) ...[
