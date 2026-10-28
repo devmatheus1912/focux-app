@@ -1,4 +1,8 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/agenda/utils/agenda_week_client_cache.dart';
@@ -57,6 +61,7 @@ class SessionInvalidator {
         MigracaoMagicaDraftCache.clear,
         AlunoFollowUpStore.clearAll,
         _clearHealthSession,
+        _clearImageCaches,
       ])
         _safely(task),
     ]);
@@ -65,6 +70,20 @@ class SessionInvalidator {
       debugPrint('[SessionInvalidator] $reason');
     }
   }
+
+  /// Foto de evolução e mídia de chat ficam em disco no cache de imagens: saem junto com a sessão
+  /// (senão o próximo usuário do aparelho as encontra).
+  static Future<void> _clearImageCaches() async {
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    if (!limparCacheDeImagensEmDisco) return;
+    await DefaultCacheManager().emptyCache();
+  }
+
+  /// Só testes: o gerenciador de cache em disco precisa de plugin nativo (path_provider).
+  @visibleForTesting
+  static bool limparCacheDeImagensEmDisco =
+      kIsWeb || !Platform.environment.containsKey('FLUTTER_TEST');
 
   static Future<void> _safely(Future<void> Function() task) async {
     try {

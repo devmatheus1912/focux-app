@@ -4,11 +4,42 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'offline_outbox_storage.dart';
 import 'offline_queue_policy.dart';
 
 export 'offline_queue_policy.dart' show DroppedMutation, QueuedRequest;
 
+/// Fachada síncrona sobre o armazenamento da fila: lê as duas chaves ao abrir e grava direto nas
+/// mudanças. Mantém o código da fila igual ao que era com SharedPreferences.
+class _OutboxHandle {
+  _OutboxHandle(this._store, this._values);
+
+  final OfflineOutboxStorage _store;
+  final Map<String, String?> _values;
+
+  String? getString(String key) => _values[key];
+
+  Future<void> setString(String key, String value) async {
+    _values[key] = value;
+    await _store.write(key, value);
+  }
+
+  Future<void> remove(String key) async {
+    _values.remove(key);
+    await _store.remove(key);
+  }
+}
+
 class OfflineSyncService {
+  /// Só testes: troca o armazenamento da fila.
+  @visibleForTesting
+  static OfflineOutboxStorage storage = OfflineOutboxStorage.padrao();
+
+  static Future<_OutboxHandle> _open() async => _OutboxHandle(storage, {
+    _queueKey: await storage.read(_queueKey),
+    _droppedKey: await storage.read(_droppedKey),
+  });
+
   static const _queueKey = 'offline_outbox_queue';
   static const _droppedKey = 'offline_outbox_dropped';
   static const _maxDropped = 20;
@@ -48,7 +79,7 @@ class OfflineSyncService {
     if (isSensitivePath(options.path)) {
       return false;
     }
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     final queueStr = prefs.getString(_queueKey);
     final List<dynamic> queueList =
         queueStr != null ? jsonDecode(queueStr) : [];
@@ -104,7 +135,7 @@ class OfflineSyncService {
   /// porque ele descreve mutações do usuário que saiu.
   static Future<void> clearQueue() async {
     _generation++;
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     await prefs.remove(_queueKey);
     await prefs.remove(_droppedKey);
     _notifyChanged();
@@ -112,7 +143,7 @@ class OfflineSyncService {
 
   /// Get the number of pending requests
   static Future<int> getPendingCount() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     final queueStr = prefs.getString(_queueKey);
     if (queueStr == null) return 0;
     return (jsonDecode(queueStr) as List)
@@ -138,7 +169,7 @@ class OfflineSyncService {
   }
 
   static Future<void> _sync(Dio dio) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     final queueStr = prefs.getString(_queueKey);
     if (queueStr == null) return;
 
@@ -185,7 +216,8 @@ class OfflineSyncService {
     }
 
     // Enquanto a rodada rodava, novas ações só podem ter sido anexadas ao fim.
-    final latestStr = prefs.getString(_queueKey);
+    // Lê de novo no armazenamento: a fachada guarda só o retrato do início da rodada.
+    final latestStr = await storage.read(_queueKey);
     final latest =
         latestStr == null ? const <dynamic>[] : jsonDecode(latestStr) as List;
     final merged = [
@@ -239,7 +271,7 @@ class OfflineSyncService {
     int generation,
   ) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await _open();
       if (generation != _generation) return;
       final raw = prefs.getString(_droppedKey);
       final list = raw != null ? (jsonDecode(raw) as List<dynamic>) : <dynamic>[];
@@ -261,7 +293,7 @@ class OfflineSyncService {
 
   /// Mutações que a fila desistiu de reenviar e que o usuário ainda não viu.
   static Future<List<DroppedMutation>> pendingDropped() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     final raw = prefs.getString(_droppedKey);
     if (raw == null) return const [];
     try {
@@ -274,7 +306,7 @@ class OfflineSyncService {
   }
 
   static Future<void> clearDropped() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = await _open();
     await prefs.remove(_droppedKey);
     _notifyChanged();
   }

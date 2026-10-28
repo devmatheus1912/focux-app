@@ -75,6 +75,7 @@ dependencies:
   wakelock_plus: ^1.7.0
   webview_flutter: ^4.10.0
   cached_network_image: ^4.0.4
+  flutter_cache_manager: ^3.4.1
   sentry_flutter: ^8.11.0
   amplitude_flutter: ^4.7.3
   intercom_flutter: ^9.6.21
