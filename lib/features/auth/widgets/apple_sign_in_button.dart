@@ -10,11 +10,15 @@ class AppleSignInButton extends StatelessWidget {
     required this.onPressed,
     required this.isLoading,
     this.label = 'Continuar com Apple',
+    this.compacto = false,
   });
 
   final VoidCallback? onPressed;
   final bool isLoading;
   final String label;
+
+  /// Lado a lado com outro botão: altura 56, rótulo em até 2 linhas.
+  final bool compacto;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +41,8 @@ class AppleSignInButton extends StatelessWidget {
             splashColor: const Color(0x33000000),
             highlightColor: const Color(0x1A000000),
             child: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              height: compacto ? 56 : 52,
+              padding: EdgeInsets.symmetric(horizontal: compacto ? 10 : 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
@@ -58,14 +62,20 @@ class AppleSignInButton extends StatelessWidget {
                             )
                             : const Icon(Icons.apple, size: 22, color: fg),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: fg,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.1,
+                  SizedBox(width: compacto ? 8 : 12),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: compacto ? 2 : 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: fg,
+                        fontSize: compacto ? 13.5 : 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.1,
+                        height: compacto ? 1.2 : null,
+                      ),
                     ),
                   ),
                 ],

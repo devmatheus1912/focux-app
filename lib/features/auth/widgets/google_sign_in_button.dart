@@ -12,6 +12,7 @@ class GoogleSignInButton extends StatelessWidget {
     required this.isLoading,
     this.label = 'Entrar com Google',
     this.dark = false,
+    this.compacto = false,
   });
 
   final VoidCallback? onPressed;
@@ -21,6 +22,9 @@ class GoogleSignInButton extends StatelessWidget {
   /// When true, uses the dark theme variant from Google brand spec
   /// (#131314 background, white text). Default false = white surface.
   final bool dark;
+
+  /// Lado a lado com outro botão: altura 56, rótulo em até 2 linhas.
+  final bool compacto;
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +50,8 @@ class GoogleSignInButton extends StatelessWidget {
             splashColor: const Color(0x14000000),
             highlightColor: const Color(0x0A000000),
             child: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              height: compacto ? 56 : 52,
+              padding: EdgeInsets.symmetric(horizontal: compacto ? 10 : 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: border, width: 1),
@@ -73,14 +77,20 @@ class GoogleSignInButton extends StatelessWidget {
                             )
                             : CustomPaint(painter: _GoogleLogoPainter()),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: fg,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.1,
+                  SizedBox(width: compacto ? 8 : 12),
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: compacto ? 2 : 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: fg,
+                        fontSize: compacto ? 13.5 : 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.1,
+                        height: compacto ? 1.2 : null,
+                      ),
                     ),
                   ),
                 ],

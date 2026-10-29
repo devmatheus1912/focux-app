@@ -33,10 +33,9 @@ import '../utils/login_display.dart';
 import '../utils/post_login_redirect.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
-import '../widgets/apple_sign_in_button.dart';
 import '../widgets/auth_legal_consent_text.dart';
-import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
+import '../widgets/auth_social_row.dart';
 
 part 'login_screen_actions.part.dart';
 
@@ -376,26 +375,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                       const SizedBox(height: 12),
                                     ],
-                                    if (showApple) ...[
-                                      AppleSignInButton(
-                                        onPressed:
-                                            _loadingApple || _loading || _loadingGoogle
+                                    if (showApple || showGoogle)
+                                      AuthSocialRow(
+                                        mostrarApple: showApple,
+                                        mostrarGoogle: showGoogle,
+                                        carregandoApple: _loadingApple,
+                                        carregandoGoogle: _loadingGoogle,
+                                        onApple:
+                                            _loadingApple ||
+                                                    _loading ||
+                                                    _loadingGoogle
                                                 ? null
                                                 : _submitApple,
-                                        isLoading: _loadingApple,
+                                        onGoogle:
+                                            _loadingGoogle ? null : _submitGoogle,
                                       ),
-                                      if (showGoogle) const SizedBox(height: 10),
-                                    ],
-                                    if (showGoogle) ...[
-                                      GoogleSignInButton(
-                                        onPressed:
-                                            _loadingGoogle
-                                                ? null
-                                                : _submitGoogle,
-                                        isLoading: _loadingGoogle,
-                                        dark: true,
-                                      ),
-                                    ],
                                     if (showApple || showGoogle) ...[
                                       const SizedBox(height: 12),
                                       AuthLegalConsentText(primary: primary),

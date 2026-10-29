@@ -75,8 +75,8 @@ void main() {
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('ProductEvents.loginSuccess'));
     expect(screen, contains('AuthRoleToggle'));
-    expect(screen, contains('GoogleSignInButton'));
-    expect(screen, contains('AppleSignInButton'));
+    // Apple e Google lado a lado, no mesmo componente (mesmo peso).
+    expect(screen, contains('AuthSocialRow'));
     expect(screen, contains('_submitApple'));
     expect(screen, contains('AppleSignInService.isAvailableOnDevice'));
     expect(screen, contains('_googleEnabled'));

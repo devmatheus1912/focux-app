@@ -55,7 +55,6 @@ void main() {
     expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('AuthFormEntrance'));
-    expect(screen, contains('dark: true'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxTonalButton'));
@@ -63,8 +62,7 @@ void main() {
     expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('PasswordStrengthMeter'));
-    expect(screen, contains('GoogleSignInButton'));
-    expect(screen, contains('AppleSignInButton'));
+    expect(screen, contains('AuthSocialRow'));
     expect(screen, contains('_submitApple'));
     expect(screen, contains('AppleSignInService.isAvailableOnDevice'));
     expect(screen, contains('_googleEnabled'));

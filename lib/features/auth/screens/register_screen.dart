@@ -27,12 +27,11 @@ import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
 import '../services/apple_sign_in_service.dart';
 import '../services/google_sign_in_service.dart';
-import '../widgets/apple_sign_in_button.dart';
-import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
+import '../widgets/auth_social_row.dart';
 
 part 'register_screen_actions.part.dart';
 
@@ -222,32 +221,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               // preencher o formulário abaixo.
                               if (_appleEnabled || _googleEnabled) ...[
                                 const SizedBox(height: 20),
-                                if (_appleEnabled) ...[
-                                  AppleSignInButton(
-                                    label: 'Continuar com Apple',
-                                    isLoading: _loadingApple,
-                                    onPressed:
-                                        _loadingApple ||
-                                                _loading ||
-                                                _loadingGoogle
-                                            ? null
-                                            : _submitApple,
-                                  ),
-                                  if (_googleEnabled)
-                                    const SizedBox(height: 10),
-                                ],
-                                if (_googleEnabled)
-                                  GoogleSignInButton(
-                                    label: 'Cadastrar com Google',
-                                    isLoading: _loadingGoogle,
-                                    dark: true,
-                                    onPressed:
-                                        _loadingGoogle ||
-                                                _loading ||
-                                                _loadingApple
-                                            ? null
-                                            : _submitGoogle,
-                                  ),
+                                AuthSocialRow(
+                                  mostrarApple: _appleEnabled,
+                                  mostrarGoogle: _googleEnabled,
+                                  rotuloApple: 'Continuar com Apple',
+                                  rotuloGoogle: 'Cadastrar com Google',
+                                  carregandoApple: _loadingApple,
+                                  carregandoGoogle: _loadingGoogle,
+                                  onApple:
+                                      _loadingApple ||
+                                              _loading ||
+                                              _loadingGoogle
+                                          ? null
+                                          : _submitApple,
+                                  onGoogle:
+                                      _loadingGoogle ||
+                                              _loading ||
+                                              _loadingApple
+                                          ? null
+                                          : _submitGoogle,
+                                ),
                                 const SizedBox(height: 16),
                                 const FxConversionDivider(
                                   label: 'ou cadastre com e-mail',
