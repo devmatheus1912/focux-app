@@ -34,20 +34,32 @@ String loginRegisterPath({required bool isAluno, String? personalSlug}) {
   return '/register/aluno';
 }
 
+String loginAjudaLabel() => 'Precisa de ajuda?';
+
+String loginAlunoContexto() => 'Treinando com';
+
+String loginTrocarLabel() => 'Trocar';
+
+String loginSouPersonalLabel() => 'Sou personal';
+
+String loginAlunoSemLinkTexto() => 'É aluno? Abra o link que seu personal enviou. ';
+
+String loginDigitarCodigoLabel() => 'Digitar o código do personal';
+
 String loginHelpTitle() => 'Entrar no Focux';
 
 String loginHelpSubtitle() =>
-    'Personal usa e-mail da conta. Aluno entra pelo link do personal.';
+    'Personal entra com e-mail, Apple ou Google. Aluno entra pelo link do personal.';
 
 String loginHelpPersonalBody() =>
     'E-mail e senha, Apple ou Google. A Home abre depois do login.';
 
 String loginHelpAlunoBody() =>
-    'Abra o link do personal (?p=slug) ou digite o código do personal abaixo.';
+    'Abra o link de convite do seu personal ou digite o código do personal. Se já entrou antes, o app lembra dele.';
 
 String loginSlugMissingError() =>
     'Informe o código do seu personal ou abra o link (?p=slug).';
 
 String loginSlugFieldLabel() => 'Código do personal';
 
-String loginSlugFieldHint() => 'ex.: joao-silva';
+String loginSlugFieldHint() => 'O código que seu personal enviou';

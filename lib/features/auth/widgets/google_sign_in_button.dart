@@ -103,6 +103,20 @@ class GoogleSignInButton extends StatelessWidget {
   }
 }
 
+/// Marca "G" do Google em 4 cores, para botões de contorno.
+class GoogleLogoMark extends StatelessWidget {
+  const GoogleLogoMark({super.key, this.size = 22});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: size,
+    height: size,
+    child: CustomPaint(painter: _GoogleLogoPainter()),
+  );
+}
+
 /// Paints the Google G mark using SVG path data normalized to a 24x24 box.
 /// Source: official Google Identity guidelines (4-color logo).
 class _GoogleLogoPainter extends CustomPainter {

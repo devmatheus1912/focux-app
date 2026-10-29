@@ -5,6 +5,7 @@ import '../../../core/support/intercom_service.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/fx_settings_tile.dart';
+import 'perfil_biometria_tile.dart';
 
 /// Conta e segurança — grupo + sair em card separado.
 ///
@@ -52,6 +53,7 @@ class PerfilContaSegurancaSection extends StatelessWidget {
         FxSettingsGroup(
           header: 'Conta e segurança',
           children: [
+            PerfilBiometriaTile(mute: mute, line: line),
             if (showMfa)
               FxSettingsTile(
                 icon: Icons.phonelink_lock_outlined,

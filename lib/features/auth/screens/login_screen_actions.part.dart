@@ -18,6 +18,73 @@ extension on _LoginScreenState {
     );
   }
 
+  Future<void> _carregarBiometria() async {
+    final tipo = await ref.read(biometriaLoginProvider).tipoParaEntrar();
+    if (mounted) setState(() => _biometria = tipo);
+  }
+
+  Future<void> _entrarComBiometria() async {
+    if (_loading || _loadingGoogle || _loadingApple) return;
+    final tipo = _biometria;
+    final cred = await ref
+        .read(biometriaLoginProvider)
+        .entrar('Entrar no Focux${tipo == null ? '' : ' com ${tipo.rotulo}'}');
+    if (cred == null || !mounted) return;
+    _emailController.text = cred.email;
+    _passwordController.text = cred.senha;
+    setState(() {
+      _isAluno = cred.aluno;
+      _editandoCodigo = false;
+      final slug = cred.personalSlug;
+      if (slug != null) _slugController.text = slug;
+    });
+    _viaBiometria = true;
+    try {
+      await _submit();
+    } finally {
+      _viaBiometria = false;
+    }
+  }
+
+  /// Depois do login com senha: mantém a biometria em dia ou oferece ativar.
+  Future<void> _posLoginBiometria({required bool aluno, String? slug}) async {
+    final bio = ref.read(biometriaLoginProvider);
+    final cred = CredencialBiometria(
+      email: _emailController.text.trim(),
+      senha: _passwordController.text,
+      aluno: aluno,
+      personalSlug: aluno ? slug : null,
+    );
+    try {
+      if (await bio.ativa()) {
+        await bio.atualizarSeAtiva(cred);
+        return;
+      }
+      if (_viaBiometria) return;
+      final tipo = await bio.tipoParaOferecer();
+      if (tipo == null || !mounted) return;
+      final aceitou = await showAuthBiometriaSheet(context, tipo: tipo);
+      if (aceitou == true) {
+        await bio.ativar(cred, 'Confirme para ativar ${tipo.rotulo}');
+      } else {
+        await bio.adiarOferta();
+      }
+    } catch (_) {
+      // Biometria é conveniência: nunca trava o login.
+    }
+  }
+
+  /// Credencial guardada recusada: a senha mudou. Apaga e pede a senha.
+  Future<void> _credencialBiometriaRecusada() async {
+    await ref.read(biometriaLoginProvider).desativar();
+    if (!mounted) return;
+    _passwordController.clear();
+    setState(() {
+      _biometria = null;
+      _error = 'Sua senha mudou. Entre com e-mail e senha.';
+    });
+  }
+
   Future<void> _abrirAjuda() {
     return showFxHelpSheet(
       context,
@@ -70,6 +137,8 @@ extension on _LoginScreenState {
         logAuthHttpOk('login', path: '/api/auth/login/aluno');
         await PersonalSlugStore.save(slug);
         if (!mounted) return;
+        await _posLoginBiometria(aluno: true, slug: slug);
+        if (!mounted) return;
         _trackLogin(success: true, method: 'password');
         final requiresChange =
             ref.read(authProvider.notifier).requiresPasswordChange;
@@ -96,6 +165,10 @@ extension on _LoginScreenState {
         logAuthHttpOk('login', path: '/api/auth/login');
         if (await _maybeOpenMfa(result, method: 'password')) return;
         if (!mounted) return;
+        // ignore: unawaited_futures
+        PersonalSlugStore.save(null);
+        await _posLoginBiometria(aluno: false);
+        if (!mounted) return;
         _trackLogin(success: true, method: 'password');
         await _prefetchPersonalAfterLogin();
         if (!mounted) return;
@@ -109,9 +182,14 @@ extension on _LoginScreenState {
         method: 'password',
         codigo: ApiError.from(error)?.codigo,
       );
-      setState(() {
-        _error = mapLoginError(error);
-      });
+      final status = ApiError.from(error)?.status;
+      if (_viaBiometria && (status == 400 || status == 401 || status == 403)) {
+        await _credencialBiometriaRecusada();
+      } else {
+        setState(() {
+          _error = mapLoginError(error);
+        });
+      }
     } finally {
       if (mounted) {
         setState(() {

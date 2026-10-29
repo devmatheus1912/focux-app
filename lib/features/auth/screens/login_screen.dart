@@ -35,7 +35,11 @@ import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../widgets/auth_social_row.dart';
+import '../services/biometria_login.dart';
+import '../widgets/auth_biometria_sheet.dart';
+import '../widgets/auth_social_button.dart';
+import '../widgets/auth_social_stack.dart';
+import '../widgets/auth_text_link.dart';
 
 part 'login_screen_actions.part.dart';
 
@@ -63,6 +67,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _error;
   // BUG-39: role toggle — personal or aluno
   bool _isAluno = false;
+  // Aluno sem código conhecido (ou que pediu "Trocar"): mostra o campo.
+  bool _editandoCodigo = false;
+  BiometriaTipo? _biometria;
+  bool _viaBiometria = false;
   bool _roleFromQueryApplied = false;
   String? _personalSlug;
 
@@ -70,6 +78,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void initState() {
     super.initState();
     _loadCapabilities();
+    _carregarBiometria();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _resetPublicAuthBranding(),
     );
@@ -181,6 +190,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final showApple = _appleEnabled && !_isAluno;
     final showGoogle = _googleEnabled && !_isAluno;
     final showGoogleNote = _googleStatusNote != null && !_isAluno;
+    final ocupado = _loading || _loadingGoogle || _loadingApple;
+    final codigoConhecido = _effectivePersonalSlug != null;
+    final mostrarCampoCodigo = _isAluno && (!codigoConhecido || _editandoCodigo);
     return fxScreenA11yScope(
       label: 'Entrar no Focux',
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -212,216 +224,168 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: AutofillGroup(
                         child: AuthFormEntrance(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SizedBox(height: 2),
                               AuthLoginBrandHeader(isAluno: _isAluno),
-                              const SizedBox(height: 14),
-                              AuthGlassCard(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            loginEntrarLabel(),
-                                            style: authPageTitleStyle(context),
-                                          ),
-                                        ),
-                                        FxHelpIconButton(
-                                          tooltip: loginHelpTitle(),
-                                          onTap: _abrirAjuda,
-                                        ),
-                                      ],
+                              const SizedBox(height: TokensStrip.s6),
+                              if (_isAluno && codigoConhecido && !_editandoCodigo)
+                                _contextoAluno(),
+                              if (mostrarCampoCodigo) ...[
+                                AuthField(
+                                  label: loginSlugFieldLabel(),
+                                  controller: _slugController,
+                                  hintText: loginSlugFieldHint(),
+                                  icon: Icons.link_rounded,
+                                  textInputAction: TextInputAction.next,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'[a-zA-Z0-9\-_]'),
                                     ),
-                                    const SizedBox(height: 16),
-                                    AuthRoleToggle(
-                                      isAluno: _isAluno,
-                                      onPersonalTap: () {
-                                        if (_isAluno) {
-                                          HapticFeedback.selectionClick();
-                                          setState(() => _isAluno = false);
-                                        }
-                                      },
-                                      onAlunoTap: () {
-                                        if (!_isAluno) {
-                                          HapticFeedback.selectionClick();
-                                          setState(() => _isAluno = true);
-                                        }
-                                      },
-                                    ),
-                                    if (_isAluno) ...[
-                                      const SizedBox(height: 16),
-                                      AuthField(
-                                        label: loginSlugFieldLabel(),
-                                        controller: _slugController,
-                                        hintText: loginSlugFieldHint(),
-                                        icon: Icons.link_rounded,
-                                        textInputAction: TextInputAction.next,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                            RegExp(r'[a-zA-Z0-9\-_]'),
-                                          ),
-                                        ],
-                                        validator: (value) {
-                                          if (!_isAluno) return null;
-                                          if (value == null ||
-                                              value.trim().isEmpty) {
-                                            return loginSlugMissingError();
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ],
-                                    const SizedBox(height: 16),
-                                    AuthField(
-                                      label: 'E-mail',
-                                      controller: _emailController,
-                                      hintText: 'seu@email.com',
-                                      icon: Icons.person_outline_rounded,
-                                      keyboardType: TextInputType.emailAddress,
-                                      textInputAction: TextInputAction.next,
-                                      autofillHints: const [
-                                        AutofillHints.email,
-                                      ],
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return 'Informe o e-mail.';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: 12),
-                                    AuthField(
-                                      label: 'Senha',
-                                      controller: _passwordController,
-                                      hintText: '••••••••',
-                                      icon: Icons.lock_outline_rounded,
-                                      obscureText: !_showPassword,
-                                      textInputAction: TextInputAction.done,
-                                      autofillHints: const [
-                                        AutofillHints.password,
-                                      ],
-                                      onFieldSubmitted: (_) => _submit(),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Informe a senha.';
-                                        }
-                                        return null;
-                                      },
-                                      suffix: IconButton(
-                                        tooltip:
-                                            _showPassword
-                                                ? 'Ocultar senha'
-                                                : 'Mostrar senha',
-                                        onPressed:
-                                            () => setState(
-                                              () =>
-                                                  _showPassword =
-                                                      !_showPassword,
-                                            ),
-                                        icon: Icon(
-                                          _showPassword
-                                              ? Icons.visibility_off_outlined
-                                              : Icons.visibility_outlined,
-                                          color: heroTealSurface(0.82),
-                                          size: 18,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: TokensStrip.s2),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: FxConversionTextLink(
-                                        text: '',
-                                        actionText: loginEsqueciLabel(),
-                                        onTap:
-                                            () => authUnfocusAndGo(
-                                              context,
-                                              loginEsqueciPath(
-                                                isAluno: _isAluno,
-                                                personalSlug:
-                                                    _effectivePersonalSlug,
-                                              ),
-                                            ),
-                                      ),
-                                    ),
-                                    if (_error != null) ...[
-                                      Semantics(
-                                        liveRegion: true,
-                                        child: Text(
-                                          _error!,
-                                          style: authInlineErrorStyle(),
-                                        ),
-                                      ),
-                                      const SizedBox(height: TokensStrip.s3),
-                                    ],
-                                    FxLiquidPrimaryButton(
-                                      label: loginEntrarLabel(),
-                                      loading: _loading,
-                                      loadingLabel: loginEntrandoLabel(),
-                                      onPressed:
-                                          _loading || _loadingGoogle || _loadingApple
-                                              ? null
-                                              : _submit,
-                                    ),
-                                    if (showApple ||
-                                        showGoogle ||
-                                        showGoogleNote) ...[
-                                      const SizedBox(height: 12),
-                                      const FxConversionDivider(
-                                        label: 'ou continue com',
-                                      ),
-                                      const SizedBox(height: 12),
-                                    ],
-                                    if (showApple || showGoogle)
-                                      AuthSocialRow(
-                                        mostrarApple: showApple,
-                                        mostrarGoogle: showGoogle,
-                                        carregandoApple: _loadingApple,
-                                        carregandoGoogle: _loadingGoogle,
-                                        onApple:
-                                            _loadingApple ||
-                                                    _loading ||
-                                                    _loadingGoogle
-                                                ? null
-                                                : _submitApple,
-                                        onGoogle:
-                                            _loadingGoogle ? null : _submitGoogle,
-                                      ),
-                                    if (showApple || showGoogle) ...[
-                                      const SizedBox(height: 12),
-                                      AuthLegalConsentText(primary: primary),
-                                    ],
-                                    if (showGoogleNote) ...[
-                                      if (showGoogle)
-                                        const SizedBox(height: 12),
-                                      AuthOperationalNotice(
-                                        icon: Icons.g_mobiledata_rounded,
-                                        title:
-                                            _googleStatusTitle ??
-                                            'Google pendente no ambiente',
-                                        text: _googleStatusNote!,
-                                        action: _googleStatusAction,
-                                      ),
-                                    ],
                                   ],
+                                  validator: (value) {
+                                    if (!_isAluno) return null;
+                                    if (value == null || value.trim().isEmpty) {
+                                      return loginSlugMissingError();
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              AuthField(
+                                label: 'E-mail',
+                                controller: _emailController,
+                                hintText: 'seu@email.com',
+                                icon: Icons.person_outline_rounded,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [AutofillHints.email],
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Informe o e-mail.';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              AuthField(
+                                label: 'Senha',
+                                controller: _passwordController,
+                                hintText: '••••••••',
+                                icon: Icons.lock_outline_rounded,
+                                obscureText: !_showPassword,
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [AutofillHints.password],
+                                onFieldSubmitted: (_) => _submit(),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Informe a senha.';
+                                  }
+                                  return null;
+                                },
+                                suffix: IconButton(
+                                  tooltip:
+                                      _showPassword
+                                          ? 'Ocultar senha'
+                                          : 'Mostrar senha',
+                                  onPressed:
+                                      () => setState(
+                                        () => _showPassword = !_showPassword,
+                                      ),
+                                  icon: Icon(
+                                    _showPassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                    color: heroTealSurface(0.82),
+                                    size: 20,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: TokensStrip.s4),
-                              FxConversionTextLink(
-                                text: loginRodapeTexto(isAluno: _isAluno),
-                                actionText: loginRodapeAcao(isAluno: _isAluno),
-                                onTap:
-                                    () => authUnfocusAndGo(
-                                      context,
-                                      loginRegisterPath(
-                                        isAluno: _isAluno,
-                                        personalSlug: _effectivePersonalSlug,
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: AuthTextLink(
+                                  label: loginEsqueciLabel(),
+                                  fontSize: 13.5,
+                                  onTap:
+                                      () => authUnfocusAndGo(
+                                        context,
+                                        loginEsqueciPath(
+                                          isAluno: _isAluno,
+                                          personalSlug: _effectivePersonalSlug,
+                                        ),
                                       ),
-                                    ),
+                                ),
                               ),
+                              if (_error != null) ...[
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Text(
+                                    _error!,
+                                    textAlign: TextAlign.center,
+                                    style: authInlineErrorStyle(),
+                                  ),
+                                ),
+                                const SizedBox(height: TokensStrip.s3),
+                              ],
+                              FxLiquidPrimaryButton(
+                                label: loginEntrarLabel(),
+                                loading: _loading,
+                                loadingLabel: loginEntrandoLabel(),
+                                onPressed: ocupado ? null : _submit,
+                              ),
+                              if (_biometria != null) ...[
+                                const SizedBox(height: TokensStrip.s3),
+                                AuthSocialButton(
+                                  key: const ValueKey('login-biometria'),
+                                  label: 'Entrar com ${_biometria!.rotulo}',
+                                  leading: Icon(
+                                    _biometria == BiometriaTipo.faceId
+                                        ? Icons.face_unlock_outlined
+                                        : Icons.fingerprint_rounded,
+                                    size: 24,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: ocupado ? null : _entrarComBiometria,
+                                ),
+                              ],
+                              if (showApple || showGoogle || showGoogleNote) ...[
+                                const SizedBox(height: TokensStrip.s4),
+                                const FxConversionDivider(label: 'ou'),
+                                const SizedBox(height: TokensStrip.s4),
+                              ],
+                              if (showApple || showGoogle)
+                                AuthSocialStack(
+                                  mostrarApple: showApple,
+                                  mostrarGoogle: showGoogle,
+                                  carregandoApple: _loadingApple,
+                                  carregandoGoogle: _loadingGoogle,
+                                  onApple:
+                                      _loadingApple || _loading || _loadingGoogle
+                                          ? null
+                                          : _submitApple,
+                                  onGoogle:
+                                      _loadingGoogle || _loading || _loadingApple
+                                          ? null
+                                          : _submitGoogle,
+                                ),
+                              if (showApple || showGoogle) ...[
+                                const SizedBox(height: TokensStrip.s3),
+                                AuthLegalConsentText(primary: primary),
+                              ],
+                              if (showGoogleNote) ...[
+                                if (showGoogle) const SizedBox(height: 12),
+                                AuthOperationalNotice(
+                                  icon: Icons.g_mobiledata_rounded,
+                                  title:
+                                      _googleStatusTitle ??
+                                      'Google pendente no ambiente',
+                                  text: _googleStatusNote!,
+                                  action: _googleStatusAction,
+                                ),
+                              ],
+                              const SizedBox(height: TokensStrip.s5),
+                              ..._rodape(),
                             ],
                           ),
                         ),
@@ -435,5 +399,97 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
     );
+  }
+
+  /// "Treinando com {código} · Trocar": o aluno já está com o personal certo.
+  Widget _contextoAluno() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s3),
+      child: Row(
+        key: const ValueKey('login-contexto-aluno'),
+        children: [
+          Expanded(
+            child: Semantics(
+              container: true,
+              child: Text.rich(
+                TextSpan(
+                  text: '${loginAlunoContexto()} ',
+                  children: [
+                    TextSpan(
+                      text: _effectivePersonalSlug,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: heroTealSurface(0.82), fontSize: 14),
+              ),
+            ),
+          ),
+          AuthTextLink(
+            label: loginTrocarLabel(),
+            onTap: () => setState(() => _editandoCodigo = true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Rodapé: criar conta/ativar, caminho do aluno e ajuda.
+  List<Widget> _rodape() {
+    return [
+      AuthFraseComLink(
+        frase: loginRodapeTexto(isAluno: _isAluno),
+        acao: loginRodapeAcao(isAluno: _isAluno),
+        onTap:
+            () => authUnfocusAndGo(
+              context,
+              loginRegisterPath(
+                isAluno: _isAluno,
+                personalSlug: _effectivePersonalSlug,
+              ),
+            ),
+      ),
+      if (_isAluno)
+        Center(
+          child: AuthTextLink(
+            label: loginSouPersonalLabel(),
+            onTap: _virarPersonal,
+          ),
+        )
+      else
+        AuthFraseComLink(
+          frase: loginAlunoSemLinkTexto(),
+          acao: loginDigitarCodigoLabel(),
+          onTap:
+              () => setState(() {
+                _isAluno = true;
+                _editandoCodigo = true;
+              }),
+        ),
+      Center(
+        child: AuthTextLink(
+          label: loginAjudaLabel(),
+          fontSize: 13.5,
+          onTap: _abrirAjuda,
+        ),
+      ),
+    ];
+  }
+
+  void _virarPersonal() {
+    // ignore: unawaited_futures
+    PersonalSlugStore.save(null);
+    setState(() {
+      _isAluno = false;
+      _editandoCodigo = false;
+      _personalSlug = null;
+      _slugController.clear();
+      _error = null;
+    });
   }
 }

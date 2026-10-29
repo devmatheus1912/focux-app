@@ -71,12 +71,13 @@ void main() {
 
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('AuthTextLink'));
+    expect(screen, isNot(contains('AuthGlassCard')));
+    expect(screen, isNot(contains('AuthRoleToggle')));
     expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('ProductEvents.loginSuccess'));
-    expect(screen, contains('AuthRoleToggle'));
-    // Apple e Google lado a lado, no mesmo componente (mesmo peso).
-    expect(screen, contains('AuthSocialRow'));
+    // Apple e Google empilhados, no mesmo componente (mesmo peso).
+    expect(screen, contains('AuthSocialStack'));
     expect(screen, contains('_submitApple'));
     expect(screen, contains('AppleSignInService.isAvailableOnDevice'));
     expect(screen, contains('_googleEnabled'));
