@@ -502,6 +502,26 @@
   "modeloExcluir": "Excluir modelo",
   "modeloExcluirTitulo": "Excluir o modelo?",
   "modeloExcluirTexto": "Os treinos dele continuam salvos em Sessões.",
+  "modeloAplicarConfirma": "Aplicar em {nome}? A ficha atual é substituída.",
+  "@modeloAplicarConfirma": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "modeloAplicarMantendo": "Aplicar mantendo as cargas",
+  "modeloAplicarDoZero": "Aplicar com cargas do zero",
+  "modeloNomeDivisao": "{divisao} · {dias} dias",
+  "@modeloNomeDivisao": {
+    "placeholders": {
+      "divisao": {"type": "String"},
+      "dias": {"type": "int"}
+    }
+  },
+  "modeloCriar": "Criar modelo",
+  "modeloCriarSemana": "Criar semana",
+  "modeloRecomecar": "Recomeçar modelo",
+  "modeloRecomecarTitulo": "Recomeçar o modelo?",
+  "modeloRecomecarTexto": "As sessões saem do modelo. Fichas já aplicadas nos alunos não mudam.",
   "modeloAplicado": "Ficha aplicada em {nome}",
   "@modeloAplicado": {
     "placeholders": {

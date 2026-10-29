@@ -24,6 +24,7 @@ import '../utils/ficha_medicao.dart';
 import '../utils/ficha_vigencia.dart';
 import '../utils/semana_da_fila.dart';
 import '../utils/treino_criacao_fluxo.dart';
+import '../widgets/editor_da_semana.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
@@ -54,7 +55,8 @@ class AlunoRotinaScreen extends ConsumerStatefulWidget {
   ConsumerState<AlunoRotinaScreen> createState() => _AlunoRotinaScreenState();
 }
 
-class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
+class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
+    with EditorDaSemana<AlunoRotinaScreen> {
   RotinaFila? _rotina;
   List<DiaDaSemana> _dias = const [];
   var _carregando = true;
@@ -140,6 +142,18 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   void _marcarInicioSeVazia() {
     if (estadoDaFicha(_dias).vazia) _medicao.iniciar(DateTime.now());
   }
+
+  @override
+  List<DiaDaSemana> get semanaAtual => _dias;
+
+  @override
+  bool get gravandoSemana => _salvando;
+
+  @override
+  void definirGravando(bool valor) => setState(() => _salvando = valor);
+
+  @override
+  Future<bool> gravarSemanaInteira(List<DiaDaSemana> dias) => _persistir(dias);
 
   Future<bool> _persistir(List<DiaDaSemana> dias) {
     setState(() => _dias = dias);
@@ -258,10 +272,10 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                   dias: _dias,
                   hoje: DateTime.now().weekday,
                   ocupado: _salvando,
-                  onAdicionar: _adicionar,
+                  onAdicionar: adicionarNoDia,
                   onAbrir: _abrirSessao,
-                  onMais: _menuDaSessao,
-                  onMaisDoDia: _menuDoDia,
+                  onMais: menuDaSessao,
+                  onMaisDoDia: menuDoDia,
                 ),
               if (!estado.vazia)
                 Padding(
@@ -383,99 +397,6 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     ref.invalidate(alunoRotinaProvider(widget.alunoId));
     ref.invalidate(fichaVolumeProvider(widget.alunoId));
     await _carregar();
-  }
-
-  Future<void> _adicionar(int dia) async {
-    final nome = await pedirNomeDaSessao(context);
-    if (nome == null || !mounted) return;
-    await _persistir(
-      comSessaoNoDia(_dias, dia: dia, sessao: SessaoDaSemana(nome: nome)),
-    );
-  }
-
-  Future<void> _menuDaSessao(int dia, int indice) async {
-    final sessao = _dias[dia - 1].sessoes[indice];
-    final acao = await mostrarMenuDaSessao(
-      context,
-      nome: sessao.nome,
-      podeCopiar: sessao.treinoId != null,
-    );
-    if (acao == null || !mounted) return;
-    switch (acao) {
-      case SessaoAcao.maisUm:
-        await _adicionar(dia);
-      case SessaoAcao.descanso:
-        await _marcarDescanso(dia);
-      case SessaoAcao.mover:
-        final para = await escolherDia(context, excluir: dia);
-        if (para == null || !mounted) return;
-        await _persistir(moverDia(_dias, de: dia, para: para));
-      case SessaoAcao.copiar:
-        final para = await escolherDia(context);
-        if (para == null || !mounted) return;
-        await _copiarSessao(sessao, para);
-    }
-  }
-
-  /// Dia sem sessão: "Treinar neste dia" (segue a sequência), adicionar ou marcar descanso.
-  Future<void> _menuDoDia(int dia) async {
-    final atual = _dias[dia - 1];
-    final acao = await mostrarMenuDoDia(
-      context,
-      dia: nomesDosDias(S.of(context))[dia - 1],
-      segue: atual.segueSequencia,
-    );
-    if (acao == null || !mounted) return;
-    switch (acao) {
-      case DiaAcao.adicionar:
-        await _adicionar(dia);
-      case DiaAcao.treinar:
-      case DiaAcao.descanso:
-        await _persistir(alternarTreinoDescanso(_dias, dia));
-    }
-  }
-
-  Future<void> _marcarDescanso(int dia) async {
-    final s = S.of(context);
-    final ok = await showFxConfirmSheet(
-      context,
-      title: s.rotinaDescansoConfirmaTitulo,
-      message: s.rotinaDescansoConfirmaTexto,
-      confirmLabel: s.rotinaMarcarDescanso,
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
-    await _persistir([
-      for (final d in _dias)
-        d.dia == dia ? DiaDaSemana(dia: d.dia, descanso: true) : d,
-    ]);
-  }
-
-  Future<void> _copiarSessao(SessaoDaSemana sessao, int para) async {
-    if (_salvando || sessao.treinoId == null) return;
-    setState(() => _salvando = true);
-    try {
-      final copia = await ref
-          .read(treinoRepositoryProvider)
-          .duplicar(sessao.treinoId!);
-      if (!mounted) return;
-      setState(() => _salvando = false);
-      await _persistir(
-        comSessaoNoDia(
-          _dias,
-          dia: para,
-          sessao: SessaoDaSemana(
-            treinoId: copia.id,
-            nome: copia.nome,
-            exerciciosCount: sessao.exerciciosCount,
-          ),
-        ),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _salvando = false);
-      FeedbackHelper.showError(context, S.of(context).checkinNaoSalvou);
-    }
   }
 
   Future<void> _menuDaFicha() async {

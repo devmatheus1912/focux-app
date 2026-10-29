@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/feedback_helper.dart';
-import '../../../core/widgets/fx_action_sheet.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_loading.dart';
 import '../../../core/widgets/fx_status_pill.dart';
@@ -14,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import 'ficha_acoes.dart';
+import 'modelo_acoes.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 /// Aba "Semanas" de Modelos de treino: um card por modelo e "Novo modelo".
@@ -62,62 +61,55 @@ class FichaModelosAba extends ConsumerWidget {
         ),
         FxStickyActions(
           primaryLabel: s.modelosNovo,
-          onPrimary: () => _novoModelo(context, ref),
+          onPrimary: () => criarNovoModelo(context, ref),
         ),
       ],
     );
   }
-
-  Future<void> _novoModelo(BuildContext context, WidgetRef ref) async {
-    final s = S.of(context);
-    final dias = await showFxActionSheet<int>(
-      context,
-      title: s.modelosQuantosDias,
-      itens: [
-        for (final n in const [2, 3, 4, 5, 6, 7])
-          FxActionSheetItem(
-            value: n,
-            label: s.modeloNDias(n),
-            icon: Icons.calendar_today_rounded,
-          ),
-      ],
-    );
-    if (dias == null || !context.mounted) return;
-    final nome = await pedirTexto(
-      context,
-      titulo: s.rotinaModeloNomeTitulo,
-      inicial: s.modeloNomeSugerido(dias),
-    );
-    if (nome == null || !context.mounted) return;
-    try {
-      final modelo = await ref
-          .read(fichaModeloRepositoryProvider)
-          .criarPorDias(nome: nome, diasPorSemana: dias);
-      ref.invalidate(fichaModelosProvider);
-      if (context.mounted) context.push('/modelos/${modelo.id}');
-    } catch (_) {
-      if (context.mounted) FeedbackHelper.showError(context, s.checkinNaoSalvou);
-    }
-  }
 }
 
-/// Um modelo na lista: nome, "A · B · C · D", contagens e o estado.
-class FichaModeloCard extends StatelessWidget {
+/// Um modelo na lista: nome, "A · B · C · D", contagens, o estado e o "…".
+class FichaModeloCard extends ConsumerWidget {
   const FichaModeloCard({super.key, required this.modelo});
 
   final FichaModelo modelo;
 
+  Future<void> _menu(BuildContext context, WidgetRef ref) async {
+    final acao = await mostrarMenuDoModelo(context, nome: modelo.nome, comRecomecar: false);
+    if (acao == null || !context.mounted) return;
+    switch (acao) {
+      case ModeloAcao.aplicar:
+        await aplicarModeloEmAluno(context, ref, modelo);
+      case ModeloAcao.renomear:
+        await renomearModelo(context, ref, modelo);
+      case ModeloAcao.excluir:
+        await excluirModelo(context, ref, modelo);
+      case ModeloAcao.recomecar:
+        break;
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final s = S.of(context);
     final contagem = s.modeloContagem(modelo.sessoes.length, modelo.totalExercicios);
     final resumo = modelo.resumoDasSessoes;
     return FxTapRow(
       title: modelo.nome,
       subtitle: resumo.isEmpty ? contagem : '$resumo · $contagem',
-      trailing: FxStatusPill(
-        label: modelo.pronto ? s.modeloPronto : s.modeloEmMontagem,
-        tone: modelo.pronto ? FxPillTone.success : FxPillTone.warning,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FxStatusPill(
+            label: modelo.pronto ? s.modeloPronto : s.modeloEmMontagem,
+            tone: modelo.pronto ? FxPillTone.success : FxPillTone.warning,
+          ),
+          IconButton(
+            tooltip: s.rotinaMenuFicha,
+            onPressed: () => _menu(context, ref),
+            icon: const Icon(Icons.more_horiz_rounded),
+          ),
+        ],
       ),
       onTap: () => context.push('/modelos/${modelo.id}'),
     );

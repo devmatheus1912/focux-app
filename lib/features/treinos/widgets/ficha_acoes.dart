@@ -21,7 +21,7 @@ enum SessaoAcao { maisUm, descanso, mover, copiar }
 /// Dia sem sessão: descanso ou "segue a sequência".
 enum DiaAcao { adicionar, treinar, descanso }
 
-enum ModeloAcao { renomear, aplicar, excluir }
+enum ModeloAcao { renomear, aplicar, recomecar, excluir }
 
 List<String> nomesDosDias(S s) => [
   s.rotinaDiaSeg,
@@ -74,7 +74,11 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
   );
 }
 
-Future<ModeloAcao?> mostrarMenuDoModelo(BuildContext context, {required String nome}) {
+Future<ModeloAcao?> mostrarMenuDoModelo(
+  BuildContext context, {
+  required String nome,
+  bool comRecomecar = true,
+}) {
   final s = S.of(context);
   return showFxActionSheet<ModeloAcao>(
     context,
@@ -90,6 +94,12 @@ Future<ModeloAcao?> mostrarMenuDoModelo(BuildContext context, {required String n
         label: s.modeloRenomear,
         icon: Icons.edit_outlined,
       ),
+      if (comRecomecar)
+        FxActionSheetItem(
+          value: ModeloAcao.recomecar,
+          label: s.modeloRecomecar,
+          icon: Icons.restart_alt_rounded,
+        ),
       FxActionSheetItem(
         value: ModeloAcao.excluir,
         label: s.modeloExcluir,
@@ -210,7 +220,11 @@ Future<bool?> escolherCargas(BuildContext context) {
 
 Future<String?> pedirNomeDaSessao(BuildContext context) {
   final s = S.of(context);
-  return pedirTexto(context, titulo: s.rotinaNomeDaSessao, dica: s.rotinaNomeExemplo);
+  return pedirTexto(
+    context,
+    titulo: s.rotinaNomeDaSessao,
+    dica: s.rotinaNomeExemplo,
+  );
 }
 
 /// Pede um nome ao personal; devolve null se cancelar ou deixar vazio.
@@ -222,7 +236,8 @@ Future<String?> pedirTexto(
 }) async {
   final nome = await showDialog<String>(
     context: context,
-    builder: (_) => _DialogoDeTexto(titulo: titulo, dica: dica, inicial: inicial),
+    builder:
+        (_) => _DialogoDeTexto(titulo: titulo, dica: dica, inicial: inicial),
   );
   return nome == null || nome.isEmpty ? null : nome;
 }
@@ -230,7 +245,11 @@ Future<String?> pedirTexto(
 /// O controller mora aqui para ser descartado só quando o diálogo sai da árvore,
 /// depois da animação de saída (descartar logo após o `await` quebra em debug).
 class _DialogoDeTexto extends StatefulWidget {
-  const _DialogoDeTexto({required this.titulo, required this.inicial, this.dica});
+  const _DialogoDeTexto({
+    required this.titulo,
+    required this.inicial,
+    this.dica,
+  });
 
   final String titulo;
   final String? dica;
@@ -241,7 +260,9 @@ class _DialogoDeTexto extends StatefulWidget {
 }
 
 class _DialogoDeTextoState extends State<_DialogoDeTexto> {
-  late final TextEditingController _controle = TextEditingController(text: widget.inicial);
+  late final TextEditingController _controle = TextEditingController(
+    text: widget.inicial,
+  );
 
   @override
   void dispose() {
@@ -260,8 +281,16 @@ class _DialogoDeTextoState extends State<_DialogoDeTexto> {
         decoration: InputDecoration(hintText: widget.dica),
       ),
       actions: [
-        FxTonalButton(label: FocuxMicrocopy.cancelar, onPressed: () => Navigator.pop(context), compact: true),
-        FxTonalButton(label: s.rotinaPronto, onPressed: () => Navigator.pop(context, _controle.text.trim()), compact: true),
+        FxTonalButton(
+          label: FocuxMicrocopy.cancelar,
+          onPressed: () => Navigator.pop(context),
+          compact: true,
+        ),
+        FxTonalButton(
+          label: s.rotinaPronto,
+          onPressed: () => Navigator.pop(context, _controle.text.trim()),
+          compact: true,
+        ),
       ],
     );
   }
@@ -297,16 +326,17 @@ Future<int?> escolherAluno(
 }) {
   return showDialog<int>(
     context: context,
-    builder: (dialogContext) => SimpleDialog(
-      title: Text(titulo ?? S.of(dialogContext).rotinaUsarEmOutro),
-      children: [
-        for (final aluno in alunos)
-          if (aluno.id != excluirId)
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, aluno.id),
-              child: Text(aluno.nome),
-            ),
-      ],
-    ),
+    builder:
+        (dialogContext) => SimpleDialog(
+          title: Text(titulo ?? S.of(dialogContext).rotinaUsarEmOutro),
+          children: [
+            for (final aluno in alunos)
+              if (aluno.id != excluirId)
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(dialogContext, aluno.id),
+                  child: Text(aluno.nome),
+                ),
+          ],
+        ),
   );
 }

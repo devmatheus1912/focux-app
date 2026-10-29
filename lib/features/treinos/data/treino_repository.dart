@@ -509,23 +509,7 @@ class TreinoRepository {
   Future<RotinaFila> gravarSemana(int alunoId, List<DiaDaSemana> dias) async {
     final response = await _dio.put(
       '/api/alunos/$alunoId/rotina/semana',
-      data: {
-        'dias': [
-          for (final dia in dias)
-            {
-              'dia': dia.dia,
-              'descanso': dia.descanso || (dia.sessoes.isEmpty && !dia.segueSequencia),
-              if (dia.segueSequencia && dia.sessoes.isEmpty) 'segueSequencia': true,
-              'sessoes': [
-                for (final sessao in dia.sessoes)
-                  {
-                    'nome': sessao.nome,
-                    if (sessao.treinoId != null) 'treinoId': sessao.treinoId,
-                  },
-              ],
-            },
-        ],
-      },
+      data: {'dias': semanaComoJson(dias)},
     );
     return RotinaFila.fromJson(response.data);
   }
@@ -573,3 +557,20 @@ class TreinoRepository {
     return RotinaFila.fromJson(response.data);
   }
 }
+
+/// Corpo de `dias` da gravação da semana (ficha do aluno e modelo usam o mesmo).
+List<Map<String, Object>> semanaComoJson(List<DiaDaSemana> dias) => [
+  for (final dia in dias)
+    {
+      'dia': dia.dia,
+      'descanso': dia.descanso || (dia.sessoes.isEmpty && !dia.segueSequencia),
+      if (dia.segueSequencia && dia.sessoes.isEmpty) 'segueSequencia': true,
+      'sessoes': [
+        for (final sessao in dia.sessoes)
+          {
+            'nome': sessao.nome,
+            if (sessao.treinoId != null) 'treinoId': sessao.treinoId!,
+          },
+      ],
+    },
+];

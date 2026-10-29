@@ -2,7 +2,8 @@ import '../models/ficha_modelo.dart';
 import 'semana_da_fila.dart';
 
 /// A semana de um modelo no mesmo formato da ficha: sete dias, sessões em cada
-/// um e descanso nos outros. Item sem dia válido fica de fora.
+/// um, descanso nos dias de aviso e "segue a sequência" nos outros.
+/// Item sem dia válido fica de fora.
 List<DiaDaSemana> semanaDoModelo(FichaModelo modelo) {
   final porDia = <int, List<SessaoDaSemana>>{};
   for (final item in modelo.sessoes) {
@@ -16,12 +17,15 @@ List<DiaDaSemana> semanaDoModelo(FichaModelo modelo) {
       ),
     );
   }
+  final avisos = modelo.avisoDias.toSet();
   return [
     for (var dia = 1; dia <= 7; dia++)
-      DiaDaSemana(
-        dia: dia,
-        sessoes: porDia[dia] ?? const [],
-        descanso: (porDia[dia] ?? const []).isEmpty,
-      ),
+      if ((porDia[dia] ?? const []).isNotEmpty)
+        DiaDaSemana(dia: dia, sessoes: porDia[dia]!)
+      else if (avisos.contains(dia) || porDia.isEmpty)
+        DiaDaSemana(dia: dia, descanso: true)
+      else
+        // Fora do aviso num modelo com sessões: segue a sequência (rodízio).
+        DiaDaSemana(dia: dia, segueSequencia: true),
   ];
 }

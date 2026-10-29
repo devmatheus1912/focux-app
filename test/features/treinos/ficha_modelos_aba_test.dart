@@ -9,6 +9,7 @@ import 'package:focux_app/core/widgets/fx_choice_strip.dart';
 import 'package:focux_app/features/treinos/data/ficha_modelo_repository.dart';
 import 'package:focux_app/features/treinos/models/ficha_modelo.dart';
 import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
+import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/utils/semana_do_modelo.dart';
 import 'package:focux_app/features/treinos/utils/treino_criacao_fluxo.dart';
 import 'package:focux_app/features/treinos/widgets/ficha_modelos_aba.dart';
@@ -21,14 +22,20 @@ class _Repo extends FichaModeloRepository {
   _Repo(this.modelos) : super(ApiClient());
 
   final List<FichaModelo> modelos;
-  final criados = <(String, int)>[];
+  final criados = <(String, String)>[];
 
   @override
   Future<List<FichaModelo>> listar() async => modelos;
 
   @override
-  Future<FichaModelo> criarPorDias({required String nome, required int diasPorSemana}) async {
-    criados.add((nome, diasPorSemana));
+  Future<FichaModelo> criarPelaSemana({required String nome, required List<DiaDaSemana> dias}) async {
+    criados.add((
+      nome,
+      [
+        for (final d in dias)
+          if (d.sessoes.isNotEmpty) d.sessoes.single.nome else if (d.segueSequencia) 'segue' else '-',
+      ].join(' '),
+    ));
     return FichaModelo(id: 77, nome: nome);
   }
 }
@@ -43,6 +50,7 @@ const _hipertrofia = FichaModelo(
     FichaModeloItem(descanso: false, treinoId: 3, nome: 'Treino C', diaSemana: 4, exerciciosCount: 6),
     FichaModeloItem(descanso: false, treinoId: 4, nome: 'Treino D', diaSemana: 5, exerciciosCount: 7),
   ],
+  avisoDias: [3, 6, 7],
 );
 
 const _emMontagem = FichaModelo(
@@ -52,6 +60,7 @@ const _emMontagem = FichaModelo(
     FichaModeloItem(descanso: false, treinoId: 5, nome: 'Treino A', diaSemana: 1, exerciciosCount: 2),
     FichaModeloItem(descanso: false, treinoId: 6, nome: 'Treino B', diaSemana: 3, exerciciosCount: 0),
   ],
+  avisoDias: [2, 4, 5, 6, 7],
 );
 
 Future<void> _settle(WidgetTester tester) async {
@@ -187,23 +196,22 @@ void main() {
       expect(find.text('Novo modelo'), findsOneWidget);
     });
 
-    testWidgets('novo modelo: escolhe os dias, o nome e abre a tela do modelo', (tester) async {
+    testWidgets('novo modelo: dias e divisão, sem pedir nome, e abre a tela do modelo', (tester) async {
       final (repo, aberturas) = await _abrir(tester, const []);
       await tester.tap(find.text('Novo modelo'));
       await _settle(tester);
 
       expect(find.text('Quantos dias por semana?'), findsOneWidget);
-      await tester.tap(find.text('4 dias'));
+      expect(find.byType(TextField), findsNothing);
+      expect(find.textContaining('Vale por'), findsNothing);
+      await tester.tap(find.text('5'));
       await _settle(tester);
-      expect(
-        tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        'Modelo de 4 dias',
-      );
-      await tester.enterText(find.byType(TextField), 'Hipertrofia 4 dias');
-      await tester.tap(find.text('Pronto'));
+      await tester.tap(find.text('Criar modelo'));
       await _settle(tester);
 
-      expect(repo.criados, [('Hipertrofia 4 dias', 4)]);
+      expect(repo.criados, [
+        ('ABC · 5 dias', 'A · Peito e tríceps B · Costas e bíceps C · Pernas e glúteo segue segue - -'),
+      ]);
       expect(aberturas, ['77']);
     });
 

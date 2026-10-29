@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
 import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
@@ -27,6 +28,13 @@ class _Repo extends FichaModeloRepository {
   final renomeados = <String>[];
   final arquivados = <int>[];
   final aplicados = <(int, int, bool)>[];
+  final semanas = <List<DiaDaSemana>>[];
+
+  @override
+  Future<FichaModelo> gravarSemana(int id, List<DiaDaSemana> dias) async {
+    semanas.add(dias);
+    return modelo;
+  }
 
   @override
   Future<FichaVolume> volumeDoModelo(int id) async => FichaVolume.vazio;
@@ -62,6 +70,7 @@ const _modelo = FichaModelo(
     FichaModeloItem(descanso: false, treinoId: 12, nome: 'Treino B', diaSemana: 2, exerciciosCount: 0),
     FichaModeloItem(descanso: true),
   ],
+  avisoDias: [3, 4, 5, 6, 7],
 );
 
 Future<void> _settle(WidgetTester tester) async {
@@ -153,10 +162,32 @@ void main() {
     expect(find.byType(FxLiquidPrimaryButton), findsOneWidget);
   });
 
-  testWidgets('a semana do modelo é só de leitura: sem "…" por sessão', (tester) async {
+  testWidgets('a semana do modelo edita como a ficha: "…" em cada dia', (tester) async {
     await _abrir(tester);
-    expect(find.byTooltip('Mais ações da sessão'), findsNothing);
-    expect(find.text('Adicionar treino'), findsNothing);
+    expect(find.byTooltip('Mais ações da sessão'), findsNWidgets(7));
+    expect(find.text('Adicionar treino'), findsNWidgets(5));
+  });
+
+  testWidgets('"Treinar neste dia" grava a semana do modelo', (tester) async {
+    final (repo, _) = await _abrir(tester);
+
+    await tester.tap(find.byTooltip('Mais ações da sessão').at(3));
+    await _settle(tester);
+    await tester.tap(find.text('Treinar neste dia'));
+    await _settle(tester);
+
+    expect(repo.semanas.single.firstWhere((d) => d.dia == 4).segueSequencia, isTrue);
+  });
+
+  testWidgets('recomeçar o modelo pede confirmação e grava a semana vazia', (tester) async {
+    final (repo, _) = await _abrir(tester);
+    await _menu(tester);
+    await tester.tap(find.text('Recomeçar modelo'));
+    await _settle(tester);
+    await tester.tap(find.text('Recomeçar modelo').last);
+    await _settle(tester);
+
+    expect(repo.semanas.single.every((d) => d.sessoes.isEmpty), isTrue);
   });
 
   testWidgets('tocar numa sessão abre o montador com o modelo no extra', (tester) async {
@@ -211,11 +242,9 @@ void main() {
     await _settle(tester);
     await tester.tap(find.text('Bia Lima'));
     await _settle(tester);
-    await tester.tap(find.text('Manter as cargas'));
-    await _settle(tester);
 
-    expect(find.text('Substituir a ficha?'), findsOneWidget);
-    await tester.tap(find.text('Aplicar em aluno').last);
+    expect(find.text('Aplicar em Bia Lima? A ficha atual é substituída.'), findsOneWidget);
+    await tester.tap(find.text('Aplicar mantendo as cargas'));
     await _settle(tester);
 
     expect(repo.aplicados, [(31, 4, true)]);

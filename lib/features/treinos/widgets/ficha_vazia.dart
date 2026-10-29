@@ -17,9 +17,18 @@ import 'ficha_acoes.dart';
 
 /// O que o personal escolheu em "Montar do zero": a semana e por quantas semanas vale.
 class PlanoDaFicha {
-  const PlanoDaFicha({required this.semana, required this.semanas});
+  const PlanoDaFicha({
+    required this.semana,
+    required this.semanas,
+    required this.divisao,
+    required this.dias,
+  });
 
   final List<DiaDaSemana> semana;
+
+  /// Rótulo da divisão escolhida ("ABC") e dias de treino: servem para sugerir o nome de um modelo.
+  final String divisao;
+  final int dias;
 
   /// Nulo = sem prazo.
   final int? semanas;
@@ -27,22 +36,25 @@ class PlanoDaFicha {
 
 /// Ficha vazia: usar um modelo, montar do zero (dias → divisão → prévia) ou copiar de outro aluno.
 /// A tela dona desenha "Criar ficha" com o [PlanoDaFicha] que chega em [onPlano].
+/// No modelo só existe "Montar do zero": sem modelos, sem cópia e sem prazo.
 class FichaVazia extends StatefulWidget {
   const FichaVazia({
     super.key,
-    required this.modelos,
     required this.ocupado,
-    required this.onUsarModelo,
-    required this.onVerModelos,
-    required this.onCopiarDeAluno,
     required this.onPlano,
+    this.modelos = const [],
+    this.onUsarModelo,
+    this.onVerModelos,
+    this.onCopiarDeAluno,
+    this.mostrarPrazo = true,
   });
 
   final List<FichaModelo> modelos;
   final bool ocupado;
-  final ValueChanged<FichaModelo> onUsarModelo;
-  final VoidCallback onVerModelos;
-  final VoidCallback onCopiarDeAluno;
+  final ValueChanged<FichaModelo>? onUsarModelo;
+  final VoidCallback? onVerModelos;
+  final VoidCallback? onCopiarDeAluno;
+  final bool mostrarPrazo;
   final ValueChanged<PlanoDaFicha?> onPlano;
 
   static const modelosVisiveis = 3;
@@ -69,6 +81,8 @@ class _FichaVaziaState extends State<FichaVazia> {
           : PlanoDaFicha(
               semana: semanaPorDivisao(_diasDeTreino, divisao),
               semanas: _semanas == 0 ? null : _semanas,
+              divisao: divisao.rotulo,
+              dias: _dias,
             ),
     );
   }
@@ -119,7 +133,9 @@ class _FichaVaziaState extends State<FichaVazia> {
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final modelos = widget.modelos.take(FichaVazia.modelosVisiveis).toList();
+    final modelos = widget.onUsarModelo == null
+        ? const <FichaModelo>[]
+        : widget.modelos.take(FichaVazia.modelosVisiveis).toList();
 
     Widget painel(List<Widget> filhos) => Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s3),
@@ -150,7 +166,7 @@ class _FichaVaziaState extends State<FichaVazia> {
                     if (modelo.resumoDasSessoes.isNotEmpty) modelo.resumoDasSessoes,
                     s.modeloContagem(modelo.sessoes.length, modelo.totalExercicios),
                   ].join(' · '),
-                  onTap: () => widget.onUsarModelo(modelo),
+                  onTap: () => widget.onUsarModelo!(modelo),
                 ),
                 const SizedBox(height: TokensStrip.s1),
               ],
@@ -174,11 +190,12 @@ class _FichaVaziaState extends State<FichaVazia> {
             ),
             if (_divisao != null) ..._escolhaDaDivisao(s, chrome),
           ]),
-          FxLinkRow(
-            label: s.fichaVaziaCopiarAluno,
-            icon: Icons.people_alt_outlined,
-            onTap: widget.onCopiarDeAluno,
-          ),
+          if (widget.onCopiarDeAluno != null)
+            FxLinkRow(
+              label: s.fichaVaziaCopiarAluno,
+              icon: Icons.people_alt_outlined,
+              onTap: widget.onCopiarDeAluno,
+            ),
         ],
       ),
     );
@@ -276,13 +293,15 @@ class _FichaVaziaState extends State<FichaVazia> {
             ],
           ),
         ),
-      const SizedBox(height: TokensStrip.s1),
-      FxLinkRow(
-        label: _semanas == 0 ? s.vigenciaSemPrazo : s.fichaVaziaValePor(_semanas),
-        icon: Icons.event_rounded,
-        detalhe: s.fichaVaziaMudar,
-        onTap: _mudarPrazo,
-      ),
+      if (widget.mostrarPrazo) ...[
+        const SizedBox(height: TokensStrip.s1),
+        FxLinkRow(
+          label: _semanas == 0 ? s.vigenciaSemPrazo : s.fichaVaziaValePor(_semanas),
+          icon: Icons.event_rounded,
+          detalhe: s.fichaVaziaMudar,
+          onTap: _mudarPrazo,
+        ),
+      ],
     ];
   }
 }

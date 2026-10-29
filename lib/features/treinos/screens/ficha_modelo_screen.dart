@@ -13,20 +13,22 @@ import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_sticky_actions.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../alunos/providers/alunos_provider.dart';
 import '../models/ficha_modelo.dart';
 import '../providers/ficha_modelos_provider.dart';
 import '../providers/ficha_volume_provider.dart';
-import '../providers/treinos_provider.dart';
+import '../utils/semana_da_fila.dart';
 import '../utils/semana_do_modelo.dart';
 import '../utils/treino_criacao_fluxo.dart';
+import '../widgets/editor_da_semana.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
+import '../widgets/ficha_vazia.dart';
 import '../widgets/ficha_volume_secao.dart';
+import '../widgets/modelo_acoes.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
-/// Um modelo de ficha: a semana inteira, com as sessões prontas para montar.
+/// Um modelo de ficha: a semana inteira, editada como a ficha de um aluno.
 class FichaModeloScreen extends ConsumerStatefulWidget {
   const FichaModeloScreen({super.key, required this.modeloId});
 
@@ -36,20 +38,71 @@ class FichaModeloScreen extends ConsumerStatefulWidget {
   ConsumerState<FichaModeloScreen> createState() => _FichaModeloScreenState();
 }
 
-class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
+class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
+    with EditorDaSemana<FichaModeloScreen> {
   var _ocupado = false;
 
+  /// Semana gravada nesta tela; nula = a que veio do servidor.
+  List<DiaDaSemana>? _semana;
+  FichaModelo? _modelo;
+  PlanoDaFicha? _plano;
+
   void _recarregar() {
+    _semana = null;
     ref.invalidate(fichaModeloProvider(widget.modeloId));
     ref.invalidate(modeloVolumeProvider(widget.modeloId));
     ref.invalidate(fichaModelosProvider);
   }
 
   @override
+  List<DiaDaSemana> get semanaAtual =>
+      _semana ?? (_modelo == null ? semanaVazia() : semanaDoModelo(_modelo!));
+
+  @override
+  bool get gravandoSemana => _ocupado;
+
+  @override
+  void definirGravando(bool valor) => setState(() => _ocupado = valor);
+
+  @override
+  Future<bool> gravarSemanaInteira(List<DiaDaSemana> dias) async {
+    if (_ocupado) return false;
+    setState(() {
+      _ocupado = true;
+      _semana = dias;
+    });
+    try {
+      final gravado = await ref
+          .read(fichaModeloRepositoryProvider)
+          .gravarSemana(widget.modeloId, dias);
+      if (!mounted) return true;
+      setState(() {
+        _modelo = gravado;
+        _semana = semanaDoModelo(gravado);
+        _ocupado = false;
+      });
+      ref.invalidate(fichaModeloProvider(widget.modeloId));
+      ref.invalidate(modeloVolumeProvider(widget.modeloId));
+      ref.invalidate(fichaModelosProvider);
+      return true;
+    } catch (_) {
+      if (!mounted) return false;
+      setState(() {
+        _ocupado = false;
+        _semana = null;
+      });
+      FeedbackHelper.showError(context, S.of(context).checkinNaoSalvou);
+      return false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final async = ref.watch(fichaModeloProvider(widget.modeloId));
-    final modelo = async.asData?.value;
+    final carregado = async.asData?.value;
+    if (carregado != null && !_ocupado) _modelo = carregado;
+    final modelo = _modelo;
 
     return fxScreenA11yScope(
       label: s.modeloTitulo,
@@ -69,18 +122,24 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
               ),
           ],
         ),
-        body: async.when(
-          loading: () => const Center(child: FxLoading()),
-          error: (_, __) => Center(
-            child: FxTonalButton(label: s.modeloNaoAbriu, onPressed: _recarregar, compact: true),
-          ),
-          data: (modelo) => _corpo(s, ShellChrome.of(context), modelo),
-        ),
+        body: modelo == null
+            ? async.hasError
+                  ? Center(
+                      child: FxTonalButton(
+                        label: s.modeloNaoAbriu,
+                        onPressed: _recarregar,
+                        compact: true,
+                      ),
+                    )
+                  : const Center(child: FxLoading())
+            : _corpo(s, ShellChrome.of(context), modelo),
       ),
     );
   }
 
   Widget _corpo(S s, ShellPalette chrome, FichaModelo modelo) {
+    final dias = semanaAtual;
+    final vazia = estadoDaFicha(dias).vazia;
     final contagem = s.modeloContagem(modelo.sessoes.length, modelo.totalExercicios);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -99,24 +158,41 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
                 style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
               const SizedBox(height: TokensStrip.s4),
-              FichaSemana(
-                dias: semanaDoModelo(modelo),
-                hoje: 0,
-                ocupado: _ocupado,
-                onAbrir: _abrirSessao,
-              ),
-              const SizedBox(height: TokensStrip.s3),
-              FichaVolumeSecao(
-                provider: modeloVolumeProvider(widget.modeloId),
-                origem: 'modelo',
-              ),
+              if (vazia)
+                FichaVazia(
+                  ocupado: _ocupado,
+                  mostrarPrazo: false,
+                  onPlano: (plano) => setState(() => _plano = plano),
+                )
+              else ...[
+                FichaSemana(
+                  dias: dias,
+                  hoje: 0,
+                  ocupado: _ocupado,
+                  onAbrir: _abrirSessao,
+                  onAdicionar: adicionarNoDia,
+                  onMais: menuDaSessao,
+                  onMaisDoDia: menuDoDia,
+                ),
+                const SizedBox(height: TokensStrip.s3),
+                FichaVolumeSecao(
+                  provider: modeloVolumeProvider(widget.modeloId),
+                  origem: 'modelo',
+                ),
+              ],
             ],
           ),
         ),
         FxStickyActions(
-          primaryLabel: s.modeloAplicarEmAluno,
+          primaryLabel: vazia ? s.modeloCriarSemana : s.modeloAplicarEmAluno,
           loading: _ocupado,
-          onPrimary: () => _aplicar(modelo),
+          onPrimary: !vazia
+              ? () => aplicarModeloEmAluno(context, ref, modelo)
+              : _plano == null
+              ? null
+              : () async {
+                  if (await gravarSemanaInteira(_plano!.semana)) _plano = null;
+                },
         ),
       ],
     );
@@ -128,7 +204,7 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
       extra: TreinoRouteExtra(modeloId: widget.modeloId).toExtra(),
     );
     if (!mounted) return;
-    _recarregar();
+    setState(_recarregar);
   }
 
   Future<void> _menu(FichaModelo modelo) async {
@@ -136,80 +212,26 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen> {
     if (acao == null || !mounted) return;
     switch (acao) {
       case ModeloAcao.aplicar:
-        await _aplicar(modelo);
+        await aplicarModeloEmAluno(context, ref, modelo);
       case ModeloAcao.renomear:
-        await _renomear(modelo);
+        await renomearModelo(context, ref, modelo);
+      case ModeloAcao.recomecar:
+        await _recomecar();
       case ModeloAcao.excluir:
-        await _excluir();
+        if (await excluirModelo(context, ref, modelo) && mounted) context.pop();
     }
   }
 
-  Future<void> _renomear(FichaModelo modelo) async {
-    final s = S.of(context);
-    final nome = await pedirTexto(
-      context,
-      titulo: s.rotinaModeloNomeTitulo,
-      inicial: modelo.nome,
-    );
-    if (nome == null || !mounted) return;
-    await _executar(() async {
-      await ref.read(fichaModeloRepositoryProvider).renomear(modelo.id, nome);
-      _recarregar();
-    });
-  }
-
-  Future<void> _excluir() async {
+  Future<void> _recomecar() async {
     final s = S.of(context);
     final ok = await showFxConfirmSheet(
       context,
-      title: s.modeloExcluirTitulo,
-      message: s.modeloExcluirTexto,
-      confirmLabel: s.modeloExcluir,
+      title: s.modeloRecomecarTitulo,
+      message: s.modeloRecomecarTexto,
+      confirmLabel: s.modeloRecomecar,
       destructive: true,
     );
     if (!ok || !mounted) return;
-    await _executar(() async {
-      await ref.read(fichaModeloRepositoryProvider).arquivar(widget.modeloId);
-      ref.invalidate(fichaModelosProvider);
-      if (mounted) context.pop();
-    });
-  }
-
-  Future<void> _aplicar(FichaModelo modelo) async {
-    final s = S.of(context);
-    final alunos = await ref.read(alunosProvider.future);
-    if (!mounted) return;
-    final destino = await escolherAluno(context, alunos: alunos, excluirId: -1);
-    if (destino == null || !mounted) return;
-    final manterCargas = await escolherCargas(context);
-    if (manterCargas == null || !mounted) return;
-    final ok = await showFxConfirmSheet(
-      context,
-      title: s.rotinaAplicarConfirmaTitulo,
-      message: s.rotinaAplicarConfirmaTexto,
-      confirmLabel: s.modeloAplicarEmAluno,
-      destructive: true,
-    );
-    if (!ok || !mounted) return;
-    final nome = alunos.where((a) => a.id == destino).map((a) => a.nome).firstOrNull ?? '';
-    await _executar(() async {
-      await ref
-          .read(fichaModeloRepositoryProvider)
-          .aplicar(modelo.id, destino, manterCargas: manterCargas);
-      ref.invalidate(alunoRotinaProvider(destino));
-      if (mounted) FeedbackHelper.showSuccess(context, s.modeloAplicado(nome));
-    });
-  }
-
-  Future<void> _executar(Future<void> Function() acao) async {
-    if (_ocupado) return;
-    setState(() => _ocupado = true);
-    try {
-      await acao();
-    } catch (_) {
-      if (mounted) FeedbackHelper.showError(context, S.of(context).checkinNaoSalvou);
-    } finally {
-      if (mounted) setState(() => _ocupado = false);
-    }
+    await gravarSemanaInteira(semanaVazia());
   }
 }
