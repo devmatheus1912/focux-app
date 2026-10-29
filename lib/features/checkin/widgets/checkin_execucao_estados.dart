@@ -7,7 +7,7 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../core/widgets/fx_error_state.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_tela_carregando.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../l10n/app_localizations.dart';
 import '../utils/checkin_execucao_display.dart';
@@ -16,24 +16,8 @@ class CheckinPreparandoView extends StatelessWidget {
   const CheckinPreparandoView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
-    final primary = Theme.of(context).colorScheme.primary;
-    final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FxLoading(color: brand, size: 32),
-          const SizedBox(height: TokensStrip.s3),
-          Text(
-            S.of(context).checkinPreparando,
-            style: TextStyle(color: chrome.mute, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      FxTelaCarregando(rotulo: S.of(context).checkinPreparando);
 }
 
 class CheckinIniciarErroView extends StatelessWidget {

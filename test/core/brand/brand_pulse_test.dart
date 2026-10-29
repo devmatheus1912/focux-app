@@ -46,15 +46,4 @@ void main() {
       );
     });
   });
-
-  test('slide 1 has metrics without features; slide 2 inverse', () {
-    for (final persona in OnboardingPersona.values) {
-      final slides = FocuxBrandCopy.slidesFor(persona);
-      expect(slides.length, 2);
-      expect(slides[0].metrics, isNotEmpty);
-      expect(slides[0].features, isEmpty);
-      expect(slides[1].metrics, isEmpty);
-      expect(slides[1].features, isNotEmpty);
-    }
-  });
 }

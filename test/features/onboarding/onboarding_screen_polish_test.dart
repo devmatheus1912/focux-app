@@ -14,35 +14,21 @@ void main() {
     expect(screen, isNot(contains('CircularProgressIndicator')));
   });
 
-  test('onboarding chrome soft alinhado à Home', () {
-    final widgets = readScreenSourceBundle(
-      'lib/features/onboarding/screens/onboarding_screen_widgets.part.dart',
-    );
+  test('onboarding de uma tela por perfil, no desenho do login', () {
     final screen = readScreenSourceBundle(
       'lib/features/onboarding/screens/onboarding_screen.dart',
     );
-    expect(widgets, contains('glassPanel'));
-    expect(screen, contains('< 760'));
-    // Hero budget: metric chips removidos do slide 1.
-    expect(widgets, isNot(contains('class _MetricChipWidget')));
-    expect(widgets, contains('_OnboardingHook'));
-    expect(widgets, contains('FxLiquidPrimaryButton'));
-    expect(widgets, contains('FxConversionTextLink'));
-    expect(widgets, isNot(contains('FxSettingsTile')));
-    expect(widgets, isNot(contains('FxSettingsGroup')));
-    expect(widgets, contains('onboardingCtaNext'));
-    expect(widgets, contains('onboardingLoginLead'));
-    expect(widgets, contains('onboardingLoginAction'));
-    expect(
-      widgets.indexOf('onboardingFinishCta'),
-      lessThan(widgets.indexOf('onboardingLoginLead')),
-    );
-    expect(widgets, isNot(contains('FxLiquidSecondaryButton')));
-    expect(screen, contains('AuthRoleToggle'));
     expect(screen, contains('AuthShell'));
-    expect(screen, contains('PageView'));
+    expect(screen, contains('AuthRoleToggle'));
+    expect(screen, contains('FxLiquidPrimaryButton'));
+    expect(screen, contains('AuthFraseComLink'));
     expect(screen, contains('PopScope'));
-    expect(screen, contains('_persistProgress'));
-    expect(widgets, contains('onboardingBack'));
+    expect(screen, contains('_persistPersona'));
+    // sem carrossel, sem "Pular" nem "Quero isso"
+    expect(screen, isNot(contains('PageView')));
+    expect(screen, isNot(contains('PageController')));
+    expect(screen, isNot(contains('TextButton')));
+    expect(screen, isNot(contains('FxSettingsTile')));
+    expect(screen, isNot(contains('FxSettingsGroup')));
   });
 }

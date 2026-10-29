@@ -14,7 +14,11 @@ void main() {
       anyOf(contains('fxScreenA11yScope'), contains('Semantics(')),
     );
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, contains('CinematicSplashScene'));
+    expect(screen, contains('SplashScene'));
+    expect(screen, contains('SplashEstado'));
+    expect(screen, contains('_tentativa'));
+    expect(screen, isNot(contains('_progressCtrl')));
+    expect(screen, isNot(contains('_ambientCtrl')));
     expect(screen, contains('FocuxSystemChrome.dark'));
     expect(screen, contains('AuthShell('));
     expect(screen, isNot(contains('flatBackground: false')));
@@ -23,6 +27,7 @@ void main() {
     expect(screen, contains('PopScope('));
     expect(screen, contains('canPop: false'));
     expect(screen, contains('TokensStrip.prefersReducedMotion'));
+    expect(screen, isNot(contains('minVisible')));
     expect(screen, contains('splashGuestTarget'));
     expect(screen, contains('splashAlunoTarget'));
     expect(screen, contains('splashPersonalTarget'));
@@ -44,15 +49,13 @@ void main() {
     },
   );
 
-  test('cena cinematic sempre resolve lockup mesmo em compact', () {
+  test('cena da splash é só o logo parado', () {
     final scene = readScreenSourceBundle(
-      'lib/features/auth/widgets/cinematic_splash_scene.dart',
+      'lib/features/auth/widgets/splash_scene.dart',
     );
-    expect(scene, contains('FocuxBrandTagline'));
     expect(scene, contains('FocuxOfficialLogo.full'));
-    // Compact não pode forçar icon-only permanente.
-    expect(scene, isNot(contains('iconOnlyT = compact ? 1.0')));
-    expect(scene, contains('heroTealSurface'));
+    expect(scene, contains('liveRegion: true'));
+    expect(scene, isNot(contains('FocuxBrandTagline')));
   });
 
   test('launch theme Android é dark como a Home', () {

@@ -4,11 +4,9 @@ import 'package:focux_app/core/brand/brand_pulse.dart';
 import 'package:focux_app/core/brand/focux_brand_copy.dart';
 import 'package:focux_app/core/theme/app_theme.dart';
 import 'package:focux_app/core/theme/tokens_strip.dart';
-import 'package:focux_app/core/widgets/fx_conversion.dart';
 import 'package:focux_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 
 Future<List<BrandSocialProofItem>> _emptyPulse() async => const [];
 
@@ -21,170 +19,138 @@ void _setSurface(WidgetTester tester, Size size) {
   });
 }
 
-Widget _onboardingApp({GoRouter? router}) {
-  if (router != null) {
-    return MaterialApp.router(
-      theme: AppTheme.buildDarkTheme(TokensStrip.neonGlow),
-      routerConfig: router,
-    );
-  }
-  return MaterialApp(
-    theme: AppTheme.buildDarkTheme(TokensStrip.neonGlow),
-    home: OnboardingScreen(socialProofLoader: _emptyPulse),
-  );
+GoRouter _router() => GoRouter(
+  initialLocation: '/onboarding',
+  routes: [
+    GoRoute(
+      path: '/onboarding',
+      builder:
+          (context, state) => OnboardingScreen(socialProofLoader: _emptyPulse),
+    ),
+    GoRoute(
+      path: '/login',
+      builder:
+          (context, state) =>
+              const Scaffold(body: Center(child: Text('LOGIN_SCREEN'))),
+    ),
+    GoRoute(
+      path: '/register',
+      builder:
+          (context, state) =>
+              const Scaffold(body: Center(child: Text('REGISTER_SCREEN'))),
+    ),
+    GoRoute(
+      path: '/register/aluno',
+      builder:
+          (context, state) =>
+              const Scaffold(body: Center(child: Text('REGISTER_ALUNO'))),
+    ),
+  ],
+);
+
+Widget _app(GoRouter router) => MaterialApp.router(
+  theme: AppTheme.buildDarkTheme(TokensStrip.neonGlow),
+  routerConfig: router,
+);
+
+Future<void> _abrir(WidgetTester tester, GoRouter router) async {
+  SharedPreferences.setMockInitialValues({});
+  _setSurface(tester, const Size(390, 844));
+  await tester.pumpWidget(_app(router));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('onboarding exibe toggle personal/aluno e primeiro slide', (
+  testWidgets('personal: título, três benefícios e Começar grátis', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
-
-    await tester.pumpWidget(_onboardingApp());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
-
-    expect(find.byType(FxConversionTextLink), findsOneWidget);
-    expect(find.text(FocuxBrandCopy.onboardingCtaNext), findsOneWidget);
-    expect(find.text(FocuxBrandCopy.onboardingPersonaPersonal), findsOneWidget);
-    expect(find.text(FocuxBrandCopy.onboardingPersonaAluno), findsOneWidget);
-
-    await tester.tap(find.text(FocuxBrandCopy.onboardingPersonaAluno));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 800));
-
-    expect(find.textContaining('Execute com timer'), findsOneWidget);
-  });
-
-  testWidgets('trocar persona mantém o slide atual', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    _setSurface(tester, const Size(430, 932));
-
-    await tester.pumpWidget(_onboardingApp());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
-
-    expect(find.textContaining('Centro de Comando'), findsOneWidget);
-    // Slide 1: hero budget — sem metric chips nem checklist.
-    expect(find.text('360°'), findsNothing);
-    expect(find.textContaining('Modos Treino'), findsNothing);
-
-    await tester.tap(find.text(FocuxBrandCopy.onboardingCtaNext));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
+    await _abrir(tester, _router());
+    expect(find.text('Seus alunos treinam. Você acompanha.'), findsOneWidget);
+    for (final b in FocuxBrandCopy.onboardingBeneficios(
+      OnboardingPersona.personal,
+    )) {
+      expect(find.text(b.texto), findsOneWidget);
+    }
+    expect(find.text(FocuxBrandCopy.onboardingCtaFinish), findsOneWidget);
+    expect(find.text(FocuxBrandCopy.onboardingCtaFinishHint), findsOneWidget);
     expect(
-      find.textContaining('Mensalidades com PIX'),
+      find.text(FocuxBrandCopy.onboardingSocialProofFallback),
       findsOneWidget,
     );
-
-    await tester.tap(find.text(FocuxBrandCopy.onboardingPersonaAluno));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    expect(find.textContaining('Form check'), findsOneWidget);
-    expect(find.textContaining('Mensalidades com PIX'), findsNothing);
-    expect(find.textContaining('Centro de Comando'), findsNothing);
-    expect(
-      find.text(FocuxBrandCopy.onboardingCtaFinishAluno),
-      findsOneWidget,
-    );
+    // sem carrossel, sem "Pular" e sem "Quero isso"
+    expect(find.byType(PageView), findsNothing);
+    expect(find.text('Pular'), findsNothing);
   });
 
-  testWidgets('Entrar marca onboarding e navega para login', (
+  testWidgets('escolher "Sou aluno" troca a tela inteira', (tester) async {
+    await _abrir(tester, _router());
+    await tester.tap(find.text(FocuxBrandCopy.onboardingSouAluno));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      find.text('Seu treino, do jeito que seu personal montou.'),
+      findsOneWidget,
+    );
+    expect(find.text('Seus alunos treinam. Você acompanha.'), findsNothing);
+    expect(find.text(FocuxBrandCopy.onboardingCtaFinishAluno), findsOneWidget);
+    expect(
+      find.text(FocuxBrandCopy.onboardingCtaFinishHintAluno),
+      findsOneWidget,
+    );
+    expect(find.text(FocuxBrandCopy.onboardingCtaFinish), findsNothing);
+  });
+
+  testWidgets('Começar grátis marca o onboarding e vai ao cadastro', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({});
-    _setSurface(tester, const Size(430, 932));
-
-    final router = GoRouter(
-      initialLocation: '/onboarding',
-      routes: [
-        GoRoute(
-          path: '/onboarding',
-          builder:
-              (context, state) =>
-                  OnboardingScreen(socialProofLoader: _emptyPulse),
-        ),
-        GoRoute(
-          path: '/login',
-          builder:
-              (context, state) =>
-                  const Scaffold(body: Center(child: Text('LOGIN_SCREEN'))),
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(_onboardingApp(router: router));
+    await _abrir(tester, _router());
+    await tester.tap(find.text(FocuxBrandCopy.onboardingCtaFinish));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
-
-    await tester.tap(
-      find.descendant(
-        of: find.byType(FxConversionTextLink),
-        matching: find.byType(FxTonalButton),
-      ),
-    );
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('LOGIN_SCREEN'), findsOneWidget);
-
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('REGISTER_SCREEN'), findsOneWidget);
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('onboarding_done_v3'), isTrue);
   });
 
-  testWidgets('Pular marca onboarding e navega para login', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    _setSurface(tester, const Size(430, 932));
-
-    final router = GoRouter(
-      initialLocation: '/onboarding',
-      routes: [
-        GoRoute(
-          path: '/onboarding',
-          builder:
-              (context, state) =>
-                  OnboardingScreen(socialProofLoader: _emptyPulse),
-        ),
-        GoRoute(
-          path: '/login',
-          builder:
-              (context, state) =>
-                  const Scaffold(body: Center(child: Text('LOGIN_SCREEN'))),
-        ),
-      ],
-    );
-
-    await tester.pumpWidget(_onboardingApp(router: router));
+  testWidgets('Tenho um convite leva a ativar conta do aluno', (tester) async {
+    await _abrir(tester, _router());
+    await tester.tap(find.text(FocuxBrandCopy.onboardingSouAluno));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text(FocuxBrandCopy.onboardingCtaFinishAluno));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('REGISTER_ALUNO'), findsOneWidget);
+  });
 
-    await tester.tap(find.text(FocuxBrandCopy.onboardingSkip));
+  testWidgets('"Já tem conta? Entrar" marca o onboarding e vai ao login', (
+    tester,
+  ) async {
+    await _abrir(tester, _router());
+    await tester.tap(find.text(FocuxBrandCopy.authExistingAccountAction));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
+    await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('LOGIN_SCREEN'), findsOneWidget);
-
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('onboarding_done_v3'), isTrue);
   });
 
-  testWidgets('slide 1 sem metric chips (hero budget Home)', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({});
-    _setSurface(tester, const Size(430, 932));
-
-    await tester.pumpWidget(_onboardingApp());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1000));
-
-    expect(find.text('360°'), findsNothing);
-    expect(find.text('Ao vivo'), findsNothing);
-    expect(find.textContaining('Centro de Comando'), findsOneWidget);
-    expect(find.text(FocuxBrandCopy.onboardingSocialProofFallback), findsOneWidget);
-  });
+  for (final tela in [const Size(320, 640), const Size(390, 844)]) {
+    testWidgets(
+      'botão principal visível sem rolar em ${tela.width.toInt()}×${tela.height.toInt()}',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({});
+        _setSurface(tester, tela);
+        await tester.pumpWidget(_app(_router()));
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getRect(find.text(FocuxBrandCopy.onboardingCtaFinish)).bottom,
+          lessThanOrEqualTo(tela.height),
+        );
+      },
+    );
+  }
 }

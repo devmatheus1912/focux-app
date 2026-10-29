@@ -2,25 +2,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/core/brand/focux_brand_copy.dart';
 
 void main() {
-  test('slides personal refletem produto real', () {
-    final slides = FocuxBrandCopy.slidesFor(OnboardingPersona.personal);
-    expect(slides, hasLength(2));
-    expect(slides[1].features.any((f) => f.contains('Copiloto')), isTrue);
+  test('personal tem 3 benefícios e título próprio', () {
+    final b = FocuxBrandCopy.onboardingBeneficios(OnboardingPersona.personal);
+    expect(b, hasLength(3));
+    expect(b.any((x) => x.texto.toLowerCase().contains('check-in')), isTrue);
+    expect(b.any((x) => x.texto.contains('PIX')), isTrue);
     expect(
-      slides[0].subtitle.toLowerCase().contains('check-in'),
-      isTrue,
+      FocuxBrandCopy.onboardingTitulo(OnboardingPersona.personal),
+      'Seus alunos treinam. Você acompanha.',
     );
   });
 
-  test('slides aluno cobrem treino e ecossistema completo', () {
-    final slides = FocuxBrandCopy.slidesFor(OnboardingPersona.aluno);
-    expect(slides, hasLength(2));
-    expect(slides[0].titleHighlight, 'Na palma da mão.');
-    expect(slides[1].title, 'IA, form check e mensalidade. ');
-    expect(
-      slides[1].features.any((f) => f.toLowerCase().contains('assistente')),
-      isTrue,
-    );
+  test('aluno tem 3 benefícios de treino, evolução e conversa', () {
+    final b = FocuxBrandCopy.onboardingBeneficios(OnboardingPersona.aluno);
+    expect(b, hasLength(3));
+    expect(b.any((x) => x.texto.toLowerCase().contains('evolução')), isTrue);
+    expect(b.any((x) => x.texto.toLowerCase().contains('personal')), isTrue);
   });
 
   test('tagline unificada com hook de marca', () {

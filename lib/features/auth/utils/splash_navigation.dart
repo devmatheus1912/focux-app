@@ -25,31 +25,22 @@ bool deveOferecerTestePro({
   return alunos > 0 || treinos > 0;
 }
 
-class SplashMotionBudget {
-  const SplashMotionBudget({required this.compact, required this.reduceMotion});
+/// O que a splash mostra enquanto resolve o destino: nada animado; o
+/// indicador e a mensagem só aparecem se demorar.
+enum SplashEstado { resolvendo, demorando, travada }
 
-  final bool compact;
+/// Tempos da splash: sem espera mínima e sem animação decorativa.
+class SplashMotionBudget {
+  const SplashMotionBudget({required this.reduceMotion});
+
   final bool reduceMotion;
 
-  Duration get resolveDelay =>
-      reduceMotion
-          ? Duration.zero
-          : Duration(milliseconds: compact ? 100 : 420);
+  /// Sem sinal de "carregando" antes disso.
+  static const demora = Duration(milliseconds: 1200);
 
-  Duration get minVisible =>
-      reduceMotion
-          ? Duration.zero
-          : Duration(milliseconds: compact ? 380 : 800);
-
-  Duration get entry =>
-      Duration(milliseconds: reduceMotion ? 0 : (compact ? 420 : 900));
-
-  Duration get progress =>
-      Duration(milliseconds: reduceMotion ? 0 : (compact ? 900 : 2200));
+  /// Passado esse tempo, mensagem e "Tentar de novo".
+  static const travada = Duration(seconds: 3);
 
   Duration get fade =>
-      Duration(milliseconds: reduceMotion ? 0 : (compact ? 240 : 340));
-
-  Duration get progressFinish =>
-      Duration(milliseconds: reduceMotion ? 0 : (compact ? 180 : 300));
+      reduceMotion ? Duration.zero : const Duration(milliseconds: 150);
 }

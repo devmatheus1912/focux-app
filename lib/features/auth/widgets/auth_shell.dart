@@ -247,9 +247,13 @@ class AuthRoleToggle extends StatelessWidget {
     required this.isAluno,
     required this.onPersonalTap,
     required this.onAlunoTap,
+    this.personalLabel,
+    this.alunoLabel,
   });
 
   final bool isAluno;
+  final String? personalLabel;
+  final String? alunoLabel;
   final VoidCallback onPersonalTap;
   final VoidCallback onAlunoTap;
 
@@ -317,12 +321,12 @@ class AuthRoleToggle extends StatelessWidget {
       child: Row(
         children: [
           tab(
-            label: FocuxBrandCopy.onboardingPersonaPersonal,
+            label: personalLabel ?? FocuxBrandCopy.onboardingPersonaPersonal,
             selected: !isAluno,
             onTap: onPersonalTap,
           ),
           tab(
-            label: FocuxBrandCopy.onboardingPersonaAluno,
+            label: alunoLabel ?? FocuxBrandCopy.onboardingPersonaAluno,
             selected: isAluno,
             onTap: onAlunoTap,
           ),

@@ -15,7 +15,7 @@ import '../../alunos/utils/alunos_home_prefetch.dart';
 import '../providers/auth_provider.dart';
 import '../utils/splash_navigation.dart';
 import '../widgets/auth_shell.dart';
-import '../widgets/cinematic_splash_scene.dart';
+import '../widgets/splash_scene.dart';
 import '../../../core/theme/focux_system_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
@@ -28,114 +28,77 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
-    with TickerProviderStateMixin {
-  late final AnimationController _ambientCtrl;
-  late final AnimationController _entryCtrl;
-  late final AnimationController _progressCtrl;
+    with SingleTickerProviderStateMixin {
   late final AnimationController _fadeCtrl;
-
   late final Animation<double> _fadeOut;
 
-  bool _compactSplash = false;
+  SplashEstado _estado = SplashEstado.resolvendo;
+  Timer? _demoraTimer;
+  Timer? _travadaTimer;
+
+  /// Cada tentativa tem um número; uma tentativa antiga não navega.
+  int _tentativa = 0;
+  bool _reduceMotion = false;
 
   @override
   void initState() {
     super.initState();
-    _ambientCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 5200),
-    );
-
-    _entryCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-
-    _progressCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    );
-
     _fadeCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 340),
+      duration: const Duration(milliseconds: 150),
     );
-
     _fadeOut = Tween<double>(
       begin: 1,
       end: 0,
     ).animate(CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeInCubic));
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final reduceMotion = TokensStrip.prefersReducedMotion(context);
-      if (!reduceMotion) {
-        _ambientCtrl.repeat();
-      }
-      final compact = await _resolveQuickSplash();
-      if (!mounted) return;
-      final budget = SplashMotionBudget(
-        compact: compact,
-        reduceMotion: reduceMotion,
-      );
-      if (compact) {
-        setState(() => _compactSplash = true);
-      }
-      _entryCtrl.duration = budget.entry;
-      _progressCtrl.duration = budget.progress;
-      _fadeCtrl.duration = budget.fade;
-      _entryCtrl.forward();
-      _bootstrap(budget);
+      _reduceMotion = TokensStrip.prefersReducedMotion(context);
+      _fadeCtrl.duration = SplashMotionBudget(reduceMotion: _reduceMotion).fade;
+      _iniciar();
     });
   }
 
   @override
   void dispose() {
-    _ambientCtrl.dispose();
-    _entryCtrl.dispose();
-    _progressCtrl.dispose();
+    _demoraTimer?.cancel();
+    _travadaTimer?.cancel();
     _fadeCtrl.dispose();
     super.dispose();
   }
 
-  Future<bool> _resolveQuickSplash() async {
-    if (ref.read(authProvider) == AuthStatus.authenticated) {
-      return true;
-    }
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('onboarding_done_v3') ?? false;
+  void _iniciar() {
+    final tentativa = ++_tentativa;
+    _demoraTimer?.cancel();
+    _travadaTimer?.cancel();
+    setState(() => _estado = SplashEstado.resolvendo);
+    _demoraTimer = Timer(SplashMotionBudget.demora, () {
+      if (mounted && tentativa == _tentativa) {
+        setState(() => _estado = SplashEstado.demorando);
+      }
+    });
+    _travadaTimer = Timer(SplashMotionBudget.travada, () {
+      if (mounted && tentativa == _tentativa) {
+        setState(() => _estado = SplashEstado.travada);
+      }
+    });
+    _bootstrap(tentativa);
   }
 
   static const _resolveNavigationTimeout = Duration(seconds: 5);
   static const _profilePrefetchTimeout = Duration(seconds: 2);
 
-  Future<void> _bootstrap(SplashMotionBudget budget) async {
-    final bootstrapFuture = _resolveNavigationTarget(budget).timeout(
+  Future<void> _bootstrap(int tentativa) async {
+    final target = await _resolveNavigationTarget().timeout(
       _resolveNavigationTimeout,
       onTimeout: () => _fallbackNavigationTarget(),
     );
-    // Mid progress em paralelo — não espera 0.92 antes de fechar a barra.
-    if (budget.progress == Duration.zero) {
-      _progressCtrl.value = 0.62;
-    } else {
-      unawaited(_progressCtrl.animateTo(0.62, curve: Curves.easeOutCubic));
-    }
-    final minDelay = Future<void>.delayed(budget.minVisible);
-
-    final target = await bootstrapFuture;
-    await minDelay;
-    if (!mounted) return;
-
-    await _progressCtrl.animateTo(
-      1,
-      duration: budget.progressFinish,
-      curve: Curves.easeOut,
-    );
-    if (!mounted) return;
-
+    if (!mounted || tentativa != _tentativa) return;
+    _demoraTimer?.cancel();
+    _travadaTimer?.cancel();
     await _fadeCtrl.forward();
-    if (!mounted) return;
-
+    if (!mounted || tentativa != _tentativa) return;
     context.go(target);
   }
 
@@ -162,8 +125,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     return splashGuestTarget(onboardingDone: false);
   }
 
-  Future<String> _resolveNavigationTarget(SplashMotionBudget budget) async {
-    await Future<void>.delayed(budget.resolveDelay);
+  Future<String> _resolveNavigationTarget() async {
     await _awaitAuthSettled();
 
     final authStatus = ref.read(authProvider);
@@ -240,21 +202,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             body: AuthShell(
               child: PopScope(
                 canPop: false,
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([
-                    _ambientCtrl,
-                    _entryCtrl,
-                    _progressCtrl,
-                    _fadeCtrl,
-                  ]),
-                  builder:
-                      (context, _) => CinematicSplashScene(
-                        progress: _progressCtrl.value,
-                        ambient: _ambientCtrl,
-                        entry: _entryCtrl,
-                        fadeOut: _fadeOut,
-                        compact: _compactSplash,
-                      ),
+                child: SplashScene(
+                  estado: _estado,
+                  fadeOut: _fadeOut,
+                  onTentarNovamente: _iniciar,
                 ),
               ),
             ),

@@ -53,7 +53,7 @@ void main() {
     expect(screen, contains('Botão principal fixo'));
     expect(
       screen.indexOf('registerCriarLabel'),
-      greaterThan(screen.indexOf('onboardingExistingAccountCta')),
+      greaterThan(screen.indexOf('authExistingAccountAction')),
     );
     expect(screen, contains('AuthBackBar'));
     expect(screen, contains('ensureFooter: true'));

@@ -11,7 +11,7 @@ import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../core/widgets/fx_loading.dart';
+import '../../../core/widgets/fx_tela_carregando.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -116,7 +116,7 @@ class _BrandPublicIdentityScreenState
         child: const FxShellScaffold(
           useMesh: true,
           appBar: FxShellAppBar(title: 'Seu link público'),
-          body: Center(child: FxLoading()),
+          body: FxTelaCarregando(),
         ),
       );
     }

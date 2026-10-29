@@ -79,13 +79,12 @@ void main() {
     );
   });
 
-  test('reduced motion zera espera da splash', () {
-    const budget = SplashMotionBudget(compact: false, reduceMotion: true);
-    expect(budget.resolveDelay, Duration.zero);
-    expect(budget.minVisible, Duration.zero);
-    expect(budget.entry, Duration.zero);
-    expect(budget.progress, Duration.zero);
-    expect(budget.fade, Duration.zero);
-    expect(budget.progressFinish, Duration.zero);
+  test('splash não tem espera mínima: só um fade curto', () {
+    const normal = SplashMotionBudget(reduceMotion: false);
+    expect(normal.fade, const Duration(milliseconds: 150));
+    const reduzido = SplashMotionBudget(reduceMotion: true);
+    expect(reduzido.fade, Duration.zero);
+    expect(SplashMotionBudget.demora, const Duration(milliseconds: 1200));
+    expect(SplashMotionBudget.travada, const Duration(seconds: 3));
   });
 }

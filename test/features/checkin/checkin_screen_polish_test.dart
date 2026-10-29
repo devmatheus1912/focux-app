@@ -50,7 +50,7 @@ void main() {
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
 
     final estados = _src(estadosPath);
-    expect(estados, contains('FxLoading'));
+    expect(estados, contains('FxTelaCarregando'));
     expect(estados, contains('.checkinPreparando'));
     expect(estados, contains('checkinExecutionControlMin'));
     expect(estados, contains('liveRegion: true'));

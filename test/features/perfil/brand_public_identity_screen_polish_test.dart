@@ -9,7 +9,7 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
-    expect(screen, contains('FxLoading'));
+    expect(screen, contains('FxTelaCarregando'));
     expect(screen, contains('FxErrorState'));
     expect(screen, contains('friendlyError'));
     expect(screen, contains('ref.invalidate'));

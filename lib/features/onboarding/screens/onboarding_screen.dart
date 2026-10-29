@@ -7,21 +7,18 @@ import '../../../core/api/api_client.dart';
 import '../../../core/brand/brand_pulse.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/theme/focux_hub_typography.dart';
-import '../../../core/theme/focux_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/motion_preferences.dart';
 import '../../../core/widgets/focux_official_logo.dart';
-import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_motion.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../auth/widgets/auth_shell.dart';
+import '../../auth/widgets/auth_text_link.dart';
 import '../data/brand_pulse_repository.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
-part 'onboarding_screen_widgets.part.dart';
-
-/// Onboarding pré-login — 2 slides × Personal/Aluno.
+/// Primeira abertura: uma tela por perfil (Personal ou Aluno), com o que o app
+/// faz em três linhas e uma ação principal. Sem carrossel.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, this.socialProofLoader});
 
@@ -32,87 +29,11 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen>
-    with TickerProviderStateMixin {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _personaKey = 'onboarding_persona_v3';
-  static const _slideKey = 'onboarding_slide_v3';
 
-  final _page = PageController();
-  int _current = 0;
   OnboardingPersona _persona = OnboardingPersona.personal;
   String _socialProofLine = FocuxBrandCopy.onboardingSocialProofFallback;
-
-  PageController get _activePage => _page;
-
-  late AnimationController _entryCtrl;
-  late Animation<double> _iconScale;
-  late Animation<double> _titleSlide;
-  late Animation<double> _subtitleSlide;
-  late Animation<double> _metricsSlide;
-  late Animation<double> _fade;
-
-  bool _motionConfigured = false;
-
-  /// Telas ≤760px de altura útil — logo/tipografia mais compactos.
-  static bool _isCompactLayout(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).height;
-    final padding = MediaQuery.paddingOf(context);
-    return (height - padding.top - padding.bottom) < 760;
-  }
-
-  List<_OBData> _pagesFor(OnboardingPersona persona) {
-    final slides = FocuxBrandCopy.slidesFor(persona);
-    return List.generate(slides.length, (i) {
-      final slide = slides[i];
-      return _OBData(
-        title: slide.title,
-        titleHighlight: slide.titleHighlight,
-        subtitle: slide.subtitle,
-        features: slide.features,
-      );
-    });
-  }
-
-  void _setupEntryAnimation({required bool reduceMotion}) {
-    final iconCurve = reduceMotion ? Curves.easeOutCubic : Curves.elasticOut;
-    _entryCtrl = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: reduceMotion ? 500 : 900),
-    );
-    _iconScale = Tween<double>(
-      begin: reduceMotion ? 0.94 : 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _entryCtrl,
-        curve: Interval(0.0, 0.5, curve: iconCurve),
-      ),
-    );
-    _titleSlide = Tween<double>(begin: 30, end: 0).animate(
-      CurvedAnimation(
-        parent: _entryCtrl,
-        curve: const Interval(0.15, 0.6, curve: Curves.easeOutCubic),
-      ),
-    );
-    _subtitleSlide = Tween<double>(begin: 30, end: 0).animate(
-      CurvedAnimation(
-        parent: _entryCtrl,
-        curve: const Interval(0.3, 0.7, curve: Curves.easeOutCubic),
-      ),
-    );
-    _metricsSlide = Tween<double>(begin: 40, end: 0).animate(
-      CurvedAnimation(
-        parent: _entryCtrl,
-        curve: const Interval(0.45, 0.85, curve: Curves.easeOutCubic),
-      ),
-    );
-    _fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _entryCtrl,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-      ),
-    );
-  }
 
   @override
   void initState() {
@@ -127,27 +48,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   Future<void> _restoreProgress() async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_personaKey);
-    final slide = prefs.getInt(_slideKey) ?? 0;
     if (!mounted) return;
-    final persona =
-        raw == OnboardingPersona.aluno.name
-            ? OnboardingPersona.aluno
-            : OnboardingPersona.personal;
-    final pages = _pagesFor(persona);
-    final index = slide.clamp(0, pages.length - 1);
     setState(() {
-      _persona = persona;
-      _current = index;
+      _persona =
+          raw == OnboardingPersona.aluno.name
+              ? OnboardingPersona.aluno
+              : OnboardingPersona.personal;
     });
-    if (_page.hasClients) {
-      _page.jumpToPage(index);
-    }
   }
 
-  Future<void> _persistProgress() async {
+  Future<void> _persistPersona() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_personaKey, _persona.name);
-    await prefs.setInt(_slideKey, _current);
   }
 
   Future<void> _loadSocialProof() async {
@@ -162,27 +74,8 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         setState(() => _socialProofLine = line);
       }
     } catch (_) {
-      // Mantém fallback neutro — onboarding não depende de rede.
+      // Mantém o fallback neutro: a primeira abertura não depende de rede.
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_motionConfigured) return;
-    _motionConfigured = true;
-    final reduce = reduceMotionOf(context);
-    _setupEntryAnimation(reduceMotion: reduce);
-    _entryCtrl.forward();
-  }
-
-  List<_OBData> get _pages => _pagesFor(_persona);
-
-  @override
-  void dispose() {
-    _page.dispose();
-    _entryCtrl.dispose();
-    super.dispose();
   }
 
   Future<void> _markDone() async {
@@ -190,18 +83,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     await prefs.setBool('onboarding_done_v3', true);
     await prefs.remove('onboarding_done_v2');
     await prefs.remove('onboarding_done');
+    await prefs.remove('onboarding_slide_v3');
   }
-
-  Future<void> _skip() => _goLogin();
 
   Future<void> _finish() async {
     await _markDone();
     if (!mounted) return;
-    if (_persona == OnboardingPersona.aluno) {
-      context.go('/register/aluno');
-    } else {
-      context.go('/register');
-    }
+    context.go(
+      _persona == OnboardingPersona.aluno ? '/register/aluno' : '/register',
+    );
   }
 
   Future<void> _goLogin() async {
@@ -214,137 +104,218 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   void _setPersona(OnboardingPersona persona) {
     if (_persona == persona) return;
     HapticFeedback.selectionClick();
-
-    final currentIndex =
-        _page.hasClients ? (_page.page?.round() ?? _current) : _current;
-    final targetIndex = currentIndex.clamp(0, _pagesFor(persona).length - 1);
-
-    setState(() {
-      _persona = persona;
-      _current = targetIndex;
-    });
-    _persistProgress();
-    if (_page.hasClients) {
-      _page.jumpToPage(targetIndex);
-    }
-    _entryCtrl.forward(from: 0);
-  }
-
-  void _next() {
-    HapticFeedback.selectionClick();
-    if (_current < _pages.length - 1) {
-      if (reduceMotionOf(context)) {
-        _activePage.jumpToPage(_current + 1);
-      } else {
-        _activePage.nextPage(
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOutCubic,
-        );
-      }
-    } else {
-      _finish();
-    }
-  }
-
-  void _onPageChanged(int i) {
-    HapticFeedback.selectionClick();
-    setState(() => _current = i);
-    _entryCtrl.forward(from: 0);
-    _persistProgress();
-  }
-
-  void _back() {
-    if (_current <= 0) {
-      _skip();
-      return;
-    }
-    HapticFeedback.selectionClick();
-    if (reduceMotionOf(context)) {
-      _activePage.jumpToPage(_current - 1);
-    } else {
-      _activePage.previousPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeOutCubic,
-      );
-    }
+    setState(() => _persona = persona);
+    _persistPersona();
   }
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    final pages = _pages;
-    final isLast = _current >= pages.length - 1;
     final textScaler = clampedTextScaler(context);
-    final compact = _isCompactLayout(context);
+    final reduceMotion = reduceMotionOf(context);
+    final aluno = _persona == OnboardingPersona.aluno;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        _back();
+        _goLogin();
       },
       child: fxScreenA11yScope(
-      label: 'Boas-vindas Focux',
-      child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-        child: Scaffold(
-          body: AuthShell(
-            child: Column(
-              children: [
-                _OnboardingHeader(
-                  persona: _persona,
-                  onPersonaChanged: _setPersona,
-                  onSkip: _skip,
-                ),
-                Expanded(
-                  child: Semantics(
-                    label: 'Slide ${_current + 1} de ${pages.length}',
-                    child: PageView.builder(
-                      clipBehavior: Clip.none,
-                      controller: _activePage,
-                      itemCount: pages.length,
-                      onPageChanged: _onPageChanged,
-                      itemBuilder:
-                          (_, i) => _OBPageWidget(
-                            key: ValueKey('${_persona.name}-$i'),
-                            pageIndex: i,
-                            persona: _persona,
-                            data: pages[i],
-                            compact: compact,
-                            iconScale: _iconScale,
-                            titleSlide: _titleSlide,
-                            subtitleSlide: _subtitleSlide,
-                            metricsSlide: _metricsSlide,
-                            fade: _fade,
-                          ),
-                    ),
-                  ),
-                ),
-                _OnboardingFooter(
-                  primary: primary,
-                  pageCount: pages.length,
-                  current: _current,
-                  isLast: isLast,
-                  persona: _persona,
-                  socialProofLine: _current == 0 ? _socialProofLine : null,
-                  onDotTap:
-                      (i) =>
-                          reduceMotionOf(context)
-                              ? _activePage.jumpToPage(i)
-                              : _activePage.animateToPage(
-                                i,
-                                duration: const Duration(milliseconds: 400),
-                                curve: Curves.easeOutCubic,
+        label: 'Boas-vindas Focux',
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+          child: Scaffold(
+            body: AuthShell(
+              child: AuthFormEntrance(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(
+                          TokensStrip.s5,
+                          TokensStrip.s3,
+                          TokensStrip.s5,
+                          TokensStrip.s4,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            AuthRoleToggle(
+                              isAluno: aluno,
+                              personalLabel:
+                                  FocuxBrandCopy.onboardingSouPersonal,
+                              alunoLabel: FocuxBrandCopy.onboardingSouAluno,
+                              onPersonalTap:
+                                  () => _setPersona(OnboardingPersona.personal),
+                              onAlunoTap:
+                                  () => _setPersona(OnboardingPersona.aluno),
+                            ),
+                            const SizedBox(height: TokensStrip.s6),
+                            Center(
+                              child: Semantics(
+                                label: 'Focux',
+                                image: true,
+                                child: FocuxOfficialLogo.full(
+                                  width: authLogoWidthFor(
+                                    context,
+                                    withTagline: true,
+                                  ),
+                                ),
                               ),
-                  onBack: _current > 0 ? _back : null,
-                  onLogin: _goLogin,
-                  onPrimary: _next,
+                            ),
+                            const SizedBox(height: TokensStrip.s5),
+                            AnimatedSwitcher(
+                              duration:
+                                  reduceMotion
+                                      ? Duration.zero
+                                      : const Duration(milliseconds: 220),
+                              child: _Conteudo(
+                                key: ValueKey(_persona),
+                                persona: _persona,
+                                socialProofLine: _socialProofLine,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    _Rodape(
+                      persona: _persona,
+                      onPrimary: _finish,
+                      onLogin: _goLogin,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Conteudo extends StatelessWidget {
+  const _Conteudo({
+    super.key,
+    required this.persona,
+    required this.socialProofLine,
+  });
+
+  final OnboardingPersona persona;
+  final String socialProofLine;
+
+  static IconData _icone(OnboardingIcone icone) => switch (icone) {
+    OnboardingIcone.treino => Icons.fitness_center_rounded,
+    OnboardingIcone.cobranca => Icons.payments_outlined,
+    OnboardingIcone.atencao => Icons.notifications_active_outlined,
+    OnboardingIcone.video => Icons.play_circle_outline_rounded,
+    OnboardingIcone.evolucao => Icons.trending_up_rounded,
+    OnboardingIcone.chat => Icons.chat_bubble_outline_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            FocuxBrandCopy.onboardingTitulo(persona),
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.pageTitle(
+              context,
+              color: heroTealInk(),
+            ).copyWith(fontSize: 26, height: 1.2, fontWeight: FontWeight.w800),
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s5),
+        for (final beneficio in FocuxBrandCopy.onboardingBeneficios(persona))
+          Padding(
+            padding: const EdgeInsets.only(bottom: TokensStrip.s4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: primary.withValues(alpha: 0.16),
+                  ),
+                  child: Icon(
+                    _icone(beneficio.icone),
+                    size: 22,
+                    color: heroTealInk(),
+                  ),
+                ),
+                const SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Text(
+                    beneficio.texto,
+                    style: FocuxHubTypography.body(
+                      color: heroTealInk(),
+                    ).copyWith(fontWeight: FontWeight.w600, height: 1.3),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const SizedBox(height: TokensStrip.s2),
+        Text(
+          socialProofLine,
+          textAlign: TextAlign.center,
+          style: FocuxHubTypography.bodyMuted(color: heroTealSurface(0.78)),
+        ),
+      ],
+    );
+  }
+}
+
+class _Rodape extends StatelessWidget {
+  const _Rodape({
+    required this.persona,
+    required this.onPrimary,
+    required this.onLogin,
+  });
+
+  final OnboardingPersona persona;
+  final VoidCallback onPrimary;
+  final VoidCallback onLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        TokensStrip.s5,
+        TokensStrip.s2,
+        TokensStrip.s5,
+        TokensStrip.s3,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FxLiquidPrimaryButton(
+            label: FocuxBrandCopy.onboardingFinishCta(persona),
+            onPressed: onPrimary,
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            FocuxBrandCopy.onboardingFinishHint(persona),
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.bodyMuted(color: heroTealSurface(0.78)),
+          ),
+          const SizedBox(height: TokensStrip.s1),
+          AuthFraseComLink(
+            frase: FocuxBrandCopy.authExistingAccountLead,
+            acao: FocuxBrandCopy.authExistingAccountAction,
+            onTap: onLogin,
+          ),
+        ],
       ),
     );
   }
