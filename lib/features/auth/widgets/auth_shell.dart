@@ -43,8 +43,6 @@ class AuthShell extends StatelessWidget {
     this.showCornerGlow = false,
     this.forceDark = true,
     this.flatBackground = true,
-    this.showGrid = true,
-    this.animateGridIn = true,
   });
 
   final Widget child;
@@ -52,8 +50,6 @@ class AuthShell extends StatelessWidget {
   final bool showCenterGlow;
   final bool showCornerGlow;
   final bool flatBackground;
-  final bool showGrid;
-  final bool animateGridIn;
 
   /// Auth/splash UI is authored for the dark cinematic mesh (white type).
   final bool forceDark;
@@ -78,8 +74,6 @@ class AuthShell extends StatelessWidget {
         showCenterGlow: showCenterGlow,
         showCornerGlow: showCornerGlow,
         flatBackground: flatBackground,
-        showGrid: showGrid,
-        animateGridIn: animateGridIn,
         child: MeshScope(
           active: true,
           child: FxKeyboardPopScope(

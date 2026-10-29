@@ -202,9 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           statusBarBrightness: Brightness.dark,
         ),
         child: Scaffold(
-          // Sem a grade: fundo liso e calmo, o formulário é o destaque.
           body: AuthShell(
-            showGrid: false,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final scrollPad = authScrollPadding(

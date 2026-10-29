@@ -17,7 +17,6 @@ void main() {
     expect(screen, contains('CinematicSplashScene'));
     expect(screen, contains('FocuxSystemChrome.dark'));
     expect(screen, contains('AuthShell('));
-    expect(screen, contains('animateGridIn: false'));
     expect(screen, isNot(contains('flatBackground: false')));
     expect(screen, isNot(contains('showCornerGlow: true')));
     expect(screen, contains('extendBody: true'));

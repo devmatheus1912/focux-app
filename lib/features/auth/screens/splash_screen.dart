@@ -238,7 +238,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             backgroundColor: TokensStrip.cinematicBg,
             extendBody: true,
             body: AuthShell(
-              animateGridIn: false,
               child: PopScope(
                 canPop: false,
                 child: AnimatedBuilder(
