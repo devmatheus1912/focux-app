@@ -12,6 +12,7 @@ import '../../../core/config/env.dart';
 import '../../../core/storage/personal_slug_store.dart';
 import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
@@ -36,7 +37,6 @@ import '../widgets/apple_sign_in_button.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/google_sign_in_button.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'login_screen_actions.part.dart';
 
@@ -196,7 +196,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               builder: (context, constraints) {
                 final scrollPad = authScrollPadding(
                   context,
-                  top: 40,
+                  top: 24,
                   bottomExtra: 24,
                   ensureFooter: true,
                 );
@@ -311,17 +311,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         }
                                         return null;
                                       },
-                                      suffix: Semantics(
-                                        button: true,
-                                        label:
+                                      suffix: IconButton(
+                                        tooltip:
                                             _showPassword
                                                 ? 'Ocultar senha'
                                                 : 'Mostrar senha',
-                                        child: FxTonalButton(label: _showPassword ? 'Ocultar' : 'Ver', onPressed: () {
-                                            setState(() {
-                                              _showPassword = !_showPassword;
-                                            });
-                                          }, compact: true),
+                                        onPressed:
+                                            () => setState(
+                                              () =>
+                                                  _showPassword =
+                                                      !_showPassword,
+                                            ),
+                                        icon: Icon(
+                                          _showPassword
+                                              ? Icons.visibility_off_outlined
+                                              : Icons.visibility_outlined,
+                                          color: heroTealSurface(0.82),
+                                          size: 18,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: TokensStrip.s2),
@@ -410,8 +417,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               const SizedBox(height: TokensStrip.s4),
                               FxConversionTextLink(
-                                text: 'Não tem conta? ',
-                                actionText: loginCriarContaLabel(),
+                                text: loginRodapeTexto(isAluno: _isAluno),
+                                actionText: loginRodapeAcao(isAluno: _isAluno),
                                 onTap:
                                     () => authUnfocusAndGo(
                                       context,

@@ -5,11 +5,17 @@ import '../../../core/legal/focux_legal.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 
-/// "Ao criar, você concorda com os Termos de uso e a Política de privacidade."
+/// Aceite dos Termos e da Política. Curto por padrão (login com Apple/Google);
+/// [completo] acrescenta a regra de conteúdo, só nas telas de criar conta.
 class AuthLegalConsentText extends StatefulWidget {
-  const AuthLegalConsentText({super.key, required this.primary});
+  const AuthLegalConsentText({
+    super.key,
+    required this.primary,
+    this.completo = false,
+  });
 
   final Color primary;
+  final bool completo;
 
   @override
   State<AuthLegalConsentText> createState() => _AuthLegalConsentTextState();
@@ -39,7 +45,11 @@ class _AuthLegalConsentTextState extends State<AuthLegalConsentText> {
             height: 1.45,
           ),
           children: [
-            const TextSpan(text: 'Ao criar, você concorda com os '),
+            TextSpan(
+              text: widget.completo
+                  ? 'Ao criar, você concorda com os '
+                  : 'Ao continuar, você aceita os ',
+            ),
             TextSpan(text: 'Termos de uso', style: link, recognizer: _termos),
             const TextSpan(text: ' e a '),
             TextSpan(
@@ -47,10 +57,13 @@ class _AuthLegalConsentTextState extends State<AuthLegalConsentText> {
               style: link,
               recognizer: _privacidade,
             ),
-            const TextSpan(
+            TextSpan(
               text:
-                  '. Conteúdo ofensivo ou abusivo não é tolerado: denúncias '
-                  'são analisadas em até 24 horas e a conta pode ser removida.',
+                  widget.completo
+                      ? '. Conteúdo ofensivo ou abusivo não é tolerado: '
+                          'denúncias são analisadas em até 24 horas e a conta '
+                          'pode ser removida.'
+                      : '.',
             ),
           ],
         ),

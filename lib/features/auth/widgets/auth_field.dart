@@ -23,6 +23,7 @@ class AuthField extends StatelessWidget {
     this.focusNode,
     this.inputFormatters,
     this.autofillHints,
+    this.helperText,
   });
 
   final String label;
@@ -38,6 +39,10 @@ class AuthField extends StatelessWidget {
   final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
   final Iterable<String>? autofillHints;
+
+  /// Dica fixa abaixo do campo (requisito de senha, validade do código): ao
+  /// contrário do placeholder, não some quando a pessoa começa a digitar.
+  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +73,11 @@ class AuthField extends StatelessWidget {
           style: FocuxHubTypography.body(color: heroTealInk()),
           decoration: InputDecoration(
             hintText: hintText,
+            helperText: helperText,
+            helperMaxLines: 2,
+            helperStyle: FocuxHubTypography.bodyMuted(
+              color: heroTealSurface(0.78),
+            ).copyWith(fontSize: 12),
             hintStyle: FocuxHubTypography.body(color: heroTealSurface(0.72)),
             prefixIcon:
                 icon == null

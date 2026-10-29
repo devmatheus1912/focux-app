@@ -11,6 +11,8 @@ String registerEnviarCodigoLabel() => 'Enviar código';
 
 String registerEnviandoCodigoLabel() => 'Enviando…';
 
+String registerReenviarCodigoLabel() => 'Reenviar código';
+
 String registerEnviarConfirmTitle() => 'Enviar código por e-mail?';
 
 String registerEnviarConfirmMessage() =>

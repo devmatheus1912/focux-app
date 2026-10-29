@@ -8,6 +8,7 @@ import 'package:focux_app/core/widgets/fx_conversion.dart';
 import 'package:focux_app/features/onboarding/screens/onboarding_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 
 Future<List<BrandSocialProofItem>> _emptyPulse() async => const [];
 
@@ -120,7 +121,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1000));
 
-    await tester.tap(find.byType(FxConversionTextLink));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FxConversionTextLink),
+        matching: find.byType(FxTonalButton),
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

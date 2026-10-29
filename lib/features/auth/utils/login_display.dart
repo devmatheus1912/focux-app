@@ -6,6 +6,13 @@ String loginEsqueciLabel() => 'Esqueci minha senha';
 
 String loginCriarContaLabel() => 'Criar conta grátis';
 
+/// Rodapé do login: o aluno não cria conta sozinho, ele ativa com o convite.
+String loginRodapeTexto({required bool isAluno}) =>
+    isAluno ? 'Recebeu um convite? ' : 'Não tem conta? ';
+
+String loginRodapeAcao({required bool isAluno}) =>
+    isAluno ? 'Ativar conta' : loginCriarContaLabel();
+
 String loginRoleQuery({required bool isAluno}) =>
     isAluno ? 'aluno' : 'personal';
 

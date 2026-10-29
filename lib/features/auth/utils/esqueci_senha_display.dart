@@ -23,6 +23,25 @@ String esqueciPageSubtitle({required bool isAluno}) =>
         ? esqueciAlunoPedePersonalBody()
         : 'Digite seu e-mail e enviamos um código de 6 dígitos para redefinir sua senha.';
 
+/// Passos do aluno: a senha nova sai de um link que o personal envia pelo
+/// perfil 360 ("Enviar link para nova senha").
+List<String> esqueciAlunoPassos() => const [
+  'Peça ao seu personal para enviar um link de nova senha.',
+  'Abra o link que ele mandar.',
+  'Crie a nova senha e entre.',
+];
+
+String esqueciAlunoCopiarLabel() => 'Copiar mensagem para o meu personal';
+
+String esqueciAlunoCopiadoAviso() =>
+    'Mensagem copiada. Cole no WhatsApp do seu personal.';
+
+/// Texto pronto para o aluno mandar ao personal.
+String esqueciAlunoMensagem() =>
+    'Oi! Esqueci minha senha do app. Pode me enviar um link para criar uma '
+    'nova senha? No seu painel é Perfil do aluno > Enviar link para nova senha. '
+    'Obrigado!';
+
 String esqueciHelpSubtitle({bool isAluno = false}) =>
     isAluno
         ? 'O personal envia um link para criar uma senha nova. Não há código por e-mail.'

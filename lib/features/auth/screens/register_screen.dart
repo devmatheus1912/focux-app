@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/brand/focux_brand_copy.dart';
 import '../../../core/analytics/analytics_service.dart';
 import '../../../core/config/env.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/br_phone.dart';
@@ -33,6 +32,7 @@ import '../widgets/google_sign_in_button.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'register_screen_actions.part.dart';
 
@@ -70,6 +70,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   bool _codeSent = false;
   bool _showPassword = false;
   bool _passwordFocused = false;
+
+  /// Campos opcionais ficam recolhidos até o personal pedir (menos rolagem).
+  bool _mostrarTelefone = false;
+  bool _mostrarIndicacao = false;
   int _resendSeconds = 0;
   Timer? _resendTimer;
   String? _error;
@@ -294,56 +298,56 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 },
                               ),
                               const SizedBox(height: 10),
-                              AuthField(
-                                label: 'Código do e-mail',
-                                controller: _codeController,
-                                hintText: '6 dígitos',
-                                icon: Icons.pin_outlined,
-                                keyboardType: TextInputType.number,
-                                textInputAction: TextInputAction.next,
-                                autofillHints: const [
-                                  AutofillHints.oneTimeCode,
-                                ],
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(6),
-                                ],
-                                validator: (value) {
-                                  if (value == null ||
-                                      value.trim().length != 6) {
-                                    return 'Informe o código de 6 dígitos.';
-                                  }
-                                  return null;
-                                },
-                              ),
                               const SizedBox(height: TokensStrip.s2),
-                              FxLiquidSecondaryButton(
+                              FxTonalButton(
                                 label:
                                     _sendingCode
                                         ? registerEnviandoCodigoLabel()
                                         : _resendSeconds > 0
                                         ? '${registerEnviarCodigoLabel()} (${_resendSeconds}s)'
+                                        : _codeSent
+                                        ? registerReenviarCodigoLabel()
                                         : registerEnviarCodigoLabel(),
+                                icon: Icons.mail_outline_rounded,
+                                expanded: true,
                                 onPressed:
                                     _sendingCode || _resendSeconds > 0
                                         ? null
                                         : _pedirEnviarCodigo,
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                _codeSent
-                                    ? 'Código enviado. Válido por 10 minutos.'
-                                    : 'Toque em Enviar para receber o código no e-mail.',
-                                style: FocuxHubTypography.bodyMuted(
-                                  color: heroTealSurface(0.72),
-                                  fontWeight: FontWeight.w500,
+                              if (_codeSent) ...[
+                                const SizedBox(height: 10),
+                                AuthField(
+                                  label: 'Código do e-mail',
+                                  controller: _codeController,
+                                  hintText: '6 dígitos',
+                                  helperText:
+                                      'Código enviado. Válido por 10 minutos.',
+                                  icon: Icons.pin_outlined,
+                                  keyboardType: TextInputType.number,
+                                  textInputAction: TextInputAction.next,
+                                  autofillHints: const [
+                                    AutofillHints.oneTimeCode,
+                                  ],
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                    LengthLimitingTextInputFormatter(6),
+                                  ],
+                                  validator: (value) {
+                                    if (value == null ||
+                                        value.trim().length != 6) {
+                                      return 'Informe o código de 6 dígitos.';
+                                    }
+                                    return null;
+                                  },
                                 ),
-                              ),
+                              ],
                               const SizedBox(height: 12),
                               AuthField(
                                 label: 'Senha',
                                 controller: _passwordController,
-                                hintText: 'Mín. 8 caracteres',
+                                hintText: 'Crie uma senha',
+                                helperText: 'Mínimo de 8 caracteres.',
                                 icon: Icons.lock_outline_rounded,
                                 obscureText: !_showPassword,
                                 textInputAction: TextInputAction.next,
@@ -381,34 +385,64 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ],
                               const SizedBox(height: 10),
-                              AuthField(
-                                label: 'Telefone / WhatsApp',
-                                controller: _phoneController,
-                                hintText: '(11) 99999-0000',
-                                icon: Icons.phone_iphone_rounded,
-                                keyboardType: TextInputType.phone,
-                                textInputAction: TextInputAction.done,
-                                autofillHints: const [
-                                  AutofillHints.telephoneNumber,
-                                ],
-                                inputFormatters: [BrPhone.formatter()],
-                                validator: BrPhone.validateOptional,
-                                onFieldSubmitted: (_) => _pedirCriarConta(),
-                              ),
-                              const SizedBox(height: 10),
-                              AuthField(
-                                label: S.of(context).registerIndicacaoLabel,
-                                controller: _referralController,
-                                hintText: S.of(context).registerIndicacaoHint,
-                                icon: Icons.card_giftcard_outlined,
-                                textInputAction: TextInputAction.done,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp('[A-Za-z0-9-]'),
+                              if (_mostrarTelefone ||
+                                  _phoneController.text.isNotEmpty)
+                                AuthField(
+                                  label: 'Telefone / WhatsApp (opcional)',
+                                  controller: _phoneController,
+                                  hintText: '(11) 99999-0000',
+                                  icon: Icons.phone_iphone_rounded,
+                                  keyboardType: TextInputType.phone,
+                                  textInputAction: TextInputAction.done,
+                                  autofillHints: const [
+                                    AutofillHints.telephoneNumber,
+                                  ],
+                                  inputFormatters: [BrPhone.formatter()],
+                                  validator: BrPhone.validateOptional,
+                                  onFieldSubmitted: (_) => _pedirCriarConta(),
+                                )
+                              else
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FxTonalButton(
+                                    label: 'Adicionar WhatsApp (opcional)',
+                                    icon: Icons.add_rounded,
+                                    compact: true,
+                                    onPressed:
+                                        () => setState(
+                                          () => _mostrarTelefone = true,
+                                        ),
                                   ),
-                                  LengthLimitingTextInputFormatter(32),
-                                ],
-                              ),
+                                ),
+                              const SizedBox(height: 10),
+                              if (_mostrarIndicacao ||
+                                  _referralController.text.isNotEmpty)
+                                AuthField(
+                                  label: S.of(context).registerIndicacaoLabel,
+                                  controller: _referralController,
+                                  hintText: S.of(context).registerIndicacaoHint,
+                                  icon: Icons.card_giftcard_outlined,
+                                  textInputAction: TextInputAction.done,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp('[A-Za-z0-9-]'),
+                                    ),
+                                    LengthLimitingTextInputFormatter(32),
+                                  ],
+                                )
+                              else
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: FxTonalButton(
+                                    label: 'Tenho um código de indicação',
+                                    icon: Icons.card_giftcard_outlined,
+                                    compact: true,
+                                    onPressed:
+                                        () => setState(
+                                          () => _mostrarIndicacao = true,
+                                        ),
+                                  ),
+                                ),
                               const SizedBox(height: 22),
                               if (_error != null) ...[
                                 Semantics(
@@ -446,7 +480,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 padding: const EdgeInsets.only(
                                   bottom: TokensStrip.s2,
                                 ),
-                                child: AuthLegalConsentText(primary: primary),
+                                child: AuthLegalConsentText(primary: primary, completo: true),
                               ),
                             ],
                           ),

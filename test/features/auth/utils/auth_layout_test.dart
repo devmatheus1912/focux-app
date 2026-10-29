@@ -37,7 +37,7 @@ void main() {
 
     expect(shortWidth, lessThan(tallWidth));
     expect(tallWidth, kAuthFormLogoWidth);
-    expect(shortWidth, 104.0);
+    expect(shortWidth, 88.0);
   });
 
   testWidgets('authScrollPadding inclui safe area inferior', (tester) async {

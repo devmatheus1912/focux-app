@@ -5,6 +5,7 @@ import '../theme/hero_teal.dart';
 import '../theme/tokens_strip.dart';
 import 'focux_brand_tagline.dart';
 import 'focux_official_logo.dart';
+import 'fx_tonal_button.dart';
 
 /// Lockup S6: logo oficial + tagline. Sem inset, sem chevron.
 class FxConversionLockup extends StatelessWidget {
@@ -67,42 +68,30 @@ class FxConversionTextLink extends StatelessWidget {
   final Color? actionColor;
   final double fontSize;
 
+  /// Frase curta e, ao lado, o botão tonal da ação: nunca texto puro como ação.
   @override
   Widget build(BuildContext context) {
-    final primary = actionColor ?? Theme.of(context).colorScheme.primary;
-    return Semantics(
-      link: onTap != null,
-      button: onTap != null,
-      enabled: onTap != null,
-      label: '$text$actionText',
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: Align(
-            alignment: Alignment.center,
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: FocuxHubTypography.body(
-                  color: textColor ?? heroTealSurface(0.82),
-                ).copyWith(fontSize: fontSize),
-                children: [
-                  TextSpan(text: text),
-                  TextSpan(
-                    text: actionText,
-                    style: TextStyle(
-                      color: primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    final frase = text.trim();
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: TokensStrip.s2,
+      children: [
+        if (frase.isNotEmpty)
+          Text(
+            frase,
+            textAlign: TextAlign.center,
+            style: FocuxHubTypography.body(
+              color: textColor ?? heroTealSurface(0.82),
+            ).copyWith(fontSize: fontSize),
           ),
+        FxTonalButton(
+          label: actionText,
+          compact: true,
+          texto: actionColor,
+          onPressed: onTap,
         ),
-      ),
+      ],
     );
   }
 }

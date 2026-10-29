@@ -13,10 +13,11 @@ abstract final class FocuxBrandCopy {
 
   static const onboardingHookHighlight = 'caminham juntos.';
 
-  static const onboardingHookAluno =
-      'Treino, progresso e personal — tudo no mesmo app.';
+  /// Um slogan só, para Personal e Aluno (antes o do aluno era outro e deixava
+  /// "app." sozinho na última linha).
+  static const onboardingHookAluno = onboardingHook;
 
-  static const onboardingHookAlunoHighlight = 'mesmo app.';
+  static const onboardingHookAlunoHighlight = onboardingHookHighlight;
 
   /// Fallback neutro quando o pulse público não responde (sem número inventado).
   static const onboardingSocialProofFallback =

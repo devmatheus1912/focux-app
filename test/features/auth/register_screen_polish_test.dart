@@ -58,7 +58,7 @@ void main() {
     expect(screen, contains('dark: true'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxLiquidSecondaryButton'));
+    expect(screen, contains('FxTonalButton'));
     expect(screen, contains('FxConversionLockup'));
     expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('showFxConfirmSheet'));

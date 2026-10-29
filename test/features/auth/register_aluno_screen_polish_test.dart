@@ -19,7 +19,7 @@ void main() {
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxConversionTextLink'));
     expect(screen, contains('minLength: 8'));
-    expect(screen, contains('Mín. 8 caracteres'));
+    expect(screen, contains('Crie uma senha'));
     expect(screen, contains('keyboardDismissBehavior'));
     expect(screen, contains('viewInsetsOf'));
     expect(screen, contains('authScrollPadding'));

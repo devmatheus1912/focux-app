@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_loading.dart';
 
-/// Botão “Continuar com Apple” (fundo preto, ícone, label claro).
+/// Botão “Continuar com Apple”. As telas de auth são sempre escuras, então
+/// usa a variante branca (padrão da Apple para fundo escuro).
 class AppleSignInButton extends StatelessWidget {
   const AppleSignInButton({
     super.key,
@@ -18,8 +19,8 @@ class AppleSignInButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final disabled = onPressed == null || isLoading;
-    const bg = Color(0xFF000000);
-    const fg = Color(0xFFFFFFFF);
+    const bg = Color(0xFFFFFFFF);
+    const fg = Color(0xFF000000);
 
     return Semantics(
       label: label,
@@ -33,14 +34,14 @@ class AppleSignInButton extends StatelessWidget {
           child: InkWell(
             onTap: disabled ? null : onPressed,
             borderRadius: BorderRadius.circular(12),
-            splashColor: const Color(0x33FFFFFF),
-            highlightColor: const Color(0x1AFFFFFF),
+            splashColor: const Color(0x33000000),
+            highlightColor: const Color(0x1A000000),
             child: Container(
               height: 52,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF3A3A3A), width: 1),
+                border: Border.all(color: const Color(0xFFD1D5DB), width: 1),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

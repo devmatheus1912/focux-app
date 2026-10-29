@@ -57,7 +57,7 @@ void main() {
     expect(screen, contains('authScrollPadding'));
     expect(
       readScreenSourceBundle('lib/features/auth/utils/auth_layout.dart'),
-      contains('kAuthFormLogoWidth = 118.0'),
+      contains('kAuthFormLogoWidth = 100.0'),
     );
 
     // Segurança: nunca logar token/conta do Google no console.

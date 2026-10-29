@@ -19,6 +19,8 @@ import '../utils/auth_error_messages.dart';
 import '../utils/esqueci_senha_display.dart';
 import '../widgets/auth_operational_notice.dart';
 import '../widgets/auth_shell.dart';
+import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_tonal_button.dart';
 
 part 'esqueci_senha_screen_actions.part.dart';
 
@@ -166,19 +168,7 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
-                                    ConstrainedBox(
-                                      constraints: const BoxConstraints(
-                                        maxWidth: 320,
-                                      ),
-                                      child: Text(
-                                        esqueciPageSubtitle(isAluno: _isAluno),
-                                        style: authSubtitleStyle(
-                                          color: heroTealSurface(0.82),
-                                        ).copyWith(height: 1.55),
-                                      ),
-                                    ),
-                                    const SizedBox(height: TokensStrip.s5),
+                                    const SizedBox(height: TokensStrip.s4),
                                     AuthRoleToggle(
                                       isAluno: _isAluno,
                                       onPersonalTap: () {
@@ -200,7 +190,82 @@ class _EsqueciSenhaScreenState extends ConsumerState<EsqueciSenhaScreen> {
                                         }
                                       },
                                     ),
+                                    const SizedBox(height: TokensStrip.s3),
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 320,
+                                      ),
+                                      child: Text(
+                                        esqueciPageSubtitle(isAluno: _isAluno),
+                                        style: authSubtitleStyle(
+                                          color: heroTealSurface(0.82),
+                                        ).copyWith(height: 1.55),
+                                      ),
+                                    ),
                                     const SizedBox(height: 18),
+                                    if (!mostraCodigo) ...[
+                                      for (final (i, passo)
+                                          in esqueciAlunoPassos().indexed)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: TokensStrip.s2,
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 12,
+                                                backgroundColor: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary.withValues(
+                                                  alpha: 0.22,
+                                                ),
+                                                child: Text(
+                                                  '${i + 1}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: TokensStrip.s3,
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  passo,
+                                                  style: authSubtitleStyle(
+                                                    color: heroTealSurface(
+                                                      0.9,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      const SizedBox(height: TokensStrip.s2),
+                                      FxTonalButton(
+                                        label: esqueciAlunoCopiarLabel(),
+                                        icon: Icons.copy_rounded,
+                                        expanded: true,
+                                        onPressed: () async {
+                                          await Clipboard.setData(
+                                            ClipboardData(
+                                              text: esqueciAlunoMensagem(),
+                                            ),
+                                          );
+                                          if (!context.mounted) return;
+                                          FeedbackHelper.showSuccess(
+                                            context,
+                                            esqueciAlunoCopiadoAviso(),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: TokensStrip.s4),
+                                    ],
                                     if (mostraCodigo) ...[
                                       AuthField(
                                         label: 'E-mail cadastrado',

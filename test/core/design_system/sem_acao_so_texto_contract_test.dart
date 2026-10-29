@@ -14,6 +14,7 @@ const _excecoes = <String, String>{
 };
 
 void main() {
+  _contratoAuth();
   test('o app inteiro não usa TextButton como ação', () {
     final achados = <String>[];
     for (final pasta in _pastasMigradas) {
@@ -36,5 +37,25 @@ void main() {
           'Use FxLiquidPrimaryButton, FxTonalButton ou botão de ícone. '
           'Achados: ${achados.join(', ')}',
     );
+  });
+}
+
+/// Telas de entrada: ação nunca é texto com `TapGestureRecognizer`; só os
+/// links legais dentro do parágrafo (Termos e Política) podem ser assim.
+void _contratoAuth() {
+  test('auth: só o texto legal usa link de texto dentro de parágrafo', () {
+    final achados = <String>[];
+    for (final f in Directory('lib/features/auth').listSync(recursive: true)) {
+      if (f is! File || !f.path.endsWith('.dart')) continue;
+      final caminho = f.path.replaceAll(r'\', '/');
+      if (caminho.endsWith('widgets/auth_legal_consent_text.dart')) continue;
+      final linhas = f.readAsLinesSync();
+      for (var i = 0; i < linhas.length; i++) {
+        if (linhas[i].contains('TapGestureRecognizer')) {
+          achados.add('$caminho:${i + 1}');
+        }
+      }
+    }
+    expect(achados, isEmpty, reason: achados.join(', '));
   });
 }

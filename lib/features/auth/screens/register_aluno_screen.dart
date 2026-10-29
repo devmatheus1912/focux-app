@@ -14,7 +14,6 @@ import '../../../core/theme/hero_teal.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_conversion.dart';
 import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_shell_scaffold.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
@@ -222,37 +221,6 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: TokensStrip.s4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: TokensStrip.s2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: primary.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(
-                                      TokensStrip.rButton,
-                                    ),
-                                    border: Border.all(
-                                      color: primary.withValues(alpha: 0.28),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.mail_outline_rounded,
-                                        color: primary,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: TokensStrip.s2),
-                                      Text(
-                                        'Convite do seu personal',
-                                        style: FocuxHubTypography.chip(primary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: TokensStrip.s4),
                                 Text(
                                   'Ativar conta',
                                   style: authPageTitleStyle(context),
@@ -268,9 +236,14 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                 if (widget.personalSlug != null) ...[
                                   const SizedBox(height: TokensStrip.s3),
                                   DecoratedBox(
-                                    decoration: fxStripCardDecoration(
-                                      context,
-                                      glowStrength: 0.08,
+                                    decoration: BoxDecoration(
+                                      color: primary.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(
+                                        TokensStrip.rCard,
+                                      ),
+                                      border: Border.all(
+                                        color: primary.withValues(alpha: 0.28),
+                                      ),
                                     ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(14),
@@ -287,7 +260,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                               'Cadastro vinculado ao app do seu personal',
                                               style:
                                                   FocuxHubTypography.cardTitle(
-                                                    color: primary,
+                                                    color: heroTealInk(),
                                                   ),
                                             ),
                                           ),
@@ -336,7 +309,8 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                 AuthField(
                                   label: 'Senha',
                                   controller: _senhaCtrl,
-                                  hintText: 'Mín. 8 caracteres',
+                                  hintText: 'Crie uma senha',
+                                  helperText: 'Mínimo de 8 caracteres.',
                                   icon: Icons.lock_outline_rounded,
                                   obscureText: !_senhaVisivel,
                                   textInputAction: TextInputAction.done,
@@ -395,7 +369,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                   onPressed: _loading ? null : _submit,
                                 ),
                                 const SizedBox(height: TokensStrip.s3),
-                                AuthLegalConsentText(primary: primary),
+                                AuthLegalConsentText(primary: primary, completo: true),
                                 FxConversionTextLink(
                                   text: '',
                                   actionText:
