@@ -97,14 +97,8 @@ class IdentidadePreviaApp extends StatelessWidget {
                               isDark: escuro,
                               onAction: () {},
                               assinatura: nomePersonal,
-                              fundoMarca:
-                                  estilo.usaGradiente
-                                      ? BrandPalette.gradient(
-                                        palette.primary,
-                                        palette.secondary,
-                                        dark: escuro,
-                                      )
-                                      : null,
+                              estilo: estilo,
+                              primaria: palette.primary,
                             ),
                             const SizedBox(height: 8),
                             AlunoPersonalCard(

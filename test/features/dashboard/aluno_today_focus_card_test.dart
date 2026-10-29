@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/theme/brand_style.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_action_link.dart';
 import 'package:focux_app/core/widgets/fx_tonal_button.dart';
@@ -32,7 +33,8 @@ Future<void> _abrir(
   double escala = 1.0,
   bool dark = false,
   String? assinatura,
-  Gradient? fundoMarca,
+  BrandStyle estilo = BrandStyle.classico,
+  Color? primaria,
 }) async {
   tester.view.physicalSize = const Size(1170, 2400);
   tester.view.devicePixelRatio = 3;
@@ -69,7 +71,8 @@ Future<void> _abrir(
             seloFicha: selo,
             onVerTreinos: onVerTreinos,
             assinatura: assinatura,
-            fundoMarca: fundoMarca,
+            estilo: estilo,
+            primaria: primaria,
           ),
         ),
       ),
@@ -247,7 +250,8 @@ void main() {
       await _abrir(
         tester,
         pronto,
-        fundoMarca: const LinearGradient(colors: [Colors.teal, Colors.blue]),
+        estilo: BrandStyle.cinematografico,
+        primaria: const Color(0xFF0B4F5C),
       );
       expect(
         find.byWidgetPredicate(

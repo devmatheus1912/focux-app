@@ -293,8 +293,6 @@ String leadKanbanAgeLabel(String criadoEm, {DateTime? now}) {
   return '${days}d';
 }
 
-const leadFreeCap = 5;
-
 bool leadShowsLimitBanner(int count, {int? limiteLeads}) {
   if (limiteLeads == null || limiteLeads <= 0) return false;
   final warnFrom = limiteLeads <= 1 ? 1 : limiteLeads - 1;

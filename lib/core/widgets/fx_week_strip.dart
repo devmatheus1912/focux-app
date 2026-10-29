@@ -28,9 +28,13 @@ class FxWeekDay {
 /// Os sete dias da semana em uma linha: treino cheio, concluído com marca,
 /// descanso apagado, hoje com anel e o próximo treino com contorno.
 class FxWeekStrip extends StatelessWidget {
-  const FxWeekStrip({super.key, required this.dias});
+  const FxWeekStrip({super.key, required this.dias, this.sobre});
 
   final List<FxWeekDay> dias;
+
+  /// Cor do texto e dos ícones quando a faixa fica sobre um card sólido da
+  /// marca (claro sobre escuro). Nulo = faixa normal.
+  final Color? sobre;
 
   static List<String> nomes(S s) => [
     s.rotinaDiaSeg,
@@ -68,14 +72,23 @@ class FxWeekStrip extends StatelessWidget {
     return Row(
       children: [
         for (final (i, d) in dias.indexed)
-          Expanded(child: _Dia(nome: n[i], dia: d, chrome: chrome)),
+          Expanded(
+            child: _Dia(nome: n[i], dia: d, chrome: chrome, sobre: sobre),
+          ),
       ],
     );
   }
 }
 
 class _Dia extends StatelessWidget {
-  const _Dia({required this.nome, required this.dia, required this.chrome});
+  const _Dia({
+    required this.nome,
+    required this.dia,
+    required this.chrome,
+    this.sobre,
+  });
+
+  final Color? sobre;
 
   final String nome;
   final FxWeekDay dia;
@@ -83,26 +96,29 @@ class _Dia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sobre = this.sobre;
     final brand = chrome.brand;
     final concluido = dia.estado == FxWeekDayState.concluido;
     final treino = dia.estado == FxWeekDayState.treino;
     final fundo = concluido
         ? EagleTokens.good
         : treino
-        ? brand
+        ? (sobre == null ? brand : sobre.withValues(alpha: 0.22))
         : Colors.transparent;
     final borda = dia.proximo
-        ? brand
+        ? (sobre ?? brand)
         : (concluido || treino)
-        ? fundo
-        : chrome.lineStrong;
+        ? (sobre != null && treino ? sobre.withValues(alpha: 0.5) : fundo)
+        : (sobre?.withValues(alpha: 0.35) ?? chrome.lineStrong);
+    final tinta = sobre ?? chrome.ink;
+    final suave = sobre?.withValues(alpha: 0.72) ?? chrome.mute;
 
     return Column(
       children: [
         Text(
           nome,
           style: FocuxHubTypography.cardSubtitle(
-            color: dia.hoje ? chrome.ink : chrome.mute,
+            color: dia.hoje ? tinta : suave,
           ).copyWith(fontWeight: dia.hoje ? FontWeight.w700 : FontWeight.w500),
         ),
         const SizedBox(height: TokensStrip.s1),
@@ -117,13 +133,13 @@ class _Dia extends StatelessWidget {
           foregroundDecoration: dia.hoje
               ? BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: chrome.ink, width: 2),
+                  border: Border.all(color: tinta, width: 2),
                 )
               : null,
           child: concluido
               ? const Icon(Icons.check_rounded, size: 18, color: Colors.white)
               : treino
-              ? const Icon(Icons.fitness_center, size: 14, color: Colors.white)
+              ? Icon(Icons.fitness_center, size: 14, color: sobre ?? Colors.white)
               : null,
         ),
       ],

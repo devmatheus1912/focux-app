@@ -125,19 +125,20 @@ void main() {
   });
 
   group('aluno360MenuItens', () {
-    test('Excluir é o último, separado e destrutivo', () {
+    test('Excluir é o último, no grupo de perigo e destrutivo', () {
       final itens = aluno360MenuItens(_aluno());
       expect(itens.last.acao, Aluno360MenuAcao.excluir);
-      expect(itens.last.separadorAntes, isTrue);
+      expect(itens.last.grupo, Aluno360MenuGrupo.perigo);
       expect(itens.last.destrutivo, isTrue);
     });
 
-    test('ativo oferece Pausar e Bloquear, nessa ordem, com o separador antes', () {
+    test('ativo oferece Pausar (acesso) e Bloquear (perigo), nessa ordem', () {
       final status = aluno360MenuItens(_aluno())
           .where((i) => i.acao == Aluno360MenuAcao.status)
           .toList();
       expect(status.map((i) => i.novoStatus), ['INATIVO', 'BLOQUEADO']);
-      expect(status.first.separadorAntes, isTrue);
+      expect(status.first.grupo, Aluno360MenuGrupo.acesso);
+      expect(status.last.grupo, Aluno360MenuGrupo.perigo);
       expect(status.last.destrutivo, isTrue);
     });
 
@@ -148,10 +149,10 @@ void main() {
       expect(status, contains('ATIVO'));
     });
 
-    test('"Reenviar link" só com a conta ainda não ativa', () {
+    test('o link de acesso aparece sempre: conta nova ou senha esquecida', () {
       expect(
         aluno360MenuItens(_aluno(contaAtiva: true)).map((i) => i.acao),
-        isNot(contains(Aluno360MenuAcao.reenviarLink)),
+        contains(Aluno360MenuAcao.reenviarLink),
       );
       expect(
         aluno360MenuItens(_aluno(contaAtiva: false)).map((i) => i.acao),

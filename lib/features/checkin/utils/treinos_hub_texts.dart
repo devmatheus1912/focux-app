@@ -139,9 +139,3 @@ String treinosDuracaoTexto(S s, Duration d) {
   return s.treinosDuracaoHorasMinutos(h, min);
 }
 
-/// Leitura única do destaque: "Próximo treino: Treino A, 6 exercícios, Até 23 de out.".
-String treinosDestaqueSemantics(TreinosDestaqueTexto t) => [
-  '${t.eyebrow}: ${t.titulo}',
-  t.detalhe,
-  if (t.prazo case final prazo?) prazo,
-].join(', ');

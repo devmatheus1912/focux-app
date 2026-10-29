@@ -66,7 +66,6 @@ void main() {
     expect(screen, contains('FxActionRow'));
     expect(screen, contains('FxMetricStrip'));
     expect(screen, contains('/alunos?filtro=risco'));
-    expect(screen, contains('BrandPalette.sectionLink'));
     expect(screen, contains('dashboardReadableMuted'));
     expect(screen, contains('RISK_STUDENTS'));
     expect(screen, contains('FxHelpIconButton'));

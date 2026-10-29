@@ -63,27 +63,6 @@ Color dashboardHeroMutedOnTeal() => Colors.white.withValues(alpha: 0.90);
 TextStyle dashboardPageTitleStyle(BuildContext context, {required Color color}) =>
     FocuxHubTypography.pageTitle(context, color: color);
 
-TextStyle dashboardSectionTitleStyle(
-  BuildContext context, {
-  required Color color,
-}) => FocuxHubTypography.sectionTitle(context, color: color);
-
-TextStyle dashboardMicroLabelStyle(
-  BuildContext context, {
-  required bool isDark,
-  Color? color,
-  FontWeight fontWeight = FontWeight.w800,
-  double letterSpacing = 0.1,
-}) => FocuxHubTypography.eyebrow(
-  context,
-  color: color ?? dashboardReadableCaption(context, isDark: isDark),
-  fontWeight: fontWeight,
-  letterSpacing: letterSpacing,
-);
-
-TextStyle dashboardActionChipStyle(Color foreground) =>
-    FocuxHubTypography.chip(foreground);
-
 TextStyle dashboardHeroMutedOnTealStyle({
   FontWeight fontWeight = FontWeight.w700,
 }) => FocuxHubTypography.bodyMuted(
@@ -101,5 +80,3 @@ TextStyle dashboardCardSubtitleStyle(
   fontWeight: fontWeight,
 );
 
-TextStyle dashboardChipLabelStyle(Color foreground) =>
-    FocuxHubTypography.chip(foreground);

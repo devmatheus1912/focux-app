@@ -1,64 +1,5 @@
 part of 'identidade_visual_screen.dart';
 
-class _PaletteThemePreviewPair extends StatelessWidget {
-  const _PaletteThemePreviewPair({
-    required this.palette,
-    required this.name,
-    required this.slogan,
-    required this.logoUrl,
-    required this.reduceMotion,
-  });
-
-  final CuratedBrandPalette palette;
-  final String name;
-  final String slogan;
-  final String? logoUrl;
-  final bool reduceMotion;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = ShellChrome.of(context).mute;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          identidadeAlunoVisibilityLabel(),
-          style: FocuxHubTypography.chip(mute).copyWith(letterSpacing: 0.2),
-        ),
-        const SizedBox(height: TokensStrip.s3),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _PaletteThemePreview(
-                  dark: false,
-                  palette: palette,
-                  name: name,
-                  slogan: slogan,
-                  logoUrl: logoUrl,
-                  reduceMotion: reduceMotion,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _PaletteThemePreview(
-                  dark: true,
-                  palette: palette,
-                  name: name,
-                  slogan: slogan,
-                  logoUrl: logoUrl,
-                  reduceMotion: reduceMotion,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _PaletteThemePreview extends StatelessWidget {
   const _PaletteThemePreview({
     required this.dark,
@@ -415,55 +356,22 @@ class _BrandField extends StatelessWidget {
 }
 
 class _PanelTitle extends StatelessWidget {
-  const _PanelTitle({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-    required this.mute,
-  });
+  const _PanelTitle({required this.title, required this.mute});
 
-  final IconData icon;
   final String title;
-  final String subtitle;
-  final Color accent;
   final Color mute;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 18, color: accent),
+    return Semantics(
+      header: true,
+      child: Text(
+        title,
+        style: FocuxHubTypography.sectionTitle(
+          context,
+          color: ShellChrome.of(context).ink,
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: FocuxHubTypography.sectionTitle(
-                  context,
-                  color: ShellChrome.of(context).ink,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(color: mute, fontSize: 11.5, height: 1.3),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -26,6 +26,7 @@ import '../utils/aluno_detail_aluno_actions.dart';
 import '../utils/aluno_detail_aluno_resolution.dart';
 import '../utils/aluno_display_utils.dart';
 import '../widgets/aluno360_composite_header.dart';
+import '../widgets/aluno360_menu_sheet.dart';
 import '../widgets/aluno360_help_sheets.dart';
 import '../widgets/aluno360_detail_evolucao_tab.dart';
 import '../widgets/aluno360_detail_ferramentas_tab.dart';

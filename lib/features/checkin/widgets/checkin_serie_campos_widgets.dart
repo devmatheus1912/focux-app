@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/widgets/fx_tonal_button.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/tokens_strip.dart';
-import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
-import '../../../l10n/app_localizations.dart';
-import '../utils/checkin_serie_input.dart';
 
 /// Alvo mínimo de toque dos chips de sensação.
 const double checkinFeedbackChipMin = 48;
@@ -129,101 +124,3 @@ class CheckinFeedbackChip extends StatelessWidget {
   }
 }
 
-/// RPE rápido quando o personal definiu [rpeAlvo] na ficha.
-Future<int?> showCheckinRpeAlvoPrompt(
-  BuildContext context, {
-  required int rpeAlvo,
-}) {
-  return showFxHomeSheet<int>(
-    context,
-    builder: (ctx) => _CheckinRpeAlvoPromptSheet(rpeAlvo: rpeAlvo),
-  );
-}
-
-class _CheckinRpeAlvoPromptSheet extends StatefulWidget {
-  const _CheckinRpeAlvoPromptSheet({required this.rpeAlvo});
-
-  final int rpeAlvo;
-
-  @override
-  State<_CheckinRpeAlvoPromptSheet> createState() =>
-      _CheckinRpeAlvoPromptSheetState();
-}
-
-class _CheckinRpeAlvoPromptSheetState
-    extends State<_CheckinRpeAlvoPromptSheet> {
-  late int _rpe;
-
-  @override
-  void initState() {
-    super.initState();
-    _rpe = widget.rpeAlvo.clamp(1, 10);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final primary = theme.colorScheme.primary;
-    final brand = isDark ? BrandPalette.accent(primary) : primary;
-
-    return FxHomeSheetSurface(
-      isDark: isDark,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          FxHomeSheetHandle(isDark: isDark),
-          const SizedBox(height: TokensStrip.s4),
-          FxHomeSheetHeader(
-            isDark: isDark,
-            title: s.checkinRpeTitulo,
-            subtitle: checkinRpeAlvoHint(s, widget.rpeAlvo),
-            leading: Icon(Icons.speed_rounded, color: brand, size: 18),
-          ),
-          const SizedBox(height: TokensStrip.s3),
-          Text(
-            checkinRpeValueLine(s, _rpe),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: brand,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Slider(
-            value: _rpe.toDouble(),
-            min: 1,
-            max: 10,
-            divisions: 9,
-            activeColor: brand,
-            label: checkinRpeValueLine(s, _rpe),
-            onChanged: (v) => setState(() => _rpe = v.round()),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          SizedBox(
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => FxHomeSheetChrome.dismissAndPop(context, _rpe),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: brand,
-                foregroundColor: theme.colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                ),
-              ),
-              child: Text(s.checkinRegistrarSerie),
-            ),
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          FxTonalButton(
-            label: s.checkinCancelar,
-            expanded: true,
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
-    );
-  }
-}

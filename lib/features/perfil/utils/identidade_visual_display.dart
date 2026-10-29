@@ -3,7 +3,6 @@ import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
 import '../../../core/theme/curated_brand_palettes.dart';
 import '../../../core/theme/focux_contrast.dart';
-import '../../../core/ux/fx_hub_freshness.dart';
 
 bool identidadeHasWhiteLabel({
   required bool? featureWhiteLabel,
@@ -101,16 +100,10 @@ String identidadeEstiloDescricao(BrandStyle estilo) => switch (estilo) {
   BrandStyle.classico =>
     'A sua cor nos botões e destaques, como sempre foi.',
   BrandStyle.cinematografico =>
-    'Card principal em tom da sua marca, fundo tingido e acento da cor secundária.',
+    'Card principal sólido na cor da sua marca, fundo tingido e acento da cor secundária.',
   BrandStyle.minimalista =>
-    'Só a cor primária, superfícies neutras e nenhum gradiente.',
+    'Só a cor primária: sem preenchimento, contorno fino e cor no destaque.',
 };
-
-String identidadeEstiloSubtitle() =>
-    'O clima do app do seu aluno. Você vê o resultado na prévia.';
-
-String identidadeImagensSubtitle() =>
-    'Logo no topo e capa 16:9 na home do aluno. Slogan junto do seu nome.';
 
 String identidadeCapaAdicionar() => 'Adicionar capa';
 
@@ -149,8 +142,6 @@ String identidadeAppBarSubtitle({
   required DateTime? fetchedAt,
   DateTime? now,
 }) {
-  return FxHubFreshness.joinCount(
-    hasWhiteLabel ? 'Sua marca no app' : 'Marca no app',
-    FxHubFreshness.fromFetchedAt(fetchedAt, now: now),
-  );
+  // Tela de configuração: "atualizado há…" não ajuda quem está escolhendo.
+  return hasWhiteLabel ? 'Sua marca no app' : 'Marca no app';
 }

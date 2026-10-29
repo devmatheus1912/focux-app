@@ -50,6 +50,12 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
     _markFetched();
   }
 
+  Future<void> _abrirMenu(Aluno aluno) async {
+    final item = await showAluno360MenuSheet(context, aluno);
+    if (item == null || !mounted) return;
+    await _onMenu(item, aluno);
+  }
+
   /// Ações do ⋮: cada item chama o fluxo que já existia, com sua confirmação.
   Future<void> _onMenu(Aluno360MenuItem item, Aluno aluno) async {
     switch (item.acao) {
@@ -351,8 +357,7 @@ class _AlunoDetailScreenState extends ConsumerState<AlunoDetailScreen>
                               onBack: () => safePopOrGo(context, '/alunos'),
                               onHelp: openTabHelp,
                               onChat: () => abrirChatAluno360(context, ref, aluno),
-                              menuItens: aluno360MenuItens(aluno),
-                              onMenu: (item) => _onMenu(item, aluno),
+                              onMenu: () => _abrirMenu(aluno),
                             ),
                           ),
                           SliverToBoxAdapter(

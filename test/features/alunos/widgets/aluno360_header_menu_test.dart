@@ -3,73 +3,140 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/alunos/data/aluno_repository.dart';
 import 'package:focux_app/features/alunos/utils/aluno360_menu_acoes.dart';
 import 'package:focux_app/features/alunos/widgets/aluno360_composite_header.dart';
+import 'package:focux_app/features/alunos/widgets/aluno360_menu_sheet.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Aluno _aluno({bool contaAtiva = false}) => Aluno(
+Aluno _aluno({bool contaAtiva = false, String status = 'ATIVO'}) => Aluno(
   id: 1,
   nome: 'Hugo Silva',
   email: 'hugo@x.com',
-  status: 'ATIVO',
+  status: status,
   contaAtiva: contaAtiva,
 );
 
-Future<void> _abrir(
+Widget _app(Widget home) => MaterialApp(
+  locale: const Locale('pt'),
+  supportedLocales: S.supportedLocales,
+  localizationsDelegates: S.localizationsDelegates,
+  home: Scaffold(body: home),
+);
+
+Future<void> _abrirCabecalho(
   WidgetTester tester, {
-  required List<Aluno360MenuItem> itens,
-  required void Function(Aluno360MenuItem) onMenu,
+  VoidCallback? onMenu,
   VoidCallback? onChat,
 }) async {
   GoogleFonts.config.allowRuntimeFetching = false;
   await tester.pumpWidget(
-    MaterialApp(
-      locale: const Locale('pt'),
-      supportedLocales: S.supportedLocales,
-      localizationsDelegates: S.localizationsDelegates,
-      home: Scaffold(
-        body: Aluno360HeaderToolbar(
-          displayName: 'Hugo',
-          showTitle: false,
-          ink: Colors.black,
-          onBack: () {},
-          onChat: onChat,
-          onHelp: () {},
-          menuItens: itens,
-          onMenu: onMenu,
-        ),
+    _app(
+      Aluno360HeaderToolbar(
+        displayName: 'Hugo',
+        showTitle: false,
+        ink: Colors.black,
+        onBack: () {},
+        onChat: onChat,
+        onHelp: () {},
+        onMenu: onMenu,
       ),
     ),
   );
 }
 
+/// Abre a folha do ⋮; [resultado] completa quando ela fecha.
+class _Folha {
+  Future<Aluno360MenuItem?>? resultado;
+}
+
+Future<_Folha> _abrirFolha(WidgetTester tester, Aluno aluno) async {
+  GoogleFonts.config.allowRuntimeFetching = false;
+  tester.view.physicalSize = const Size(1200, 3000);
+  tester.view.devicePixelRatio = 2;
+  addTearDown(tester.view.reset);
+  final folha = _Folha();
+  await tester.pumpWidget(
+    _app(
+      Builder(
+        builder:
+            (context) => Center(
+              child: ElevatedButton(
+                onPressed:
+                    () => folha.resultado = showAluno360MenuSheet(context, aluno),
+                child: const Text('abrir'),
+              ),
+            ),
+      ),
+    ),
+  );
+  await tester.tap(find.text('abrir'));
+  await tester.pumpAndSettle();
+  return folha;
+}
+
 void main() {
-  testWidgets('Chat é ação do cabeçalho, não está escondido em "Mais ações"', (tester) async {
+  testWidgets('Chat é ação do cabeçalho, não está escondido em "Mais ações"', (
+    tester,
+  ) async {
     var chat = 0;
-    await _abrir(
-      tester,
-      itens: aluno360MenuItens(_aluno()),
-      onMenu: (_) {},
-      onChat: () => chat++,
-    );
+    await _abrirCabecalho(tester, onMenu: () {}, onChat: () => chat++);
     await tester.tap(find.byTooltip('Conversar com o aluno'));
     expect(chat, 1);
   });
 
+  testWidgets('o ⋮ do cabeçalho é um botão de ícone, não um menu flutuante', (
+    tester,
+  ) async {
+    var abriu = 0;
+    await _abrirCabecalho(tester, onMenu: () => abriu++);
+    expect(find.byType(PopupMenuButton<Object?>), findsNothing);
+    expect(find.byType(PopupMenuItem<Object?>), findsNothing);
+    final alvo = tester.getSize(find.byTooltip('Mais opções do aluno'));
+    expect(alvo.width, greaterThanOrEqualTo(48));
+    expect(alvo.height, greaterThanOrEqualTo(48));
+    await tester.tap(find.byTooltip('Mais opções do aluno'));
+    expect(abriu, 1);
+  });
+
   testWidgets('não há lixeira solta no cabeçalho', (tester) async {
-    await _abrir(tester, itens: aluno360MenuItens(_aluno()), onMenu: (_) {});
+    await _abrirCabecalho(tester, onMenu: () {});
     expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
     expect(find.byTooltip('Excluir aluno'), findsNothing);
   });
 
-  testWidgets('o ⋮ lista os itens na ordem e Excluir é o último', (tester) async {
-    await _abrir(tester, itens: aluno360MenuItens(_aluno()), onMenu: (_) {});
-    await tester.tap(find.byTooltip('Mais opções do aluno'));
-    await tester.pumpAndSettle();
+  test('os itens saem agrupados: link sempre presente, perigo por último', () {
+    final itens = aluno360MenuItens(_aluno());
+    expect(itens.first.acao, Aluno360MenuAcao.editar);
+    expect(itens.last.acao, Aluno360MenuAcao.excluir);
+    expect(
+      itens.where((i) => i.acao == Aluno360MenuAcao.reenviarLink),
+      hasLength(1),
+    );
+    expect(
+      aluno360MenuItens(_aluno(contaAtiva: true))
+          .where((i) => i.acao == Aluno360MenuAcao.reenviarLink),
+      hasLength(1),
+      reason: 'conta ativa também precisa do link (senha esquecida)',
+    );
+    final bloquear = itens.firstWhere(
+      (i) => i.novoStatus == 'BLOQUEADO',
+    );
+    expect(bloquear.grupo, Aluno360MenuGrupo.perigo);
+    final pausar = itens.firstWhere((i) => i.novoStatus == 'INATIVO');
+    expect(pausar.grupo, Aluno360MenuGrupo.acesso);
+  });
+
+  testWidgets('a folha mostra os grupos e Excluir fica por último', (
+    tester,
+  ) async {
+    await _abrirFolha(tester, _aluno());
     final textos = [
+      'Cadastro',
       'Editar cadastro',
       'Criar tarefa',
+      'Acesso',
       'Reenviar link de acesso',
       'Pausar aluno',
+      'Zona de perigo',
       'Bloquear acesso',
       'Excluir aluno',
     ];
@@ -79,41 +146,30 @@ void main() {
       expect(y, greaterThan(ultimoY), reason: t);
       ultimoY = y;
     }
-    expect(find.byType(PopupMenuDivider), findsNWidgets(2));
   });
 
-  testWidgets('conta já ativa não oferece reenviar link', (tester) async {
-    await _abrir(tester, itens: aluno360MenuItens(_aluno(contaAtiva: true)), onMenu: (_) {});
-    await tester.tap(find.byTooltip('Mais opções do aluno'));
-    await tester.pumpAndSettle();
+  testWidgets('conta ativa oferece link para nova senha', (tester) async {
+    await _abrirFolha(tester, _aluno(contaAtiva: true));
+    expect(find.text('Enviar link para nova senha'), findsOneWidget);
     expect(find.text('Reenviar link de acesso'), findsNothing);
   });
 
-  testWidgets('escolher Excluir entrega a ação ao dono da tela (que pede confirmação)', (tester) async {
-    Aluno360MenuItem? escolhido;
-    await _abrir(
-      tester,
-      itens: aluno360MenuItens(_aluno()),
-      onMenu: (i) => escolhido = i,
-    );
-    await tester.tap(find.byTooltip('Mais opções do aluno'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Excluir aluno'));
-    await tester.pumpAndSettle();
-    expect(escolhido?.acao, Aluno360MenuAcao.excluir);
-  });
-
-  testWidgets('escolher Pausar entrega o status de destino', (tester) async {
-    Aluno360MenuItem? escolhido;
-    await _abrir(
-      tester,
-      itens: aluno360MenuItens(_aluno()),
-      onMenu: (i) => escolhido = i,
-    );
-    await tester.tap(find.byTooltip('Mais opções do aluno'));
-    await tester.pumpAndSettle();
+  testWidgets('tocar em Pausar devolve o status de destino', (tester) async {
+    final folha = await _abrirFolha(tester, _aluno());
     await tester.tap(find.text('Pausar aluno'));
     await tester.pumpAndSettle();
-    expect(escolhido?.novoStatus, 'INATIVO');
+    final item = await folha.resultado;
+    expect(item?.acao, Aluno360MenuAcao.status);
+    expect(item?.novoStatus, 'INATIVO');
+  });
+
+  testWidgets('tocar em Excluir devolve a ação sem confirmar na própria folha', (
+    tester,
+  ) async {
+    final folha = await _abrirFolha(tester, _aluno());
+    await tester.tap(find.text('Excluir aluno'));
+    await tester.pumpAndSettle();
+    final item = await folha.resultado;
+    expect(item?.acao, Aluno360MenuAcao.excluir);
   });
 }

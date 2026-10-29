@@ -10,6 +10,7 @@ import '../widgets/fx_dock.dart';
 import '../widgets/mesh_scope.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/fx_shell_inset_owner.dart';
 
 class AlunoShell extends ConsumerWidget {
   const AlunoShell({super.key, required this.navigationShell});
@@ -52,7 +53,7 @@ class AlunoShell extends ConsumerWidget {
                     child: MediaQuery.removePadding(
                       context: context,
                       removeBottom: !onChat,
-                      child: navigationShell,
+                      child: FxShellInsetOwner(child: navigationShell),
                     ),
                   ),
                 ),

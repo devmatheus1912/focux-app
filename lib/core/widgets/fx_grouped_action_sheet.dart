@@ -18,12 +18,16 @@ class FxActionItem<T> {
     required this.rotulo,
     required this.icone,
     this.descricao,
+    this.perigo = false,
   });
 
   final T valor;
   final String rotulo;
   final IconData icone;
   final String? descricao;
+
+  /// Linha em vermelho, para ação séria mas reversível (ex.: bloquear acesso).
+  final bool perigo;
 }
 
 /// Ações do mesmo tipo, com um título pequeno ("Montar", "Usar", "Guardar").
@@ -137,6 +141,7 @@ class FxGroupedActionSheet<T> extends StatelessWidget {
                     subtitle: a.descricao,
                     value: '',
                     picker: true,
+                    danger: a.perigo,
                     showDivider: j < g.itens.length - 1,
                     onTap: () {
                       HapticFeedback.selectionClick();

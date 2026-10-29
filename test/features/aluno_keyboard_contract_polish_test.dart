@@ -132,9 +132,9 @@ void main() {
 
   test('excluir conta aluno sheet: onTapOutside dismiss', () {
     final src = readScreenSourceBundle(
-      'lib/core/account/excluir_conta_flow.dart',
+      'lib/core/account/excluir_conta_sheet.dart',
     );
-    expect(src, contains('showFxFormSheet'));
+    expect(src, contains('FxSheetFrame'));
     expect(src, contains('onTapOutside'));
     expect(src, contains('FxKeyboardDismissScope.dismiss'));
   });

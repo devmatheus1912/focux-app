@@ -10,6 +10,7 @@ import '../widgets/fx_dock.dart';
 import '../widgets/mesh_scope.dart';
 import '../../features/dashboard/providers/dashboard_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../widgets/fx_shell_inset_owner.dart';
 
 /// Shell scaffold wrapping the 5 main personal-trainer tabs.
 class MainShell extends ConsumerWidget {
@@ -58,7 +59,7 @@ class MainShell extends ConsumerWidget {
                   child: MediaQuery.removePadding(
                     context: context,
                     removeBottom: true,
-                    child: navigationShell,
+                    child: FxShellInsetOwner(child: navigationShell),
                   ),
                 ),
                 Positioned(

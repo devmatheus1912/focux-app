@@ -49,7 +49,3 @@ Future<void> openDashboardShortcut(
   );
 }
 
-int countLockedShortcuts(
-  List<DashboardToolShortcut> shortcuts,
-  PlanoFeatures features,
-) => shortcuts.where((s) => !s.isUnlocked(features)).length;

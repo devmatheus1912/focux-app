@@ -48,7 +48,10 @@ void main() {
     expect(screen, contains('FxHelpIconButton'));
     expect(screen, contains('identidadeHasWhiteLabel'));
     expect(screen, contains('Assinar Enterprise'));
-    expect(screen, contains('_PaletteThemePreviewPair'));
+    expect(screen, contains('_PaletteThemePreview('));
+    expect(screen, isNot(contains('_PaletteThemePreviewPair')));
+    expect(screen, contains('IdentidadeEstiloMiniaturas'));
+    expect(screen, contains('_salvando || !_dirty'));
     expect(screen, contains('_PaletteThemePreview'));
     expect(screen, contains('IdentidadePaletasGrade'));
     expect(screen, isNot(contains('_LiveBrandHero')));

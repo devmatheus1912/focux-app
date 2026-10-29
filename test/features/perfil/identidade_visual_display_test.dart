@@ -81,7 +81,7 @@ void main() {
         fetchedAt: now.subtract(const Duration(seconds: 5)),
         now: now,
       ),
-      'Sua marca no app · Atualizado agora',
+      'Sua marca no app',
     );
   });
 }

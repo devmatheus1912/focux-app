@@ -9,9 +9,6 @@ String iaCopilotoGerarConfirmTitle(String modeDisplay) =>
 String iaCopilotoGerarConfirmMessage() =>
     'Consome cota de IA. Nada é aplicado no aluno automaticamente.';
 
-String iaCopilotoGerarConfirmLabel(String modeDisplay) =>
-    iaCopilotoGerarLabel(modeDisplay);
-
 String iaCopilotoCriarTarefaLabel() => 'Criar tarefa';
 
 String iaCopilotoCriarTarefaConfirmTitle() => 'Salvar tarefa no Copiloto?';

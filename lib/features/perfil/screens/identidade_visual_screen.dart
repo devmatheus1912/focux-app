@@ -43,6 +43,7 @@ import '../../../core/widgets/fx_choice_strip.dart';
 import '../widgets/identidade_previa_app.dart';
 import '../widgets/identidade_capa_tile.dart';
 import '../widgets/identidade_paletas_grade.dart';
+import '../widgets/identidade_estilo_miniaturas.dart';
 
 part 'identidade_visual_screen_actions.part.dart';
 part 'identidade_visual_screen_widgets.part.dart';
@@ -239,7 +240,7 @@ class _IdentidadeVisualScreenState
                       loading: _salvando,
                       loadingLabel: identidadeSalvandoLabel(),
                       onPressed:
-                          _salvando
+                          _salvando || !_dirty
                               ? null
                               : () =>
                                   _pedirSalvar(hasWhiteLabel: hasWhiteLabel),
@@ -306,7 +307,8 @@ class _IdentidadeVisualScreenState
                                 ),
                                 const SizedBox(height: TokensStrip.s3),
                                 if (_previa == 2)
-                                  _PaletteThemePreviewPair(
+                                  _PaletteThemePreview(
+                                    dark: true,
                                     palette: _palette,
                                     name: nomePersonal,
                                     slogan: _sloganCtrl.text.trim(),
@@ -332,31 +334,22 @@ class _IdentidadeVisualScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       _PanelTitle(
-                                        icon: Icons.auto_awesome_motion_outlined,
                                         title: 'Estilo',
-                                        subtitle: identidadeEstiloSubtitle(),
-                                        accent: chromeAccent,
                                         mute: chrome.mute,
                                       ),
-                                      const SizedBox(height: 14),
-                                      FxChoiceStrip<BrandStyle>(
-                                        itens: [
-                                          for (final e in BrandStyle.values)
-                                            FxChoiceItem(
-                                              value: e,
-                                              label: identidadeEstiloLabel(e),
-                                            ),
-                                        ],
+                                      const SizedBox(height: TokensStrip.s3),
+                                      IdentidadeEstiloMiniaturas(
                                         selecionado: _estilo,
+                                        primaria: _corPrimaria,
+                                        dark: _previa == 1,
                                         onSelecionar:
                                             hasWhiteLabel
-                                                ? (e) {
-                                                  HapticFeedback.selectionClick();
-                                                  setState(() => _estilo = e);
-                                                }
-                                                : (_) {},
+                                                ? (e) => setState(
+                                                  () => _estilo = e,
+                                                )
+                                                : null,
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: TokensStrip.s2),
                                       Text(
                                         identidadeEstiloDescricao(_estilo),
                                         style: FocuxHubTypography.bodyMuted(
@@ -375,13 +368,10 @@ class _IdentidadeVisualScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       _PanelTitle(
-                                        icon: Icons.auto_awesome_outlined,
-                                        title: 'Imagens e slogan',
-                                        subtitle: identidadeImagensSubtitle(),
-                                        accent: chromeAccent,
+                                        title: 'Logo, capa e slogan',
                                         mute: chrome.mute,
                                       ),
-                                      const SizedBox(height: 18),
+                                      const SizedBox(height: TokensStrip.s3),
                                       Center(
                                         child: _LogoUploadRing(
                                           nome: nomePersonal,
@@ -444,13 +434,10 @@ class _IdentidadeVisualScreenState
                                         CrossAxisAlignment.start,
                                     children: [
                                       _PanelTitle(
-                                        icon: Icons.palette_outlined,
-                                        title: 'Paleta premium',
-                                        subtitle: identidadePaletteSubtitle(),
-                                        accent: chromeAccent,
+                                        title: 'Cores',
                                         mute: chrome.mute,
                                       ),
-                                      const SizedBox(height: 14),
+                                      const SizedBox(height: TokensStrip.s3),
                                       IdentidadePaletasGrade(
                                         selecionada: _palette,
                                         onSelect:

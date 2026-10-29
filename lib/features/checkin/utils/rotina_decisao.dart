@@ -89,50 +89,6 @@ RotinaDecisao? decisaoDaRotina({
   return null;
 }
 
-/// O que o personal lê no topo, a partir dos campos que a API manda sem o histórico.
-RotinaDecisao? decisaoParaPersonal(RotinaFila rotina, DateTime agora) {
-  if (rotina.itens.isEmpty) return null;
-  final treinos = <ExecucaoTreino>[
-    for (final item in rotina.itens)
-      if (!item.descanso && item.treinoId != null)
-        ExecucaoTreino(
-          treinoId: item.treinoId!,
-          treinoNome: item.nome?.trim().isNotEmpty == true ? item.nome!.trim() : 'Treino',
-          status: item.treinoId == rotina.sessaoAbertaTreinoId
-              ? treinoStatusEmAndamento
-              : treinoStatusDisponivel,
-          exercicios: const [],
-          exerciciosCount: 1,
-        ),
-  ];
-  final historico = <ExecucaoTreino>[];
-  final ultimo = rotina.ultimoTreinoId;
-  if (ultimo != null) {
-    final quando = rotina.concluiuHoje ? agora : agora.subtract(const Duration(days: 1));
-    final nome = treinos
-        .where((treino) => treino.treinoId == ultimo)
-        .map((treino) => treino.treinoNome)
-        .firstOrNull;
-    historico.add(
-      ExecucaoTreino(
-        treinoId: ultimo,
-        treinoNome: nome ?? 'Treino',
-        status: treinoStatusConcluido,
-        iniciadoEm: quando.subtract(const Duration(hours: 1)).toIso8601String(),
-        concluidoEm: quando.toIso8601String(),
-        exercicios: const [],
-      ),
-    );
-  }
-  return decisaoDaRotina(
-    itens: rotina.itens,
-    diasAviso: rotina.diasAviso,
-    treinos: treinos,
-    historico: historico,
-    agora: agora,
-  );
-}
-
 RotinaDecisao _agora({
   required RotinaMomento momento,
   required List<RotinaItem> itens,

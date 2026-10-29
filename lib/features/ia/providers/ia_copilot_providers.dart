@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../features/auth/providers/auth_provider.dart';
-import '../../health/data/health_repository.dart';
 import '../data/ia_repository.dart';
 import '../models/ia_copilot_insight.dart';
 import '../models/ia_copilot_proxima_acao.dart';
@@ -39,15 +38,6 @@ final insightsProvider =
 final proximaAcaoProvider =
     FutureProvider.family<IaCopilotProximaAcao, int>((ref, alunoId) async {
   return IaRepository(ref.read(apiClientProvider)).proximaAcao(alunoId);
-});
-
-final copilotRecoveryProvider = FutureProvider.family<RecoverySnapshot?, int>((
-  ref,
-  alunoId,
-) async {
-  return HealthRepository.fromClient(
-    ref.read(apiClientProvider),
-  ).fetchRecoveryForAluno(alunoId);
 });
 
 class IaCopilotTaskDraft {

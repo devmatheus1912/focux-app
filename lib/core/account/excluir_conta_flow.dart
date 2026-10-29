@@ -4,11 +4,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../utils/friendly_error.dart';
 import '../widgets/feedback_helper.dart';
-import '../widgets/fx_form_sheet.dart';
-import '../widgets/fx_input_deco.dart';
-import '../widgets/fx_keyboard_dismiss_scope.dart';
 import '../widgets/fx_loading.dart';
-import '../widgets/fx_tonal_button.dart';
+import 'excluir_conta_sheet.dart';
 
 const excluirContaPath = '/api/lgpd/me/delete';
 const excluirContaCodigoPath = '/api/lgpd/me/delete/codigo';
@@ -40,46 +37,27 @@ String? excluirContaErroLocal(
   return null;
 }
 
-/// Sheet de exclusão de conta com carregamento bloqueante durante o DELETE.
-/// [aposExcluir] roda só se o backend confirmar a exclusão.
+/// Folha de exclusão de conta em passos, com carregamento bloqueante durante o
+/// DELETE. [aposExcluir] roda só se o backend confirmar a exclusão.
 Future<void> excluirContaFlow(
   BuildContext context, {
   required Dio dio,
-  required String subtitulo,
+  required ExcluirContaPapel papel,
   required Future<void> Function() aposExcluir,
   bool avisoAssinatura = false,
 }) async {
   final l10n = S.of(context);
-  final senhaCtrl = TextEditingController();
-  final codigoCtrl = TextEditingController();
-  final confirmCtrl = TextEditingController();
-  var usarCodigo = false;
-
-  final ok = await showFxFormSheet(
+  final credencial = await showExcluirContaSheet(
     context,
-    title: 'Excluir conta',
-    subtitle: avisoAssinatura
-        ? '$subtitulo\n\n${l10n.excluirContaAvisoAssinatura}'
-        : subtitulo,
-    icon: Icons.delete_forever_outlined,
-    confirmLabel: 'Excluir definitivamente',
-    destructive: true,
-    child: _ExcluirContaCampos(
-      dio: dio,
-      senhaCtrl: senhaCtrl,
-      codigoCtrl: codigoCtrl,
-      confirmCtrl: confirmCtrl,
-      onModoChanged: (v) => usarCodigo = v,
-    ),
+    dio: dio,
+    papel: papel,
+    avisoAssinatura: avisoAssinatura,
   );
-
-  final senha = senhaCtrl.text;
-  final codigo = codigoCtrl.text;
-  final confirmacao = confirmCtrl.text;
-  senhaCtrl.dispose();
-  codigoCtrl.dispose();
-  confirmCtrl.dispose();
-  if (!ok || !context.mounted) return;
+  if (credencial == null || !context.mounted) return;
+  final senha = credencial.senha;
+  final codigo = credencial.codigo;
+  final confirmacao = credencial.confirmacao;
+  final usarCodigo = credencial.usarCodigo;
 
   final erro = excluirContaErroLocal(
     l10n,
@@ -134,104 +112,4 @@ Future<void> excluirContaFlow(
   }
   navigator.pop();
   await aposExcluir();
-}
-
-class _ExcluirContaCampos extends StatefulWidget {
-  const _ExcluirContaCampos({
-    required this.dio,
-    required this.senhaCtrl,
-    required this.codigoCtrl,
-    required this.confirmCtrl,
-    required this.onModoChanged,
-  });
-
-  final Dio dio;
-  final TextEditingController senhaCtrl;
-  final TextEditingController codigoCtrl;
-  final TextEditingController confirmCtrl;
-  final ValueChanged<bool> onModoChanged;
-
-  @override
-  State<_ExcluirContaCampos> createState() => _ExcluirContaCamposState();
-}
-
-class _ExcluirContaCamposState extends State<_ExcluirContaCampos> {
-  bool _usarCodigo = false;
-  bool _enviando = false;
-
-  Future<void> _pedirCodigo() async {
-    if (_enviando) return;
-    final l10n = S.of(context);
-    setState(() => _enviando = true);
-    try {
-      final resp = await widget.dio.post<Map<String, dynamic>>(
-        excluirContaCodigoPath,
-        options: Options(extra: {'fxNoRetry': true, 'fxNoInvalidate': true}),
-      );
-      final email = resp.data?['emailMascarado']?.toString() ?? '';
-      if (!mounted) return;
-      setState(() => _usarCodigo = true);
-      widget.onModoChanged(true);
-      FeedbackHelper.showSuccess(context, l10n.excluirContaCodigoEnviado(email));
-    } catch (e) {
-      if (mounted) FeedbackHelper.showError(context, friendlyError(e));
-    } finally {
-      if (mounted) setState(() => _enviando = false);
-    }
-  }
-
-  void _usarSenha() {
-    setState(() => _usarCodigo = false);
-    widget.onModoChanged(false);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = S.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_usarCodigo)
-          TextField(
-            controller: widget.codigoCtrl,
-            keyboardType: TextInputType.number,
-            maxLength: 6,
-            autofillHints: const [AutofillHints.oneTimeCode],
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: FxInputDeco.build(context, l10n.excluirContaCodigoLabel),
-          )
-        else
-          TextField(
-            controller: widget.senhaCtrl,
-            obscureText: true,
-            onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: FxInputDeco.build(context, l10n.excluirContaSenhaLabel),
-          ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FxTonalButton(
-            label:
-                _usarCodigo
-                    ? l10n.excluirContaReenviarCodigo
-                    : l10n.excluirContaPedirCodigo,
-            loading: _enviando,
-            compact: true,
-            onPressed: _enviando ? null : _pedirCodigo,
-          ),
-        ),
-        if (_usarCodigo)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: FxTonalButton(label: l10n.excluirContaUsarSenha, onPressed: _usarSenha, compact: true),
-          ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: widget.confirmCtrl,
-          onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-          decoration: FxInputDeco.build(context, l10n.excluirContaConfirmLabel),
-        ),
-      ],
-    );
-  }
 }

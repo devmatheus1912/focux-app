@@ -18,13 +18,6 @@ abstract final class AnamneseStatus {
   };
 }
 
-/// Status aceitos no PUT de revisão do personal.
-abstract final class AnamneseRevisaoStatus {
-  static const revisada = AnamneseStatus.revisada;
-  static const precisaAtestado = AnamneseStatus.precisaAtestado;
-  static const solicitada = AnamneseStatus.solicitada;
-}
-
 class Anamnese {
   final int? id;
   final String status;

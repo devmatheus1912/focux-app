@@ -14,6 +14,8 @@ class FxActionLink extends StatelessWidget {
     required this.onTap,
     this.icon,
     this.destructive = false,
+    this.fundo,
+    this.texto,
   });
 
   final String label;
@@ -23,17 +25,23 @@ class FxActionLink extends StatelessWidget {
   final String? icon;
   final bool destructive;
 
+  /// Cores explícitas (link sobre um card sólido da marca).
+  final Color? fundo;
+  final Color? texto;
+
   @override
   Widget build(BuildContext context) {
     return FxTonalButton(
       label: label,
       compact: true,
       danger: destructive,
+      fundo: fundo,
+      texto: texto,
       onPressed: onTap,
       trailing: FxIcon(
         name: icon ?? 'chevron-right',
         size: 16,
-        color: _cor(context),
+        color: texto ?? _cor(context),
       ),
     );
   }

@@ -47,9 +47,7 @@ import '../../treinos/widgets/ficha_vigencia_linha.dart';
 import '../widgets/aluno_personal_card.dart';
 import '../../../core/widgets/fx_action_link.dart';
 import '../widgets/aluno_capa_banner.dart';
-import '../../../core/theme/brand_palette.dart';
 import '../../../core/theme/brand_style.dart';
-import '../../../core/theme/theme_provider.dart';
 
 part 'aluno_dashboard_screen_header.part.dart';
 
@@ -349,7 +347,6 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
     final semana = faixaDaSemana(home.rotina, home.historico, now);
     final selo = _seloDaFicha(s, home.rotina, now);
     final estilo = BrandStyle.fromApi(home.personalBrand.estiloMarca);
-    final secundaria = ref.watch(secondaryColorProvider);
     final primaria = Theme.of(context).colorScheme.primary;
     final capa = home.personalBrand.capaUrl;
 
@@ -372,10 +369,8 @@ class _AlunoDashboardScreenState extends ConsumerState<AlunoDashboardScreen> {
           prontidaoBaixa: view.prontidaoBaixa,
           isDark: isDark,
           assinatura: home.personalBrand.nomePersonal,
-          fundoMarca:
-              estilo.usaGradiente
-                  ? BrandPalette.gradient(primaria, secundaria, dark: isDark)
-                  : null,
+          estilo: estilo,
+          primaria: primaria,
           semana: semana,
           onSemana: () => context.go('/checkin/treinos'),
           seloFicha: selo?.texto,

@@ -20,6 +20,8 @@ class FxTonalButton extends StatelessWidget {
     this.expanded = false,
     this.danger = false,
     this.trailing,
+    this.fundo,
+    this.texto,
     this.semanticLabel,
   });
 
@@ -40,6 +42,11 @@ class FxTonalButton extends StatelessWidget {
   /// Peça depois do rótulo (seta de navegação).
   final Widget? trailing;
 
+  /// Cores explícitas (botão sobre um card sólido da marca). Sem elas, vale o
+  /// tom da marca do tema.
+  final Color? fundo;
+  final Color? texto;
+
   /// Leitura mais específica que o texto ('Adicionar em Aquecimento').
   final String? semanticLabel;
 
@@ -52,8 +59,8 @@ class FxTonalButton extends StatelessWidget {
         danger
             ? Theme.of(context).colorScheme.error
             : Theme.of(context).colorScheme.primary;
-    final fg = FxActionChip.tonalForeground(accent, isDark: isDark);
-    final bg = FxActionChip.tonalBackground(accent, isDark: isDark);
+    final fg = texto ?? FxActionChip.tonalForeground(accent, isDark: isDark);
+    final bg = fundo ?? FxActionChip.tonalBackground(accent, isDark: isDark);
     final enabled = onPressed != null && !loading;
     final altura = compact ? 36.0 : alturaToque;
 
@@ -97,7 +104,12 @@ class FxTonalButton extends StatelessWidget {
           child: Material(
             color: enabled ? bg : bg.withValues(alpha: 0.5),
             shape: StadiumBorder(
-              side: BorderSide(color: accent.withValues(alpha: isDark ? 0.40 : 0.28)),
+              side: BorderSide(
+                color:
+                    texto != null
+                        ? texto!.withValues(alpha: 0.35)
+                        : accent.withValues(alpha: isDark ? 0.40 : 0.28),
+              ),
             ),
             child: InkWell(
               customBorder: const StadiumBorder(),

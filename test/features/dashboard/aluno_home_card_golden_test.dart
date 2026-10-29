@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:focux_app/core/theme/brand_palette.dart';
+import 'package:focux_app/core/theme/brand_style.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/core/widgets/fx_week_strip.dart';
 import 'package:focux_app/features/dashboard/utils/aluno_today_action.dart';
@@ -106,11 +106,8 @@ void main() {
                 semana: _semana,
                 seloFicha: 'Até 14/02',
                 assinatura: 'Matheus Teste',
-                fundoMarca: BrandPalette.gradient(
-                  const Color(0xFF1A2332),
-                  const Color(0xFFC9A962),
-                  dark: dark,
-                ),
+                estilo: BrandStyle.cinematografico,
+                primaria: const Color(0xFF1A2332),
               ),
               const SizedBox(height: 12),
               AlunoPersonalCard(

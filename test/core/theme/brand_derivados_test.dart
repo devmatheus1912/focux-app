@@ -19,13 +19,13 @@ void main() {
     });
 
     test(
-      'só o Cinematográfico usa gradiente, acento secundário e fundo tingido',
+      'só o Cinematográfico usa card sólido, acento secundário e fundo tingido',
       () {
-        expect(BrandStyle.cinematografico.usaGradiente, isTrue);
+        expect(BrandStyle.cinematografico.cardSolido, isTrue);
         expect(BrandStyle.cinematografico.usaAcentoSecundario, isTrue);
         expect(BrandStyle.cinematografico.tingeFundo, isTrue);
         for (final e in [BrandStyle.classico, BrandStyle.minimalista]) {
-          expect(e.usaGradiente, isFalse);
+          expect(e.cardSolido, isFalse);
           expect(e.usaAcentoSecundario, isFalse);
           expect(e.tingeFundo, isFalse);
         }
@@ -57,14 +57,22 @@ void main() {
             reason: '${paleta.name}: acento ilegível',
           );
 
-          final g = BrandPalette.gradient(
+          final card = BrandPalette.cardDeMarca(
             paleta.primary,
-            paleta.secondary,
             dark: escuro,
           );
-          // tom sólido e baixo: sem degradê, texto por cima legível
-          expect(g.colors.first, g.colors.last);
-          expect(g.colors.first.a, lessThanOrEqualTo(0.16 + 1e-6));
+          // card sólido (opaco): texto claro por cima passa AA nos dois extremos
+          expect(card.fundo.a, 1.0);
+          expect(
+            FocuxContrast.contrastRatio(card.sobre, card.fundo),
+            greaterThanOrEqualTo(FocuxContrast.wcagAaNormal),
+            reason: '${paleta.name}: texto ilegível no topo do card',
+          );
+          expect(
+            FocuxContrast.contrastRatio(card.sobre, card.fundoFim),
+            greaterThanOrEqualTo(FocuxContrast.wcagAaNormal),
+            reason: '${paleta.name}: texto ilegível no fim do card',
+          );
           final tinta = BrandPalette.surfaceTint(paleta.primary, dark: escuro);
           expect(tinta.a, lessThanOrEqualTo(0.06 + 1e-6));
         });

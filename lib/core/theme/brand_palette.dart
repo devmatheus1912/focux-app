@@ -155,18 +155,38 @@ class BrandPalette {
   static Color sectionAccent(Color primary, {required bool dark}) =>
       dark ? accent(primary) : deep(primary);
 
-  /// Fundo da marca para superfícies grandes (card principal da Home): a
-  /// primária em tom sólido e baixo (sem degradê, que denuncia visual
-  /// genérico), com texto por cima legível em claro e escuro. A secundária
-  /// fica para ícones, anéis e selos ([secondaryAccent]).
-  static LinearGradient gradient(
-    Color primary,
-    Color secondary, {
-    required bool dark,
-  }) {
-    final tom = primary.withValues(alpha: dark ? 0.16 : 0.10);
-    return LinearGradient(colors: [tom, tom]);
+  /// Card principal da Home no estilo Cinematográfico: a primária **sólida**,
+  /// levemente escurecida, com texto claro por cima. Mesma matiz de cima para
+  /// baixo, só a luminosidade varia (no máximo [cardDeMarcaVariacao]); sem
+  /// segunda cor, sem brilho. A cor salva do personal não muda: só a aplicada.
+  ///
+  /// Trava de contraste: a luminosidade desce até o branco passar AA (4.5:1)
+  /// nos dois extremos, então qualquer cor escolhida fica legível.
+  static CardDeMarca cardDeMarca(Color primaria, {required bool dark}) {
+    final hsl = HSLColor.fromColor(primaria);
+    // Teto de luminosidade: o card é "levemente escurecido", e no escuro fica
+    // um pouco mais fundo para não brilhar sobre o fundo.
+    final teto = dark ? 0.26 : 0.34;
+    var topo = hsl.lightness > teto ? teto : hsl.lightness;
+    topo = topo.clamp(0.14, teto).toDouble();
+    final saturacao = hsl.saturation.clamp(0.0, 0.85).toDouble();
+
+    Color cor(double l) =>
+        hsl.withSaturation(saturacao).withLightness(l.clamp(0.0, 1.0)).toColor();
+    bool passa(Color c) =>
+        FocuxContrast.meetsWcagAa(Colors.white, c);
+
+    var fundo = cor(topo);
+    while (!passa(fundo) && topo > 0.05) {
+      topo -= 0.01;
+      fundo = cor(topo);
+    }
+    final fim = cor((topo - cardDeMarcaVariacao).clamp(0.04, 1.0).toDouble());
+    return CardDeMarca(fundo: fundo, fundoFim: fim, sobre: Colors.white);
   }
+
+  /// Quanto a luminosidade (HSL) pode variar do topo ao fim do card sólido.
+  static const double cardDeMarcaVariacao = 0.06;
 
   /// Tinta de superfície a 4% (claro) / 6% (escuro): fundos que sentem a marca
   /// sem virar cor chapada.
@@ -192,4 +212,24 @@ class BrandPalette {
     }
     return sectionAccent(primary, dark: dark);
   }
+}
+
+/// Cores do card sólido da marca: [fundo] no topo, [fundoFim] embaixo (mesma
+/// matiz) e [sobre] para texto, ícones e o botão invertido.
+class CardDeMarca {
+  const CardDeMarca({
+    required this.fundo,
+    required this.fundoFim,
+    required this.sobre,
+  });
+
+  final Color fundo;
+  final Color fundoFim;
+  final Color sobre;
+
+  LinearGradient get degrade => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [fundo, fundoFim],
+  );
 }

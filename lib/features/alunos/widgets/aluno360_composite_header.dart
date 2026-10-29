@@ -1,17 +1,13 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../constants/aluno_360_layout.dart';
 import '../../../l10n/app_localizations.dart';
-import '../utils/aluno360_menu_acoes.dart';
-import '../utils/aluno_status.dart';
 
 /// Tab bar for Aluno 360 (Resumo · Evolução · Ferramentas).
 class Aluno360DetailTabBar extends StatelessWidget {
@@ -161,7 +157,6 @@ class Aluno360HeaderToolbar extends StatelessWidget {
     this.freshnessLabel,
     this.onChat,
     this.onHelp,
-    this.menuItens = const [],
     this.onMenu,
     this.actionsEnabled = true,
   });
@@ -174,9 +169,8 @@ class Aluno360HeaderToolbar extends StatelessWidget {
   final VoidCallback? onChat;
   final VoidCallback? onHelp;
 
-  /// Itens do ⋮ (ver [aluno360MenuItens]) e o que fazer ao escolher um.
-  final List<Aluno360MenuItem> menuItens;
-  final ValueChanged<Aluno360MenuItem>? onMenu;
+  /// Abre a folha do ⋮ (ver `showAluno360MenuSheet`).
+  final VoidCallback? onMenu;
   final bool actionsEnabled;
 
   @override
@@ -241,72 +235,21 @@ class Aluno360HeaderToolbar extends StatelessWidget {
           ),
         if (onHelp != null && actionsEnabled)
           FxHelpIconButton(tooltip: 'Ajuda sobre esta aba', onTap: onHelp!),
-        if (onMenu != null && menuItens.isNotEmpty && actionsEnabled)
-          PopupMenuButton<Aluno360MenuItem>(
+        if (onMenu != null && actionsEnabled)
+          IconButton(
             tooltip: s.aluno360MenuTooltip,
-            position: PopupMenuPosition.under,
-            icon: Icon(Icons.more_vert_rounded, color: ink),
-            onSelected: onMenu,
-            itemBuilder: (_) => [
-              for (final item in menuItens) ...[
-                if (item.separadorAntes) const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: item,
-                  child: _MenuLinha(item: item),
-                ),
-              ],
-            ],
+            onPressed: onMenu,
+            style: IconButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              side: BorderSide(color: ink.withValues(alpha: 0.14)),
+            ),
+            icon: Icon(Icons.more_horiz_rounded, color: ink),
           ),
       ],
     );
   }
 }
 
-class _MenuLinha extends StatelessWidget {
-  const _MenuLinha({required this.item});
-
-  final Aluno360MenuItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    final (icone, texto) = switch (item.acao) {
-      Aluno360MenuAcao.editar => (Icons.edit_outlined, s.aluno360MenuEditar),
-      Aluno360MenuAcao.criarTarefa => (
-        Icons.playlist_add_check_rounded,
-        s.aluno360MenuCriarTarefa,
-      ),
-      Aluno360MenuAcao.reenviarLink => (
-        Icons.link_rounded,
-        s.alunoReenviarLinkAcao,
-      ),
-      Aluno360MenuAcao.status => (
-        alunoStatusIcon(item.novoStatus ?? ''),
-        alunoStatusAcaoLabel(item.novoStatus ?? ''),
-      ),
-      Aluno360MenuAcao.excluir => (
-        Icons.delete_outline_rounded,
-        s.aluno360MenuExcluir,
-      ),
-    };
-    final cor = item.destrutivo ? EagleTokens.bad : null;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icone, size: 20, color: cor),
-        const SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            texto,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: cor == null ? null : TextStyle(color: cor),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 /// Pinned sliver: toolbar + hero strip + tabs in one measured column.
 class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -325,7 +268,6 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
     this.freshnessLabel,
     this.onChat,
     this.onHelp,
-    this.menuItens = const [],
     this.onMenu,
     this.actionsEnabled = true,
   });
@@ -344,8 +286,7 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final VoidCallback onBack;
   final VoidCallback? onChat;
   final VoidCallback? onHelp;
-  final List<Aluno360MenuItem> menuItens;
-  final ValueChanged<Aluno360MenuItem>? onMenu;
+  final VoidCallback? onMenu;
   final bool actionsEnabled;
 
   @override
@@ -405,7 +346,6 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
                     onBack: onBack,
                     onChat: onChat,
                     onHelp: onHelp,
-                    menuItens: menuItens,
                     onMenu: onMenu,
                     actionsEnabled: actionsEnabled,
                   ),
@@ -471,6 +411,6 @@ class Aluno360CompositeHeaderDelegate extends SliverPersistentHeaderDelegate {
         actionsEnabled != oldDelegate.actionsEnabled ||
         onHelp != oldDelegate.onHelp ||
         onChat != oldDelegate.onChat ||
-        !listEquals(menuItens, oldDelegate.menuItens);
+        (onMenu == null) != (oldDelegate.onMenu == null);
   }
 }

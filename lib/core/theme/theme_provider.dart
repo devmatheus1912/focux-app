@@ -66,5 +66,3 @@ class ThemeModeController extends Notifier<ThemeMode> {
   }
 }
 
-/// Main-shell tabs render over [CinematicMeshBackground] — keep scaffolds transparent.
-const shellScaffoldColor = Colors.transparent;

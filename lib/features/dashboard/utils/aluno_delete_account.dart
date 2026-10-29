@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/account/excluir_conta_flow.dart';
+import '../../../core/account/excluir_conta_sheet.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -13,11 +14,7 @@ Future<void> confirmDeleteAlunoAccount(
   return excluirContaFlow(
     context,
     dio: ref.read(apiClientProvider).dio,
-    subtitulo:
-        'Esta ação é irreversível. Seus dados pessoais serão anonimizados conforme a LGPD. '
-        'Histórico financeiro ou operacional pode ser mantido pelo prazo legal.\n\n'
-        'Prefere pela web? Veja como em focuxpersonal.com/excluir-conta.\n\n'
-        'Digite sua senha (ou peça o código por e-mail) e EXCLUIR para confirmar.',
+    papel: ExcluirContaPapel.aluno,
     aposExcluir: () async {
       await ref.read(authProvider.notifier).logout();
       if (!context.mounted) return;

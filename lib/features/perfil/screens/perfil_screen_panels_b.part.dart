@@ -5,11 +5,7 @@ Future<void> _showDeleteAccountDialog(BuildContext context) {
   return excluirContaFlow(
     context,
     dio: ApiClient().dio,
-    subtitulo:
-        'Esta ação é irreversível. Todos os seus dados pessoais serão anonimizados '
-        'conforme a LGPD (Art. 18). Dados financeiros serão mantidos por 5 anos '
-        'conforme legislação fiscal.\n\n'
-        'Digite sua senha (ou peça o código por e-mail) e EXCLUIR para confirmar.',
+    papel: ExcluirContaPapel.personal,
     avisoAssinatura: true,
     // Conta já excluída no backend: sair sem pedir confirmação.
     aposExcluir: () async {

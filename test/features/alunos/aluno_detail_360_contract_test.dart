@@ -174,7 +174,11 @@ void main() {
       contains('copilotMensagemPronta'),
     );
     expect(screen, contains('copySensitiveToClipboard'));
-    expect(screen, contains('aluno360MenuCriarTarefa'));
+    expect(
+      File('lib/features/alunos/widgets/aluno360_menu_sheet.dart')
+          .readAsStringSync(),
+      contains('aluno360MenuCriarTarefa'),
+    );
     expect(screen, contains('FxTonalButton'));
     // Criar tarefa fica no ⋮ do cabeçalho e o Chat é ação do cabeçalho; nunca no sticky.
     expect(screen, contains('Aluno360MenuAcao.criarTarefa'));

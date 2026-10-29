@@ -145,8 +145,6 @@
   "alunoHomeTitulo": "Today",
   "alunoHomeSaudacao": "Hi, {nome}",
   "alunoHomeSaudacaoSemNome": "Hi",
-  "alunoHomeSeuPersonal": "Your trainer: {nome}",
-  "alunoHomeAbrirConversa": "Open chat with {nome}",
   "alunoHomeAjudaTooltip": "How to use Today",
   "alunoHomeAjudaSubtitulo": "What to do today, how your week is going and your next step.",
   "alunoHomeAjudaCalculoTitulo": "How we calculate",
