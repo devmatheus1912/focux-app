@@ -7,8 +7,8 @@ import 'package:focux_app/core/health/health_service.dart';
 import 'package:focux_app/features/health/data/health_repository.dart';
 import 'package:focux_app/features/health/screens/health_dashboard_screen.dart';
 import 'package:focux_app/features/health/utils/health_dashboard_display.dart';
-import 'package:focux_app/features/health/widgets/recovery_score_ring.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const _localSummary = HealthSummary(
   steps: 12000,
@@ -97,207 +97,281 @@ void main() {
     );
   });
 
-  testWidgets(
-    'POST falho com resumo local não publica prontidão nem atualiza widget',
-    (tester) async {
-      var homeWidgetUpdates = 0;
-
-      await _pumpDashboard(
-        tester,
-        screen: HealthDashboardScreen(
-          checkAuthorization: () async => true,
-          loadTodaySummary: () async => _localSummary,
-          syncToday: (_) => throw Exception('sync falhou'),
-          updateHomeWidgetRecovery: ({
-            required int recoveryScore,
-            required String recoveryLabel,
-            required String recoveryHint,
-            required int steps,
-          }) async {
-            homeWidgetUpdates++;
-          },
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('/100'), findsNothing);
-      expect(
-        find.bySemanticsLabel(
-          'Prontidão indisponível. Aguardando sincronização com o servidor.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('--'), findsWidgets);
-      expect(find.textContaining('%'), findsNothing);
-      expect(find.text('12000'), findsOneWidget);
-      expect(find.text('8,0h'), findsOneWidget);
-      expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
-      expect(homeWidgetUpdates, 0);
-    },
-  );
-
-  testWidgets(
-    'POST ok publica score do servidor e atualiza widget da Home',
-    (tester) async {
-      var homeWidgetUpdates = 0;
-      int? syncedScore;
-
-      await _pumpDashboard(
-        tester,
-        screen: HealthDashboardScreen(
-          checkAuthorization: () async => true,
-          loadTodaySummary: () async => _localSummary,
-          syncToday: (_) async => _serverSnapshot,
-          updateHomeWidgetRecovery: ({
-            required int recoveryScore,
-            required String recoveryLabel,
-            required String recoveryHint,
-            required int steps,
-          }) async {
-            homeWidgetUpdates++;
-            syncedScore = recoveryScore;
-          },
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(RecoveryScoreRing), findsOneWidget);
-      expect(
-        find.bySemanticsLabel('Prontidão 77 de 100. Pronto para treinar'),
-        findsOneWidget,
-      );
-      expect(find.text('77/100'), findsOneWidget);
-      expect(find.textContaining('%'), findsNothing);
-      expect(find.text('Pronto para treinar'), findsOneWidget);
-      expect(find.text('12000'), findsOneWidget);
-      expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
-      expect(homeWidgetUpdates, 1);
-      expect(syncedScore, 77);
-    },
-  );
-
-  testWidgets(
-    'servidor sem nota: prontidão indisponível e widget da Home limpo',
-    (tester) async {
-      var homeWidgetUpdates = 0;
-      var homeWidgetClears = 0;
-      int? clearedSteps;
-
-      await _pumpDashboard(
-        tester,
-        screen: HealthDashboardScreen(
-          checkAuthorization: () async => true,
-          loadTodaySummary: () async => _localSummary,
-          syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 9000}),
-          updateHomeWidgetRecovery: ({
-            required int recoveryScore,
-            required String recoveryLabel,
-            required String recoveryHint,
-            required int steps,
-          }) async {
-            homeWidgetUpdates++;
-          },
-          clearHomeWidgetRecoveryScore: ({required int? steps}) async {
-            homeWidgetClears++;
-            clearedSteps = steps;
-          },
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('/100'), findsNothing);
-      expect(
-        find.bySemanticsLabel(
-          'Prontidão indisponível. Aguardando sincronização com o servidor.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('0'), findsNothing);
-      expect(find.textContaining('%'), findsNothing);
-      expect(homeWidgetUpdates, 0);
-      expect(homeWidgetClears, 1);
-      expect(clearedSteps, 9000);
-    },
-  );
-
-  testWidgets(
-    'sem sono nem FC: pede os dados, blocos vazios com -- e conexão discreta',
-    (tester) async {
-      await _pumpDashboard(
-        tester,
-        screen: HealthDashboardScreen(
-          checkAuthorization: () async => true,
-          loadTodaySummary:
-              () async => const HealthSummary(
-                steps: 4000,
-                caloriesBurned: 0,
-                avgHeartRate: 0,
-                sleepHours: 0,
-              ),
-          syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 4000}),
-          updateHomeWidgetRecovery: ({
-            required int recoveryScore,
-            required String recoveryLabel,
-            required String recoveryHint,
-            required int steps,
-          }) async {},
-          clearHomeWidgetRecoveryScore: ({required int? steps}) async {},
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text(saudeSemScoreMensagem), findsOneWidget);
-      expect(find.text(saudeSemScoreAcao), findsOneWidget);
-      expect(find.text(saudeAtualizarLabel()), findsNothing);
-      expect(find.byType(RecoveryScoreRing), findsOneWidget);
-      expect(find.text('4000'), findsOneWidget);
-      expect(find.textContaining('kcal'), findsNothing);
-      expect(find.text(saudeSemDadosHoje), findsOneWidget);
-      expect(find.text(saudeSemBatimento), findsOneWidget);
-      expect(find.text(saudeSemSono), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text(saudeGerenciarConexaoLabel),
-        200,
-      );
-      expect(find.text(saudeGerenciarConexaoLabel), findsOneWidget);
-      expect(find.text(saudeDesconectarLabel()), findsNothing);
-    },
-  );
-
-  testWidgets('iOS: "Como liberar" ensina o caminho nos Ajustes', (
-    tester,
-  ) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+  Future<void> abrir(
+    WidgetTester tester, {
+    HealthSummary resumo = _localSummary,
+    Future<RecoverySnapshot> Function(HealthSummary)? sync,
+    Future<void> Function({required int? steps})? limpar,
+    Future<void> Function({
+      required int recoveryScore,
+      required String recoveryLabel,
+      required String recoveryHint,
+      required int steps,
+    })?
+    atualizar,
+    bool compartilhando = false,
+    Future<bool> Function(bool)? definir,
+    List<RecoveryDia> historico = const [],
+  }) async {
+    SharedPreferences.setMockInitialValues({
+      'saude_escolha_compartilhamento_feita': true,
+    });
+    await tester.binding.setSurfaceSize(const Size(390, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await _pumpDashboard(
       tester,
       screen: HealthDashboardScreen(
         checkAuthorization: () async => true,
-        loadTodaySummary:
-            () async => const HealthSummary(
-              steps: 4000,
-              caloriesBurned: 0,
-              avgHeartRate: 0,
-              sleepHours: 0,
-            ),
-        syncToday: (_) async => RecoverySnapshot.fromJson({'steps': 4000}),
+        loadTodaySummary: () async => resumo,
+        syncToday: sync ?? (_) async => _serverSnapshot,
+        updateHomeWidgetRecovery:
+            atualizar ??
+            ({
+              required int recoveryScore,
+              required String recoveryLabel,
+              required String recoveryHint,
+              required int steps,
+            }) async {},
+        clearHomeWidgetRecoveryScore: limpar ?? ({required int? steps}) async {},
+        loadHistorico: () async => historico,
+        loadCompartilhamento: () async => compartilhando,
+        setCompartilhamento: definir ?? (v) async => v,
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('com nota: anel, rótulo, dica do treino e botões do card', (
+    tester,
+  ) async {
+    var atualizacoes = 0;
+    int? nota;
+    await abrir(
+      tester,
+      atualizar: ({
+        required int recoveryScore,
+        required String recoveryLabel,
+        required String recoveryHint,
+        required int steps,
+      }) async {
+        atualizacoes++;
+        nota = recoveryScore;
+      },
+    );
+    expect(find.text('77'), findsOneWidget);
+    expect(find.text('Pronto para treinar'), findsOneWidget);
+    expect(find.textContaining('Do servidor.'), findsOneWidget);
+    expect(find.text('Ver treino de hoje'), findsOneWidget);
+    expect(find.text('Por quê?'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.text('12.000'), findsOneWidget);
+    expect(find.text('8h'), findsOneWidget);
+    expect(atualizacoes, 1);
+    expect(nota, 77);
+  });
+
+  testWidgets('"Por quê?" mostra o que entrou na nota e que passos não entram', (
+    tester,
+  ) async {
+    await abrir(tester);
+    await tester.tap(find.text('Por quê?'));
+    await tester.pumpAndSettle();
+    expect(find.text('Como chegamos nessa nota'), findsOneWidget);
+    expect(
+      find.text('Não entram: medem atividade, não recuperação.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sync falho com sono local: nota indisponível, não "sem sono"', (
+    tester,
+  ) async {
+    var atualizacoes = 0;
+    await abrir(
+      tester,
+      sync: (_) => throw Exception('sync falhou'),
+      atualizar: ({
+        required int recoveryScore,
+        required String recoveryLabel,
+        required String recoveryHint,
+        required int steps,
+      }) async {
+        atualizacoes++;
+      },
+    );
+    expect(find.text('Prontidão indisponível'), findsOneWidget);
+    expect(find.text('Sem sono registrado'), findsNothing);
+    expect(find.textContaining('/100'), findsNothing);
+    expect(find.text('12.000'), findsOneWidget);
+    expect(find.text('8h'), findsOneWidget);
+    expect(find.byTooltip(saudeAtualizarLabel()), findsOneWidget);
+    expect(atualizacoes, 0);
+  });
+
+  testWidgets('servidor sem nota e sem sono: sem número e com "Como registrar"', (
+    tester,
+  ) async {
+    var limpou = 0;
+    int? passos;
+    await abrir(
+      tester,
+      resumo: const HealthSummary(
+        steps: 5124,
+        caloriesBurned: 24,
+        avgHeartRate: 90,
+        sleepHours: 0,
+      ),
+      sync: (_) async => RecoverySnapshot.fromJson({'steps': 5124}),
+      limpar: ({required int? steps}) async {
+        limpou++;
+        passos = steps;
+      },
+    );
+    // O caso do print: 63 "Recuperação parcial" sem nenhum sono.
+    expect(find.text('63'), findsNothing);
+    expect(find.text('Recuperação parcial'), findsNothing);
+    expect(find.text('Sem sono registrado'), findsOneWidget);
+    expect(find.text('Como registrar'), findsOneWidget);
+    expect(find.text('Registrar sono'), findsOneWidget);
+    expect(find.text('5.124'), findsOneWidget);
+    // calorias implausíveis (24 kcal com 5 mil passos) viram "--"
+    expect(find.text('24'), findsNothing);
+    expect(find.text('Precisa de um relógio'), findsOneWidget);
+    expect(find.text('Inclui treino e caminhada'), findsOneWidget);
+    expect(limpou, 1);
+    expect(passos, 5124);
+  });
+
+  testWidgets('calibrando: sem número e com explicação', (tester) async {
+    await abrir(
+      tester,
+      sync:
+          (_) async => RecoverySnapshot.fromJson({
+            'steps': 9000,
+            'sleepHours': 8,
+            'calibrando': true,
+            'insumos': ['sono'],
+          }),
+    );
+    expect(find.text('Calibrando sua nota'), findsOneWidget);
+    expect(find.text('Ver treino de hoje'), findsNothing);
+    expect(find.text('Por quê?'), findsOneWidget);
+  });
+
+  testWidgets('iOS: "Como registrar" ensina o caminho nos Ajustes', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    await abrir(
+      tester,
+      resumo: const HealthSummary(
+        steps: 4000,
+        caloriesBurned: 0,
+        avgHeartRate: 0,
+        sleepHours: 0,
+      ),
+      sync: (_) async => RecoverySnapshot.fromJson({'steps': 4000}),
+    );
+    await tester.tap(find.text('Como registrar'));
+    await tester.pumpAndSettle();
+    expect(find.text(saudeLiberarIosSubtitulo), findsOneWidget);
+    expect(find.text('Abra os Ajustes'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('interruptor de compartilhamento chama o servidor', (
+    tester,
+  ) async {
+    final chamadas = <bool>[];
+    await abrir(
+      tester,
+      compartilhando: false,
+      definir: (v) async {
+        chamadas.add(v);
+        return v;
+      },
+    );
+    expect(find.text('Só você vê seus dados de saúde.'), findsOneWidget);
+    await tester.scrollUntilVisible(find.byType(Switch), 200);
+    await tester.tap(find.byType(Switch));
+    await tester.pumpAndSettle();
+    expect(chamadas, [true]);
+    expect(
+      find.text('Seu personal vê sua nota de prontidão e os dados do dia.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('quem já compartilhava recebe o aviso uma vez', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.binding.setSurfaceSize(const Size(390, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await _pumpDashboard(
+      tester,
+      screen: HealthDashboardScreen(
+        checkAuthorization: () async => true,
+        loadTodaySummary: () async => _localSummary,
+        syncToday: (_) async => _serverSnapshot,
         updateHomeWidgetRecovery: ({
           required int recoveryScore,
           required String recoveryLabel,
           required String recoveryHint,
           required int steps,
         }) async {},
-        clearHomeWidgetRecoveryScore: ({required int? steps}) async {},
+        loadHistorico: () async => const [],
+        loadCompartilhamento: () async => true,
+        setCompartilhamento: (v) async => v,
       ),
     );
     await tester.pumpAndSettle();
-
-    await tester.tap(find.text(saudeSemScoreAcao));
+    expect(find.text('Seu personal já vê sua prontidão'), findsOneWidget);
+    await tester.tap(find.text('Entendi'));
     await tester.pumpAndSettle();
+    expect(find.text('Seu personal já vê sua prontidão'), findsNothing);
+  });
 
-    expect(find.text(saudeLiberarIosSubtitulo), findsOneWidget);
-    expect(find.text('Abra os Ajustes'), findsOneWidget);
-    debugDefaultTargetPlatformOverride = null;
+  testWidgets('tendência: com menos de 3 dias com nota mostra a mensagem', (
+    tester,
+  ) async {
+    await abrir(tester);
+    expect(
+      find.text('Sua tendência aparece depois de 3 dias com nota.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('tendência: com 3 ou mais dias mostra as barras', (tester) async {
+    final hoje = DateTime(2026, 10, 29);
+    await abrir(
+      tester,
+      historico: [
+        for (var i = 6; i >= 0; i--)
+          RecoveryDia(
+            data: hoje.subtract(Duration(days: i)),
+            score: i < 4 ? 60 + i : null,
+            rotulo: i < 4 ? 'Treino moderado' : null,
+            sonoHoras: 7,
+            fcRepouso: 58,
+            passos: 8000,
+          ),
+      ],
+    );
+    expect(find.text('Últimos 7 dias'), findsOneWidget);
+    expect(
+      find.text('Sua tendência aparece depois de 3 dias com nota.'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('meta de passos: abre a folha e salva', (tester) async {
+    await abrir(tester);
+    await tester.tap(find.textContaining('toque para ajustar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Meta diária'), findsOneWidget);
+    await tester.tap(find.text('Salvar meta'));
+    await tester.pumpAndSettle();
+    expect(find.text('Meta diária'), findsNothing);
   });
 
   test('zero do wearable vira --', () {
@@ -310,9 +384,12 @@ void main() {
     (tester) async {
       var homeWidgetClears = 0;
 
+      SharedPreferences.setMockInitialValues({});
       await _pumpDashboard(
         tester,
         screen: HealthDashboardScreen(
+          loadHistorico: () async => const [],
+          loadCompartilhamento: () async => false,
           checkAuthorization: () async => true,
           loadTodaySummary: () async => _localSummary,
           syncToday: (_) => throw const SocketException('sem rede'),
@@ -330,7 +407,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(homeWidgetClears, 0);
-      expect(find.text('12000'), findsOneWidget);
+      expect(find.text('12.000'), findsOneWidget);
     },
   );
 }

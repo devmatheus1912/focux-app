@@ -10,7 +10,7 @@ void main() {
     expect(saudeAtualizarLabel(), 'Atualizar agora');
     expect(saudeDesconectarLabel(), 'Desconectar saúde');
     expect(saudeDesconectarConfirmTitle(), contains('Desconectar'));
-    expect(saudeDesconectarConfirmMessage(), contains('Apple Health'));
+    expect(saudeDesconectarConfirmMessage(), contains('Health Connect'));
     expect(saudeSyncSoftError(), contains('servidor'));
     expect(saudeConectarCtaLabel(), 'Conectar');
   });

@@ -1,5 +1,5 @@
 const saudeComoCalculamos =
-    'Prontidão é um índice de 0 a 100 (não é porcentagem) que junta sono, passos e FC média do wearable. Sem sono nem batimentos, não calculamos: passos sozinhos não medem recuperação.';
+    'Prontidão é um índice de 0 a 100 (não é porcentagem) que compara o seu sono, a sua FC em repouso e a sua variabilidade (HRV) com a sua própria média. Sem sono registrado não calculamos, e passos não entram: medem atividade, não recuperação.';
 
 String saudeAtualizarLabel() => 'Atualizar agora';
 
@@ -8,7 +8,7 @@ String saudeDesconectarLabel() => 'Desconectar saúde';
 String saudeDesconectarConfirmTitle() => 'Desconectar saúde?';
 
 String saudeDesconectarConfirmMessage() =>
-    'O app deixa de ler Apple Health e Google Fit neste aparelho.';
+    'O app deixa de ler o app Saúde e o Health Connect neste aparelho.';
 
 /// Sync com o servidor falhou; dados locais ainda podem aparecer.
 String saudeSyncSoftError([Object? _]) =>
@@ -20,7 +20,7 @@ const saudeGerenciarConexaoLabel = 'Gerenciar conexão';
 
 /// Sincronizou, mas sem sono nem FC o servidor não dá nota.
 const saudeSemScoreMensagem =
-    'Precisamos do seu sono ou batimentos para calcular a prontidão.';
+    'Precisamos do seu sono para calcular a prontidão.';
 
 const saudeSemScoreAcao = 'Como liberar';
 

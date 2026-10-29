@@ -75,12 +75,12 @@ class _Aluno360RecoveryInsightCardState
                   onTap: () => setState(() => _expanded = !_expanded),
                   borderRadius: BorderRadius.circular(12),
                   child: OperationalMetricTile(
-                    label: 'Não conectado',
+                    label: 'Sem dados de saúde',
                     value: '—',
                     hint:
                         _expanded
-                            ? 'Peça para conectar Apple Health ou Google Fit no app do aluno, se fizer sentido.'
-                            : 'Apple Health ou Google Fit ainda não vinculados',
+                            ? 'Peça para conectar o app Saúde ou o Health Connect no app do aluno, se fizer sentido.'
+                            : 'O aluno ainda não conectou ou não compartilha os dados de saúde',
                     color: widget.primary,
                     isDark: widget.isDark,
                     emphasis: OperationalMetricEmphasis.muted,
@@ -141,6 +141,16 @@ class _Aluno360RecoveryInsightCardState
                                 context,
                                 ink,
                               ),
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              snapshot.calibrando
+                                  ? 'Calibrando: a nota aparece em alguns dias'
+                                  : 'Sem sono registrado hoje',
+                              style: Aluno360Layout.metaStyle(
+                                context,
+                              ).copyWith(color: mute),
                             ),
                           ],
                         ],
