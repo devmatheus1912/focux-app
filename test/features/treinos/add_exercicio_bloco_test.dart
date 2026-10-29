@@ -248,7 +248,7 @@ void main() {
     }
 
     testWidgets(
-      'aquecimento: título com destino, padrão 2 × 15 e "Pronto (1)"',
+      'aquecimento: título com destino, padrão 2 × 15 e "Pronto · 1 adicionado"',
       (tester) async {
         final adapter = await abrir(tester, 'AQUECIMENTO');
         expect(find.text('Adicionando ao aquecimento'), findsOneWidget);
@@ -273,8 +273,9 @@ void main() {
               c.path == '/api/treinos/12/exercicios/77/series',
         );
         expect((put.corpo as Map)['bloco'], 'AQUECIMENTO');
-        expect(find.text('Pronto (1)'), findsOneWidget);
-        expect(find.text('Fechar'), findsNothing);
+        expect(find.text('Pronto · 1 adicionado'), findsOneWidget);
+        expect(find.text('Adicionado · Supino reto'), findsOneWidget);
+        expect(find.text('Desfazer'), findsOneWidget);
       },
     );
 

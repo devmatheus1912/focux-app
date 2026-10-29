@@ -4,7 +4,7 @@ import '../../exercicios/data/exercicio_repository.dart';
 class ExercisePickerFilter {
   const ExercisePickerFilter({
     this.espaco,
-    this.equipamento,
+    this.equipamentos = const {},
     this.equipamentosAluno = const {},
     this.filtrarPorAluno = false,
     this.somenteFavoritos = false,
@@ -12,7 +12,8 @@ class ExercisePickerFilter {
   });
 
   final Espaco? espaco;
-  final Equipamento? equipamento;
+  /// Ou entre os equipamentos escolhidos (halter ou polia).
+  final Set<Equipamento> equipamentos;
   final Set<Equipamento> equipamentosAluno;
   final bool filtrarPorAluno;
   final bool somenteFavoritos;
@@ -20,14 +21,14 @@ class ExercisePickerFilter {
 
   bool get isActive =>
       espaco != null ||
-      equipamento != null ||
+      equipamentos.isNotEmpty ||
       filtrarPorAluno ||
       somenteFavoritos ||
       somenteComVideo;
 
   ExercisePickerFilter copyWith({
     Espaco? espaco,
-    Equipamento? equipamento,
+    Set<Equipamento>? equipamentos,
     Set<Equipamento>? equipamentosAluno,
     bool? filtrarPorAluno,
     bool? somenteFavoritos,
@@ -38,7 +39,8 @@ class ExercisePickerFilter {
   }) {
     return ExercisePickerFilter(
       espaco: clearEspaco ? null : (espaco ?? this.espaco),
-      equipamento: clearEquipamento ? null : (equipamento ?? this.equipamento),
+      equipamentos:
+          clearEquipamento ? const {} : (equipamentos ?? this.equipamentos),
       equipamentosAluno:
           clearAluno ? const {} : (equipamentosAluno ?? this.equipamentosAluno),
       filtrarPorAluno:
@@ -60,7 +62,8 @@ class ExercisePickerFilter {
   bool operator ==(Object other) =>
       other is ExercisePickerFilter &&
       other.espaco == espaco &&
-      other.equipamento == equipamento &&
+      other.equipamentos.length == equipamentos.length &&
+      other.equipamentos.containsAll(equipamentos) &&
       other.filtrarPorAluno == filtrarPorAluno &&
       other.somenteFavoritos == somenteFavoritos &&
       other.somenteComVideo == somenteComVideo &&
@@ -70,7 +73,7 @@ class ExercisePickerFilter {
   @override
   int get hashCode => Object.hash(
     espaco,
-    equipamento,
+    Object.hashAll(equipamentos.map((e) => e.name).toList()..sort()),
     filtrarPorAluno,
     somenteFavoritos,
     somenteComVideo,
@@ -91,8 +94,8 @@ List<Exercicio> applyExercisePickerFilter(
           !exercicio.espacosCompativeis.contains(filter.espaco)) {
         return false;
       }
-      if (filter.equipamento != null &&
-          !exercicio.equipamentos.contains(filter.equipamento)) {
+      if (filter.equipamentos.isNotEmpty &&
+          !exercicio.equipamentos.any(filter.equipamentos.contains)) {
         return false;
       }
       if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {

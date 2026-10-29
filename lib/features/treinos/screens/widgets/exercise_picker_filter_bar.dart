@@ -30,7 +30,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
   int get _advancedActiveCount {
     var n = 0;
     if (filter.espaco != null) n++;
-    if (filter.equipamento != null) n++;
+    n += filter.equipamentos.length;
     return n;
   }
 
@@ -60,21 +60,9 @@ class ExercisePickerFilterBar extends StatelessWidget {
 
   List<Widget> _activeFilterChips() {
     final chips = <Widget>[];
-    if (filter.filtrarPorAluno && filter.equipamentosAluno.isNotEmpty) {
-      chips.add(
-        _FilterChip(
-          label: 'Do aluno',
-          icon: Icons.person_outline_rounded,
-          selected: true,
-          primary: primary,
-          isDark: isDark,
-          onTap: () => onChanged(filter.copyWith(clearAluno: true)),
-        ),
-      );
-    }
     if (filter.espaco != null) {
       chips.add(
-        _FilterChip(
+        ExercisePickerChip(
           label: _espacoLabel(filter.espaco!),
           selected: true,
           primary: primary,
@@ -83,14 +71,19 @@ class ExercisePickerFilterBar extends StatelessWidget {
         ),
       );
     }
-    if (filter.equipamento != null) {
+    for (final equipamento in filter.equipamentos) {
       chips.add(
-        _FilterChip(
-          label: _equipamentoLabel(filter.equipamento!),
+        ExercisePickerChip(
+          label: _equipamentoLabel(equipamento),
           selected: true,
           primary: primary,
           isDark: isDark,
-          onTap: () => onChanged(filter.copyWith(clearEquipamento: true)),
+          onTap:
+              () => onChanged(
+                filter.copyWith(
+                  equipamentos: {...filter.equipamentos}..remove(equipamento),
+                ),
+              ),
         ),
       );
     }
@@ -135,7 +128,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
               clipBehavior: Clip.none,
               child: Row(
                 children: [
-                  _FilterChip(
+                  ExercisePickerChip(
                     label:
                         advancedCount > 0
                             ? 'Filtros ($advancedCount)'
@@ -147,7 +140,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
                     onTap: () => _openAdvanced(context),
                   ),
                   const SizedBox(width: 8),
-                  _FilterChip(
+                  ExercisePickerChip(
                     label: 'Favoritos',
                     icon:
                         filter.somenteFavoritos
@@ -166,7 +159,7 @@ class ExercisePickerFilterBar extends StatelessWidget {
                     },
                   ),
                   const SizedBox(width: 8),
-                  _FilterChip(
+                  ExercisePickerChip(
                     label: 'Com vídeo',
                     icon: Icons.play_circle_outline_rounded,
                     selected: filter.somenteComVideo,
@@ -181,6 +174,24 @@ class ExercisePickerFilterBar extends StatelessWidget {
                       );
                     },
                   ),
+                  if (filter.equipamentosAluno.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    ExercisePickerChip(
+                      label: 'Equipamento do aluno',
+                      icon: Icons.person_outline_rounded,
+                      selected: filter.filtrarPorAluno,
+                      primary: primary,
+                      isDark: isDark,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        onChanged(
+                          filter.copyWith(
+                            filtrarPorAluno: !filter.filtrarPorAluno,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -198,8 +209,9 @@ class ExercisePickerFilterBar extends StatelessWidget {
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
+class ExercisePickerChip extends StatelessWidget {
+  const ExercisePickerChip({
+    super.key,
     required this.label,
     required this.selected,
     required this.primary,

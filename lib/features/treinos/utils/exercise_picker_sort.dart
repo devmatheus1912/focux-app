@@ -1,4 +1,5 @@
 import '../../exercicios/data/exercicio_repository.dart';
+import 'exercicio_texto.dart';
 
 int compareExerciciosForPicker(
   Exercicio a,
@@ -31,5 +32,17 @@ List<Exercicio> sortExerciciosForPicker(
           alreadyInTreinoIds: alreadyInTreinoIds,
         ),
       );
+  return list;
+}
+
+/// Ordem do seletor: alfabética, sem acento, e **estável** (o exercício que
+/// acabou de entrar no treino não muda de lugar). Favoritos ficam numa seção
+/// própria, montada pelo painel.
+List<Exercicio> sortExerciciosAlfabetico(Iterable<Exercicio> items) {
+  final list = items.toList();
+  list.sort((a, b) {
+    final porNome = semAcento(a.nomeDisplay).compareTo(semAcento(b.nomeDisplay));
+    return porNome != 0 ? porNome : a.id.compareTo(b.id);
+  });
   return list;
 }

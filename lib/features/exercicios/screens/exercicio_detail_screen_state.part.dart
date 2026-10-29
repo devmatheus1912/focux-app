@@ -2,7 +2,6 @@ part of 'exercicio_detail_screen.dart';
 
 class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   bool _uploadingVideo = false;
-  DateTime? _fetchedAt;
 
   Future<void> _toggleFavorito(BuildContext context, bool favoritado) async {
     final repo = ref.read(exercicioRepositoryProvider);
@@ -134,16 +133,11 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
   Future<void> _refresh() async {
     ref.invalidate(exercicioProvider(widget.exercicioId));
     await ref.read(exercicioProvider(widget.exercicioId).future);
-    if (mounted) setState(() => _fetchedAt = DateTime.now());
   }
 
   @override
   Widget build(BuildContext context) {
     final exercicioAsync = ref.watch(exercicioProvider(widget.exercicioId));
-    if (exercicioAsync.hasValue) {
-      _fetchedAt ??= DateTime.now();
-    }
-
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final mute = chrome.mute;
@@ -163,7 +157,7 @@ class _ExercicioDetailScreenState extends ConsumerState<ExercicioDetailScreen> {
         useMesh: true,
         appBar: FxShellAppBar(
           title: 'Exercício',
-          subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt),
+          // Sem "Atualizado agora": o conteúdo do exercício é estático.
           onBack: leave,
           actions: [
             FxHelpIconButton(

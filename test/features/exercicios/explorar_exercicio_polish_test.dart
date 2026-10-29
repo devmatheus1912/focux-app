@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('biblioteca: músculo + lista inset; sem segmento Movimento', () {
+  test('biblioteca: chips de grupo combináveis + lista A–Z; sem abas', () {
     final panel = File(
       'lib/features/treinos/widgets/exercise_library_panel.dart',
     ).readAsStringSync();
@@ -11,13 +11,17 @@ void main() {
       'lib/features/exercicios/screens/widgets/template_split_picker.dart',
     ).readAsStringSync();
 
-    expect(panel, contains('ExerciseLibraryBrowseMode.musculo'));
-    expect(panel, contains('exercicioPickerStatsProvider'));
-    expect(panel, contains('Grupos musculares'));
-    expect(panel, contains('FxInsetPickerOption.list'));
-    expect(panel, contains('edgeToEdgeRows: true'));
+    final chips = File(
+      'lib/features/treinos/widgets/exercise_group_chips.dart',
+    ).readAsStringSync();
+    expect(chips, contains('exercicioPickerStatsProvider'));
+    expect(panel, contains('ExerciseGroupChips'));
+    expect(panel, contains('Set<GrupoMuscular> _grupos'));
+    expect(panel, contains('Mais usados'));
+    expect(panel, contains('Favoritos'));
+    expect(panel, isNot(contains('ExerciseLibraryBrowseMode')));
+    expect(panel, isNot(contains('AlunoSegmentedChoice')));
     expect(panel, isNot(contains('FxSettingsTile')));
-    expect(panel, isNot(contains('ExerciseLibraryBrowseMode.movimento')));
     expect(panel, isNot(contains("label: 'Movimento'")));
     expect(panel, isNot(contains('numeric: true')));
     expect(panel, isNot(contains('PadraoExerciciosBottomSheet')));

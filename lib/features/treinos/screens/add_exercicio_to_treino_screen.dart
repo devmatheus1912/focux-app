@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +32,6 @@ import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_page.dart';
 import '../../exercicios/data/exercicio_repository.dart';
 import '../../exercicios/models/exercicio_criado.dart';
-import '../../exercicios/data/exercicio_taxonomy_labels.dart';
 import '../../exercicios/providers/exercicio_picker_provider.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
 import '../../exercicios/services/biblioteca_bootstrap.dart';
@@ -47,7 +48,15 @@ import '../utils/prescricao_padrao_bloco.dart';
 import '../utils/prescricao_serie.dart';
 import '../utils/treino_criacao_fluxo.dart';
 import '../utils/workout_prescription_display.dart';
+import '../utils/aluno_restricao_match.dart';
+import '../utils/exercise_balance.dart';
+import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../widgets/add_exercicio_help_sheet.dart';
+import '../widgets/add_undo_bar.dart';
+import '../widgets/aluno_restricao_strip.dart';
+import '../../anamnese/data/anamnese_repository.dart';
+import '../../anamnese/providers/anamnese_provider.dart';
+import '../../../core/widgets/fx_motion.dart';
 import '../widgets/exercise_library_panel.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -90,9 +99,12 @@ class _AddExercicioToTreinoScreenState
   String? _error;
   bool _seedingBiblioteca = false;
   ExercisePickerFilter _pickerFilter = const ExercisePickerFilter();
-  String? _alunoFilterNome;
   String? _alunoFilterWarning;
   List<int> _recentIds = const [];
+  List<int> _maisUsadosIds = const [];
+  _UltimoAdicionado? _ultimo;
+  int _ultimoSeq = 0;
+  bool _restricaoDispensada = false;
   ExercisePrescriptionMemory? _lastPrescription;
 
   Future<void> _cancel() async {
@@ -145,6 +157,25 @@ class _AddExercicioToTreinoScreenState
     );
     final treinoAsync = pickerAsync.whenData((h) => h.treino);
     final alreadyInTreinoIds = _treinoExercicioIds(treinoAsync);
+    final balanco = balancoDoTreino(
+      treinoAsync.maybeWhen(
+        data:
+            (t) => t.exercicios.map((e) => e.exercicio.grupoMuscularPrimario),
+        orElse: () => const <GrupoMuscular?>[],
+      ),
+    );
+    final alunoId = widget.alunoId;
+    final anamnese =
+        alunoId == null
+            ? null
+            : ref.watch(alunoAnamneseProvider(alunoId)).maybeWhen(
+              data: (a) => a,
+              orElse: () => null,
+            );
+    final temRestricao = anamneseTemRestricao(anamnese);
+    final regioesAluno = regioesDaAnamnese(anamnese);
+    final alturaBarra =
+        (_adicionados > 0 ? 72.0 : 0.0) + (_ultimo != null ? 64.0 : 0.0);
     final chrome = ShellChrome.of(context);
     final isDark = chrome.isDark;
     final primary = Theme.of(context).colorScheme.primary;
@@ -163,7 +194,11 @@ class _AddExercicioToTreinoScreenState
               orElse: () => 'Montando treino',
             ),
             leadingWidth: 120,
-            leading: FxTonalButton(label: _adicionados > 0 ? 'Pronto ($_adicionados)' : 'Fechar', onPressed: _cancel, compact: true),
+            leading: FxTonalButton(
+              label: 'Fechar',
+              onPressed: _cancel,
+              compact: true,
+            ),
             actions: [
               ShellHeaderIconButton(
                 icon: 'plus',
@@ -177,7 +212,10 @@ class _AddExercicioToTreinoScreenState
               ),
             ],
           ),
-          body: SafeArea(
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: SafeArea(
             bottom: false,
             child: CallbackShortcuts(
               bindings: {
@@ -300,11 +338,21 @@ class _AddExercicioToTreinoScreenState
                                     setState(() => _pickerFilter = next),
                             onLoadPage: _loadPickerPage,
                             onSelect: _adicionarRapido,
+                            onPreview: _abrirPrevia,
                             libraryTotalCount: home.libraryCount,
                             searchPlaceholder: pickerHints.searchPlaceholder,
                             recentIds: _recentIds,
+                            maisUsadosIds: _maisUsadosIds,
+                            balanco: balanco,
+                            regioesAluno: regioesAluno,
+                            bottomPadding: alturaBarra,
                             shortcutItems: home.shortcuts,
-                            header: _alunoFilterHeader(isDark, primary),
+                            header: _headerDoPicker(
+                              isDark: isDark,
+                              primary: primary,
+                              anamnese: temRestricao ? anamnese : null,
+                              regioes: regioesAluno,
+                            ),
                             resumoNoTreino: _resumoNoTreino(treinoAsync),
                             onCadastrar: _openCreateExercise,
                           );
@@ -316,8 +364,93 @@ class _AddExercicioToTreinoScreenState
               ),
             ),
           ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      FxSettingsLayout.pageInset,
+                      0,
+                      FxSettingsLayout.pageInset,
+                      TokensStrip.s3,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_ultimo != null) ...[
+                          AddUndoBar(
+                            key: ValueKey('undo-${_ultimo!.chave}'),
+                            nome: _ultimo!.nome,
+                            onDesfazer: _desfazerUltimo,
+                            onExpirar: () {
+                              if (mounted) setState(() => _ultimo = null);
+                            },
+                          ),
+                          const SizedBox(height: TokensStrip.s2),
+                        ],
+                        if (_adicionados > 0)
+                          FxLiquidPrimaryButton(
+                            label:
+                                _adicionados == 1
+                                    ? 'Pronto · 1 adicionado'
+                                    : 'Pronto · $_adicionados adicionados',
+                            onPressed: _cancel,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  /// Faixa de atenção do aluno (anamnese) e aviso de equipamento.
+  Widget? _headerDoPicker({
+    required bool isDark,
+    required Color primary,
+    required Anamnese? anamnese,
+    required Set<RegiaoCorpo> regioes,
+  }) {
+    final equipamento = _alunoFilterHeader(isDark, primary);
+    final mostraRestricao = anamnese != null && !_restricaoDispensada;
+    if (!mostraRestricao && equipamento == null) return null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (mostraRestricao)
+          AlunoRestricaoStrip(
+            anamnese: anamnese,
+            regioes: regioes,
+            onDispensar: () => setState(() => _restricaoDispensada = true),
+            onVerAnamnese: () {
+              final id = widget.alunoId;
+              if (id != null) context.push('/alunos/$id/anamnese');
+            },
+          ),
+        if (equipamento != null) equipamento,
+      ],
+    );
+  }
+}
+
+/// Último exercício adicionado, para o "Desfazer".
+class _UltimoAdicionado {
+  const _UltimoAdicionado({
+    required this.itemId,
+    required this.nome,
+    required this.chave,
+  });
+
+  final int itemId;
+  final String nome;
+  final int chave;
 }

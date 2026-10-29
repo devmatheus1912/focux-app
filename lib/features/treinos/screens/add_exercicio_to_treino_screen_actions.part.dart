@@ -20,18 +20,6 @@ extension _AddExercicioToTreinoScreenActions
         ),
       );
     }
-    if (_alunoFilterNome != null && _pickerFilter.filtrarPorAluno) {
-      return _AlunoEquipmentFilterBanner(
-        alunoNome: _alunoFilterNome!,
-        equipamentos: _pickerFilter.equipamentosAluno,
-        isDark: isDark,
-        primary: primary,
-        onClear:
-            () => setState(
-              () => _pickerFilter = _pickerFilter.copyWith(clearAluno: true),
-            ),
-      );
-    }
     return null;
   }
 
@@ -68,7 +56,6 @@ extension _AddExercicioToTreinoScreenActions
       final aluno = await ref.read(alunoProvider(alunoId).future);
       if (!mounted || aluno.equipamentosDisponiveis.isEmpty) return;
       setState(() {
-        _alunoFilterNome = aluno.nome;
         _alunoFilterWarning = null;
         _pickerFilter = ExercisePickerFilter.fromAlunoEquipamentos(
           aluno.equipamentosDisponiveis,
@@ -84,11 +71,13 @@ extension _AddExercicioToTreinoScreenActions
   }
 
   Future<void> _loadPickerMemory() async {
-    final recent = await RecentExerciseUsageStore.recentIds();
+    final recent = await RecentExerciseUsageStore.recentesIds();
+    final mais = await RecentExerciseUsageStore.maisUsadosIds();
     final last = await ExercisePrescriptionMemoryStore.load();
     if (!mounted) return;
     setState(() {
       _recentIds = recent;
+      _maisUsadosIds = mais;
       _lastPrescription = last;
     });
   }
@@ -99,9 +88,17 @@ extension _AddExercicioToTreinoScreenActions
     await ExercisePrescriptionMemoryStore.save(memory);
     if (!mounted) return;
     setState(() => _lastPrescription = memory);
-    final recent = await RecentExerciseUsageStore.recentIds();
+    await _recarregarUso();
+  }
+
+  Future<void> _recarregarUso() async {
+    final recent = await RecentExerciseUsageStore.recentesIds();
+    final mais = await RecentExerciseUsageStore.maisUsadosIds();
     if (!mounted) return;
-    setState(() => _recentIds = recent);
+    setState(() {
+      _recentIds = recent;
+      _maisUsadosIds = mais;
+    });
   }
 
   ExercisePrescriptionMemory _currentPrescriptionMemory() {
@@ -323,23 +320,93 @@ extension _AddExercicioToTreinoScreenActions
         );
       }
       await ExercisePrescriptionMemoryStore.saveFor(exercicio.id, linhas, bloco: bloco);
+      await RecentExerciseUsageStore.recordUsage(exercicio.id);
       AnalyticsService.instance.track(
         'quick_add_exercicio',
         props: {'exId': exercicio.id, 'treinoId': widget.treinoId, 'bloco': bloco},
       );
       if (mounted) {
         HapticFeedback.mediumImpact();
-        setState(() => _adicionados++);
+        setState(() {
+          _adicionados++;
+          _ultimo =
+              item == null
+                  ? null
+                  : _UltimoAdicionado(
+                    itemId: item.id,
+                    nome: exercicio.nomeDisplay,
+                    chave: ++_ultimoSeq,
+                  );
+        });
         ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
         ref.invalidate(treinoProvider(widget.treinoId));
-        FeedbackHelper.showSuccess(
-          context,
-          '${exercicio.nomeDisplay} adicionado (${linhas.length} × ${base.repeticoes}).',
-        );
+        unawaited(_recarregarUso());
       }
     } catch (error) {
       if (mounted) {
         setState(() => _error = friendlyError(error, fallback: 'Não adicionou o exercício.'));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  /// Prévia da mídia com a ação fixa "Adicionar ao Treino A" (ou, se já está
+  /// no treino, "Ajustar prescrição").
+  Future<void> _abrirPrevia(Exercicio exercicio) {
+    final treino = ref
+        .read(treinoPickerHomeProvider(widget.treinoId))
+        .whenData((h) => h.treino)
+        .value;
+    final jaNoTreino =
+        treino?.exercicios.any((e) => e.exercicio.id == exercicio.id) ?? false;
+    final nome = treino == null ? 'treino' : displayWorkoutName(treino.nome);
+    return showExerciseMediaPreview(
+      context,
+      exercicio: exercicio,
+      rodape: Builder(
+        builder:
+            (sheetContext) => FxLiquidPrimaryButton(
+              label:
+                  jaNoTreino
+                      ? 'Já está no treino · Ajustar'
+                      : 'Adicionar ao $nome',
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                _adicionarRapido(exercicio);
+              },
+            ),
+      ),
+    );
+  }
+
+  /// Remove o exercício recém-adicionado (faixa "Adicionado · Desfazer").
+  Future<void> _desfazerUltimo() async {
+    final ultimo = _ultimo;
+    if (ultimo == null || _loading) return;
+    setState(() {
+      _ultimo = null;
+      _loading = true;
+    });
+    try {
+      await ref
+          .read(treinoRepositoryProvider)
+          .removerExercicio(widget.treinoId, ultimo.itemId);
+      if (!mounted) return;
+      HapticFeedback.selectionClick();
+      setState(() {
+        if (_adicionados > 0) _adicionados--;
+      });
+      ref.invalidate(treinoPickerHomeProvider(widget.treinoId));
+      ref.invalidate(treinoProvider(widget.treinoId));
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = friendlyError(
+            error,
+            fallback: 'Não conseguimos desfazer. Remova pelo treino.',
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -360,9 +427,13 @@ extension _AddExercicioToTreinoScreenActions
           padraoMovimento: padrao,
           grupoMuscularPrimario: grupo,
           espaco: filter.espaco,
-          equipamento: filter.equipamento,
+          // Equipamentos escolhidos à mão valem sobre os do aluno.
           equipamentosAluno:
-              filter.filtrarPorAluno ? filter.equipamentosAluno : const {},
+              filter.equipamentos.isNotEmpty
+                  ? filter.equipamentos
+                  : (filter.filtrarPorAluno
+                      ? filter.equipamentosAluno
+                      : const {}),
           somenteFavoritos: filter.somenteFavoritos,
           somenteComVideo: filter.somenteComVideo,
           page: page,
@@ -534,60 +605,6 @@ class _BibliotecaSyncBanner extends StatelessWidget {
                 icon: const Icon(Icons.close_rounded, size: 16),
                 visualDensity: VisualDensity.compact,
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AlunoEquipmentFilterBanner extends StatelessWidget {
-  const _AlunoEquipmentFilterBanner({
-    required this.alunoNome,
-    required this.equipamentos,
-    required this.isDark,
-    required this.primary,
-    required this.onClear,
-  });
-
-  final String alunoNome;
-  final Set<Equipamento> equipamentos;
-  final bool isDark;
-  final Color primary;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final mute = isDark ? EagleTokens.darkInkMute : TokensStrip.textSecondary;
-    final labels = equipamentos
-        .map((e) => TaxonomyLabels.equipamento[e] ?? e.name)
-        .take(3)
-        .join(', ');
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: primary.withValues(alpha: isDark ? 0.14 : 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: primary.withValues(alpha: 0.2)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.person_outline_rounded, color: primary, size: 18),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Equipamento de $alunoNome: $labels',
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: FocuxHubTypography.bodyMuted(
-                  color: mute,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            FxTonalButton(label: 'Limpar', onPressed: onClear, compact: true),
           ],
         ),
       ),

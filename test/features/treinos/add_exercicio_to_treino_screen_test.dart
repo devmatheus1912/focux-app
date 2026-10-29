@@ -114,28 +114,34 @@ void main() {
     expect(find.text('Treino Emagrecimento'), findsWidgets);
     expect(find.text('Todos'), findsOneWidget);
     expect(find.text('Movimento'), findsNothing);
-    expect(find.text('Músculo'), findsOneWidget);
+    expect(find.text('Músculo'), findsNothing); // sem aba: chips de grupo
     // o cadastro virou o "+" do topo, sem rodapé fixo
     expect(find.byTooltip('Cadastrar exercício'), findsOneWidget);
     expect(find.text('Buscar'), findsOneWidget);
+    // os botões do cabeçalho não encostam na borda da tela
+    final tela = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    expect(
+      tester.getRect(find.byTooltip('Ajuda para adicionar exercícios')).right,
+      lessThanOrEqualTo(tela - 8),
+    );
     expect(find.text('Explorar'), findsNothing);
     expect(find.text('Biblioteca completa'), findsNothing);
     expect(find.text('Prescrição'), findsNothing);
     expect(find.text('Concluir'), findsNothing);
   });
 
-  testWidgets('segmento Músculo mostra grupos sem Explorar', (tester) async {
+  testWidgets('chips de grupo no lugar da aba Músculo', (tester) async {
     await pumpScreen(tester, reduceMotion: true);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
 
-    await tester.tap(find.text('Músculo'));
+    expect(find.text('Explorar'), findsNothing);
+    final chip = find.textContaining('Peito');
+    expect(chip, findsOneWidget);
+    await tester.tap(chip);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
-
-    expect(find.text('Explorar'), findsNothing);
-    expect(find.text('Grupos musculares · 1'), findsOneWidget);
-    expect(find.text('Peito'), findsOneWidget);
+    expect(find.text('Todos'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

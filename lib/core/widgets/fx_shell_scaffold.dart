@@ -255,6 +255,8 @@ class FxShellAppBar extends StatelessWidget implements PreferredSizeWidget {
           (backButton == null ? 0 : (leading != null ? 92 : 56)),
       title: titleWidget,
       actions: balancedActions,
+      // Margem do último botão: sem ela o "?" encosta na borda da tela.
+      actionsPadding: const EdgeInsetsDirectional.only(end: TokensStrip.s3),
     );
   }
 }

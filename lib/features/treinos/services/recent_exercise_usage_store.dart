@@ -1,11 +1,14 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Histórico local dos exercícios mais usados pelo personal.
+/// Histórico local do personal: contagem de uso (mais usados) e ordem de uso
+/// (recentes). Fica no aparelho, sem backend.
 class RecentExerciseUsageStore {
   RecentExerciseUsageStore._();
 
   static const _key = 'recent_exercise_usage_v1';
+  static const _orderKey = 'recent_exercise_order_v1';
   static const _maxItems = 24;
+  static const _maxRecentes = 12;
 
   static Future<void> recordUsage(int exercicioId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,7 +33,29 @@ class RecentExerciseUsageStore {
         .map((e) => '${e.key}:${e.value}')
         .toList(growable: false);
     await prefs.setStringList(_key, next);
+
+    final ordem = prefs.getStringList(_orderKey) ?? [];
+    final novaOrdem =
+        [
+          '$exercicioId',
+          ...ordem.where((id) => id != '$exercicioId'),
+        ].take(_maxRecentes).toList();
+    await prefs.setStringList(_orderKey, novaOrdem);
   }
+
+  /// Últimos exercícios adicionados, do mais recente para o mais antigo.
+  static Future<List<int>> recentesIds({int limit = 5}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(_orderKey) ?? [];
+    return [
+      for (final id in raw.take(limit))
+        if (int.tryParse(id) != null) int.parse(id),
+    ];
+  }
+
+  /// Os que o personal mais adiciona (por contagem).
+  static Future<List<int>> maisUsadosIds({int limit = 5}) =>
+      recentIds(limit: limit);
 
   static Future<List<int>> recentIds({int limit = 6}) async {
     final prefs = await SharedPreferences.getInstance();

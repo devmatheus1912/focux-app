@@ -16,10 +16,16 @@ import 'exercise_media_thumb.dart';
 Future<void> showExerciseMediaPreview(
   BuildContext context, {
   required Exercicio exercicio,
+  Widget? rodape,
 }) {
   final video = exercicio.videoUrl?.trim();
   if (video != null && video.isNotEmpty) {
-    return showExerciseVideoPreview(context, exercicio: exercicio, url: video);
+    return showExerciseVideoPreview(
+      context,
+      exercicio: exercicio,
+      url: video,
+      rodape: rodape,
+    );
   }
   // Sem mídia publicada: não abrir sheet "em breve" (§38 hide do stub).
   if (!exercicioHasPublishedLibraryMedia(exercicio)) {
@@ -29,7 +35,12 @@ Future<void> showExerciseMediaPreview(
   if (gif == null || gif.isEmpty) return Future.value();
   return showFxHomeSheet<void>(
     context,
-    builder: (_) => ExerciseGifPreviewSheet(exercicio: exercicio, url: gif),
+    builder:
+        (_) => ExerciseGifPreviewSheet(
+          exercicio: exercicio,
+          url: gif,
+          rodape: rodape,
+        ),
   );
 }
 
@@ -37,6 +48,7 @@ Future<void> showExerciseVideoPreview(
   BuildContext context, {
   required Exercicio exercicio,
   String? url,
+  Widget? rodape,
 }) {
   final resolved = url?.trim() ?? exercicio.videoUrl?.trim();
   if (resolved == null || resolved.isEmpty) return Future.value();
@@ -47,6 +59,7 @@ Future<void> showExerciseVideoPreview(
           exercicio: exercicio,
           url: resolved,
           isPersonalVideo: exercicioHasPersonalVideo(exercicio),
+          rodape: rodape,
         ),
   );
 }
@@ -56,10 +69,14 @@ class ExerciseGifPreviewSheet extends StatefulWidget {
     super.key,
     required this.exercicio,
     required this.url,
+    this.rodape,
   });
 
   final Exercicio exercicio;
   final String url;
+
+  /// Ação fixa no pé da folha (ex.: "Adicionar ao Treino A").
+  final Widget? rodape;
 
   @override
   State<ExerciseGifPreviewSheet> createState() =>
@@ -192,6 +209,10 @@ class _ExerciseGifPreviewSheetState extends State<ExerciseGifPreviewSheet> {
                     ),
                   ),
                 ),
+                if (widget.rodape != null) ...[
+                  const SizedBox(height: 12),
+                  widget.rodape!,
+                ],
               ],
             ),
           ),
@@ -264,11 +285,13 @@ class ExerciseVideoPreviewSheet extends StatefulWidget {
     required this.exercicio,
     required this.url,
     this.isPersonalVideo = false,
+    this.rodape,
   });
 
   final Exercicio exercicio;
   final String url;
   final bool isPersonalVideo;
+  final Widget? rodape;
 
   @override
   State<ExerciseVideoPreviewSheet> createState() =>
@@ -392,6 +415,10 @@ class _ExerciseVideoPreviewSheetState extends State<ExerciseVideoPreviewSheet> {
             ),
           ),
           const SizedBox(height: 8),
+          if (widget.rodape != null) ...[
+            const SizedBox(height: 4),
+            widget.rodape!,
+          ],
         ],
       ),
     );

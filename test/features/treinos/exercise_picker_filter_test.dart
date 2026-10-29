@@ -38,7 +38,7 @@ void main() {
         [base, casa],
         const ExercisePickerFilter(
           espaco: Espaco.casaSemEquipo,
-          equipamento: Equipamento.pesoCorporal,
+          equipamentos: {Equipamento.pesoCorporal},
         ),
       );
       expect(filtered.map((e) => e.id), [2]);

@@ -18,6 +18,7 @@ class ExerciseLibraryRow extends StatelessWidget {
     required this.onTap,
     this.selected = false,
     this.alreadyInTreino = false,
+    this.alerta,
     this.resumoNoTreino,
     this.showDivider = true,
     this.onPreviewThumb,
@@ -38,6 +39,9 @@ class ExerciseLibraryRow extends StatelessWidget {
   final String? resumoNoTreino;
   final bool showDivider;
   final VoidCallback? onPreviewThumb;
+
+  /// "Atenção: joelho": região do aluno citada nas contraindicações. Só aviso.
+  final String? alerta;
   final VoidCallback? onUploadVideo;
   /// Segurar o card: favoritar/desfavoritar (preferido no picker).
   final VoidCallback? onFavoriteToggle;
@@ -160,6 +164,30 @@ class ExerciseLibraryRow extends StatelessWidget {
                             ],
                           ],
                         ),
+                        if (alerta != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 14,
+                                  color: EagleTokens.warn,
+                                ),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    alerta!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: FxSettingsLayout.subhead(
+                                      color: EagleTokens.warn,
+                                    ).copyWith(fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ),

@@ -1,38 +1,33 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/brand_palette.dart';
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/fx_settings_layout.dart';
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
 import '../../../core/widgets/fx_input_deco.dart';
 import '../../../core/widgets/fx_loading.dart';
-import '../../../core/widgets/fx_inset_picker_option.dart';
 import '../../../core/widgets/fx_settings_group.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../exercicios/data/enums.dart';
 import '../../exercicios/data/exercicio_page.dart';
 import '../../exercicios/data/exercicio_repository.dart';
-import '../../exercicios/data/exercicio_taxonomy_labels.dart';
-import '../../exercicios/data/exercise_enum_api.dart';
-import '../../exercicios/providers/exercicio_picker_provider.dart';
 import '../../exercicios/providers/exercicios_provider.dart';
-import '../../alunos/widgets/aluno_form_choices.dart';
 import '../../exercicios/screens/widgets/exercise_media_thumb.dart';
 import '../../exercicios/screens/widgets/exercise_video_preview_sheet.dart';
 import '../screens/widgets/exercise_picker_filter_bar.dart';
+import '../utils/aluno_restricao_match.dart';
 import '../utils/exercise_library_sections.dart';
-import '../utils/exercise_library_meta.dart';
 import '../utils/exercise_picker_filter.dart';
 import '../utils/exercise_picker_library_label.dart';
 import '../utils/exercise_picker_sort.dart';
+import 'exercise_alpha_rail.dart';
+import 'exercise_balance_strip.dart';
+import 'exercise_group_chips.dart';
 import 'exercise_library_row.dart';
 
 typedef ExerciseLibraryPageLoader =
@@ -44,9 +39,8 @@ typedef ExerciseLibraryPageLoader =
       GrupoMuscular? grupo,
     });
 
-enum ExerciseLibraryBrowseMode { todos, musculo }
-
-/// Biblioteca paginada: busca, filtros, músculo e lista A–Z.
+/// Biblioteca paginada: busca, filtros, grupos musculares combináveis e lista
+/// A–Z com favoritos, recentes e mais usados no topo.
 class ExerciseLibraryPanel extends ConsumerStatefulWidget {
   const ExerciseLibraryPanel({
     super.key,
@@ -59,12 +53,17 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
     this.searchPlaceholder = 'Buscar por nome, músculo ou equipamento',
     this.initialQuery = '',
     this.recentIds = const [],
+    this.maisUsadosIds = const [],
     this.shortcutItems = const [],
     this.header,
     this.footer,
     this.onUploadVideo,
     this.resumoNoTreino = const {},
     this.onCadastrar,
+    this.balanco = const {},
+    this.regioesAluno = const {},
+    this.onPreview,
+    this.bottomPadding = 0,
   });
 
   /// Prescrição já aplicada a cada exercício que está no treino ("3 × 10-12").
@@ -72,6 +71,18 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
 
   /// "Não achou? Cadastrar 'termo'": abre o cadastro de exercício.
   final VoidCallback? onCadastrar;
+
+  /// Grupos que já estão no treino ("No treino: Peito 3").
+  final Map<GrupoMuscular, int> balanco;
+
+  /// Regiões da anamnese do aluno, para marcar contraindicações. Só aviso.
+  final Set<RegiaoCorpo> regioesAluno;
+
+  /// Abre a prévia do exercício; sem ele, usa a prévia de mídia padrão.
+  final void Function(Exercicio exercicio)? onPreview;
+
+  /// Espaço no fim da lista para a barra "Pronto" não cobrir a última linha.
+  final double bottomPadding;
 
   final Set<int> alreadyInTreinoIds;
   final ExercisePickerFilter filter;
@@ -81,7 +92,12 @@ class ExerciseLibraryPanel extends ConsumerStatefulWidget {
   final int libraryTotalCount;
   final String searchPlaceholder;
   final String initialQuery;
+
+  /// Ordem de uso, do mais recente para o mais antigo.
   final List<int> recentIds;
+
+  /// Os que o personal mais adiciona (contagem).
+  final List<int> maisUsadosIds;
   final List<Exercicio> shortcutItems;
   final Widget? header;
   final Widget? footer;
@@ -99,10 +115,10 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   Timer? _searchDebounce;
   late ExercisePickerFilter _filter;
   String _committedQuery = '';
-  ExerciseLibraryBrowseMode _browse = ExerciseLibraryBrowseMode.todos;
-  GrupoMuscular? _grupo;
+  final Set<GrupoMuscular> _grupos = {};
   final Map<int, Exercicio> _localUpdates = {};
   final List<Exercicio> _items = [];
+  final Map<String, GlobalKey> _chavesDasLetras = {};
   bool _uploading = false;
   bool _loading = true;
   bool _loadingMore = false;
@@ -111,26 +127,18 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   int _totalElements = 0;
   String? _error;
 
+  /// Altura aproximada usada para saltar pelo índice A–Z.
+  static const _alturaLinha = 52.0;
+  static const _alturaCabecalho = 40.0;
+
   Exercicio _resolve(Exercicio exercicio) =>
       _localUpdates[exercicio.id] ?? exercicio;
 
   bool get _searching => _committedQuery.trim().length >= 2;
 
-  bool get _showCategoryTiles =>
-      !_searching &&
-      _browse == ExerciseLibraryBrowseMode.musculo &&
-      _grupo == null;
-
-  bool get _showRecents =>
-      !_searching &&
-      _browse == ExerciseLibraryBrowseMode.todos &&
-      _grupo == null &&
-      widget.recentIds.isNotEmpty;
-
-  String? get _categoryChipLabel {
-    if (_grupo == null) return null;
-    return TaxonomyLabels.grupo[_grupo] ?? _grupo!.name;
-  }
+  /// Favoritos, recentes e mais usados só valem na navegação sem busca nem
+  /// grupo escolhido.
+  bool get _mostraAtalhos => !_searching && _grupos.isEmpty;
 
   @override
   void initState() {
@@ -154,7 +162,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   }
 
   void _onScroll() {
-    if (_showCategoryTiles || !_hasNext || _loadingMore || _loading) return;
+    if (!_hasNext || _loadingMore || _loading) return;
     if (_scrollCtrl.position.pixels >=
         _scrollCtrl.position.maxScrollExtent - 120) {
       _fetchPage(reset: false);
@@ -179,33 +187,17 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     _fetchPage(reset: true);
   }
 
-  void _setBrowse(ExerciseLibraryBrowseMode mode) {
-    if (_browse == mode && _grupo == null) return;
-    HapticFeedback.selectionClick();
+  void _alternarGrupo(GrupoMuscular grupo) {
     setState(() {
-      _browse = mode;
-      _grupo = null;
-    });
-    if (!_showCategoryTiles) {
-      _fetchPage(reset: true);
-    }
-  }
-
-  void _selectGrupo(GrupoMuscular grupo) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _browse = ExerciseLibraryBrowseMode.musculo;
-      _grupo = grupo;
+      if (!_grupos.add(grupo)) _grupos.remove(grupo);
     });
     _fetchPage(reset: true);
   }
 
-  void _clearCategory() {
-    HapticFeedback.selectionClick();
-    setState(() => _grupo = null);
-    if (_browse == ExerciseLibraryBrowseMode.todos) {
-      _fetchPage(reset: true);
-    }
+  void _limparGrupos() {
+    if (_grupos.isEmpty) return;
+    setState(_grupos.clear);
+    _fetchPage(reset: true);
   }
 
   Future<void> _handleUpload(Exercicio exercicio) async {
@@ -254,16 +246,6 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   }
 
   Future<void> _fetchPage({required bool reset}) async {
-    if (_showCategoryTiles && !_searching) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _loadingMore = false;
-          _error = null;
-        });
-      }
-      return;
-    }
     if (reset) {
       setState(() {
         _loading = true;
@@ -277,25 +259,34 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     }
 
     try {
-      final result = await widget.onLoadPage(
-        busca: _committedQuery,
-        page: _page,
-        filter: _filter,
-        padrao: null,
-        grupo: _grupo,
-      );
+      // Vários grupos: uma consulta por grupo (mesma página) e a lista junta.
+      final alvos = _grupos.isEmpty ? <GrupoMuscular?>[null] : _grupos.toList();
+      final resultados = await Future.wait([
+        for (final grupo in alvos)
+          widget.onLoadPage(
+            busca: _committedQuery,
+            page: _page,
+            filter: _filter,
+            padrao: null,
+            grupo: grupo,
+          ),
+      ]);
       if (!mounted) return;
+      final vistos = <int>{};
+      final novos = [
+        for (final r in resultados)
+          for (final e in r.content)
+            if (vistos.add(e.id)) e,
+      ];
       setState(() {
-        if (reset) {
-          _items
-            ..clear()
-            ..addAll(result.content);
-        } else {
-          _items.addAll(result.content);
-        }
-        _totalElements = result.meta.totalElements;
-        _hasNext = result.meta.hasNext;
-        _page = result.meta.page + 1;
+        if (reset) _items.clear();
+        _items.addAll(novos);
+        _totalElements = resultados.fold(
+          0,
+          (soma, r) => soma + r.meta.totalElements,
+        );
+        _hasNext = resultados.any((r) => r.meta.hasNext);
+        _page = resultados.map((r) => r.meta.page).reduce(math.max) + 1;
         _loading = false;
         _loadingMore = false;
       });
@@ -322,30 +313,86 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     super.dispose();
   }
 
-  List<Exercicio> _recentExercicios(List<Exercicio> loaded) {
-    if (!_showRecents) return const [];
+  List<Exercicio> _porIds(
+    List<int> ids,
+    List<Exercicio> loaded, {
+    Set<int> ignorar = const {},
+    int limite = 5,
+  }) {
     final byId = <int, Exercicio>{
       for (final item in widget.shortcutItems) item.id: item,
       for (final item in loaded) item.id: item,
     };
     final out = <Exercicio>[];
-    for (final id in widget.recentIds) {
+    for (final id in ids) {
+      if (ignorar.contains(id)) continue;
       final match = byId[id];
       if (match == null) continue;
       out.add(_resolve(match));
-      if (out.length >= 5) break;
+      if (out.length >= limite) break;
     }
     return out;
+  }
+
+  /// Seções da lista: Favoritos, Recentes, Mais usados e depois A–Z.
+  List<ExerciseLibrarySection> _secoes(List<Exercicio> ordenados) {
+    final atalhos = _mostraAtalhos;
+    final favoritos =
+        atalhos && !_filter.somenteFavoritos
+            ? ordenados.where((e) => e.favoritado).toList()
+            : const <Exercicio>[];
+    final recentes =
+        atalhos ? _porIds(widget.recentIds, ordenados) : const <Exercicio>[];
+    final maisUsados =
+        atalhos
+            ? _porIds(
+              widget.maisUsadosIds,
+              ordenados,
+              ignorar: {for (final e in recentes) e.id},
+            )
+            : const <Exercicio>[];
+    final idsFavoritos = {for (final e in favoritos) e.id};
+    return [
+      if (favoritos.isNotEmpty)
+        ExerciseLibrarySection(letter: 'Favoritos', items: favoritos),
+      if (recentes.isNotEmpty)
+        ExerciseLibrarySection(letter: 'Recentes', items: recentes),
+      if (maisUsados.isNotEmpty)
+        ExerciseLibrarySection(letter: 'Mais usados', items: maisUsados),
+      ...buildExerciseLibrarySections([
+        for (final e in ordenados)
+          if (!idsFavoritos.contains(e.id)) e,
+      ]),
+    ];
+  }
+
+  static const _secoesEspeciais = {'Favoritos', 'Recentes', 'Mais usados'};
+
+  void _saltarParaLetra(List<ExerciseLibrarySection> secoes, String letra) {
+    var offset = 0.0;
+    for (final s in secoes) {
+      if (s.letter == letra) break;
+      offset += _alturaCabecalho +
+          s.items.length * _alturaLinha +
+          FxSettingsLayout.groupGap;
+    }
+    if (!_scrollCtrl.hasClients) return;
+    _scrollCtrl.jumpTo(offset.clamp(0.0, _scrollCtrl.position.maxScrollExtent));
+    // Depois do salto aproximado, alinha pela seção de verdade se já existir.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _chavesDasLetras[letra]?.currentContext;
+      if (ctx != null && ctx.mounted) {
+        Scrollable.ensureVisible(ctx, duration: const Duration(milliseconds: 120));
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
-    final sorted = sortExerciciosForPicker(
-      _items.map(_resolve),
-      alreadyInTreinoIds: widget.alreadyInTreinoIds,
-    );
+    final ordenados = sortExerciciosAlfabetico(_items.map(_resolve));
+    final secoes = _secoes(ordenados);
     final caption =
         _filter.isActive || _searching
             ? exercisePickerLibraryLines(
@@ -354,6 +401,10 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
               filter: _filter,
             )
             : null;
+    final letras = [
+      for (final s in secoes)
+        if (!_secoesEspeciais.contains(s.letter)) s.letter,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -402,43 +453,43 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 onChanged: _onFilterChanged,
               ),
               const SizedBox(height: 10),
-              Semantics(
-                container: true,
-                label: 'Ver todos ou por músculo',
-                child: AlunoSegmentedChoice(
-                  options: const [
-                    (value: 'todos', label: 'Todos'),
-                    (value: 'musculo', label: 'Músculo'),
-                  ],
-                  selected: _browse.name,
-                  isDark: isDark,
-                  onSelect: (value) {
-                    _setBrowse(
-                      value == 'musculo'
-                          ? ExerciseLibraryBrowseMode.musculo
-                          : ExerciseLibraryBrowseMode.todos,
-                    );
-                  },
-                ),
+              ExerciseGroupChips(
+                selecionados: _grupos,
+                noTreino: widget.balanco,
+                onToggle: _alternarGrupo,
+                onLimpar: _limparGrupos,
+                primary: primary,
+                isDark: isDark,
               ),
-              if (_categoryChipLabel != null) ...[
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _CategoryClearChip(
-                    label: _categoryChipLabel!,
-                    primary: primary,
-                    isDark: isDark,
-                    onClear: _clearCategory,
-                  ),
-                ),
-              ],
+              ExerciseBalanceStrip(
+                balanco: widget.balanco,
+                selecionados: _grupos,
+                onToggle: _alternarGrupo,
+                primary: primary,
+                isDark: isDark,
+              ),
             ],
           ),
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: _buildBody(context, isDark, primary, sorted),
+          child: Stack(
+            children: [
+              Positioned.fill(child: _buildBody(context, isDark, primary, secoes)),
+              if (!_searching && _grupos.isEmpty && letras.length >= 5)
+                Positioned(
+                  right: 2,
+                  top: 8,
+                  bottom: 8 + widget.bottomPadding,
+                  child: ExerciseAlphaRail(
+                    letras: letras,
+                    isDark: isDark,
+                    primary: primary,
+                    onLetra: (l) => _saltarParaLetra(secoes, l),
+                  ),
+                ),
+            ],
+          ),
         ),
         if (widget.footer != null)
           Padding(
@@ -460,16 +511,9 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     BuildContext context,
     bool isDark,
     Color primary,
-    List<Exercicio> sorted,
+    List<ExerciseLibrarySection> secoes,
   ) {
-    if (_showCategoryTiles) {
-      return _CategoryTilesBody(
-        primary: primary,
-        onSelectGrupo: _selectGrupo,
-      );
-    }
-
-    if (_loading && sorted.isEmpty) {
+    if (_loading && _items.isEmpty) {
       return const Padding(
         padding: EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
@@ -496,7 +540,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
         ),
       );
     }
-    if (sorted.isEmpty) {
+    if (_items.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(
           FxSettingsLayout.pageInset,
@@ -509,11 +553,13 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
           title:
               _committedQuery.isNotEmpty
                   ? 'Nada encontrado para "$_committedQuery"'
-                  : _filter.isActive
+                  : _filter.isActive || _grupos.isNotEmpty
                   ? 'Nenhum exercício com estes filtros'
                   : 'Nenhum exercício nesta lista',
           subtitle:
-              _filter.isActive || _committedQuery.isNotEmpty
+              _filter.isActive ||
+                      _grupos.isNotEmpty ||
+                      _committedQuery.isNotEmpty
                   ? 'Tente outro termo ou limpe busca e filtros.'
                   : 'A biblioteca ainda está vazia.',
           action:
@@ -522,7 +568,9 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                     label: 'Cadastrar "$_committedQuery"',
                     onTap: widget.onCadastrar!,
                   )
-                  : _committedQuery.isNotEmpty || _filter.isActive
+                  : _committedQuery.isNotEmpty ||
+                      _filter.isActive ||
+                      _grupos.isNotEmpty
                   ? FxEmptyAction(
                     label:
                         _committedQuery.isNotEmpty
@@ -534,7 +582,9 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                         _searchCtrl.clear();
                         setState(() => _committedQuery = '');
                       } else {
+                        _grupos.clear();
                         _onFilterChanged(const ExercisePickerFilter());
+                        return;
                       }
                       _fetchPage(reset: true);
                     },
@@ -544,188 +594,23 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       );
     }
 
-    final recents = _recentExercicios(sorted);
-    final sections = <ExerciseLibrarySection>[
-      if (recents.isNotEmpty)
-        ExerciseLibrarySection(letter: 'Recentes', items: recents),
-      ...buildExerciseLibrarySections(sorted),
-    ];
-
     return _GroupedExerciseList(
       controller: _scrollCtrl,
-      sections: sections,
+      sections: secoes,
+      chaves: _chavesDasLetras,
       searchQuery: _committedQuery,
       alreadyInTreinoIds: widget.alreadyInTreinoIds,
       resumoNoTreino: widget.resumoNoTreino,
+      regioesAluno: widget.regioesAluno,
       uploading: _uploading,
       primary: primary,
       onUploadVideo: widget.onUploadVideo,
       onSelect: widget.onSelect,
+      onPreview: widget.onPreview,
       onUpload: _handleUpload,
       onFavoriteToggle: _toggleFavorite,
       loadingMore: _loadingMore,
-    );
-  }
-}
-
-class _CategoryClearChip extends StatelessWidget {
-  const _CategoryClearChip({
-    required this.label,
-    required this.primary,
-    required this.isDark,
-    required this.onClear,
-  });
-
-  final String label;
-  final Color primary;
-  final bool isDark;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Limpar categoria $label',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onClear,
-          borderRadius: BorderRadius.circular(TokensStrip.rSm),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            decoration: BoxDecoration(
-              color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
-              borderRadius: BorderRadius.circular(TokensStrip.rSm),
-              border: Border.all(color: primary),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.bodyMuted(
-                      color: primary,
-                      fontWeight: FontWeight.w800,
-                    ).copyWith(fontSize: 12),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Icon(Icons.close_rounded, size: 15, color: primary),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryTilesBody extends ConsumerWidget {
-  const _CategoryTilesBody({
-    required this.primary,
-    required this.onSelectGrupo,
-  });
-
-  final Color primary;
-  final ValueChanged<GrupoMuscular> onSelectGrupo;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(exercicioPickerStatsProvider);
-    final soft = BrandPalette.softened(primary);
-
-    return statsAsync.when(
-      loading:
-          () => const Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              8,
-              FxSettingsLayout.pageInset,
-              8,
-            ),
-            child: SkeletonList(count: 6),
-          ),
-      error:
-          (_, __) => Padding(
-            padding: const EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              12,
-              FxSettingsLayout.pageInset,
-              12,
-            ),
-            child: FxEmptyState(
-              icon: 'wifi-off',
-              title: 'Não carregamos as categorias',
-              subtitle: 'Verifique a conexão e tente de novo.',
-              action: FxEmptyAction(
-                label: 'Tentar novamente',
-                onTap: () => ref.invalidate(exercicioPickerStatsProvider),
-              ),
-            ),
-          ),
-      data: (stats) {
-        final items = [
-          for (final grupo in GrupoMuscular.values)
-            if (exercisePickerStatCount(stats.porGrupo, grupo.name) > 0)
-              (
-                label: TaxonomyLabels.grupo[grupo] ?? grupo.name,
-                count: exercisePickerStatCount(stats.porGrupo, grupo.name),
-                onTap: () => onSelectGrupo(grupo),
-                icon: iconeDoGrupoMuscular(grupo),
-              ),
-        ]..sort((a, b) => b.count.compareTo(a.count));
-
-        if (items.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.fromLTRB(
-              FxSettingsLayout.pageInset,
-              12,
-              FxSettingsLayout.pageInset,
-              12,
-            ),
-            child: FxEmptyState(
-              icon: 'search',
-              title: 'Sem grupos musculares',
-              subtitle: 'Volte para Todos ou busque pelo nome.',
-            ),
-          );
-        }
-
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(
-            FxSettingsLayout.pageInset,
-            4,
-            FxSettingsLayout.pageInset,
-            16,
-          ),
-          children: [
-            FxSettingsGroup(
-              accent: primary,
-              edgeToEdgeRows: true,
-              caption: 'Grupos musculares · ${items.length}',
-              children: FxInsetPickerOption.list(
-                accent: soft,
-                items: [
-                  for (final item in items)
-                    FxInsetPickerOptionSpec(
-                      icon: item.icon,
-                      label: item.label,
-                      subtitle:
-                          item.count == 1
-                              ? '1 exercício'
-                              : '${item.count} exercícios',
-                      selected: false,
-                      onTap: item.onTap,
-                    ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+      bottomPadding: widget.bottomPadding,
     );
   }
 }
@@ -734,30 +619,43 @@ class _GroupedExerciseList extends StatelessWidget {
   const _GroupedExerciseList({
     required this.controller,
     required this.sections,
+    required this.chaves,
     required this.searchQuery,
     required this.alreadyInTreinoIds,
     this.resumoNoTreino = const {},
+    this.regioesAluno = const {},
     required this.uploading,
     required this.primary,
     required this.onSelect,
     required this.onUpload,
     required this.onFavoriteToggle,
+    this.onPreview,
     this.onUploadVideo,
     this.loadingMore = false,
+    this.bottomPadding = 0,
   });
 
   final ScrollController controller;
   final List<ExerciseLibrarySection> sections;
+  final Map<String, GlobalKey> chaves;
   final String searchQuery;
   final Set<int> alreadyInTreinoIds;
   final Map<int, String> resumoNoTreino;
+  final Set<RegiaoCorpo> regioesAluno;
   final bool uploading;
   final Color primary;
   final ValueChanged<Exercicio> onSelect;
+  final void Function(Exercicio exercicio)? onPreview;
   final Future<void> Function(Exercicio) onUpload;
   final Future<void> Function(Exercicio) onFavoriteToggle;
   final Future<Exercicio?> Function(Exercicio exercicio)? onUploadVideo;
   final bool loadingMore;
+  final double bottomPadding;
+
+  String? _alerta(Exercicio e) {
+    final comum = regioesEmComum(regioesAluno, e);
+    return comum.isEmpty ? null : 'Atenção: ${resumoRegioes(comum)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -765,11 +663,11 @@ class _GroupedExerciseList extends StatelessWidget {
       controller: controller,
       physics: const BouncingScrollPhysics(),
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         FxSettingsLayout.pageInset,
         4,
-        FxSettingsLayout.pageInset,
-        12,
+        FxSettingsLayout.pageInset + 20,
+        12 + bottomPadding,
       ),
       itemCount: sections.length + (loadingMore ? 1 : 0),
       itemBuilder: (context, sectionIndex) {
@@ -781,7 +679,9 @@ class _GroupedExerciseList extends StatelessWidget {
         }
 
         final section = sections[sectionIndex];
+        final chave = chaves.putIfAbsent(section.letter, GlobalKey.new);
         return Padding(
+          key: chave,
           padding: EdgeInsets.only(
             bottom:
                 sectionIndex < sections.length - 1
@@ -800,18 +700,21 @@ class _GroupedExerciseList extends StatelessWidget {
                     section.items[i].id,
                   ),
                   resumoNoTreino: resumoNoTreino[section.items[i].id],
+                  alerta: _alerta(section.items[i]),
                   showDivider: i < section.items.length - 1,
                   insetGroup: true,
                   uploadEnabled: onUploadVideo != null && !uploading,
                   onTap: () => onSelect(section.items[i]),
                   onFavoriteToggle: () => onFavoriteToggle(section.items[i]),
                   onPreviewThumb:
-                      canPreviewExerciseMedia(section.items[i])
-                          ? () => showExerciseMediaPreview(
+                      !canPreviewExerciseMedia(section.items[i])
+                          ? null
+                          : onPreview != null
+                          ? () => onPreview!(section.items[i])
+                          : () => showExerciseMediaPreview(
                             context,
                             exercicio: section.items[i],
-                          )
-                          : null,
+                          ),
                   onUploadVideo:
                       onUploadVideo == null
                           ? null

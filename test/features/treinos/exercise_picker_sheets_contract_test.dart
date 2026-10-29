@@ -20,9 +20,10 @@ void main() {
 
     expect(library, contains('class ExerciseLibraryPanel'));
     expect(library, contains('FxSettingsGroup'));
-    expect(library, contains('FxInsetPickerOption.list'));
-    expect(library, contains('ExerciseLibraryBrowseMode'));
+    expect(library, contains('ExerciseGroupChips'));
+    expect(library, contains('ExerciseAlphaRail'));
     expect(library, contains('Recentes'));
+    expect(library, contains('Mais usados'));
     expect(filters, contains('FxInsetPickerOption.list'));
     expect(filters, contains('edgeToEdgeRows: true'));
     expect(filters, isNot(contains('_FilterPickerTile')));

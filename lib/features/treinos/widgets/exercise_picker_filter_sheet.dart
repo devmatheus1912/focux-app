@@ -68,7 +68,7 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
   }
 
   bool get _hasAdvanced =>
-      _filter.espaco != null || _filter.equipamento != null;
+      _filter.espaco != null || _filter.equipamentos.isNotEmpty;
 
   String _espacoLabel(Espaco espaco) =>
       TaxonomyLabels.espaco[espaco] ??
@@ -88,11 +88,11 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
     final primary = Theme.of(context).colorScheme.primary;
     final brand = BrandPalette.softened(primary);
     final ativos =
-        (_filter.espaco != null ? 1 : 0) + (_filter.equipamento != null ? 1 : 0);
+        (_filter.espaco != null ? 1 : 0) + _filter.equipamentos.length;
 
     return FxSheetFrame(
       title: 'Filtros',
-      subtitle: 'Refina por espaço e equipamento.',
+      subtitle: 'Escolha mais de um equipamento se quiser.',
       leading: Icon(Icons.tune_rounded, color: brand, size: 20),
       footer: Row(
         children: [
@@ -146,20 +146,18 @@ class _ExercisePickerFilterSheetState extends State<_ExercisePickerFilterSheet> 
           FxSettingsGroup(
             accent: primary,
             edgeToEdgeRows: true,
-            caption: 'Equipamento principal',
+            caption: 'Equipamento (um ou mais)',
             children: FxInsetPickerOption.list(
               accent: brand,
               items: [
                 for (final equipamento in _equipamentos)
                   FxInsetPickerOptionSpec(
                     label: _equipamentoLabel(equipamento),
-                    selected: _filter.equipamento == equipamento,
+                    selected: _filter.equipamentos.contains(equipamento),
                     onTap: () {
-                      _apply(
-                        _filter.equipamento == equipamento
-                            ? _filter.copyWith(clearEquipamento: true)
-                            : _filter.copyWith(equipamento: equipamento),
-                      );
+                      final next = {..._filter.equipamentos};
+                      if (!next.add(equipamento)) next.remove(equipamento);
+                      _apply(_filter.copyWith(equipamentos: next));
                     },
                   ),
               ],

@@ -39,7 +39,7 @@ void main() {
     expect(screen, contains("label: 'Modalidade'"));
     expect(screen, contains("label: 'Dificuldade'"));
     expect(screen, isNot(contains('freshness: freshness')));
-    expect(screen, contains('subtitle: FxHubFreshness.fromFetchedAt(_fetchedAt)'));
+    expect(screen, isNot(contains('FxHubFreshness')));
     expect(screen, contains('PopScope'));
   });
 }

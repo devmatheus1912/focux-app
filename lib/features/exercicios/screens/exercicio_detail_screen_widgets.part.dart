@@ -148,7 +148,7 @@ class _GuidanceExpansion extends StatelessWidget {
   Widget build(BuildContext context) {
     return _CleanExpansion(
       icon: Icons.health_and_safety_outlined,
-      title: 'Cuidados e substituicoes',
+      title: 'Cuidados e substituições',
       children: [
         if (exercicio.errosComuns?.trim().isNotEmpty == true)
           _GuidanceCard(
@@ -160,7 +160,7 @@ class _GuidanceExpansion extends StatelessWidget {
         if (exercicio.contraindicacoes?.trim().isNotEmpty == true)
           _GuidanceCard(
             icon: Icons.health_and_safety_outlined,
-            title: 'Contraindicacoes',
+            title: 'Contraindicações',
             text: exercicio.contraindicacoes!.trim(),
             color: EagleTokens.bad,
           ),
@@ -189,7 +189,7 @@ class _TechnicalDataExpansion extends StatelessWidget {
   Widget build(BuildContext context) {
     return _CleanExpansion(
       icon: Icons.tune_rounded,
-      title: 'Dados tecnicos',
+      title: 'Dados técnicos',
       children: [
         if (_taxonomyChips(exercicio).isNotEmpty)
           Wrap(spacing: 6, runSpacing: 6, children: _taxonomyChips(exercicio)),
@@ -828,33 +828,56 @@ class _VideoPlayerState extends State<_VideoPlayer> {
     }
     final controller = _ctrl;
     if (controller == null) return const SizedBox.shrink();
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
-            child: VideoPlayer(controller),
-          ),
+    // Play sobre o próprio vídeo (toque em qualquer ponto alterna).
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: AspectRatio(
+        aspectRatio: controller.value.aspectRatio,
+        child: ValueListenableBuilder<VideoPlayerValue>(
+          valueListenable: controller,
+          builder: (context, value, _) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                VideoPlayer(controller),
+                Positioned.fill(
+                  child: Semantics(
+                    button: true,
+                    label: value.isPlaying ? 'Pausar vídeo' : 'Reproduzir vídeo',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap:
+                          () =>
+                              value.isPlaying
+                                  ? controller.pause()
+                                  : controller.play(),
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 150),
+                        opacity: value.isPlaying ? 0 : 1,
+                        child: Center(
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.black54,
+                            ),
+                            child: const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 36,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              tooltip: controller.value.isPlaying ? 'Pausar' : 'Reproduzir',
-              icon: Icon(
-                controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-              ),
-              onPressed:
-                  () => setState(() {
-                    controller.value.isPlaying
-                        ? controller.pause()
-                        : controller.play();
-                  }),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }
