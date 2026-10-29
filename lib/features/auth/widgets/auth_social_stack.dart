@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/tokens_strip.dart';
 import 'auth_social_button.dart';
-import 'google_sign_in_button.dart';
+import 'google_logo_mark.dart';
 
 /// Apple e Google empilhados, largura total, mesmo verbo e mesmo estilo.
 /// A Apple vem primeiro (equivalência de destaque exigida pela App Store).

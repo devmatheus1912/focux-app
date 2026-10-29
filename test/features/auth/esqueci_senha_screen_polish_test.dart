@@ -40,7 +40,7 @@ void main() {
     expect(screen, contains('ConsumerStatefulWidget'));
     expect(screen, contains('authRepositoryProvider'));
     expect(screen, contains('AuthRoleToggle'));
-    expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('AuthBackBar'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('LayoutBuilder'));
     expect(screen, contains('AuthFormEntrance'));

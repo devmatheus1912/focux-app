@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/core/widgets/fx_help.dart';
 import 'package:focux_app/features/auth/screens/register_screen.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -51,22 +52,22 @@ void main() {
 
   testWidgets('WhatsApp e indicação ficam recolhidos até pedir', (tester) async {
     await _abrir(tester);
-    expect(find.text('Adicionar WhatsApp (opcional)'), findsOneWidget);
-    expect(find.text('Tenho um código de indicação'), findsOneWidget);
+    expect(find.text('+ Adicionar WhatsApp (opcional)'), findsOneWidget);
+    expect(find.text('+ Tenho um código de indicação'), findsOneWidget);
     expect(find.text('Telefone / WhatsApp (opcional)'), findsNothing);
 
-    await tester.ensureVisible(find.text('Adicionar WhatsApp (opcional)'));
-    await tester.tap(find.text('Adicionar WhatsApp (opcional)'));
+    await tester.ensureVisible(find.text('+ Adicionar WhatsApp (opcional)'));
+    await tester.tap(find.text('+ Adicionar WhatsApp (opcional)'));
     await tester.pump();
     expect(find.text('Telefone / WhatsApp (opcional)'), findsOneWidget);
-    expect(find.text('Adicionar WhatsApp (opcional)'), findsNothing);
+    expect(find.text('+ Adicionar WhatsApp (opcional)'), findsNothing);
   });
 
   testWidgets('indicação que veio no link já aparece preenchida', (
     tester,
   ) async {
     await _abrir(tester, indicacao: 'AMIGO-123');
-    expect(find.text('Tenho um código de indicação'), findsNothing);
+    expect(find.text('+ Tenho um código de indicação'), findsNothing);
     expect(find.text('AMIGO-123'), findsOneWidget);
   });
 
@@ -113,5 +114,32 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     final botao = tester.getRect(find.text('Criar minha conta'));
     expect(botao.bottom, lessThanOrEqualTo((3200 - 800) / 2));
+  });
+
+  testWidgets('segue o desenho do login: sem título, sem "?" e com ajuda no rodapé', (
+    tester,
+  ) async {
+    await _abrir(tester);
+    expect(find.byType(FxHelpIconButton), findsNothing);
+    expect(find.text('Criar conta'), findsNothing);
+    expect(find.text('— PERSONAL —'), findsNothing);
+    expect(find.text('Já tem conta?'), findsOneWidget);
+    expect(find.text('Precisa de ajuda?'), findsOneWidget);
+    // o único botão preenchido é o principal fixo
+    expect(find.text('Criar minha conta'), findsOneWidget);
+  });
+
+  testWidgets('o primeiro campo começa antes de 50% da altura em 390×844', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_app());
+    await tester.pump(const Duration(milliseconds: 800));
+    expect(
+      tester.getTopLeft(find.text('Nome completo')).dy,
+      lessThan(844 * 0.5),
+    );
   });
 }

@@ -269,6 +269,21 @@ void main() {
       }
     });
 
+    test('botão social preto: texto ≥ 4,5:1 e borda ≥ 3:1 sobre o fundo', () {
+      expect(
+        _contraste(Colors.white, AuthSocialButton.fundo),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(
+        _contraste(AuthSocialButton.borda, fundoEscuro),
+        greaterThanOrEqualTo(3),
+      );
+      expect(
+        _contraste(AuthSocialButton.borda, fundoClaro),
+        greaterThanOrEqualTo(3),
+      );
+    });
+
     test('rótulo dos botões sociais lê ≥ 4,5:1', () {
       final botao = sobre(fundoClaro, Colors.white.withValues(alpha: 0.05));
       expect(_contraste(Colors.white, botao), greaterThanOrEqualTo(4.5));

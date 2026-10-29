@@ -5,7 +5,8 @@ import 'package:focux_app/core/widgets/fx_conversion.dart';
 import 'package:focux_app/core/widgets/fx_tonal_button.dart';
 import 'package:focux_app/features/auth/utils/esqueci_senha_display.dart';
 import 'package:focux_app/features/auth/utils/login_display.dart';
-import 'package:focux_app/features/auth/widgets/apple_sign_in_button.dart';
+import 'package:focux_app/features/auth/widgets/auth_social_button.dart';
+import 'package:focux_app/features/auth/widgets/auth_social_stack.dart';
 import 'package:focux_app/features/auth/widgets/auth_legal_consent_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -100,17 +101,30 @@ void main() {
     });
   });
 
-  testWidgets('Apple no escuro usa a variante branca da Apple', (tester) async {
+  testWidgets('Apple e Google usam o mesmo preto puro', (tester) async {
     await tester.pumpWidget(
-      _app(AppleSignInButton(onPressed: () {}, isLoading: false)),
+      _app(
+        AuthSocialStack(
+          mostrarApple: true,
+          mostrarGoogle: true,
+          carregandoApple: false,
+          carregandoGoogle: false,
+          onApple: () {},
+          onGoogle: () {},
+        ),
+      ),
     );
-    final material = tester.widget<Material>(
-      find.descendant(
-        of: find.byType(AppleSignInButton),
-        matching: find.byType(Material),
-      ).first,
-    );
-    expect(material.color, const Color(0xFFFFFFFF));
+    final materiais = [
+      for (final m in tester.widgetList<Material>(
+        find.descendant(
+          of: find.byType(AuthSocialButton),
+          matching: find.byType(Material),
+        ),
+      ))
+        m.color,
+    ];
+    expect(materiais, everyElement(const Color(0xFF000000)));
+    expect(AuthSocialButton.fundo, const Color(0xFF000000));
   });
 
   group('recuperar senha do aluno', () {

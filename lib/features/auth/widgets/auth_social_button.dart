@@ -2,23 +2,26 @@ import 'package:flutter/material.dart';
 
 import '../../../core/widgets/fx_loading.dart';
 
-/// Botão de entrada social fino (pílula de contorno), igual para Apple e
-/// Google: nenhum pesa mais que o outro nem que o "Entrar".
+/// Botão fino de contorno (pílula preta), igual para Apple e Google e para as
+/// ações secundárias das telas de entrada: nenhum pesa mais que o botão
+/// principal. Preto puro (o que a Apple aceita) com contorno cinza.
 class AuthSocialButton extends StatelessWidget {
   const AuthSocialButton({
     super.key,
     required this.label,
-    required this.leading,
+    this.leading,
     required this.onPressed,
     this.loading = false,
   });
 
   final String label;
-  final Widget leading;
+  final Widget? leading;
   final VoidCallback? onPressed;
   final bool loading;
 
   static const double altura = 52;
+  static const Color fundo = Color(0xFF000000);
+  static const Color borda = Color(0xFF8E918F);
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +34,8 @@ class AuthSocialButton extends StatelessWidget {
       child: Opacity(
         opacity: onPressed == null && !loading ? 0.6 : 1,
         child: Material(
-          color: Colors.white.withValues(alpha: 0.05),
-          shape: StadiumBorder(
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.28)),
-          ),
+          color: fundo,
+          shape: const StadiumBorder(side: BorderSide(color: borda)),
           child: InkWell(
             customBorder: const StadiumBorder(),
             onTap: desabilitado ? null : onPressed,
@@ -43,19 +44,21 @@ class AuthSocialButton extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: 22,
-                    height: 22,
-                    child:
-                        loading
-                            ? const FxLoading(
-                              size: 18,
-                              strokeWidth: 2.2,
-                              color: Colors.white,
-                            )
-                            : leading,
-                  ),
-                  const SizedBox(width: 12),
+                  if (leading != null || loading) ...[
+                    SizedBox(
+                      width: 22,
+                      height: 22,
+                      child:
+                          loading
+                              ? const FxLoading(
+                                size: 18,
+                                strokeWidth: 2.2,
+                                color: Colors.white,
+                              )
+                              : leading,
+                    ),
+                    const SizedBox(width: 12),
+                  ],
                   Flexible(
                     child: Text(
                       label,

@@ -21,8 +21,9 @@ import '../providers/auth_provider.dart';
 import '../utils/auth_error_messages.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
+import '../widgets/auth_social_button.dart';
+import '../widgets/auth_text_link.dart';
 import '../widgets/password_strength_meter.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
 
 /// `/aluno/ativar/:token` — link que o personal mandou: cria a senha e entra.
 class AtivarAlunoScreen extends ConsumerStatefulWidget {
@@ -204,7 +205,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
               onRetry: _validar,
             ),
             const SizedBox(height: TokensStrip.s4),
-            FxTonalButton(label: s.ativarIrLogin, onPressed: () => context.go(_loginPath), compact: true),
+            AuthTextLink(label: s.ativarIrLogin, onTap: () => context.go(_loginPath)),
           ],
         ),
       ),
@@ -267,12 +268,22 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                                 ? null
                                 : s.ativarEmailInvalido,
                   ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FxTonalButton(label: _codigoEnviadoPara == null
+                  const SizedBox(height: 8),
+                  AuthSocialButton(
+                    label:
+                        _codigoEnviadoPara == null
                             ? s.ativarEnviarCodigo
-                            : s.ativarReenviarCodigo, onPressed: _enviando || _enviandoCodigo ? null : _enviarCodigo, compact: true),
+                            : s.ativarReenviarCodigo,
+                    leading: const Icon(
+                      Icons.mail_outline_rounded,
+                      size: 22,
+                      color: Colors.white,
+                    ),
+                    loading: _enviandoCodigo,
+                    onPressed:
+                        _enviando || _enviandoCodigo ? null : _enviarCodigo,
                   ),
+                  const SizedBox(height: 8),
                   if (_codigoEnviadoPara != null) ...[
                     Text(
                       s.ativarCodigoEnviado(_codigoEnviadoPara!),
@@ -344,7 +355,7 @@ class _AtivarAlunoScreenState extends ConsumerState<AtivarAlunoScreen> {
                 const SizedBox(height: TokensStrip.s3),
                 AuthLegalConsentText(primary: primary),
                 Center(
-                  child: FxTonalButton(label: s.ativarIrLogin, onPressed: _enviando ? null : () => context.go(_loginPath), compact: true),
+                  child: AuthTextLink(label: s.ativarIrLogin, onTap: _enviando ? null : () => context.go(_loginPath)),
                 ),
               ],
             ),

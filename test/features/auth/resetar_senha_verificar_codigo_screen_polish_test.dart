@@ -12,7 +12,7 @@ void main() {
     expect(screen, contains('AuthShell'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('AuthOtpField'));
-    expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('AuthBackBar'));
     expect(screen, isNot(contains('CircularProgressIndicator')));
     expect(screen, contains('authPageTitleStyle'));
     expect(screen, contains('authSubtitleStyle'));

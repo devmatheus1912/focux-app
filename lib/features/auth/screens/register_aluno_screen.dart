@@ -20,6 +20,7 @@ import '../utils/auth_error_messages.dart';
 import '../utils/auth_http_debug.dart';
 import '../widgets/auth_legal_consent_text.dart';
 import '../widgets/auth_shell.dart';
+import '../widgets/auth_text_link.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../convites/utils/convite_display.dart';
@@ -188,9 +189,7 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                       TokensStrip.s5,
                       0,
                     ),
-                    child: AuthStickyRoleBar(
-                      roleLabel: 'ALUNO',
-                      onBack: _voltar,
+                    child: AuthBackBar(onBack: _voltar,
                     ),
                   ),
                   Expanded(
@@ -370,21 +369,22 @@ class _RegisterAlunoScreenState extends ConsumerState<RegisterAlunoScreen> {
                                 ),
                                 const SizedBox(height: TokensStrip.s3),
                                 AuthLegalConsentText(primary: primary, completo: true),
-                                FxConversionTextLink(
-                                  text: '',
-                                  actionText:
-                                      FocuxBrandCopy
-                                          .authInviteExistingAccountCta,
-                                  onTap: () {
-                                    if (_loading) return;
-                                    final slug = widget.personalSlug?.trim();
-                                    authUnfocusAndGo(
-                                      context,
-                                      slug == null || slug.isEmpty
-                                          ? '/login?role=aluno'
-                                          : '/login?role=aluno&p=${Uri.encodeComponent(slug)}',
-                                    );
-                                  },
+                                Center(
+                                  child: AuthTextLink(
+                                    label:
+                                        FocuxBrandCopy
+                                            .authInviteExistingAccountCta,
+                                    onTap: () {
+                                      if (_loading) return;
+                                      final slug = widget.personalSlug?.trim();
+                                      authUnfocusAndGo(
+                                        context,
+                                        slug == null || slug.isEmpty
+                                            ? '/login?role=aluno'
+                                            : '/login?role=aluno&p=${Uri.encodeComponent(slug)}',
+                                      );
+                                    },
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                               ],

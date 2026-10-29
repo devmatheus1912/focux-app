@@ -34,3 +34,5 @@ String registerHelpGoogleBody() =>
 String registerHelpAppleBody() =>
     'Apple cria ou entra na mesma conta personal. Na tela da Apple, '
     'escolha Compartilhar meu e-mail (não Ocultar).';
+
+String registerAjudaLabel() => 'Precisa de ajuda?';

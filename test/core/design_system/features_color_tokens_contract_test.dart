@@ -8,9 +8,10 @@ void main() {
     'lib/features/qa/',
   ];
   const excludedFiles = {
-    'lib/features/auth/widgets/google_sign_in_button.dart',
-    // Apple HIG — preto/branco de marca, não tokens do produto.
-    'lib/features/auth/widgets/apple_sign_in_button.dart',
+    // Marca "G" do Google (cores oficiais) e botão social preto: cores de marca
+    // de terceiros (Apple HIG / Google), não tokens do produto.
+    'lib/features/auth/widgets/google_logo_mark.dart',
+    'lib/features/auth/widgets/auth_social_button.dart',
     'lib/features/dashboard/utils/dashboard_readability.dart',
     // Parser de hex do white-label — constrói Color a partir de string, não é token.
     'lib/features/dashboard/utils/dashboard_screen_helpers.dart',

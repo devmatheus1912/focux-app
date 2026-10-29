@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 
@@ -69,43 +68,21 @@ class AuthBackButton extends StatelessWidget {
   }
 }
 
-/// Barra fixa de marca no cadastro / esqueci — back + papel sempre no viewport.
-class AuthStickyRoleBar extends StatelessWidget {
-  const AuthStickyRoleBar({
-    super.key,
-    required this.roleLabel,
-    required this.onBack,
-  });
+/// Barra do topo das telas de formulário: só o botão de voltar. O papel já
+/// está no logo ("Focux Personal" / "Focux Aluno").
+class AuthBackBar extends StatelessWidget {
+  const AuthBackBar({super.key, required this.onBack, this.semanticLabel});
 
-  final String roleLabel;
   final VoidCallback onBack;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return Semantics(
-      label: 'Focux $roleLabel',
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-        child: Row(
-          children: [
-            AuthBackButton(onTap: onBack),
-            Expanded(
-              child: Text(
-                '— ${roleLabel.toUpperCase()} —',
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.chip(
-                  primary.withValues(alpha: 0.92),
-                ).copyWith(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 2.4,
-                ),
-              ),
-            ),
-            const SizedBox(width: 38),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: AuthBackButton(onTap: onBack),
       ),
     );
   }

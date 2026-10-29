@@ -114,9 +114,7 @@ class _ResetarSenhaScreenState extends ConsumerState<ResetarSenhaScreen> {
                     TokensStrip.s5,
                     0,
                   ),
-                  child: AuthStickyRoleBar(
-                    roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                    onBack: () => authUnfocusAndLeave(context, _loginPath),
+                  child: AuthBackBar(onBack: () => authUnfocusAndLeave(context, _loginPath),
                   ),
                 ),
                 Expanded(

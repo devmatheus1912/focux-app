@@ -30,8 +30,9 @@ import '../services/google_sign_in_service.dart';
 import '../widgets/password_strength_meter.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../core/widgets/fx_tonal_button.dart';
-import '../widgets/auth_social_row.dart';
+import '../widgets/auth_social_button.dart';
+import '../widgets/auth_social_stack.dart';
+import '../widgets/auth_text_link.dart';
 
 part 'register_screen_actions.part.dart';
 
@@ -159,9 +160,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     TokensStrip.s5,
                     0,
                   ),
-                  child: AuthStickyRoleBar(
-                    roleLabel: 'PERSONAL',
-                    onBack:
+                  child: AuthBackBar(onBack:
                         () => authUnfocusAndLeave(
                           context,
                           '/login?role=personal',
@@ -195,25 +194,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                               const SizedBox(height: TokensStrip.s4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'Criar conta',
-                                      style: authPageTitleStyle(context),
-                                    ),
+                              Center(
+                                child: Text(
+                                  'Comece com sua conta e escolha o plano depois.',
+                                  textAlign: TextAlign.center,
+                                  style: authSubtitleStyle(
+                                    color: heroTealSurface(0.82),
                                   ),
-                                  FxHelpIconButton(
-                                    tooltip: registerHelpTitle(),
-                                    onTap: _abrirAjuda,
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Comece com sua conta e escolha o plano depois.',
-                                style: authSubtitleStyle(
-                                  color: heroTealSurface(0.82),
                                 ),
                               ),
                               // Botões de terceiros primeiro (guideline 4.0 – Sign in with Apple):
@@ -221,11 +208,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               // preencher o formulário abaixo.
                               if (_appleEnabled || _googleEnabled) ...[
                                 const SizedBox(height: 20),
-                                AuthSocialRow(
+                                AuthSocialStack(
                                   mostrarApple: _appleEnabled,
                                   mostrarGoogle: _googleEnabled,
-                                  rotuloApple: 'Continuar com Apple',
-                                  rotuloGoogle: 'Cadastrar com Google',
                                   carregandoApple: _loadingApple,
                                   carregandoGoogle: _loadingGoogle,
                                   onApple:
@@ -243,7 +228,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                                 const SizedBox(height: 16),
                                 const FxConversionDivider(
-                                  label: 'ou cadastre com e-mail',
+                                  label: 'ou',
                                 ),
                               ],
                               const SizedBox(height: 18),
@@ -292,7 +277,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                               const SizedBox(height: 10),
                               const SizedBox(height: TokensStrip.s2),
-                              FxTonalButton(
+                              AuthSocialButton(
                                 label:
                                     _sendingCode
                                         ? registerEnviandoCodigoLabel()
@@ -301,8 +286,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         : _codeSent
                                         ? registerReenviarCodigoLabel()
                                         : registerEnviarCodigoLabel(),
-                                icon: Icons.mail_outline_rounded,
-                                expanded: true,
+                                leading: const Icon(
+                                  Icons.mail_outline_rounded,
+                                  size: 22,
+                                  color: Colors.white,
+                                ),
                                 onPressed:
                                     _sendingCode || _resendSeconds > 0
                                         ? null
@@ -402,11 +390,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               else
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: FxTonalButton(
-                                    label: 'Adicionar WhatsApp (opcional)',
-                                    icon: Icons.add_rounded,
-                                    compact: true,
-                                    onPressed:
+                                  child: AuthTextLink(
+                                    label: '+ Adicionar WhatsApp (opcional)',
+                                    onTap:
                                         () => setState(
                                           () => _mostrarTelefone = true,
                                         ),
@@ -431,21 +417,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               else
                                 Align(
                                   alignment: Alignment.centerLeft,
-                                  child: FxTonalButton(
-                                    label: 'Tenho um código de indicação',
-                                    icon: Icons.card_giftcard_outlined,
-                                    compact: true,
-                                    onPressed:
+                                  child: AuthTextLink(
+                                    label: '+ Tenho um código de indicação',
+                                    onTap:
                                         () => setState(
                                           () => _mostrarIndicacao = true,
                                         ),
                                   ),
                                 ),
                               const SizedBox(height: TokensStrip.s4),
-                              FxConversionTextLink(
-                                text: '',
-                                actionText:
-                                    FocuxBrandCopy.onboardingExistingAccountCta,
+                              AuthFraseComLink(
+                                frase: FocuxBrandCopy.authExistingAccountLead,
+                                acao: FocuxBrandCopy.authExistingAccountAction,
                                 onTap: () {
                                   if (_loading) return;
                                   authUnfocusAndGo(
@@ -453,6 +436,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     '/login?role=personal',
                                   );
                                 },
+                              ),
+                              Center(
+                                child: AuthTextLink(
+                                  label: registerAjudaLabel(),
+                                  fontSize: 13.5,
+                                  onTap: _abrirAjuda,
+                                ),
                               ),
                               const SizedBox(height: TokensStrip.s4),
                               Padding(

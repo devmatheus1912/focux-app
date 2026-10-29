@@ -96,9 +96,7 @@ class _ResetarSenhaVerificarCodigoScreenState
                     TokensStrip.s5,
                     0,
                   ),
-                  child: AuthStickyRoleBar(
-                    roleLabel: _isAluno ? 'ALUNO' : 'PERSONAL',
-                    onBack: () => authUnfocusAndLeave(context, _esqueciPath),
+                  child: AuthBackBar(onBack: () => authUnfocusAndLeave(context, _esqueciPath),
                   ),
                 ),
                 Expanded(

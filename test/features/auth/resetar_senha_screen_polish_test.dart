@@ -43,7 +43,7 @@ void main() {
     expect(screen, contains('heroTeal'));
     expect(screen, contains('liveRegion: true'));
     expect(screen, contains('AuthFormEntrance'));
-    expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('AuthBackBar'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));
     expect(screen, contains('FxConversionLockup'));

@@ -55,17 +55,17 @@ void main() {
       screen.indexOf('registerCriarLabel'),
       greaterThan(screen.indexOf('onboardingExistingAccountCta')),
     );
-    expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('AuthBackBar'));
     expect(screen, contains('ensureFooter: true'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, isNot(contains('FxSettingsTile')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxTonalButton'));
+    expect(screen, contains('AuthSocialButton'));
     expect(screen, contains('FxConversionLockup'));
-    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('AuthFraseComLink'));
     expect(screen, contains('showFxConfirmSheet'));
     expect(screen, contains('PasswordStrengthMeter'));
-    expect(screen, contains('AuthSocialRow'));
+    expect(screen, contains('AuthSocialStack'));
     expect(screen, contains('_submitApple'));
     expect(screen, contains('AppleSignInService.isAvailableOnDevice'));
     expect(screen, contains('_googleEnabled'));

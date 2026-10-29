@@ -13,11 +13,11 @@ void main() {
       screen.indexOf('Criar conta'),
       lessThan(screen.indexOf('authInviteExistingAccountCta')),
     );
-    expect(screen, contains('AuthStickyRoleBar'));
+    expect(screen, contains('AuthBackBar'));
     expect(screen, contains('AuthFormEntrance'));
     expect(screen, contains('FxConversionLockup'));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxConversionTextLink'));
+    expect(screen, contains('AuthTextLink'));
     expect(screen, contains('minLength: 8'));
     expect(screen, contains('Crie uma senha'));
     expect(screen, contains('keyboardDismissBehavior'));

@@ -89,9 +89,7 @@ class _DefinirSenhaAlunoScreenState
                       TokensStrip.s5,
                       0,
                     ),
-                    child: AuthStickyRoleBar(
-                      roleLabel: 'ALUNO',
-                      onBack: () => unawaited(_sairSemDefinirSenha()),
+                    child: AuthBackBar(onBack: () => unawaited(_sairSemDefinirSenha()),
                     ),
                   ),
                 Expanded(
