@@ -17,12 +17,16 @@ class CheckinWorkoutHeader extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback? onHelp;
 
+  /// Abre as ações do exercício (ajustar, confirmar séries, finalizar).
+  final VoidCallback? onMais;
+
   const CheckinWorkoutHeader({
     super.key,
     required this.treinoNome,
     required this.contextLine,
     required this.onBack,
     this.onHelp,
+    this.onMais,
   });
 
   @override
@@ -68,6 +72,23 @@ class CheckinWorkoutHeader extends StatelessWidget {
                 tooltip: s.checkinDicasExercicio,
                 onTap: onHelp!,
                 expandHitTarget: true,
+              ),
+            if (onMais != null)
+              SizedBox(
+                height: checkinExecutionControlMin,
+                child: Center(
+                  child: IconButton(
+                    tooltip: s.checkinMais,
+                    onPressed: onMais,
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                      side: BorderSide(
+                        color: chrome.mute.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    icon: Icon(Icons.more_horiz_rounded, color: chrome.ink),
+                  ),
+                ),
               ),
             SizedBox(
               height: checkinExecutionControlMin,

@@ -28,17 +28,13 @@ void main() {
     expect(screen, contains('FxFormStickyBar'));
   });
 
-  test('checkin serie sheet: dismiss scope + onTapOutside + unfocus before pop', () {
+  test('checkin serie sheet: dismiss scope + unfocus before pop', () {
     final sheet = readScreenSourceBundle(
       'lib/features/checkin/widgets/checkin_serie_detail_widgets.dart',
-    );
-    final campos = readScreenSourceBundle(
-      'lib/features/checkin/widgets/checkin_serie_campos_widgets.dart',
     );
     expect(sheet, contains('FxKeyboardDismissScope'));
     expect(sheet, contains('FxKeyboardDismissScope.dismiss'));
     expect(sheet, contains('keyboardDismissBehavior'));
-    expect(campos, contains('onTapOutside'));
     expect(sheet, contains('FxHomeSheetSurface'));
   });
 

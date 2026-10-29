@@ -60,27 +60,15 @@ void main() {
       expect(rodape.height, greaterThanOrEqualTo(48));
     });
 
-    testWidgets('Finalizar incompleto sai do rodapé e vira botão tonal no conteúdo', (
+    testWidgets('Finalizar incompleto fica no menu ⋯, fora do corpo', (
       tester,
     ) async {
       await pumpCheckin(tester, FakeCheckinRepo());
 
-      final finalizar = find.text('Finalizar treino');
-      expect(
-        find.ancestor(of: finalizar, matching: find.byType(CheckinRodapeBar)),
-        findsNothing,
-      );
-      expect(
-        find.ancestor(
-          of: finalizar,
-          matching: find.byType(SingleChildScrollView),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        tester.getSize(find.byType(CheckinFinalizarLink)).height,
-        greaterThanOrEqualTo(48),
-      );
+      expect(find.text('Finalizar treino'), findsNothing);
+      await tester.tap(find.byTooltip('Mais'));
+      await pumpSheet(tester);
+      expect(find.text('Finalizar treino'), findsOneWidget);
     });
 
     testWidgets('tudo feito: Finalizar ocupa o rodapé', (tester) async {
@@ -113,7 +101,7 @@ void main() {
       // a carga aparece sem a unidade (o rótulo "kg" já está acima) e inteira
       final carga = find.text('20');
       expect(carga, findsOneWidget);
-      expect(tester.getSize(carga).height, lessThan(60));
+      expect(tester.getSize(carga).height, lessThan(80));
       expect(find.text('20 kg'), findsNothing);
       expect(tester.takeException(), isNull);
     });
@@ -283,10 +271,11 @@ void main() {
 
       await tester.tap(find.text('Próxima série'));
       await tester.pump();
-      await tester.tap(find.text('Mais'));
+      await tester.tap(find.byTooltip('Mais'));
       await pumpSheet(tester);
 
-      expect(find.text('Ajustar'), findsOneWidget);
+      expect(find.text('Ajustar'), findsNothing);
+      expect(find.text('Finalizar treino'), findsOneWidget);
       expect(find.text('Desfazer série'), findsNothing);
       expect(find.textContaining('Confirmar'), findsNothing);
       repo.travaSerie!.complete();
@@ -369,7 +358,7 @@ void main() {
       final repo = FakeCheckinRepo(feitas: [3, 3])..concluirSemEvolucao = true;
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Finalizar treino'));
+      await escolherNoMenuMais(tester, 'Finalizar treino');
       await pumpSheet(tester);
 
       expect(find.text('Treino concluído'), findsOneWidget);
@@ -387,7 +376,7 @@ void main() {
             );
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Finalizar treino'));
+      await escolherNoMenuMais(tester, 'Finalizar treino');
       await pumpSheet(tester);
 
       expect(find.text('Este treino já foi concluído.'), findsNothing);
@@ -401,7 +390,7 @@ void main() {
         final repo = FakeCheckinRepo()..travaConcluir = Completer<void>();
         await pumpCheckin(tester, repo);
 
-        await tester.tap(find.text('Finalizar treino'));
+        await escolherNoMenuMais(tester, 'Finalizar treino');
         await pumpSheet(tester);
         await tester.tap(find.text('Finalizar'));
         await tester.pump();
@@ -432,7 +421,7 @@ void main() {
             );
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Finalizar treino'));
+      await escolherNoMenuMais(tester, 'Finalizar treino');
       await pumpSheet(tester);
       expect(find.text('Conexão lenta. Verifique sua internet.'), findsOneWidget);
       expect(find.text('Treino concluído'), findsNothing);
@@ -440,7 +429,7 @@ void main() {
       repo
         ..erroConcluir = null
         ..concluirSemEvolucao = true;
-      await tester.tap(find.text('Finalizar treino'));
+      await escolherNoMenuMais(tester, 'Finalizar treino');
       await pumpSheet(tester);
       expect(repo.concluidos, 2);
       expect(find.text('Treino concluído'), findsOneWidget);

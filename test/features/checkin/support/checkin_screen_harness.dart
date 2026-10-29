@@ -243,3 +243,15 @@ Future<void> tocarRegistrar(WidgetTester tester, {bool primeira = true}) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
 }
+
+/// Abre o menu ⋯ do cabeçalho e escolhe [rotulo] (ex.: "Finalizar treino").
+/// Com tudo feito o botão já está no rodapé: toca direto.
+Future<void> escolherNoMenuMais(WidgetTester tester, String rotulo) async {
+  if (find.text(rotulo).evaluate().isEmpty) {
+    await tester.tap(find.byTooltip('Mais'));
+    await pumpSheet(tester);
+  }
+  await tester.tap(find.text(rotulo));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
+}

@@ -31,7 +31,7 @@ double _pendentesAvisoReserva(TextScaler textScaler) {
 }
 
 /// Teto da mídia inline: o Registrar do rodapé nunca some atrás do vídeo.
-const double checkinMediaMaxFracaoTela = 0.3;
+const double checkinMediaMaxFracaoTela = 0.24;
 
 /// Altura da mídia inline; vídeo vertical para no teto e fica com barras.
 double checkinMediaAltura({

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../legal/focux_legal.dart';
 import '../theme/design_tokens.dart';
 import '../theme/focux_hub_typography.dart';
 import '../theme/shell_chrome.dart';
@@ -166,16 +167,46 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
     );
   }
 
+  /// Campo preenchido (fundo tonal e borda), para não parecer solto na folha.
+  InputDecoration _deco(BuildContext context, String rotulo) {
+    final chrome = ShellChrome.of(context);
+    final base = FxInputDeco.build(context, rotulo);
+    OutlineInputBorder borda(Color cor, [double largura = 1]) =>
+        FxInputDeco.outlineBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: cor, width: largura),
+        );
+    return base.copyWith(
+      filled: true,
+      fillColor: chrome.ink.withValues(alpha: chrome.isDark ? 0.08 : 0.045),
+      enabledBorder: borda(chrome.lineStrong),
+      focusedBorder: borda(Theme.of(context).colorScheme.primary, 2),
+      counterText: '',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final chrome = ShellChrome.of(context);
     const perigo = EagleTokens.bad;
-    final linhas = excluirContaConsequencias(
-      l10n,
-      widget.papel,
-      avisoAssinatura: widget.avisoAssinatura,
-    );
+    final linhas =
+        excluirContaConsequencias(l10n, widget.papel)
+            .where((l) => l != l10n.excluirContaAcComum)
+            .toList();
+    final icones = switch (widget.papel) {
+      ExcluirContaPapel.aluno => const [
+        Icons.shield_outlined,
+        Icons.receipt_long_outlined,
+        Icons.person_off_outlined,
+      ],
+      ExcluirContaPapel.personal => const [
+        Icons.shield_outlined,
+        Icons.group_off_outlined,
+        Icons.receipt_long_outlined,
+        Icons.credit_card_off_outlined,
+      ],
+    };
 
     Widget secao(String titulo) => Padding(
       padding: const EdgeInsets.only(bottom: TokensStrip.s2),
@@ -183,6 +214,31 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
         header: true,
         child: Text(titulo, style: FocuxHubTypography.chip(chrome.mute)),
       ),
+    );
+
+    Widget linha(IconData icone, Color cor, String texto, {Color? corTexto}) =>
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icone, size: 20, color: cor),
+            const SizedBox(width: TokensStrip.s3),
+            Expanded(
+              child: Text(
+                texto,
+                style: TextStyle(
+                  color: corTexto ?? chrome.ink,
+                  fontSize: 14,
+                  height: 1.35,
+                  fontWeight: corTexto == null ? FontWeight.w500 : FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+
+    final botaoFundo = Color.alphaBlend(
+      perigo.withValues(alpha: chrome.isDark ? 0.3 : 0.2),
+      chrome.isDark ? const Color(0xFF1B1F27) : Colors.white,
     );
 
     return FxSheetFrame(
@@ -200,8 +256,11 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: perigo,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: perigo.withValues(alpha: 0.28),
-                disabledForegroundColor: Colors.white70,
+                // Desabilitado ainda se lê: texto escuro sobre vermelho claro.
+                disabledBackgroundColor: botaoFundo,
+                disabledForegroundColor: chrome.isDark
+                    ? Colors.white.withValues(alpha: 0.78)
+                    : const Color(0xFF5C1A1A),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
@@ -222,38 +281,59 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           secao(l10n.excluirContaSecaoAcontece),
-          for (final linha in linhas)
-            Padding(
-              padding: const EdgeInsets.only(bottom: TokensStrip.s2),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Icon(
-                      linha == l10n.excluirContaAcComum
-                          ? Icons.warning_amber_rounded
-                          : Icons.check_rounded,
-                      size: 18,
-                      color:
-                          linha == l10n.excluirContaAcComum
-                              ? perigo
-                              : chrome.mute,
-                    ),
-                  ),
-                  const SizedBox(width: TokensStrip.s2),
-                  Expanded(
-                    child: Text(
-                      linha,
-                      style: FocuxHubTypography.body(color: chrome.ink),
-                    ),
+          Container(
+            key: const ValueKey('excluir-conta-consequencias'),
+            padding: const EdgeInsets.all(TokensStrip.s3),
+            decoration: BoxDecoration(
+              color: chrome.ink.withValues(alpha: chrome.isDark ? 0.07 : 0.04),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < linhas.length; i++) ...[
+                  if (i > 0) const SizedBox(height: TokensStrip.s3),
+                  linha(
+                    icones[i < icones.length ? i : icones.length - 1],
+                    chrome.mute,
+                    linhas[i],
                   ),
                 ],
+                const SizedBox(height: TokensStrip.s3),
+                linha(
+                  Icons.warning_amber_rounded,
+                  perigo,
+                  l10n.excluirContaAcComum,
+                  corTexto: perigo,
+                ),
+              ],
+            ),
+          ),
+          if (widget.avisoAssinatura) ...[
+            const SizedBox(height: TokensStrip.s3),
+            Container(
+              key: const ValueKey('excluir-conta-alerta-loja'),
+              padding: const EdgeInsets.all(TokensStrip.s3),
+              decoration: BoxDecoration(
+                color: EagleTokens.warn.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: EagleTokens.warn.withValues(alpha: 0.5),
+                ),
+              ),
+              child: linha(
+                Icons.info_outline_rounded,
+                EagleTokens.warn,
+                l10n.excluirContaAvisoAssinatura,
               ),
             ),
-          Text(
-            l10n.excluirContaWeb,
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ],
+          const SizedBox(height: TokensStrip.s3),
+          FxTonalButton(
+            label: l10n.excluirContaWebBotao,
+            icon: Icons.open_in_new_rounded,
+            compact: true,
+            onPressed: FocuxLegal.openDeleteAccount,
           ),
           const SizedBox(height: TokensStrip.s4),
           secao(l10n.excluirContaSecaoConfirmar),
@@ -264,22 +344,24 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
               maxLength: 6,
               autofillHints: const [AutofillHints.oneTimeCode],
               onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-              decoration: FxInputDeco.build(
-                context,
-                l10n.excluirContaCodigoLabel,
-              ),
+              decoration: _deco(context, l10n.excluirContaCodigoLabel),
             )
           else
             TextField(
               controller: _senha,
               obscureText: true,
               onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-              decoration: FxInputDeco.build(
-                context,
-                l10n.excluirContaSenhaLabel,
+              decoration: _deco(context, l10n.excluirContaSenhaLabel),
+            ),
+          const SizedBox(height: TokensStrip.s3),
+          if (!_usarCodigo)
+            Padding(
+              padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+              child: Text(
+                l10n.excluirContaSemSenhaDica,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
               ),
             ),
-          const SizedBox(height: TokensStrip.s2),
           Wrap(
             spacing: TokensStrip.s2,
             runSpacing: TokensStrip.s2,
@@ -309,10 +391,7 @@ class _ExcluirContaSheetState extends State<_ExcluirContaSheet> {
             controller: _confirmacao,
             textCapitalization: TextCapitalization.characters,
             onTapOutside: (_) => FxKeyboardDismissScope.dismiss(),
-            decoration: FxInputDeco.build(
-              context,
-              l10n.excluirContaConfirmLabel,
-            ),
+            decoration: _deco(context, l10n.excluirContaConfirmLabel),
           ),
           const SizedBox(height: TokensStrip.s2),
         ],

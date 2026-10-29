@@ -45,4 +45,65 @@ extension _CheckinCarga on _CheckinScreenState {
     }
     return total;
   }
+
+  /// Ações do exercício no ⋮ do cabeçalho: tudo que antes ficava espalhado
+  /// em "Mais" e "Finalizar treino" no corpo da tela.
+  Future<void> _abrirMais(ExecucaoExercicio ee) async {
+    final s = S.of(context);
+    final livre = !_registrando && !_concluindo;
+    final podeRegistrar = checkinPodeRegistrar(ee);
+    final faltaSerie =
+        livre && ee.series != null && ee.seriesFeitas < ee.series!;
+    final escolha = await showFxGroupedActionSheet<String>(
+      context,
+      titulo: s.checkinMaisTitulo,
+      subtitulo: ee.exercicioNome,
+      grupos: [
+        FxActionGroup<String>(null, [
+          if (podeRegistrar && livre)
+            FxActionItem(
+              valor: 'ajustar',
+              rotulo: s.checkinAjustar,
+              descricao: s.checkinAjustarSub,
+              icone: Icons.tune_rounded,
+            ),
+          if (faltaSerie)
+            FxActionItem(
+              valor: 'confirmar',
+              rotulo: checkinConfirmarRestanteLabel(
+                s,
+                feitas: ee.seriesFeitas,
+                total: ee.series,
+              ),
+              descricao: s.checkinConfirmarRestanteSub,
+              icone: Icons.done_all_rounded,
+            ),
+          if (livre && ee.seriesFeitas > 0)
+            FxActionItem(
+              valor: 'desfazer',
+              rotulo: s.checkinDesfazerSerie,
+              descricao: s.checkinDesfazerSub,
+              icone: Icons.undo_rounded,
+            ),
+          FxActionItem(
+            valor: 'finalizar',
+            rotulo: s.checkinFinalizarTreino,
+            descricao: s.checkinFinalizarSub,
+            icone: Icons.flag_rounded,
+          ),
+        ]),
+      ],
+    );
+    if (escolha == null || !mounted) return;
+    switch (escolha) {
+      case 'ajustar':
+        await _registrarSerieDetalhada(ee);
+      case 'confirmar':
+        _confirmarRestante(ee);
+      case 'desfazer':
+        _desfazer(ee);
+      case 'finalizar':
+        await _finalizar();
+    }
+  }
 }

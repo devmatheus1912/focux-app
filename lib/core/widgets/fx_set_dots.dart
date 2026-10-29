@@ -33,7 +33,7 @@ class FxSetDots extends StatelessWidget {
     final proxima = series.indexWhere((s) => !s.feita);
     return Wrap(
       alignment: WrapAlignment.center,
-      spacing: TokensStrip.s3,
+      spacing: TokensStrip.s1,
       runSpacing: TokensStrip.s2,
       children: [
         for (var i = 0; i < series.length; i++)
@@ -77,11 +77,15 @@ class _Dot extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: SizedBox(
-        width: 64,
+        width: 56,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
+            AnimatedContainer(
+              duration: TokensStrip.prefersReducedMotion(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
               width: 32,
               height: 32,
               alignment: Alignment.center,
@@ -93,19 +97,30 @@ class _Dot extends StatelessWidget {
                   width: atual ? 2.5 : 1.5,
                 ),
               ),
-              child:
-                  feita
-                      ? const Icon(
-                        Icons.check_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      )
-                      : Text(
-                        serie.aquecimento ? 'A' : '${serie.numero}',
-                        style: FocuxHubTypography.chip(
-                          atual ? accent : chrome.mute,
+              // Ao registrar, a marca entra com uma escala curta.
+              child: AnimatedSwitcher(
+                duration: TokensStrip.prefersReducedMotion(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
+                transitionBuilder:
+                    (child, animacao) =>
+                        ScaleTransition(scale: animacao, child: child),
+                child:
+                    feita
+                        ? const Icon(
+                          Icons.check_rounded,
+                          key: ValueKey('feita'),
+                          size: 18,
+                          color: Colors.white,
+                        )
+                        : Text(
+                          serie.aquecimento ? 'A' : '${serie.numero}',
+                          key: ValueKey('numero-${serie.numero}'),
+                          style: FocuxHubTypography.chip(
+                            atual ? accent : chrome.mute,
+                          ),
                         ),
-                      ),
+              ),
             ),
             const SizedBox(height: 2),
             Text(

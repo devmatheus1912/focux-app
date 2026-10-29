@@ -171,31 +171,6 @@ class CheckinRodapeBar extends StatelessWidget {
   }
 }
 
-/// Finalizar com exercício faltando: botão tonal abaixo do card, que confirma
-/// antes de encerrar.
-class CheckinFinalizarLink extends StatelessWidget {
-  const CheckinFinalizarLink({
-    super.key,
-    required this.concluindo,
-    required this.onFinalizar,
-  });
-
-  final bool concluindo;
-  final VoidCallback onFinalizar;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return FxTonalButton(
-      label: concluindo ? s.checkinFinalizando : s.checkinFinalizarTreino,
-      icon: Icons.flag_rounded,
-      expanded: true,
-      loading: concluindo,
-      onPressed: concluindo ? null : onFinalizar,
-    );
-  }
-}
-
 /// Faixa curta logo depois de registrar: confirma o que foi gravado e deixa
 /// desfazer com um toque, sem abrir menu.
 class CheckinDesfazerFaixa extends StatelessWidget {

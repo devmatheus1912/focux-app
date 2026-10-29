@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,8 +11,6 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_home_sheet.dart';
 import '../../../core/widgets/fx_number_pad_sheet.dart';
 import '../../../core/widgets/fx_set_dots.dart';
-import '../../../core/widgets/fx_settings_group.dart';
-import '../../../core/widgets/fx_settings_tile.dart';
 import '../../../core/widgets/fx_strip_card.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -22,14 +22,15 @@ import 'checkin_media_widgets.dart';
 
 part 'checkin_serie_steppers.part.dart';
 
+/// Exercício atual em três zonas, sem rolagem no caso comum:
+/// topo fixo (nome, bolinhas), mídia compacta no meio e, na base, carga e reps.
+/// Só a mídia cede espaço; sem altura (tela baixa, letra grande) vira rolagem e
+/// o vídeo passa a ser o botão "Ver vídeo".
 /// Registrar a série fica no rodapé fixo da tela (zona do polegar).
 class CheckinSerieCard extends StatelessWidget {
   final ExecucaoExercicio ee;
   final int index;
   final int total;
-  final VoidCallback? onDesfazer;
-  final VoidCallback? onAjustar;
-  final VoidCallback? onConfirmarRestante;
   final VoidCallback? onTrocar;
   final double? draftCargaKg;
   final int? draftReps;
@@ -48,9 +49,6 @@ class CheckinSerieCard extends StatelessWidget {
     required this.ee,
     required this.index,
     required this.total,
-    this.onDesfazer,
-    this.onAjustar,
-    this.onConfirmarRestante,
     this.onTrocar,
     this.draftCargaKg,
     this.draftReps,
@@ -63,6 +61,12 @@ class CheckinSerieCard extends StatelessWidget {
     this.concluidoFrase,
   });
 
+  /// Abaixo disso (dp) não cabem topo, mídia e base juntos.
+  static const double alturaMinimaTresZonas = 520;
+
+  /// Mídia menor que isso vira o botão "Ver vídeo".
+  static const double alturaMinimaMidia = 96;
+
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
@@ -71,6 +75,165 @@ class CheckinSerieCard extends StatelessWidget {
     final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
     final hasDemo = checkinExerciseHasDemo(ee);
     final done = !checkinPodeRegistrar(ee);
+
+    final topo = _topo(context, brand: brand);
+    final base =
+        done
+            ? FxStripCard(
+              accent: brand,
+              glowStrength: 0.04,
+              padding: const EdgeInsets.all(TokensStrip.s4),
+              child: Text(
+                concluidoFrase ?? s.checkinExercicioConcluido,
+                textAlign: TextAlign.center,
+                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+              ),
+            )
+            : FxStripCard(
+              accent: brand,
+              glowStrength: 0,
+              padding: const EdgeInsets.all(TokensStrip.s3),
+              child: _CheckinSetSteppers(
+                cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
+                reps: draftReps,
+                onPlusCarga: onPlusCarga,
+                onMinusCarga: onMinusCarga,
+                onPlusReps: onPlusReps,
+                onMinusReps: onMinusReps,
+                onEditarCarga: onEditarCarga,
+                onEditarReps: onEditarReps,
+                cargaAnteriorKg: ee.cargaAnteriorKg,
+              ),
+            );
+
+    const pad = EdgeInsets.fromLTRB(
+      FxSettingsLayout.pageInset,
+      TokensStrip.s2,
+      FxSettingsLayout.pageInset,
+      TokensStrip.s3,
+    );
+
+    return LayoutBuilder(
+      builder: (context, c) {
+        final escala = MediaQuery.textScalerOf(context).scale(1);
+        final apertado =
+            c.maxHeight < alturaMinimaTresZonas || escala > 1.5;
+        if (apertado) {
+          return SingleChildScrollView(
+            padding: pad,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                topo,
+                if (hasDemo) ...[
+                  const SizedBox(height: TokensStrip.s2),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _botaoVerVideo(context),
+                  ),
+                ],
+                const SizedBox(height: TokensStrip.s3),
+                base,
+              ],
+            ),
+          );
+        }
+        return Padding(
+          padding: pad,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              topo,
+              const SizedBox(height: TokensStrip.s3),
+              Expanded(
+                child:
+                    hasDemo
+                        ? _midia(context, brand: brand, dark: chrome.isDark)
+                        : const SizedBox.shrink(),
+              ),
+              const SizedBox(height: TokensStrip.s3),
+              base,
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _botaoVerVideo(BuildContext context) {
+    return FxTonalButton(
+      label: S.of(context).checkinVerVideo,
+      icon: Icons.play_circle_outline_rounded,
+      compact: true,
+      onPressed: () => _abrirVideoEmFolha(context),
+    );
+  }
+
+  /// Vídeo em folha, na altura natural dele, para quando não cabe no meio.
+  void _abrirVideoEmFolha(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
+    final brand = chrome.isDark ? BrandPalette.accent(primary) : primary;
+    showFxHomeSheet<void>(
+      context,
+      builder:
+          (ctx) => FxHomeSheetSurface(
+            isDark: chrome.isDark,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FxHomeSheetHandle(isDark: chrome.isDark),
+                const SizedBox(height: TokensStrip.s3),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                  child: _inlineDemoPreview(
+                    ee: ee,
+                    brand: brand,
+                    dark: chrome.isDark,
+                  ),
+                ),
+                const SizedBox(height: TokensStrip.s3),
+              ],
+            ),
+          ),
+    );
+  }
+
+  /// Mídia no meio: ocupa o que sobrou (no máximo a altura natural) e, se sobrar
+  /// pouco, vira o botão "Ver vídeo".
+  Widget _midia(
+    BuildContext context, {
+    required Color brand,
+    required bool dark,
+  }) {
+    return LayoutBuilder(
+      builder: (context, m) {
+        if (m.maxHeight < alturaMinimaMidia) {
+          return Center(child: _botaoVerVideo(context));
+        }
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: m.maxHeight),
+            child: FxStripCard(
+              glowStrength: 0.04,
+              accent: brand,
+              padding: EdgeInsets.zero,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Topo fixo: nome, trocar, série atual e bolinhas.
+  Widget _topo(BuildContext context, {required Color brand}) {
+    final s = S.of(context);
+    final chrome = ShellChrome.of(context);
     final contextLine = checkinSerieContextLine(
       s,
       seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
@@ -83,249 +246,94 @@ class CheckinSerieCard extends StatelessWidget {
       index: index,
       total: total,
     );
+    final dots = _dots(ee);
+    final kpi =
+        ee.proximaSeriePapel == 'AQUECIMENTO'
+            ? 'Aquecimento · ${checkinSerieKpiLabel(ee.seriesFeitas, ee.series)}'
+            : checkinSerieKpiLabel(ee.seriesFeitas, ee.series);
 
-    return Padding(
+    return FxStripCard(
+      accent: brand,
+      glowStrength: 0.04,
       padding: const EdgeInsets.fromLTRB(
-        FxSettingsLayout.pageInset,
-        TokensStrip.s2,
-        FxSettingsLayout.pageInset,
+        TokensStrip.s4,
+        TokensStrip.s3,
+        TokensStrip.s3,
         TokensStrip.s3,
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // S8: um alvo dominante — nome + KPI + receita, agrupados.
-          FxStripCard(
-            accent: brand,
-            glowStrength: 0.04,
-            padding: const EdgeInsets.fromLTRB(
-              TokensStrip.s4,
-              TokensStrip.s4,
-              TokensStrip.s4,
-              TokensStrip.s3,
-            ),
-            onTap:
-                onTrocar == null
-                    ? null
-                    : () {
-                      HapticFeedback.selectionClick();
-                      onTrocar!();
-                    },
-            semanticsLabel:
-                onTrocar == null
-                    ? null
-                    : '${ee.exercicioNome}. $trocarHint',
-            child: Column(
-              children: [
-                Text(
-                  ee.exercicioNome,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: FocuxHubTypography.pageTitle(
-                    context,
-                    color: chrome.ink,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: TokensStrip.s1),
+                  child: Text(
+                    ee.exercicioNome,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: FocuxHubTypography.pageTitle(
+                      context,
+                      color: chrome.ink,
+                    ),
                   ),
                 ),
-                if (onTrocar != null) ...[
-                  const SizedBox(height: TokensStrip.s2),
-                  FxTonalButton(
-                    label: s.checkinTrocarExercicio,
-                    icon: Icons.swap_horiz_rounded,
-                    compact: true,
-                    semanticLabel: trocarHint,
-                    onPressed: onTrocar,
+              ),
+              if (onTrocar != null) ...[
+                const SizedBox(width: TokensStrip.s2),
+                IconButton(
+                  tooltip: trocarHint,
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                    onTrocar!();
+                  },
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    side: BorderSide(color: brand.withValues(alpha: 0.35)),
+                    backgroundColor: brand.withValues(alpha: 0.08),
                   ),
-                ],
-                const SizedBox(height: TokensStrip.s3),
-                Text(
-                  ee.proximaSeriePapel == 'AQUECIMENTO'
-                      ? 'Aquecimento · ${checkinSerieKpiLabel(ee.seriesFeitas, ee.series)}'
-                      : checkinSerieKpiLabel(ee.seriesFeitas, ee.series),
-                  textAlign: TextAlign.center,
-                  style: FocuxHubTypography.metric(
-                    color: brand,
-                    fontSize: FocuxHubTypography.metricLg,
-                    fontWeight: FontWeight.w800,
-                  ).copyWith(
-                    height: 1.05,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  icon: Icon(Icons.swap_horiz_rounded, color: brand),
                 ),
-                if (_dots(ee).isNotEmpty) ...[
-                  const SizedBox(height: TokensStrip.s3),
-                  FxSetDots(series: _dots(ee), accent: brand),
-                ],
-                const SizedBox(height: TokensStrip.s2),
-                Text(
-                  contextLine,
-                  textAlign: TextAlign.center,
-                  style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                ),
-                if (previous != null) ...[
-                  const SizedBox(height: TokensStrip.s1),
-                  Text(
-                    previous,
-                    textAlign: TextAlign.center,
-                    style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
-          if (hasDemo) ...[
-            const SizedBox(height: TokensStrip.s3),
-            FxStripCard(
-              glowStrength: 0.04,
-              accent: brand,
-              padding: EdgeInsets.zero,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(TokensStrip.rCard),
-                child: _inlineDemoPreview(
-                  ee: ee,
-                  brand: brand,
-                  dark: chrome.isDark,
+          const SizedBox(height: TokensStrip.s2),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                kpi,
+                style: FocuxHubTypography.metric(
+                  color: brand,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ).copyWith(
+                  height: 1.05,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
-            ),
-          ],
-          const SizedBox(height: TokensStrip.s3),
-          if (!done) ...[
-            FxStripCard(
-              accent: brand,
-              glowStrength: 0,
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s3,
-                vertical: TokensStrip.s3,
-              ),
-              child: _CheckinSetSteppers(
-                cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
-                reps: draftReps,
-                onPlusCarga: onPlusCarga,
-                onMinusCarga: onMinusCarga,
-                onPlusReps: onPlusReps,
-                onMinusReps: onMinusReps,
-                onEditarCarga: onEditarCarga,
-                onEditarReps: onEditarReps,
-                cargaAnteriorKg: ee.cargaAnteriorKg,
-              ),
-            ),
-            if (onAjustar != null ||
-                onConfirmarRestante != null ||
-                onDesfazer != null) ...[
-              const SizedBox(height: TokensStrip.s1),
-              FxTonalButton(
-                label: s.checkinMais,
-                icon: Icons.more_horiz_rounded,
-                compact: true,
-                onPressed: () async {
-                  final actions = <({
-                    String id,
-                    String label,
-                    String subtitle,
-                    IconData icon,
-                  })>[
-                    if (onAjustar != null)
-                      (
-                        id: 'ajustar',
-                        label: s.checkinAjustar,
-                        subtitle: s.checkinAjustarSub,
-                        icon: Icons.tune_rounded,
-                      ),
-                    if (onConfirmarRestante != null)
-                      (
-                        id: 'confirmar',
-                        label: checkinConfirmarRestanteLabel(
-                          s,
-                          feitas: ee.seriesFeitas,
-                          total: ee.series,
-                        ),
-                        subtitle: s.checkinConfirmarRestanteSub,
-                        icon: Icons.done_all_rounded,
-                      ),
-                    if (onDesfazer != null)
-                      (
-                        id: 'desfazer',
-                        label: s.checkinDesfazerSerie,
-                        subtitle: s.checkinDesfazerSub,
-                        icon: Icons.undo_rounded,
-                      ),
-                  ];
-                  if (actions.isEmpty) return;
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
-                  final primary = Theme.of(context).colorScheme.primary;
-                  final soft = BrandPalette.softened(primary);
-                  final picked = await showFxHomeSheet<String>(
-                    context,
-                    builder: (ctx) {
-                      return FxHomeSheetSurface(
-                        isDark: isDark,
-                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 14),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            FxHomeSheetHandle(isDark: isDark),
-                            const SizedBox(height: 8),
-                            FxHomeSheetHeader(
-                              isDark: isDark,
-                              title: s.checkinMaisTitulo,
-                              subtitle: s.checkinMaisSub,
-                              leading: Icon(
-                                Icons.more_horiz_rounded,
-                                color: soft,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(height: TokensStrip.s3),
-                            FxSettingsGroup(
-                              accent: primary,
-                              children: [
-                                for (var i = 0; i < actions.length; i++)
-                                  FxSettingsTile(
-                                    icon: actions[i].icon,
-                                    accent: soft,
-                                    label: actions[i].label,
-                                    subtitle: actions[i].subtitle,
-                                    value: '',
-                                    picker: true,
-                                    showDivider: i < actions.length - 1,
-                                    onTap:
-                                        () => Navigator.of(
-                                          ctx,
-                                        ).pop(actions[i].id),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                  switch (picked) {
-                    case 'ajustar':
-                      onAjustar?.call();
-                    case 'confirmar':
-                      onConfirmarRestante?.call();
-                    case 'desfazer':
-                      onDesfazer?.call();
-                  }
-                },
-              ),
+              if (dots.isNotEmpty) ...[
+                const SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: FxSetDots(series: dots, accent: brand),
+                  ),
+                ),
+              ],
             ],
-          ] else
-            FxStripCard(
-              accent: brand,
-              glowStrength: 0.04,
-              padding: const EdgeInsets.symmetric(
-                horizontal: TokensStrip.s4,
-                vertical: TokensStrip.s4,
-              ),
-              child: Text(
-                concluidoFrase ?? s.checkinExercicioConcluido,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
+          ),
+          const SizedBox(height: TokensStrip.s2),
+          Text(
+            contextLine,
+            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+          ),
+          if (previous != null)
+            Text(
+              previous,
+              style: FocuxHubTypography.bodyMuted(color: chrome.mute),
             ),
         ],
       ),

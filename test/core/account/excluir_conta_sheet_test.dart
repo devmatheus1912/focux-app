@@ -184,4 +184,94 @@ void main() {
       expect(find.text('Não dá para desfazer.'), findsOneWidget);
     });
   }
+
+  testWidgets('cada consequência tem ícone próprio e sem ✓', (tester) async {
+    await _abrir(tester, papel: ExcluirContaPapel.personal);
+    final cartao = find.byKey(const ValueKey('excluir-conta-consequencias'));
+    expect(cartao, findsOneWidget);
+    expect(
+      find.descendant(of: cartao, matching: find.byIcon(Icons.check_rounded)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: cartao,
+        matching: find.byIcon(Icons.group_off_outlined),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: cartao,
+        matching: find.byIcon(Icons.warning_amber_rounded),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('aviso da loja vira cartão de alerta só quando existe', (
+    tester,
+  ) async {
+    await _abrir(tester, papel: ExcluirContaPapel.personal);
+    expect(
+      find.byKey(const ValueKey('excluir-conta-alerta-loja')),
+      findsNothing,
+    );
+  });
+
+  testWidgets('com assinatura da loja mostra o cartão de alerta fora da lista', (
+    tester,
+  ) async {
+    await _abrir(
+      tester,
+      papel: ExcluirContaPapel.personal,
+      avisoAssinatura: true,
+    );
+    final alerta = find.byKey(const ValueKey('excluir-conta-alerta-loja'));
+    expect(alerta, findsOneWidget);
+    expect(
+      find.descendant(
+        of: alerta,
+        matching: find.text(l10n.excluirContaAvisoAssinatura),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('excluir-conta-consequencias')),
+        matching: find.text(l10n.excluirContaAvisoAssinatura),
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('botão desabilitado ainda tem contraste de leitura (≥ 3:1)', (
+    tester,
+  ) async {
+    await _abrir(tester, papel: ExcluirContaPapel.aluno);
+    final botao = tester.widget<ElevatedButton>(
+      find.widgetWithText(ElevatedButton, 'Excluir definitivamente'),
+    );
+    final fundo = botao.style!.backgroundColor!.resolve({WidgetState.disabled})!;
+    final texto = botao.style!.foregroundColor!.resolve({WidgetState.disabled})!;
+    double lum(Color c) => c.computeLuminance();
+    final claro = lum(fundo) > lum(texto) ? lum(fundo) : lum(texto);
+    final escuro = lum(fundo) > lum(texto) ? lum(texto) : lum(fundo);
+    expect((claro + 0.05) / (escuro + 0.05), greaterThanOrEqualTo(3));
+  });
+
+  testWidgets('campos são preenchidos e o código por e-mail tem dica acima', (
+    tester,
+  ) async {
+    await _abrir(tester, papel: ExcluirContaPapel.aluno);
+    final campo = tester.widget<TextField>(
+      find.widgetWithText(TextField, 'Senha atual'),
+    );
+    expect(campo.decoration!.filled, isTrue);
+    expect(find.text('Receber código por e-mail'), findsOneWidget);
+    expect(
+      find.text('Entrou com Google ou Apple? Receba um código por e-mail.'),
+      findsOneWidget,
+    );
+  });
 }

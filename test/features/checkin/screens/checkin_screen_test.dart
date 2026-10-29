@@ -116,7 +116,7 @@ void main() {
     await tester.tap(find.text('Pular descanso'));
     await tester.pump();
 
-    await tester.tap(find.text('Finalizar treino'));
+    await escolherNoMenuMais(tester, 'Finalizar treino');
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
@@ -132,14 +132,14 @@ void main() {
     final repo = FakeCheckinRepo();
     await pumpCheckin(tester, repo);
 
-    await tester.tap(find.text('Finalizar treino'));
+    await escolherNoMenuMais(tester, 'Finalizar treino');
     await pumpSheet(tester);
     expect(find.text('Faltam 2 exercícios'), findsOneWidget);
     await tester.tap(find.text('Voltar ao treino'));
     await pumpSheet(tester);
     expect(repo.concluidos, 0);
 
-    await tester.tap(find.text('Finalizar treino'));
+    await escolherNoMenuMais(tester, 'Finalizar treino');
     await pumpSheet(tester);
     await tester.tap(find.text('Finalizar'));
     await pumpSheet(tester);
@@ -169,7 +169,7 @@ void main() {
     final repo = FakeCheckinRepo(feitas: [3, 3]);
     await pumpCheckin(tester, repo);
 
-    await tester.tap(find.text('Finalizar treino'));
+    await escolherNoMenuMais(tester, 'Finalizar treino');
     await pumpSheet(tester);
 
     expect(find.textContaining('Falta'), findsNothing);
@@ -188,7 +188,7 @@ void main() {
     final repo = FakeCheckinRepo(feitas: [3, 3]);
     await pumpCheckin(tester, repo);
 
-    await tester.tap(find.text('Finalizar treino'));
+    await escolherNoMenuMais(tester, 'Finalizar treino');
     await pumpSheet(tester);
     await tester.tap(find.text('Ver detalhes'));
     await pumpSheet(tester);

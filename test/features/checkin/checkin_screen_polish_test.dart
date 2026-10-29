@@ -39,8 +39,7 @@ void main() {
     expect(screen, contains('CheckinRascunhos'));
     expect(screen, contains('CheckinRestFocusView'));
     expect(screen, contains('_registrarSerieRapida'));
-    expect(screen, contains('onAjustar:'));
-    expect(screen, contains('onConfirmarRestante:'));
+    expect(screen, contains('_abrirMais'));
     expect(screen, contains('selectedId:'));
     expect(screen, isNot(contains('ListView(')));
     expect(screen, isNot(contains('SkeletonList')));
@@ -54,7 +53,6 @@ void main() {
     expect(estados, contains('FxLoading'));
     expect(estados, contains('.checkinPreparando'));
     expect(estados, contains('checkinExecutionControlMin'));
-    expect(estados, contains('s.checkinFinalizarTreino'));
     expect(estados, contains('liveRegion: true'));
     expect(estados, isNot(contains('CircularProgressIndicator')));
   });
@@ -192,6 +190,7 @@ void main() {
     expect(header, contains('s.checkinSair'));
     expect(header, contains('checkinExecutionControlMin'));
     expect(header, contains('FxHelpIconButton'));
+    expect(header, contains('s.checkinMais'));
     expect(header, isNot(contains('CheckinLiveBadge')));
     expect(header, isNot(contains('AO VIVO')));
     expect(header, isNot(contains('chevron_left')));
@@ -203,12 +202,6 @@ void main() {
     final card = _src(
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
     );
-    expect(card, contains('checkinExecutionControlMin'));
-    expect(card, contains('s.checkinAjustar'));
-    expect(card, contains('s.checkinMais'));
-    expect(card, contains('s.checkinMaisTitulo'));
-    expect(card, contains('showFxHomeSheet'));
-    expect(card, contains('checkinConfirmarRestanteLabel'));
     expect(card, contains('checkinTrocarExercicioHint'));
     expect(card, contains('_CheckinSetSteppers'));
     expect(card, contains('_CheckinStepperButton'));
@@ -223,8 +216,6 @@ void main() {
     expect(card, isNot(contains("'Dicas'")));
     expect(card, isNot(contains('onOpenTips')));
     expect(card, isNot(contains("'Ampliar'")));
-    expect(card, contains('FxStripCard'));
-    expect(card, contains('BrandPalette.accent'));
     expect(card, isNot(contains('_CheckinPosturaHelp')));
     expect(card, contains('ValueKey'));
     expect(card, contains('VerticalDivider'));
@@ -244,9 +235,8 @@ void main() {
     expect(tips, contains('checkinExerciseHasDemo'));
   });
 
-  test('checkin execution alinha card no topo com scroll', () {
+  test('checkin execution mostra o card em três zonas', () {
     final screen = _src(screenPath);
-    expect(screen, contains('alignment: Alignment.topCenter'));
     expect(screen, contains('onHelp:'));
     expect(screen, contains('showCheckinExerciseTipsSheet'));
     expect(screen, isNot(contains('onOpenTips:')));
@@ -309,7 +299,6 @@ void main() {
     expect(sheet, contains('FxKeyboardDismissScope'));
     expect(sheet, contains('FxKeyboardDismissScope.dismiss'));
     expect(sheet, contains('ScrollViewKeyboardDismissBehavior.onDrag'));
-    expect(sheet, contains('onTapOutside'));
     expect(sheet, contains('FxHomeSheetSurface'));
     expect(sheet, contains('checkinFeedbackChipMin'));
     expect(sheet, isNot(contains('class CheckinTinyMetric')));

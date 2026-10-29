@@ -97,6 +97,7 @@ extension _CheckinCorpo on _CheckinScreenState {
               current != null && checkinExerciseHasTips(current)
                   ? () => showCheckinExerciseTipsSheet(context, ee: current)
                   : null,
+          onMais: current == null ? null : () => _abrirMais(current),
         ),
         Expanded(
           child:
@@ -200,27 +201,7 @@ extension _CheckinCorpo on _CheckinScreenState {
         subtitle: s.checkinNenhumAtivoTexto,
       );
     }
-    return Align(
-      alignment: Alignment.topCenter,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _card(current, currentIndex, exercicios, onTrocar),
-            if (checkinExerciciosFaltando(exercicios) > 0)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: FxSettingsLayout.pageInset,
-                ),
-                child: CheckinFinalizarLink(
-                  concluindo: _concluindo,
-                  onFinalizar: _finalizar,
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
+    return _card(current, currentIndex, exercicios, onTrocar);
   }
 
   Widget _card(
@@ -230,11 +211,6 @@ extension _CheckinCorpo on _CheckinScreenState {
     VoidCallback? onTrocar,
   ) {
     final draft = _rascunhos.de(current);
-    final livre = !_registrando && !_concluindo;
-    final faltaSerie =
-        livre &&
-        current.series != null &&
-        current.seriesFeitas < current.series!;
     final proximo = _proximoIncompleto(exercicios, current);
     final s = S.of(context);
     return CheckinSerieCard(
@@ -261,12 +237,7 @@ extension _CheckinCorpo on _CheckinScreenState {
           (kg) => _mexerRascunho(() => _rascunhos.definirCarga(current, kg)),
       onEditarReps:
           (n) => _mexerRascunho(() => _rascunhos.definirReps(current, n)),
-      onAjustar: () => _registrarSerieDetalhada(current),
-      onConfirmarRestante:
-          faltaSerie ? () => _confirmarRestante(current) : null,
       onTrocar: onTrocar,
-      onDesfazer:
-          livre && current.seriesFeitas > 0 ? () => _desfazer(current) : null,
     );
   }
 

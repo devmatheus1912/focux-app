@@ -1,5 +1,8 @@
 part of 'checkin_exercise_widgets.dart';
 
+/// Carga e reps lado a lado. Cada campo é uma coluna com a largura toda da
+/// metade: rótulo, número enorme (toque para digitar) e, embaixo, os botões
+/// − e + com metade da largura cada. Segurar o botão repete.
 class _CheckinSetSteppers extends StatelessWidget {
   const _CheckinSetSteppers({
     required this.cargaKg,
@@ -32,6 +35,7 @@ class _CheckinSetSteppers extends StatelessWidget {
     final brand = Theme.of(context).colorScheme.primary;
     return IntrinsicHeight(
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: _CheckinStepper(
@@ -119,6 +123,7 @@ class _CheckinStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = S.of(context);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
@@ -127,54 +132,60 @@ class _CheckinStepper extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: TokensStrip.s1),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _CheckinStepperButton(
-              icon: Icons.remove_rounded,
-              tooltip: s.checkinDiminuir(label),
-              onPressed: onMinus,
-              ink: ink,
-              accent: accent,
-            ),
-            Expanded(
-              child: Semantics(
-                button: onEditar != null,
-                label: onEditar == null ? null : '$label: $value',
-                excludeSemantics: onEditar != null,
-                child: InkWell(
-                  onTap: onEditar,
-                  borderRadius: BorderRadius.circular(8),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minHeight: 56),
-                    child: Center(
-                      // Cabe sempre numa linha: encolhe em vez de quebrar.
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                        value,
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        // Número grande: lido de longe, com a mão ocupada.
-                        style: FocuxHubTypography.metric(
-                          color: ink,
-                          fontSize: 34,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      ),
+        Semantics(
+          button: onEditar != null,
+          label: onEditar == null ? null : '$label: $value',
+          excludeSemantics: onEditar != null,
+          child: InkWell(
+            onTap: onEditar,
+            borderRadius: BorderRadius.circular(TokensStrip.rInput),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 64,
+                minWidth: double.infinity,
+              ),
+              child: Center(
+                // Cabe sempre numa linha: encolhe em vez de quebrar.
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: FocuxHubTypography.metric(
+                      color: ink,
+                      fontSize: 44,
+                      fontWeight: FontWeight.w800,
+                    ).copyWith(
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
               ),
             ),
-            _CheckinStepperButton(
-              icon: Icons.add_rounded,
-              tooltip: s.checkinAumentar(label),
-              onPressed: onPlus,
-              ink: ink,
-              accent: accent,
+          ),
+        ),
+        const SizedBox(height: TokensStrip.s1),
+        Row(
+          children: [
+            Expanded(
+              child: _CheckinStepperButton(
+                icon: Icons.remove_rounded,
+                tooltip: s.checkinDiminuir(label),
+                onPressed: onMinus,
+                ink: ink,
+                accent: accent,
+              ),
+            ),
+            const SizedBox(width: TokensStrip.s2),
+            Expanded(
+              child: _CheckinStepperButton(
+                icon: Icons.add_rounded,
+                tooltip: s.checkinAumentar(label),
+                onPressed: onPlus,
+                ink: ink,
+                accent: accent,
+              ),
             ),
           ],
         ),
@@ -183,7 +194,8 @@ class _CheckinStepper extends StatelessWidget {
   }
 }
 
-class _CheckinStepperButton extends StatelessWidget {
+/// Botão − ou +. Um toque soma um passo; segurar repete a cada 120 ms.
+class _CheckinStepperButton extends StatefulWidget {
   const _CheckinStepperButton({
     required this.icon,
     required this.tooltip,
@@ -199,22 +211,65 @@ class _CheckinStepperButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
+  State<_CheckinStepperButton> createState() => _CheckinStepperButtonState();
+}
+
+class _CheckinStepperButtonState extends State<_CheckinStepperButton> {
+  Timer? _repete;
+
+  void _parar() {
+    _repete?.cancel();
+    _repete = null;
+  }
+
+  @override
+  void dispose() {
+    _parar();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      tooltip: tooltip,
-      style: IconButton.styleFrom(
-        foregroundColor: ink,
-        backgroundColor: accent.withValues(alpha: 0.08),
-        minimumSize: const Size(
-          checkinExecutionControlMin,
-          checkinExecutionControlMin,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(TokensStrip.rInput),
+    final habilitado = widget.onPressed != null;
+    return Tooltip(
+      message: widget.tooltip,
+      child: Semantics(
+        button: true,
+        enabled: habilitado,
+        label: widget.tooltip,
+        excludeSemantics: true,
+        child: GestureDetector(
+          onLongPressStart:
+              !habilitado
+                  ? null
+                  : (_) {
+                    _parar();
+                    _repete = Timer.periodic(
+                      const Duration(milliseconds: 120),
+                      (_) {
+                        HapticFeedback.selectionClick();
+                        widget.onPressed!();
+                      },
+                    );
+                  },
+          onLongPressEnd: (_) => _parar(),
+          onLongPressCancel: _parar,
+          child: Material(
+            color: widget.accent.withValues(alpha: habilitado ? 0.10 : 0.04),
+            borderRadius: BorderRadius.circular(TokensStrip.rInput),
+            child: InkWell(
+              onTap: habilitado ? widget.onPressed : null,
+              borderRadius: BorderRadius.circular(TokensStrip.rInput),
+              child: SizedBox(
+                height: 56,
+                child: Center(
+                  child: Icon(widget.icon, color: widget.ink, size: 28),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
-      icon: Icon(icon),
     );
   }
 }
