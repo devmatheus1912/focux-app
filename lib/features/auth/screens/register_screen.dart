@@ -314,6 +314,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   label: 'Código do e-mail',
                                   controller: _codeController,
                                   hintText: '6 dígitos',
+                                  onChanged: (v) {
+                                    if (v.length == 6) {
+                                      _passwordFocus.requestFocus();
+                                    }
+                                  },
                                   helperText:
                                       'Código enviado. Válido por 10 minutos.',
                                   icon: Icons.pin_outlined,
@@ -436,26 +441,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         ),
                                   ),
                                 ),
-                              const SizedBox(height: 22),
-                              if (_error != null) ...[
-                                Semantics(
-                                  liveRegion: true,
-                                  child: Text(
-                                    _error!,
-                                    style: authInlineErrorStyle(),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                              FxLiquidPrimaryButton(
-                                label: registerCriarLabel(),
-                                loading: _loading,
-                                loadingLabel: registerCriandoLabel(),
-                                onPressed:
-                                    _loading || _loadingGoogle
-                                        ? null
-                                        : _pedirCriarConta,
-                              ),
+                              const SizedBox(height: TokensStrip.s4),
                               FxConversionTextLink(
                                 text: '',
                                 actionText:
@@ -480,6 +466,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                       ),
                     ),
+                  ),
+                ),
+                // Botão principal fixo: fica sempre acima do teclado.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    TokensStrip.s5,
+                    TokensStrip.s2,
+                    TokensStrip.s5,
+                    TokensStrip.s3,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_error != null) ...[
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(_error!, style: authInlineErrorStyle()),
+                        ),
+                        const SizedBox(height: TokensStrip.s2),
+                      ],
+                      FxLiquidPrimaryButton(
+                        label: registerCriarLabel(),
+                        loading: _loading,
+                        loadingLabel: registerCriandoLabel(),
+                        onPressed:
+                            _loading || _loadingGoogle || _loadingApple
+                                ? null
+                                : _pedirCriarConta,
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -48,9 +48,12 @@ void main() {
     expect(screen, contains('AutofillHints.oneTimeCode'));
     expect(screen, contains('heroTeal'));
     expect(screen, contains('registerCriarLabel'));
+    // O botão principal fica numa barra fixa abaixo da rolagem (sempre acima do
+    // teclado); "Já tenho conta" fica dentro da rolagem.
+    expect(screen, contains('Botão principal fixo'));
     expect(
       screen.indexOf('registerCriarLabel'),
-      lessThan(screen.indexOf('onboardingExistingAccountCta')),
+      greaterThan(screen.indexOf('onboardingExistingAccountCta')),
     );
     expect(screen, contains('AuthStickyRoleBar'));
     expect(screen, contains('ensureFooter: true'));

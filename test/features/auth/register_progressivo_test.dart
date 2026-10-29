@@ -83,4 +83,35 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('o botão principal fica fixo no rodapé e não rola com o formulário', (
+    tester,
+  ) async {
+    await _abrir(tester);
+    final botao = find.text('Criar minha conta');
+    expect(botao, findsOneWidget);
+    final antes = tester.getTopLeft(botao).dy;
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -300));
+    await tester.pump();
+    expect(tester.getTopLeft(botao).dy, antes, reason: 'não acompanha a rolagem');
+    // e está fora da área rolável
+    expect(
+      find.descendant(
+        of: find.byType(SingleChildScrollView),
+        matching: botao,
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('com o teclado aberto, o botão continua visível acima dele', (
+    tester,
+  ) async {
+    await _abrir(tester);
+    tester.view.viewInsets = const FakeViewPadding(bottom: 800);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pump(const Duration(milliseconds: 300));
+    final botao = tester.getRect(find.text('Criar minha conta'));
+    expect(botao.bottom, lessThanOrEqualTo((3200 - 800) / 2));
+  });
 }

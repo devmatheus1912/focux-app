@@ -24,6 +24,7 @@ class AuthField extends StatelessWidget {
     this.inputFormatters,
     this.autofillHints,
     this.helperText,
+    this.onChanged,
   });
 
   final String label;
@@ -43,6 +44,9 @@ class AuthField extends StatelessWidget {
   /// Dica fixa abaixo do campo (requisito de senha, validade do código): ao
   /// contrário do placeholder, não some quando a pessoa começa a digitar.
   final String? helperText;
+
+  /// A cada mudança do texto (ex.: passar para a senha quando o código fecha 6 dígitos).
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +74,7 @@ class AuthField extends StatelessWidget {
           obscureText: obscureText,
           onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
           onFieldSubmitted: onFieldSubmitted,
+          onChanged: onChanged,
           style: FocuxHubTypography.body(color: heroTealInk()),
           decoration: InputDecoration(
             hintText: hintText,
