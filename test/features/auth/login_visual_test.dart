@@ -114,6 +114,26 @@ void main() {
       expect(find.text('Digitar o código do personal'), findsOneWidget);
     });
 
+    testWidgets('o formulário começa antes de 45% da altura (390×844)', (
+      tester,
+    ) async {
+      await _abrir(tester, '/login');
+      final topo = tester.getTopLeft(find.text('E-mail')).dy;
+      expect(topo, lessThan(844 * 0.45));
+    });
+
+    testWidgets('com o teclado aberto, Entrar fica acima dele', (tester) async {
+      await _abrir(tester, '/login', tela: const Size(390, 844));
+      tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pump(const Duration(milliseconds: 300));
+      final entrar = find.text('Entrar');
+      await tester.ensureVisible(entrar);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(tester.getRect(entrar).bottom, lessThanOrEqualTo(844 - 300));
+    });
+
     for (final (nome, tela, escala) in [
       ('390×844', const Size(390, 844), 1.0),
       ('360×690 com letra 1,3x', const Size(360, 690), 1.3),
