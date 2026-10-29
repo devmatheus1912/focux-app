@@ -29,6 +29,7 @@ class FichaVolume {
     this.grupos = const [],
     this.seriesSemGrupo = 0,
     this.exerciciosSemGrupo = 0,
+    this.rodizio = false,
   });
 
   static const vazio = FichaVolume();
@@ -37,6 +38,9 @@ class FichaVolume {
   final List<VolumeGrupo> grupos;
   final int seriesSemGrupo;
   final int exerciciosSemGrupo;
+
+  /// A semana tem dias que seguem a sequência: o volume é o da 1ª semana do rodízio.
+  final bool rodizio;
 
   bool get semSeries => totalSeries <= 0;
 
@@ -51,6 +55,7 @@ class FichaVolume {
           .toList(growable: false),
       seriesSemGrupo: (json['seriesSemGrupo'] as num?)?.toInt() ?? 0,
       exerciciosSemGrupo: (json['exerciciosSemGrupo'] as num?)?.toInt() ?? 0,
+      rodizio: json['rodizio'] == true,
     );
   }
 }

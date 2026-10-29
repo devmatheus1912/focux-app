@@ -8,6 +8,7 @@ import '../models/ficha_modelo.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
 
 enum FichaAcao {
+  mudarDivisao,
   aplicarModelo,
   salvarModelo,
   duplicarBase,
@@ -21,7 +22,7 @@ enum SessaoAcao { maisUm, renomear, descanso, mover, copiar }
 /// Dia sem sessão: descanso ou "segue a sequência".
 enum DiaAcao { adicionar, treinar, descanso }
 
-enum ModeloAcao { renomear, aplicar, recomecar, excluir }
+enum ModeloAcao { renomear, aplicar, mudarDivisao, recomecar, excluir }
 
 List<String> nomesDosDias(S s) => [
   s.rotinaDiaSeg,
@@ -39,6 +40,11 @@ Future<FichaAcao?> mostrarMenuDaFicha(BuildContext context) {
     context,
     title: s.rotinaMenuFicha,
     itens: [
+      FxActionSheetItem(
+        value: FichaAcao.mudarDivisao,
+        label: s.rotinaMudarDivisao,
+        icon: Icons.view_week_outlined,
+      ),
       FxActionSheetItem(
         value: FichaAcao.aplicarModelo,
         label: s.rotinaAplicarModelo,
@@ -94,6 +100,12 @@ Future<ModeloAcao?> mostrarMenuDoModelo(
         label: s.modeloRenomear,
         icon: Icons.edit_outlined,
       ),
+      if (comRecomecar)
+        FxActionSheetItem(
+          value: ModeloAcao.mudarDivisao,
+          label: s.rotinaMudarDivisao,
+          icon: Icons.view_week_outlined,
+        ),
       if (comRecomecar)
         FxActionSheetItem(
           value: ModeloAcao.recomecar,

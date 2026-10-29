@@ -5,6 +5,9 @@ import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/fx_action_link.dart';
 import '../../../core/widgets/fx_action_sheet.dart';
+import '../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../core/widgets/fx_motion.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../core/widgets/fx_choice_chip.dart';
 import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_link_row.dart';
@@ -303,5 +306,50 @@ class _FichaVaziaState extends State<FichaVazia> {
         ),
       ],
     ];
+  }
+}
+
+/// Folha com "Montar do zero" (dias → divisão → prévia) e um botão: novo modelo
+/// e "Mudar divisão" usam a mesma. Devolve o plano escolhido ou null.
+Future<PlanoDaFicha?> escolherDivisao(
+  BuildContext context, {
+  required String titulo,
+  required String botao,
+}) => showFxBottomSheet<PlanoDaFicha>(
+  context: context,
+  builder: (_) => _EscolherDivisaoFolha(titulo: titulo, botao: botao),
+);
+
+class _EscolherDivisaoFolha extends StatefulWidget {
+  const _EscolherDivisaoFolha({required this.titulo, required this.botao});
+
+  final String titulo;
+  final String botao;
+
+  @override
+  State<_EscolherDivisaoFolha> createState() => _EscolherDivisaoFolhaState();
+}
+
+class _EscolherDivisaoFolhaState extends State<_EscolherDivisaoFolha> {
+  PlanoDaFicha? _plano;
+
+  @override
+  Widget build(BuildContext context) {
+    return FxSheetFrame(
+      title: widget.titulo,
+      expand: true,
+      footer: Padding(
+        padding: const EdgeInsets.all(TokensStrip.s3),
+        child: FxLiquidPrimaryButton(
+          label: widget.botao,
+          onPressed: _plano == null ? null : () => Navigator.pop(context, _plano),
+        ),
+      ),
+      child: FichaVazia(
+        ocupado: false,
+        mostrarPrazo: false,
+        onPlano: (plano) => setState(() => _plano = plano),
+      ),
+    );
   }
 }

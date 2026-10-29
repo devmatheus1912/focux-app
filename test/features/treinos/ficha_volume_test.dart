@@ -238,6 +238,16 @@ void main() {
       expect(find.textContaining('Referência comum'), findsNothing);
     });
 
+    testWidgets('com rodízio, o total diz que é a 1ª semana', (tester) async {
+      await abrir(tester, const FichaVolume(totalSeries: 19, rodizio: true));
+      expect(find.text('19 séries de trabalho na 1ª semana'), findsOneWidget);
+    });
+
+    test('lê o rodízio do servidor', () {
+      expect(FichaVolume.fromJson({'totalSeries': 3, 'rodizio': true}).rodizio, isTrue);
+      expect(FichaVolume.fromJson({'totalSeries': 3}).rodizio, isFalse);
+    });
+
     testWidgets('tocar abre os grupos em ordem, a referência e o "sem grupo"', (tester) async {
       await abrir(tester, _volume);
       await tester.tap(find.text('Volume da semana'));

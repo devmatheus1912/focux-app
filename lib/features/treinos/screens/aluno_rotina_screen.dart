@@ -406,6 +406,8 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
     final acao = await mostrarMenuDaFicha(context);
     if (acao == null || !mounted) return;
     switch (acao) {
+      case FichaAcao.mudarDivisao:
+        await mudarDivisao();
       case FichaAcao.aplicarModelo:
         await _aplicarModelo();
       case FichaAcao.salvarModelo:

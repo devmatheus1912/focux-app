@@ -175,4 +175,29 @@ void main() {
       expect(semC[2].sessoes.single.nome, 'C2');
     });
   });
+
+  group('trocarDivisao', () {
+    List<DiaDaSemana> abc() => [
+      DiaDaSemana(dia: 1, sessoes: const [SessaoDaSemana(treinoId: 1, nome: 'A · Peito', exerciciosCount: 5)]),
+      DiaDaSemana(dia: 2, sessoes: const [SessaoDaSemana(treinoId: 2, nome: 'B · Costas', exerciciosCount: 4)]),
+      DiaDaSemana(dia: 3, sessoes: const [SessaoDaSemana(treinoId: 3, nome: 'C · Pernas', exerciciosCount: 6)]),
+      for (var d = 4; d <= 7; d++) DiaDaSemana(dia: d, descanso: true),
+    ];
+
+    test('ABC para ABCD em 4 dias: A, B e C ficam com treino e nome; D nasce vazio', () {
+      final troca = trocarDivisao(abc(), semanaPorDivisao(const [1, 2, 4, 5], umaPorDia(4)));
+      expect(troca.saem, isEmpty);
+      final sessoes = [
+        for (final d in troca.semana)
+          for (final x in d.sessoes) '${d.dia}:${x.treinoId}:${x.nome}',
+      ];
+      expect(sessoes, ['1:1:A · Peito', '2:2:B · Costas', '4:3:C · Pernas', '5:null:Treino D']);
+    });
+
+    test('ABC para AB: C sai e é avisado', () {
+      final troca = trocarDivisao(abc(), semanaPorDivisao(const [1, 2, 3, 4], divisoesSugeridas(4).first));
+      expect(troca.saem.map((x) => x.nome), ['C · Pernas']);
+      expect(troca.semana.where((d) => d.segueSequencia).map((d) => d.dia), [3, 4]);
+    });
+  });
 }

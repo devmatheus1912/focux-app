@@ -218,6 +218,8 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
         await aplicarModeloEmAluno(context, ref, modelo);
       case ModeloAcao.renomear:
         await renomearModelo(context, ref, modelo);
+      case ModeloAcao.mudarDivisao:
+        await mudarDivisao();
       case ModeloAcao.recomecar:
         await _recomecar();
       case ModeloAcao.excluir:

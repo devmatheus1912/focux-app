@@ -6,6 +6,7 @@ import '../../../l10n/app_localizations.dart';
 import '../providers/treinos_provider.dart';
 import '../utils/semana_da_fila.dart';
 import 'ficha_acoes.dart';
+import 'ficha_vazia.dart';
 
 /// Edição da semana que a ficha do aluno e o modelo fazem igual: adicionar,
 /// "…" da sessão e do dia, mover, copiar e marcar descanso. Cada tela diz de
@@ -74,6 +75,29 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
       case DiaAcao.descanso:
         await gravarSemanaInteira(alternarTreinoDescanso(semanaAtual, dia));
     }
+  }
+
+  /// Troca dias e divisão sem perder exercício (A com A); confirma se alguma sessão sai.
+  Future<void> mudarDivisao() async {
+    final s = S.of(context);
+    final plano = await escolherDivisao(
+      context,
+      titulo: s.rotinaMudarDivisao,
+      botao: s.rotinaMudarDivisao,
+    );
+    if (plano == null || !mounted) return;
+    final troca = trocarDivisao(semanaAtual, plano.semana);
+    if (troca.saem.isNotEmpty) {
+      final ok = await showFxConfirmSheet(
+        context,
+        title: s.rotinaMudarDivisaoTitulo,
+        message: s.rotinaMudarDivisaoSaem(troca.saem.map((x) => x.nome).join(', ')),
+        confirmLabel: s.rotinaMudarDivisao,
+        destructive: true,
+      );
+      if (!ok || !mounted) return;
+    }
+    await gravarSemanaInteira(troca.semana);
   }
 
   Future<void> marcarDescanso(int dia) async {

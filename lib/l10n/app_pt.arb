@@ -615,6 +615,12 @@
       "n": {"type": "int"}
     }
   },
+  "volumeNaPrimeiraSemana": "{series} na 1ª semana",
+  "@volumeNaPrimeiraSemana": {
+    "placeholders": {
+      "series": {"type": "String"}
+    }
+  },
   "volumeVazio": "Monte as sessões para ver o volume.",
   "volumeReferencia": "Referência comum para hipertrofia: 10 a 20 séries por semana por grupo. Ajuste ao seu aluno.",
   "volumeSemGrupo": "Sem grupo definido: {n, plural, =1{1 série} other{{n} séries}}",
@@ -675,6 +681,14 @@
   "@treinoMontarProxima": {
     "placeholders": {
       "nome": {"type": "String"}
+    }
+  },
+  "rotinaMudarDivisao": "Mudar divisão",
+  "rotinaMudarDivisaoTitulo": "Mudar a divisão?",
+  "rotinaMudarDivisaoSaem": "Saem da semana: {nomes}. As outras sessões ficam com os exercícios.",
+  "@rotinaMudarDivisaoSaem": {
+    "placeholders": {
+      "nomes": {"type": "String"}
     }
   },
   "rotinaSegueSequencia": "Segue a sequência",

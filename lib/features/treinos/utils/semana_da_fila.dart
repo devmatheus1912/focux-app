@@ -213,3 +213,40 @@ EstadoDaFicha estadoDaFicha(List<DiaDaSemana> semana) {
   }
   return EstadoDaFicha(dias: dias, sessoes: sessoes, prontas: prontas);
 }
+
+/// Resultado de "Mudar divisão": a semana nova e as sessões que saem dela.
+class DivisaoTrocada {
+  const DivisaoTrocada({required this.semana, required this.saem});
+
+  final List<DiaDaSemana> semana;
+  final List<SessaoDaSemana> saem;
+}
+
+/// Põe a [nova] semana (dias e letras escolhidos) no lugar da [atual] sem
+/// perder exercício: a 1ª sessão nova recebe a 1ª sessão de hoje (A com A),
+/// e assim por diante, mantendo treino e nome. Letras novas nascem vazias;
+/// as sessões de hoje que sobram saem.
+DivisaoTrocada trocarDivisao(List<DiaDaSemana> atual, List<DiaDaSemana> nova) {
+  final hoje = [
+    for (final d in atual)
+      for (final s in d.sessoes) s,
+  ];
+  var usadas = 0;
+  final semana = <DiaDaSemana>[];
+  for (final d in nova) {
+    if (d.sessoes.isEmpty) {
+      semana.add(d);
+      continue;
+    }
+    final sessoes = <SessaoDaSemana>[];
+    for (final nova in d.sessoes) {
+      sessoes.add(usadas < hoje.length ? hoje[usadas] : nova);
+      usadas++;
+    }
+    semana.add(d.copyWith(sessoes: sessoes));
+  }
+  return DivisaoTrocada(
+    semana: semana,
+    saem: usadas < hoje.length ? hoje.sublist(usadas) : const [],
+  );
+}

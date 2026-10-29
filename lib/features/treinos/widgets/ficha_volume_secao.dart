@@ -79,7 +79,9 @@ class _FichaVolumeSecaoState extends ConsumerState<FichaVolumeSecao> {
       children: [
         FxTapRow(
           title: s.volumeTitulo,
-          subtitle: s.volumeSeriesDeTrabalho(volume.totalSeries),
+          subtitle: volume.rodizio
+              ? s.volumeNaPrimeiraSemana(s.volumeSeriesDeTrabalho(volume.totalSeries))
+              : s.volumeSeriesDeTrabalho(volume.totalSeries),
           trailing: Icon(
             _aberta ? Icons.expand_less_rounded : Icons.expand_more_rounded,
             color: chrome.mute,

@@ -347,6 +347,29 @@ void main() {
     });
   });
 
+  group('mudar divisão', () {
+    testWidgets('pelo menu da ficha, mantém as sessões e grava a semana nova', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[]);
+
+      await _abrirMenuDaFicha(tester);
+      await tester.tap(find.text('Mudar divisão'));
+      await _settle(tester);
+      await tester.tap(find.text('4'));
+      await _settle(tester);
+      await tester.tap(find.text('ABCD'));
+      await _settle(tester);
+      await tester.tap(find.text('Mudar divisão').last);
+      await _settle(tester);
+
+      expect(find.text('Mudar a divisão?'), findsNothing, reason: 'nenhuma sessão sai');
+      final sessoes = [
+        for (final d in repo.ultimaSemana!)
+          for (final x in d.sessoes) '${d.dia}:${x.nome}',
+      ];
+      expect(sessoes, ['1:Peito', '2:Costas', '4:Treino C', '5:Treino D']);
+    });
+  });
+
   group('renomear', () {
     testWidgets('o "…" da sessão renomeia e busca a semana de novo', (tester) async {
       final (repo, _) = await _abrir(tester, <Object?>[]);

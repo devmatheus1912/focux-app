@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/tokens_strip.dart';
 import '../../../core/widgets/feedback_helper.dart';
 import '../../../core/widgets/fx_action_sheet.dart';
-import '../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
-import '../../../core/widgets/fx_motion.dart';
-import '../../../core/widgets/fx_sheet_frame.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../alunos/providers/alunos_provider.dart';
 import '../models/ficha_modelo.dart';
@@ -102,10 +98,7 @@ Future<bool> excluirModelo(BuildContext context, WidgetRef ref, FichaModelo mode
 /// O nome nasce da divisão ("ABC · 5 dias") e muda depois em Renomear.
 Future<void> criarNovoModelo(BuildContext context, WidgetRef ref) async {
   final s = S.of(context);
-  final plano = await showFxBottomSheet<PlanoDaFicha>(
-    context: context,
-    builder: (_) => const _NovoModeloFolha(),
-  );
+  final plano = await escolherDivisao(context, titulo: s.modelosNovo, botao: s.modeloCriar);
   if (plano == null || !context.mounted) return;
   try {
     final modelo = await ref.read(fichaModeloRepositoryProvider).criarPelaSemana(
@@ -116,37 +109,5 @@ Future<void> criarNovoModelo(BuildContext context, WidgetRef ref) async {
     if (context.mounted) context.push('/modelos/${modelo.id}');
   } catch (_) {
     if (context.mounted) FeedbackHelper.showError(context, s.checkinNaoSalvou);
-  }
-}
-
-class _NovoModeloFolha extends StatefulWidget {
-  const _NovoModeloFolha();
-
-  @override
-  State<_NovoModeloFolha> createState() => _NovoModeloFolhaState();
-}
-
-class _NovoModeloFolhaState extends State<_NovoModeloFolha> {
-  PlanoDaFicha? _plano;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = S.of(context);
-    return FxSheetFrame(
-      title: s.modelosNovo,
-      expand: true,
-      footer: Padding(
-        padding: const EdgeInsets.all(TokensStrip.s3),
-        child: FxLiquidPrimaryButton(
-          label: s.modeloCriar,
-          onPressed: _plano == null ? null : () => Navigator.pop(context, _plano),
-        ),
-      ),
-      child: FichaVazia(
-        ocupado: false,
-        mostrarPrazo: false,
-        onPlano: (plano) => setState(() => _plano = plano),
-      ),
-    );
   }
 }

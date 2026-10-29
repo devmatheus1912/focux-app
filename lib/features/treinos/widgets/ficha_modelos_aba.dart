@@ -85,6 +85,7 @@ class FichaModeloCard extends ConsumerWidget {
       case ModeloAcao.excluir:
         await excluirModelo(context, ref, modelo);
       case ModeloAcao.recomecar:
+      case ModeloAcao.mudarDivisao:
         break;
     }
   }
