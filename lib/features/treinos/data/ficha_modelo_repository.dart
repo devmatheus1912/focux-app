@@ -36,12 +36,6 @@ class FichaModeloRepository {
     required int alunoId,
   }) => _criar({'nome': nome, 'alunoId': alunoId});
 
-  /// Cria um modelo com Treino A, B, C… vazios nos dias padrão.
-  Future<FichaModelo> criarPorDias({
-    required String nome,
-    required int diasPorSemana,
-  }) => _criar({'nome': nome, 'diasPorSemana': diasPorSemana});
-
   /// Cria um modelo já com a semana montada (dias, divisão, segue a sequência).
   Future<FichaModelo> criarPelaSemana({
     required String nome,

@@ -101,14 +101,6 @@ const diasPorFrequencia = {
   7: [1, 2, 3, 4, 5, 6, 7],
 };
 
-/// Semana nova com Treino A, B, C… nos dias padrão da frequência escolhida.
-/// Os outros dias viram descanso. Fora de 2 a 7, devolve a semana vazia.
-List<DiaDaSemana> semanaPorFrequencia(int diasPorSemana) =>
-    semanaPorDivisao(
-      diasPorFrequencia[diasPorSemana] ?? const <int>[],
-      umaPorDia(diasPorSemana),
-    );
-
 /// Sessões da [divisao] nos primeiros [diasDeTreino] (1 a 7, em qualquer ordem).
 /// Dias de treino que sobram seguem a sequência; os outros são descanso.
 List<DiaDaSemana> semanaPorDivisao(List<int> diasDeTreino, Divisao divisao) {

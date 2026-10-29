@@ -1,5 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:focux_app/features/treinos/utils/divisao_catalogo.dart';
 import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
+
+
+/// Uma letra por dia nos dias padrão (o jeito antigo de criar a ficha).
+List<DiaDaSemana> semanaPorFrequencia(int dias) =>
+    semanaPorDivisao(diasPorFrequencia[dias] ?? const <int>[], umaPorDia(dias));
 
 void main() {
   _remontarTest();

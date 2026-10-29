@@ -453,10 +453,6 @@ class TreinoRepository {
     );
   }
 
-  Future<void> salvarComoTemplate(int id) async {
-    throwIfQueuedOffline(await _dio.post('/api/treinos/$id/template'));
-  }
-
   /// Troca o nome da sessão (ficha, modelo ou biblioteca).
   Future<Treino> renomearTreino(int id, String nome) async {
     final response = await _dio.patch('/api/treinos/$id', data: {'nome': nome});

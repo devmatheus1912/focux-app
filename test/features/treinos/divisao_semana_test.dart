@@ -13,6 +13,11 @@ String _resumo(List<DiaDaSemana> semana) => [
         : '${d.dia}:-',
 ].join(' ');
 
+
+/// Uma letra por dia nos dias padrão (o jeito antigo de criar a ficha).
+List<DiaDaSemana> semanaPorFrequencia(int dias) =>
+    semanaPorDivisao(diasPorFrequencia[dias] ?? const <int>[], umaPorDia(dias));
+
 void main() {
   group('divisoesSugeridas', () {
     test('2 a 7 dias têm sugestão, e a primeira é a recomendada', () {

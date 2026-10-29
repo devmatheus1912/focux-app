@@ -475,19 +475,6 @@
   "modelosNovo": "Novo modelo",
   "modelosVazioTitulo": "Nenhum modelo ainda",
   "modelosVazioSubtitulo": "Salve uma ficha como modelo ou crie um por dias da semana.",
-  "modelosQuantosDias": "Quantos dias por semana?",
-  "modeloNDias": "{n} dias",
-  "@modeloNDias": {
-    "placeholders": {
-      "n": {"type": "int"}
-    }
-  },
-  "modeloNomeSugerido": "Modelo de {n} dias",
-  "@modeloNomeSugerido": {
-    "placeholders": {
-      "n": {"type": "int"}
-    }
-  },
   "modeloContagem": "{sessoes, plural, =1{1 sessão} other{{sessoes} sessões}} · {exercicios, plural, =1{1 exercício} other{{exercicios} exercícios}}",
   "@modeloContagem": {
     "placeholders": {

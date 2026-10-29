@@ -305,7 +305,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
                           setState(() => _done.add('${day.nome}-$i'));
                         }
                       } catch (_) {
-                        // Erro já exibido em openMontarPorModelo.
+                        // Erro já exibido em openSugerirExercicios.
                       } finally {
                         if (mounted) setState(() => _saving = false);
                       }
@@ -332,7 +332,7 @@ class _TemplateSlotEditorState extends ConsumerState<_TemplateSlotEditor> {
             _TemplateCompleteCard(
               onBackToWorkout: () {
                 HapticFeedback.mediumImpact();
-                // Fecha só o editor; onCompleted fecha Montar por modelo.
+                // Fecha só o editor; onCompleted fecha a tela de Sugerir exercícios.
                 if (Navigator.of(context).canPop()) {
                   Navigator.pop(context);
                 }

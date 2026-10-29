@@ -31,7 +31,7 @@ Future<void> showAddExercicioHelpSheet(BuildContext context) {
       ),
       FxHelpTip(
         'Modelos',
-        'No detalhe do treino, Montar por modelo lista estruturas por dias na semana.',
+        'No detalhe do treino, Sugerir exercícios traz os blocos da letra desta sessão (ex.: B · Costas e bíceps).',
         icon: 'spark',
       ),
     ],
