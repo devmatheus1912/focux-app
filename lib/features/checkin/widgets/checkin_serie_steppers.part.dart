@@ -36,7 +36,8 @@ class _CheckinSetSteppers extends StatelessWidget {
           Expanded(
             child: _CheckinStepper(
               label: s.checkinStepperKg,
-              value: checkinCargaLabel(cargaKg) ?? '—',
+              // O rótulo "kg" já está acima do número: sem a unidade ele não quebra.
+              value: cargaKg == null ? '—' : fxNumberPadTexto(cargaKg),
               onMinus: onMinusCarga,
               onPlus: onPlusCarga,
               onEditar:
@@ -148,8 +149,12 @@ class _CheckinStepper extends StatelessWidget {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minHeight: 56),
                     child: Center(
-                      child: Text(
+                      // Cabe sempre numa linha: encolhe em vez de quebrar.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
                         value,
+                        maxLines: 1,
                         textAlign: TextAlign.center,
                         // Número grande: lido de longe, com a mão ocupada.
                         style: FocuxHubTypography.metric(
@@ -157,6 +162,7 @@ class _CheckinStepper extends StatelessWidget {
                           fontSize: 34,
                           fontWeight: FontWeight.w800,
                         ),
+                      ),
                       ),
                     ),
                   ),

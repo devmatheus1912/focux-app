@@ -53,7 +53,10 @@ class AlunoShell extends ConsumerWidget {
                     child: MediaQuery.removePadding(
                       context: context,
                       removeBottom: !onChat,
-                      child: FxShellInsetOwner(child: navigationShell),
+                      child: FxShellInsetOwner(
+                        removeTopPadding: true,
+                        child: navigationShell,
+                      ),
                     ),
                   ),
                 ),

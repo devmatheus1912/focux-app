@@ -105,6 +105,20 @@ void main() {
     });
   });
 
+  group('stepper de carga e reps', () {
+    testWidgets('em tela estreita o número fica numa linha só (sem 2,/5/kg)', (
+      tester,
+    ) async {
+      await pumpCheckin(tester, FakeCheckinRepo(), tela: const Size(320, 900));
+      // a carga aparece sem a unidade (o rótulo "kg" já está acima) e inteira
+      final carga = find.text('20');
+      expect(carga, findsOneWidget);
+      expect(tester.getSize(carga).height, lessThan(60));
+      expect(find.text('20 kg'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('faixa de desfazer', () {
     testWidgets('depois de registrar mostra a faixa com botão Desfazer', (
       tester,
