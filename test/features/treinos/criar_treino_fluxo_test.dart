@@ -463,7 +463,7 @@ void main() {
     expect(find.bySemanticsLabel('Detalhe do treino'), findsNothing);
   });
 
-  testWidgets('menu do detalhe explica atribuir × copiar', (tester) async {
+  testWidgets('menu do detalhe na biblioteca: aplicar (cópia), duplicar, sem template', (tester) async {
     final router = GoRouter(
       initialLocation: '/treinos/12',
       routes: [
@@ -482,15 +482,16 @@ void main() {
     await tester.tap(find.byTooltip('Opções do treino'));
     await _settle(tester);
 
-    expect(find.text('Atribuir a aluno'), findsOneWidget);
-    expect(
-      find.text('Mesmo treino: suas edições chegam ao aluno'),
-      findsOneWidget,
-    );
-    expect(find.text('Copiar para aluno'), findsOneWidget);
+    expect(find.text('Aplicar na ficha de um aluno'), findsOneWidget);
     expect(
       find.text('Cópia só do aluno: o original não muda'),
       findsOneWidget,
     );
+    expect(find.text('Duplicar sessão'), findsOneWidget);
+    expect(find.text('Renomear sessão'), findsOneWidget);
+    expect(find.text('Excluir treino'), findsOneWidget);
+    expect(find.text('Copiar para aluno'), findsNothing);
+    expect(find.text('Salvar como template'), findsNothing);
+    expect(find.text('Tirar da ficha'), findsNothing);
   });
 }

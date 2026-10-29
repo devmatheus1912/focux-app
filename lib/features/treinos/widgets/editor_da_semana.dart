@@ -21,6 +21,9 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
   /// Grava a semana inteira; devolve true quando gravou.
   Future<bool> gravarSemanaInteira(List<DiaDaSemana> dias);
 
+  /// Busca a semana de novo (depois de renomear uma sessão, por exemplo).
+  Future<void> recarregarSemana();
+
   Future<void> adicionarNoDia(int dia) async {
     final nome = await pedirNomeDaSessao(context);
     if (nome == null || !mounted) return;
@@ -40,6 +43,8 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
     switch (acao) {
       case SessaoAcao.maisUm:
         await adicionarNoDia(dia);
+      case SessaoAcao.renomear:
+        await _renomear(sessao);
       case SessaoAcao.descanso:
         await marcarDescanso(dia);
       case SessaoAcao.mover:
@@ -85,6 +90,23 @@ mixin EditorDaSemana<W extends ConsumerStatefulWidget> on ConsumerState<W> {
       for (final d in semanaAtual)
         d.dia == dia ? DiaDaSemana(dia: d.dia, descanso: true) : d,
     ]);
+  }
+
+  Future<void> _renomear(SessaoDaSemana sessao) async {
+    final s = S.of(context);
+    final nome = await pedirTexto(context, titulo: s.treinoRenomear, inicial: sessao.nome);
+    if (nome == null || !mounted || sessao.treinoId == null) return;
+    definirGravando(true);
+    try {
+      await ref.read(treinoRepositoryProvider).renomearTreino(sessao.treinoId!, nome);
+      if (!mounted) return;
+      definirGravando(false);
+      await recarregarSemana();
+    } catch (_) {
+      if (!mounted) return;
+      definirGravando(false);
+      FeedbackHelper.showError(context, s.checkinNaoSalvou);
+    }
   }
 
   Future<void> _copiarSessao(SessaoDaSemana sessao, int para) async {

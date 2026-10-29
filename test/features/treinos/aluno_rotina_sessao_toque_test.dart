@@ -29,6 +29,13 @@ class _FakeTreinoRepository extends TreinoRepository {
   List<DiaDaSemana>? ultimaSemana;
   final copias = <(int, int, bool)>[];
   final duplicados = <int>[];
+  final renomeados = <(int, String)>[];
+
+  @override
+  Future<Treino> renomearTreino(int id, String nome) async {
+    renomeados.add((id, nome));
+    return Treino(id: id, nome: nome, exercicios: const []);
+  }
   final vigencias = <(int, int)>[];
   final renovacoes = <(int, int)>[];
   var vigenciasRemovidas = 0;
@@ -337,6 +344,29 @@ void main() {
     testWidgets('copiar de outro aluno aparece na ficha vazia', (tester) async {
       await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
       expect(find.text('Copiar a ficha de outro aluno'), findsOneWidget);
+    });
+  });
+
+  group('renomear', () {
+    testWidgets('o "…" da sessão renomeia e busca a semana de novo', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[]);
+      final antes = repo.buscas;
+
+      await _abrirMenuDaSessao(tester);
+      await tester.tap(find.text('Renomear sessão'));
+      await _settle(tester);
+      await tester.enterText(find.byType(TextField), 'A · Peito e tríceps');
+      await tester.tap(find.text('Pronto').last);
+      await _settle(tester);
+
+      expect(repo.renomeados, [(7, 'A · Peito e tríceps')]);
+      expect(repo.buscas, greaterThan(antes));
+    });
+
+    testWidgets('sessão sem treino não oferece renomear', (tester) async {
+      await _abrir(tester, <Object?>[]);
+      await _abrirMenuDaSessao(tester, indice: 1);
+      expect(find.text('Renomear sessão'), findsNothing);
     });
   });
 

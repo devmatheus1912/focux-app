@@ -6,6 +6,7 @@ import '../../../../core/theme/brand_palette.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/focux_hub_typography.dart';
 import '../../../../core/theme/fx_settings_layout.dart';
+import '../../../../core/widgets/fx_action_sheet.dart';
 import '../../../../core/widgets/fx_bottom_sheet.dart';
 import '../../../../core/widgets/fx_settings_group.dart';
 import '../../../../core/widgets/fx_settings_tile.dart';
@@ -14,20 +15,73 @@ import '../../data/template_splits.dart';
 import '../../utils/template_split_catalog.dart';
 import 'padrao_exercicios_bottom_sheet.dart';
 
+/// Um modelo com só o dia [indice]: os blocos de uma sessão (ex.: só o B do ABC).
+TemplateSplit soODia(TemplateSplit template, int indice) => TemplateSplit(
+  id: template.id,
+  nome: template.nome,
+  descricao: template.descricao,
+  grupo: template.grupo,
+  diasSemana: template.diasSemana,
+  dias: [template.dias[indice]],
+);
+
+/// Editor dos blocos de um dia só, aberto direto pela sessão.
+class TemplateDiaEditor extends StatelessWidget {
+  const TemplateDiaEditor({
+    super.key,
+    required this.template,
+    required this.indice,
+    required this.onAdicionar,
+    this.onCompleted,
+    this.alreadyInTreinoIds = const {},
+  });
+
+  final TemplateSplit template;
+  final int indice;
+  final Future<void> Function(Exercicio exercicio) onAdicionar;
+  final VoidCallback? onCompleted;
+  final Set<int> alreadyInTreinoIds;
+
+  @override
+  Widget build(BuildContext context) => _TemplateSlotEditor(
+    template: soODia(template, indice),
+    alreadyInTreinoIds: alreadyInTreinoIds,
+    onAdicionar: onAdicionar,
+    onCompleted: onCompleted,
+  );
+}
+
 class TemplateSplitPicker extends StatelessWidget {
   const TemplateSplitPicker({
     super.key,
     required this.onAdicionar,
     this.onCompleted,
     this.alreadyInTreinoIds = const {},
+    this.umDiaSo = false,
   });
 
   final Future<void> Function(Exercicio exercicio) onAdicionar;
   final VoidCallback? onCompleted;
   final Set<int> alreadyInTreinoIds;
 
-  void _openTemplate(BuildContext context, TemplateSplit template) {
+  /// Os exercícios vão para uma sessão só: com vários dias, pergunta qual antes.
+  final bool umDiaSo;
+
+  Future<void> _openTemplate(BuildContext context, TemplateSplit original) async {
     HapticFeedback.selectionClick();
+    var template = original;
+    if (umDiaSo && original.dias.length > 1) {
+      final indice = await showFxActionSheet<int>(
+        context,
+        title: original.nome,
+        itens: [
+          for (final (i, dia) in original.dias.indexed)
+            FxActionSheetItem(value: i, label: dia.nome, icon: Icons.view_day_rounded),
+        ],
+      );
+      if (indice == null || !context.mounted) return;
+      template = soODia(original, indice);
+    }
     Navigator.push(
       context,
       MaterialPageRoute(

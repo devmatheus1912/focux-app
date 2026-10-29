@@ -6,6 +6,8 @@ Future<void> _dispatchTreinoDetailAction({
   required Treino treino,
   required int treinoId,
   required int? alunoId,
+  String? alunoNome,
+  int? modeloId,
   required bool isDark,
   required String action,
   VoidCallback? onAssigned,
@@ -26,11 +28,12 @@ Future<void> _dispatchTreinoDetailAction({
         ref.invalidate(treinoProvider(treinoId));
       }
       break;
-    case 'template_split':
-      await openMontarPorModelo(
+    case 'sugerir':
+      await openSugerirExercicios(
         context: context,
         ref: ref,
         treinoId: treinoId,
+        nomeDaSessao: treino.nome,
         alreadyInTreinoIds: treino.exercicios
             .map((item) => item.exercicio.id)
             .toSet(),
@@ -78,64 +81,81 @@ Future<void> _dispatchTreinoDetailAction({
         }
       }
       break;
-    case 'clone':
+    case 'rename':
+      final s = S.of(context);
+      final nome = await pedirTexto(context, titulo: s.treinoRenomear, inicial: treino.nome);
+      if (nome == null || !context.mounted) break;
       try {
-        final alunos = await ref.read(alunosProvider.future);
-        if (!context.mounted) return;
-        final selected = await _showTreinoSheet<TreinoAtribuicaoResult>(
-          context: context,
-          builder:
-              (dialogContext) => TreinoAssignSheet(
-                alunos: alunos,
-                isDark: isDark,
-                title: 'Cópia para aluno',
-                subtitleWhenReady: 'Escolha quem recebe a cópia dedicada.',
-                confirmLabel: 'Criar cópia',
-              ),
-        );
-        if (selected == null) return;
-        await repo.clonarParaAluno(treinoId, selected.alunoId);
-        AnalyticsService.instance.track(
-          ProductEvents.treinosCloned,
-          props: {'source': 'detail', 'id': treinoId},
-        );
+        await repo.renomearTreino(treinoId, nome);
+        ref.invalidate(treinoProvider(treinoId));
+        if (alunoId != null) ref.invalidate(alunoRotinaProvider(alunoId));
+        if (modeloId != null) ref.invalidate(fichaModeloProvider(modeloId));
         invalidateTreinosCaches(ref);
-        invalidateTreinosDoAluno(ref, selected.alunoId);
+      } catch (e) {
+        if (context.mounted) FeedbackHelper.showApiFailure(context, e);
+      }
+      break;
+    case 'copy_day':
+      final para = await escolherDia(context);
+      if (para == null || !context.mounted) break;
+      try {
+        final semana = await lerSemanaDoLugar(ref, alunoId: alunoId, modeloId: modeloId);
+        if (semana == null) break;
+        final copia = await repo.duplicar(treinoId);
+        await gravarSemanaDoLugar(
+          ref,
+          alunoId: alunoId,
+          modeloId: modeloId,
+          dias: comSessaoNoDia(
+            semana,
+            dia: para,
+            sessao: SessaoDaSemana(
+              treinoId: copia.id,
+              nome: copia.nome,
+              exerciciosCount: treino.exercicios.length,
+            ),
+          ),
+        );
         if (context.mounted) {
-          FeedbackHelper.showSuccess(
-            context,
-            'Cópia dedicada criada para o aluno.',
-          );
+          FeedbackHelper.showSuccess(context, S.of(context).treinoCopiadoPara(nomesDosDias(S.of(context))[para - 1]));
         }
       } catch (e) {
-        if (context.mounted) {
-          FeedbackHelper.showApiFailure(context, e);
-        }
+        if (context.mounted) FeedbackHelper.showApiFailure(context, e);
+      }
+      break;
+    case 'remove_from':
+      final s = S.of(context);
+      final ok = await showFxConfirmSheet(
+        context,
+        title: alunoId != null ? s.treinoTirarDaFichaTitulo : s.treinoTirarDoModeloTitulo,
+        message: s.treinoTirarTexto,
+        confirmLabel: alunoId != null ? s.treinoTirarDaFicha : s.treinoTirarDoModelo,
+        destructive: true,
+      );
+      if (!ok || !context.mounted) break;
+      try {
+        final semana = await lerSemanaDoLugar(ref, alunoId: alunoId, modeloId: modeloId);
+        if (semana == null) break;
+        await gravarSemanaDoLugar(
+          ref,
+          alunoId: alunoId,
+          modeloId: modeloId,
+          dias: semanaSemASessao(semana, treinoId),
+        );
+        if (context.mounted) safePopOrGo(context, '/treinos');
+      } catch (e) {
+        if (context.mounted) FeedbackHelper.showApiFailure(context, e);
       }
       break;
     case 'duplicate':
       try {
-        await repo.duplicar(treinoId);
+        final copia = await repo.duplicar(treinoId);
         AnalyticsService.instance.track(
           ProductEvents.treinosDuplicated,
           props: {'source': 'detail', 'id': treinoId},
         );
         invalidateTreinosCaches(ref);
-        if (context.mounted) {
-          FeedbackHelper.showSuccess(context, 'Treino duplicado com sucesso.');
-        }
-      } catch (e) {
-        if (context.mounted) {
-          FeedbackHelper.showApiFailure(context, e);
-        }
-      }
-      break;
-    case 'template':
-      try {
-        await repo.salvarComoTemplate(treinoId);
-        if (context.mounted) {
-          FeedbackHelper.showSuccess(context, 'Treino salvo como template.');
-        }
+        if (context.mounted) context.pushReplacement('/treinos/${copia.id}');
       } catch (e) {
         if (context.mounted) {
           FeedbackHelper.showApiFailure(context, e);

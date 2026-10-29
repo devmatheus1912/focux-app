@@ -16,7 +16,7 @@ enum FichaAcao {
   fichasAnteriores,
 }
 
-enum SessaoAcao { maisUm, descanso, mover, copiar }
+enum SessaoAcao { maisUm, renomear, descanso, mover, copiar }
 
 /// Dia sem sessão: descanso ou "segue a sequência".
 enum DiaAcao { adicionar, treinar, descanso }
@@ -125,6 +125,12 @@ Future<SessaoAcao?> mostrarMenuDaSessao(
         label: s.rotinaMaisUmNesteDia,
         icon: Icons.add_rounded,
       ),
+      if (podeCopiar)
+        FxActionSheetItem(
+          value: SessaoAcao.renomear,
+          label: s.treinoRenomear,
+          icon: Icons.edit_outlined,
+        ),
       FxActionSheetItem(
         value: SessaoAcao.mover,
         label: s.rotinaMoverDia,

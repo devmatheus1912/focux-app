@@ -190,9 +190,35 @@ void main() {
       expect(find.text('Atribuir'), findsNothing);
     });
 
-    testWidgets('aberta pelos modelos: continua com Atribuir', (tester) async {
+    testWidgets('pela ficha, o rodapé oferece montar a próxima sessão vazia', (tester) async {
+      await abrir(tester, alunoId: 3);
+      expect(find.text('Montar Treino B'), findsOneWidget);
+    });
+
+    testWidgets('pela ficha, o menu tem Tirar da ficha e Copiar para outro dia, sem Excluir', (tester) async {
+      await abrir(tester, alunoId: 3);
+      await tester.tap(find.byTooltip('Opções do treino'));
+      await _settle(tester);
+
+      expect(find.text('Tirar da ficha'), findsOneWidget);
+      expect(find.text('Copiar para outro dia'), findsOneWidget);
+      expect(find.text('Renomear sessão'), findsOneWidget);
+      expect(find.text('Sugerir exercícios'), findsOneWidget);
+      expect(find.text('Excluir treino'), findsNothing);
+      expect(find.text('Duplicar sessão'), findsNothing);
+      expect(find.text('Aplicar na ficha de um aluno'), findsNothing);
+      expect(find.text('Salvar como template'), findsNothing);
+    });
+
+    testWidgets('pela biblioteca, sem rodapé de sequência', (tester) async {
       await abrir(tester);
-      expect(find.text('Atribuir'), findsOneWidget);
+      expect(find.textContaining('Montar Treino'), findsNothing);
+      expect(find.text('Voltar à ficha'), findsNothing);
+    });
+
+    testWidgets('aberta pela biblioteca: sem o chip Atribuir no topo', (tester) async {
+      await abrir(tester);
+      expect(find.text('Atribuir'), findsNothing);
       expect(find.textContaining('Ficha de'), findsNothing);
     });
 

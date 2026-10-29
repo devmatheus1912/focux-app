@@ -6,6 +6,8 @@ Future<void> _openTreinoDetailMenu({
   required Treino treino,
   required int treinoId,
   required int? alunoId,
+  required String? alunoNome,
+  required int? modeloId,
   required bool isDark,
   required VoidCallback onAssigned,
 }) async {
@@ -13,6 +15,9 @@ Future<void> _openTreinoDetailMenu({
       ProductEvents.treinoDetailMenuOpened,
       props: {'id': treinoId},
     );
+    final lugar = lugarDoTreino(alunoId: alunoId, modeloId: modeloId);
+    final naSemana = lugar != LugarDoTreino.biblioteca;
+    final temSugestao = sugestaoDaSessao(treino.nome) != null;
     final action = await _showTreinoSheet<String>(
       context: context,
       builder: (sheetContext) {
@@ -33,44 +38,57 @@ Future<void> _openTreinoDetailMenu({
               showChevron: true,
               onTap: () => Navigator.pop(sheetContext, 'add'),
             ),
+            if (naSemana || temSugestao)
+              TreinoInsetActionSpec(
+                icon: Icons.auto_awesome_rounded,
+                label: temSugestao
+                    ? s.treinoSugerirDe(treino.nome.trim())
+                    : s.treinoSugerirExercicios,
+                grupo: 'Montar',
+                onTap: () => Navigator.pop(sheetContext, 'sugerir'),
+              ),
             TreinoInsetActionSpec(
-              icon: Icons.view_agenda_outlined,
-              label: 'Montar por modelo',
+              icon: Icons.edit_outlined,
+              label: s.treinoRenomear,
               grupo: 'Montar',
-              onTap: () => Navigator.pop(sheetContext, 'template_split'),
+              onTap: () => Navigator.pop(sheetContext, 'rename'),
             ),
-            TreinoInsetActionSpec(
-              icon: Icons.person_add_alt_1_rounded,
-              label: s.treinoDetalheAtribuirAluno,
-              grupo: 'Usar',
-              subtitle: s.treinoDetalheAtribuirSubtitulo,
-              onTap: () => Navigator.pop(sheetContext, 'assign'),
-            ),
-            TreinoInsetActionSpec(
-              icon: Icons.assignment_ind_rounded,
-              label: 'Copiar para aluno',
-              grupo: 'Usar',
-              subtitle: s.treinoDetalheCopiarSubtitulo,
-              onTap: () => Navigator.pop(sheetContext, 'clone'),
-            ),
-            TreinoInsetActionSpec(
-              icon: Icons.control_point_duplicate_rounded,
-              label: 'Duplicar treino',
-              grupo: 'Guardar',
-              onTap: () => Navigator.pop(sheetContext, 'duplicate'),
-            ),
-            TreinoInsetActionSpec(
-              icon: Icons.bookmark_border_rounded,
-              label: 'Salvar como template',
-              grupo: 'Guardar',
-              onTap: () => Navigator.pop(sheetContext, 'template'),
-            ),
-            TreinoInsetActionSpec(
-              icon: Icons.delete_outline_rounded,
-              label: 'Excluir treino',
-              danger: true,
-              onTap: () => Navigator.pop(sheetContext, 'delete'),
-            ),
+            if (naSemana)
+              TreinoInsetActionSpec(
+                icon: Icons.copy_rounded,
+                label: s.rotinaCopiarDia,
+                grupo: 'Semana',
+                onTap: () => Navigator.pop(sheetContext, 'copy_day'),
+              )
+            else ...[
+              TreinoInsetActionSpec(
+                icon: Icons.control_point_duplicate_rounded,
+                label: s.treinoDuplicarSessao,
+                grupo: 'Usar',
+                onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+              ),
+              TreinoInsetActionSpec(
+                icon: Icons.person_add_alt_1_rounded,
+                label: s.treinoAplicarNaFicha,
+                grupo: 'Usar',
+                subtitle: s.treinoDetalheCopiarSubtitulo,
+                onTap: () => Navigator.pop(sheetContext, 'assign'),
+              ),
+            ],
+            if (naSemana)
+              TreinoInsetActionSpec(
+                icon: Icons.remove_circle_outline_rounded,
+                label: lugar == LugarDoTreino.ficha ? s.treinoTirarDaFicha : s.treinoTirarDoModelo,
+                danger: true,
+                onTap: () => Navigator.pop(sheetContext, 'remove_from'),
+              )
+            else
+              TreinoInsetActionSpec(
+                icon: Icons.delete_outline_rounded,
+                label: 'Excluir treino',
+                danger: true,
+                onTap: () => Navigator.pop(sheetContext, 'delete'),
+              ),
           ],
         );
       },
@@ -86,6 +104,8 @@ Future<void> _openTreinoDetailMenu({
       treino: treino,
       treinoId: treinoId,
       alunoId: alunoId,
+      alunoNome: alunoNome,
+      modeloId: modeloId,
       isDark: isDark,
       action: action,
       onAssigned: onAssigned,
@@ -222,21 +242,7 @@ class _TreinoDetailBody extends StatelessWidget {
                         modeloId: modeloId!,
                         treinoId: treinoId,
                       )
-                    else ...[
-                      const SizedBox(height: TokensStrip.s3),
-                      Wrap(
-                        spacing: TokensStrip.s2,
-                        runSpacing: TokensStrip.s2,
-                        children: [
-                          FxActionChip(
-                            label: 'Atribuir',
-                            accent: primary,
-                            isDark: isDark,
-                            onPressed: openAssign,
-                          ),
-                        ],
-                      ),
-                    ],
+
                   ],
                 ),
               ),
@@ -338,10 +344,13 @@ class _TreinoDetailBody extends StatelessWidget {
                           onPressed: () => openAdd(),
                         ),
                         const SizedBox(height: 8),
-                        FxTonalButton(label: 'Montar por modelo', onPressed: () => openMontarPorModelo(
+                        FxTonalButton(label: sugestaoDaSessao(treino.nome) != null
+                            ? S.of(context).treinoSugerirDe(treino.nome.trim())
+                            : S.of(context).treinoSugerirExercicios, onPressed: () => openSugerirExercicios(
                             context: context,
                             ref: ref,
                             treinoId: treinoId,
+                            nomeDaSessao: treino.nome,
                             alreadyInTreinoIds: const {},
                           ), compact: true),
                       ],
@@ -357,6 +366,24 @@ class _TreinoDetailBody extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         FxTonalButton(label: 'Adicionar exercício', onPressed: () => openAdd(), compact: true),
+                      ],
+                    )
+                    : alunoId != null || modeloId != null
+                    ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FxLiquidPrimaryButton(
+                          label: 'Adicionar exercício',
+                          onPressed: () => openAdd(),
+                        ),
+                        const SizedBox(height: 8),
+                        MontarEmSequencia(
+                          treinoId: treinoId,
+                          alunoId: alunoId,
+                          alunoNome: alunoNome,
+                          modeloId: modeloId,
+                        ),
                       ],
                     )
                     : FxLiquidPrimaryButton(

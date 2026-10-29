@@ -79,3 +79,16 @@ List<Divisao> outrasDivisoes(int dias) => [
 
 /// Uma letra por dia: o comportamento de antes da divisão.
 Divisao umaPorDia(int dias) => _generica(dias.clamp(0, 7));
+
+/// O dia do modelo de exercícios que corresponde a uma sessão pelo nome
+/// ("B · Costas e bíceps" → ABC, dia B). Nome genérico ("Treino B") não casa:
+/// várias divisões usam as mesmas letras.
+(TemplateSplit, int)? sugestaoDaSessao(String nome) {
+  final alvo = nome.trim();
+  if (alvo.isEmpty || RegExp(r'^Treino [A-G]$').hasMatch(alvo)) return null;
+  for (final split in templateSplits) {
+    final i = _doSplit(split.id).indexOf(alvo);
+    if (i >= 0) return (split, split.dias.length == 1 ? 0 : i);
+  }
+  return null;
+}

@@ -155,6 +155,9 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen>
   @override
   Future<bool> gravarSemanaInteira(List<DiaDaSemana> dias) => _persistir(dias);
 
+  @override
+  Future<void> recarregarSemana() => _carregar();
+
   Future<bool> _persistir(List<DiaDaSemana> dias) {
     setState(() => _dias = dias);
     if (estadoDaFicha(dias).vazia) _medicao.iniciar(DateTime.now());

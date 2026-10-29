@@ -57,8 +57,8 @@ void main() {
     expect(screen, contains('ProductEvents.treinoPrescriptionSaved'));
     expect(screen, contains('treinoPrescriptionRejection'));
     expect(screen, contains('openAdd()'));
-    expect(screen, contains('Montar por modelo'));
-    expect(screen, contains('openMontarPorModelo'));
+    expect(screen, contains('openSugerirExercicios'));
+    expect(screen, contains('MontarEmSequencia'));
     expect(screen, contains('TreinosLayout.touchTarget'));
     expect(screen, contains('TreinoAssignSheet'));
     expect(screen, contains('includePrazo: true'));
@@ -140,15 +140,16 @@ void main() {
     expect(screen, isNot(contains('TreinoPrescriptionField')));
     expect(screen, isNot(contains('TreinoTipoSeriePicker')));
     expect(screen, contains('FxLiquidPrimaryButton'));
-    expect(screen, contains('FxActionChip'));
+    // O chip "Atribuir" do topo saiu (SPEC-ficha-divisao, parte G).
+    expect(screen, isNot(contains('FxActionChip')));
     expect(screen, isNot(contains("label: 'Grupos'")));
     expect(screen, isNot(contains("label: 'Carga'")));
     expect(screen, isNot(contains("label: 'Exercícios'")));
     expect(screen, isNot(contains("label: 'Séries'")));
     expect(screen, isNot(contains('freshnessLabel')));
-    expect(screen, contains("label: 'Atribuir'"));
+    expect(screen, isNot(contains("label: 'Atribuir'")));
     expect(screen, isNot(contains("label: 'Lista'")));
-    expect(screen, contains("label: 'Duplicar treino'"));
+    expect(screen, contains('treinoDuplicarSessao'));
     expect(
       File(
         'lib/features/treinos/screens/treino_detail_screen_body.part.dart',

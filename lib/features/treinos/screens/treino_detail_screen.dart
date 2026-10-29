@@ -43,12 +43,17 @@ import '../widgets/ficha_contexto_treino.dart';
 import '../widgets/modelo_contexto_treino.dart';
 import '../widgets/treino_assign_sheet.dart';
 import '../widgets/montar_por_modelo.dart';
+import '../widgets/treino_no_lugar.dart';
+import '../widgets/ficha_acoes.dart';
+import '../providers/ficha_modelos_provider.dart';
+import '../utils/divisao_catalogo.dart';
+import '../utils/semana_da_fila.dart';
+import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../widgets/treino_detail_help_sheet.dart';
 import '../widgets/treino_inset_sheet.dart';
 import '../widgets/prescription_editor_sheet.dart';
 import '../widgets/treino_prescription_video_block.dart';
 import '../data/workout_builder_preset.dart';
-import '../../../core/widgets/fx_action_chip.dart';
 import '../../../l10n/app_localizations.dart';
 
 part 'treino_detail_screen_body.part.dart';
@@ -154,6 +159,8 @@ class _TreinoDetailScreenState extends ConsumerState<TreinoDetailScreen> {
               _TreinoDetailOverflowButton(
                 treinoId: treinoId,
                 alunoId: alunoId,
+                alunoNome: alunoNome,
+                modeloId: widget.modeloId,
                 isDark: isDark,
                 onAssigned: _onAssigned,
               ),
@@ -279,12 +286,16 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
   const _TreinoDetailOverflowButton({
     required this.treinoId,
     required this.alunoId,
+    required this.alunoNome,
+    required this.modeloId,
     required this.isDark,
     required this.onAssigned,
   });
 
   final int treinoId;
   final int? alunoId;
+  final String? alunoNome;
+  final int? modeloId;
   final bool isDark;
   final VoidCallback onAssigned;
 
@@ -300,6 +311,8 @@ class _TreinoDetailOverflowButton extends ConsumerWidget {
         treino: treino,
         treinoId: treinoId,
         alunoId: alunoId,
+        alunoNome: alunoNome,
+        modeloId: modeloId,
         isDark: isDark,
         onAssigned: onAssigned,
       ),

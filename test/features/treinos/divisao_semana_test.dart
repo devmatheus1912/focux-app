@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
 import 'package:focux_app/features/treinos/utils/divisao_catalogo.dart';
 import 'package:focux_app/features/treinos/utils/semana_da_fila.dart';
+import 'package:focux_app/features/treinos/widgets/treino_no_lugar.dart';
 
 String _resumo(List<DiaDaSemana> semana) => [
   for (final d in semana)
@@ -126,5 +127,52 @@ void main() {
     final base = semanaPorDivisao(const [1, 2, 3], umaPorDia(2));
     final movida = moverDia(base, de: 1, para: 3);
     expect(_resumo(movida), '1:segue 2:Treino B 3:Treino A 4:- 5:- 6:- 7:-');
+  });
+
+  group('sugestaoDaSessao', () {
+    test('nome com foco acha o dia do modelo', () {
+      final b = sugestaoDaSessao('B · Costas e bíceps');
+      expect(b?.$1.id, 'bro-split');
+      expect(b?.$2, 1);
+      expect(sugestaoDaSessao('A · Superior')?.$1.id, 'upper-lower');
+      expect(sugestaoDaSessao('Inferior B')?.$2, 1);
+      expect(sugestaoDaSessao('Full body')?.$2, 0);
+    });
+
+    test('nome genérico ou desconhecido não casa', () {
+      expect(sugestaoDaSessao('Treino B'), isNull);
+      expect(sugestaoDaSessao('Peito do João'), isNull);
+      expect(sugestaoDaSessao(''), isNull);
+    });
+  });
+
+  group('sessões no lugar', () {
+    List<DiaDaSemana> semana() => [
+      DiaDaSemana(dia: 1, sessoes: const [SessaoDaSemana(treinoId: 1, nome: 'A', exerciciosCount: 3)]),
+      DiaDaSemana(dia: 2, sessoes: const [SessaoDaSemana(treinoId: 2, nome: 'B', exerciciosCount: 0)]),
+      DiaDaSemana(
+        dia: 3,
+        sessoes: const [
+          SessaoDaSemana(treinoId: 3, nome: 'C', exerciciosCount: 0),
+          SessaoDaSemana(treinoId: 4, nome: 'C2', exerciciosCount: 2),
+        ],
+      ),
+      for (var d = 4; d <= 7; d++) DiaDaSemana(dia: d, descanso: true),
+    ];
+
+    test('próxima vazia segue a ordem e volta ao início', () {
+      expect(proximaSessaoVazia(semana(), 1)?.nome, 'B');
+      expect(proximaSessaoVazia(semana(), 2)?.nome, 'C');
+      expect(proximaSessaoVazia(semana(), 4)?.nome, 'B');
+      expect(proximaSessaoVazia(semana(), 99), isNull);
+    });
+
+    test('tirar a sessão: o dia que fica vazio vira descanso', () {
+      final semB = semanaSemASessao(semana(), 2);
+      expect(semB[1].descanso, isTrue);
+      expect(semB[1].sessoes, isEmpty);
+      final semC = semanaSemASessao(semana(), 3);
+      expect(semC[2].sessoes.single.nome, 'C2');
+    });
   });
 }

@@ -97,6 +97,9 @@ class _FichaModeloScreenState extends ConsumerState<FichaModeloScreen>
   }
 
   @override
+  Future<void> recarregarSemana() async => setState(_recarregar);
+
+  @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final async = ref.watch(fichaModeloProvider(widget.modeloId));

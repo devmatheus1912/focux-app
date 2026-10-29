@@ -646,6 +646,37 @@
     }
   },
   "rotinaFrequenciaTitulo": "Quantos dias por semana?",
+  "treinoSugerirExercicios": "Sugerir exercícios",
+  "treinoSugerirUmDia": "Escolha o modelo e o dia desta sessão",
+  "treinoSugerirDe": "Sugerir exercícios · {nome}",
+  "@treinoSugerirDe": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "treinoSugeridosAdicionados": "Exercícios adicionados ao treino.",
+  "treinoRenomear": "Renomear sessão",
+  "treinoDuplicarSessao": "Duplicar sessão",
+  "treinoAplicarNaFicha": "Aplicar na ficha de um aluno",
+  "treinoTirarDaFicha": "Tirar da ficha",
+  "treinoTirarDoModelo": "Tirar do modelo",
+  "treinoTirarDaFichaTitulo": "Tirar da ficha?",
+  "treinoTirarDoModeloTitulo": "Tirar do modelo?",
+  "treinoTirarTexto": "A sessão sai da semana e o dia vira descanso.",
+  "treinoCopiadoPara": "Cópia colocada em {dia}",
+  "@treinoCopiadoPara": {
+    "placeholders": {
+      "dia": {"type": "String"}
+    }
+  },
+  "treinoVoltarAFicha": "Voltar à ficha",
+  "treinoVoltarAoModelo": "Voltar ao modelo",
+  "treinoMontarProxima": "Montar {nome}",
+  "@treinoMontarProxima": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
   "rotinaSegueSequencia": "Segue a sequência",
   "rotinaTreinarNesteDia": "Treinar neste dia",
   "rotinaAdicionarTreinoAqui": "Adicionar treino aqui",
