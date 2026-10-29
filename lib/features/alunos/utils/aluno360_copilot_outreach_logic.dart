@@ -26,7 +26,8 @@ String resolveOutreachMessage(
 String contactPriorityOutreachAcao() =>
     'Mandar mensagem curta para retomar o treino.';
 
-bool alunoTemHistoricoWearable(RecoverySnapshot? recovery) => recovery != null;
+bool alunoTemHistoricoWearable(RecoverySnapshot? recovery) =>
+    recovery != null && !recovery.naoCompartilhado;
 
 bool _mensagemMencionaWearable(String text) =>
     copilotAcaoMencionaWearable(text);

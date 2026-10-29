@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/fx_settings_layout.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -29,6 +30,7 @@ import 'exercise_alpha_rail.dart';
 import 'exercise_balance_strip.dart';
 import 'exercise_group_chips.dart';
 import 'exercise_library_row.dart';
+import '../utils/exercise_search_terms.dart';
 
 typedef ExerciseLibraryPageLoader =
     Future<ExercicioPickerPage> Function({
@@ -119,6 +121,10 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   final Map<int, Exercicio> _localUpdates = {};
   final List<Exercicio> _items = [];
   final Map<String, GlobalKey> _chavesDasLetras = {};
+  final GlobalKey _listaKey = GlobalKey();
+  final ValueNotifier<String?> _letraFixa = ValueNotifier(null);
+  List<String> _ordemDasSecoes = const [];
+  bool _focoAntesDoToque = false;
   bool _uploading = false;
   bool _loading = true;
   bool _loadingMore = false;
@@ -135,6 +141,16 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       _localUpdates[exercicio.id] ?? exercicio;
 
   bool get _searching => _committedQuery.trim().length >= 2;
+
+  /// Palavras da busca que são grupo ou equipamento ("peito halter").
+  List<TermoReconhecido> get _termosReconhecidos =>
+      termosReconhecidos(_committedQuery);
+
+  void _removerTermo(TermoReconhecido termo) {
+    final novo = removerTermoDaBusca(_searchCtrl.text, termo.palavra);
+    _searchCtrl.text = novo;
+    _searchCtrl.selection = TextSelection.collapsed(offset: novo.length);
+  }
 
   /// Favoritos, recentes e mais usados só valem na navegação sem busca nem
   /// grupo escolhido.
@@ -161,7 +177,44 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     }
   }
 
+  /// Adicionar um exercício não tira o foco da busca: o personal digita,
+  /// toca, digita o próximo sem reabrir o teclado.
+  void _aoSelecionar(Exercicio exercicio) {
+    final tinhaFoco = _focoAntesDoToque;
+    widget.onSelect(exercicio);
+    if (tinhaFoco) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _searchFocus.requestFocus();
+      });
+    }
+  }
+
+  /// Seção que está no topo da lista agora: vira o rótulo fixo (a letra não
+  /// some enquanto se rola por uma seção longa).
+  void _atualizarLetraFixa() {
+    if (!_scrollCtrl.hasClients || _scrollCtrl.offset < 24) {
+      _letraFixa.value = null;
+      return;
+    }
+    final lista = _listaKey.currentContext?.findRenderObject();
+    if (lista is! RenderBox || !lista.attached) return;
+    final topo = lista.localToGlobal(Offset.zero).dy;
+    String? atual;
+    for (final letra in _ordemDasSecoes) {
+      final ctx = _chavesDasLetras[letra]?.currentContext;
+      final caixa = ctx?.findRenderObject();
+      if (caixa is! RenderBox || !caixa.attached) continue;
+      final base = caixa.localToGlobal(Offset(0, caixa.size.height)).dy;
+      if (base > topo + 16) {
+        atual = letra;
+        break;
+      }
+    }
+    _letraFixa.value = atual;
+  }
+
   void _onScroll() {
+    _atualizarLetraFixa();
     if (!_hasNext || _loadingMore || _loading) return;
     if (_scrollCtrl.position.pixels >=
         _scrollCtrl.position.maxScrollExtent - 120) {
@@ -303,6 +356,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _letraFixa.dispose();
     _scrollCtrl
       ..removeListener(_onScroll)
       ..dispose();
@@ -393,6 +447,7 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
     final primary = Theme.of(context).colorScheme.primary;
     final ordenados = sortExerciciosAlfabetico(_items.map(_resolve));
     final secoes = _secoes(ordenados);
+    _ordemDasSecoes = [for (final s in secoes) s.letter];
     final caption =
         _filter.isActive || _searching
             ? exercisePickerLibraryLines(
@@ -452,6 +507,23 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
                 resultCaption: caption,
                 onChanged: _onFilterChanged,
               ),
+              if (_termosReconhecidos.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final t in _termosReconhecidos)
+                      ExercisePickerChip(
+                        label: '${t.rotulo}  ✕',
+                        selected: true,
+                        primary: primary,
+                        isDark: isDark,
+                        onTap: () => _removerTermo(t),
+                      ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 10),
               ExerciseGroupChips(
                 selecionados: _grupos,
@@ -475,7 +547,34 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
         Expanded(
           child: Stack(
             children: [
-              Positioned.fill(child: _buildBody(context, isDark, primary, secoes)),
+              Positioned.fill(
+                child: Listener(
+                  onPointerDown:
+                      (_) => _focoAntesDoToque = _searchFocus.hasFocus,
+                  child: KeyedSubtree(
+                    key: _listaKey,
+                    child: _buildBody(context, isDark, primary, secoes),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: FxSettingsLayout.pageInset,
+                top: 4,
+                child: IgnorePointer(
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: _letraFixa,
+                    builder:
+                        (context, letra, _) =>
+                            letra == null
+                                ? const SizedBox.shrink()
+                                : _LetraFixa(
+                                  letra: letra,
+                                  primary: primary,
+                                  isDark: isDark,
+                                ),
+                  ),
+                ),
+              ),
               if (!_searching && _grupos.isEmpty && letras.length >= 5)
                 Positioned(
                   right: 2,
@@ -605,12 +704,49 @@ class _ExerciseLibraryPanelState extends ConsumerState<ExerciseLibraryPanel> {
       uploading: _uploading,
       primary: primary,
       onUploadVideo: widget.onUploadVideo,
-      onSelect: widget.onSelect,
+      onSelect: _aoSelecionar,
       onPreview: widget.onPreview,
       onUpload: _handleUpload,
       onFavoriteToggle: _toggleFavorite,
       loadingMore: _loadingMore,
       bottomPadding: widget.bottomPadding,
+    );
+  }
+}
+
+/// Letra (ou seção) do topo da lista, fixa enquanto se rola.
+class _LetraFixa extends StatelessWidget {
+  const _LetraFixa({
+    required this.letra,
+    required this.primary,
+    required this.isDark,
+  });
+
+  final String letra;
+  final Color primary;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Seção $letra',
+      excludeSemantics: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? EagleTokens.darkCardHi : Colors.white,
+          borderRadius: BorderRadius.circular(99),
+          border: Border.all(color: primary.withValues(alpha: 0.5)),
+        ),
+        child: Text(
+          letra,
+          style: TextStyle(
+            color: primary,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
     );
   }
 }

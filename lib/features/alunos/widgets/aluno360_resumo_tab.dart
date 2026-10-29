@@ -14,7 +14,6 @@ import '../constants/aluno_360_layout.dart';
 import '../data/aluno_repository.dart';
 import '../data/aluno_followup_store.dart';
 import '../providers/aluno_detail_providers.dart';
-import '../utils/aluno360_copilot_logic.dart';
 import '../utils/aluno360_operacao_logic.dart';
 import '../utils/aluno360_resumo_agora.dart';
 import 'aluno360_copilot_card.dart';
@@ -146,7 +145,7 @@ class Aluno360ResumoTab extends ConsumerWidget {
     );
     final checkins = week.totalCheckins.round();
     final semTreinos = semHistoricoDeTreino(aluno) && checkins == 0;
-    final temRecuperacao = alunoTemHistoricoWearable(recoveryAsync.value);
+    final temRecuperacao = recoveryAsync.value != null;
     void abrirEngajamento() => context.push(
       '/alunos/$alunoId/engajamento',
       extra: aluno.nome,

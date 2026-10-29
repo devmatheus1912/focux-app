@@ -267,12 +267,13 @@ void main() {
         expect(corpo['series'], 2);
         expect(corpo['repeticoes'], '15');
         expect(corpo['descansoSegundos'], 45);
-        final put = adapter.chamadas.firstWhere(
-          (c) =>
-              c.metodo == 'PUT' &&
-              c.path == '/api/treinos/12/exercicios/77/series',
+        // Séries iguais: o servidor já cria tudo na mesma chamada.
+        expect(
+          adapter.chamadas.where(
+            (c) => c.metodo == 'PUT' && c.path.endsWith('/series'),
+          ),
+          isEmpty,
         );
-        expect((put.corpo as Map)['bloco'], 'AQUECIMENTO');
         expect(find.text('Pronto · 1 adicionado'), findsOneWidget);
         expect(find.text('Adicionado · Supino reto'), findsOneWidget);
         expect(find.text('Desfazer'), findsOneWidget);

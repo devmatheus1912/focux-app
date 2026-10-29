@@ -33,6 +33,9 @@ class RecoverySnapshot {
   /// Dados que entraram na nota: `sono`, `fcRepouso`, `hrv`.
   final List<String> insumos;
 
+  /// O aluno tem leituras, mas não compartilha com o personal (sem valores).
+  final bool naoCompartilhado;
+
   const RecoverySnapshot({
     this.dataReferencia,
     required this.steps,
@@ -47,11 +50,13 @@ class RecoverySnapshot {
     this.hrv = 0,
     this.calibrando = false,
     this.insumos = const [],
+    this.naoCompartilhado = false,
   });
 
   factory RecoverySnapshot.fromJson(
     Map<String, dynamic> json,
   ) => RecoverySnapshot(
+    naoCompartilhado: json['compartilhado'] == false,
     dataReferencia: DateTime.tryParse(json['dataReferencia'] as String? ?? ''),
     steps: (json['steps'] as num?)?.toInt() ?? 0,
     caloriesBurned: (json['caloriesBurned'] as num?)?.toDouble() ?? 0,

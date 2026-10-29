@@ -310,7 +310,15 @@ extension _AddExercicioToTreinoScreenActions
       final item = treino.exercicios
           .where((linha) => linha.exercicio.id == exercicio.id)
           .fold<TreinoExercicioItem?>(null, (atual, linha) => atual == null || linha.id > atual.id ? linha : atual);
-      if (item != null) {
+      // O servidor já cria as séries iguais (mesma repetição e carga). Só
+      // precisa da segunda chamada quando há aquecimento ou séries diferentes.
+      final uniformes = linhas.every(
+        (l) =>
+            !l.aquecimento &&
+            l.repeticoes == base.repeticoes &&
+            l.cargaKg == base.cargaKg,
+      );
+      if (item != null && !uniformes) {
         await ref.read(treinoRepositoryProvider).salvarSeries(
           widget.treinoId,
           item.id,

@@ -59,6 +59,26 @@ class _Aluno360RecoveryInsightCardState
             ),
           ),
       data: (snapshot) {
+        if (snapshot != null && snapshot.naoCompartilhado) {
+          return Semantics(
+            label: 'O aluno não compartilha dados de saúde',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const DashboardSectionHeader(title: 'Wearable'),
+                const SizedBox(height: TokensStrip.s3),
+                OperationalMetricTile(
+                  label: 'Dados de saúde',
+                  value: '—',
+                  hint: 'O aluno não compartilha dados de saúde com você',
+                  color: widget.primary,
+                  isDark: widget.isDark,
+                  emphasis: OperationalMetricEmphasis.muted,
+                ),
+              ],
+            ),
+          );
+        }
         if (snapshot == null) {
           return Semantics(
             label:

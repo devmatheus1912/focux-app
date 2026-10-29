@@ -219,4 +219,11 @@ void main() {
       );
     });
   });
+
+  test('resposta "não compartilha" do personal vira estado sem valores', () {
+    final r = RecoverySnapshot.fromJson({'compartilhado': false});
+    expect(r.naoCompartilhado, isTrue);
+    expect(r.recoveryScore, isNull);
+    expect(RecoverySnapshot.fromJson({'recoveryScore': 70}).naoCompartilhado, isFalse);
+  });
 }
