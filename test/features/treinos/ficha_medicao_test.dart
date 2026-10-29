@@ -44,6 +44,7 @@ const _pronta = RotinaFila(
     RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 1, nome: 'Treino A', diaSemana: 1, exerciciosCount: 4),
     RotinaItem(id: 2, tipo: RotinaItemTipo.treino, treinoId: 2, nome: 'Treino B', diaSemana: 4, exerciciosCount: 5),
   ],
+  diasAviso: {2, 3, 5, 6, 7},
 );
 
 const _incompleta = RotinaFila(
@@ -51,6 +52,7 @@ const _incompleta = RotinaFila(
     RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 1, nome: 'Treino A', diaSemana: 1, exerciciosCount: 4),
     RotinaItem(id: 2, tipo: RotinaItemTipo.treino, treinoId: 2, nome: 'Treino B', diaSemana: 4, exerciciosCount: 0),
   ],
+  diasAviso: {2, 3, 5, 6, 7},
 );
 
 Future<void> _settle(WidgetTester tester) async {
@@ -109,6 +111,8 @@ Future<List<String>> _abrirEConcluir(
   await _settle(tester);
   if (escolherDias) {
     await tester.tap(find.text('4'));
+    await _settle(tester);
+    await tester.tap(find.text('Criar ficha'));
     await _settle(tester);
   }
   await tester.tap(find.text('Pronto'));

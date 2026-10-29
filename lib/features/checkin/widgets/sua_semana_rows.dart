@@ -7,6 +7,7 @@ import '../../treinos/models/rotina_fila.dart';
 import '../../treinos/utils/semana_da_fila.dart';
 import 'ficha_vigencia_aluno.dart';
 import '../data/checkin_repository.dart';
+import '../utils/semana_prevista.dart';
 import '../utils/treinos_hub_view.dart';
 import 'treinos_hub_rows.dart';
 
@@ -18,11 +19,15 @@ class SuaSemanaRow extends StatelessWidget {
     required this.dia,
     required this.hoje,
     this.status,
+    this.previsto,
   });
 
   final String diaNome;
   final DiaDaSemana dia;
   final bool hoje;
+
+  /// Nome previsto pela fila para um dia que segue a sequência.
+  final String? previsto;
 
   /// `true` feito, `false` não feito (dia que já passou); nulo sem marcação.
   final bool? status;
@@ -36,7 +41,13 @@ class SuaSemanaRow extends StatelessWidget {
             .map((sessao) => sessao.nome.trim())
             .where((nome) => nome.isNotEmpty)
             .toList();
-    final descanso = nomes.isEmpty;
+    final segue = nomes.isEmpty && dia.segueSequencia;
+    final descanso = nomes.isEmpty && !segue;
+    final texto = segue
+        ? (previsto?.isNotEmpty == true ? s.treinosSemanaProxima(previsto!) : s.rotinaSegueSequencia)
+        : descanso
+        ? s.rotinaDescanso
+        : nomes.join(' · ');
     final peso = hoje ? FontWeight.w700 : FontWeight.w500;
     final cor =
         descanso
@@ -50,7 +61,7 @@ class SuaSemanaRow extends StatelessWidget {
     };
     return Semantics(
       label:
-          '$diaNome, ${descanso ? s.rotinaDescanso : nomes.join(', ')}'
+          '$diaNome, $texto'
           '${hoje ? ', ${s.treinosSuaSemanaHoje}' : ''}'
           '${marca == null ? '' : ', $marca'}',
       excludeSemantics: true,
@@ -80,7 +91,7 @@ class SuaSemanaRow extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                descanso ? s.rotinaDescanso : nomes.join(' · '),
+                texto,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: peso,
                   color: cor,
@@ -129,7 +140,7 @@ class SuaSemanaBloco extends StatelessWidget {
 
   /// Dia com treino que já passou: feito ou não feito; hoje só quando feito.
   bool? _statusDoDia(DiaDaSemana dia, Set<int> feitos) {
-    if (dia.sessoes.every((x) => x.nome.trim().isEmpty)) return null;
+    if (!dia.segueSequencia && dia.sessoes.every((x) => x.nome.trim().isEmpty)) return null;
     if (feitos.contains(dia.dia)) return true;
     return dia.dia < hoje.weekday ? false : null;
   }
@@ -149,6 +160,7 @@ class SuaSemanaBloco extends StatelessWidget {
     final dias = semanaDaFila(rotina);
     final agora = hoje;
     final feitos = diasFeitosNaSemana(historico, hoje);
+    final previstos = nomesPrevistosDaSemana(rotina: rotina, historico: historico, hoje: hoje);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -166,6 +178,7 @@ class SuaSemanaBloco extends StatelessWidget {
                 dia: dia,
                 hoje: dia.dia == hoje.weekday,
                 status: _statusDoDia(dia, feitos),
+                previsto: previstos[dia.dia],
               ),
           ],
         ),

@@ -27,6 +27,7 @@ import '../utils/treino_criacao_fluxo.dart';
 import '../widgets/ficha_acoes.dart';
 import '../widgets/ficha_help_sheets.dart';
 import '../widgets/ficha_semana.dart';
+import '../widgets/ficha_vazia.dart';
 import '../widgets/ficha_volume_secao.dart';
 import '../widgets/ficha_vigencia_linha.dart';
 import '../../../core/widgets/fx_tonal_button.dart';
@@ -61,6 +62,9 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
   var _salvando = false;
   final _medicao = FichaMedicao();
   var _vigenciaAberta = false;
+
+  /// Escolha de "Montar do zero" na ficha vazia; nulo até escolher os dias.
+  PlanoDaFicha? _plano;
 
   @override
   void initState() {
@@ -241,18 +245,24 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
                 ),
               const SizedBox(height: TokensStrip.s4),
               if (estado.vazia)
-                FichaFrequencia(
+                FichaVazia(
+                  modelos: ref.watch(fichaModelosProvider).asData?.value ?? const [],
                   ocupado: _salvando,
-                  onEscolher: _criarPorFrequencia,
+                  onUsarModelo: _usarModelo,
+                  onVerModelos: _aplicarModelo,
+                  onCopiarDeAluno: _copiarDeAluno,
+                  onPlano: (plano) => setState(() => _plano = plano),
+                )
+              else
+                FichaSemana(
+                  dias: _dias,
+                  hoje: DateTime.now().weekday,
+                  ocupado: _salvando,
+                  onAdicionar: _adicionar,
+                  onAbrir: _abrirSessao,
+                  onMais: _menuDaSessao,
+                  onMaisDoDia: _menuDoDia,
                 ),
-              FichaSemana(
-                dias: _dias,
-                hoje: DateTime.now().weekday,
-                ocupado: _salvando,
-                onAdicionar: _adicionar,
-                onAbrir: _abrirSessao,
-                onMais: _menuDaSessao,
-              ),
               if (!estado.vazia)
                 Padding(
                   padding: const EdgeInsets.only(top: TokensStrip.s3),
@@ -274,9 +284,13 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           ),
         ),
         FxStickyActions(
-          primaryLabel: s.rotinaPronto,
+          primaryLabel: estado.vazia ? s.rotinaCriarFicha : s.rotinaPronto,
           loading: _salvando,
-          onPrimary: _concluir,
+          onPrimary: !estado.vazia
+              ? _concluir
+              : _plano == null
+              ? null
+              : () => _criarPeloPlano(_plano!),
           secondaryLabel: estado.vazia ? null : s.rotinaSalvarModelo,
           onSecondary: _salvarComoModelo,
         ),
@@ -295,10 +309,14 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     context.pop();
   }
 
-  /// Cria a ficha pelos dias e, se escolhido, já define por quanto tempo ela vale.
-  Future<void> _criarPorFrequencia(int dias, int? semanas) async {
-    final semana = semanaPorFrequencia(dias);
-    setState(() => _dias = semana);
+  /// Cria a ficha pela divisão e, se escolhido, já define por quanto tempo ela vale.
+  Future<void> _criarPeloPlano(PlanoDaFicha plano) async {
+    final semana = plano.semana;
+    final semanas = plano.semanas;
+    setState(() {
+      _dias = semana;
+      _plano = null;
+    });
     final repo = ref.read(treinoRepositoryProvider);
     final ok = await _aplicar(() async {
       final criada = await repo.gravarSemana(widget.alunoId, semana);
@@ -396,6 +414,24 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
         final para = await escolherDia(context);
         if (para == null || !mounted) return;
         await _copiarSessao(sessao, para);
+    }
+  }
+
+  /// Dia sem sessão: "Treinar neste dia" (segue a sequência), adicionar ou marcar descanso.
+  Future<void> _menuDoDia(int dia) async {
+    final atual = _dias[dia - 1];
+    final acao = await mostrarMenuDoDia(
+      context,
+      dia: nomesDosDias(S.of(context))[dia - 1],
+      segue: atual.segueSequencia,
+    );
+    if (acao == null || !mounted) return;
+    switch (acao) {
+      case DiaAcao.adicionar:
+        await _adicionar(dia);
+      case DiaAcao.treinar:
+      case DiaAcao.descanso:
+        await _persistir(alternarTreinoDescanso(_dias, dia));
     }
   }
 
@@ -502,6 +538,11 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
     }
     final modelo = await escolherModelo(context, modelos);
     if (modelo == null || !mounted) return;
+    await _usarModelo(modelo);
+  }
+
+  Future<void> _usarModelo(FichaModelo modelo) async {
+    final s = S.of(context);
     final manterCargas = await escolherCargas(context);
     if (manterCargas == null || !mounted) return;
     if (!estadoDaFicha(_dias).vazia) {
@@ -545,6 +586,27 @@ class _AlunoRotinaScreenState extends ConsumerState<AlunoRotinaScreen> {
           .copiarSemana(widget.alunoId, destinoId, manterCargas: manterCargas),
     );
     // A cópia da ficha também começa 8 semanas novas (no aluno de destino).
+    if (ok) _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'ficha', 'semanas': 8});
+  }
+
+  /// Ficha vazia: copia a semana de outro aluno para esta.
+  Future<void> _copiarDeAluno() async {
+    final alunos = await ref.read(alunosProvider.future);
+    if (!mounted) return;
+    final origem = await escolherAluno(
+      context,
+      alunos: alunos,
+      excluirId: widget.alunoId,
+      titulo: S.of(context).rotinaCopiarDeAluno,
+    );
+    if (origem == null || !mounted) return;
+    final manterCargas = await escolherCargas(context);
+    if (manterCargas == null || !mounted) return;
+    final ok = await _aplicar(
+      () => ref
+          .read(treinoRepositoryProvider)
+          .copiarSemana(origem, widget.alunoId, manterCargas: manterCargas),
+    );
     if (ok) _registrar(ProductEvents.fichaVigenciaDefinida, {'origem': 'ficha', 'semanas': 8});
   }
 

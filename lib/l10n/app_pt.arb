@@ -626,7 +626,37 @@
     }
   },
   "rotinaFrequenciaTitulo": "Quantos dias por semana?",
-  "rotinaFrequenciaDica": "Cria Treino A, B, C… nos dias certos. Você muda depois e preenche cada sessão.",
+  "rotinaSegueSequencia": "Segue a sequência",
+  "rotinaTreinarNesteDia": "Treinar neste dia",
+  "rotinaAdicionarTreinoAqui": "Adicionar treino aqui",
+  "rotinaCriarFicha": "Criar ficha",
+  "rotinaCopiarDeAluno": "Copiar de qual aluno?",
+  "fichaVaziaUsarModelo": "Usar um modelo",
+  "fichaVaziaVerModelos": "Ver todos os modelos",
+  "fichaVaziaDoZero": "Montar do zero",
+  "fichaVaziaDivisao": "Divisão",
+  "fichaVaziaRecomendada": "Recomendada: {nome}",
+  "@fichaVaziaRecomendada": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
+  "fichaVaziaOutras": "Outras divisões",
+  "fichaVaziaDiasDeTreino": "Dias de treino (toque para trocar por descanso)",
+  "fichaVaziaCopiarAluno": "Copiar a ficha de outro aluno",
+  "fichaVaziaValePor": "Vale por {n} semanas",
+  "@fichaVaziaValePor": {
+    "placeholders": {
+      "n": {"type": "int"}
+    }
+  },
+  "fichaVaziaMudar": "Mudar",
+  "treinosSemanaProxima": "Próximo da sequência · {nome}",
+  "@treinosSemanaProxima": {
+    "placeholders": {
+      "nome": {"type": "String"}
+    }
+  },
   "rotinaMarcarDescanso": "Marcar descanso",
   "rotinaDescansoConfirmaTitulo": "Marcar descanso?",
   "rotinaDescansoConfirmaTexto": "As sessões deste dia saem da ficha.",

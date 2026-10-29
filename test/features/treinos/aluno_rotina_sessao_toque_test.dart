@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:focux_app/features/treinos/models/ficha_volume.dart';
 import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
+import 'package:focux_app/core/widgets/fx_choice_chip.dart';
 import 'package:focux_app/core/widgets/fx_motion.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
@@ -100,6 +101,7 @@ const _fila = RotinaFila(
       diaSemana: 2,
     ),
   ],
+  diasAviso: {3, 4, 5, 6, 7},
 );
 
 Future<void> _settle(WidgetTester tester) async {
@@ -220,6 +222,7 @@ void main() {
             RotinaItem(id: 2, tipo: RotinaItemTipo.treino, treinoId: 8, nome: 'Costas', diaSemana: 2, exerciciosCount: 1),
             RotinaItem(id: 3, tipo: RotinaItemTipo.treino, treinoId: 9, nome: 'Pernas', diaSemana: 3, exerciciosCount: 0),
           ],
+          diasAviso: {4, 5, 6, 7},
         ),
       );
 
@@ -245,7 +248,20 @@ void main() {
   });
 
   group('ficha vazia', () {
-    testWidgets('oferece 2 a 7 dias e 4 cria Treino A a D', (tester) async {
+    Future<void> criar(WidgetTester tester) async {
+      await tester.tap(find.text('Criar ficha'));
+      await _settle(tester);
+    }
+
+    String sessoes(List<DiaDaSemana> semana) => [
+      for (final d in semana)
+        if (d.sessoes.isNotEmpty)
+          '${d.dia}:${d.sessoes.single.nome}'
+        else if (d.segueSequencia)
+          '${d.dia}:segue',
+    ].join(' ');
+
+    testWidgets('oferece 2 a 7 dias; 4 com ABCD cria Treino A a D', (tester) async {
       final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
 
       expect(find.text('Quantos dias por semana?'), findsOneWidget);
@@ -255,20 +271,112 @@ void main() {
 
       await tester.tap(find.text('4'));
       await _settle(tester);
+      expect(repo.gravacoes, 0, reason: 'escolher os dias só monta a prévia');
+      await tester.tap(find.text('ABCD'));
+      await _settle(tester);
+      await criar(tester);
 
       expect(repo.gravacoes, 1);
+      expect(sessoes(repo.ultimaSemana!), '1:Treino A 2:Treino B 4:Treino C 5:Treino D');
+    });
+
+    testWidgets('5 dias já vem com ABC: três sessões e dois dias seguindo a sequência', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      await tester.tap(find.text('5'));
+      await _settle(tester);
+      expect(find.text('Recomendada: ABC'), findsOneWidget);
+      expect(find.text('Segue a sequência'), findsNWidgets(2));
+      await criar(tester);
+
       expect(
-        [
-          for (final d in repo.ultimaSemana!)
-            if (d.sessoes.isNotEmpty) '${d.dia}:${d.sessoes.single.nome}',
-        ],
-        ['1:Treino A', '2:Treino B', '4:Treino C', '5:Treino D'],
+        sessoes(repo.ultimaSemana!),
+        '1:A · Peito e tríceps 2:B · Costas e bíceps 3:C · Pernas e glúteo 4:segue 5:segue',
       );
+    });
+
+    testWidgets('na prévia, tocar num dia troca treino por descanso', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      await tester.tap(find.text('5'));
+      await _settle(tester);
+      await tester.tap(find.widgetWithText(FxChoiceChip, 'Qua'));
+      await _settle(tester);
+      await tester.tap(find.widgetWithText(FxChoiceChip, 'Sáb'));
+      await _settle(tester);
+      await criar(tester);
+
+      expect(
+        sessoes(repo.ultimaSemana!),
+        '1:A · Peito e tríceps 2:B · Costas e bíceps 4:C · Pernas e glúteo 5:segue 6:segue',
+      );
+    });
+
+    testWidgets('outras divisões ficam recolhidas', (tester) async {
+      await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+      expect(find.text('Glúteo e pernas'), findsNothing);
+      await tester.tap(find.text('Outras divisões'));
+      await _settle(tester);
+      expect(find.text('Glúteo e pernas'), findsOneWidget);
+    });
+
+    testWidgets('sem escolher os dias, Criar ficha fica desligado', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+      await criar(tester);
+      expect(repo.gravacoes, 0);
     });
 
     testWidgets('com sessões, a pergunta de frequência não aparece', (tester) async {
       await _abrir(tester, <Object?>[]);
       expect(find.text('Quantos dias por semana?'), findsNothing);
+    });
+
+    testWidgets('copiar de outro aluno aparece na ficha vazia', (tester) async {
+      await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
+      expect(find.text('Copiar a ficha de outro aluno'), findsOneWidget);
+    });
+  });
+
+  group('segue a sequência', () {
+    const rodizio = RotinaFila(
+      itens: [
+        RotinaItem(id: 1, tipo: RotinaItemTipo.treino, treinoId: 7, nome: 'Treino A', diaSemana: 1, exerciciosCount: 3),
+        RotinaItem(id: 2, tipo: RotinaItemTipo.treino, treinoId: 8, nome: 'Treino B', diaSemana: 2, exerciciosCount: 3),
+      ],
+      diasAviso: {5, 6, 7},
+    );
+
+    testWidgets('dia fora do aviso aparece como Segue a sequência', (tester) async {
+      await _abrir(tester, <Object?>[], fila: rodizio);
+      expect(find.text('Segue a sequência'), findsNWidgets(2));
+      expect(find.text('4 dias · tudo pronto'), findsOneWidget);
+    });
+
+    testWidgets('o "…" de um dia que segue marca descanso', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: rodizio);
+
+      await tester.tap(find.byTooltip('Mais ações da sessão').at(2));
+      await _settle(tester);
+      await tester.tap(find.text('Marcar descanso'));
+      await _settle(tester);
+
+      final quarta = repo.ultimaSemana!.firstWhere((d) => d.dia == 3);
+      expect(quarta.descanso, isTrue);
+      expect(quarta.segueSequencia, isFalse);
+    });
+
+    testWidgets('o "…" de um descanso oferece Treinar neste dia', (tester) async {
+      final (repo, _) = await _abrir(tester, <Object?>[], fila: rodizio);
+
+      await tester.tap(find.byTooltip('Mais ações da sessão').last);
+      await _settle(tester);
+      await tester.tap(find.text('Treinar neste dia'));
+      await _settle(tester);
+
+      expect(repo.ultimaSemana!.firstWhere((d) => d.dia == 7).segueSequencia, isTrue);
     });
   });
 
@@ -276,8 +384,10 @@ void main() {
     testWidgets('ficha vazia: "Vale por" começa em 8 semanas e grava junto com os dias', (tester) async {
       final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
 
-      expect(find.text('Vale por'), findsOneWidget);
       await tester.tap(find.text('4'));
+      await _settle(tester);
+      expect(find.text('Vale por 8 semanas'), findsOneWidget);
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
 
       expect(repo.gravacoes, 1);
@@ -287,9 +397,13 @@ void main() {
     testWidgets('escolher 12 semanas grava 12', (tester) async {
       final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
 
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+      await tester.tap(find.text('Vale por 8 semanas'));
+      await _settle(tester);
       await tester.tap(find.text('12 semanas'));
       await _settle(tester);
-      await tester.tap(find.text('3'));
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
 
       expect(repo.vigencias, [(3, 12)]);
@@ -298,9 +412,13 @@ void main() {
     testWidgets('sem prazo cria a ficha sem definir vigência', (tester) async {
       final (repo, _) = await _abrir(tester, <Object?>[], fila: RotinaFila.vazia);
 
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+      await tester.tap(find.text('Vale por 8 semanas'));
+      await _settle(tester);
       await tester.tap(find.text('Sem prazo'));
       await _settle(tester);
-      await tester.tap(find.text('3'));
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
 
       expect(repo.gravacoes, 1);

@@ -228,9 +228,13 @@ void main() {
   group('vigência definida', () {
     testWidgets('criar a ficha com "Vale por" registra criação e as semanas', (tester) async {
       final cena = await _abrir(tester, RotinaFila.vazia);
+      await tester.tap(find.text('4'));
+      await _settle(tester);
+      await tester.tap(find.text('Vale por 8 semanas'));
+      await _settle(tester);
       await tester.tap(find.text('12 semanas'));
       await _settle(tester);
-      await tester.tap(find.text('4'));
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
       cena.restaurar();
 
@@ -241,9 +245,13 @@ void main() {
 
     testWidgets('criar sem prazo não registra vigência', (tester) async {
       final cena = await _abrir(tester, RotinaFila.vazia);
+      await tester.tap(find.text('3'));
+      await _settle(tester);
+      await tester.tap(find.text('Vale por 8 semanas'));
+      await _settle(tester);
       await tester.tap(find.text('Sem prazo'));
       await _settle(tester);
-      await tester.tap(find.text('3'));
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
       cena.restaurar();
 
@@ -285,6 +293,8 @@ void main() {
     testWidgets('se a gravação falhar, a vigência não é registrada', (tester) async {
       final cena = await _abrir(tester, RotinaFila.vazia, falhar: true);
       await tester.tap(find.text('4'));
+      await _settle(tester);
+      await tester.tap(find.text('Criar ficha'));
       await _settle(tester);
       cena.restaurar();
 

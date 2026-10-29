@@ -514,7 +514,8 @@ class TreinoRepository {
           for (final dia in dias)
             {
               'dia': dia.dia,
-              'descanso': dia.descanso || dia.sessoes.isEmpty,
+              'descanso': dia.descanso || (dia.sessoes.isEmpty && !dia.segueSequencia),
+              if (dia.segueSequencia && dia.sessoes.isEmpty) 'segueSequencia': true,
               'sessoes': [
                 for (final sessao in dia.sessoes)
                   {

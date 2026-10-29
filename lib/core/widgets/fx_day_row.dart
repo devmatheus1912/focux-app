@@ -34,6 +34,8 @@ class FxDayRow extends StatelessWidget {
     this.hoje = false,
     this.hojeLabel,
     this.onAdicionar,
+    this.segueLabel,
+    this.fimVazio,
   });
 
   final String dia;
@@ -44,6 +46,12 @@ class FxDayRow extends StatelessWidget {
   final bool hoje;
   final String? hojeLabel;
   final VoidCallback? onAdicionar;
+
+  /// Dia sem sessão que segue a sequência (rodízio); nulo = descanso.
+  final String? segueLabel;
+
+  /// No fim da linha de dia sem sessão (o "…" do dia, por exemplo). Substitui o "+".
+  final Widget? fimVazio;
 
   static const double colunaDia = 44;
 
@@ -87,11 +95,20 @@ class FxDayRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (sessoes.isEmpty)
+              if (sessoes.isEmpty && segueLabel != null)
+                FxTapRow(
+                  title: segueLabel!,
+                  leading: Icon(Icons.repeat_rounded, size: 20, color: chrome.mute),
+                  vazio: true,
+                  trailing: fimVazio ?? const SizedBox.shrink(),
+                  onTap: null,
+                )
+              else if (sessoes.isEmpty)
                 FxTapRow(
                   title: onAdicionar == null ? descansoLabel : adicionarLabel,
                   subtitle: onAdicionar == null ? null : descansoLabel,
                   vazio: true,
+                  trailing: fimVazio,
                   onTap: onAdicionar,
                 )
               else

@@ -228,13 +228,26 @@ void main() {
       await _menuDaFicha(tester);
       await tester.tap(find.text('Aplicar modelo'));
       await _settle(tester);
-      await tester.tap(find.text('Hipertrofia 4 dias'));
+      await tester.tap(find.text('Hipertrofia 4 dias').last);
       await _settle(tester);
       await tester.tap(find.text('Manter as cargas'));
       await _settle(tester);
 
       expect(find.text('Substituir a ficha?'), findsNothing);
       expect(repo.aplicados, [(31, 3, true)]);
+    });
+
+    testWidgets('na ficha vazia, o modelo aparece na tela e aplica em dois toques', (tester) async {
+      final repo = await _abrir(tester, fila: RotinaFila.vazia);
+
+      expect(find.text('Usar um modelo'), findsOneWidget);
+      await tester.tap(find.text('Hipertrofia 4 dias'));
+      await _settle(tester);
+      await tester.tap(find.text('Começar do zero'));
+      await _settle(tester);
+
+      expect(find.text('Substituir a ficha?'), findsNothing);
+      expect(repo.aplicados, [(31, 3, false)]);
     });
 
     testWidgets('cancelar a confirmação não aplica', (tester) async {

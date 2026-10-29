@@ -9,6 +9,7 @@ import 'package:focux_app/core/api/api_client.dart';
 import 'package:focux_app/core/theme/design_tokens.dart';
 import 'package:focux_app/features/treinos/data/treino_repository.dart';
 import 'package:focux_app/features/treinos/models/rotina_fila.dart';
+import 'package:focux_app/features/treinos/providers/ficha_modelos_provider.dart';
 import 'package:focux_app/features/treinos/providers/treinos_provider.dart';
 import 'package:focux_app/features/treinos/screens/aluno_rotina_screen.dart';
 import 'package:focux_app/l10n/app_localizations.dart';
@@ -60,6 +61,7 @@ void main() {
               treinoRepositoryProvider.overrideWithValue(
                 _Repo(vazia ? RotinaFila.vazia : _fila),
               ),
+              fichaModelosProvider.overrideWith((ref) async => const []),
             ],
             child: RepaintBoundary(
               key: const ValueKey('ficha'),

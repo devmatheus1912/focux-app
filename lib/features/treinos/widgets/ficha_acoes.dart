@@ -18,6 +18,9 @@ enum FichaAcao {
 
 enum SessaoAcao { maisUm, descanso, mover, copiar }
 
+/// Dia sem sessão: descanso ou "segue a sequência".
+enum DiaAcao { adicionar, treinar, descanso }
+
 enum ModeloAcao { renomear, aplicar, excluir }
 
 List<String> nomesDosDias(S s) => [
@@ -129,6 +132,38 @@ Future<SessaoAcao?> mostrarMenuDaSessao(
         icon: Icons.bedtime_outlined,
         destructive: true,
       ),
+    ],
+  );
+}
+
+/// "…" de um dia sem sessão. [segue] = o dia hoje segue a sequência; senão é descanso.
+Future<DiaAcao?> mostrarMenuDoDia(
+  BuildContext context, {
+  required String dia,
+  required bool segue,
+}) {
+  final s = S.of(context);
+  return showFxActionSheet<DiaAcao>(
+    context,
+    title: dia,
+    itens: [
+      if (!segue)
+        FxActionSheetItem(
+          value: DiaAcao.treinar,
+          label: s.rotinaTreinarNesteDia,
+          icon: Icons.repeat_rounded,
+        ),
+      FxActionSheetItem(
+        value: DiaAcao.adicionar,
+        label: segue ? s.rotinaAdicionarTreinoAqui : s.rotinaAdicionarTreino,
+        icon: Icons.add_rounded,
+      ),
+      if (segue)
+        FxActionSheetItem(
+          value: DiaAcao.descanso,
+          label: s.rotinaMarcarDescanso,
+          icon: Icons.bedtime_outlined,
+        ),
     ],
   );
 }
@@ -258,11 +293,12 @@ Future<int?> escolherAluno(
   BuildContext context, {
   required List<Aluno> alunos,
   required int excluirId,
+  String? titulo,
 }) {
   return showDialog<int>(
     context: context,
     builder: (dialogContext) => SimpleDialog(
-      title: Text(S.of(dialogContext).rotinaUsarEmOutro),
+      title: Text(titulo ?? S.of(dialogContext).rotinaUsarEmOutro),
       children: [
         for (final aluno in alunos)
           if (aluno.id != excluirId)
