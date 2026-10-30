@@ -37,6 +37,7 @@ import '../utils/chat_outbox.dart';
 import '../utils/chat_outgoing_dedupe.dart';
 import '../utils/chat_remetente.dart';
 import '../utils/chat_system_event.dart';
+import '../utils/chat_fio.dart';
 import 'chat_inbox_screen.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/widgets/feedback_helper.dart';
@@ -438,6 +439,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
             : null;
     final title = _displayName(brand);
     final subtitle = _subtitle(brand);
+    final fio = montarFioDoChat(_msgs, alunoMode: _isAlunoMode);
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final avatarUrl = _avatarImage(brand, alunoFotoUrl: alunoFotoUrl);
 
@@ -512,7 +514,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               unawaited(_loadHistorico());
                             },
                           )
-                          : _msgs.isEmpty
+                          : fio.isEmpty
                           ? _ConversationQuietEmpty(
                             isAluno: _isAlunoMode,
                           )
@@ -527,7 +529,7 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                               TokensStrip.s2,
                             ),
                             itemCount:
-                                _msgs.length +
+                                fio.length +
                                 (_hasMoreMessages || _loadingOlder ? 1 : 0),
                             itemBuilder: (_, index) {
                               final hasLoader =
@@ -539,12 +541,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                 );
                               }
                               final msgIndex = hasLoader ? index - 1 : index;
-                              final msg = _msgs[msgIndex];
+                              final item = fio[msgIndex];
+                              final msg = item.primeira;
                               final previous =
-                                  msgIndex > 0 ? _msgs[msgIndex - 1] : null;
+                                  msgIndex > 0 ? fio[msgIndex - 1].ultima : null;
                               final next =
-                                  msgIndex + 1 < _msgs.length
-                                      ? _msgs[msgIndex + 1]
+                                  msgIndex + 1 < fio.length
+                                      ? fio[msgIndex + 1].primeira
                                       : null;
                               final showDate =
                                   previous == null ||
@@ -577,7 +580,13 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
                                     key: _messageKey(msg),
                                     child:
                                         system
-                                            ? ConversationSystemEvent(msg: msg)
+                                            ? (item.grupo
+                                                ? ConversationEventosGrupo(
+                                                  msgs: item.msgs,
+                                                )
+                                                : ConversationSystemEvent(
+                                                  msg: msg,
+                                                ))
                                             : ConversationSwipeReplyWrapper(
                                               alignRight: _isMine(msg),
                                               accentColor: primary,

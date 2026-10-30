@@ -25,9 +25,7 @@ extension ConversationScreenSheetsHelpers on _ConversationScreenState {
     if (_isPersonalMode) {
       return 'Treino e ajustes';
     }
-    return brand?.slogan?.trim().isNotEmpty == true
-        ? brand!.slogan!
-        : 'Mensagens do treino';
+    return 'Seu personal';
   }
 
   String? _avatarImage(PersonalBrand? brand, {String? alunoFotoUrl}) {

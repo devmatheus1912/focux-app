@@ -6,6 +6,8 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/focux_hub_typography.dart';
 import '../../../core/theme/shell_chrome.dart';
 import '../../../core/theme/tokens_strip.dart';
+import '../../../core/widgets/fx_bottom_sheet.dart';
+import '../../../core/widgets/fx_sheet_frame.dart';
 import '../data/chat_repository.dart';
 import '../data/chat_text_formatter.dart';
 import '../utils/chat_bubble_grouping.dart';
@@ -257,6 +259,7 @@ class ConversationChatBackdrop extends StatelessWidget {
   }
 }
 
+/// Evento do sistema: uma linha discreta. A conversa é o que tem peso no fio.
 class ConversationSystemEvent extends StatelessWidget {
   final ChatMsg msg;
 
@@ -264,40 +267,135 @@ class ConversationSystemEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chrome = ShellChrome.of(context);
     final view = formatChatSystemEvent(msg.conteudo);
     final time = _conversationTimeLabel(msg.enviadoEm);
-    return Semantics(
-      label: '${view.threadLabel}, $time',
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: TokensStrip.s4,
-          vertical: TokensStrip.s3,
-        ),
+    final evolucao = view.tipo == ChatEventoTipo.evolucao;
+    final primary = Theme.of(context).colorScheme.primary;
+    return _LinhaDeEvento(
+      icone: evolucao ? Icons.trending_up_rounded : Icons.check_rounded,
+      corIcone: evolucao ? primary : null,
+      texto: '${view.threadLabel} · $time',
+      leitura: '${view.title}. ${view.threadLabel}, $time',
+      onTap: evolucao && view.linhas.isNotEmpty
+          ? () => _abrirEvolucao(context, view)
+          : null,
+    );
+  }
+
+  void _abrirEvolucao(BuildContext context, ChatSystemEventView view) {
+    final chrome = ShellChrome.of(context);
+    showFxBottomSheet<void>(
+      context: context,
+      builder: (_) => FxSheetFrame(
+        title: view.title,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              view.title,
-              textAlign: TextAlign.center,
-              style: FocuxHubTypography.body(color: chrome.ink).copyWith(
-                fontWeight: FontWeight.w700,
-                height: 1.35,
-                letterSpacing: 0.15,
+            for (final linha in view.linhas)
+              Padding(
+                padding: const EdgeInsets.only(bottom: TokensStrip.s2),
+                child: Text(
+                  linha,
+                  style: FocuxHubTypography.body(color: chrome.ink),
+                ),
               ),
-            ),
-            if (view.detail != null) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Text(
-                view.detail!,
-                textAlign: TextAlign.center,
-                style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-              ),
-            ],
-            const SizedBox(height: TokensStrip.s1),
-            Text(time, style: FocuxHubTypography.chip(chrome.mute)),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Treinos seguidos no mesmo dia: uma linha que abre a lista ali mesmo.
+class ConversationEventosGrupo extends StatefulWidget {
+  const ConversationEventosGrupo({super.key, required this.msgs});
+
+  final List<ChatMsg> msgs;
+
+  @override
+  State<ConversationEventosGrupo> createState() =>
+      _ConversationEventosGrupoState();
+}
+
+class _ConversationEventosGrupoState extends State<ConversationEventosGrupo> {
+  var _aberto = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final time = _conversationTimeLabel(widget.msgs.last.enviadoEm);
+    final texto = '${widget.msgs.length} treinos registrados · $time';
+    return Column(
+      children: [
+        _LinhaDeEvento(
+          icone: Icons.check_rounded,
+          texto: texto,
+          leitura: texto,
+          seta: _aberto ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+          onTap: () => setState(() => _aberto = !_aberto),
+        ),
+        if (_aberto)
+          for (final msg in widget.msgs) ConversationSystemEvent(msg: msg),
+      ],
+    );
+  }
+}
+
+class _LinhaDeEvento extends StatelessWidget {
+  const _LinhaDeEvento({
+    required this.icone,
+    required this.texto,
+    required this.leitura,
+    this.corIcone,
+    this.seta,
+    this.onTap,
+  });
+
+  final IconData icone;
+  final String texto;
+  final String leitura;
+  final Color? corIcone;
+  final IconData? seta;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final chrome = ShellChrome.of(context);
+    final linha = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TokensStrip.s3,
+        vertical: TokensStrip.s1,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icone, size: 14, color: corIcone ?? chrome.mute),
+          const SizedBox(width: TokensStrip.s1),
+          Flexible(
+            child: Text(
+              texto,
+              textAlign: TextAlign.center,
+              style: FocuxHubTypography.chip(chrome.mute),
+            ),
+          ),
+          if (seta != null) Icon(seta, size: 16, color: chrome.mute),
+        ],
+      ),
+    );
+    return Semantics(
+      button: onTap != null,
+      label: leitura,
+      excludeSemantics: true,
+      child: onTap == null
+          ? linha
+          : InkWell(
+              borderRadius: BorderRadius.circular(TokensStrip.rSm),
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Center(child: linha),
+              ),
+            ),
     );
   }
 }
@@ -377,6 +475,16 @@ class ConversationBubble extends StatelessWidget {
             color: fill,
             borderRadius: bubbleShape,
             border: borderWidth > 0 ? Border.all(color: line, width: borderWidth) : null,
+            // A bolha recebida precisa se soltar do fundo do chat.
+            boxShadow: mine || isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

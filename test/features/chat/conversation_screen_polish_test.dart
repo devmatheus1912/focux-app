@@ -30,7 +30,7 @@ void main() {
     expect(screen, isNot(contains('showDialog')));
     expect(screen, contains('_showImageViewer'));
     expect(screen, contains('ConversationSystemEvent'));
-    expect(screen, contains('Mensagens do treino'));
+    expect(screen, contains('Seu personal'));
     expect(screen, isNot(contains('Canal direto com seu personal')));
     expect('Colors.'.allMatches(screen).length, lessThanOrEqualTo(16));
   });

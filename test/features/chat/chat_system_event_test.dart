@@ -9,7 +9,8 @@ void main() {
     final view = formatChatSystemEvent(raw);
     expect(view.title, 'Treino registrado');
     expect(view.detail, 'Costa e Braceta · 1 de 28 séries');
-    expect(view.threadLabel, 'Treino registrado · Costa e Braceta · 1 de 28 séries');
+    expect(view.threadLabel, 'Costa e Braceta · 1 de 28 séries');
+    expect(view.tipo, ChatEventoTipo.treino);
     expect(view.detail, isNot(contains('Responda')));
     expect(view.threadLabel, isNot(contains('series')));
   });
@@ -20,6 +21,30 @@ void main() {
     );
     expect(view.title, 'Treino registrado');
     expect(view.detail, 'Full body · 5 de 28 séries');
+  });
+
+  test('sessão sem séries é reconhecida, com ou sem acento', () {
+    expect(
+      formatChatSystemEvent(
+        'Treino registrado: Treino B. Sem séries registradas. Responda no chat.',
+      ).tipo,
+      ChatEventoTipo.sessaoVazia,
+    );
+    expect(
+      formatChatSystemEvent('Treino registrado: B. Sem series registradas.').tipo,
+      ChatEventoTipo.sessaoVazia,
+    );
+  });
+
+  test('evolução conta os exercícios e guarda as linhas', () {
+    final view = formatChatSystemEvent(
+      'Boa, Julio! Você evoluiu neste treino.\n\n'
+      '- Carga em Supino: 40 kg -> 45 kg (+12%)\n'
+      '- Carga em Remada: 30 kg -> 32 kg (+6%)',
+    );
+    expect(view.tipo, ChatEventoTipo.evolucao);
+    expect(view.title, 'Evoluiu em 2 exercícios');
+    expect(view.linhas.first, 'Carga em Supino: 40 kg -> 45 kg (+12%)');
   });
 
   test('texto de sistema sem padrão vira primeira frase', () {
