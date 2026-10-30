@@ -1,6 +1,28 @@
 part of 'notificacoes_screen.dart';
 
-/// Não lida: ponto + título forte + borda da marca. Lida: título leve, borda neutra.
+IconData _iconeDoTipo(String tipo) {
+  final t = tipo.toUpperCase();
+  if (t.startsWith('MENSALIDADE') || t == 'DUNNING' || t == 'TRIAL') {
+    return Icons.payments_outlined;
+  }
+  if (t == 'FOCUX_SCORE' || t == 'RADAR' || t == 'ENGAJAMENTO') {
+    return Icons.person_outline_rounded;
+  }
+  if (t == 'EVOLUCAO' || t == 'FICHA_VIGENCIA') {
+    return Icons.fitness_center_rounded;
+  }
+  if (t == 'FEED' || t == 'BROADCAST' || t == 'DEPOIMENTO') {
+    return Icons.campaign_outlined;
+  }
+  return Icons.notifications_none_rounded;
+}
+
+/// Dinheiro tem verbo visível na linha; o resto abre no toque, com a seta.
+bool _temBotaoPagar(NotificacaoApp item) =>
+    item.tipo.toUpperCase().startsWith('MENSALIDADE') &&
+    (item.ctaLabel?.trim() ?? '').isNotEmpty;
+
+/// Uma linha do dia. Não lida: ponto e título forte. Lida: título normal.
 class _NotificacaoTile extends StatelessWidget {
   const _NotificacaoTile({
     required this.item,
@@ -18,60 +40,83 @@ class _NotificacaoTile extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final unread = !item.lida;
     final cta = item.ctaLabel?.trim() ?? '';
-    final subtitle = notificationSubtitle(item);
+    final titulo = notificationHumanTitle(item);
+    final apoio = [
+      notificationSubtitle(item),
+      notificationTimeLabel(item.criadaEm),
+    ].where((t) => t.isNotEmpty).join(' · ');
     return Semantics(
-      label: unread ? 'Não lida' : null,
-      child: FxSatelliteListTile(
-        title: notificationHumanTitle(item),
-        titleCase: false,
-        muted: !unread,
-        isThreeLine: temDestino && cta.isNotEmpty,
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(subtitle),
-            if (temDestino && cta.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: TokensStrip.s1),
-                child: Text(
-                  '$cta ›',
-                  style: FocuxHubTypography.bodyMuted(
-                    color: primary,
-                    fontWeight: FontWeight.w700,
+      button: true,
+      label: [
+        if (unread) 'Não lida',
+        titulo,
+        apoio,
+        if (temDestino && cta.isNotEmpty) cta,
+      ].join(', '),
+      excludeSemantics: !(temDestino && _temBotaoPagar(item)),
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TokensStrip.s3,
+              vertical: TokensStrip.s2,
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: primary.withValues(alpha: 0.10),
+                  child: Icon(_iconeDoTipo(item.tipo), size: 18, color: primary),
+                ),
+                const SizedBox(width: TokensStrip.s3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        titulo,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: FocuxHubTypography.body(color: chrome.ink).copyWith(
+                          fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                      if (apoio.isNotEmpty)
+                        Text(
+                          apoio,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: FocuxHubTypography.bodyMuted(color: chrome.mute),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              notificationTimeLabel(item.criadaEm),
-              style: FocuxHubTypography.bodyMuted(
-                color: chrome.mute,
-                fontWeight: FontWeight.w600,
-              ),
+                if (unread) ...[
+                  const SizedBox(width: TokensStrip.s2),
+                  Container(
+                    key: const ValueKey('notificacao-nao-lida'),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: primary,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
+                if (temDestino && _temBotaoPagar(item)) ...[
+                  const SizedBox(width: TokensStrip.s2),
+                  FxTonalButton(label: cta, compact: true, onPressed: onTap),
+                ] else if (temDestino) ...[
+                  const SizedBox(width: TokensStrip.s1),
+                  Icon(Icons.chevron_right_rounded, color: chrome.mute),
+                ],
+              ],
             ),
-            if (unread) ...[
-              const SizedBox(height: TokensStrip.s1),
-              Container(
-                key: const ValueKey('notificacao-nao-lida'),
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
+          ),
         ),
-        accent: unread ? primary : chrome.mute,
-        onTap: onTap,
       ),
     );
   }
@@ -104,33 +149,43 @@ class _ApagarFundo extends StatelessWidget {
   }
 }
 
+/// Uma linha na tela. [iguais] são os registros que ela representa: abrir ou
+/// apagar a linha vale para todos, senão o contador nunca zera.
 class _HubRow {
-  const _HubRow({required this.item, required this.dayGroup});
+  const _HubRow({
+    required this.item,
+    required this.dayGroup,
+    required this.iguais,
+  });
 
   final NotificacaoApp item;
   final String dayGroup;
+  final List<NotificacaoApp> iguais;
+
+  bool get temNaoLida => iguais.any((n) => !n.lida);
+  Iterable<int> get idsNaoLidos => iguais.where((n) => !n.lida).map((n) => n.id);
 }
 
 List<_HubRow> _buildNotificationRows(List<NotificacaoApp> source) {
-  return _dedupeNotifications(source)
-      .map(
-        (item) => _HubRow(item: item, dayGroup: notificationGroupLabel(item.criadaEm)),
-      )
-      .toList();
-}
-
-List<NotificacaoApp> _dedupeNotifications(List<NotificacaoApp> items) {
-  final byKey = <String, NotificacaoApp>{};
-  for (final item in items) {
-    final key = _dedupeKey(item);
-    final current = byKey[key];
-    byKey[key] = current == null ? item : _pickNotification(current, item);
+  final grupos = <String, List<NotificacaoApp>>{};
+  for (final item in source) {
+    grupos.putIfAbsent(_dedupeKey(item), () => []).add(item);
   }
-  final result = byKey.values.toList();
-  result.sort(
-    (a, b) => _dateValue(b.criadaEm).compareTo(_dateValue(a.criadaEm)),
+  final rows = [
+    for (final iguais in grupos.values)
+      () {
+        final item = iguais.reduce(_pickNotification);
+        return _HubRow(
+          item: item,
+          dayGroup: notificationGroupLabel(item.criadaEm),
+          iguais: iguais,
+        );
+      }(),
+  ];
+  rows.sort(
+    (a, b) => _dateValue(b.item.criadaEm).compareTo(_dateValue(a.item.criadaEm)),
   );
-  return result;
+  return rows;
 }
 
 NotificacaoApp _pickNotification(NotificacaoApp a, NotificacaoApp b) {
@@ -158,17 +213,15 @@ String _dedupeKey(NotificacaoApp item) {
 bool _isRadar(NotificacaoApp item) {
   final title = item.titulo.toLowerCase();
   final tipo = item.tipo.toLowerCase();
-  return title.contains('radar focux') || tipo == 'radar';
+  return title.contains('radar focux') || tipo == 'radar' || tipo == 'focux_score';
 }
 
 String _radarName(NotificacaoApp item) {
   final title = item.titulo.trim();
   if (title.toLowerCase().startsWith('radar focux:')) {
-    return formatDisplayName(title.split(':').skip(1).join(':').trim());
+    return notificacaoNomeLimpo(title.split(':').skip(1).join(':'));
   }
-  return formatDisplayName(
-    notificationHumanTitle(item).replaceAll(' precisa de ação', '').trim(),
-  );
+  return notificacaoNomeLimpo(title);
 }
 
 String _radarSummary(NotificacaoApp item) {
@@ -186,7 +239,18 @@ String _radarSummary(NotificacaoApp item) {
     ),
     '',
   );
-  return humanAction.trim().isEmpty ? msg : humanAction.trim();
+  final texto = humanAction.trim().isEmpty ? msg : humanAction.trim();
+  // O backend manda "Julio · mapa corporal": o nome já vai na segunda linha.
+  final ponto = texto.indexOf(' · ');
+  return ponto < 0 ? texto : texto.substring(ponto + 3).trim();
+}
+
+/// A ação do Radar como título: diz o que fazer, não só "precisa de ação".
+String _radarTitulo(NotificacaoApp item) {
+  final acao = _radarSummary(item);
+  if (acao.isEmpty) return 'Aluno precisa de atenção';
+  final frase = '${acao[0].toUpperCase()}${acao.substring(1)}';
+  return acao.toLowerCase() == 'mapa corporal' ? '$frase pendente' : frase;
 }
 
 String notificationGroupLabel(DateTime? date) {
@@ -197,6 +261,7 @@ String notificationGroupLabel(DateTime? date) {
   final day = DateTime(local.year, local.month, local.day);
   if (day == today) return 'Hoje';
   if (day == today.subtract(const Duration(days: 1))) return 'Ontem';
+  if (today.difference(day).inDays < 7) return 'Esta semana';
   return 'Anteriores';
 }
 
@@ -220,16 +285,13 @@ String notificationTimeLabel(DateTime? date) {
 String notificationHumanTitle(NotificacaoApp item) {
   final title = item.titulo.trim();
   final msg = item.mensagem.trim();
-  if (title.toLowerCase().startsWith('radar focux:')) {
-    final name = formatDisplayName(title.split(':').skip(1).join(':').trim());
-    return name.isEmpty ? 'Aluno precisa de ação' : '$name precisa de ação';
-  }
+  if (_isRadar(item)) return _radarTitulo(item);
   if (title.isNotEmpty) return title;
   if (msg.isNotEmpty) return msg;
   return 'Nova notificação';
 }
 
 String notificationSubtitle(NotificacaoApp item) {
-  if (_isRadar(item)) return _radarSummary(item);
+  if (_isRadar(item)) return _radarName(item);
   return item.mensagem.trim();
 }

@@ -16,15 +16,16 @@ import '../../../core/theme/tokens_strip.dart';
 import '../../../core/utils/friendly_error.dart';
 import '../../../core/ux/fx_hub_freshness.dart';
 import '../../../core/widgets/feedback_helper.dart';
+import '../../../core/widgets/fx_choice_strip.dart';
 import '../../../core/widgets/fx_confirm_sheet.dart';
 import '../../../core/widgets/fx_content_width_limiter.dart';
 import '../../../core/widgets/fx_empty_state.dart';
 import '../../../core/widgets/fx_error_state.dart';
+import '../../../core/widgets/fx_grouped_action_sheet.dart';
 import '../../../core/widgets/fx_help.dart';
 import '../../../core/widgets/fx_keyboard_dismiss_scope.dart';
 import '../../../core/widgets/fx_screen_a11y.dart';
 import '../../../core/widgets/fx_shell_scaffold.dart';
-import '../../../core/widgets/fx_toggle_chip.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../dashboard/widgets/dashboard_section_header.dart';
@@ -49,7 +50,6 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
   Timer? _debounce;
   DateTime? _fetchedAt;
   final _ocultas = <int>{};
-  var _soNaoLidas = false;
   var _viewTracked = false;
   var _ttvTracked = false;
 
@@ -113,10 +113,25 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
     final primary = Theme.of(context).colorScheme.primary;
     final repo = ref.read(notificacoesRepositoryProvider);
     final home = roleHomePath(ref);
-    final unreadCount =
-        ref.watch(notificacoesNaoLidasProvider).value ??
-        (async.value?.items.where((item) => !item.lida).length ?? 0);
     final query = ref.watch(notificacoesQueryProvider);
+    final soNaoLidas = ref.watch(notificacoesSoNaoLidasProvider);
+    final inboxAtual = async.value;
+    final listaCompleta =
+        inboxAtual != null && !inboxAtual.hasMore && query.isEmpty;
+    final unreadCount = notificacaoNaoLidasDaTela(
+      servidor:
+          ref.watch(notificacoesNaoLidasProvider).value ??
+          (inboxAtual?.items.where((item) => !item.lida).length ?? 0),
+      naLista: inboxAtual == null
+          ? null
+          : _buildNotificationRows(
+              notificacoesVisiveis(inboxAtual.items, ocultas: _ocultas),
+            ).where((row) => row.temNaoLida).length,
+      listaCompleta: listaCompleta,
+    );
+    final mostrarBusca =
+        query.isNotEmpty ||
+        (inboxAtual?.total ?? 0) > notificacaoBuscaAPartirDe;
 
     Future<void> reload() async {
       AnalyticsService.instance.track(ProductEvents.notificacoesRefreshed);
@@ -149,14 +164,15 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       return sanitized;
     }
 
-    Future<void> openItem(NotificacaoApp item) async {
+    Future<void> openItem(_HubRow row) async {
+      final item = row.item;
       AnalyticsService.instance.track(
         ProductEvents.notificacoesOpened,
         props: {'tipo': item.tipo, 'lida': item.lida},
       );
-      if (!item.lida) {
+      if (row.temNaoLida) {
         try {
-          await repo.marcarLida(item.id);
+          await Future.wait(row.idsNaoLidos.map(repo.marcarLida));
           afterRead();
         } catch (_) {
           // Abrir o destino importa mais que o estado de leitura.
@@ -168,29 +184,30 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       }
     }
 
-    Future<void> apagar(NotificacaoApp item) async {
-      setState(() => _ocultas.add(item.id));
+    Future<void> apagar(_HubRow row) async {
+      final ids = row.iguais.map((n) => n.id).toList();
+      setState(() => _ocultas.addAll(ids));
       final desfeito = await FeedbackHelper.showUndo(
         context,
         'Notificação apagada.',
       );
       if (desfeito) {
-        if (mounted) setState(() => _ocultas.remove(item.id));
+        if (mounted) setState(() => _ocultas.removeAll(ids));
         return;
       }
       try {
-        await repo.apagar(item.id);
+        await Future.wait(ids.map(repo.apagar));
       } catch (e) {
         if (!mounted) return;
-        setState(() => _ocultas.remove(item.id));
+        setState(() => _ocultas.removeAll(ids));
         FeedbackHelper.showError(this.context, friendlyError(e));
         return;
       }
       if (!mounted) return;
-      if (item.lida) {
-        ref.invalidate(notificacoesProvider);
-      } else {
+      if (row.temNaoLida) {
         afterRead();
+      } else {
+        ref.invalidate(notificacoesProvider);
       }
     }
 
@@ -216,6 +233,30 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
       ref.invalidate(notificacoesProvider);
       if (!context.mounted) return;
       FeedbackHelper.showSuccess(context, notificacaoRemovidasLabel(removidas));
+    }
+
+    void abrirAjuda() {
+      AnalyticsService.instance.track(ProductEvents.notificacoesHelpOpened);
+      showFxHelpSheet(
+        context,
+        title: 'Notificações',
+        subtitle: 'O que pediu ação. O destino abre no toque.',
+        tips: const [
+          FxHelpTip('Como calculamos', notificacaoComoCalculamos),
+          FxHelpTip(
+            'Lista',
+            'Hoje, ontem, esta semana e anteriores. Toque abre o aluno, o treino ou o aviso.',
+          ),
+          FxHelpTip(
+            'Não lidas',
+            'Têm ponto e título em negrito. Ler todas zera o sino da Home.',
+          ),
+          FxHelpTip(
+            'Apagar',
+            'Arraste para a esquerda para apagar uma. Limpar lidas tira todas as já vistas.',
+          ),
+        ],
+      );
     }
 
     final lidasCount =
@@ -255,34 +296,6 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
             safePopOrGo(context, home);
           },
           actions: [
-            FxHelpIconButton(
-              tooltip: 'Como usar as notificações',
-              onTap: () {
-                AnalyticsService.instance.track(
-                  ProductEvents.notificacoesHelpOpened,
-                );
-                showFxHelpSheet(
-                  context,
-                  title: 'Notificações',
-                  subtitle: 'O que pediu ação. O destino abre no toque.',
-                  tips: const [
-                    FxHelpTip('Como calculamos', notificacaoComoCalculamos),
-                    FxHelpTip(
-                      'Lista',
-                      'Hoje, ontem e anteriores. Toque abre o aluno, o treino ou o aviso.',
-                    ),
-                    FxHelpTip(
-                      'Não lidas',
-                      'Têm ponto e título em negrito. Ler todas zera o sino da Home.',
-                    ),
-                    FxHelpTip(
-                      'Apagar',
-                      'Arraste para a esquerda para apagar uma. Limpar lidas tira todas as já vistas.',
-                    ),
-                  ],
-                );
-              },
-            ),
             if (unreadCount > 0)
               Semantics(
                 button: true,
@@ -308,17 +321,39 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     );
                   }, compact: true),
               ),
-            if (lidasCount > 0)
-              IconButton(
-                tooltip: 'Limpar lidas',
-                icon: const Icon(Icons.delete_sweep_outlined),
-                onPressed: limparLidas,
-              ),
+            IconButton(
+              tooltip: 'Mais opções',
+              icon: const Icon(Icons.more_horiz_rounded),
+              onPressed: () async {
+                final escolha = await showFxGroupedActionSheet<String>(
+                  context,
+                  titulo: 'Notificações',
+                  grupos: [
+                    FxActionGroup<String>(null, [
+                      const FxActionItem(
+                        valor: 'ajuda',
+                        rotulo: 'Como usar as notificações',
+                        icone: Icons.help_outline_rounded,
+                      ),
+                      if (lidasCount > 0)
+                        const FxActionItem(
+                          valor: 'limpar',
+                          rotulo: 'Limpar lidas',
+                          icone: Icons.delete_sweep_outlined,
+                        ),
+                    ]),
+                  ],
+                );
+                if (!context.mounted) return;
+                if (escolha == 'limpar') await limparLidas();
+                if (escolha == 'ajuda') abrirAjuda();
+              },
+            ),
           ],
         ),
         body: Column(
           children: [
-            Padding(
+            if (mostrarBusca) Padding(
               padding: const EdgeInsets.fromLTRB(
                 TokensStrip.s4,
                 TokensStrip.s2,
@@ -365,23 +400,21 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 TokensStrip.s4,
                 TokensStrip.s1,
               ),
-              child: Row(
-                children: [
-                  FxToggleChip(
-                    label: 'Todas',
-                    selected: !_soNaoLidas,
-                    isDark: isDark,
-                    onTap: () => setState(() => _soNaoLidas = false),
-                  ),
-                  const SizedBox(width: TokensStrip.s2),
-                  FxToggleChip(
-                    key: const ValueKey('notificacoes-filtro-nao-lidas'),
-                    label: notificacaoFiltroNaoLidasLabel(unreadCount),
-                    selected: _soNaoLidas,
-                    isDark: isDark,
-                    onTap: () => setState(() => _soNaoLidas = true),
-                  ),
-                ],
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FxChoiceStrip<bool>(
+                  key: const ValueKey('notificacoes-filtros'),
+                  itens: [
+                    const FxChoiceItem(value: false, label: 'Todas'),
+                    FxChoiceItem(
+                      value: true,
+                      label: notificacaoFiltroNaoLidasLabel(unreadCount),
+                    ),
+                  ],
+                  selecionado: soNaoLidas,
+                  onSelecionar: (v) =>
+                      ref.read(notificacoesSoNaoLidasProvider.notifier).value = v,
+                ),
               ),
             ),
             Expanded(
@@ -401,14 +434,10 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
           data: (inbox) {
             final items = inbox.items;
             final rows = _buildNotificationRows(
-              notificacoesVisiveis(
-                items,
-                ocultas: _ocultas,
-                soNaoLidas: _soNaoLidas,
-              ),
+              notificacoesVisiveis(items, ocultas: _ocultas),
             );
             if (rows.isEmpty) {
-              final verTodas = query.isEmpty && _soNaoLidas;
+              final verTodas = query.isEmpty && soNaoLidas;
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
@@ -419,11 +448,11 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                     icon: query.isEmpty ? 'circle-check' : 'search',
                     title: notificacaoVazioTitle(
                       query: query,
-                      soNaoLidas: _soNaoLidas,
+                      soNaoLidas: soNaoLidas,
                     ),
                     subtitle: notificacaoVazioSubtitle(
                       query: query,
-                      soNaoLidas: _soNaoLidas,
+                      soNaoLidas: soNaoLidas,
                     ),
                     action: FxEmptyAction(
                       label: verTodas
@@ -432,7 +461,7 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                           ? 'Ir para o Hoje'
                           : 'Limpar busca',
                       onTap: verTodas
-                          ? () => setState(() => _soNaoLidas = false)
+                          ? () => ref.read(notificacoesSoNaoLidasProvider.notifier).value = false
                           : query.isEmpty
                           ? () => goToRoleHome(context, ref)
                           : () {
@@ -446,6 +475,11 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                 ],
               );
             }
+            final dias = <String, List<_HubRow>>{};
+            for (final row in rows) {
+              dias.putIfAbsent(row.dayGroup, () => []).add(row);
+            }
+            final grupos = dias.entries.toList();
             final extra = inbox.hasMore ? 1 : 0;
             return RefreshIndicator(
               color: primary,
@@ -461,48 +495,69 @@ class _NotificacoesScreenState extends ConsumerState<NotificacoesScreen> {
                   FxSettingsLayout.pageInset,
                   TokensStrip.s6 + MediaQuery.viewInsetsOf(context).bottom,
                 ),
-                itemCount: rows.length + extra,
+                itemCount: grupos.length + extra,
                 itemBuilder: (context, i) {
-                  if (i >= rows.length) {
-                    return FxSatelliteListTile(
-                      title: inbox.loadingMore
-                          ? 'Carregando…'
-                          : 'Carregar mais',
-                      subtitle: inbox.loadingMore
-                          ? null
-                          : Text(
-                            'Mais ${inbox.total - items.length} nesta caixa.',
-                          ),
-                      onTap: inbox.loadingMore
-                          ? null
-                          : () => ref
-                              .read(notificacoesProvider.notifier)
-                              .loadMore(),
+                  if (i >= grupos.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: TokensStrip.s3),
+                      child: FxSatelliteListTile(
+                        title: inbox.loadingMore
+                            ? 'Carregando…'
+                            : 'Carregar mais',
+                        subtitle: inbox.loadingMore
+                            ? null
+                            : Text(
+                              'Mais ${inbox.total - items.length} nesta caixa.',
+                            ),
+                        onTap: inbox.loadingMore
+                            ? null
+                            : () => ref
+                                .read(notificacoesProvider.notifier)
+                                .loadMore(),
+                      ),
                     );
                   }
-                  final row = rows[i];
-                  final showDay =
-                      i == 0 || rows[i - 1].dayGroup != row.dayGroup;
+                  final chrome = ShellChrome.of(context);
+                  final grupo = grupos[i];
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (showDay)
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: i == 0 ? 0 : TokensStrip.s3,
-                            bottom: TokensStrip.s2,
-                          ),
-                          child: DashboardSectionHeader(title: row.dayGroup),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: i == 0 ? 0 : TokensStrip.s3,
+                          bottom: TokensStrip.s2,
                         ),
-                      Dismissible(
-                        key: ValueKey('notificacao-${row.item.id}'),
-                        direction: DismissDirection.endToStart,
-                        background: const _ApagarFundo(),
-                        onDismissed: (_) => apagar(row.item),
-                        child: _NotificacaoTile(
-                          item: row.item,
-                          temDestino: destinoDe(row.item) != null,
-                          onTap: () => openItem(row.item),
+                        child: DashboardSectionHeader(title: grupo.key),
+                      ),
+                      Ink(
+                        decoration: chrome.panel(radius: TokensStrip.rCard),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(TokensStrip.rCard),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final (n, row) in grupo.value.indexed) ...[
+                                if (n > 0)
+                                  Divider(
+                                    height: 1,
+                                    indent: TokensStrip.s3,
+                                    endIndent: TokensStrip.s3,
+                                    color: chrome.line,
+                                  ),
+                                Dismissible(
+                                  key: ValueKey('notificacao-${row.item.id}'),
+                                  direction: DismissDirection.endToStart,
+                                  background: const _ApagarFundo(),
+                                  onDismissed: (_) => apagar(row),
+                                  child: _NotificacaoTile(
+                                    item: row.item,
+                                    temDestino: destinoDe(row.item) != null,
+                                    onTap: () => openItem(row),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                       ),
                     ],

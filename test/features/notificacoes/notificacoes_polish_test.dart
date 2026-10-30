@@ -9,11 +9,11 @@ void main() {
     );
 
     expect(screen, contains('FxHubFreshness'));
-    expect(screen, contains('formatDisplayName'));
+    expect(screen, contains('notificacaoNomeLimpo'));
     expect(screen, contains('Todas marcadas como lidas.'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
-    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('roleHomePath'));
     expect(screen, contains('Semantics('));
     expect(screen, contains('Marcar todas as notificações como lidas'));
@@ -26,8 +26,7 @@ void main() {
     final screen = readScreenSourceBundle(
       'lib/features/notificacoes/screens/notificacoes_screen.dart',
     );
-    expect(screen, contains('titleCase: false'));
-    expect(screen, contains('muted: !unread'));
+    expect(screen, contains('unread ? FontWeight.w700 : FontWeight.w500'));
     expect(screen, contains("ValueKey('notificacao-nao-lida')"));
     expect(screen, contains('notificacaoNaoLidasLabel(unreadCount)'));
     expect(screen, isNot(contains('inbox.total),')));

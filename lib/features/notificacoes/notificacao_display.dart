@@ -37,6 +37,17 @@ String notificacaoRemovidasLabel(int n) {
   return '$n notificações apagadas.';
 }
 
+/// Com a lista inteira na tela, o número é o das linhas (avisos iguais viram
+/// uma); senão, o total do servidor.
+int notificacaoNaoLidasDaTela({
+  required int servidor,
+  required int? naLista,
+  required bool listaCompleta,
+}) => listaCompleta && naLista != null ? naLista : servidor;
+
+/// Busca só faz sentido com lista longa.
+const notificacaoBuscaAPartirDe = 15;
+
 String notificacaoFiltroNaoLidasLabel(int unread) =>
     unread > 0 ? 'Não lidas · $unread' : 'Não lidas';
 
@@ -68,6 +79,11 @@ String formatDisplayName(String raw) {
       })
       .join(' ');
 }
+
+/// Nome limpo do payload: sem traço solto e com maiúscula ("João -" → "João").
+String notificacaoNomeLimpo(String raw) => formatDisplayName(
+  raw.trim().replaceAll(RegExp(r'^[\s\-–—·:]+|[\s\-–—·:]+$'), ''),
+);
 
 String normalizeNotificationText(String text) =>
     text.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');

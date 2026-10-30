@@ -9,7 +9,7 @@ void main() {
     );
     expect(screen, contains('fxScreenA11yScope'));
     expect(screen, contains('FxShellScaffold'));
-    expect(screen, contains('FxHelpIconButton'));
+    expect(screen, contains('showFxHelpSheet'));
     expect(screen, contains('FxSatelliteListTile'));
     expect(screen, isNot(contains('FxSettingsGroupedList')));
     expect(screen, contains('FxEmptyState'));

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/auth/session_invalidator.dart';
 import '../../../core/state/fx_value_notifier.dart';
 import '../../auth/providers/auth_provider.dart';
 
@@ -9,12 +10,21 @@ final notificacoesRepositoryProvider = Provider<NotificacoesRepository>(
   (ref) => NotificacoesRepository(ref.read(apiClientProvider)),
 );
 
+/// Sobe a cada logout: lista e contador de uma conta não passam para a próxima.
+final _sessaoDasNotificacoesProvider = Provider.autoDispose<int>((ref) {
+  void trocou() => ref.invalidateSelf();
+  SessionInvalidator.listenable.addListener(trocou);
+  ref.onDispose(() => SessionInvalidator.listenable.removeListener(trocou));
+  return SessionInvalidator.generation;
+});
+
 final notificacoesProvider =
-    AsyncNotifierProvider<NotificacoesInboxNotifier, NotificacoesInbox>(
+    AsyncNotifierProvider.autoDispose<NotificacoesInboxNotifier, NotificacoesInbox>(
       NotificacoesInboxNotifier.new,
     );
 
-final notificacoesNaoLidasProvider = FutureProvider<int>((ref) async {
+final notificacoesNaoLidasProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(_sessaoDasNotificacoesProvider);
   return ref.read(notificacoesRepositoryProvider).totalNaoLidas();
 });
 
@@ -103,16 +113,19 @@ class NotificacoesInbox {
 }
 
 final notificacoesQueryProvider = fxValueProvider<String>('');
+final notificacoesSoNaoLidasProvider = fxValueProvider<bool>(false);
 
 class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
   static const pageSize = 30;
 
   @override
   Future<NotificacoesInbox> build() {
+    ref.watch(_sessaoDasNotificacoesProvider);
     final q = ref.watch(notificacoesQueryProvider);
+    final soNaoLidas = ref.watch(notificacoesSoNaoLidasProvider);
     return ref
         .read(notificacoesRepositoryProvider)
-        .listar(page: 0, size: pageSize, q: q);
+        .listar(page: 0, size: pageSize, q: q, naoLidas: soNaoLidas);
   }
 
   Future<void> loadMore() async {
@@ -126,6 +139,7 @@ class NotificacoesInboxNotifier extends AsyncNotifier<NotificacoesInbox> {
             page: current.page + 1,
             size: pageSize,
             q: ref.read(notificacoesQueryProvider),
+            naoLidas: ref.read(notificacoesSoNaoLidasProvider),
           );
       final seen = current.items.map((item) => item.id).toSet();
       state = AsyncData(
@@ -154,6 +168,7 @@ class NotificacoesRepository {
     int page = 0,
     int size = 30,
     String q = '',
+    bool naoLidas = false,
   }) async {
     final query = q.trim();
     final response = await _dio.get(
@@ -162,6 +177,7 @@ class NotificacoesRepository {
         'page': page,
         'size': size,
         if (query.isNotEmpty) 'q': query,
+        if (naoLidas) 'naoLidas': true,
       },
     );
     return NotificacoesInbox.fromJson(response.data as Map<String, dynamic>);

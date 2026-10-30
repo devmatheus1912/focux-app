@@ -32,14 +32,25 @@ class _FakeRepo implements NotificacoesRepository {
     int page = 0,
     int size = 30,
     String q = '',
+    bool naoLidas = false,
   }) async {
-    final visiveis = items.where((n) => !apagadas.contains(n.id)).toList();
+    final visiveis = items
+        .where((n) => !apagadas.contains(n.id) && (!naoLidas || !lidas.contains(n.id) && !n.lida))
+        .toList();
     return NotificacoesInbox(
       items: visiveis,
       hasMore: false,
       page: 0,
       total: visiveis.length,
     );
+  }
+
+  final lidas = <int>{};
+
+  @override
+  Future<NotificacaoApp> marcarLida(int id) async {
+    lidas.add(id);
+    return items.firstWhere((n) => n.id == id);
   }
 
   @override
@@ -74,7 +85,7 @@ void main() {
     await pump(tester);
     expect(find.text('Novo post no feed'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('notificacoes-filtro-nao-lidas')));
+    await tester.tap(find.text('Não lidas · 1'));
     await tester.pumpAndSettle();
 
     expect(find.text('Novo post no feed'), findsNothing);
