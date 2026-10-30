@@ -56,7 +56,7 @@ ChatSystemEventView formatChatSystemEvent(String raw) {
 
   if (_evoluiu.hasMatch(text)) {
     final linhas = [
-      for (final linha in text.split('\n'))
+      for (final linha in raw.split('\n'))
         if (linha.trimLeft().startsWith('- '))
           linha.trimLeft().substring(2).trim(),
     ];
