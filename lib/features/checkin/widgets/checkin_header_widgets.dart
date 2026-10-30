@@ -12,26 +12,35 @@ import '../utils/checkin_execucao_display.dart';
 
 class CheckinWorkoutHeader extends StatelessWidget {
   final String treinoNome;
+
+  /// Tempo do treino, ou "Descanso".
   final String contextLine;
   final VoidCallback onBack;
-  final VoidCallback? onHelp;
 
-  /// Abre as ações do exercício (ajustar, confirmar séries, finalizar).
+  /// Abre as ações do exercício (ajustar, trocar, dicas, finalizar).
   final VoidCallback? onMais;
+
+  /// Exercício atual (1 = primeiro) e total: a barra do treino.
+  final int exercicioAtual;
+  final int totalExercicios;
+  final String? progressoLeitura;
 
   const CheckinWorkoutHeader({
     super.key,
     required this.treinoNome,
     required this.contextLine,
     required this.onBack,
-    this.onHelp,
     this.onMais,
+    this.exercicioAtual = 0,
+    this.totalExercicios = 0,
+    this.progressoLeitura,
   });
 
   @override
   Widget build(BuildContext context) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
+    final primary = Theme.of(context).colorScheme.primary;
     return SafeArea(
       bottom: false,
       child: Padding(
@@ -39,15 +48,15 @@ class CheckinWorkoutHeader extends StatelessWidget {
           FxSettingsLayout.pageInset,
           TokensStrip.s2,
           TokensStrip.s3,
-          TokensStrip.s3,
+          0,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
                     treinoNome,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -56,70 +65,66 @@ class CheckinWorkoutHeader extends StatelessWidget {
                       color: chrome.ink,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    contextLine,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxTypography.bodySmall(color: chrome.mute),
+                ),
+                const SizedBox(width: TokensStrip.s2),
+                Text(
+                  contextLine,
+                  maxLines: 1,
+                  style: FocuxTypography.bodySmall(color: chrome.mute),
+                ),
+                const Spacer(),
+                if (onMais != null)
+                  IconButton(
+                    tooltip: s.checkinMais,
+                    onPressed: onMais,
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size(checkinExecutionControlMin, checkinExecutionControlMin),
+                    ),
+                    icon: Icon(Icons.more_horiz_rounded, color: chrome.ink),
                   ),
-                ],
-              ),
+                SizedBox(
+                  height: checkinExecutionControlMin,
+                  child: Center(
+                    child: FxTonalButton(
+                      label: s.checkinSair,
+                      compact: true,
+                      onPressed: onBack,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // "?", "⋯" e "Sair": mesma altura (48), mesmo estilo tonal, sem sombra.
-            if (onHelp != null)
-              _BotaoDoCabecalho(
-                tooltip: s.checkinDicasExercicio,
-                icone: Icons.help_outline_rounded,
-                onPressed: onHelp!,
-              ),
-            if (onMais != null) ...[
-              const SizedBox(width: TokensStrip.s1),
-              _BotaoDoCabecalho(
-                tooltip: s.checkinMais,
-                icone: Icons.more_horiz_rounded,
-                onPressed: onMais!,
-              ),
-            ],
-            const SizedBox(width: TokensStrip.s1),
-            SizedBox(
-              height: checkinExecutionControlMin,
-              child: Center(
-                child: FxTonalButton(
-                  label: s.checkinSair,
-                  icon: Icons.logout_rounded,
-                  compact: true,
-                  onPressed: onBack,
+            if (totalExercicios > 1)
+              Padding(
+                padding: const EdgeInsets.only(
+                  right: TokensStrip.s1,
+                  top: TokensStrip.s1,
+                ),
+                child: Semantics(
+                  label: progressoLeitura,
+                  excludeSemantics: true,
+                  child: Row(
+                    key: const ValueKey('checkin-barra-treino'),
+                    children: [
+                      for (var i = 1; i <= totalExercicios; i++) ...[
+                        if (i > 1) const SizedBox(width: TokensStrip.s1),
+                        Expanded(
+                          child: Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: i <= exercicioAtual ? primary : chrome.line,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Botão de ícone tonal do cabeçalho da execução (48, sem sombra).
-class _BotaoDoCabecalho extends StatelessWidget {
-  const _BotaoDoCabecalho({required this.tooltip, required this.icone, required this.onPressed});
-
-  final String tooltip;
-  final IconData icone;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final brand = Theme.of(context).colorScheme.primary;
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      style: IconButton.styleFrom(
-        minimumSize: const Size(48, 48),
-        backgroundColor: brand.withValues(alpha: 0.08),
-        side: BorderSide(color: brand.withValues(alpha: 0.35)),
-      ),
-      icon: Icon(icone, color: brand),
     );
   }
 }

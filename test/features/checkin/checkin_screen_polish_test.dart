@@ -189,7 +189,7 @@ void main() {
     );
     expect(header, contains('s.checkinSair'));
     expect(header, contains('checkinExecutionControlMin'));
-    expect(header, contains('_BotaoDoCabecalho')); // "?", "⋯" no mesmo estilo tonal
+    expect(header, contains("ValueKey('checkin-barra-treino')"));
     expect(header, contains('s.checkinMais'));
     expect(header, isNot(contains('CheckinLiveBadge')));
     expect(header, isNot(contains('AO VIVO')));
@@ -202,7 +202,7 @@ void main() {
     final card = _src(
       'lib/features/checkin/widgets/checkin_exercise_widgets.dart',
     );
-    expect(card, contains('checkinTrocarExercicioHint'));
+    expect(card, isNot(contains('onTrocar')));
     expect(card, contains('_CheckinSetSteppers'));
     expect(card, contains('_CheckinStepperButton'));
     expect(card, contains('s.checkinDiminuir'));
@@ -237,7 +237,7 @@ void main() {
 
   test('checkin execution mostra o card em três zonas', () {
     final screen = _src(screenPath);
-    expect(screen, contains('onHelp:'));
+    expect(screen, contains('onDicas:'));
     expect(screen, contains('showCheckinExerciseTipsSheet'));
     expect(screen, isNot(contains('onOpenTips:')));
     expect(screen, contains('CheckinSerieCard'));

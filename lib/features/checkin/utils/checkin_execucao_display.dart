@@ -122,8 +122,30 @@ String checkinEvolucaoTipoLabel(S s, String tipo) => switch (tipo) {
   _ => s.checkinEvolucaoCarga,
 };
 
-String checkinRegistrarLabel(S s, {required bool first}) =>
-    first ? s.checkinRegistrarSerie : s.checkinProximaSerie;
+/// Com o total conhecido o botão diz qual série é; sem ele, o rótulo curto.
+String checkinRegistrarLabel(
+  S s, {
+  required bool first,
+  int? atual,
+  int? total,
+}) => atual != null && total != null && total > 0 && atual <= total
+    ? s.checkinRegistrarSerieN(atual, total)
+    : first
+    ? s.checkinRegistrarSerie
+    : s.checkinProximaSerie;
+
+/// "Série 1 de 4 · 8-12 reps · 75 s": a linha do exercício na execução.
+String checkinLinhaDaSerie(
+  S s, {
+  required int atual,
+  int? total,
+  String? repeticoes,
+  int? descansoSegundos,
+}) => [
+  if (total != null && total > 0) s.checkinSerieDe(atual.clamp(1, total), total),
+  if (repeticoes != null && repeticoes.trim().isNotEmpty) '${repeticoes.trim()} reps',
+  if (descansoSegundos != null && descansoSegundos > 0) '$descansoSegundos s',
+].join(' · ');
 
 String checkinConfirmarRestanteLabel(
   S s, {

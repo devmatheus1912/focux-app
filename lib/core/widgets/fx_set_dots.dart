@@ -32,7 +32,7 @@ class FxSetDots extends StatelessWidget {
     final chrome = ShellChrome.of(context);
     final proxima = series.indexWhere((s) => !s.feita);
     return Wrap(
-      alignment: WrapAlignment.center,
+      alignment: WrapAlignment.start,
       spacing: TokensStrip.s1,
       runSpacing: TokensStrip.s2,
       children: [
@@ -77,7 +77,7 @@ class _Dot extends StatelessWidget {
       label: label,
       excludeSemantics: true,
       child: SizedBox(
-        width: 56,
+        width: 48,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -86,8 +86,8 @@ class _Dot extends StatelessWidget {
                   ? Duration.zero
                   : const Duration(milliseconds: 220),
               curve: Curves.easeOutCubic,
-              width: 32,
-              height: 32,
+              width: 26,
+              height: 26,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -110,7 +110,7 @@ class _Dot extends StatelessWidget {
                         ? const Icon(
                           Icons.check_rounded,
                           key: ValueKey('feita'),
-                          size: 18,
+                          size: 16,
                           color: Colors.white,
                         )
                         : Text(

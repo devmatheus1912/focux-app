@@ -23,8 +23,8 @@ import 'checkin_media_widgets.dart';
 
 part 'checkin_serie_steppers.part.dart';
 
-/// Exercício atual em três zonas, sem rolagem no caso comum:
-/// topo fixo (nome, bolinhas), mídia compacta no meio e, na base, carga e reps.
+/// Exercício atual em três zonas, sem rolagem no caso comum: nome e série sobre
+/// o fundo, mídia no meio e, na base, o único cartão da tela (carga e reps).
 /// Só a mídia cede espaço; sem altura (tela baixa, letra grande) vira rolagem e
 /// o vídeo passa a ser o botão "Ver vídeo".
 /// Registrar a série fica no rodapé fixo da tela (zona do polegar).
@@ -32,7 +32,9 @@ class CheckinSerieCard extends StatelessWidget {
   final ExecucaoExercicio ee;
   final int index;
   final int total;
-  final VoidCallback? onTrocar;
+
+  /// Chip no canto do vídeo, quando o exercício tem dicas.
+  final VoidCallback? onDicas;
   final double? draftCargaKg;
   final int? draftReps;
   final VoidCallback? onPlusCarga;
@@ -50,7 +52,7 @@ class CheckinSerieCard extends StatelessWidget {
     required this.ee,
     required this.index,
     required this.total,
-    this.onTrocar,
+    this.onDicas,
     this.draftCargaKg,
     this.draftReps,
     this.onPlusCarga,
@@ -94,16 +96,26 @@ class CheckinSerieCard extends StatelessWidget {
               accent: brand,
               glowStrength: 0,
               padding: const EdgeInsets.all(TokensStrip.s3),
-              child: _CheckinSetSteppers(
-                cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
-                reps: draftReps,
-                onPlusCarga: onPlusCarga,
-                onMinusCarga: onMinusCarga,
-                onPlusReps: onPlusReps,
-                onMinusReps: onMinusReps,
-                onEditarCarga: onEditarCarga,
-                onEditarReps: onEditarReps,
-                cargaAnteriorKg: ee.cargaAnteriorKg,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_chipUltimaVez(context) case final chip?) ...[
+                    Align(alignment: Alignment.centerLeft, child: chip),
+                    const SizedBox(height: TokensStrip.s2),
+                  ],
+                  _CheckinSetSteppers(
+                    cargaKg: draftCargaKg ?? ee.proximaCargaKg ?? ee.cargaKg,
+                    reps: draftReps,
+                    onPlusCarga: onPlusCarga,
+                    onMinusCarga: onMinusCarga,
+                    onPlusReps: onPlusReps,
+                    onMinusReps: onMinusReps,
+                    onEditarCarga: onEditarCarga,
+                    onEditarReps: onEditarReps,
+                    cargaAnteriorKg: ee.cargaAnteriorKg,
+                  ),
+                ],
               ),
             );
 
@@ -213,138 +225,83 @@ class CheckinSerieCard extends StatelessWidget {
         if (m.maxHeight < alturaMinimaMidia) {
           return Center(child: _botaoVerVideo(context));
         }
-        // A sobra de altura vai para a mídia, nunca para faixas vazias.
-        return SizedBox(
-          height: m.maxHeight,
-          child: FxStripCard(
-            glowStrength: 0.04,
-            accent: brand,
-            padding: EdgeInsets.zero,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(TokensStrip.rCard),
+        // Na proporção do vídeo, sem corte; o que sobra vira respiro abaixo.
+        return Stack(
+          children: [
+            Positioned.fill(
               child: _inlineDemoPreview(ee: ee, brand: brand, dark: dark),
             ),
-          ),
+            if (onDicas != null)
+              Positioned(
+                top: TokensStrip.s2,
+                right: TokensStrip.s2,
+                child: FxTonalButton(
+                  label: S.of(context).checkinDicasChip,
+                  compact: true,
+                  onPressed: onDicas,
+                ),
+              ),
+          ],
         );
       },
     );
   }
 
-  /// Topo fixo: nome, trocar, série atual e bolinhas.
+  /// Topo sobre o fundo da tela: nome, a série de agora e as bolinhas.
   Widget _topo(BuildContext context, {required Color brand}) {
     final s = S.of(context);
     final chrome = ShellChrome.of(context);
-    final contextLine = checkinSerieContextLine(
-      s,
-      seriesReps: checkinSeriesRepsLabel(ee.series, ee.repeticoes),
-      carga: checkinCargaLabel(ee.proximaCargaKg ?? ee.cargaKg),
-      descansoSegundos: ee.descansoSegundos,
-    );
-    final ultima = ultimaVezDoExercicio(ee.seriesAnteriores);
-    final trocarHint = checkinTrocarExercicioHint(
-      s,
-      index: index,
-      total: total,
-    );
     final dots = _dots(ee);
-    final aquecimento = ee.proximaSeriePapel == 'AQUECIMENTO';
+    final linha = [
+      if (ee.proximaSeriePapel == 'AQUECIMENTO') s.checkinAquecimento,
+      checkinLinhaDaSerie(
+        s,
+        atual: ee.seriesFeitas + 1,
+        total: ee.series,
+        repeticoes: ee.repeticoes,
+        descansoSegundos: ee.descansoSegundos,
+      ),
+      // O método prescrito: "Bi-set", "Drop-set", "Pirâmide"…
+      if (ee.metodo.combinado) rotuloDoCombinado(ee.metodo.grupoRotulo, 2),
+      if (ee.metodo.tecnica != Tecnica.normal) rotuloDaTecnica(ee.metodo.tecnica),
+    ].where((t) => t.isNotEmpty).join(' · ');
 
-    return FxStripCard(
-      accent: brand,
-      glowStrength: 0.04,
-      padding: const EdgeInsets.fromLTRB(
-        TokensStrip.s4,
-        TokensStrip.s3,
-        TokensStrip.s3,
-        TokensStrip.s3,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: TokensStrip.s1),
-                  child: Text(
-                    ee.exercicioNome,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: FocuxHubTypography.cardTitle(color: chrome.ink)
-                        .copyWith(fontSize: 20, height: 1.2),
-                  ),
-                ),
-              ),
-              if (onTrocar != null) ...[
-                const SizedBox(width: TokensStrip.s2),
-                IconButton(
-                  tooltip: trocarHint,
-                  onPressed: () {
-                    HapticFeedback.selectionClick();
-                    onTrocar!();
-                  },
-                  style: IconButton.styleFrom(
-                    minimumSize: const Size(48, 48),
-                    side: BorderSide(color: brand.withValues(alpha: 0.35)),
-                    backgroundColor: brand.withValues(alpha: 0.08),
-                  ),
-                  icon: Icon(Icons.swap_horiz_rounded, color: brand),
-                ),
-              ],
-            ],
-          ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          ee.exercicioNome,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: FocuxHubTypography.cardTitle(color: chrome.ink)
+              .copyWith(fontSize: 22, height: 1.2),
+        ),
+        const SizedBox(height: TokensStrip.s1),
+        Text(linha, style: FocuxHubTypography.bodyMuted(color: chrome.mute)),
+        if (dots.isNotEmpty) ...[
           const SizedBox(height: TokensStrip.s2),
-          // As bolinhas são o único indicador de progresso (o "0/4" repetia).
-          Row(
-            children: [
-              if (aquecimento) ...[
-                Text(
-                  s.checkinAquecimento,
-                  style: FocuxHubTypography.bodyMuted(color: brand),
-                ),
-                const SizedBox(width: TokensStrip.s2),
-              ],
-              // O leitor de tela ouve "Série N de M" mesmo quando não há bolinhas.
-              Semantics(
-                label: s.checkinSerieDe(
-                  (ee.seriesFeitas + 1).clamp(1, ee.series ?? dots.length.clamp(1, 99)),
-                  ee.series ?? dots.length,
-                ),
-                excludeSemantics: true,
-                child: dots.isEmpty
-                    ? const SizedBox(height: 1)
-                    : FxSetDots(series: dots, accent: brand),
-              ),
-            ],
-          ),
-          const SizedBox(height: TokensStrip.s2),
-          Text(
-            [
-              contextLine,
-              // O método prescrito: "Bi-set", "Drop-set", "Pirâmide"…
-              if (ee.metodo.combinado) rotuloDoCombinado(ee.metodo.grupoRotulo, 2),
-              if (ee.metodo.tecnica != Tecnica.normal) rotuloDaTecnica(ee.metodo.tecnica),
-            ].join(' · '),
-            style: FocuxHubTypography.bodyMuted(color: chrome.mute),
-          ),
-          if (ultima != null) ...[
-            const SizedBox(height: TokensStrip.s2),
-            FxTonalButton(
-              label: s.checkinUltimaVezChip(_resumoUltimaVez(s, ultima)),
-              icon: Icons.history_rounded,
-              compact: true,
-              onPressed: onEditarCarga == null && onEditarReps == null
-                  ? null
-                  : () {
-                      HapticFeedback.selectionClick();
-                      if (ultima.cargaKg != null) onEditarCarga?.call(ultima.cargaKg!);
-                      if (ultima.reps != null) onEditarReps?.call(ultima.reps!);
-                    },
-            ),
-          ],
+          FxSetDots(series: dots, accent: brand),
         ],
-      ),
+      ],
+    );
+  }
+
+  /// "Última vez · 40 kg × 10" preenche carga e reps de uma vez.
+  Widget? _chipUltimaVez(BuildContext context) {
+    final s = S.of(context);
+    final ultima = ultimaVezDoExercicio(ee.seriesAnteriores);
+    if (ultima == null) return null;
+    return FxTonalButton(
+      label: s.checkinUltimaVezChip(_resumoUltimaVez(s, ultima)),
+      icon: Icons.history_rounded,
+      compact: true,
+      onPressed: onEditarCarga == null && onEditarReps == null
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              if (ultima.cargaKg != null) onEditarCarga?.call(ultima.cargaKg!);
+              if (ultima.reps != null) onEditarReps?.call(ultima.reps!);
+            },
     );
   }
 

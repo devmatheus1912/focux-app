@@ -239,7 +239,7 @@ Future<void> pumpSheet(WidgetTester tester) async {
 }
 
 Future<void> tocarRegistrar(WidgetTester tester, {bool primeira = true}) async {
-  await tester.tap(find.text(primeira ? 'Registrar série' : 'Próxima série'));
+  await tester.tap(find.textContaining('Registrar série'));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
 }

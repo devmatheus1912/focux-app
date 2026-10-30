@@ -24,7 +24,7 @@ void main() {
     ) async {
       await abrir(tester, tela, escala: escala);
       expect(tester.takeException(), isNull);
-      final registrar = find.text('Registrar série');
+      final registrar = find.textContaining('Registrar série');
       expect(registrar, findsOneWidget);
       expect(find.text('kg'), findsWidgets);
       final alturaTela = tela.height;

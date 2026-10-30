@@ -86,18 +86,20 @@ extension _CheckinCorpo on _CheckinScreenState {
           contextLine:
               _descanso.ativo
                   ? s.checkinDescanso
-                  : checkinChromeContextLine(
-                    s,
-                    duration: checkinDurationLabel(_duration),
-                    current: currentIndex,
-                    total: exercicios.length,
-                  ),
+                  : checkinDurationLabel(_duration),
           onBack: _sair,
-          onHelp:
-              current != null && checkinExerciseHasTips(current)
-                  ? () => showCheckinExerciseTipsSheet(context, ee: current)
-                  : null,
-          onMais: current == null ? null : () => _abrirMais(current),
+          onMais:
+              current == null
+                  ? null
+                  : () => _abrirMais(current, onTrocar: onTrocar),
+          exercicioAtual: currentIndex,
+          totalExercicios: exercicios.length,
+          progressoLeitura: checkinChromeContextLine(
+            s,
+            duration: checkinDurationLabel(_duration),
+            current: currentIndex,
+            total: exercicios.length,
+          ),
         ),
         Expanded(
           child:
@@ -113,13 +115,7 @@ extension _CheckinCorpo on _CheckinScreenState {
                     onRpe: _ultimaEnvio == null ? null : _anotarRpe,
                     onTrocar: onTrocar,
                   )
-                  : _cardOuVazio(
-                    s,
-                    exercicios,
-                    current,
-                    currentIndex,
-                    onTrocar,
-                  ),
+                  : _cardOuVazio(s, exercicios, current, currentIndex),
         ),
         if (_ultimaSerie != null)
           CheckinDesfazerFaixa(
@@ -154,7 +150,12 @@ extension _CheckinCorpo on _CheckinScreenState {
     return switch (rodape) {
       CheckinRodape.nenhum => null,
       CheckinRodape.registrar => CheckinRodapeBar(
-        label: checkinRegistrarLabel(s, first: current!.seriesFeitas <= 0),
+        label: checkinRegistrarLabel(
+          s,
+          first: current!.seriesFeitas <= 0,
+          atual: current.seriesFeitas + 1,
+          total: current.series,
+        ),
         loading: _registrando || _concluindo,
         loadingLabel:
             _concluindo ? s.checkinFinalizando : s.checkinSalvandoSerie,
@@ -185,7 +186,6 @@ extension _CheckinCorpo on _CheckinScreenState {
     List<ExecucaoExercicio> exercicios,
     ExecucaoExercicio? current,
     int currentIndex,
-    VoidCallback? onTrocar,
   ) {
     if (exercicios.isEmpty) {
       return FxEmptyState(
@@ -201,14 +201,13 @@ extension _CheckinCorpo on _CheckinScreenState {
         subtitle: s.checkinNenhumAtivoTexto,
       );
     }
-    return _card(current, currentIndex, exercicios, onTrocar);
+    return _card(current, currentIndex, exercicios);
   }
 
   Widget _card(
     ExecucaoExercicio current,
     int currentIndex,
     List<ExecucaoExercicio> exercicios,
-    VoidCallback? onTrocar,
   ) {
     final draft = _rascunhos.de(current);
     final proximo = _proximoIncompleto(exercicios, current);
@@ -237,7 +236,9 @@ extension _CheckinCorpo on _CheckinScreenState {
           (kg) => _mexerRascunho(() => _rascunhos.definirCarga(current, kg)),
       onEditarReps:
           (n) => _mexerRascunho(() => _rascunhos.definirReps(current, n)),
-      onTrocar: onTrocar,
+      onDicas: checkinExerciseHasTips(current)
+          ? () => showCheckinExerciseTipsSheet(context, ee: current)
+          : null,
     );
   }
 

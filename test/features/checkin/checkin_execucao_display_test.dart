@@ -118,6 +118,11 @@ void main() {
     expect(checkinCargaLabel(7.5), '7,5 kg');
     expect(checkinRegistrarLabel(s, first: true), 'Registrar série');
     expect(checkinRegistrarLabel(s, first: false), 'Próxima série');
+    expect(checkinRegistrarLabel(s, first: true, atual: 1, total: 4), 'Registrar série 1 de 4');
+    expect(
+      checkinLinhaDaSerie(s, atual: 1, total: 4, repeticoes: '8-12', descansoSegundos: 75),
+      'Série 1 de 4 · 8-12 reps · 75 s',
+    );
     expect(checkinRestCountdownLabel(45), '0:45');
     expect(checkinRestCountdownLabel(69), '1:09');
     expect(

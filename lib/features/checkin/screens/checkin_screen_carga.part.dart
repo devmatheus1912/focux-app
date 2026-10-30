@@ -48,7 +48,7 @@ extension _CheckinCarga on _CheckinScreenState {
 
   /// Ações do exercício no ⋮ do cabeçalho: tudo que antes ficava espalhado
   /// em "Mais" e "Finalizar treino" no corpo da tela.
-  Future<void> _abrirMais(ExecucaoExercicio ee) async {
+  Future<void> _abrirMais(ExecucaoExercicio ee, {VoidCallback? onTrocar}) async {
     final s = S.of(context);
     final livre = !_registrando && !_concluindo;
     final podeRegistrar = checkinPodeRegistrar(ee);
@@ -85,6 +85,19 @@ extension _CheckinCarga on _CheckinScreenState {
               descricao: s.checkinDesfazerSub,
               icone: Icons.undo_rounded,
             ),
+          if (onTrocar != null)
+            FxActionItem(
+              valor: 'trocar',
+              rotulo: s.checkinTrocarExercicio,
+              descricao: s.checkinTrocarExercicioSub,
+              icone: Icons.swap_horiz_rounded,
+            ),
+          if (checkinExerciseHasTips(ee))
+            FxActionItem(
+              valor: 'dicas',
+              rotulo: s.checkinDicasExercicio,
+              icone: Icons.help_outline_rounded,
+            ),
           FxActionItem(
             valor: 'finalizar',
             rotulo: s.checkinFinalizarTreino,
@@ -102,6 +115,10 @@ extension _CheckinCarga on _CheckinScreenState {
         _confirmarRestante(ee);
       case 'desfazer':
         _desfazer(ee);
+      case 'trocar':
+        onTrocar?.call();
+      case 'dicas':
+        showCheckinExerciseTipsSheet(context, ee: ee);
       case 'finalizar':
         await _finalizar();
     }

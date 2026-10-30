@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -54,7 +56,7 @@ class CheckinExerciseThumbnailPreview extends StatelessWidget {
             imageUrl: url,
             height: _previaAltura(context),
             width: double.infinity,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             memCacheWidth: 720,
             errorBuilder:
                 (_, __, ___) => Container(
@@ -113,7 +115,7 @@ class CheckinExerciseMediaPreview extends StatelessWidget {
             imageUrl: url,
             height: _previaAltura(context),
             width: double.infinity,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             memCacheWidth: 720,
             errorBuilder:
                 (_, __, ___) => Container(
@@ -311,59 +313,51 @@ class _CheckinExerciseVideoPreviewState
       videoSource: widget.videoSource,
     );
     final video = controller.value;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: Stack(
-        children: [
-          LayoutBuilder(
-            builder:
-                (context, constraints) => Container(
-                  color: Colors.black,
-                  width: double.infinity,
-                  height: constraints.hasBoundedHeight
-                      ? constraints.maxHeight
-                      : checkinMediaAltura(
-                        largura: constraints.maxWidth,
-                        alturaTela: MediaQuery.sizeOf(context).height,
-                        aspectRatio: video.aspectRatio,
-                      ),
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: video.size.width > 0 ? video.size.width : 16,
-                      height: video.size.height > 0 ? video.size.height : 9,
-                      child: VideoPlayer(controller),
+    final proporcao = video.aspectRatio > 0 ? video.aspectRatio : 16 / 9;
+    // A caixa tem a proporção do vídeo: demonstração não corta pé nem mão, e
+    // não sobra faixa preta. Vídeo em pé ocupa a altura, no fundo da tela.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final natural = constraints.maxWidth / proporcao;
+        final altura = constraints.hasBoundedHeight
+            ? math.min(constraints.maxHeight, natural)
+            : checkinMediaAltura(
+              largura: constraints.maxWidth,
+              alturaTela: MediaQuery.sizeOf(context).height,
+              aspectRatio: video.aspectRatio,
+            );
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            key: const ValueKey('checkin-video-caixa'),
+            width: math.min(constraints.maxWidth, altura * proporcao),
+            height: altura,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  VideoPlayer(controller),
+                  Positioned(
+                    right: 8,
+                    bottom: 8,
+                    child: CheckinVideoPlayButton(
+                      playing: _playing,
+                      onTap: _togglePlay,
                     ),
                   ),
-                ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.04),
-                    Colors.black.withValues(alpha: 0.18),
-                  ],
-                ),
+                  if (badge != null && badgeIcon != null)
+                    Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: _CheckinMediaBadge(label: badge, icon: badgeIcon),
+                    ),
+                ],
               ),
             ),
           ),
-          Positioned(
-            right: 6,
-            bottom: 6,
-            child: CheckinVideoPlayButton(playing: _playing, onTap: _togglePlay),
-          ),
-          if (badge != null && badgeIcon != null)
-            Positioned(
-              left: 10,
-              bottom: 10,
-              child: _CheckinMediaBadge(label: badge, icon: badgeIcon),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -391,7 +385,8 @@ class CheckinVideoPlayButton extends StatelessWidget {
         message: label,
         excludeFromSemantics: true,
         child: Material(
-          color: Colors.black.withValues(alpha: 0.28),
+          // Forte o bastante para aparecer em vídeo claro e escuro.
+          color: Colors.black.withValues(alpha: 0.55),
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),

@@ -41,7 +41,7 @@ void main() {
     ) async {
       await pumpCheckin(tester, FakeCheckinRepo());
 
-      final registrar = find.text('Registrar série');
+      final registrar = find.textContaining('Registrar série');
       expect(registrar, findsOneWidget);
       expect(
         find.ancestor(of: registrar, matching: find.byType(CheckinRodapeBar)),
@@ -81,7 +81,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Registrar série'), findsNothing);
+      expect(find.textContaining('Registrar série'), findsNothing);
     });
 
     testWidgets('descanso não mostra Registrar no rodapé', (tester) async {
@@ -137,7 +137,7 @@ void main() {
         await pumpCheckin(tester, repo);
         final haptics = _gravarHaptics(tester);
 
-        await tester.tap(find.text('Registrar série'));
+        await tester.tap(find.textContaining('Registrar série'));
         await tester.pump();
 
         expect(find.text('Salvando…'), findsOneWidget);
@@ -235,7 +235,7 @@ void main() {
       final repo = FakeCheckinRepo(rpeAlvo: 8);
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Registrar série'));
+      await tester.tap(find.textContaining('Registrar série'));
       await pumpSheet(tester);
 
       expect(repo.registros, 1);
@@ -252,7 +252,7 @@ void main() {
       final repo = FakeCheckinRepo();
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Registrar série'));
+      await tester.tap(find.textContaining('Registrar série'));
       await pumpSheet(tester);
       await tester.tap(find.text('Pesado'));
       await pumpSheet(tester);
@@ -269,7 +269,7 @@ void main() {
           FakeCheckinRepo(feitas: [1, 0])..travaSerie = Completer<void>();
       await pumpCheckin(tester, repo);
 
-      await tester.tap(find.text('Próxima série'));
+      await tester.tap(find.textContaining('Registrar série'));
       await tester.pump();
       await tester.tap(find.byTooltip('Mais'));
       await pumpSheet(tester);
@@ -397,7 +397,7 @@ void main() {
 
         expect(repo.concluidos, 1);
         expect(find.text('Finalizando…'), findsWidgets);
-        expect(find.text('Registrar série'), findsNothing);
+        expect(find.textContaining('Registrar série'), findsNothing);
 
         await tester.tap(find.text('Finalizando…').first, warnIfMissed: false);
         await tester.tap(find.text('Sair'), warnIfMissed: false);
@@ -477,5 +477,6 @@ void main() {
 
 /// O progresso da série (bolinhas) com o rótulo de acessibilidade, mesmo atrás de uma folha.
 Finder _rotuloDaSerie(String rotulo) => find.byWidgetPredicate(
-  (w) => w is Semantics && w.properties.label == rotulo,
+  (w) => w is Text && (w.data ?? '').startsWith(rotulo),
+  skipOffstage: false,
 );

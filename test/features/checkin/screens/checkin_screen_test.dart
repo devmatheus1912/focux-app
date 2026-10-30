@@ -20,7 +20,7 @@ void main() {
       usarDynamicTypeMaximo(tester, tela);
       final repo = FakeCheckinRepo()..offline = true;
       await pumpCheckin(tester, repo, tela: tela);
-      expect(find.text('Registrar série'), findsOneWidget);
+      expect(find.textContaining('Registrar série'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       await tocarRegistrar(tester);
@@ -208,7 +208,7 @@ void main() {
 
     expect(h.alerta.toques, 1);
     expect(find.text('Pular descanso'), findsNothing);
-    expect(find.text('Próxima série'), findsOneWidget);
+    expect(find.textContaining('Registrar série'), findsOneWidget);
   });
 
   testWidgets('pular ou voltar do background não toca', (tester) async {
@@ -253,5 +253,6 @@ void main() {
 
 /// O progresso da série (bolinhas) com o rótulo de acessibilidade, mesmo atrás de uma folha.
 Finder _rotuloDaSerie(String rotulo) => find.byWidgetPredicate(
-  (w) => w is Semantics && w.properties.label == rotulo,
+  (w) => w is Text && (w.data ?? '').startsWith(rotulo),
+  skipOffstage: false,
 );
